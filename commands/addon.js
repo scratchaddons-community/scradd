@@ -11,7 +11,7 @@ module.exports = {
 			.setRequired(true)),
 
 	async run(interaction) {
-        if(typeof addons.addons[interaction.options.getString('addon_name')] === undefined) {
+        if(addons.addons[interaction.options.getString('addon_name')] == undefined) {
             await interaction.reply('That addon does not exist!')
             return
         }
@@ -20,13 +20,12 @@ module.exports = {
         const exampleEmbed = {
             color: '#0099ff',
             title: addon.name,
-            image: {url: addon.image},
+            image: {url: `https://scratchaddons.com/assets/img/addons/${interaction.options.getString('addon_name')}.png`},
             description: addon.description,
             footer: {text: `Contributors: ${addon.credits.join(", ")}`},
         }
         
         
         await interaction.reply({embeds:[exampleEmbed]})
-            //await interaction.reply(addons.addons[interaction.options.getString('addon_name')].description)
 	},
 }
