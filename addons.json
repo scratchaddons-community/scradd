@@ -1,22 +1,23 @@
 {
-    "addons": {
-        "debugger": {
-            "name": "Debugger",
-            "description": "Adds a new \"debugger\" block category and a \"logs\" window to the editor. The \"log\", \"warn\" and \"error\" blocks will print the specified message into the logs window. The \"breakpoint\" block will pause the project when executed.",
-            "credits": [
-                {
-                "name": "GrahamSH"
-                },
-                {
-                "name": "TheColaber"
-                },
-                {
-                "name": "retronbv"
-                }
-            ],
-            "tags": ["editor", "featured"],
-            "enabledByDefault": false,
-            "versionAdded": "1.16.0"
-        }
-    }
+	"addons": {
+		"debugger": {
+			"name": "Debugger",
+            "image": "https://scratchaddons.com/assets/img/addons/debugger.png",
+			"description": "Adds a new \"debugger\" block category and a \"logs\" window to the editor. The \"log\", \"warn\" and \"error\" blocks will print the specified message into the logs window. The \"breakpoint\" block will pause the project when executed.",
+			"credits": [
+				"GrahamSH",
+				"TheColaber",
+				"retronbv"
+			]
+		},
+        
+		"editor-devtools": {
+			"name": "Developer tools",
+            "image": "https://scratchaddons.com/assets/img/addons/editor-devtools.png",
+			"description": "Adds a find box and new menu options to the editor: copy/paste blocks, better clean up, go to custom block definition, and more!",
+			"credits": [
+				"griffpatch"
+			]
+		}
+	}
 }
