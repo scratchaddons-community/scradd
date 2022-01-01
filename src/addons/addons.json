@@ -1,5 +1,4 @@
-{
-	"addons": {
+ {
     "2d-color-picker": {
       "name": "2D color picker",
       "description": "Replaces saturation and brightness sliders in the costume editor with a 2D color picker. Hold Shift while dragging the cursor to change the values on a single axis.",
@@ -127,7 +126,7 @@
 				"retronbv"
 			]
 		},
-        
+
 		"editor-devtools": {
 			"name": "Developer tools",
 			"description": "Adds a find box and new menu options to the editor: copy/paste blocks, better clean up, go to custom block definition, and more!",
@@ -136,4 +135,3 @@
 			]
 		}
 	}
-}
