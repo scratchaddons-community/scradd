@@ -42,7 +42,6 @@
 		"outDir": "dist",
 		"pretty": true,
 		"removeComments": true,
-		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,

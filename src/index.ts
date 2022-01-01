@@ -1,7 +1,7 @@
 import { Client, Intents } from 'discord.js'
-
 import dotenv from 'dotenv'
-import commands from "./getCommands";
+import commands from "./getCommands.js";
+import "./sendCommands.js"
 
 dotenv.config()
 
@@ -22,4 +22,4 @@ client.once('ready', () => {
 	console.log('Ready!')
 })
 
-client.login(process.env.TOKEN)
+client.login(process.env.BOT_TOKEN)

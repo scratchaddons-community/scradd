@@ -9,18 +9,17 @@ const direcoryInfoSiblings = siblings.map(async (comand) => {
 	const resolvedPath = path.resolve(dirname, comand);
 	return {
 		path: resolvedPath,
-		keep: (await fs.lstat(resolvedPath)).isDirectory()&&!comand.startsWith("."),
+		keep: (await fs.lstat(resolvedPath)).isDirectory(),
 	};
 });
 
-const commands:CommandInfo[] =await Promise.all(
+const commands:{default:CommandInfo}[] =await Promise.all(
 	(await Promise.all(direcoryInfoSiblings))
 		.filter(({ keep }) => keep)
 		.map((entry) =>
 			import(url.pathToFileURL(path.resolve(entry.path, "./index.js")).toString()),
 		),
 );
-
-export default Object.fromEntries(commands.map((command) =>
+export default Object.fromEntries(commands.map(({default:command}) =>
 	[command.command.name,command]
 ))
