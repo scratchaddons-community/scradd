@@ -30,6 +30,7 @@
 		"maxNodeModuleJsDepth": 0,
 		"module": "esnext",
 		"moduleResolution": "node",
+		"noEmit": true,
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
 		"noImplicitAny": true,
@@ -58,11 +59,7 @@
 	"exclude": ["node_modules", ".git", "dist"],
 	"include": [
 		"./**/*",
-		"./.**/*",
-		"src/.modmail",
-		"src/.starboard",
-		"src/.suggest",
-		"src/.wlquote"
+		"./.**/*"
 	],
 	"typeAcquisition": { "enable": true }
 }
