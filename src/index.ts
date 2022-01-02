@@ -16,7 +16,7 @@ client
 	.on("warn", console.warn)
 	.on("error", console.error)
 	.on("interactionCreate", async (interaction) => {
-		if (!interaction.isCommand()) return;
+		if (!interaction.isCommand()||!interaction.guild === null) return;
 		try {
 			const command = commands[interaction.commandName];
 			if (!command) return;
@@ -43,4 +43,3 @@ client
 		}
 	})
 	.login(process.env.BOT_TOKEN);
-	
