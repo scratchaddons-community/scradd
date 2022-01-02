@@ -56,6 +56,13 @@
 		"watch": true
 	},
 	"exclude": ["node_modules", ".git", "dist"],
-	"include": ["./**/*", "./.**/*", "src/.modmail", "src/.starboard", "src/.suggest", "src/.wlquote"],
+	"include": [
+		"./**/*",
+		"./.**/*",
+		"src/.modmail",
+		"src/.starboard",
+		"src/.suggest",
+		"src/.wlquote"
+	],
 	"typeAcquisition": { "enable": true }
 }

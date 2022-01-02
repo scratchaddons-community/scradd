@@ -8,15 +8,13 @@ dotenv.config();
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client
-	.once("ready", () =>
-		console.log(`Connected to Discord with ID`, client.application?.id),
-	)
+	.once("ready", () => console.log(`Connected to Discord with ID`, client.application?.id))
 	.on("disconnect", () => console.warn("Disconnected from Discord"))
 	.on("debug", console.debug)
 	.on("warn", console.warn)
 	.on("error", console.error)
 	.on("interactionCreate", async (interaction) => {
-		if (!interaction.isCommand()||!interaction.guild === null) return;
+		if (!interaction.isCommand() || !interaction.guild === null) return;
 		try {
 			const command = commands[interaction.commandName];
 			if (!command) return;
@@ -28,9 +26,10 @@ client
 				const embed = new MessageEmbed()
 					.setTitle("Error!")
 					.setDescription(
-						`Uhoh! I found an error!\n\`\`\`json\n${JSON.stringify(
-							error,
-						).replaceAll("```", "[3 backticks]")}\`\`\``,
+						`Uhoh! I found an error!\n\`\`\`json\n${JSON.stringify(error).replaceAll(
+							"```",
+							"[3 backticks]",
+						)}\`\`\``,
 					);
 				interaction.reply({
 					content: "<@771422735486156811>",

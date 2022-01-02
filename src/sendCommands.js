@@ -9,11 +9,8 @@ const rest = new REST({
 }).setToken(process.env.BOT_TOKEN || "");
 
 await rest.put(
-	Routes.applicationGuildCommands(process.env.CLIENT_ID||"", process.env.GUILD_ID||""),
+	Routes.applicationGuildCommands(process.env.CLIENT_ID || "", process.env.GUILD_ID || ""),
 	{
-
-		body: Object.values(commands).map((command) =>
-			command.command.toJSON(),
-		),
+		body: Object.values(commands).map((command) => command.command.toJSON()),
 	},
 );

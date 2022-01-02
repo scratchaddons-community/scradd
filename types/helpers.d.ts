@@ -1,1 +1,1 @@
-export type ArrayOfAtLeastOne<type=any> = [type, ...type[]]
+export type ArrayOfAtLeastOne<type = any> = [type, ...type[]];

@@ -1,17 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import type CommandInfo from "../../types/command";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
-import type AddonManifest from "../../types/addonManifest";
 import tooltip from "../tooltip.js";
 
 const addons = await fetch(
 	"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/addons.json",
 )
-	.then((res) => res.json())
+	.then((res) => /** @type {Promise<string[]>} */ (res.json()))
 	.then((addons) =>
-		(addons as string[]).filter((addon) => !addon.startsWith("//")),
+		addons.filter((addon) => !addon.startsWith("//")),
 	);
 
 const fuse = new Fuse(
@@ -21,7 +19,7 @@ const fuse = new Fuse(
 				"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
 					addon +
 					"/addon.json",
-			).then((res) => res.json() as Promise<AddonManifest>);
+			).then((res) => /** @type {Promise<import("../../types/addonManifest").default>} */ (res.json()));
 			return { ...manifest, id: addon };
 		}),
 	),
@@ -55,7 +53,8 @@ const fuse = new Fuse(
 	},
 );
 
-const info: CommandInfo = {
+/** @type {import("../../types/command").default} */
+const info = {
 	command: new SlashCommandBuilder()
 		.setName("addon")
 		.setDescription("Replies with information about a specific addon.")
@@ -97,7 +96,7 @@ const info: CommandInfo = {
 				")";
 		}
 
-		const exampleEmbed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle(addonInfo.name)
 			.setColor("#0099ff")
 			.setDescription(
@@ -106,47 +105,46 @@ const info: CommandInfo = {
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
 						: ""),
 			)
-			.addFields([
-				{
-					name: "Contributors",
-					value: (
-						addonInfo.credits as { name: string; link?: string }[]
-					)
-						.map(({ name, link }) =>
-							link ? `[${name}](${link})` : name,
-						)
-						.join(", "),
-					inline: true,
-				},
-				{
-					name: "Enabled by default?",
-					value: addonInfo.enabledByDefault ? "Yes" : "No",
-					inline: true,
-				},
-				{
-					name: "Version added",
-					value: addonInfo.versionAdded + latestUpdateInfo,
-					inline: true,
-				},
-				{
-					name: "Group",
-					value: addonInfo.tags.includes("popup")
-						? "Extension Popup Features"
-						: addonInfo.tags.includes("easterEgg")
-						? "Easter Eggs"
-						: addonInfo.tags.includes("theme")
-						? "Themes"
-						: addonInfo.tags.includes("community")
-						? "Scratch Website Features"
-						: "Scratch Editor Features",
-					inline: true,
-				},
-			])
 			.setImage(
 				`https://scratchaddons.com/assets/img/addons/${addonInfo.id}.png`,
 			);
+		if (addonInfo.credits?.length)
+			embed.addField(
+				"Contributors",
+				addonInfo.credits
+					?.map(({ name, link }) =>
+						link ? `[${name}](${link})` : name,
+					)
+					.join(", "),
+				true,
+			);
+		embed.addFields([
+			{
+				name: "Enabled by default?",
+				value: addonInfo.enabledByDefault ? "Yes" : "No",
+				inline: true,
+			},
+			{
+				name: "Version added",
+				value: addonInfo.versionAdded + latestUpdateInfo,
+				inline: true,
+			},
+			{
+				name: "Group",
+				value: addonInfo.tags.includes("popup")
+					? "Extension Popup Features"
+					: addonInfo.tags.includes("easterEgg")
+					? "Easter Eggs"
+					: addonInfo.tags.includes("theme")
+					? "Themes"
+					: addonInfo.tags.includes("community")
+					? "Scratch Website Features"
+					: "Scratch Editor Features",
+				inline: true,
+			},
+		]);
 
-		await interaction.reply({ embeds: [exampleEmbed] });
+		await interaction.reply({ embeds: [embed] });
 	},
 };
 export default info;
