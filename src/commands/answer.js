@@ -18,7 +18,7 @@ const info = {
 			if (thread.parentId !== SUGGESTION_CHANNEL_ID) return;
 			thread.setName(thread.name.replace(/(.*) \|/i, answer + " |"));
 			interaction.reply({
-				content: ":white_check_mark: Thread renamed!",
+				content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
 			});
 		});
 	},
