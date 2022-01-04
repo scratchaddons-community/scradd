@@ -1,1 +1,1 @@
-export default console.warn
+export default console.warn;

@@ -1,1 +1,1 @@
-export default console.error
+export default console.error;

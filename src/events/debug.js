@@ -1,1 +1,1 @@
-export default console.debug
+export default console.debug;
