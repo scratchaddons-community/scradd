@@ -15,7 +15,6 @@ const info = {
 			option.setName("suggestion").setDescription("Your suggestion").setRequired(true),
 		),
 
-
 	async interaction(interaction) {
 		const embed = new MessageEmbed()
 			.setColor("#222222")
