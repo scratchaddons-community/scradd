@@ -39,11 +39,6 @@ const info = {
       SUGGESTION_CHANNEL_ID
     );
     if (channel && "send" in channel) {
-      // interaction.reply({
-      //   content:
-      //     ":white_check_mark: Suggestion posted in " + channel.toString(),
-      //   ephemeral: true,
-      // });
       const message = await channel.send({ embeds: [embed] });
       message.react("👍").then(() => message.react("👎"));
       const thread = await message.startThread({
@@ -67,7 +62,11 @@ const info = {
           ),
         ],
       });
-      thread.members.add(interaction.user.id);
+      await thread.members.add(interaction.user.id);
+      await interaction.reply({
+        content: ":white_check_mark: Suggestion posted! " + thread.toString(),
+        ephemeral: true,
+      });
     } else {
       await interaction.reply({
         content: ":negative_squared_cross_mark: Suggestion failed :(",
