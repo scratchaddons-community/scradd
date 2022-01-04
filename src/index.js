@@ -1,9 +1,8 @@
 import { Client, Intents as intents, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
-import "./lib/commands/deploy.js";
 import url from "url";
 import path from "path";
-import importScripts from "./lib/fileSystem/importScriptsInFolder.js";
+import importScripts from "./lib/importScriptsInFolder.js";
 
 process.on("unhandledException", console.error);
 process.on("unhandledRejection", console.error);

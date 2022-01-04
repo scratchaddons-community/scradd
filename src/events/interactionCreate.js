@@ -1,4 +1,4 @@
-import commands from "../lib/commands/index.js";
+import commands from "../lib/commands.js";
 
 /** @param {import("discord.js").Interaction<import("discord.js").CacheType>} interaction */
 export default async function execute(interaction) {

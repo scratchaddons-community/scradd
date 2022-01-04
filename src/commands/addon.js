@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
-import tooltip from "../lib/messages/tooltip.js";
+import tooltip from "../lib/tooltip.js";
 
 const addons = await fetch(
 	"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/addons.json",
