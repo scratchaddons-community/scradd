@@ -8,9 +8,10 @@ const rest = new REST({
 	version: "9",
 }).setToken(process.env.BOT_TOKEN || "");
 
+console.log(commands.map((command) => command.data.toJSON()));
 await rest
 	.put(Routes.applicationGuildCommands(process.env.CLIENT_ID || "", process.env.GUILD_ID || ""), {
-		body: commands.map((command) => command.slash.toJSON()),
+		body: commands.map((command) => command.data.toJSON()),
 	})
 	.then(() => console.log("Successfully registered application commands."))
 	.catch(console.error);

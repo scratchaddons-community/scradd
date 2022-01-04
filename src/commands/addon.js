@@ -58,7 +58,7 @@ const fuse = new Fuse(
 
 /** @type {import("../lib/types/command").default} */
 const info = {
-	slash: new SlashCommandBuilder()
+	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")
 		.addStringOption((option) =>
 			option.setName("addon_name").setDescription("The name of the addon").setRequired(true),

@@ -6,6 +6,6 @@ const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const commandsDir = path.resolve(dirname, "../../commands");
 
 const commands = /** @type {import("discord.js").Collection<string,import("../types/command").default>} */(await importScripts(commandsDir));
-commands.forEach((command,name)=>command.slash.setName(name))
+commands.forEach((command,name)=>command.data.setName(name))
 
 export default commands

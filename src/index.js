@@ -1,6 +1,5 @@
 import { Client, Intents as intents, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
-import commands from "./lib/commands/index.js";
 import "./lib/commands/deploy.js";
 import url from "url";
 import path from "path";

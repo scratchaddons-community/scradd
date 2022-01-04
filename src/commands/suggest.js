@@ -5,17 +5,16 @@ const SUGGESTION_CHANNEL_ID = "927059179657625612";
 
 /** @type {import("../lib/types/command").default} */
 const info = {
-	slash: new SlashCommandBuilder()
+	data: new SlashCommandBuilder()
 		.setDescription("Post a suggestion in #suggestions")
-		.addStringOption((option) =>
-			option.setName("suggestion").setDescription("Your suggestion").setRequired(true),
-		)
 		.addStringOption((option) =>
 			option
 				.setName("title")
-				.setDescription("Title for the suggestion embed")
-				.setRequired(false),
+				.setDescription("Title for the suggestion embed").setRequired(true),
+		)		.addStringOption((option) =>
+			option.setName("suggestion").setDescription("Your suggestion").setRequired(true),
 		),
+
 
 	async interaction(interaction) {
 		const embed = new MessageEmbed()
@@ -37,7 +36,7 @@ const info = {
 					await Promise.all([
 					message.react("👍").then(() => message.react("👎")),
 					message.startThread({
-						name: title || "Suggestion by " + interaction.user.username,
+						name: "Unanswered | " + title,
 						autoArchiveDuration: "MAX",
 						reason: "Suggestion by " + interaction.user.tag,
 					}).then((thread) => {
