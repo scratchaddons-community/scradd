@@ -1,38 +1,38 @@
 {
-	"name": "sa-bot",
-	"version": "0.0.0",
-	"license": "MIT",
-	"description": "",
-	"type": "module",
-	"main":"src/index.js",
-	"scripts": {
-		"start":"node src --harmony --trace-warnings",
-		"dev": "nodemon src --harmony --trace-warnings"
-	},
-	"dependencies": {
-		"@discordjs/builders": "^0.11.0",
-		"@discordjs/rest": "^0.2.0-canary.0",
-		"discord-api-types": "^0.26.0",
-		"discord.js": "^13.5.0",
-		"dotenv": "^10.0.0",
-		"fuse.js": "^6.5.3",
-		"node-fetch": "^3.1.0"
-	},
-	"devDependencies": {
-		"@types/node": "^17.0.5",
-		"prettier": "^2.5.1",
-		"prettier-plugin-ini": "^0.3.1",
-		"prettier-plugin-jsdoc": "^0.3.30",
-		"typescript": "^4.5.4",
-		"nodemon": "^2.0.15"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/shock59/sa-bot.git"
-	},
-	"bugs": {
-		"url": "https://github.com/shock59/sa-bot/issues"
-	},
-	"homepage": "https://github.com/shock59/sa-bot#readme",
-	"private": true
+  "name": "sa-bot",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src --harmony --trace-warnings",
+    "dev": "nodemon src --harmony --trace-warnings"
+  },
+  "dependencies": {
+    "@discordjs/builders": "^0.11.0",
+    "@discordjs/rest": "^0.2.0-canary.0",
+    "discord-api-types": "^0.26.0",
+    "discord.js": "^13.5.0",
+    "dotenv": "^10.0.0",
+    "fuse.js": "^6.5.3",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.5",
+    "prettier": "^2.5.1",
+    "prettier-plugin-ini": "^0.3.1",
+    "prettier-plugin-jsdoc": "^0.3.30",
+    "typescript": "^4.5.4",
+    "nodemon": "^2.0.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shock59/sa-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shock59/sa-bot/issues"
+  },
+  "homepage": "https://github.com/shock59/sa-bot#readme",
+  "private": true
 }
