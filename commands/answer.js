@@ -2,13 +2,23 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 
 const { SUGGESTION_CHANNEL_ID } = process.env;
 
-/** @type {import("../lib/types/command").default} */
+/** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder()
-		.setDescription("Answer a thread in #suggestions")
-		.addStringOption((option) =>
-			option.setName("answer").setDescription("Answer to the suggestion").setRequired(true),
-		),
+  data: new SlashCommandBuilder()
+    .setDescription("Answer a thread in #suggestions")
+    .addStringOption((option) =>
+      option
+        .setName("answer")
+        .setDescription("Answer to the suggestion")
+        .setRequired(true)
+        .addChoice("Good Idea", "Good Idea")
+        .addChoice("In development", "In development")
+        .addChoice("Implemented", "Implemented")
+        .addChoice("Possible", "Possible")
+        .addChoice("Impractical", "Impractical")
+        .addChoice("Rejected", "Rejected")
+        .addChoice("Impossible", "Impossible")
+    ),
 
 	async interaction(interaction) {
 		const answer = interaction.options.getString("answer");

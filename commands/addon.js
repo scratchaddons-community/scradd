@@ -11,52 +11,52 @@ const addons = await fetch(
 	.then((addons) => addons.filter((addon) => !addon.startsWith("//")));
 
 const fuse = new Fuse(
-	await Promise.all(
-		addons.map(async (addon) => {
-			const manifest = await fetch(
-				"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
-					addon +
-					"/addon.json",
-			).then(
-				(res) =>
-					/** @type {Promise<import("../lib/types/addonManifest").default>} */ (
-						res.json()
-					),
-			);
-			return { ...manifest, id: addon };
-		}),
-	),
-	{
-		includeScore: true,
-		threshold: 0.35,
-		ignoreLocation: true,
-		useExtendedSearch: true,
-		keys: [
-			{
-				name: "name",
-				weight: 1,
-			},
-			{
-				name: "id",
-				weight: 1,
-			},
-			{
-				name: "description",
-				weight: 0.5,
-			},
-			{
-				name: "credits.name",
-				weight: 0.2,
-			},
-			{
-				name: "info.text",
-				weight: 0.1,
-			},
-		],
-	},
+  await Promise.all(
+    addons.map(async (addon) => {
+      const manifest = await fetch(
+        "https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
+          addon +
+          "/addon.json"
+      ).then(
+        (res) =>
+          /** @type {Promise<import("../types/addonManifest").default>} */ (
+            res.json()
+          )
+      );
+      return { ...manifest, id: addon };
+    })
+  ),
+  {
+    includeScore: true,
+    threshold: 0.35,
+    ignoreLocation: true,
+    useExtendedSearch: true,
+    keys: [
+      {
+        name: "name",
+        weight: 1,
+      },
+      {
+        name: "id",
+        weight: 1,
+      },
+      {
+        name: "description",
+        weight: 0.5,
+      },
+      {
+        name: "credits.name",
+        weight: 0.2,
+      },
+      {
+        name: "info.text",
+        weight: 0.1,
+      },
+    ],
+  }
 );
 
-/** @type {import("../lib/types/command").default} */
+/** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")

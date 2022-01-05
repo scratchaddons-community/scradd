@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 
-/** @type {import("../lib/types/command").default} */
+/** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder().setDescription("Replies with Pong!"),
 	async interaction(interaction) {

@@ -1,7 +1,5 @@
 import { Client, Intents as intents, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
-import url from "url";
-import path from "path";
 import importScripts from "./lib/importScriptsInFolder.js";
 
 process.on("unhandledException", console.error);
@@ -16,11 +14,7 @@ const client = new Client({
 	],
 });
 
-const dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const eventsDir = path.resolve(dirname, "./events");
-const events = /** @type {import("discord.js").Collection<string, (...args: any[]) => void>} */ (
-	await importScripts(eventsDir)
-);
+const events = await importScripts("events");
 
 events.forEach(async (execute, event) =>
 	client.on(event, async (...args) => {
