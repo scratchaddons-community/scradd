@@ -193,8 +193,8 @@ type manifest = {
 	}>;
 	/**
 	 * The "settings" object allow the addon's users to specify settings in Scratch Addons' settings
-	 * panel. Inside your persistent scripts and userscripts, you can then access those settings with
-	 * the "addon.settings" API.
+	 * panel. Inside your persistent scripts and userscripts, you can then access those settings
+	 * with the "addon.settings" API.
 	 *
 	 * Specify an "settings" property and provide an array of setting objects.
 	 */
@@ -256,7 +256,10 @@ type manifest = {
 				type: "color";
 				/** The default value of the setting. */
 				default: `#${string}`;
-				/** Determines whether the transparency/opacity/alpha value can be changed when choosing a color. */
+				/**
+				 * Determines whether the transparency/opacity/alpha value can be changed when
+				 * choosing a color.
+				 */
 				allowTransparency?: boolean;
 		  }
 		| {
@@ -333,13 +336,19 @@ type manifest = {
 		script: string;
 	};
 	/**
-	 * Determines whether the addon's scripts should be considered disabled when disabled as the page
-	 * is running.
+	 * Determines whether the addon's scripts should be considered disabled when disabled as the
+	 * page is running.
 	 */
 	dynamicDisable?: boolean;
-	/** Determines whether the addon's scripts should be considered enabled when enabled as the page is running. */
+	/**
+	 * Determines whether the addon's scripts should be considered enabled when enabled as the page
+	 * is running.
+	 */
 	dynamicEnable?: boolean;
-	/** Determines whether the addon's userstyles should be injected as style elements rather than link elements. */
+	/**
+	 * Determines whether the addon's userstyles should be injected as style elements rather than
+	 * link elements.
+	 */
 	injectAsStyleElt?: boolean;
 	/** Determines whether the addon's userstyles should be removed and rematched to the new settings. */
 	updateUserstylesOnSettingsChange?: boolean;
