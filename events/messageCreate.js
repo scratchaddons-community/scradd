@@ -1,4 +1,4 @@
-/** @param {import("discord.js").Message<boolean>} message */
+/** @param {import("discord.js").Message} message */
 export default (message) => {
 	const content = message.content.toLowerCase();
 	if (message.mentions.users.has(message.client.user?.id || "")) react("👋");
