@@ -1,5 +1,15 @@
 import { MessageEmbed } from "discord.js";
 
+/** @param {string} attachment */
+function extension(attachment = "") {
+	const imageLink = attachment.split(".");
+	const typeOfImage = imageLink[imageLink.length - 1];
+	if (!typeOfImage) return "";
+	const image = /(jpg|jpeg|png|gif)/gi.test(typeOfImage);
+	if (!image) return "";
+	return attachment;
+}
+
 const POTATO_BOARD = "928475852084240465";
 /**
  * @param {import("discord.js").MessageReaction} reaction
@@ -7,21 +17,12 @@ const POTATO_BOARD = "928475852084240465";
  */
 
 export default async (reaction, user) => {
-	/** @param {string} attachment */
-	function extension(attachment) {
-		const imageLink = attachment.split(".");
-		const typeOfImage = imageLink[imageLink.length - 1];
-		if (!typeOfImage) return "";
-		const image = /(jpg|jpeg|png|gif)/gi.test(typeOfImage);
-		if (!image) return "";
-		return attachment;
-	}
 	const message = reaction.message;
 	if (!message.author || !message.guild) return;
 	if (reaction.emoji.name !== "🥔") return;
 	// If this was TextChannel instead of GuildBasedChannel, ts wouldnt roar at me
 	const starChannel = message.guild.channels.cache.get(POTATO_BOARD);
-	if (!starChannel) return;
+	if (!starChannel?.isThread()) return;
 	const fetchedMessages = await starChannel.messages.fetch({ limit: 100 });
 	const stars = fetchedMessages.find(
 		(m) =>
@@ -30,8 +31,7 @@ export default async (reaction, user) => {
 	);
 	if (stars) {
 		const foundStar = stars.embeds[0];
-		const image =
-			message.attachments.size > 0 ? await extension(message.attachments.first()?.url) : "";
+		const image = extension(message.attachments.first()?.url);
 		const embed = new MessageEmbed()
 			.setColor(foundStar.color)
 			.setDescription(foundStar.description)
@@ -46,12 +46,10 @@ export default async (reaction, user) => {
 		await starMsg.edit({ embeds: [embed] });
 	}
 	if (!stars) {
-		const image =
-			message.attachments.size > 0 ? await extension(message.attachments.first()?.url) : "";
-		if (image === "" && (message.cleanContent || "").length < 1)
-			return message.channel.send(`${user}, you cannot star an empty message.`);
+		const image = extension(message.attachments.first()?.url);
+
 		const embed = new MessageEmbed()
-			.setColor(15844367)
+			.setColor(0xf1c40f)
 			.setDescription(message.cleanContent || "")
 			.setAuthor({
 				name: message.author.tag,
@@ -60,6 +58,13 @@ export default async (reaction, user) => {
 			.setTimestamp(new Date())
 			.setFooter({ text: `🥔 ${reaction.count} | ${message.id}` })
 			.setImage(image);
-		await starChannel.send({ embeds: [embed] });
+		await starChannel.send({
+			content:
+				"**🥔 ${reaction.count}** | " +
+				reaction.message.channel +
+				" | " +
+				reaction.message.author,
+			embeds: [embed],
+		});
 	}
 };
