@@ -74,7 +74,8 @@ const info = {
 			const [embed] = message.embeds;
 			if (!embed) return;
 			embed.setColor(color);
-			embed.setTitle(answer + ": " + embed.title);
+			embed.setTitle(embed.title?.replace(/(.*): /i, answer + ": ") || "");
+
 			message.edit({ embeds: message.embeds });
 		});
 

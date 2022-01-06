@@ -29,7 +29,7 @@ const info = {
 
 		const title = interaction.options.getString("title") || "";
 
-		embed.setTitle(title);
+		embed.setTitle("Unanswered: " + title);
 
 		if (!SUGGESTION_CHANNEL_ID) return;
 		const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL_ID);
