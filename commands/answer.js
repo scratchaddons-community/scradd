@@ -29,6 +29,7 @@ const info = {
 			thread.setName(thread.name.replace(/(.*) \|/i, answer + " |"));
 			interaction.reply({
 				content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
+				ephemeral: true,
 			});
 		});
 	},

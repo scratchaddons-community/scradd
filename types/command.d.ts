@@ -1,4 +1,4 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder } from "@discordjs/builders";
 import type { CacheType, CommandInteraction } from "discord.js";
 
 type ComandInfo = {
