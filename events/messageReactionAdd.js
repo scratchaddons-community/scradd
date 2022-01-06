@@ -20,15 +20,10 @@ export default async (reaction, user) => {
 	const message = reaction.message;
 	if (!message.author || !message.guild) return;
 	if (reaction.emoji.name !== "🥔") return;
-	// If this was TextChannel instead of GuildBasedChannel, ts wouldnt roar at me
 	const starChannel = message.guild.channels.cache.get(POTATO_BOARD);
 	if (!starChannel?.isThread()) return;
 	const fetchedMessages = await starChannel.messages.fetch({ limit: 100 });
-	const stars = fetchedMessages.find(
-		(m) =>
-			m.embeds[0].footer.text.startsWith("🥔") &&
-			m.embeds[0].footer.text.endsWith(message.id),
-	);
+	const stars = fetchedMessages.find((m) => m.embeds[0].footer.text === message.id);
 	if (stars) {
 		const foundStar = stars.embeds[0];
 		const image = extension(message.attachments.first()?.url);
@@ -40,10 +35,15 @@ export default async (reaction, user) => {
 				iconURL: message.author.avatarURL() || "",
 			})
 			.setTimestamp()
-			.setFooter({ text: `🥔 ${reaction.count} | ${message.id}}` })
+			.setFooter({ text: message.id })
 			.setImage(image);
 		const starMsg = await starChannel.messages.fetch(stars.id);
-		await starMsg.edit({ embeds: [embed] });
+		await starMsg.edit({
+			content: `🥔 ${
+				reaction.count
+			} | ${message.channel.toString()} (${message.author.toString()})`,
+			embeds: [embed],
+		});
 	}
 	if (!stars) {
 		const image = extension(message.attachments.first()?.url);
@@ -56,14 +56,14 @@ export default async (reaction, user) => {
 				iconURL: message.author.avatarURL() || "",
 			})
 			.setTimestamp(new Date())
-			.setFooter({ text: `🥔 ${reaction.count} | ${message.id}` })
+			.setFooter({ text: message.id })
 			.setImage(image);
 		await starChannel.send({
 			content:
 				"**🥔 ${reaction.count}** | " +
-				reaction.message.channel +
+				message.channel +
 				" | " +
-				reaction.message.author,
+				message.author,
 			embeds: [embed],
 		});
 	}
