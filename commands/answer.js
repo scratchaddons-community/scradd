@@ -37,37 +37,44 @@ const info = {
 		const thread = threads.find((thread) => thread.id === interaction.channelId);
 		if (!thread) return;
 		if (thread.parentId !== SUGGESTION_CHANNEL_ID) return;
-		thread.setName(
-			thread.name.replace(/(.*) \|/i, answer + " |"),
-			"Thread answered by " + interaction.user.tag,
-		);
+		thread
+			.setName(
+				thread.name.replace(/(.*) \|/i, answer + " |"),
+				"Thread answered by " + interaction.user.tag,
+			)
+			.catch((err) => {
+				console.log("e", err);
+			});
 		thread.fetchStarterMessage().then(async (message) => {
 			/** @type {import("discord.js").ColorResolvable} */
-			let color = "#000000";
+			let color = "DARK_BUT_NOT_BLACK";
 			switch (answer) {
 				case ANSWERS.GOODIDEA:
-					color = "#1abc9c";
+					color = "GREEN";
 					break;
 				case ANSWERS.INDEVELOPMENT:
-					color = "#f1c40f";
+					color = "YELLOW";
 					break;
 				case ANSWERS.IMPLEMENTED:
-					color = "#2ecc71";
+					color = "BLUE";
 					break;
 				case ANSWERS.POSSIBLE:
-					color = "#3498db";
+					color = "ORANGE";
 					break;
 				case ANSWERS.IMPRACTICAL:
-					color = "#e74c3c";
+					color = "DARK_RED";
 					break;
 				case ANSWERS.REJECTED:
-					color = "#c0392b";
+					color = "RED";
 					break;
 				case ANSWERS.IMPOSSIBLE:
-					color = "#9b59b6";
+					color = "PURPLE";
 					break;
 			}
-			console.log(message.embeds[0]?.setColor(color));
+			const [embed] = message.embeds;
+			if (!embed) return;
+			embed.setColor(color);
+			embed.setTitle(answer + ": " + embed.title);
 			message.edit({ embeds: message.embeds });
 		});
 
