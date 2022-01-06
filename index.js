@@ -12,6 +12,7 @@ const client = new Client({
 		intents.FLAGS.GUILD_MESSAGES,
 		intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 	],
+	partials: ["USER", "REACTION", "MESSAGE"],
 });
 
 const events = await importScripts("events");
