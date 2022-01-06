@@ -6,25 +6,22 @@ const { SUGGESTION_CHANNEL_ID } = process.env;
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Post a suggestion in #suggestions")
+		.setDescription("Post a bug report in #suggestions")
 		.addStringOption((option) =>
-			option
-				.setName("title")
-				.setDescription("Title for the suggestion embed")
-				.setRequired(true),
+			option.setName("title").setDescription("Title for the bug embed").setRequired(true),
 		)
 		.addStringOption((option) =>
-			option.setName("suggestion").setDescription("Your suggestion").setRequired(true),
+			option.setName("report").setDescription("Your report").setRequired(true),
 		),
 
 	async interaction(interaction) {
 		const embed = new MessageEmbed()
 			.setColor("#222222")
 			.setAuthor({
-				name: "Suggestion by " + interaction.user.tag,
+				name: "Bug report by " + interaction.user.tag,
 				iconURL: interaction.user.avatarURL() || "",
 			})
-			.setDescription(interaction.options.getString("suggestion") || "")
+			.setDescription(interaction.options.getString("report") || "")
 			.setTimestamp();
 
 		const title = interaction.options.getString("title") || "";
@@ -39,16 +36,16 @@ const info = {
 			const thread = await message.startThread({
 				name: "Unanswered | " + title,
 				autoArchiveDuration: "MAX",
-				reason: "Suggestion by " + interaction.user.tag,
+				reason: "Bug report by " + interaction.user.tag,
 			});
 			await thread.members.add(interaction.user.id);
 			await interaction.reply({
-				content: ":white_check_mark: Suggestion posted! " + thread.toString(),
+				content: ":white_check_mark: Bug report posted! " + thread.toString(),
 				ephemeral: true,
 			});
 		} else {
 			await interaction.reply({
-				content: ":negative_squared_cross_mark: Suggestion failed :(",
+				content: ":negative_squared_cross_mark: Bug report failed :(",
 				ephemeral: true,
 			});
 		}
