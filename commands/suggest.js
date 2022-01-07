@@ -1,6 +1,11 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
-import { answerSuggestion, createMessage, deleteSuggestion } from "../common/suggest.js";
+import {
+	answerSuggestion,
+	createMessage,
+	deleteSuggestion,
+	editSuggestion,
+} from "../common/suggest.js";
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
@@ -53,6 +58,17 @@ const info = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setName("delete").setDescription("Delete a suggestion"),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("edit")
+				.setDescription("Edit a suggestion")
+				.addStringOption((option) =>
+					option
+						.setName("suggestion")
+						.setDescription("Your updated suggestion")
+						.setRequired(true),
+				),
 		),
 
 	async interaction(interaction) {
@@ -64,6 +80,7 @@ const info = {
 					name: "Suggestion by " + interaction.user.tag,
 					iconURL: interaction.user.avatarURL() || "",
 				})
+				.setFooter({ text: interaction.user.id })
 				.setTitle(interaction.options.getString("title") || "")
 				.setDescription(interaction.options.getString("suggestion") || "")
 				.setTimestamp();
@@ -97,6 +114,8 @@ const info = {
 			});
 		} else if (command === "delete") {
 			deleteSuggestion(interaction);
+		} else if (command === "edit") {
+			editSuggestion(interaction, interaction.options.getString("suggestion") || "");
 		}
 	},
 };

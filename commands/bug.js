@@ -1,5 +1,10 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { answerSuggestion, createMessage, deleteSuggestion } from "../common/suggest.js";
+import {
+	answerSuggestion,
+	createMessage,
+	deleteSuggestion,
+	editSuggestion,
+} from "../common/suggest.js";
 import { MessageEmbed } from "discord.js";
 
 const ANSWERS = {
@@ -46,6 +51,17 @@ const info = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setName("delete").setDescription("Delete a report"),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("edit")
+				.setDescription("Edit a report")
+				.addStringOption((option) =>
+					option
+						.setName("report")
+						.setDescription("Your updated report")
+						.setRequired(true),
+				),
 		),
 
 	async interaction(interaction) {
@@ -86,6 +102,8 @@ const info = {
 			});
 		} else if (command === "delete") {
 			deleteSuggestion(interaction);
+		} else if (command === "edit") {
+			editSuggestion(interaction, interaction.options.getString("report") || "");
 		}
 	},
 };

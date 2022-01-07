@@ -90,7 +90,7 @@ export async function deleteSuggestion(interaction) {
 		.setStyle("DANGER");
 	const cancelButton = new MessageButton()
 		.setLabel("Cancel")
-		.setCustomId("cancel")
+		.setCustomId("delete-cancel")
 		.setStyle("SECONDARY");
 
 	interaction.reply({
@@ -101,12 +101,12 @@ export async function deleteSuggestion(interaction) {
 
 	const collector = interaction.channel.createMessageComponentCollector({
 		filter: (i) =>
-			["delete", "cancel"].includes(i.customId) && i.user.id === interaction.user.id,
+			["delete", "delete-cancel"].includes(i.customId) && i.user.id === interaction.user.id,
 		time: 15000,
 	});
 
 	collector.on("collect", async (i) => {
-		if (i.customId === "delete") {
+		if (i.customId === "delete-cancel") {
 			if (!i.channel?.isThread() || i.channel.parentId !== SUGGESTION_CHANNEL) return;
 			i.channel.delete();
 			const m = await i.channel.fetchStarterMessage();
@@ -127,6 +127,83 @@ export async function deleteSuggestion(interaction) {
 			cancelButton.setDisabled(true);
 			interaction.editReply({
 				content: ":negative_squared_cross_mark: Deletion timed out.",
+				components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+			});
+		}
+	});
+}
+
+/**
+ * @param {import("discord.js").CommandInteraction} interaction
+ * @param {string} newSuggestion
+ */
+export async function editSuggestion(interaction, newSuggestion) {
+	if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
+	if (!interaction.guild) return interaction.reply({ content: "Command unavailable in DMs." });
+	if (!interaction.channel?.isThread() || interaction.channel.parentId !== SUGGESTION_CHANNEL)
+		return interaction.reply({
+			content: `This command can only be used in threads in <#${SUGGESTION_CHANNEL}>.`,
+			ephemeral: true,
+		});
+	console.log(
+		interaction.user.id,
+		(await interaction.channel.fetchStarterMessage()).embeds[0]?.footer?.text,
+	);
+	if (
+		interaction.user.id !==
+		(await interaction.channel.fetchStarterMessage()).embeds[0]?.footer?.text
+	)
+		return interaction.reply({
+			content: "You do not have permision to use this command.",
+			ephemeral: true,
+		});
+
+	const deleteButton = new MessageButton()
+		.setLabel("Edit")
+		.setCustomId("edit")
+		.setStyle("PRIMARY");
+	const cancelButton = new MessageButton()
+		.setLabel("Cancel")
+		.setCustomId("edit-cancel")
+		.setStyle("SECONDARY");
+
+	interaction.reply({
+		content: `Are you really sure you want to do this?`,
+		components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+		ephemeral: true,
+	});
+
+	const collector = interaction.channel.createMessageComponentCollector({
+		filter: (i) =>
+			["edit", "edit-cancel"].includes(i.customId) && i.user.id === interaction.user.id,
+		time: 15000,
+	});
+
+	collector.on("collect", async (i) => {
+		if (i.customId === "edit") {
+			if (!i.channel?.isThread() || i.channel.parentId !== SUGGESTION_CHANNEL) return;
+			const m = await i.channel.fetchStarterMessage();
+			m.embeds[0]?.setDescription(newSuggestion);
+			m.edit({ embeds: m.embeds });
+			interaction.editReply({
+				content: "Sucessfully editted.",
+			});
+		} else {
+			deleteButton.setDisabled(true);
+			cancelButton.setDisabled(true);
+			interaction.editReply({
+				content: ":negative_squared_cross_mark: Edittion canceled.",
+				components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+			});
+		}
+	});
+
+	collector.on("end", (collected) => {
+		if (collected.size === 0) {
+			deleteButton.setDisabled(true);
+			cancelButton.setDisabled(true);
+			interaction.editReply({
+				content: ":negative_squared_cross_mark: Edittion timed out.",
 				components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
 			});
 		}
