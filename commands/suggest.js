@@ -16,7 +16,7 @@ const ANSWERS = {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and cretae suggestions in #suggestions")
+		.setDescription("Manage and create suggestions in #suggestions")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
