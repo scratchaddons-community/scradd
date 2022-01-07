@@ -20,7 +20,7 @@ const events = await importScripts("events");
 events.forEach(async (execute, event) =>
 	client.on(event, async (...args) => {
 		try {
-			return execute(...args);
+			return await execute(...args);
 		} catch (error) {
 			try {
 				console.error(error);
