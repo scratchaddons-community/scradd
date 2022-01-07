@@ -74,11 +74,9 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const {thread,message} = await createMessage(interaction, {
+			const { thread, message } = await createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
-			description:
-			interaction.options.getString("suggestion") ||
-					"",
+				description: interaction.options.getString("suggestion") || "",
 			});
 			await message.react("👍").then(() => message.react("👎"));
 			await interaction.reply({
@@ -87,7 +85,7 @@ const info = {
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await answerSuggestion(interaction, answer||"", () => {
+			await answerSuggestion(interaction, answer || "", () => {
 				switch (answer) {
 					case ANSWERS.GOODIDEA:
 						return "GREEN";
@@ -114,10 +112,13 @@ const info = {
 		} else if (command === "delete") {
 			await deleteSuggestion(interaction);
 		} else if (command === "edit") {
-			if(await editSuggestion(interaction, interaction.options.getString("suggestion") || ""))			interaction.reply({
-				content: "Sucessfully editted suggestion.",
-				ephemeral: true,
-			});
+			if (
+				await editSuggestion(interaction, interaction.options.getString("suggestion") || "")
+			)
+				interaction.reply({
+					content: "Sucessfully editted suggestion.",
+					ephemeral: true,
+				});
 		}
 	},
 };

@@ -47,7 +47,7 @@ export async function postMessageToBoard(message) {
 		})
 		.setTimestamp(message.createdTimestamp);
 
-	const embeds = [...message.embeds.map(oldEmbed=>new MessageEmbed(oldEmbed)), embed];
+	const embeds = [...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)), embed];
 	while (embeds.length > 10) embeds.shift();
 
 	const button = new MessageButton()
@@ -82,7 +82,7 @@ export async function updateReactionCount(newCount, boardMessage) {
 	if (newCount < MIN_COUNT) return boardMessage.delete();
 	return boardMessage.edit({
 		content: boardMessage.content.replace(/ \d+\*\*/, ` ${newCount}**`),
-		embeds: boardMessage.embeds.map(oldEmbed=>new MessageEmbed(oldEmbed)),
+		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 		files: boardMessage.attachments.map((a) => a),
 	});
 }

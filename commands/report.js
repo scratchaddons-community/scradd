@@ -67,17 +67,17 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-
-			const {thread} = await createMessage(interaction, {
+			const { thread } = await createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
-			description:interaction.options.getString("report")||""});
+				description: interaction.options.getString("report") || "",
+			});
 			await interaction.reply({
 				content: `:white_check_mark: Bug report posted! See ${thread}`,
 				ephemeral: true,
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await answerSuggestion(interaction, answer||"", () => {
+			await answerSuggestion(interaction, answer || "", () => {
 				switch (answer) {
 					case ANSWERS.VALIDBUG:
 						return "GREEN";
@@ -100,10 +100,11 @@ const info = {
 		} else if (command === "delete") {
 			await deleteSuggestion(interaction);
 		} else if (command === "edit") {
-			if(await editSuggestion(interaction, interaction.options.getString("report") || ""))			interaction.reply({
-				content: "Sucessfully editted bug report.",
-				ephemeral: true,
-			});
+			if (await editSuggestion(interaction, interaction.options.getString("report") || ""))
+				interaction.reply({
+					content: "Sucessfully editted bug report.",
+					ephemeral: true,
+				});
 		}
 	},
 };

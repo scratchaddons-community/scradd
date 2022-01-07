@@ -155,8 +155,11 @@ export async function editSuggestion(interaction, newSuggestion) {
 	}
 	const starterMessage = await interaction.channel.fetchStarterMessage();
 	const embed = new MessageEmbed(starterMessage.embeds[0]);
-	const initingMessages = await interaction.channel.messages.fetch({limit: 2, after: starterMessage.id});
-	const user=initingMessages.first()?.mentions.users.first()
+	const initingMessages = await interaction.channel.messages.fetch({
+		limit: 2,
+		after: starterMessage.id,
+	});
+	const user = initingMessages.first()?.mentions.users.first();
 	if (interaction.user.id !== user?.id) {
 		interaction.reply({
 			content: "You do not have permision to use this command.",

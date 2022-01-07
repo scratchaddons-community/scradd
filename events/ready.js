@@ -3,7 +3,8 @@ import commands from "../lib/commands.js";
 
 /** @param {import("discord.js").Client<boolean>} client */
 export default async (client) => {
-	if (!client.application) throw new Error("`ready` was fired but `client.application` is undefined???");
+	if (!client.application)
+		throw new Error("`ready` was fired but `client.application` is undefined???");
 	console.log(
 		`Connected to Discord with ID ${client.application.id} and tag ${client.user?.tag}`,
 	);

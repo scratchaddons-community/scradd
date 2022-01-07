@@ -33,9 +33,7 @@ events.forEach(async (execute, event) =>
 						).replaceAll("[3 backticks]", "```")}\`\`\``,
 					)
 					.setColor("RANDOM");
-				const testingChannel = await client.channels.fetch(
-					process.env.ERROR_CHANNEL || "",
-				);
+				const testingChannel = await client.channels.fetch(process.env.ERROR_CHANNEL || "");
 
 				if (!testingChannel || !("send" in testingChannel))
 					throw new Error("Could not find error reporting channel");
