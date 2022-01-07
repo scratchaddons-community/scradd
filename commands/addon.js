@@ -96,7 +96,7 @@ const info = {
 
 		const embed = new MessageEmbed()
 			.setTitle(addonInfo.name)
-			.setColor("#0099ff")
+			.setColor("RANDOM")
 			.setDescription(
 				addonInfo.description +
 					`\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${addonInfo.id})` +

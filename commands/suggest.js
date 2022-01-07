@@ -74,21 +74,20 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const embed = new MessageEmbed()
-				.setColor("#222222")
-				.setAuthor({
-					name: "Suggestion by " + interaction.user.tag,
-					iconURL: interaction.user.avatarURL() || "",
-				})
-				.setFooter({ text: interaction.user.id })
-				.setTitle(interaction.options.getString("title") || "")
-				.setDescription(interaction.options.getString("suggestion") || "")
-				.setTimestamp();
-
-			createMessage(interaction, embed);
+			const {thread,message} = await createMessage(interaction, {
+				title: interaction.options.getString("title") || "",
+			description:
+			interaction.options.getString("suggestion") ||
+					"",
+			});
+			await message.react("👍").then(() => message.react("👎"));
+			await interaction.reply({
+				content: `:white_check_mark: Suggestion posted! See ${thread}`,
+				ephemeral: true,
+			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			answerSuggestion(interaction, answer, () => {
+			await answerSuggestion(interaction, answer||"", () => {
 				switch (answer) {
 					case ANSWERS.GOODIDEA:
 						return "GREEN";
@@ -113,9 +112,12 @@ const info = {
 				ephemeral: true,
 			});
 		} else if (command === "delete") {
-			deleteSuggestion(interaction);
+			await deleteSuggestion(interaction);
 		} else if (command === "edit") {
-			editSuggestion(interaction, interaction.options.getString("suggestion") || "");
+			if(await editSuggestion(interaction, interaction.options.getString("suggestion") || ""))			interaction.reply({
+				content: "Sucessfully editted suggestion.",
+				ephemeral: true,
+			});
 		}
 	},
 };

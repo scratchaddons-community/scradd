@@ -16,13 +16,11 @@ export async function getMessageFromBoard(message) {
 	if (!board)
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 	const fetchedMessages = await board.messages.fetch({ limit: 100 });
-	return fetchedMessages.find((m) => {
-		const component = m?.components[0]?.components?.[0];
+	return fetchedMessages.find((boardMessage) => {
+		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
-		const url = component.url;
-		if (!url) return false;
-		const [, , messageId] = url.match(/\d+/g) || [];
-		return message.id == messageId;
+		const [, , messageId] = component.url?.match(/\d+/) || [];
+		return messageId === message.id;
 	});
 }
 
@@ -47,9 +45,9 @@ export async function postMessageToBoard(message) {
 				message.author.defaultAvatarURL ||
 				"",
 		})
-		.setTimestamp(new Date());
+		.setTimestamp(message.createdTimestamp);
 
-	const embeds = [...message.embeds, embed];
+	const embeds = [...message.embeds.map(oldEmbed=>new MessageEmbed(oldEmbed)), embed];
 	while (embeds.length > 10) embeds.shift();
 
 	const button = new MessageButton()
@@ -84,7 +82,7 @@ export async function updateReactionCount(newCount, boardMessage) {
 	if (newCount < MIN_COUNT) return boardMessage.delete();
 	return boardMessage.edit({
 		content: boardMessage.content.replace(/ \d+\*\*/, ` ${newCount}**`),
-		embeds: boardMessage.embeds,
+		embeds: boardMessage.embeds.map(oldEmbed=>new MessageEmbed(oldEmbed)),
 		files: boardMessage.attachments.map((a) => a),
 	});
 }

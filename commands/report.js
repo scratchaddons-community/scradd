@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageEmbed } from "discord.js";
 import {
 	answerSuggestion,
 	createMessage,
 	deleteSuggestion,
 	editSuggestion,
 } from "../common/suggest.js";
-import { MessageEmbed } from "discord.js";
 
 const ANSWERS = {
 	VALIDBUG: "Valid Bug",
@@ -18,11 +18,11 @@ const ANSWERS = {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and create reports in #suggestions")
+		.setDescription("Manage and create bug reports in #suggestions")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new report")
+				.setDescription("Create a new bug report")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -36,11 +36,11 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs Only) Answer a report")
+				.setDescription("(Devs Only) Answer a bug report")
 				.addStringOption((option) =>
 					option
 						.setName("answer")
-						.setDescription("Answer to the report")
+						.setDescription("Answer to the bug report")
 						.addChoice(ANSWERS.VALIDBUG, ANSWERS.VALIDBUG)
 						.addChoice(ANSWERS.MINORBUG, ANSWERS.MINORBUG)
 						.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
@@ -50,16 +50,16 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("Delete a report"),
+			subcommand.setName("delete").setDescription("Delete a bug report"),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("Edit a report")
+				.setDescription("Edit a bug report")
 				.addStringOption((option) =>
 					option
 						.setName("report")
-						.setDescription("Your updated report")
+						.setDescription("Your updated bug report")
 						.setRequired(true),
 				),
 		),
@@ -67,20 +67,17 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const embed = new MessageEmbed()
-				.setColor("#222222")
-				.setAuthor({
-					name: "Bug report by " + interaction.user.tag,
-					iconURL: interaction.user.avatarURL() || "",
-				})
-				.setTitle(interaction.options.getString("title") || "")
-				.setDescription(interaction.options.getString("report") || "")
-				.setTimestamp();
 
-			createMessage(interaction, embed);
+			const {thread} = await createMessage(interaction, {
+				title: interaction.options.getString("title") || "",
+			description:interaction.options.getString("report")||""});
+			await interaction.reply({
+				content: `:white_check_mark: Bug report posted! See ${thread}`,
+				ephemeral: true,
+			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			answerSuggestion(interaction, answer, () => {
+			await answerSuggestion(interaction, answer||"", () => {
 				switch (answer) {
 					case ANSWERS.VALIDBUG:
 						return "GREEN";
@@ -101,9 +98,12 @@ const info = {
 				ephemeral: true,
 			});
 		} else if (command === "delete") {
-			deleteSuggestion(interaction);
+			await deleteSuggestion(interaction);
 		} else if (command === "edit") {
-			editSuggestion(interaction, interaction.options.getString("report") || "");
+			if(await editSuggestion(interaction, interaction.options.getString("report") || ""))			interaction.reply({
+				content: "Sucessfully editted bug report.",
+				ephemeral: true,
+			});
 		}
 	},
 };

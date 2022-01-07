@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 const info = {
 	data: new SlashCommandBuilder().setDescription("Replies with Pong!"),
 	async interaction(interaction) {
-		await interaction.reply("Pong!");
+		await interaction.reply({content:"Pong!",ephemeral:true});
 	},
 };
 
