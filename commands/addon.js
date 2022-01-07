@@ -73,11 +73,10 @@ const info = {
 		})[0]?.item;
 
 		if (!addonInfo) {
-			await interaction.reply({
+			return interaction.reply({
 				content: "That addon does not exist!",
 				ephemeral: true,
 			});
-			return;
 		}
 
 		let latestUpdateInfo = "";

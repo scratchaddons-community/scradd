@@ -31,7 +31,7 @@ const info = {
 
 		embed.setTitle(title);
 
-		if (!SUGGESTION_CHANNEL_ID) return;
+		if (!SUGGESTION_CHANNEL_ID) throw new Error("SUGGESTION_CHANNEL_ID is not set in the .env");
 		const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL_ID);
 		if (channel && "send" in channel) {
 			const message = await channel.send({ embeds: [embed] });

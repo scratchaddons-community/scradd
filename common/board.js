@@ -21,7 +21,7 @@ export async function getBoardChannel(guild) {
 export async function getMessageFromBoard(message) {
 	if(!message.guild) return;
 	const board= await getBoardChannel(message.guild)
-	if (!board) return;
+	if (!board) throw new Error("No board channel found. Make sure POTATOBOARD_CHANNEL_ID is set in the .env file.");
 	const fetchedMessages = await board.messages.fetch({ limit: 100 });
 	return fetchedMessages.find((m) => !!m.embeds.at(-1)?.footer?.text.endsWith(" "+message.id));
 }
@@ -36,7 +36,7 @@ export async function postMessageToBoard(message) {
 	const author = await message.guild?.members.fetch(message.author).catch(()=>{});
 
 	const board= await getBoardChannel(message.guild)
-	if (!board) return;
+	if (!board) throw new Error("No board channel found. Make sure POTATOBOARD_CHANNEL_ID is set in the .env file.");
 
 	const embed = new MessageEmbed()
 		.setColor(author?.displayHexColor||0x000000)

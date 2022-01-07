@@ -34,7 +34,7 @@ events.forEach(async (execute, event) =>
 					)
 					.setColor("#ff000");
 				const testingChannel = await client.channels.fetch(
-					process.env.TESTING_CHANNEL_ID || "",
+					process.env.ERROR_CHANNEL_ID || "",
 				);
 
 				if (!testingChannel || !("send" in testingChannel))
@@ -44,7 +44,7 @@ events.forEach(async (execute, event) =>
 					content: "<@771422735486156811> <@799565073374380063> <@765910070222913556>",
 					embeds: [embed],
 				});
-				return;
+				;
 			} catch (errorError) {
 				console.error(errorError);
 			}

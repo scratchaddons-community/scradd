@@ -11,7 +11,11 @@ export default async (reaction, user) => {
 	if (user.partial)user= await user.fetch();
 	const message = reaction.message;
 
-	if (!message.author || !message.guild || reaction.emoji.name !== BOARD_EMOJI) return;
+	if (
+		// Ignore DMS
+		!message.guild ||
+		// Ignore when it's the wrong emoji
+		reaction.emoji.name !== BOARD_EMOJI) return;
 
 	if (
 		// if a bot reacted

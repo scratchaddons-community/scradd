@@ -31,12 +31,12 @@ const info = {
 
 	async interaction(interaction) {
 		const answer = interaction.options.getString("answer");
-		if (!SUGGESTION_CHANNEL_ID || !answer) return;
-		if (!interaction.guild) return;
+		if (!SUGGESTION_CHANNEL_ID || !answer) throw new Error("Either SUGGESTION_CHANNEL_ID is not set in the .env or you did not provide an answer.");
+		if (!interaction.guild) return interaction.reply({content:"How would this work in a DM?? 😛"});
 		const { threads } = await interaction.guild.channels.fetchActiveThreads();
 		const thread = threads.find((thread) => thread.id === interaction.channelId);
-		if (!thread) return;
-		if (thread.parentId !== SUGGESTION_CHANNEL_ID) return;
+		if (!thread) throw new Error("Couldn't find thread'");
+		if (thread.parentId !== SUGGESTION_CHANNEL_ID) return interaction.reply({content: "This is not a suggestion thread!", ephemeral: true});
 		thread
 			.setName(
 				thread.name.replace(/(.*) \|/i, answer + " |"),
@@ -72,7 +72,7 @@ const info = {
 					break;
 			}
 			const [embed] = message.embeds;
-			if (!embed) return;
+			if (!embed) return interaction.reply({content:"The first message in this thread has no embed!",ephemeral:true});
 			embed.setColor(color);
 			embed.setTitle(embed.title?.replace(/(.*): /i, answer + ": ") || "");
 
