@@ -35,7 +35,6 @@
 		"noErrorTruncation": true,
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
-		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,

@@ -1,7 +1,6 @@
-import { MessageReaction } from "discord.js";
 import { BOARD_EMOJI, getMessageFromBoard, updateReactionCount } from "../common/board.js";
 
-/** @param {MessageReaction} reaction */
+/** @param {import("discord.js").MessageReaction} reaction */
 export default async function (reaction) {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	if (reaction.emoji.toString() !== BOARD_EMOJI) return;
