@@ -33,19 +33,17 @@ const info = {
 		const answer = interaction.options.getString("answer");
 		if (!SUGGESTION_CHANNEL_ID || !answer) throw new Error("Either SUGGESTION_CHANNEL_ID is not set in the .env or you did not provide an answer.");
 		if (!interaction.guild) return interaction.reply({content:"How would this work in a DM?? 😛"});
-		const { threads } = await interaction.guild.channels.fetchActiveThreads();
-		const thread = threads.find((thread) => thread.id === interaction.channelId);
-		if (!thread) throw new Error("Couldn't find thread'");
-		if (thread.parentId !== SUGGESTION_CHANNEL_ID) return interaction.reply({content: "This is not a suggestion thread!", ephemeral: true});
-		thread
+		if (!interaction.channel?.isThread() || interaction.channel.parentId !== SUGGESTION_CHANNEL_ID) return interaction.reply({content: `This command can only be used in threads in <#${SUGGESTION_CHANNEL_ID}>.`, ephemeral: true});
+		
+		interaction.channel
 			.setName(
-				thread.name.replace(/(.*) \|/i, answer + " |"),
+				interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
 				"Thread answered by " + interaction.user.tag,
 			)
 			.catch((err) => {
 				console.log("e", err);
 			});
-		thread.fetchStarterMessage().then(async (message) => {
+		interaction.channel.fetchStarterMessage().then(async (message) => {
 			/** @type {import("discord.js").ColorResolvable} */
 			let color = "DARK_BUT_NOT_BLACK";
 			switch (answer) {
