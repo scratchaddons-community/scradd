@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { answerSuggestion, createMessage, deleteSuggestion } from "../common/suggest.js";
 import { MessageEmbed } from "discord.js";
-
-const { SUGGESTION_CHANNEL } = process.env;
 
 const ANSWERS = {
 	VALIDBUG: "Valid Bug",
@@ -44,6 +43,9 @@ const info = {
 						.addChoice(ANSWERS.FIXED, ANSWERS.FIXED)
 						.setRequired(true),
 				),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand.setName("delete").setDescription("Delete a report"),
 		),
 
 	async interaction(interaction) {
@@ -55,95 +57,35 @@ const info = {
 					name: "Bug report by " + interaction.user.tag,
 					iconURL: interaction.user.avatarURL() || "",
 				})
+				.setTitle(interaction.options.getString("title") || "")
 				.setDescription(interaction.options.getString("report") || "")
 				.setTimestamp();
 
-			const title = interaction.options.getString("title") || "";
-
-			embed.setTitle(title);
-
-			if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env");
-			const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
-			if (channel && "send" in channel) {
-				const message = await channel.send({ embeds: [embed] });
-				message.react("👍").then(() => message.react("👎"));
-				const thread = await message.startThread({
-					name: "Unanswered | " + title,
-					autoArchiveDuration: "MAX",
-					reason: "Bug report by " + interaction.user.tag,
-				});
-				await thread.members.add(interaction.user.id);
-				await interaction.reply({
-					content: ":white_check_mark: Bug report posted! " + thread.toString(),
-					ephemeral: true,
-				});
-			} else {
-				await interaction.reply({
-					content: ":negative_squared_cross_mark: Bug report failed :(",
-					ephemeral: true,
-				});
-			}
+			createMessage(interaction, embed);
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			if (!SUGGESTION_CHANNEL || !answer)
-				throw new Error(
-					"Either SUGGESTION_CHANNEL is not set in the .env or you did not provide an answer.",
-				);
-			if (!interaction.guild)
-				return interaction.reply({ content: "How would this work in a DM?? 😛" });
-			if (
-				!interaction.channel?.isThread() ||
-				interaction.channel.parentId !== SUGGESTION_CHANNEL
-			)
-				return interaction.reply({
-					content: `This command can only be used in threads in <#${SUGGESTION_CHANNEL}>.`,
-					ephemeral: true,
-				});
-
-			interaction.channel
-				.setName(
-					interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
-					"Thread answered by " + interaction.user.tag,
-				)
-				.catch((err) => {
-					console.log("e", err);
-				});
-			interaction.channel.fetchStarterMessage().then(async (message) => {
-				/** @type {import("discord.js").ColorResolvable} */
-				let color = "DARK_BUT_NOT_BLACK";
+			answerSuggestion(interaction, answer, () => {
 				switch (answer) {
 					case ANSWERS.VALIDBUG:
-						color = "GREEN";
-						break;
+						return "GREEN";
 					case ANSWERS.MINORBUG:
-						color = "DARK_GREEN";
-						break;
+						return "DARK_GREEN";
 					case ANSWERS.INDEVELOPMENT:
-						color = "YELLOW";
-						break;
+						return "YELLOW";
 					case ANSWERS.INVALIDBUG:
-						color = "RED";
-						break;
+						return "RED";
 					case ANSWERS.FIXED:
-						color = "BLUE";
-						break;
+						return "BLUE";
+					default:
+						return "#000";
 				}
-				const [embed] = message.embeds;
-				if (!embed)
-					return interaction.reply({
-						content: "The first message in this thread has no embed!",
-						ephemeral: true,
-					});
-				embed.setColor(color);
-				embed.setTitle(embed.title?.replace(/(.*): /i, answer + ": ") || "");
-
-				message.edit({ embeds: message.embeds });
 			});
-
 			interaction.reply({
 				content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
 				ephemeral: true,
 			});
+		} else if (command === "delete") {
+			deleteSuggestion(interaction);
 		}
 	},
 };
