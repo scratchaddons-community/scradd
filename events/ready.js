@@ -3,21 +3,19 @@ import commands from "../lib/commands.js";
 
 /** @param {import("discord.js").Client<boolean>} client */
 export default async (client) => {
-	if (!client.application)
-		throw new Error("`ready` was fired but `client.application` is undefined???");
+	if (!client.application) return;
 	console.log(
 		`Connected to Discord with ID ${client.application.id} and tag ${client.user?.tag}`,
 	);
 	const prexistingCommands = await client.application.commands.fetch({
 		guildId: process.env.GUILD_ID || "",
 	});
+
 	/**
 	 * @type {Collection<
 	 * 	string,
-	 * 	Omit<
-	 * 		import("@discordjs/builders").SlashCommandBuilder,
-	 * 		"addSubcommand" | "addSubcommandGroup"
-	 * 	>
+	 * 	| import("@discordjs/builders").SlashCommandBuilder
+	 * 	| import("@discordjs/builders").SlashCommandSubcommandsOnlyBuilder
 	 * >}
 	 */
 	const slashes = new Collection();

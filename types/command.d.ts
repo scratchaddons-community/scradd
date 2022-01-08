@@ -2,9 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import type { CacheType, CommandInteraction } from "discord.js";
 
 type ComandInfo = {
-	data:
-		| SlashCommandSubcommandsOnlyBuilder
-		| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+	data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
 	interaction: (interaction: CommandInteraction<CacheType>) => Promise<void> | void;
 };
 
