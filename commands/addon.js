@@ -4,73 +4,76 @@ import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import tooltip from "../lib/tooltip.js";
 
-const addons = await fetch(
+const ids = await fetch(
 	"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/addons.json",
 )
 	.then((res) => /** @type {Promise<string[]>} */ (res.json()))
 	.then((addons) => addons.filter((addon) => !addon.startsWith("//")));
 
-const fuse = new Fuse(
-	await Promise.all(
-		addons.map(async (addon) => {
-			const manifest = await fetch(
-				"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
-					addon +
-					"/addon.json",
-			).then(
-				(res) =>
-					/** @type {Promise<import("../types/addonManifest").default>} */ (res.json()),
-			);
-			return { ...manifest, id: addon };
-		}),
-	),
-	{
-		includeScore: true,
-		threshold: 0.35,
-		ignoreLocation: true,
-		useExtendedSearch: true,
-		keys: [
-			{
-				name: "name",
-				weight: 1,
-			},
-			{
-				name: "id",
-				weight: 1,
-			},
-			{
-				name: "description",
-				weight: 0.5,
-			},
-			{
-				name: "credits.name",
-				weight: 0.2,
-			},
-			{
-				name: "info.text",
-				weight: 0.1,
-			},
-		],
-	},
+const addons = await Promise.all(
+	ids.map(async (id) => {
+		const manifest = await fetch(
+			"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
+				id +
+				"/addon.json",
+		).then(
+			(res) => /** @type {Promise<import("../types/addonManifest").default>} */ (res.json()),
+		);
+		return { ...manifest, id: id };
+	}),
 );
+
+const fuse = new Fuse(addons, {
+	includeScore: true,
+	threshold: 0.35,
+	ignoreLocation: true,
+	useExtendedSearch: true,
+	keys: [
+		{
+			name: "name",
+			weight: 1,
+		},
+		{
+			name: "id",
+			weight: 1,
+		},
+		{
+			name: "description",
+			weight: 0.5,
+		},
+		{
+			name: "credits.name",
+			weight: 0.2,
+		},
+		{
+			name: "info.text",
+			weight: 0.1,
+		},
+	],
+});
 
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")
 		.addStringOption((option) =>
-			option.setName("addon_name").setDescription("The name of the addon").setRequired(true),
+			option.setName("addon_name").setDescription("The name of the addon"),
 		),
 
 	async interaction(interaction) {
-		const addon = interaction.options.getString("addon_name") || "";
-		const addonInfo = fuse.search(addon).sort((a, b) => {
-			a.score ??= 0;
-			b.score ??= 0;
-			// Sort very good matches at the top no matter what
-			if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
-			else return 0;
-		})[0]?.item;
+		const addon = interaction.options.getString("addon_name");
+		let addonInfo;
+		if (addon) {
+			addonInfo = fuse.search(addon).sort((a, b) => {
+				a.score ??= 0;
+				b.score ??= 0;
+				// Sort very good matches at the top no matter what
+				if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
+				else return 0;
+			})[0]?.item;
+		} else {
+			addonInfo = addons[Math.floor(Math.random() * addons.length)];
+		}
 
 		if (!addonInfo) {
 			return interaction.reply({
@@ -96,7 +99,7 @@ const info = {
 
 		const embed = new MessageEmbed()
 			.setTitle(addonInfo.name)
-			.setColor("RANDOM")
+			.setColor("BLURPLE")
 			.setDescription(
 				addonInfo.description +
 					`\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${addonInfo.id})` +
