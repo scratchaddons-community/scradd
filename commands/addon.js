@@ -62,18 +62,15 @@ const info = {
 
 	async interaction(interaction) {
 		const addon = interaction.options.getString("addon_name");
-		let addonInfo;
-		if (addon) {
-			addonInfo = fuse.search(addon).sort((a, b) => {
-				a.score ??= 0;
-				b.score ??= 0;
-				// Sort very good matches at the top no matter what
-				if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
-				else return 0;
-			})[0]?.item;
-		} else {
-			addonInfo = addons[Math.floor(Math.random() * addons.length)];
-		}
+		const addonInfo = addon
+			? fuse.search(addon).sort((a, b) => {
+					a.score ??= 0;
+					b.score ??= 0;
+					// Sort very good matches at the top no matter what
+					if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
+					else return 0;
+			  })[0]?.item
+			: addons[Math.floor(Math.random() * addons.length)];
 
 		if (!addonInfo) {
 			return interaction.reply({
@@ -81,21 +78,18 @@ const info = {
 				ephemeral: true,
 			});
 		}
-
-		let latestUpdateInfo = "";
-		if (addonInfo.latestUpdate) {
-			const lastUpdatedIn = `last updated in ${addonInfo.latestUpdate?.version}`;
-			latestUpdateInfo =
-				" (" +
-				(addonInfo.latestUpdate.temporaryNotice
+		const lastUpdatedIn = `last updated in ${addonInfo.latestUpdate?.version}`;
+		const latestUpdateInfo = addonInfo.latestUpdate
+			? " (" +
+			  (addonInfo.latestUpdate.temporaryNotice
 					? tooltip(
 							interaction,
 							lastUpdatedIn,
 							`${addonInfo.latestUpdate?.temporaryNotice}`,
 					  )
 					: lastUpdatedIn) +
-				")";
-		}
+			  ")"
+			: "";
 
 		const embed = new MessageEmbed()
 			.setTitle(addonInfo.name)
