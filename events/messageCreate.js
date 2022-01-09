@@ -1,7 +1,9 @@
 /** @param {import("discord.js").Message} message */
 export default (message) => {
 	const content = message.content.toLowerCase();
-	if (message.mentions.users.has(message.client.user?.id || "")) react("👋");
+	if (message.author.bot) return;
+	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
+		react("👋");
 	if (content.includes("dango")) react("🍡");
 	if (content.includes("griff")) react("927763388740816899");
 	if (content.includes("sus")) react("927763785140273152");
