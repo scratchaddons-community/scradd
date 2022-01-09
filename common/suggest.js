@@ -32,7 +32,6 @@ export async function createMessage(interaction, data) {
 		reason: "Suggestion/report by " + interaction.user.tag,
 	});
 	await thread.members.add(interaction.user.id);
-	console.log(await thread.messages.fetch());
 	return { thread, message };
 }
 
