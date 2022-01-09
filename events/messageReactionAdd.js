@@ -8,6 +8,8 @@ import {
 } from "../common/board.js";
 
 /**
+ * This code is reused for messageReactionRemove as well.
+ *
  * @param {import("discord.js").MessageReaction} reaction
  * @param {import("discord.js").User} user
  */

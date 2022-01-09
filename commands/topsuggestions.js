@@ -12,7 +12,7 @@ const info = {
 			limit: 100,
 			// after: 0,
 		});
-		console.log(messages[0]);
+		console.log(messages.first());
 	},
 };
 
