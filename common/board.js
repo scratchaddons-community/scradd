@@ -59,8 +59,8 @@ export async function postMessageToBoard(message) {
 		})
 		.setTimestamp(message.createdTimestamp);
 
-	const embeds = [...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)), embed];
-	while (embeds.length > 10) embeds.shift();
+	const embeds = [embed, ...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed))];
+	while (embeds.length > 10) embeds.pop();
 
 	const button = new MessageButton()
 		.setEmoji("👀")
