@@ -146,7 +146,7 @@ export async function editSuggestion(interaction, newSuggestion) {
 		return false;
 	}
 	if (!interaction.channel?.isThread() || interaction.channel.parentId !== SUGGESTION_CHANNEL) {
-		!!interaction.reply({
+		interaction.reply({
 			content: `This command can only be used in threads in <#${SUGGESTION_CHANNEL}>.`,
 			ephemeral: true,
 		});
