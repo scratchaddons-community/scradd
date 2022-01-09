@@ -19,7 +19,7 @@ export async function getMessageFromBoard(message) {
 	return fetchedMessages.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
-		const [, , messageId] = component.url?.match(/\d+/) || [];
+		const [, , messageId] = component.url?.match(/\d+/g) || [];
 		return messageId === message.id;
 	});
 }
