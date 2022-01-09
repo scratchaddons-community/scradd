@@ -34,9 +34,21 @@ export async function postMessageToBoard(message) {
 	if (!board)
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
+	const repliedMessage = message.reference?.messageId
+		? await message.channel.messages.fetch(message.reference?.messageId)
+		: false;
+	const content =
+		(repliedMessage
+			? "**Replying to " +
+			  repliedMessage.author.username +
+			  ":**\n> " +
+			  repliedMessage.content +
+			  "\n\n"
+			: "") + message.content;
+
 	const embed = new MessageEmbed()
 		.setColor(0xffd700)
-		.setDescription(message.content || "")
+		.setDescription(content)
 		.setAuthor({
 			name: author?.displayName || message.author.username,
 			iconURL:
