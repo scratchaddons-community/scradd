@@ -1,4 +1,5 @@
 import { Guild, Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import getAllMessages from "../lib/getAllMessages.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL;
 export const BOARD_EMOJI = "🥔";
@@ -15,7 +16,7 @@ export async function getMessageFromBoard(message) {
 	const board = await getBoardChannel(message.guild);
 	if (!board)
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
-	const fetchedMessages = await board.messages.fetch({ limit: 100 });
+	const fetchedMessages = await getAllMessages(board);
 	return fetchedMessages.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
@@ -59,7 +60,16 @@ export async function postMessageToBoard(message) {
 		})
 		.setTimestamp(message.createdTimestamp);
 
-	const embeds = [embed, ...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed))];
+	const embeds = [
+		embed,
+		...message.stickers.map((sticker) => {
+			return new MessageEmbed()
+				.setDescription("")
+				.setImage(`https://media.discordapp.net/stickers/` + sticker.id + `.webp?size=160`);
+		}),
+		...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+	];
+
 	while (embeds.length > 10) embeds.pop();
 
 	const button = new MessageButton()

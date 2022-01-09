@@ -32,7 +32,7 @@ export default async (reaction, user) => {
 		// if a bot reacted
 		user.bot ||
 		// or if they self-reacted
-		user.id === message.author.id ||
+		(user.id === message.author.id&&process.env.NODE_ENV === 'production') ||
 		// or if they reacted to a message on the board
 		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id)
 	)

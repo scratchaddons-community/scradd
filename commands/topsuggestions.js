@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { SUGGESTION_CHANNEL } from "../common/suggest.js";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import getAllMessages from "../lib/getAllMessages";
+import getAllMessages from "../lib/getAllMessages.js";
 
 /** @type {import("../types/command").default} */
 const info = {
