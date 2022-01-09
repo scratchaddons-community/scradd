@@ -76,7 +76,6 @@ const all = await getAllMessages(channel);
 			}
 			if (offset === 0) previousButton.setDisabled(true);
 			else previousButton.setDisabled(false);
-			console.log(offset, filtered.length);
 			if (offset + 10 >= filtered.length - 1) nextButton.setDisabled(true);
 			else nextButton.setDisabled(false);
 			interaction.editReply({
