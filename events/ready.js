@@ -22,8 +22,8 @@ export default async (client) => {
 	 */
 	const slashes = new Collection();
 	commands.forEach((command, key) => slashes.set(key, command.data));
-	for (const [, command] of prexistingCommands) {
-		if (slashes.has(command.name)) continue;
+	for (const [name, command] of prexistingCommands) {
+		if (slashes.has(name)) continue;
 		command.delete();
 	}
 

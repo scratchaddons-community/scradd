@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { SUGGESTION_CHANNEL } from "../common/suggest.js";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import getAllMessages from "../lib/getAllMessages";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -9,22 +10,12 @@ const info = {
 		if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env");
 		const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 		if (!channel?.isText()) return;
-
-		const all = [];
-		let limit = 100;
-		let lastFetch = limit;
-		/** @type {undefined | string} */
-		let lastMessage = undefined;
-		while (lastFetch === limit) {
-			const messages = await channel.messages.fetch({
-				limit,
-				after: lastMessage,
-			});
-			lastFetch = messages.size;
-			lastMessage = messages.last().id;
-			console.log(lastFetch);
-			all.push(...messages.values());
-		}
+const all = await getAllMessages(channel);
+		/** @type {{
+				id: string,
+				count:number,
+				title: string,
+			}[]} */
 		const filtered = [];
 		for (const message of all) {
 			const count = message.reactions.resolve("👍")?.count;
@@ -32,7 +23,7 @@ const info = {
 			filtered.push({
 				id: message.id,
 				count,
-				title: message.embeds[0]?.title,
+				title: message.embeds[0]?.title||'',
 			});
 		}
 
