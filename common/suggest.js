@@ -1,6 +1,6 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 
-const SUGGESTION_CHANNEL = process.env.SUGGESTION_CHANNEL;
+export const SUGGESTION_CHANNEL = process.env.SUGGESTION_CHANNEL;
 
 /**
  * @param {import("discord.js").CommandInteraction} interaction
