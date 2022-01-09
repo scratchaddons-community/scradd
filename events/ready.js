@@ -20,22 +20,19 @@ export default async (client) => {
 	 */
 	const slashes = new Collection();
 	commands.forEach((command, key) => slashes.set(key, command.data));
-	await Promise.all(
-		prexistingCommands.map((command) => {
-			if (slashes.has(command.name)) return;
-			return command.delete();
-		}),
-	);
+	for (const [name, command] of prexistingCommands) {
+		if (slashes.has(name)) return;
+		return command.delete();
+	}
 
-	await Promise.all(
-		slashes.map((command) => {
-			if (prexistingCommands.has(command.name))
-				client.application?.commands.edit(
-					command.name,
-					command.toJSON(),
-					process.env.GUILD_ID || "",
-				);
-			client.application?.commands.create(command.toJSON(), process.env.GUILD_ID || "");
-		}),
-	);
+	for (const [name, command] of slashes) {
+		if (prexistingCommands.has(name)) {
+			client.application?.commands.edit(
+				command.name,
+				command.toJSON(),
+				process.env.GUILD_ID || "",
+			);
+		}
+		client.application?.commands.create(command.toJSON(), process.env.GUILD_ID || "");
+	}
 };
