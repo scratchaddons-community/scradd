@@ -6,7 +6,7 @@ import tooltip from "../lib/tooltip.js";
 
 const addons = await fetch(
 	"https://raw.githubusercontent.com/ScratchAddons/website-v2/master/data/addons/en.json",
-).then((res) => /** @type {Promise<{}[]>} */ (res.json()));
+).then((res) => /** @type {Promise<{ id: string }[]>} */ (res.json()));
 
 const fuse = new Fuse(addons, {
 	includeScore: true,
