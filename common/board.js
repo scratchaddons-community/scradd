@@ -101,7 +101,7 @@ export async function postMessageToBoard(message) {
  * @param {Message<boolean>} boardMessage
  */
 export async function updateReactionCount(newCount, boardMessage) {
-	if (newCount < MIN_COUNT) return boardMessage.delete();
+	if (newCount < MIN_COUNT - 1) return boardMessage.delete();
 	return boardMessage.edit({
 		content: boardMessage.content.replace(/ \d+\*\*/, ` ${newCount}**`),
 		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
