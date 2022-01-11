@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import {
-	answerSuggestion,
-	createMessage,
-	deleteSuggestion,
-	editSuggestion,
-} from "../common/suggest.js";
+import SuggestionBuilder from "../common/suggest.js";
+
+const { BUGS_CHANNEL } = process.env;
+if (!BUGS_CHANNEL) throw new Error("BUGS_CHANNEL is not set in the .env.");
 
 const ANSWERS = {
 	VALIDBUG: "Valid Bug",
@@ -13,6 +11,8 @@ const ANSWERS = {
 	INVALIDBUG: "Invalid Bug",
 	FIXED: "Fixed",
 };
+
+const BugsChannel = new SuggestionBuilder(BUGS_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -66,7 +66,7 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const { thread } = await createMessage(interaction, {
+			const { thread } = await BugsChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
 			});
@@ -76,7 +76,7 @@ const info = {
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await answerSuggestion(interaction, answer || "", () => {
+			await BugsChannel.answerSuggestion(interaction, answer || "", () => {
 				switch (answer) {
 					case ANSWERS.VALIDBUG:
 						return "GREEN";
@@ -97,9 +97,14 @@ const info = {
 				ephemeral: true,
 			});
 		} else if (command === "delete") {
-			await deleteSuggestion(interaction);
+			await BugsChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {
-			if (await editSuggestion(interaction, interaction.options.getString("report") || ""))
+			if (
+				await BugsChannel.editSuggestion(
+					interaction,
+					interaction.options.getString("report") || "",
+				)
+			)
 				interaction.reply({
 					content: "Sucessfully editted bug report.",
 					ephemeral: true,

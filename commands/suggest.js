@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import {
-	answerSuggestion,
-	createMessage,
-	deleteSuggestion,
-	editSuggestion,
-} from "../common/suggest.js";
+import SuggestionBuilder from "../common/suggest.js";
+
+const { SUGGESTION_CHANNEL } = process.env;
+if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
@@ -15,6 +13,8 @@ const ANSWERS = {
 	REJECTED: "Rejected",
 	IMPOSSIBLE: "Impossible",
 };
+
+const SuggestionChannel = new SuggestionBuilder(SUGGESTION_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -73,7 +73,7 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const { thread, message } = await createMessage(interaction, {
+			const { thread, message } = await SuggestionChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("suggestion") || "",
 			});
@@ -84,7 +84,7 @@ const info = {
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await answerSuggestion(interaction, answer || "", () => {
+			await SuggestionChannel.answerSuggestion(interaction, answer || "", () => {
 				switch (answer) {
 					case ANSWERS.GOODIDEA:
 						return "GREEN";
@@ -109,10 +109,13 @@ const info = {
 				ephemeral: true,
 			});
 		} else if (command === "delete") {
-			await deleteSuggestion(interaction);
+			await SuggestionChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {
 			if (
-				await editSuggestion(interaction, interaction.options.getString("suggestion") || "")
+				await SuggestionChannel.editSuggestion(
+					interaction,
+					interaction.options.getString("suggestion") || "",
+				)
 			)
 				interaction.reply({
 					content: "Sucessfully editted suggestion.",
