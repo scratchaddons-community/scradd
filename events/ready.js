@@ -22,16 +22,16 @@ export default async (client) => {
 	 */
 	const slashes = new Collection();
 	commands.forEach((command, key) => slashes.set(key, command.data));
-	for (const [name, command] of prexistingCommands) {
-		if (slashes.has(name)) continue;
+	prexistingCommands.each((command) => {
+		if (slashes.has(command.name)) return;
 		command.delete();
-	}
+	});
 
-	for (const [name, command] of slashes) {
+	slashes.each((command, name) => {
 		if (prexistingCommands.has(name)) {
 			client.application?.commands.edit(name, command.toJSON(), process.env.GUILD_ID || "");
 		} else {
 			client.application?.commands.create(command.toJSON(), process.env.GUILD_ID || "");
 		}
-	}
+	});
 };
