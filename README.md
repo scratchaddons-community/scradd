@@ -1,4 +1,4 @@
-# sa-bot
+# scradd
 
 Bot for Scratch Addons Discord server
 
