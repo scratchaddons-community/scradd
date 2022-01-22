@@ -44,7 +44,7 @@ export default async (reaction, user) => {
 	const boardMessage = await getMessageFromBoard(message);
 
 	if (boardMessage?.embeds[0]) {
-		updateReactionCount(reaction.count||0, boardMessage);
+		updateReactionCount(reaction.count || 0, boardMessage);
 	} else {
 		if (reaction.count < MIN_COUNT) return;
 		postMessageToBoard(message);

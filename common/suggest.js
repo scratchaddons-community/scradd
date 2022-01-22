@@ -56,17 +56,19 @@ export default class SuggestionBuilder {
 			});
 		}
 
-		await Promise.all([interaction.channel.setName(
-			interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
-			"Thread answered by " + interaction.user.tag,
-		),
+		await Promise.all([
+			interaction.channel.setName(
+				interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
+				"Thread answered by " + interaction.user.tag,
+			),
 
-		await interaction.channel.fetchStarterMessage().then(async (message) => {
-			const embed = new MessageEmbed(message.embeds[0]);
-			embed.setColor(colors[answer] || 0x000);
+			await interaction.channel.fetchStarterMessage().then(async (message) => {
+				const embed = new MessageEmbed(message.embeds[0]);
+				embed.setColor(colors[answer] || 0x000);
 
-			message.edit({ embeds: [embed] });
-		})]);
+				message.edit({ embeds: [embed] });
+			}),
+		]);
 	}
 
 	/** @param {import("discord.js").CommandInteraction} interaction */

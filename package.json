@@ -21,11 +21,12 @@
 	},
 	"devDependencies": {
 		"@types/node": "^17.0.10",
+		"nodemon": "^2.0.15",
+		"openode": "^2.1.6",
 		"prettier": "^2.5.1",
 		"prettier-plugin-ini": "^0.3.1",
 		"prettier-plugin-jsdoc": "^0.3.30",
-		"typescript": "^4.5.5",
-		"nodemon": "^2.0.15"
+		"typescript": "^4.5.5"
 	},
 	"repository": {
 		"type": "git",

@@ -416,6 +416,6 @@ export type WebsiteData = ArrayOfAtLeastOne<{
 	id: string;
 	name: manifest["name"];
 	description: manifest["description"];
-	tags: manifest[ "tags" ]
-	credits: manifest[ "credits"]
-}>
+	tags: manifest["tags"];
+	credits: manifest["credits"];
+}>;

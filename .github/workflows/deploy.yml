@@ -1,0 +1,31 @@
+name: Deploy bot
+on:
+    workflow_dispatch:
+    release:
+        types: [published]
+
+jobs:
+    run:
+        name: Deploy bot
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2.3.5
+              with:
+                  ref: ${{ github.head_ref }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v2.4.1
+              with:
+                  node-version: 16
+                  cache: "npm"
+
+            - name: Install
+              run: npm ci --force
+
+            - name: Configure
+              run: npx openode ci-conf "${{ secrets.OPENODE }}" "scradd"
+
+            - name: Deploy
+              run: npx openode deploy
