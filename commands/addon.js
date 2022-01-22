@@ -6,7 +6,7 @@ import tooltip from "../lib/tooltip.js";
 
 const addons = await fetch(
 	"https://raw.githubusercontent.com/ScratchAddons/website-v2/master/data/addons/en.json",
-).then((res) => /** @type {Promise<{ id: string }[]>} */ (res.json()));
+).then((res) => /** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (res.json()));
 
 const fuse = new Fuse(addons, {
 	includeScore: true,
@@ -38,6 +38,19 @@ const info = {
 		),
 
 	async interaction(interaction) {
+		/** @param {import("../types/addonManifest").default} credits */
+		function generateCredits({ credits }) {
+			return credits
+				?.map(({ name, link, note }) =>
+					link
+						? `[${name}](${link} "${note || ""}")`
+						: note
+						? tooltip(interaction, name, note)
+						: name,
+				)
+				.join(", ");
+		}
+
 		const input = interaction.options.getString("addon_name");
 		const result = input
 			? fuse.search(input).sort((a, b) => {
@@ -100,14 +113,8 @@ const info = {
 				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${result.id}`,
 			);
 
-		if (addon.credits?.length)
-			embed.addField(
-				"Contributors",
-				addon.credits
-					?.map(({ name, link }) => (link ? `[${name}](${link})` : name))
-					.join(", "),
-				true,
-			);
+		const credits = generateCredits(addon);
+		if (credits) embed.addField("Contributors", credits, true);
 
 		embed.addFields([
 			{

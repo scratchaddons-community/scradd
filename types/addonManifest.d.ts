@@ -68,6 +68,16 @@ type definitions_cssManipulator =
 			s: definitions_cssManipulator;
 			/** The source that provides value. */
 			v: definitions_cssManipulator;
+	  }
+	| {
+			/** The type of the manipulator. */
+			type?: "map";
+			/** The source that provides the color. */
+			source: definitions_cssManipulator;
+			/** The possible options. */
+			options: {
+				[key: string]: definitions_cssManipulator;
+			};
 	  };
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
@@ -278,12 +288,22 @@ type manifest = {
 	 *
 	 * A credited author/contributor.
 	 */
-	credits?: ArrayOfAtLeastOne<{
-		/** The name of the credited person. */
-		name: string;
-		/** The name of the credited person. */
-		link?: `http${string}`;
-	}>;
+	credits?: ArrayOfAtLeastOne<
+		{
+			/** The name of the credited person. */
+			name: string;
+			/** The link relevant to the credit. */
+			link?: `http${string}`;
+		} & (
+			| { id: never; note: never }
+			| {
+					/** The ID for the credit. Required if note is in use. */
+					id: string;
+					/** The note for the credit. */
+					note?: string;
+			  }
+		)
+	>;
 	/**
 	 * You can provide the "enabledByDefault" property and set it to true. Its default value is false.
 	 *
@@ -368,12 +388,13 @@ type manifest = {
 	versionAdded: string;
 	/** The preview used for the addon. */
 	addonPreview?: {
-		/** The type of the preview. */ type: "editor-dark-mode";
+		/** The type of the preview. */
+		type: "editor-dark-mode";
 	};
 	/** The preview used for presets. */
 	presetPreview?: {
 		/** The type of the preview. */
-		type: "pallate";
+		type: "palette";
 		colors?: string[];
 	};
 	/** The information about the latest update. */
@@ -390,3 +411,11 @@ type manifest = {
 };
 
 export default manifest;
+
+export type WebsiteData = ArrayOfAtLeastOne<{
+	id: string;
+	name: manifest["name"];
+	description: manifest["description"];
+	tags: manifest[ "tags" ]
+	credits: manifest[ "credits"]
+}>
