@@ -65,7 +65,7 @@ export async function postMessageToBoard(message) {
 		case "CHANNEL_NAME_CHANGE": {
 			// rename thread
 			description =
-				(message.type,
+				(
 				`<:edit:934526895255592981> ${message.author} changed the channel name: **${
 					message.channel.isThread() && message.channel.name
 				}**`);
@@ -74,8 +74,7 @@ export async function postMessageToBoard(message) {
 		case "CHANNEL_PINNED_MESSAGE": {
 			// pin message
 			const pinned = await message.fetchReference();
-			description =
-				(message.type,
+			description =(
 				`<:pin:934527802621956217> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`);
 			break;
 		}
