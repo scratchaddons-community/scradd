@@ -1,10 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
-import dotenv from "dotenv";
-
-dotenv.config();
-
 import { BOARD_CHANNEL } from "../common/board.js";
 
 /** @type {import("../types/command").default} */
