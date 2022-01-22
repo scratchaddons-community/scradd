@@ -7,6 +7,8 @@ export const BOARD_CHANNEL = process.env.BOARD_CHANNEL;
 export const BOARD_EMOJI = "🥔";
 export const MIN_COUNT = 1;
 
+export const MAX_REPLY_LENGTH = 100;
+
 /** @param {Message<boolean>} message */
 export async function getMessageFromBoard(message) {
 	if (!message.guild) return;
@@ -23,15 +25,29 @@ export async function getMessageFromBoard(message) {
 }
 
 /**
- * @param {Message} [repliedMessage]
+ * @param {Message} message
  *
- * @returns {string}
+ * @returns {Promise<string>}
  */
-function generateReplyInfo(repliedMessage) {
+async function generateReplyInfo(message) {
+	if (message.type == "CONTEXT_MENU_COMMAND")
+		return message.interaction?.user + " used **" + message.interaction?.commandName + "**:\n";
+
+	if (message.type == "APPLICATION_COMMAND")
+		return message.interaction?.user + " used **/" + message.interaction?.commandName + "**:\n";
+
+	const repliedMessage = message.type === "REPLY" ? await message.fetchReference() : false;
+
 	if (!repliedMessage) return "";
 	const { author, content } = repliedMessage;
-	if (content) return `*Replying to **${author.username}**:*\n> ${content}\n\n`;
-	else return `*Replying to **${author.username}***\n\n`;
+
+	if (content)
+		return `*Replying to ${author}:*\n> ${
+			content.length < MAX_REPLY_LENGTH
+				? content
+				: content.substring(0, MAX_REPLY_LENGTH - 3) + "…"
+		}\n\n`;
+	else return `*Replying to ${author}*\n\n`;
 }
 
 /** @param {Message<boolean>} message */
@@ -44,17 +60,80 @@ export async function postMessageToBoard(message) {
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
-	const repliedMessage = message.reference?.messageId
-		? await message.channel.messages.fetch(message.reference?.messageId)
-		: undefined;
-
-	const repliedInfo = generateReplyInfo(repliedMessage);
-
-console.log(message.valueOf());
+	let description = "";
+	switch (message.type) {
+		case "CHANNEL_NAME_CHANGE": {
+			// rename thread
+			description =
+				(message.type,
+				`${message.author} changed the channel name: **${
+					message.channel.isThread() && message.channel.name
+				}**`);
+			break;
+		}
+		case "CHANNEL_PINNED_MESSAGE": {
+			// pin message
+			const pinned = await message.fetchReference();
+			description =
+				(message.type,
+				`${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`);
+			break;
+		}
+		case "GUILD_MEMBER_JOIN": {
+			// join server
+			description = `:join: ${message.author} just joined the server!`;
+			break;
+		}
+		case "CHANNEL_FOLLOW_ADD": {
+			// follow channel
+			description = `:join: ${message.author} has added **${message.content}** to this channel. Its most important updates will show up here.`;
+			break;
+		}
+		case "RECIPIENT_ADD": {
+			description = `:join: ${
+				message.author
+			} added ${message.mentions.users.first()} to the thread.`;
+			break;
+		}
+		case "THREAD_CREATED": {
+			// xxx started a thread: xxx. see all threads.
+			description = `:thread: ${message.author} started a thread: **${message.content}** See all **threads**.`;
+			break;
+		}
+		case "USER_PREMIUM_GUILD_SUBSCRIPTION": {
+			// :nitro: **xxx** just boosted the server!
+			description = `:boost: ${message.author} just boosted the server!`;
+			break;
+		}
+		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1": {
+			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 1**!
+			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 1**!`;
+			break;
+		}
+		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2": {
+			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 2**!
+			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 2**!`;
+			break;
+		}
+		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3": {
+			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 3**!
+			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 3**!`;
+			break;
+		}
+		case "APPLICATION_COMMAND":
+		case "CONTEXT_MENU_COMMAND":
+		case "REPLY": {
+			description = (await generateReplyInfo(message)) + message.content;
+			break;
+		}
+		default: {
+			description = message.content;
+		}
+	}
 
 	const embed = new MessageEmbed()
 		.setColor(0xffd700)
-		.setDescription(repliedInfo + message.content)
+		.setDescription(description)
 		.setAuthor({
 			name: author?.displayName || message.author.username,
 			iconURL:

@@ -24,7 +24,7 @@ const info = {
 		 */
 		const filtered = [];
 		for (const message of all) {
-			const count = message.reactions.resolve("👍")?.count;
+			const count = (message.reactions.resolve("👍")?.count||0)-(message.reactions.resolve("👎")?.count||0);
 			if (!count) continue;
 			filtered.push({
 				id: message.id,
