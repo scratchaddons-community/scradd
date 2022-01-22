@@ -66,7 +66,7 @@ export async function postMessageToBoard(message) {
 			// rename thread
 			description =
 				(message.type,
-				`${message.author} changed the channel name: **${
+				`<:edit:934526895255592981> ${message.author} changed the channel name: **${
 					message.channel.isThread() && message.channel.name
 				}**`);
 			break;
@@ -76,48 +76,48 @@ export async function postMessageToBoard(message) {
 			const pinned = await message.fetchReference();
 			description =
 				(message.type,
-				`${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`);
+				`<:pin:934527802621956217> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`);
 			break;
 		}
 		case "GUILD_MEMBER_JOIN": {
 			// join server
-			description = `:join: ${message.author} just joined the server!`;
+			description = `<:add:934518444160856107> ${message.author} just joined the server!`;
 			break;
 		}
 		case "CHANNEL_FOLLOW_ADD": {
 			// follow channel
-			description = `:join: ${message.author} has added **${message.content}** to this channel. Its most important updates will show up here.`;
+			description = `<:add:934518444160856107> ${message.author} has added **${message.content}** to this channel. Its most important updates will show up here.`;
 			break;
 		}
 		case "RECIPIENT_ADD": {
-			description = `:join: ${
+			description = `<:add:934518444160856107> ${
 				message.author
 			} added ${message.mentions.users.first()} to the thread.`;
 			break;
 		}
 		case "THREAD_CREATED": {
 			// xxx started a thread: xxx. see all threads.
-			description = `:thread: ${message.author} started a thread: **${message.content}** See all **threads**.`;
+			description = `<:thread:934519757707812934> ${message.author} started a thread: **${message.content}** See all **threads**.`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION": {
 			// :nitro: **xxx** just boosted the server!
-			description = `:boost: ${message.author} just boosted the server!`;
+			description = `<:boost:934520614432145459> ${message.author} just boosted the server!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 1**!
-			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 1**!`;
+			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 1**!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 2**!
-			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 2**!`;
+			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 2**!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 3**!
-			description = `:boost: ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 3**!`;
+			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 3**!`;
 			break;
 		}
 		case "APPLICATION_COMMAND":

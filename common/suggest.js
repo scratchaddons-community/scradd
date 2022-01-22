@@ -16,7 +16,7 @@ export default class SuggestionBuilder {
 		const author = await interaction.guild?.members.fetch(interaction.user).catch(() => {});
 
 		const embed = new MessageEmbed()
-			.setColor("#222222")
+			.setColor(0x222222)
 			.setAuthor({
 				name: "Suggestion by " + author?.displayName || interaction.user.username,
 				iconURL:
@@ -63,7 +63,7 @@ export default class SuggestionBuilder {
 
 		await interaction.channel.fetchStarterMessage().then(async (message) => {
 			const embed = new MessageEmbed(message.embeds[0]);
-			embed.setColor(colors[answer] || "#000");
+			embed.setColor(colors[answer] || 0x000);
 
 			message.edit({ embeds: [embed] });
 		})]);
