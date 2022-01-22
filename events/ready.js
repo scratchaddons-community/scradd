@@ -1,6 +1,8 @@
 import { Collection } from "discord.js";
 import commands from "../lib/commands.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 /** @param {import("discord.js").Client<boolean>} client */
 export default async (client) => {
 	if (!client.application)

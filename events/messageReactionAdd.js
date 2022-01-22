@@ -6,7 +6,9 @@ import {
 	MIN_COUNT,
 	updateReactionCount,
 } from "../common/board.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 /**
  * This code is reused for messageReactionRemove as well.
  *
@@ -32,7 +34,7 @@ export default async (reaction, user) => {
 		// if a bot reacted
 		user.bot ||
 		// or if they self-reacted
-		(user.id === message.author.id&&process.env.NODE_ENV === 'production') ||
+		(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 		// or if they reacted to a message on the board
 		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id)
 	)
@@ -42,7 +44,7 @@ export default async (reaction, user) => {
 	const boardMessage = await getMessageFromBoard(message);
 
 	if (boardMessage?.embeds[0]) {
-		updateReactionCount(reaction.count, boardMessage);
+		updateReactionCount(reaction.count||0, boardMessage);
 	} else {
 		if (reaction.count < MIN_COUNT) return;
 		postMessageToBoard(message);

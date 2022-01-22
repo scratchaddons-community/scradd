@@ -1,6 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import SuggestionBuilder from "../common/suggest.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const { BUGS_CHANNEL } = process.env;
 if (!BUGS_CHANNEL) throw new Error("BUGS_CHANNEL is not set in the .env.");
 
@@ -76,26 +78,19 @@ const info = {
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await BugsChannel.answerSuggestion(interaction, answer || "", () => {
-				switch (answer) {
-					case ANSWERS.VALIDBUG:
-						return "GREEN";
-					case ANSWERS.MINORBUG:
-						return "DARK_GREEN";
-					case ANSWERS.INDEVELOPMENT:
-						return "YELLOW";
-					case ANSWERS.INVALIDBUG:
-						return "RED";
-					case ANSWERS.FIXED:
-						return "BLUE";
-					default:
-						return "#000";
-				}
-			});
-			interaction.reply({
-				content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
-				ephemeral: true,
-			});
+			await Promise.all([
+				BugsChannel.answerSuggestion(interaction, answer || "", {
+					[ANSWERS.VALIDBUG]: "GREEN",
+					[ANSWERS.MINORBUG]: "DARK_GREEN",
+					[ANSWERS.INDEVELOPMENT]: "YELLOW",
+					[ANSWERS.INVALIDBUG]: "RED",
+					[ANSWERS.FIXED]: "BLUE",
+				}),
+				interaction.reply({
+					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
+					ephemeral: true,
+				}),
+			]);
 		} else if (command === "delete") {
 			await BugsChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {

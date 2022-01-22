@@ -1,20 +1,17 @@
-import { Guild, Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL;
 export const BOARD_EMOJI = "🥔";
 export const MIN_COUNT = 1;
-/** @param {Guild} guild */
-export async function getBoardChannel(guild) {
-	const { threads } = await guild.channels.fetchActiveThreads();
-	return threads.find((thread) => thread.id === BOARD_CHANNEL);
-}
 
 /** @param {Message<boolean>} message */
 export async function getMessageFromBoard(message) {
 	if (!message.guild) return;
-	const board = await getBoardChannel(message.guild);
-	if (!board)
+	const board = await message.guild.channels.fetch(BOARD_CHANNEL || "");
+	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 	const fetchedMessages = await getAllMessages(board);
 	return fetchedMessages.find((boardMessage) => {
@@ -25,27 +22,35 @@ export async function getMessageFromBoard(message) {
 	});
 }
 
+/**
+ * @param {Message} [repliedMessage]
+ *
+ * @returns {string}
+ */
+function generateReplyInfo(repliedMessage) {
+	if (!repliedMessage) return "";
+	const { author, content } = repliedMessage;
+	if (content) return `*Replying to **${author.username}**:*\n> ${content}\n\n`;
+	else return `*Replying to **${author.username}***\n\n`;
+}
+
 /** @param {Message<boolean>} message */
 export async function postMessageToBoard(message) {
 	if (!message.guild) return;
 
 	const author = await message.guild?.members.fetch(message.author).catch(() => {});
 
-	const board = await getBoardChannel(message.guild);
-	if (!board)
+	const board = await message.guild.channels.fetch(BOARD_CHANNEL || "");
+	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
 	const repliedMessage = message.reference?.messageId
 		? await message.channel.messages.fetch(message.reference?.messageId)
-		: "";
+		: undefined;
 
-	const repliedInfo =
-		repliedMessage &&
-		"**Replying to " +
-			repliedMessage.author.username +
-			":**\n> " +
-			repliedMessage.content +
-			"\n\n";
+	const repliedInfo = generateReplyInfo(repliedMessage);
+
+console.log(message.valueOf());
 
 	const embed = new MessageEmbed()
 		.setColor(0xffd700)
@@ -100,8 +105,8 @@ export async function postMessageToBoard(message) {
  * @param {number} newCount
  * @param {Message<boolean>} boardMessage
  */
-export async function updateReactionCount(newCount, boardMessage) {
-	if (newCount < MIN_COUNT - 1) return boardMessage.delete();
+export async function updateReactionCount(newCount = 0, boardMessage) {
+	if (newCount < Math.max(MIN_COUNT - 1, 1)) return boardMessage.delete();
 	return boardMessage.edit({
 		content: boardMessage.content.replace(/ \d+\*\*/, ` ${newCount}**`),
 		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),

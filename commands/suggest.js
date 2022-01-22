@@ -1,6 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import SuggestionBuilder from "../common/suggest.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
 
@@ -77,37 +79,30 @@ const info = {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("suggestion") || "",
 			});
-			await message.react("👍").then(() => message.react("👎"));
-			await interaction.reply({
-				content: `:white_check_mark: Suggestion posted! See ${thread}`,
-				ephemeral: true,
-			});
+			await Promise.all([
+				message.react("👍").then(() => message.react("👎")),
+				interaction.reply({
+					content: `:white_check_mark: Suggestion posted! See ${thread}`,
+					ephemeral: true,
+				}),
+			]);
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await SuggestionChannel.answerSuggestion(interaction, answer || "", () => {
-				switch (answer) {
-					case ANSWERS.GOODIDEA:
-						return "GREEN";
-					case ANSWERS.INDEVELOPMENT:
-						return "YELLOW";
-					case ANSWERS.IMPLEMENTED:
-						return "BLUE";
-					case ANSWERS.POSSIBLE:
-						return "ORANGE";
-					case ANSWERS.IMPRACTICAL:
-						return "DARK_RED";
-					case ANSWERS.REJECTED:
-						return "RED";
-					case ANSWERS.IMPOSSIBLE:
-						return "PURPLE";
-					default:
-						return "#000";
-				}
-			});
-			interaction.reply({
-				content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
-				ephemeral: true,
-			});
+			await Promise.all([
+				SuggestionChannel.answerSuggestion(interaction, answer || "", {
+					[ANSWERS.GOODIDEA]: "GREEN",
+					[ANSWERS.INDEVELOPMENT]: "YELLOW",
+					[ANSWERS.IMPLEMENTED]: "BLUE",
+					[ANSWERS.POSSIBLE]: "ORANGE",
+					[ANSWERS.IMPRACTICAL]: "DARK_RED",
+					[ANSWERS.REJECTED]: "RED",
+					[ANSWERS.IMPOSSIBLE]: "PURPLE",
+				}),
+				interaction.reply({
+					content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
+					ephemeral: true,
+				}),
+			]);
 		} else if (command === "delete") {
 			await SuggestionChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {

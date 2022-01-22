@@ -1,7 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
 

@@ -1,9 +1,10 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 
 export default class SuggestionBuilder {
+	CHANNEL_ID = "";
+
 	/** @param {string} CHANNEL_ID */
 	constructor(CHANNEL_ID) {
-		/** @type {string} */
 		this.CHANNEL_ID = CHANNEL_ID;
 	}
 
@@ -42,9 +43,9 @@ export default class SuggestionBuilder {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 * @param {string} answer
-	 * @param {(answer: string) => import("discord.js").ColorResolvable} getColor
+	 * @param {Record<string, import("discord.js").ColorResolvable>} colors
 	 */
-	async answerSuggestion(interaction, answer, getColor) {
+	async answerSuggestion(interaction, answer, colors) {
 		if (!interaction.guild) {
 			return interaction.reply({ content: "Command unavailable in DMs." });
 		}
@@ -55,16 +56,17 @@ export default class SuggestionBuilder {
 			});
 		}
 
-		interaction.channel.setName(
+		await Promise.all([interaction.channel.setName(
 			interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
 			"Thread answered by " + interaction.user.tag,
-		);
-		interaction.channel.fetchStarterMessage().then(async (message) => {
+		),
+
+		await interaction.channel.fetchStarterMessage().then(async (message) => {
 			const embed = new MessageEmbed(message.embeds[0]);
-			embed.setColor(getColor(answer));
+			embed.setColor(colors[answer] || "#000");
 
 			message.edit({ embeds: [embed] });
-		});
+		})]);
 	}
 
 	/** @param {import("discord.js").CommandInteraction} interaction */
@@ -100,25 +102,30 @@ export default class SuggestionBuilder {
 		});
 
 		collector.on("collect", async (i) => {
-			if (i.customId === "delete-cancel") {
-				if (
-					!interaction.channel?.isThread() ||
-					interaction.channel.parentId !== this.CHANNEL_ID
-				)
-					return i.reply({
-						content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+			switch (i.customId) {
+				case "delete-cancel": {
+					if (
+						!interaction.channel?.isThread() ||
+						interaction.channel.parentId !== this.CHANNEL_ID
+					)
+						return i.reply({
+							content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+							ephemeral: true,
+						});
+					interaction.channel.delete();
+					const m = await interaction.channel.fetchStarterMessage();
+					m.delete();
+					break;
+				}
+				case "delete": {
+					deleteButton.setDisabled(true);
+					cancelButton.setDisabled(true);
+					i.reply({
+						content: ":negative_squared_cross_mark: Deletion canceled.",
 						ephemeral: true,
 					});
-				interaction.channel.delete();
-				const m = await interaction.channel.fetchStarterMessage();
-				m.delete();
-			} else {
-				deleteButton.setDisabled(true);
-				cancelButton.setDisabled(true);
-				i.reply({
-					content: ":negative_squared_cross_mark: Deletion canceled.",
-					ephemeral: true,
-				});
+					break;
+				}
 			}
 		});
 
@@ -137,12 +144,12 @@ export default class SuggestionBuilder {
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 * @param {string} newSuggestion
 	 *
-	 * @returns {Promise<boolean>} If true, you must repond to the interaction with a success
+	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
 	 */
 	async editSuggestion(interaction, newSuggestion) {
 		if (!interaction.guild) {
-			interaction.reply({ content: "The command unavailable in DMs." });
+			interaction.reply({ content: "The command is unavailable in DMs." });
 			return false;
 		}
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
