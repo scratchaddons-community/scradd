@@ -16,7 +16,7 @@ export default class SuggestionBuilder {
 		const author = await interaction.guild?.members.fetch(interaction.user).catch(() => {});
 
 		const embed = new MessageEmbed()
-			.setColor(0x222222)
+			.setColor(0x222_222)
 			.setAuthor({
 				name: "Suggestion by " + author?.displayName || interaction.user.username,
 				iconURL:
@@ -96,14 +96,12 @@ export default class SuggestionBuilder {
 			ephemeral: true,
 		});
 
-		const collector = interaction.channel.createMessageComponentCollector({
+		interaction.channel.createMessageComponentCollector({
 			filter: (i) =>
 				["delete", "delete-cancel"].includes(i.customId) &&
 				i.user.id === interaction.user.id,
-			time: 15000,
-		});
-
-		collector.on("collect", async (i) => {
+			time: 15_000,
+		}).on("collect", async (i) => {
 			switch (i.customId) {
 				case "delete-cancel": {
 					if (
@@ -129,9 +127,7 @@ export default class SuggestionBuilder {
 					break;
 				}
 			}
-		});
-
-		collector.on("end", (collected) => {
+		}).on("end", (collected) => {
 			if (collected.size !== 0) return;
 			deleteButton.setDisabled(true);
 			cancelButton.setDisabled(true);

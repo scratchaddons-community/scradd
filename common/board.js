@@ -3,7 +3,7 @@ import getAllMessages from "../lib/getAllMessages.js";
 import dotenv from "dotenv";
 
 dotenv.config();
-export const BOARD_CHANNEL = process.env.BOARD_CHANNEL;
+export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
 export const MIN_COUNT = 1;
 
@@ -12,7 +12,7 @@ export const MAX_REPLY_LENGTH = 100;
 /** @param {Message<boolean>} message */
 export async function getMessageFromBoard(message) {
 	if (!message.guild) return;
-	const board = await message.guild.channels.fetch(BOARD_CHANNEL || "");
+	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 	const fetchedMessages = await getAllMessages(board);
@@ -56,7 +56,7 @@ export async function postMessageToBoard(message) {
 
 	const author = await message.guild?.members.fetch(message.author).catch(() => {});
 
-	const board = await message.guild.channels.fetch(BOARD_CHANNEL || "");
+	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
@@ -64,18 +64,15 @@ export async function postMessageToBoard(message) {
 	switch (message.type) {
 		case "CHANNEL_NAME_CHANGE": {
 			// rename thread
-			description =
-				(
-				`<:edit:934526895255592981> ${message.author} changed the channel name: **${
-					message.channel.isThread() && message.channel.name
-				}**`);
+			description = `<:edit:934526895255592981> ${
+				message.author
+			} changed the channel name: **${message.channel.isThread() && message.channel.name}**`;
 			break;
 		}
 		case "CHANNEL_PINNED_MESSAGE": {
 			// pin message
 			const pinned = await message.fetchReference();
-			description =(
-				`<:pin:934527802621956217> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`);
+			description = `<:pin:934527802621956217> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`;
 			break;
 		}
 		case "GUILD_MEMBER_JOIN": {
@@ -176,6 +173,7 @@ export async function postMessageToBoard(message) {
 		embeds,
 		files: message.attachments.map((a) => a),
 		components: [new MessageActionRow().addComponents(button)],
+		allowedMentions: process.env.NODE_ENV === "production" ? { users: [] } : undefined,
 	});
 }
 

@@ -72,7 +72,7 @@ const info = {
 		const collector = interaction.channel.createMessageComponentCollector({
 			filter: (i) =>
 				["previous", "next"].includes(i.customId) && i.user.id === interaction.user.id,
-			time: 10000,
+			time: 10_000,
 		});
 
 		collector.on("collect", async (i) => {
@@ -92,9 +92,7 @@ const info = {
 			});
 			i.deferUpdate();
 			collector.resetTimer();
-		});
-
-		collector.on("end", () => {
+		}).on("end", () => {
 			previousButton.setDisabled(true);
 			nextButton.setDisabled(true);
 			interaction.editReply({
