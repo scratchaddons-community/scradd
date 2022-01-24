@@ -3,7 +3,7 @@ import commands from "../lib/commands.js";
 import dotenv from "dotenv";
 
 dotenv.config();
-/** @param {import("discord.js").Client<boolean>} client */
+/** @param {import("discord.js").Client} client */
 export default async (client) => {
 	if (!client.application)
 		throw new Error("`ready` was fired but `client.application` is undefined???");

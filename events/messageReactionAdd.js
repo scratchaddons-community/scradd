@@ -3,7 +3,7 @@ import {
 	BOARD_EMOJI,
 	getMessageFromBoard,
 	postMessageToBoard,
-	MIN_COUNT,
+	MIN_REACTIONS,
 	updateReactionCount,
 } from "../common/board.js";
 import dotenv from "dotenv";
@@ -46,7 +46,7 @@ export default async (reaction, user) => {
 	if (boardMessage?.embeds[0]) {
 		updateReactionCount(reaction.count || 0, boardMessage);
 	} else {
-		if (reaction.count < MIN_COUNT) return;
+		if (reaction.count < MIN_REACTIONS) return;
 		postMessageToBoard(message);
 	}
 };

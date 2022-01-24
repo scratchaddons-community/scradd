@@ -5,23 +5,23 @@ import dotenv from "dotenv";
 dotenv.config();
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_COUNT = 1;
+export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
 
 export const MAX_REPLY_LENGTH = 100;
 
-/** @param {Message<boolean>} message */
+/** @param {Message} message */
 export async function getMessageFromBoard(message) {
 	if (!message.guild) return;
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
-	const fetchedMessages = await getAllMessages(board);
-	return fetchedMessages.find((boardMessage) => {
+	const fetchedMessages = await getAllMessages(board, (boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
 		const [, , messageId] = component.url?.match(/\d+/g) || [];
 		return messageId === message.id;
 	});
+	return fetchedMessages[0];
 }
 
 /**
@@ -50,7 +50,7 @@ async function generateReplyInfo(message) {
 	else return `*Replying to ${author}*\n\n`;
 }
 
-/** @param {Message<boolean>} message */
+/** @param {Message} message */
 export async function postMessageToBoard(message) {
 	if (!message.guild) return;
 
@@ -173,18 +173,18 @@ export async function postMessageToBoard(message) {
 		embeds,
 		files: message.attachments.map((a) => a),
 		components: [new MessageActionRow().addComponents(button)],
-		allowedMentions: process.env.NODE_ENV === "production" ? { users: [] } : undefined,
+		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 	});
 }
 
 /**
  * @param {number} newCount
- * @param {Message<boolean>} boardMessage
+ * @param {Message} boardMessage
  */
 export async function updateReactionCount(newCount = 0, boardMessage) {
-	if (newCount < Math.max(MIN_COUNT - 1, 1)) return boardMessage.delete();
+	if (newCount < Math.max(MIN_REACTIONS - 1, 1)) return boardMessage.delete();
 	return boardMessage.edit({
-		content: boardMessage.content.replace(/ \d+\*\*/, ` ${newCount}**`),
+		content: boardMessage.content.replace(/\d+/, `${newCount}`),
 		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 		files: boardMessage.attachments.map((a) => a),
 	});

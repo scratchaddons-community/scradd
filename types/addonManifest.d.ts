@@ -16,9 +16,9 @@ type definitions_cssManipulator =
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
 			/** The value in case the source is truthy. */
-			true: Record<string, unknown> | string | number | null;
+			true: { [key: string]: unknown } | string | number | null;
 			/** The value in case the source is falsy. */
-			false: Record<string, unknown> | string | number | null;
+			false: { [key: string]: unknown } | string | number | null;
 	  }
 	| {
 			/** The type of the manipulator. */
@@ -119,7 +119,7 @@ type definitions_matches =
 	  >;
 
 type definitions_if = {
-	settings: Record<string, unknown>;
+	settings: { [key: string]: unknown };
 	addonEnabled: string | ArrayOfAtLeastOne<string>;
 };
 

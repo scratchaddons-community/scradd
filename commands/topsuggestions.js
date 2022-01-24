@@ -2,8 +2,12 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import dotenv from "dotenv";
+import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
+
+const PAGE_OFFSET = 15;
+
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
 
@@ -14,26 +18,22 @@ const info = {
 		if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env");
 		const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 		if (!channel?.isText()) return;
-		const all = await getAllMessages(channel);
-		/**
-		 * @type {{
-		 * 	id: string;
-		 * 	count: number;
-		 * 	title: string;
-		 * }[]}
-		 */
-		const filtered = [];
-		for (const message of all) {
+		const all = (
+			await getAllMessages(channel, (message) => !!message.reactions.valueOf().size)
+		).map(async (message) => {
 			const count =
 				(message.reactions.resolve("👍")?.count || 0) -
 				(message.reactions.resolve("👎")?.count || 0);
-			if (!count) continue;
-			filtered.push({
+
+			return {
 				id: message.id,
 				count,
 				title: message.embeds[0]?.title || "",
-			});
-		}
+				thread: message.thread,
+			};
+		});
+
+		const filtered = (await Promise.all(all)).sort((a, b) => b.count - a.count);
 
 		if (!interaction.channel?.isText()) return;
 
@@ -41,65 +41,83 @@ const info = {
 			.setLabel("<< Previous")
 			.setStyle("PRIMARY")
 			.setDisabled(true)
-			.setCustomId("previous");
+			.setCustomId(generateHash("previous"));
 		const nextButton = new MessageButton()
 			.setLabel("Next >>")
 			.setStyle("PRIMARY")
-			.setCustomId("next");
+			.setCustomId(generateHash("next"));
 
 		let offset = 0;
-		const embed = () =>
-			new MessageEmbed().setTitle("Top suggestions").setDescription(
-				filtered
-					.sort((a, b) => b.count - a.count)
-					.filter((_, i) => i > offset && i <= offset + 10)
-					.map(
-						(x, i) =>
-							`${i + offset + 1}. **${x.count} 👍** [${
-								x.title
-							}](https://discordapp.com/channels/${
-								interaction.guild?.id
-							}/${SUGGESTION_CHANNEL}/${x.id})`,
-					)
-					.join("\n"),
-			);
+		const embed = async () => {
+			const content = filtered
+				.filter((_, i) => i > offset && i <= offset + PAGE_OFFSET)
+				.map(async (x, i) => {
+					const author =
+						x.thread &&
+						(
+							await x.thread?.messages.fetch({
+								limit: 2,
+								after: (await x.thread.fetchStarterMessage()).id,
+							})
+						)
+							?.first()
+							?.mentions.users.first()
+							?.toString();
+					return (
+						`${i + offset + 1}. **${x.count}** [👍 ${
+							x.title
+						}](https://discord.com/channels/${
+							process.env.GUILD_ID
+						}/${SUGGESTION_CHANNEL}/${x.id})` + (author ? ` by ${author}` : ``)
+					);
+				});
+
+			return new MessageEmbed()
+				.setTitle("Top suggestions")
+				.setDescription((await Promise.all(content)).join("\n"));
+		};
 
 		interaction.reply({
-			embeds: [embed()],
+			embeds: [await embed()],
 			components: [new MessageActionRow().addComponents(previousButton, nextButton)],
 		});
 
 		const collector = interaction.channel.createMessageComponentCollector({
 			filter: (i) =>
-				["previous", "next"].includes(i.customId) && i.user.id === interaction.user.id,
+				[previousButton.customId, nextButton.customId].includes(i.customId) &&
+				i.user.id === interaction.user.id,
 			time: 10_000,
 		});
 
-		collector.on("collect", async (i) => {
-			if (!interaction.channel?.isText()) return;
-			if (i.customId === "next") {
-				offset += 10;
-			} else {
-				offset -= 10;
-			}
-			if (offset === 0) previousButton.setDisabled(true);
-			else previousButton.setDisabled(false);
-			if (offset + 10 >= filtered.length - 1) nextButton.setDisabled(true);
-			else nextButton.setDisabled(false);
-			interaction.editReply({
-				embeds: [embed()],
-				components: [new MessageActionRow().addComponents(previousButton, nextButton)],
+		collector
+			.on("collect", async (i) => {
+				if (!interaction.channel?.isText()) return;
+				if (i.customId === nextButton.customId) {
+					offset += PAGE_OFFSET;
+				} else {
+					offset -= PAGE_OFFSET;
+				}
+				if (offset === 0) previousButton.setDisabled(true);
+				else previousButton.setDisabled(false);
+				if (offset + PAGE_OFFSET >= filtered.length - 1) nextButton.setDisabled(true);
+				else nextButton.setDisabled(false);
+				interaction.editReply({
+					embeds: [await embed()],
+					components: [new MessageActionRow().addComponents(previousButton, nextButton)],
+				});
+				i.deferUpdate();
+				collector.resetTimer();
+			})
+			.on("end", async () => {
+				previousButton.setDisabled(true);
+				nextButton.setDisabled(true);
+				interaction.editReply({
+					embeds: (await interaction.fetchReply()).embeds.map(
+						(oldEmbed) => new MessageEmbed(oldEmbed),
+					),
+					components: [new MessageActionRow().addComponents(previousButton, nextButton)],
+				});
 			});
-			i.deferUpdate();
-			collector.resetTimer();
-		}).on("end", () => {
-			previousButton.setDisabled(true);
-			nextButton.setDisabled(true);
-			interaction.editReply({
-				embeds: [embed()],
-				components: [new MessageActionRow().addComponents(previousButton, nextButton)],
-			});
-		});
 	},
 };
 

@@ -1,4 +1,5 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import generateHash from "../lib/generateHash.js";
 
 export default class SuggestionBuilder {
 	CHANNEL_ID = "";
@@ -43,7 +44,7 @@ export default class SuggestionBuilder {
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 * @param {string} answer
-	 * @param {Record<string, import("discord.js").ColorResolvable>} colors
+	 * @param {{ [key: string]: import("discord.js").ColorResolvable }} colors
 	 */
 	async answerSuggestion(interaction, answer, colors) {
 		if (!interaction.guild) {
@@ -83,11 +84,11 @@ export default class SuggestionBuilder {
 
 		const deleteButton = new MessageButton()
 			.setLabel("Delete")
-			.setCustomId("delete")
+			.setCustomId(generateHash("delete"))
 			.setStyle("DANGER");
 		const cancelButton = new MessageButton()
 			.setLabel("Cancel")
-			.setCustomId("delete-cancel")
+			.setCustomId(generateHash("cancel"))
 			.setStyle("SECONDARY");
 
 		interaction.reply({
@@ -96,46 +97,49 @@ export default class SuggestionBuilder {
 			ephemeral: true,
 		});
 
-		interaction.channel.createMessageComponentCollector({
-			filter: (i) =>
-				["delete", "delete-cancel"].includes(i.customId) &&
-				i.user.id === interaction.user.id,
-			time: 15_000,
-		}).on("collect", async (i) => {
-			switch (i.customId) {
-				case "delete-cancel": {
-					if (
-						!interaction.channel?.isThread() ||
-						interaction.channel.parentId !== this.CHANNEL_ID
-					)
-						return i.reply({
-							content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+		interaction.channel
+			.createMessageComponentCollector({
+				filter: (i) =>
+					[deleteButton.customId, cancelButton.customId].includes(i.customId) &&
+					i.user.id === interaction.user.id,
+				time: 15_000,
+			})
+			.on("collect", async (i) => {
+				switch (i.customId) {
+					case cancelButton.customId: {
+						if (
+							!interaction.channel?.isThread() ||
+							interaction.channel.parentId !== this.CHANNEL_ID
+						)
+							return i.reply({
+								content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+								ephemeral: true,
+							});
+						interaction.channel.delete();
+						const m = await interaction.channel.fetchStarterMessage();
+						m.delete();
+						break;
+					}
+					case deleteButton.customId: {
+						deleteButton.setDisabled(true);
+						cancelButton.setDisabled(true);
+						i.reply({
+							content: ":negative_squared_cross_mark: Deletion canceled.",
 							ephemeral: true,
 						});
-					interaction.channel.delete();
-					const m = await interaction.channel.fetchStarterMessage();
-					m.delete();
-					break;
+						break;
+					}
 				}
-				case "delete": {
-					deleteButton.setDisabled(true);
-					cancelButton.setDisabled(true);
-					i.reply({
-						content: ":negative_squared_cross_mark: Deletion canceled.",
-						ephemeral: true,
-					});
-					break;
-				}
-			}
-		}).on("end", (collected) => {
-			if (collected.size !== 0) return;
-			deleteButton.setDisabled(true);
-			cancelButton.setDisabled(true);
-			interaction.editReply({
-				content: ":negative_squared_cross_mark: Deletion timed out.",
-				components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+			})
+			.on("end", (collected) => {
+				if (collected.size !== 0) return;
+				deleteButton.setDisabled(true);
+				cancelButton.setDisabled(true);
+				interaction.editReply({
+					content: ":negative_squared_cross_mark: Deletion timed out.",
+					components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+				});
 			});
-		});
 	}
 
 	/**
