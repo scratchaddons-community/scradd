@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
-import dotenv from "dotenv";
 import generateHash from "../lib/generateHash.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -15,6 +15,7 @@ if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .
 const info = {
 	data: new SlashCommandBuilder().setDescription("Gets the top suggestions from #suggestions."),
 	async interaction(interaction) {
+		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 		if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env");
 		const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 		if (!channel?.isText()) return;

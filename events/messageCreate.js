@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+
+dotenv.config();
 /** @param {import("discord.js").Message} message */
 export default (message) => {
-	if (message.author.bot) return;
+	if (message.author.bot || message.guild?.id !== process.env.GUILD_ID) return;
 
 	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 		react("👋");

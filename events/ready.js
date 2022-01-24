@@ -10,6 +10,15 @@ export default async (client) => {
 	console.log(
 		`Connected to Discord with ID ${client.application.id} and tag ${client.user?.tag}`,
 	);
+	if (process.env.NODE_ENV === "production") {
+		const { ERROR_CHANNEL } = process.env;
+		if (!ERROR_CHANNEL) throw new Error("ERROR_CHANNEL is not set in the .env");
+		const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
+
+		if (!testingChannel || !("send" in testingChannel))
+			throw new Error("Could not find error reporting channel");
+		await testingChannel.send("Bot online!");
+	}
 	const prexistingCommands = await client.application.commands.fetch({
 		guildId: process.env.GUILD_ID || "",
 	});

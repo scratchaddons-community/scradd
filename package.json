@@ -8,7 +8,7 @@
 	"scripts": {
 		"start": "node . --harmony --trace-warnings",
 		"dev": "nodemon . --harmony --trace-warnings",
-		"format": "prettier -w \"**\" --ignore-unknown"
+		"format": "prettier --write \"**\" --ignore-unknown"
 	},
 	"dependencies": {
 		"@discordjs/builders": "^0.11.0",

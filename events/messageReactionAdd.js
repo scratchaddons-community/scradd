@@ -23,8 +23,8 @@ export default async (reaction, user) => {
 	const message = reaction.message;
 
 	if (
-		// Ignore DMS
-		!message.guild ||
+		// Ignore other servers
+		message.guild?.id !== process.env.GUILD_ID ||
 		// Ignore when it's the wrong emoji
 		reaction.emoji.name !== BOARD_EMOJI
 	)

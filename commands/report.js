@@ -66,6 +66,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
+		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
 			const { thread } = await BugsChannel.createMessage(interaction, {

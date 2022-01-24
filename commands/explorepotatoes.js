@@ -4,6 +4,8 @@ import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import firstPromiseWithValue from "../lib/firstPromiseWithValue.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 /** @type {{ [key: string]: { [key: string]: boolean } }} */
 const threadsFound = {};
@@ -102,6 +104,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
+		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 		if (!board?.isText())
 			throw new Error(
