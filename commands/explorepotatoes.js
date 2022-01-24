@@ -50,7 +50,7 @@ async function textChannelMatchesChannel(channelWanted, channelFound) {
 				promises.push(textChannelMatchesChannel(channel, channelFound));
 			}
 
-			if(!await firstPromiseWithValue(true, promises)) return false;
+			if (!(await firstPromiseWithValue(true, promises))) return false;
 
 			break;
 			// else return false;
@@ -152,6 +152,7 @@ const info = {
 					components: [],
 				};
 			}
+			if (!fetchedMessages.length) nextButton.setDisabled(true);
 			return {
 				content: source.content,
 				embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
