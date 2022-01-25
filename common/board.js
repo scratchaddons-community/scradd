@@ -191,7 +191,7 @@ export async function postMessageToBoard(message) {
  * @param {number} newCount
  * @param {Message} boardMessage
  */
-export async function updateReactionCount(newCount = 0, boardMessage) {
+export async function updateReactionCount(newCount, boardMessage) {
 	if (newCount < Math.max(MIN_REACTIONS - 1, 1)) return boardMessage.delete();
 	return boardMessage.edit({
 		content: boardMessage.content.replace(/\d+/, `${newCount}`),
