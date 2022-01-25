@@ -26,7 +26,9 @@ export default async (reaction, user) => {
 		// Ignore other servers
 		message.guild?.id !== process.env.GUILD_ID ||
 		// Ignore when it's the wrong emoji
-		reaction.emoji.name !== BOARD_EMOJI
+		reaction.emoji.name !== BOARD_EMOJI ||
+		// Ignore when it's me
+		user.id === message.client.user?.id
 	)
 		return;
 
@@ -39,11 +41,12 @@ export default async (reaction, user) => {
 		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id)
 	)
 		// remove the reaction
-		return reaction.users.remove(user);
+		return await reaction.users.remove(user);
 
 	const boardMessage = await getMessageFromBoard(message);
 
-	const count = reaction.count - (reaction.me ? 1 : 0);
+	const fetched = message.reactions.resolve(BOARD_EMOJI);
+	const count = (fetched?.count || 0) - (fetched?.me ? 1 : 0);
 
 	if (boardMessage?.embeds[0]) {
 		updateReactionCount(count, boardMessage);
