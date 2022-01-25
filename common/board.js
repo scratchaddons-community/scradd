@@ -174,12 +174,12 @@ export async function postMessageToBoard(message) {
 				"/" +
 				message.id,
 		);
-
+	const reaction = message.reactions.resolve(BOARD_EMOJI);
+	if (!reaction) return;
 	await board.send({
 		content:
-			`**${BOARD_EMOJI} ${message.reactions.resolve(BOARD_EMOJI)?.count || 0}** | ${
-				message.channel
-			}` + (author ? ` | ${author}` : ""),
+			`**${BOARD_EMOJI} ${reaction?.count - (reaction.me ? 1 : 0)}** | ${message.channel}` +
+			(author ? ` | ${author}` : ""),
 		embeds,
 		files: message.attachments.map((a) => a),
 		components: [new MessageActionRow().addComponents(button)],

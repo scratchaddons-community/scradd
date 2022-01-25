@@ -32,7 +32,7 @@ export default async (reaction, user) => {
 
 	if (
 		// if a bot reacted
-		user.bot ||
+		(user.bot && user.id !== message.client.user?.id) ||
 		// or if they self-reacted
 		(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 		// or if they reacted to a message on the board
@@ -43,10 +43,12 @@ export default async (reaction, user) => {
 
 	const boardMessage = await getMessageFromBoard(message);
 
+	const count = reaction.count - (reaction.me ? 1 : 0);
+
 	if (boardMessage?.embeds[0]) {
-		updateReactionCount(reaction.count || 0, boardMessage);
+		updateReactionCount(count, boardMessage);
 	} else {
-		if (reaction.count < MIN_REACTIONS) return;
+		if (count < MIN_REACTIONS) return;
 		postMessageToBoard(message);
 	}
 };
