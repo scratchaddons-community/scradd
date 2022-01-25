@@ -1,6 +1,7 @@
 import { Client, Intents as intents, MessageEmbed } from "discord.js";
 import importScripts from "./lib/importScripts.js";
 import dotenv from "dotenv";
+import http from "http";
 
 dotenv.config();
 process.on("unhandledException", console.error);
@@ -51,3 +52,11 @@ events.forEach(async (execute, event) =>
 );
 
 client.login(process.env.BOT_TOKEN);
+
+const server = http.createServer((_, res) => {
+	res.writeHead(302, {
+		location: "https://discord.gg/Cs25kzs889",
+	});
+	res.end();
+});
+server.listen(process.env.PORT || 80);
