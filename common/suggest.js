@@ -45,16 +45,30 @@ export default class SuggestionBuilder {
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 * @param {string} answer
 	 * @param {{ [key: string]: import("discord.js").ColorResolvable }} colors
+	 *
+	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
+	 *   message yourself.
 	 */
 	async answerSuggestion(interaction, answer, colors) {
 		if (!interaction.guild) {
-			return interaction.reply({ content: "Command unavailable in DMs." });
+			await interaction.reply({ content: "Command unavailable in DMs." });
+			return false;
 		}
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
-			return interaction.reply({
+			interaction.reply({
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
+			return false;
+		}
+		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
+
+		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
+			interaction.reply({
+				content: "You don't have permission to run this command!",
+				ephemeral: true,
+			});
+			return false;
 		}
 
 		await Promise.all([
@@ -70,6 +84,7 @@ export default class SuggestionBuilder {
 				message.edit({ embeds: [embed] });
 			}),
 		]);
+		return true;
 	}
 
 	/** @param {import("discord.js").CommandInteraction} interaction */
@@ -81,6 +96,27 @@ export default class SuggestionBuilder {
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
+
+		const user = (
+			await interaction.channel?.messages.fetch({
+				limit: 2,
+				after: (await interaction.channel.fetchStarterMessage()).id,
+			})
+		)
+			?.first()
+			?.mentions.users.first();
+
+		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
+
+		if (
+			interaction.user.id !== user?.id &&
+			!roles.hasAny(process.env.MODERATOR_ROLE || "", process.env.DEVELOPER_ROLE || "")
+		) {
+			return interaction.reply({
+				content: "You don't have permission to run this command!",
+				ephemeral: true,
+			});
+		}
 
 		const deleteButton = new MessageButton()
 			.setLabel("Delete")

@@ -79,19 +79,19 @@ const info = {
 			});
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
-			await Promise.all([
-				BugsChannel.answerSuggestion(interaction, answer || "", {
+			if (
+				await BugsChannel.answerSuggestion(interaction, answer || "", {
 					[ANSWERS.VALIDBUG]: "GREEN",
 					[ANSWERS.MINORBUG]: "DARK_GREEN",
 					[ANSWERS.INDEVELOPMENT]: "YELLOW",
 					[ANSWERS.INVALIDBUG]: "RED",
 					[ANSWERS.FIXED]: "BLUE",
-				}),
+				})
+			)
 				interaction.reply({
 					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
 					ephemeral: true,
-				}),
-			]);
+				});
 		} else if (command === "delete") {
 			await BugsChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {

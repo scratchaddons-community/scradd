@@ -99,8 +99,8 @@ const info = {
 			}
 			case "answer": {
 				const answer = interaction.options.getString("answer");
-				await Promise.all([
-					SuggestionChannel.answerSuggestion(interaction, answer || "", {
+				if (
+					await SuggestionChannel.answerSuggestion(interaction, answer || "", {
 						[ANSWERS.GOODIDEA]: "GREEN",
 						[ANSWERS.INDEVELOPMENT]: "YELLOW",
 						[ANSWERS.IMPLEMENTED]: "BLUE",
@@ -108,12 +108,12 @@ const info = {
 						[ANSWERS.IMPRACTICAL]: "DARK_RED",
 						[ANSWERS.REJECTED]: "RED",
 						[ANSWERS.IMPOSSIBLE]: "PURPLE",
-					}),
+					})
+				)
 					interaction.reply({
 						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
 						ephemeral: true,
-					}),
-				]);
+					});
 				break;
 			}
 			case "delete": {
