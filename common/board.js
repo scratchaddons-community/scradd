@@ -31,10 +31,20 @@ export async function getMessageFromBoard(message) {
  */
 async function generateReplyInfo(message) {
 	if (message.type == "CONTEXT_MENU_COMMAND")
-		return message.interaction?.user + " used **" + message.interaction?.commandName + "**:\n";
+		return (
+			message.interaction?.user.toString() +
+			" used **" +
+			message.interaction?.commandName +
+			"**:\n"
+		);
 
 	if (message.type == "APPLICATION_COMMAND")
-		return message.interaction?.user + " used **/" + message.interaction?.commandName + "**:\n";
+		return (
+			message.interaction?.user.toString() +
+			" used **/" +
+			message.interaction?.commandName +
+			"**:\n"
+		);
 
 	const repliedMessage = message.type === "REPLY" ? await message.fetchReference() : false;
 
