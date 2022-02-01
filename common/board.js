@@ -20,7 +20,7 @@ export async function getMessageFromBoard(message) {
 		if (component?.type !== "BUTTON") return false;
 		const [, , messageId] = component.url?.match(/\d+/g) || [];
 		return messageId === message.id;
-	});
+	},false);
 	return fetchedMessages[0];
 }
 
@@ -179,11 +179,12 @@ export async function postMessageToBoard(message) {
 	await board.send({
 		content:
 			`**${BOARD_EMOJI} ${reaction?.count - (reaction.me ? 1 : 0)}** | ${message.channel}` +
+			(message.channel.isThread() ? ` (${message.channel.parent})` : "") +
 			(author ? ` | ${author}` : ""),
 		embeds,
 		files: message.attachments.map((a) => a),
 		components: [new MessageActionRow().addComponents(button)],
-		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+		allowedMentions: { users: [] },
 	});
 }
 

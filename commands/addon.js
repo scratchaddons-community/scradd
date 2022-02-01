@@ -34,7 +34,7 @@ const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")
 		.addStringOption((option) =>
-			option.setName("addon_name").setDescription("The name of the addon"),
+			option.setName("addon_name").setDescription("The name of the addon. Leave empty to learn about a random addon."),
 		),
 
 	async interaction(interaction) {
