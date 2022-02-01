@@ -15,16 +15,13 @@
 		"@discordjs/rest": "^0.2.0-canary.0",
 		"discord-api-types": "^0.26.1",
 		"discord.js": "^13.6.0",
-		"dotenv": "^14.3.0",
+		"dotenv": "^15.0.0",
 		"fuse.js": "^6.5.3",
 		"node-fetch": "^3.2.0"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "^1.0.0",
-		"@rushstack/eslint-patch": "^1.1.0",
-		"@types/eslint": "^8.2.2",
-		"@types/node": "^17.0.12",
-		"eslint": "^8.5.0",
+		"@types/node": "^17.0.14",
 		"nodemon": "^2.0.15",
 		"openode": "^2.1.6",
 		"prettier": "^2.5.1",
