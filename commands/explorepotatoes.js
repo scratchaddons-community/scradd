@@ -105,35 +105,42 @@ const info = {
 
 	async interaction(interaction) {
 		if (interaction.guild?.id !== process.env.GUILD_ID) return;
+		const deferPromise = interaction.deferReply();
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 		if (!board?.isText())
 			throw new Error(
 				"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
 			);
 
-		const minReactions = interaction.options.getInteger("minimum-reactions");
-		const user = interaction.options.getUser("user");
+		const minReactions = interaction.options.getInteger("minimum-reactions") || 0;
+		const user = interaction.options.getUser("user")?.id;
 		const channelId = interaction.options.getChannel("channel")?.id;
 		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
+		const [, fetchedMessages] = await Promise.all([
+			deferPromise,
+			getAllMessages(board, async (message) => {
+				if (!message.content || !message.embeds[0] || !message.author.bot) return false;
 
-		const fetchedMessages = await getAllMessages(board, async (message) => {
-			if (!message.content || !message.embeds[0] || !message.author.bot) return false;
+				if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
 
-			if (+(message.content.match(/\d+/)?.[0] || 0) < (minReactions || 0)) return false;
+				if (message.mentions.users.first()?.id !== user) return false;
 
-			if (user && message.mentions.users.first()?.id !== user.id) return false;
+				if (channelWanted) {
+					const channelFound =
+						message.mentions.channels.first() || message.content.match(/<#(\d+)>/)?.[1];
 
-			if (channelWanted) {
-				const channelFound =
-					message.mentions.channels.first() || message.content.match(/<#(\d+)>/)?.[1];
-
-				if (!channelFound) return false;
-				if (!(await textChannelMatchesChannel(channelWanted, channelFound))) {
-					return false;
+					if (
+						!(
+							channelFound &&
+							(await textChannelMatchesChannel(channelWanted, channelFound))
+						)
+					) {
+						return false;
+					}
 				}
-			}
-			return true;
-		});
+				return true;
+			}),
+		]);
 
 		const nextButton = new MessageButton()
 			.setLabel("Next")
@@ -146,17 +153,19 @@ const info = {
 			const index = Math.floor(Math.random() * fetchedMessages.length);
 			const source = fetchedMessages[index];
 			fetchedMessages.splice(index, 1);
-			if (!source || !source.components[0]?.components[0]) {
+			if (!source?.components[0]?.components[0]) {
 				return {
 					content: "No messages found. Try changing any filters you my have used.",
 					ephemeral: true,
 					embeds: [],
 					attachments: [],
 					components: [],
+					allowedMentions: { users: [] },
 				};
 			}
 			if (!fetchedMessages.length) nextButton.setDisabled(true);
 			return {
+				ephemeral: false,
 				content: source.content,
 				embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 				files: source.attachments.map((a) => a),
@@ -172,11 +181,11 @@ const info = {
 			};
 		}
 
-		await interaction.reply(generateMessage());
+		await interaction.editReply(generateMessage());
 
 		const collector = interaction.channel?.createMessageComponentCollector({
 			filter: (i) => i.customId === nextButton.customId && i.user.id === interaction.user.id,
-			time: 10_000,
+			time: 15_000,
 		});
 
 		collector
@@ -193,20 +202,17 @@ const info = {
 					content: source.content,
 					embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 					files: source.attachments.map((a) => a),
-					components: source.components?.[0]?.components[0]
-						? [
-								source.components[0]?.setComponents(
-									source.components[0].components[0],
-									nextButton.setDisabled(true),
-								),
-						  ]
-						: source.components.map((components) =>
-								components.setComponents(
-									components.components.map((component) =>
-										component.setDisabled(true),
+					components: source.components.map((components) =>
+						components.setComponents(
+							components.components.map(
+								(component) =>
+									component.setDisabled(
+										!(component.type === "BUTTON" && component.url),
 									),
-								),
-						  ),
+								// disable it if it's not a button with a URL
+							),
+						),
+					),
 					allowedMentions: { users: [] },
 				});
 			});

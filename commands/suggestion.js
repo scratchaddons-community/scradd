@@ -134,6 +134,7 @@ const info = {
 				break;
 			}
 			case "get-top": {
+				const deferPromise = interaction.deferReply();
 				/** @type {[string, string][]} */
 				const SUGGESTION_EMOJIS = [
 					["👍", "👎"],
@@ -162,14 +163,15 @@ const info = {
 
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 				if (!channel?.isText()) return;
-				const all = (
+				const [,unfiltered] = await Promise.all([
+					deferPromise,
+
+					getAllMessages(channel, (message) => !!message.reactions.valueOf().size),
+				]);
+
+				const all=(
 					await Promise.all(
-						(
-							await getAllMessages(
-								channel,
-								(message) => !!message.reactions.valueOf().size,
-							)
-						).map(async (message) => {
+						unfiltered.map(async (message) => {
 							const getReaction = message.reactions;
 							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) =>
 								getReactions(getReaction, upvote, downvote),
@@ -243,7 +245,7 @@ const info = {
 						});
 				};
 
-				interaction.reply({
+				interaction.editReply({
 					embeds: [await embed()],
 					components: [new MessageActionRow().addComponents(previousButton, nextButton)],
 				});
@@ -252,7 +254,7 @@ const info = {
 					filter: (i) =>
 						[previousButton.customId, nextButton.customId].includes(i.customId) &&
 						i.user.id === interaction.user.id,
-					time: 10_000,
+					time: 15_000,
 				});
 
 				collector

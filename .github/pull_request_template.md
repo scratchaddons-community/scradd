@@ -22,8 +22,8 @@ Resolves #
 
 <!-- By submitting this issue, you agree to follow our policies. -->
 
--   [ ] I agree to follow the [Code of Conduct](https://github.com/shock59/sa-bot/blob/issues/.github/CODE_OF_CONDUCT.md).
--   [ ] I agree to follow the [Contributing Guidelines](https://github.com/shock59/sa-bot/blob/issues/.github/CONTRIBUTING.md).
+-   [ ] I agree to follow the [Code of Conduct](https://github.com/scratchaddons-community/scradd/blob/issues/.github/CODE_OF_CONDUCT.md).
+-   [ ] I agree to follow the [Contributing Guidelines](https://github.com/scratchaddons-community/scradd/blob/issues/.github/CONTRIBUTING.md).
 
 ### TODO
 

@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](https://github.com/shock59/sa-bot/blob/master/CODE_OF_CONDUCT.md).
+For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](https://github.com/scratchaddons-community/scradd/blob/master/CODE_OF_CONDUCT.md).
 
 ## General Guidelines
 
@@ -12,7 +12,7 @@ Please:
 
 ## Filing [issues](https://docs.github.com/en/github/managing-your-work-on-github/about-issues)
 
-Found a bug? Report it! Be sure to check if it is already reported by using the search bar [here](https://github.com/shock59/sa-bot/issues). If there are no similar issues, you can create a new one. We will take a look at it.
+Found a bug? Report it! Be sure to check if it is already reported by using the search bar [here](https://github.com/scratchaddons-community/scradd/issues). If there are no similar issues, you can create a new one. We will take a look at it.
 
 ## Starting [discussions](https://docs.github.com/en/discussions/collaborating-with-your-community-using-discussions/about-discussions)
 
@@ -24,7 +24,7 @@ Please:
 
 ## Creating [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 
-Contributions are welcome! Be sure to file an issue first (see above). If you know a fix for that issue, or you know a fix for a different one, you can create a pull request. Fork this repository, create a new branch from the 'main' branch, and make your changes to the new branch. Now, create a pull request on the origin repository (shock59/sa-bot). We will review your pull request.
+Contributions are welcome! Be sure to file an issue first (see above). If you know a fix for that issue, or you know a fix for a different one, you can create a pull request. Fork this repository, create a new branch from the 'main' branch, and make your changes to the new branch. Now, create a pull request on the origin repository (scratchaddons-community/scradd). We will review your pull request.
 
 Please:
 
