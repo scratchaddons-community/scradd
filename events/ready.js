@@ -25,10 +25,11 @@ export default async (client) => {
 	/**
 	 * @type {Collection<
 	 * 	string,
-	 * 	Omit<
-	 * 		import("@discordjs/builders").SlashCommandBuilder,
-	 * 		"addSubcommand" | "addSubcommandGroup"
-	 * 	>
+	 * 	| import("@discordjs/builders").SlashCommandSubcommandsOnlyBuilder
+	 * 	| Omit<
+	 * 			import("@discordjs/builders").SlashCommandBuilder,
+	 * 			"addSubcommand" | "addSubcommandGroup"
+	 * 	  >
 	 * >}
 	 */
 	const slashes = new Collection();

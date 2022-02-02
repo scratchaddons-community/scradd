@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder ,SlashCommandSubcommandsOnlyBuilder} from "@discordjs/builders";
 import type { CommandInteraction } from "discord.js";
 
 type ComandInfo = {

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import SuggestionBuilder from "../common/suggest.js";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed, MessagePayload } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
@@ -9,7 +9,8 @@ import truncateText from "../lib/truncateText.js";
 dotenv.config();
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
-const PAGE_OFFSET = 5;
+const PAGE_OFFSET = 15;
+const MAX_TITLE_LENGTH = 20;
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
@@ -77,11 +78,36 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("get-top").setDescription("Get the top suggestions"),
+			subcommand
+				.setName("get-top")
+				.setDescription("Get the top suggestions")
+				.addUserOption((input) =>
+					input
+						.setName("user")
+						.setDescription("Filter suggestions to only get those by a certain user.")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("answer")
+						.setDescription(
+							"Filter suggestions to only get those with a certain answer.",
+						)
+						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
+						.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
+						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
+						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
+						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
+						.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
+						.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
+						.addChoice("Unanswered", "Unanswered")
+						.setRequired(false),
+				),
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== process.env.GUILD_ID) return;
+		if (interaction.guild?.id !== process.env.GUILD_ID || !interaction.channel?.isText())
+			return;
 		const command = interaction.options.getSubcommand();
 		switch (command) {
 			case "create": {
@@ -154,37 +180,61 @@ const info = {
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 				if (!channel?.isText()) return;
 				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
-				console.log(unfiltered.length);
 
-				const all = unfiltered
-					.map((message) => {
-						const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
-							const upvoteReaction = message.reactions.resolve(upvote);
-							const downvoteReaction = message.reactions.resolve(downvote);
+				const all = (
+					await Promise.all(
+						unfiltered.map(async (message) => {
+							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
+								const upvoteReaction = message.reactions.resolve(upvote);
+								const downvoteReaction = message.reactions.resolve(downvote);
 
-							if (!upvoteReaction || !downvoteReaction) return;
+								if (!upvoteReaction || !downvoteReaction) return;
 
-							return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
-						}).find((count) => typeof count === "number");
-						if (typeof count !== "number") return;
+								return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
+							}).find((count) => typeof count === "number");
+							if (typeof count !== "number") return;
 
-						const description =
-							message.embeds[0]?.title ||
-							message.embeds[0]?.description ||
-							message.content;
-						console.log(truncateText(description, 20));
-						return {
-							id: message.id,
-							count: count,
-							title: truncateText(description, 20),
-							thread: message.thread,
-							author: message.embeds[0]?.author?.name.split(/#| /).at(-2),
-						};
-					})
+							const description =
+								message.embeds[0]?.title ||
+								message.embeds[0]?.description ||
+								message.content;
+
+							const authorTag = message.embeds[0]?.author?.name.split(/#| /).at(-2);
+							const author = (
+								message.author.id === "323630372531470346" && authorTag
+									? await interaction.guild?.members.search({ query: authorTag })
+									: (
+											await message.thread?.messages.fetch({
+												limit: 2,
+												after: (
+													await message.thread.fetchStarterMessage()
+												).id,
+											})
+									  )?.first()?.mentions.users
+							)?.first();
+							const requestedUser = interaction.options.getUser("user")?.id;
+							if (requestedUser && author?.id !== requestedUser) return;
+
+							const answer =
+								message.thread?.name.split("|")[0]?.trim() || "Unanswered";
+							const requestedAnswer = interaction.options.getString("answer");
+							if (requestedAnswer && answer !== requestedAnswer) return;
+
+							return {
+								id: message.id,
+								count,
+								title: truncateText(
+									description.split("/n")[0] || "",
+									MAX_TITLE_LENGTH,
+								),
+								answer,
+								author: author?.toString(),
+							};
+						}),
+					)
+				)
 					.filter((a) => a)
 					.sort((a, b) => (b?.count || 0) - (a?.count || 0));
-
-				if (!interaction.channel?.isText()) return;
 
 				const previousButton = new MessageButton()
 					.setLabel("<< Previous")
@@ -199,49 +249,48 @@ const info = {
 					.setCustomId(generateHash("next"));
 
 				let offset = 0;
-				const embed = async () => {
+				/**
+				 * @returns {Promise<
+				 * 	MessagePayload | import("discord.js").InteractionReplyOptions
+				 * >}
+				 */
+				async function embed() {
 					const content = all
 						.filter((x, i) => x && i >= offset && i < offset + PAGE_OFFSET)
-						.map(async (x, i) => {
+						.map((x, i) => {
 							if (!x) return; // impossible
-							const author =
-								(
-									await x.thread?.messages.fetch({
-										limit: 2,
-										after: (await x.thread.fetchStarterMessage()).id,
-									})
-								)
-									?.first()
-									?.mentions.users.first()
-									?.toString() ||
-								(x.author &&
-									(await interaction.guild?.members.search({ query: x.author }))
-										?.first()
-										?.toString());
-							console.log(x.thread?.name.split("|")[0]);
+
 							return (
 								`${i + offset + 1}. **${x.count}** [👍 ${
 									x.title
 								}](https://discord.com/channels/${
 									process.env.GUILD_ID
-								}/${SUGGESTION_CHANNEL}/${x.id} "${x.thread?.name
-									.split("|")[0]
-									?.trim()}")` + (author ? ` by ${author}` : ``)
+								}/${SUGGESTION_CHANNEL}/${x.id} "${x.answer}")` +
+								(x.author ? ` by ${x.author}` : ``)
 							);
-						});
+						})
+						.join("\n")
+						.trim();
+					if (!content.length)
+						return { content: "No suggestions found.", ephemeral: true };
+					return {
+						embeds: [
+							new MessageEmbed()
+								.setTitle("Top suggestions")
+								.setDescription(content)
+								.setFooter({
+									text: `Page ${
+										Math.floor(offset / PAGE_OFFSET) + 1
+									}/${numberOfPages}`,
+								}),
+						],
+						components: [
+							new MessageActionRow().addComponents(previousButton, nextButton),
+						],
+					};
+				}
 
-					return new MessageEmbed()
-						.setTitle("Top suggestions")
-						.setDescription((await Promise.all(content)).join("\n"))
-						.setFooter({
-							text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}`,
-						});
-				};
-
-				interaction.editReply({
-					embeds: [await embed()],
-					components: [new MessageActionRow().addComponents(previousButton, nextButton)],
-				});
+				interaction.editReply(await embed());
 
 				const collector = interaction.channel.createMessageComponentCollector({
 					filter: (i) =>
@@ -260,12 +309,7 @@ const info = {
 						}
 						previousButton.setDisabled(offset === 0);
 						nextButton.setDisabled(offset + PAGE_OFFSET >= all.length - 1);
-						interaction.editReply({
-							embeds: [await embed()],
-							components: [
-								new MessageActionRow().addComponents(previousButton, nextButton),
-							],
-						});
+						interaction.editReply(await embed());
 						i.deferUpdate();
 						collector.resetTimer();
 					})

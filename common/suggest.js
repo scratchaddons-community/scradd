@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { GuildMember, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import generateHash from "../lib/generateHash.js";
 
 export default class SuggestionBuilder {
@@ -14,8 +14,17 @@ export default class SuggestionBuilder {
 	 * @param {{ title: string; description: string }} data
 	 */
 	async createMessage(interaction, data) {
-		const author = await interaction.guild?.members.fetch(interaction.user).catch(() => { });
-		
+		const author = interaction.member;
+		if (!(author instanceof GuildMember)) return;
+
+		if (data.title.length > 20) {
+			interaction.reply({
+				content: `The title can not be longer than 20 characters.`,
+				ephemeral: true,
+			});
+			return false;
+		}
+
 		const embed = new MessageEmbed()
 			.setColor(0x222_222)
 			.setAuthor({
