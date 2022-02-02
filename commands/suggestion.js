@@ -272,7 +272,11 @@ const info = {
 						.join("\n")
 						.trim();
 					if (!content.length)
-						return { content: "No suggestions found. Try changing any filters you my have used.", ephemeral: true };
+						return {
+							content:
+								"No suggestions found. Try changing any filters you my have used.",
+							ephemeral: true,
+						};
 					return {
 						embeds: [
 							new MessageEmbed()

@@ -137,7 +137,7 @@ export default class SuggestionBuilder {
 			.setCustomId(generateHash("cancel"))
 			.setStyle("SECONDARY");
 
-		interaction.reply({
+		await interaction.reply({
 			content: `Are you really sure you want to do this?`,
 			components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
 			ephemeral: true,
@@ -152,7 +152,7 @@ export default class SuggestionBuilder {
 			})
 			.on("collect", async (i) => {
 				switch (i.customId) {
-					case cancelButton.customId: {
+					case deleteButton.customId: {
 						if (
 							!interaction.channel?.isThread() ||
 							interaction.channel.parentId !== this.CHANNEL_ID
@@ -166,12 +166,13 @@ export default class SuggestionBuilder {
 						m.delete();
 						break;
 					}
-					case deleteButton.customId: {
+					case cancelButton.customId: {
 						deleteButton.setDisabled(true);
 						cancelButton.setDisabled(true);
-						i.reply({
+						i.deferUpdate();
+						interaction.editReply({
 							content: ":negative_squared_cross_mark: Deletion canceled.",
-							ephemeral: true,
+							components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
 						});
 						break;
 					}
