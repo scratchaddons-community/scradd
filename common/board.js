@@ -1,13 +1,12 @@
 import { Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import dotenv from "dotenv";
+import truncateText from "../lib/truncateText.js";
 
 dotenv.config();
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
 export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
-
-export const MAX_REPLY_LENGTH = 100;
 
 /** @param {Message} message */
 export async function getMessageFromBoard(message) {
@@ -15,13 +14,13 @@ export async function getMessageFromBoard(message) {
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
-	const fetchedMessages = await getAllMessages(board, (boardMessage) => {
+	const fetchedMessages = await getAllMessages(board);
+	return fetchedMessages.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
 		const [, , messageId] = component.url?.match(/\d+/g) || [];
 		return messageId === message.id;
-	},false);
-	return fetchedMessages[0];
+	});
 }
 
 /**
@@ -51,12 +50,7 @@ async function generateReplyInfo(message) {
 	if (!repliedMessage) return "";
 	const { author, content } = repliedMessage;
 
-	if (content)
-		return `*Replying to ${author}:*\n> ${
-			content.length < MAX_REPLY_LENGTH
-				? content
-				: content.substring(0, MAX_REPLY_LENGTH - 3) + "…"
-		}\n\n`;
+	if (content) return `*Replying to ${author}:*\n> ${truncateText(content, 100)}\n\n`;
 	else return `*Replying to ${author}*\n\n`;
 }
 
@@ -74,7 +68,7 @@ export async function postMessageToBoard(message) {
 	switch (message.type) {
 		case "CHANNEL_NAME_CHANGE": {
 			// rename thread
-			description = `<:edit:934526895255592981> ${
+			description = `<:edit:938441054716297277> ${
 				message.author
 			} changed the channel name: **${message.channel.isThread() && message.channel.name}**`;
 			break;
@@ -82,48 +76,48 @@ export async function postMessageToBoard(message) {
 		case "CHANNEL_PINNED_MESSAGE": {
 			// pin message
 			const pinned = await message.fetchReference();
-			description = `<:pin:934527802621956217> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`;
+			description = `<:pin:938441100258070568> ${message.author} pinned [a message](https://discord.com/channels/${pinned.guild?.id}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`;
 			break;
 		}
 		case "GUILD_MEMBER_JOIN": {
 			// join server
-			description = `<:add:934518444160856107> ${message.author} just joined the server!`;
+			description = `<:add:938441019278635038> ${message.author} just joined the server!`;
 			break;
 		}
 		case "CHANNEL_FOLLOW_ADD": {
 			// follow channel
-			description = `<:add:934518444160856107> ${message.author} has added **${message.content}** to this channel. Its most important updates will show up here.`;
+			description = `<:add:938441019278635038> ${message.author} has added **${message.content}** to this channel. Its most important updates will show up here.`;
 			break;
 		}
 		case "RECIPIENT_ADD": {
-			description = `<:add:934518444160856107> ${
+			description = `<:add:938441019278635038> ${
 				message.author
 			} added ${message.mentions.users.first()} to the thread.`;
 			break;
 		}
 		case "THREAD_CREATED": {
 			// xxx started a thread: xxx. see all threads.
-			description = `<:thread:934519757707812934> ${message.author} started a thread: **${message.content}** See all **threads**.`;
+			description = `<:thread:938441090657296444> ${message.author} started a thread: **${message.content}** See all **threads**.`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION": {
 			// :nitro: **xxx** just boosted the server!
-			description = `<:boost:934520614432145459> ${message.author} just boosted the server!`;
+			description = `<:boost:938441038756986931> ${message.author} just boosted the server!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 1**!
-			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 1**!`;
+			description = `<:boost:938441038756986931> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 1**!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 2**!
-			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 2**!`;
+			description = `<:boost:938441038756986931> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 2**!`;
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 3**!
-			description = `<:boost:934520614432145459> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 3**!`;
+			description = `<:boost:938441038756986931> ${message.author} just boosted the server! ${message.guild.name} has achieved **Level 3**!`;
 			break;
 		}
 		case "APPLICATION_COMMAND":

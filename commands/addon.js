@@ -34,7 +34,11 @@ const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")
 		.addStringOption((option) =>
-			option.setName("addon_name").setDescription("The name of the addon. Leave empty to learn about a random addon."),
+			option
+				.setName("addon")
+				.setDescription(
+					"The name of the addon. Leave empty to learn about a random addon.",
+				),
 		),
 
 	async interaction(interaction) {
@@ -51,7 +55,7 @@ const info = {
 				.join(", ");
 		}
 
-		const input = interaction.options.getString("addon_name");
+		const input = interaction.options.getString("addon");
 		const result = input
 			? fuse.search(input).sort((a, b) => {
 					a.score ??= 0;

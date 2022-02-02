@@ -5,6 +5,7 @@ import firstPromiseWithValue from "../lib/firstPromiseWithValue.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import dotenv from "dotenv";
+import asyncFilter from "../lib/asyncFilter.js";
 dotenv.config();
 
 /** @type {{ [key: string]: { [key: string]: boolean } }} */
@@ -118,27 +119,29 @@ const info = {
 		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
 		const [, fetchedMessages] = await Promise.all([
 			deferPromise,
-			getAllMessages(board, async (message) => {
-				if (!message.content || !message.embeds[0] || !message.author.bot) return false;
-				if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
+			getAllMessages(board).then((messages) =>
+				asyncFilter(messages, async (message) => {
+					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
+					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
 
-				if (message.mentions.users.first()?.id !== user) return false;
+					if (message.mentions.users.first()?.id !== user) return false;
 
-				if (channelWanted) {
-					const matchResult = message.content.match(/<#(\d+)>/g);
-					const channelFound = message.mentions.channels.first() || matchResult?.[1];
-					
-					if (
-						!(
-							channelFound &&
-							(await textChannelMatchesChannel(channelWanted, channelFound))
-						)
-					) {
-						return false;
+					if (channelWanted) {
+						const matchResult = message.content.match(/<#(\d+)>/g);
+						const channelFound = message.mentions.channels.first() || matchResult?.[1];
+
+						if (
+							!(
+								channelFound &&
+								(await textChannelMatchesChannel(channelWanted, channelFound))
+							)
+						) {
+							return false;
+						}
 					}
-				}
-				return true;
-			}),
+					return true;
+				}),
+			),
 		]);
 
 		const nextButton = new MessageButton()

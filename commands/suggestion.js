@@ -1,14 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import SuggestionBuilder from "../common/suggest.js";
-import { MessageActionRow, MessageButton, MessageEmbed, ReactionManager } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
+import truncateText from "../lib/truncateText.js";
 
 dotenv.config();
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
-const PAGE_OFFSET = 15;
+const PAGE_OFFSET = 5;
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
@@ -148,51 +149,37 @@ const info = {
 					["749005259682086964", "749005284403445790"],
 				];
 
-				/**
-				 * @param {ReactionManager} reactions
-				 * @param {...string} emojis
-				 */
-				function getReactions(reactions, ...emojis) {
-					const foundEmojis = emojis
-						.map((emoji) => reactions.resolve(emoji)?.count)
-						.filter((emoji) => emoji && emoji > 0);
-					if (emojis.length === foundEmojis.length)
-						return foundEmojis.reduce((acc, curr) => (acc || 0) - (curr || 0)) || 0;
-					else return false;
-				}
-
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 				if (!channel?.isText()) return;
-				const [,unfiltered] = await Promise.all([
-					deferPromise,
+				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
+				console.log(unfiltered.length);
 
-					getAllMessages(channel, (message) => !!message.reactions.valueOf().size),
-				]);
+				const all = unfiltered
+					.map((message) => {
+						const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
+							const upvoteReaction = message.reactions.resolve(upvote);
+							const downvoteReaction = message.reactions.resolve(downvote);
 
-				const all=(
-					await Promise.all(
-						unfiltered.map(async (message) => {
-							const getReaction = message.reactions;
-							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) =>
-								getReactions(getReaction, upvote, downvote),
-							).filter((count) => typeof count === "number")[0];
-							const description =
-								message.embeds[0]?.title || message.embeds[0]?.description || "";
-							return {
-								id: message.id,
-								count: typeof count === "undefined" ? false : count,
-								title:
-									description.length < 50
-										? description
-										: description.substring(0, 50 - 3) + "…",
-								thread: message.thread,
-								author: message.embeds[0]?.author?.name.split(/#| /).at(-2),
-							};
-						}),
-					)
-				)
-					.filter((info) => typeof info.count === "number")
-					.sort((a, b) => +b.count - +a.count);
+							if (!upvoteReaction || !downvoteReaction) return;
+
+							return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
+						}).find((count) => typeof count === "number");
+						if (typeof count !== "number") return;
+
+						const description =
+							message.embeds[0]?.title ||
+							message.embeds[0]?.description ||
+							message.content;
+						return {
+							id: message.id,
+							count: count,
+							title: truncateText(description, 50),
+							thread: message.thread,
+							author: message.embeds[0]?.author?.name.split(/#| /).at(-2),
+						};
+					})
+					.filter((a) => a)
+					.sort((a, b) => (b?.count || 0) - (a?.count || 0));
 
 				if (!interaction.channel?.isText()) return;
 
@@ -201,27 +188,29 @@ const info = {
 					.setStyle("PRIMARY")
 					.setDisabled(true)
 					.setCustomId(generateHash("previous"));
+				const numberOfPages = Math.ceil(all.length / PAGE_OFFSET);
 				const nextButton = new MessageButton()
 					.setLabel("Next >>")
 					.setStyle("PRIMARY")
+					.setDisabled(numberOfPages === 1)
 					.setCustomId(generateHash("next"));
 
 				let offset = 0;
 				const embed = async () => {
 					const content = all
-						.filter((_, i) => i > offset && i <= offset + PAGE_OFFSET)
+						.filter((x, i) => x && i >= offset && i < offset + PAGE_OFFSET)
 						.map(async (x, i) => {
+							if (!x) return; // impossible
 							const author =
-								(x.thread &&
-									(
-										await x.thread?.messages.fetch({
-											limit: 2,
-											after: (await x.thread.fetchStarterMessage()).id,
-										})
-									)
-										?.first()
-										?.mentions.users.first()
-										?.toString()) ||
+								(
+									await x.thread?.messages.fetch({
+										limit: 2,
+										after: (await x.thread.fetchStarterMessage()).id,
+									})
+								)
+									?.first()
+									?.mentions.users.first()
+									?.toString() ||
 								(x.author &&
 									(await interaction.guild?.members.search({ query: x.author }))
 										?.first()
@@ -239,9 +228,7 @@ const info = {
 						.setTitle("Top suggestions")
 						.setDescription((await Promise.all(content)).join("\n"))
 						.setFooter({
-							text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${Math.ceil(
-								all.length / PAGE_OFFSET,
-							)}`,
+							text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}`,
 						});
 				};
 
@@ -265,10 +252,8 @@ const info = {
 						} else {
 							offset -= PAGE_OFFSET;
 						}
-						if (offset === 0) previousButton.setDisabled(true);
-						else previousButton.setDisabled(false);
-						if (offset + PAGE_OFFSET >= all.length - 1) nextButton.setDisabled(true);
-						else nextButton.setDisabled(false);
+						previousButton.setDisabled(offset === 0);
+						nextButton.setDisabled(offset + PAGE_OFFSET >= all.length - 1);
 						interaction.editReply({
 							embeds: [await embed()],
 							components: [

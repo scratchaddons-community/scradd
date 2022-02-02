@@ -52,7 +52,7 @@
 		"target": "esnext",
 		"useDefineForClassFields": true,
 		"useUnknownInCatchVariables": true,
-		"watch": true
+		"watch": false
 	},
 	"exclude": ["node_modules", ".git", "dist"],
 	"include": ["./**/*", "./.**/*"],
