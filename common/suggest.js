@@ -14,8 +14,8 @@ export default class SuggestionBuilder {
 	 * @param {{ title: string; description: string }} data
 	 */
 	async createMessage(interaction, data) {
-		const author = await interaction.guild?.members.fetch(interaction.user).catch(() => {});
-
+		const author = await interaction.guild?.members.fetch(interaction.user).catch(() => { });
+		
 		const embed = new MessageEmbed()
 			.setColor(0x222_222)
 			.setAuthor({
@@ -73,11 +73,12 @@ export default class SuggestionBuilder {
 
 		await Promise.all([
 			interaction.channel.setName(
-				interaction.channel.name.replace(/(.*) \|/i, answer + " |"),
+				interaction.channel.name.replace(/^(.+)(?= \||$)/i, answer),
 				"Thread answered by " + interaction.user.tag,
 			),
 
 			await interaction.channel.fetchStarterMessage().then(async (message) => {
+				if (message.author.id !== interaction.client.user?.id) return;
 				const embed = new MessageEmbed(message.embeds[0]);
 				embed.setColor(colors[answer] || 0x000);
 
@@ -198,6 +199,13 @@ export default class SuggestionBuilder {
 			return false;
 		}
 		const starterMessage = await interaction.channel.fetchStarterMessage();
+		if (starterMessage.author.id !== interaction.client.user?.id) {
+			interaction.reply({
+				content: "This suggestion can not be edited.",
+				ephemeral: true,
+			});
+			return false;
+		}
 		const embed = new MessageEmbed(starterMessage.embeds[0]);
 		const initingMessages = await interaction.channel.messages.fetch({
 			limit: 2,

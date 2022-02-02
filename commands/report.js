@@ -69,14 +69,16 @@ const info = {
 		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 		const command = interaction.options.getSubcommand();
 		if (command === "create") {
-			const { thread } = await BugsChannel.createMessage(interaction, {
+			const res = await BugsChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
 			});
-			await interaction.reply({
-				content: `:white_check_mark: Bug report posted! See ${thread}`,
-				ephemeral: true,
-			});
+			if (res) {
+				await interaction.reply({
+					content: `:white_check_mark: Bug report posted! See ${res.thread}`,
+					ephemeral: true,
+				});
+			}
 		} else if (command === "answer") {
 			const answer = interaction.options.getString("answer");
 			if (

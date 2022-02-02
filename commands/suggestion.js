@@ -85,17 +85,19 @@ const info = {
 		const command = interaction.options.getSubcommand();
 		switch (command) {
 			case "create": {
-				const { thread, message } = await SuggestionChannel.createMessage(interaction, {
+				const res = await SuggestionChannel.createMessage(interaction, {
 					title: interaction.options.getString("title") || "",
 					description: interaction.options.getString("suggestion") || "",
 				});
-				await Promise.all([
-					message.react("👍").then(() => message.react("👎")),
-					interaction.reply({
-						content: `:white_check_mark: Suggestion posted! See ${thread}`,
-						ephemeral: true,
-					}),
-				]);
+				if (res) {
+					await Promise.all([
+						res.message.react("👍").then(() => res.message.react("👎")),
+						interaction.reply({
+							content: `:white_check_mark: Suggestion posted! See ${res.thread}`,
+							ephemeral: true,
+						}),
+					]);
+				}
 				break;
 			}
 			case "answer": {
@@ -170,10 +172,11 @@ const info = {
 							message.embeds[0]?.title ||
 							message.embeds[0]?.description ||
 							message.content;
+						console.log(truncateText(description, 20));
 						return {
 							id: message.id,
 							count: count,
-							title: truncateText(description, 50),
+							title: truncateText(description, 20),
 							thread: message.thread,
 							author: message.embeds[0]?.author?.name.split(/#| /).at(-2),
 						};
@@ -215,12 +218,15 @@ const info = {
 									(await interaction.guild?.members.search({ query: x.author }))
 										?.first()
 										?.toString());
+							console.log(x.thread?.name.split("|")[0]);
 							return (
 								`${i + offset + 1}. **${x.count}** [👍 ${
 									x.title
 								}](https://discord.com/channels/${
 									process.env.GUILD_ID
-								}/${SUGGESTION_CHANNEL}/${x.id})` + (author ? ` by ${author}` : ``)
+								}/${SUGGESTION_CHANNEL}/${x.id} "${x.thread?.name
+									.split("|")[0]
+									?.trim()}")` + (author ? ` by ${author}` : ``)
 							);
 						});
 
