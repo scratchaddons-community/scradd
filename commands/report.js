@@ -110,7 +110,7 @@ const info = {
 				})
 			)
 				interaction.reply({
-					content: "Sucessfully editted bug report.",
+					content: "Sucessfully edited bug report.",
 					ephemeral: true,
 				});
 		}

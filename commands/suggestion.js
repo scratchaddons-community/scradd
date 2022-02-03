@@ -161,7 +161,7 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: "Sucessfully editted suggestion.",
+						content: "Sucessfully edited suggestion.",
 						ephemeral: true,
 					});
 				break;
