@@ -80,7 +80,7 @@ async function textChannelMatchesChannel(channelWanted, channelFound) {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potato board.")
+		.setDescription("Replies with a random message from the potatoboard.")
 		.addIntegerOption((input) =>
 			input
 				.setName("minimum-reactions")
