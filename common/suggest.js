@@ -37,7 +37,8 @@ export default class SuggestionBuilder {
 					"",
 			})
 			.setTitle(data.title)
-			.setDescription(data.description);
+			.setDescription(data.description)
+			.setFooter({ text: "Unanswered" });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 		if (!channel?.isText()) throw new Error("Suggestion channel not found");
@@ -90,7 +91,7 @@ export default class SuggestionBuilder {
 			await interaction.channel.fetchStarterMessage().then(async (message) => {
 				if (message.author.id !== interaction.client.user?.id) return;
 				const embed = new MessageEmbed(message.embeds[0]);
-				embed.setColor(colors[answer] || 0x000);
+				embed.setColor(colors[answer] || 0x000).setFooter({ text: answer });
 
 				message.edit({ embeds: [embed] });
 			}),
@@ -107,8 +108,9 @@ export default class SuggestionBuilder {
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
-		const starter = await interaction.channel.fetchStarterMessage().catch(err => {});
-		const user =starter&&
+		const starter = await interaction.channel.fetchStarterMessage().catch((err) => {});
+		const user =
+			starter &&
 			(
 				await interaction.channel?.messages.fetch({
 					limit: 2,
@@ -196,7 +198,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {string} newSuggestion
+	 * @param {{ title: null|string; body:null| string }} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
@@ -235,7 +237,8 @@ export default class SuggestionBuilder {
 			return false;
 		}
 
-		embed?.setDescription(newSuggestion);
+		if (newSuggestion.body) embed?.setDescription(newSuggestion.body);
+		if (newSuggestion.title) embed?.setTitle(newSuggestion.title);
 		starterMessage.edit({ embeds: [embed] });
 		return true;
 	}

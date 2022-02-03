@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import SuggestionBuilder,{MAX_TITLE_LENGTH} from "../common/suggest.js";
+import SuggestionBuilder, { MAX_TITLE_LENGTH } from "../common/suggest.js";
 import { MessageActionRow, MessageButton, MessageEmbed, MessagePayload } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import generateHash from "../lib/generateHash.js";
@@ -71,9 +71,15 @@ const info = {
 				.setDescription("Edit a suggestion")
 				.addStringOption((option) =>
 					option
+						.setName("title")
+						.setDescription("Title for the suggestion embed")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
 						.setName("suggestion")
 						.setDescription("Your updated suggestion")
-						.setRequired(true),
+						.setRequired(false),
 				),
 		),
 	// .addSubcommand((subcommand) =>
@@ -149,10 +155,10 @@ const info = {
 			}
 			case "edit": {
 				if (
-					await SuggestionChannel.editSuggestion(
-						interaction,
-						interaction.options.getString("suggestion") || "",
-					)
+					await SuggestionChannel.editSuggestion(interaction, {
+						body: interaction.options.getString("suggestion"),
+						title: interaction.options.getString("title"),
+					})
 				)
 					interaction.reply({
 						content: "Sucessfully editted suggestion.",

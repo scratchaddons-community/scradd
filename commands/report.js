@@ -59,9 +59,15 @@ const info = {
 				.setDescription("Edit a bug report")
 				.addStringOption((option) =>
 					option
+						.setName("title")
+						.setDescription("Title for the report embed")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
 						.setName("report")
 						.setDescription("Your updated bug report")
-						.setRequired(true),
+						.setRequired(false),
 				),
 		),
 
@@ -98,10 +104,10 @@ const info = {
 			await BugsChannel.deleteSuggestion(interaction);
 		} else if (command === "edit") {
 			if (
-				await BugsChannel.editSuggestion(
-					interaction,
-					interaction.options.getString("report") || "",
-				)
+				await BugsChannel.editSuggestion(interaction, {
+					body: interaction.options.getString("report"),
+					title: interaction.options.getString("title"),
+				})
 			)
 				interaction.reply({
 					content: "Sucessfully editted bug report.",
