@@ -6,7 +6,7 @@ import truncateText from "../lib/truncateText.js";
 dotenv.config();
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
+export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 5 : 1;
 
 /** @param {Message} message */
 export async function getMessageFromBoard(message) {
@@ -18,7 +18,7 @@ export async function getMessageFromBoard(message) {
 	return fetchedMessages.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 		if (component?.type !== "BUTTON") return false;
-		const [, , messageId] = component.url?.match(/\d+/g) || [];
+		const messageId = component.url?.match(/\d+$/)?.[0];
 		return messageId === message.id;
 	});
 }

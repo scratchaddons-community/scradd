@@ -78,6 +78,7 @@ const info = {
 			const res = await BugsChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
+				type: "Report"
 			});
 			if (res) {
 				await interaction.reply({

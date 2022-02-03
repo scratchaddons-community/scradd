@@ -123,8 +123,7 @@ const info = {
 				asyncFilter(messages, async (message) => {
 					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
 					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
-
-					if (message.mentions.users.first()?.id !== user) return false;
+					if (user && message.mentions.users.first()?.id !== user) return false;
 
 					if (channelWanted) {
 						const matchResult = message.content.match(/<#(\d+)>/g);

@@ -12,7 +12,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: string; description: string }} data
+	 * @param {{ title: string; description: string; type:"Suggestion"|"Report" }} data
 	 */
 	async createMessage(interaction, data) {
 		const author = interaction.member;
@@ -29,7 +29,7 @@ export default class SuggestionBuilder {
 		const embed = new MessageEmbed()
 			.setColor(0x222_222)
 			.setAuthor({
-				name: "Suggestion by " + author?.displayName || interaction.user.username,
+				name: data.type+" from " + author?.displayName || interaction.user.username,
 				iconURL:
 					author?.displayAvatarURL() ||
 					interaction.user.displayAvatarURL() ||
@@ -84,7 +84,7 @@ export default class SuggestionBuilder {
 
 		await Promise.all([
 			interaction.channel.setName(
-				interaction.channel.name.replace(/^([^|]+?)(?=(?: \|.+)?$)/i, answer),
+				interaction.channel.name.replace(/^(?:.+? \| )?([^|]+)$/i, answer),
 				"Thread answered by " + interaction.user.tag,
 			),
 
@@ -238,7 +238,13 @@ export default class SuggestionBuilder {
 		}
 
 		if (newSuggestion.body) embed?.setDescription(newSuggestion.body);
-		if (newSuggestion.title) embed?.setTitle(newSuggestion.title);
+		if (newSuggestion.title) {
+			interaction.channel.setName(
+				interaction.channel.name.replace(/(?<=^.+ \| )(.+)$/i, newSuggestion.title),
+				"Suggestion/report edited"
+			)
+				embed?.setTitle(newSuggestion.title);
+		}
 		starterMessage.edit({ embeds: [embed] });
 		return true;
 	}

@@ -117,7 +117,7 @@ const info = {
 			case "create": {
 				const res = await SuggestionChannel.createMessage(interaction, {
 					title: interaction.options.getString("title") || "",
-					description: interaction.options.getString("suggestion") || "",
+					description: interaction.options.getString("suggestion") || "",type:"Suggestion"
 				});
 				if (res) {
 					await Promise.all([
@@ -203,7 +203,7 @@ const info = {
 								message.embeds[0]?.description ||
 								message.content;
 
-							const authorTag = message.embeds[0]?.author?.name.split(/#| /).at(-2);
+							const authorTag = message.embeds[0]?.author?.name.split(/#| /g).at(-2);
 							const author = (
 								message.author.id === "323630372531470346" && authorTag
 									? await interaction.guild?.members.search({ query: authorTag })
