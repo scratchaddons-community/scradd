@@ -6,7 +6,7 @@ import truncateText from "../lib/truncateText.js";
 dotenv.config();
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
+export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 1;
 
 /** @param {Message} message */
 export async function getMessageFromBoard(message) {
