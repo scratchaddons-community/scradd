@@ -20,7 +20,7 @@ export default class SuggestionBuilder {
 
 		if (data.title.length > MAX_TITLE_LENGTH) {
 			interaction.reply({
-				content: `The title can not be longer than `+MAX_TITLE_LENGTH+` characters.`,
+				content: `The title can not be longer than ` + MAX_TITLE_LENGTH + ` characters.`,
 				ephemeral: true,
 			});
 			return false;
@@ -107,21 +107,24 @@ export default class SuggestionBuilder {
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
-
-		const user = (
-			await interaction.channel?.messages.fetch({
-				limit: 2,
-				after: (await interaction.channel.fetchStarterMessage()).id,
-			})
-		)
-			?.first()
-			?.mentions.users.first();
+		const starter = await interaction.channel.fetchStarterMessage().catch(err => {});
+		const user =starter&&
+			(
+				await interaction.channel?.messages.fetch({
+					limit: 2,
+					after: starter.id,
+				})
+			)
+				?.first()
+				?.mentions.users.first();
 
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
 
 		if (
-			interaction.user.id !== user?.id &&
-			!roles.hasAny(process.env.MODERATOR_ROLE || "", process.env.DEVELOPER_ROLE || "")
+			!(
+				roles.hasAny(process.env.MODERATOR_ROLE || "", process.env.DEVELOPER_ROLE || "") ||
+				(user && interaction.user.id === user?.id)
+			)
 		) {
 			return interaction.reply({
 				content: "You don't have permission to run this command!",
@@ -163,8 +166,7 @@ export default class SuggestionBuilder {
 								ephemeral: true,
 							});
 						interaction.channel.delete();
-						const m = await interaction.channel.fetchStarterMessage();
-						m.delete();
+						starter?.delete();
 						break;
 					}
 					case cancelButton.customId: {
