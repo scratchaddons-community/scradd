@@ -29,5 +29,5 @@ export default (message) => {
 	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
 	if (includes("appel")) message.react("<:appel:938818517535440896>")
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
-	if (content.match(/give( you)? up/)) message.react("<a:rick:938547171366682624>");
+	if (content.match(/gives? ( you)? up/)) message.react("<a:rick:938547171366682624>");
 };
