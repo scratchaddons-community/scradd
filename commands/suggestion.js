@@ -76,35 +76,34 @@ const info = {
 						.setDescription("Your updated suggestion")
 						.setRequired(true),
 				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("get-top")
-				.setDescription("Get the top suggestions")
-				.addUserOption((input) =>
-					input
-						.setName("user")
-						.setDescription("Filter suggestions to only get those by a certain user.")
-						.setRequired(false),
-				)
-				.addStringOption((option) =>
-					option
-						.setName("answer")
-						.setDescription(
-							"Filter suggestions to only get those with a certain answer.",
-						)
-						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-						.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
-						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
-						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
-						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
-						.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
-						.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
-						.addChoice("Unanswered", "Unanswered")
-						.setRequired(false),
-				),
 		),
-
+	// .addSubcommand((subcommand) =>
+	// 	subcommand
+	// 		.setName("get-top")
+	// 		.setDescription("Get the top suggestions")
+	// 		.addUserOption((input) =>
+	// 			input
+	// 				.setName("user")
+	// 				.setDescription("Filter suggestions to only get those by a certain user.")
+	// 				.setRequired(false),
+	// 		)
+	// 		.addStringOption((option) =>
+	// 			option
+	// 				.setName("answer")
+	// 				.setDescription(
+	// 					"Filter suggestions to only get those with a certain answer.",
+	// 				)
+	// 				.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
+	// 				.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
+	// 				.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
+	// 				.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
+	// 				.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
+	// 				.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
+	// 				.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
+	// 				.addChoice("Unanswered", "Unanswered")
+	// 				.setRequired(false),
+	// 		),
+	//)
 	async interaction(interaction) {
 		if (interaction.guild?.id !== process.env.GUILD_ID || !interaction.channel?.isText())
 			return;

@@ -27,7 +27,7 @@ export default (message) => {
 	if (includes("griff", false)) message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
 	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
-	if (includes("colander")) message.react("<:colaber:938480402752995408>");
+	if (includes("appel")) message.react("<:appel:938818517535440896>")
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
 	if (content.match(/give( you)? up/)) message.react("<a:rick:938547171366682624>");
 };

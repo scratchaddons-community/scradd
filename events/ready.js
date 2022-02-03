@@ -17,7 +17,6 @@ export default async (client) => {
 
 		if (!testingChannel || !("send" in testingChannel))
 			throw new Error("Could not find error reporting channel");
-		await testingChannel.send("Bot online!");
 	}
 	const prexistingCommands = await client.application.commands.fetch({
 		guildId: process.env.GUILD_ID || "",
