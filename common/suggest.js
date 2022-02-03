@@ -172,7 +172,9 @@ export default class SuggestionBuilder {
 						i.deferUpdate();
 						interaction.editReply({
 							content: ":negative_squared_cross_mark: Deletion canceled.",
-							components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
+							components: [
+								new MessageActionRow().addComponents(deleteButton, cancelButton),
+							],
 						});
 						break;
 					}
