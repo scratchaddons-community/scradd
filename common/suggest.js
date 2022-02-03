@@ -82,7 +82,7 @@ export default class SuggestionBuilder {
 
 		await Promise.all([
 			interaction.channel.setName(
-				interaction.channel.name.replace(/^(.+)(?= \||$)/i, answer),
+				interaction.channel.name.replace(/^([^|]+?)(?=(?: \|.+)?$)/i, answer),
 				"Thread answered by " + interaction.user.tag,
 			),
 
