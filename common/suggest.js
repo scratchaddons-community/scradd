@@ -1,5 +1,6 @@
 import { GuildMember, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import generateHash from "../lib/generateHash.js";
+export const MAX_TITLE_LENGTH = 50;
 
 export default class SuggestionBuilder {
 	CHANNEL_ID = "";
@@ -17,9 +18,9 @@ export default class SuggestionBuilder {
 		const author = interaction.member;
 		if (!(author instanceof GuildMember)) return;
 
-		if (data.title.length > 20) {
+		if (data.title.length > MAX_TITLE_LENGTH) {
 			interaction.reply({
-				content: `The title can not be longer than 20 characters.`,
+				content: `The title can not be longer than `+MAX_TITLE_LENGTH+` characters.`,
 				ephemeral: true,
 			});
 			return false;

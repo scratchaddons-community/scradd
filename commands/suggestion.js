@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import SuggestionBuilder from "../common/suggest.js";
+import SuggestionBuilder,{MAX_TITLE_LENGTH} from "../common/suggest.js";
 import { MessageActionRow, MessageButton, MessageEmbed, MessagePayload } from "discord.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import generateHash from "../lib/generateHash.js";
@@ -10,7 +10,6 @@ dotenv.config();
 const { SUGGESTION_CHANNEL } = process.env;
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
 const PAGE_OFFSET = 15;
-const MAX_TITLE_LENGTH = 20;
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
