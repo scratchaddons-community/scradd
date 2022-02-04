@@ -108,7 +108,7 @@ export default class SuggestionBuilder {
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
-		const starter = await interaction.channel.fetchStarterMessage().catch((err) => {});
+		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
 		const user =
 			starter &&
 			(

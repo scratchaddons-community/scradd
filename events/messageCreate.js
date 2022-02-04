@@ -5,9 +5,10 @@ dotenv.config();
 export default (message) => {
 	if (message.author.bot || message.guild?.id !== process.env.GUILD_ID) return;
 
-if (message.content.startsWith("r!suggest")) message.reply({ content: "`r!suggest` has been removed, please use `/suggestion create`."})
-
-if (message.content.startsWith("r!wlquote")) message.reply({ content: "`r!wlquote` has been removed, please use `/explorepotatoes`."})
+	if (message.content.startsWith("r!suggest"))
+		message.reply({
+			content: "`r!suggest` has been removed, please use `/suggestion create`.",
+		});
 
 	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 		message.react("👋");
