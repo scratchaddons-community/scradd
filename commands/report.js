@@ -50,7 +50,11 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("(Devs, mods, and OP only) Delete a bug report. Use this in threads in #reports."),
+			subcommand
+				.setName("delete")
+				.setDescription(
+					"(Devs, mods, and OP only) Delete a bug report. Use this in threads in #reports.",
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -77,7 +81,7 @@ const info = {
 			const res = await BugsChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
-				type: "Report"
+				type: "Report",
 			});
 			if (res) {
 				await interaction.reply({

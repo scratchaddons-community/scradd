@@ -46,7 +46,9 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs only) Answer a suggestion. Use this in threads in #suggestions.")
+				.setDescription(
+					"(Devs only) Answer a suggestion. Use this in threads in #suggestions.",
+				)
 				.addStringOption((option) =>
 					option
 						.setName("answer")
@@ -62,7 +64,11 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("(Devs, mods, and OP only) Delete a suggestion. Use this in threads in #suggestions."),
+			subcommand
+				.setName("delete")
+				.setDescription(
+					"(Devs, mods, and OP only) Delete a suggestion. Use this in threads in #suggestions.",
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -116,7 +122,8 @@ const info = {
 			case "create": {
 				const res = await SuggestionChannel.createMessage(interaction, {
 					title: interaction.options.getString("title") || "",
-					description: interaction.options.getString("suggestion") || "",type:"Suggestion"
+					description: interaction.options.getString("suggestion") || "",
+					type: "Suggestion",
 				});
 				if (res) {
 					await Promise.all([

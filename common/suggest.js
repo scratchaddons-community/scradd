@@ -12,7 +12,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: string; description: string; type:"Suggestion"|"Report" }} data
+	 * @param {{ title: string; description: string; type: "Suggestion" | "Report" }} data
 	 */
 	async createMessage(interaction, data) {
 		const author = interaction.member;
@@ -29,7 +29,7 @@ export default class SuggestionBuilder {
 		const embed = new MessageEmbed()
 			.setColor(0x222_222)
 			.setAuthor({
-				name: data.type+" from " + author?.displayName || interaction.user.username,
+				name: data.type + " from " + author?.displayName || interaction.user.username,
 				iconURL:
 					author?.displayAvatarURL() ||
 					interaction.user.displayAvatarURL() ||
@@ -198,7 +198,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null|string; body:null| string }} newSuggestion
+	 * @param {{ title: null | string; body: null | string }} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
@@ -241,9 +241,9 @@ export default class SuggestionBuilder {
 		if (newSuggestion.title) {
 			interaction.channel.setName(
 				interaction.channel.name.replace(/(?<=^.+ \| )(.+)$/i, newSuggestion.title),
-				"Suggestion/report edited"
-			)
-				embed?.setTitle(newSuggestion.title);
+				"Suggestion/report edited",
+			);
+			embed?.setTitle(newSuggestion.title);
 		}
 		starterMessage.edit({ embeds: [embed] });
 		return true;
