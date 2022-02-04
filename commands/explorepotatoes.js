@@ -104,56 +104,42 @@ const info = {
 				.addChannelTypes([0, 4, 5, 6, 10, 11]),
 		),
 
-	async interaction(interaction) {
-		if (interaction.guild?.id !== process.env.GUILD_ID) return;
-		const deferPromise = interaction.deferReply();
-		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
+	async interaction(_interaction) {
+		// Never name a param in a function the name of the same function, you'll run into tricky bugs
+		if (_interaction.guild?.id !== process.env.GUILD_ID) return;
+		const deferPromise = _interaction.deferReply();
+		const board = await _interaction.guild?.channels.fetch(BOARD_CHANNEL);
 		if (!board?.isText())
 			throw new Error(
 				"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
 			);
 
-		const minReactions = interaction.options.getInteger("minimum-reactions") || 0;
-		const user = interaction.options.getUser("user")?.id;
-		const channelId = interaction.options.getChannel("channel")?.id;
-		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
+		const minReactions = _interaction.options.getInteger("minimum-reactions") || 0;
+		const user = _interaction.options.getUser("user")?.id;
+		const channelId = _interaction.options.getChannel("channel")?.id;
+		const channelWanted = channelId && (await _interaction.guild?.channels.fetch(channelId));
 		const [, fetchedMessages] = await Promise.all([
 			deferPromise,
-			getAllMessages(board).then((messages) =>
-				asyncFilter(messages, async (message) => {
-					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
-					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
-					if (user && message.mentions.users.first()?.id !== user) return false;
-
-					if (channelWanted) {
-						const matchResult = message.content.match(/<#(\d+)>/g);
-						const channelFound = message.mentions.channels.first() || matchResult?.[1];
-
-						if (
-							!(
-								channelFound &&
-								(await textChannelMatchesChannel(channelWanted, channelFound))
-							)
-						) {
-							return false;
-						}
-					}
-					return true;
-				}),
-			),
+			// Organize code a bit
+			_getMessages(board)
 		]);
-
+		// Shuffle
+		fetchedMessages = fetchedMessages.sort(() => 0.5 - Math.random())
 		const nextButton = new MessageButton()
 			.setLabel("Next")
 			.setCustomId(generateHash("next"))
 			.setStyle("SECONDARY")
 			.setEmoji("➡");
 
-		/** @returns {import("discord.js").InteractionReplyOptions} */
-		function generateMessage() {
-			const index = Math.floor(Math.random() * fetchedMessages.length);
+		const backButton = new MessageButton()
+			.setLabel("Back")
+			.setCustomId(generateHash("back"))
+			.setEmoji("⬅️");
+		/** @returns {import("discord.js")._InteractionReplyOptions} */
+		function generateMessage(index) {
+			// Loop array, javascript array indexes start at 0 so that's why -1
+			index = index % (fetchedMessages.length - 1);
 			const source = fetchedMessages[index];
-			fetchedMessages.splice(index, 1);
 			if (!source?.components[0]?.components[0]) {
 				return {
 					content: "No messages found. Try changing any filters you may have used.",
@@ -174,32 +160,50 @@ const info = {
 					source.components[0]?.components[0]
 						? source.components[0]?.setComponents(
 								source.components[0].components[0],
-								nextButton,
+								backButton,
+								nextButton
 						  )
 						: source.components[0],
 				],
 				allowedMentions: { users: [] },
 			};
 		}
+		// First messsage
+		await _interaction.editReply(generateMessage(0));
+		// Declare index here, not sure if this needs some sort of persistent storage or not
+		let index = 0;
+		// Collectors
 
-		await interaction.editReply(generateMessage());
-
-		const collector = interaction.channel?.createMessageComponentCollector({
-			filter: (i) => i.customId === nextButton.customId && i.user.id === interaction.user.id,
-			time: 15_000,
-		});
-
-		collector
-			?.on("collect", async (i) => {
+		collector(nextButton.customId, 1);
+		collector(backButton.customId, -1);
+		/**
+		 * Creates a collector
+		 * @param {*} buttonID The ID of the button
+		 * @param {Integer} direction The number of messages to go through (1 for forwards, -1 for backwards, etc)
+		 * @returns {Collector} Collector object
+		 */
+		function collector(buttonID, direction = 1){
+			const _collector = _interaction.channel?.createMessageComponentCollector({
+				// use backButton
+				filter: (i) => i.customId === buttonID && i.user.id === _interaction.user.id,
+				time: 15_000,
+			});
+			if (!_collector){
+				console.trace();
+				throw new Error("Something went wrong, no collector object.")
+			}
+			_collector.on("collect", async (i) => {
 				await i.deferUpdate();
-				interaction.editReply(generateMessage());
-				collector.resetTimer();
-			})
-			.on("end", async () => {
-				const source = await interaction.fetchReply();
-				if (!(source instanceof Message)) return interaction.deleteReply();
+				index += direction;
+				_interaction.editReply(generateMessage(index));
+				_collector.resetTimer();
+			}).on("end", onEnd);
+			// When the collector ends
+			async function onEnd(){
+				const source = await _interaction.fetchReply();
+				if (!(source instanceof Message)) return _interaction.deleteReply();
 
-				interaction.editReply({
+				_interaction.editReply({
 					content: source.content,
 					embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 					files: source.attachments.map((a) => a),
@@ -216,7 +220,35 @@ const info = {
 					),
 					allowedMentions: { users: [] },
 				});
-			});
+			}
+			return _collector;
+		}
+
+
+		function _getMessages(board){
+			return getAllMessages(board).then((messages) =>
+				asyncFilter(messages, async (message) => {
+					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
+					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
+					if (user && message.mentions.users.first()?.id !== user) return false;
+
+					if (channelWanted) {
+						const matchResult = message.content.match(/<#(\d+)>/g);
+						const channelFound = message.mentions.channels.first() || matchResult?.[1];
+
+						if (
+							!(
+								channelFound &&
+								(await textChannelMatchesChannel(channelWanted, channelFound))
+							)
+						) {
+							return false;
+						}
+					}
+					return true;
+				}),
+			)
+		}
 	},
 };
 
