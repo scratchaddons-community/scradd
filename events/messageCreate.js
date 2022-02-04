@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
 
@@ -13,7 +13,7 @@ const WH_NAME = "scradd-wh";
 export default async (message) => {
 	if (message.author.id === message.client.user?.id) return;
 
-	if (message.channel.type === "DM") {
+	if (message.channel.type === "DM" && ["DEFAULT", "REPLY"].includes(message.type)) {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
 		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 		if (!mailChannel) throw new Error("Could not find modmail channel");
@@ -29,12 +29,7 @@ export default async (message) => {
 			thread.name.endsWith("(" + message.author.id + ")"),
 		);
 		if (thread) {
-			webhook.send({
-				threadId: thread.id,
-				content: message.content,
-				username: message.author.username,
-				avatarURL: message.author.avatarURL() || "",
-			});
+			webhook.send({ threadId: thread.id, ...generateMessage(message) });
 		} else {
 			const embed = new MessageEmbed()
 				.setTitle("Confimation")
@@ -80,12 +75,7 @@ export default async (message) => {
 
 					if (!webhook) throw new Error("Could not find webhook");
 					i.reply("Modmail ticket opened");
-					webhook.send({
-						threadId: thread.id,
-						content: message.content,
-						username: message.author.username,
-						avatarURL: message.author.avatarURL() || "",
-					});
+					webhook.send({ threadId: thread.id, ...generateMessage(message) });
 					button.setDisabled(true);
 				})
 				.on("end", async () => {
@@ -104,14 +94,15 @@ export default async (message) => {
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
 		message.channel.parent?.id === MODMAIL_CHANNEL &&
 		!message.webhookId &&
-		!message.content.startsWith("=")
+		!message.content.startsWith("=") &&
+		["DEFAULT", "REPLY"].includes(message.type)
 	) {
 		const user = await message.client.users.fetch(
 			message.channel?.name.match(/^.+ \((\d+)\)$/i)?.[1] || "",
 		);
 		if (!user) return;
 		const channel = await user.createDM();
-		channel.send(message.content);
+		channel.send(generateMessage(message));
 		return;
 	}
 
@@ -141,3 +132,24 @@ export default async (message) => {
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
 	if (content.match(/gives?( you)? up/)) message.react("<a:rick:938547171366682624>");
 };
+
+/** @param {Message} message */
+function generateMessage(message) {
+	return {
+		content: message.content || undefined,
+		username: message.author.username,
+		files: message.attachments.map((a) => a),
+		allowedMentions: { users: [] },
+
+		avatarURL: message.author.avatarURL() || "",
+		embeds: message.stickers
+			.map((sticker) => {
+				return new MessageEmbed()
+					.setDescription("")
+					.setImage(
+						`https://media.discordapp.net/stickers/` + sticker.id + `.webp?size=160`,
+					);
+			})
+			.concat(message.embeds.map((a) => new MessageEmbed(a))), //.splice(10),
+	};
+}
