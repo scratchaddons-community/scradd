@@ -26,7 +26,7 @@ const SuggestionChannel = new SuggestionBuilder(SUGGESTION_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Suggestion Commands")
+		.setDescription(" ")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")

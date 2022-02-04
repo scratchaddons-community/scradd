@@ -8,10 +8,10 @@ if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.")
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
+	.setDescription(" ")
 		.addSubcommand((subcommand) =>
-			subcommand.setName("close").setDescription("(Mods Only) Close a modmail thread."),
-		)
-		.setDescription("ModMail Commands"),
+			subcommand.setName("close").setDescription("(Mods only) Close a modmail ticket."),
+		),
 
 	async interaction(interaction) {
 		if (
@@ -22,25 +22,27 @@ const info = {
 		const command = interaction.options.getSubcommand();
 		if (command === "close") {
 			await interaction.reply({
-				content: `:white_check_mark: ModMail closed!`,
+				content: `:white_check_mark: Modmail ticket closed!`,
 			});
 			const starter = await interaction.channel.fetchStarterMessage();
-			const user = await interaction.client.users.fetch(starter.embeds[0]?.description || "");
+			const user = await interaction.client.users.fetch(
+				interaction.channel?.name.match(/^.+ \((\d+)\)$/i)?.[1] || "",
+			);
 			if (!user) return;
 			const dm = await user.createDM();
-			dm.send("ModMail closed!");
+			dm.send({content: "Modmail ticket closed!"});
 
 			await starter.edit({
 				embeds: [
 					{
-						title: "ModMail Ticket Closed",
+						title: "Modmail ticket closed",
 						description: starter.embeds[0]?.description || "",
 						color: 0x00ff00,
 					},
 				],
 			});
-			interaction.channel.setArchived(true, "Closed by " + interaction.user.username);
-			interaction.channel.setLocked(true, "Closed by " + interaction.user.username);
+			interaction.channel.setLocked(true, "Closed by " + interaction.user.tag);
+			interaction.channel.setArchived(true, "Closed by " + interaction.user.tag);
 		}
 	},
 };

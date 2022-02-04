@@ -20,82 +20,38 @@ export default async (message) => {
 		if (mailChannel.type !== "GUILD_TEXT")
 			throw new Error("Modmail channel is not a text channel");
 		const webhooks = await mailChannel.fetchWebhooks();
-		let webhook = webhooks.find((wh) => wh.name === WH_NAME);
-		if (!webhook) {
-			webhook = await mailChannel.createWebhook(WH_NAME);
-		}
+		const webhook =
+			webhooks.find((wh) => wh.name === WH_NAME) ||
+			(await mailChannel.createWebhook(WH_NAME));
 
-		const { threads } = await mailChannel.threads.fetch();
-		for (const [, thread] of threads) {
-			const starter = await thread.fetchStarterMessage();
-			if (starter.embeds[0]?.description === message.author.id) {
-				webhook.send({
-					threadId: thread.id,
-					content: message.content,
-					username: message.author.username,
-					avatarURL: message.author.avatarURL() || "",
-				});
-				return;
-			}
-		}
-
-		const embed = new MessageEmbed()
-			.setTitle("Confimation")
-			.setDescription(
-				"You are sending this message to the Scratch Addons Server. If you are sure you would like to do this, press the button below.",
-			)
-			.setColor("BLURPLE");
-		const button = new MessageButton()
-			.setLabel("Confirm")
-			.setStyle("PRIMARY")
-			.setCustomId(generateHash("confirm"));
-		const sentMsg = await message.channel.send({
-			embeds: [embed],
-			components: [new MessageActionRow().addComponents(button)],
-		});
-
-		message.channel.createMessageCollector({ time: 15_000 }).on("collect", (msg) => {
-			button.setDisabled(true);
-			sentMsg.edit({
+		const { threads } = await mailChannel.threads.fetchActive();
+		const thread = threads.find((thread) =>
+			thread.name.endsWith("(" + message.author.id + ")"),
+		);
+		if (thread) {
+			webhook.send({
+				threadId: thread.id,
+				content: message.content,
+				username: message.author.username,
+				avatarURL: message.author.avatarURL() || "",
+			});
+		} else {
+			const embed = new MessageEmbed()
+				.setTitle("Confimation")
+				.setDescription(
+					"You are sending this message to the Scratch Addons Server. If you are sure you would like to do this, press the button below.",
+				)
+				.setColor("BLURPLE");
+			const button = new MessageButton()
+				.setLabel("Confirm")
+				.setStyle("PRIMARY")
+				.setCustomId(generateHash("confirm"));
+			const sentMsg = await message.channel.send({
 				embeds: [embed],
 				components: [new MessageActionRow().addComponents(button)],
 			});
-		});
 
-		message.channel
-			.createMessageComponentCollector({
-				filter: (i) => button.customId === i.customId,
-				time: 15_000,
-			})
-			.on("collect", async (i) => {
-				const embed = new MessageEmbed()
-					.setTitle("ModMail Ticket")
-					.setDescription(message.author.id)
-					.setColor("BLURPLE");
-
-				const starterMsg = await mailChannel.send({
-					content: process.env.NODE_ENV === "production" ? "@here" : undefined,
-					embeds: [embed],
-				});
-				const thread = await starterMsg.startThread({
-					name: `${message.author.username}-${message.author.discriminator}`,
-				});
-
-				if (!webhook) throw new Error("Could not find webhook");
-				i.reply("ModMail Started");
-				webhook.send({
-					threadId: thread.id,
-					content: message.content,
-					username: message.author.username,
-					avatarURL: message.author.avatarURL() || "",
-				});
-				button.setDisabled(true);
-				sentMsg.edit({
-					embeds: [embed],
-					components: [new MessageActionRow().addComponents(button)],
-				});
-			})
-			.on("end", async () => {
+			message.channel.createMessageCollector({ time: 15_000 }).on("collect", () => {
 				button.setDisabled(true);
 				sentMsg.edit({
 					embeds: [embed],
@@ -103,8 +59,46 @@ export default async (message) => {
 				});
 			});
 
-		return;
+			message.channel
+				.createMessageComponentCollector({
+					filter: (i) => button.customId === i.customId,
+					time: 15_000,
+				})
+				.on("collect", async (i) => {
+					const embed = new MessageEmbed()
+						.setTitle("Modmail ticket opened")
+						.setDescription("Ticket by " + message.author.toString())
+						.setColor("BLURPLE");
+
+					const starterMsg = await mailChannel.send({
+						content: process.env.NODE_ENV === "production" ? "@here" : undefined,
+						embeds: [embed],
+					});
+					const thread = await starterMsg.startThread({
+						name: `${message.author.username} (${message.author.id})`,
+					});
+
+					if (!webhook) throw new Error("Could not find webhook");
+					i.reply("Modmail ticket opened");
+					webhook.send({
+						threadId: thread.id,
+						content: message.content,
+						username: message.author.username,
+						avatarURL: message.author.avatarURL() || "",
+					});
+					button.setDisabled(true);
+				})
+				.on("end", async () => {
+					button.setDisabled(true);
+					sentMsg.edit({
+						embeds: [embed],
+						components: [new MessageActionRow().addComponents(button)],
+					});
+				});
+		}
 	}
+
+	if (message.author.bot || message.guild?.id !== process.env.GUILD_ID) return;
 
 	if (
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -112,15 +106,14 @@ export default async (message) => {
 		!message.webhookId &&
 		!message.content.startsWith("=")
 	) {
-		const starter = await message.channel.fetchStarterMessage();
-		const user = await message.client.users.fetch(starter.embeds[0]?.description || "");
+		const user = await message.client.users.fetch(
+			message.channel?.name.match(/^.+ \((\d+)\)$/i)?.[1] || "",
+		);
 		if (!user) return;
 		const channel = await user.createDM();
 		channel.send(message.content);
 		return;
 	}
-
-	if (message.author.bot || message.guild?.id !== process.env.GUILD_ID) return;
 
 	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 		message.react("👋");

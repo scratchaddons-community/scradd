@@ -19,7 +19,7 @@ const BugsChannel = new SuggestionBuilder(BUGS_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Bug Reporting Commands")
+		.setDescription(" ")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")

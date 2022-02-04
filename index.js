@@ -1,4 +1,4 @@
-import { Client, Intents, MessageEmbed } from "discord.js";
+import { Client, Intents as intents, MessageEmbed } from "discord.js";
 import importScripts from "./lib/importScripts.js";
 import dotenv from "dotenv";
 import http from "http";
@@ -9,10 +9,10 @@ process.on("unhandledRejection", console.error);
 
 const client = new Client({
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-		Intents.FLAGS.DIRECT_MESSAGES,
+		intents.FLAGS.GUILDS,
+		intents.FLAGS.GUILD_MESSAGES,
+		intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		intents.FLAGS.DIRECT_MESSAGES,
 	],
 	partials: ["USER", "REACTION", "MESSAGE", "CHANNEL"],
 });
