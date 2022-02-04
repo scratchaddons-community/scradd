@@ -19,11 +19,10 @@ const BugsChannel = new SuggestionBuilder(BUGS_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and create bug reports in #suggestions")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new bug report")
+				.setDescription("Create a new bug report in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -37,7 +36,7 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs Only) Answer a bug report")
+				.setDescription("(Devs only) Answer a bug report. Use this in threads in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("answer")
@@ -51,12 +50,12 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("Delete a bug report"),
+			subcommand.setName("delete").setDescription("(Devs, mods, and OP only) Delete a bug report. Use this in threads in #reports."),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("Edit a bug report")
+				.setDescription("(OP Only) Edit a bug report. Use this in threads in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("title")

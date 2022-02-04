@@ -26,11 +26,10 @@ const SuggestionChannel = new SuggestionBuilder(SUGGESTION_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and create suggestions in #suggestions")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new suggestion")
+				.setDescription("Create a new suggestion in #suggestions.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -47,7 +46,7 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs Only) Answer a suggestion")
+				.setDescription("(Devs only) Answer a suggestion. Use this in threads in #suggestions.")
 				.addStringOption((option) =>
 					option
 						.setName("answer")
@@ -63,12 +62,12 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("Delete a suggestion"),
+			subcommand.setName("delete").setDescription("(Devs, mods, and OP only) Delete a suggestion. Use this in threads in #suggestions."),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("Edit a suggestion")
+				.setDescription("(OP Only) Edit a suggestion. Use this in threads in #suggestions.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
