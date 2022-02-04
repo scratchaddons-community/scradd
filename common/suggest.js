@@ -45,7 +45,7 @@ export default class SuggestionBuilder {
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			name: "Unanswered | " + embed.title,
-			autoArchiveDuration: "MAX",
+			autoArchiveDuration: 1440,
 			reason: "Suggestion/report by " + interaction.user.tag,
 		});
 		await thread.members.add(interaction.user.id);
