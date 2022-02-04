@@ -1,107 +1,94 @@
 # scradd
 
-Bot for Scratch Addons Discord server
+## About
 
-Cloud hosted on [opeNode.io](https://www.openode.io/)
+This is a Discord bot for the [Scratch Addons Discord server](https://discord.gg/Cs25kzs889). It was partially made because it was the servers' one year anniversary, and partially because we wanted a bot that we had ultimate customization over.
+
+Logo made by @(does weirdo have a github) and @retronbv.
+
+Cloud hosted on [opeNode.io](https://www.openode.io/).
 
 ## Features
 
-### General
+### Potatoboard
 
----
+Messages with more than 8 :potato: reactions are shown in the #potatoboard channel. If a message is funny out of context, like this: ![](https://cdn.discordapp.com/attachments/901225174974726177/939015132720287784/unknown.png) then once it gets 8 reactions, it will be posted, without context, in the #potatoboard channel. Makes for a good laugh.
 
-### PotatoBoard
+Potatoboard can also be used to higlight messages that the community finds noteworthy, like a good drawing, so more people can see it.
 
-Messages with more than 6 potato emoji reactions are shown in the #potatoboard channel.
+Finally, potatoboard is useful to pick out good memes from just chatting in #memes. In the past, pins were used for this, but we had issues with the pin limit.
 
-* #### Related: /explorepotatos - Get a random message from the potatoboard
+#### Related: /explorepotatos
+
+The /explorepotatoes command gets a random message from the potatoboard. Optional filters can be added such as channel it was posted in, number of reactions, and/or author of the original message.
 
 ### React to messages including certain strings
 
-Scradd reacts to messages that include any of the following strings with an emoji associated with the found string:
+Scradd reacts to some messages that include certain meme-y strings with an emoji associated with the string used. I'm not going to tell you what they are, find them yourself ![](https://cdn.discordapp.com/emojis/902948518002573364.webp?size=22&quality=lossless)!
 
-* dango, dangos, dangoes
-* potato, potatos, potatoes
-* griff
-* amongus
-* sus
-* appel, appels, appeles
-* tera, teras, teraes
-* give you up, give up
+### Suggestions
 
-### Commands
+Create and manage suggestions in the #suggest channel.
 
----
+A typical suggestion looks something like this: ![](https://user-images.githubusercontent.com/75680333/152417553-31b2c407-e74b-4143-915b-5c00b76bce01.png)
 
-### /suggestion
+#### /suggestion create
 
-Includes actions like creating, modifying and deleting suggestions.
-Applies to threads in the #suggestions channel.
+Creates a new suggestion. Takes a title and a description.
 
-A suggestion looks like this:
+#### /suggestion edit
 
-![image](https://user-images.githubusercontent.com/75680333/152417553-31b2c407-e74b-4143-915b-5c00b76bce01.png)
+Edits the title and/or the content of suggestions. Only the suggestion author can use it. Run it in the thread on the suggestion.
 
-### /suggestion create
+#### /suggestion answer
 
-Creates a new suggestion. Used in #questions-bugs-chat or #bots. Everyone can use.
+Answers suggestions. Requires having the developer role.
 
-### /suggestion edit
+A suggestion can be answered with one of the following answers:
 
-Edits the title or the content of the suggestion the command is used in the thread of. Only suggestion author can use.
+-   Impractical
+-   Impossible
+-   Rejected
+-   Good Idea
+-   Implemented
+-   In Development
+-   Possible
 
-### /suggestion answer
+#### /suggestion delete
 
-Answers the suggestion the command is used in the thread of. Requires developer or moderator permission.
-A suggestion can be answered with one of the following:
+Deletes suggestions. Requires having the developer and/or moderator roles.
 
-* Impractical
-* Impossible
-* Rejected
-* Good Idea
-* Implemented
-* In Development
-* Possible
+### Bug reports
 
-### /suggestion delete
+Create and manage bug reports in the #bugs channel.
 
-Deletes the suggestion the command is used in the thread of. Requires developer or moderator permission.
-
----
-
-### /report
+A typical report looks something like this: ![](https://cdn.discordapp.com/attachments/901225174974726177/939020057625886760/unknown.png)
 
 ### /report create
 
-Creates a new report. Used in #questions-bugs-chat or #bots. Everyone can use.
+Creates a new report. Takes a title and a description.
 
 ### /report edit
 
-Edits the title or the content of the report the command is used in the thread of. Only report author can use.
+Edits the title and/or the content of reports. Only the report author can use it. Run it in the thread on the report.
 
-### /report answer
+#### /report answer
 
-Answers the report the command is used in the thread of. Requires developer or moderator permission.
-A report can be answered with one of the following:
+Answers reports. Requires having the developer role.
 
-* Valid Bug
-* Minor Bug
-* In Development
-* Invalid Bug
-* Fixed
+A report can be answered with one of the following answers:
 
-### /report delete
+-   Valid Bug
+-   Minor Bug
+-   In Development
+-   Invalid Bug
+-   Fixed
 
-Deletes the report the command is used in the thread of. Requires developer or moderator permission.
+#### /report delete
 
----
-
-### /explorepotatos
-
-Replies with a random message from the potatoboard.
+Deletes reports. Requires having the developer and/or moderator roles.
 
 ### /addon
 
-Replies with information about a specific addon.
+Replies with information about a specific addon. Replies with the best match if no addon found with the given name. If no addon name is provided, replies with a ramdom addon.
 
-* Replies with the best match if no addon found with given name.
