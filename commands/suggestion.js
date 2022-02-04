@@ -278,7 +278,7 @@ const info = {
 					if (!content.length)
 						return {
 							content:
-								"No suggestions found. Try changing any filters you my have used.",
+								"No suggestions found. Try changing any filters you may have used.",
 							ephemeral: true,
 						};
 					return {
