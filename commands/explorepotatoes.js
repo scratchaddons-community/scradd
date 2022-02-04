@@ -120,7 +120,7 @@ const info = {
 		const [, fetchedMessages] = await Promise.all([
 			deferPromise,
 			// Organize code a bit
-			_getMessages(board),
+			getMessages(board),
 		]);
 		const nextButton = new MessageButton()
 			.setLabel("Next")
@@ -193,20 +193,20 @@ const info = {
 		 * @returns Collector object.
 		 */
 		function collector(buttonID, direction) {
-			const _collector = interaction.channel?.createMessageComponentCollector({
+			const collector = interaction.channel?.createMessageComponentCollector({
 				// use backButton
 				filter: (i) => i.customId === buttonID && i.user.id === interaction.user.id,
 				time: 15_000,
 			});
-			if (!_collector) {
+			if (!collector) {
 				throw new Error("Something went wrong, no collector object.");
 			}
-			_collector
+			collector
 				.on("collect", async (i) => {
 					await i.deferUpdate();
 					index += direction;
 					interaction.editReply(generateMessage(index));
-					_collector.resetTimer();
+					collector.resetTimer();
 				})
 				// When the collector ends
 				.on("end", async function onEnd() {
@@ -232,11 +232,11 @@ const info = {
 					});
 				});
 
-			return _collector;
+			return collector;
 		}
 
 		/** @param {import("discord.js").TextBasedChannel} board */
-		async function _getMessages(board) {
+		async function getMessages(board) {
 			const messages = await getAllMessages(board);
 			const filtered = await asyncFilter(messages, async (message) => {
 				if (!message.content || !message.embeds[0] || !message.author.bot) return false;
