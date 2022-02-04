@@ -133,6 +133,7 @@ const info = {
 
 		const backButton = new MessageButton()
 			.setLabel("Back")
+			.setStyle("SECONDARY")
 			.setCustomId(generateHash("back"))
 			.setStyle("SECONDARY")
 			.setEmoji("⬅️");
