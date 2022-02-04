@@ -134,8 +134,14 @@ const info = {
 		const backButton = new MessageButton()
 			.setLabel("Back")
 			.setCustomId(generateHash("back"))
+			.setStyle("SECONDARY")
 			.setEmoji("⬅️");
-		/** @returns {import("discord.js")._InteractionReplyOptions} */
+		
+		/**
+		* Generates a message from the given index in the `fetchedMessages` array. 
+		* @param {Integer} index The index in the `fetchedMessages` array. Can go over or under the actual length.
+		* @returns {import("discord.js")._InteractionReplyOptions}
+		*/
 		function generateMessage(index) {
 			// Loop array, javascript array indexes start at 0 so that's why -1
 			index = index % (fetchedMessages.length - 1);
