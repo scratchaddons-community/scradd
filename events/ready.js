@@ -18,6 +18,11 @@ export default async (client) => {
 		if (!testingChannel || !("send" in testingChannel))
 			throw new Error("Could not find error reporting channel");
 	}
+
+	client.user?.setActivity(
+		process.env.NODE_ENV === "production" ? "the Scratch Addons server!" : "out for bugs...",
+		{ type: "WATCHING" },
+	);
 	const prexistingCommands = await client.application.commands.fetch({
 		guildId: process.env.GUILD_ID || "",
 	});

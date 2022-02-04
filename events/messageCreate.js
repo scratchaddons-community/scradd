@@ -105,6 +105,11 @@ export default async (message) => {
 		channel.send(generateMessage(message));
 		return;
 	}
+  
+	if (message.content.startsWith("r!suggest"))
+		message.reply({
+			content: "`r!suggest` has been removed, please use `/suggestion create`.",
+		});
 
 	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 		message.react("👋");
