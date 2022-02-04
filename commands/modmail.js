@@ -8,7 +8,7 @@ if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.")
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-	.setDescription(" ")
+		.setDescription(" ")
 		.addSubcommand((subcommand) =>
 			subcommand.setName("close").setDescription("(Mods only) Close a modmail ticket."),
 		),
@@ -30,7 +30,7 @@ const info = {
 			);
 			if (!user) return;
 			const dm = await user.createDM();
-			dm.send({content: "Modmail ticket closed!"});
+			dm.send({ content: "Modmail ticket closed!" });
 
 			await starter.edit({
 				embeds: [
