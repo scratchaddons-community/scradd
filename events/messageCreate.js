@@ -3,76 +3,117 @@ import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
 
 dotenv.config();
-const { GUILD_ID } = process.env;
+const { MODMAIL_CHANNEL, GUILD_ID } = process.env;
 if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
+if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
 
-/** @param {string} userId */
-function topicFormat(userId) {
-	return "ModMail Channel for " + userId;
-}
+const WH_NAME = "scradd-wh";
 
 /** @param {import("discord.js").Message} message */
 export default async (message) => {
 	if (message.author.id === message.client.user?.id) return;
 
-	if (message.channel.type === 'DM') {
+	if (message.channel.type === "DM") {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
-		const channels = await guild.channels.fetch()
-		for (const [, channel] of channels) {
-			if (channel.type !== "GUILD_TEXT") continue
-			if (channel.topic === topicFormat(message.author.id)) {
-				channel.send(message.content);
+		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
+		if (!mailChannel) throw new Error("Could not find modmail channel");
+		if (mailChannel.type !== "GUILD_TEXT")
+			throw new Error("Modmail channel is not a text channel");
+		const webhooks = await mailChannel.fetchWebhooks();
+		let webhook = webhooks.find((wh) => wh.name === WH_NAME);
+		if (!webhook) {
+			webhook = await mailChannel.createWebhook(WH_NAME);
+		}
+
+		const { threads } = await mailChannel.threads.fetch();
+		for (const [, thread] of threads) {
+			const starter = await thread.fetchStarterMessage();
+			if (starter.embeds[0]?.description === message.author.id) {
+				webhook.send({
+					threadId: thread.id,
+					content: message.content,
+					username: message.author.username,
+					avatarURL: message.author.avatarURL() || "",
+				});
 				return;
 			}
 		}
 
-		// send message in embed with a button
 		const embed = new MessageEmbed()
 			.setTitle("Confimation")
 			.setDescription(
-				"You are sending this message to the Scratch Addons Server. If you are sure you would like to do this, press the button below."
+				"You are sending this message to the Scratch Addons Server. If you are sure you would like to do this, press the button below.",
 			)
 			.setColor("BLURPLE");
 		const button = new MessageButton()
 			.setLabel("Confirm")
 			.setStyle("PRIMARY")
 			.setCustomId(generateHash("confirm"));
-		const  sentMsg = await  message.channel.send({
+		const sentMsg = await message.channel.send({
 			embeds: [embed],
-			components: [new MessageActionRow()
-				.addComponents(button)],
+			components: [new MessageActionRow().addComponents(button)],
 		});
 
-		 message.channel.createMessageComponentCollector({
-			filter: (i) =>button.customId === i.customId,
-			time: 15_000,
-		})
+		message.channel.createMessageCollector({ time: 15_000 }).on("collect", (msg) => {
+			button.setDisabled(true);
+			sentMsg.edit({
+				embeds: [embed],
+				components: [new MessageActionRow().addComponents(button)],
+			});
+		});
 
+		message.channel
+			.createMessageComponentCollector({
+				filter: (i) => button.customId === i.customId,
+				time: 15_000,
+			})
 			.on("collect", async (i) => {
-				const channel = await guild.channels.create(message.author.username + message.author.discriminator, {
-					type: "GUILD_TEXT",
-					topic: topicFormat(message.author.id)
+				const embed = new MessageEmbed()
+					.setTitle("ModMail Ticket")
+					.setDescription(message.author.id)
+					.setColor("BLURPLE");
+
+				const starterMsg = await mailChannel.send({
+					content: process.env.NODE_ENV === "production" ? "@here" : undefined,
+					embeds: [embed],
 				});
-				
-				channel.send(message.content);
-				i.deferReply()
+				const thread = await starterMsg.startThread({
+					name: `${message.author.username}-${message.author.discriminator}`,
+				});
+
+				if (!webhook) throw new Error("Could not find webhook");
+				i.reply("ModMail Started");
+				webhook.send({
+					threadId: thread.id,
+					content: message.content,
+					username: message.author.username,
+					avatarURL: message.author.avatarURL() || "",
+				});
+				button.setDisabled(true);
+				sentMsg.edit({
+					embeds: [embed],
+					components: [new MessageActionRow().addComponents(button)],
+				});
 			})
 			.on("end", async () => {
 				button.setDisabled(true);
 				sentMsg.edit({
 					embeds: [embed],
-					components: [new MessageActionRow()
-						.addComponents(button)]
+					components: [new MessageActionRow().addComponents(button)],
 				});
 			});
 
-
 		return;
 	}
-	
-	if (message.channel.type === "GUILD_TEXT" && message.channel.topic?.startsWith(topicFormat(""))) {
-		const userId = message.channel.topic.split(topicFormat(""))[1];
-		const user = await message.client.users.fetch(userId || "");
+
+	if (
+		message.channel.type === "GUILD_PUBLIC_THREAD" &&
+		message.channel.parent?.id === MODMAIL_CHANNEL &&
+		!message.webhookId &&
+		!message.content.startsWith("=")
+	) {
+		const starter = await message.channel.fetchStarterMessage();
+		const user = await message.client.users.fetch(starter.embeds[0]?.description || "");
 		if (!user) return;
 		const channel = await user.createDM();
 		channel.send(message.content);
