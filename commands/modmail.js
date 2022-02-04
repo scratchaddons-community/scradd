@@ -9,9 +9,7 @@ if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.")
 const info = {
 	data: new SlashCommandBuilder()
 		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("close")
-				.setDescription("(Mods Only) Send a message in a modmail thread"),
+			subcommand.setName("close").setDescription("(Mods Only) Close a modmail thread."),
 		)
 		.setDescription("ModMail Commands"),
 
@@ -41,7 +39,8 @@ const info = {
 					},
 				],
 			});
-			interaction.channel.delete("Closed by " + interaction.user.username);
+			interaction.channel.setArchived(true, "Closed by " + interaction.user.username);
+			interaction.channel.setLocked(true, "Closed by " + interaction.user.username);
 		}
 	},
 };
