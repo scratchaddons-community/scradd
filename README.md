@@ -7,7 +7,7 @@ Scradd is the Discord bot for the [Scratch Addons Discord server](https://discor
 Logo made by Weirdo#8115 (Discord) and @retronbv.
 
 Cloud-hosted on [opeNode.io](https://www.openode.io/).
-
+<!--
 ## Table of Contents
  [Features](#features) | [Contributing](#contributing) 
 | --- | ---
@@ -15,14 +15,14 @@ Cloud-hosted on [opeNode.io](https://www.openode.io/).
 | [Suggestions - /suggestion](#suggestions) | [Contributors](#contributors)
 | [Bug Reports - /bugreport](#bug-reports) |
 | [Addon Info - /addon](#addon-addon) |
-
+-->
 
 
 ## Features
 
 ### Potatoboard
   
-Messages with more than 8 :potato: reactions are shown in the #potatoboard channel. 
+Messages with more than 6 :potato: reactions are shown in the #potatoboard channel. 
 
 Potatoboard can be used to higlight messages that the community finds noteworthy: like a good drawing, a good meme in #memes.. or a message funny out of context like this:
 
