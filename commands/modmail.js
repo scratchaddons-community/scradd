@@ -2,8 +2,8 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import dotenv from "dotenv";
 
 dotenv.config();
-const { MODMAIL_CHANNEL } = process.env;
-if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
+const { MODTALK_CHANNEL } = process.env;
+if (!MODTALK_CHANNEL) throw new Error("MODTALK_CHANNEL is not set in the .env.");
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -16,7 +16,7 @@ const info = {
 	async interaction(interaction) {
 		if (
 			interaction.channel?.type !== "GUILD_PUBLIC_THREAD" ||
-			interaction.channel.parentId !== MODMAIL_CHANNEL
+			interaction.channel.parentId !== MODTALK_CHANNEL
 		)
 			return;
 		const command = interaction.options.getSubcommand();

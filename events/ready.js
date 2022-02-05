@@ -11,9 +11,9 @@ export default async (client) => {
 		`Connected to Discord with ID ${client.application.id} and tag ${client.user?.tag}`,
 	);
 	if (process.env.NODE_ENV === "production") {
-		const { ERROR_CHANNEL } = process.env;
-		if (!ERROR_CHANNEL) throw new Error("ERROR_CHANNEL is not set in the .env");
-		const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
+		const { MODTALK_CHANNEL } = process.env;
+		if (!MODTALK_CHANNEL) throw new Error("MODTALK_CHANNEL is not set in the .env");
+		const testingChannel = await client.channels.fetch(MODTALK_CHANNEL);
 
 		if (!testingChannel || !("send" in testingChannel))
 			throw new Error("Could not find error reporting channel");
