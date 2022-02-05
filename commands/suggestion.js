@@ -46,7 +46,7 @@ const info = {
 				.addStringOption((option) =>
 					option
 						.setName("category")
-						.setDescription("Sugegstion category")
+						.setDescription("Suggestion category")
 						.addChoice("New addon", "New addon")
 						.addChoice("New feature (in existing addon)", "New feature")
 						.addChoice("Settings page addition", "Settings addition")
@@ -101,7 +101,7 @@ const info = {
 				.addStringOption((option) =>
 					option
 						.setName("category")
-						.setDescription("Sugegstion category")
+						.setDescription("Suggestion category")
 						.addChoice("New addon", "New addon")
 						.addChoice("New feature (in existing addon)", "New feature")
 						.addChoice("Settings page addition", "Settings addition")
