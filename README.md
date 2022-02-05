@@ -1,40 +1,75 @@
 # scradd
-
+![](https://cdn.discordapp.com/icons/938438560925761619/d886f0b0867e67c2211b7086c0651590.webp?size=80)
 ## About
 
-This is a Discord bot for the [Scratch Addons Discord server](https://discord.gg/Cs25kzs889). It was partially made because it was the servers' one year anniversary, and partially because we wanted a bot that we had ultimate customization over.
+Scradd is the Discord bot for the [Scratch Addons Discord server](https://discord.gg/Cs25kzs889). It was partially made because servers' one year anniversary, and partially because we wanted a bot that we had ultimate customization over.
 
-Logo made by @(does weirdo have a github) and @retronbv.
+Logo made by Weirdo#8115 (Discord) and @retronbv.
 
-Cloud hosted on [opeNode.io](https://www.openode.io/).
+Cloud-hosted on [opeNode.io](https://www.openode.io/).
+
+## Table of Contents
+ [Features](#features) | [Contributing](#contributing) 
+| --- | ---
+| [Potatoboard](#potatoboard) | [How to contribute](#how-to-contribute)
+| [Suggestions - /suggestion](#suggestions) | [Contributors](#contributors)
+| [Bug Reports - /bugreport](#bug-reports) |
+| [Addon Info - /addon](#addon-addon) |
+
+
 
 ## Features
 
 ### Potatoboard
+  
+Messages with more than 8 :potato: reactions are shown in the #potatoboard channel. 
+Potatoboard can be used to higlight messages that the community finds noteworthy or funny: like a good drawing, a message funny out of context or a good meme in #memes.
 
-Messages with more than 8 :potato: reactions are shown in the #potatoboard channel. If a message is funny out of context, like this: ![](https://cdn.discordapp.com/attachments/901225174974726177/939015132720287784/unknown.png) then once it gets 8 reactions, it will be posted, without context, in the #potatoboard channel. Makes for a good laugh.
 
-Potatoboard can also be used to higlight messages that the community finds noteworthy, like a good drawing, so more people can see it.
+![](https://cdn.discordapp.com/attachments/901225174974726177/939015132720287784/unknown.png) 
 
-Finally, potatoboard is useful to pick out good memes from just chatting in #memes. In the past, pins were used for this, but we had issues with the pin limit.
 
-#### Related: /explorepotatos
+#### Related: /explorepotatos [minimum-reactions] [user] [channel]
 
-The /explorepotatoes command gets a random message from the potatoboard. Optional filters can be added such as channel it was posted in, number of reactions, and/or author of the original message.
+Gets a random message from the potatoboard. 
+
+
+| Argument | Description | Optional?|
+| --- | ---| --- |
+| minimum-reactions | Minimum reactions the message needs to have | yes|
+| user | The author of the message | yes|
+| channel | The channel that the message was originally in | yes |
+
+---
 
 ### React to messages including certain strings
 
-Scradd reacts to some messages that include certain meme-y strings with an emoji associated with the string used. I'm not going to tell you what they are, find them yourself ![](https://cdn.discordapp.com/emojis/902948518002573364.webp?size=22&quality=lossless)!
+Scradd reacts to messages that include certain strings. 
+
+What strings? Well... find out yourself! ![](https://cdn.discordapp.com/emojis/902948518002573364.webp?size=22&quality=lossless)
+
+---
 
 ### Suggestions
 
-Create and manage suggestions in the #suggest channel.
+Create and manage suggestions in the #suggestions channel.
 
-A typical suggestion looks something like this: ![](https://user-images.githubusercontent.com/75680333/152417553-31b2c407-e74b-4143-915b-5c00b76bce01.png)
+**Subcommands:** create | edit | answer | delete
 
-#### /suggestion create
+A typical suggestion looks something like this: 
 
-Creates a new suggestion. Takes a title and a description.
+![](https://user-images.githubusercontent.com/75680333/152417553-31b2c407-e74b-4143-915b-5c00b76bce01.png)
+
+
+#### /suggestion create (title) (description) (category)
+
+Creates a new suggestion.
+
+| Argument | Optional?|
+| --- | --- |
+| title | no|
+| description | no|
+| category | no |
 
 #### /suggestion edit
 
@@ -42,7 +77,7 @@ Edits the title and/or the content of suggestions. Only the suggestion author ca
 
 #### /suggestion answer
 
-Answers suggestions. Requires having the developer role.
+Answers the suggestion it's used in the thread of. Requires having the developer role.
 
 A suggestion can be answered with one of the following answers:
 
@@ -56,25 +91,36 @@ A suggestion can be answered with one of the following answers:
 
 #### /suggestion delete
 
-Deletes suggestions. Requires having the developer and/or moderator roles.
+Deletes the suggestion it's used in the thread of. Requires having the developer and/or moderator roles.
 
-### Bug reports
+### Bug Reports
 
 Create and manage bug reports in the #bugs channel.
 
-A typical report looks something like this: ![](https://cdn.discordapp.com/attachments/901225174974726177/939020057625886760/unknown.png)
+**Subcommands:** create | edit | answer | delete
 
-### /report create
+A typical bug report looks something like this: 
 
-Creates a new report. Takes a title and a description.
+![](https://cdn.discordapp.com/attachments/901225174974726177/939020057625886760/unknown.png)
 
-### /report edit
+### /bugreport create (title) (description)
 
-Edits the title and/or the content of reports. Only the report author can use it. Run it in the thread on the report.
+Creates a new report.
 
-#### /report answer
+| Argument | Optional?|
+| --- | --- |
+| title | yes|
+| description | yes|
 
-Answers reports. Requires having the developer role.
+#### /bugreport edit [content] 
+
+Edits the title and/or the content of the report it's used in the thread of.
+**Required**: Be author of the report
+
+#### /bugreport answer
+
+Answers the report it's used in the thread of. 
+**Required**: Have Developer role
 
 A report can be answered with one of the following answers:
 
@@ -84,11 +130,33 @@ A report can be answered with one of the following answers:
 -   Invalid Bug
 -   Fixed
 
-#### /report delete
+#### /bugreport delete
 
-Deletes reports. Requires having the developer and/or moderator roles.
+Deletes the report it's used in the thread of.
+**Required**: Be author of the report or have Developer or Moderator role
 
-### /addon
+---
 
-Replies with information about a specific addon. Replies with the best match if no addon found with the given name. If no addon name is provided, replies with a ramdom addon.
+### /addon [addon]
 
+Replies with information about a specific addon. 
+
+Replies with the best match if no addon found with the given name. Replies with a ramdom addon if no addon provided.
+
+| Argument | Optional?|
+| --- | --- |
+| addon | yes|
+---
+
+## Contributing
+
+### How to contribute
+For feature suggestions, create an issue or use the [/suggest command](#suggestions) in the Discord server with category argument selected as "Server / Scradd suggestions".
+For bugs, create an issue or use the [/bugreport command](#bug-reports) in the Discord server.
+For code changes, create a pull request.
+
+
+### Contributors
+![](https://contrib.rocks/image?repo=scratchaddons-community/scradd)
+
+[Graphs](https://github.com/scratchaddons-community/scradd/graphs/contributors)
