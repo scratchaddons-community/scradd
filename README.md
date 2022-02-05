@@ -35,11 +35,11 @@ Potatoboard can be used to higlight messages that the community finds noteworthy
 Gets a random message from the potatoboard. 
 
 
-| Argument | Description | Optional?|
+| Argument | Description | Required?|
 | --- | ---| --- |
-| minimum-reactions | Minimum reactions the message needs to have | yes|
-| user | The author of the message | yes|
-| channel | The channel that the message was originally in | yes |
+| minimum-reactions | Minimum reactions the message needs to have | no |
+| user | The author of the message | no |
+| channel | The channel that the message was originally in | no |
 
 ---
 
@@ -66,11 +66,11 @@ A typical suggestion looks something like this:
 
 Creates a new suggestion.
 
-| Argument | Optional?|
+| Argument | Required?|
 | --- | --- |
-| title | no|
-| description | no|
-| category | no |
+| title | yes |
+| description | yes |
+| category | yes |
 
 #### /suggestion edit
 
@@ -111,9 +111,9 @@ A typical bug report looks something like this:
 
 Creates a new report.
 
-| Argument | Optional?|
+| Argument | Required?|
 | --- | --- |
-| title | yes|
+| title | yes |
 | description | yes|
 
 #### /bugreport edit [content] 
@@ -147,9 +147,9 @@ Replies with information about a specific addon.
 
 Replies with the best match if no addon found with the given name. Replies with a ramdom addon if no addon provided.
 
-| Argument | Optional?|
+| Argument | Required?|
 | --- | --- |
-| addon | yes|
+| addon | no |
 ---
 
 ## Contributing
