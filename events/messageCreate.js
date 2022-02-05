@@ -135,14 +135,31 @@ export default async (message) => {
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
 	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
 	if (includes("appel")) message.react("<:appel:938818517535440896>");
+	if (includes("cubot")) message.react("<:cubot:939336981601722428>");
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
 	if (content.match(/gives?( you)? up/)) message.react("<a:rick:938547171366682624>");
 	if (content.includes("( ^∘^)つ")) message.react("<:sxd:939291985796280420>");
+	if (content.includes("scradd bad")) message.react("<:angery:939337168780943390>");
+	if (content.includes("sat on addons"))
+		message
+			.react("<:sa_full1:939336189880713287>")
+			.then(() => message.react("<:soa_full1:939336229449789510>"))
+			.then(() => message.react("<:sa_full3:939336281454936095>"));
+	if (content.match(/^r!(mimic|possess|sudo|speakas|sayas|impersonate)\s+<@!?\d+>/iu)) {
+		const member = await message.guild?.members.fetch(message.mentions.users.first()?.id || "");
+		message.reply({
+			content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${
+				member?.user.tag
+			}\` instead of \`r!mimic @${
+				member?.nickname || member?.user.username
+			}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
+		});
+	}
 
 	const spoilerHack =
 		"||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||";
 	if (content.includes(spoilerHack)) {
-		const arr = message.content.split(spoilerHack);
+		const arr = message.cleanContent.split(spoilerHack);
 		arr.shift();
 		message.reply({
 			content: "You used the spoiler hack to hide: ```\n" + arr.join(spoilerHack) + "\n```",

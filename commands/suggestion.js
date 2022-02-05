@@ -48,7 +48,7 @@ const info = {
 						.setName("category")
 						.setDescription("Sugegstion category")
 						.addChoice("New addon", "New addon")
-						.addChoice("New feature", "New feature")
+						.addChoice("New feature (in existing addon)", "New feature")
 						.addChoice("Settings page addition", "Settings addition")
 						.addChoice("Server/Scradd suggestion", "Server suggestion")
 						.addChoice("Other", "Other")
@@ -96,6 +96,17 @@ const info = {
 					option
 						.setName("suggestion")
 						.setDescription("Your updated suggestion")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Sugegstion category")
+						.addChoice("New addon", "New addon")
+						.addChoice("New feature (in existing addon)", "New feature")
+						.addChoice("Settings page addition", "Settings addition")
+						.addChoice("Server/Scradd suggestion", "Server suggestion")
+						.addChoice("Other", "Other")
 						.setRequired(false),
 				),
 		),
@@ -163,7 +174,7 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
+						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				break;
@@ -177,10 +188,11 @@ const info = {
 					await SuggestionChannel.editSuggestion(interaction, {
 						body: interaction.options.getString("suggestion"),
 						title: interaction.options.getString("title"),
+						category: interaction.options.getString("category"),
 					})
 				)
 					interaction.reply({
-						content: "Sucessfully edited suggestion.",
+						content: "Sucessfully edited suggestion. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 						ephemeral: true,
 					});
 				break;

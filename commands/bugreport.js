@@ -83,6 +83,17 @@ const info = {
 						.setName("report")
 						.setDescription("Your updated bug report")
 						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+					.setName("category")
+					.setDescription("Report category")
+					.addChoice("Addon bug", "Addon bug")
+					.addChoice("Settings bug", "Settings bug")
+					.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+					.addChoice("Server mistake/Scradd bug", "Server bug")
+					.addChoice("Other", "Other")
+						.setRequired(false),
 				),
 		),
 
@@ -114,7 +125,7 @@ const info = {
 				})
 			)
 				interaction.reply({
-					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
+					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 					ephemeral: true,
 				});
 		} else if (command === "delete") {
@@ -124,10 +135,11 @@ const info = {
 				await BugsChannel.editSuggestion(interaction, {
 					body: interaction.options.getString("report"),
 					title: interaction.options.getString("title"),
+					category: interaction.options.getString("category"),
 				})
 			)
 				interaction.reply({
-					content: "Sucessfully edited bug report.",
+					content: "Sucessfully edited bug report. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 					ephemeral: true,
 				});
 		}

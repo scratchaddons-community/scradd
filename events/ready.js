@@ -20,7 +20,7 @@ export default async (client) => {
 	}
 
 	client.user?.setActivity(
-		process.env.NODE_ENV === "production" ? "the Scratch Addons server!" : "out for bugs...",
+		process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
 		{ type: "WATCHING" },
 	);
 	const prexistingCommands = await client.application.commands.fetch({

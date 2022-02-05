@@ -38,15 +38,15 @@ export default class SuggestionBuilder {
 			})
 			.setTitle(data.title)
 			.setDescription(data.description)
-			.setFooter({ text: data.category+" • Unanswered" });
+			.setFooter({ text: data.category + " • Unanswered" });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
-		if (!channel?.isText()) throw new Error(data.type+" channel not found");
+		if (!channel?.isText()) throw new Error(data.type + " channel not found");
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			name: "Unanswered | " + embed.title,
 			autoArchiveDuration: 1440,
-			reason: data.type+" by " + interaction.user.tag,
+			reason: data.type + " by " + interaction.user.tag,
 		});
 		await thread.members.add(interaction.user.id);
 		return { thread, message };
@@ -91,7 +91,10 @@ export default class SuggestionBuilder {
 			await interaction.channel.fetchStarterMessage().then(async (message) => {
 				if (message.author.id !== interaction.client.user?.id) return;
 				const embed = new MessageEmbed(message.embeds[0]);
-				embed.setColor(colors[answer] || 0x000).setFooter({ text: answer });
+				const category = embed.footer?.text.split(" • ")[0];
+				embed
+					.setColor(colors[answer] || 0x000)
+					.setFooter({ text: (category ? category + " • " : "") + answer });
 
 				message.edit({ embeds: [embed] });
 			}),
@@ -198,7 +201,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null | string; body: null | string }} newSuggestion
+	 * @param {{ title: null | string; body: null | string;category: null | string}} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
@@ -244,6 +247,10 @@ export default class SuggestionBuilder {
 				"Suggestion/report edited",
 			);
 			embed?.setTitle(newSuggestion.title);
+		}
+		if (newSuggestion.category) {
+			const answer = embed.footer?.text.split(" • ").at(-1);
+			embed.setFooter({ text: newSuggestion.category + " • " + answer });
 		}
 		starterMessage.edit({ embeds: [embed] });
 		return true;
