@@ -26,11 +26,11 @@ const SuggestionChannel = new SuggestionBuilder(SUGGESTION_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and create suggestions in #suggestions")
+		.setDescription(" ")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new suggestion")
+				.setDescription("Create a new suggestion in #suggestions.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -42,12 +42,25 @@ const info = {
 						.setName("suggestion")
 						.setDescription("Your suggestion")
 						.setRequired(true),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Suggestion category")
+						.addChoice("New addon", "New addon")
+						.addChoice("New feature (in existing addon)", "New feature")
+						.addChoice("Settings page addition", "Settings addition")
+						.addChoice("Server/Scradd suggestion", "Server suggestion")
+						.addChoice("Other", "Other")
+						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs Only) Answer a suggestion")
+				.setDescription(
+					"(Devs only) Answer a suggestion. Use this in threads in #suggestions.",
+				)
 				.addStringOption((option) =>
 					option
 						.setName("answer")
@@ -63,12 +76,16 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("Delete a suggestion"),
+			subcommand
+				.setName("delete")
+				.setDescription(
+					"(Devs, mods, and OP only) Delete a suggestion. Use this in threads in #suggestions.",
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("Edit a suggestion")
+				.setDescription("(OP Only) Edit a suggestion. Use this in threads in #suggestions.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -79,6 +96,17 @@ const info = {
 					option
 						.setName("suggestion")
 						.setDescription("Your updated suggestion")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Suggestion category")
+						.addChoice("New addon", "New addon")
+						.addChoice("New feature (in existing addon)", "New feature")
+						.addChoice("Settings page addition", "Settings addition")
+						.addChoice("Server/Scradd suggestion", "Server suggestion")
+						.addChoice("Other", "Other")
 						.setRequired(false),
 				),
 		),
@@ -118,6 +146,8 @@ const info = {
 				const res = await SuggestionChannel.createMessage(interaction, {
 					title: interaction.options.getString("title") || "",
 					description: interaction.options.getString("suggestion") || "",
+					type: "Suggestion",
+					category: interaction.options.getString("category") || "",
 				});
 				if (res) {
 					await Promise.all([
@@ -144,7 +174,7 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below.`,
+						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				break;
@@ -158,10 +188,11 @@ const info = {
 					await SuggestionChannel.editSuggestion(interaction, {
 						body: interaction.options.getString("suggestion"),
 						title: interaction.options.getString("title"),
+						category: interaction.options.getString("category"),
 					})
 				)
 					interaction.reply({
-						content: "Sucessfully edited suggestion.",
+						content: "Sucessfully edited suggestion. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 						ephemeral: true,
 					});
 				break;
@@ -203,7 +234,7 @@ const info = {
 								message.embeds[0]?.description ||
 								message.content;
 
-							const authorTag = message.embeds[0]?.author?.name.split(/#| /).at(-2);
+							const authorTag = message.embeds[0]?.author?.name.split(/#| /g).at(-2);
 							const author = (
 								message.author.id === "323630372531470346" && authorTag
 									? await interaction.guild?.members.search({ query: authorTag })
@@ -278,7 +309,7 @@ const info = {
 					if (!content.length)
 						return {
 							content:
-								"No suggestions found. Try changing any filters you my have used.",
+								"No suggestions found. Try changing any filters you may have used.",
 							ephemeral: true,
 						};
 					return {

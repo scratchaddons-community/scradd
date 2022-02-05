@@ -80,7 +80,7 @@ async function textChannelMatchesChannel(channelWanted, channelFound) {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potato board.")
+		.setDescription("Replies with a random message from the potatoboard.")
 		.addIntegerOption((input) =>
 			input
 				.setName("minimum-reactions")
@@ -123,8 +123,7 @@ const info = {
 				asyncFilter(messages, async (message) => {
 					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
 					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
-
-					if (message.mentions.users.first()?.id !== user) return false;
+					if (user && message.mentions.users.first()?.id !== user) return false;
 
 					if (channelWanted) {
 						const matchResult = message.content.match(/<#(\d+)>/g);
@@ -157,7 +156,7 @@ const info = {
 			fetchedMessages.splice(index, 1);
 			if (!source?.components[0]?.components[0]) {
 				return {
-					content: "No messages found. Try changing any filters you my have used.",
+					content: "No messages found. Try changing any filters you may have used.",
 					ephemeral: true,
 					embeds: [],
 					attachments: [],
