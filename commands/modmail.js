@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -7,11 +8,17 @@ if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.")
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder()
-	.setDescription(" ")
-		.addSubcommand((subcommand) =>
-			subcommand.setName("close").setDescription("(Mods only) Close a modmail ticket."),
-		),
+	data: new SlashCommandBuilder().setDescription(" ").addSubcommand((subcommand) =>
+		subcommand
+			.setName("close")
+			.setDescription("(Mods only) Close a modmail ticket.")
+			.addStringOption((input) =>
+				input
+					.setName("reason")
+					.setDescription("Reason for closing the ticket")
+					.setRequired(true),
+			),
+	),
 
 	async interaction(interaction) {
 		if (
@@ -30,7 +37,14 @@ const info = {
 			);
 			if (!user) return;
 			const dm = await user.createDM();
-			dm.send({content: "Modmail ticket closed!"});
+			dm.send({
+				embeds: [
+					new MessageEmbed()
+						.setTitle("Modmail ticket closed!")
+						.setDescription(interaction.options.getString("reason") || "")
+						.setTimestamp(starter.createdTimestamp),
+				],
+			});
 
 			await starter.edit({
 				embeds: [

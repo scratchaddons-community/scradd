@@ -34,7 +34,7 @@ export default async (message) => {
 			const embed = new MessageEmbed()
 				.setTitle("Confimation")
 				.setDescription(
-					"You are sending this message to the Scratch Addons Server. If you are sure you would like to do this, press the button below.",
+					"You are sending this message to the "+mailChannel.guild.name+" Server. If you are sure you would like to do this, press the button below.",
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -74,7 +74,7 @@ export default async (message) => {
 					});
 
 					if (!webhook) throw new Error("Could not find webhook");
-					i.reply("Modmail ticket opened");
+					i.reply("✅ Modmail ticket opened");
 					webhook.send({ threadId: thread.id, ...generateMessage(message) });
 					button.setDisabled(true);
 				})
