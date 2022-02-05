@@ -49,8 +49,8 @@ const info = {
 						.setDescription("Sugegstion category")
 						.addChoice("New addon", "New addon")
 						.addChoice("New feature", "New feature")
-						.addChoice("Settings page addition", "Settings page addition")
-						.addChoice("Server/Scradd suggestion", "Server/Scradd suggestion")
+						.addChoice("Settings page addition", "Settings addition")
+						.addChoice("Server/Scradd suggestion", "Server suggestion")
 						.addChoice("Other", "Other")
 						.setRequired(true),
 				),

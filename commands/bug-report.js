@@ -38,9 +38,9 @@ const info = {
 						.setName("category")
 						.setDescription("Report category")
 						.addChoice("Addon bug", "Addon bug")
-						.addChoice("Settings page bug", "Settings page bug")
-						.addChoice("Bug with no addons enabled", "Bug with no addons enabled")
-						.addChoice("Server mistake/Scradd bug", "Server mistake/Scradd bug")
+						.addChoice("Settings bug", "Settings bug")
+						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+						.addChoice("Server mistake/Scradd bug", "Server bug")
 						.addChoice("Other", "Other")
 						.setRequired(true),
 				),
