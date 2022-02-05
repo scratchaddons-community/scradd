@@ -3,9 +3,9 @@ import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
 
 dotenv.config();
-const { MODTALK_CHANNEL, GUILD_ID } = process.env;
+const { MODMAIL_CHANNEL, GUILD_ID } = process.env;
 if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
-if (!MODTALK_CHANNEL) throw new Error("MODTALK_CHANNEL is not set in the .env.");
+if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
 
 const WH_NAME = "scradd-wh";
 
@@ -15,7 +15,7 @@ export default async (message) => {
 
 	if (message.channel.type === "DM" && ["DEFAULT", "REPLY"].includes(message.type)) {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
-		const mailChannel = await guild.channels.fetch(MODTALK_CHANNEL);
+		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 		if (!mailChannel) throw new Error("Could not find modmail channel");
 		if (mailChannel.type !== "GUILD_TEXT")
 			throw new Error("Modmail channel is not a text channel");
@@ -92,7 +92,7 @@ export default async (message) => {
 
 	if (
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
-		message.channel.parent?.id === MODTALK_CHANNEL &&
+		message.channel.parent?.id === MODMAIL_CHANNEL &&
 		!message.webhookId &&
 		!message.content.startsWith("=") &&
 		["DEFAULT", "REPLY"].includes(message.type)

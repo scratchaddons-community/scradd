@@ -35,9 +35,9 @@ events.forEach(async (execute, event) =>
 						).replaceAll("[3 backticks]", "```")}\`\`\``,
 					)
 					.setColor("RANDOM");
-				const { MODTALK_CHANNEL } = process.env;
-				if (!MODTALK_CHANNEL) throw new Error("MODTALK_CHANNEL is not set in the .env");
-				const testingChannel = await client.channels.fetch(MODTALK_CHANNEL);
+				const { ERROR_CHANNEL } = process.env;
+				if (!ERROR_CHANNEL) throw new Error("ERROR_CHANNEL is not set in the .env");
+				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
 
 				if (!testingChannel || !("send" in testingChannel))
 					throw new Error("Could not find error reporting channel");
