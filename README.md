@@ -24,7 +24,7 @@ Cloud-hosted on [opeNode.io](https://www.openode.io/).
   
 Messages with more than 8 :potato: reactions are shown in the #potatoboard channel. 
 
-Potatoboard can be used to higlight messages that the community finds noteworthy or funny: like a good drawing, a message funny out of context or a good meme in #memes.
+Potatoboard can be used to higlight messages that the community finds noteworthy: like a good drawing, a good meme in #memes.. or a message funny out of context like this:
 
 
 ![](https://cdn.discordapp.com/attachments/901225174974726177/939015132720287784/unknown.png) 
@@ -93,6 +93,9 @@ A suggestion can be answered with one of the following answers:
 #### /suggestion delete
 
 Deletes the suggestion it's used in the thread of. Requires having the developer and/or moderator roles.
+
+---
+
 
 ### Bug Reports
 
