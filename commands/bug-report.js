@@ -32,6 +32,17 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option.setName("report").setDescription("Your report").setRequired(true),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Report category")
+						.addChoice("Addon bug", "Addon bug")
+						.addChoice("Settings page bug", "Settings page bug")
+						.addChoice("Bug with no addons enabled", "Bug with no addons enabled")
+						.addChoice("Server mistake/Scradd bug", "Server mistake/Scradd bug")
+						.addChoice("Other", "Other")
+						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -83,6 +94,7 @@ const info = {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
 				type: "Report",
+				category: interaction.options.getString("category") || "",
 			});
 			if (res) {
 				await interaction.reply({

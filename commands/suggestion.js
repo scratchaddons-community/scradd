@@ -42,6 +42,17 @@ const info = {
 						.setName("suggestion")
 						.setDescription("Your suggestion")
 						.setRequired(true),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Sugegstion category")
+						.addChoice("New addon", "New addon")
+						.addChoice("New feature", "New feature")
+						.addChoice("Settings page addition", "Settings page addition")
+						.addChoice("Server/Scradd suggestion", "Server/Scradd suggestion")
+						.addChoice("Other", "Other")
+						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -125,6 +136,7 @@ const info = {
 					title: interaction.options.getString("title") || "",
 					description: interaction.options.getString("suggestion") || "",
 					type: "Suggestion",
+					category: interaction.options.getString("category") || "",
 				});
 				if (res) {
 					await Promise.all([

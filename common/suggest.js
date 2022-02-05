@@ -12,7 +12,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: string; description: string; type: "Suggestion" | "Report" }} data
+	 * @param {{ title: string; description: string; type: string; category: string }} data
 	 */
 	async createMessage(interaction, data) {
 		const author = interaction.member;
@@ -38,15 +38,15 @@ export default class SuggestionBuilder {
 			})
 			.setTitle(data.title)
 			.setDescription(data.description)
-			.setFooter({ text: "Unanswered" });
+			.setFooter({ text: data.category+" • Unanswered" });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
-		if (!channel?.isText()) throw new Error("Suggestion channel not found");
+		if (!channel?.isText()) throw new Error(data.type+" channel not found");
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			name: "Unanswered | " + embed.title,
 			autoArchiveDuration: 1440,
-			reason: "Suggestion/report by " + interaction.user.tag,
+			reason: data.type+" by " + interaction.user.tag,
 		});
 		await thread.members.add(interaction.user.id);
 		return { thread, message };
