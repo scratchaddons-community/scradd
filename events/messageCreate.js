@@ -130,7 +130,7 @@ export default async (message) => {
 	}
 	if (includes("dango")) message.react("🍡");
 	if (includes("potato")) message.react("🥔");
-	if (includes("griff", false) || includes("patch", false) || includes("griffpatch", false))
+	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
 	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
