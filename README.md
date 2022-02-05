@@ -160,7 +160,7 @@ For bugs, create an issue or use the [/bugreport command](#bug-reports) in the D
 For code changes, create a pull request.
 
 
-### Contributors
-![](https://contrib.rocks/image?repo=scratchaddons-community/scradd)
+### [Contributors](https://github.com/scratchaddons-community/scradd/graphs/contributors)
+<!--![](https://contrib.rocks/image?repo=scratchaddons-community/scradd)-->
 
-[Graphs](https://github.com/scratchaddons-community/scradd/graphs/contributors)
+
