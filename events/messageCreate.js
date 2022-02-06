@@ -131,7 +131,7 @@ export default async (message) => {
 		);
 	}
 	if (includes("dango")) message.react("🍡");
-	if(content==="e")message.react("<:e_:939986562937151518>")
+	if (content === "e") message.react("<:e_:939986562937151518>");
 	if (content == "potato" || content == "potatoes" || content === "🥔") message.react("🥔");
 	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
@@ -172,7 +172,7 @@ export default async (message) => {
 
 /** @param {Message} message */
 function generateMessage(message) {
-	message.react("✅")
+	message.react("✅");
 	return {
 		content: message.content || undefined,
 		username: message.author.username,

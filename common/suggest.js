@@ -201,7 +201,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null | string; body: null | string;category: null | string}} newSuggestion
+	 * @param {{ title: null | string; body: null | string; category: null | string }} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.

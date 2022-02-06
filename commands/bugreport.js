@@ -86,13 +86,13 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option
-					.setName("category")
-					.setDescription("Report category")
-					.addChoice("Addon bug", "Addon bug")
-					.addChoice("Settings bug", "Settings bug")
-					.addChoice("Core bug (happens with no addons enabled)", "Core bug")
-					// .addChoice("Server mistake/Scradd bug", "Server bug")
-					.addChoice("Other", "Other")
+						.setName("category")
+						.setDescription("Report category")
+						.addChoice("Addon bug", "Addon bug")
+						.addChoice("Settings bug", "Settings bug")
+						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+						// .addChoice("Server mistake/Scradd bug", "Server bug")
+						.addChoice("Other", "Other")
 						.setRequired(false),
 				),
 		),
@@ -139,7 +139,8 @@ const info = {
 				})
 			)
 				interaction.reply({
-					content: "Sucessfully edited bug report. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
+					content:
+						"Sucessfully edited bug report. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 					ephemeral: true,
 				});
 		}
