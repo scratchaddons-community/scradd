@@ -36,7 +36,7 @@ export default async (message) => {
 				.setDescription(
 					"You are sending this message to the " +
 						mailChannel.guild.name +
-						" Server. If you are sure you would like to do this, press the button below.",
+						" Server's mod team. If you are sure you would like to do this, press the button below.",
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -172,6 +172,7 @@ export default async (message) => {
 
 /** @param {Message} message */
 function generateMessage(message) {
+	message.react("✅")
 	return {
 		content: message.content || undefined,
 		username: message.author.username,
