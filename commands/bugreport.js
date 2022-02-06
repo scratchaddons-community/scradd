@@ -91,7 +91,7 @@ const info = {
 					.addChoice("Addon bug", "Addon bug")
 					.addChoice("Settings bug", "Settings bug")
 					.addChoice("Core bug (happens with no addons enabled)", "Core bug")
-					.addChoice("Server mistake/Scradd bug", "Server bug")
+					// .addChoice("Server mistake/Scradd bug", "Server bug")
 					.addChoice("Other", "Other")
 						.setRequired(false),
 				),
