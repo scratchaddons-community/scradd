@@ -129,7 +129,7 @@ export default async (message) => {
 		);
 	}
 	if (includes("dango")) message.react("🍡");
-	if (includes("potato")) message.react("🥔");
+	// if (includes("potato")) message.react("🥔");
 	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
