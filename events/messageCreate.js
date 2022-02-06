@@ -34,7 +34,9 @@ export default async (message) => {
 			const embed = new MessageEmbed()
 				.setTitle("Confimation")
 				.setDescription(
-					"You are sending this message to the "+mailChannel.guild.name+" Server. If you are sure you would like to do this, press the button below.",
+					"You are sending this message to the " +
+						mailChannel.guild.name +
+						" Server. If you are sure you would like to do this, press the button below.",
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -129,7 +131,8 @@ export default async (message) => {
 		);
 	}
 	if (includes("dango")) message.react("🍡");
-	// if (includes("potato")) message.react("🥔");
+	if(content==="e")message.react("<:e_:939986562937151518>")
+	if (content == "potato" || content == "potatoes" || content === "🥔") message.react("🥔");
 	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
@@ -138,7 +141,7 @@ export default async (message) => {
 	if (includes("cubot")) message.react("<:cubot:939336981601722428>");
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
 	if (content.match(/gives?( you)? up/)) message.react("<a:rick:938547171366682624>");
-	if (content.includes("( ^∘^)つ")) message.react("<:sxd:939291985796280420>");
+	if (content.includes("( ^∘^)つ")) message.react("<:scratchxdiscord:939985869421547520>");
 	if (content.includes("scradd bad")) message.react("<:angery:939337168780943390>");
 	if (content.includes("sat on addons"))
 		message
