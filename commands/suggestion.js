@@ -50,7 +50,7 @@ const info = {
 						.addChoice("New addon", "New addon")
 						.addChoice("New feature (in existing addon)", "New feature")
 						.addChoice("Settings page addition", "Settings addition")
-						.addChoice("Server/Scradd suggestion", "Server suggestion")
+						// .addChoice("Server/Scradd suggestion", "Server suggestion")
 						.addChoice("Other", "Other")
 						.setRequired(true),
 				),
