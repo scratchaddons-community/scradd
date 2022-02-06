@@ -19,11 +19,11 @@ const BugsChannel = new SuggestionBuilder(BUGS_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Manage and create bug reports in #suggestions")
+		.setDescription(" ")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new bug report")
+				.setDescription("Create a new bug report in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -32,12 +32,23 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option.setName("report").setDescription("Your report").setRequired(true),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("category")
+						.setDescription("Report category")
+						.addChoice("Addon bug", "Addon bug")
+						.addChoice("Settings bug", "Settings bug")
+						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+						.addChoice("Server mistake/Scradd bug", "Server bug")
+						.addChoice("Other", "Other")
+						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs Only) Answer a bug report")
+				.setDescription("(Devs only) Answer a bug report. Use this in threads in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("answer")
@@ -51,12 +62,16 @@ const info = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName("delete").setDescription("Delete a bug report"),
+			subcommand
+				.setName("delete")
+				.setDescription(
+					"(Devs, mods, and OP only) Delete a bug report. Use this in threads in #reports.",
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("Edit a bug report")
+				.setDescription("(OP Only) Edit a bug report. Use this in threads in #reports.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -68,6 +83,17 @@ const info = {
 						.setName("report")
 						.setDescription("Your updated bug report")
 						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+					.setName("category")
+					.setDescription("Report category")
+					.addChoice("Addon bug", "Addon bug")
+					.addChoice("Settings bug", "Settings bug")
+					.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+					// .addChoice("Server mistake/Scradd bug", "Server bug")
+					.addChoice("Other", "Other")
+						.setRequired(false),
 				),
 		),
 
@@ -78,7 +104,8 @@ const info = {
 			const res = await BugsChannel.createMessage(interaction, {
 				title: interaction.options.getString("title") || "",
 				description: interaction.options.getString("report") || "",
-				type: "Report"
+				type: "Report",
+				category: interaction.options.getString("category") || "",
 			});
 			if (res) {
 				await interaction.reply({
@@ -98,7 +125,7 @@ const info = {
 				})
 			)
 				interaction.reply({
-					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below.`,
+					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 					ephemeral: true,
 				});
 		} else if (command === "delete") {
@@ -108,10 +135,11 @@ const info = {
 				await BugsChannel.editSuggestion(interaction, {
 					body: interaction.options.getString("report"),
 					title: interaction.options.getString("title"),
+					category: interaction.options.getString("category"),
 				})
 			)
 				interaction.reply({
-					content: "Sucessfully edited bug report.",
+					content: "Sucessfully edited bug report. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 					ephemeral: true,
 				});
 		}

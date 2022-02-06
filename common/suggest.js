@@ -12,7 +12,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: string; description: string; type:"Suggestion"|"Report" }} data
+	 * @param {{ title: string; description: string; type: string; category: string }} data
 	 */
 	async createMessage(interaction, data) {
 		const author = interaction.member;
@@ -29,7 +29,7 @@ export default class SuggestionBuilder {
 		const embed = new MessageEmbed()
 			.setColor(0x222_222)
 			.setAuthor({
-				name: data.type+" from " + author?.displayName || interaction.user.username,
+				name: data.type + " from " + author?.displayName || interaction.user.username,
 				iconURL:
 					author?.displayAvatarURL() ||
 					interaction.user.displayAvatarURL() ||
@@ -38,15 +38,15 @@ export default class SuggestionBuilder {
 			})
 			.setTitle(data.title)
 			.setDescription(data.description)
-			.setFooter({ text: "Unanswered" });
+			.setFooter({ text: data.category + " • Unanswered" });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
-		if (!channel?.isText()) throw new Error("Suggestion channel not found");
+		if (!channel?.isText()) throw new Error(data.type + " channel not found");
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			name: "Unanswered | " + embed.title,
-			autoArchiveDuration: "MAX",
-			reason: "Suggestion/report by " + interaction.user.tag,
+			autoArchiveDuration: 1440,
+			reason: data.type + " by " + interaction.user.tag,
 		});
 		await thread.members.add(interaction.user.id);
 		return { thread, message };
@@ -84,14 +84,17 @@ export default class SuggestionBuilder {
 
 		await Promise.all([
 			interaction.channel.setName(
-				interaction.channel.name.replace(/^(?:.+? \| )?([^|]+)$/i, answer),
+				interaction.channel.name.replace(/^[^|]+?(?=( \| .+)?$)/i, answer),
 				"Thread answered by " + interaction.user.tag,
 			),
 
 			await interaction.channel.fetchStarterMessage().then(async (message) => {
 				if (message.author.id !== interaction.client.user?.id) return;
 				const embed = new MessageEmbed(message.embeds[0]);
-				embed.setColor(colors[answer] || 0x000).setFooter({ text: answer });
+				const category = embed.footer?.text.split(" • ")[0];
+				embed
+					.setColor(colors[answer] || 0x000)
+					.setFooter({ text: (category ? category + " • " : "") + answer });
 
 				message.edit({ embeds: [embed] });
 			}),
@@ -108,7 +111,7 @@ export default class SuggestionBuilder {
 				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
-		const starter = await interaction.channel.fetchStarterMessage().catch((err) => {});
+		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
 		const user =
 			starter &&
 			(
@@ -198,7 +201,7 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null|string; body:null| string }} newSuggestion
+	 * @param {{ title: null | string; body: null | string;category: null | string}} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
@@ -241,9 +244,13 @@ export default class SuggestionBuilder {
 		if (newSuggestion.title) {
 			interaction.channel.setName(
 				interaction.channel.name.replace(/(?<=^.+ \| )(.+)$/i, newSuggestion.title),
-				"Suggestion/report edited"
-			)
-				embed?.setTitle(newSuggestion.title);
+				"Suggestion/report edited",
+			);
+			embed?.setTitle(newSuggestion.title);
+		}
+		if (newSuggestion.category) {
+			const answer = embed.footer?.text.split(" • ").at(-1);
+			embed.setFooter({ text: newSuggestion.category + " • " + answer });
 		}
 		starterMessage.edit({ embeds: [embed] });
 		return true;

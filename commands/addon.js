@@ -10,7 +10,9 @@ const addons = await fetch(
 
 const fuse = new Fuse(addons, {
 	includeScore: true,
-	threshold: 0.35,
+	threshold: 0,
+	shouldSort: true,
+	findAllMatches: true,
 	ignoreLocation: true,
 	useExtendedSearch: true,
 	keys: [
@@ -24,7 +26,7 @@ const fuse = new Fuse(addons, {
 		},
 		{
 			name: "description",
-			weight: 0.5,
+			weight: 0.9,
 		},
 	],
 });
@@ -56,17 +58,17 @@ const info = {
 		}
 
 		const input = interaction.options.getString("addon");
-		const result = input
+		const output = input
 			? fuse.search(input).sort((a, b) => {
 					a.score ??= 0;
 					b.score ??= 0;
 					// Sort very good matches at the top no matter what
 					if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
 					else return 0;
-			  })[0]?.item
-			: addons[Math.floor(Math.random() * addons.length)];
+			  })[0] || {}
+			: { score: 0, item: addons[Math.floor(Math.random() * addons.length)] };
 
-		if (!result) {
+		if (!output.item) {
 			return interaction.reply({
 				content: "That addon does not exist!",
 				ephemeral: true,
@@ -75,7 +77,7 @@ const info = {
 
 		const addon = await fetch(
 			"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
-				result.id +
+				output.item.id +
 				"/addon.json",
 		).then(
 			(res) => /** @type {Promise<import("../types/addonManifest").default>} */ (res.json()),
@@ -95,12 +97,15 @@ const info = {
 			.setColor("BLURPLE")
 			.setDescription(
 				addon.description +
-					`\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${result.id})` +
+					`\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${output.item.id})` +
 					(addon.permissions?.length
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
 						: ""),
 			)
-			.setImage(`https://scratchaddons.com/assets/img/addons/${result.id}.png`);
+			.setImage(`https://scratchaddons.com/assets/img/addons/${output.item.id}.png`)
+			.setFooter({
+				text: output.score ? "Input: " + input : "Random addon",
+			});
 
 		const group = addon.tags.includes("popup")
 			? "Extension Popup Features"
@@ -114,7 +119,7 @@ const info = {
 
 		if (group !== "Easter Eggs")
 			embed.setURL(
-				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${result.id}`,
+				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${output.item.id}`,
 			);
 
 		const credits = generateCredits(addon);
