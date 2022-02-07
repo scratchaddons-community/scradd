@@ -166,8 +166,8 @@ export default async (message) => {
 					content.split(/\W+/g).includes(text + "es")))
 		);
 	}
-	if (includes("dango")|| content.includes("🍡")) message.react("🍡");
-	if (content === "e") message.react("<:e_:939986562937151518>");
+	if (includes("dango") || content.includes("🍡")) message.react("🍡");
+	if (content === "e" || content === ".") message.react("<:e_:939986562937151518>");
 	if (content == "potato" || content == "potatoes" || content.includes("🥔")) message.react("🥔");
 	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
