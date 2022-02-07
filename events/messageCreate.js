@@ -184,8 +184,15 @@ export default async (message) => {
 			.react("<:sa_full1:939336189880713287>")
 			.then(() => message.react("<:soa_full1:939336229449789510>"))
 			.then(() => message.react("<:sa_full3:939336281454936095>"));
-	if (content.match(/^r!(mimic|possess|sudo|speakas|sayas|impersonate)\s+<@!?\d+>/iu)) {
-		const member = await message.guild?.members.fetch(message.mentions.users.first()?.id || "");
+
+	const firstMention = message.mentions.users.first();
+	if (
+		content.match(/^r!(mimic|possess|sudo|speakas|sayas|impersonate)\s+<@!?\d+>/iu) &&
+		firstMention?.id !== message.author.id &&
+		!firstMention?.bot &&
+		!firstMention?.system
+	) {
+		const member = await message.guild?.members.fetch(firstMention?.id||"");
 		message.reply({
 			content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${
 				member?.user.tag
