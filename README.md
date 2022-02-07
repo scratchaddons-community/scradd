@@ -72,6 +72,14 @@ Creates a new suggestion.
 | description | yes |
 | category | yes |
 
+A suggestion can be created in one of the following categories:
+
+- New Addon
+- New Feature (in existing addon)
+- Settings page addition
+- Other
+
+
 #### /suggestion edit
 
 Edits the title and/or the content of suggestions. Only the suggestion author can use it. Run it in the thread on the suggestion.
@@ -150,6 +158,20 @@ Replies with the best match if no addon found with the given name. Replies with 
 | Argument | Required?|
 | --- | --- |
 | addon | no |
+
+---
+
+### Modmail
+
+**Subcommands:** start | close
+
+#### /modmail start
+Starts a new modmail ticket.
+**Required**: Have Moderator role
+
+#### /modmail close
+Closes modmail ticket.
+**Required**: Have Moderator role
 ---
 
 ## Repository Navigation
