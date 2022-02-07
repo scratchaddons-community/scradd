@@ -155,19 +155,23 @@ Replies with the best match if no addon found with the given name. Replies with 
 ## Repository Navigation
 ### common
 Common code used by other files. Currently includes code for the Potatobard, Modmail features and the Suggestion builder.
+
 ![](https://user-images.githubusercontent.com/75680333/152847504-2f96e7ae-6d8f-407b-950c-18bfa2bd033d.png)
 
 ### commands
 Independent slash commands. May import a common script. Includes all commands that appear on Scradd's slash command list.
 <!--![](https://user-images.githubusercontent.com/75680333/152848021-011f3e62-a354-42c1-b5fa-6216fcc2d52b.png)-->
+
 ![](https://user-images.githubusercontent.com/75680333/152848168-ca3ab779-ad9d-40c9-acc9-1358cb1fb367.png)
 
 ### events
 Scripts that are run when something happens. This can be both about the server or Scradd.
+
 ![](https://user-images.githubusercontent.com/75680333/152852754-c9dae90f-095c-40d7-a18e-cfaefff6d5e5.png)
 
 ### lib
 Little helper scripts to use in other files.
+
 ![](https://user-images.githubusercontent.com/75680333/152853946-8e08f922-3ff3-4113-b2d2-9b98310a3817.png)
 
 
