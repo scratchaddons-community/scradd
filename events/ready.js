@@ -15,10 +15,20 @@ export default async (client) => {
 		process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
 		{ type: "WATCHING" },
 	);
+	const GUILD_ID = process.env.GUILD_ID || "";
+
 	const prexistingCommands = await client.application.commands.fetch({
-		guildId: process.env.GUILD_ID || "",
+		guildId: GUILD_ID,
 	});
-	/** @type {Collection<string, {command:import("../types/command").Command,permissions?:import("discord.js").ApplicationCommandPermissionData[]}>} */
+	/**
+	 * @type {Collection<
+	 * 	string,
+	 * 	{
+	 * 		command: import("../types/command").Command;
+	 * 		permissions?: import("discord.js").ApplicationCommandPermissionData[];
+	 * 	}
+	 * >}
+	 */
 	const slashes = new Collection();
 	commands.forEach((command, key) =>
 		slashes.set(key, { command: command.data, permissions: command.permissions }),
@@ -30,8 +40,8 @@ export default async (client) => {
 
 	slashes.each(async ({ command, permissions }, name) => {
 		const newCommand = await (prexistingCommands.has(name)
-			? client.application?.commands.edit(name, command.toJSON(), process.env.GUILD_ID || "")
-			: client.application?.commands.create(command.toJSON(), process.env.GUILD_ID || ""));
-		if (permissions) newCommand?.permissions.add({ permissions, });
+			? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
+			: client.application?.commands.create(command.toJSON(), GUILD_ID));
+		if (permissions) newCommand?.permissions.add({ permissions, guild: GUILD_ID });
 	});
 };

@@ -5,11 +5,7 @@ export default async function execute(interaction) {
 	if (!interaction.isCommand()) return;
 
 	const command = commands.get(interaction.commandName);
-	if (!command)
-		return interaction.reply({
-			content: "You somehow used a non-existent command... 🤔",
-			ephemeral: true,
-		});
+	if (!command) throw new Error("Command '" + interaction.commandName + "' not found.");
 
 	return command.interaction(interaction);
 }
