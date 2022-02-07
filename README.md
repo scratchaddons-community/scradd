@@ -24,7 +24,7 @@ Cloud-hosted on [opeNode.io](https://www.openode.io/).
   
 Messages with more than 6 :potato: reactions are shown in the #potatoboard channel. 
 
-Potatoboard can be used to higlight messages that the community finds noteworthy: like a good drawing, a good meme in #memes.. or a message funny out of context like this:
+Potatoboard can be used to higlight messages that the community finds noteworthy: like a good drawing, a good meme in #memes... or a message funny out of context like this:
 
 
 ![](https://cdn.discordapp.com/attachments/901225174974726177/939015132720287784/unknown.png) 
