@@ -322,7 +322,7 @@ const info = {
 									text: `Page ${
 										Math.floor(offset / PAGE_OFFSET) + 1
 									}/${numberOfPages}`,
-								}),
+								}).setColor("BLURPLE"),
 						],
 						components: [
 							new MessageActionRow().addComponents(previousButton, nextButton),

@@ -27,7 +27,7 @@ export default class SuggestionBuilder {
 		}
 
 		const embed = new MessageEmbed()
-			.setColor(0x222_222)
+			.setColor(0x222)
 			.setAuthor({
 				name: data.type + " from " + author?.displayName || interaction.user.username,
 				iconURL:

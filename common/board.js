@@ -132,7 +132,7 @@ export async function postMessageToBoard(message) {
 	}
 
 	const embed = new MessageEmbed()
-		.setColor(0xffd700)
+		.setColor(author?.displayColor ?? 0xffd700)
 		.setDescription(description)
 		.setAuthor({
 			name: author?.displayName || message.author.username,
