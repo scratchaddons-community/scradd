@@ -118,20 +118,20 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const res = await BugsChannel.createMessage(interaction, {
-					title: interaction.options.getString("title") || "",
-					description: interaction.options.getString("report") || "",
-					type: "Report",
-					category: interaction.options.getString("category") || "",
-				});
-				if (res) {
-					await interaction.reply({
-						content: `<:yes:940054094272430130> Bug report posted! See ${res.thread}`,
+				const answer = interaction.options.getString("answer");
+				if (
+					await BugsChannel.answerSuggestion(interaction, answer || "", {
+						[ANSWERS.VALIDBUG]: "GREEN",
+						[ANSWERS.MINORBUG]: "DARK_GREEN",
+						[ANSWERS.INDEVELOPMENT]: "YELLOW",
+						[ANSWERS.INVALIDBUG]: "RED",
+						[ANSWERS.FIXED]: "BLUE",
+					})
+				)
+					interaction.reply({
+						content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
-				}
-
-				break;
 			}
 			case "delete": {
 				await BugsChannel.deleteSuggestion(interaction);
