@@ -1,13 +1,17 @@
-import { Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
+import {
+	generateMessage,
+	getMemberFromThread,
+	getThreadFromMember,
+	MODMAIL_CHANNEL,
+	WH_NAME,
+} from "../common/modmail.js";
 
 dotenv.config();
-const { MODMAIL_CHANNEL, GUILD_ID } = process.env;
+const { GUILD_ID } = process.env;
 if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
-if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
-
-const WH_NAME = "scradd-wh";
 
 /** @param {import("discord.js").Message} message */
 export default async (message) => {
@@ -24,10 +28,7 @@ export default async (message) => {
 			webhooks.find((wh) => wh.name === WH_NAME) ||
 			(await mailChannel.createWebhook(WH_NAME));
 
-		const { threads } = await mailChannel.threads.fetchActive();
-		const thread = threads.find((thread) =>
-			thread.name.endsWith("(" + message.author.id + ")"),
-		);
+		const thread = await getThreadFromMember(guild, message.author);
 		if (thread) {
 			webhook.send({ threadId: thread.id, ...generateMessage(message) });
 		} else {
@@ -43,42 +44,74 @@ export default async (message) => {
 				.setLabel("Confirm")
 				.setStyle("PRIMARY")
 				.setCustomId(generateHash("confirm"));
+			const cancelButton = new MessageButton()
+				.setLabel("Cancel")
+				.setCustomId(generateHash("cancel"))
+				.setStyle("SECONDARY");
 			const sentMsg = await message.channel.send({
 				embeds: [embed],
-				components: [new MessageActionRow().addComponents(button)],
+				components: [new MessageActionRow().addComponents(button, cancelButton)],
 			});
 
 			message.channel.createMessageCollector({ time: 15_000 }).on("collect", () => {
 				button.setDisabled(true);
+				cancelButton.setDisabled(true);
 				sentMsg.edit({
 					embeds: [embed],
-					components: [new MessageActionRow().addComponents(button)],
+					components: [new MessageActionRow().addComponents(button, cancelButton)],
 				});
 			});
 
 			message.channel
 				.createMessageComponentCollector({
-					filter: (i) => button.customId === i.customId,
+					filter: (i) =>
+						[button.customId, cancelButton.customId].includes(i.customId) &&
+						i.user.id === message.author.id,
 					time: 15_000,
 				})
 				.on("collect", async (i) => {
-					const embed = new MessageEmbed()
-						.setTitle("Modmail ticket opened")
-						.setDescription("Ticket by " + message.author.toString())
-						.setColor("BLURPLE");
+					switch (i.customId) {
+						case button.customId: {
+							const embed = new MessageEmbed()
+								.setTitle("Modmail ticket opened")
+								.setDescription("Ticket by " + message.author.toString())
+								.setColor("BLURPLE");
 
-					const starterMsg = await mailChannel.send({
-						content: process.env.NODE_ENV === "production" ? "@here" : undefined,
-						embeds: [embed],
-					});
-					const thread = await starterMsg.startThread({
-						name: `${message.author.username} (${message.author.id})`,
-					});
+							const starterMsg = await mailChannel.send({
+								content:
+									process.env.NODE_ENV === "production" ? "@here" : undefined,
+								embeds: [embed],
+							});
+							const thread = await starterMsg.startThread({
+								name: `${message.author.username} (${message.author.id})`,
+							});
 
-					if (!webhook) throw new Error("Could not find webhook");
-					i.reply("✅ Modmail ticket opened");
-					webhook.send({ threadId: thread.id, ...generateMessage(message) });
-					button.setDisabled(true);
+							if (!webhook) throw new Error("Could not find webhook");
+							i.reply({
+								content: "<:yes:940054094272430130> Modmail ticket opened",
+								ephemeral: true,
+							});
+							webhook.send({ threadId: thread.id, ...generateMessage(message) });
+							button.setDisabled(true);
+							break;
+						}
+						case cancelButton.customId: {
+							button.setDisabled(true);
+							cancelButton.setDisabled(true);
+							i.reply({
+								content: "<:no:940054047854047282> Modmail canceled",
+								ephemeral: true,
+							});
+
+							sentMsg.edit({
+								embeds: [embed],
+								components: [
+									new MessageActionRow().addComponents(button, cancelButton),
+								],
+							});
+							break;
+						}
+					}
 				})
 				.on("end", async () => {
 					button.setDisabled(true);
@@ -97,14 +130,17 @@ export default async (message) => {
 		message.channel.parent?.id === MODMAIL_CHANNEL &&
 		!message.webhookId &&
 		!message.content.startsWith("=") &&
-		["DEFAULT", "REPLY"].includes(message.type)
+		["DEFAULT", "REPLY"].includes(message.type) &&
+		message.guild
 	) {
-		const user = await message.client.users.fetch(
-			message.channel?.name.match(/^.+ \((\d+)\)$/i)?.[1] || "",
-		);
+		const user = await getMemberFromThread(message.guild, message.channel);
 		if (!user) return;
-		const channel = await user.createDM();
-		channel.send(generateMessage(message));
+		const channel = await user.createDM().catch(() => {
+			message.reply({
+				content: "<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
+			});
+		});
+		channel?.send(generateMessage(message));
 		return;
 	}
 
@@ -169,25 +205,3 @@ export default async (message) => {
 		});
 	}
 };
-
-/** @param {Message} message */
-function generateMessage(message) {
-	message.react("✅");
-	return {
-		content: message.content || undefined,
-		username: message.author.username,
-		files: message.attachments.map((a) => a),
-		allowedMentions: { users: [] },
-
-		avatarURL: message.author.avatarURL() || "",
-		embeds: message.stickers
-			.map((sticker) => {
-				return new MessageEmbed()
-					.setDescription("")
-					.setImage(
-						`https://media.discordapp.net/stickers/` + sticker.id + `.webp?size=160`,
-					);
-			})
-			.concat(message.embeds.map((a) => new MessageEmbed(a))), //.splice(10),
-	};
-}
