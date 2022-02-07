@@ -20,14 +20,17 @@ export default class SuggestionBuilder {
 
 		if (data.title.length > MAX_TITLE_LENGTH) {
 			interaction.reply({
-				content: `The title can not be longer than ` + MAX_TITLE_LENGTH + ` characters.`,
+				content:
+					`<:no:940054047854047282> The title can not be longer than ` +
+					MAX_TITLE_LENGTH +
+					` characters.`,
 				ephemeral: true,
 			});
 			return false;
 		}
 
 		const embed = new MessageEmbed()
-			.setColor(0x222_222)
+			.setColor(0x222)
 			.setAuthor({
 				name: data.type + " from " + author?.displayName || interaction.user.username,
 				iconURL:
@@ -62,12 +65,14 @@ export default class SuggestionBuilder {
 	 */
 	async answerSuggestion(interaction, answer, colors) {
 		if (!interaction.guild) {
-			await interaction.reply({ content: "Command unavailable in DMs." });
+			await interaction.reply({
+				content: "<:no:940054047854047282> Command unavailable in DMs.",
+			});
 			return false;
 		}
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
 			interaction.reply({
-				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
 			return false;
@@ -76,7 +81,7 @@ export default class SuggestionBuilder {
 
 		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
 			interaction.reply({
-				content: "You don't have permission to run this command!",
+				content: "<:no:940054047854047282> You don't have permission to run this command!",
 				ephemeral: true,
 			});
 			return false;
@@ -88,16 +93,19 @@ export default class SuggestionBuilder {
 				"Thread answered by " + interaction.user.tag,
 			),
 
-			await interaction.channel.fetchStarterMessage().then(async (message) => {
-				if (message.author.id !== interaction.client.user?.id) return;
-				const embed = new MessageEmbed(message.embeds[0]);
-				const category = embed.footer?.text.split(" • ")[0];
-				embed
-					.setColor(colors[answer] || 0x000)
-					.setFooter({ text: (category ? category + " • " : "") + answer });
+			interaction.channel
+				.fetchStarterMessage()
+				.catch(() => {})
+				.then(async (message) => {
+					if (!message || message.author.id !== interaction.client.user?.id) return;
+					const embed = new MessageEmbed(message.embeds[0]);
+					const category = embed.footer?.text.split(" • ")[0];
+					embed
+						.setColor(colors[answer] || 0x000)
+						.setFooter({ text: (category ? category + " • " : "") + answer });
 
-				message.edit({ embeds: [embed] });
-			}),
+					message.edit({ embeds: [embed] });
+				}),
 		]);
 		return true;
 	}
@@ -105,10 +113,12 @@ export default class SuggestionBuilder {
 	/** @param {import("discord.js").CommandInteraction} interaction */
 	async deleteSuggestion(interaction) {
 		if (!interaction.guild)
-			return interaction.reply({ content: "This command is unavailable in DMs." });
+			return interaction.reply({
+				content: "<:no:940054047854047282> This command is unavailable in DMs.",
+			});
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID)
 			return interaction.reply({
-				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
 		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
@@ -132,7 +142,7 @@ export default class SuggestionBuilder {
 			)
 		) {
 			return interaction.reply({
-				content: "You don't have permission to run this command!",
+				content: "<:no:940054047854047282> You don't have permission to run this command!",
 				ephemeral: true,
 			});
 		}
@@ -167,7 +177,7 @@ export default class SuggestionBuilder {
 							interaction.channel.parentId !== this.CHANNEL_ID
 						)
 							return i.reply({
-								content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+								content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 								ephemeral: true,
 							});
 						interaction.channel.delete();
@@ -179,7 +189,7 @@ export default class SuggestionBuilder {
 						cancelButton.setDisabled(true);
 						i.deferUpdate();
 						interaction.editReply({
-							content: ":negative_squared_cross_mark: Deletion canceled.",
+							content: "<:no:940054047854047282> Deletion canceled.",
 							components: [
 								new MessageActionRow().addComponents(deleteButton, cancelButton),
 							],
@@ -193,7 +203,7 @@ export default class SuggestionBuilder {
 				deleteButton.setDisabled(true);
 				cancelButton.setDisabled(true);
 				interaction.editReply({
-					content: ":negative_squared_cross_mark: Deletion timed out.",
+					content: "<:no:940054047854047282> Deletion timed out.",
 					components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
 				});
 			});
@@ -201,27 +211,29 @@ export default class SuggestionBuilder {
 
 	/**
 	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null | string; body: null | string;category: null | string}} newSuggestion
+	 * @param {{ title: null | string; body: null | string; category: null | string }} newSuggestion
 	 *
 	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
 	 *   message yourself.
 	 */
 	async editSuggestion(interaction, newSuggestion) {
 		if (!interaction.guild) {
-			interaction.reply({ content: "The command is unavailable in DMs." });
+			interaction.reply({
+				content: "<:no:940054047854047282> The command is unavailable in DMs.",
+			});
 			return false;
 		}
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
 			interaction.reply({
-				content: `This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
 			return false;
 		}
-		const starterMessage = await interaction.channel.fetchStarterMessage();
-		if (starterMessage.author.id !== interaction.client.user?.id) {
+		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
+		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
 			interaction.reply({
-				content: "This suggestion can not be edited.",
+				content: "<:no:940054047854047282> This suggestion can not be edited.",
 				ephemeral: true,
 			});
 			return false;
@@ -234,7 +246,7 @@ export default class SuggestionBuilder {
 		const user = initingMessages.first()?.mentions.users.first();
 		if (interaction.user.id !== user?.id) {
 			interaction.reply({
-				content: "You do not have permision to use this command.",
+				content: "<:no:940054047854047282> You do not have permision to use this command.",
 				ephemeral: true,
 			});
 			return false;

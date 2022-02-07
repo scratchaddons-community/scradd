@@ -50,7 +50,7 @@ const info = {
 						.addChoice("New addon", "New addon")
 						.addChoice("New feature (in existing addon)", "New feature")
 						.addChoice("Settings page addition", "Settings addition")
-						.addChoice("Server/Scradd suggestion", "Server suggestion")
+						// .addChoice("Server/Scradd suggestion", "Server suggestion")
 						.addChoice("Other", "Other")
 						.setRequired(true),
 				),
@@ -153,7 +153,7 @@ const info = {
 					await Promise.all([
 						res.message.react("👍").then(() => res.message.react("👎")),
 						interaction.reply({
-							content: `:white_check_mark: Suggestion posted! See ${res.thread}`,
+							content: `<:yes:940054094272430130> Suggestion posted! See ${res.thread}`,
 							ephemeral: true,
 						}),
 					]);
@@ -174,7 +174,7 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: `:white_check_mark: Answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content: `<:yes:940054094272430130> Sucessfully answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				break;
@@ -192,7 +192,8 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: "Sucessfully edited suggestion. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
+						content:
+							"<:yes:940054094272430130> Sucessfully edited suggestion! If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
 						ephemeral: true,
 					});
 				break;
@@ -309,7 +310,7 @@ const info = {
 					if (!content.length)
 						return {
 							content:
-								"No suggestions found. Try changing any filters you may have used.",
+								"<:no:940054047854047282> No suggestions found. Try changing any filters you may have used.",
 							ephemeral: true,
 						};
 					return {
@@ -321,7 +322,8 @@ const info = {
 									text: `Page ${
 										Math.floor(offset / PAGE_OFFSET) + 1
 									}/${numberOfPages}`,
-								}),
+								})
+								.setColor("BLURPLE"),
 						],
 						components: [
 							new MessageActionRow().addComponents(previousButton, nextButton),

@@ -86,13 +86,13 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option
-					.setName("category")
-					.setDescription("Report category")
-					.addChoice("Addon bug", "Addon bug")
-					.addChoice("Settings bug", "Settings bug")
-					.addChoice("Core bug (happens with no addons enabled)", "Core bug")
-					.addChoice("Server mistake/Scradd bug", "Server bug")
-					.addChoice("Other", "Other")
+						.setName("category")
+						.setDescription("Report category")
+						.addChoice("Addon bug", "Addon bug")
+						.addChoice("Settings bug", "Settings bug")
+						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
+						// .addChoice("Server mistake/Scradd bug", "Server bug")
+						.addChoice("Other", "Other")
 						.setRequired(false),
 				),
 		),
@@ -100,48 +100,61 @@ const info = {
 	async interaction(interaction) {
 		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 		const command = interaction.options.getSubcommand();
-		if (command === "create") {
-			const res = await BugsChannel.createMessage(interaction, {
-				title: interaction.options.getString("title") || "",
-				description: interaction.options.getString("report") || "",
-				type: "Report",
-				category: interaction.options.getString("category") || "",
-			});
-			if (res) {
-				await interaction.reply({
-					content: `:white_check_mark: Bug report posted! See ${res.thread}`,
-					ephemeral: true,
+		switch (command) {
+			case "create": {
+				const res = await BugsChannel.createMessage(interaction, {
+					title: interaction.options.getString("title") || "",
+					description: interaction.options.getString("report") || "",
+					type: "Report",
+					category: interaction.options.getString("category") || "",
 				});
+				if (res) {
+					await interaction.reply({
+						content: `<:yes:940054094272430130> Bug report posted! See ${res.thread}`,
+						ephemeral: true,
+					});
+				}
+
+				break;
 			}
-		} else if (command === "answer") {
-			const answer = interaction.options.getString("answer");
-			if (
-				await BugsChannel.answerSuggestion(interaction, answer || "", {
-					[ANSWERS.VALIDBUG]: "GREEN",
-					[ANSWERS.MINORBUG]: "DARK_GREEN",
-					[ANSWERS.INDEVELOPMENT]: "YELLOW",
-					[ANSWERS.INVALIDBUG]: "RED",
-					[ANSWERS.FIXED]: "BLUE",
-				})
-			)
-				interaction.reply({
-					content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
-					ephemeral: true,
-				});
-		} else if (command === "delete") {
-			await BugsChannel.deleteSuggestion(interaction);
-		} else if (command === "edit") {
-			if (
-				await BugsChannel.editSuggestion(interaction, {
-					body: interaction.options.getString("report"),
-					title: interaction.options.getString("title"),
-					category: interaction.options.getString("category"),
-				})
-			)
-				interaction.reply({
-					content: "Sucessfully edited bug report. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
-					ephemeral: true,
-				});
+			case "answer": {
+				const answer = interaction.options.getString("answer");
+				if (
+					await BugsChannel.answerSuggestion(interaction, answer || "", {
+						[ANSWERS.VALIDBUG]: "GREEN",
+						[ANSWERS.MINORBUG]: "DARK_GREEN",
+						[ANSWERS.INDEVELOPMENT]: "YELLOW",
+						[ANSWERS.INVALIDBUG]: "RED",
+						[ANSWERS.FIXED]: "BLUE",
+					})
+				)
+					interaction.reply({
+						content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						ephemeral: true,
+					});
+				break;
+			}
+			case "delete": {
+				await BugsChannel.deleteSuggestion(interaction);
+
+				break;
+			}
+			case "edit": {
+				if (
+					await BugsChannel.editSuggestion(interaction, {
+						body: interaction.options.getString("report"),
+						title: interaction.options.getString("title"),
+						category: interaction.options.getString("category"),
+					})
+				)
+					interaction.reply({
+						content:
+							"<:yes:940054094272430130> Sucessfully edited bug report! If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
+						ephemeral: true,
+					});
+
+				break;
+			}
 		}
 	},
 };

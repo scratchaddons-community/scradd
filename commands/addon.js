@@ -70,7 +70,7 @@ const info = {
 
 		if (!output.item) {
 			return interaction.reply({
-				content: "That addon does not exist!",
+				content: "<:no:940054047854047282> That addon does not exist!",
 				ephemeral: true,
 			});
 		}

@@ -156,7 +156,8 @@ const info = {
 			fetchedMessages.splice(index, 1);
 			if (!source?.components[0]?.components[0]) {
 				return {
-					content: "No messages found. Try changing any filters you may have used.",
+					content:
+						"<:no:940054047854047282> No messages found. Try changing any filters you may have used.",
 					ephemeral: true,
 					embeds: [],
 					attachments: [],
