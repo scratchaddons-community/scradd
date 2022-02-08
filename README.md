@@ -4,7 +4,7 @@
 
 Scradd is the Discord bot for the [Scratch Addons Discord server](https://discord.gg/Cs25kzs889). It was partially made because servers' one year anniversary, and partially because we wanted a bot that we had ultimate customization over.
 
-Logo made by (Discord) Weirdo#8115 and retronbv 🥔#0795
+Logo made by (Discord) Weirdo#8115 and retronbv 🥔#0795 (@retronbv on Github)
 
 Cloud hosted on [opeNode.io](https://www.openode.io/). <!--reconsider dash?-->
 <!--
