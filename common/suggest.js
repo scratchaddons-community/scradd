@@ -18,6 +18,18 @@ export default class SuggestionBuilder {
 		const author = interaction.member;
 		if (!(author instanceof GuildMember)) return;
 
+		if (data.category.startsWith("Server ")) {
+			interaction.reply({
+				content:
+					`<:no:940054047854047282> In an effort to help SA developers find meaningful suggestions, we have disabled server-related suggestions and bug reports. Now, when a developer looks in <#${process.env.SUGGESTION_CHANNEL}>, they can see suggestions for SA that they can make. ` +
+					data.category.endsWith(" bug")
+						? `If I have a bug or the server has a mistake, please send me a DM to let the mods know.`
+						: `If you have a suggestion to improve me or the server, please post it in <#806602307750985803> for discussion.`,
+				ephemeral: true,
+			});
+			return false;
+		}
+
 		if (data.title.length > MAX_TITLE_LENGTH) {
 			interaction.reply({
 				content:

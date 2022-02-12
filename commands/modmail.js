@@ -16,7 +16,7 @@ dotenv.config();
 const info = {
 	data: new SlashCommandBuilder()
 		.setDefaultPermission(false)
-		.setDescription(" ")
+		.setDescription(".")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")

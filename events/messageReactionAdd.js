@@ -17,6 +17,7 @@ dotenv.config();
  */
 
 export default async (reaction, user) => {
+	console.log("[DEBUG] Reaction added:", reaction);
 	if (reaction.partial) reaction = await reaction.fetch();
 	if (reaction.message.partial) reaction.message = await reaction.message.fetch();
 	if (user.partial) user = await user.fetch();

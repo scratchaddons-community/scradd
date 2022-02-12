@@ -14,7 +14,7 @@ const client = new Client({
 		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 		Intents.FLAGS.DIRECT_MESSAGES,
 	],
-	partials: ["USER", "REACTION", "MESSAGE", "CHANNEL"],
+	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
 
 const events = await importScripts("events");

@@ -17,7 +17,11 @@ if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
 export default async (message) => {
 	if (message.author.id === message.client.user?.id) return;
 
-	if (message.channel.type === "DM" && ["DEFAULT", "REPLY"].includes(message.type)) {
+	if (
+		!message.content.startsWith("=") &&
+		message.channel.type === "DM" &&
+		["DEFAULT", "REPLY"].includes(message.type)
+	) {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
 		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 		if (!mailChannel) throw new Error("Could not find modmail channel");
@@ -123,7 +127,7 @@ export default async (message) => {
 		}
 	}
 
-	if (message.author.bot || message.guild?.id !== process.env.GUILD_ID) return;
+	if (message.guild?.id !== process.env.GUILD_ID) return;
 
 	if (
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -143,8 +147,8 @@ export default async (message) => {
 		channel?.send(generateMessage(message));
 		return;
 	}
-
-	if (message.content.startsWith("r!suggest"))
+	if (message.author.bot) return;
+	if (message.content.match(/^r!(suggest|suggestion|sg|idea)/iu))
 		message.reply({
 			content: "`r!suggest` has been removed, please use `/suggestion create`.",
 		});
@@ -168,7 +172,13 @@ export default async (message) => {
 	}
 	if (includes("dango") || content.includes("🍡")) message.react("🍡");
 	if (content === "e" || content === ".") message.react("<:e_:939986562937151518>");
-	if (content == "potato" || content == "potatoes" || content.includes("🥔")) message.react("🥔");
+	if (
+		content == "potato" ||
+		content == "potatoes" ||
+		content == "potatos" ||
+		content.includes("🥔")
+	)
+		message.react("🥔");
 	if (includes("griff", false) || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
@@ -207,7 +217,11 @@ export default async (message) => {
 		const arr = message.cleanContent.split(spoilerHack);
 		arr.shift();
 		message.reply({
-			content: "You used the spoiler hack to hide: ```\n" + arr.join(spoilerHack) + "\n```",
+			content:
+				"You used the spoiler hack to hide: ```\n" +
+				arr.join(spoilerHack).replaceAll("```", "[3 backticks]") +
+				"\n```",
+			allowedMentions: { users: [], repliedUser: true,roles:[] },
 		});
 	}
 };
