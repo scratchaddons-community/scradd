@@ -167,7 +167,7 @@ const info = {
 			}
 			if (!fetchedMessages.length) nextButton.setDisabled(true);
 			return {
-				ephemeral: false,
+				ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 				content: source.content,
 				embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 				files: source.attachments.map((a) => a),
