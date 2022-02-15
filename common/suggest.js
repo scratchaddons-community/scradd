@@ -89,6 +89,7 @@ export default class SuggestionBuilder {
 			});
 			return false;
 		}
+		if (interaction.channel.archived) interaction.channel.setArchived(false,"Thread answered by " + interaction.user.tag);
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
 
 		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
@@ -242,6 +243,7 @@ export default class SuggestionBuilder {
 			});
 			return false;
 		}
+		if (interaction.channel.archived) interaction.channel.setArchived(false,"Thread edited");
 		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
 		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
 			interaction.reply({
