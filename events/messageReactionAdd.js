@@ -38,7 +38,9 @@ export default async (reaction, user) => {
 		// or if they self-reacted
 		(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 		// or if they reacted to a message on the board
-		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id)
+		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id) ||
+		// or they reacted to an /explorepotatoes message
+		(message.interaction?.commandName === "explorepotatoes" && message.embeds.length)
 	)
 		// remove the reaction
 		return await reaction.users.remove(user);

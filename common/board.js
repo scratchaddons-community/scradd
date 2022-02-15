@@ -8,6 +8,22 @@ export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
 export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
 
+/** @param {Message} boardMessage */
+export async function getSourceFromBoard(boardMessage) {
+	const component = boardMessage?.components[0]?.components?.[0];
+	if (component?.type !== "BUTTON") return false;
+	const { guildId, channelId, messageId } =
+		component.url?.match(
+			/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu,
+		)?.groups || {};
+	if (boardMessage.guild?.id !== guildId || !channelId || !messageId) return false;
+	const channel = await boardMessage.guild?.channels.fetch(channelId);
+	if (!channel?.isText()) return false;
+	const message = await channel.messages.fetch(messageId);
+	if (!message) return false;
+	return message;
+}
+
 /** @param {Message} message */
 export async function getMessageFromBoard(message) {
 	if (!message.guild) return;
@@ -178,7 +194,7 @@ export async function postMessageToBoard(message) {
 		embeds,
 		files: message.attachments.map((a) => a),
 		components: [new MessageActionRow().addComponents(button)],
-		allowedMentions: { users: [] },
+		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 	});
 }
 
@@ -189,6 +205,7 @@ export async function postMessageToBoard(message) {
 export async function updateReactionCount(newCount, boardMessage) {
 	if (newCount < Math.max(MIN_REACTIONS - 1, 1)) return boardMessage.delete();
 	return boardMessage.edit({
+		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		content: boardMessage.content.replace(/\d+/, `${newCount}`),
 		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 		files: boardMessage.attachments.map((a) => a),

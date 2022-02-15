@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Message, MessageButton, MessageEmbed, ThreadChannel } from "discord.js";
-import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
+import { BOARD_CHANNEL, getSourceFromBoard, MIN_REACTIONS } from "../common/board.js";
 import firstPromiseWithValue from "../lib/firstPromiseWithValue.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
@@ -123,21 +123,23 @@ const info = {
 				asyncFilter(messages, async (message) => {
 					if (!message.content || !message.embeds[0] || !message.author.bot) return false;
 					if ((message.content.match(/\d+/)?.[0] || 0) < minReactions) return false;
-					if (user && message.mentions.users.first()?.id !== user) return false;
+					const source = await getSourceFromBoard(message);
+					if (
+						user &&
+						(source && source?.author.id) !== user &&
+						message.mentions.users.first()?.id !== user
+					)
+						return false;
 
-					if (channelWanted) {
-						const matchResult = message.content.match(/<#(\d+)>/g);
-						const channelFound = message.mentions.channels.first() || matchResult?.[1];
+					const channelFound =
+						(source && source.channel) || message.mentions.channels.first();
+					if (
+						channelWanted &&
+						channelFound &&
+						!(await textChannelMatchesChannel(channelWanted, channelFound))
+					)
+						return false;
 
-						if (
-							!(
-								channelFound &&
-								(await textChannelMatchesChannel(channelWanted, channelFound))
-							)
-						) {
-							return false;
-						}
-					}
 					return true;
 				}),
 			),
