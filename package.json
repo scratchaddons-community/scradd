@@ -1,14 +1,23 @@
 {
+	"private": true,
 	"name": "scradd",
 	"version": "1.4.3",
-	"license": "MIT",
 	"description": "",
+	"license": "MIT",
+	"homepage": "https://discord.gg/Cs25kzs889",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/scratchaddons-community/scradd.git"
+	},
+	"bugs": {
+		"url": "https://github.com/scratchaddons-community/scradd/issues"
+	},
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
-		"start": "node . --harmony --trace-warnings",
 		"dev": "nodemon . --harmony --trace-warnings",
-		"format": "prettier --write \"**\" --ignore-unknown"
+		"format": "prettier --write \"**\" --ignore-unknown && prettier-package-json --write",
+		"start": "node . --harmony --trace-warnings"
 	},
 	"dependencies": {
 		"@discordjs/builders": "^0.12.0",
@@ -25,16 +34,13 @@
 		"nodemon": "^2.0.15",
 		"openode": "^2.1.6",
 		"prettier": "^2.5.1",
+		"prettier-package-json": "^2.6.0",
 		"typescript": "^4.5.5"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/scratchaddons-community/scradd.git"
-	},
-	"bugs": {
-		"url": "https://github.com/scratchaddons-community/scradd/issues"
-	},
-	"homepage": "https://discord.gg/Cs25kzs889",
-	"private": true,
-	"prettier": "@redguy12/prettier-config"
+	"prettier": "@redguy12/prettier-config",
+	"prettier-package-json": {
+		"tabWidth": 4,
+		"useTabs": true,
+		"expandUsers": true
+	}
 }

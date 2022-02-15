@@ -22,9 +22,9 @@ export default class SuggestionBuilder {
 			interaction.reply({
 				content:
 					`<:no:940054047854047282> In an effort to help SA developers find meaningful suggestions, we have disabled server-related suggestions and bug reports. Now, when a developer looks in <#${process.env.SUGGESTION_CHANNEL}>, they can see suggestions for SA that they can make. ` +
-					data.category.endsWith(" bug")
+					(data.category.endsWith(" bug")
 						? `If I have a bug or the server has a mistake, please send me a DM to let the mods know.`
-						: `If you have a suggestion to improve me or the server, please post it in <#806602307750985803> for discussion.`,
+						: `If you have a suggestion to improve me or the server, please post it in <#806602307750985803> for discussion.`),
 				ephemeral: true,
 			});
 			return false;
@@ -72,7 +72,7 @@ export default class SuggestionBuilder {
 	 * @param {string} answer
 	 * @param {{ [key: string]: import("discord.js").ColorResolvable }} colors
 	 *
-	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
+	 * @returns {Promise<boolean>} - If true, you must respond to the interaction with a success
 	 *   message yourself.
 	 */
 	async answerSuggestion(interaction, answer, colors) {
@@ -225,7 +225,7 @@ export default class SuggestionBuilder {
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 * @param {{ title: null | string; body: null | string; category: null | string }} newSuggestion
 	 *
-	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
+	 * @returns {Promise<boolean>} - If true, you must respond to the interaction with a success
 	 *   message yourself.
 	 */
 	async editSuggestion(interaction, newSuggestion) {
@@ -258,7 +258,7 @@ export default class SuggestionBuilder {
 		const user = initingMessages.first()?.mentions.users.first();
 		if (interaction.user.id !== user?.id) {
 			interaction.reply({
-				content: "<:no:940054047854047282> You do not have permision to use this command.",
+				content: "<:no:940054047854047282> You do not have permission to use this command.",
 				ephemeral: true,
 			});
 			return false;

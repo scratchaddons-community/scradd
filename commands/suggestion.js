@@ -13,7 +13,7 @@ const PAGE_OFFSET = 15;
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
-	INDEVELOPMENT: "In Development",
+	IN_DEVELOPMENT: "In Development",
 	IMPLEMENTED: "Implemented",
 	POSSIBLE: "Possible",
 	IMPRACTICAL: "Impractical",
@@ -66,7 +66,7 @@ const info = {
 						.setName("answer")
 						.setDescription("Answer to the suggestion")
 						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-						.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
+						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
 						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
 						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
 						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
@@ -127,7 +127,7 @@ const info = {
 	// 					"Filter suggestions to only get those with a certain answer.",
 	// 				)
 	// 				.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-	// 				.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
+	// 				.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
 	// 				.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
 	// 				.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
 	// 				.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
@@ -165,7 +165,7 @@ const info = {
 				if (
 					await SuggestionChannel.answerSuggestion(interaction, answer || "", {
 						[ANSWERS.GOODIDEA]: "GREEN",
-						[ANSWERS.INDEVELOPMENT]: "YELLOW",
+						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
 						[ANSWERS.IMPLEMENTED]: "BLUE",
 						[ANSWERS.POSSIBLE]: "ORANGE",
 						[ANSWERS.IMPRACTICAL]: "DARK_RED",
@@ -174,7 +174,7 @@ const info = {
 					})
 				)
 					interaction.reply({
-						content: `<:yes:940054094272430130> Sucessfully answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content: `<:yes:940054094272430130> Successfully answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				break;
@@ -184,16 +184,20 @@ const info = {
 				break;
 			}
 			case "edit": {
+				const title = interaction.options.getString("title");
 				if (
 					await SuggestionChannel.editSuggestion(interaction, {
 						body: interaction.options.getString("suggestion"),
-						title: interaction.options.getString("title"),
+						title,
 						category: interaction.options.getString("category"),
 					})
 				)
 					interaction.reply({
 						content:
-							"<:yes:940054094272430130> Sucessfully edited suggestion! If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
+							"<:yes:940054094272430130> Successfully edited suggestion! " +
+							(title
+								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
+								: ""),
 						ephemeral: true,
 					});
 				break;

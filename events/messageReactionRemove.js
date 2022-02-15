@@ -1,3 +1,3 @@
-import funct from "./messageReactionAdd.js";
+import func from "./messageReactionAdd.js";
 
-export default funct;
+export default func;

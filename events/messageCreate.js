@@ -6,7 +6,7 @@ import {
 	getMemberFromThread,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
-	WH_NAME,
+	WEBHOOK_NAME,
 } from "../common/modmail.js";
 
 dotenv.config();
@@ -29,15 +29,15 @@ export default async (message) => {
 			throw new Error("Modmail channel is not a text channel");
 		const webhooks = await mailChannel.fetchWebhooks();
 		const webhook =
-			webhooks.find((wh) => wh.name === WH_NAME) ||
-			(await mailChannel.createWebhook(WH_NAME));
+			webhooks.find((webhook) => webhook.name === WEBHOOK_NAME) ||
+			(await mailChannel.createWebhook(WEBHOOK_NAME));
 
 		const thread = await getThreadFromMember(guild, message.author);
 		if (thread) {
 			webhook.send({ threadId: thread.id, ...generateMessage(message) });
 		} else {
 			const embed = new MessageEmbed()
-				.setTitle("Confimation")
+				.setTitle("Confirmation")
 				.setDescription(
 					"You are sending this message to the " +
 						mailChannel.guild.name +
@@ -179,15 +179,16 @@ export default async (message) => {
 		content.includes("🥔")
 	)
 		message.react("🥔");
-	if (includes("griff", false) || includes("griffpatch", false))
+	if (includes("griff") || includes("griffpatch", false))
 		message.react("<:griffpatch:938441399936909362>");
 	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
 	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
 	if (includes("appel")) message.react("<:appel:938818517535440896>");
 	if (includes("cubot")) message.react("<:cubot:939336981601722428>");
+	if (includes("splory", false)) message.react("<:splory:942561415594663966>");
 	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
 	if (content.match(/gives?( you)? up/)) message.react("<a:rick:938547171366682624>");
-	if (content.includes("( ^∘^)つ")) message.react("<:scratchxdiscord:939985869421547520>");
+	if (content.includes("( ^∘^)つ")) message.react("<:sxd:939985869421547520>");
 	if (content.includes("scradd bad")) message.react("<:angery:939337168780943390>");
 	if (content.includes("sat on addons"))
 		message
@@ -197,7 +198,7 @@ export default async (message) => {
 
 	const firstMention = message.mentions.users.first();
 	if (
-		content.match(/^r!(mimic|possess|sudo|speakas|sayas|impersonate)\s+<@!?\d+>/iu) &&
+		content.match(/^r!(mimic|possess|sudo|speakAs|sayAs|impersonate)\s+<@!?\d+>/iu) &&
 		firstMention?.id !== message.author.id &&
 		!firstMention?.bot &&
 		!firstMention?.system
@@ -221,7 +222,7 @@ export default async (message) => {
 				"You used the spoiler hack to hide: ```\n" +
 				arr.join(spoilerHack).replaceAll("```", "[3 backticks]") +
 				"\n```",
-			allowedMentions: { users: [], repliedUser: true,roles:[] },
+			allowedMentions: { users: [], repliedUser: true, roles: [] },
 		});
 	}
 };

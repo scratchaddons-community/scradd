@@ -1,13 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
-import {
-	generateMessage,
-	getMemberFromThread,
-	getThreadFromMember,
-	MODMAIL_CHANNEL,
-	WH_NAME,
-} from "../common/modmail.js";
+import { getMemberFromThread, getThreadFromMember, MODMAIL_CHANNEL } from "../common/modmail.js";
 import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
@@ -132,7 +126,7 @@ const info = {
 				if (mailChannel.type !== "GUILD_TEXT")
 					throw new Error("Modmail channel is not a text channel");
 				const embed = new MessageEmbed()
-					.setTitle("Confimation")
+					.setTitle("Confirmation")
 					.setDescription(
 						"Are you sure you want to send this message to " +
 							user?.user.toString() +

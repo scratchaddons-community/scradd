@@ -30,7 +30,7 @@ events.forEach(async (execute, event) =>
 				const embed = new MessageEmbed()
 					.setTitle("Error!")
 					.setDescription(
-						`Uhoh! I found an error! (event ${event})\n\`\`\`json\n${JSON.stringify(
+						`Uh-oh! I found an error! (event ${event})\n\`\`\`json\n${JSON.stringify(
 							error,
 						).replaceAll("[3 backticks]", "```")}\`\`\``,
 					)

@@ -136,7 +136,7 @@ type manifest = {
 	/** The description of the addons. Any credits and attributions also belong here. */
 	description: string;
 	/**
-	 * Tags wich are used for filtering and badges on the Scratch Addons settings page.
+	 * Tags which are used for filtering and badges on the Scratch Addons settings page.
 	 *
 	 * A tag.
 	 */
@@ -319,7 +319,7 @@ type manifest = {
 		id: string;
 		/** The description of the preset. */
 		description?: string;
-		/** An object containing preset vlaues of the settings. */
+		/** An object containing preset values of the settings. */
 		values: {
 			[key: string]: boolean | number | string;
 		};
@@ -381,7 +381,7 @@ type manifest = {
 		/** The name of the CSS variable. */
 		name: string;
 		value: definitions_cssManipulator;
-		/** Whethe to drop the variable entirely when it evaluates to null. */
+		/** Whether to drop the variable entirely when it evaluates to null. */
 		dropNull?: boolean;
 	}[];
 	/** The version that introduced the addon. */
@@ -401,11 +401,11 @@ type manifest = {
 	latestUpdate?: {
 		/** The version of the update. */
 		version: string;
-		/** Whether to list thte addon on "Featured new addons and updates". */
+		/** Whether to list the addon on "Featured new addons and updates". */
 		isMajor?: boolean;
 		/** The notice describing the update. */
 		temporaryNotice?: string;
-		/** The aray of new setting IDs. */
+		/** The array of new setting IDs. */
 		newSettings?: string[];
 	};
 };

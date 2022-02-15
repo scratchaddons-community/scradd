@@ -7,10 +7,10 @@ const { BUGS_CHANNEL } = process.env;
 if (!BUGS_CHANNEL) throw new Error("BUGS_CHANNEL is not set in the .env.");
 
 const ANSWERS = {
-	VALIDBUG: "Valid Bug",
-	MINORBUG: "Minor Bug",
-	INDEVELOPMENT: "In Development",
-	INVALIDBUG: "Invalid Bug",
+	VALID_BUG: "Valid Bug",
+	MINOR_BUG: "Minor Bug",
+	IN_DEVELOPMENT: "In Development",
+	INVALID_BUG: "Invalid Bug",
 	FIXED: "Fixed",
 };
 
@@ -53,10 +53,10 @@ const info = {
 					option
 						.setName("answer")
 						.setDescription("Answer to the bug report")
-						.addChoice(ANSWERS.VALIDBUG, ANSWERS.VALIDBUG)
-						.addChoice(ANSWERS.MINORBUG, ANSWERS.MINORBUG)
-						.addChoice(ANSWERS.INDEVELOPMENT, ANSWERS.INDEVELOPMENT)
-						.addChoice(ANSWERS.INVALIDBUG, ANSWERS.INVALIDBUG)
+						.addChoice(ANSWERS.VALID_BUG, ANSWERS.VALID_BUG)
+						.addChoice(ANSWERS.MINOR_BUG, ANSWERS.MINOR_BUG)
+						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
+						.addChoice(ANSWERS.INVALID_BUG, ANSWERS.INVALID_BUG)
 						.addChoice(ANSWERS.FIXED, ANSWERS.FIXED)
 						.setRequired(true),
 				),
@@ -121,10 +121,10 @@ const info = {
 				const answer = interaction.options.getString("answer");
 				if (
 					await BugsChannel.answerSuggestion(interaction, answer || "", {
-						[ANSWERS.VALIDBUG]: "GREEN",
-						[ANSWERS.MINORBUG]: "DARK_GREEN",
-						[ANSWERS.INDEVELOPMENT]: "YELLOW",
-						[ANSWERS.INVALIDBUG]: "RED",
+						[ANSWERS.VALID_BUG]: "GREEN",
+						[ANSWERS.MINOR_BUG]: "DARK_GREEN",
+						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
+						[ANSWERS.INVALID_BUG]: "RED",
 						[ANSWERS.FIXED]: "BLUE",
 					})
 				)
@@ -140,18 +140,23 @@ const info = {
 				break;
 			}
 			case "edit": {
+				const title = interaction.options.getString("title");
 				if (
 					await BugsChannel.editSuggestion(interaction, {
 						body: interaction.options.getString("report"),
-						title: interaction.options.getString("title"),
+						title,
 						category: interaction.options.getString("category"),
 					})
-				)
+				) {
 					interaction.reply({
 						content:
-							"<:yes:940054094272430130> Sucessfully edited bug report! If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).",
+							"<:yes:940054094272430130> Successfully edited bug report! " +
+							(title
+								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
+								: ""),
 						ephemeral: true,
 					});
+				}
 
 				break;
 			}

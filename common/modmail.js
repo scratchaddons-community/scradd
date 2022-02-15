@@ -1,5 +1,4 @@
 import {
-	Client,
 	Guild,
 	GuildMember,
 	Message,
@@ -10,7 +9,7 @@ import {
 } from "discord.js";
 export const { MODMAIL_CHANNEL = "" } = process.env;
 if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
-export const WH_NAME = "scradd-wh";
+export const WEBHOOK_NAME = "scradd-webhook";
 /**
  * @param {Message} message
  *
