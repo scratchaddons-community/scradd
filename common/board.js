@@ -64,9 +64,9 @@ async function generateReplyInfo(message) {
 	const repliedMessage = message.type === "REPLY" ? await message.fetchReference() : false;
 
 	if (!repliedMessage) return "";
-	const { author, content } = repliedMessage;
+	const { author, cleanContent } = repliedMessage;
 
-	if (content) return `*Replying to ${author}:*\n> ${truncateText(content, 100)}\n\n`;
+	if (cleanContent) return `*Replying to ${author}:*\n> ${truncateText(cleanContent, 100)}\n\n`;
 	else return `*Replying to ${author}*\n\n`;
 }
 
