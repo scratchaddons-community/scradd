@@ -5,6 +5,7 @@ import { Client, Intents, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
 import importScripts from "./lib/importScripts.js";
+import escape, { escapeForCodeblock } from "./lib/escape.js";
 
 dotenv.config();
 process.on("unhandledException", console.error);
@@ -36,9 +37,9 @@ for (const [event, execute] of events.entries()) {
 				const embed = new MessageEmbed()
 					.setTitle("Error!")
 					.setDescription(
-						`Uh-oh! I found an error! (event ${event})\n\`\`\`json\n${JSON.stringify(
-							error,
-						).replaceAll("[3 backticks]", "```")}\`\`\``,
+						`Uh-oh! I found an error! (event ${escape(
+							event,
+						)})\n\`\`\`json\n${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
 					)
 					.setColor("RANDOM");
 				const { ERROR_CHANNEL } = process.env;
@@ -47,7 +48,7 @@ for (const [event, execute] of events.entries()) {
 
 				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
 
-				if (!testingChannel || !("send" in testingChannel))
+				if (!testingChannel?.isText())
 					throw new Error("Could not find error reporting channel");
 
 				await testingChannel.send({

@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
+import escape, { escapeForInlineCode, escapeForLink } from "../lib/escape.js";
 
 import generateTooltip from "../lib/generateTooltip.js";
 
@@ -65,7 +66,7 @@ const info = {
 			return credits
 				?.map(({ name, link, note }) =>
 					link
-						? `[${name}](${link} "${note || ""}")`
+						? `[${escapeForLink(name)}](${link} "${note || ""}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
@@ -83,7 +84,9 @@ const info = {
 
 		if (!item) {
 			await interaction.reply({
-				content: "<:no:940054047854047282> That addon does not exist!",
+				content: `<:no:940054047854047282> That addon${
+					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
+				} does not exist!`,
 				ephemeral: true,
 			});
 
@@ -119,18 +122,18 @@ const info = {
 			.setColor("BLURPLE")
 			.setDescription(
 				`${
-					addon.description
+					escape(addon.description)
 				}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${
-					item.id
+					encodeURIComponent(item.id)
 				})${
 					addon.permissions?.length
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
 						: ""
 				}`,
 			)
-			.setImage(`https://scratchaddons.com/assets/img/addons/${item.id}.png`)
+			.setImage(`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`)
 			.setFooter({
-				text: input ? `Input: ${input}` : "Random addon",
+				text: input ? `Input: ${(input)}` : "Random addon",
 			});
 
 		const group = addon.tags.includes("popup")
@@ -145,7 +148,7 @@ const info = {
 
 		if (group !== "Easter Eggs") {
 			embed.setURL(
-				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${item.id}`,
+				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(item.id)}`,
 			);
 		}
 
@@ -157,12 +160,12 @@ const info = {
 			{
 				inline: true,
 				name: "Group",
-				value: group,
+				value: escape(group),
 			},
 			{
 				inline: true,
 				name: "Version added",
-				value: addon.versionAdded + latestUpdateInfo,
+				value: escape(addon.versionAdded + latestUpdateInfo),
 			},
 		]);
 

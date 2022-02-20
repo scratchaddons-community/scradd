@@ -1,5 +1,6 @@
 /** @file Code To perform operations related to modmail tickets. */
 import { MessageEmbed } from "discord.js";
+import {escapeForWebhook} from "../lib/escape.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
@@ -25,12 +26,11 @@ export async function generateMessage(message) {
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: message.author.avatarURL() || "",
-		content: message.content || undefined,
+		content: escapeForWebhook(message.content) || undefined,
 
 		embeds: message.stickers
 			.map((sticker) =>
 				new MessageEmbed()
-					.setDescription("")
 					.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`),
 			)
 			.concat(message.embeds.map((embed) => new MessageEmbed(embed)))

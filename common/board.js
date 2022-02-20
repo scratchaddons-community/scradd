@@ -1,6 +1,7 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
+import escape, { escapeForWebhook } from "../lib/escape.js";
 
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
@@ -78,15 +79,15 @@ export async function sourceToBoardMessage(message) {
  */
 async function generateReplyInfo(message) {
 	if (message.type === "CONTEXT_MENU_COMMAND") {
-		return `${message.interaction?.user.toString() || ""} used **${
-			message.interaction?.commandName || ""
-		}**:\n`;
+		return `${message.interaction?.user.toString() || ""} used **${escape(
+			message.interaction?.commandName || "",
+		)}**:\n`;
 	}
 
 	if (message.type === "APPLICATION_COMMAND") {
-		return `${message.interaction?.user.toString() || ""} used **/${
-			message.interaction?.commandName || ""
-		}**:\n`;
+		return `${message.interaction?.user.toString() || ""} used **/${escape(
+			message.interaction?.commandName || "",
+		)}**:\n`;
 	}
 
 	const repliedMessage = message.type === "REPLY" ? await message.fetchReference() : false;
@@ -95,7 +96,8 @@ async function generateReplyInfo(message) {
 
 	const { author, cleanContent } = repliedMessage;
 
-	if (cleanContent) return `*Replying to ${author.toString()}:*\n> ${truncateText(cleanContent, 100)}\n\n`;
+	if (cleanContent)
+		return `*Replying to ${author.toString()}:*\n> ${truncateText(cleanContent, 100)}\n\n`;
 
 	return `*Replying to ${author.toString()}*\n\n`;
 }
@@ -121,7 +123,7 @@ export async function postMessageToBoard(message) {
 		case "CHANNEL_NAME_CHANGE": {
 			// Rename thread
 			description = `<:edit:938441054716297277> ${message.author.toString()} changed the channel name: **${
-				(message.channel.isThread() && message.channel.name) || ""
+				message.channel.isThread() ? escape(message.channel.name) : ""
 			}**`;
 
 			break;
@@ -130,9 +132,11 @@ export async function postMessageToBoard(message) {
 			// Pin message
 			const pinned = await message.fetchReference();
 
-			description = `<:pin:938441100258070568> ${message.author.toString()} pinned [a message](https://discord.com/channels/${
-				pinned.guild?.id || ""
-			}/${pinned.channel?.id}/${pinned.id}). See all **pinned messages**.`;
+			description = `<:pin:938441100258070568> ${message.author.toString()} pinned [a message](https://discord.com/channels/${encodeURIComponent(
+				pinned.guild?.id || "",
+			)}/${encodeURIComponent(pinned.channel?.id)}/${encodeURIComponent(
+				pinned.id,
+			)}). See all **pinned messages**.`;
 
 			break;
 		}
@@ -144,9 +148,9 @@ export async function postMessageToBoard(message) {
 		}
 		case "CHANNEL_FOLLOW_ADD": {
 			// Follow channel
-			description = `<:add:938441019278635038> ${message.author.toString()} has added **${
-				message.content
-			}** to this channel. Its most important updates will show up here.`;
+			description = `<:add:938441019278635038> ${message.author.toString()} has added **${escape(
+				message.content,
+			)}** to this channel. Its most important updates will show up here.`;
 
 			break;
 		}
@@ -159,9 +163,9 @@ export async function postMessageToBoard(message) {
 		}
 		case "THREAD_CREATED": {
 			// Xxx started a thread: xxx. see all threads.
-			description = `<:thread:938441090657296444> ${message.author.toString()} started a thread: **${
-				message.content
-			}** See all **threads**.`;
+			description = `<:thread:938441090657296444> ${message.author.toString()} started a thread: **${escape(
+				message.content,
+			)}** See all **threads**.`;
 
 			break;
 		}
@@ -173,25 +177,25 @@ export async function postMessageToBoard(message) {
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 1**!
-			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${
-				message.guild.name
-			} has achieved **Level 1**!`;
+			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${escape(
+				message.guild.name,
+			)} has achieved **Level 1**!`;
 
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 2**!
-			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${
-				message.guild.name
-			} has achieved **Level 2**!`;
+			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${escape(
+				message.guild.name,
+			)} has achieved **Level 2**!`;
 
 			break;
 		}
 		case "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3": {
 			// :nitro: **xxx** just boosted the server! xxx has achieved **Level 3**!
-			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${
-				message.guild.name
-			} has achieved **Level 3**!`;
+			description = `<:boost:938441038756986931> ${message.author.toString()} just boosted the server! ${escape(
+				message.guild.name,
+			)} has achieved **Level 3**!`;
 
 			break;
 		}
@@ -225,9 +229,9 @@ export async function postMessageToBoard(message) {
 	const embeds = [
 		embed,
 		...message.stickers.map((sticker) =>
-			new MessageEmbed()
-				.setDescription("")
-				.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`),
+			new MessageEmbed().setImage(
+				`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
+			),
 		),
 		...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 	];

@@ -4,6 +4,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
 import { getMemberFromThread, getThreadFromMember, MODMAIL_CHANNEL } from "../common/modmail.js";
+import escape from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
@@ -206,8 +207,8 @@ const info = {
 											new MessageEmbed()
 												.setTitle("Modmail ticket opened")
 												.setDescription(
-													`The moderation team of ${
-														interaction.guild?.name || "Scratch Addons"
+													`The moderation team of ${escape(
+														interaction.guild?.name || "Scratch Addons")
 													} would like to talk to you.`,
 												)
 												.setColor("BLURPLE"),

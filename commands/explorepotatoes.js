@@ -180,7 +180,6 @@ const info = {
 
 			if (!source?.components[0]?.components[0]) {
 				return {
-					allowedMentions: { users: [] },
 					attachments: [],
 					components: [],
 
@@ -195,8 +194,6 @@ const info = {
 			if (fetchedMessages.length === 0) nextButton.setDisabled(true);
 
 			return {
-				allowedMentions: { users: [] },
-
 				components: [
 					source.components[0]?.components[0]
 						? source.components[0]?.setComponents(

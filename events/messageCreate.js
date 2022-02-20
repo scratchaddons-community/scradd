@@ -9,6 +9,7 @@ import {
 	MODMAIL_CHANNEL,
 	WEBHOOK_NAME,
 } from "../common/modmail.js";
+import escape, {escapeForCodeblock} from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
@@ -55,7 +56,7 @@ export default async function messageCreate(message) {
 			const confirmEmbed = new MessageEmbed()
 				.setTitle("Confirmation")
 				.setDescription(
-					`You are sending this message to the ${mailChannel.guild.name} Server's mod team. If you are sure you would like to do this, press the button below.`,
+					`You are sending this message to the ${escape(mailChannel.guild.name)} Server's mod team. If you are sure you would like to do this, press the button below.`,
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -201,10 +202,10 @@ export default async function messageCreate(message) {
 	 */
 	function includes(text, plural = true) {
 		return (
-			content.split(/\W+/).includes(text) ||
+			content.split(/[^a-z0-9]+/gi).includes(text) ||
 			(plural &&
-				(content.split(/\W+/).includes(`${text}s`) ||
-					content.split(/\W+/).includes(`${text}es`)))
+				(content.split(/[^a-z0-9]+/gi).includes(`${text}s`) ||
+					content.split(/[^a-z0-9]+/gi).includes(`${text}es`)))
 		);
 	}
 
@@ -266,16 +267,6 @@ export default async function messageCreate(message) {
 	) {
 		const member = await message.guild?.members.fetch(firstMention?.id || "");
 
-		/**
-		 * Escape text for use inside inline code blocks.
-		 *
-		 * @param {string} text - The text to escape.
-		 *
-		 * @returns {string} The escaped text.
-		 */
-		function escape(text) {
-			return text.replaceAll("`", "\\`");
-		}
 
 		promises.push(
 			message.reply({
@@ -307,9 +298,8 @@ export default async function messageCreate(message) {
 			message.reply({
 				allowedMentions: { repliedUser: true, roles: [], users: [] },
 
-				content: `You used the spoiler hack to hide: \`\`\`\n${array
-					.join(spoilerHack)
-					.replaceAll("```", "[3 backticks]")}\n\`\`\``,
+				content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(array
+					.join(spoilerHack))}\n\`\`\``,
 			}),
 		);
 	}
