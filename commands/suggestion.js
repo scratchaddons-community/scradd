@@ -1,27 +1,32 @@
+/** @file Commands To manage suggestions. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import SuggestionBuilder, { MAX_TITLE_LENGTH } from "../common/suggest.js";
-import { MessageActionRow, MessageButton, MessageEmbed, MessagePayload } from "discord.js";
-import getAllMessages from "../lib/getAllMessages.js";
-import generateHash from "../lib/generateHash.js";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
+
+import SuggestionChannel, { MAX_TITLE_LENGTH } from "../common/suggest.js";
+import generateHash from "../lib/generateHash.js";
+import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
 
 dotenv.config();
-const { SUGGESTION_CHANNEL } = process.env;
+
+const { SUGGESTION_CHANNEL = "", GUILD_ID = "" } = process.env;
+
 if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
+
 const PAGE_OFFSET = 15;
 
 const ANSWERS = {
 	GOODIDEA: "Good Idea",
-	IN_DEVELOPMENT: "In Development",
 	IMPLEMENTED: "Implemented",
-	POSSIBLE: "Possible",
-	IMPRACTICAL: "Impractical",
-	REJECTED: "Rejected",
 	IMPOSSIBLE: "Impossible",
+	IMPRACTICAL: "Impractical",
+	IN_DEVELOPMENT: "In Development",
+	POSSIBLE: "Possible",
+	REJECTED: "Rejected",
 };
 
-const SuggestionChannel = new SuggestionBuilder(SUGGESTION_CHANNEL);
+const suggestions = new SuggestionChannel(SUGGESTION_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -110,6 +115,7 @@ const info = {
 						.setRequired(false),
 				),
 		),
+
 	// .addSubcommand((subcommand) =>
 	// 	subcommand
 	// 		.setName("get-top")
@@ -136,34 +142,38 @@ const info = {
 	// 				.addChoice("Unanswered", "Unanswered")
 	// 				.setRequired(false),
 	// 		),
-	//)
+	// )
 	async interaction(interaction) {
-		if (interaction.guild?.id !== process.env.GUILD_ID || !interaction.channel?.isText())
-			return;
+		if (interaction.guild?.id !== GUILD_ID || !interaction.channel?.isText()) return;
+
 		const command = interaction.options.getSubcommand();
+
 		switch (command) {
 			case "create": {
-				const res = await SuggestionChannel.createMessage(interaction, {
-					title: interaction.options.getString("title") || "",
-					description: interaction.options.getString("suggestion") || "",
-					type: "Suggestion",
+				const success = await suggestions.createMessage(interaction, {
 					category: interaction.options.getString("category") || "",
+					description: interaction.options.getString("suggestion") || "",
+					title: interaction.options.getString("title") || "",
+					type: "Suggestion",
 				});
-				if (res) {
+
+				if (success) {
 					await Promise.all([
-						res.message.react("👍").then(() => res.message.react("👎")),
+						success.react("👍").then(async () => await success.react("👎")),
 						interaction.reply({
-							content: `<:yes:940054094272430130> Suggestion posted! See ${res.thread}`,
+							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread.toString()}`,
 							ephemeral: true,
 						}),
 					]);
 				}
+
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer");
+				const answer = interaction.options.getString("answer") || "";
+
 				if (
-					await SuggestionChannel.answerSuggestion(interaction, answer || "", {
+					await suggestions.answerSuggestion(interaction, answer, {
 						[ANSWERS.GOODIDEA]: "GREEN",
 						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
 						[ANSWERS.IMPLEMENTED]: "BLUE",
@@ -172,34 +182,41 @@ const info = {
 						[ANSWERS.REJECTED]: "RED",
 						[ANSWERS.IMPOSSIBLE]: "PURPLE",
 					})
-				)
-					interaction.reply({
+				) {
+					await interaction.reply({
 						content: `<:yes:940054094272430130> Successfully answered suggestion as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
+				}
+
 				break;
 			}
 			case "delete": {
-				await SuggestionChannel.deleteSuggestion(interaction);
+				await suggestions.deleteSuggestion(interaction);
+
 				break;
 			}
 			case "edit": {
 				const title = interaction.options.getString("title");
+
 				if (
-					await SuggestionChannel.editSuggestion(interaction, {
+					await suggestions.editSuggestion(interaction, {
 						body: interaction.options.getString("suggestion"),
-						title,
 						category: interaction.options.getString("category"),
+						title,
 					})
-				)
-					interaction.reply({
-						content:
-							"<:yes:940054094272430130> Successfully edited suggestion! " +
-							(title
+				) {
+					await interaction.reply({
+						content: `<:yes:940054094272430130> Successfully edited suggestion! ${
+							title
 								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
-								: ""),
+								: ""
+						}`,
+
 						ephemeral: true,
 					});
+				}
+
 				break;
 			}
 			case "get-top": {
@@ -218,7 +235,9 @@ const info = {
 				];
 
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
+
 				if (!channel?.isText()) return;
+
 				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
 
 				const all = (
@@ -228,10 +247,11 @@ const info = {
 								const upvoteReaction = message.reactions.resolve(upvote);
 								const downvoteReaction = message.reactions.resolve(downvote);
 
-								if (!upvoteReaction || !downvoteReaction) return;
+								if (!upvoteReaction || !downvoteReaction) return false;
 
 								return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
-							}).find((count) => typeof count === "number");
+							}).find((currentCount) => typeof currentCount === "number");
+
 							if (typeof count !== "number") return;
 
 							const description =
@@ -239,42 +259,49 @@ const info = {
 								message.embeds[0]?.description ||
 								message.content;
 
-							const authorTag = message.embeds[0]?.author?.name.split(/#| /g).at(-2);
+							const authorTag = message.embeds[0]?.author?.name.split(/#| /).at(-2);
 							const author = (
 								message.author.id === "323630372531470346" && authorTag
 									? await interaction.guild?.members.search({ query: authorTag })
 									: (
 											await message.thread?.messages.fetch({
-												limit: 2,
 												after: (
 													await message.thread.fetchStarterMessage()
 												).id,
+
+												limit: 2,
 											})
 									  )?.first()?.mentions.users
 							)?.first();
 							const requestedUser = interaction.options.getUser("user")?.id;
+
 							if (requestedUser && author?.id !== requestedUser) return;
 
 							const answer =
 								message.thread?.name.split("|")[0]?.trim() || "Unanswered";
 							const requestedAnswer = interaction.options.getString("answer");
+
 							if (requestedAnswer && answer !== requestedAnswer) return;
 
 							return {
-								id: message.id,
+								answer,
+								author: author?.toString(),
 								count,
+								id: message.id,
+
 								title: truncateText(
 									description.split("/n")[0] || "",
 									MAX_TITLE_LENGTH,
 								),
-								answer,
-								author: author?.toString(),
 							};
 						}),
 					)
 				)
-					.filter((a) => a)
-					.sort((a, b) => (b?.count || 0) - (a?.count || 0));
+					.filter((suggestion) => suggestion)
+					.sort(
+						(suggestionOne, suggestionTwo) =>
+							(suggestionTwo?.count || 0) - (suggestionOne?.count || 0),
+					);
 
 				const previousButton = new MessageButton()
 					.setLabel("<< Previous")
@@ -288,36 +315,50 @@ const info = {
 					.setDisabled(numberOfPages === 1)
 					.setCustomId(generateHash("next"));
 
+				// eslint-disable-next-line fp/no-let -- This must be changable.
 				let offset = 0;
-				/**
-				 * @returns {Promise<
-				 * 	MessagePayload | import("discord.js").InteractionReplyOptions
-				 * >}
-				 */
-				async function embed() {
-					const content = all
-						.filter((x, i) => x && i >= offset && i < offset + PAGE_OFFSET)
-						.map((x, i) => {
-							if (!x) return; // impossible
 
-							return (
-								`${i + offset + 1}. **${x.count}** [👍 ${
-									x.title
-								}](https://discord.com/channels/${
-									process.env.GUILD_ID
-								}/${SUGGESTION_CHANNEL}/${x.id} "${x.answer}")` +
-								(x.author ? ` by ${x.author}` : ``)
-							);
+				/**
+				 * Generate an embed that lists the top suggestions.
+				 *
+				 * @returns {	| import("discord.js").MessagePayload
+				 * 	| import("discord.js").InteractionReplyOptions}
+				 *   - Embed with top suggestions.
+				 */
+				function embed() {
+					const content = all
+						.filter(
+							(suggestion, index) =>
+								suggestion && index >= offset && index < offset + PAGE_OFFSET,
+						)
+						.map((suggestion, index) => {
+							if (!suggestion) return ""; // Impossible
+
+							return `${index + offset + 1}. **${suggestion.count}** [👍 ${
+								suggestion.title
+							}](https://discord.com/channels/${GUILD_ID}/${SUGGESTION_CHANNEL}/${
+								suggestion.id
+							} "${suggestion.answer}")${
+								suggestion.author ? ` by ${suggestion.author}` : ""
+							}`;
 						})
 						.join("\n")
 						.trim();
-					if (!content.length)
+
+					if (content.length === 0) {
 						return {
 							content:
 								"<:no:940054047854047282> No suggestions found. Try changing any filters you may have used.",
+
 							ephemeral: true,
 						};
+					}
+
 					return {
+						components: [
+							new MessageActionRow().addComponents(previousButton, nextButton),
+						],
+
 						embeds: [
 							new MessageEmbed()
 								.setTitle("Top suggestions")
@@ -329,45 +370,47 @@ const info = {
 								})
 								.setColor("BLURPLE"),
 						],
-						components: [
-							new MessageActionRow().addComponents(previousButton, nextButton),
-						],
 					};
 				}
 
-				interaction.editReply(await embed());
+				await interaction.editReply(embed());
 
 				const collector = interaction.channel.createMessageComponentCollector({
-					filter: (i) =>
-						[previousButton.customId, nextButton.customId].includes(i.customId) &&
-						i.user.id === interaction.user.id,
+					filter: (buttonInteraction) =>
+						[previousButton.customId, nextButton.customId].includes(
+							buttonInteraction.customId,
+						) && buttonInteraction.user.id === interaction.user.id,
+
 					time: 15_000,
 				});
 
 				collector
-					.on("collect", async (i) => {
+					.on("collect", async (buttonInteraction) => {
 						if (!interaction.channel?.isText()) return;
-						if (i.customId === nextButton.customId) {
+
+						if (buttonInteraction.customId === nextButton.customId)
 							offset += PAGE_OFFSET;
-						} else {
-							offset -= PAGE_OFFSET;
-						}
+						else offset -= PAGE_OFFSET;
+
 						previousButton.setDisabled(offset === 0);
 						nextButton.setDisabled(offset + PAGE_OFFSET >= all.length - 1);
-						interaction.editReply(await embed());
-						i.deferUpdate();
+						await Promise.all([
+							interaction.editReply(embed()),
+							buttonInteraction.deferUpdate(),
+						]);
 						collector.resetTimer();
 					})
 					.on("end", async () => {
 						previousButton.setDisabled(true);
 						nextButton.setDisabled(true);
-						interaction.editReply({
-							embeds: (await interaction.fetchReply()).embeds.map(
-								(oldEmbed) => new MessageEmbed(oldEmbed),
-							),
+						await interaction.editReply({
 							components: [
 								new MessageActionRow().addComponents(previousButton, nextButton),
 							],
+
+							embeds: (
+								await interaction.fetchReply()
+							).embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 						});
 					});
 			}

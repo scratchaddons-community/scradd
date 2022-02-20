@@ -1,6 +1,8 @@
+/** @file Commands To manage modmails. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
+
 import { getMemberFromThread, getThreadFromMember, MODMAIL_CHANNEL } from "../common/modmail.js";
 import generateHash from "../lib/generateHash.js";
 
@@ -38,6 +40,7 @@ const info = {
 
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
+
 		switch (command) {
 			case "close": {
 				if (
@@ -45,12 +48,14 @@ const info = {
 					interaction.channel.parentId !== MODMAIL_CHANNEL ||
 					!interaction.guild
 				) {
-					interaction.reply({
+					await interaction.reply({
 						content: `<:no:940054047854047282> This command can only be used in threads in <#${MODMAIL_CHANNEL}>.`,
 						ephemeral: true,
 					});
+
 					return;
 				}
+
 				const reason = interaction.options.getString("reason") || "";
 				/** @type {Promise<any>[]} */
 				const promises = [
@@ -58,24 +63,21 @@ const info = {
 						content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
 					}),
 				];
-				promises.push(
-					getMemberFromThread(interaction.guild, interaction.channel).then(
-						async (user) => {
-							const dm = await user?.createDM().catch(() => {});
-							dm?.send({
-								embeds: [
-									new MessageEmbed()
-										.setTitle("Modmail ticket closed!")
-										.setDescription(reason)
-										.setTimestamp(interaction.channel?.createdTimestamp)
-										.setColor(0x008000),
-								],
-							});
-						},
-					),
-				);
 
 				promises.push(
+					getMemberFromThread(interaction.channel).then(async (user) => {
+						const dmChannel = await user?.createDM().catch(() => {});
+
+						return await dmChannel?.send({
+							embeds: [
+								new MessageEmbed()
+									.setTitle("Modmail ticket closed!")
+									.setDescription(reason)
+									.setTimestamp(interaction.channel?.createdTimestamp)
+									.setColor(0x008000),
+							],
+						});
+					}),
 					interaction.channel
 						.fetchStarterMessage()
 						.catch(() => {})
@@ -83,59 +85,77 @@ const info = {
 							starter?.edit({
 								embeds: [
 									{
-										title: "Modmail ticket closed!",
-										description: starter.embeds[0]?.description || "",
 										color: 0x008000,
+										description: starter.embeds[0]?.description || "",
+										title: "Modmail ticket closed!",
 									},
 								],
 							}),
 						),
 				);
 				await Promise.all(promises);
-				await interaction.channel.setLocked(true, "Closed by " + interaction.user.tag);
-				await interaction.channel.setArchived(true, "Closed by " + interaction.user.tag);
+				await interaction.channel.setLocked(true, `Closed by ${interaction.user.tag}`);
+				await interaction.channel.setArchived(true, `Closed by ${interaction.user.tag}`);
+
 				break;
 			}
 			case "start": {
 				const user = await interaction.guild?.members.fetch(
 					interaction.options.getUser("user") || "",
 				);
+
 				if (!user || !interaction.guild) {
-					interaction.reply({
+					await interaction.reply({
 						content: "<:no:940054047854047282> Could not find user.",
 						ephemeral: true,
 					});
+
 					return;
 				}
+
 				const thread = await getThreadFromMember(interaction.guild, user);
-				if (thread)
-					return interaction.reply({
-						ephemeral: true,
+
+				if (thread) {
+					await interaction.reply({
 						content: "<:no:940054047854047282> User already has a ticket open.",
-					});
-				const dm = await user.createDM().catch(() => {
-					interaction.reply({
 						ephemeral: true,
-						content:
-							"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
 					});
+
+					return;
+				}
+
+				/** @type {Promise<unknown>[]} */
+				const promises = [];
+
+				const dmChannel = await user.createDM().catch(() => {
+					promises.push(
+						interaction.reply({
+							content:
+								"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
+
+							ephemeral: true,
+						}),
+					);
 				});
-				if (!dm) return;
+
+				if (!dmChannel) return;
+
 				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
+
 				if (!mailChannel) throw new Error("Could not find modmail channel");
+
 				if (mailChannel.type !== "GUILD_TEXT")
 					throw new Error("Modmail channel is not a text channel");
-				const embed = new MessageEmbed()
+
+				const confirmEmbed = new MessageEmbed()
 					.setTitle("Confirmation")
 					.setDescription(
-						"Are you sure you want to send this message to " +
-							user?.user.toString() +
-							"?",
+						`Are you sure you want to send this message to ${user?.user.toString()}?`,
 					)
 					.setColor("BLURPLE")
 					.setAuthor({
-						name: user.displayName || user.user.username,
 						iconURL: user?.avatarURL() || user?.user.avatarURL() || undefined,
+						name: user.displayName || user.user.username,
 					});
 
 				const button = new MessageButton()
@@ -146,73 +166,81 @@ const info = {
 					.setLabel("Cancel")
 					.setCustomId(generateHash("cancel"))
 					.setStyle("SECONDARY");
+
 				await interaction.reply({
-					ephemeral: true,
-					embeds: [embed],
 					components: [new MessageActionRow().addComponents(button, cancelButton)],
+					embeds: [confirmEmbed],
+					ephemeral: true,
 					fetchReply: true,
 				});
 
 				interaction.channel
 					?.createMessageComponentCollector({
-						filter: (i) =>
-							[button.customId, cancelButton.customId].includes(i.customId) &&
-							i.user.id === interaction.user.id,
+						filter: (buttonInteraction) =>
+							[button.customId, cancelButton.customId].includes(
+								buttonInteraction.customId,
+							) && buttonInteraction.user.id === interaction.user.id,
+
 						time: 15_000,
 					})
-					.on("collect", async (i) => {
-						switch (i.customId) {
+					.on("collect", async (buttonInteraction) => {
+						switch (buttonInteraction.customId) {
 							case button.customId: {
-								const embed = new MessageEmbed()
+								const openedEmbed = new MessageEmbed()
 									.setTitle("Modmail ticket opened")
 									.setDescription(
-										"Ticket to " +
-											user.toString() +
-											" (by " +
-											interaction.user.toString() +
-											")",
+										`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 									)
 									.setColor("BLURPLE");
 
-								const starterMsg = await mailChannel.send({
-									embeds: [embed],
+								const starterMessage = await mailChannel.send({
+									embeds: [openedEmbed],
 								});
-								await starterMsg.startThread({
+
+								await starterMessage.startThread({
 									name: `${user.user.username} (${user.id})`,
 								});
-								dm.send({
-									embeds: [
-										new MessageEmbed()
-											.setTitle("Modmail ticket opened")
-											.setDescription(
-												"The moderation team of " +
-													interaction.guild?.name +
-													" would like to talk to you.",
-											)
-											.setColor("BLURPLE"),
-									],
-								});
-								i.reply({
-									content: "<:yes:940054094272430130> Modmail ticket opened",
-									ephemeral: true,
-								});
+								await Promise.all([
+									dmChannel.send({
+										embeds: [
+											new MessageEmbed()
+												.setTitle("Modmail ticket opened")
+												.setDescription(
+													`The moderation team of ${
+														interaction.guild?.name || "Scratch Addons"
+													} would like to talk to you.`,
+												)
+												.setColor("BLURPLE"),
+										],
+									}),
+									buttonInteraction.reply({
+										content: "<:yes:940054094272430130> Modmail ticket opened",
+										ephemeral: true,
+									}),
+								]);
 								button.setDisabled(true);
+
 								break;
 							}
 							case cancelButton.customId: {
-								i.reply({
+								await buttonInteraction.reply({
 									content: "<:no:940054047854047282> Modmail canceled",
 									ephemeral: true,
 								});
+
 								break;
 							}
 						}
 					});
+
+				await Promise.all(promises);
+
 				break;
 			}
 		}
 	},
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", type: "ROLE", permission: true }],
+
+	permissions: [{ id: process.env.MODERATOR_ROLE || "", permission: true, type: "ROLE" }],
 };
 
 export default info;

@@ -1,26 +1,31 @@
+/** @file Update Potatoboard when reactions are added. */
+import dotenv from "dotenv";
+
 import {
 	BOARD_CHANNEL,
 	BOARD_EMOJI,
-	getMessageFromBoard,
+	sourceToBoardMessage,
 	postMessageToBoard,
 	MIN_REACTIONS,
 	updateReactionCount,
 } from "../common/board.js";
-import dotenv from "dotenv";
 
 dotenv.config();
+
 /**
+ * Determine if a message should be posted to #potatoboard or update it if it is already there.
+ *
  * This code is reused for messageReactionRemove as well.
  *
- * @param {import("discord.js").MessageReaction} reaction
- * @param {import("discord.js").User} user
+ * @param {import("discord.js").MessageReaction} reaction - The added reaction.
+ * @param {import("discord.js").User} user - The user who reacted.
  */
-
-export default async (reaction, user) => {
+export default async function reactionAdd(reaction, user) {
 	if (reaction.partial) reaction = await reaction.fetch();
-	if (reaction.message.partial) reaction.message = await reaction.message.fetch();
+
+	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
+
 	if (user.partial) user = await user.fetch();
-	const message = reaction.message;
 
 	if (
 		// Ignore other servers
@@ -35,25 +40,29 @@ export default async (reaction, user) => {
 	if (
 		// if a bot reacted
 		(user.bot && user.id !== message.client.user?.id) ||
-		// or if they self-reacted
+		// Or if they self-reacted
 		(user.id === message.author.id && process.env.NODE_ENV === "production") ||
-		// or if they reacted to a message on the board
+		// Or if they reacted to a message on the board
 		(message.channel.id === BOARD_CHANNEL && message.author.id === message.client.user?.id) ||
-		// or they reacted to an /explorepotatoes message
-		(message.interaction?.commandName === "explorepotatoes" && message.embeds.length)
-	)
-		// remove the reaction
-		return await reaction.users.remove(user);
+		// Or they reacted to an /explorepotatoes message
+		(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
+	) {
+		// Remove the reaction
+		await reaction.users.remove(user);
 
-	const boardMessage = await getMessageFromBoard(message);
+		return;
+	}
+
+	const boardMessage = await sourceToBoardMessage(message);
 
 	const fetched = message.reactions.resolve(BOARD_EMOJI);
 	const count = (fetched?.count || 0) - (fetched?.me ? 1 : 0);
 
 	if (boardMessage?.embeds[0]) {
-		updateReactionCount(count, boardMessage);
+		await updateReactionCount(count, boardMessage);
 	} else {
 		if (count < MIN_REACTIONS) return;
-		postMessageToBoard(message);
+
+		await postMessageToBoard(message);
 	}
-};
+}

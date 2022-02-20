@@ -1,20 +1,24 @@
+/** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import SuggestionBuilder from "../common/suggest.js";
 import dotenv from "dotenv";
 
+import SuggestionChannel from "../common/suggest.js";
+
 dotenv.config();
-const { BUGS_CHANNEL } = process.env;
+
+const { BUGS_CHANNEL, GUILD_ID } = process.env;
+
 if (!BUGS_CHANNEL) throw new Error("BUGS_CHANNEL is not set in the .env.");
 
 const ANSWERS = {
-	VALID_BUG: "Valid Bug",
-	MINOR_BUG: "Minor Bug",
-	IN_DEVELOPMENT: "In Development",
-	INVALID_BUG: "Invalid Bug",
 	FIXED: "Fixed",
+	INVALID_BUG: "Invalid Bug",
+	IN_DEVELOPMENT: "In Development",
+	MINOR_BUG: "Minor Bug",
+	VALID_BUG: "Valid Bug",
 };
 
-const BugsChannel = new SuggestionBuilder(BUGS_CHANNEL);
+const channel = new SuggestionChannel(BUGS_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -98,19 +102,22 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== process.env.GUILD_ID) return;
+		if (interaction.guild?.id !== GUILD_ID) return;
+
 		const command = interaction.options.getSubcommand();
+
 		switch (command) {
 			case "create": {
-				const res = await BugsChannel.createMessage(interaction, {
-					title: interaction.options.getString("title") || "",
-					description: interaction.options.getString("report") || "",
-					type: "Report",
+				const success = await channel.createMessage(interaction, {
 					category: interaction.options.getString("category") || "",
+					description: interaction.options.getString("report") || "",
+					title: interaction.options.getString("title") || "",
+					type: "Report",
 				});
-				if (res) {
+
+				if (success) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Bug report posted! See ${res.thread}`,
+						content: `<:yes:940054094272430130> Bug report posted! See ${success.toString()}`,
 						ephemeral: true,
 					});
 				}
@@ -118,42 +125,47 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer");
+				const answer = interaction.options.getString("answer") || "";
+
 				if (
-					await BugsChannel.answerSuggestion(interaction, answer || "", {
+					await channel.answerSuggestion(interaction, answer, {
 						[ANSWERS.VALID_BUG]: "GREEN",
 						[ANSWERS.MINOR_BUG]: "DARK_GREEN",
 						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
 						[ANSWERS.INVALID_BUG]: "RED",
 						[ANSWERS.FIXED]: "BLUE",
 					})
-				)
-					interaction.reply({
+				) {
+					await interaction.reply({
 						content: `:white_check_mark: Answered report as ${answer}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
+				}
+
 				break;
 			}
 			case "delete": {
-				await BugsChannel.deleteSuggestion(interaction);
+				await channel.deleteSuggestion(interaction);
 
 				break;
 			}
 			case "edit": {
 				const title = interaction.options.getString("title");
+
 				if (
-					await BugsChannel.editSuggestion(interaction, {
+					await channel.editSuggestion(interaction, {
 						body: interaction.options.getString("report"),
-						title,
 						category: interaction.options.getString("category"),
+						title,
 					})
 				) {
-					interaction.reply({
-						content:
-							"<:yes:940054094272430130> Successfully edited bug report! " +
-							(title
+					await interaction.reply({
+						content: `<:yes:940054094272430130> Successfully edited bug report! ${
+							title
 								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
-								: ""),
+								: ""
+						}`,
+
 						ephemeral: true,
 					});
 				}

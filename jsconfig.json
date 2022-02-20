@@ -12,20 +12,7 @@
 		"importsNotUsedAsValues": "error",
 		"isolatedModules": true,
 		"jsx": "preserve",
-		"lib": [
-			"dom",
-			"ES2015",
-			"ES2016",
-			"ES2017",
-			"ES2018",
-			"ES2019",
-			"ES2020",
-			"ES2021",
-			"ES5",
-			"ES6",
-			"ES7",
-			"ESNext"
-		],
+		"lib": ["dom", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ES2021"],
 		"maxNodeModuleJsDepth": 0,
 		"module": "esnext",
 		"moduleResolution": "node",
@@ -49,12 +36,12 @@
 		"strictNullChecks": true,
 		"strictPropertyInitialization": true,
 		"stripInternal": true,
-		"target": "esnext",
+		"target": "es2021",
 		"useDefineForClassFields": true,
 		"useUnknownInCatchVariables": true,
 		"watch": false
 	},
 	"exclude": ["node_modules", ".git", "dist"],
-	"include": ["./**/*", "./.**/*"],
+	"include": ["./*", "./.*", "./**/*", "./.**/*"],
 	"typeAcquisition": { "enable": true }
 }

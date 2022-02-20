@@ -1,6 +1,7 @@
+/** @file Run Actions on posted messages. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import generateHash from "../lib/generateHash.js";
 import dotenv from "dotenv";
+
 import {
 	generateMessage,
 	getMemberFromThread,
@@ -8,14 +9,23 @@ import {
 	MODMAIL_CHANNEL,
 	WEBHOOK_NAME,
 } from "../common/modmail.js";
+import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
-const { GUILD_ID } = process.env;
+
+const { GUILD_ID = "", NODE_ENV } = process.env;
+
 if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
 
-/** @param {import("discord.js").Message} message */
-export default async (message) => {
+/**
+ * Send modmails, autoreact if contains certain triggers, and autoreply if contains certain triggers.
+ *
+ * @param {import("discord.js").Message} message - The message that was sent.
+ */
+export default async function messageCreate(message) {
 	if (message.author.id === message.client.user?.id) return;
+
+	const promises = [];
 
 	if (
 		!message.content.startsWith("=") &&
@@ -24,24 +34,28 @@ export default async (message) => {
 	) {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
 		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
+
 		if (!mailChannel) throw new Error("Could not find modmail channel");
+
 		if (mailChannel.type !== "GUILD_TEXT")
 			throw new Error("Modmail channel is not a text channel");
+
 		const webhooks = await mailChannel.fetchWebhooks();
 		const webhook =
-			webhooks.find((webhook) => webhook.name === WEBHOOK_NAME) ||
+			webhooks.find((possibleWebhook) => possibleWebhook.name === WEBHOOK_NAME) ||
 			(await mailChannel.createWebhook(WEBHOOK_NAME));
 
-		const thread = await getThreadFromMember(guild, message.author);
-		if (thread) {
-			webhook.send({ threadId: thread.id, ...generateMessage(message) });
+		const existingThread = await getThreadFromMember(guild, message.author);
+
+		if (existingThread) {
+			promises.push(
+				webhook.send({ threadId: existingThread.id, ...(await generateMessage(message)) }),
+			);
 		} else {
-			const embed = new MessageEmbed()
+			const confirmEmbed = new MessageEmbed()
 				.setTitle("Confirmation")
 				.setDescription(
-					"You are sending this message to the " +
-						mailChannel.guild.name +
-						" Server's mod team. If you are sure you would like to do this, press the button below.",
+					`You are sending this message to the ${mailChannel.guild.name} Server's mod team. If you are sure you would like to do this, press the button below.`,
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -52,82 +66,104 @@ export default async (message) => {
 				.setLabel("Cancel")
 				.setCustomId(generateHash("cancel"))
 				.setStyle("SECONDARY");
-			const sentMsg = await message.channel.send({
-				embeds: [embed],
+			const sentMessage = await message.channel.send({
 				components: [new MessageActionRow().addComponents(button, cancelButton)],
+				embeds: [confirmEmbed],
 			});
 
-			message.channel.createMessageCollector({ time: 15_000 }).on("collect", () => {
+			message.channel.createMessageCollector({ time: 15_000 }).on("collect", async () => {
 				button.setDisabled(true);
 				cancelButton.setDisabled(true);
-				sentMsg.edit({
-					embeds: [embed],
+				await sentMessage.edit({
 					components: [new MessageActionRow().addComponents(button, cancelButton)],
+					embeds: [confirmEmbed],
 				});
 			});
 
 			message.channel
 				.createMessageComponentCollector({
-					filter: (i) =>
-						[button.customId, cancelButton.customId].includes(i.customId) &&
-						i.user.id === message.author.id,
+					filter: (buttonInteraction) =>
+						[button.customId, cancelButton.customId].includes(
+							buttonInteraction.customId,
+						) && buttonInteraction.user.id === message.author.id,
+
 					time: 15_000,
 				})
-				.on("collect", async (i) => {
-					switch (i.customId) {
+				.on("collect", async (buttonInteraction) => {
+					const buttonPromises = [];
+
+					switch (buttonInteraction.customId) {
 						case button.customId: {
-							const embed = new MessageEmbed()
+							const openedEmbed = new MessageEmbed()
 								.setTitle("Modmail ticket opened")
-								.setDescription("Ticket by " + message.author.toString())
+								.setDescription(`Ticket by ${message.author.toString()}`)
 								.setColor("BLURPLE");
 
-							const starterMsg = await mailChannel.send({
-								content:
-									process.env.NODE_ENV === "production" ? "@here" : undefined,
-								embeds: [embed],
+							const starterMessage = await mailChannel.send({
+								content: NODE_ENV === "production" ? "@here" : undefined,
+
+								embeds: [openedEmbed],
 							});
-							const thread = await starterMsg.startThread({
+							const newThread = await starterMessage.startThread({
 								name: `${message.author.username} (${message.author.id})`,
 							});
 
 							if (!webhook) throw new Error("Could not find webhook");
-							i.reply({
-								content: "<:yes:940054094272430130> Modmail ticket opened",
-								ephemeral: true,
-							});
-							webhook.send({ threadId: thread.id, ...generateMessage(message) });
+
+							buttonPromises.push(
+								buttonInteraction.reply({
+									content: "<:yes:940054094272430130> Modmail ticket opened",
+									ephemeral: true,
+								}),
+								webhook.send({
+									threadId: newThread.id,
+									...(await generateMessage(message)),
+								}),
+							);
 							button.setDisabled(true);
+
 							break;
 						}
 						case cancelButton.customId: {
 							button.setDisabled(true);
 							cancelButton.setDisabled(true);
-							i.reply({
-								content: "<:no:940054047854047282> Modmail canceled",
-								ephemeral: true,
-							});
 
-							sentMsg.edit({
-								embeds: [embed],
-								components: [
-									new MessageActionRow().addComponents(button, cancelButton),
-								],
-							});
+							buttonPromises.push(
+								buttonInteraction.reply({
+									content: "<:no:940054047854047282> Modmail canceled",
+									ephemeral: true,
+								}),
+
+								sentMessage.edit({
+									components: [
+										new MessageActionRow().addComponents(button, cancelButton),
+									],
+
+									embeds: [confirmEmbed],
+								}),
+							);
+
 							break;
 						}
 					}
+
+					await Promise.all(buttonPromises);
 				})
 				.on("end", async () => {
 					button.setDisabled(true);
-					sentMsg.edit({
-						embeds: [embed],
+					await sentMessage.edit({
 						components: [new MessageActionRow().addComponents(button)],
+						embeds: [confirmEmbed],
 					});
 				});
 		}
 	}
 
-	if (message.guild?.id !== process.env.GUILD_ID) return;
+	if (message.guild?.id !== GUILD_ID) {
+		await Promise.all(promises);
+
+		return;
+	}
 
 	if (
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -137,92 +173,146 @@ export default async (message) => {
 		["DEFAULT", "REPLY"].includes(message.type) &&
 		message.guild
 	) {
-		const user = await getMemberFromThread(message.guild, message.channel);
-		if (!user) return;
-		const channel = await user.createDM().catch(() => {
-			message.reply({
-				content: "<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
-			});
-		});
-		channel?.send(generateMessage(message));
-		return;
-	}
-	if (message.author.bot) return;
-	if (message.content.match(/^r!(suggest|suggestion|sg|idea)/iu))
-		message.reply({
-			content: "`r!suggest` has been removed, please use `/suggestion create`.",
-		});
+		const user = await getMemberFromThread(message.channel);
 
-	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
-		message.react("👋");
+		if (user) {
+			const channel = await user.createDM().catch(() => {
+				promises.push(
+					message.reply({
+						content:
+							"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
+					}),
+				);
+			});
+
+			promises.push(channel?.send(await generateMessage(message)));
+		}
+	}
 
 	const content = message.content.toLowerCase();
 
 	/**
-	 * @param {string} text
-	 * @param {boolean} [plural]
+	 * Determines whether the message contains a word.
+	 *
+	 * @param {string} text - The word to check for.
+	 * @param {boolean} [plural] - Whether to account for plurals.
+	 *
+	 * @returns {boolean} Whether the message contains the word.
 	 */
 	function includes(text, plural = true) {
 		return (
-			content.split(/\W+/g).includes(text) ||
+			content.split(/\W+/).includes(text) ||
 			(plural &&
-				(content.split(/\W+/g).includes(text + "s") ||
-					content.split(/\W+/g).includes(text + "es")))
+				(content.split(/\W+/).includes(`${text}s`) ||
+					content.split(/\W+/).includes(`${text}es`)))
 		);
 	}
-	if (includes("dango") || content.includes("🍡")) message.react("🍡");
-	if (content === "e" || content === ".") message.react("<:e_:939986562937151518>");
+
+	if (includes("dango") || content.includes("🍡")) promises.push(message.react("🍡"));
+
+	if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
+		promises.push(message.react("<:e_:939986562937151518>"));
+
 	if (
-		content == "potato" ||
-		content == "potatoes" ||
-		content == "potatos" ||
+		content === "potato" ||
+		content === "potatoes" ||
+		content === "potatos" ||
 		content.includes("🥔")
 	)
-		message.react("🥔");
+		promises.push(message.react("🥔"));
+
 	if (includes("griff") || includes("griffpatch", false))
-		message.react("<:griffpatch:938441399936909362>");
-	if (includes("amongus", false)) message.react("<:sus:938441549660975136>");
-	if (includes("sus", false)) message.react("<:sus_pepe:938548233385414686>");
-	if (includes("appel")) message.react("<:appel:938818517535440896>");
-	if (includes("cubot")) message.react("<:cubot:939336981601722428>");
-	if (includes("splory", false)) message.react("<:splory:942561415594663966>");
-	if (includes("tera")) message.react("<:tewwa:938486033274785832>");
-	if (content.match(/gives?( you)? up/)) message.react("<a:rick:938547171366682624>");
-	if (content.includes("( ^∘^)つ")) message.react("<:sxd:939985869421547520>");
-	if (content.includes("scradd bad")) message.react("<:angery:939337168780943390>");
-	if (content.includes("sat on addons"))
-		message
-			.react("<:sa_full1:939336189880713287>")
-			.then(() => message.react("<:soa_full1:939336229449789510>"))
-			.then(() => message.react("<:sa_full3:939336281454936095>"));
+		promises.push(message.react("<:griffpatch:938441399936909362>"));
+
+	if (includes("amongus", false)) promises.push(message.react("<:sus:938441549660975136>"));
+
+	if (includes("sus", false)) promises.push(message.react("<:sus_pepe:938548233385414686>"));
+
+	if (includes("appel")) promises.push(message.react("<:appel:938818517535440896>"));
+
+	if (includes("cubot")) promises.push(message.react("<:cubot:939336981601722428>"));
+
+	if (includes("splory", false)) promises.push(message.react("<:splory:942561415594663966>"));
+
+	if (includes("tera")) promises.push(message.react("<:tewwa:938486033274785832>"));
+
+	if (/gives?(?: you)? up/.test(content))
+		promises.push(message.react("<a:rick:938547171366682624>"));
+
+	if (content.includes("( ^∘^)つ")) promises.push(message.react("<:sxd:939985869421547520>"));
+
+	if (content.includes("scradd bad"))
+		promises.push(message.react("<:angery:939337168780943390>"));
+
+	if (content.includes("sat on addons")) {
+		promises.push(
+			message
+				.react("<:sa_full1:939336189880713287>")
+				.then(async () => await message.react("<:soa_full1:939336229449789510>"))
+				.then(async () => await message.react("<:sa_full3:939336281454936095>")),
+		);
+	}
+
+	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
+		promises.push(message.react("👋"));
 
 	const firstMention = message.mentions.users.first();
+
 	if (
-		content.match(/^r!(mimic|possess|sudo|speakAs|sayAs|impersonate)\s+<@!?\d+>/iu) &&
+		/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(content) &&
 		firstMention?.id !== message.author.id &&
 		!firstMention?.bot &&
 		!firstMention?.system
 	) {
 		const member = await message.guild?.members.fetch(firstMention?.id || "");
-		message.reply({
-			content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${
-				member?.user.tag
-			}\` instead of \`r!mimic @${
-				member?.nickname || member?.user.username
-			}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
-		});
+
+		/**
+		 * Escape text for use inside inline code blocks.
+		 *
+		 * @param {string} text - The text to escape.
+		 *
+		 * @returns {string} The escaped text.
+		 */
+		function escape(text) {
+			return text.replaceAll("`", "\\`");
+		}
+
+		promises.push(
+			message.reply({
+				content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escape(
+					member?.user.tag || "",
+				)}\` instead of \`r!mimic @${escape(
+					member?.nickname || member?.user.username || "",
+				)}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
+			}),
+		);
 	}
 
-	const spoilerHack = "||​||".repeat(200);
-	if (content.includes(spoilerHack)) {
-		const arr = message.cleanContent.split(spoilerHack);
-		arr.shift();
-		message.reply({
-			content:
-				"You used the spoiler hack to hide: ```\n" +
-				arr.join(spoilerHack).replaceAll("```", "[3 backticks]") +
-				"\n```",
-			allowedMentions: { users: [], repliedUser: true, roles: [] },
-		});
+	if (/^r!(?:idea|sg|suggest(?:ion)?)/diu.test(message.content)) {
+		promises.push(
+			message.reply({
+				content: "`r!suggest` has been removed, please use `/suggestion create`.",
+			}),
+		);
 	}
-};
+
+	// eslint-disable-next-line no-irregular-whitespace -- This is intended.
+	const spoilerHack = "||​||".repeat(200);
+
+	if (content.includes(spoilerHack)) {
+		const array = message.cleanContent.split(spoilerHack);
+
+		array.shift();
+		promises.push(
+			message.reply({
+				allowedMentions: { repliedUser: true, roles: [], users: [] },
+
+				content: `You used the spoiler hack to hide: \`\`\`\n${array
+					.join(spoilerHack)
+					.replaceAll("```", "[3 backticks]")}\n\`\`\``,
+			}),
+		);
+	}
+
+	await Promise.all(promises);
+}

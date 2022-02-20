@@ -1,60 +1,75 @@
-import {
-	Guild,
-	GuildMember,
-	Message,
-	MessageEmbed,
-	MessagePayload,
-	ThreadChannel,
-	User,
-} from "discord.js";
+/** @file Code To perform operations related to modmail tickets. */
+import { MessageEmbed } from "discord.js";
+
 export const { MODMAIL_CHANNEL = "" } = process.env;
+
 if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
+
 export const WEBHOOK_NAME = "scradd-webhook";
 /**
- * @param {Message} message
+ * Generate a webhook message from a message sent by a user.
  *
- * @returns {(import("discord.js").WebhookMessageOptions & {
- * 	threadId?: undefined;
- * }) &
- * 	(MessagePayload | import("discord.js").MessageOptions)}
+ * @param {import("discord.js").Message} message - Message sent by a user.
+ *
+ * @returns {Promise<
+ * 	(import("discord.js").WebhookMessageOptions & {
+ * 		threadId?: undefined;
+ * 	}) &
+ * 		(import("discord.js").MessagePayload | import("discord.js").MessageOptions)
+ * >}
+ *   - Webhook message.
  */
-export function generateMessage(message) {
-	message.react("<:yes:940054094272430130>");
-	return {
-		content: message.content || undefined,
-		username: message.author.username,
-		files: message.attachments.map((a) => a),
-		allowedMentions: { users: [] },
+export async function generateMessage(message) {
+	await message.react("<:yes:940054094272430130>");
 
+	return {
+		allowedMentions: { users: [] },
 		avatarURL: message.author.avatarURL() || "",
+		content: message.content || undefined,
+
 		embeds: message.stickers
-			.map((sticker) => {
-				return new MessageEmbed()
+			.map((sticker) =>
+				new MessageEmbed()
 					.setDescription("")
-					.setImage(
-						`https://media.discordapp.net/stickers/` + sticker.id + `.webp?size=160`,
-					);
-			})
-			.concat(message.embeds.map((a) => new MessageEmbed(a))), //.splice(10),
+					.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`),
+			)
+			.concat(message.embeds.map((embed) => new MessageEmbed(embed)))
+			.splice(10),
+
+		files: message.attachments.map((attachment) => attachment),
+		username: message.author.username,
 	};
 }
 
 /**
- * @param {Guild} guild
- * @param {ThreadChannel} thread
+ * Given a modmail ticket thread, return the user who messages are being sent to.
+ *
+ * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
+ *
+ * @returns {Promise<import("discord.js").GuildMember | void>} - User who messages are being sent to.
  */
-export function getMemberFromThread(guild, thread) {
-	return guild.members.fetch(thread.name.match(/^.+ \((\d+)\)$/i)?.[1] || "").catch(() => {});
+export async function getMemberFromThread(thread) {
+	return await thread.guild.members
+		.fetch(/^.+ \((?<userId>\d+)\)$/.exec(thread.name)?.groups?.userId || "")
+		.catch(() => {});
 }
 
 /**
- * @param {Guild} guild
- * @param {GuildMember | User} user
+ * Given a user, find a ticket thread that sends messages to them.
+ *
+ * @param {import("discord.js").Guild} guild - The guild to search in.
+ * @param {import("discord.js").GuildMember | import("discord.js").User} user - The user to search for.
+ *
+ * @returns {Promise<import("discord.js").ThreadChannel | void>} - Ticket thread.
  */
 export async function getThreadFromMember(guild, user) {
 	const mailChannel = await guild?.channels.fetch(MODMAIL_CHANNEL);
+
 	if (!mailChannel) throw new Error("Could not find modmail channel");
+
 	if (mailChannel.type !== "GUILD_TEXT") throw new Error("Modmail channel is not a text channel");
+
 	const { threads } = await mailChannel.threads.fetchActive();
-	return threads.find((thread) => thread.name.endsWith("(" + user.id + ")"));
+
+	return threads.find((thread) => thread.name.endsWith(`(${user.id})`));
 }

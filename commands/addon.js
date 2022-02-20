@@ -1,20 +1,25 @@
+/** @file Command To get information about an addon. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
-import tooltip from "../lib/tooltip.js";
+
+import generateTooltip from "../lib/generateTooltip.js";
 
 const addons = await fetch(
 	"https://raw.githubusercontent.com/ScratchAddons/website-v2/master/data/addons/en.json",
-).then((res) => /** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (res.json()));
+).then(
+	async (response) =>
+		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (
+			await response.json()
+		),
+);
 
 const fuse = new Fuse(addons, {
-	includeScore: true,
-	threshold: 0,
-	shouldSort: true,
 	findAllMatches: true,
 	ignoreLocation: true,
-	useExtendedSearch: true,
+	includeScore: true,
+
 	keys: [
 		{
 			name: "name",
@@ -29,6 +34,10 @@ const fuse = new Fuse(addons, {
 			weight: 0.9,
 		},
 	],
+
+	shouldSort: true,
+	threshold: 0,
+	useExtendedSearch: true,
 });
 
 /** @type {import("../types/command").default} */
@@ -44,67 +53,84 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		/** @param {import("../types/addonManifest").default} credits */
+		/**
+		 * Generate a string of Markdown that credits the makers of an addon.
+		 *
+		 * @param {import("../types/addonManifest").default} arg0 - Addon manifest.
+		 *
+		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
+		 *   available.
+		 */
 		function generateCredits({ credits }) {
 			return credits
 				?.map(({ name, link, note }) =>
 					link
 						? `[${name}](${link} "${note || ""}")`
 						: note
-						? tooltip(interaction, name, note)
+						? generateTooltip(interaction, name, note)
 						: name,
 				)
 				.join(", ");
 		}
 
 		const input = interaction.options.getString("addon");
-		const output = input
-			? fuse.search(input).sort((a, b) => {
-					a.score ??= 0;
-					b.score ??= 0;
+		const item = input
+			? fuse.search(input).sort(({ score: scoreOne = 0 }, { score: scoreTwo = 0 }) =>
 					// Sort very good matches at the top no matter what
-					if (+(a.score < 0.1) ^ +(b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
-					else return 0;
-			  })[0] || {}
-			: { score: 0, item: addons[Math.floor(Math.random() * addons.length)] };
+					+(scoreOne < 0.1) ^ +(scoreTwo < 0.1) ? (scoreOne < 0.1 ? -1 : 1) : 0,
+			  )[0]?.item
+			: addons[Math.floor(Math.random() * addons.length)];
 
-		if (!output.item) {
-			return interaction.reply({
+		if (!item) {
+			await interaction.reply({
 				content: "<:no:940054047854047282> That addon does not exist!",
 				ephemeral: true,
 			});
+
+			return;
 		}
 
 		const addon = await fetch(
-			"https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/" +
-				output.item.id +
-				"/addon.json",
+			`https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/${item.id}/addon.json`,
 		).then(
-			(res) => /** @type {Promise<import("../types/addonManifest").default>} */ (res.json()),
+			async (response) =>
+				/** @type {Promise<import("../types/addonManifest").default>} */ (
+					await response.json()
+				),
 		);
 
-		const lastUpdatedIn = `last updated in ${addon.latestUpdate?.version}`;
+		const lastUpdatedIn = `last updated in ${
+			addon.latestUpdate?.version || "<unknown version>"
+		}`;
 		const latestUpdateInfo = addon.latestUpdate
-			? " (" +
-			  (addon.latestUpdate.temporaryNotice
-					? tooltip(interaction, lastUpdatedIn, `${addon.latestUpdate?.temporaryNotice}`)
-					: lastUpdatedIn) +
-			  ")"
+			? ` (${
+					addon.latestUpdate.temporaryNotice
+						? generateTooltip(
+								interaction,
+								lastUpdatedIn,
+								`${addon.latestUpdate?.temporaryNotice}`,
+						  )
+						: lastUpdatedIn
+			  })`
 			: "";
 
 		const embed = new MessageEmbed()
 			.setTitle(addon.name)
 			.setColor("BLURPLE")
 			.setDescription(
-				addon.description +
-					`\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${output.item.id})` +
-					(addon.permissions?.length
+				`${
+					addon.description
+				}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${
+					item.id
+				})${
+					addon.permissions?.length
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
-						: ""),
+						: ""
+				}`,
 			)
-			.setImage(`https://scratchaddons.com/assets/img/addons/${output.item.id}.png`)
+			.setImage(`https://scratchaddons.com/assets/img/addons/${item.id}.png`)
 			.setFooter({
-				text: output.score ? "Input: " + input : "Random addon",
+				text: input ? `Input: ${input}` : "Random addon",
 			});
 
 		const group = addon.tags.includes("popup")
@@ -117,28 +143,31 @@ const info = {
 			? "Scratch Website Features"
 			: "Scratch Editor Features";
 
-		if (group !== "Easter Eggs")
+		if (group !== "Easter Eggs") {
 			embed.setURL(
-				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${output.item.id}`,
+				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${item.id}`,
 			);
+		}
 
 		const credits = generateCredits(addon);
+
 		if (credits) embed.addField("Contributors", credits, true);
 
 		embed.addFields([
 			{
+				inline: true,
 				name: "Group",
 				value: group,
-				inline: true,
 			},
 			{
+				inline: true,
 				name: "Version added",
 				value: addon.versionAdded + latestUpdateInfo,
-				inline: true,
 			},
 		]);
 
 		await interaction.reply({ embeds: [embed] });
 	},
 };
+
 export default info;
