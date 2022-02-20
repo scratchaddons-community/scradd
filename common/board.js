@@ -278,6 +278,7 @@ export async function updateReactionCount(count, boardMessage) {
 	await (count < Math.max(MIN_REACTIONS - 1, 1)
 		? boardMessage.delete()
 		: boardMessage.edit({
+				allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 				content: boardMessage.content.replace(/\d+/, `${count}`),
 				embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 				files: boardMessage.attachments.map((attachment) => attachment),
