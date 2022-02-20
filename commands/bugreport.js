@@ -138,7 +138,9 @@ const info = {
 					})
 				) {
 					await interaction.reply({
-						content: `:white_check_mark: Answered report as ${escape(answer)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content: `:white_check_mark: Answered report as ${escape(
+							answer,
+						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				}

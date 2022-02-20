@@ -4,7 +4,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
 import SuggestionChannel, { MAX_TITLE_LENGTH } from "../common/suggest.js";
-import escape, {escapeForLink} from "../lib/escape.js";
+import escape, { escapeForLink } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
@@ -185,7 +185,9 @@ const info = {
 					})
 				) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Successfully answered suggestion as ${escape(answer)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content: `<:yes:940054094272430130> Successfully answered suggestion as ${escape(
+							answer,
+						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
 						ephemeral: true,
 					});
 				}
@@ -322,7 +324,7 @@ const info = {
 				/**
 				 * Generate an embed that lists the top suggestions.
 				 *
-				 * @returns {	| import("discord.js").MessagePayload
+				 * @returns {| import("discord.js").MessagePayload
 				 * 	| import("discord.js").InteractionReplyOptions}
 				 *   - Embed with top suggestions.
 				 */
@@ -335,12 +337,16 @@ const info = {
 						.map((suggestion, index) => {
 							if (!suggestion) return ""; // Impossible
 
-							return `${index + offset + 1}. **${suggestion.count}** [👍 ${
-								escapeForLink(suggestion.title)
-							}](https://discord.com/channels/${encodeURIComponent(GUILD_ID)}/${encodeURIComponent(SUGGESTION_CHANNEL)}/${
-								encodeURIComponent(suggestion.id)
-							} "${suggestion.answer}")${
-								suggestion.author ? ` by ${escape(suggestion.author)}` : ""
+							return `${index + offset + 1}. **${
+								suggestion.count
+							}** [👍 ${escapeForLink(
+								suggestion.title,
+							)}](https://discord.com/channels/${encodeURIComponent(
+								GUILD_ID,
+							)}/${encodeURIComponent(SUGGESTION_CHANNEL)}/${encodeURIComponent(
+								suggestion.id,
+							)} "${suggestion.answer}")${
+								suggestion.author && ` by ${escape(suggestion.author)}`
 							}`;
 						})
 						.join("\n")

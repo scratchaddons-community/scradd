@@ -64,9 +64,9 @@ const info = {
 		 */
 		function generateCredits({ credits }) {
 			return credits
-				?.map(({ name, link, note }) =>
+				?.map(({ name, link, note = "" }) =>
 					link
-						? `[${escapeForLink(name)}](${link} "${note || ""}")`
+						? `[${escapeForLink(name)}](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
@@ -121,19 +121,21 @@ const info = {
 			.setTitle(addon.name)
 			.setColor("BLURPLE")
 			.setDescription(
-				`${
-					escape(addon.description)
-				}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${
-					encodeURIComponent(item.id)
-				})${
+				`${escape(
+					addon.description,
+				)}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${encodeURIComponent(
+					item.id,
+				)})${
 					addon.permissions?.length
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
 						: ""
 				}`,
 			)
-			.setImage(`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`)
+			.setImage(
+				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`,
+			)
 			.setFooter({
-				text: input ? `Input: ${(input)}` : "Random addon",
+				text: input ? `Input: ${input}` : "Random addon",
 			});
 
 		const group = addon.tags.includes("popup")
@@ -148,7 +150,9 @@ const info = {
 
 		if (group !== "Easter Eggs") {
 			embed.setURL(
-				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(item.id)}`,
+				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
+					item.id,
+				)}`,
 			);
 		}
 

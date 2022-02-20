@@ -117,7 +117,7 @@ export async function postMessageToBoard(message) {
 	if (!board?.isText())
 		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
-	let description = "";
+	let description;
 
 	switch (message.type) {
 		case "CHANNEL_NAME_CHANGE": {

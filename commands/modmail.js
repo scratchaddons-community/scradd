@@ -208,8 +208,8 @@ const info = {
 												.setTitle("Modmail ticket opened")
 												.setDescription(
 													`The moderation team of ${escape(
-														interaction.guild?.name || "Scratch Addons")
-													} would like to talk to you.`,
+														interaction.guild?.name || "Scratch Addons",
+													)} would like to talk to you.`,
 												)
 												.setColor("BLURPLE"),
 										],

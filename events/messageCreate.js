@@ -9,7 +9,7 @@ import {
 	MODMAIL_CHANNEL,
 	WEBHOOK_NAME,
 } from "../common/modmail.js";
-import escape, {escapeForCodeblock} from "../lib/escape.js";
+import escape, { escapeForCodeblock } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
@@ -56,7 +56,9 @@ export default async function messageCreate(message) {
 			const confirmEmbed = new MessageEmbed()
 				.setTitle("Confirmation")
 				.setDescription(
-					`You are sending this message to the ${escape(mailChannel.guild.name)} Server's mod team. If you are sure you would like to do this, press the button below.`,
+					`You are sending this message to the ${escape(
+						mailChannel.guild.name,
+					)} Server's mod team. If you are sure you would like to do this, press the button below.`,
 				)
 				.setColor("BLURPLE");
 			const button = new MessageButton()
@@ -267,7 +269,6 @@ export default async function messageCreate(message) {
 	) {
 		const member = await message.guild?.members.fetch(firstMention?.id || "");
 
-
 		promises.push(
 			message.reply({
 				content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escape(
@@ -298,8 +299,9 @@ export default async function messageCreate(message) {
 			message.reply({
 				allowedMentions: { repliedUser: true, roles: [], users: [] },
 
-				content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(array
-					.join(spoilerHack))}\n\`\`\``,
+				content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(
+					array.join(spoilerHack),
+				)}\n\`\`\``,
 			}),
 		);
 	}
