@@ -118,12 +118,14 @@ export default class SuggestionChannel {
 
 			return false;
 		}
+		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
+		if (interaction.user?.id === starter?.author.id) {
+			await interaction.reply({
+				content: "<:no:940054047854047282> You don't have permission to run this command!",
+				ephemeral: true,
+			});
 
-		if (interaction.channel.archived) {
-			await interaction.channel.setArchived(
-				false,
-				`Thread answered by ${interaction.user.tag}`,
-			);
+			return false;
 		}
 
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
@@ -137,28 +139,32 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		await Promise.all([
+		if (interaction.channel.archived) {
+			await interaction.channel.setArchived(
+				false,
+				`Thread answered by ${interaction.user.tag}`,
+			);
+		}
+		/** @type {Promise<any>[]} */
+		const promises = [
 			interaction.channel.setName(
 				interaction.channel.name.replace(/^[^|]+?(?=(?: \| .+)?$)/, answer),
 				`Thread answered by ${interaction.user.tag}`,
 			),
+		];
 
-			interaction.channel
-				.fetchStarterMessage()
-				.catch(() => {})
-				.then(async (message) => {
-					if (!message || message.author.id !== interaction.client.user?.id) return;
+		if (starter && starter?.author.id === interaction.client.user?.id) {
+			const embed = new MessageEmbed(starter.embeds[0]);
+			const category = embed.footer?.text.split(" • ")[0];
 
-					const embed = new MessageEmbed(message.embeds[0]);
-					const category = embed.footer?.text.split(" • ")[0];
+			embed
+				.setColor(colors[`${answer}`] || 0x000)
+				.setFooter({ text: `${category ? `${category} • ` : ""}${answer}` });
 
-					embed
-						.setColor(colors[`${answer}`] || 0x000)
-						.setFooter({ text: `${category ? `${category} • ` : ""}${answer}` });
+			promises.push(starter.edit({ embeds: [embed] }));
+		}
 
-					return await message.edit({ embeds: [embed] });
-				}),
-		]);
+		await Promise.all(promises);
 
 		return true;
 	}
