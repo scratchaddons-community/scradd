@@ -115,35 +115,35 @@ const info = {
 						.addChoice("Other", "Other")
 						.setRequired(false),
 				),
-		),
+		)
 
-	// .addSubcommand((subcommand) =>
-	// 	subcommand
-	// 		.setName("get-top")
-	// 		.setDescription("Get the top suggestions")
-	// 		.addUserOption((input) =>
-	// 			input
-	// 				.setName("user")
-	// 				.setDescription("Filter suggestions to only get those by a certain user.")
-	// 				.setRequired(false),
-	// 		)
-	// 		.addStringOption((option) =>
-	// 			option
-	// 				.setName("answer")
-	// 				.setDescription(
-	// 					"Filter suggestions to only get those with a certain answer.",
-	// 				)
-	// 				.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-	// 				.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
-	// 				.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
-	// 				.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
-	// 				.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
-	// 				.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
-	// 				.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
-	// 				.addChoice("Unanswered", "Unanswered")
-	// 				.setRequired(false),
-	// 		),
-	// )
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("get-top")
+				.setDescription("Get the top suggestions")
+				.addUserOption((input) =>
+					input
+						.setName("user")
+						.setDescription("Filter suggestions to only get those by a certain user.")
+						.setRequired(false),
+				)
+				.addStringOption((option) =>
+					option
+						.setName("answer")
+						.setDescription(
+							"Filter suggestions to only get those with a certain answer.",
+						)
+						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
+						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
+						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
+						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
+						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
+						.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
+						.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
+						.addChoice("Unanswered", "Unanswered")
+						.setRequired(false),
+				),
+		),
 	async interaction(interaction) {
 		if (interaction.guild?.id !== GUILD_ID || !interaction.channel?.isText()) return;
 
@@ -241,65 +241,48 @@ const info = {
 
 				if (!channel?.isText()) return;
 
+				const requestedUser = interaction.options.getUser("user")?.id;
+				const requestedAnswer = interaction.options.getString("answer");
 				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
+				const all = unfiltered
+					.map((message) => {
+						const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
+							const upvoteReaction = message.reactions.resolve(upvote);
+							const downvoteReaction = message.reactions.resolve(downvote);
 
-				const all = (
-					await Promise.all(
-						unfiltered.map(async (message) => {
-							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
-								const upvoteReaction = message.reactions.resolve(upvote);
-								const downvoteReaction = message.reactions.resolve(downvote);
+							if (!upvoteReaction || !downvoteReaction) return false;
 
-								if (!upvoteReaction || !downvoteReaction) return false;
+							return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
+						}).find((currentCount) => typeof currentCount === "number");
 
-								return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
-							}).find((currentCount) => typeof currentCount === "number");
+						if (typeof count !== "number") return;
 
-							if (typeof count !== "number") return;
+						const description =
+							message.embeds[0]?.title ||
+							message.embeds[0]?.description ||
+							message.content;
 
-							const description =
-								message.embeds[0]?.title ||
-								message.embeds[0]?.description ||
-								message.content;
+						const author =
+							(message.author.id === "323630372531470346"
+								? message.embeds[0]?.footer?.text.split(": ")[1]
+								: message.embeds[0]?.author?.iconURL?.split(/\/(\d+)\//)[1]) ||
+							message.author.id;
 
-							const authorTag = message.embeds[0]?.author?.name.split(/#| /).at(-2);
-							const author = (
-								message.author.id === "323630372531470346" && authorTag
-									? await interaction.guild?.members.search({ query: authorTag })
-									: (
-											await message.thread?.messages.fetch({
-												after: (
-													await message.thread.fetchStarterMessage()
-												).id,
+						if (requestedUser && author !== requestedUser) return;
 
-												limit: 2,
-											})
-									  )?.first()?.mentions.users
-							)?.first();
-							const requestedUser = interaction.options.getUser("user")?.id;
+						const answer = message.thread?.name.split("|")[0]?.trim() || "Unanswered";
 
-							if (requestedUser && author?.id !== requestedUser) return;
+						if (requestedAnswer && answer !== requestedAnswer) return;
+						return {
+							answer,
+							author: author,
+							count,
+							id: message.id,
 
-							const answer =
-								message.thread?.name.split("|")[0]?.trim() || "Unanswered";
-							const requestedAnswer = interaction.options.getString("answer");
+							title: truncateText(description.split("/n")[0] || "", MAX_TITLE_LENGTH),
+						};
+					})
 
-							if (requestedAnswer && answer !== requestedAnswer) return;
-
-							return {
-								answer,
-								author: author?.toString(),
-								count,
-								id: message.id,
-
-								title: truncateText(
-									description.split("/n")[0] || "",
-									MAX_TITLE_LENGTH,
-								),
-							};
-						}),
-					)
-				)
 					.filter((suggestion) => suggestion)
 					.sort(
 						(suggestionOne, suggestionTwo) =>
@@ -337,16 +320,18 @@ const info = {
 						.map((suggestion, index) => {
 							if (!suggestion) return ""; // Impossible
 
-							return `${index + offset + 1}. **${
-								suggestion.count
-							}** [👍 ${escapeForLink(
+							return `${index + offset + 1}. **${suggestion.count}** [${
+								suggestion.count > 0 ? "👍" : "👎"
+							} ${escapeForLink(
 								suggestion.title,
 							)}](https://discord.com/channels/${encodeURIComponent(
 								GUILD_ID,
 							)}/${encodeURIComponent(SUGGESTION_CHANNEL)}/${encodeURIComponent(
 								suggestion.id,
 							)} "${suggestion.answer}")${
-								suggestion.author && ` by ${escape(suggestion.author)}`
+								suggestion.author && !requestedUser
+									? ` by <@${suggestion.author}>`
+									: ""
 							}`;
 						})
 						.join("\n")
