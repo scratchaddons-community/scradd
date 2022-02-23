@@ -227,7 +227,8 @@ export default async function messageCreate(message) {
 	if (includes("griff") || includes("griffpatch", false))
 		promises.push(message.react("<:griffpatch:938441399936909362>"));
 
-	if (includes("amongus", false)) promises.push(message.react("<:sus:938441549660975136>"));
+	if (includes("amongus", false) || includes("amogus", false))
+		promises.push(message.react("<:sus:938441549660975136>"));
 
 	if (includes("sus", false)) promises.push(message.react("<:sus_pepe:938548233385414686>"));
 
@@ -239,7 +240,7 @@ export default async function messageCreate(message) {
 
 	if (includes("tera")) promises.push(message.react("<:tewwa:938486033274785832>"));
 
-	if (/gives?(?: you)? up/.test(content))
+	if (/gives?(?: you)? up/.test(content) || includes("rick") || includes("rickroll"))
 		promises.push(message.react("<a:rick:938547171366682624>"));
 
 	if (content.includes("( ^∘^)つ")) promises.push(message.react("<:sxd:939985869421547520>"));
