@@ -1,7 +1,7 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
-import escape, { escapeForWebhook } from "../lib/escape.js";
+import escape from "../lib/escape.js";
 
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
@@ -229,11 +229,13 @@ export async function postMessageToBoard(message) {
 	const embeds = [
 		embed,
 		...message.stickers.map((sticker) =>
-			new MessageEmbed().setDescription("").setImage(
+			new MessageEmbed().setImage(
 				`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
 			),
 		),
-		...message.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+		...message.embeds
+			.filter((embed) => !embed.video)
+			.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 	];
 
 	while (embeds.length > 10) embeds.pop();
@@ -264,7 +266,7 @@ export async function postMessageToBoard(message) {
 		}${author ? ` | ${author.toString()}` : ""}`,
 
 		embeds,
-		files: message.attachments.map((attachments) => attachments),
+		files: message.attachments.map((attachment) => attachment),
 	});
 }
 
