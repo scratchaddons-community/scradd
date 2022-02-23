@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
-import SuggestionChannel, { MAX_TITLE_LENGTH } from "../common/suggest.js";
+import SuggestionChannel, { MAX_TITLE_LENGTH, SUGGESTION_EMOJIS } from "../common/suggest.js";
 import escape, { escapeForLink } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
@@ -224,18 +224,6 @@ const info = {
 			}
 			case "get-top": {
 				const deferPromise = interaction.deferReply();
-				/** @type {[string, string][]} */
-				const SUGGESTION_EMOJIS = [
-					["👍", "👎"],
-					["575851403558256642", "575851403600330792"],
-					["✅", "613912745699442698"],
-					["613912747578621952", "613912747440209930"],
-					["613912747612045322", "613913094984564736"],
-					["613912745837985832", "613912745691054080"],
-					["😀", "😔"],
-					["❤", "💔"],
-					["749005259682086964", "749005284403445790"],
-				];
 
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 
