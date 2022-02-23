@@ -5,6 +5,19 @@ import generateHash from "../lib/generateHash.js";
 
 export const MAX_TITLE_LENGTH = 50;
 
+/** @type {[string, string][]} */
+export const SUGGESTION_EMOJIS = [
+	["👍", "👎"],
+	["575851403558256642", "575851403600330792"],
+	["✅", "613912745699442698"],
+	["613912747578621952", "613912747440209930"],
+	["613912747612045322", "613913094984564736"],
+	["613912745837985832", "613912745691054080"],
+	["😀", "😔"],
+	["❤", "💔"],
+	["749005259682086964", "749005284403445790"],
+];
+
 export default class SuggestionChannel {
 	CHANNEL_ID = "";
 
@@ -119,15 +132,6 @@ export default class SuggestionChannel {
 			return false;
 		}
 		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
-		if (interaction.user?.id === starter?.author.id) {
-			await interaction.reply({
-				content: "<:no:940054047854047282> You don't have permission to run this command!",
-				ephemeral: true,
-			});
-
-			return false;
-		}
-
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
 
 		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
