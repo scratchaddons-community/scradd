@@ -115,7 +115,9 @@ const info = {
 	async interaction(interaction) {
 		if (interaction.guild?.id !== process.env.GUILD_ID) return;
 
-		const deferPromise = interaction.deferReply();
+		const deferPromise = interaction.deferReply({
+			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
+		});
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
 		if (!board?.isText()) {
@@ -180,6 +182,7 @@ const info = {
 
 			if (!source?.components[0]?.components[0]) {
 				return {
+					allowedMentions: { users: [] },
 					attachments: [],
 					components: [],
 
@@ -194,6 +197,7 @@ const info = {
 			if (fetchedMessages.length === 0) nextButton.setDisabled(true);
 
 			return {
+				allowedMentions: { users: [] },
 				components: [
 					source.components[0]?.components[0]
 						? source.components[0]?.setComponents(
