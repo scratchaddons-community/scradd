@@ -229,7 +229,7 @@ export async function postMessageToBoard(message) {
 	const embeds = [
 		embed,
 		...message.stickers.map((sticker) =>
-			new MessageEmbed().setImage(
+			new MessageEmbed().setDescription("").setImage(
 				`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
 			),
 		),
