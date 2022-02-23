@@ -9,13 +9,12 @@ import {
 	MIN_REACTIONS,
 	updateReactionCount,
 } from "../common/board.js";
+import { SUGGESTION_EMOJIS } from "../common/suggest.js";
 
 dotenv.config();
 
 /**
  * Determine if a message should be posted to #potatoboard or update it if it is already there.
- *
- * This code is reused for messageReactionRemove as well.
  *
  * @param {import("discord.js").MessageReaction} reaction - The added reaction.
  * @param {import("discord.js").User} user - The user who reacted.
@@ -26,6 +25,14 @@ export default async function reactionAdd(reaction, user) {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
 	if (user.partial) user = await user.fetch();
+
+	if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL) {
+		const otherReaction=(
+		SUGGESTION_EMOJIS.find((emojis) =>
+			emojis.includes(reaction.emoji.id || reaction.emoji.name || ""),
+			)?.find((emoji) => emoji !== (reaction.emoji.id || reaction.emoji.name || "")));
+		if(otherReaction)return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+	}
 
 	if (
 		// Ignore other servers
