@@ -248,6 +248,9 @@ export default async function messageCreate(message) {
 	if (content.includes("scradd bad"))
 		promises.push(message.react("<:angery:939337168780943390>"));
 
+	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
+		promises.push(message.react("👋"));
+
 	if (content.includes("sat on addons")) {
 		promises.push(
 			message
@@ -256,9 +259,6 @@ export default async function messageCreate(message) {
 				.then(async () => await message.react("<:sa_full3:939336281454936095>")),
 		);
 	}
-
-	if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
-		promises.push(message.react("👋"));
 
 	const firstMention = message.mentions.users.first();
 

@@ -341,7 +341,11 @@ const info = {
 
 						embeds: [
 							new MessageEmbed()
-								.setTitle("Top suggestions")
+								.setTitle(
+									"Top suggestions" +
+										(requestedUser ? ` by ${requestedUser}` : "") +
+										(requestedAnswer ? ` labeled ${requestedAnswer}` : ""),
+								)
 								.setDescription(content)
 								.setFooter({
 									text: `Page ${

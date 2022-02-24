@@ -26,12 +26,15 @@ export default async function reactionAdd(reaction, user) {
 
 	if (user.partial) user = await user.fetch();
 
-	if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL) {
-		const otherReaction=(
-		SUGGESTION_EMOJIS.find((emojis) =>
+	if (
+		reaction.message.channel.id === process.env.SUGGESTION_CHANNEL &&
+		user.id !== user.client.user?.id
+	) {
+		const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 			emojis.includes(reaction.emoji.id || reaction.emoji.name || ""),
-			)?.find((emoji) => emoji !== (reaction.emoji.id || reaction.emoji.name || "")));
-		if(otherReaction)return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+		)?.find((emoji) => emoji !== (reaction.emoji.id || reaction.emoji.name || ""));
+		if (otherReaction)
+			return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
 	}
 
 	if (
