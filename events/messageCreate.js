@@ -74,7 +74,7 @@ export default async function messageCreate(message) {
 				embeds: [confirmEmbed],
 			});
 
-			message.channel.createMessageCollector({ time: 15_000 }).on("collect", async () => {
+			message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
 				button.setDisabled(true);
 				cancelButton.setDisabled(true);
 				await sentMessage.edit({
@@ -90,7 +90,7 @@ export default async function messageCreate(message) {
 							buttonInteraction.customId,
 						) && buttonInteraction.user.id === message.author.id,
 
-					time: 15_000,
+					time: 30_000,
 				})
 				.on("collect", async (buttonInteraction) => {
 					const buttonPromises = [];

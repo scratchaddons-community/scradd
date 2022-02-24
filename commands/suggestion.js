@@ -365,7 +365,7 @@ const info = {
 							buttonInteraction.customId,
 						) && buttonInteraction.user.id === interaction.user.id,
 
-					time: 15_000,
+					time: 30_000,
 				});
 
 				collector
