@@ -7,6 +7,7 @@ const info = {
 		.setDescription(
 			"(Mods only) Say what you tell me to say. Won't publically share the author.",
 		)
+		.setDefaultPermission(false)
 		.addStringOption((input) =>
 			input.setName("message").setDescription("What you want me to say").setRequired(true),
 		),
