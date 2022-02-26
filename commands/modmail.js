@@ -21,7 +21,9 @@ const info = {
 				.addStringOption((input) =>
 					input
 						.setName("reason")
-						.setDescription("Reason for closing the ticket")
+						.setDescription(
+							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
+						)
 						.setRequired(true),
 				),
 		)
@@ -192,13 +194,16 @@ const info = {
 									.setDescription(
 										`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 									)
+									.setFooter({
+										text: "Please note that reactions, replies, edits, and deletes are not supported.",
+									})
 									.setColor("BLURPLE");
 
 								const starterMessage = await mailChannel.send({
 									embeds: [openedEmbed],
 								});
 
-								await starterMessage.startThread({
+								const thread = await starterMessage.startThread({
 									name: `${user.user.username} (${user.id})`,
 								});
 								await Promise.all([
@@ -209,13 +214,16 @@ const info = {
 												.setDescription(
 													`The moderation team of ${escape(
 														interaction.guild?.name || "Scratch Addons",
-													)} would like to talk to you.`,
+													)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 												)
+												.setFooter({
+													text: "Please note that reactions, replies, edits, and deletes are not supported.",
+												})
 												.setColor("BLURPLE"),
 										],
 									}),
 									buttonInteraction.reply({
-										content: "<:yes:940054094272430130> Modmail ticket opened",
+										content: `<:yes:940054094272430130> Modmail ticket opened! Send them a message in ${thread.toString()}.`,
 										ephemeral: true,
 									}),
 								]);

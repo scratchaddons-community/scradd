@@ -162,7 +162,7 @@ const info = {
 					await Promise.all([
 						success.react("👍").then(async () => await success.react("👎")),
 						interaction.reply({
-							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread?.toString()}`,
+							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread?.toString()}.`,
 							ephemeral: true,
 						}),
 					]);
@@ -229,8 +229,9 @@ const info = {
 
 				if (!channel?.isText()) return;
 
-				const requestedUser = interaction.options.getUser("user")?.id;
+				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
+
 				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
 				const all = unfiltered
 					.map((message) => {
@@ -256,11 +257,11 @@ const info = {
 								: message.embeds[0]?.author?.iconURL?.split(/\/(\d+)\//)[1]) ||
 							message.author.id;
 
-						if (requestedUser && author !== requestedUser) return;
+						if (requestedUser && author !== requestedUser?.id) return;
 
 						const answer = message.thread?.name.split("|")[0]?.trim() || "Unanswered";
 
-						if (requestedAnswer && answer !== requestedAnswer) return;
+						if (requestedAnswer && answer.toLowerCase() !== requestedAnswer.toLowerCase()) return;
 						return {
 							answer,
 							author: author,
@@ -288,6 +289,8 @@ const info = {
 					.setStyle("PRIMARY")
 					.setDisabled(numberOfPages === 1)
 					.setCustomId(generateHash("next"));
+
+				const nick = requestedUser && (await interaction.guild?.members.fetch(requestedUser.id))?.nickname;
 
 				// eslint-disable-next-line fp/no-let -- This must be changable.
 				let offset = 0;
@@ -343,7 +346,7 @@ const info = {
 							new MessageEmbed()
 								.setTitle(
 									"Top suggestions" +
-										(requestedUser ? ` by ${requestedUser}` : "") +
+										(requestedUser ? ` by ${nick}` : "") +
 										(requestedAnswer ? ` labeled ${requestedAnswer}` : ""),
 								)
 								.setDescription(content)

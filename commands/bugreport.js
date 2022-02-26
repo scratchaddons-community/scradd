@@ -118,7 +118,7 @@ const info = {
 
 				if (success) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Bug report posted! See ${success.toString()}`,
+						content: `<:yes:940054094272430130> Bug report posted! See ${success.toString()}.`,
 						ephemeral: true,
 					});
 				}

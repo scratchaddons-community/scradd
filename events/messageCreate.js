@@ -24,14 +24,12 @@ if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
  * @param {import("discord.js").Message} message - The message that was sent.
  */
 export default async function messageCreate(message) {
-	if (message.author.id === message.client.user?.id) return;
-
 	const promises = [];
 
 	if (
 		!message.content.startsWith("=") &&
 		message.channel.type === "DM" &&
-		["DEFAULT", "REPLY"].includes(message.type)
+		message.author.id !== message.client.user?.id
 	) {
 		const guild = await message.client.guilds.fetch(GUILD_ID);
 		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
@@ -50,7 +48,10 @@ export default async function messageCreate(message) {
 
 		if (existingThread) {
 			promises.push(
-				webhook.send({ threadId: existingThread.id, ...(await generateMessage(message)) }),
+				webhook
+					.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
+					.then(async () => await message.react("<:yes:940054094272430130>"))
+					.catch(async () => await message.react("<:no:940054047854047282>")),
 			);
 		} else {
 			const confirmEmbed = new MessageEmbed()
@@ -100,6 +101,9 @@ export default async function messageCreate(message) {
 							const openedEmbed = new MessageEmbed()
 								.setTitle("Modmail ticket opened")
 								.setDescription(`Ticket by ${message.author.toString()}`)
+								.setFooter({
+									text: "Please note that reactions, replies, edits, and deletes are not supported.",
+								})
 								.setColor("BLURPLE");
 
 							const starterMessage = await mailChannel.send({
@@ -115,13 +119,22 @@ export default async function messageCreate(message) {
 
 							buttonPromises.push(
 								buttonInteraction.reply({
-									content: "<:yes:940054094272430130> Modmail ticket opened",
+									content:
+										"<:yes:940054094272430130> Modmail ticket opened. You may send the mod team messages by sending me DMs. I will DM you their messages. Please note that reactions, replies, edits, and deletes are not supported.",
 									ephemeral: true,
 								}),
-								webhook.send({
-									threadId: newThread.id,
-									...(await generateMessage(message)),
-								}),
+								webhook
+									.send({
+										threadId: newThread.id,
+										...(await generateMessage(message)),
+									})
+									.then(
+										async () =>
+											await message.react("<:yes:940054094272430130>"),
+									)
+									.catch(
+										async () => await message.react("<:no:940054047854047282>"),
+									),
 							);
 							button.setDisabled(true);
 
@@ -162,7 +175,7 @@ export default async function messageCreate(message) {
 		}
 	}
 
-	if (message.guild?.id !== GUILD_ID) {
+	if (!message.guild || message.guild?.id !== GUILD_ID) {
 		await Promise.all(promises);
 
 		return;
@@ -172,24 +185,29 @@ export default async function messageCreate(message) {
 		message.channel.type === "GUILD_PUBLIC_THREAD" &&
 		message.channel.parent?.id === MODMAIL_CHANNEL &&
 		!message.webhookId &&
-		!message.content.startsWith("=") &&
-		["DEFAULT", "REPLY"].includes(message.type) &&
-		message.guild
+		!message.content.startsWith("=")
 	) {
 		const user = await getMemberFromThread(message.channel);
 
 		if (user) {
-			const channel = await user.createDM().catch(() => {
-				promises.push(
-					message.reply({
-						content:
-							"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
-					}),
-				);
+			const channel = await user.createDM().catch(async () => {
+				await message.react("<:no:940054047854047282>");
 			});
 
-			promises.push(channel?.send(await generateMessage(message)));
+			promises.push(
+				channel
+					?.send(await generateMessage(message))
+					.then(async () => await message.react("<:yes:940054094272430130>"))
+					.catch(async () => await message.react("<:no:940054047854047282>")),
+			);
 		}
+	}
+
+	if (
+		message.type === "THREAD_CREATED" &&
+		message.channel.id === process.env.SUGGESTION_CHANNEL
+	) {
+		return await message.delete();
 	}
 
 	const content = message.content.toLowerCase();
@@ -238,9 +256,17 @@ export default async function messageCreate(message) {
 
 	if (includes("splory", false)) promises.push(message.react("<:splory:942561415594663966>"));
 
-	if (includes("tera")) promises.push(message.react("<:tewwa:938486033274785832>"));
+	if (includes("tera") || content.includes("<:tewwa:898310317833076847>"))
+		promises.push(message.react("<:tewwa:938486033274785832>"));
 
-	if (/gives?(?: you)? up/.test(content) || includes("rick") || includes("rickroll"))
+	if (
+		/gives? you up/.test(content) ||
+		includes("rick") ||
+		includes("rickroll") ||
+		includes("rickrolled", false) ||
+		includes("rickrolling", false) ||
+		content.includes("dQw4w9WgXcQ")
+	)
 		promises.push(message.react("<a:rick:938547171366682624>"));
 
 	if (content.includes("( ^∘^)つ")) promises.push(message.react("<:sxd:939985869421547520>"));
@@ -260,12 +286,31 @@ export default async function messageCreate(message) {
 		);
 	}
 
+	// eslint-disable-next-line no-irregular-whitespace -- This is intended.
+	const spoilerHack = "||​||".repeat(200);
+
+	if (content.includes(spoilerHack)) {
+		const array = message.cleanContent.split(spoilerHack);
+
+		array.shift();
+		promises.push(
+			message.reply({
+				allowedMentions: { repliedUser: true, roles: [], users: [] },
+
+				content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(
+					array.join(spoilerHack),
+				)}\n\`\`\``,
+			}),
+		);
+	}
+
 	const firstMention = message.mentions.users.first();
 
 	if (
 		/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(content) &&
 		firstMention?.id !== message.author.id &&
 		!firstMention?.bot &&
+		!message.author?.bot &&
 		!firstMention?.system
 	) {
 		const member = await message.guild?.members.fetch(firstMention?.id || "");
@@ -281,28 +326,10 @@ export default async function messageCreate(message) {
 		);
 	}
 
-	if (/^r!(?:idea|sg|suggest(?:ion)?)/diu.test(message.content)) {
+	if (/^r!(?:idea|sg|suggest(?:ion)?)/diu.test(message.content) && !message.author?.bot) {
 		promises.push(
 			message.reply({
 				content: "`r!suggest` has been removed, please use `/suggestion create`.",
-			}),
-		);
-	}
-
-	// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-	const spoilerHack = "||​||".repeat(200);
-
-	if (content.includes(spoilerHack)) {
-		const array = message.cleanContent.split(spoilerHack);
-
-		array.shift();
-		promises.push(
-			message.reply({
-				allowedMentions: { repliedUser: true, roles: [], users: [] },
-
-				content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(
-					array.join(spoilerHack),
-				)}\n\`\`\``,
 			}),
 		);
 	}

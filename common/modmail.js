@@ -1,6 +1,7 @@
 /** @file Code To perform operations related to modmail tickets. */
 import { MessageEmbed } from "discord.js";
 import { escapeForWebhook } from "../lib/escape.js";
+import messageToText from "../lib/messageToText.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
@@ -21,12 +22,10 @@ export const WEBHOOK_NAME = "scradd-webhook";
  *   - Webhook message.
  */
 export async function generateMessage(message) {
-	await message.react("<:yes:940054094272430130>");
-
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: message.author.avatarURL() || "",
-		content: escapeForWebhook(message.content) || undefined,
+		content: escapeForWebhook(await messageToText(message)) || undefined,
 
 		embeds: message.stickers
 			.map((sticker) =>
