@@ -25,6 +25,15 @@ export default async function ready(client) {
 	);
 
 	const GUILD_ID = process.env.GUILD_ID || "";
+	const guilds = await client.guilds.fetch();
+	guilds.forEach(async (guild) => {
+		if (guild.id === GUILD_ID) return;
+
+		const commands = await client.application?.commands.fetch({
+			guildId: guild.id,
+		}).catch(()=>{});
+		commands?.forEach((command) => command.delete().catch(() => {}));
+	});
 
 	const prexistingCommands = await client.application.commands.fetch({
 		guildId: GUILD_ID,
