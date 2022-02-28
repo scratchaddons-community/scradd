@@ -1,72 +1,73 @@
-/** @file Initialize Bot on ready. */
+/** @file Initialize Bot on ready.Register commands and set RPC. */
 import { Collection } from "discord.js";
-import dotenv from "dotenv";
 
 import commands from "../lib/commands.js";
 
-dotenv.config();
+/** @type {import("../types/event").default<"ready">} */
+const event = {
+	async event(client) {
+		console.log(
+			`Connected to Discord with ID ${client.application.id} and tag ${
+				client.user?.tag || ""
+			}`,
+		);
 
-/**
- * Register commands and set RPC.
- *
- * @param {import("discord.js").Client} client - Discord Client.
- */
-export default async function ready(client) {
-	if (!client.application)
-		throw new Error("`ready` was fired but `client.application` is undefined???");
+		client.user?.setActivity(
+			process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
+			{ type: "WATCHING" },
+		);
 
-	console.log(
-		`Connected to Discord with ID ${client.application.id} and tag ${client.user?.tag || ""}`,
-	);
+		const GUILD_ID = process.env.GUILD_ID || "";
+		const guilds = await client.guilds.fetch();
+		guilds.forEach(async (guild) => {
+			if (guild.id === GUILD_ID) return;
 
-	client.user?.setActivity(
-		process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
-		{ type: "WATCHING" },
-	);
+			const commands = await client.application?.commands
+				.fetch({
+					guildId: guild.id,
+				})
+				.catch(() => {});
+			commands?.forEach((command) => command.delete().catch(() => {}));
+		});
 
-	const GUILD_ID = process.env.GUILD_ID || "";
-	const guilds = await client.guilds.fetch();
-	guilds.forEach(async (guild) => {
-		if (guild.id === GUILD_ID) return;
+		const prexistingCommands = await client.application.commands.fetch({
+			guildId: GUILD_ID,
+		});
+		/**
+		 * @type {Collection<
+		 * 	string,
+		 * 	{
+		 * 		command: import("../types/command").Command;
+		 * 		permissions?: import("discord.js").ApplicationCommandPermissionData[];
+		 * 	}
+		 * >}
+		 */
+		const slashes = new Collection();
 
-		const commands = await client.application?.commands.fetch({
-			guildId: guild.id,
-		}).catch(()=>{});
-		commands?.forEach((command) => command.delete().catch(() => {}));
-	});
+		for (const [key, command] of commands.entries()) {
+			if (command.apply !== false)
+				slashes.set(key, { command: command.data, permissions: command.permissions });
+		}
 
-	const prexistingCommands = await client.application.commands.fetch({
-		guildId: GUILD_ID,
-	});
-	/**
-	 * @type {Collection<
-	 * 	string,
-	 * 	{
-	 * 		command: import("../types/command").Command;
-	 * 		permissions?: import("discord.js").ApplicationCommandPermissionData[];
-	 * 	}
-	 * >}
-	 */
-	const slashes = new Collection();
+		await Promise.all(
+			prexistingCommands.map((command) => {
+				if (slashes.has(command.name)) return false;
 
-	for (const [key, command] of commands.entries())
-		slashes.set(key, { command: command.data, permissions: command.permissions });
+				return command.delete();
+			}),
+		);
 
-	await Promise.all(
-		prexistingCommands.map((command) => {
-			if (slashes.has(command.name)) return false;
+		await Promise.all(
+			slashes.map(async ({ command, permissions }, name) => {
+				const newCommand = await (prexistingCommands.has(name)
+					? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
+					: client.application?.commands.create(command.toJSON(), GUILD_ID));
 
-			return command.delete();
-		}),
-	);
-
-	await Promise.all(
-		slashes.map(async ({ command, permissions }, name) => {
-			const newCommand = await (prexistingCommands.has(name)
-				? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
-				: client.application?.commands.create(command.toJSON(), GUILD_ID));
-
-			if (permissions) await newCommand?.permissions.add({ guild: GUILD_ID, permissions });
-		}),
-	);
-}
+				if (permissions)
+					await newCommand?.permissions.add({ guild: GUILD_ID, permissions });
+			}),
+		);
+	},
+	once: true,
+};
+export default event;

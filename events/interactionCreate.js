@@ -1,17 +1,16 @@
 /** @file Runs Commands when used. */
 import commands from "../lib/commands.js";
 
-/**
- * Run command.
- *
- * @param {import("discord.js").Interaction} interaction - Interaction.
- */
-export default async function execute(interaction) {
-	if (!interaction.isCommand()) return;
+/** @type {import("../types/event").default<"interactionCreate">} */
+const event = {
+	async event(interaction) {
+		if (!interaction.isCommand()) return;
 
-	const command = commands.get(interaction.commandName);
+		const command = commands.get(interaction.commandName);
 
-	if (!command) throw new Error(`Command '${interaction.commandName}' not found.`);
+		if (!command) throw new Error(`Command '${interaction.commandName}' not found.`);
 
-	await command.interaction(interaction);
-}
+		await command.interaction(interaction);
+	},
+};
+export default event;

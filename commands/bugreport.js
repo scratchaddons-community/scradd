@@ -1,11 +1,8 @@
 /** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import dotenv from "dotenv";
 
 import SuggestionChannel from "../common/suggest.js";
 import escape from "../lib/escape.js";
-
-dotenv.config();
 
 const { BUGS_CHANNEL, GUILD_ID } = process.env;
 

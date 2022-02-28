@@ -1,15 +1,12 @@
 /** @file Command To get a random message from the #potatoboard. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Message, MessageButton, MessageEmbed } from "discord.js";
-import dotenv from "dotenv";
 
 import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
 import asyncFilter from "../lib/asyncFilter.js";
 import firstPromiseValued from "../lib/firstPromiseValued.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
-
-dotenv.config();
 
 /** @type {{ [key: string]: { [key: string]: boolean } }} */
 const threadsFound = {};

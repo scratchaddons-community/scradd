@@ -399,8 +399,8 @@ export async function getUserFromMessage(message) {
  *
  * @returns
  */
-export async function getUserFromThread(thread,starter) {
-	const starterMessage = starter||await thread?.fetchStarterMessage().catch(() => {});
+export async function getUserFromThread(thread, starter) {
+	const starterMessage = starter || (await thread?.fetchStarterMessage().catch(() => {}));
 	if (!starterMessage) return;
 
 	const initingMessages = await thread?.messages.fetch({

@@ -1,7 +1,6 @@
 /** @file Commands To manage suggestions. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import dotenv from "dotenv";
 
 import SuggestionChannel, {
 	getUserFromMessage,
@@ -12,8 +11,6 @@ import escape, { escapeForLinkOrWebhook } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
-
-dotenv.config();
 
 const { SUGGESTION_CHANNEL = "", GUILD_ID = "" } = process.env;
 

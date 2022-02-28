@@ -1,7 +1,6 @@
 /** @file Commands To manage modmails. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import dotenv from "dotenv";
 
 import {
 	closeModmail,
@@ -10,8 +9,6 @@ import {
 	sendOpenedMessage,
 } from "../common/modmail.js";
 import generateHash from "../lib/generateHash.js";
-
-dotenv.config();
 
 /** @type {import("../types/command").default} */
 const info = {

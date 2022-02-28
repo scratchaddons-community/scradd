@@ -4,6 +4,7 @@ import type { CommandInteraction, ApplicationCommandPermissionData } from "disco
 type ComandInfo = {
 	permissions?: ApplicationCommandPermissionData[];
 	data: Command;
+	apply?: boolean;
 	interaction: (interaction: CommandInteraction) => Promise<void> | void;
 };
 

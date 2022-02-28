@@ -1,11 +1,8 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import dotenv from "dotenv";
 
 import getAllMessages from "../lib/getAllMessages.js";
 import messageToText from "../lib/messageToText.js";
-
-dotenv.config();
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";

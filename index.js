@@ -31,22 +31,16 @@ const client = new Client({
 		"GUILD_SCHEDULED_EVENTS",
 	],
 
-	partials: [
-		"USER",
-		"MESSAGE",
-		"CHANNEL",
-		"GUILD_MEMBER",
-		"REACTION",
-		"GUILD_SCHEDULED_EVENT",
-	],
+	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
 
 const events = await importScripts("events");
 
 for (const [event, execute] of events.entries()) {
-	client.on(event, async (...args) => {
+	if (execute.apply === false) continue;
+	client[execute.once === true ? "once" : "on"](event, async (...args) => {
 		try {
-			await execute(...args);
+			await execute.event(...args);
 
 			return;
 		} catch (error) {

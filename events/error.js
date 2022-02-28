@@ -1,2 +1,7 @@
-/** @file Enables Error reporting. */
-export default console.error;
+/**
+ * @file Enables Error reporting.
+ *
+ * @type {import("../types/event").default<"error">}
+ */
+const event = { event: console.error };
+export default event;
