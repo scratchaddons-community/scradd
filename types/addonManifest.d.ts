@@ -16,9 +16,9 @@ type definitions_cssManipulator =
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
 			/** The value in case the source is truthy. */
-			true: { [key: string]: unknown } | string | number | null;
+			true: definitions_cssManipulator | null;
 			/** The value in case the source is falsy. */
-			false: { [key: string]: unknown } | string | number | null;
+			false: definitions_cssManipulator | null;
 	  }
 	| {
 			/** The type of the manipulator. */

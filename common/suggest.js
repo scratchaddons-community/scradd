@@ -1,5 +1,12 @@
 /** @file Code Shared between suggestions and bug reports. */
-import { GuildMember, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import {
+	GuildMember,
+	Message,
+	MessageActionRow,
+	MessageButton,
+	MessageEmbed,
+	ThreadChannel,
+} from "discord.js";
 
 import generateHash from "../lib/generateHash.js";
 
@@ -75,11 +82,7 @@ export default class SuggestionChannel {
 		const embed = new MessageEmbed()
 			.setColor(0x222)
 			.setAuthor({
-				iconURL:
-					author?.displayAvatarURL() ||
-					interaction.user.displayAvatarURL() ||
-					interaction.user.defaultAvatarURL ||
-					"",
+				iconURL: author.displayAvatarURL(),
 
 				name: `${data.type} from ${author?.displayName}` || interaction.user.username,
 			})
@@ -195,18 +198,8 @@ export default class SuggestionChannel {
 
 			return;
 		}
-
-		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
-		const user =
-			starter &&
-			(
-				await interaction.channel?.messages.fetch({
-					after: starter.id,
-					limit: 2,
-				})
-			)
-				?.first()
-				?.mentions.users.first();
+		const starter = await interaction.channel.fetchStarterMessage();
+		const user = await getUserFromThread(interaction.channel, starter);
 
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
 
@@ -263,7 +256,7 @@ export default class SuggestionChannel {
 							return;
 						}
 
-						await Promise.all([interaction.channel.delete(), starter?.delete()]);
+						await Promise.all([interaction.channel.delete(), starter.delete()]);
 
 						break;
 					}
@@ -343,11 +336,7 @@ export default class SuggestionChannel {
 		}
 
 		const embed = new MessageEmbed(starterMessage.embeds[0]);
-		const initingMessages = await interaction.channel.messages.fetch({
-			after: starterMessage.id,
-			limit: 2,
-		});
-		const user = initingMessages.first()?.mentions.users.first();
+		const user = await getUserFromThread(interaction.channel, starterMessage);
 
 		if (interaction.user.id !== user?.id) {
 			await interaction.reply({
@@ -385,4 +374,38 @@ export default class SuggestionChannel {
 
 		return true;
 	}
+}
+
+/**
+ * @param {Message} message
+ *
+ * @returns
+ */
+export async function getUserFromMessage(message) {
+	const author =
+		(message.author.id === "323630372531470346"
+			? message.embeds[0]?.footer?.text.split(": ")[1]
+			: message.embeds[0]?.author?.iconURL?.split(/\/(\d+)\//)[1]) || message.author.id;
+	if (author) {
+		return message.guild?.members.fetch(author);
+	} else {
+		return message.thread && getUserFromThread(message.thread);
+	}
+}
+
+/**
+ * @param {ThreadChannel} thread
+ * @param {Message} [starter]
+ *
+ * @returns
+ */
+export async function getUserFromThread(thread,starter) {
+	const starterMessage = starter||await thread?.fetchStarterMessage().catch(() => {});
+	if (!starterMessage) return;
+
+	const initingMessages = await thread?.messages.fetch({
+		after: starterMessage.id,
+		limit: 2,
+	});
+	return initingMessages?.first()?.mentions.members?.first();
 }

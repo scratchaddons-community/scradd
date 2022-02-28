@@ -3,8 +3,12 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
-import SuggestionChannel, { MAX_TITLE_LENGTH, SUGGESTION_EMOJIS } from "../common/suggest.js";
-import escape, { escapeForLink } from "../lib/escape.js";
+import SuggestionChannel, {
+	getUserFromMessage,
+	MAX_TITLE_LENGTH,
+	SUGGESTION_EMOJIS,
+} from "../common/suggest.js";
+import escape, { escapeForLinkOrWebhook } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
@@ -233,44 +237,51 @@ const info = {
 				const requestedAnswer = interaction.options.getString("answer");
 
 				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
-				const all = unfiltered
-					.map((message) => {
-						const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
-							const upvoteReaction = message.reactions.resolve(upvote);
-							const downvoteReaction = message.reactions.resolve(downvote);
+				const all = (
+					await Promise.all(
+						unfiltered.map(async (message) => {
+							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
+								const upvoteReaction = message.reactions.resolve(upvote);
+								const downvoteReaction = message.reactions.resolve(downvote);
 
-							if (!upvoteReaction || !downvoteReaction) return false;
+								if (!upvoteReaction || !downvoteReaction) return false;
 
-							return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
-						}).find((currentCount) => typeof currentCount === "number");
+								return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
+							}).find((currentCount) => typeof currentCount === "number");
 
-						if (typeof count !== "number") return;
+							if (typeof count !== "number") return;
 
-						const description =
-							message.embeds[0]?.title ||
-							message.embeds[0]?.description ||
-							message.content;
+							const description =
+								message.embeds[0]?.title ||
+								message.embeds[0]?.description ||
+								message.content;
 
-						const author =
-							(message.author.id === "323630372531470346"
-								? message.embeds[0]?.footer?.text.split(": ")[1]
-								: message.embeds[0]?.author?.iconURL?.split(/\/(\d+)\//)[1]) ||
-							message.author.id;
+							const author = await getUserFromMessage(message);
 
-						if (requestedUser && author !== requestedUser?.id) return;
+							if (requestedUser && author?.id !== requestedUser?.id) return;
 
-						const answer = message.thread?.name.split("|")[0]?.trim() || "Unanswered";
+							const answer =
+								message.thread?.name.split("|")[0]?.trim() || "Unanswered";
 
-						if (requestedAnswer && answer.toLowerCase() !== requestedAnswer.toLowerCase()) return;
-						return {
-							answer,
-							author: author,
-							count,
-							id: message.id,
+							if (
+								requestedAnswer &&
+								answer.toLowerCase() !== requestedAnswer.toLowerCase()
+							)
+								return;
+							return {
+								answer,
+								author: author,
+								count,
+								id: message.id,
 
-							title: truncateText(description.split("/n")[0] || "", MAX_TITLE_LENGTH),
-						};
-					})
+								title: truncateText(
+									description.split("/n")[0] || "",
+									MAX_TITLE_LENGTH,
+								),
+							};
+						}),
+					)
+				)
 
 					.filter((suggestion) => suggestion)
 					.sort(
@@ -290,7 +301,9 @@ const info = {
 					.setDisabled(numberOfPages === 1)
 					.setCustomId(generateHash("next"));
 
-				const nick = requestedUser && (await interaction.guild?.members.fetch(requestedUser.id))?.nickname;
+				const nick =
+					requestedUser &&
+					(await interaction.guild?.members.fetch(requestedUser.id))?.nickname;
 
 				// eslint-disable-next-line fp/no-let -- This must be changable.
 				let offset = 0;
@@ -313,7 +326,7 @@ const info = {
 
 							return `${index + offset + 1}. **${suggestion.count}** [${
 								suggestion.count > 0 ? "👍" : "👎"
-							} ${escapeForLink(
+							} ${escapeForLinkOrWebhook(
 								suggestion.title,
 							)}](https://discord.com/channels/${encodeURIComponent(
 								GUILD_ID,
@@ -321,7 +334,7 @@ const info = {
 								suggestion.id,
 							)} "${suggestion.answer}")${
 								suggestion.author && !requestedUser
-									? ` by <@${suggestion.author}>`
+									? ` by <@${suggestion.author.id}>`
 									: ""
 							}`;
 						})

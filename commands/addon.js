@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
-import escape, { escapeForInlineCode, escapeForLink } from "../lib/escape.js";
+import escape, { escapeForInlineCode, escapeForLinkOrWebhook } from "../lib/escape.js";
 
 import generateTooltip from "../lib/generateTooltip.js";
 
@@ -66,7 +66,7 @@ const info = {
 			return credits
 				?.map(({ name, link, note = "" }) =>
 					link
-						? `[${escapeForLink(name)}](${link} "${note}")`
+						? `[${escapeForLinkOrWebhook(name)}](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,

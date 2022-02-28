@@ -3,8 +3,12 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
-import { getMemberFromThread, getThreadFromMember, MODMAIL_CHANNEL } from "../common/modmail.js";
-import escape from "../lib/escape.js";
+import {
+	closeModmail,
+	getThreadFromMember,
+	MODMAIL_CHANNEL,
+	sendOpenedMessage,
+} from "../common/modmail.js";
 import generateHash from "../lib/generateHash.js";
 
 dotenv.config();
@@ -31,7 +35,7 @@ const info = {
 			subcommand
 				.setName("start")
 				.setDescription(
-					"(Mods only) Start a modmail ticket with a user. If a non-mod wants to start a ticket, please DM me.",
+					"(Mods only) Start a modmail ticket with a user. (Non-mods may start a ticket by DMing me.)",
 				)
 				.addUserOption((input) =>
 					input
@@ -60,45 +64,11 @@ const info = {
 				}
 
 				const reason = interaction.options.getString("reason") || "";
-				/** @type {Promise<any>[]} */
-				const promises = [
-					interaction.reply({
-						content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
-					}),
-				];
+				await interaction.reply({
+					content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
+				});
 
-				promises.push(
-					getMemberFromThread(interaction.channel).then(async (user) => {
-						const dmChannel = await user?.createDM().catch(() => {});
-
-						return await dmChannel?.send({
-							embeds: [
-								new MessageEmbed()
-									.setTitle("Modmail ticket closed!")
-									.setDescription(reason)
-									.setTimestamp(interaction.channel?.createdTimestamp)
-									.setColor(0x008000),
-							],
-						});
-					}),
-					interaction.channel
-						.fetchStarterMessage()
-						.catch(() => {})
-						.then((starter) =>
-							starter?.edit({
-								embeds: [
-									{
-										color: 0x008000,
-										description: starter.embeds[0]?.description || "",
-										title: "Modmail ticket closed!",
-									},
-								],
-							}),
-						),
-				);
-				await Promise.all(promises);
-				await interaction.channel.setLocked(true, `Closed by ${interaction.user.tag}`);
-				await interaction.channel.setArchived(true, `Closed by ${interaction.user.tag}`);
+				await closeModmail(interaction.channel, interaction.user, reason);
 
 				break;
 			}
@@ -130,19 +100,6 @@ const info = {
 				/** @type {Promise<unknown>[]} */
 				const promises = [];
 
-				const dmChannel = await user.createDM().catch(() => {
-					promises.push(
-						interaction.reply({
-							content:
-								"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
-
-							ephemeral: true,
-						}),
-					);
-				});
-
-				if (!dmChannel) return;
-
 				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
 
 				if (!mailChannel) throw new Error("Could not find modmail channel");
@@ -157,7 +114,7 @@ const info = {
 					)
 					.setColor("BLURPLE")
 					.setAuthor({
-						iconURL: user?.avatarURL() || user?.user.avatarURL() || undefined,
+						iconURL: user.displayAvatarURL(),
 						name: user.displayName || user.user.username,
 					});
 
@@ -207,20 +164,14 @@ const info = {
 									name: `${user.user.username} (${user.id})`,
 								});
 								await Promise.all([
-									dmChannel.send({
-										embeds: [
-											new MessageEmbed()
-												.setTitle("Modmail ticket opened")
-												.setDescription(
-													`The moderation team of ${escape(
-														interaction.guild?.name || "Scratch Addons",
-													)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
-												)
-												.setFooter({
-													text: "Please note that reactions, replies, edits, and deletes are not supported.",
-												})
-												.setColor("BLURPLE"),
-										],
+									sendOpenedMessage(user).then((success) => {
+										if (!success)
+											return interaction.reply({
+												content:
+													"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
+
+												ephemeral: true,
+											});
 									}),
 									buttonInteraction.reply({
 										content: `<:yes:940054094272430130> Modmail ticket opened! Send them a message in ${thread.toString()}.`,

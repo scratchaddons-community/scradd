@@ -1,7 +1,7 @@
 /** @file Run Bot. */
 import http from "http";
 
-import { Client, Intents, MessageEmbed } from "discord.js";
+import { Client, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
 import importScripts from "./lib/importScripts.js";
@@ -13,13 +13,32 @@ process.on("unhandledRejection", console.error);
 
 const client = new Client({
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-		Intents.FLAGS.DIRECT_MESSAGES,
+		"GUILDS",
+		"GUILD_MESSAGES",
+		"GUILD_MESSAGE_REACTIONS",
+		"DIRECT_MESSAGES",
+		"GUILD_MEMBERS",
+		"GUILD_BANS",
+		"GUILD_EMOJIS_AND_STICKERS",
+		"GUILD_INTEGRATIONS",
+		"GUILD_WEBHOOKS",
+		"GUILD_INVITES",
+		"GUILD_VOICE_STATES",
+		"GUILD_PRESENCES",
+		"GUILD_MESSAGE_TYPING",
+		"DIRECT_MESSAGE_REACTIONS",
+		"DIRECT_MESSAGE_TYPING",
+		"GUILD_SCHEDULED_EVENTS",
 	],
 
-	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
+	partials: [
+		"USER",
+		"MESSAGE",
+		"CHANNEL",
+		"GUILD_MEMBER",
+		"REACTION",
+		"GUILD_SCHEDULED_EVENT",
+	],
 });
 
 const events = await importScripts("events");

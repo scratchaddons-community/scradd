@@ -49,7 +49,10 @@ export default async function messageCreate(message) {
 		if (existingThread) {
 			promises.push(
 				webhook
-					.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
+					.send({
+						threadId: existingThread.id,
+						...(await generateMessage(message, guild)),
+					})
 					.then(async () => await message.react("<:yes:940054094272430130>"))
 					.catch(async () => await message.react("<:no:940054047854047282>")),
 			);
@@ -126,7 +129,7 @@ export default async function messageCreate(message) {
 								webhook
 									.send({
 										threadId: newThread.id,
-										...(await generateMessage(message)),
+										...(await generateMessage(message, guild)),
 									})
 									.then(
 										async () =>
@@ -175,10 +178,8 @@ export default async function messageCreate(message) {
 		}
 	}
 
-	if (!message.guild || message.guild?.id !== GUILD_ID) {
-		await Promise.all(promises);
-
-		return;
+	if (message.guild !== null && message.guild.id !== GUILD_ID) {
+		return await Promise.all(promises);
 	}
 
 	if (
@@ -190,9 +191,11 @@ export default async function messageCreate(message) {
 		const user = await getMemberFromThread(message.channel);
 
 		if (user) {
-			const channel = await user.createDM().catch(async () => {
-				await message.react("<:no:940054047854047282>");
-			});
+			const channel =
+				user.user.dmChannel ||
+				(await user.createDM().catch(async () => {
+					await message.react("<:no:940054047854047282>");
+				}));
 
 			promises.push(
 				channel
@@ -210,7 +213,10 @@ export default async function messageCreate(message) {
 		return await message.delete();
 	}
 
-	const content = message.content.toLowerCase();
+	const content = message.content
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "");
 
 	/**
 	 * Determines whether the message contains a word.
@@ -238,7 +244,7 @@ export default async function messageCreate(message) {
 		content === "potato" ||
 		content === "potatoes" ||
 		content === "potatos" ||
-		content.includes("🥔")
+		(content.includes("🥔") && message.channel.id !== process.env.BOARD_CHANNEL)
 	)
 		promises.push(message.react("🥔"));
 
@@ -265,7 +271,7 @@ export default async function messageCreate(message) {
 		includes("rickroll") ||
 		includes("rickrolled", false) ||
 		includes("rickrolling", false) ||
-		content.includes("dQw4w9WgXcQ")
+		message.content.includes("dQw4w9WgXcQ")
 	)
 		promises.push(message.react("<a:rick:938547171366682624>"));
 

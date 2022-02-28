@@ -1,6 +1,6 @@
 /** @file Code To perform operations related to modmail tickets. */
-import { MessageEmbed } from "discord.js";
-import { escapeForWebhook } from "../lib/escape.js";
+import { GuildMember, MessageEmbed } from "discord.js";
+import escape, { escapeForLinkOrWebhook } from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
@@ -21,11 +21,13 @@ export const WEBHOOK_NAME = "scradd-webhook";
  * >}
  *   - Webhook message.
  */
-export async function generateMessage(message) {
+export async function generateMessage(message, guild = message.guild) {
+	if (!guild) throw new Error("Expected guild to be passed as message is from a DM");
+	const author = await guild.members.fetch(message.author.id);
 	return {
 		allowedMentions: { users: [] },
-		avatarURL: message.author.avatarURL() || "",
-		content: escapeForWebhook(await messageToText(message)) || undefined,
+		avatarURL: author.displayAvatarURL(),
+		content: escapeForLinkOrWebhook(await messageToText(message)) || undefined,
 
 		embeds: message.stickers
 			.map((sticker) =>
@@ -72,4 +74,76 @@ export async function getThreadFromMember(guild, user) {
 	const { threads } = await mailChannel.threads.fetchActive();
 
 	return threads.find((thread) => thread.name.endsWith(`(${user.id})`));
+}
+
+/**
+ * @param {import("discord.js").ThreadChannel} thread
+ * @param {import("discord.js").User} user
+ * @param {string} reason
+ */
+export async function closeModmail(thread, user, reason) {
+	await Promise.all([
+		sendClosedMessage(thread, reason),
+		thread
+			.fetchStarterMessage()
+			.catch(() => {})
+			.then((starter) =>
+				starter?.edit({
+					embeds: [
+						{
+							color: 0x008000,
+							description: starter.embeds[0]?.description || "",
+							title: "Modmail ticket closed!",
+						},
+					],
+				}),
+			),
+	]);
+	await thread.setLocked(true, `Closed by ${user.tag}: ${reason}`);
+	await thread.setArchived(true, `Closed by ${user.tag}: ${reason}`);
+}
+
+/**
+ * @param {import("discord.js").ThreadChannel} thread
+ * @param {string} [reason]
+ *
+ * @returns
+ */
+export async function sendClosedMessage(thread, reason) {
+	const user = await getMemberFromThread(thread);
+	const embed = new MessageEmbed()
+		.setTitle("Modmail ticket closed!")
+		.setTimestamp(thread.createdTimestamp)
+		.setColor(32768);
+	if (reason) embed.setDescription(reason);
+	const dmChannel = await user?.createDM().catch(() => {});
+	return await dmChannel?.send({
+		embeds: [embed],
+	});
+}
+
+/**
+ * @param {GuildMember} user
+ *
+ * @returns
+ */
+export async function sendOpenedMessage(user) {
+	const dmChannel = await user.createDM().catch(() => {});
+
+	if (!dmChannel) return false;
+	return await dmChannel.send({
+		embeds: [
+			new MessageEmbed()
+				.setTitle("Modmail ticket opened")
+				.setDescription(
+					`The moderation team of ${escape(
+						user.guild.name,
+					)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
+				)
+				.setFooter({
+					text: "Please note that reactions, replies, edits, and deletes are not supported.",
+				})
+				.setColor("BLURPLE"),
+		],
+	});
 }
