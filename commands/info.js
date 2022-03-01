@@ -34,48 +34,48 @@ const info = {
 					BOARD_EMOJI,
 				)} reactions, I will post it to <#${escape(
 					BOARD_CHANNEL,
-				)}>. This is useful for cases such as the following:\n- when you want to [highlight a good piece of work made by someone in the server](https://canary.discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n- when you want to [give somone credit for making or saying something funny](https://canary.discord.com/channels/806602307750985799/938809898660155453/944108757686841344)\n- when someone says [something that without context makes no sense](https://canary.discord.com/channels/806602307750985799/938809898660155453/941848293170876486)\n- and etcetera.\n\nYou cannot react to your own messages with ${escape(
+				)}>. This is useful for cases such as the following:\n- when you want to [highlight a good piece of work made by someone in the server](https://discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n- when you want to [give somone credit for making or saying something funny](https://discord.com/channels/806602307750985799/938809898660155453/944108757686841344)\n- when someone says [something that without context makes no sense](https://discord.com/channels/806602307750985799/938809898660155453/941848293170876486)\n- and etcetera.\n\nYou cannot react to your own messages with ${escape(
 					BOARD_EMOJI,
 				)} to prevent abusing the potatoboard. Also, if Scradd autoreacts to a message with ${escape(
 					BOARD_EMOJI,
 				)}, it does not count towards the ${escape(
 					MIN_REACTIONS + "",
-				)} needed to be posted.\n\nYou can use the [\`/explorepotatoes\`](https://github.com/scratchaddons-community/scradd/blob/main/commands/explorepotatoes.js) command to find a random message from the potatoboard. You can filter by the user or by minimum number of ${escape(
+				)} needed to be posted.\n\nYou can use the [\`/explorepotatoes\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/explorepotatoes.js>) command to find a random message from the potatoboard. You can filter by the user or by minimum number of ${escape(
 					BOARD_EMOJI,
-				)} reactions.\n\nMost of the code handling potatoboard starts from [messageReactionAdd.js](https://github.com/scratchaddons-community/scradd/blob/main/events/messageReactionAdd.js).`,
+				)} reactions.\n\nMost of the code handling potatoboard starts from [messageReactionAdd.js](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageReactionAdd.js>).`,
 				emoji: BOARD_EMOJI,
 			},
 			"Suggestions": {
-				value: `Users can use the \`/suggestion create\` command to post a suggestion to <#${escape(
+				value: `Users can use the [\`/suggestion create\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/suggestion.js>) command to post a suggestion to <#${escape(
 					process.env.SUGGESTION_CHANNEL || "",
-				)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it as well as open a thread for discussion on it. ${dev}s can use the \`/suggestion answer\` command in the thread to answer a suggestion following the guidelines in <#909944155139112970>. ${dev}s, ${mod}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer, suggestions you could implement, and so on.\n\nSimilar \`/bugreport\` commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
+				)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it, as well as open a thread for discussion on it. One of ${dev} can use the \`/suggestion answer\` command in the thread to answer a suggestion, following the guidelines in <#909944155139112970>. ${dev}, ${mod}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
 				emoji: "👍",
 			},
 			"Modmail": {
 				value: `Users may DM me to send private messages to all the ${mod}s at once. I will send all their messages to a thread in <#${escape(
 					MODMAIL_CHANNEL,
-				)}> (through a webhook so the user’s original avatar and nickname is used) and react to it with <:yes:940054094272430130>. If sending any message fails, I will react with <:no:940054047854047282>. I will DM the user any messages ${mod}s send in the thread (anonymously; the ${mod}s’ identities are not revealed), following the same reaction rules. Reactions, replies, edits, and deletes are not supported.\nWhen the ticket is resolved, a ${mod} can use the \`/modmail close\` command to lock the thread, edit the thread strting message to indicate its closed status, and DM the user. The ${mod} can specify a reason that will be posted in the thread as well as sent to the user. \n\nIf the ${mod}s want to contact a user for any reason, they can use the \`/modmail start\` command to start a modmail with a user themselves. It will open a new thread in <#${escape(
+				)}> (through a webhook so the user’s original avatar and nickname is used) and react to it with <:yes:940054094272430130>. If sending any message fails, I will react with <:no:940054047854047282>. I will DM the user any messages ${mod}s send in the thread (anonymously; the ${mod}s’ identities are not revealed), following the same reaction rules. Reactions, replies, edits, and deletes are not supported.\nThe source code for these is in [\`messageCreate.js\`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).\nWhen the ticket is resolved, a ${mod} can use the \`/modmail close\` command to lock the thread, edit the thread starting message to indicate its closed status, and DM the user. The ${mod} can specify a reason that will be posted in the thread as well as sent to the user. \n\nIf the ${mod}s want to contact a user for any reason, they can use the [\`/modmail start\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/modmail.js>) command to start a modmail with a user themselves. It will open a new thread in <#${escape(
 					MODMAIL_CHANNEL,
 				)}> and DM the user that a Modmail has been started. The ${mod}s can then ask the user what they need to ask, for instance, requesting them to change an innappropriate status.`,
 				emoji: "🛡",
 			},
 			"Miscellaneous commands": {
-				value: `(click a command name to view the source code)\n- [\`/addon\`](https://github.com/scratchaddons-community/scradd/blob/main/commands/addon.js): Search for an addon by name, description, or internal ID and return various information about it. Don\’t specify a filter to get a random addon. You can click on the addon\’s name to get a link straight to the settings page to enable it.\n- [\`/info\`](https://github.com/scratchaddons-community/scradd/blob/main/commands/info.js) (this command): A help command to learn more about the bot and its functions.\n- [\`/say\`](https://github.com/scratchaddons-community/scradd/blob/main/commands/say.js): A ${mod}-only (to prevent abuse) command that makes me mimic what you tell me to say. Note that the person who used the command will not be named publically, but ${mod}s are able to find out still by looking in <#${escape(
+				value: `- [\`/addon\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/addon.js>): Search for an addon by name, description, or internal ID and return various information about it. Don\’t specify a filter to get a random addon. You can click on the addon\’s name to get a link straight to the settings page to enable it.\n- [\`/info\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/info.js>) (this command): A help command to learn more about the bot and its functions.\n- [\`/say\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/say.js>): A ${mod}-only (to prevent abuse) command that makes me mimic what you tell me to say. Note that the person who used the command will not be named publically, but ${mod}s are able to find out still by looking in <#${escape(
 					process.env.ERROR_CHANNEL || "",
 				)}>.`,
 				emoji: "➕",
 			},
 			"Autoreactions and responses": {
-				value: "I automatically reacts to some messages as little easter eggs. How many reactions can you find? There are currently **16** triggers. (Yes, you can just read the source code to find them, but please don’t spoil them - it’s fun for people to find them themselves.)\nThere are also **3** automatic responses when using now-removed <@323630372531470346> commands and the like. These are not needed to be kept secret. They are: prompt users to use `/suggestion create` instead of `r!suggest`,tell people not to ping others when using `r!mimic`, and call people out when they abuse the spoiler hack. The source code for these is in [`messageCreate.js`](https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js).",
+				value: "I automatically react to some messages as easter eggs. How many reactions can you find? There are currently **16** triggers. (Yes, you can just read the source code to find them, but please don’t spoil them - it’s fun for people to find them themselves.)\nThere are also **3** automatic responses when using now-removed <@323630372531470346> commands and the like. These are not needed to be kept secret. They are: prompt users to use `/suggestion create` instead of `r!suggest`, tell people not to ping others when using `r!mimic`, and call people out when they abuse the spoiler hack. The source code for these is in [`messageCreate.js`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).",
 				emoji: "✅",
 			},
 			"Credits": {
 				value:
 					"Code written by (in no particular order): " +
 					(await getRole("938439909742616616")) +
-					".\nIcon by <@691223009515667457> and <@765910070222913556>.\nCloud-hosted on [opeNode.io](https://www.openode.io/open-source/scradd).\nBeta testers (also in no particular order): " +
+					".\nLogo by <@691223009515667457> and <@765910070222913556>.\nBeta testers (also in no particular order): " +
 					(await getRole("938440159102386276")) +
-					".\nThird-party code libraries used: " +
+					".\nCloud-hosted on [opeNode.io](https://www.openode.io/open-source/scradd).\nThird-party code libraries used: " +
 					join(
 						Object.keys(pkg.dependencies),
 						(dependency) => `\`${escape(dependency)}\``,
@@ -94,7 +94,7 @@ const info = {
 		 * @param {T[]} array
 		 * @param {(item: T) => string} [callback]
 		 */
-		function join(array, callback = (item) => (`${item}`)) {
+		function join(array, callback = (item) => `${item}`) {
 			const last = array.pop();
 
 			if (typeof last === "undefined") return "(N/A)";
