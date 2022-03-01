@@ -13,7 +13,6 @@ process.on("unhandledRejection", console.error);
 const client = new Client({
 	allowedMentions: { parse: [], roles: [] },
 	presence: {
-		status: "dnd",
 		activities: [
 			{
 				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
