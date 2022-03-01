@@ -1,7 +1,18 @@
-/** @file Initialize Bot on ready.Register commands and set RPC. */
-import { Collection } from "discord.js";
+/** @file Initialize Bot on ready. Register commands and etc. */
+import { Collection, MessageEmbed } from "discord.js";
 
 import commands from "../lib/commands.js";
+
+import fileSystem from "fs/promises";
+import path from "path";
+import url from "url";
+
+const pkg = JSON.parse(
+	await fileSystem.readFile(
+		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../package.json"),
+		"utf8",
+	),
+);
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {
@@ -12,15 +23,29 @@ const event = {
 			}`,
 		);
 
-		client.user?.setActivity(
-			process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
-			{ type: "WATCHING" },
-		);
-
 		const GUILD_ID = process.env.GUILD_ID || "";
 		const guilds = await client.guilds.fetch();
 		guilds.forEach(async (guild) => {
-			if (guild.id === GUILD_ID) return;
+			if (guild.id === GUILD_ID) {
+				if(process.env.NODE_ENV !== "production")return
+				const { channels } = await guild.fetch();
+				const { ERROR_CHANNEL } = process.env;
+
+				if (!ERROR_CHANNEL) throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
+
+				const channel = await channels.fetch(ERROR_CHANNEL);
+
+				if (!channel?.isText()) throw new ReferenceError("Could not find error reporting channel");
+
+				return await channel?.send({
+					embeds: [
+						new MessageEmbed()
+							.setTitle("Bot restarted!")
+							.setDescription("Version " + pkg.version)
+							.setColor("RANDOM"),
+					],
+				});
+			}
 
 			const commands = await client.application?.commands
 				.fetch({

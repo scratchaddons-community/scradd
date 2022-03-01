@@ -92,7 +92,7 @@ export default class SuggestionChannel {
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
-		if (!channel?.isText()) throw new Error(`${data.type} channel not found`);
+		if (!channel?.isText()) throw new ReferenceError(`${data.type} channel not found`);
 
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
@@ -139,7 +139,7 @@ export default class SuggestionChannel {
 
 		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
 			await interaction.reply({
-				content: "<:no:940054047854047282> You don't have permission to run this command!",
+				content: "<:no:940054047854047282> You don’t have permission to run this command!",
 				ephemeral: true,
 			});
 
@@ -210,7 +210,7 @@ export default class SuggestionChannel {
 			)
 		) {
 			await interaction.reply({
-				content: "<:no:940054047854047282> You don't have permission to run this command!",
+				content: "<:no:940054047854047282> You don’t have permission to run this command!",
 				ephemeral: true,
 			});
 

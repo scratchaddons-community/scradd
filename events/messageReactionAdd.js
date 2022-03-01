@@ -35,9 +35,9 @@ const event = {
 		if (
 			// Ignore other servers
 			message.guild?.id !== process.env.GUILD_ID ||
-			// Ignore when it's the wrong emoji
+			// Ignore when it’s the wrong emoji
 			reaction.emoji.name !== BOARD_EMOJI ||
-			// Ignore when it's me
+			// Ignore when it’s me
 			user.id === message.client.user?.id
 		)
 			return;

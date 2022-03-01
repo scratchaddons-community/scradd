@@ -83,14 +83,12 @@ const info = {
 			: addons[Math.floor(Math.random() * addons.length)];
 
 		if (!item) {
-			await interaction.reply({
+			return await interaction.reply({
 				content: `<:no:940054047854047282> That addon${
 					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
 				} does not exist!`,
 				ephemeral: true,
 			});
-
-			return;
 		}
 
 		const addon = await fetch(

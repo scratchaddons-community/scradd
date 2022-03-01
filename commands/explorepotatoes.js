@@ -74,7 +74,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 		}
 
 		default: {
-			// It's likely a VC
+			// It’s likely a VC
 			return false;
 		}
 	}
@@ -118,7 +118,7 @@ const info = {
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
 		if (!board?.isText()) {
-			throw new Error(
+			throw new ReferenceError(
 				"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
 			);
 		}
@@ -232,7 +232,7 @@ const info = {
 			.on("end", async () => {
 				const source = await interaction.fetchReply();
 
-				if (!(source instanceof Message)) return;
+				if (!(source instanceof Message)) throw new TypeError("Source is not a message.");
 
 				await interaction.editReply({
 					allowedMentions: { users: [] },
@@ -244,7 +244,7 @@ const info = {
 									component.setDisabled(
 										!(component.type === "BUTTON" && component.url),
 									),
-								// Disable it if it's not a button with a URL
+								// Disable it if it’s not a button with a URL
 							),
 						),
 					),

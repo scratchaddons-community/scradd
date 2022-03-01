@@ -16,7 +16,7 @@ import generateHash from "../lib/generateHash.js";
 
 const { GUILD_ID = "", NODE_ENV } = process.env;
 
-if (!GUILD_ID) throw new Error("GUILD_ID is not set in the .env.");
+if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 
 /** @type {import("../types/event").default<"messageCreate">} */
 const event = {
@@ -31,10 +31,10 @@ const event = {
 			const guild = await message.client.guilds.fetch(GUILD_ID);
 			const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
-			if (!mailChannel) throw new Error("Could not find modmail channel");
+			if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
 			if (mailChannel.type !== "GUILD_TEXT")
-				throw new Error("Modmail channel is not a text channel");
+				throw new TypeError("Modmail channel is not a text channel");
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
@@ -59,7 +59,7 @@ const event = {
 					.setDescription(
 						`You are sending this message to the ${escape(
 							mailChannel.guild.name,
-						)} Server's mod team. If you are sure you would like to do this, press the button below.`,
+						)} Server’s mod team. If you are sure you would like to do this, press the button below.`,
 					)
 					.setColor("BLURPLE");
 				const button = new MessageButton()
@@ -115,7 +115,7 @@ const event = {
 									name: `${message.author.username} (${message.author.id})`,
 								});
 
-								if (!webhook) throw new Error("Could not find webhook");
+								if (!webhook) throw new ReferenceError("Could not find webhook");
 
 								buttonPromises.push(
 									buttonInteraction.reply({
@@ -249,10 +249,10 @@ const event = {
 		)
 			promises.push(message.react("🥔"));
 
-		if (includes("griff") || includes("griffpatch", false))
+		if (includes("griff") || includes("griffpatch"))
 			promises.push(message.react("<:griffpatch:938441399936909362>"));
 
-		if (includes("amongus", false) || includes("amogus", false))
+		if (includes("amongus") || includes("amogus"))
 			promises.push(message.react("<:sus:938441549660975136>"));
 
 		if (includes("sus", false)) promises.push(message.react("<:sus_pepe:938548233385414686>"));
@@ -261,18 +261,18 @@ const event = {
 
 		if (includes("cubot")) promises.push(message.react("<:cubot:939336981601722428>"));
 
-		if (includes("splory", false)) promises.push(message.react("<:splory:942561415594663966>"));
+		if (includes("splory")) promises.push(message.react("<:splory:942561415594663966>"));
 
-		if (includes("tera") || content.includes("<:tewwa:898310317833076847>"))
+		if (includes("tera") || content.includes("tewwa"))
 			promises.push(message.react("<:tewwa:938486033274785832>"));
 
 		if (
-			/gives? you up/.test(content) ||
+			/gives? ?you ?up/.test(content) ||
 			includes("rick") ||
 			includes("rickroll") ||
 			includes("rickrolled", false) ||
 			includes("rickrolling", false) ||
-			message.content.includes("dQw4w9WgXcQ")
+			message.cleanContent.includes("dQw4w9WgXcQ")
 		)
 			promises.push(message.react("<a:rick:938547171366682624>"));
 
@@ -280,6 +280,8 @@ const event = {
 
 		if (content.includes("scradd bad"))
 			promises.push(message.react("<:angery:939337168780943390>"));
+
+		if (content === "no") promises.push(message.react("<:no:940054047854047282>"));
 
 		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 			promises.push(message.react("👋"));
@@ -296,13 +298,13 @@ const event = {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
 
-		if (content.includes(spoilerHack)) {
-			const array = message.cleanContent.split(spoilerHack);
+		if (message.content.includes(spoilerHack)) {
+			const array = message.content.split(spoilerHack);
 
 			array.shift();
 			promises.push(
 				message.reply({
-					allowedMentions: { repliedUser: true, roles: [], users: [] },
+					allowedMentions: { roles: [], users: [] },
 
 					content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(
 						array.join(spoilerHack),
@@ -314,7 +316,9 @@ const event = {
 		const firstMention = message.mentions.users.first();
 
 		if (
-			/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(content) &&
+			/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(
+				message.content,
+			) &&
 			firstMention?.id !== message.author.id &&
 			!firstMention?.bot &&
 			!message.author?.bot &&
@@ -324,7 +328,7 @@ const event = {
 
 			promises.push(
 				message.reply({
-					content: `Please don't ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escape(
+					content: `Please don’t ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escape(
 						member?.user.tag || "",
 					)}\` instead of \`r!mimic @${escape(
 						member?.nickname || member?.user.username || "",

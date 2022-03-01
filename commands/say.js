@@ -5,7 +5,7 @@ import { escapeForInlineCode } from "../lib/escape.js";
 const info = {
 	data: new SlashCommandBuilder()
 		.setDescription(
-			"(Mods only) Say what you tell me to say. Won't publically share the author.",
+			"(Mods only) Say what you tell me to say. Won’t publically share the author.",
 		)
 		.setDefaultPermission(false)
 		.addStringOption((input) =>

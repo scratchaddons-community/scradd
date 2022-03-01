@@ -51,7 +51,7 @@ export async function sourceToBoardMessage(message) {
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isText())
-		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
+		throw new ReferenceError("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
 	const fetchedMessages = await getAllMessages(board);
 
@@ -79,7 +79,7 @@ export async function postMessageToBoard(message) {
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isText())
-		throw new Error("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
+		throw new ReferenceError("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
 
 	const description = await messageToText(message);
 

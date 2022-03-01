@@ -83,12 +83,12 @@ type definitions_cssManipulator =
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
  *
  * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
- * pattern, and patterns that don't start will be treated as an relative RegEx pattern.
+ * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
  * `[...]`: An array that contains match rules. The script will execute if it matches any of the rules.
  *
  * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
- * pattern, and patterns that don't start will be treated as an relative RegEx pattern.
+ * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
  * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`,
  * `"newPostScreens"`, `"editingScreens"`, `"forums"`, `"scratchWWWNoProject"`: A match rule shortcut.
@@ -131,7 +131,7 @@ type definitions_if = {
 type manifest = {
 	/** The URL to the schema. */
 	$schema?: string;
-	/** The name of the addon. Don't make it too long. */
+	/** The name of the addon. Don’t make it too long. */
 	name: string;
 	/** The description of the addons. Any credits and attributions also belong here. */
 	description: string;
@@ -202,7 +202,7 @@ type manifest = {
 		if?: definitions_if;
 	}>;
 	/**
-	 * The "settings" object allow the addon's users to specify settings in Scratch Addons' settings
+	 * The "settings" object allow the addon’s users to specify settings in Scratch Addons’ settings
 	 * panel. Inside your persistent scripts and userscripts, you can then access those settings
 	 * with the "addon.settings" API.
 	 *
@@ -356,21 +356,21 @@ type manifest = {
 		script: string;
 	};
 	/**
-	 * Determines whether the addon's scripts should be considered disabled when disabled as the
+	 * Determines whether the addon’s scripts should be considered disabled when disabled as the
 	 * page is running.
 	 */
 	dynamicDisable?: boolean;
 	/**
-	 * Determines whether the addon's scripts should be considered enabled when enabled as the page
+	 * Determines whether the addon’s scripts should be considered enabled when enabled as the page
 	 * is running.
 	 */
 	dynamicEnable?: boolean;
 	/**
-	 * Determines whether the addon's userstyles should be injected as style elements rather than
+	 * Determines whether the addon’s userstyles should be injected as style elements rather than
 	 * link elements.
 	 */
 	injectAsStyleElt?: boolean;
-	/** Determines whether the addon's userstyles should be removed and rematched to the new settings. */
+	/** Determines whether the addon’s userstyles should be removed and rematched to the new settings. */
 	updateUserstylesOnSettingsChange?: boolean;
 	/**
 	 * An array of CSS variables the addon defines.

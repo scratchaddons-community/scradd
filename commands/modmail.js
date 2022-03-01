@@ -99,10 +99,10 @@ const info = {
 
 				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
 
-				if (!mailChannel) throw new Error("Could not find modmail channel");
+				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
 				if (mailChannel.type !== "GUILD_TEXT")
-					throw new Error("Modmail channel is not a text channel");
+					throw new TypeError("Modmail channel is not a text channel");
 
 				const confirmEmbed = new MessageEmbed()
 					.setTitle("Confirmation")

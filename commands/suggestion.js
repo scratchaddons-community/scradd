@@ -14,7 +14,7 @@ import truncateText from "../lib/truncateText.js";
 
 const { SUGGESTION_CHANNEL = "", GUILD_ID = "" } = process.env;
 
-if (!SUGGESTION_CHANNEL) throw new Error("SUGGESTION_CHANNEL is not set in the .env.");
+if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env.");
 
 const PAGE_OFFSET = 15;
 
@@ -146,7 +146,7 @@ const info = {
 				),
 		),
 	async interaction(interaction) {
-		if (interaction.guild?.id !== GUILD_ID || !interaction.channel?.isText()) return;
+		if (interaction.guild?.id !== GUILD_ID) return;
 
 		const command = interaction.options.getSubcommand();
 
@@ -228,7 +228,7 @@ const info = {
 
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 
-				if (!channel?.isText()) return;
+				if (!channel?.isText()) throw new ReferenceError ("Could not find suggestion channel.");
 
 				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
@@ -372,7 +372,7 @@ const info = {
 
 				await interaction.editReply(embed());
 
-				const collector = interaction.channel.createMessageComponentCollector({
+				const collector = interaction.channel?.createMessageComponentCollector({
 					filter: (buttonInteraction) =>
 						[previousButton.customId, nextButton.customId].includes(
 							buttonInteraction.customId,
@@ -382,9 +382,7 @@ const info = {
 				});
 
 				collector
-					.on("collect", async (buttonInteraction) => {
-						if (!interaction.channel?.isText()) return;
-
+					?.on("collect", async (buttonInteraction) => {
 						if (buttonInteraction.customId === nextButton.customId)
 							offset += PAGE_OFFSET;
 						else offset -= PAGE_OFFSET;

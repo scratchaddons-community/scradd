@@ -10,8 +10,18 @@ import escape, { escapeForCodeblock } from "./lib/escape.js";
 dotenv.config();
 process.on("unhandledException", console.error);
 process.on("unhandledRejection", console.error);
-
 const client = new Client({
+	allowedMentions: { parse: [], roles: [] },
+	presence: {
+		status: "dnd",
+		activities: [
+			{
+				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
+				type: "WATCHING",
+				url: "https://scradd.openode.dev",
+			},
+		],
+	},
 	intents: [
 		"GUILDS",
 		"GUILD_MESSAGES",
@@ -30,6 +40,8 @@ const client = new Client({
 		"DIRECT_MESSAGE_TYPING",
 		"GUILD_SCHEDULED_EVENTS",
 	],
+	restGlobalRateLimit: 50,
+	failIfNotExists: false,
 
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
@@ -40,9 +52,7 @@ for (const [event, execute] of events.entries()) {
 	if (execute.apply === false) continue;
 	client[execute.once === true ? "once" : "on"](event, async (...args) => {
 		try {
-			await execute.event(...args);
-
-			return;
+			return await execute.event(...args);
 		} catch (error) {
 			try {
 				console.error(error);
@@ -57,12 +67,12 @@ for (const [event, execute] of events.entries()) {
 					.setColor("RANDOM");
 				const { ERROR_CHANNEL } = process.env;
 
-				if (!ERROR_CHANNEL) throw new Error("ERROR_CHANNEL is not set in the .env");
+				if (!ERROR_CHANNEL) throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
 
 				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
 
 				if (!testingChannel?.isText())
-					throw new Error("Could not find error reporting channel");
+					throw new ReferenceError("Could not find error reporting channel");
 
 				await testingChannel.send({
 					embeds: [embed],

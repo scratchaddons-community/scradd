@@ -5,7 +5,7 @@ import messageToText from "../lib/messageToText.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
-if (!MODMAIL_CHANNEL) throw new Error("MODMAIL_CHANNEL is not set in the .env.");
+if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
 
 export const WEBHOOK_NAME = "scradd-webhook";
 /**
@@ -22,7 +22,7 @@ export const WEBHOOK_NAME = "scradd-webhook";
  *   - Webhook message.
  */
 export async function generateMessage(message, guild = message.guild) {
-	if (!guild) throw new Error("Expected guild to be passed as message is from a DM");
+	if (!guild) throw new TypeError("Expected guild to be passed as message is from a DM");
 	const author = await guild.members.fetch(message.author.id);
 	return {
 		allowedMentions: { users: [] },
@@ -67,9 +67,9 @@ export async function getMemberFromThread(thread) {
 export async function getThreadFromMember(guild, user) {
 	const mailChannel = await guild?.channels.fetch(MODMAIL_CHANNEL);
 
-	if (!mailChannel) throw new Error("Could not find modmail channel");
+	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-	if (mailChannel.type !== "GUILD_TEXT") throw new Error("Modmail channel is not a text channel");
+	if (mailChannel.type !== "GUILD_TEXT") throw new TypeError("Modmail channel is not a text channel");
 
 	const { threads } = await mailChannel.threads.fetchActive();
 

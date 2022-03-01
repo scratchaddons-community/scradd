@@ -6,7 +6,7 @@ import escape from "../lib/escape.js";
 
 const { BUGS_CHANNEL, GUILD_ID } = process.env;
 
-if (!BUGS_CHANNEL) throw new Error("BUGS_CHANNEL is not set in the .env.");
+if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env.");
 
 const ANSWERS = {
 	FIXED: "Fixed",

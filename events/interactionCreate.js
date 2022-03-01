@@ -8,7 +8,7 @@ const event = {
 
 		const command = commands.get(interaction.commandName);
 
-		if (!command) throw new Error(`Command '${interaction.commandName}' not found.`);
+		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
 
 		await command.interaction(interaction);
 	},
