@@ -27,7 +27,7 @@ const info = {
 		/** @type {{ [key: string]: { value: string; emoji?: string } }} */
 		const OPTIONS = {
 			"Hello!": {
-				value: "Hello! I am Scradd, a Discord bot for the Scratch Addons community! Pick an option in the dropdown below to learn more about my features.",
+				value: `Hello! I am Scradd v${pkg.version}, a Discord bot for the Scratch Addons community! Pick an option in the dropdown below to learn more about my features.`,
 				emoji: "👋",
 			},
 			"Potatoboard": {
