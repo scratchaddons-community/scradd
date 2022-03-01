@@ -18,7 +18,6 @@ const pkg = JSON.parse(
 
 /** @type {import("../types/command").default} */
 const info = {
-	apply: process.env.NODE_ENV !== "production",
 	data: new SlashCommandBuilder().setDescription("Learn about me!"),
 
 	async interaction(interaction) {
