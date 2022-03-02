@@ -142,6 +142,16 @@ const info = {
 						time: 30_000,
 					})
 					.on("collect", async (buttonInteraction) => {
+						const editPromise = interaction.editReply({
+							components: [
+								new MessageActionRow().addComponents(
+									button.setDisabled(true),
+									cancelButton.setDisabled(true),
+								),
+							],
+
+							embeds: [confirmEmbed],
+						});
 						switch (buttonInteraction.customId) {
 							case button.customId: {
 								const openedEmbed = new MessageEmbed()
@@ -172,17 +182,7 @@ const info = {
 											ephemeral: true,
 										});
 									}),
-
-									interaction.editReply({
-										components: [
-											new MessageActionRow().addComponents(
-												button.setDisabled(true),
-												cancelButton.setDisabled(true),
-											),
-										],
-
-										embeds: [confirmEmbed],
-									}),
+									editPromise,
 								]);
 
 								break;
@@ -193,16 +193,7 @@ const info = {
 										content: "<:no:940054047854047282> Modmail canceled",
 										ephemeral: true,
 									}),
-									interaction.editReply({
-										components: [
-											new MessageActionRow().addComponents(
-												button.setDisabled(true),
-												cancelButton.setDisabled(true),
-											),
-										],
-
-										embeds: [confirmEmbed],
-									}),
+									editPromise,
 								]);
 
 								break;

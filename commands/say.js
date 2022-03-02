@@ -1,4 +1,4 @@
-/** @file Have The bot mimic what you say but don't tell anyone who said it first. */
+/** @file Have The bot mimic what you say but don’t tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 
 import { escapeForInlineCode } from "../lib/escape.js";

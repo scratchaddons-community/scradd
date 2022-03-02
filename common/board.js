@@ -90,7 +90,7 @@ export async function postMessageToBoard(message) {
 	const description = await messageToText(message);
 
 	const boardEmbed = new MessageEmbed()
-		.setColor(author?.displayColor ?? 0xffd700)
+		.setColor(author?.displayColor || "DEFAULT")
 		.setDescription(description)
 		.setAuthor({
 			iconURL: author?.displayAvatarURL() || message.author.displayAvatarURL(),

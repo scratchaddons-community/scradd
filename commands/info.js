@@ -20,7 +20,7 @@ const pkg = JSON.parse(
 );
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE || "")}>`;
-const development = `<@&${escapeMessage(process.env.DEVELOPER_ROLE || "")}>`;
+const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE || "")}>`;
 
 /**
  * Get all users with a role.
@@ -76,7 +76,7 @@ const OPTIONS = [
 		description: () =>
 			`Users can use the [\`/suggestion create\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/suggestion.js>) command to post a suggestion to <#${escapeMessage(
 				process.env.SUGGESTION_CHANNEL || "",
-			)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it, as well as open a thread for discussion on it. One of ${development} can use the \`/suggestion answer\` command in the thread to answer a suggestion, following the guidelines in <#909944155139112970>. ${development}, ${moderator}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
+			)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it, as well as open a thread for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to answer a suggestion, following the guidelines in <#909944155139112970>. ${developers}, the ${moderator}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
 
 		emoji: "👍",
 		name: "Suggestions",
@@ -103,7 +103,7 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			"I automatically react to some messages as easter eggs. How many reactions can you find? There are currently **16** triggers. (Yes, you can just read the source code to find them, but please don’t spoil them - it’s fun for people to find them themselves.)\nThere are also **3** automatic responses when using now-removed <@323630372531470346> commands and the like. These are not needed to be kept secret. They are: prompt users to use `/suggestion create` instead of `r!suggest`, tell people not to ping others when using `r!mimic`, and call people out when they abuse the spoiler hack. The source code for these is in [`messageCreate.js`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).",
+			"I automatically react to some messages as easter eggs. How many reactions can you find? There are currently **17**! (Yes, you can just read the source code to find them, but please don’t spoil them - it’s fun for people to find them themselves.)\nThere are also **3** automatic responses when using now-removed <@323630372531470346> commands and the like. These are not needed to be kept secret. They are: prompt users to use `/suggestion create` instead of `r!suggest`, tell people not to ping others when using `r!mimic`, and call people out when they abuse the spoiler hack. The source code for these is in [`messageCreate.js`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).",
 
 		emoji: "✅",
 		name: "Autoreactions and responses",

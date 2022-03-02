@@ -36,8 +36,8 @@ const ANSWERS = [
 		name: "Impossible",
 	},
 	{
-		color: "DARK_GREEN",
-		description: "This is possible, but it would require lots of code and isn't worth it",
+		color: "LUMINOUS_VIVID_PINK",
+		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
 	{
@@ -46,16 +46,16 @@ const ANSWERS = [
 		name: "In Development",
 	},
 	{
-		color: "LUMINOUS_VIVID_PINK",
+		color: "DARK_GREEN",
 		description: "This is possible, but it could be rejected for ethical reasons or the like",
 		name: "Possible",
 	},
 	{
 		color: "DARK_RED",
-		description: "Wouldn't work for non-SA users or users who don't have the addon/option on",
+		description: "Wouldn’t work for non-SA users or users who don’t have the addon/option on",
 		name: "Incompatible",
 	},
-	{ color: "PURPLE", description: "We don't want to add this for some reason", name: "Rejected" },
+	{ color: "PURPLE", description: "We don’t want to add this for some reason", name: "Rejected" },
 ];
 
 const CATEGORIES = [

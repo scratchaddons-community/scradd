@@ -13,7 +13,7 @@ export const WEBHOOK_NAME = "scradd-webhook";
  * Generate a webhook message from a message sent by a user.
  *
  * @param {import("discord.js").Message} message - Message sent by a user.
- * @param {import("discord.js").Guild} [guild] - The guild to search. Default's to the message's guild.
+ * @param {import("discord.js").Guild} [guild] - The guild to search. Defaults to the message’s guild.
  *
  * @returns {Promise<
  * 	(import("discord.js").WebhookMessageOptions & {
