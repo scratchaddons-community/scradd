@@ -68,7 +68,7 @@ for (const [event, execute] of events.entries()) {
 							event,
 						)})\n\`\`\`json\n${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
 					)
-					.setColor("RANDOM");
+					.setColor("LUMINOUS_VIVID_PINK");
 				const { ERROR_CHANNEL } = process.env;
 
 				if (!ERROR_CHANNEL)

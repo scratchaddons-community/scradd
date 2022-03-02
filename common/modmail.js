@@ -37,7 +37,7 @@ export async function generateMessage(message, guild = message.guild || undefine
 			.map((sticker) =>
 				new MessageEmbed().setImage(
 					`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
-				),
+				).setColor("BLURPLE"),
 			)
 			.concat(message.embeds.map((embed) => new MessageEmbed(embed)))
 			.splice(10),
@@ -94,7 +94,7 @@ export async function sendClosedMessage(thread, reason) {
 	const embed = new MessageEmbed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
-		.setColor(32768);
+		.setColor("DARK_GREEN");
 
 	if (reason) embed.setDescription(reason);
 
@@ -121,7 +121,7 @@ export async function closeModmail(thread, user, reason) {
 				starter?.edit({
 					embeds: [
 						{
-							color: 0x008000,
+							color: "DARK_GREEN",
 							description: starter.embeds[0]?.description || "",
 							title: "Modmail ticket closed!",
 						},
@@ -157,7 +157,7 @@ export async function sendOpenedMessage(user) {
 				.setFooter({
 					text: "Please note that reactions, replies, edits, and deletes are not supported.",
 				})
-				.setColor("BLURPLE"),
+				.setColor("YELLOW"),
 		],
 	});
 }

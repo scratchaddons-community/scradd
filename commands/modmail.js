@@ -152,7 +152,7 @@ const info = {
 									.setFooter({
 										text: "Please note that reactions, replies, edits, and deletes are not supported.",
 									})
-									.setColor("BLURPLE");
+									.setColor("YELLOW");
 
 								const starterMessage = await mailChannel.send({
 									embeds: [openedEmbed],

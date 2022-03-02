@@ -120,7 +120,7 @@ const info = {
 
 		const embed = new MessageEmbed()
 			.setTitle(addon.name)
-			.setColor("BLURPLE")
+			.setColor(0xff7b26)
 			.setDescription(
 				`${escapeMessage(
 					addon.description,

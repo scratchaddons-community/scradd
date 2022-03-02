@@ -112,7 +112,7 @@ const event = {
 									.setFooter({
 										text: "Please note that reactions, replies, edits, and deletes are not supported.",
 									})
-									.setColor("BLURPLE");
+									.setColor("YELLOW");
 
 								const starterMessage = await mailChannel.send({
 									content: NODE_ENV === "production" ? "@here" : undefined,

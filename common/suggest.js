@@ -110,7 +110,7 @@ export default class SuggestionChannel {
 		}
 
 		const embed = new MessageEmbed()
-			.setColor(0x222)
+			.setColor("GREYPLE")
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
 
@@ -196,7 +196,7 @@ export default class SuggestionChannel {
 			const category = embed.footer?.text.split(" • ")[0];
 
 			embed
-				.setColor(answers.find(({ name }) => answer === name)?.color || 0x000)
+				.setColor(answers.find(({ name }) => answer === name)?.color || "GREYPLE")
 				.setFooter({ text: `${category ? `${category} • ` : ""}${answer}` });
 
 			promises.push(starter.edit({ embeds: [embed] }));

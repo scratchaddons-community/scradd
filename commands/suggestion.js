@@ -26,32 +26,32 @@ const ANSWERS = [
 		name: "Good Idea",
 	},
 	{
-		color: "YELLOW",
+		color: "ORANGE",
 		description: "This already exists in Scratch or in Scratch Addons",
 		name: "Implemented",
 	},
 	{
-		color: "BLUE",
+		color: "RED",
 		description: "This is not something we can add for technical reasons",
 		name: "Impossible",
 	},
 	{
-		color: "ORANGE",
+		color: "DARK_GREEN",
 		description: "This is possible, but it would require lots of code and isn't worth it",
 		name: "Impractical",
 	},
 	{
-		color: "DARK_RED",
+		color: "YELLOW",
 		description: "Someone is currently working on this",
 		name: "In Development",
 	},
 	{
-		color: "RED",
+		color: "LUMINOUS_VIVID_PINK",
 		description: "This is possible, but it could be rejected for ethical reasons or the like",
 		name: "Possible",
 	},
 	{
-		color: "PURPLE",
+		color: "DARK_RED",
 		description: "Wouldn't work for non-SA users or users who don't have the addon/option on",
 		name: "Incompatible",
 	},
@@ -436,7 +436,7 @@ const info = {
 										Math.floor(offset / PAGE_OFFSET) + 1
 									}/${numberOfPages}`,
 								})
-								.setColor("BLURPLE"),
+								.setColor("RANDOM"),
 						],
 					};
 				}

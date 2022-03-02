@@ -102,9 +102,9 @@ export async function postMessageToBoard(message) {
 	const embeds = [
 		boardEmbed,
 		...message.stickers.map((sticker) =>
-			new MessageEmbed().setImage(
-				`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
-			),
+			new MessageEmbed()
+				.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`)
+				.setColor("BLURPLE"),
 		),
 		...message.embeds
 			.filter((embed) => !embed.video)
