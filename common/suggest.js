@@ -10,6 +10,14 @@ import {
 
 import generateHash from "../lib/generateHash.js";
 
+/**
+ * @typedef {{
+ * 	description: string;
+ * 	editableTo?: boolean;
+ * 	color: import("discord.js").ColorResolvable;
+ * 	name: string;
+ * }[]} Answers
+ */
 export const MAX_TITLE_LENGTH = 50;
 
 /** @type {[string, string][]} */
@@ -24,6 +32,28 @@ export const SUGGESTION_EMOJIS = [
 	["❤", "💔"],
 	["749005259682086964", "749005284403445790"],
 ];
+
+/**
+ * Get the member who created the suggestion.
+ *
+ * @param {ThreadChannel} thread - The suggestion thread.
+ * @param {Message} [starter] - The starter message.
+ *
+ * @returns {Promise<GuildMember | undefined>} - The member.
+ */
+export async function getUserFromThread(thread, starter) {
+	const starterMessage = starter || (await thread?.fetchStarterMessage().catch(() => {}));
+
+	if (!starterMessage) return;
+
+	const initingMessages = await thread?.messages.fetch({
+		after: starterMessage.id,
+		limit: 2,
+	});
+	const message = initingMessages?.first();
+
+	return message?.mentions.members?.first();
+}
 
 export default class SuggestionChannel {
 	CHANNEL_ID = "";
@@ -59,7 +89,7 @@ export default class SuggestionChannel {
 					this.CHANNEL_ID
 				}>, they can see ${
 					data.category.endsWith(" bug")
-						? "SA bugs they can fix without having to dig through tons of Scradd bug reports. If I have a bug or the server has a mistake, please send me a DM to let the mods know."
+						? "SA bugs they can fix without having to dig through tons of bug reports for me. If I have a bug or the server has a mistake, please send me a DM to let the mods know."
 						: "SA suggestions they can add without having to dig through tons of server suggestions. If you have a suggestion to improve me or the server, please post it in <#806602307750985803> for discussion."
 				}`,
 
@@ -111,13 +141,12 @@ export default class SuggestionChannel {
 	 *
 	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
 	 * @param {string} answer - The answer to the suggestion.
-	 * @param {{ [key: string]: import("discord.js").ColorResolvable }} colors - An object that maps
-	 *   answers to colors.
+	 * @param {Answers} answers - An object that maps answers to colors.
 	 *
 	 * @returns {Promise<boolean>} - If true, you must respond to the interaction with a success
 	 *   message yourself.
 	 */
-	async answerSuggestion(interaction, answer, colors) {
+	async answerSuggestion(interaction, answer, answers) {
 		if (!interaction.guild) {
 			await interaction.reply({
 				content: "<:no:940054047854047282> Command unavailable in DMs.",
@@ -134,6 +163,7 @@ export default class SuggestionChannel {
 
 			return false;
 		}
+
 		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
 		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
 
@@ -152,6 +182,7 @@ export default class SuggestionChannel {
 				`Thread answered by ${interaction.user.tag}`,
 			);
 		}
+
 		/** @type {Promise<any>[]} */
 		const promises = [
 			interaction.channel.setName(
@@ -165,7 +196,7 @@ export default class SuggestionChannel {
 			const category = embed.footer?.text.split(" • ")[0];
 
 			embed
-				.setColor(colors[`${answer}`] || 0x000)
+				.setColor(answers.find(({ name }) => answer === name)?.color || 0x000)
 				.setFooter({ text: `${category ? `${category} • ` : ""}${answer}` });
 
 			promises.push(starter.edit({ embeds: [embed] }));
@@ -198,6 +229,7 @@ export default class SuggestionChannel {
 
 			return;
 		}
+
 		const starter = await interaction.channel.fetchStarterMessage();
 		const user = await getUserFromThread(interaction.channel, starter);
 
@@ -377,35 +409,20 @@ export default class SuggestionChannel {
 }
 
 /**
- * @param {Message} message
+ * Get the member who made a suggestion.
  *
- * @returns
+ * @param {Message} message - The message to get the member from.
+ *
+ * @returns {Promise<import("discord.js").GuildMember | undefined>} - The member who made the suggestion.
  */
 export async function getUserFromMessage(message) {
 	const author =
 		(message.author.id === "323630372531470346"
 			? message.embeds[0]?.footer?.text.split(": ")[1]
-			: message.embeds[0]?.author?.iconURL?.split(/\/(\d+)\//)[1]) || message.author.id;
-	if (author) {
-		return message.guild?.members.fetch(author);
-	} else {
-		return message.thread && getUserFromThread(message.thread);
-	}
-}
+			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups
+					?.userId) || message.author.id;
 
-/**
- * @param {ThreadChannel} thread
- * @param {Message} [starter]
- *
- * @returns
- */
-export async function getUserFromThread(thread, starter) {
-	const starterMessage = starter || (await thread?.fetchStarterMessage().catch(() => {}));
-	if (!starterMessage) return;
+	if (author) return await message.guild?.members.fetch(author);
 
-	const initingMessages = await thread?.messages.fetch({
-		after: starterMessage.id,
-		limit: 2,
-	});
-	return initingMessages?.first()?.mentions.members?.first();
+	return message.thread ? await getUserFromThread(message.thread) : undefined;
 }

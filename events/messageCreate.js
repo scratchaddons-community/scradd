@@ -11,10 +11,10 @@ import {
 	MODMAIL_CHANNEL,
 	WEBHOOK_NAME,
 } from "../common/modmail.js";
-import escape, { escapeForCodeblock } from "../lib/escape.js";
+import escapeMessage, { escapeForCodeblock } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 
-const { GUILD_ID = "", NODE_ENV } = process.env;
+const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 
@@ -53,11 +53,19 @@ const event = {
 						.then(async () => await message.react("<:yes:940054094272430130>"))
 						.catch(async () => await message.react("<:no:940054047854047282>")),
 				);
-			} else {
+			} else if (
+				[
+					"DEFAULT",
+					"REPLY",
+					"APPLICATION_COMMAND",
+					"THREAD_STARTER_MESSAGE",
+					"CONTEXT_MENU_COMMAND",
+				].includes(message.type)
+			) {
 				const confirmEmbed = new MessageEmbed()
 					.setTitle("Confirmation")
 					.setDescription(
-						`You are sending this message to the ${escape(
+						`You are sending this message to the ${escapeMessage(
 							mailChannel.guild.name,
 						)} Server’s mod team. If you are sure you would like to do this, press the button below.`,
 					)
@@ -70,7 +78,7 @@ const event = {
 					.setLabel("Cancel")
 					.setCustomId(generateHash("cancel"))
 					.setStyle("SECONDARY");
-				const sentMessage = await message.channel.send({
+				const sentMessage = await message.reply({
 					components: [new MessageActionRow().addComponents(button, cancelButton)],
 					embeds: [confirmEmbed],
 				});
@@ -121,6 +129,7 @@ const event = {
 									buttonInteraction.reply({
 										content:
 											"<:yes:940054094272430130> Modmail ticket opened. You may send the mod team messages by sending me DMs. I will DM you their messages. Please note that reactions, replies, edits, and deletes are not supported.",
+
 										ephemeral: true,
 									}),
 									webhook
@@ -179,9 +188,8 @@ const event = {
 			}
 		}
 
-		if (message.guild !== null && message.guild.id !== GUILD_ID) {
+		if (message.guild !== null && message.guild.id !== GUILD_ID)
 			return await Promise.all(promises);
-		}
 
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -207,17 +215,16 @@ const event = {
 			}
 		}
 
-		if (
-			message.type === "THREAD_CREATED" &&
-			message.channel.id === process.env.SUGGESTION_CHANNEL
-		) {
+		if (message.type === "THREAD_CREATED" && message.channel.id === SUGGESTION_CHANNEL)
 			return await message.delete();
-		}
 
 		const content = message.content
 			.toLowerCase()
 			.normalize("NFD")
-			.replace(/\p{Diacritic}/gu, "");
+			.replace(
+				/[\p{Diacritic}\u200E\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A\u200B\u200C\u200D\u200F\u2060\u2061\u2062\u2063\u2064\u206A\u206B\u206C\u206D\u206E\u206F\uFEFF\uFFA0𝅳𝅴𝅵𝅶𝅷𝅸𝅹𝅺\f]/gu,
+				"",
+			);
 
 		/**
 		 * Determines whether the message contains a word.
@@ -229,10 +236,10 @@ const event = {
 		 */
 		function includes(text, plural = true) {
 			return (
-				content.split(/[^a-z0-9]+/gi).includes(text) ||
+				content.split(/[^\da-z]+/i).includes(text) ||
 				(plural &&
-					(content.split(/[^a-z0-9]+/gi).includes(`${text}s`) ||
-						content.split(/[^a-z0-9]+/gi).includes(`${text}es`)))
+					(content.split(/[^\da-z]+/i).includes(`${text}s`) ||
+						content.split(/[^\da-z]+/i).includes(`${text}es`)))
 			);
 		}
 
@@ -245,7 +252,7 @@ const event = {
 			content === "potato" ||
 			content === "potatoes" ||
 			content === "potatos" ||
-			(content.includes("🥔") && message.channel.id !== process.env.BOARD_CHANNEL)
+			(content.includes("🥔") && message.channel.id !== BOARD_CHANNEL)
 		)
 			promises.push(message.react("🥔"));
 
@@ -272,16 +279,17 @@ const event = {
 			includes("rickroll") ||
 			includes("rickrolled", false) ||
 			includes("rickrolling", false) ||
-			message.cleanContent.includes("dQw4w9WgXcQ")
+			message.content.includes("dQw4w9WgXcQ")
 		)
 			promises.push(message.react("<a:rick:938547171366682624>"));
 
-		if (content.includes("( ^∘^)つ")) promises.push(message.react("<:sxd:939985869421547520>"));
+		if (message.content.includes("( ^∘^)つ"))
+			promises.push(message.react("<:sxd:939985869421547520>"));
 
 		if (content.includes("scradd bad"))
 			promises.push(message.react("<:angery:939337168780943390>"));
 
-		if (content === "no") promises.push(message.react("<:no:940054047854047282>"));
+		if (content === "no") promises.push(message.react("<a:no:947888617953574912>"));
 
 		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 			promises.push(message.react("👋"));
@@ -328,9 +336,9 @@ const event = {
 
 			promises.push(
 				message.reply({
-					content: `Please don’t ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escape(
+					content: `Please don’t ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escapeMessage(
 						member?.user.tag || "",
-					)}\` instead of \`r!mimic @${escape(
+					)}\` instead of \`r!mimic @${escapeMessage(
 						member?.nickname || member?.user.username || "",
 					)}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
 				}),
@@ -348,4 +356,5 @@ const event = {
 		await Promise.all(promises);
 	},
 };
+
 export default event;

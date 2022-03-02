@@ -13,4 +13,5 @@ const event = {
 		await command.interaction(interaction);
 	},
 };
+
 export default event;

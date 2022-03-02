@@ -1,11 +1,12 @@
 /** @file Initialize Bot on ready. Register commands and etc. */
-import { Collection, MessageEmbed } from "discord.js";
-
-import commands from "../lib/commands.js";
 
 import fileSystem from "fs/promises";
 import path from "path";
 import url from "url";
+
+import { Collection, MessageEmbed } from "discord.js";
+
+import commands from "../lib/commands.js";
 
 const pkg = JSON.parse(
 	await fileSystem.readFile(
@@ -25,34 +26,39 @@ const event = {
 
 		const GUILD_ID = process.env.GUILD_ID || "";
 		const guilds = await client.guilds.fetch();
+
 		guilds.forEach(async (guild) => {
 			if (guild.id === GUILD_ID) {
-				if(process.env.NODE_ENV !== "production")return
+				if (process.env.NODE_ENV !== "production") return;
+
 				const { channels } = await guild.fetch();
 				const { ERROR_CHANNEL } = process.env;
 
-				if (!ERROR_CHANNEL) throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
+				if (!ERROR_CHANNEL)
+					throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
 
 				const channel = await channels.fetch(ERROR_CHANNEL);
 
-				if (!channel?.isText()) throw new ReferenceError("Could not find error reporting channel");
+				if (!channel?.isText())
+					throw new ReferenceError("Could not find error reporting channel");
 
 				return await channel?.send({
 					embeds: [
 						new MessageEmbed()
 							.setTitle("Bot restarted!")
-							.setDescription("Version " + pkg.version)
+							.setDescription(`Version ${pkg.version}`)
 							.setColor("RANDOM"),
 					],
 				});
 			}
 
-			const commands = await client.application?.commands
+			const guildCommands = await client.application?.commands
 				.fetch({
 					guildId: guild.id,
 				})
 				.catch(() => {});
-			commands?.forEach((command) => command.delete().catch(() => {}));
+
+			guildCommands?.forEach(async (command) => await command.delete().catch(() => {}));
 		});
 
 		const prexistingCommands = await client.application.commands.fetch({
@@ -93,6 +99,8 @@ const event = {
 			}),
 		);
 	},
+
 	once: true,
 };
+
 export default event;

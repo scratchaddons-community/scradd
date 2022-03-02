@@ -1,6 +1,7 @@
 /** @file Code To perform operations related to modmail tickets. */
-import { GuildMember, MessageEmbed } from "discord.js";
-import escape, { escapeForLinkOrWebhook } from "../lib/escape.js";
+import { GuildMember, Message, MessageEmbed } from "discord.js";
+
+import escapeMessage from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
@@ -12,6 +13,7 @@ export const WEBHOOK_NAME = "scradd-webhook";
  * Generate a webhook message from a message sent by a user.
  *
  * @param {import("discord.js").Message} message - Message sent by a user.
+ * @param {import("discord.js").Guild} [guild] - The guild to search. Default's to the message's guild.
  *
  * @returns {Promise<
  * 	(import("discord.js").WebhookMessageOptions & {
@@ -21,13 +23,15 @@ export const WEBHOOK_NAME = "scradd-webhook";
  * >}
  *   - Webhook message.
  */
-export async function generateMessage(message, guild = message.guild) {
+export async function generateMessage(message, guild = message.guild || undefined) {
 	if (!guild) throw new TypeError("Expected guild to be passed as message is from a DM");
+
 	const author = await guild.members.fetch(message.author.id);
+
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: author.displayAvatarURL(),
-		content: escapeForLinkOrWebhook(await messageToText(message)) || undefined,
+		content: (await messageToText(message)) || undefined,
 
 		embeds: message.stickers
 			.map((sticker) =>
@@ -69,7 +73,8 @@ export async function getThreadFromMember(guild, user) {
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-	if (mailChannel.type !== "GUILD_TEXT") throw new TypeError("Modmail channel is not a text channel");
+	if (mailChannel.type !== "GUILD_TEXT")
+		throw new TypeError("Modmail channel is not a text channel");
 
 	const { threads } = await mailChannel.threads.fetchActive();
 
@@ -77,9 +82,34 @@ export async function getThreadFromMember(guild, user) {
 }
 
 /**
- * @param {import("discord.js").ThreadChannel} thread
- * @param {import("discord.js").User} user
- * @param {string} reason
+ * Let a user know that their ticket has been closed.
+ *
+ * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
+ * @param {string} [reason] - The reason for closing the ticket.
+ *
+ * @returns {Promise<Message<boolean> | undefined>} - The message.
+ */
+export async function sendClosedMessage(thread, reason) {
+	const user = await getMemberFromThread(thread);
+	const embed = new MessageEmbed()
+		.setTitle("Modmail ticket closed!")
+		.setTimestamp(thread.createdTimestamp)
+		.setColor(32768);
+
+	if (reason) embed.setDescription(reason);
+
+	const dmChannel = await user?.createDM().catch(() => {});
+
+	return await dmChannel?.send({
+		embeds: [embed],
+	});
+}
+/**
+ * Close a Modmail ticket.
+ *
+ * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
+ * @param {import("discord.js").User} user - User who closed the ticket.
+ * @param {string} reason - The reason for closing the ticket.
  */
 export async function closeModmail(thread, user, reason) {
 	await Promise.all([
@@ -104,39 +134,23 @@ export async function closeModmail(thread, user, reason) {
 }
 
 /**
- * @param {import("discord.js").ThreadChannel} thread
- * @param {string} [reason]
+ * Let a user know that the Mods want to talk to them.
  *
- * @returns
- */
-export async function sendClosedMessage(thread, reason) {
-	const user = await getMemberFromThread(thread);
-	const embed = new MessageEmbed()
-		.setTitle("Modmail ticket closed!")
-		.setTimestamp(thread.createdTimestamp)
-		.setColor(32768);
-	if (reason) embed.setDescription(reason);
-	const dmChannel = await user?.createDM().catch(() => {});
-	return await dmChannel?.send({
-		embeds: [embed],
-	});
-}
-
-/**
- * @param {GuildMember} user
+ * @param {GuildMember} user - The user to message.
  *
- * @returns
+ * @returns {Promise<import("discord.js").Message | false>} - The message sent.
  */
 export async function sendOpenedMessage(user) {
 	const dmChannel = await user.createDM().catch(() => {});
 
 	if (!dmChannel) return false;
+
 	return await dmChannel.send({
 		embeds: [
 			new MessageEmbed()
 				.setTitle("Modmail ticket opened")
 				.setDescription(
-					`The moderation team of ${escape(
+					`The moderation team of ${escapeMessage(
 						user.guild.name,
 					)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 				)

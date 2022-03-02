@@ -4,14 +4,16 @@ import http from "http";
 import { Client, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 
+import escapeMessage, { escapeForCodeblock } from "./lib/escape.js";
 import importScripts from "./lib/importScripts.js";
-import escape, { escapeForCodeblock } from "./lib/escape.js";
 
 dotenv.config();
 process.on("unhandledException", console.error);
 process.on("unhandledRejection", console.error);
+
 const client = new Client({
 	allowedMentions: { parse: [], roles: [] },
+
 	presence: {
 		activities: [
 			{
@@ -21,6 +23,7 @@ const client = new Client({
 			},
 		],
 	},
+
 	intents: [
 		"GUILDS",
 		"GUILD_MESSAGES",
@@ -39,6 +42,7 @@ const client = new Client({
 		"DIRECT_MESSAGE_TYPING",
 		"GUILD_SCHEDULED_EVENTS",
 	],
+
 	restGlobalRateLimit: 50,
 	failIfNotExists: false,
 
@@ -49,9 +53,10 @@ const events = await importScripts("events");
 
 for (const [event, execute] of events.entries()) {
 	if (execute.apply === false) continue;
-	client[execute.once === true ? "once" : "on"](event, async (...args) => {
+
+	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {
-			return await execute.event(...args);
+			return execute.event(...args);
 		} catch (error) {
 			try {
 				console.error(error);
@@ -59,14 +64,15 @@ for (const [event, execute] of events.entries()) {
 				const embed = new MessageEmbed()
 					.setTitle("Error!")
 					.setDescription(
-						`Uh-oh! I found an error! (event ${escape(
+						`Uh-oh! I found an error! (event ${escapeMessage(
 							event,
 						)})\n\`\`\`json\n${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
 					)
 					.setColor("RANDOM");
 				const { ERROR_CHANNEL } = process.env;
 
-				if (!ERROR_CHANNEL) throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
+				if (!ERROR_CHANNEL)
+					throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
 
 				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
 

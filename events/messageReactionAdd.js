@@ -28,6 +28,7 @@ const event = {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 				emojis.includes(reaction.emoji.id || reaction.emoji.name || ""),
 			)?.find((emoji) => emoji !== (reaction.emoji.id || reaction.emoji.name || ""));
+
 			if (otherReaction)
 				return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
 		}
@@ -73,4 +74,5 @@ const event = {
 		}
 	},
 };
+
 export default event;

@@ -1,4 +1,6 @@
+/** @file Have The bot mimic what you say but don't tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+
 import { escapeForInlineCode } from "../lib/escape.js";
 
 /** @type {import("../types/command").default} */
@@ -16,13 +18,15 @@ const info = {
 		const content = interaction.options.getString("message") || "";
 
 		const message = await interaction.channel?.send({
-			content: content,
 			allowedMentions: { parse: ["users"], roles: [] },
+			content,
 		});
+
 		if (message) {
 			const channel = await interaction.guild?.channels.fetch(
 				process.env.ERROR_CHANNEL || "",
 			);
+
 			await Promise.all([
 				interaction.reply({
 					content: "<:yes:940054094272430130>",
@@ -35,6 +39,7 @@ const info = {
 						)}\` (https://discord.com/channels/${process.env.GUILD_ID || ""}/${
 							message.channel.id
 						}/${message.id})`,
+
 						allowedMentions: { users: [] },
 					}),
 			]);

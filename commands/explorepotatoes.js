@@ -195,6 +195,7 @@ const info = {
 
 			return {
 				allowedMentions: { users: [] },
+
 				components: [
 					source.components[0]?.components[0]
 						? source.components[0]?.setComponents(

@@ -27,7 +27,7 @@ export async function boardMessageToSource(boardMessage) {
 
 	if (boardMessage.guild?.id !== guildId || !channelId || !messageId) return;
 
-	const channel = await boardMessage.guild?.channels.fetch(channelId);
+	const channel = await boardMessage.guild?.channels.fetch(channelId).catch(() => {});
 
 	if (!channel?.isText()) return;
 
@@ -50,8 +50,11 @@ export async function sourceToBoardMessage(message) {
 
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText())
-		throw new ReferenceError("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
+	if (!board?.isText()) {
+		throw new ReferenceError(
+			"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
+		);
+	}
 
 	const fetchedMessages = await getAllMessages(board);
 
@@ -78,12 +81,15 @@ export async function postMessageToBoard(message) {
 
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText())
-		throw new ReferenceError("No board channel found. Make sure BOARD_CHANNEL is set in the .env file.");
+	if (!board?.isText()) {
+		throw new ReferenceError(
+			"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
+		);
+	}
 
 	const description = await messageToText(message);
 
-	const embed = new MessageEmbed()
+	const boardEmbed = new MessageEmbed()
 		.setColor(author?.displayColor ?? 0xffd700)
 		.setDescription(description)
 		.setAuthor({
@@ -94,7 +100,7 @@ export async function postMessageToBoard(message) {
 		.setTimestamp(message.createdTimestamp);
 
 	const embeds = [
-		embed,
+		boardEmbed,
 		...message.stickers.map((sticker) =>
 			new MessageEmbed().setImage(
 				`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,

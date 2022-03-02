@@ -61,6 +61,7 @@ const info = {
 				}
 
 				const reason = interaction.options.getString("reason") || "";
+
 				await interaction.reply({
 					content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
 				});
@@ -83,11 +84,11 @@ const info = {
 					return;
 				}
 
-				const thread = await getThreadFromMember(interaction.guild, user);
+				const existingThread = await getThreadFromMember(interaction.guild, user);
 
-				if (thread) {
+				if (existingThread) {
 					await interaction.reply({
-						content: "<:no:940054047854047282> User already has a ticket open.",
+						content: `<:no:940054047854047282> User already has a ticket open (${existingThread.toString()}).`,
 						ephemeral: true,
 					});
 
@@ -160,30 +161,49 @@ const info = {
 								const thread = await starterMessage.startThread({
 									name: `${user.user.username} (${user.id})`,
 								});
-								await Promise.all([
-									sendOpenedMessage(user).then((success) => {
-										if (!success)
-											return interaction.reply({
-												content:
-													"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
 
-												ephemeral: true,
-											});
+								await Promise.all([
+									sendOpenedMessage(user).then(async (success) => {
+										await buttonInteraction.reply({
+											content: success
+												? `<:yes:940054094272430130> Modmail ticket opened! Send them a message in ${thread.toString()}.`
+												: "<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
+
+											ephemeral: true,
+										});
 									}),
-									buttonInteraction.reply({
-										content: `<:yes:940054094272430130> Modmail ticket opened! Send them a message in ${thread.toString()}.`,
-										ephemeral: true,
+
+									interaction.editReply({
+										components: [
+											new MessageActionRow().addComponents(
+												button.setDisabled(true),
+												cancelButton.setDisabled(true),
+											),
+										],
+
+										embeds: [confirmEmbed],
 									}),
 								]);
-								button.setDisabled(true);
 
 								break;
 							}
 							case cancelButton.customId: {
-								await buttonInteraction.reply({
-									content: "<:no:940054047854047282> Modmail canceled",
-									ephemeral: true,
-								});
+								await Promise.all([
+									buttonInteraction.reply({
+										content: "<:no:940054047854047282> Modmail canceled",
+										ephemeral: true,
+									}),
+									interaction.editReply({
+										components: [
+											new MessageActionRow().addComponents(
+												button.setDisabled(true),
+												cancelButton.setDisabled(true),
+											),
+										],
+
+										embeds: [confirmEmbed],
+									}),
+								]);
 
 								break;
 							}

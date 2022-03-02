@@ -3,8 +3,8 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
-import escape, { escapeForInlineCode, escapeForLinkOrWebhook } from "../lib/escape.js";
 
+import escapeMessage, { escapeForInlineCode, escapeLinks } from "../lib/escape.js";
 import generateTooltip from "../lib/generateTooltip.js";
 
 const addons = await fetch(
@@ -66,7 +66,7 @@ const info = {
 			return credits
 				?.map(({ name, link, note = "" }) =>
 					link
-						? `[${escapeForLinkOrWebhook(name)}](${link} "${note}")`
+						? `[${escapeLinks(name)}](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
@@ -83,12 +83,15 @@ const info = {
 			: addons[Math.floor(Math.random() * addons.length)];
 
 		if (!item) {
-			return await interaction.reply({
+			await interaction.reply({
 				content: `<:no:940054047854047282> That addon${
 					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
 				} does not exist!`,
+
 				ephemeral: true,
 			});
+
+			return;
 		}
 
 		const addon = await fetch(
@@ -119,7 +122,7 @@ const info = {
 			.setTitle(addon.name)
 			.setColor("BLURPLE")
 			.setDescription(
-				`${escape(
+				`${escapeMessage(
 					addon.description,
 				)}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${encodeURIComponent(
 					item.id,
@@ -162,12 +165,12 @@ const info = {
 			{
 				inline: true,
 				name: "Group",
-				value: escape(group),
+				value: escapeMessage(group),
 			},
 			{
 				inline: true,
 				name: "Version added",
-				value: escape(addon.versionAdded + latestUpdateInfo),
+				value: escapeMessage(addon.versionAdded + latestUpdateInfo),
 			},
 		]);
 

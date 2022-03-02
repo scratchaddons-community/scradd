@@ -6,6 +6,7 @@ import { BOARD_EMOJI, sourceToBoardMessage, updateReactionCount } from "../commo
 const event = {
 	async event(reaction) {
 		if (reaction.partial) reaction = await reaction.fetch();
+
 		const message = reaction.message.partial
 			? await reaction.message.fetch()
 			: reaction.message;
@@ -20,4 +21,5 @@ const event = {
 		await updateReactionCount(0, boardMessage);
 	},
 };
+
 export default event;

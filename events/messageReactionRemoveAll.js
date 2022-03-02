@@ -16,4 +16,5 @@ const event = {
 		await updateReactionCount(0, boardMessage);
 	},
 };
+
 export default event;

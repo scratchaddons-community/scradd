@@ -7,7 +7,7 @@ import SuggestionChannel, {
 	MAX_TITLE_LENGTH,
 	SUGGESTION_EMOJIS,
 } from "../common/suggest.js";
-import escape, { escapeForLinkOrWebhook } from "../lib/escape.js";
+import escapeMessage, { escapeLinks } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import truncateText from "../lib/truncateText.js";
@@ -18,15 +18,73 @@ if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set
 
 const PAGE_OFFSET = 15;
 
-const ANSWERS = {
-	GOODIDEA: "Good Idea",
-	IMPLEMENTED: "Implemented",
-	IMPOSSIBLE: "Impossible",
-	IMPRACTICAL: "Impractical",
-	IN_DEVELOPMENT: "In Development",
-	POSSIBLE: "Possible",
-	REJECTED: "Rejected",
-};
+/** @type {import("../common/suggest.js").Answers} */
+const ANSWERS = [
+	{
+		color: "GREEN",
+		description: "This will probably be added if anyone codes it",
+		name: "Good Idea",
+	},
+	{
+		color: "YELLOW",
+		description: "This already exists in Scratch or in Scratch Addons",
+		name: "Implemented",
+	},
+	{
+		color: "BLUE",
+		description: "This is not something we can add for technical reasons",
+		name: "Impossible",
+	},
+	{
+		color: "ORANGE",
+		description: "This is possible, but it would require lots of code and isn't worth it",
+		name: "Impractical",
+	},
+	{
+		color: "DARK_RED",
+		description: "Someone is currently working on this",
+		name: "In Development",
+	},
+	{
+		color: "RED",
+		description: "This is possible, but it could be rejected for ethical reasons or the like",
+		name: "Possible",
+	},
+	{
+		color: "PURPLE",
+		description: "Wouldn't work for non-SA users or users who don't have the addon/option on",
+		name: "Incompatible",
+	},
+	{ color: "PURPLE", description: "We don't want to add this for some reason", name: "Rejected" },
+];
+
+const CATEGORIES = [
+	{
+		description: "A feature that has no similar features in other addons already",
+		name: "New addon",
+	},
+
+	{ description: "A feature that would be added to an existing addon", name: "New feature" },
+	{
+		description: "A feature for the settings page or popup, shown without any addons enabled",
+
+		name: "Settings addition",
+	},
+
+	{
+		description: "A suggestion to improve the server or something to add to me",
+		editableTo: false,
+		name: "Server suggestion",
+	},
+
+	{
+		description: "Something that has no effect for users",
+		editableTo: false,
+		name: "Technical suggestion",
+	},
+
+	{ description: "Anything not listed above", name: "Other" },
+];
 
 const suggestions = new SuggestionChannel(SUGGESTION_CHANNEL);
 
@@ -41,7 +99,9 @@ const info = {
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription("Title for the suggestion embed")
+						.setDescription(
+							`A short summary of your suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
+						)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
@@ -50,17 +110,21 @@ const info = {
 						.setDescription("Your suggestion")
 						.setRequired(true),
 				)
-				.addStringOption((option) =>
-					option
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("category")
 						.setDescription("Suggestion category")
-						.addChoice("New addon", "New addon")
-						.addChoice("New feature (in existing addon)", "New feature")
-						.addChoice("Settings page addition", "Settings addition")
-						.addChoice("Server/Scradd suggestion", "Server suggestion")
-						.addChoice("Other", "Other")
-						.setRequired(true),
-				),
+						.setRequired(true);
+
+					for (const category of CATEGORIES) {
+						newOption.addChoice(
+							`${category.name} (${category.description})`,
+							category.name,
+						);
+					}
+
+					return newOption;
+				}),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -68,19 +132,17 @@ const info = {
 				.setDescription(
 					"(Devs only) Answer a suggestion. Use this in threads in #suggestions.",
 				)
-				.addStringOption((option) =>
-					option
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("answer")
 						.setDescription("Answer to the suggestion")
-						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
-						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
-						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
-						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
-						.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
-						.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
-						.setRequired(true),
-				),
+						.setRequired(true);
+
+					for (const answer of ANSWERS)
+						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+
+					return newOption;
+				}),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -105,17 +167,23 @@ const info = {
 						.setDescription("Your updated suggestion")
 						.setRequired(false),
 				)
-				.addStringOption((option) =>
-					option
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("category")
 						.setDescription("Suggestion category")
-						.addChoice("New addon", "New addon")
-						.addChoice("New feature (in existing addon)", "New feature")
-						.addChoice("Settings page addition", "Settings addition")
-						// .addChoice("Server/Scradd suggestion", "Server suggestion")
-						.addChoice("Other", "Other")
-						.setRequired(false),
-				),
+						.setRequired(false);
+
+					for (const category of CATEGORIES) {
+						if (category.editableTo === false) continue;
+
+						newOption.addChoice(
+							`${category.name} (${category.description})`,
+							category.name,
+						);
+					}
+
+					return newOption;
+				}),
 		)
 
 		.addSubcommand((subcommand) =>
@@ -128,23 +196,24 @@ const info = {
 						.setDescription("Filter suggestions to only get those by a certain user.")
 						.setRequired(false),
 				)
-				.addStringOption((option) =>
-					option
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("answer")
 						.setDescription(
 							"Filter suggestions to only get those with a certain answer.",
 						)
-						.addChoice(ANSWERS.GOODIDEA, ANSWERS.GOODIDEA)
-						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
-						.addChoice(ANSWERS.IMPLEMENTED, ANSWERS.IMPLEMENTED)
-						.addChoice(ANSWERS.POSSIBLE, ANSWERS.POSSIBLE)
-						.addChoice(ANSWERS.IMPRACTICAL, ANSWERS.IMPRACTICAL)
-						.addChoice(ANSWERS.REJECTED, ANSWERS.REJECTED)
-						.addChoice(ANSWERS.IMPOSSIBLE, ANSWERS.IMPOSSIBLE)
-						.addChoice("Unanswered", "Unanswered")
-						.setRequired(false),
-				),
+						.setRequired(false);
+
+					for (const answer of ANSWERS)
+						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+
+					return newOption.addChoice(
+						"Unanswered (This has not yet been answered)",
+						"Unanswered",
+					);
+				}),
 		),
+
 	async interaction(interaction) {
 		if (interaction.guild?.id !== GUILD_ID) return;
 
@@ -152,8 +221,21 @@ const info = {
 
 		switch (command) {
 			case "create": {
+				const category = interaction.options.getString("category") || "";
+
+				if (category.startsWith("Technical")) {
+					await interaction.reply({
+						content:
+							"<:no:940054047854047282> Please suggest things that do not affect users in the development server or on GitHub.",
+
+						ephemeral: true,
+					});
+
+					return;
+				}
+
 				const success = await suggestions.createMessage(interaction, {
-					category: interaction.options.getString("category") || "",
+					category,
 					description: interaction.options.getString("suggestion") || "",
 					title: interaction.options.getString("title") || "",
 					type: "Suggestion",
@@ -174,21 +256,12 @@ const info = {
 			case "answer": {
 				const answer = interaction.options.getString("answer") || "";
 
-				if (
-					await suggestions.answerSuggestion(interaction, answer, {
-						[ANSWERS.GOODIDEA]: "GREEN",
-						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
-						[ANSWERS.IMPLEMENTED]: "BLUE",
-						[ANSWERS.POSSIBLE]: "ORANGE",
-						[ANSWERS.IMPRACTICAL]: "DARK_RED",
-						[ANSWERS.REJECTED]: "RED",
-						[ANSWERS.IMPOSSIBLE]: "PURPLE",
-					})
-				) {
+				if (await suggestions.answerSuggestion(interaction, answer, ANSWERS)) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Successfully answered suggestion as ${escape(
+						content: `<:yes:940054094272430130> Successfully answered suggestion as ${escapeMessage(
 							answer,
 						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+
 						ephemeral: true,
 					});
 				}
@@ -228,7 +301,8 @@ const info = {
 
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 
-				if (!channel?.isText()) throw new ReferenceError ("Could not find suggestion channel.");
+				if (!channel?.isText())
+					throw new ReferenceError("Could not find suggestion channel.");
 
 				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
@@ -265,9 +339,10 @@ const info = {
 								answer.toLowerCase() !== requestedAnswer.toLowerCase()
 							)
 								return;
+
 							return {
 								answer,
-								author: author,
+								author,
 								count,
 								id: message.id,
 
@@ -323,13 +398,9 @@ const info = {
 
 							return `${index + offset + 1}. **${suggestion.count}** [${
 								suggestion.count > 0 ? "👍" : "👎"
-							} ${escapeForLinkOrWebhook(
-								suggestion.title,
-							)}](https://discord.com/channels/${encodeURIComponent(
-								GUILD_ID,
-							)}/${encodeURIComponent(SUGGESTION_CHANNEL)}/${encodeURIComponent(
-								suggestion.id,
-							)} "${suggestion.answer}")${
+							} ${escapeLinks(suggestion.title)}](https://discord.com/channels/${
+								GUILD_ID || "@me"
+							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
 								suggestion.author && !requestedUser
 									? ` by <@${suggestion.author.id}>`
 									: ""
@@ -355,9 +426,9 @@ const info = {
 						embeds: [
 							new MessageEmbed()
 								.setTitle(
-									"Top suggestions" +
-										(requestedUser ? ` by ${nick}` : "") +
-										(requestedAnswer ? ` labeled ${requestedAnswer}` : ""),
+									`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
+										requestedAnswer ? ` labeled ${requestedAnswer}` : ""
+									}`,
 								)
 								.setDescription(content)
 								.setFooter({

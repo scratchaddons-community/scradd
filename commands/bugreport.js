@@ -1,20 +1,67 @@
 /** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 
-import SuggestionChannel from "../common/suggest.js";
-import escape from "../lib/escape.js";
+import SuggestionChannel, { MAX_TITLE_LENGTH } from "../common/suggest.js";
+import escapeMessage from "../lib/escape.js";
 
 const { BUGS_CHANNEL, GUILD_ID } = process.env;
 
 if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env.");
 
-const ANSWERS = {
-	FIXED: "Fixed",
-	INVALID_BUG: "Invalid Bug",
-	IN_DEVELOPMENT: "In Development",
-	MINOR_BUG: "Minor Bug",
-	VALID_BUG: "Valid Bug",
-};
+/** @type {import("../common/suggest.js").Answers} */
+const ANSWERS = [
+	{
+		color: "GREEN",
+		description: "This bug has been verified and it will be fixed soon",
+		name: "Valid Bug",
+	},
+	{
+		color: "DARK_GREEN",
+
+		description:
+			"This bug is not a high priority to fix it as it does not affect usage of the addon",
+
+		name: "Minor Bug",
+	},
+	{
+		color: "YELLOW",
+		description: "A contributor is currently working to fix this bug",
+		name: "In Development",
+	},
+	{
+		color: "BLUE",
+		description: "This bug has been fixed in the next version of Scratch Addons",
+		name: "Fixed",
+	},
+	{
+		color: "RED",
+		description: "This is not something that we can or will change",
+		name: "Invalid Bug",
+	},
+];
+
+const CATEGORIES = [
+	{
+		description: "A bug that is only reproduced on Scratch when one or more addons are enabled",
+
+		name: "Addon bug",
+	},
+
+	{
+		description: "A bug found on the settings page or in non-addon-specific areas of popup",
+		name: "Settings bug",
+	},
+
+	{ description: "A bug happening with no addons enabled", name: "Core bug" },
+
+	{
+		description: "A bug in me or a mistake made with the server",
+		editableTo: false,
+		name: "Server bug",
+	},
+
+	{ description: "Anything not listed above", name: "Other" },
+];
 
 const channel = new SuggestionChannel(BUGS_CHANNEL);
 
@@ -25,78 +72,95 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new bug report in #reports.")
+				.setDescription("Create a new bug report in #bugs.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription("Title for the report embed")
+						.setDescription(
+							`A short summary of your bug report (maximum ${MAX_TITLE_LENGTH} characters)`,
+						)
 						.setRequired(true),
-				)
-				.addStringOption((option) =>
-					option.setName("report").setDescription("Your report").setRequired(true),
 				)
 				.addStringOption((option) =>
 					option
+						.setName("report")
+						.setDescription("A detailed description of the bug")
+						.setRequired(true),
+				)
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("category")
 						.setDescription("Report category")
-						.addChoice("Addon bug", "Addon bug")
-						.addChoice("Settings bug", "Settings bug")
-						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
-						.addChoice("Server mistake/Scradd bug", "Server bug")
-						.addChoice("Other", "Other")
-						.setRequired(true),
-				),
+						.setRequired(true);
+
+					for (const category of CATEGORIES) {
+						newOption.addChoice(
+							`${category.name} (${category.description})`,
+							category.name,
+						);
+					}
+
+					return newOption;
+				}),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
-				.setDescription("(Devs only) Answer a bug report. Use this in threads in #reports.")
-				.addStringOption((option) =>
-					option
+				.setDescription("(Devs only) Answer a bug report. Use this in threads in #bugs.")
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("answer")
 						.setDescription("Answer to the bug report")
-						.addChoice(ANSWERS.VALID_BUG, ANSWERS.VALID_BUG)
-						.addChoice(ANSWERS.MINOR_BUG, ANSWERS.MINOR_BUG)
-						.addChoice(ANSWERS.IN_DEVELOPMENT, ANSWERS.IN_DEVELOPMENT)
-						.addChoice(ANSWERS.INVALID_BUG, ANSWERS.INVALID_BUG)
-						.addChoice(ANSWERS.FIXED, ANSWERS.FIXED)
-						.setRequired(true),
-				),
+						.setRequired(true);
+
+					for (const answer of ANSWERS)
+						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+
+					return newOption;
+				}),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("delete")
 				.setDescription(
-					"(Devs, mods, and OP only) Delete a bug report. Use this in threads in #reports.",
+					"(Devs, mods, and OP only) Delete a bug report. Use this in threads in #bugs.",
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("(OP Only) Edit a bug report. Use this in threads in #reports.")
+				.setDescription("(OP Only) Edit a bug report. Use this in threads in #bugs.")
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription("Title for the report embed")
+						.setDescription(
+							`A short summary of your bug report (maximum ${MAX_TITLE_LENGTH} characters)`,
+						)
 						.setRequired(false),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("report")
-						.setDescription("Your updated bug report")
+						.setDescription("A detailed description of the bug")
 						.setRequired(false),
 				)
-				.addStringOption((option) =>
-					option
+				.addStringOption((option) => {
+					const newOption = option
 						.setName("category")
 						.setDescription("Report category")
-						.addChoice("Addon bug", "Addon bug")
-						.addChoice("Settings bug", "Settings bug")
-						.addChoice("Core bug (happens with no addons enabled)", "Core bug")
-						// .addChoice("Server mistake/Scradd bug", "Server bug")
-						.addChoice("Other", "Other")
-						.setRequired(false),
-				),
+						.setRequired(false);
+
+					for (const category of CATEGORIES) {
+						if (category.editableTo === false) continue;
+
+						newOption.addChoice(
+							`${category.name} (${category.description})`,
+							category.name,
+						);
+					}
+
+					return newOption;
+				}),
 		),
 
 	async interaction(interaction) {
@@ -115,7 +179,10 @@ const info = {
 
 				if (success) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Bug report posted! See ${success.toString()}.`,
+						content: `<:yes:940054094272430130> Bug report posted! See ${
+							success.thread?.toString() || ""
+						}.`,
+
 						ephemeral: true,
 					});
 				}
@@ -125,19 +192,12 @@ const info = {
 			case "answer": {
 				const answer = interaction.options.getString("answer") || "";
 
-				if (
-					await channel.answerSuggestion(interaction, answer, {
-						[ANSWERS.VALID_BUG]: "GREEN",
-						[ANSWERS.MINOR_BUG]: "DARK_GREEN",
-						[ANSWERS.IN_DEVELOPMENT]: "YELLOW",
-						[ANSWERS.INVALID_BUG]: "RED",
-						[ANSWERS.FIXED]: "BLUE",
-					})
-				) {
+				if (await channel.answerSuggestion(interaction, answer, ANSWERS)) {
 					await interaction.reply({
-						content: `:white_check_mark: Answered report as ${escape(
+						content: `:white_check_mark: Answered report as ${escapeMessage(
 							answer,
 						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+
 						ephemeral: true,
 					});
 				}
