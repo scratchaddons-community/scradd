@@ -41,7 +41,7 @@ const ANSWERS = [
 		name: "Impractical",
 	},
 	{
-		color: "YELLOW",
+		color: "GOLD",
 		description: "Someone is currently working on this",
 		name: "In Development",
 	},

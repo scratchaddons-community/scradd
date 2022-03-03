@@ -107,12 +107,12 @@ const event = {
 						switch (buttonInteraction.customId) {
 							case button.customId: {
 								const openedEmbed = new MessageEmbed()
-									.setTitle("Modmail ticket opened")
+									.setTitle("Modmail ticket opened!")
 									.setDescription(`Ticket by ${message.author.toString()}`)
 									.setFooter({
-										text: "Please note that reactions, replies, edits, and deletes are not supported.",
+										text: "Please note that reactions, replies, edits, and deletions are not supported.",
 									})
-									.setColor("YELLOW");
+									.setColor("GOLD");
 
 								const starterMessage = await mailChannel.send({
 									content: NODE_ENV === "production" ? "@here" : undefined,
@@ -128,7 +128,7 @@ const event = {
 								buttonPromises.push(
 									buttonInteraction.reply({
 										content:
-											"<:yes:940054094272430130> Modmail ticket opened. You may send the mod team messages by sending me DMs. I will DM you their messages. Please note that reactions, replies, edits, and deletes are not supported.",
+											"<:yes:940054094272430130> Modmail ticket opened! You may send the mod team messages by sending me DMs. I will DM you their messages. Please note that reactions, replies, edits, and deletions are not supported.",
 
 										ephemeral: true,
 									}),
@@ -194,21 +194,29 @@ const event = {
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
-			!message.webhookId &&
-			!message.content.startsWith("=")
+			!message.content.startsWith("=") &&
+			(message.webhookId
+				? (await message.fetchWebhook()).owner?.id !== message.client.user?.id
+				: true)
 		) {
-			const user = await getMemberFromThread(message.channel);
+			const member = await getMemberFromThread(message.channel);
 
-			if (user) {
+			if (member) {
 				const channel =
-					user.user.dmChannel ||
-					(await user.createDM().catch(async () => {
+					member.user.dmChannel ||
+					(await member.createDM().catch(async () => {
 						await message.react("<:no:940054047854047282>");
 					}));
+				const messageToSend = await generateMessage(message);
+
+				messageToSend.content =
+					message.author.toString() +
+					":" +
+					(messageToSend.content ? " " + messageToSend.content : "");
 
 				promises.push(
 					channel
-						?.send(await generateMessage(message))
+						?.send(messageToSend)
 						.then(async () => await message.react("<:yes:940054094272430130>"))
 						.catch(async () => await message.react("<:no:940054047854047282>")),
 				);

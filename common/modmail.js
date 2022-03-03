@@ -26,24 +26,25 @@ export const WEBHOOK_NAME = "scradd-webhook";
 export async function generateMessage(message, guild = message.guild || undefined) {
 	if (!guild) throw new TypeError("Expected guild to be passed as message is from a DM");
 
-	const author = await guild.members.fetch(message.author.id);
+	const author = (await guild.members.fetch(message.author.id).catch(() => {})) || message.author;
+
+	const embeds = message.stickers
+		.map((sticker) =>
+			new MessageEmbed()
+				.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`)
+				.setColor("BLURPLE"),
+		)
+		.concat(message.embeds.map((embed) => new MessageEmbed(embed)));
+
+	while (embeds.length > 10) embeds.pop();
 
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: author.displayAvatarURL(),
 		content: (await messageToText(message)) || undefined,
-
-		embeds: message.stickers
-			.map((sticker) =>
-				new MessageEmbed().setImage(
-					`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`,
-				).setColor("BLURPLE"),
-			)
-			.concat(message.embeds.map((embed) => new MessageEmbed(embed)))
-			.splice(10),
-
+		embeds,
 		files: message.attachments.map((attachment) => attachment),
-		username: message.author.username,
+		username: author instanceof GuildMember ? author.displayName : author.username,
 	};
 }
 
@@ -148,16 +149,16 @@ export async function sendOpenedMessage(user) {
 	return await dmChannel.send({
 		embeds: [
 			new MessageEmbed()
-				.setTitle("Modmail ticket opened")
+				.setTitle("Modmail ticket opened!")
 				.setDescription(
 					`The moderation team of ${escapeMessage(
 						user.guild.name,
 					)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 				)
 				.setFooter({
-					text: "Please note that reactions, replies, edits, and deletes are not supported.",
+					text: "Please note that reactions, replies, edits, and deletions are not supported.",
 				})
-				.setColor("YELLOW"),
+				.setColor("GOLD"),
 		],
 	});
 }

@@ -155,14 +155,14 @@ const info = {
 						switch (buttonInteraction.customId) {
 							case button.customId: {
 								const openedEmbed = new MessageEmbed()
-									.setTitle("Modmail ticket opened")
+									.setTitle("Modmail ticket opened!")
 									.setDescription(
 										`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 									)
 									.setFooter({
-										text: "Please note that reactions, replies, edits, and deletes are not supported.",
+										text: "Please note that reactions, replies, edits, and deletions are not supported.",
 									})
-									.setColor("YELLOW");
+									.setColor("GOLD");
 
 								const starterMessage = await mailChannel.send({
 									embeds: [openedEmbed],

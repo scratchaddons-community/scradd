@@ -24,7 +24,7 @@ const ANSWERS = [
 		name: "Minor Bug",
 	},
 	{
-		color: "YELLOW",
+		color: "GOLD",
 		description: "A contributor is currently working to fix this bug",
 		name: "In Development",
 	},

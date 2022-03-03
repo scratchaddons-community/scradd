@@ -4,7 +4,15 @@ import { MODMAIL_CHANNEL, sendClosedMessage, sendOpenedMessage } from "../common
 /** @type {import("../types/event").default<"threadUpdate">} */
 const event = {
 	async event(oldThread, newThread) {
-		if (oldThread.parentId !== MODMAIL_CHANNEL || oldThread.archived === newThread.archived)
+		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
+
+		if (
+			oldThread.parentId !== MODMAIL_CHANNEL ||
+			oldThread.archived === newThread.archived ||
+			(newThread.archived &&
+				latestMessage?.interaction?.commandName === "modmail" &&
+				Date.now() - +latestMessage.createdAt < 60_000)
+		)
 			return;
 
 		if (newThread.archived) return await sendClosedMessage(newThread);
