@@ -423,7 +423,7 @@ export async function getUserFromMessage(message) {
 			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups
 					?.userId) || message.author.id;
 
-	if (author) return await message.guild?.members.fetch(author);
+	if (author) return await message.guild?.members.fetch(author).catch(() => undefined);
 
 	return message.thread ? await getUserFromThread(message.thread) : undefined;
 }

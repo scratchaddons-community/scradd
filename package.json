@@ -1,7 +1,7 @@
 {
 	"private": true,
 	"name": "scradd",
-	"version": "1.8.0",
+	"version": "1.8.1",
 	"description": "Custom Discord bot for the Scratch Addons server.",
 	"license": "MIT",
 	"homepage": "https://scradd.openode.dev",
