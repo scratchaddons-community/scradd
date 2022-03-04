@@ -21,6 +21,7 @@ if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 /** @type {import("../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
+		if (message.flags.has("EPHEMERAL")) return;
 		const promises = [];
 
 		if (
@@ -121,6 +122,7 @@ const event = {
 								});
 								const newThread = await starterMessage.startThread({
 									name: `${message.author.username} (${message.author.id})`,
+									autoArchiveDuration: "MAX",
 								});
 
 								if (!webhook) throw new ReferenceError("Could not find webhook");
@@ -195,7 +197,7 @@ const event = {
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
 			!message.content.startsWith("=") &&
-			(message.webhookId
+			(message.webhookId && message.author.id !== message.client.user?.id
 				? (await message.fetchWebhook()).owner?.id !== message.client.user?.id
 				: true)
 		) {

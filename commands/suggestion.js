@@ -402,7 +402,7 @@ const info = {
 								GUILD_ID || "@me"
 							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
 								suggestion.author && !requestedUser
-									? ` by <@${suggestion.author.id}>`
+									? ` by ${suggestion.author.toString()}`
 									: ""
 							}`;
 						})

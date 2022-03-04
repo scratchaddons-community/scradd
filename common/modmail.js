@@ -3,12 +3,14 @@ import { GuildMember, Message, MessageEmbed } from "discord.js";
 
 import escapeMessage from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
+import asyncFilter from "../lib/asyncFilter.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
 
 export const WEBHOOK_NAME = "scradd-webhook";
+
 /**
  * Generate a webhook message from a message sent by a user.
  *
@@ -37,11 +39,10 @@ export async function generateMessage(message, guild = message.guild || undefine
 		.concat(message.embeds.map((embed) => new MessageEmbed(embed)));
 
 	while (embeds.length > 10) embeds.pop();
-
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: author.displayAvatarURL(),
-		content: (await messageToText(message)) || undefined,
+		content: await messageToText(message, false),
 		embeds,
 		files: message.attachments.map((attachment) => attachment),
 		username: author instanceof GuildMember ? author.displayName : author.username,
@@ -56,9 +57,12 @@ export async function generateMessage(message, guild = message.guild || undefine
  * @returns {Promise<import("discord.js").GuildMember | void>} - User who messages are being sent to.
  */
 export async function getMemberFromThread(thread) {
-	return await thread.guild.members
-		.fetch(/^.+ \((?<userId>\d+)\)$/.exec(thread.name)?.groups?.userId || "")
-		.catch(() => {});
+	const starter = await thread.fetchStarterMessage().catch(() => {});
+	const embed = starter?.embeds[0];
+	if (!embed?.description) return;
+	const userId =
+		/<@!(?<userId>\d+)>/.exec(embed.description)?.groups?.userId || embed.description;
+	return await thread.guild.members.fetch(userId).catch(() => {});
 }
 
 /**
@@ -79,7 +83,12 @@ export async function getThreadFromMember(guild, user) {
 
 	const { threads } = await mailChannel.threads.fetchActive();
 
-	return threads.find((thread) => thread.name.endsWith(`(${user.id})`));
+	return (
+		await asyncFilter(
+			threads,
+			async (thread) => (await getMemberFromThread(thread))?.id === user.id,
+		).next()
+	).value;
 }
 
 /**
@@ -88,7 +97,7 @@ export async function getThreadFromMember(guild, user) {
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
  * @param {string} [reason] - The reason for closing the ticket.
  *
- * @returns {Promise<Message<boolean> | undefined>} - The message.
+ * @returns {Promise<Message<boolean> | undefined>} - Message sent to user.
  */
 export async function sendClosedMessage(thread, reason) {
 	const user = await getMemberFromThread(thread);
@@ -101,9 +110,27 @@ export async function sendClosedMessage(thread, reason) {
 
 	const dmChannel = await user?.createDM().catch(() => {});
 
-	return await dmChannel?.send({
-		embeds: [embed],
-	});
+	return (
+		await Promise.all([
+			thread
+				.fetchStarterMessage()
+				.catch(() => {})
+				.then((starter) => {
+					starter?.edit({
+						embeds: [
+							{
+								color: "DARK_GREEN",
+								description: starter.embeds[0]?.description || "",
+								title: "Modmail ticket closed!",
+							},
+						],
+					});
+				}),
+			dmChannel?.send({
+				embeds: [embed],
+			}),
+		])
+	)[1];
 }
 /**
  * Close a Modmail ticket.
@@ -113,23 +140,7 @@ export async function sendClosedMessage(thread, reason) {
  * @param {string} reason - The reason for closing the ticket.
  */
 export async function closeModmail(thread, user, reason) {
-	await Promise.all([
-		sendClosedMessage(thread, reason),
-		thread
-			.fetchStarterMessage()
-			.catch(() => {})
-			.then((starter) =>
-				starter?.edit({
-					embeds: [
-						{
-							color: "DARK_GREEN",
-							description: starter.embeds[0]?.description || "",
-							title: "Modmail ticket closed!",
-						},
-					],
-				}),
-			),
-	]);
+	await sendClosedMessage(thread, reason);
 	await thread.setLocked(true, `Closed by ${user.tag}: ${reason}`);
 	await thread.setArchived(true, `Closed by ${user.tag}: ${reason}`);
 }

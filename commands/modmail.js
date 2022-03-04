@@ -169,7 +169,8 @@ const info = {
 								});
 
 								const thread = await starterMessage.startThread({
-									name: `${user.user.username} (${user.id})`,
+									name: `${user.user.username}`,
+									autoArchiveDuration: "MAX",
 								});
 
 								await Promise.all([

@@ -1,0 +1,33 @@
+export default {
+	emojis: {
+		yes: "<:yes:940054094272430130>",
+		no: "<:no:940054047854047282>",
+		// e,
+		// griffpatch,
+		// sus,
+		// amongus,
+		// appel,
+		// cubot,
+		// splory,
+		// tera,
+		// rick,
+		// sxd,
+		// angery,
+		// nope,
+		// soa: ["", "", ""],
+		// add,
+		// remove,
+		// edit,
+		// pin,
+		// boost,
+		// thread,
+	},
+	robotop: "323630372531470346",
+	servers: {
+		testing: "938438560925761619",
+	},
+	roles: {
+		developers: "938439909742616616",
+		testers: "938440159102386276",
+	},
+};

@@ -129,14 +129,21 @@ const info = {
 		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
 		const [, fetchedMessages] = await Promise.all([
 			deferPromise,
-			getAllMessages(board).then(
-				async (messages) =>
-					await asyncFilter(messages, async (message) => {
-						if (!message.content || !message.embeds[0] || !message.author.bot)
-							return false;
-
-						if ((/\d+/.exec(message.content)?.[0] || 0) < minReactions) return false;
-
+			getAllMessages(board).then((messages) =>
+				asyncFilter(
+					messages
+						.filter((message) => {
+							if (
+								!message.content ||
+								!message.embeds[0] ||
+								!message.author.bot ||
+								(/\d+/.exec(message.content)?.[0] || 0) < minReactions
+							)
+								return false;
+							return true;
+						})
+						.sort(() => Math.random() - 0.5),
+					async (message) => {
 						const source = await boardMessageToSource(message);
 
 						if (
@@ -156,7 +163,8 @@ const info = {
 							return false;
 
 						return true;
-					}),
+					},
+				),
 			),
 		]);
 
@@ -166,18 +174,16 @@ const info = {
 			.setStyle("SECONDARY")
 			.setEmoji("➡");
 
+		let source = (await fetchedMessages.next()).value;
 		/**
 		 * Grab a new message from the board.
 		 *
-		 * @returns {import("discord.js").InteractionReplyOptions} - Reply to post next.
+		 * @param {void | Message<boolean>} current
+		 *
+		 * @returns {Promise<import("discord.js").InteractionReplyOptions>} - Reply to post next.
 		 */
-		function generateMessage() {
-			const index = Math.floor(Math.random() * fetchedMessages.length);
-			const source = fetchedMessages[+index];
-
-			fetchedMessages.splice(index, 1);
-
-			if (!source?.components[0]?.components[0]) {
+		async function generateMessage(current) {
+			if (!current?.components[0]?.components[0]) {
 				return {
 					allowedMentions: { users: [] },
 					attachments: [],
@@ -190,29 +196,30 @@ const info = {
 					ephemeral: true,
 				};
 			}
+			source = (await fetchedMessages.next()).value;
 
-			if (fetchedMessages.length === 0) nextButton.setDisabled(true);
+			if (!source?.components[0]?.components[0]) nextButton.setDisabled(true);
 
 			return {
 				allowedMentions: { users: [] },
 
 				components: [
-					source.components[0]?.components[0]
-						? source.components[0]?.setComponents(
-								source.components[0].components[0],
+					current.components[0]?.components[0]
+						? current.components[0]?.setComponents(
+								current.components[0].components[0],
 								nextButton,
 						  )
-						: source.components[0],
+						: current.components[0],
 				],
 
-				content: source.content,
-				embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+				content: current.content,
+				embeds: current.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 				ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
-				files: source.attachments.map((attachment) => attachment),
+				files: current.attachments.map((attachment) => attachment),
 			};
 		}
 
-		await interaction.editReply(generateMessage());
+		await interaction.editReply(await generateMessage(source));
 
 		const collector = interaction.channel?.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
@@ -224,10 +231,9 @@ const info = {
 
 		collector
 			?.on("collect", async (buttonInteraction) => {
-				await Promise.all([
-					buttonInteraction.deferUpdate(),
-					interaction.editReply(generateMessage()),
-				]);
+				await interaction.editReply(await generateMessage(source));
+				buttonInteraction.deferUpdate();
+
 				collector.resetTimer();
 			})
 			.on("end", async () => {

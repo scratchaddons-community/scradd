@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 
 import generateHash from "../lib/generateHash.js";
+import CONSTANTS from "./CONSTANTS.js";
 
 /**
  * @typedef {{
@@ -417,7 +418,7 @@ export default class SuggestionChannel {
  */
 export async function getUserFromMessage(message) {
 	const author =
-		(message.author.id === "323630372531470346"
+		(message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]
 			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups
 					?.userId) || message.author.id;
