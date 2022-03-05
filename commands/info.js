@@ -56,6 +56,15 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
+			`Users can use the [\`/suggestion create\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/suggestion.js>) command to post a suggestion to <#${escapeMessage(
+				process.env.SUGGESTION_CHANNEL || "",
+			)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it, as well as open a thread for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to answer a suggestion. ${developers}, the ${moderator}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
+
+		emoji: "👍",
+		name: "Suggestions",
+	},
+	{
+		description: () =>
 			`After a message gets **${escapeMessage(`${MIN_REACTIONS}`)}** ${escapeMessage(
 				BOARD_EMOJI,
 			)} reactions, I will post it to <#${escapeMessage(
@@ -75,18 +84,9 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			`Users can use the [\`/suggestion create\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/suggestion.js>) command to post a suggestion to <#${escapeMessage(
-				process.env.SUGGESTION_CHANNEL || "",
-			)}>. I will react to the suggestion with 👍 and 👎 for people to vote on it, as well as open a thread for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to answer a suggestion. ${developers}, the ${moderator}s, and the user who originally posted the suggestion (the OP) can run \`/suggestion delete\` to delete the suggestion if needed. The OP may also run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
-
-		emoji: "👍",
-		name: "Suggestions",
-	},
-	{
-		description: () =>
 			`Users may DM me to send private messages to all the ${moderator}s at once. I will send all their messages to a thread in <#${escapeMessage(
 				MODMAIL_CHANNEL,
-			)}> (through a webhook so the user’s original avatar and nickname is used) and react to it with <:yes:940054094272430130>. If sending any message fails, I will react with <:no:940054047854047282>. I will DM the user any messages ${moderator}s send in the thread (anonymously; the ${moderator}s’ identities are not revealed), following the same reaction rules. Reactions, replies, edits, and deletions are not supported.\nThe source code for these is in [\`messageCreate.js\`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).\nWhen the ticket is resolved, a ${moderator} can use the \`/modmail close\` command to lock the thread, edit the thread starting message to indicate its closed status, and DM the user. The ${moderator} can specify a reason that will be posted in the thread as well as sent to the user. \n\nIf the ${moderator}s want to contact a user for any reason, they can use the [\`/modmail start\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/modmail.js>) command to start a modmail with a user themselves. It will open a new thread in <#${escapeMessage(
+			)}> (through a webhook so the user’s original avatar and nickname is used) and react to it with <:yes:940054094272430130>. If sending any message fails, I will react with <:no:940054047854047282>. I will DM the user any messages the ${moderator}s send in the thread, using the same reactions. Reactions, replies, edits, and deletions are not supported.\nThe source code for these is in [\`messageCreate.js\`](<https://github.com/scratchaddons-community/scradd/blob/main/events/messageCreate.js>).\nWhen the ticket is resolved, a ${moderator} can use the \`/modmail close\` command to lock the thread, edit the thread starting message to indicate its closed status, and DM the user. The ${moderator} can specify a reason that will be posted in the thread as well as sent to the user. \n\nIf the ${moderator}s want to contact a user for any reason, they can use the [\`/modmail start\`](<https://github.com/scratchaddons-community/scradd/blob/main/commands/modmail.js>) command to start a modmail with a user themselves. It will open a new thread in <#${escapeMessage(
 				MODMAIL_CHANNEL,
 			)}> and DM the user that a Modmail has been started. The ${moderator}s can then ask the user what they need to ask, for instance, requesting them to change an innappropriate status.`,
 
@@ -138,13 +138,25 @@ const OPTIONS = [
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Learn about me!"),
+	data: new SlashCommandBuilder().setDescription("Learn about me!").addStringOption((input) =>
+		input
+			.setName("tab")
+			.setDescription(
+				"Which tab to open by default. You may still swap between tabs after it has loaded.",
+			)
+			.addChoices(
+				OPTIONS.map(({ emoji, name }) => {
+					return [emoji + " " + name, name];
+				}),
+			)
+			.setRequired(false),
+	),
 
 	async interaction(interaction) {
 		const hash = generateHash("info");
-		const DEFAULT_KEY = "Hello!";
+		const defaultKey = interaction.options.getString("tab")||"Hello!";
 		const defaultContent =
-			(await OPTIONS.find(({ name }) => name === DEFAULT_KEY)?.description(
+			(await OPTIONS.find(({ name }) => name === defaultKey)?.description(
 				interaction.client,
 			)) || "";
 		const message = await interaction.reply({
@@ -159,11 +171,11 @@ const info = {
 						.setCustomId(hash)
 						.addOptions(
 							Array.from(
-								Object.entries(OPTIONS).map(([key, { emoji }]) => ({
-									default: key === DEFAULT_KEY,
+								Object.values(OPTIONS).map(({ emoji, name }) => ({
+									default: name === defaultKey,
 									emoji,
-									label: key,
-									value: key,
+									label: name,
+									value: name,
 								})),
 							),
 						),
