@@ -45,6 +45,7 @@ const client = new Client({
 
 	restGlobalRateLimit: 50,
 	failIfNotExists: false,
+	restWsBridgeTimeout: 30_000,
 
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });

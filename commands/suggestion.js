@@ -245,7 +245,7 @@ const info = {
 					await Promise.all([
 						success.react("👍").then(async () => await success.react("👎")),
 						interaction.reply({
-							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread?.toString()}.`,
+							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread?.toString()}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
 							ephemeral: true,
 						}),
 					]);
@@ -255,12 +255,17 @@ const info = {
 			}
 			case "answer": {
 				const answer = interaction.options.getString("answer") || "";
+				const result = await suggestions.answerSuggestion(interaction, answer, ANSWERS);
 
-				if (await suggestions.answerSuggestion(interaction, answer, ANSWERS)) {
+				if (result) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Successfully answered suggestion as ${escapeMessage(
-							answer,
-						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content:
+							`<:yes:940054094272430130> Successfully answered suggestion as ${escapeMessage(
+								answer,
+							)}! Please elaborate on your answer below.` +
+							(result === "ratelimit"
+								? " If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
+								: ""),
 
 						ephemeral: true,
 					});
@@ -276,17 +281,16 @@ const info = {
 			case "edit": {
 				const title = interaction.options.getString("title");
 
-				if (
-					await suggestions.editSuggestion(interaction, {
-						body: interaction.options.getString("suggestion"),
-						category: interaction.options.getString("category"),
-						title,
-					})
-				) {
+				const result = await suggestions.editSuggestion(interaction, {
+					body: interaction.options.getString("suggestion"),
+					category: interaction.options.getString("category"),
+					title,
+				});
+				if (result) {
 					await interaction.reply({
 						content: `<:yes:940054094272430130> Successfully edited suggestion! ${
-							title
-								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
+							result === "ratelimit"
+								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
 								: ""
 						}`,
 

@@ -181,7 +181,7 @@ const info = {
 					await interaction.reply({
 						content: `<:yes:940054094272430130> Bug report posted! See ${
 							success.thread?.toString() || ""
-						}.`,
+						}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
 
 						ephemeral: true,
 					});
@@ -191,12 +191,16 @@ const info = {
 			}
 			case "answer": {
 				const answer = interaction.options.getString("answer") || "";
-
-				if (await channel.answerSuggestion(interaction, answer, ANSWERS)) {
+				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
+				if (result) {
 					await interaction.reply({
-						content: `:white_check_mark: Answered report as ${escapeMessage(
-							answer,
-						)}! Please elaborate on your answer below. If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour).`,
+						content:
+							`:white_check_mark: Answered report as ${escapeMessage(
+								answer,
+							)}! Please elaborate on your answer below.` +
+							(result === "ratelimit"
+								? " If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
+								: ""),
 
 						ephemeral: true,
 					});
@@ -212,17 +216,16 @@ const info = {
 			case "edit": {
 				const title = interaction.options.getString("title");
 
-				if (
-					await channel.editSuggestion(interaction, {
-						body: interaction.options.getString("report"),
-						category: interaction.options.getString("category"),
-						title,
-					})
-				) {
+				const result = await channel.editSuggestion(interaction, {
+					body: interaction.options.getString("report"),
+					category: interaction.options.getString("category"),
+					title,
+				});
+				if (result) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Successfully edited bug report! ${
-							title
-								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the rate limit is up (within the next hour)."
+						content: `<:yes:940054094272430130> Successfully edited bug report!${
+							result === "ratelimit"
+								? " If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
 								: ""
 						}`,
 

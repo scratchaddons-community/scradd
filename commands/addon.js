@@ -6,6 +6,7 @@ import fetch from "node-fetch";
 
 import escapeMessage, { escapeForInlineCode, escapeLinks } from "../lib/escape.js";
 import generateTooltip from "../lib/generateTooltip.js";
+import joinWithAnd from "../lib/joinWithAnd.js";
 
 const addons = await fetch(
 	"https://raw.githubusercontent.com/ScratchAddons/website-v2/master/data/addons/en.json",
@@ -63,15 +64,15 @@ const info = {
 		 *   available.
 		 */
 		function generateCredits({ credits }) {
-			return credits
-				?.map(({ name, link, note = "" }) =>
+			return joinWithAnd(
+				credits?.map(({ name, link, note = "" }) =>
 					link
 						? `[${escapeLinks(name)}](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
-				)
-				.join(", ");
+				) || [],
+			);
 		}
 
 		const input = interaction.options.getString("addon");

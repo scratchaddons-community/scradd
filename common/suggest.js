@@ -144,8 +144,8 @@ export default class SuggestionChannel {
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answers} answers - An object that maps answers to colors.
 	 *
-	 * @returns {Promise<boolean>} - If true, you must respond to the interaction with a success
-	 *   message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
+	 *   a success message yourself.
 	 */
 	async answerSuggestion(interaction, answer, answers) {
 		if (!interaction.guild) {
@@ -184,12 +184,14 @@ export default class SuggestionChannel {
 			);
 		}
 
-		/** @type {Promise<any>[]} */
 		const promises = [
-			interaction.channel.setName(
-				interaction.channel.name.replace(/^[^|]+?(?=(?: \| .+)?$)/, answer),
-				`Thread answered by ${interaction.user.tag}`,
-			),
+			Promise.race([
+				new Promise((resolve) => setTimeout(resolve, 2000)),
+				interaction.channel.setName(
+					interaction.channel.name.replace(/^[^|]+?(?=(?: \| .+)?$)/, answer),
+					`Thread answered by ${interaction.user.tag}`,
+				),
+			]),
 		];
 
 		if (starter && starter?.author.id === interaction.client.user?.id) {
@@ -205,7 +207,7 @@ export default class SuggestionChannel {
 
 		await Promise.all(promises);
 
-		return true;
+		return interaction.channel.name.startsWith(answer + " |") ? true : "ratelimit";
 	}
 
 	/**
@@ -333,8 +335,8 @@ export default class SuggestionChannel {
 	 * @param {{ title: null | string; body: null | string; category: null | string }} updated -
 	 *   Updated suggestion.
 	 *
-	 * @returns {Promise<boolean>} - If true, you must respond to the interaction with a success
-	 *   message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
+	 *   a success message yourself.
 	 */
 	async editSuggestion(interaction, updated) {
 		if (!interaction.guild) {
@@ -380,20 +382,23 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		if (updated.body) embed?.setDescription(updated.body);
+		if (updated.body) embed.setDescription(updated.body);
 
 		const promises = [];
 
-		if (updated.title) {
-			promises.push(
-				interaction.channel.setName(
-					interaction.channel.name.replace(/(?<=^.+ \| ).+$/, updated.title),
-					"Suggestion/report edited",
-				),
-			);
+		promises.push(
+			updated.title
+				? Promise.race([
+						interaction.channel.setName(
+							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, updated.title),
+							"Suggestion/report edited",
+						),
+						new Promise((resolve) => setTimeout(resolve, 2000)),
+				  ])
+				: Promise.resolve(interaction.channel),
+		);
 
-			embed?.setTitle(updated.title);
-		}
+		embed.setTitle(updated.title || embed.title || "");
 
 		if (updated.category) {
 			const answer = embed.footer?.text.split(" • ").at(-1);
@@ -405,7 +410,9 @@ export default class SuggestionChannel {
 
 		await Promise.all(promises);
 
-		return true;
+		return (updated.title ? interaction.channel.name.endsWith(updated.title) : true)
+			? true
+			: "ratelimit";
 	}
 }
 
