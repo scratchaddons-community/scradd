@@ -17,30 +17,32 @@ const addons = await fetch(
 		),
 );
 
-const fuse = new Fuse(addons, {
-	findAllMatches: true,
-	ignoreLocation: true,
-	includeScore: true,
+const fuse = new Fuse(
+	addons.map((addon) => ({
+		...addon,
+		// search: `(${addon.id}) ${addon.name}\n`,
+	})),
+	{
+		findAllMatches: true,
+		ignoreLocation: true,
+		includeScore: true,
 
-	keys: [
-		{
-			name: "name",
-			weight: 1,
-		},
-		{
-			name: "id",
-			weight: 1,
-		},
-		{
-			name: "description",
-			weight: 0.9,
-		},
-	],
-
-	shouldSort: true,
-	threshold: 0,
-	useExtendedSearch: true,
-});
+		keys: [
+			{
+				name: "id",
+				weight: 1,
+			},
+			{
+				name: "name",
+				weight: 1,
+			},
+			{
+				name: "description",
+				weight: 0.5,
+			},
+		],
+	},
+);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -76,18 +78,15 @@ const info = {
 		}
 
 		const input = interaction.options.getString("addon");
-		const item = input
-			? fuse.search(input).sort(({ score: scoreOne = 0 }, { score: scoreTwo = 0 }) =>
-					// Sort very good matches at the top no matter what
-					+(scoreOne < 0.1) ^ +(scoreTwo < 0.1) ? (scoreOne < 0.1 ? -1 : 1) : 0,
-			  )[0]?.item
-			: addons[Math.floor(Math.random() * addons.length)];
+		const { item, score = 0 } = input
+			? fuse.search(input)[0] || {}
+			: { item: addons[Math.floor(Math.random() * addons.length)] };
 
 		if (!item) {
 			await interaction.reply({
-				content: `<:no:940054047854047282> That addon${
+				content: `<:no:940054047854047282> Could not find that addon${
 					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
-				} does not exist!`,
+				}!`,
 
 				ephemeral: true,
 			});
@@ -137,7 +136,7 @@ const info = {
 				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`,
 			)
 			.setFooter({
-				text: input ? `Input: ${input}` : "Random addon",
+				text: Math.round((1 - score) * 100) + "% match | " + (input || "Random addon"),
 			});
 
 		const group = addon.tags.includes("popup")
@@ -160,7 +159,7 @@ const info = {
 
 		const credits = generateCredits(addon);
 
-		if (credits) embed.addField("Contributors", credits, true);
+		if (credits && credits !== "(N/A)") embed.addField("Contributors", credits, true);
 
 		embed.addFields([
 			{
