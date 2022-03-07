@@ -10,13 +10,16 @@ import generateTooltip from "../lib/generateTooltip.js";
 import joinWithAnd from "../lib/joinWithAnd.js";
 
 const addons = await fetch(
-	"https://raw.githubusercontent.com/ScratchAddons/website-v2/master/data/addons/en.json",
+	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",
 ).then(
 	async (response) =>
 		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (
 			await response.json()
 		),
 );
+
+/** @type {{ [key: string]: import("../types/addonManifest").default }} */
+const manifestCache = {};
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -88,15 +91,13 @@ const info = {
 
 			return;
 		}
-
-		const addon = await fetch(
-			`${CONSTANTS.repos.sa}/raw/master/addons/${item.id}/addon.json`,
-		).then(
-			async (response) =>
-				/** @type {Promise<import("../types/addonManifest").default>} */ (
-					await response.json()
-				),
-		);
+		const addon = (manifestCache[item.id] ||= await fetch(
+			`${CONSTANTS.repos.sa}/addons/${item.id}/addon.json?date=${Date.now()}`,
+		).then(async (response) => {
+			return await /** @type {Promise<import("../types/addonManifest").default>} */ (
+				response.json()
+			);
+		}));
 
 		const lastUpdatedIn = `last updated in ${
 			addon.latestUpdate?.version || "<unknown version>"

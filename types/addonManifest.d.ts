@@ -128,7 +128,7 @@ type definitions_if = {
  *
  * The manifest that describes an addon.
  */
-type manifest = {
+type AddonManifest = {
 	/** The URL to the schema. */
 	$schema?: string;
 	/** The name of the addon. Don’t make it too long. */
@@ -410,12 +410,12 @@ type manifest = {
 	};
 };
 
-export default manifest;
+export default AddonManifest;
 
 export type WebsiteData = ArrayOfAtLeastOne<{
 	id: string;
-	name: manifest["name"];
-	description: manifest["description"];
-	tags: manifest["tags"];
-	credits: manifest["credits"];
+	name: AddonManifest["name"];
+	description: AddonManifest["description"];
+	tags: AddonManifest["tags"];
+	credits: AddonManifest["credits"];
 }>;
