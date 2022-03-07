@@ -1,16 +1,22 @@
 /** @file Code To perform operations related to modmail tickets. */
-import { GuildMember, Message, MessageEmbed } from "discord.js";
+import { GuildMember, Message, MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
+import generateHash from "../lib/generateHash.js";
 
 import escapeMessage from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
 import asyncFilter from "../lib/asyncFilter.js";
+import extractMessageExtremities from "../lib/extractMessageExtremities.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
 
-export const WEBHOOK_NAME = "scradd-webhook";
-
+export const COLORS = {
+	/** @type {import("discord.js").ColorResolvable} */ opened: "GOLD",
+	/** @type {import("discord.js").ColorResolvable} */ closed: "DARK_GREEN",
+};
+export const UNSUPPORTED =
+	"Please note that reactions, replies, edits, and deletions are not supported.";
 /**
  * Generate a webhook message from a message sent by a user.
  *
@@ -26,25 +32,14 @@ export const WEBHOOK_NAME = "scradd-webhook";
  *   - Webhook message.
  */
 export async function generateMessage(message, guild = message.guild || undefined) {
-	if (!guild) throw new TypeError("Expected guild to be passed as message is from a DM");
+	const { author, files, embeds } = await extractMessageExtremities(message, guild);
 
-	const author = (await guild.members.fetch(message.author.id).catch(() => {})) || message.author;
-
-	const embeds = message.stickers
-		.map((sticker) =>
-			new MessageEmbed()
-				.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`)
-				.setColor("BLURPLE"),
-		)
-		.concat(message.embeds.map((embed) => new MessageEmbed(embed)));
-
-	while (embeds.length > 10) embeds.pop();
 	return {
 		allowedMentions: { users: [] },
 		avatarURL: author.displayAvatarURL(),
 		content: await messageToText(message, false),
 		embeds,
-		files: message.attachments.map((attachment) => attachment),
+		files,
 		username: author instanceof GuildMember ? author.displayName : author.username,
 	};
 }
@@ -61,7 +56,8 @@ export async function getMemberFromThread(thread) {
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
 	const userId =
-		/<@!(?<userId>\d+)>/.exec(embed.description)?.groups?.userId || embed.description;
+		/<@!?(?<userId>\d+)>/.exec(embed.description)?.groups?.userId || embed.description;
+
 	return await thread.guild.members.fetch(userId).catch(() => {});
 }
 
@@ -167,9 +163,87 @@ export async function sendOpenedMessage(user) {
 					)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 				)
 				.setFooter({
-					text: "Please note that reactions, replies, edits, and deletions are not supported.",
+					text: UNSUPPORTED,
 				})
-				.setColor("GOLD"),
+				.setColor(COLORS.opened),
 		],
 	});
+}
+
+/**
+ * @param {{ display: string; icon?: string; name: string }} receiver
+ * @param {(
+ * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
+ * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
+ * @param {(
+ * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
+ * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
+ * @param {(
+ * 	buttonInteraction: import("discord.js").MessageComponentInteraction,
+ * ) => Promise<void>} onConfirm
+ */
+export async function generateConfirm(receiver, onConfirm, reply, edit) {
+	const confirmEmbed = new MessageEmbed()
+		.setTitle("Confirmation")
+		.setDescription(`Are you sure you want to send this message to **${receiver.display}**?`)
+		.setColor("BLURPLE")
+		.setAuthor({
+			iconURL: receiver.icon,
+			name: receiver.name,
+		});
+
+	const button = new MessageButton()
+		.setLabel("Confirm")
+		.setStyle("PRIMARY")
+		.setCustomId(generateHash("confirm"));
+	const cancelButton = new MessageButton()
+		.setLabel("Cancel")
+		.setCustomId(generateHash("cancel"))
+		.setStyle("SECONDARY");
+
+	const message = await reply({
+		components: [new MessageActionRow().addComponents(button, cancelButton)],
+		embeds: [confirmEmbed],
+	});
+
+	if (message instanceof Message) {
+		const collector = message.channel.createMessageComponentCollector({
+			filter: (buttonInteraction) =>
+				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
+
+			time: 30_000,
+		});
+		collector
+			.on("collect", async (buttonInteraction) => {
+				collector.stop();
+				switch (buttonInteraction.customId) {
+					case button.customId: {
+						await onConfirm(buttonInteraction);
+
+						break;
+					}
+					case cancelButton.customId: {
+						await buttonInteraction.reply({
+							content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
+							ephemeral: true,
+						});
+
+						break;
+					}
+				}
+			})
+			.on("end", async () => {
+				await edit({
+					components: [
+						new MessageActionRow().addComponents(
+							button.setDisabled(true),
+							cancelButton.setDisabled(true),
+						),
+					],
+
+					embeds: [confirmEmbed],
+				});
+			});
+		return collector;
+	}
 }

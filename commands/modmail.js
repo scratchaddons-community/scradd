@@ -1,14 +1,17 @@
 /** @file Commands To manage modmails. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
 	closeModmail,
+	COLORS,
+	generateConfirm,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
 	sendOpenedMessage,
+	UNSUPPORTED,
 } from "../common/modmail.js";
-import generateHash from "../lib/generateHash.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -53,7 +56,7 @@ const info = {
 					!interaction.guild
 				) {
 					await interaction.reply({
-						content: `<:no:940054047854047282> This command can only be used in threads in <#${MODMAIL_CHANNEL}>.`,
+						content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${MODMAIL_CHANNEL}>.`,
 						ephemeral: true,
 					});
 
@@ -63,7 +66,7 @@ const info = {
 				const reason = interaction.options.getString("reason") || "";
 
 				await interaction.reply({
-					content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
+					content: `${CONSTANTS.emojis.statuses.yes} Modmail ticket closed! ${reason}`,
 				});
 
 				await closeModmail(interaction.channel, interaction.user, reason);
@@ -77,7 +80,7 @@ const info = {
 
 				if (!user || !interaction.guild) {
 					await interaction.reply({
-						content: "<:no:940054047854047282> Could not find user.",
+						content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
 						ephemeral: true,
 					});
 
@@ -88,15 +91,14 @@ const info = {
 
 				if (existingThread) {
 					await interaction.reply({
-						content: `<:no:940054047854047282> User already has a ticket open (${existingThread.toString()}).`,
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} User already has a ticket open (${existingThread.toString()}).`,
 						ephemeral: true,
 					});
 
 					return;
 				}
-
-				/** @type {Promise<unknown>[]} */
-				const promises = [];
 
 				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
 
@@ -105,104 +107,52 @@ const info = {
 				if (mailChannel.type !== "GUILD_TEXT")
 					throw new TypeError("Modmail channel is not a text channel");
 
-				const confirmEmbed = new MessageEmbed()
-					.setTitle("Confirmation")
-					.setDescription(
-						`Are you sure you want to send this message to ${user?.user.toString()}?`,
-					)
-					.setColor("BLURPLE")
-					.setAuthor({
-						iconURL: user.displayAvatarURL(),
-						name: user.displayName || user.user.username,
-					});
+				await generateConfirm(
+					{
+						display: user?.user.toString(),
+						icon: user.displayAvatarURL(),
+						name: user.displayName,
+					},
 
-				const button = new MessageButton()
-					.setLabel("Confirm")
-					.setStyle("PRIMARY")
-					.setCustomId(generateHash("confirm"));
-				const cancelButton = new MessageButton()
-					.setLabel("Cancel")
-					.setCustomId(generateHash("cancel"))
-					.setStyle("SECONDARY");
+					async (buttonInteraction) => {
+						const openedEmbed = new MessageEmbed()
+							.setTitle("Modmail ticket opened!")
+							.setDescription(
+								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
+							)
+							.setFooter({
+								text: UNSUPPORTED,
+							})
+							.setColor(COLORS.opened);
 
-				await interaction.reply({
-					components: [new MessageActionRow().addComponents(button, cancelButton)],
-					embeds: [confirmEmbed],
-					ephemeral: true,
-					fetchReply: true,
-				});
-
-				interaction.channel
-					?.createMessageComponentCollector({
-						filter: (buttonInteraction) =>
-							[button.customId, cancelButton.customId].includes(
-								buttonInteraction.customId,
-							) && buttonInteraction.user.id === interaction.user.id,
-
-						time: 30_000,
-					})
-					.on("collect", async (buttonInteraction) => {
-						const editPromise = interaction.editReply({
-							components: [
-								new MessageActionRow().addComponents(
-									button.setDisabled(true),
-									cancelButton.setDisabled(true),
-								),
-							],
-
-							embeds: [confirmEmbed],
-						});
-						switch (buttonInteraction.customId) {
-							case button.customId: {
-								const openedEmbed = new MessageEmbed()
-									.setTitle("Modmail ticket opened!")
-									.setDescription(
-										`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
-									)
-									.setFooter({
-										text: "Please note that reactions, replies, edits, and deletions are not supported.",
-									})
-									.setColor("GOLD");
-
+						await sendOpenedMessage(user).then(async (success) => {
+							if (success) {
 								const starterMessage = await mailChannel.send({
 									embeds: [openedEmbed],
 								});
-
 								const thread = await starterMessage.startThread({
 									name: `${user.user.username}`,
 									autoArchiveDuration: "MAX",
 								});
+								await buttonInteraction.reply({
+									content: `${
+										CONSTANTS.emojis.statuses.yes
+									} Modmail ticket opened! Send them a message in ${thread.toString()}.`,
+									ephemeral: true,
+								});
+							} else {
+								await buttonInteraction.reply({
+									content: `${CONSTANTS.emojis.statuses.no} Could not DM user. Ask them to open their DMs.`,
 
-								await Promise.all([
-									sendOpenedMessage(user).then(async (success) => {
-										await buttonInteraction.reply({
-											content: success
-												? `<:yes:940054094272430130> Modmail ticket opened! Send them a message in ${thread.toString()}.`
-												: "<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
-
-											ephemeral: true,
-										});
-									}),
-									editPromise,
-								]);
-
-								break;
+									ephemeral: true,
+								});
 							}
-							case cancelButton.customId: {
-								await Promise.all([
-									buttonInteraction.reply({
-										content: "<:no:940054047854047282> Modmail canceled",
-										ephemeral: true,
-									}),
-									editPromise,
-								]);
-
-								break;
-							}
-						}
-					});
-
-				await Promise.all(promises);
+						});
+					},
+					(options) =>
+						interaction.reply({ ...options, ephemeral: true, fetchReply: true }),
+					(options) => interaction.editReply(options),
+				);
 
 				break;
 			}

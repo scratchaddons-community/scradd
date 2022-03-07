@@ -1,5 +1,6 @@
 /** @file Have The bot mimic what you say but don’t tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+import CONSTANTS from "../common/CONSTANTS.js";
 
 import { escapeForInlineCode } from "../lib/escape.js";
 
@@ -29,7 +30,7 @@ const info = {
 
 			await Promise.all([
 				interaction.reply({
-					content: "<:yes:940054094272430130>",
+					content: CONSTANTS.emojis.statuses.yes,
 					ephemeral: true,
 				}),
 				channel?.isText() &&

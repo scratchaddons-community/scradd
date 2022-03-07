@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { Message, MessageButton, MessageEmbed } from "discord.js";
 
 import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 import asyncFilter from "../lib/asyncFilter.js";
 import firstPromiseValued from "../lib/firstPromiseValued.js";
 import generateHash from "../lib/generateHash.js";
@@ -51,7 +52,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 			return channelFound.isThread() && channelFound.parentId === channelWanted.id;
 		}
 		case "GUILD_CATEGORY": {
-			//	category
+			// category
 			const promises = [];
 
 			for (const channel of channelWanted.children.values())
@@ -60,11 +61,10 @@ async function textChannelMatches(channelWanted, channelFound) {
 			if (!(await firstPromiseValued(true, promises))) return false;
 
 			break;
-			// else return false;
 		}
 		case "GUILD_NEWS_THREAD":
 		case "GUILD_PUBLIC_THREAD": {
-			//	other public thread
+			// other public thread
 			if (
 				(typeof channelFound === "string" && channelWanted.id === channelFound) ||
 				(typeof channelFound === "object" && channelWanted.id === channelFound.id)
@@ -118,9 +118,7 @@ const info = {
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
 		if (!board?.isText()) {
-			throw new ReferenceError(
-				"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
-			);
+			throw new ReferenceError("Could not find board channel.");
 		}
 
 		const minReactions = interaction.options.getInteger("minimum-reactions") || 0;
@@ -189,8 +187,7 @@ const info = {
 					attachments: [],
 					components: [],
 
-					content:
-						"<:no:940054047854047282> No messages found. Try changing any filters you may have used.",
+					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
 
 					embeds: [],
 					ephemeral: true,

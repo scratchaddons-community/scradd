@@ -1,5 +1,6 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import extractMessageExtremities from "../lib/extractMessageExtremities.js";
 
 import getAllMessages from "../lib/getAllMessages.js";
 import messageToText from "../lib/messageToText.js";
@@ -51,9 +52,7 @@ export async function sourceToBoardMessage(message) {
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isText()) {
-		throw new ReferenceError(
-			"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
-		);
+		throw new ReferenceError("Could not find board channel.");
 	}
 
 	const fetchedMessages = await getAllMessages(board);
@@ -75,56 +74,40 @@ export async function sourceToBoardMessage(message) {
  * @param {import("discord.js").Message} message - Message to add.
  */
 export async function postMessageToBoard(message) {
-	if (!message.guild) return;
+	if (!message.guild) throw new TypeError("Cannot post DMs to potatoboard");
 
-	const author = await message.guild?.members.fetch(message.author).catch(() => {});
+	const { author, files, embeds } = await extractMessageExtremities(message);
 
-	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
+	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isText()) {
-		throw new ReferenceError(
-			"No board channel found. Make sure BOARD_CHANNEL is set in the .env file.",
-		);
+		throw new ReferenceError("Could not find board channel.");
 	}
 
 	const description = await messageToText(message);
 
 	const boardEmbed = new MessageEmbed()
-		.setColor(author?.displayColor || "DEFAULT")
+		.setColor(("displayColor" in author && author.displayColor) || "DEFAULT")
 		.setDescription(description)
 		.setAuthor({
 			iconURL: author?.displayAvatarURL() || message.author.displayAvatarURL(),
 
-			name: author?.displayName || message.author.username,
+			name: "displayName" in author ? author.displayName : author.username,
 		})
 		.setTimestamp(message.createdTimestamp);
-
-	const embeds = [
-		boardEmbed,
-		...message.stickers.map((sticker) =>
-			new MessageEmbed()
-				.setImage(`https://media.discordapp.net/stickers/${sticker.id}.webp?size=160`)
-				.setColor("BLURPLE"),
-		),
-		...message.embeds
-			.filter((embed) => !embed.video)
-			.map((oldEmbed) => new MessageEmbed(oldEmbed)),
-	];
-
-	while (embeds.length > 10) embeds.pop();
 
 	const button = new MessageButton()
 		.setEmoji("👀")
 		.setLabel("View Context")
 		.setStyle("LINK")
 		.setURL(
-			`https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`,
+			`https://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
 		);
 	const reaction = message.reactions.resolve(BOARD_EMOJI);
 
 	if (!reaction) return;
 
-	await board.send({
+	return await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
@@ -137,9 +120,8 @@ export async function postMessageToBoard(message) {
 							: ""
 				  }`
 		}${author ? ` | ${author.toString()}` : ""}`,
-
-		embeds,
-		files: message.attachments.map((attachment) => attachment),
+		embeds: [boardEmbed, ...embeds],
+		files,
 	});
 }
 

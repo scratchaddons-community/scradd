@@ -8,7 +8,7 @@ import {
 	MIN_REACTIONS,
 	updateReactionCount,
 } from "../common/board.js";
-import { SUGGESTION_EMOJIS } from "../common/suggest.js";
+import { OLD_EMOJIS as SUGGESTION_EMOJIS } from "../commands/suggestion.js";
 
 /** @type {import("../types/event").default<"messageReactionAdd">} */
 const event = {

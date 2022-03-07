@@ -2,17 +2,21 @@
  * @file Run Actions on posted messages.Send modmails, autoreact if contains certain triggers, and
  *   autoreply if contains certain triggers.
  */
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
+	COLORS,
+	generateConfirm,
 	generateMessage,
 	getMemberFromThread,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
-	WEBHOOK_NAME,
+	UNSUPPORTED,
 } from "../common/modmail.js";
+
 import escapeMessage, { escapeForCodeblock } from "../lib/escape.js";
-import generateHash from "../lib/generateHash.js";
+import reactAll from "../lib/reactAll.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
@@ -39,9 +43,9 @@ const event = {
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
-				webhooks.find((possibleWebhook) => possibleWebhook.name === WEBHOOK_NAME) ||
-				(await mailChannel.createWebhook(WEBHOOK_NAME));
-
+				webhooks.find(
+					(possibleWebhook) => possibleWebhook.name === CONSTANTS.webhookName,
+				) || (await mailChannel.createWebhook(CONSTANTS.webhookName));
 			const existingThread = await getThreadFromMember(guild, message.author);
 
 			if (existingThread) {
@@ -51,8 +55,8 @@ const event = {
 							threadId: existingThread.id,
 							...(await generateMessage(message, guild)),
 						})
-						.then(async () => await message.react("<:yes:940054094272430130>"))
-						.catch(async () => await message.react("<:no:940054047854047282>")),
+						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
+						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
 				);
 			} else if (
 				[
@@ -63,130 +67,64 @@ const event = {
 					"CONTEXT_MENU_COMMAND",
 				].includes(message.type)
 			) {
-				const confirmEmbed = new MessageEmbed()
-					.setTitle("Confirmation")
-					.setDescription(
-						`You are sending this message to the ${escapeMessage(
-							mailChannel.guild.name,
-						)} Server’s mod team. If you are sure you would like to do this, press the button below.`,
-					)
-					.setColor("BLURPLE");
-				const button = new MessageButton()
-					.setLabel("Confirm")
-					.setStyle("PRIMARY")
-					.setCustomId(generateHash("confirm"));
-				const cancelButton = new MessageButton()
-					.setLabel("Cancel")
-					.setCustomId(generateHash("cancel"))
-					.setStyle("SECONDARY");
-				const sentMessage = await message.reply({
-					components: [new MessageActionRow().addComponents(button, cancelButton)],
-					embeds: [confirmEmbed],
-				});
+				let toEdit = message;
+				const collector = await generateConfirm(
+					{
+						display: `the ${escapeMessage(mailChannel.guild.name)} Server’s mod team`,
+						name: mailChannel.guild.name,
+						icon: mailChannel.guild.iconURL() || undefined,
+					},
+					async (buttonInteraction) => {
+						const openedEmbed = new MessageEmbed()
+							.setTitle("Modmail ticket opened!")
+							.setDescription(`Ticket by ${message.author.toString()}`)
+							.setFooter({
+								text: UNSUPPORTED,
+							})
+							.setColor(COLORS.opened);
 
-				message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
-					button.setDisabled(true);
-					cancelButton.setDisabled(true);
-					await sentMessage.edit({
-						components: [new MessageActionRow().addComponents(button, cancelButton)],
-						embeds: [confirmEmbed],
-					});
-				});
+						const starterMessage = await mailChannel.send({
+							content: NODE_ENV === "production" ? "@here" : undefined,
 
-				message.channel
-					.createMessageComponentCollector({
-						filter: (buttonInteraction) =>
-							[button.customId, cancelButton.customId].includes(
-								buttonInteraction.customId,
-							) && buttonInteraction.user.id === message.author.id,
-
-						time: 30_000,
-					})
-					.on("collect", async (buttonInteraction) => {
-						const buttonPromises = [];
-
-						switch (buttonInteraction.customId) {
-							case button.customId: {
-								const openedEmbed = new MessageEmbed()
-									.setTitle("Modmail ticket opened!")
-									.setDescription(`Ticket by ${message.author.toString()}`)
-									.setFooter({
-										text: "Please note that reactions, replies, edits, and deletions are not supported.",
-									})
-									.setColor("GOLD");
-
-								const starterMessage = await mailChannel.send({
-									content: NODE_ENV === "production" ? "@here" : undefined,
-
-									embeds: [openedEmbed],
-								});
-								const newThread = await starterMessage.startThread({
-									name: `${message.author.username} (${message.author.id})`,
-									autoArchiveDuration: "MAX",
-								});
-
-								if (!webhook) throw new ReferenceError("Could not find webhook");
-
-								buttonPromises.push(
-									buttonInteraction.reply({
-										content:
-											"<:yes:940054094272430130> Modmail ticket opened! You may send the mod team messages by sending me DMs. I will DM you their messages. Please note that reactions, replies, edits, and deletions are not supported.",
-
-										ephemeral: true,
-									}),
-									webhook
-										.send({
-											threadId: newThread.id,
-											...(await generateMessage(message, guild)),
-										})
-										.then(
-											async () =>
-												await message.react("<:yes:940054094272430130>"),
-										)
-										.catch(
-											async () =>
-												await message.react("<:no:940054047854047282>"),
-										),
-								);
-								button.setDisabled(true);
-
-								break;
-							}
-							case cancelButton.customId: {
-								button.setDisabled(true);
-								cancelButton.setDisabled(true);
-
-								buttonPromises.push(
-									buttonInteraction.reply({
-										content: "<:no:940054047854047282> Modmail canceled",
-										ephemeral: true,
-									}),
-
-									sentMessage.edit({
-										components: [
-											new MessageActionRow().addComponents(
-												button,
-												cancelButton,
-											),
-										],
-
-										embeds: [confirmEmbed],
-									}),
-								);
-
-								break;
-							}
-						}
-
-						await Promise.all(buttonPromises);
-					})
-					.on("end", async () => {
-						button.setDisabled(true);
-						await sentMessage.edit({
-							components: [new MessageActionRow().addComponents(button)],
-							embeds: [confirmEmbed],
+							embeds: [openedEmbed],
 						});
-					});
+						const newThread = await starterMessage.startThread({
+							name: `${message.author.username}`,
+							autoArchiveDuration: "MAX",
+						});
+
+						if (!webhook) throw new ReferenceError("Could not find webhook");
+
+						await Promise.all([
+							buttonInteraction.reply({
+								content:
+									`${CONSTANTS.emojis.statuses.yes} Modmail ticket opened! You may send the mod team messages by sending me DMs. I will DM you their messages. ` +
+									UNSUPPORTED,
+
+								ephemeral: true,
+							}),
+							webhook
+								.send({
+									threadId: newThread.id,
+									...(await generateMessage(message, guild)),
+								})
+								.then(
+									async () => await message.react(CONSTANTS.emojis.statuses.yes),
+								)
+								.catch(
+									async () => await message.react(CONSTANTS.emojis.statuses.no),
+								),
+						]);
+					},
+					async (options) => {
+						toEdit = await message.reply(options);
+						return toEdit;
+					},
+					(options) => toEdit.edit(options),
+				);
+				message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
+					collector?.stop();
+				});
 			}
 		}
 
@@ -199,7 +137,8 @@ const event = {
 			!message.content.startsWith("=") &&
 			(message.webhookId && message.author.id !== message.client.user?.id
 				? (await message.fetchWebhook()).owner?.id !== message.client.user?.id
-				: true)
+				: true) &&
+			message.interaction?.commandName !== "modmail"
 		) {
 			const member = await getMemberFromThread(message.channel);
 
@@ -207,7 +146,7 @@ const event = {
 				const channel =
 					member.user.dmChannel ||
 					(await member.createDM().catch(async () => {
-						await message.react("<:no:940054047854047282>");
+						await message.react(CONSTANTS.emojis.statuses.no);
 					}));
 				const messageToSend = await generateMessage(message);
 
@@ -216,11 +155,12 @@ const event = {
 					":" +
 					(messageToSend.content ? " " + messageToSend.content : "");
 
+				console.log(message);
 				promises.push(
 					channel
 						?.send(messageToSend)
-						.then(async () => await message.react("<:yes:940054094272430130>"))
-						.catch(async () => await message.react("<:no:940054047854047282>")),
+						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
+						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
 				);
 			}
 		}
@@ -232,7 +172,7 @@ const event = {
 			.toLowerCase()
 			.normalize("NFD")
 			.replace(
-				/[\p{Diacritic}\u200E\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A\u200B\u200C\u200D\u200F\u2060\u2061\u2062\u2063\u2064\u206A\u206B\u206C\u206D\u206E\u206F\uFEFF\uFFA0𝅳𝅴𝅵𝅶𝅷𝅸𝅹𝅺\f]/gu,
+				/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
 				"",
 			);
 
@@ -245,18 +185,17 @@ const event = {
 		 * @returns {boolean} Whether the message contains the word.
 		 */
 		function includes(text, plural = true) {
+			const split = content.split(/[^\da-z]+/i);
 			return (
-				content.split(/[^\da-z]+/i).includes(text) ||
-				(plural &&
-					(content.split(/[^\da-z]+/i).includes(`${text}s`) ||
-						content.split(/[^\da-z]+/i).includes(`${text}es`)))
+				split.includes(text) ||
+				(plural && (split.includes(`${text}s`) || split.includes(`${text}es`)))
 			);
 		}
 
 		if (includes("dango") || content.includes("🍡")) promises.push(message.react("🍡"));
 
 		if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
-			promises.push(message.react("<:e_:939986562937151518>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.e));
 
 		if (
 			content === "potato" ||
@@ -267,21 +206,21 @@ const event = {
 			promises.push(message.react("🥔"));
 
 		if (includes("griff") || includes("griffpatch"))
-			promises.push(message.react("<:griffpatch:938441399936909362>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.griffpatch));
 
 		if (includes("amongus") || includes("amogus"))
-			promises.push(message.react("<:sus:938441549660975136>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.amongus));
 
-		if (includes("sus", false)) promises.push(message.react("<:sus_pepe:938548233385414686>"));
+		if (includes("sus", false)) promises.push(message.react(CONSTANTS.emojis.autoreact.sus));
 
-		if (includes("appel")) promises.push(message.react("<:appel:938818517535440896>"));
+		if (includes("appel")) promises.push(message.react(CONSTANTS.emojis.autoreact.appel));
 
-		if (includes("cubot")) promises.push(message.react("<:cubot:939336981601722428>"));
+		if (includes("cubot")) promises.push(message.react(CONSTANTS.emojis.autoreact.cubot));
 
-		if (includes("splory")) promises.push(message.react("<:splory:942561415594663966>"));
+		if (includes("splory")) promises.push(message.react(CONSTANTS.emojis.autoreact.splory));
 
 		if (includes("tera") || content.includes("tewwa"))
-			promises.push(message.react("<:tewwa:938486033274785832>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.tera));
 
 		if (
 			/gives? ?you ?up/.test(content) ||
@@ -291,26 +230,21 @@ const event = {
 			includes("rickrolling", false) ||
 			message.content.includes("dQw4w9WgXcQ")
 		)
-			promises.push(message.react("<a:rick:938547171366682624>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.rick));
 
 		if (message.content.includes("( ^∘^)つ"))
-			promises.push(message.react("<:sxd:939985869421547520>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.sxd));
 
 		if (content.includes("scradd bad"))
-			promises.push(message.react("<:angery:939337168780943390>"));
+			promises.push(message.react(CONSTANTS.emojis.autoreact.angery));
 
-		if (content === "no") promises.push(message.react("<a:no:947888617953574912>"));
+		if (content === "no") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
 
 		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 			promises.push(message.react("👋"));
 
 		if (content.includes("sat on addons")) {
-			promises.push(
-				message
-					.react("<:sa_full1:939336189880713287>")
-					.then(async () => await message.react("<:soa_full1:939336229449789510>"))
-					.then(async () => await message.react("<:sa_full3:939336281454936095>")),
-			);
+			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
 		}
 
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.

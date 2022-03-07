@@ -1,10 +1,12 @@
 /** @file Let A user know when their Modmail thread is archived or unarchived. */
 import { MessageEmbed } from "discord.js";
 import {
+	COLORS,
 	getMemberFromThread,
 	MODMAIL_CHANNEL,
 	sendClosedMessage,
 	sendOpenedMessage,
+	UNSUPPORTED,
 } from "../common/modmail.js";
 
 /** @type {import("../types/event").default<"threadUpdate">} */
@@ -22,8 +24,8 @@ const event = {
 
 		if (newThread.archived) return await sendClosedMessage(newThread);
 		const member = await getMemberFromThread(newThread);
-		console.log(member);
 		if (!member) return;
+
 		return await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
 				starter.edit({
@@ -31,9 +33,9 @@ const event = {
 						(starter.embeds[0] || new MessageEmbed())
 							.setTitle("Modmail ticket opened!")
 							.setFooter({
-								text: "Please note that reactions, replies, edits, and deletions are not supported.",
+								text: UNSUPPORTED,
 							})
-							.setColor("GOLD"),
+							.setColor(COLORS.opened),
 					],
 				});
 			}),

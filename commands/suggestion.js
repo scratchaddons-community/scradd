@@ -1,24 +1,44 @@
 /** @file Commands To manage suggestions. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
+	DEFAULT_ANSWER,
 	getUserFromMessage,
 	MAX_TITLE_LENGTH,
-	SUGGESTION_EMOJIS,
+	NO_SERVER_START,
+	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
 import escapeMessage, { escapeLinks } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
+import reactAll from "../lib/reactAll.js";
 import truncateText from "../lib/truncateText.js";
 
-const { SUGGESTION_CHANNEL = "", GUILD_ID = "" } = process.env;
+const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
 
 if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env.");
 
 const PAGE_OFFSET = 15;
 
-/** @type {import("../common/suggest.js").Answers} */
+/** @type {[string, string][]} */
+export const OLD_EMOJIS = [
+	["👍", "👎"],
+	["575851403558256642", "575851403600330792"],
+	["✅", "613912745699442698"],
+	["613912747578621952", "613912747440209930"],
+	["613912747612045322", "613913094984564736"],
+	["613912745837985832", "613912745691054080"],
+	["😀", "😔"],
+	["❤", "💔"],
+	["749005259682086964", "749005284403445790"],
+];
+
+/** @type {[string, string]} */
+export const EMOJIS = ["👍", "👎"];
+
+/** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
 	{
 		color: "GREEN",
@@ -47,7 +67,8 @@ const ANSWERS = [
 	},
 	{
 		color: "DARK_GREEN",
-		description: "This is possible, but it could be rejected for ethical reasons or the like",
+		description:
+			"This is possible, but it could be rejected for things like ethical or technical reasons",
 		name: "Possible",
 	},
 	{
@@ -58,6 +79,7 @@ const ANSWERS = [
 	{ color: "PURPLE", description: "We don’t want to add this for some reason", name: "Rejected" },
 ];
 
+/** @type {import("../common/suggest.js").Category[]} */
 const CATEGORIES = [
 	{
 		description: "A feature that has no similar features in other addons already",
@@ -73,20 +95,23 @@ const CATEGORIES = [
 
 	{
 		description: "A suggestion to improve the server or something to add to me",
-		editableTo: false,
+		customResponse: `${NO_SERVER_START}<#${SUGGESTION_CHANNEL}>, they can see SA suggestions they can add without having to dig through tons of server suggestions. If you have a suggestion to improve me or the server, please post it in <#${CONSTANTS.channels.general}> for discussion.`,
 		name: "Server suggestion",
 	},
 
 	{
 		description: "Something that has no effect for users",
-		editableTo: false,
+		customResponse:
+			"Please suggest things that do not affect users in the development server or on GitHub.",
 		name: "Technical suggestion",
 	},
 
 	{ description: "Anything not listed above", name: "Other" },
 ];
 
-const suggestions = new SuggestionChannel(SUGGESTION_CHANNEL);
+export const CHANNEL_TAG = "#suggestions";
+
+const channel = new SuggestionChannel(SUGGESTION_CHANNEL, CATEGORIES);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -95,19 +120,19 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription("Create a new suggestion in #suggestions.")
+				.setDescription(`Create a new suggestion in ${CHANNEL_TAG}.`)
 				.addStringOption((option) =>
 					option
 						.setName("title")
 						.setDescription(
-							`A short summary of your suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
+							`A short summary of the suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
 						)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("suggestion")
-						.setDescription("Your suggestion")
+						.setDescription("A detailed description of the suggestion")
 						.setRequired(true),
 				)
 				.addStringOption((option) => {
@@ -130,7 +155,7 @@ const info = {
 			subcommand
 				.setName("answer")
 				.setDescription(
-					"(Devs only) Answer a suggestion. Use this in threads in #suggestions.",
+					`(Devs only) Answer a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
 				)
 				.addStringOption((option) => {
 					const newOption = option
@@ -148,23 +173,27 @@ const info = {
 			subcommand
 				.setName("delete")
 				.setDescription(
-					"(Devs, mods, and OP only) Delete a suggestion. Use this in threads in #suggestions.",
+					`(Devs, mods, and OP only) Delete a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("edit")
-				.setDescription("(OP Only) Edit a suggestion. Use this in threads in #suggestions.")
+				.setDescription(
+					`(OP Only) Edit a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
+				)
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription("Title for the suggestion embed")
+						.setDescription(
+							`A short summary of the suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
+						)
 						.setRequired(false),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("suggestion")
-						.setDescription("Your updated suggestion")
+						.setDescription("A detailed description of the suggestion")
 						.setRequired(false),
 				)
 				.addStringOption((option) => {
@@ -174,7 +203,7 @@ const info = {
 						.setRequired(false);
 
 					for (const category of CATEGORIES) {
-						if (category.editableTo === false) continue;
+						if (category.customResponse) continue;
 
 						newOption.addChoice(
 							`${category.name} (${category.description})`,
@@ -204,13 +233,10 @@ const info = {
 						)
 						.setRequired(false);
 
-					for (const answer of ANSWERS)
+					for (const answer of [DEFAULT_ANSWER, ...ANSWERS])
 						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
 
-					return newOption.addChoice(
-						"Unanswered (This has not yet been answered)",
-						"Unanswered",
-					);
+					return newOption;
 				}),
 		),
 
@@ -221,31 +247,19 @@ const info = {
 
 		switch (command) {
 			case "create": {
-				const category = interaction.options.getString("category") || "";
-
-				if (category.startsWith("Technical")) {
-					await interaction.reply({
-						content:
-							"<:no:940054047854047282> Please suggest things that do not affect users in the development server or on GitHub.",
-
-						ephemeral: true,
-					});
-
-					return;
-				}
-
-				const success = await suggestions.createMessage(interaction, {
-					category,
+				const success = await channel.createMessage(interaction, {
+					category: interaction.options.getString("category") || "",
 					description: interaction.options.getString("suggestion") || "",
 					title: interaction.options.getString("title") || "",
-					type: "Suggestion",
 				});
 
 				if (success) {
 					await Promise.all([
-						success.react("👍").then(async () => await success.react("👎")),
+						reactAll(success, EMOJIS),
 						interaction.reply({
-							content: `<:yes:940054094272430130> Suggestion posted! See ${success.thread?.toString()}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
+							content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
+								success.thread?.toString() || ""
+							}. If you made any mistakes, you can fix them with \`/suggestion edit\`.`,
 							ephemeral: true,
 						}),
 					]);
@@ -255,17 +269,16 @@ const info = {
 			}
 			case "answer": {
 				const answer = interaction.options.getString("answer") || "";
-				const result = await suggestions.answerSuggestion(interaction, answer, ANSWERS);
-
+				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
 						content:
-							`<:yes:940054094272430130> Successfully answered suggestion as ${escapeMessage(
+							`${
+								CONSTANTS.emojis.statuses.yes
+							} Successfully answered suggestion as ${escapeMessage(
 								answer,
 							)}! Please elaborate on your answer below.` +
-							(result === "ratelimit"
-								? " If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
-								: ""),
+							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: true,
 					});
@@ -274,24 +287,22 @@ const info = {
 				break;
 			}
 			case "delete": {
-				await suggestions.deleteSuggestion(interaction);
+				await channel.deleteSuggestion(interaction);
 
 				break;
 			}
 			case "edit": {
 				const title = interaction.options.getString("title");
 
-				const result = await suggestions.editSuggestion(interaction, {
+				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("suggestion"),
 					category: interaction.options.getString("category"),
 					title,
 				});
 				if (result) {
 					await interaction.reply({
-						content: `<:yes:940054094272430130> Successfully edited suggestion! ${
-							result === "ratelimit"
-								? "If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour)."
-								: ""
+						content: `${CONSTANTS.emojis.statuses.yes} Successfully edited suggestion!${
+							result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""
 						}`,
 
 						ephemeral: true,
@@ -315,7 +326,7 @@ const info = {
 				const all = (
 					await Promise.all(
 						unfiltered.map(async (message) => {
-							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
+							const count = OLD_EMOJIS.map(([upvote, downvote]) => {
 								const upvoteReaction = message.reactions.resolve(upvote);
 								const downvoteReaction = message.reactions.resolve(downvote);
 
@@ -336,7 +347,7 @@ const info = {
 							if (requestedUser && author?.id !== requestedUser?.id) return;
 
 							const answer =
-								message.thread?.name.split("|")[0]?.trim() || "Unanswered";
+								message.thread?.name.split("|")[0]?.trim() || DEFAULT_ANSWER.name;
 
 							if (
 								requestedAnswer &&
@@ -401,7 +412,7 @@ const info = {
 							if (!suggestion) return ""; // Impossible
 
 							return `${index + offset + 1}. **${suggestion.count}** [${
-								suggestion.count > 0 ? "👍" : "👎"
+								suggestion.count > 0 ? EMOJIS[0] : EMOJIS[1]
 							} ${escapeLinks(suggestion.title)}](https://discord.com/channels/${
 								GUILD_ID || "@me"
 							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
@@ -415,8 +426,7 @@ const info = {
 
 					if (!content) {
 						return {
-							content:
-								"<:no:940054047854047282> No suggestions found. Try changing any filters you may have used.",
+							content: `${CONSTANTS.emojis.statuses.no} No suggestions found. Try changing any filters you may have used.`,
 
 							ephemeral: true,
 						};

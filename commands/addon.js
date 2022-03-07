@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
+import CONSTANTS from "../common/CONSTANTS.js";
 
 import escapeMessage, { escapeForInlineCode, escapeLinks } from "../lib/escape.js";
 import generateTooltip from "../lib/generateTooltip.js";
@@ -17,32 +18,26 @@ const addons = await fetch(
 		),
 );
 
-const fuse = new Fuse(
-	addons.map((addon) => ({
-		...addon,
-		// search: `(${addon.id}) ${addon.name}\n`,
-	})),
-	{
-		findAllMatches: true,
-		ignoreLocation: true,
-		includeScore: true,
+const fuse = new Fuse(addons, {
+	findAllMatches: true,
+	ignoreLocation: true,
+	includeScore: true,
 
-		keys: [
-			{
-				name: "id",
-				weight: 1,
-			},
-			{
-				name: "name",
-				weight: 1,
-			},
-			{
-				name: "description",
-				weight: 0.5,
-			},
-		],
-	},
-);
+	keys: [
+		{
+			name: "id",
+			weight: 1,
+		},
+		{
+			name: "name",
+			weight: 1,
+		},
+		{
+			name: "description",
+			weight: 0.5,
+		},
+	],
+});
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -60,12 +55,12 @@ const info = {
 		/**
 		 * Generate a string of Markdown that credits the makers of an addon.
 		 *
-		 * @param {import("../types/addonManifest").default} arg0 - Addon manifest.
+		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
 		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
 		 *   available.
 		 */
-		function generateCredits({ credits }) {
+		function generateCredits(credits) {
 			return joinWithAnd(
 				credits?.map(({ name, link, note = "" }) =>
 					link
@@ -84,7 +79,7 @@ const info = {
 
 		if (!item) {
 			await interaction.reply({
-				content: `<:no:940054047854047282> Could not find that addon${
+				content: `${CONSTANTS.emojis.statuses.no} Could not find that addon${
 					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
 				}!`,
 
@@ -95,7 +90,7 @@ const info = {
 		}
 
 		const addon = await fetch(
-			`https://github.com/ScratchAddons/ScratchAddons/raw/master/addons/${item.id}/addon.json`,
+			`${CONSTANTS.repos.sa}/raw/master/addons/${item.id}/addon.json`,
 		).then(
 			async (response) =>
 				/** @type {Promise<import("../types/addonManifest").default>} */ (
@@ -120,13 +115,11 @@ const info = {
 
 		const embed = new MessageEmbed()
 			.setTitle(addon.name)
-			.setColor(0xff7b26)
+			.setColor(CONSTANTS.colors.theme)
 			.setDescription(
-				`${escapeMessage(
-					addon.description,
-				)}\n[See source code](https://github.com/ScratchAddons/ScratchAddons/tree/master/addons/${encodeURIComponent(
-					item.id,
-				)})${
+				`${escapeMessage(addon.description)}\n[See source code](${
+					CONSTANTS.repos.sa
+				}/tree/master/addons/${encodeURIComponent(item.id)})${
 					addon.permissions?.length
 						? "\n\n**This addon may require additional permissions to be granted in order to function.**"
 						: ""
@@ -136,7 +129,9 @@ const info = {
 				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`,
 			)
 			.setFooter({
-				text: Math.round((1 - score) * 100) + "% match | " + (input || "Random addon"),
+				text: input
+					? Math.round((1 - score) * 100) + "% match" + CONSTANTS.footerSeperator + input
+					: "Random addon",
 			});
 
 		const group = addon.tags.includes("popup")
@@ -157,9 +152,9 @@ const info = {
 			);
 		}
 
-		const credits = generateCredits(addon);
+		const credits = generateCredits(addon.credits);
 
-		if (credits && credits !== "(N/A)") embed.addField("Contributors", credits, true);
+		if (credits) embed.addField("Contributors", credits, true);
 
 		embed.addFields([
 			{
