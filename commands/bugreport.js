@@ -131,13 +131,6 @@ const info = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("delete")
-				.setDescription(
-					`(Devs, mods, and OP only) Delete a bug report. Use this in threads in ${CHANNEL_TAG}.`,
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
 				.setName("edit")
 				.setDescription(
 					`(OP Only) Edit a bug report. Use this in threads in ${CHANNEL_TAG}.`,
@@ -216,11 +209,6 @@ const info = {
 						ephemeral: true,
 					});
 				}
-
-				break;
-			}
-			case "delete": {
-				await channel.deleteSuggestion(interaction);
 
 				break;
 			}

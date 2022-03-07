@@ -138,7 +138,7 @@ const info = {
 								(/\d+/.exec(message.content)?.[0] || 0) < minReactions
 							)
 								return false;
-							return true;
+							return message;
 						})
 						.sort(() => Math.random() - 0.5),
 					async (message) => {
@@ -160,7 +160,7 @@ const info = {
 						)
 							return false;
 
-						return true;
+						return message;
 					},
 				),
 			),

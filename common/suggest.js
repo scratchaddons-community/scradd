@@ -2,13 +2,9 @@
 import {
 	GuildMember,
 	Message,
-	MessageActionRow,
-	MessageButton,
 	MessageEmbed,
-	ThreadChannel,
 } from "discord.js";
 
-import generateHash from "../lib/generateHash.js";
 import CONSTANTS from "./CONSTANTS.js";
 
 /**
@@ -40,28 +36,6 @@ export const DEFAULT_ANSWER = {
 
 export const NO_SERVER_START =
 	"In an effort to help SA developers find meaningful information, we have disabled server-related suggestions and bug reports. With this off, when a developer looks in ";
-
-/**
- * Get the member who created the suggestion.
- *
- * @param {ThreadChannel} thread - The suggestion thread.
- * @param {Message} [starter] - The starter message.
- *
- * @returns {Promise<GuildMember | undefined>} - The member.
- */
-export async function getUserFromThread(thread, starter) {
-	const starterMessage = starter || (await thread?.fetchStarterMessage().catch(() => {}));
-
-	if (!starterMessage) return;
-
-	const initingMessages = await thread?.messages.fetch({
-		after: starterMessage.id,
-		limit: 2,
-	});
-	const message = initingMessages?.first();
-
-	return message?.mentions.members?.first();
-}
 
 export default class SuggestionChannel {
 	/**
@@ -212,118 +186,6 @@ export default class SuggestionChannel {
 	}
 
 	/**
-	 * Delete a suggestion.
-	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - Interaction.
-	 */
-	async deleteSuggestion(interaction) {
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
-			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		const starter = await interaction.channel.fetchStarterMessage();
-		const user = await getUserFromThread(interaction.channel, starter);
-
-		const roles = (
-			await interaction.guild?.members.fetch(interaction.user?.id)
-		)?.roles.valueOf();
-
-		if (
-			!(
-				roles?.hasAny(process.env.MODERATOR_ROLE || "", process.env.DEVELOPER_ROLE || "") ||
-				(user && interaction.user.id === user?.id)
-			)
-		) {
-			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		const deleteButton = new MessageButton()
-			.setLabel("Delete")
-			.setCustomId(generateHash("delete"))
-			.setStyle("DANGER");
-		const cancelButton = new MessageButton()
-			.setLabel("Cancel")
-			.setCustomId(generateHash("cancel"))
-			.setStyle("SECONDARY");
-
-		await interaction.reply({
-			components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
-			content: "Are you sure you want to do this?",
-			ephemeral: true,
-		});
-
-		interaction.channel
-			.createMessageComponentCollector({
-				filter: (buttonInteraction) =>
-					[deleteButton.customId, cancelButton.customId].includes(
-						buttonInteraction.customId,
-					) && buttonInteraction.user.id === interaction.user.id,
-
-				time: 30_000,
-			})
-			.on("collect", async (buttonInteraction) => {
-				switch (buttonInteraction.customId) {
-					case deleteButton.customId: {
-						if (
-							!interaction.channel?.isThread() ||
-							interaction.channel.parentId !== this.CHANNEL_ID
-						) {
-							await buttonInteraction.reply({
-								content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
-								ephemeral: true,
-							});
-
-							return;
-						}
-
-						await Promise.all([interaction.channel.delete(), starter.delete()]);
-
-						break;
-					}
-					case cancelButton.customId: {
-						deleteButton.setDisabled(true);
-						cancelButton.setDisabled(true);
-						await Promise.all([
-							buttonInteraction.deferUpdate(),
-							interaction.editReply({
-								components: [
-									new MessageActionRow().addComponents(
-										deleteButton,
-										cancelButton,
-									),
-								],
-
-								content: `${CONSTANTS.emojis.statuses.no} Deletion canceled.`,
-							}),
-						]);
-
-						break;
-					}
-				}
-			})
-			.on("end", async (collected) => {
-				if (collected.size > 0) return;
-
-				deleteButton.setDisabled(true);
-				cancelButton.setDisabled(true);
-				await interaction.editReply({
-					components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
-					content: `${CONSTANTS.emojis.statuses.no} Deletion timed out.`,
-				});
-			});
-	}
-
-	/**
 	 * Edit a suggestion.
 	 *
 	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
@@ -355,7 +217,7 @@ export default class SuggestionChannel {
 
 			return false;
 		}
-		const user = await getUserFromThread(interaction.channel, starterMessage);
+		const user = await getUserFromMessage(starterMessage);
 
 		if (interaction.user.id !== user?.id) {
 			await interaction.reply({
@@ -409,16 +271,19 @@ export default class SuggestionChannel {
  *
  * @param {Message} message - The message to get the member from.
  *
- * @returns {Promise<import("discord.js").GuildMember | undefined>} - The member who made the suggestion.
+ * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
+ *   made the suggestion.
  */
 export async function getUserFromMessage(message) {
 	const author =
-		(message.author.id === CONSTANTS.robotop
+		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]
-			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups
-					?.userId) || message.author.id;
+			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups?.userId;
 
-	if (author) return await message.guild?.members.fetch(author).catch(() => undefined);
+	if (author) {
+		const fetchedMember = await message.guild?.members.fetch(author).catch(() => undefined);
+		if (fetchedMember) return fetchedMember;
+	}
 
-	return message.thread ? await getUserFromThread(message.thread) : undefined;
+	return message.member || message.author;
 }

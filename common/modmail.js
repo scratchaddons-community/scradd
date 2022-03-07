@@ -83,7 +83,7 @@ export async function getThreadFromMember(guild, user) {
 	return (
 		await asyncFilter(
 			threads,
-			async (thread) => (await getMemberFromThread(thread))?.id === user.id,
+			async (thread) => (await getMemberFromThread(thread))?.id === user.id && thread,
 		).next()
 	).value;
 }

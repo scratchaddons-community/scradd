@@ -171,13 +171,6 @@ const info = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("delete")
-				.setDescription(
-					`(Devs, mods, and OP only) Delete a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
 				.setName("edit")
 				.setDescription(
 					`(OP Only) Edit a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
@@ -286,11 +279,6 @@ const info = {
 
 				break;
 			}
-			case "delete": {
-				await channel.deleteSuggestion(interaction);
-
-				break;
-			}
 			case "edit": {
 				const title = interaction.options.getString("title");
 
@@ -337,15 +325,6 @@ const info = {
 
 							if (typeof count !== "number") return;
 
-							const description =
-								message.embeds[0]?.title ||
-								message.embeds[0]?.description ||
-								message.content;
-
-							const author = await getUserFromMessage(message);
-
-							if (requestedUser && author?.id !== requestedUser?.id) return;
-
 							const answer =
 								message.thread?.name.split("|")[0]?.trim() || DEFAULT_ANSWER.name;
 
@@ -355,6 +334,14 @@ const info = {
 							)
 								return;
 
+							const description =
+								message.embeds[0]?.title ||
+								message.embeds[0]?.description ||
+								message.content;
+
+							const author = await getUserFromMessage(message);
+
+							if (requestedUser && author?.id !== requestedUser?.id) return;
 							return {
 								answer,
 								author,
