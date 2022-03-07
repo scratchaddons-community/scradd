@@ -6,6 +6,7 @@ import escapeMessage from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
 import asyncFilter from "../lib/asyncFilter.js";
 import extractMessageExtremities from "../lib/extractMessageExtremities.js";
+import CONSTANTS from "./CONSTANTS.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
