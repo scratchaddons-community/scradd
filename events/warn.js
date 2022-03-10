@@ -3,6 +3,10 @@
  *
  * @type {import("../types/event").default<"warn">}
  */
-const event = { event: console.warn };
+const event = {
+	event(...args) {
+		throw new Error(args.join(" "));
+	},
+};
 
 export default event;

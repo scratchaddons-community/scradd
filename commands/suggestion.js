@@ -5,11 +5,12 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
 	DEFAULT_ANSWER,
-	getUserFromMessage,
+	getUserFromSuggestion,
 	MAX_TITLE_LENGTH,
 	NO_SERVER_START,
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
+import asyncFilter from "../lib/asyncFilter.js";
 import escapeMessage, { escapeLinks } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
@@ -339,7 +340,7 @@ const info = {
 								message.embeds[0]?.description ||
 								message.content;
 
-							const author = await getUserFromMessage(message);
+						const author = await getUserFromSuggestion(message);
 
 							if (requestedUser && author?.id !== requestedUser?.id) return;
 							return {
@@ -389,7 +390,7 @@ const info = {
 				 * 	| import("discord.js").InteractionReplyOptions}
 				 *   - Embed with top suggestions.
 				 */
-				function embed() {
+				function generateMessage() {
 					const content = all
 						.filter(
 							(suggestion, index) =>
@@ -442,7 +443,7 @@ const info = {
 					};
 				}
 
-				await interaction.editReply(embed());
+				await interaction.editReply(generateMessage());
 
 				const collector = interaction.channel?.createMessageComponentCollector({
 					filter: (buttonInteraction) =>
@@ -462,7 +463,7 @@ const info = {
 						previousButton.setDisabled(offset === 0);
 						nextButton.setDisabled(offset + PAGE_OFFSET >= all.length - 1);
 						await Promise.all([
-							interaction.editReply(embed()),
+							interaction.editReply(generateMessage()),
 							buttonInteraction.deferUpdate(),
 						]);
 						collector.resetTimer();

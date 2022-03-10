@@ -8,8 +8,6 @@ import escapeMessage, { escapeForCodeblock } from "./lib/escape.js";
 import importScripts from "./lib/importScripts.js";
 
 dotenv.config();
-process.on("unhandledException", console.error);
-process.on("unhandledRejection", console.error);
 
 const client = new Client({
 	allowedMentions: { parse: [], roles: [] },

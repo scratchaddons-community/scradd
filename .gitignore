@@ -31,7 +31,7 @@ node_modules/
 
 # env environment variables file
 .env
-.env.test
+.env.*
 
 .vscode
 .openode

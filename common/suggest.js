@@ -217,7 +217,7 @@ export default class SuggestionChannel {
 
 			return false;
 		}
-		const user = await getUserFromMessage(starterMessage);
+		const user = await getUserFromSuggestion(starterMessage);
 
 		if (interaction.user.id !== user?.id) {
 			await interaction.reply({
@@ -274,7 +274,7 @@ export default class SuggestionChannel {
  * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
  *   made the suggestion.
  */
-export async function getUserFromMessage(message) {
+export async function getUserFromSuggestion(message) {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]
