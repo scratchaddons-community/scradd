@@ -84,6 +84,7 @@ const event = {
 							.setColor(COLORS.opened);
 
 						const starterMessage = await mailChannel.send({
+							allowedMentions: { parse: ["everyone"] },
 							content: NODE_ENV === "production" ? "@here" : undefined,
 
 							embeds: [openedEmbed],

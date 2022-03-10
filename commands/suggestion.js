@@ -10,7 +10,6 @@ import SuggestionChannel, {
 	NO_SERVER_START,
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
-import asyncFilter from "../lib/asyncFilter.js";
 import escapeMessage, { escapeLinks } from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import getAllMessages from "../lib/getAllMessages.js";
@@ -340,7 +339,7 @@ const info = {
 								message.embeds[0]?.description ||
 								message.content;
 
-						const author = await getUserFromSuggestion(message);
+							const author = await getUserFromSuggestion(message);
 
 							if (requestedUser && author?.id !== requestedUser?.id) return;
 							return {

@@ -1,9 +1,5 @@
 /** @file Code Shared between suggestions and bug reports. */
-import {
-	GuildMember,
-	Message,
-	MessageEmbed,
-} from "discord.js";
+import { GuildMember, Message, MessageEmbed } from "discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 

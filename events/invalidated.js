@@ -3,7 +3,7 @@
  *
  * @type {import("../types/event").default<"invalidated">}
  */
- const event = {
+const event = {
 	event() {
 		console.error("Session is invalid!");
 		process.exit();

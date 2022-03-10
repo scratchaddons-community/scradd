@@ -113,29 +113,30 @@ const info = {
 						  "% match" +
 						  CONSTANTS.footerSeperator +
 						  input
-						: "Random addon") + (compact
+						: "Random addon") +
+					(compact
 						? CONSTANTS.footerSeperator +
 						  "Compact mode: Pass compact:False for more information."
 						: ""),
 			});
 
-			const group = item.tags.includes("popup")
-				? "Extension Popup Features"
-				: item.tags.includes("easterEgg")
-				? "Easter Eggs"
-				: item.tags.includes("theme")
-				? "Themes"
-				: item.tags.includes("community")
-				? "Scratch Website Features"
-				: "Scratch Editor Features";
+		const group = item.tags.includes("popup")
+			? "Extension Popup Features"
+			: item.tags.includes("easterEgg")
+			? "Easter Eggs"
+			: item.tags.includes("theme")
+			? "Themes"
+			: item.tags.includes("community")
+			? "Scratch Website Features"
+			: "Scratch Editor Features";
 
-			if (group !== "Easter Eggs") {
-				embed.setURL(
-					`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
-						item.id,
-					)}`,
-				);
-			}
+		if (group !== "Easter Eggs") {
+			embed.setURL(
+				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
+					item.id,
+				)}`,
+			);
+		}
 
 		if (!compact) {
 			const addon = (manifestCache[item.id] ||= await fetch(
