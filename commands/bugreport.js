@@ -206,7 +206,7 @@ const info = {
 							)}! Please elaborate on your answer below.` +
 							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
-						ephemeral: true,
+						ephemeral: false,
 					});
 				}
 
