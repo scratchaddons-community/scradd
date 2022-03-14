@@ -39,7 +39,7 @@ export async function boardMessageToSource(boardMessage) {
 	return message;
 }
 
-/** @type {import("discord.js").Message[]|undefined} */
+/** @type {import("discord.js").Message[] | undefined} */
 let MESSAGES;
 
 /**
@@ -58,7 +58,7 @@ export async function sourceToBoardMessage(message) {
 		throw new ReferenceError("Could not find board channel.");
 	}
 
-	MESSAGES??=((await getAllMessages(board)));
+	MESSAGES ??= await getAllMessages(board);
 
 	return MESSAGES.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
@@ -110,7 +110,7 @@ export async function postMessageToBoard(message) {
 
 	if (!reaction) return;
 
-	const boardMessage= await board.send({
+	const boardMessage = await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
@@ -126,7 +126,8 @@ export async function postMessageToBoard(message) {
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
-	MESSAGES.push(boardMessage)
+	MESSAGES ??= await getAllMessages(board);
+	MESSAGES.push(boardMessage);
 	return boardMessage;
 }
 
@@ -137,17 +138,18 @@ export async function postMessageToBoard(message) {
  * @param {import("discord.js").Message} boardMessage - The message to update.
  */
 export async function updateReactionCount(count, boardMessage) {
+	MESSAGES ??= await getAllMessages(boardMessage.channel);
+	
 	if (count < Math.max(MIN_REACTIONS - 1, 1)) {
-		MESSAGES= MESSAGES.filter(({id}) => id !== boardMessage.id)
+		MESSAGES = MESSAGES.filter(({ id }) => id !== boardMessage.id);
 		await boardMessage.delete();
 	} else {
-		const newMessage= await boardMessage.edit({
-		allowedMentions: process.env.NODE_ENV === "production" ? undefined : {users: []},
-		content: boardMessage.content.replace(/\d+/, `${count}`),
-		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
-		files: boardMessage.attachments.map((attachment) => attachment),
+		const newMessage = await boardMessage.edit({
+			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+			content: boardMessage.content.replace(/\d+/, `${count}`),
+			embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+			files: boardMessage.attachments.map((attachment) => attachment),
 		});
-	MESSAGES=	MESSAGES.map((msg)=>msg.id===newMessage.id?newMessage:msg)
+		MESSAGES = MESSAGES.map((msg) => (msg.id === newMessage.id ? newMessage : msg));
 	}
-
 }

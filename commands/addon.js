@@ -54,7 +54,9 @@ const info = {
 		.addBooleanOption((input) =>
 			input
 				.setName("compact")
-				.setDescription("Whether to show misc information and the image. Defaults to true.")
+				.setDescription(
+					"Whether to show misc information and the image. Defaults to false in #bots and true everywhere else.",
+				)
 				.setRequired(false),
 		),
 
@@ -84,7 +86,9 @@ const info = {
 			? fuse.search(input)[0] || {}
 			: { item: addons[Math.floor(Math.random() * addons.length)] };
 
-		const compact = !!interaction.options.getBoolean("compact");
+		const compact =
+			interaction.options.getBoolean("compact") ??
+			interaction.channel?.id !== process.env.BOTS_CHANNEL;
 
 		if (!item) {
 			await interaction.reply({
