@@ -101,6 +101,7 @@ export async function sendClosedMessage(thread, reason) {
 	const embed = new MessageEmbed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
+		.setFooter({ text: "Any future messages will trigger a new ticket." })
 		.setColor("DARK_GREEN");
 
 	if (reason) embed.setDescription(reason);
