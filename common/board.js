@@ -39,6 +39,9 @@ export async function boardMessageToSource(boardMessage) {
 	return message;
 }
 
+/** @type {import("discord.js").Message[]|undefined} */
+let MESSAGES;
+
 /**
  * Supplied a message, get the message in #potatoboard that references it.
  *
@@ -55,9 +58,9 @@ export async function sourceToBoardMessage(message) {
 		throw new ReferenceError("Could not find board channel.");
 	}
 
-	const fetchedMessages = await getAllMessages(board);
+	MESSAGES??=((await getAllMessages(board)));
 
-	return fetchedMessages.find((boardMessage) => {
+	return MESSAGES.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 
 		if (component?.type !== "BUTTON") return false;
@@ -107,7 +110,7 @@ export async function postMessageToBoard(message) {
 
 	if (!reaction) return;
 
-	return await board.send({
+	const boardMessage= await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
@@ -123,6 +126,8 @@ export async function postMessageToBoard(message) {
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
+	MESSAGES.push(boardMessage)
+	return boardMessage;
 }
 
 /**
@@ -132,12 +137,17 @@ export async function postMessageToBoard(message) {
  * @param {import("discord.js").Message} boardMessage - The message to update.
  */
 export async function updateReactionCount(count, boardMessage) {
-	await (count < Math.max(MIN_REACTIONS - 1, 1)
-		? boardMessage.delete()
-		: boardMessage.edit({
-				allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-				content: boardMessage.content.replace(/\d+/, `${count}`),
-				embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
-				files: boardMessage.attachments.map((attachment) => attachment),
-		  }));
+	if (count < Math.max(MIN_REACTIONS - 1, 1)) {
+		MESSAGES= MESSAGES.filter(({id}) => id !== boardMessage.id)
+		await boardMessage.delete();
+	} else {
+		const newMessage= await boardMessage.edit({
+		allowedMentions: process.env.NODE_ENV === "production" ? undefined : {users: []},
+		content: boardMessage.content.replace(/\d+/, `${count}`),
+		embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+		files: boardMessage.attachments.map((attachment) => attachment),
+		});
+	MESSAGES=	MESSAGES.map((msg)=>msg.id===newMessage.id?newMessage:msg)
+	}
+
 }
