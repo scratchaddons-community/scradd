@@ -228,8 +228,8 @@ const info = {
 
 		collector
 			?.on("collect", async (buttonInteraction) => {
-				await interaction.editReply(await generateMessage(source));
 				buttonInteraction.deferUpdate();
+				await interaction.editReply(await generateMessage(source));
 
 				collector.resetTimer();
 			})

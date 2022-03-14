@@ -201,9 +201,7 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered bug report as ${escapeMessage(
-								answer,
-							)}! Please elaborate on your answer below.` +
+							} Successfully answered bug report as ${escapeMessage(answer)}!` +
 							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,

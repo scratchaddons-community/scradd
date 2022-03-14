@@ -156,7 +156,6 @@ const event = {
 					":" +
 					(messageToSend.content ? " " + messageToSend.content : "");
 
-				console.log(message);
 				promises.push(
 					channel
 						?.send(messageToSend)
@@ -239,7 +238,7 @@ const event = {
 		if (content.includes("scradd bad"))
 			promises.push(message.react(CONSTANTS.emojis.autoreact.angery));
 
-		if (content === "no") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
+		if (message.content === "NO") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
 
 		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
 			promises.push(message.react("👋"));

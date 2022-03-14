@@ -268,9 +268,7 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered suggestion as ${escapeMessage(
-								answer,
-							)}! Please elaborate on your answer below.` +
+							} Successfully answered suggestion as ${escapeMessage(answer)}!` +
 							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
@@ -377,7 +375,7 @@ const info = {
 
 				const nick =
 					requestedUser &&
-					(await interaction.guild?.members.fetch(requestedUser.id))?.nickname;
+					(await interaction.guild?.members.fetch(requestedUser.id))?.displayName;
 
 				// eslint-disable-next-line fp/no-let -- This must be changable.
 				let offset = 0;
@@ -398,9 +396,9 @@ const info = {
 						.map((suggestion, index) => {
 							if (!suggestion) return ""; // Impossible
 
-							return `${index + offset + 1}. **${suggestion.count}** [${
+							return `${index + offset + 1}. **${suggestion.count}** ${
 								suggestion.count > 0 ? EMOJIS[0] : EMOJIS[1]
-							} ${escapeLinks(suggestion.title)}](https://discord.com/channels/${
+							} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
 								GUILD_ID || "@me"
 							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
 								suggestion.author && !requestedUser

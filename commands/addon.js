@@ -112,12 +112,10 @@ const info = {
 						? Math.round((1 - score) * 100) +
 						  "% match" +
 						  CONSTANTS.footerSeperator +
+						  "Input: " +
 						  input
 						: "Random addon") +
-					(compact
-						? CONSTANTS.footerSeperator +
-						  "Compact mode: Pass compact:False for more information."
-						: ""),
+					(compact ? CONSTANTS.footerSeperator + "Compact mode" : ""),
 			});
 
 		const group = item.tags.includes("popup")
