@@ -1,5 +1,8 @@
 /** @file Run Bot. */
+import fileSystem from "fs/promises";
 import http from "http";
+import path from "path";
+import url from "url";
 
 import { Client, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
@@ -9,6 +12,12 @@ import importScripts from "./lib/importScripts.js";
 
 dotenv.config();
 
+const pkg = JSON.parse(
+	await fileSystem.readFile(
+		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./package.json"),
+		"utf8",
+	),
+);
 const client = new Client({
 	allowedMentions: { parse: [], roles: [] },
 
@@ -17,7 +26,7 @@ const client = new Client({
 			{
 				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
 				type: "WATCHING",
-				url: "https://scradd.openode.dev",
+				url: pkg.homepage,
 			},
 		],
 	},
@@ -63,9 +72,9 @@ for (const [event, execute] of events.entries()) {
 				const embed = new MessageEmbed()
 					.setTitle("Error!")
 					.setDescription(
-						`Uh-oh! I found an error! (event ${escapeMessage(
-							event,
-						)})\n\`\`\`json\n${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
+						`Uh-oh! I found an error! (event **${escapeMessage(event)}**)\n` +
+							`\`\`\`json\n` +
+							`${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
 					)
 					.setColor("LUMINOUS_VIVID_PINK");
 				const { ERROR_CHANNEL } = process.env;
@@ -92,7 +101,7 @@ await client.login(process.env.BOT_TOKEN);
 
 const server = http.createServer((_, response) => {
 	response.writeHead(302, {
-		location: "https://discord.gg/Cs25kzs889",
+		location: pkg.homepage,
 	});
 	response.end();
 });

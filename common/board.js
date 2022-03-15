@@ -139,7 +139,7 @@ export async function postMessageToBoard(message) {
  */
 export async function updateReactionCount(count, boardMessage) {
 	MESSAGES ??= await getAllMessages(boardMessage.channel);
-	
+
 	if (count < Math.max(MIN_REACTIONS - 1, 1)) {
 		MESSAGES = MESSAGES.filter(({ id }) => id !== boardMessage.id);
 		await boardMessage.delete();

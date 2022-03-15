@@ -56,7 +56,7 @@ const info = {
 					!interaction.guild
 				) {
 					await interaction.reply({
-						content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${MODMAIL_CHANNEL}>.`,
+						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${MODMAIL_CHANNEL}>.`,
 						ephemeral: true,
 					});
 
@@ -66,7 +66,7 @@ const info = {
 				const reason = interaction.options.getString("reason") || "";
 
 				await interaction.reply({
-					content: `${CONSTANTS.emojis.statuses.yes} Modmail ticket closed! ${reason}`,
+					content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket closed!** ${reason}`,
 				});
 
 				await closeModmail(interaction.channel, interaction.user, reason);
@@ -137,7 +137,7 @@ const info = {
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes
-									} Modmail ticket opened! Send them a message in ${thread.toString()}.`,
+									} **Modmail ticket opened!** Send ${user.toString()} a message in ${thread.toString()}.`,
 									ephemeral: true,
 								});
 							} else {

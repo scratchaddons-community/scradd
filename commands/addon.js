@@ -73,7 +73,7 @@ const info = {
 			return joinWithAnd(
 				credits?.map(({ name, link, note = "" }) =>
 					link
-						? `[${escapeLinks(name)}](${link} "${note}")`
+						? `[**${escapeLinks(name)}**](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
@@ -94,7 +94,7 @@ const info = {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} Could not find that addon${
 					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
-				}!`,
+				}.`,
 
 				ephemeral: true,
 			});
@@ -106,9 +106,10 @@ const info = {
 			.setTitle(item.name)
 			.setColor(CONSTANTS.colors.theme)
 			.setDescription(
-				`${escapeMessage(item.description)}\n[See source code](${
-					CONSTANTS.repos.sa
-				}/tree/master/addons/${encodeURIComponent(item.id)})`,
+				`${escapeMessage(item.description)}\n` +
+					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(
+						item.id,
+					)}/)`,
 			)
 			.setFooter({
 				text:
@@ -120,7 +121,10 @@ const info = {
 						  input
 						: "Random addon") +
 					(compact ? CONSTANTS.footerSeperator + "Compact mode" : ""),
-			});
+			})
+			[compact ? "setThumbnail" : "setImage"](
+				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`,
+			);
 
 		const group = item.tags.includes("popup")
 			? "Extension Popup Features"
@@ -149,9 +153,9 @@ const info = {
 				);
 			}));
 
-			const lastUpdatedIn = `last updated in ${
+			const lastUpdatedIn = `last updated in **${
 				addon.latestUpdate?.version || "<unknown version>"
-			}`;
+			}**`;
 			const latestUpdateInfo = addon.latestUpdate
 				? ` (${
 						addon.latestUpdate.temporaryNotice
@@ -171,27 +175,23 @@ const info = {
 			if (addon.permissions?.length)
 				embed.setDescription(
 					embed.description +
-						"\n\n**This addon may require additional permissions to be granted in order to function.**",
+						"\n" +
+						"\n" +
+						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
-			embed
-				.setImage(
-					`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(
-						item.id,
-					)}.png`,
-				)
-				.addFields([
-					{
-						inline: true,
-						name: "Group",
-						value: escapeMessage(group),
-					},
-					{
-						inline: true,
-						name: "Version added",
-						value: escapeMessage(addon.versionAdded + latestUpdateInfo),
-					},
-				]);
+			embed.addFields([
+				{
+					inline: true,
+					name: "Group",
+					value: escapeMessage(group),
+				},
+				{
+					inline: true,
+					name: "Version added",
+					value: escapeMessage(addon.versionAdded + latestUpdateInfo),
+				},
+			]);
 		}
 
 		await interaction.reply({ embeds: [embed] });

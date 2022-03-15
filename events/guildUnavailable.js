@@ -5,7 +5,7 @@
  */
 const event = {
 	event(guild) {
-		throw new Error(`Guild ${guild.name} (${guild.id}) unavailable`);
+		throw new ReferenceError(`Guild ${guild.name} (${guild.id}) unavailable`);
 	},
 };
 

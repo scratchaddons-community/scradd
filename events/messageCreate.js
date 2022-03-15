@@ -99,7 +99,7 @@ const event = {
 						await Promise.all([
 							buttonInteraction.reply({
 								content:
-									`${CONSTANTS.emojis.statuses.yes} Modmail ticket opened! You may send the mod team messages by sending me DMs. I will DM you their messages. ` +
+									`${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ` +
 									UNSUPPORTED,
 
 								ephemeral: true,
@@ -258,9 +258,10 @@ const event = {
 				message.reply({
 					allowedMentions: { roles: [], users: [] },
 
-					content: `You used the spoiler hack to hide: \`\`\`\n${escapeForCodeblock(
-						array.join(spoilerHack),
-					)}\n\`\`\``,
+					content:
+						`You used the spoiler hack to hide: \`\`\`\n` +
+						`${escapeForCodeblock(array.join(spoilerHack))}\n` +
+						`\`\`\``,
 				}),
 			);
 		}
@@ -280,10 +281,10 @@ const event = {
 
 			promises.push(
 				message.reply({
-					content: `Please don’t ping people when using \`r!mimic\` - use their tag instead. Example: \`r!mimic ${escapeMessage(
-						member?.user.tag || "",
+					content: `Please don’t ping people when using \`r!mimic\` - use their username instead. Example: \`r!mimic ${escapeMessage(
+						member?.user.username || "",
 					)}\` instead of \`r!mimic @${escapeMessage(
-						member?.nickname || member?.user.username || "",
+						member?.displayName || "",
 					)}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
 				}),
 			);

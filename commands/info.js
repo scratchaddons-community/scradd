@@ -7,7 +7,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
-import { MODMAIL_CHANNEL } from "../common/modmail.js";
+import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
 import escapeMessage from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import joinWithAnd from "../lib/joinWithAnd.js";
@@ -45,6 +45,10 @@ const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scrad
 /**
  * @type {{
  * 	description(client: Client): string | Promise<string>;
+ * 	edit?: (
+ * 		interaction: import("discord.js").CommandInteraction,
+ * 		Reply: Message,
+ * 	) => string | Promise<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
@@ -52,59 +56,77 @@ const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scrad
 const OPTIONS = [
 	{
 		description: () =>
-			`Hello! I am Scradd v${pkg.version}, a Discord bot for the Scratch Addons community! Pick an option in the dropdown below to learn more about my features.`,
+			`Hello! I am **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
 
 		emoji: "👋",
 		name: "Hello!",
 	},
 	{
 		description: () =>
-			`Users can use the [\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command to post a suggestion to <#${escapeMessage(
+			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to <#${escapeMessage(
 				process.env.SUGGESTION_CHANNEL || "",
-			)}>. I will react to the suggestion with ${joinWithAnd(
+			)}>. I will **react to the suggestion** with ${joinWithAnd(
 				EMOJIS,
-			)} for people to vote on it, as well as open a thread for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to answer a suggestion. The OP may run the \`/suggestion edit\` command to edit the suggestion if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to get the top suggestions. By default it returns all suggestions, but you can filter by the suggestion’s OP and/or the suggestion’s answer. This can be used to find things such as your most liked suggestions, suggestions you could go answer if you are a dev, suggestions you could implement if you are a dev, and so on.\n\nSimilar [\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands also exist but with a few key differences: the words used in the commands are slightly different, no reactions are added to reports, the possible answers are different, and there is no \`/bugreport get-top\`.`,
+			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
+			`\n` +
+			`Similar **[\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bugreport get-top\`**.`,
 
 		emoji: EMOJIS[0],
 		name: "Suggestions",
 	},
 	{
 		description: () =>
-			`After a message gets **${escapeMessage(`${MIN_REACTIONS}`)}** ${escapeMessage(
+			`After a message gets **${escapeMessage(`${MIN_REACTIONS}`)} ${escapeMessage(
 				BOARD_EMOJI,
-			)} reactions, I will post it to <#${escapeMessage(
+			)} reactions**, I will post it to <#${escapeMessage(
 				BOARD_CHANNEL,
-			)}>. This is useful for cases such as the following:\n- when you want to [highlight a good piece of work made by someone in the server](https://discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n- when you want to [give somone credit for making or saying something funny](https://discord.com/channels/806602307750985799/938809898660155453/944108757686841344)\n- when someone says [something that without context makes no sense](https://discord.com/channels/806602307750985799/938809898660155453/941848293170876486)\n- and etcetera.\n\nYou cannot react to your own messages with ${escapeMessage(
+			)}>. This is useful for cases such as the following:\n` +
+			`- when you want to [**highlight a good piece of work made by someone in the server**](https://discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n` +
+			`- when you want to [**give somone credit for making or saying something funny**](https://discord.com/channels/806602307750985799/938809898660155453/949148897396260904)\n` +
+			`- when someone says [**something that without context makes no sense**](https://discord.com/channels/806602307750985799/938809898660155453/941848293170876486)\n` +
+			`- and etcetera.\n` +
+			`\n` +
+			`You **cannot react to your own messages** with ${escapeMessage(
 				BOARD_EMOJI,
-			)} to prevent abusing the potatoboard. Also, if I autoreact to a message with ${escapeMessage(
+			)} to **prevent abusing** the potatoboard. Also, **if I autoreact** to a message with ${escapeMessage(
 				BOARD_EMOJI,
-			)}, it does not count towards the ${escapeMessage(
+			)}, **it does not count** towards the ${escapeMessage(
 				`${MIN_REACTIONS}`,
-			)} needed to be posted.\n\nYou can use the [\`/explorepotatoes\`](<${BLOB_ROOT}/commands/explorepotatoes.js>) command to find a random message from the potatoboard. You can filter by the user or by minimum number of ${escapeMessage(
+			)} needed to be posted.\n` +
+			`\n` +
+			`You can use the **[\`/explorepotatoes\`](<${BLOB_ROOT}/commands/explorepotatoes.js>) command** to find **a random message from the potatoboard**. You can filter by the **user**, **channel**, and/or minimum number of ${escapeMessage(
 				BOARD_EMOJI,
-			)} reactions.\n\nMost of the code handling potatoboard starts from [messageReactionAdd.js](<${BLOB_ROOT}/events/messageReactionAdd.js>).`,
+			)} **reactions**.\n` +
+			`\n` +
+			`Most of the code handling Potatoboard starts from **[messageReactionAdd.js](<${BLOB_ROOT}/events/messageReactionAdd.js>)**.`,
 
 		emoji: BOARD_EMOJI,
 		name: "Potatoboard",
 	},
 	{
 		description: () =>
-			`Users may DM me to send private messages to all the ${moderator}s at once. I will send all their messages to a thread in <#${escapeMessage(
+			`Users may **DM me to send private messages to all the ${moderator}s** at once. I will send all their messages to **a thread in <#${escapeMessage(
 				MODMAIL_CHANNEL,
-			)}> (through a webhook so the user’s original avatar and nickname is used) and react to it with ${
+			)}>** (through a webhook so the user’s original avatar and nickname is used) and **react to it with ${
 				CONSTANTS.emojis.statuses.yes
-			}. If sending any message fails, I will react with ${
+			}**. If sending any message fails, I will **react with ${
 				CONSTANTS.emojis.statuses.no
-			}. I will DM the user any messages the ${moderator}s send in the thread, using the same reactions. Reactions, replies, edits, and deletions are not supported.\nThe source code for these is in [\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>).\nWhen the ticket is resolved, a ${moderator} can use the \`/modmail close\` command to lock the thread, edit the thread starting message to indicate its closed status, and DM the user. The ${moderator} can specify a reason that will be posted in the thread as well as sent to the user. \n\nIf the ${moderator}s want to contact a user for any reason, they can use the [\`/modmail start\`](<${BLOB_ROOT}/commands/modmail.js>) command to start a modmail with a user themselves. It will open a new thread in <#${escapeMessage(
+			}**. I will **DM the user any messages the ${moderator}s send in the thread**, using the same reactions. ${UNSUPPORTED}\n` +
+			`The source **code for these is in [\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.\n` +
+			`When the ticket is resolved, **a ${moderator} can use the \`/modmail close\` command** to **lock the thread**, **edit the thread starting message** to indicate its closed status, and **DM the user**. The ${moderator} **must specify a reason** for doing so that will be **posted in the thread** as well as **sent to the user**. \n` +
+			`\n` +
+			`If the ${moderator}s want to contact a user for any reason, they can **use the [\`/modmail start\`](<${BLOB_ROOT}/commands/modmail.js>) command to start a modmail** with a user themselves. It will **open a new thread** in <#${escapeMessage(
 				MODMAIL_CHANNEL,
-			)}> and DM the user that a Modmail has been started. The ${moderator}s can then ask the user what they need to ask, for instance, requesting them to change an innappropriate status.`,
+			)}> and **DM the user** that a Modmail has been started. The ${moderator}s **can then ask the user what they need to ask**, for instance, requesting them to **change an innappropriate status**.`,
 
 		emoji: "🛡",
 		name: "Modmail",
 	},
 	{
 		description: () =>
-			`- [\`/addon\`](<${BLOB_ROOT}/commands/addon.js>): Search for an addon by name, description, or internal ID and return various information about it. Don\’t specify a filter to get a random addon. You can click on the addon\’s name to get a link straight to the settings page to enable it.\n- [\`/info\`](<${BLOB_ROOT}/commands/info.js>) (this command): A help command to learn more about the bot and its functions.\n- [\`/say\`](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that makes me mimic what you tell me to say. Note that the person who used the command will not be named publically, but ${moderator}s are able to find out still by looking in <#${escapeMessage(
+			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
+			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging.\n` +
+			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
 				process.env.ERROR_CHANNEL || "",
 			)}>.`,
 
@@ -113,22 +135,28 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			"I automatically react to some messages as easter eggs. How many reactions can you find? There are currently **17**! (Yes, you can just read the source code to find them, but please don’t spoil them - it’s fun for people to find them themselves.)\nThere are also **3** automatic responses when using now-removed <@" +
+			"I **automatically react to some messages** as easter eggs. **How many reactions can you find?** There are currently **17**! (Yes, you may just read the source code to find them, but **please don’t spoil them** - it’s more fun for people to find them themselves.)\n" +
+			"There are also **3** automatic responses when using now-removed <@" +
 			CONSTANTS.robotop +
-			`> commands and the like. Unlike autoreactions, these are kept secret. They are: prompt users to use \`/suggestion create\` instead of \`r!suggest\`, tell people not to ping others when using \`r!mimic\`, and call people out when they abuse the spoiler hack. The source code for these is in [\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>).`,
+			`> commands and the like. Unlike autoreactions, **these are not kept secret**. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\`, **tell people not to ping others** when using \`r!mimic\`, and **call members out** when they abuse the spoiler hack. The source code for these is in **[\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.`,
 
 		emoji: "✅",
 		name: "Autoreactions and responses",
 	},
 	{
 		description: async (client) =>
-			`Code written by (in no particular order): ${await getRole(
+			`**Code** written by (in no particular order): ${await getRole(
 				CONSTANTS.roles.developers,
 				client,
-			)}.\nLogo by <@691223009515667457> and <@765910070222913556>.\nNamed by <@752972078579449888>.\nBeta testers (also in no particular order): ${await getRole(
+			)}.\n` +
+			`**Logo** by <@691223009515667457> and <@765910070222913556>.\n` +
+			`**Named** by <@752972078579449888>.\n` +
+			`Beta **testers** (also in no particular order): ${await getRole(
 				CONSTANTS.roles.testers,
 				client,
-			)}.\nCloud-hosted on [opeNode.io](https://www.openode.io/open-source/scradd).\nThird-party code libraries used: ${joinWithAnd(
+			)}.\n` +
+			`Cloud-**hosted** on [opeNode.io](https://www.openode.io/open-source/scradd).\n` +
+			`Third-party code **libraries** used: ${joinWithAnd(
 				Object.keys(pkg.dependencies),
 				(dependency) => `\`${escapeMessage(dependency)}\``,
 			)}`,
@@ -138,10 +166,46 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			`I am open-source! The source code is available [on Github](${CONSTANTS.repos.scradd.root}).`,
+			`I am **open-source**! The source code is available [**on Github**](${CONSTANTS.repos.scradd.root}).`,
 
-		emoji: "👨‍💻",
+		emoji: "💻",
 		name: "Source Code",
+	},
+	{
+		description: () => "Pinging...",
+		edit: (interaction, reply) =>
+			`__**Bot info:**__\n` +
+			`**Ping**: ${+reply.createdAt - +interaction.createdAt}ms\n` +
+			`Last **restarted**  <t:${Math.round(+(interaction.client.readyAt || 0) / 1000)}:R>\n` +
+			`Bot **created** <t:${Math.round(
+				+(interaction.client.application?.createdAt || 0) / 1000,
+			)}:R>\n` +
+			`Current **version**: v${pkg.version}\n` +
+			`\n__**Configuration:**__\n` +
+			`**Mode**: ${process.env.NODE_ENV === "production" ? "Production" : "Testing"}\n` +
+			`**Bots** channel: ${
+				process.env.BOTS_CHANNEL ? `<#${process.env.BOTS_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Suggestions** channel: ${
+				process.env.SUGGESTION_CHANNEL ? `<#${process.env.SUGGESTION_CHANNEL}>\n` : "*None*"
+			}` +
+			`**Bugs** channel: ${
+				process.env.BUGS_CHANNEL ? `<#${process.env.BUGS_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Logs** channel: ${
+				process.env.ERROR_CHANNEL ? `<#${process.env.ERROR_CHANNEL}>\n` : "*None*"
+			}` +
+			`**Board** channel: ${
+				process.env.BOARD_CHANNEL ? `<#${process.env.BOARD_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Mods** role: ${
+				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>\n` : "*None*"
+			}` +
+			`**Devs** role: ${
+				process.env.DEVELOPER_ROLE ? `<@&${process.env.DEVELOPER_ROLE}>` : "*None*"
+			}`,
+		emoji: "🐛",
+		name: "Debug info",
 	},
 ];
 
@@ -164,10 +228,8 @@ const info = {
 	async interaction(interaction) {
 		const hash = generateHash("info");
 		const defaultKey = interaction.options.getString("tab") || "Hello!";
-		const defaultContent =
-			(await OPTIONS.find(({ name }) => name === defaultKey)?.description(
-				interaction.client,
-			)) || "";
+		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
+		const defaultContent = (await currentOption?.description(interaction.client)) || "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
 
@@ -195,6 +257,14 @@ const info = {
 			ephemeral: true,
 			fetchReply: true,
 		});
+		if (!(message instanceof Message)) throw new TypeError("Result not a Message");
+		if (currentOption?.edit)
+			await interaction.editReply({
+				allowedMentions: { users: [] },
+				components: message.components,
+
+				content: await currentOption?.edit(interaction, message),
+			});
 
 		/**
 		 * Disable the select menu.
@@ -257,15 +327,16 @@ const info = {
 						...option,
 						default: option.value === chosen,
 					}));
+					const option = OPTIONS.find((option) => option.name === chosen);
 					promises.push(
 						interaction.editReply({
 							allowedMentions: { users: [] },
 							components: [new MessageActionRow().addComponents(select)],
 
 							content:
-								(await OPTIONS.find(
-									(option) => option.name === chosen,
-								)?.description(interaction.client)) || defaultContent,
+								(await (option?.edit
+									? option?.edit(interaction, message)
+									: option?.description(interaction.client))) || defaultContent,
 						}),
 					);
 					await Promise.all(promises);

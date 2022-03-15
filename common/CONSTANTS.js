@@ -24,6 +24,7 @@ export default {
 			],
 		},
 		discord: {
+			reply: "<:reply:953046345214750720>",
 			error: "<:error:949439327413358602>",
 			add: "<:add:938441019278635038>",
 			remove: "<:remove:947707131879104554>",

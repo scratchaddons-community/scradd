@@ -160,9 +160,9 @@ export async function sendOpenedMessage(user) {
 			new MessageEmbed()
 				.setTitle("Modmail ticket opened!")
 				.setDescription(
-					`The moderation team of ${escapeMessage(
+					`The moderation team of **${escapeMessage(
 						user.guild.name,
-					)} would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
+					)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 				)
 				.setFooter({
 					text: UNSUPPORTED,

@@ -194,7 +194,7 @@ export default class SuggestionChannel {
 	async editSuggestion(interaction, updated) {
 		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
 

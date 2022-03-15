@@ -52,7 +52,7 @@ const ANSWERS = [
 	},
 	{
 		color: "RED",
-		description: "This is not something we can add for technical reasons",
+		description: "This is not something we may add for technical reasons",
 		name: "Impossible",
 	},
 	{
@@ -396,7 +396,7 @@ const info = {
 						.map((suggestion, index) => {
 							if (!suggestion) return ""; // Impossible
 
-							return `${index + offset + 1}. **${suggestion.count}** ${
+							return `${index + offset + 1}) **${suggestion.count}** ${
 								suggestion.count > 0 ? EMOJIS[0] : EMOJIS[1]
 							} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
 								GUILD_ID || "@me"

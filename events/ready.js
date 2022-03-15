@@ -46,7 +46,7 @@ const event = {
 					embeds: [
 						new MessageEmbed()
 							.setTitle("Bot restarted!")
-							.setDescription(`Version ${pkg.version}`)
+							.setDescription(`Version **v${pkg.version}**`)
 							.setColor("RANDOM"),
 					],
 				});
