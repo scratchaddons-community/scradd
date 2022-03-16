@@ -52,7 +52,7 @@ const info = {
 			case "close": {
 				if (
 					interaction.channel?.type !== "GUILD_PUBLIC_THREAD" ||
-					interaction.channel.parentId !== MODMAIL_CHANNEL ||
+					interaction.channel.parent?.id !== MODMAIL_CHANNEL ||
 					!interaction.guild
 				) {
 					await interaction.reply({

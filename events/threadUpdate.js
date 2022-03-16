@@ -14,7 +14,7 @@ const event = {
 	async event(oldThread, newThread) {
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 		if (
-			newThread.parentId !== MODMAIL_CHANNEL ||
+			newThread.parent?.id !== MODMAIL_CHANNEL ||
 			oldThread.archived === newThread.archived ||
 			(newThread.archived &&
 				latestMessage?.interaction?.commandName === "modmail" &&
@@ -26,7 +26,7 @@ const event = {
 		const member = await getMemberFromThread(newThread);
 		if (!member) return;
 
-		return await Promise.all([
+		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
 				starter.edit({
 					embeds: [

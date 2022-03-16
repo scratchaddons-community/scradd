@@ -1,19 +1,9 @@
 /** @file Initialize Bot on ready. Register commands and etc. */
 
-import fileSystem from "fs/promises";
-import path from "path";
-import url from "url";
-
 import { Collection, MessageEmbed } from "discord.js";
 
 import commands from "../lib/commands.js";
-
-const pkg = JSON.parse(
-	await fileSystem.readFile(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../package.json"),
-		"utf8",
-	),
-);
+import pkg from "../lib/package.js";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {

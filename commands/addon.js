@@ -73,7 +73,7 @@ const info = {
 			return joinWithAnd(
 				credits?.map(({ name, link, note = "" }) =>
 					link
-						? `[**${escapeLinks(name)}**](${link} "${note}")`
+						? `[${escapeLinks(name)}](${link} "${note}")`
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
@@ -153,9 +153,9 @@ const info = {
 				);
 			}));
 
-			const lastUpdatedIn = `last updated in **${
+			const lastUpdatedIn = `last updated in ${
 				addon.latestUpdate?.version || "<unknown version>"
-			}**`;
+			}`;
 			const latestUpdateInfo = addon.latestUpdate
 				? ` (${
 						addon.latestUpdate.temporaryNotice

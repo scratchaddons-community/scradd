@@ -49,7 +49,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 
 			if (channelFound.id === channelWanted.id) break;
 
-			return channelFound.isThread() && channelFound.parentId === channelWanted.id;
+			return channelFound.isThread() && channelFound.parent?.id === channelWanted.id;
 		}
 		case "GUILD_CATEGORY": {
 			// category

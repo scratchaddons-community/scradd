@@ -37,7 +37,7 @@ const info = {
 					channel.send({
 						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(
 							content,
-						)}\` (https://discord.com/channels/${process.env.GUILD_ID || ""}/${
+						)}\` (https://discord.com/channels/${process.env.GUILD_ID || "@me"}/${
 							message.channel.id
 						}/${message.id})`,
 

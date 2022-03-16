@@ -123,7 +123,10 @@ export default class SuggestionChannel {
 	 *   a success message yourself.
 	 */
 	async answerSuggestion(interaction, answer, answers) {
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
+		if (
+			!interaction.channel?.isThread() ||
+			interaction.channel.parent?.id !== this.CHANNEL_ID
+		) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
@@ -192,7 +195,10 @@ export default class SuggestionChannel {
 	 *   a success message yourself.
 	 */
 	async editSuggestion(interaction, updated) {
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
+		if (
+			!interaction.channel?.isThread() ||
+			interaction.channel.parent?.id !== this.CHANNEL_ID
+		) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,

@@ -1,8 +1,4 @@
 /** @file Show Information about the bot. */
-import fileSystem from "fs/promises";
-import path from "path";
-import url from "url";
-
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js";
 
@@ -13,13 +9,7 @@ import generateHash from "../lib/generateHash.js";
 import joinWithAnd from "../lib/joinWithAnd.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { EMOJIS } from "./suggestion.js";
-
-const pkg = JSON.parse(
-	await fileSystem.readFile(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../package.json"),
-		"utf8",
-	),
-);
+import pkg from "../lib/package.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE || "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE || "")}>`;
@@ -125,7 +115,7 @@ const OPTIONS = [
 	{
 		description: () =>
 			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
-			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging.\n` +
+			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
 			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
 				process.env.ERROR_CHANNEL || "",
 			)}>.`,
@@ -192,12 +182,15 @@ const OPTIONS = [
 			`**Bugs** channel: ${
 				process.env.BUGS_CHANNEL ? `<#${process.env.BUGS_CHANNEL}>` : "*None*"
 			}\n` +
-			`**Logs** channel: ${
-				process.env.ERROR_CHANNEL ? `<#${process.env.ERROR_CHANNEL}>\n` : "*None*"
-			}` +
 			`**Board** channel: ${
 				process.env.BOARD_CHANNEL ? `<#${process.env.BOARD_CHANNEL}>` : "*None*"
 			}\n` +
+			`**Modmaill** channel: ${
+				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Logs** channel: ${
+				process.env.ERROR_CHANNEL ? `<#${process.env.ERROR_CHANNEL}>\n` : "*None*"
+			}` +
 			`**Mods** role: ${
 				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>\n` : "*None*"
 			}` +
@@ -211,19 +204,29 @@ const OPTIONS = [
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Learn about me!").addStringOption((input) =>
-		input
-			.setName("tab")
-			.setDescription(
-				"Which tab to open by default. You may still swap between tabs after it has loaded.",
-			)
-			.addChoices(
-				OPTIONS.map(({ emoji, name }) => {
-					return [emoji + " " + name, name];
-				}),
-			)
-			.setRequired(false),
-	),
+	data: new SlashCommandBuilder()
+		.setDescription("Learn about me!")
+		.addStringOption((input) =>
+			input
+				.setName("tab")
+				.setDescription(
+					"Which tab to open by default. You may still swap between tabs after it has loaded.",
+				)
+				.addChoices(
+					OPTIONS.map(({ emoji, name }) => {
+						return [emoji + " " + name, name];
+					}),
+				)
+				.setRequired(false),
+		)
+		.addBooleanOption((input) =>
+			input
+				.setName("ephemeral")
+				.setRequired(false)
+				.setDescription(
+					"Whether to hide the message for people other than you. Defaults to True.",
+				),
+		),
 
 	async interaction(interaction) {
 		const hash = generateHash("info");
@@ -254,7 +257,7 @@ const info = {
 			],
 
 			content: defaultContent,
-			ephemeral: true,
+			ephemeral: interaction.options.getBoolean("ephemeral") ?? true,
 			fetchReply: true,
 		});
 		if (!(message instanceof Message)) throw new TypeError("Result not a Message");

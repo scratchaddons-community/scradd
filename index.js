@@ -1,5 +1,4 @@
 /** @file Run Bot. */
-import fileSystem from "fs/promises";
 import http from "http";
 import path from "path";
 import url from "url";
@@ -9,15 +8,12 @@ import dotenv from "dotenv";
 
 import escapeMessage, { escapeForCodeblock } from "./lib/escape.js";
 import importScripts from "./lib/importScripts.js";
+import pkg from "./lib/package.js";
 
 dotenv.config();
 
-const pkg = JSON.parse(
-	await fileSystem.readFile(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./package.json"),
-		"utf8",
-	),
-);
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
 const client = new Client({
 	allowedMentions: { parse: [], roles: [] },
 
@@ -57,7 +53,9 @@ const client = new Client({
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
 
-const events = await importScripts("events");
+const events = await importScripts(
+	/** @type {`${string}events`} */ (path.resolve(dirname, "./events")),
+);
 
 for (const [event, execute] of events.entries()) {
 	if (execute.apply === false) continue;
@@ -99,11 +97,13 @@ for (const [event, execute] of events.entries()) {
 
 await client.login(process.env.BOT_TOKEN);
 
-const server = http.createServer((_, response) => {
-	response.writeHead(302, {
-		location: pkg.homepage,
+if (process.env.NODE_ENV === "production") {
+	const server = http.createServer((_, response) => {
+		response.writeHead(302, {
+			location: pkg.homepage,
+		});
+		response.end();
 	});
-	response.end();
-});
 
-server.listen(process.env.PORT || 80);
+	server.listen(process.env.PORT || 80);
+}

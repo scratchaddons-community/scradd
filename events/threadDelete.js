@@ -4,9 +4,9 @@ import { MODMAIL_CHANNEL, sendClosedMessage } from "../common/modmail.js";
 /** @type {import("../types/event").default<"threadDelete">} */
 const event = {
 	async event(thread) {
-		if (thread.parentId !== MODMAIL_CHANNEL || thread.archived || thread.locked) return;
+		if (thread.parent?.id !== MODMAIL_CHANNEL || thread.archived || thread.locked) return;
 
-		return await sendClosedMessage(thread);
+		await sendClosedMessage(thread);
 	},
 };
 

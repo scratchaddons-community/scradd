@@ -22,7 +22,7 @@ export async function boardMessageToSource(boardMessage) {
 	if (component?.type !== "BUTTON") return;
 
 	const { guildId, channelId, messageId } =
-		/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu.exec(
+		/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+|@me)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu.exec(
 			component.url || "",
 		)?.groups || {};
 
@@ -104,7 +104,9 @@ export async function postMessageToBoard(message) {
 		.setLabel("View Context")
 		.setStyle("LINK")
 		.setURL(
-			`https://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
+			`https://discord.com/channels/${message.guild?.id || "@me"}/${message.channel.id}/${
+				message.id
+			}`,
 		);
 	const reaction = message.reactions.resolve(BOARD_EMOJI);
 
