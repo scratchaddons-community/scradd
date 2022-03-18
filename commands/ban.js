@@ -4,6 +4,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 
 /** @type {import("../types/command").default} */
 const info = {
+ apply: process.env.NODE_ENV!== "production",
 	data: new SlashCommandBuilder()
 		.setDescription("(Mods only) Ban a user.")
 		.addUserOption((option) =>
