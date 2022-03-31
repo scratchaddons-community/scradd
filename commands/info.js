@@ -61,7 +61,7 @@ const OPTIONS = [
 			`\n` +
 			`Similar **[\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bugreport get-top\`**.`,
 
-		emoji: EMOJIS[0],
+		emoji: "👍",
 		name: "Suggestions",
 	},
 	{
