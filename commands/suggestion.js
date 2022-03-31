@@ -24,6 +24,7 @@ const PAGE_OFFSET = 15;
 
 /** @type {[string, string][]} */
 export const OLD_EMOJIS = [
+	["959117513088720926", "🍅"],
 	["👍", "👎"],
 	["575851403558256642", "575851403600330792"],
 	["✅", "613912745699442698"],
@@ -36,7 +37,7 @@ export const OLD_EMOJIS = [
 ];
 
 /** @type {[string, string]} */
-export const EMOJIS = ["👍", "👎"];
+export const EMOJIS = ["<:potato_:959117513088720926>", "🍅"];
 
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
