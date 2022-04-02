@@ -37,7 +37,7 @@ export const OLD_EMOJIS = [
 ];
 
 /** @type {[string, string]} */
-export const EMOJIS = ["<:potato_:959117513088720926>", "🍅"];
+export const EMOJIS = ["👍", "👎"];
 
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
