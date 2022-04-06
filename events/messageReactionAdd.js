@@ -22,9 +22,14 @@ const event = {
 		if (user.partial) user = await user.fetch();
 
 		if (
-			reaction.message.channel.id === process.env.SUGGESTION_CHANNEL &&
-			user.id !== user.client.user?.id
-		) {
+			// Ignore other servers
+			message.guild?.id !== process.env.GUILD_ID ||
+			// Ignore when it’s me
+			user.id === message.client.user?.id
+		)
+			return;
+
+		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 				emojis.includes(reaction.emoji.id ?? reaction.emoji.name ?? ""),
 			)?.find((emoji) => emoji !== (reaction.emoji.id ?? reaction.emoji.name ?? ""));
@@ -34,18 +39,14 @@ const event = {
 		}
 
 		if (
-			// Ignore other servers
-			message.guild?.id !== process.env.GUILD_ID ||
 			// Ignore when it’s the wrong emoji
-			reaction.emoji.name !== BOARD_EMOJI ||
-			// Ignore when it’s me
-			user.id === message.client.user?.id
+			reaction.emoji.name !== BOARD_EMOJI
 		)
 			return;
 
 		if (
 			// if a bot reacted
-			(user.bot && user.id !== message.client.user?.id) ||
+			user.bot ||
 			// Or if they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			// Or if they reacted to a message on the board
