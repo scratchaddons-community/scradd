@@ -88,7 +88,7 @@ export default class SuggestionChannel {
 			.setColor(DEFAULT_ANSWER.color)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
-				name: author?.displayName || interaction.user.username,
+				name: author?.displayName ?? interaction.user.username,
 			})
 			.setTitle(data.title)
 			.setDescription(data.description)
@@ -103,7 +103,7 @@ export default class SuggestionChannel {
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: 1_440,
-			name: `${DEFAULT_ANSWER.name} | ${embed.title || ""}`,
+			name: `${DEFAULT_ANSWER.name} | ${embed.title ?? ""}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
 
@@ -136,11 +136,10 @@ export default class SuggestionChannel {
 		}
 
 		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
-		const roles = (
-			await interaction.guild?.members.fetch(interaction.user?.id)
-		)?.roles.valueOf();
+		if (!(interaction.member instanceof GuildMember))
+			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!roles?.has(process.env.DEVELOPER_ROLE || "")) {
+		if (!interaction.member?.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -158,7 +157,7 @@ export default class SuggestionChannel {
 
 		const promises = [
 			Promise.race([
-				new Promise((resolve) => setTimeout(resolve, 2_000)),
+				new Promise((resolve) => setTimeout(resolve, 3_000)),
 				interaction.channel.setName(
 					interaction.channel.name.replace(/^[^|]+?(?=(?: \| .+)?$)/, answer),
 					`Thread answered by ${interaction.user.tag}`,
@@ -171,7 +170,7 @@ export default class SuggestionChannel {
 			const category = embed.footer?.text.split(CONSTANTS.footerSeperator)[0];
 
 			embed
-				.setColor((answers.find(({ name }) => answer === name) || DEFAULT_ANSWER).color)
+				.setColor((answers.find(({ name }) => answer === name) ?? DEFAULT_ANSWER).color)
 				.setFooter({
 					text: `${category ? `${category}` + CONSTANTS.footerSeperator : ""}${answer}`,
 				});
@@ -243,18 +242,18 @@ export default class SuggestionChannel {
 							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, updated.title),
 							"Suggestion/report edited",
 						),
-						new Promise((resolve) => setTimeout(resolve, 2_000)),
+						new Promise((resolve) => setTimeout(resolve, 3_000)),
 				  ])
 				: Promise.resolve(interaction.channel),
 		);
 
-		embed.setTitle(updated.title || embed.title || "");
+		embed.setTitle(updated.title ?? embed.title ?? "");
 
 		if (updated.category) {
 			const answer = embed.footer?.text.split(CONSTANTS.footerSeperator).at(-1);
 
 			embed.setFooter({
-				text: `${updated.category}${CONSTANTS.footerSeperator}${answer || ""}`,
+				text: `${updated.category}${CONSTANTS.footerSeperator}${answer ?? ""}`,
 			});
 		}
 
@@ -280,12 +279,14 @@ export async function getUserFromSuggestion(message) {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]
-			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL || "")?.groups?.userId;
+			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups?.userId;
 
 	if (author) {
 		const fetchedMember = await message.guild?.members.fetch(author).catch(() => undefined);
 		if (fetchedMember) return fetchedMember;
 	}
 
-	return message.member || message.author;
+	const user = author && (await message.client?.users.fetch(author).catch(() => undefined));
+
+	return user || (message.member ?? message.author);
 }

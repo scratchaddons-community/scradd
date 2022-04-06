@@ -77,13 +77,13 @@ const info = {
 						: note
 						? generateTooltip(interaction, name, note)
 						: name,
-				) || [],
+				) ?? [],
 			);
 		}
 
 		const input = interaction.options.getString("addon");
 		const { item, score = 0 } = input
-			? fuse.search(input)[0] || {}
+			? fuse.search(input)[0] ?? {}
 			: { item: addons[Math.floor(Math.random() * addons.length)] };
 
 		const compact =
@@ -145,7 +145,7 @@ const info = {
 		}
 
 		if (!compact) {
-			const addon = (manifestCache[item.id] ||= await fetch(
+			const addon = (manifestCache[item.id] ??= await fetch(
 				`${CONSTANTS.repos.sa}/addons/${item.id}/addon.json?date=${Date.now()}`,
 			).then(async (response) => {
 				return await /** @type {Promise<import("../types/addonManifest").default>} */ (
@@ -154,7 +154,7 @@ const info = {
 			}));
 
 			const lastUpdatedIn = `last updated in ${
-				addon.latestUpdate?.version || "<unknown version>"
+				addon.latestUpdate?.version ?? "<unknown version>"
 			}`;
 			const latestUpdateInfo = addon.latestUpdate
 				? ` (${

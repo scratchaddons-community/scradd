@@ -32,16 +32,16 @@ export const UNSUPPORTED =
  * >}
  *   - Webhook message.
  */
-export async function generateMessage(message, guild = message.guild || undefined) {
-	const { author, files, embeds } = await extractMessageExtremities(message, guild);
+export async function generateMessage(message) {
+	const { files, embeds } = await extractMessageExtremities(message);
 
 	return {
 		allowedMentions: { users: [] },
-		avatarURL: author.displayAvatarURL(),
+		avatarURL: message.member?.displayAvatarURL() ?? message.author?.displayAvatarURL(),
 		content: await messageToText(message, false),
 		embeds,
 		files,
-		username: author instanceof GuildMember ? author.displayName : author.username,
+		username: message.member?.displayName ?? message.author.username,
 	};
 }
 
@@ -57,7 +57,7 @@ export async function getMemberFromThread(thread) {
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
 	const userId =
-		/<@!?(?<userId>\d+)>/.exec(embed.description)?.groups?.userId || embed.description;
+		/<@!?(?<userId>\d+)>/.exec(embed.description)?.groups?.userId ?? embed.description;
 
 	return await thread.guild.members.fetch(userId).catch(() => {});
 }
@@ -118,7 +118,7 @@ export async function sendClosedMessage(thread, reason) {
 						embeds: [
 							{
 								color: "DARK_GREEN",
-								description: starter.embeds[0]?.description || "",
+								description: starter.embeds[0]?.description ?? "",
 								title: "Modmail ticket closed!",
 							},
 						],
@@ -173,7 +173,7 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {{ display: string; icon?: string; name: string }} receiver
+ * @param {{ display: string; icon?: string; name: string; additional?: string }} receiver
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
  * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
@@ -187,7 +187,12 @@ export async function sendOpenedMessage(user) {
 export async function generateConfirm(receiver, onConfirm, reply, edit) {
 	const confirmEmbed = new MessageEmbed()
 		.setTitle("Confirmation")
-		.setDescription(`Are you sure you want to send this message to **${receiver.display}**?`)
+		.setDescription(
+			`Are you sure you want to send this message to **${receiver.display}**?` +
+				receiver.additional
+				? " " + receiver.additional
+				: "",
+		)
 		.setColor("BLURPLE")
 		.setAuthor({
 			iconURL: receiver.icon,

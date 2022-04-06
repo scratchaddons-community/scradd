@@ -10,11 +10,11 @@ const event = {
 	async event(client) {
 		console.log(
 			`Connected to Discord with ID ${client.application.id} and tag ${
-				client.user?.tag || ""
+				client.user?.tag ?? ""
 			}`,
 		);
 
-		const GUILD_ID = process.env.GUILD_ID || "";
+		const GUILD_ID = process.env.GUILD_ID ?? "";
 		const guilds = await client.guilds.fetch();
 
 		guilds.forEach(async (guild) => {

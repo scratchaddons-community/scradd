@@ -16,7 +16,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const content = interaction.options.getString("message") || "";
+		const content = interaction.options.getString("message") ?? "";
 
 		const message = await interaction.channel?.send({
 			allowedMentions: { parse: ["users"], roles: [] },
@@ -25,7 +25,7 @@ const info = {
 
 		if (message) {
 			const channel = await interaction.guild?.channels.fetch(
-				process.env.ERROR_CHANNEL || "",
+				process.env.ERROR_CHANNEL ?? "",
 			);
 
 			await Promise.all([
@@ -37,7 +37,7 @@ const info = {
 					channel.send({
 						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(
 							content,
-						)}\` (https://discord.com/channels/${process.env.GUILD_ID || "@me"}/${
+						)}\` (https://discord.com/channels/${process.env.GUILD_ID ?? "@me"}/${
 							message.channel.id
 						}/${message.id})`,
 
@@ -47,7 +47,7 @@ const info = {
 		}
 	},
 
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", permission: true, type: "ROLE" }],
+	permissions: [{ id: process.env.MODERATOR_ROLE ?? "", permission: true, type: "ROLE" }],
 };
 
 export default info;

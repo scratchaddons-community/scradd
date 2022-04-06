@@ -176,15 +176,15 @@ const info = {
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					category: interaction.options.getString("category") || "",
-					description: interaction.options.getString("bugreport") || "",
-					title: interaction.options.getString("title") || "",
+					category: interaction.options.getString("category") ?? "",
+					description: interaction.options.getString("bugreport") ?? "",
+					title: interaction.options.getString("title") ?? "",
 				});
 
 				if (success) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Bug report posted! See ${
-							success.thread?.toString() || ""
+							success.thread?.toString() ?? ""
 						}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
 
 						ephemeral: true,
@@ -194,7 +194,7 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") || "";
+				const answer = interaction.options.getString("answer") ?? "";
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({

@@ -63,7 +63,7 @@ const info = {
 					return;
 				}
 
-				const reason = interaction.options.getString("reason") || "";
+				const reason = interaction.options.getString("reason") ?? "";
 
 				await interaction.reply({
 					content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket closed!** ${reason}`,
@@ -75,7 +75,7 @@ const info = {
 			}
 			case "start": {
 				const user = await interaction.guild?.members.fetch(
-					interaction.options.getUser("user") || "",
+					interaction.options.getUser("user") ?? "",
 				);
 
 				if (!user || !interaction.guild) {

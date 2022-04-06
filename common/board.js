@@ -5,7 +5,7 @@ import extractMessageExtremities from "../lib/extractMessageExtremities.js";
 import getAllMessages from "../lib/getAllMessages.js";
 import messageToText from "../lib/messageToText.js";
 
-export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
+export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
 export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
 
@@ -23,8 +23,8 @@ export async function boardMessageToSource(boardMessage) {
 
 	const { guildId, channelId, messageId } =
 		/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+|@me)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu.exec(
-			component.url || "",
-		)?.groups || {};
+			component.url ?? "",
+		)?.groups ?? {};
 
 	if (boardMessage.guild?.id !== guildId || !channelId || !messageId) return;
 
@@ -65,7 +65,7 @@ export async function sourceToBoardMessage(message) {
 
 		if (component?.type !== "BUTTON") return false;
 
-		const messageId = /\d+$/.exec(component.url || "")?.[0];
+		const messageId = /\d+$/.exec(component.url ?? "")?.[0];
 
 		return messageId === message.id;
 	});
@@ -79,7 +79,7 @@ export async function sourceToBoardMessage(message) {
 export async function postMessageToBoard(message) {
 	if (!message.guild) throw new TypeError("Cannot post DMs to potatoboard");
 
-	const { author, files, embeds } = await extractMessageExtremities(message);
+	const { files, embeds } = await extractMessageExtremities(message);
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
@@ -90,12 +90,12 @@ export async function postMessageToBoard(message) {
 	const description = await messageToText(message);
 
 	const boardEmbed = new MessageEmbed()
-		.setColor(("displayColor" in author && author.displayColor) || "DEFAULT")
+		.setColor(message.member?.displayColor ?? "DEFAULT")
 		.setDescription(description)
 		.setAuthor({
-			iconURL: author?.displayAvatarURL() || message.author.displayAvatarURL(),
+			iconURL: message.member?.displayAvatarURL() ?? message.author.displayAvatarURL(),
 
-			name: "displayName" in author ? author.displayName : author.username,
+			name: message.member?.displayName ?? message.author.username,
 		})
 		.setTimestamp(message.createdTimestamp);
 
@@ -104,7 +104,7 @@ export async function postMessageToBoard(message) {
 		.setLabel("View Context")
 		.setStyle("LINK")
 		.setURL(
-			`https://discord.com/channels/${message.guild?.id || "@me"}/${message.channel.id}/${
+			`https://discord.com/channels/${message.guild?.id ?? "@me"}/${message.channel.id}/${
 				message.id
 			}`,
 		);
@@ -116,15 +116,15 @@ export async function postMessageToBoard(message) {
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
-		content: `**${BOARD_EMOJI} ${(reaction?.count || 0) - (reaction.me ? 1 : 0)}** | ${
+		content: `**${BOARD_EMOJI} ${(reaction?.count ?? 0) - (reaction.me ? 1 : 0)}** | ${
 			message.channel.type === "DM"
 				? ""
 				: `${message.channel.toString()}${
 						message.channel.isThread()
-							? ` (${message.channel.parent?.toString() || ""})`
+							? ` (${message.channel.parent?.toString() ?? ""})`
 							: ""
 				  }`
-		}${author ? ` | ${author.toString()}` : ""}`,
+		} | ${(message.member ?? message.author).toString()}`,
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});

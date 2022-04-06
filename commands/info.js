@@ -8,11 +8,11 @@ import escapeMessage from "../lib/escape.js";
 import generateHash from "../lib/generateHash.js";
 import joinWithAnd from "../lib/joinWithAnd.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { EMOJIS } from "./suggestion.js";
+import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import pkg from "../lib/package.js";
 
-const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE || "")}>`;
-const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE || "")}>`;
+const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
+const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
 
 /**
  * Get all users with a role.
@@ -25,7 +25,7 @@ const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE || "")}>`;
 async function getRole(roleId, client) {
 	const guild = await client.guilds.fetch(CONSTANTS.servers.testing);
 	const role = await guild.roles.fetch(roleId);
-	const members = Array.from(role?.members.values() || []);
+	const members = Array.from(role?.members.values() ?? []);
 
 	return joinWithAnd(members);
 }
@@ -54,9 +54,9 @@ const OPTIONS = [
 	{
 		description: () =>
 			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to <#${escapeMessage(
-				process.env.SUGGESTION_CHANNEL || "",
+				process.env.SUGGESTION_CHANNEL ?? "",
 			)}>. I will **react to the suggestion** with ${joinWithAnd(
-				EMOJIS,
+				SUGGESTION_EMOJIS[0],
 			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
 			`\n` +
 			`Similar **[\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bugreport get-top\`**.`,
@@ -117,7 +117,7 @@ const OPTIONS = [
 			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
 			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
 			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
-				process.env.ERROR_CHANNEL || "",
+				process.env.ERROR_CHANNEL ?? "",
 			)}>.`,
 
 		emoji: "➕",
@@ -126,9 +126,7 @@ const OPTIONS = [
 	{
 		description: () =>
 			"I **automatically react to some messages** as easter eggs. **How many reactions can you find?** There are currently **17**! (Yes, you may just read the source code to find them, but **please don’t spoil them** - it’s more fun for people to find them themselves.)\n" +
-			"There are also **3** automatic responses when using now-removed <@" +
-			CONSTANTS.robotop +
-			`> commands and the like. Unlike autoreactions, **these are not kept secret**. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\`, **tell people not to ping others** when using \`r!mimic\`, and **call members out** when they abuse the spoiler hack. The source code for these is in **[\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.`,
+			`There are also **2** automatic responses. Unlike autoreactions, **these are not kept secret**, as they have a actual meaningful purpose. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\` and **call members out** when they abuse the spoiler hack. The source code for these is in **[\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.`,
 
 		emoji: "✅",
 		name: "Autoreactions and responses",
@@ -166,9 +164,11 @@ const OPTIONS = [
 		edit: (interaction, reply) =>
 			`__**Bot info:**__\n` +
 			`**Ping**: ${+reply.createdAt - +interaction.createdAt}ms\n` +
-			`Last **restarted**  <t:${Math.round(+(interaction.client.readyAt || 0) / 1000)}:R>\n` +
+			`Last **restarted**  <t:${Math.round(
+				+(interaction.client.readyAt ?? 0) / 1_000,
+			)}:R>\n` +
 			`Bot **created** <t:${Math.round(
-				+(interaction.client.application?.createdAt || 0) / 1000,
+				+(interaction.client.application?.createdAt ?? 0) / 1_000,
 			)}:R>\n` +
 			`Current **version**: v${pkg.version}\n` +
 			`\n__**Configuration:**__\n` +
@@ -230,9 +230,9 @@ const info = {
 
 	async interaction(interaction) {
 		const hash = generateHash("info");
-		const defaultKey = interaction.options.getString("tab") || "Hello!";
+		const defaultKey = interaction.options.getString("tab") ?? "Hello!";
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
-		const defaultContent = (await currentOption?.description(interaction.client)) || "";
+		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
 
@@ -324,7 +324,7 @@ const info = {
 					if (select?.type !== "SELECT_MENU")
 						throw new TypeError("Expected first component to be a select menu");
 
-					const chosen = selectInteraction.values[0] || "";
+					const chosen = selectInteraction.values[0] ?? "";
 
 					select.options = select.options.map((option) => ({
 						...option,
@@ -339,7 +339,7 @@ const info = {
 							content:
 								(await (option?.edit
 									? option?.edit(interaction, message)
-									: option?.description(interaction.client))) || defaultContent,
+									: option?.description(interaction.client))) ?? defaultContent,
 						}),
 					);
 					await Promise.all(promises);

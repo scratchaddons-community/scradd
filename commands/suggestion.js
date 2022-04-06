@@ -24,8 +24,8 @@ const PAGE_OFFSET = 15;
 
 /** @type {[string, string][]} */
 export const OLD_EMOJIS = [
+	["👍", "👎"], // These are the emojis that are currently used.
 	["959117513088720926", "🍅"],
-	["👍", "👎"],
 	["575851403558256642", "575851403600330792"],
 	["✅", "613912745699442698"],
 	["613912747578621952", "613912747440209930"],
@@ -36,11 +36,8 @@ export const OLD_EMOJIS = [
 	["749005259682086964", "749005284403445790"],
 ];
 
-/** @type {[string, string]} */
-export const EMOJIS = ["👍", "👎"];
-
 /** @type {import("../common/suggest.js").Answer[]} */
-const ANSWERS = [
+export const ANSWERS = [
 	{
 		color: "GREEN",
 		description: "This will probably be added if anyone codes it",
@@ -242,17 +239,17 @@ const info = {
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					category: interaction.options.getString("category") || "",
-					description: interaction.options.getString("suggestion") || "",
-					title: interaction.options.getString("title") || "",
+					category: interaction.options.getString("category") ?? "",
+					description: interaction.options.getString("suggestion") ?? "",
+					title: interaction.options.getString("title") ?? "",
 				});
 
 				if (success) {
 					await Promise.all([
-						reactAll(success, EMOJIS),
+						reactAll(success, SUGGESTION_EMOJIS[0]),
 						interaction.reply({
 							content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
-								success.thread?.toString() || ""
+								success.thread?.toString() ?? ""
 							}. If you made any mistakes, you can fix them with \`/suggestion edit\`.`,
 							ephemeral: true,
 						}),
@@ -262,7 +259,7 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") || "";
+				const answer = interaction.options.getString("answer") ?? "";
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
@@ -313,19 +310,19 @@ const info = {
 				const all = (
 					await Promise.all(
 						unfiltered.map(async (message) => {
-							const count = OLD_EMOJIS.map(([upvote, downvote]) => {
+							const count = SUGGESTION_EMOJIS.map(([upvote, downvote]) => {
 								const upvoteReaction = message.reactions.resolve(upvote);
 								const downvoteReaction = message.reactions.resolve(downvote);
 
 								if (!upvoteReaction || !downvoteReaction) return false;
 
-								return (upvoteReaction.count || 0) - (downvoteReaction.count || 0);
+								return (upvoteReaction.count ?? 0) - (downvoteReaction.count ?? 0);
 							}).find((currentCount) => typeof currentCount === "number");
 
 							if (typeof count !== "number") return;
 
 							const answer =
-								message.thread?.name.split("|")[0]?.trim() || DEFAULT_ANSWER.name;
+								message.thread?.name.split("|")[0]?.trim() ?? DEFAULT_ANSWER.name;
 
 							if (
 								requestedAnswer &&
@@ -334,8 +331,8 @@ const info = {
 								return;
 
 							const description =
-								message.embeds[0]?.title ||
-								message.embeds[0]?.description ||
+								message.embeds[0]?.title ??
+								message.embeds[0]?.description ??
 								message.content;
 
 							const author = await getUserFromSuggestion(message);
@@ -348,7 +345,7 @@ const info = {
 								id: message.id,
 
 								title: truncateText(
-									description.split("/n")[0] || "",
+									description.split("/n")[0] ?? "",
 									MAX_TITLE_LENGTH,
 								),
 							};
@@ -359,7 +356,7 @@ const info = {
 					.filter((suggestion) => suggestion)
 					.sort(
 						(suggestionOne, suggestionTwo) =>
-							(suggestionTwo?.count || 0) - (suggestionOne?.count || 0),
+							(suggestionTwo?.count ?? 0) - (suggestionOne?.count ?? 0),
 					);
 
 				const previousButton = new MessageButton()
@@ -398,9 +395,11 @@ const info = {
 							if (!suggestion) return ""; // Impossible
 
 							return `${index + offset + 1}) **${suggestion.count}** ${
-								suggestion.count > 0 ? EMOJIS[0] : EMOJIS[1]
+								suggestion.count > 0
+									? SUGGESTION_EMOJIS[0][0]
+									: SUGGESTION_EMOJIS[0][1]
 							} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
-								GUILD_ID || "@me"
+								GUILD_ID ?? "@me"
 							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
 								suggestion.author && !requestedUser
 									? ` by ${suggestion.author.toString()}`

@@ -30,7 +30,7 @@ const event = {
 			newThread.fetchStarterMessage().then((starter) => {
 				starter.edit({
 					embeds: [
-						(starter.embeds[0] || new MessageEmbed())
+						(starter.embeds[0] ?? new MessageEmbed())
 							.setTitle("Modmail ticket opened!")
 							.setFooter({
 								text: UNSUPPORTED,

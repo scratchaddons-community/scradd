@@ -15,7 +15,7 @@ dotenv.config();
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const client = new Client({
-	allowedMentions: { parse: [], roles: [] },
+	allowedMentions: { parse: ["users"], roles: [] },
 
 	presence: {
 		activities: [
@@ -46,7 +46,6 @@ const client = new Client({
 		"GUILD_SCHEDULED_EVENTS",
 	],
 
-	restGlobalRateLimit: 50,
 	failIfNotExists: false,
 	restWsBridgeTimeout: 30_000,
 
@@ -105,5 +104,5 @@ if (process.env.NODE_ENV === "production") {
 		response.end();
 	});
 
-	server.listen(process.env.PORT || 80);
+	server.listen(process.env.PORT ?? 80);
 }

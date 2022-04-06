@@ -1,5 +1,5 @@
 /**
- * @file Run Actions on posted messages.Send modmails, autoreact if contains certain triggers, and
+ * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
  *   autoreply if contains certain triggers.
  */
 import { MessageEmbed } from "discord.js";
@@ -45,7 +45,7 @@ const event = {
 			const webhook =
 				webhooks.find(
 					(possibleWebhook) => possibleWebhook.name === CONSTANTS.webhookName,
-				) || (await mailChannel.createWebhook(CONSTANTS.webhookName));
+				) ?? (await mailChannel.createWebhook(CONSTANTS.webhookName));
 			const existingThread = await getThreadFromMember(guild, message.author);
 
 			if (existingThread) {
@@ -53,7 +53,7 @@ const event = {
 					webhook
 						.send({
 							threadId: existingThread.id,
-							...(await generateMessage(message, guild)),
+							...(await generateMessage(message)),
 						})
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
 						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
@@ -70,9 +70,11 @@ const event = {
 				let toEdit = message;
 				const collector = await generateConfirm(
 					{
-						display: `the ${escapeMessage(mailChannel.guild.name)} Server’s mod team`,
+						display: `the ${escapeMessage(mailChannel.guild.name)} server’s mod team`,
 						name: mailChannel.guild.name,
-						icon: mailChannel.guild.iconURL() || undefined,
+						icon: mailChannel.guild.iconURL() ?? undefined,
+						additional:
+							"This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.",
 					},
 					async (buttonInteraction) => {
 						const openedEmbed = new MessageEmbed()
@@ -107,7 +109,7 @@ const event = {
 							webhook
 								.send({
 									threadId: newThread.id,
-									...(await generateMessage(message, guild)),
+									...(await generateMessage(message)),
 								})
 								.then(
 									async () => await message.react(CONSTANTS.emojis.statuses.yes),
@@ -145,7 +147,7 @@ const event = {
 
 			if (member) {
 				const channel =
-					member.user.dmChannel ||
+					member.user.dmChannel ??
 					(await member.createDM().catch(async () => {
 						await message.react(CONSTANTS.emojis.statuses.no);
 					}));
@@ -165,8 +167,23 @@ const event = {
 			}
 		}
 
-		if (message.type === "THREAD_CREATED" && message.channel.id === SUGGESTION_CHANNEL)
+		if (
+			message.type === "THREAD_CREATED" &&
+			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id)
+		)
 			return await message.delete();
+
+		// Autoactions start here. Return early in some channels.
+
+		if (
+			[
+				SUGGESTION_CHANNEL,
+				process.env.BUGS_CHANNEL,
+				BOARD_CHANNEL,
+				process.env.ERROR_CHANNEL,
+			].includes(message.channel.id)
+		)
+			return await Promise.all(promises);
 
 		const content = message.content
 			.toLowerCase()
@@ -240,7 +257,7 @@ const event = {
 
 		if (message.content === "NO") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
 
-		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
+		if (message.mentions.users.has(message.client.user?.id ?? "") && message.type !== "REPLY")
 			promises.push(message.react("👋"));
 
 		if (content.includes("sat on addons")) {
@@ -262,30 +279,6 @@ const event = {
 						`You used the spoiler hack to hide: \`\`\`\n` +
 						`${escapeForCodeblock(array.join(spoilerHack))}\n` +
 						`\`\`\``,
-				}),
-			);
-		}
-
-		const firstMention = message.mentions.users.first();
-
-		if (
-			/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(
-				message.content,
-			) &&
-			firstMention?.id !== message.author.id &&
-			!firstMention?.bot &&
-			!message.author?.bot &&
-			!firstMention?.system
-		) {
-			const member = await message.guild?.members.fetch(firstMention?.id || "");
-
-			promises.push(
-				message.reply({
-					content: `Please don’t ping people when using \`r!mimic\` - use their username instead. Example: \`r!mimic ${escapeMessage(
-						member?.user.username || "",
-					)}\` instead of \`r!mimic @${escapeMessage(
-						member?.displayName || "",
-					)}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
 				}),
 			);
 		}

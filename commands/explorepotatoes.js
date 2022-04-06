@@ -121,7 +121,7 @@ const info = {
 			throw new ReferenceError("Could not find board channel.");
 		}
 
-		const minReactions = interaction.options.getInteger("minimum-reactions") || 0;
+		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
 		const user = interaction.options.getUser("user")?.id;
 		const channelId = interaction.options.getChannel("channel")?.id;
 		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
@@ -135,7 +135,7 @@ const info = {
 								!message.content ||
 								!message.embeds[0] ||
 								!message.author.bot ||
-								(/\d+/.exec(message.content)?.[0] || 0) < minReactions
+								(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
 							)
 								return false;
 							return message;
@@ -151,7 +151,7 @@ const info = {
 						)
 							return false;
 
-						const channelFound = source?.channel || message.mentions.channels.first();
+						const channelFound = source?.channel ?? message.mentions.channels.first();
 
 						if (
 							channelWanted &&

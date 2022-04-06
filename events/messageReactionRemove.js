@@ -32,7 +32,7 @@ const event = {
 		const boardMessage = await sourceToBoardMessage(message);
 
 		const fetched = message.reactions.resolve(BOARD_EMOJI);
-		const count = (fetched?.count || 0) - (fetched?.me ? 1 : 0);
+		const count = (fetched?.count ?? 0) - (fetched?.me ? 1 : 0);
 
 		if (boardMessage?.embeds[0]) {
 			await updateReactionCount(count, boardMessage);
