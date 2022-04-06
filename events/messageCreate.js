@@ -2,7 +2,7 @@
  * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
  *   autoreply if contains certain triggers.
  */
-import { MessageEmbed } from "discord.js";
+import { MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -15,7 +15,7 @@ import {
 	UNSUPPORTED,
 } from "../common/modmail.js";
 
-import escapeMessage, { escapeForCodeblock } from "../lib/escape.js";
+import escapeMessage from "../lib/escape.js";
 import reactAll from "../lib/reactAll.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
@@ -25,8 +25,10 @@ if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 /** @type {import("../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
-		if (message.flags.has("EPHEMERAL")) return;
+		if (message.flags.has("EPHEMERAL") || message.type === "THREAD_STARTER_MESSAGE") return;
 		const promises = [];
+
+		let reactions = 0;
 
 		if (
 			!message.content.startsWith("=") &&
@@ -49,6 +51,7 @@ const event = {
 			const existingThread = await getThreadFromMember(guild, message.author);
 
 			if (existingThread) {
+				reactions++;
 				promises.push(
 					webhook
 						.send({
@@ -131,9 +134,6 @@ const event = {
 			}
 		}
 
-		if (message.guild !== null && message.guild.id !== GUILD_ID)
-			return await Promise.all(promises);
-
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
@@ -157,6 +157,8 @@ const event = {
 					message.author.toString() +
 					":" +
 					(messageToSend.content ? " " + messageToSend.content : "");
+
+				reactions++;
 
 				promises.push(
 					channel
@@ -185,85 +187,6 @@ const event = {
 		)
 			return await Promise.all(promises);
 
-		const content = message.content
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(
-				/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
-				"",
-			);
-
-		/**
-		 * Determines whether the message contains a word.
-		 *
-		 * @param {string} text - The word to check for.
-		 * @param {boolean} [plural] - Whether to account for plurals.
-		 *
-		 * @returns {boolean} Whether the message contains the word.
-		 */
-		function includes(text, plural = true) {
-			const split = content.split(/[^\da-z]+/i);
-			return (
-				split.includes(text) ||
-				(plural && (split.includes(`${text}s`) || split.includes(`${text}es`)))
-			);
-		}
-
-		if (includes("dango") || content.includes("🍡")) promises.push(message.react("🍡"));
-
-		if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.e));
-
-		if (
-			content === "potato" ||
-			content === "potatoes" ||
-			content === "potatos" ||
-			(content.includes("🥔") && message.channel.id !== BOARD_CHANNEL)
-		)
-			promises.push(message.react("🥔"));
-
-		if (includes("griff") || includes("griffpatch"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.griffpatch));
-
-		if (includes("amongus") || includes("amogus"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.amongus));
-
-		if (includes("sus", false)) promises.push(message.react(CONSTANTS.emojis.autoreact.sus));
-
-		if (includes("appel")) promises.push(message.react(CONSTANTS.emojis.autoreact.appel));
-
-		if (includes("cubot")) promises.push(message.react(CONSTANTS.emojis.autoreact.cubot));
-
-		if (includes("splory")) promises.push(message.react(CONSTANTS.emojis.autoreact.splory));
-
-		if (includes("tera") || content.includes("tewwa"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.tera));
-
-		if (
-			/gives? ?you ?up/.test(content) ||
-			includes("rick") ||
-			includes("rickroll") ||
-			includes("rickrolled", false) ||
-			includes("rickrolling", false) ||
-			message.content.includes("dQw4w9WgXcQ")
-		)
-			promises.push(message.react(CONSTANTS.emojis.autoreact.rick));
-
-		if (message.content.includes("( ^∘^)つ"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.sxd));
-
-		if (content.includes("scradd bad"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.angery));
-
-		if (message.content === "NO") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
-
-		if (message.mentions.users.has(message.client.user?.id ?? "") && message.type !== "REPLY")
-			promises.push(message.react("👋"));
-
-		if (content.includes("sat on addons")) {
-			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
-		}
-
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
 
@@ -277,7 +200,7 @@ const event = {
 
 					content:
 						`You used the spoiler hack to hide: \`\`\`\n` +
-						`${escapeForCodeblock(array.join(spoilerHack))}\n` +
+						`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
 						`\`\`\``,
 				}),
 			);
@@ -290,6 +213,89 @@ const event = {
 				}),
 			);
 		}
+
+		const content = message.content
+			.toLowerCase()
+			.normalize("NFD")
+			.replace(
+				/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
+				"",
+			);
+
+		/**
+		 * Determines whether the message contains a word.
+		 *
+		 * @param {string | RegExp} text - The word to check for.
+		 *
+		 * @returns {boolean} Whether the message contains the word.
+		 */
+		function includes(text, { full = false, plural = true } = {}) {
+			return new RegExp(
+				(full ? "^" : "\\b") +
+					(typeof text === "string" ? text : text.source) +
+					(plural ? "(e?s)?" : "") +
+					(full ? "$" : "\\b"),
+				"i",
+			).test(content);
+		}
+
+		/**
+		 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
+		 *
+		 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
+		 */
+		function react(emoji) {
+			if (reactions > 2) return;
+			reactions++;
+			const promise = message.react(emoji).catch(() => {});
+			promises.push(promise);
+			return promise;
+		}
+
+		if (includes("potato", { full: true }) || content.includes("🥔")) react("🥔");
+
+		if (includes("dango") || content.includes("🍡")) react("🍡");
+
+		if (includes(/av[ao]cado/) || content.includes("🥑")) react("🥑");
+
+		if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
+			react(CONSTANTS.emojis.autoreact.e);
+
+		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
+
+		if (includes(/griff(?:patch)?y?'?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
+
+		if (includes("cubot")) react(CONSTANTS.emojis.autoreact.cubot);
+
+		if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
+
+		if (includes(/te(?:r|w)+a/)) react(CONSTANTS.emojis.autoreact.tera);
+
+		if (content.includes("sat on addons")) {
+			if (reactions < 2) {
+				reactions = reactions + 3;
+				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
+			}
+		}
+
+		if (includes(/amon?g ?us/, { plural: false })) react(CONSTANTS.emojis.autoreact.amongus);
+
+		if (includes("sus", { plural: false })) react(CONSTANTS.emojis.autoreact.sus);
+
+		if (
+			/gives? ?you ?up/.test(content) ||
+			includes("rickroll") ||
+			includes(/(?:rick(roll(?:ed|ing))?|dqw4w9wgxcq)/i, { plural: false })
+		)
+			react(CONSTANTS.emojis.autoreact.rick);
+
+		if (/\b(NO+)+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
+
+		if (
+			message.mentions.users.has(message.client.user?.id ?? "") &&
+			message.mentions.repliedUser?.id !== (message.client.user?.id ?? "")
+		)
+			react("👋");
 
 		await Promise.all(promises);
 	},

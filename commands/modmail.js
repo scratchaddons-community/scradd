@@ -28,7 +28,7 @@ const info = {
 						.setDescription(
 							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
 						)
-						.setRequired(true),
+						.setRequired(false),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -66,7 +66,16 @@ const info = {
 				const reason = interaction.options.getString("reason") ?? "";
 
 				await interaction.reply({
-					content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket closed!** ${reason}`,
+					embeds: [
+						new MessageEmbed()
+							.setTitle("Modmail ticket closed!")
+							.setTimestamp(interaction.channel.createdTimestamp)
+							.setDescription(reason)
+							.setFooter({
+								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
+							})
+							.setColor("DARK_GREEN"),
+					],
 				});
 
 				await closeModmail(interaction.channel, interaction.user, reason);
@@ -159,7 +168,7 @@ const info = {
 		}
 	},
 
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", permission: true, type: "ROLE" }],
+	permissions: [{ id: process.env.MODERATOR_ROLE ?? "", permission: true, type: "ROLE" }],
 };
 
 export default info;

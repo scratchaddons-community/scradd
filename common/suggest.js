@@ -10,13 +10,6 @@ import CONSTANTS from "./CONSTANTS.js";
  * 	name: string;
  * }} Answer
  */
-/**
- * @typedef {{
- * 	description: string;
- * 	customResponse?: string;
- * 	name: string;
- * }} Category
- */
 
 export const MAX_TITLE_LENGTH = 50;
 
@@ -38,20 +31,17 @@ export default class SuggestionChannel {
 	 * Initialize a suggestion channel.
 	 *
 	 * @param {string} CHANNEL_ID - The ID of the channel to use.
-	 * @param {Category[]} CATEGORIES - The categories to use.
 	 */
-	constructor(CHANNEL_ID, CATEGORIES) {
+	constructor(CHANNEL_ID) {
 		/** @type {string} */
 		this.CHANNEL_ID = CHANNEL_ID;
-		/** @type {Category[]} */
-		this.CATEGORIES = CATEGORIES;
 	}
 
 	/**
 	 * Post a message in a suggestion channel.
 	 *
 	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
-	 * @param {{ title: string; description: string; category: string }} data - The suggestion information.
+	 * @param {{ title: string; description: string; }} data - The suggestion information.
 	 *
 	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the
 	 *   suggestion message on success.
@@ -61,18 +51,6 @@ export default class SuggestionChannel {
 
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
-
-		const category = this.CATEGORIES.find((current) => current.name === data.category);
-
-		if (category?.customResponse) {
-			await interaction.reply({
-				content: CONSTANTS.emojis.statuses.no + " " + category.customResponse,
-
-				ephemeral: true,
-			});
-
-			return false;
-		}
 
 		if (data.title.length > MAX_TITLE_LENGTH) {
 			await interaction.reply({
@@ -93,7 +71,7 @@ export default class SuggestionChannel {
 			.setTitle(data.title)
 			.setDescription(data.description)
 			.setFooter({
-				text: `${data.category}${CONSTANTS.footerSeperator}${DEFAULT_ANSWER.name}`,
+				text: `${DEFAULT_ANSWER.name}`,
 			});
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
@@ -167,12 +145,11 @@ export default class SuggestionChannel {
 
 		if (starter && starter?.author.id === interaction.client.user?.id) {
 			const embed = new MessageEmbed(starter.embeds[0]);
-			const category = embed.footer?.text.split(CONSTANTS.footerSeperator)[0];
 
 			embed
 				.setColor((answers.find(({ name }) => answer === name) ?? DEFAULT_ANSWER).color)
 				.setFooter({
-					text: `${category ? `${category}` + CONSTANTS.footerSeperator : ""}${answer}`,
+					text: answer,
 				});
 
 			promises.push(starter.edit({ embeds: [embed] }));
@@ -187,7 +164,7 @@ export default class SuggestionChannel {
 	 * Edit a suggestion.
 	 *
 	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
-	 * @param {{ title: null | string; body: null | string; category: null | string }} updated -
+	 * @param {{ title: null | string; body: null | string; }} updated -
 	 *   Updated suggestion.
 	 *
 	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
@@ -249,13 +226,6 @@ export default class SuggestionChannel {
 
 		embed.setTitle(updated.title ?? embed.title ?? "");
 
-		if (updated.category) {
-			const answer = embed.footer?.text.split(CONSTANTS.footerSeperator).at(-1);
-
-			embed.setFooter({
-				text: `${updated.category}${CONSTANTS.footerSeperator}${answer ?? ""}`,
-			});
-		}
 
 		promises.push(starterMessage.edit({ embeds: [embed] }));
 

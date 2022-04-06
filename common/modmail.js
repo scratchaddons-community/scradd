@@ -101,7 +101,7 @@ export async function sendClosedMessage(thread, reason) {
 	const embed = new MessageEmbed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
-		.setFooter({ text: "Any future messages will trigger a new ticket." })
+		.setFooter({ text: "Any future messages will start a new ticket." })
 		.setColor("DARK_GREEN");
 
 	if (reason) embed.setDescription(reason);
@@ -116,11 +116,9 @@ export async function sendClosedMessage(thread, reason) {
 				.then((starter) => {
 					starter?.edit({
 						embeds: [
-							{
-								color: "DARK_GREEN",
-								description: starter.embeds[0]?.description ?? "",
-								title: "Modmail ticket closed!",
-							},
+							new MessageEmbed(starter.embeds[0])
+								.setTitle("Modmail ticket closed!")
+								.setColor("DARK_GREEN"),
 						],
 					});
 				}),
@@ -189,9 +187,9 @@ export async function generateConfirm(receiver, onConfirm, reply, edit) {
 		.setTitle("Confirmation")
 		.setDescription(
 			`Are you sure you want to send this message to **${receiver.display}**?` +
-				receiver.additional
+				(receiver.additional
 				? " " + receiver.additional
-				: "",
+				: ""),
 		)
 		.setColor("BLURPLE")
 		.setAuthor({

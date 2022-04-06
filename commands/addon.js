@@ -71,12 +71,10 @@ const info = {
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
-				credits?.map(({ name, link, note = "" }) =>
+				credits?.map(({ name, link, note }) =>
 					link
 						? `[${escapeLinks(name)}](${link} "${note}")`
-						: note
-						? generateTooltip(interaction, name, note)
-						: name,
+						: generateTooltip(interaction, name, note),
 				) ?? [],
 			);
 		}
@@ -153,20 +151,9 @@ const info = {
 				);
 			}));
 
-			const lastUpdatedIn = `last updated in ${
+			const lastUpdatedIn = `last updated in v${
 				addon.latestUpdate?.version ?? "<unknown version>"
 			}`;
-			const latestUpdateInfo = addon.latestUpdate
-				? ` (${
-						addon.latestUpdate.temporaryNotice
-							? generateTooltip(
-									interaction,
-									lastUpdatedIn,
-									`${addon.latestUpdate?.temporaryNotice}`,
-							  )
-							: lastUpdatedIn
-				  })`
-				: "";
 
 			const credits = generateCredits(addon.credits);
 
@@ -189,7 +176,16 @@ const info = {
 				{
 					inline: true,
 					name: "Version added",
-					value: escapeMessage(addon.versionAdded + latestUpdateInfo),
+					value:
+						"v" +
+						addon.versionAdded +
+						(addon.latestUpdate
+							? ` (${generateTooltip(
+									interaction,
+									lastUpdatedIn,
+									`${addon.latestUpdate?.temporaryNotice}`,
+							  )})`
+							: ""),
 				},
 			]);
 		}

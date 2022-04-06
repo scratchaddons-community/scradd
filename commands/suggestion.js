@@ -23,7 +23,7 @@ if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set
 const PAGE_OFFSET = 15;
 
 /** @type {[string, string][]} */
-export const OLD_EMOJIS = [
+export const SUGGESTION_EMOJIS = [
 	["👍", "👎"], // These are the emojis that are currently used.
 	["959117513088720926", "🍅"],
 	["575851403558256642", "575851403600330792"],
@@ -77,39 +77,7 @@ export const ANSWERS = [
 	{ color: "PURPLE", description: "We don’t want to add this for some reason", name: "Rejected" },
 ];
 
-/** @type {import("../common/suggest.js").Category[]} */
-const CATEGORIES = [
-	{
-		description: "A feature that has no similar features in other addons already",
-		name: "New addon",
-	},
-
-	{ description: "A feature that would be added to an existing addon", name: "New feature" },
-	{
-		description: "A feature for the settings page or popup, shown without any addons enabled",
-
-		name: "Settings addition",
-	},
-
-	{
-		description: "A suggestion to improve the server or something to add to me",
-		customResponse: `${NO_SERVER_START}<#${SUGGESTION_CHANNEL}>, they can see SA suggestions they can add without having to dig through tons of server suggestions. If you have a suggestion to improve me or the server, please post it in <#${CONSTANTS.channels.general}> for discussion.`,
-		name: "Server suggestion",
-	},
-
-	{
-		description: "Something that has no effect for users",
-		customResponse:
-			"Please suggest things that do not affect users in the development server or on GitHub.",
-		name: "Technical suggestion",
-	},
-
-	{ description: "Anything not listed above", name: "Other" },
-];
-
 export const CHANNEL_TAG = "#suggestions";
-
-const channel = new SuggestionChannel(SUGGESTION_CHANNEL, CATEGORIES);
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -132,22 +100,7 @@ const info = {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(true),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Suggestion category")
-						.setRequired(true);
-
-					for (const category of CATEGORIES) {
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -186,24 +139,7 @@ const info = {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(false),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Suggestion category")
-						.setRequired(false);
-
-					for (const category of CATEGORIES) {
-						if (category.customResponse) continue;
-
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		)
 
 		.addSubcommand((subcommand) =>
@@ -239,7 +175,6 @@ const info = {
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					category: interaction.options.getString("category") ?? "",
 					description: interaction.options.getString("suggestion") ?? "",
 					title: interaction.options.getString("title") ?? "",
 				});
@@ -280,7 +215,6 @@ const info = {
 
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("suggestion"),
-					category: interaction.options.getString("category"),
 					title,
 				});
 				if (result) {
@@ -333,7 +267,9 @@ const info = {
 							const description =
 								message.embeds[0]?.title ??
 								message.embeds[0]?.description ??
-								message.content;
+								(message.embeds[0]?.image?.url
+									? message.embeds[0]?.image?.url
+									: message.content);
 
 							const author = await getUserFromSuggestion(message);
 
@@ -344,10 +280,7 @@ const info = {
 								count,
 								id: message.id,
 
-								title: truncateText(
-									description.split("/n")[0] ?? "",
-									MAX_TITLE_LENGTH,
-								),
+								title: truncateText(description, MAX_TITLE_LENGTH),
 							};
 						}),
 					)

@@ -126,7 +126,7 @@ const OPTIONS = [
 	{
 		description: () =>
 			"I **automatically react to some messages** as easter eggs. **How many reactions can you find?** There are currently **17**! (Yes, you may just read the source code to find them, but **please don’t spoil them** - it’s more fun for people to find them themselves.)\n" +
-			`There are also **2** automatic responses. Unlike autoreactions, **these are not kept secret**, as they have a actual meaningful purpose. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\` and **call members out** when they abuse the spoiler hack. The source code for these is in **[\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.`,
+			`There are also **2** automatic responses. Unlike autoreactions, **these are not kept secret**, as they have a actual meaningful purpose. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\` and **call members out** when they abuse the spoiler hack.`,
 
 		emoji: "✅",
 		name: "Autoreactions and responses",
@@ -137,8 +137,7 @@ const OPTIONS = [
 				CONSTANTS.roles.developers,
 				client,
 			)}.\n` +
-			`**Logo** by <@691223009515667457> and <@765910070222913556>.\n` +
-			`**Named** by <@752972078579449888>.\n` +
+			`**Design** by <@691223009515667457>, <@765910070222913556>, and <@752972078579449888>.\n` +
 			`Beta **testers** (also in no particular order): ${await getRole(
 				CONSTANTS.roles.testers,
 				client,
@@ -166,9 +165,6 @@ const OPTIONS = [
 			`**Ping**: ${+reply.createdAt - +interaction.createdAt}ms\n` +
 			`Last **restarted**  <t:${Math.round(
 				+(interaction.client.readyAt ?? 0) / 1_000,
-			)}:R>\n` +
-			`Bot **created** <t:${Math.round(
-				+(interaction.client.application?.createdAt ?? 0) / 1_000,
 			)}:R>\n` +
 			`Current **version**: v${pkg.version}\n` +
 			`\n__**Configuration:**__\n` +
@@ -224,7 +220,7 @@ const info = {
 				.setName("ephemeral")
 				.setRequired(false)
 				.setDescription(
-					"Whether to hide the message for people other than you. Defaults to True.",
+					"Whether to hide the message from other people. Defaults to False in #bots and True everywhere else.",
 				),
 		),
 
@@ -234,7 +230,7 @@ const info = {
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
 		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
 		const message = await interaction.reply({
-			allowedMentions: { users: [] },
+			allowedMentions: { parse: [], users: [] },
 
 			components: [
 				new MessageActionRow().addComponents(
@@ -257,13 +253,15 @@ const info = {
 			],
 
 			content: defaultContent,
-			ephemeral: interaction.options.getBoolean("ephemeral") ?? true,
+			ephemeral:
+				interaction.options.getBoolean("ephemeral") ??
+				interaction.channel?.id !== process.env.BOTS_CHANNEL,
 			fetchReply: true,
 		});
 		if (!(message instanceof Message)) throw new TypeError("Result not a Message");
 		if (currentOption?.edit)
 			await interaction.editReply({
-				allowedMentions: { users: [] },
+				allowedMentions: { parse: [], users: [] },
 				components: message.components,
 
 				content: await currentOption?.edit(interaction, message),
@@ -278,13 +276,13 @@ const info = {
 		async function disable() {
 			if (!(message instanceof Message)) {
 				return await interaction.editReply({
-					allowedMentions: { users: [] },
+					allowedMentions: { parse: [], users: [] },
 					content: message.content,
 				});
 			}
 
 			return await interaction.editReply({
-				allowedMentions: { users: [] },
+				allowedMentions: { parse: [], users: [] },
 
 				components: message.components.map((components) =>
 					components.setComponents(
