@@ -2,7 +2,7 @@
  * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
  *   autoreply if contains certain triggers.
  */
-import { MessageEmbed, Util } from "discord.js";
+import { GuildMember, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -48,7 +48,7 @@ const event = {
 				webhooks.find(
 					(possibleWebhook) => possibleWebhook.name === CONSTANTS.webhookName,
 				) ?? (await mailChannel.createWebhook(CONSTANTS.webhookName));
-			const existingThread = await getThreadFromMember(guild, message.author);
+			const existingThread = await getThreadFromMember(message.author, guild);
 
 			if (existingThread) {
 				reactions++;
@@ -145,7 +145,7 @@ const event = {
 		) {
 			const member = await getMemberFromThread(message.channel);
 
-			if (member) {
+			if (member instanceof GuildMember) {
 				const channel =
 					member.user.dmChannel ??
 					(await member.createDM().catch(async () => {

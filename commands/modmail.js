@@ -96,7 +96,7 @@ const info = {
 					return;
 				}
 
-				const existingThread = await getThreadFromMember(interaction.guild, user);
+				const existingThread = await getThreadFromMember(user);
 
 				if (existingThread) {
 					await interaction.reply({

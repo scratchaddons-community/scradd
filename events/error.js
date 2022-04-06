@@ -5,7 +5,7 @@
  */
 const event = {
 	event(error) {
-		throw error
+		throw error;
 	},
 };
 

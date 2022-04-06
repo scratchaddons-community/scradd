@@ -50,7 +50,8 @@ export async function generateMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns {Promise<import("discord.js").GuildMember | void>} - User who messages are being sent to.
+ * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages
+ *   are being sent to.
  */
 export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
@@ -59,19 +60,23 @@ export async function getMemberFromThread(thread) {
 	const userId =
 		/<@!?(?<userId>\d+)>/.exec(embed.description)?.groups?.userId ?? embed.description;
 
-	return await thread.guild.members.fetch(userId).catch(() => {});
+	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
 
 /**
  * Given a user, find a ticket thread that sends messages to them.
  *
- * @param {import("discord.js").Guild} guild - The guild to search in.
  * @param {import("discord.js").GuildMember | import("discord.js").User} user - The user to search for.
+ * @param {import("discord.js").Guild} [guild] - The guild to search in.
  *
  * @returns {Promise<import("discord.js").ThreadChannel | void>} - Ticket thread.
  */
-export async function getThreadFromMember(guild, user) {
-	const mailChannel = await guild?.channels.fetch(MODMAIL_CHANNEL);
+export async function getThreadFromMember(
+	user,
+	guild = user instanceof GuildMember ? user.guild : undefined,
+) {
+	if (!guild) throw new ReferenceError("Expected guild to be passed along with a User.");
+	const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
@@ -106,7 +111,8 @@ export async function sendClosedMessage(thread, reason) {
 
 	if (reason) embed.setDescription(reason);
 
-	const dmChannel = await user?.createDM().catch(() => {});
+	const dmChannel =
+		user instanceof GuildMember ? await user?.createDM().catch(() => {}) : undefined;
 
 	return (
 		await Promise.all([
@@ -133,7 +139,7 @@ export async function sendClosedMessage(thread, reason) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  * @param {import("discord.js").User} user - User who closed the ticket.
- * @param {string} reason - The reason for closing the ticket.
+ * @param {string} [reason] - The reason for closing the ticket.
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, reason);
@@ -187,9 +193,7 @@ export async function generateConfirm(receiver, onConfirm, reply, edit) {
 		.setTitle("Confirmation")
 		.setDescription(
 			`Are you sure you want to send this message to **${receiver.display}**?` +
-				(receiver.additional
-				? " " + receiver.additional
-				: ""),
+				(receiver.additional ? " " + receiver.additional : ""),
 		)
 		.setColor("BLURPLE")
 		.setAuthor({

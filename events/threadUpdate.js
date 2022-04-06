@@ -1,5 +1,5 @@
 /** @file Let A user know when their Modmail thread is archived or unarchived. */
-import { MessageEmbed } from "discord.js";
+import { GuildMember, MessageEmbed } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -24,7 +24,7 @@ const event = {
 
 		if (newThread.archived) return await sendClosedMessage(newThread);
 		const member = await getMemberFromThread(newThread);
-		if (!member) return;
+		if (!(member instanceof GuildMember)) return;
 
 		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
