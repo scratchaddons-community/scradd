@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import CONSTANTS from "../common/CONSTANTS.js";
+import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -7,7 +8,11 @@ const info = {
 	data: new SlashCommandBuilder().setDescription("Kills the bot.").setDefaultPermission(false),
 
 	interaction: (interaction) => {
-		console.log(interaction.user.tag, "is killing the bot.");
+		logError(
+			interaction.user.tag + " is killing the bot.",
+			"interactionCreate",
+			interaction.client,
+		);
 		process.exit();
 	},
 

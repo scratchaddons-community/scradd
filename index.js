@@ -3,12 +3,12 @@ import http from "http";
 import path from "path";
 import url from "url";
 
-import { Client, MessageEmbed,Util } from "discord.js";
+import { Client } from "discord.js";
 import dotenv from "dotenv";
 
-import escapeMessage from "./lib/escape.js";
 import importScripts from "./lib/importScripts.js";
 import pkg from "./lib/package.js";
+import logError from "./lib/logError.js";
 
 dotenv.config();
 
@@ -63,38 +63,15 @@ for (const [event, execute] of events.entries()) {
 		try {
 			return await execute.event(...args);
 		} catch (error) {
-			try {
-				console.error(error);
-
-				const embed = new MessageEmbed()
-					.setTitle("Error!")
-					.setDescription(
-						`Uh-oh! I found an error! (event **${escapeMessage(event)}**)\n` +
-						`\`\`\`json\n` +
-						`${Util.cleanCodeBlockContent(JSON.stringify(error))}\`\`\``,
-					)
-					.setColor("LUMINOUS_VIVID_PINK");
-				const { ERROR_CHANNEL } = process.env;
-
-				if (!ERROR_CHANNEL)
-					throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
-
-				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
-
-				if (!testingChannel?.isText())
-					throw new ReferenceError("Could not find error reporting channel");
-
-				await testingChannel.send({
-					embeds: [embed],
-				});
-			} catch (errorError) {
-				console.error(errorError);
-			}
+			logError(error, event, client);
 		}
 	});
 }
 
 await client.login(process.env.BOT_TOKEN);
+
+process.on("uncaughtException", (err, origin) => logError(err, "NODE_" + origin, client));
+process.on("warning", (err) => logError(err, "NODE_warning", client));
 
 if (process.env.NODE_ENV === "production") {
 	const server = http.createServer((_, response) => {

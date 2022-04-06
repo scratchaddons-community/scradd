@@ -4,8 +4,8 @@
  * @type {import("../types/event").default<"warn">}
  */
 const event = {
-	event(...args) {
-		throw new Error(args.join(" "));
+	event(message) {
+		throw new Error(message);
 	},
 };
 
