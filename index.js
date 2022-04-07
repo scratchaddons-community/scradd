@@ -20,7 +20,7 @@ const client = new Client({
 	presence: {
 		activities: [
 			{
-				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs...",
+				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
 				type: "WATCHING",
 				url: pkg.homepage,
 			},

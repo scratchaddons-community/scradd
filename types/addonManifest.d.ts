@@ -82,12 +82,12 @@ type definitions_cssManipulator =
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
  *
- * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
  * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
- * `[...]`: An array that contains match rules. The script will execute if it matches any of the rules.
+ * `[…]`: An array that contains match rules. The script will execute if it matches any of the rules.
  *
- * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
  * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
  * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`,
@@ -95,7 +95,7 @@ type definitions_cssManipulator =
  *
  * `"isNotScratchWWW"`: A match rule shortcut matcher.
  *
- * `"https://..."`: A URL match rule.
+ * `"https://…"`: A URL match rule.
  */
 type definitions_matches =
 	| "*"

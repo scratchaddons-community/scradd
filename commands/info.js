@@ -159,7 +159,7 @@ const OPTIONS = [
 		name: "Source Code",
 	},
 	{
-		description: () => "Pinging...",
+		description: () => "Pinging…",
 		edit: (interaction, reply) =>
 			`__**Bot info:**__\n` +
 			`**Ping**: ${+reply.createdAt - +interaction.createdAt}ms\n` +
