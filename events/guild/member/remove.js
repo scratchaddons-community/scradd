@@ -15,9 +15,19 @@ const event = {
 			`Ahh… ${member.toString()} left us… hope they’ll have safe travels!`,
 		];
 
+		const ban = await member.guild.bans
+			.fetch(member)
+			.then((partialBan) => {
+				if (partialBan.partial) return partialBan.fetch();
+				return partialBan;
+			})
+			.catch(() => {});
+
 		await Promise.all([
 			channel.send({
-				content: byes[Math.floor(Math.random() * byes.length)],
+				content: ban
+					? `Oof… ${member.toString()} got banned…${ban.reason ? ` ${ban.reason}` : ""}`
+					: byes[Math.floor(Math.random() * byes.length)],
 			}),
 			getThreadFromMember(member).then(async (thread) => {
 				if (thread) closeModmail(thread, member.user);
