@@ -79,6 +79,8 @@ export const ANSWERS = [
 
 export const CHANNEL_TAG = "#suggestions";
 
+const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
+
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
@@ -256,7 +258,7 @@ const info = {
 							if (typeof count !== "number") return;
 
 							const answer =
-								message.thread?.name.split("|")[0]?.trim() ?? DEFAULT_ANSWER.name;
+								message.thread?.name.split(" | ")[1]?.trim() ?? DEFAULT_ANSWER.name;
 
 							if (
 								requestedAnswer &&

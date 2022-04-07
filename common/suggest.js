@@ -81,7 +81,7 @@ export default class SuggestionChannel {
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: 1_440,
-			name: `${DEFAULT_ANSWER.name} | ${embed.title ?? ""}`,
+			name: `${embed.title ?? ""} | ${DEFAULT_ANSWER.name}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
 
@@ -137,7 +137,7 @@ export default class SuggestionChannel {
 			Promise.race([
 				new Promise((resolve) => setTimeout(resolve, 3_000)),
 				interaction.channel.setName(
-					interaction.channel.name.replace(/^[^|]+?(?=(?: \| .+)?$)/, answer),
+					interaction.channel.name.replace(/^(.+? \| )?[^|]+$/,"$1"+answer),
 					`Thread answered by ${interaction.user.tag}`,
 				),
 			]),
