@@ -7,10 +7,10 @@ import {
 	postMessageToBoard,
 	MIN_REACTIONS,
 	updateReactionCount,
-} from "../common/board.js";
-import { SUGGESTION_EMOJIS } from "../commands/suggestion.js";
+} from "../../../common/board.js";
+import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 
-/** @type {import("../types/event").default<"messageReactionAdd">} */
+/** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
 	async event(reaction, user) {
 		if (reaction.partial) reaction = await reaction.fetch();

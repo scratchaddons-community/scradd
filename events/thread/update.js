@@ -7,9 +7,9 @@ import {
 	sendClosedMessage,
 	sendOpenedMessage,
 	UNSUPPORTED,
-} from "../common/modmail.js";
+} from "../../common/modmail.js";
 
-/** @type {import("../types/event").default<"threadUpdate">} */
+/** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
 	async event(oldThread, newThread) {
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();

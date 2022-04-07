@@ -3,7 +3,7 @@ import http from "http";
 import path from "path";
 import url from "url";
 
-import { Client } from "discord.js";
+import { Client, Collection } from "discord.js";
 import dotenv from "dotenv";
 
 import importScripts from "./lib/importScripts.js";
@@ -52,9 +52,11 @@ const client = new Client({
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
 
-const events = await importScripts(
-	/** @type {`${string}events`} */ (path.resolve(dirname, "./events")),
-);
+const events = await /**
+ * @template {keyof import("discord.js").ClientEvents} K
+ *
+ * @type {Promise<Collection<K, import("./types/event").default<K>>>}
+ */ (importScripts(path.resolve(dirname, "./events")));
 
 for (const [event, execute] of events.entries()) {
 	if (execute.apply === false) continue;

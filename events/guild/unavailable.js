@@ -1,7 +1,7 @@
 /**
  * @file Enables Error reporting.
  *
- * @type {import("../types/event").default<"guildUnavailable">}
+ * @type {import("../../types/event").default<"guildUnavailable">}
  */
 const event = {
 	event(guild) {

@@ -3,7 +3,7 @@
  *   autoreply if contains certain triggers.
  */
 import { GuildMember, MessageEmbed, Util } from "discord.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 import {
 	COLORS,
@@ -13,16 +13,16 @@ import {
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
 	UNSUPPORTED,
-} from "../common/modmail.js";
+} from "../../common/modmail.js";
 
-import escapeMessage from "../lib/escape.js";
-import reactAll from "../lib/reactAll.js";
+import escapeMessage from "../../lib/escape.js";
+import reactAll from "../../lib/reactAll.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 
-/** @type {import("../types/event").default<"messageCreate">} */
+/** @type {import("../../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
 		if (message.flags.has("EPHEMERAL") || message.type === "THREAD_STARTER_MESSAGE") return;

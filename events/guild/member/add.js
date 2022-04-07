@@ -1,7 +1,7 @@
 /**
  * @file Enables Error reporting.
  *
- * @type {import("../types/event").default<"guildMemberAdd">}
+ * @type {import("../../../types/event").default<"guildMemberAdd">}
  */
 const event = {
 	async event(member) {

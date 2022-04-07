@@ -1,7 +1,7 @@
 /** @file Runs Commands when used. */
-import commands from "../lib/commands.js";
+import commands from "../../lib/commands.js";
 
-/** @type {import("../types/event").default<"interactionCreate">} */
+/** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
 	async event(interaction) {
 		if (!interaction.isCommand()) return;

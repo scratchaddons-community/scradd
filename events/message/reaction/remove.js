@@ -6,9 +6,9 @@ import {
 	postMessageToBoard,
 	MIN_REACTIONS,
 	updateReactionCount,
-} from "../common/board.js";
+} from "../../../common/board.js";
 
-/** @type {import("../types/event").default<"messageReactionRemove">} */
+/** @type {import("../../../types/event").default<"messageReactionRemove">} */
 const event = {
 	async event(reaction, user) {
 		if (reaction.partial) reaction = await reaction.fetch();
