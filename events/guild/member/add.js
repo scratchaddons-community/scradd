@@ -1,9 +1,9 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import fetch from "node-fetch";
 
-const rawCount = /** @type {{ count: number; _chromeCountDate: string }} */ (
-	await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())
-).count;
+const rawCount =
+	/** @type {{ count: number; _chromeCountDate: string }} */
+	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
 
 const count = new Intl.NumberFormat().format(
 	+(
@@ -46,9 +46,7 @@ const event = {
 		];
 
 		await Promise.all([
-			channel.send({
-				content: greetings[Math.floor(Math.random() * greetings.length)],
-			}),
+			channel.send({ content: greetings[Math.floor(Math.random() * greetings.length)] }),
 			member
 				.createDM()
 				.then((dm) =>

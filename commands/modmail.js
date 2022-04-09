@@ -129,9 +129,7 @@ const info = {
 							.setDescription(
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 							)
-							.setFooter({
-								text: UNSUPPORTED,
-							})
+							.setFooter({ text: UNSUPPORTED })
 							.setColor(COLORS.opened);
 
 						await sendOpenedMessage(user).then(async (success) => {

@@ -13,8 +13,10 @@ export const { MODMAIL_CHANNEL = "" } = process.env;
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
 
 export const COLORS = {
-	/** @type {import("discord.js").ColorResolvable} */ opened: "GOLD",
-	/** @type {import("discord.js").ColorResolvable} */ closed: "DARK_GREEN",
+	/** @type {import("discord.js").ColorResolvable} */
+	opened: "GOLD",
+	/** @type {import("discord.js").ColorResolvable} */
+	closed: "DARK_GREEN",
 };
 export const UNSUPPORTED =
 	"Please note that reactions, replies, edits, and deletions are not supported.";
@@ -25,9 +27,7 @@ export const UNSUPPORTED =
  * @param {import("discord.js").Guild} [guild] - The guild to search. Defaults to the message’s guild.
  *
  * @returns {Promise<
- * 	(import("discord.js").WebhookMessageOptions & {
- * 		threadId?: undefined;
- * 	}) &
+ * 	(import("discord.js").WebhookMessageOptions & { threadId?: undefined }) &
  * 		(import("discord.js").MessagePayload | import("discord.js").MessageOptions)
  * >}
  *   - Webhook message.
@@ -128,9 +128,7 @@ export async function sendClosedMessage(thread, reason) {
 						],
 					});
 				}),
-			dmChannel?.send({
-				embeds: [embed],
-			}),
+			dmChannel?.send({ embeds: [embed] }),
 		])
 	)[1];
 }
@@ -168,9 +166,7 @@ export async function sendOpenedMessage(user) {
 						user.guild.name,
 					)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 				)
-				.setFooter({
-					text: UNSUPPORTED,
-				})
+				.setFooter({ text: UNSUPPORTED })
 				.setColor(COLORS.opened),
 		],
 	});
@@ -196,10 +192,7 @@ export async function generateConfirm(receiver, onConfirm, reply, edit) {
 				(receiver.additional ? " " + receiver.additional : ""),
 		)
 		.setColor("BLURPLE")
-		.setAuthor({
-			iconURL: receiver.icon,
-			name: receiver.name,
-		});
+		.setAuthor({ iconURL: receiver.icon, name: receiver.name });
 
 	const button = new MessageButton()
 		.setLabel("Confirm")

@@ -78,9 +78,7 @@ process
 
 if (process.env.NODE_ENV === "production") {
 	const server = http.createServer((_, response) => {
-		response.writeHead(302, {
-			location: pkg.homepage,
-		});
+		response.writeHead(302, { location: pkg.homepage });
 		response.end();
 	});
 

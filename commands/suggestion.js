@@ -58,11 +58,7 @@ export const ANSWERS = [
 		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
-	{
-		color: "GOLD",
-		description: "Someone is currently working on this",
-		name: "In Development",
-	},
+	{ color: "GOLD", description: "Someone is currently working on this", name: "In Development" },
 	{
 		color: "DARK_GREEN",
 		description:

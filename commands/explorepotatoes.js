@@ -32,10 +32,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 					return !!threadsFound[`${channelFound}`];
 
 				const thread = (
-					await channelWanted.threads.fetchArchived({
-						before: channelFound,
-						limit: 2,
-					})
+					await channelWanted.threads.fetchArchived({ before: channelFound, limit: 2 })
 				).threads.first();
 
 				threadsFound[channelWanted.id] = {

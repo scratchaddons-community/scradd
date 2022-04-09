@@ -54,10 +54,7 @@ const event = {
 				reactions++;
 				promises.push(
 					webhook
-						.send({
-							threadId: existingThread.id,
-							...(await generateMessage(message)),
-						})
+						.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
 						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
 				);
@@ -83,9 +80,7 @@ const event = {
 						const openedEmbed = new MessageEmbed()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
-							.setFooter({
-								text: UNSUPPORTED,
-							})
+							.setFooter({ text: UNSUPPORTED })
 							.setColor(COLORS.opened);
 
 						const starterMessage = await mailChannel.send({

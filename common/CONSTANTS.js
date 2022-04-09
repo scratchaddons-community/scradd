@@ -1,9 +1,6 @@
 export default {
 	emojis: {
-		statuses: {
-			yes: "<:yes:940054094272430130>",
-			no: "<:no:940054047854047282>",
-		},
+		statuses: { yes: "<:yes:940054094272430130>", no: "<:no:940054047854047282>" },
 		autoreact: {
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",
@@ -37,23 +34,14 @@ export default {
 		},
 	},
 	robotop: "323630372531470346",
-	servers: {
-		testing: "938438560925761619",
-	},
-	roles: {
-		developers: "938439909742616616",
-		testers: "938440159102386276",
-	},
+	servers: { testing: "938438560925761619" },
+	roles: { developers: "938439909742616616", testers: "938440159102386276" },
 	repos: {
 		sa: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
 		scradd: { root: "https://github.com/scratchaddons-community/scradd", branch: "main" },
 	},
-	colors: {
-		theme: 0xff7b26,
-	},
+	colors: { theme: 0xff7b26 },
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	channels: {
-		general: "806602307750985803",
-	},
+	channels: { general: "806602307750985803" },
 };

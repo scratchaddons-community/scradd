@@ -29,10 +29,7 @@ const info = {
 			);
 
 			await Promise.all([
-				interaction.reply({
-					content: CONSTANTS.emojis.statuses.yes,
-					ephemeral: true,
-				}),
+				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				channel?.isText() &&
 					channel.send({
 						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(

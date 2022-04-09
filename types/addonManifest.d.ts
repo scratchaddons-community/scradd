@@ -75,9 +75,7 @@ type definitions_cssManipulator =
 			/** The source that provides the color. */
 			source: definitions_cssManipulator;
 			/** The possible options. */
-			options: {
-				[key: string]: definitions_cssManipulator;
-			};
+			options: { [key: string]: definitions_cssManipulator };
 	  };
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
@@ -320,9 +318,7 @@ type AddonManifest = {
 		/** The description of the preset. */
 		description?: string;
 		/** An object containing preset values of the settings. */
-		values: {
-			[key: string]: boolean | number | string;
-		};
+		values: { [key: string]: boolean | number | string };
 	}>;
 	/**
 	 * An array of libraries that the addon uses.

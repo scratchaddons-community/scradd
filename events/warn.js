@@ -1,4 +1,4 @@
-import {emitWarning} from "process";
+import { emitWarning } from "process";
 
 /**
  * @file Enables Reporting warnings.

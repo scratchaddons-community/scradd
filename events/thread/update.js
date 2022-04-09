@@ -32,9 +32,7 @@ const event = {
 					embeds: [
 						(starter.embeds[0] ?? new MessageEmbed())
 							.setTitle("Modmail ticket opened!")
-							.setFooter({
-								text: UNSUPPORTED,
-							})
+							.setFooter({ text: UNSUPPORTED })
 							.setColor(COLORS.opened),
 					],
 				});

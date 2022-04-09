@@ -3,13 +3,7 @@ import { GuildMember, Message, MessageEmbed } from "discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 
-/**
- * @typedef {{
- * 	description: string;
- * 	color: import("discord.js").ColorResolvable;
- * 	name: string;
- * }} Answer
- */
+/** @typedef {{ description: string; color: import("discord.js").ColorResolvable; name: string }} Answer */
 
 export const MAX_TITLE_LENGTH = 50;
 
@@ -70,9 +64,7 @@ export default class SuggestionChannel {
 			})
 			.setTitle(data.title)
 			.setDescription(data.description)
-			.setFooter({
-				text: `${DEFAULT_ANSWER.name}`,
-			});
+			.setFooter({ text: `${DEFAULT_ANSWER.name}` });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
@@ -137,7 +129,7 @@ export default class SuggestionChannel {
 			Promise.race([
 				new Promise((resolve) => setTimeout(resolve, 3_000)),
 				interaction.channel.setName(
-					interaction.channel.name.replace(/^(.+? \| )?[^|]+$/,"$1"+answer),
+					interaction.channel.name.replace(/^(.+? \| )?[^|]+$/, "$1" + answer),
 					`Thread answered by ${interaction.user.tag}`,
 				),
 			]),
@@ -148,9 +140,7 @@ export default class SuggestionChannel {
 
 			embed
 				.setColor((answers.find(({ name }) => answer === name) ?? DEFAULT_ANSWER).color)
-				.setFooter({
-					text: answer,
-				});
+				.setFooter({ text: answer });
 
 			promises.push(starter.edit({ embeds: [embed] }));
 		}

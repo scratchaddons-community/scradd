@@ -13,9 +13,8 @@ const addons = await fetch(
 	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",
 ).then(
 	async (response) =>
-		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (
-			await response.json()
-		),
+		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */
+		(await response.json()),
 );
 
 /** @type {{ [key: string]: import("../types/addonManifest").default }} */
@@ -27,18 +26,9 @@ const fuse = new Fuse(addons, {
 	includeScore: true,
 
 	keys: [
-		{
-			name: "id",
-			weight: 1,
-		},
-		{
-			name: "name",
-			weight: 1,
-		},
-		{
-			name: "description",
-			weight: 0.5,
-		},
+		{ name: "id", weight: 1 },
+		{ name: "name", weight: 1 },
+		{ name: "description", weight: 0.5 },
 	],
 });
 
@@ -162,9 +152,8 @@ const info = {
 			const manifest = (manifestCache[addon.id] ??= await fetch(
 				`${CONSTANTS.repos.sa}/addons/${addon.id}/addon.json?date=${Date.now()}`,
 			).then(async (response) => {
-				return await /** @type {Promise<import("../types/addonManifest").default>} */ (
-					response.json()
-				);
+				return await /** @type {Promise<import("../types/addonManifest").default>} */
+				(response.json());
 			}));
 
 			const lastUpdatedIn = `last updated in v${
@@ -184,11 +173,7 @@ const info = {
 				);
 
 			embed.addFields([
-				{
-					inline: true,
-					name: "Group",
-					value: Util.escapeMarkdown(group),
-				},
+				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
 				{
 					inline: true,
 					name: "Version added",
