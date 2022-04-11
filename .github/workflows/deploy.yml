@@ -16,7 +16,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.1.0
+              uses: actions/setup-node@v3.1.1
               with:
                   node-version: 16
                   cache: "npm"
