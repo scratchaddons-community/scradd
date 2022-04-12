@@ -63,13 +63,7 @@ const event = {
 							return await message.react(CONSTANTS.emojis.statuses.no);
 						}),
 				);
-			} else if (
-				[
-					"DEFAULT",
-					"REPLY",
-					"THREAD_STARTER_MESSAGE",
-				].includes(message.type)
-			) {
+			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
 				const collector = await generateConfirm(
 					{

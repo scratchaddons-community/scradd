@@ -145,17 +145,14 @@ export default async function warn(user, strikes, reason) {
 				)
 				.catch(() => false),
 	]);
-	
+
 	return actualStrikes;
 }
 
 /**
  * @param {import("discord.js").GuildMember} user
  * @param {number} strikes
- * @param {{
- * 	user: string;
- * 	expiresAt: number;
- * }[]} warns
+ * @param {{ user: string; expiresAt: number }[]} warns
  */
 function unwarn(user, strikes, warns) {
 	for (var i = 0; i < strikes; i++) {

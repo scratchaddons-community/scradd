@@ -41,16 +41,13 @@ const event = {
 				});
 			}
 
-			const guildCommands = await client.application?.commands.fetch({
-				guildId: guild.id,
-			}).catch(()=>{});
-console.log("deleting commands from",guild.id)
+			const guildCommands = await client.application?.commands
+				.fetch({ guildId: guild.id })
+				.catch(() => {});
 			guildCommands?.forEach(async (command) => await command.delete());
 		});
 
-		const prexistingCommands = await client.application.commands.fetch({
-			guildId: GUILD_ID,
-		});
+		const prexistingCommands = await client.application.commands.fetch({ guildId: GUILD_ID });
 
 		const prexistingDmCommands = await client.application.commands.fetch();
 
@@ -63,7 +60,6 @@ console.log("deleting commands from",guild.id)
 
 		await Promise.all([
 			...prexistingCommands.map((command) => {
-				console.log("sync 1 ing command ",command.name)
 				if (
 					slashes.has(command.name) ||
 					(slashes.get(command.name)?.permissions !== "DM" &&
@@ -71,11 +67,9 @@ console.log("deleting commands from",guild.id)
 				)
 					return;
 
-					console.log("deleting command",command.name)
 				return command.delete();
 			}),
 			prexistingDmCommands.map((command) => {
-				console.log("sync 1 ing global command",command.name)
 				if (
 					slashes.has(command.name) ||
 					(slashes.get(command.name)?.permissions === "DM" &&
@@ -83,14 +77,12 @@ console.log("deleting commands from",guild.id)
 				)
 					return;
 
-					console.log("deleting global command",command.name)
 				return command.delete();
 			}),
 		]);
 
 		await Promise.all(
 			slashes.map(async ({ data: command, permissions }, name) => {
-				console.log("sync 2 ing command",command.name)
 				const newCommand = await (prexistingCommands.has(name)
 					? permissions === "DM" && process.env.NODE_ENV === "production"
 						? client.application?.commands.edit(name, command.toJSON())
