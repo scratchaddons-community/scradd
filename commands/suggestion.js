@@ -166,7 +166,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== GUILD_ID) return;
+		if (interaction.guild?.id !== GUILD_ID) throw new Error("Ran command in the wrong server!");
 
 		const command = interaction.options.getSubcommand();
 

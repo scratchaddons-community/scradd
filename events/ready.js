@@ -24,8 +24,7 @@ const event = {
 				const { channels } = await guild.fetch();
 				const { LOGS_CHANNEL } = process.env;
 
-				if (!LOGS_CHANNEL)
-					throw new ReferenceError("LOGS_CHANNEL is not set in the .env");
+				if (!LOGS_CHANNEL) throw new ReferenceError("LOGS_CHANNEL is not set in the .env");
 
 				const channel = await channels.fetch(LOGS_CHANNEL);
 
@@ -42,49 +41,68 @@ const event = {
 				});
 			}
 
-			const guildCommands = await client.application?.commands
-				.fetch({
-					guildId: guild.id,
-				})
-				.catch(() => {});
-
-			guildCommands?.forEach(async (command) => await command.delete().catch(() => {}));
+			const guildCommands = await client.application?.commands.fetch({
+				guildId: guild.id,
+			}).catch(()=>{});
+console.log("deleting commands from",guild.id)
+			guildCommands?.forEach(async (command) => await command.delete());
 		});
 
 		const prexistingCommands = await client.application.commands.fetch({
 			guildId: GUILD_ID,
 		});
-		/**
-		 * @type {Collection<
-		 * 	string,
-		 * 	{
-		 * 		command: import("../types/command").Command;
-		 * 		permissions?: import("discord.js").ApplicationCommandPermissionData[];
-		 * 	}
-		 * >}
-		 */
+
+		const prexistingDmCommands = await client.application.commands.fetch();
+
+		/** @type {Collection<string, import("../types/command").default>} */
 		const slashes = new Collection();
 
 		for (const [key, command] of commands.entries()) {
-			if (command.apply !== false)
-				slashes.set(key, { command: command.data, permissions: command.permissions });
+			if (command.apply !== false) slashes.set(key, command);
 		}
 
-		await Promise.all(
-			prexistingCommands.map((command) => {
-				if (slashes.has(command.name)) return false;
+		await Promise.all([
+			...prexistingCommands.map((command) => {
+				console.log("sync 1 ing command ",command.name)
+				if (
+					slashes.has(command.name) ||
+					(slashes.get(command.name)?.permissions !== "DM" &&
+						process.env.NODE_ENV === "production")
+				)
+					return;
 
+					console.log("deleting command",command.name)
 				return command.delete();
 			}),
-		);
+			prexistingDmCommands.map((command) => {
+				console.log("sync 1 ing global command",command.name)
+				if (
+					slashes.has(command.name) ||
+					(slashes.get(command.name)?.permissions === "DM" &&
+						process.env.NODE_ENV === "production")
+				)
+					return;
+
+					console.log("deleting global command",command.name)
+				return command.delete();
+			}),
+		]);
 
 		await Promise.all(
-			slashes.map(async ({ command, permissions }, name) => {
+			slashes.map(async ({ data: command, permissions }, name) => {
+				console.log("sync 2 ing command",command.name)
 				const newCommand = await (prexistingCommands.has(name)
-					? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
-					: client.application?.commands.create(command.toJSON(), GUILD_ID));
+					? permissions === "DM" && process.env.NODE_ENV === "production"
+						? client.application?.commands.edit(name, command.toJSON())
+						: client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
+					: client.application?.commands.create(
+							command.toJSON(),
+							permissions === "DM" && process.env.NODE_ENV === "production"
+								? undefined
+								: GUILD_ID,
+					  ));
 
-				if (permissions)
+				if (permissions && permissions !== "DM")
 					await newCommand?.permissions.add({ guild: GUILD_ID, permissions });
 			}),
 		);

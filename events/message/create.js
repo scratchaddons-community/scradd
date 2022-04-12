@@ -33,7 +33,7 @@ const event = {
 		if (
 			!message.content.startsWith("=") &&
 			message.channel.type === "DM" &&
-			message.author.id !== message.client.user?.id
+			(message.author.id !== message.client.user?.id || message.interaction)
 		) {
 			const guild = await message.client.guilds.fetch(GUILD_ID);
 			const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
@@ -45,10 +45,12 @@ const event = {
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
-				webhooks.find(
-					(possibleWebhook) => possibleWebhook.name === CONSTANTS.webhookName,
-				) ?? (await mailChannel.createWebhook(CONSTANTS.webhookName));
-			const existingThread = await getThreadFromMember(message.author, guild);
+				webhooks.find((possibleWebhook) => !!possibleWebhook.token) ??
+				(await mailChannel.createWebhook(CONSTANTS.webhookName));
+			const existingThread = await getThreadFromMember(
+				message.interaction?.user || message.author,
+				guild,
+			);
 
 			if (existingThread) {
 				reactions++;
@@ -56,15 +58,16 @@ const event = {
 					webhook
 						.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
-						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
+						.catch(async (error) => {
+							console.error(error);
+							return await message.react(CONSTANTS.emojis.statuses.no);
+						}),
 				);
 			} else if (
 				[
 					"DEFAULT",
 					"REPLY",
-					"APPLICATION_COMMAND",
 					"THREAD_STARTER_MESSAGE",
-					"CONTEXT_MENU_COMMAND",
 				].includes(message.type)
 			) {
 				let toEdit = message;
@@ -112,9 +115,10 @@ const event = {
 								.then(
 									async () => await message.react(CONSTANTS.emojis.statuses.yes),
 								)
-								.catch(
-									async () => await message.react(CONSTANTS.emojis.statuses.no),
-								),
+								.catch(async (error) => {
+									console.error(error);
+									return await message.react(CONSTANTS.emojis.statuses.no);
+								}),
 						]);
 					},
 					async (options) => {
@@ -143,7 +147,8 @@ const event = {
 			if (member instanceof GuildMember) {
 				const channel =
 					member.user.dmChannel ??
-					(await member.createDM().catch(async () => {
+					(await member.createDM().catch(async (error) => {
+						console.error(error);
 						await message.react(CONSTANTS.emojis.statuses.no);
 					}));
 				const messageToSend = await generateMessage(message);
@@ -159,7 +164,10 @@ const event = {
 					channel
 						?.send(messageToSend)
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
-						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
+						.catch(async (error) => {
+							console.error(error);
+							return await message.react(CONSTANTS.emojis.statuses.no);
+						}),
 				);
 			}
 		}
@@ -242,7 +250,9 @@ const event = {
 		function react(emoji) {
 			if (reactions > 2) return;
 			reactions++;
-			const promise = message.react(emoji).catch(() => {});
+			const promise = message.react(emoji).catch((error) => {
+				console.error(error);
+			});
 			promises.push(promise);
 			return promise;
 		}

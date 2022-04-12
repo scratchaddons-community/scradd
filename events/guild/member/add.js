@@ -25,9 +25,9 @@ const event = {
 			([, "st", "nd", "rd"][(number / 10) % 10 ^ 1 && number % 10] || "th") +
 			"**" +
 			(`${number}`.includes("69")
-				? " (nice)"
+				? " (nic" + "e".repeat(Math.floor(number.toString().length / 2)) + ")"
 				: /^[1-9]0+$/.test(number + "")
-				? " (🥳🥳🥳)"
+				? " (" + "🥳".repeat(number.toString().length - 1) + ")"
 				: "");
 
 		const greetings = [
