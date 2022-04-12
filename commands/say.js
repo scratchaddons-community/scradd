@@ -19,13 +19,12 @@ const info = {
 		const content = interaction.options.getString("message") ?? "";
 
 		const message = await interaction.channel?.send({
-			allowedMentions: { parse: ["users"], roles: [] },
 			content,
 		});
 
 		if (message) {
 			const channel = await interaction.guild?.channels.fetch(
-				process.env.ERROR_CHANNEL ?? "",
+				process.env.LOGS_CHANNEL ?? "",
 			);
 
 			await Promise.all([
@@ -34,7 +33,7 @@ const info = {
 					channel.send({
 						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(
 							content,
-						)}\` (https://discord.com/channels/${process.env.GUILD_ID ?? "@me"}/${
+						)}\` (https://discord.com/channels/${message.guild?.id ?? "@me"}/${
 							message.channel.id
 						}/${message.id})`,
 

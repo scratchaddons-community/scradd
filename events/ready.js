@@ -22,12 +22,12 @@ const event = {
 				if (process.env.NODE_ENV !== "production") return;
 
 				const { channels } = await guild.fetch();
-				const { ERROR_CHANNEL } = process.env;
+				const { LOGS_CHANNEL } = process.env;
 
-				if (!ERROR_CHANNEL)
-					throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
+				if (!LOGS_CHANNEL)
+					throw new ReferenceError("LOGS_CHANNEL is not set in the .env");
 
-				const channel = await channels.fetch(ERROR_CHANNEL);
+				const channel = await channels.fetch(LOGS_CHANNEL);
 
 				if (!channel?.isText())
 					throw new ReferenceError("Could not find error reporting channel");

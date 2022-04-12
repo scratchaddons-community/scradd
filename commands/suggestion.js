@@ -199,7 +199,7 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered suggestion as ${escapeMessage(answer)}!` +
+							} Successfully answered suggestion as **${escapeMessage(answer)}**!` +
 							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,

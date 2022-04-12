@@ -117,7 +117,7 @@ const OPTIONS = [
 			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
 			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
 			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
-				process.env.ERROR_CHANNEL ?? "",
+				process.env.LOGS_CHANNEL ?? "",
 			)}>.`,
 
 		emoji: "➕",
@@ -153,7 +153,7 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			`I am **open-source**! The source code is available [**on Github**](${CONSTANTS.repos.scradd.root}).`,
+			`I am **open-source**! The source code is available [**on GitHub**](${CONSTANTS.repos.scradd.root}).`,
 
 		emoji: "💻",
 		name: "Source Code",
@@ -162,7 +162,7 @@ const OPTIONS = [
 		description: () => "Pinging…",
 		edit: (interaction, reply) =>
 			`__**Bot info:**__\n` +
-			`**Ping**: ${+reply.createdAt - +interaction.createdAt}ms\n` +
+			`**Ping**: ${Math.abs(+reply.createdAt - +interaction.createdAt)}ms\n` +
 			`Last **restarted**  <t:${Math.round(
 				+(interaction.client.readyAt ?? 0) / 1_000,
 			)}:R>\n` +
@@ -185,7 +185,7 @@ const OPTIONS = [
 				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
 			}\n` +
 			`**Logs** channel: ${
-				process.env.ERROR_CHANNEL ? `<#${process.env.ERROR_CHANNEL}>\n` : "*None*"
+				process.env.LOGS_CHANNEL ? `<#${process.env.LOGS_CHANNEL}>\n` : "*None*"
 			}` +
 			`**Mods** role: ${
 				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>\n` : "*None*"
@@ -230,7 +230,7 @@ const info = {
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
 		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
 		const message = await interaction.reply({
-			allowedMentions: { parse: [], users: [] },
+			allowedMentions: { users: [] },
 
 			components: [
 				new MessageActionRow().addComponents(
@@ -261,7 +261,7 @@ const info = {
 		if (!(message instanceof Message)) throw new TypeError("Result not a Message");
 		if (currentOption?.edit)
 			await interaction.editReply({
-				allowedMentions: { parse: [], users: [] },
+				allowedMentions: { users: [] },
 				components: message.components,
 
 				content: await currentOption?.edit(interaction, message),
@@ -276,13 +276,13 @@ const info = {
 		async function disable() {
 			if (!(message instanceof Message)) {
 				return await interaction.editReply({
-					allowedMentions: { parse: [], users: [] },
+					allowedMentions: { users: [] },
 					content: message.content,
 				});
 			}
 
 			return await interaction.editReply({
-				allowedMentions: { parse: [], users: [] },
+				allowedMentions: { users: [] },
 
 				components: message.components.map((components) =>
 					components.setComponents(

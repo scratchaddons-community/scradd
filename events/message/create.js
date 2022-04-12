@@ -177,7 +177,7 @@ const event = {
 				SUGGESTION_CHANNEL,
 				process.env.BUGS_CHANNEL,
 				BOARD_CHANNEL,
-				process.env.ERROR_CHANNEL,
+				process.env.LOGS_CHANNEL,
 			].includes(message.channel.id)
 		)
 			return await Promise.all(promises);
@@ -191,7 +191,7 @@ const event = {
 			array.shift();
 			promises.push(
 				message.reply({
-					allowedMentions: { roles: [], users: [] },
+					allowedMentions: { users: [] },
 
 					content:
 						`You used the spoiler hack to hide: \`\`\`\n` +
@@ -253,7 +253,11 @@ const event = {
 
 		if (includes(/av[ao]cado/) || content.includes("🥑")) react("🥑");
 
-		if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
+		if (
+			content === "e" ||
+			(content === "." && message.author.id === "761276793666797589") ||
+			content.includes("<:e_:847428533432090665>")
+		)
 			react(CONSTANTS.emojis.autoreact.e);
 
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
@@ -266,10 +270,17 @@ const event = {
 
 		if (includes(/te(?:r|w)+a/)) react(CONSTANTS.emojis.autoreact.tera);
 
-		if (content.includes("sat on addons")) {
+		if (includes("sat on addon")) {
 			if (reactions < 2) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
+			}
+		}
+
+		if (includes("snake")) {
+			if (reactions < 2) {
+				reactions = reactions + 3;
+				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
 			}
 		}
 

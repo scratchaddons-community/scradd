@@ -36,7 +36,6 @@ export async function generateMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
 
 	return {
-		allowedMentions: { users: [] },
 		avatarURL: message.member?.displayAvatarURL() ?? message.author?.displayAvatarURL(),
 		content: await messageToText(message, false),
 		embeds,
