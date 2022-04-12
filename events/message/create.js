@@ -15,7 +15,7 @@ import {
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
-import escapeMessage from "../../lib/escape.js";
+import escapeMessage, { strip } from "../../lib/escape.js";
 import reactAll from "../../lib/reactAll.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
@@ -66,13 +66,18 @@ const event = {
 			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
 				const collector = await generateConfirm(
-					{
-						display: `the ${escapeMessage(mailChannel.guild.name)} server’s mod team`,
-						name: mailChannel.guild.name,
-						icon: mailChannel.guild.iconURL() ?? undefined,
-						additional:
-							"This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.",
-					},
+					new MessageEmbed()
+						.setTitle("Confirmation")
+						.setDescription(
+							`Are you sure you want to send this message to **the ${escapeMessage(
+								mailChannel.guild.name,
+							)} server’s mod team**?This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
+						)
+						.setColor("BLURPLE")
+						.setAuthor({
+							iconURL: mailChannel.guild.iconURL() ?? undefined,
+							name: mailChannel.guild.name,
+						}),
 					async (buttonInteraction) => {
 						const openedEmbed = new MessageEmbed()
 							.setTitle("Modmail ticket opened!")
@@ -211,13 +216,15 @@ const event = {
 			);
 		}
 
-		const content = message.content
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(
-				/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
-				"",
-			);
+		const content = strip(
+			message.content
+				.toLowerCase()
+				.normalize("NFD")
+				.replace(
+					/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
+					"",
+				),
+		);
 
 		/**
 		 * Determines whether the message contains a word.

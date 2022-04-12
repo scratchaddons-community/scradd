@@ -117,12 +117,13 @@ const info = {
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(
-					{
-						display: user?.user.toString(),
-						icon: user.displayAvatarURL(),
-						name: user.displayName,
-					},
-
+					new MessageEmbed()
+						.setTitle("Confirmation")
+						.setDescription(
+							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
+						)
+						.setColor("BLURPLE")
+						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 					async (buttonInteraction) => {
 						const openedEmbed = new MessageEmbed()
 							.setTitle("Modmail ticket opened!")

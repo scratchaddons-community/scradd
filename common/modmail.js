@@ -24,7 +24,6 @@ export const UNSUPPORTED =
  * Generate a webhook message from a message sent by a user.
  *
  * @param {import("discord.js").Message} message - Message sent by a user.
- * @param {import("discord.js").Guild} [guild] - The guild to search. Defaults to the message’s guild.
  *
  * @returns {Promise<
  * 	(import("discord.js").WebhookMessageOptions & { threadId?: undefined }) &
@@ -179,7 +178,7 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {{ display: string; icon?: string; name: string; additional?: string }} receiver
+ * @param {MessageEmbed} confirmEmbed
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
  * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
@@ -190,17 +189,8 @@ export async function sendOpenedMessage(user) {
  * 	buttonInteraction: import("discord.js").MessageComponentInteraction,
  * ) => Promise<void>} onConfirm
  */
-export async function generateConfirm(receiver, onConfirm, reply, edit) {
-	const confirmEmbed = new MessageEmbed()
-		.setTitle("Confirmation")
-		.setDescription(
-			`Are you sure you want to send this message to **${receiver.display}**?` +
-				(receiver.additional ? " " + receiver.additional : ""),
-		)
-		.setColor("BLURPLE")
-		.setAuthor({ iconURL: receiver.icon, name: receiver.name });
-
-	const button = new MessageButton()
+export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
+		const button = new MessageButton()
 		.setLabel("Confirm")
 		.setStyle("PRIMARY")
 		.setCustomId(generateHash("confirm"));
