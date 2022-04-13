@@ -1,5 +1,5 @@
 /**
- * @file Enables Error reporting.
+ * @file Turns Off the bot when its session is invalidated.
  *
  * @type {import("../types/event").default<"invalidated">}
  */

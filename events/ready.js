@@ -1,6 +1,7 @@
 /** @file Initialize Bot on ready. Register commands and etc. */
 
-import { Collection, MessageEmbed } from "discord.js";
+import { Collection } from "discord.js";
+import { Embed } from "@discordjs/builders";
 
 import commands from "../lib/commands.js";
 import pkg from "../lib/package.js";
@@ -33,10 +34,10 @@ const event = {
 
 				return await channel?.send({
 					embeds: [
-						new MessageEmbed()
+						new Embed()
 							.setTitle("Bot restarted!")
 							.setDescription(`Version **v${pkg.version}**`)
-							.setColor("RANDOM"),
+							.setColor(Math.floor(Math.random() * (0xffffff + 1))),
 					],
 				});
 			}

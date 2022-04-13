@@ -1,9 +1,10 @@
 /** @file Code Shared between suggestions and bug reports. */
-import { GuildMember, Message, MessageEmbed } from "discord.js";
+import { Constants, GuildMember, Message, MessageEmbed } from "discord.js";
+import { Embed } from "@discordjs/builders";
 
 import CONSTANTS from "./CONSTANTS.js";
 
-/** @typedef {{ description: string; color: import("discord.js").ColorResolvable; name: string }} Answer */
+/** @typedef {{ description: string; color: number; name: string }} Answer */
 
 export const MAX_TITLE_LENGTH = 50;
 
@@ -13,7 +14,7 @@ export const RATELIMT_MESSAGE =
 /** @type {Answer} */
 export const DEFAULT_ANSWER = {
 	name: "Unanswered",
-	color: "GREYPLE",
+	color: Constants.Colors.GREYPLE,
 	description: "This has not yet been answered",
 };
 
@@ -56,7 +57,7 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		const embed = new MessageEmbed()
+		const embed = new Embed()
 			.setColor(DEFAULT_ANSWER.color)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),

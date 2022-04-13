@@ -56,7 +56,7 @@ const OPTIONS = [
 			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to <#${escapeMessage(
 				process.env.SUGGESTION_CHANNEL ?? "",
 			)}>. I will **react to the suggestion** with ${joinWithAnd(
-				SUGGESTION_EMOJIS[0],
+				SUGGESTION_EMOJIS[0] || [],
 			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
 			`\n` +
 			`Similar **[\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bugreport get-top\`**.`,

@@ -34,8 +34,10 @@ const event = {
 				emojis.includes(reaction.emoji.id ?? reaction.emoji.name ?? ""),
 			)?.find((emoji) => emoji !== (reaction.emoji.id ?? reaction.emoji.name ?? ""));
 
-			if (otherReaction)
-				return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+			if (otherReaction) {
+				await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+				return;
+			}
 		}
 
 		if (

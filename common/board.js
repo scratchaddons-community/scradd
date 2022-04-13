@@ -1,6 +1,7 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import extractMessageExtremities from "../lib/extractMessageExtremities.js";
+import { Embed } from "@discordjs/builders";
 
 import getAllMessages from "../lib/getAllMessages.js";
 import messageToText from "../lib/messageToText.js";
@@ -89,9 +90,9 @@ export async function postMessageToBoard(message) {
 
 	const description = await messageToText(message);
 
-	const boardEmbed = new MessageEmbed()
-		.setColor(message.member?.displayColor ?? "DEFAULT")
-		.setDescription(description)
+	const boardEmbed = new Embed()
+		.setColor(message.member?.displayColor ?? 0)
+		.setDescription(description??null)
 		.setAuthor({
 			iconURL: message.member?.displayAvatarURL() ?? message.author.displayAvatarURL(),
 

@@ -8,6 +8,7 @@ import {
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
+import { Embed } from "@discordjs/builders";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
@@ -22,7 +23,10 @@ const event = {
 		)
 			return;
 
-		if (newThread.archived) return await sendClosedMessage(newThread);
+		if (newThread.archived) {
+			await sendClosedMessage(newThread);
+			return;
+		}
 		const member = await getMemberFromThread(newThread);
 		if (!(member instanceof GuildMember)) return;
 
@@ -30,12 +34,12 @@ const event = {
 			newThread.fetchStarterMessage().then((starter) => {
 				starter.edit({
 					embeds: [
-						(starter.embeds[0] ?? new MessageEmbed())
+						(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
 							.setTitle("Modmail ticket opened!")
 							.setFooter({ text: UNSUPPORTED })
 							.setColor(COLORS.opened),
 					],
-				});
+				}).catch(console.error);
 			}),
 			sendOpenedMessage(member),
 		]);

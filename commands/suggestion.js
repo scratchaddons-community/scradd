@@ -1,13 +1,12 @@
 /** @file Commands To manage suggestions. */
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { Constants, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
 	DEFAULT_ANSWER,
 	getUserFromSuggestion,
 	MAX_TITLE_LENGTH,
-	NO_SERVER_START,
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
 import escapeMessage, { escapeLinks } from "../lib/escape.js";
@@ -39,38 +38,38 @@ export const SUGGESTION_EMOJIS = [
 /** @type {import("../common/suggest.js").Answer[]} */
 export const ANSWERS = [
 	{
-		color: "GREEN",
+		color: Constants.Colors.GREEN,
 		description: "This will probably be added if anyone codes it",
 		name: "Good Idea",
 	},
 	{
-		color: "ORANGE",
+		color: Constants.Colors.ORANGE,
 		description: "This already exists in Scratch or in Scratch Addons",
 		name: "Implemented",
 	},
 	{
-		color: "RED",
+		color: Constants.Colors.RED,
 		description: "This is not something we may add for technical reasons",
 		name: "Impossible",
 	},
 	{
-		color: "LUMINOUS_VIVID_PINK",
+		color: Constants.Colors.LUMINOUS_VIVID_PINK,
 		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
-	{ color: "GOLD", description: "Someone is currently working on this", name: "In Development" },
+	{ color: Constants.Colors.GOLD, description: "Someone is currently working on this", name: "In Development" },
 	{
-		color: "DARK_GREEN",
+		color: Constants.Colors.DARK_GREEN,
 		description:
 			"This is possible, but it could be rejected for things like ethical or technical reasons",
 		name: "Possible",
 	},
 	{
-		color: "DARK_RED",
+		color: Constants.Colors.DARK_RED,
 		description: "Wouldn’t work for non-SA users or users who don’t have the addon/option on",
 		name: "Incompatible",
 	},
-	{ color: "PURPLE", description: "We don’t want to add this for some reason", name: "Rejected" },
+	{ color: Constants.Colors.PURPLE, description: "We don’t want to add this for some reason", name: "Rejected" },
 ];
 
 export const CHANNEL_TAG = "#suggestions";
@@ -179,7 +178,7 @@ const info = {
 
 				if (success) {
 					await Promise.all([
-						reactAll(success, SUGGESTION_EMOJIS[0]),
+						reactAll(success, SUGGESTION_EMOJIS[0]||[]),
 						interaction.reply({
 							content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
 								success.thread?.toString() ?? ""
@@ -327,8 +326,8 @@ const info = {
 
 							return `${index + offset + 1}) **${suggestion.count}** ${
 								suggestion.count > 0
-									? SUGGESTION_EMOJIS[0][0]
-									: SUGGESTION_EMOJIS[0][1]
+									? SUGGESTION_EMOJIS[0]?.[0]
+									: SUGGESTION_EMOJIS[0]?.[1]
 							} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
 								GUILD_ID ?? "@me"
 							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
@@ -354,7 +353,7 @@ const info = {
 						],
 
 						embeds: [
-							new MessageEmbed()
+							new Embed()
 								.setTitle(
 									`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
 										requestedAnswer ? ` labeled ${requestedAnswer}` : ""
@@ -366,7 +365,7 @@ const info = {
 										Math.floor(offset / PAGE_OFFSET) + 1
 									}/${numberOfPages}`,
 								})
-								.setColor("RANDOM"),
+								.setColor(Math.floor(Math.random() * (0xffffff + 1))),
 						],
 					};
 				}

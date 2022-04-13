@@ -1,12 +1,9 @@
 /** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { Constants } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, {
-	MAX_TITLE_LENGTH,
-	NO_SERVER_START,
-	RATELIMT_MESSAGE,
-} from "../common/suggest.js";
+import SuggestionChannel, { MAX_TITLE_LENGTH, RATELIMT_MESSAGE } from "../common/suggest.js";
 import escapeMessage from "../lib/escape.js";
 
 const { BUGS_CHANNEL, GUILD_ID } = process.env;
@@ -16,12 +13,12 @@ if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
 	{
-		color: "GREEN",
+		color: Constants.Colors.GREEN,
 		description: "This bug has been verified and it will be fixed soon",
 		name: "Valid Bug",
 	},
 	{
-		color: "DARK_GREEN",
+		color: Constants.Colors.DARK_GREEN,
 
 		description:
 			"This bug is not a high priority to fix it as it does not affect usage of the addon",
@@ -29,17 +26,17 @@ const ANSWERS = [
 		name: "Minor Bug",
 	},
 	{
-		color: "GOLD",
+		color: Constants.Colors.GOLD,
 		description: "A contributor is currently working to fix this bug",
 		name: "In Development",
 	},
 	{
-		color: "BLUE",
+		color: Constants.Colors.BLUE,
 		description: "This bug has been fixed in the next version of Scratch Addons",
 		name: "Fixed",
 	},
 	{
-		color: "RED",
+		color: Constants.Colors.RED,
 		description: "This is not something that we can or will change",
 		name: "Invalid Bug",
 	},

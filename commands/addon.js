@@ -1,6 +1,6 @@
 /** @file Command To get information about an addon. */
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed, Util } from "discord.js";
+import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { Util } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -56,8 +56,8 @@ const info = {
 		 *
 		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
-		 * @returns {string | undefined} - Returns credit information or undefined if no credits
-		 *   are available.
+		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
+		 *   available.
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
@@ -90,7 +90,7 @@ const info = {
 			return;
 		}
 
-		const embed = new MessageEmbed()
+		const embed = new Embed()
 			.setTitle(addon.name)
 			.setColor(CONSTANTS.colors.theme)
 			.setDescription(
@@ -108,9 +108,8 @@ const info = {
 						  "Input: " +
 						  input
 						: "Random addon") +
-					(compact
-						? CONSTANTS.footerSeperator + "Compact mode"
-						: "Addon id: " + addon.id),
+					CONSTANTS.footerSeperator +
+					(compact ? "Compact mode" : "Addon ID: " + addon.id),
 			})
 			[compact ? "setThumbnail" : "setImage"](
 				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(addon.id)}.png`,
@@ -162,7 +161,12 @@ const info = {
 
 			const credits = generateCredits(addon.credits);
 
-			if (credits) embed.addField("Contributors", Util.escapeMarkdown(credits), true);
+			if (credits)
+				embed.addField({
+					name: "Contributors",
+					value: Util.escapeMarkdown(credits),
+					inline: true,
+				});
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
@@ -172,7 +176,7 @@ const info = {
 						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
-			embed.addFields([
+			embed.addFields(
 				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
 				{
 					inline: true,
@@ -189,7 +193,7 @@ const info = {
 								: ""),
 					),
 				},
-			]);
+			);
 		}
 
 		await interaction.reply({ embeds: [embed] });

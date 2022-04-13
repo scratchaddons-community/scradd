@@ -1,6 +1,14 @@
 /** @file Code To perform operations related to modmail tickets. */
-import { GuildMember, Message, MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
+import {
+	GuildMember,
+	Message,
+	MessageEmbed,
+	MessageActionRow,
+	MessageButton,
+	Constants,
+} from "discord.js";
 import generateHash from "../lib/generateHash.js";
+import { Embed } from "@discordjs/builders";
 
 import escapeMessage from "../lib/escape.js";
 import messageToText from "../lib/messageToText.js";
@@ -13,10 +21,9 @@ export const { MODMAIL_CHANNEL = "" } = process.env;
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
 
 export const COLORS = {
-	/** @type {import("discord.js").ColorResolvable} */
-	opened: "GOLD",
-	/** @type {import("discord.js").ColorResolvable} */
-	closed: "DARK_GREEN",
+	opened: Constants.Colors.GOLD,
+	closed: Constants.Colors.DARK_GREEN,
+	confirm: Constants.Colors.BLURPLE,
 };
 export const UNSUPPORTED =
 	"Please note that reactions, replies, edits, and deletions are not supported.";
@@ -108,11 +115,11 @@ export async function getThreadFromMember(
  */
 export async function sendClosedMessage(thread, reason) {
 	const user = await getMemberFromThread(thread);
-	const embed = new MessageEmbed()
+	const embed = new Embed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
 		.setFooter({ text: "Any future messages will start a new ticket." })
-		.setColor("DARK_GREEN");
+		.setColor(Constants.Colors.DARK_GREEN);
 
 	if (reason) embed.setDescription(reason);
 
@@ -129,9 +136,9 @@ export async function sendClosedMessage(thread, reason) {
 						embeds: [
 							new MessageEmbed(starter.embeds[0])
 								.setTitle("Modmail ticket closed!")
-								.setColor("DARK_GREEN"),
+								.setColor(Constants.Colors.DARK_GREEN),
 						],
-					});
+					}).catch(console.error);
 				}),
 			dmChannel?.send({ embeds: [embed] }),
 		])
@@ -164,7 +171,7 @@ export async function sendOpenedMessage(user) {
 
 	return await dmChannel.send({
 		embeds: [
-			new MessageEmbed()
+			new Embed()
 				.setTitle("Modmail ticket opened!")
 				.setDescription(
 					`The moderation team of **${escapeMessage(
@@ -178,7 +185,7 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {MessageEmbed} confirmEmbed
+ * @param {Embed} confirmEmbed
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
  * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
@@ -190,7 +197,7 @@ export async function sendOpenedMessage(user) {
  * ) => Promise<void>} onConfirm
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
-		const button = new MessageButton()
+	const button = new MessageButton()
 		.setLabel("Confirm")
 		.setStyle("PRIMARY")
 		.setCustomId(generateHash("confirm"));

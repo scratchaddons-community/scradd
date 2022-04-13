@@ -7,7 +7,7 @@ import { emitWarning } from "process";
  */
 const event = {
 	event(message) {
-		throw emitWarning(message);
+		emitWarning(message);
 	},
 };
 

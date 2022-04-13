@@ -1,6 +1,5 @@
 /** @file Commands To manage modmails. */
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -63,22 +62,22 @@ const info = {
 					return;
 				}
 
-				const reason = interaction.options.getString("reason") ?? "";
+				const reason = interaction.options.getString("reason") ?? null;
 
 				await interaction.reply({
 					embeds: [
-						new MessageEmbed()
+						new Embed()
 							.setTitle("Modmail ticket closed!")
 							.setTimestamp(interaction.channel.createdTimestamp)
 							.setDescription(reason)
 							.setFooter({
 								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
 							})
-							.setColor("DARK_GREEN"),
+							.setColor(COLORS.closed),
 					],
 				});
 
-				await closeModmail(interaction.channel, interaction.user, reason);
+				await closeModmail(interaction.channel, interaction.user, reason ?? "");
 
 				break;
 			}
@@ -117,15 +116,15 @@ const info = {
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(
-					new MessageEmbed()
+					new Embed()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
 						)
-						.setColor("BLURPLE")
+						.setColor(COLORS.confirm)
 						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 					async (buttonInteraction) => {
-						const openedEmbed = new MessageEmbed()
+						const openedEmbed = new Embed()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,

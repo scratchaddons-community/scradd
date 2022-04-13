@@ -1,6 +1,7 @@
-import { Interaction, MessageEmbed, Util } from "discord.js";
+import { Constants, Util } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "./database.js";
+import { Embed } from "@discordjs/builders";
 
 /**
  * @param {import("discord.js").Message} log
@@ -27,9 +28,9 @@ let /** @type {import("discord.js").Message} */ warnLog,
  * @param {string} [reason]
  */
 export default async function warn(user, reason, strikes = 1) {
+	const modtalk = await user.client.channels.fetch(process.env.MODTALK_CHANNEL ?? "");
+	if (!modtalk?.isText()) throw new TypeError("Could not find modtalk");
 	if (!warnLog || !muteLog) {
-		const modtalk = await user.client.channels.fetch(process.env.MODTALK_CHANNEL ?? "");
-		if (!modtalk?.isText()) throw new TypeError("Could not find modtalk");
 		const dbs = await getDatabases(["warn", "mute"], modtalk);
 		warnLog = dbs.warn;
 		muteLog = dbs.mute;
@@ -124,7 +125,7 @@ export default async function warn(user, reason, strikes = 1) {
 				.then((dm) =>
 					dm.send({
 						embeds: [
-							new MessageEmbed()
+							new Embed()
 								.setTitle(
 									`You were warned in ${Util.escapeMarkdown(user.guild.name)}!`,
 								)
@@ -133,7 +134,7 @@ export default async function warn(user, reason, strikes = 1) {
 										reason ? ` ${reason}` : ""
 									}`,
 								)
-								.setColor("DARK_RED")
+								.setColor(Constants.Colors.DARK_RED)
 								.setFooter({
 									text:
 										`${

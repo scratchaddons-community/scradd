@@ -2,7 +2,8 @@
  * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
  *   autoreply if contains certain triggers.
  */
-import { GuildMember, MessageEmbed, Util } from "discord.js";
+import { GuildMember, Util } from "discord.js";
+import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/mod.js";
 
@@ -67,20 +68,20 @@ const event = {
 			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
 				const collector = await generateConfirm(
-					new MessageEmbed()
+					new Embed()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to send this message to **the ${escapeMessage(
 								mailChannel.guild.name,
 							)} server’s mod team**?This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
 						)
-						.setColor("BLURPLE")
+						.setColor(COLORS.confirm)
 						.setAuthor({
 							iconURL: mailChannel.guild.iconURL() ?? undefined,
 							name: mailChannel.guild.name,
 						}),
 					async (buttonInteraction) => {
-						const openedEmbed = new MessageEmbed()
+						const openedEmbed = new Embed()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
 							.setFooter({ text: UNSUPPORTED })
@@ -172,11 +173,14 @@ const event = {
 			}
 		}
 
-		const mentions = message.mentions.users.filter(
-			(user) =>
-				process.env.NODE_ENV !== "production" ||
-				(user.id !== message.author.id && !user.bot),
+		const mentions = (
+			process.env.NODE_ENV === "production"
+				? message.mentions.users.filter(
+						(user) => user.id !== message.author.id && !user.bot,
+				  )
+				: message.mentions.users
 		).size;
+
 		if (mentions > 4 && message.member) {
 			promises.push(
 				warn(message.member, "Please don’t ping so many people!", Math.round(mentions / 5)),
@@ -189,8 +193,10 @@ const event = {
 		if (
 			message.type === "THREAD_CREATED" &&
 			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id)
-		)
-			return await Promise.all([...promises, message.delete()]);
+		) {
+			await Promise.all([...promises, message.delete()]);
+			return;
+		}
 
 		// Autoactions start here. Return early in some channels.
 
@@ -201,8 +207,10 @@ const event = {
 				BOARD_CHANNEL,
 				process.env.LOGS_CHANNEL,
 			].includes(message.channel.id)
-		)
-			return await Promise.all(promises);
+		) {
+			await Promise.all(promises);
+			return;
+		}
 
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
@@ -284,7 +292,7 @@ const event = {
 		)
 			react(CONSTANTS.emojis.autoreact.e);
 
-		if (includes("quack") || includes("duck"), content.includes("🦆")) react("🦆");
+		if (includes("quack") || includes("duck") || content.includes("🦆")) react("🦆");
 
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 

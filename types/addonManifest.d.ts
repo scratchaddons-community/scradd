@@ -5,12 +5,15 @@ type definitions_cssManipulator =
 	| string
 	| number
 	| {
-			/** The type of the manipulator. */ type?: "settingValue";
+			/** The type of the manipulator. */
+			type?: "settingValue";
 			/** The setting ID to reference. */
 			settingId: string;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "ternary";
+			/** The type of the manipulator. */
+
+			type?: "ternary";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
 			/** The value in case the source is truthy. */
@@ -19,7 +22,9 @@ type definitions_cssManipulator =
 			false: definitions_cssManipulator | null;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "textColor";
+			/** The type of the manipulator. */
+
+			type?: "textColor";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
 			threshold: definitions_cssManipulator;
@@ -29,7 +34,9 @@ type definitions_cssManipulator =
 			white?: definitions_cssManipulator;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "multiply" | "brighten";
+			/** The type of the manipulator. */
+
+			type?: "multiply" | "brighten";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
 			/** The red value of the color. */
@@ -42,19 +49,25 @@ type definitions_cssManipulator =
 			a?: number;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "alphaBlend";
+			/** The type of the manipulator. */
+
+			type?: "alphaBlend";
 			/** The source that provides opaque color. */
 			opaqueSource: definitions_cssManipulator;
 			/** The source that provides transparent color. */
 			transparentSource: definitions_cssManipulator;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "recolorFilter";
+			/** The type of the manipulator. */
+
+			type?: "recolorFilter";
 			/** The source that provides the color. */
 			source: definitions_cssManipulator;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "makeHsv";
+			/** The type of the manipulator. */
+
+			type?: "makeHsv";
 			/** The source that provides hue. */
 			h: definitions_cssManipulator;
 			/** The source that provides saturation. */
@@ -63,7 +76,9 @@ type definitions_cssManipulator =
 			v: definitions_cssManipulator;
 	  }
 	| {
-			/** The type of the manipulator. */ type?: "map";
+			/** The type of the manipulator. */
+
+			type?: "map";
 			/** The source that provides the color. */
 			source: definitions_cssManipulator;
 			/** The possible options. */
@@ -119,7 +134,9 @@ type definitions_if = {
  * The manifest that describes an addon.
  */
 type AddonManifest = {
-	/** The URL to the schema. */ $schema?: string;
+	/** The URL to the schema. */
+
+	$schema?: string;
 	/** The name of the addon. Don’t make it too long. */
 	name: string;
 	/** The description of the addons. Any credits and attributions also belong here. */
@@ -171,7 +188,9 @@ type AddonManifest = {
 	 * array of URL matches.
 	 */
 	userscripts?: ArrayOfAtLeastOne<{
-		/** The path to the userscript. */ url: `${string}.js`;
+		/** The path to the userscript. */
+
+		url: `${string}.js`;
 		matches: definitions_matches;
 		/** Determines whether the addon should be run after the document is complete loading. */
 		runAtComplete?: boolean;
@@ -184,7 +203,9 @@ type AddonManifest = {
 	 * array of URL matches.
 	 */
 	userstyles?: ArrayOfAtLeastOne<{
-		/** The path to the userstyle. */ url: `${string}.css`;
+		/** The path to the userstyle. */
+
+		url: `${string}.css`;
 		matches: definitions_matches;
 		if?: definitions_if;
 	}>;
@@ -197,7 +218,9 @@ type AddonManifest = {
 	 */
 	settings?: (
 		| ({
-				/** The name of the setting. */ name: string;
+				/** The name of the setting. */
+
+				name: string;
 				/* The identifier of the setting to get the specified value from your code. */
 				id: string;
 				/** The type of the setting. */
@@ -206,7 +229,9 @@ type AddonManifest = {
 				default: boolean | number | string;
 				if?: definitions_if;
 		  } & {
-				/** The type of the setting. */ type: "select";
+				/** The type of the setting. */
+
+				type: "select";
 				/**
 				 * The potential values for the select setting.
 				 *
@@ -215,7 +240,9 @@ type AddonManifest = {
 				potentialValues: (
 					| string
 					| {
-							/** The name of the potential value. */ name: string;
+							/** The name of the potential value. */
+
+							name: string;
 							/** The identifier of the potential value. */
 							id: string;
 					  }
@@ -224,17 +251,23 @@ type AddonManifest = {
 				default: string;
 		  })
 		| {
-				/** The type of the setting. */ type: "boolean";
+				/** The type of the setting. */
+
+				type: "boolean";
 				/** The default value of the setting. */
 				default: boolean;
 		  }
 		| {
-				/** The type of the setting. */ type: "positive_integer";
+				/** The type of the setting. */
+
+				type: "positive_integer";
 				/** The default value of the setting. */
 				default: number;
 		  }
 		| {
-				/** The type of the setting. */ type: "string";
+				/** The type of the setting. */
+
+				type: "string";
 				/** The default value of the setting. */
 				default: string;
 				/** The minimum length of the string. */
@@ -243,7 +276,9 @@ type AddonManifest = {
 				max?: number;
 		  }
 		| {
-				/** The type of the setting. */ type: "color";
+				/** The type of the setting. */
+
+				type: "color";
 				/** The default value of the setting. */
 				default: `#${string}`;
 				/**
@@ -253,7 +288,9 @@ type AddonManifest = {
 				allowTransparency?: boolean;
 		  }
 		| {
-				/** The type of the setting. */ type: "integer";
+				/** The type of the setting. */
+
+				type: "integer";
 				/** The default value of the setting. */
 				default: number;
 				/** The minimum value of the integer. */
@@ -269,13 +306,17 @@ type AddonManifest = {
 	 */
 	credits?: ArrayOfAtLeastOne<
 		{
-			/** The name of the credited person. */ name: string;
+			/** The name of the credited person. */
+
+			name: string;
 			/** The link relevant to the credit. */
 			link?: `http${string}`;
 		} & (
 			| { id: never; note: never }
 			| {
-					/** The ID for the credit. Required if note is in use. */ id: string;
+					/** The ID for the credit. Required if note is in use. */
+
+					id: string;
 					/** The note for the credit. */
 					note?: string;
 			  }
@@ -290,7 +331,9 @@ type AddonManifest = {
 	enabledByDefault?: boolean;
 	/** An array containing presets for settings. */
 	presets?: ArrayOfAtLeastOne<{
-		/** The name of the preset. */ name: string;
+		/** The name of the preset. */
+
+		name: string;
 		/** The identifier of the preset. */
 		id: string;
 		/** The description of the preset. */
@@ -310,14 +353,18 @@ type AddonManifest = {
 	 * Information about the addon.
 	 */
 	info?: ArrayOfAtLeastOne<{
-		/** Type of the information. */ type: "warning" | "notice";
+		/** Type of the information. */
+
+		type: "warning" | "notice";
 		/** ID of the information. */
 		id: string;
 		/** Text of the information. */
 		text: string;
 	}>;
 	popup?: {
-		/** The path to the popup icon. */ icon: string;
+		/** The path to the popup icon. */
+
+		icon: string;
 		/** The name of the popup. */
 		name: string;
 		/** Determines whether to show the fullscreen button. */
@@ -350,7 +397,9 @@ type AddonManifest = {
 	 * A CSS variable.
 	 */
 	customCssVariables?: {
-		/** The name of the CSS variable. */ name: string;
+		/** The name of the CSS variable. */
+
+		name: string;
 		value: definitions_cssManipulator;
 		/** Whether to drop the variable entirely when it evaluates to null. */
 		dropNull?: boolean;
@@ -359,16 +408,22 @@ type AddonManifest = {
 	versionAdded: string;
 	/** The preview used for the addon. */
 	addonPreview?: {
-		/** The type of the preview. */ type: "editor-dark-mode";
+		/** The type of the preview. */
+
+		type: "editor-dark-mode";
 	};
 	/** The preview used for presets. */
 	presetPreview?: {
-		/** The type of the preview. */ type: "palette";
+		/** The type of the preview. */
+
+		type: "palette";
 		colors?: string[];
 	};
 	/** The information about the latest update. */
 	latestUpdate?: {
-		/** The version of the update. */ version: string;
+		/** The version of the update. */
+
+		version: string;
 		/** Whether to list the addon on "Featured new addons and updates". */
 		isMajor?: boolean;
 		/** The notice describing the update. */

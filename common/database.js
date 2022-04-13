@@ -59,7 +59,7 @@ export async function getDatabases(names, channel) {
  */
 export async function extractData(database) {
 	console.log(cache[database.id]);
-	if (cache[database.id]) return cache[database.id] || [];
+	if (cache[database.id]) return /** @type {T[]} */ (cache[database.id] || []);
 	const attachment = database?.attachments.first()?.url;
 
 	return (cache[database.id] = attachment

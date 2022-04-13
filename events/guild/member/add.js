@@ -1,6 +1,7 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { MessageActionRow, MessageButton } from "discord.js";
 import fetch from "node-fetch";
 
+import { Embed } from "@discordjs/builders";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
@@ -63,7 +64,7 @@ const event = {
 						],
 
 						embeds: [
-							new MessageEmbed()
+							new Embed()
 								.setDescription(
 									`Welcome, ${member.toString()}, to the official ${
 										member.guild.name
