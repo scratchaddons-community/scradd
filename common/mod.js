@@ -18,16 +18,22 @@ async function getData(log) {
 	});
 }
 
+let /** @type {import("discord.js").Message} */ warnLog,
+	/** @type {import("discord.js").Message} */ muteLog;
+
 /**
  * @param {import("discord.js").GuildMember} user
- * @param {import("discord.js").GuildTextBasedChannel} channel
- * @param {number} strikes
+ * @param {number} [strikes]
  * @param {string} [reason]
  */
-export default async function warn(user, strikes, reason) {
-	const modtalk = await user.client.channels.fetch(process.env.MODTALK_CHANNEL ?? "");
-	if (!modtalk?.isText()) throw new TypeError("Could not find modtalk");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modtalk);
+export default async function warn(user, reason, strikes = 1) {
+	if (!warnLog || !muteLog) {
+		const modtalk = await user.client.channels.fetch(process.env.MODTALK_CHANNEL ?? "");
+		if (!modtalk?.isText()) throw new TypeError("Could not find modtalk");
+		const dbs = await getDatabases(["warn", "mute"], modtalk);
+		warnLog = dbs.warn;
+		muteLog = dbs.mute;
+	}
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog), getData(muteLog)]);
 	const oldLength = allWarns.length;
 

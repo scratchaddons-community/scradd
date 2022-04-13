@@ -32,7 +32,7 @@ export async function getDatabases(names, channel) {
 						message,
 					]),
 			)
-			.filter(([a]) => a),
+			.filter(([name, message]) => name && message.author.id === message.client.user?.id),
 	);
 
 	return Object.fromEntries(
@@ -58,9 +58,11 @@ export async function getDatabases(names, channel) {
  * @returns {Promise<T[]>}
  */
 export async function extractData(database) {
+	console.log(cache[database.id]);
+	if (cache[database.id]) return cache[database.id] || [];
 	const attachment = database?.attachments.first()?.url;
 
-	return attachment
+	return (cache[database.id] = attachment
 		? await fetch(attachment)
 				.then((res) => res.text())
 				.then(
@@ -68,28 +70,37 @@ export async function extractData(database) {
 						/** @type {T[]} */
 						papaparse.parse(csv.trim(), { dynamicTyping: true, header: true }).data,
 				)
-		: [];
+		: []);
 }
+
+/** @type {{ [key: string]: { [key: string]: any }[] }} */
+const cache = {};
+
+/** @type {NodeJS.Timeout | undefined} */
+let timeout;
 
 /**
  * @template {{ [key: string]: any }} T
  *
  * @param {import("discord.js").Message} database
  * @param {T[]} content
- *
- * @returns
  */
 export async function writeToDatabase(database, content) {
-	return await database.edit({
-		files: content.length
-			? [
-					new MessageAttachment(
-						Buffer.from(papaparse.unparse(content), "utf-8"),
-						/SCRADD (?<name>.+) LOG/
-							.exec(database.content)
-							?.groups?.name?.toLowerCase() + ".csv",
-					),
-			  ]
-			: [],
-	});
+	timeout && clearTimeout(timeout);
+	timeout = setTimeout(async () => {
+		timeout = undefined;
+		await database.edit({
+			files: content.length
+				? [
+						new MessageAttachment(
+							Buffer.from(papaparse.unparse(content), "utf-8"),
+							/SCRADD (?<name>.+) LOG/
+								.exec(database.content)
+								?.groups?.name?.toLowerCase() + ".csv",
+						),
+				  ]
+				: [],
+		});
+	}, 60_000);
+	cache[database.id] = content;
 }

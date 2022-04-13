@@ -4,6 +4,7 @@
  */
 import { GuildMember, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import warn from "../../common/mod.js";
 
 import {
 	COLORS,
@@ -171,11 +172,25 @@ const event = {
 			}
 		}
 
+		const mentions = message.mentions.users.filter(
+			(user) =>
+				process.env.NODE_ENV !== "production" ||
+				(user.id !== message.author.id && !user.bot),
+		).size;
+		if (mentions > 4 && message.member) {
+			promises.push(
+				warn(message.member, "Please don’t ping so many people!", Math.round(mentions / 5)),
+				message.reply({
+					content: CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!",
+				}),
+			);
+		}
+
 		if (
 			message.type === "THREAD_CREATED" &&
 			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id)
 		)
-			return await message.delete();
+			return await Promise.all([...promises, message.delete()]);
 
 		// Autoactions start here. Return early in some channels.
 
@@ -258,8 +273,6 @@ const event = {
 			return promise;
 		}
 
-		if (includes("potato", { full: true }) || content.includes("🥔")) react("🥔");
-
 		if (includes("dango") || content.includes("🍡")) react("🍡");
 
 		if (includes(/av[ao]cado/) || content.includes("🥑")) react("🥑");
@@ -270,6 +283,8 @@ const event = {
 			content.includes("<:e_:847428533432090665>")
 		)
 			react(CONSTANTS.emojis.autoreact.e);
+
+		if (includes("quack") || includes("duck"), content.includes("🦆")) react("🦆");
 
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 

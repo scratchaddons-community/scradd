@@ -177,7 +177,7 @@ export default class SuggestionChannel {
 
 		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
 			await interaction.reply({
-				// TODO: it doesn't have to be a suggestion here
+				// TODO: it doesn’t have to be a suggestion here
 				content: `${CONSTANTS.emojis.statuses.no} This suggestion can not be edited.`,
 				ephemeral: true,
 			});

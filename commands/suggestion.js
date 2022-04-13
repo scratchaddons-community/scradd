@@ -371,16 +371,18 @@ const info = {
 					};
 				}
 
-				await interaction.editReply(generateMessage());
+				const reply = await interaction.editReply(generateMessage());
 
-				const collector = interaction.channel?.createMessageComponentCollector({
-					filter: (buttonInteraction) =>
-						[previousButton.customId, nextButton.customId].includes(
-							buttonInteraction.customId,
-						) && buttonInteraction.user.id === interaction.user.id,
+				const collector =
+					reply.embeds[0] &&
+					interaction.channel?.createMessageComponentCollector({
+						filter: (buttonInteraction) =>
+							[previousButton.customId, nextButton.customId].includes(
+								buttonInteraction.customId,
+							) && buttonInteraction.user.id === interaction.user.id,
 
-					time: 30_000,
-				});
+						time: 30_000,
+					});
 
 				collector
 					?.on("collect", async (buttonInteraction) => {

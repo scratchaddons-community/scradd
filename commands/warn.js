@@ -35,7 +35,7 @@ const info = {
 				ephemeral: true,
 			});
 
-		const actualStrikes = await warn(user, strikes, reason);
+		const actualStrikes = await warn(user, reason, strikes);
 		if (actualStrikes === 0)
 			return interaction.reply({
 				content: CONSTANTS.emojis.statuses.no + " Could not issue 0 strikes.",
