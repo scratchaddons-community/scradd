@@ -78,11 +78,7 @@ const OPTIONS = [
 			`\n` +
 			`You **cannot react to your own messages** with ${escapeMessage(
 				BOARD_EMOJI,
-			)} to **prevent abusing** the potatoboard. Also, **if I autoreact** to a message with ${escapeMessage(
-				BOARD_EMOJI,
-			)}, **it does not count** towards the ${escapeMessage(
-				`${MIN_REACTIONS}`,
-			)} needed to be posted.\n` +
+			)} to **prevent abusing** the potatoboard.\n` +
 			`\n` +
 			`You can use the **[\`/explorepotatoes\`](<${BLOB_ROOT}/commands/explorepotatoes.js>) command** to find **a random message from the potatoboard**. You can filter by the **user**, **channel**, and/or minimum number of ${escapeMessage(
 				BOARD_EMOJI,

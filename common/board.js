@@ -92,7 +92,7 @@ export async function postMessageToBoard(message) {
 
 	const boardEmbed = new Embed()
 		.setColor(message.member?.displayColor ?? 0)
-		.setDescription(description??null)
+		.setDescription(description ?? null)
 		.setAuthor({
 			iconURL: message.member?.displayAvatarURL() ?? message.author.displayAvatarURL(),
 
@@ -117,7 +117,7 @@ export async function postMessageToBoard(message) {
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
-		content: `**${BOARD_EMOJI} ${(reaction?.count ?? 0) - (reaction.me ? 1 : 0)}** | ${
+		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${
 			message.channel.type === "DM"
 				? ""
 				: `${message.channel.toString()}${
