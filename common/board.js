@@ -125,6 +125,9 @@ export async function postMessageToBoard(message) {
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
+	if (message.channel.type === "GUILD_NEWS") {
+		await message.crosspost();
+	}
 	MESSAGES ??= await getAllMessages(board);
 	MESSAGES.push(boardMessage);
 	return boardMessage;
