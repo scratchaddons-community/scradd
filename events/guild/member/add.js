@@ -16,7 +16,8 @@ const count = new Intl.NumberFormat().format(
 /** @type {import("../../../types/event").default<"guildMemberAdd">} */
 const event = {
 	async event(member) {
-		const channel = await member.client.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
+		if (member.guild.id !== process.env.GUILD_ID) return;
+		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
 		if (!channel?.isText()) return;
 
 		/** @param {number} number */

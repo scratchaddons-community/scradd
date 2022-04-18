@@ -134,6 +134,8 @@ const event = {
 			}
 		}
 
+		if (message.guild?.id !== process.env.GUILD_ID) return;
+
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&

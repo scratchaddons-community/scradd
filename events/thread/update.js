@@ -13,6 +13,8 @@ import { Embed } from "@discordjs/builders";
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
 	async event(oldThread, newThread) {
+		if (newThread.guild.id !== process.env.GUILD_ID) return;
+
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 		if (
 			newThread.parent?.id !== MODMAIL_CHANNEL ||

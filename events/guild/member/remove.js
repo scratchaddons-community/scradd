@@ -7,7 +7,8 @@ import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
  */
 const event = {
 	async event(member) {
-		const channel = await member.client.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
+		if (member.guild.id !== process.env.GUILD_ID) return;
+		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
 		if (!channel?.isText()) throw new Error("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
 		const byes = [
