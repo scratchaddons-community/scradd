@@ -104,11 +104,7 @@ export async function postMessageToBoard(message) {
 		.setEmoji("👀")
 		.setLabel("View Context")
 		.setStyle("LINK")
-		.setURL(
-			`https://discord.com/channels/${message.guild?.id ?? "@me"}/${message.channel.id}/${
-				message.id
-			}`,
-		);
+		.setURL(message.url);
 	const reaction = message.reactions.resolve(BOARD_EMOJI);
 
 	if (!reaction) return;
