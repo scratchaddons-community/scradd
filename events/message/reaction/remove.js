@@ -17,17 +17,15 @@ const event = {
 			? await reaction.message.fetch()
 			: reaction.message;
 
-		if (user.partial) user = await user.fetch();
-
 		if (
 			// Ignore other servers
 			message.guild?.id !== process.env.GUILD_ID ||
 			// Ignore when it’s the wrong emoji
-			reaction.emoji.name !== BOARD_EMOJI ||
-			// Ignore when it’s me
-			user.id === message.client.user?.id
+			reaction.emoji.name !== BOARD_EMOJI
 		)
 			return;
+
+		if (user.partial) user = await user.fetch();
 
 		const boardMessage = await sourceToBoardMessage(message);
 

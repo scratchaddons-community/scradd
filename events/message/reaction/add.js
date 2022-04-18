@@ -19,17 +19,12 @@ const event = {
 			? await reaction.message.fetch()
 			: reaction.message;
 
+		// Ignore other servers
+		if (message.guild?.id !== process.env.GUILD_ID) return;
+
 		if (user.partial) user = await user.fetch();
 
-		if (
-			// Ignore other servers
-			message.guild?.id !== process.env.GUILD_ID ||
-			// Ignore when it’s me
-			user.id === message.client.user?.id
-		)
-			return;
-
-		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL) {
+		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && !reaction.me) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 				emojis.includes(reaction.emoji.id ?? reaction.emoji.name ?? ""),
 			)?.find((emoji) => emoji !== (reaction.emoji.id ?? reaction.emoji.name ?? ""));
