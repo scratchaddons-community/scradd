@@ -111,7 +111,7 @@ export async function getThreadFromMember(
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
  * @param {string} [reason] - The reason for closing the ticket.
  *
- * @returns {Promise<Message<boolean> | undefined>} - Message sent to user.
+ * @returns {Promise<Message<boolean> | false>} - Message sent to user.
  */
 export async function sendClosedMessage(thread, reason) {
 	const user = await getMemberFromThread(thread);
@@ -123,24 +123,23 @@ export async function sendClosedMessage(thread, reason) {
 
 	if (reason) embed.setDescription(reason);
 
-	const dmChannel =
-		user instanceof GuildMember ? await user?.createDM().catch(() => {}) : undefined;
-
 	return (
 		await Promise.all([
 			thread
 				.fetchStarterMessage()
 				.catch(() => {})
 				.then((starter) => {
-					starter?.edit({
-						embeds: [
-							new MessageEmbed(starter.embeds[0])
-								.setTitle("Modmail ticket closed!")
-								.setColor(Constants.Colors.DARK_GREEN),
-						],
-					}).catch(console.error);
+					starter
+						?.edit({
+							embeds: [
+								new MessageEmbed(starter.embeds[0])
+									.setTitle("Modmail ticket closed!")
+									.setColor(Constants.Colors.DARK_GREEN),
+							],
+						})
+						.catch(console.error);
 				}),
-			dmChannel?.send({ embeds: [embed] }),
+			user instanceof GuildMember && user?.send({ embeds: [embed] }),
 		])
 	)[1];
 }
@@ -165,23 +164,21 @@ export async function closeModmail(thread, user, reason) {
  * @returns {Promise<import("discord.js").Message | false>} - The message sent.
  */
 export async function sendOpenedMessage(user) {
-	const dmChannel = await user.createDM().catch(() => {});
-
-	if (!dmChannel) return false;
-
-	return await dmChannel.send({
-		embeds: [
-			new Embed()
-				.setTitle("Modmail ticket opened!")
-				.setDescription(
-					`The moderation team of **${escapeMessage(
-						user.guild.name,
-					)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
-				)
-				.setFooter({ text: UNSUPPORTED })
-				.setColor(COLORS.opened),
-		],
-	});
+	return await user
+		.send({
+			embeds: [
+				new Embed()
+					.setTitle("Modmail ticket opened!")
+					.setDescription(
+						`The moderation team of **${escapeMessage(
+							user.guild.name,
+						)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
+					)
+					.setFooter({ text: UNSUPPORTED })
+					.setColor(COLORS.opened),
+			],
+		})
+		.catch(() => false);
 }
 
 /**

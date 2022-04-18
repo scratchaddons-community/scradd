@@ -50,52 +50,49 @@ const event = {
 		await Promise.all([
 			channel.send({ content: greetings[Math.floor(Math.random() * greetings.length)] }),
 			member
-				.createDM()
-				.then((dm) =>
-					dm.send({
-						components: [
-							new MessageActionRow().addComponents([
-								new MessageButton()
-									.setStyle("LINK")
-									.setLabel("Go chat!")
-									.setURL(
-										`https://discord.com/channels/${member.guild.id}/${channel.id}`,
-									),
-							]),
-						],
+				.send({
+					components: [
+						new MessageActionRow().addComponents([
+							new MessageButton()
+								.setStyle("LINK")
+								.setLabel("Go chat!")
+								.setURL(
+									`https://discord.com/channels/${member.guild.id}/${channel.id}`,
+								),
+						]),
+					],
 
-						embeds: [
-							new Embed()
-								.setDescription(
-									`Welcome, ${member.toString()}, to the official ${
-										member.guild.name
-									} Discord server. Here, you will find lots of useful channels, friendly members, a [fair amount of bots](https://discord.com/channels/${
-										member.guild.id
-									}/${
-										process.env.BOTS_CHANNEL
-									}), [Scratch Addons devs](https://discord.com/channels/${
-										member.guild.id
-									}/826250884279173162), [a potato army](<https://discord.gg/Y7B3hJCgw8>), and even <@557632229719670794> himself. You can [see what addons are being developed](https://discord.com/channels/${
-										member.guild.id
-									}/806605006072709130), [become a beta tester](https://discord.com/channels/${
-										member.guild.id
-									}/809066418687311872), and get [help with coding on Scratch](https://discord.com/channels/${
-										member.guild.id
-									}/806609527281549312). Read [the fair rules](https://discord.com/channels/${
-										member.guild.id
-									}/${
-										member.guild.rulesChannel?.id
-									}) and get some <#806896002479947827>. If you never need any help, feel free to send me a DM!\n\nThanks for being part of the ${count}+ users who have installed Scratch Addons!\n\n*Also, sorry if you can’t talk yet. We get raided whenever we turn that off 😔.*`,
-								)
-								.setFooter({ text: "~ Scratch Addons Team" })
-								.setAuthor({
-									name: member.guild.name,
-									iconURL: member.guild.iconURL() ?? undefined,
-								})
-								.setTimestamp(member.joinedAt),
-						],
-					}),
-				)
+					embeds: [
+						new Embed()
+							.setDescription(
+								`Welcome, ${member.toString()}, to the official ${escapeMessage(
+									member.guild.name,
+								)} Discord server. Here, you will find lots of useful channels, friendly members, a [fair amount of bots](https://discord.com/channels/${
+									member.guild.id
+								}/${
+									process.env.BOTS_CHANNEL
+								}), [Scratch Addons devs](https://discord.com/channels/${
+									member.guild.id
+								}/826250884279173162), [a potato army](<https://discord.gg/Y7B3hJCgw8>), and even <@557632229719670794> himself. You can [see what addons are being developed](https://discord.com/channels/${
+									member.guild.id
+								}/806605006072709130), [become a beta tester](https://discord.com/channels/${
+									member.guild.id
+								}/809066418687311872), and get [help with coding on Scratch](https://discord.com/channels/${
+									member.guild.id
+								}/806609527281549312). Read [the fair rules](https://discord.com/channels/${
+									member.guild.id
+								}/${
+									member.guild.rulesChannel?.id
+								}) and get some <#806896002479947827>. If you never need any help, feel free to send me a DM to contact the mods!\n\nThanks for being part of the ${count}+ users who have installed Scratch Addons!\n\n*Also, sorry if you can’t talk yet. We get raided whenever we turn that off 😔.*`,
+							)
+							.setFooter({ text: `~ ${escapeMessage(member.guild.name)} Team` })
+							.setAuthor({
+								name: member.guild.name,
+								iconURL: member.guild.iconURL() ?? undefined,
+							})
+							.setTimestamp(member.joinedAt),
+					],
+				})
 				.catch(() => {}),
 		]);
 	},

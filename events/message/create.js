@@ -148,12 +148,6 @@ const event = {
 			const member = await getMemberFromThread(message.channel);
 
 			if (member instanceof GuildMember) {
-				const channel =
-					member.user.dmChannel ??
-					(await member.createDM().catch(async (error) => {
-						console.error(error);
-						await message.react(CONSTANTS.emojis.statuses.no);
-					}));
 				const messageToSend = await generateMessage(message);
 
 				messageToSend.content =
@@ -164,7 +158,7 @@ const event = {
 				reactions++;
 
 				promises.push(
-					channel
+					member
 						?.send(messageToSend)
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
 						.catch(async (error) => {

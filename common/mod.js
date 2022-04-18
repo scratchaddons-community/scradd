@@ -125,36 +125,31 @@ export default async function warn(user, reason, strikes = 1) {
 		writeToDatabase(warnLog, allWarns),
 
 		strikes > 0 &&
-			member
-				.createDM()
-				.then((dm) =>
-					dm.send({
-						embeds: [
-							new Embed()
-								.setTitle(
-									`You were warned in ${Util.escapeMarkdown(user.guild.name)}!`,
-								)
-								.setDescription(
-									`You earned ${Math.max(1, strikes)} strikes.${
-										reason ? ` ${reason}` : ""
-									}`,
-								)
-								.setColor(Constants.Colors.DARK_RED)
-								.setFooter({
-									text:
-										`${
-											strikes === 1 ? "This strike" : "These strikes"
-										} will automatically be removed in ${
-											process.env.NODE_ENV === "production"
-												? "48 hours"
-												: "120 seconds"
-										}.` +
-										CONSTANTS.footerSeperator +
-										"You may DM me to discuss this strike with the mods if you want.",
-								}),
-						],
-					}),
-				)
+			user
+				.send({
+					embeds: [
+						new Embed()
+							.setTitle(`You were warned in ${Util.escapeMarkdown(guild.name)}!`)
+							.setDescription(
+								`You earned ${Math.max(1, strikes)} strikes.${
+									reason ? ` **${strip(reason)}**` : ""
+								}`,
+							)
+							.setColor(Constants.Colors.DARK_RED)
+							.setFooter({
+								text:
+									`${
+										strikes === 1 ? "This strike" : "These strikes"
+									} will automatically be removed in ${
+										process.env.NODE_ENV === "production"
+											? "48 hours"
+											: "120 seconds"
+									}.` +
+									CONSTANTS.footerSeperator +
+									"You may DM me to discuss this strike with the mods if you want.",
+							}),
+					],
+				})
 				.catch(() => false),
 	]);
 

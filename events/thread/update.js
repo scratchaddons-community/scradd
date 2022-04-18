@@ -34,14 +34,16 @@ const event = {
 
 		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
-				starter.edit({
-					embeds: [
-						(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
-							.setTitle("Modmail ticket opened!")
-							.setFooter({ text: UNSUPPORTED })
-							.setColor(COLORS.opened),
-					],
-				}).catch(console.error);
+				starter
+					.edit({
+						embeds: [
+							(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
+								.setTitle("Modmail ticket opened!")
+								.setFooter({ text: UNSUPPORTED })
+								.setColor(COLORS.opened),
+						],
+					})
+					.catch(console.error);
 			}),
 			sendOpenedMessage(member),
 		]);
