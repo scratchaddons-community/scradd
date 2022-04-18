@@ -21,7 +21,7 @@ const info = {
 		const message = await interaction.channel?.send({ content });
 
 		if (message) {
-			const channel = await interaction.guild?.channels.fetch(process.env.LOGS_CHANNEL ?? "");
+			const channel = await interaction.guild?.channels.fetch(process.env.LOG_CHANNEL ?? "");
 
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),

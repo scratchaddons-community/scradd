@@ -23,15 +23,19 @@ let /** @type {import("discord.js").Message} */ warnLog,
 	/** @type {import("discord.js").Message} */ muteLog;
 
 /**
- * @param {import("discord.js").GuildMember} user
+ * @param {import("discord.js").GuildMember | import("discord.js").User} user
  * @param {number} [strikes]
  * @param {string} [reason]
  */
 export default async function warn(user, reason, strikes = 1) {
-	const modtalk = await user.client.channels.fetch(process.env.MODTALK_CHANNEL ?? "");
-	if (!modtalk?.isText()) throw new TypeError("Could not find modtalk");
+	const guild =
+		user instanceof GuildMember
+			? user.guild
+			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
+	const modLog = guild.systemChannel;
+	if (!modLog) throw new TypeError("Could not find mod log");
 	if (!warnLog || !muteLog) {
-		const dbs = await getDatabases(["warn", "mute"], modtalk);
+		const dbs = await getDatabases(["warn", "mute"], modLog);
 		warnLog = dbs.warn;
 		muteLog = dbs.mute;
 	}
@@ -62,6 +66,7 @@ export default async function warn(user, reason, strikes = 1) {
 	const actualStrikes = allWarns.length - oldLength;
 
 	if (newMutes) {
+		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id);
 		const oldMutes = allMutes.filter((mute) => mute.user === user.id).length;
 
 		const userMutes = oldMutes + newMutes;
@@ -71,15 +76,15 @@ export default async function warn(user, reason, strikes = 1) {
 		if (userMutes > 3) {
 			//ban
 			promises.push(
-				user.bannable
+				member.bannable
 					? process.env.NODE_ENV === "production" ||
-					  user.roles.highest.name === "@everyone"
-						? user.ban({ reason: reason ?? "Too many warnings" })
-						: modtalk.send({
+					  member.roles.highest.name === "@everyone"
+						? member.ban({ reason: reason ?? "Too many warnings" })
+						: modLog.send({
 								allowedMentions: { users: [] },
 								content: `(Just pretend like ${user.toString()} is banned now okay?)`,
 						  })
-					: modtalk.send({
+					: modLog.send({
 							allowedMentions: { users: [] },
 							content: `Missing permissions to ban ${user.toString()}.`,
 					  }),
@@ -104,9 +109,9 @@ export default async function warn(user, reason, strikes = 1) {
 			promises.push(
 				...[
 					writeToDatabase(muteLog, allMutes),
-					user.moderatable
-						? user.disableCommunicationUntil(timeoutLength * 3600000 + Date.now())
-						: modtalk.send({
+					member.moderatable
+						? member.disableCommunicationUntil(timeoutLength * 3600000 + Date.now())
+						: modLog.send({
 								allowedMentions: { users: [] },
 								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hours.`,
 						  }),
@@ -120,7 +125,7 @@ export default async function warn(user, reason, strikes = 1) {
 		writeToDatabase(warnLog, allWarns),
 
 		strikes > 0 &&
-			user
+			member
 				.createDM()
 				.then((dm) =>
 					dm.send({
