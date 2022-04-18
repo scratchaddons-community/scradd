@@ -2,6 +2,9 @@ import { MessageActionRow, MessageButton } from "discord.js";
 import fetch from "node-fetch";
 
 import { Embed } from "@discordjs/builders";
+import { censor } from "../../../common/mod.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
+import escapeMessage from "../../../lib/escape.js";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
@@ -95,6 +98,18 @@ const event = {
 				})
 				.catch(() => {}),
 		]);
+
+		const censored = censor(member.displayName);
+		if (censored) {
+			await member.setNickname(censored.censored);
+			await member
+				.send({
+					content:
+						CONSTANTS.emojis.statuses.no +
+						" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
+				})
+				.catch(() => {});
+		}
 	},
 };
 

@@ -9,11 +9,18 @@ import {
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 import { Embed } from "@discordjs/builders";
+import { censor, warn } from "../../common/mod.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
 	async event(oldThread, newThread) {
 		if (newThread.guild.id !== process.env.GUILD_ID) return;
+		const censored = censor(newThread.name);
+		if (censored) {
+			await newThread.setName(censored.censored);
+			const owner = await newThread.fetchOwner();
+			if (owner?.guildMember) await warn(owner.guildMember, "Watch your language!");
+		}
 
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 		if (

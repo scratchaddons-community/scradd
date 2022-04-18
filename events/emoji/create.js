@@ -1,0 +1,15 @@
+import { censor, warn } from "../../common/mod.js";
+
+/** @type {import("../../types/event").default<"emojiCreate">} */
+const event = {
+	async event(emoji) {
+		if (!emoji.name || emoji.guild.id !== process.env.GUILD_ID) return;
+		const censored = censor(emoji.name);
+		if (censored) {
+			await emoji.setName(censored.censored.replaceAll(/[^a-z0-9_]/g, "_"));
+			if (emoji.author) await warn(emoji.author, "Watch your language!");
+		}
+	},
+};
+
+export default event;

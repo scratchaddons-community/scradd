@@ -5,7 +5,7 @@
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import warn from "../../common/mod.js";
+import { badWordsAllowed, censorMessage, warn } from "../../common/mod.js";
 
 import {
 	COLORS,
@@ -187,52 +187,62 @@ const event = {
 		}
 
 		if (
+			/^r!(?:idea|sg|suggest(?:ion)?)(?: |$)/diu.test(message.content) &&
+			!message.author?.bot
+		) {
+			promises.push(
+				message.reply({
+					content: "`r!suggest` has been removed, please use `/suggestion create`.",
+				}),
+			);
+		}
+
+		if (!badWordsAllowed(message.channel)) {
+			if (await censorMessage(message)) return;
+		}
+
+		if (process.env.LOG_CHANNEL !== message.channel.id) {
+			// eslint-disable-next-line no-irregular-whitespace -- This is intended.
+			const spoilerHack = "||​||".repeat(200);
+
+			if (message.content.includes(spoilerHack)) {
+				const array = message.content.split(spoilerHack);
+
+				array.shift();
+				promises.push(
+					message.reply({
+						allowedMentions: { users: [] },
+
+						content:
+							`You used the spoiler hack to hide: \`\`\`\n` +
+							`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
+							`\`\`\``,
+					}),
+				);
+			}
+		}
+
+		if (
 			message.type === "THREAD_CREATED" &&
-			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id)
+			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id) &&
+			message.reference
 		) {
 			await Promise.all([...promises, message.delete()]);
 			return;
 		}
 
-		// Autoactions start here. Return early in some channels.
+		// Autoreactions start here. Return early in some channels.
 
 		if (
 			[
 				SUGGESTION_CHANNEL,
 				process.env.BUGS_CHANNEL,
 				BOARD_CHANNEL,
-				process.env.LOGS_CHANNEL,
+				process.env.LOG_CHANNEL,
 			].includes(message.channel.id)
 		) {
 			await Promise.all(promises);
 			return;
-		}
-
-		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-		const spoilerHack = "||​||".repeat(200);
-
-		if (message.content.includes(spoilerHack)) {
-			const array = message.content.split(spoilerHack);
-
-			array.shift();
-			promises.push(
-				message.reply({
-					allowedMentions: { users: [] },
-
-					content:
-						`You used the spoiler hack to hide: \`\`\`\n` +
-						`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
-						`\`\`\``,
-				}),
-			);
-		}
-
-		if (/^r!(?:idea|sg|suggest(?:ion)?)/diu.test(message.content) && !message.author?.bot) {
-			promises.push(
-				message.reply({
-					content: "`r!suggest` has been removed, please use `/suggestion create`.",
-				}),
-			);
 		}
 
 		const content = strip(
