@@ -16,7 +16,7 @@ import {
 const info = {
 	data: new SlashCommandBuilder()
 		.setDefaultPermission(false)
-		.setDescription(".")
+		.setDescription("(Mods only) Commands to manage modmail tickets")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")

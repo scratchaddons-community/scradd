@@ -79,7 +79,7 @@ const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(".")
+		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}.`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")

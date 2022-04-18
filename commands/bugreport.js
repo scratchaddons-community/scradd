@@ -49,7 +49,7 @@ const channel = new SuggestionChannel(BUGS_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(".")
+		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}.`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
