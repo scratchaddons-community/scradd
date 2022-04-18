@@ -11,7 +11,7 @@ const event = {
 		if (!member || member.nickname) return;
 		const censored = censor(member.displayName);
 		if (censored) {
-			const modLog = guild.systemChannel;
+			const modLog = guild.publicUpdatesChannel;
 			if (!modLog) throw new TypeError("Could not find mod log");
 			await (member.moderatable
 				? member.setNickname(censored.censored)

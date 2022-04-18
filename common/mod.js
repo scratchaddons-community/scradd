@@ -34,7 +34,7 @@ export async function warn(user, reason, strikes = 1) {
 		user instanceof GuildMember
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-	const modLog = guild.systemChannel;
+	const modLog = guild.publicUpdatesChannel;
 	if (!modLog) throw new TypeError("Could not find mod log");
 	if (!warnLog || !muteLog) {
 		const dbs = await getDatabases(["warn", "mute"], modLog);

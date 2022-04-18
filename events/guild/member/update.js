@@ -6,7 +6,7 @@ const event = {
 		if (newMember.guild.id !== process.env.GUILD_ID) return;
 		const censored = censor(newMember.displayName);
 		if (censored) {
-			const modLog = newMember.guild.systemChannel;
+			const modLog = newMember.guild.publicUpdatesChannel;
 			if (!modLog) throw new TypeError("Could not find mod log");
 			await (newMember.moderatable
 				? newMember.setNickname(censored.censored)
