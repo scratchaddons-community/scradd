@@ -57,7 +57,11 @@ export const ANSWERS = [
 		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
-	{ color: Constants.Colors.GOLD, description: "Someone is currently working on this", name: "In Development" },
+	{
+		color: Constants.Colors.GOLD,
+		description: "Someone is currently working on this",
+		name: "In Development",
+	},
 	{
 		color: Constants.Colors.DARK_GREEN,
 		description:
@@ -69,7 +73,11 @@ export const ANSWERS = [
 		description: "Wouldn’t work for non-SA users or users who don’t have the addon/option on",
 		name: "Incompatible",
 	},
-	{ color: Constants.Colors.PURPLE, description: "We don’t want to add this for some reason", name: "Rejected" },
+	{
+		color: Constants.Colors.PURPLE,
+		description: "We don’t want to add this for some reason",
+		name: "Rejected",
+	},
 ];
 
 export const CHANNEL_TAG = "#suggestions";
@@ -178,7 +186,7 @@ const info = {
 
 				if (success) {
 					await Promise.all([
-						reactAll(success, SUGGESTION_EMOJIS[0]||[]),
+						reactAll(success, SUGGESTION_EMOJIS[0] || []),
 						interaction.reply({
 							content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
 								success.thread?.toString() ?? ""
