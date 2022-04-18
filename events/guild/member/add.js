@@ -38,7 +38,7 @@ const event = {
 		const greetings = [
 			`Everybody please welcome ${member.toString()} to ${
 				member.guild.name
-			}, they’re our ${nth(member.guild.memberCount)} member!`,
+			}; they’re our ${nth(member.guild.memberCount)} member!`,
 			`Y’all should welcome ${member.toString()} to ${
 				member.guild.name
 			}, as they’re our ${nth(member.guild.memberCount)} member!`,
