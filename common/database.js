@@ -58,7 +58,6 @@ export async function getDatabases(names, channel) {
  * @returns {Promise<T[]>}
  */
 export async function extractData(database) {
-	console.log(cache[database.id]);
 	if (cache[database.id]) return /** @type {T[]} */ (cache[database.id] || []);
 	const attachment = database?.attachments.first()?.url;
 
