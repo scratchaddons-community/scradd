@@ -165,27 +165,30 @@ const OPTIONS = [
 			`Current **version**: v${pkg.version}\n` +
 			`\n__**Configuration:**__\n` +
 			`**Mode**: ${process.env.NODE_ENV === "production" ? "Production" : "Testing"}\n` +
-			`**Bots** channel: ${
-				process.env.BOTS_CHANNEL ? `<#${process.env.BOTS_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Suggestions** channel: ${
-				process.env.SUGGESTION_CHANNEL ? `<#${process.env.SUGGESTION_CHANNEL}>\n` : "*None*"
-			}` +
-			`**Bugs** channel: ${
-				process.env.BUGS_CHANNEL ? `<#${process.env.BUGS_CHANNEL}>` : "*None*"
-			}\n` +
 			`**Board** channel: ${
 				process.env.BOARD_CHANNEL ? `<#${process.env.BOARD_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Logs** channel: ${
+				process.env.LOG_CHANNEL ? `<#${process.env.LOG_CHANNEL}>` : "*None*"
 			}\n` +
 			`**Modmaill** channel: ${
 				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
 			}\n` +
-			`**Logs** channel: ${
-				process.env.LOGS_CHANNEL ? `<#${process.env.LOGS_CHANNEL}>\n` : "*None*"
-			}` +
+			`**Public logs** channel: ${
+				process.env.MODMAIL_CHANNEL ? `<#${process.env.PUBLIC_LOGS_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Suggestions** channel: ${
+				process.env.SUGGESTION_CHANNEL ? `<#${process.env.SUGGESTION_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Bugs** channel: ${
+				process.env.BUGS_CHANNEL ? `<#${process.env.BUGS_CHANNEL}>` : "*None*"
+			}\n` +
+			`**Bots** channel: ${
+				process.env.BOTS_CHANNEL ? `<#${process.env.BOTS_CHANNEL}>` : "*None*"
+			}\n` +
 			`**Mods** role: ${
-				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>\n` : "*None*"
-			}` +
+				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>` : "*None*"
+			}\n` +
 			`**Devs** role: ${
 				process.env.DEVELOPER_ROLE ? `<@&${process.env.DEVELOPER_ROLE}>` : "*None*"
 			}`,
