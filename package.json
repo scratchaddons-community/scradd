@@ -17,7 +17,8 @@
 	"scripts": {
 		"dev": "nodemon . --harmony --trace-warnings",
 		"format": "prettier --write \"**\" --ignore-unknown && prettier-package-json --write",
-		"start": "node . --harmony --trace-warnings"
+		"start": "node . --harmony --trace-warnings",
+		"types": "tsc --project jsconfig.json"
 	},
 	"dependencies": {
 		"@discordjs/builders": "0.12.0",
