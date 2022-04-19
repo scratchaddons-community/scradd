@@ -123,7 +123,10 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const embed = new Embed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
-		.setFooter({ text: "Any future messages will start a new ticket." })
+		.setFooter({
+			iconURL: thread.guild.iconURL() ?? undefined,
+			text: "Any future messages will start a new ticket.",
+		})
 		.setColor(Constants.Colors.DARK_GREEN);
 
 	if (reason) embed.setDescription(reason);
