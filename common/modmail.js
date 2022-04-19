@@ -109,12 +109,17 @@ export async function getThreadFromMember(
  * Let a user know that their ticket has been closed.
  *
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
- * @param {string} [reason] - The reason for closing the ticket.
+ * @param {{
+ * 	reason?: string;
+ * 	user?: import("discord.js").User | import("discord.js").GuildMember;
+ * }} [meta]
+ *   - The reason for closing the ticket.
+ *
  *
  * @returns {Promise<Message<boolean> | false>} - Message sent to user.
  */
-export async function sendClosedMessage(thread, reason) {
-	const user = await getMemberFromThread(thread);
+export async function sendClosedMessage(thread, { reason, user } = {}) {
+	const member = await getMemberFromThread(thread);
 	const embed = new Embed()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdTimestamp)
@@ -122,6 +127,11 @@ export async function sendClosedMessage(thread, reason) {
 		.setColor(Constants.Colors.DARK_GREEN);
 
 	if (reason) embed.setDescription(reason);
+	if (user)
+		embed.setAuthor({
+			iconURL: user.displayAvatarURL(),
+			name: user instanceof GuildMember ? user.displayName : user.username,
+		});
 
 	return (
 		await Promise.all([
@@ -139,7 +149,7 @@ export async function sendClosedMessage(thread, reason) {
 						})
 						.catch(console.error);
 				}),
-			user instanceof GuildMember && user?.send({ embeds: [embed] }),
+			member instanceof GuildMember && member?.send({ embeds: [embed] }),
 		])
 	)[1];
 }
@@ -147,13 +157,19 @@ export async function sendClosedMessage(thread, reason) {
  * Close a Modmail ticket.
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
- * @param {import("discord.js").User} user - User who closed the ticket.
+ * @param {import("discord.js").GuildMember | import("discord.js").User} user - User who closed the ticket.
  * @param {string} [reason] - The reason for closing the ticket.
  */
 export async function closeModmail(thread, user, reason) {
-	await sendClosedMessage(thread, reason);
-	await thread.setLocked(true, `Closed by ${user.tag}: ${reason}`);
-	await thread.setArchived(true, `Closed by ${user.tag}: ${reason}`);
+	await sendClosedMessage(thread, { reason, user });
+	await thread.setLocked(
+		true,
+		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
+	);
+	await thread.setArchived(
+		true,
+		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
+	);
 }
 
 /**

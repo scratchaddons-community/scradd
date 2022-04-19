@@ -1,5 +1,6 @@
 /** @file Commands To manage modmails. */
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -21,6 +22,7 @@ const info = {
 			subcommand
 				.setName("close")
 				.setDescription("(Mods only) Close a modmail ticket.")
+				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identiy.")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
@@ -77,7 +79,13 @@ const info = {
 					],
 				});
 
-				await closeModmail(interaction.channel, interaction.user, reason ?? "");
+				await closeModmail(
+					interaction.channel,
+					interaction.member instanceof GuildMember
+						? interaction.member
+						: interaction.user,
+					reason ?? "",
+				);
 
 				break;
 			}
