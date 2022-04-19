@@ -6,8 +6,7 @@ import url from "url";
 import { Client, Collection } from "discord.js";
 import dotenv from "dotenv";
 
-import importScripts from "./lib/importScripts.js";
-import pkg from "./lib/package.js";
+import { importScripts, pkg } from "./lib/files.js";
 import logError from "./lib/logError.js";
 
 dotenv.config();

@@ -1,10 +1,9 @@
 /** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Constants } from "discord.js";
+import { Constants, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { MAX_TITLE_LENGTH, RATELIMT_MESSAGE } from "../common/suggest.js";
-import escapeMessage from "../lib/escape.js";
 
 const { BUGS_CHANNEL, GUILD_ID } = process.env;
 
@@ -141,7 +140,7 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered bug report as **${escapeMessage(answer)}**!` +
+							} Successfully answered bug report as **${Util.escapeMarkdown(answer)}**!` +
 							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,

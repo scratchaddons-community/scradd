@@ -1,5 +1,5 @@
 /** @file Fetch And output all commands. */
-import importScripts from "./importScripts.js";
+import { importScripts } from "../lib/files.js";
 import path from "path";
 import url from "url";
 

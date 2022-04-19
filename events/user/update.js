@@ -1,5 +1,5 @@
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { censor, warn } from "../../common/mod.js";
+import { censor } from "../../common/mod.js";
 
 /** @type {import("../../types/event").default<"userUpdate">} */
 const event = {

@@ -2,8 +2,8 @@ import { Constants, GuildChannel, GuildMember, Util } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "./database.js";
 import { Embed } from "@discordjs/builders";
-import { strip } from "../lib/escape.js";
-import firstPromiseValued from "../lib/firstPromiseValued.js";
+import { stripMarkdown } from "../lib/markdown.js";
+import {firstPromiseValued} from "../lib/promises.js";
 import fetch from "node-fetch";
 
 /**
@@ -135,7 +135,7 @@ export async function warn(user, reason, strikes = 1) {
 							.setTitle(`You were warned in ${Util.escapeMarkdown(guild.name)}!`)
 							.setDescription(
 								`You earned ${Math.max(1, strikes)} strikes.${
-									reason ? ` **${strip(reason)}**` : ""
+									reason ? ` **${stripMarkdown(reason)}**` : ""
 								}`,
 							)
 							.setColor(Constants.Colors.DARK_RED)
@@ -231,7 +231,7 @@ export async function censorMessage(message) {
 			}),
 		];
 	}
-	const censoredContent = removeLanguage(strip(message.cleanContent));
+	const censoredContent = removeLanguage(stripMarkdown(message.cleanContent));
 	if (censoredContent) {
 		await Promise.all(censoredContent);
 		return true;

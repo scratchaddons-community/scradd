@@ -4,10 +4,9 @@ import { Message, MessageButton, MessageEmbed } from "discord.js";
 
 import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import asyncFilter from "../lib/asyncFilter.js";
-import firstPromiseValued from "../lib/firstPromiseValued.js";
-import generateHash from "../lib/generateHash.js";
-import getAllMessages from "../lib/getAllMessages.js";
+import {asyncFilter,firstPromiseValued} from "../lib/promises.js";
+import { generateHash } from "../lib/text.js";
+import { getAllMessages } from "../lib/message.js";
 
 /** @type {{ [key: string]: { [key: string]: boolean } }} */
 const threadsFound = {};

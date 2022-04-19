@@ -17,8 +17,8 @@ import {
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
-import escapeMessage, { strip } from "../../lib/escape.js";
-import reactAll from "../../lib/reactAll.js";
+import{ escapeMessage, stripMarkdown } from "../../lib/markdown.js";
+import {reactAll} from "../../lib/message.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
@@ -245,7 +245,7 @@ const event = {
 			return;
 		}
 
-		const content = strip(
+		const content = stripMarkdown(
 			message.content
 				.toLowerCase()
 				.normalize("NFD")

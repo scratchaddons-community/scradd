@@ -1,6 +1,6 @@
 /** @file Commands To manage suggestions. */
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Constants, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Constants, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
@@ -9,11 +9,9 @@ import SuggestionChannel, {
 	MAX_TITLE_LENGTH,
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
-import escapeMessage, { escapeLinks } from "../lib/escape.js";
-import generateHash from "../lib/generateHash.js";
-import getAllMessages from "../lib/getAllMessages.js";
-import reactAll from "../lib/reactAll.js";
-import truncateText from "../lib/truncateText.js";
+import { escapeLinks } from "../lib/markdown.js";
+import { getAllMessages,reactAll } from "../lib/message.js";
+import { generateHash,truncateText } from "../lib/text.js";
 
 const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
 
@@ -206,8 +204,9 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered suggestion as **${escapeMessage(answer)}**!` +
-							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							} Successfully answered suggestion as **${Util.escapeMarkdown(
+								answer,
+							)}**!` + (result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});

@@ -1,10 +1,8 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import extractMessageExtremities from "../lib/extractMessageExtremities.js";
-import { Embed } from "@discordjs/builders";
+import { extractMessageExtremities , getAllMessages ,messageToText} from "../lib/message.js";
 
-import getAllMessages from "../lib/getAllMessages.js";
-import messageToText from "../lib/messageToText.js";
+import { Embed } from "@discordjs/builders";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";

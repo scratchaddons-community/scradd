@@ -3,8 +3,8 @@
 import { Collection } from "discord.js";
 import { Embed } from "@discordjs/builders";
 
-import commands from "../lib/commands.js";
-import pkg from "../lib/package.js";
+import commands from "../common/commands.js";
+import {pkg} from "../lib/files.js";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {

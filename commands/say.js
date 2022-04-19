@@ -2,7 +2,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import { escapeForInlineCode } from "../lib/escape.js";
+import { replaceBackticks } from "../lib/markdown.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -27,7 +27,7 @@ const info = {
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				channel?.isText() &&
 					channel.send({
-						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(
+						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${replaceBackticks(
 							content,
 						)}\` (${message.url})`,
 

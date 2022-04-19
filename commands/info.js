@@ -4,12 +4,12 @@ import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
 import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
-import escapeMessage from "../lib/escape.js";
-import generateHash from "../lib/generateHash.js";
-import joinWithAnd from "../lib/joinWithAnd.js";
+import {escapeMessage,replaceBackticks} from "../lib/markdown.js";
+import { generateHash } from "../lib/text.js";
+import {joinWithAnd} from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
-import pkg from "../lib/package.js";
+import {pkg} from "../lib/files.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
@@ -141,7 +141,7 @@ const OPTIONS = [
 			`Cloud-**hosted** on [opeNode.io](https://www.openode.io/open-source/scradd).\n` +
 			`Third-party code **libraries** used: ${joinWithAnd(
 				Object.keys(pkg.dependencies),
-				(dependency) => `\`${escapeMessage(dependency)}\``,
+				(dependency) => `\`${replaceBackticks(escapeMessage(dependency))}\``,
 			)}`,
 
 		emoji: "📝",

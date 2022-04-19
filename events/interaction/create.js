@@ -1,7 +1,7 @@
 /** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
 import { censor, warn } from "../../common/mod.js";
-import commands from "../../lib/commands.js";
+import commands from "../../common/commands.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
@@ -12,7 +12,7 @@ const event = {
 				const censored = censorOptions(interaction.options.data);
 
 				if (censored.isBad) {
-					return await Promise.all([
+					await Promise.all([
 						interaction.reply({ ephemeral: true, content: "Watch your language!" }),
 						warn(
 							interaction.member instanceof GuildMember
@@ -22,6 +22,7 @@ const event = {
 							censored.strikes,
 						),
 					]);
+					return
 				}
 			}
 

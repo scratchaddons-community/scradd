@@ -7,13 +7,13 @@ import {
 	MessageButton,
 	Constants,
 } from "discord.js";
-import generateHash from "../lib/generateHash.js";
+import { generateHash } from "../lib/text.js";
 import { Embed } from "@discordjs/builders";
 
-import escapeMessage from "../lib/escape.js";
-import messageToText from "../lib/messageToText.js";
-import asyncFilter from "../lib/asyncFilter.js";
-import extractMessageExtremities from "../lib/extractMessageExtremities.js";
+import {escapeMessage} from "../lib/markdown.js";
+import {asyncFilter} from "../lib/promises.js";
+import { extractMessageExtremities ,messageToText} from "../lib/message.js";
+
 import CONSTANTS from "./CONSTANTS.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
