@@ -94,7 +94,7 @@ export async function postMessageToBoard(message) {
 		.setColor(message.member?.displayColor ?? 0)
 		.setDescription(description ?? null)
 		.setAuthor({
-			iconURL: message.member?.displayAvatarURL() ?? message.author.displayAvatarURL(),
+			iconURL: (message.member ?? message.author).displayAvatarURL(),
 
 			name: message.member?.displayName ?? message.author.username,
 		})
