@@ -75,8 +75,12 @@ export async function extractData(database) {
 /** @type {{ [key: string]: { [key: string]: any }[] }} */
 const cache = {};
 
-/** @type {NodeJS.Timeout | undefined} */
-let timeout;
+/**
+ * @type {{
+ * 	[key: string]: { callback: () => Promise<void>; timeout: NodeJS.Timeout } | undefined;
+ * }}
+ */
+let timeouts = {};
 
 /**
  * @template {{ [key: string]: any }} T
@@ -85,9 +89,9 @@ let timeout;
  * @param {T[]} content
  */
 export async function writeToDatabase(database, content) {
-	timeout && clearTimeout(timeout);
-	timeout = setTimeout(async () => {
-		timeout = undefined;
+	const timeoutId = timeouts[database.id];
+	const callback = async () => {
+		timeouts[database.id] = undefined;
 		await database.edit({
 			files: content.length
 				? [
@@ -100,6 +104,18 @@ export async function writeToDatabase(database, content) {
 				  ]
 				: [],
 		});
-	}, 60_000);
+	};
+	timeouts[database.id] = { timeout: setTimeout(callback, 60_000), callback };
+	timeoutId && clearTimeout(timeoutId.timeout);
 	cache[database.id] = content;
 }
+
+process.on("beforeExit", async () => {
+	await Promise.all(
+		Object.values(timeouts).map(async (info) => {
+			if (!info) return;
+			clearTimeout(info.timeout);
+			return await info.callback();
+		}),
+	);
+});
