@@ -25,8 +25,13 @@ export const COLORS = {
 	closed: Constants.Colors.DARK_GREEN,
 	confirm: Constants.Colors.BLURPLE,
 };
+
+// TODO: this is incorrect grammar in /info but it will support reactions, replies, etc in the future
 export const UNSUPPORTED =
-	"Please note that reactions, replies, edits, and deletions are not supported.";
+	"Please note that reactions, replies, edits, and deletions are not supported" +
+	CONSTANTS.footerSeperator +
+	"Messages starting with an equals sign (=) are ignored.";
+
 /**
  * Generate a webhook message from a message sent by a user.
  *
