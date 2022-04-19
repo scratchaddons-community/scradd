@@ -4,6 +4,7 @@ import { extractData, getDatabases, writeToDatabase } from "./database.js";
 import { Embed } from "@discordjs/builders";
 import { strip } from "../lib/escape.js";
 import firstPromiseValued from "../lib/firstPromiseValued.js";
+import fetch from "node-fetch";
 
 /**
  * @param {import("discord.js").Message} log
