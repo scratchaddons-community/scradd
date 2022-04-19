@@ -8,7 +8,8 @@ const event = {
 		if (censored) {
 			await thread.setName(censored.censored);
 			const owner = await thread.fetchOwner();
-			if (owner?.guildMember) await warn(owner.guildMember, "Watch your language!");
+			if (owner?.guildMember)
+				await warn(owner.guildMember, "Watch your language!", censored.strikes);
 		}
 	},
 };

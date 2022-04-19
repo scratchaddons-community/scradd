@@ -16,7 +16,7 @@ const event = {
 							censored.censored
 						}\`.`,
 				  }));
-			await warn(newMember, "Watch your language!");
+			await warn(newMember, "Watch your language!", censored.strikes);
 		}
 	},
 };

@@ -19,7 +19,8 @@ const event = {
 		if (censored) {
 			await newThread.setName(censored.censored);
 			const owner = await newThread.fetchOwner();
-			if (owner?.guildMember) await warn(owner.guildMember, "Watch your language!");
+			if (owner?.guildMember)
+				await warn(owner.guildMember, "Watch your language!", censored.strikes);
 		}
 
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();

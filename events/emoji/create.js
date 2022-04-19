@@ -7,7 +7,7 @@ const event = {
 		const censored = censor(emoji.name);
 		if (censored) {
 			await emoji.setName(censored.censored.replaceAll(/[^a-z0-9_]/g, "_"));
-			if (emoji.author) await warn(emoji.author, "Watch your language!");
+			if (emoji.author) await warn(emoji.author, "Watch your language!", censored.strikes);
 		}
 	},
 };
