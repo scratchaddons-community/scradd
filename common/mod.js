@@ -82,7 +82,7 @@ export async function warn(user, reason, strikes = 1) {
 				member.bannable
 					? process.env.NODE_ENV === "production" ||
 					  member.roles.highest.name === "@everyone"
-						? member.ban({ reason: reason ?? "Too many warnings" })
+						? member.ban({ reason: "Too many infractions" })
 						: modLog.send({
 								allowedMentions: { users: [] },
 								content: `(Just pretend like ${user.toString()} is banned now okay?)`,
