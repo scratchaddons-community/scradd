@@ -73,7 +73,7 @@ const event = {
 						.setDescription(
 							`Are you sure you want to send this message to **the ${escapeMessage(
 								mailChannel.guild.name,
-							)} server’s mod team**?This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
+							)} server’s mod team**? This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
 						)
 						.setColor(COLORS.confirm)
 						.setAuthor({
