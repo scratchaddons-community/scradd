@@ -140,8 +140,9 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered bug report as **${Util.escapeMarkdown(answer)}**!` +
-							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							} Successfully answered bug report as **${Util.escapeMarkdown(
+								answer,
+							)}**!` + (result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});

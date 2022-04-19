@@ -3,7 +3,7 @@ import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "./database.js";
 import { Embed } from "@discordjs/builders";
 import { stripMarkdown } from "../lib/markdown.js";
-import {firstPromiseValued} from "../lib/promises.js";
+import { firstPromiseValued } from "../lib/promises.js";
 import fetch from "node-fetch";
 
 /**

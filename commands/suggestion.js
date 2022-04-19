@@ -10,8 +10,8 @@ import SuggestionChannel, {
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
 import { escapeLinks } from "../lib/markdown.js";
-import { getAllMessages,reactAll } from "../lib/message.js";
-import { generateHash,truncateText } from "../lib/text.js";
+import { getAllMessages, reactAll } from "../lib/message.js";
+import { generateHash, truncateText } from "../lib/text.js";
 
 const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
 

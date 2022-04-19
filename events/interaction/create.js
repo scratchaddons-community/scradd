@@ -22,7 +22,7 @@ const event = {
 							censored.strikes,
 						),
 					]);
-					return
+					return;
 				}
 			}
 

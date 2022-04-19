@@ -5,8 +5,8 @@ import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import  {escapeMessage, replaceBackticks, escapeLinks,generateTooltip } from "../lib/markdown.js";
-import {joinWithAnd} from "../lib/text.js";
+import { escapeMessage, replaceBackticks, escapeLinks, generateTooltip } from "../lib/markdown.js";
+import { joinWithAnd } from "../lib/text.js";
 
 const addons = await fetch(
 	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",

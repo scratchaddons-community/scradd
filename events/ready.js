@@ -4,7 +4,7 @@ import { Collection } from "discord.js";
 import { Embed } from "@discordjs/builders";
 
 import commands from "../common/commands.js";
-import {pkg} from "../lib/files.js";
+import { pkg } from "../lib/files.js";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {

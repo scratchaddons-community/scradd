@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { Embed } from "@discordjs/builders";
 import { censor } from "../../../common/mod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
-import {escapeMessage} from "../../../lib/markdown.js";
+import { escapeMessage } from "../../../lib/markdown.js";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;

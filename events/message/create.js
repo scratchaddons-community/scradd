@@ -17,8 +17,8 @@ import {
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
-import{ escapeMessage, stripMarkdown } from "../../lib/markdown.js";
-import {reactAll} from "../../lib/message.js";
+import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
+import { reactAll } from "../../lib/message.js";
 
 const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 

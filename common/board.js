@@ -1,6 +1,6 @@
 /** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import { extractMessageExtremities , getAllMessages ,messageToText} from "../lib/message.js";
+import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { Embed } from "@discordjs/builders";
 

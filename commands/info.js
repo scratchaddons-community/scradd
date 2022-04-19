@@ -4,12 +4,12 @@ import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
 import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
-import {escapeMessage,replaceBackticks} from "../lib/markdown.js";
+import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
 import { generateHash } from "../lib/text.js";
-import {joinWithAnd} from "../lib/text.js";
+import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
-import {pkg} from "../lib/files.js";
+import { pkg } from "../lib/files.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
