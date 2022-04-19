@@ -1,4 +1,4 @@
-import { Constants, GuildMember, Util } from "discord.js";
+import { Constants, GuildChannel, GuildMember, Util } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "./database.js";
 import { Embed } from "@discordjs/builders";
@@ -287,14 +287,19 @@ export async function censorMessage(message) {
 		return true;
 }
 
+/**
+ * @param {import("discord.js").AnyChannel} channel
+ *
+ * @returns
+ */
 export function badWordsAllowed(channel) {
 	return [
-		"806895693162872892",
 		"816329956074061867",
+		channel instanceof GuildChannel ? channel.guild.publicUpdatesChannel?.id : channel.id,
 		process.env.MODLOG_CHANNEL,
 		process.env.MODMAIL_CHANNEL,
 		"853256939089559583",
 		"894314668317880321",
 		"869662117651955802",
-	].includes(channel.isThread() ? channel.parent?.id || channel.id : channel.id);
+	].includes((channel.isThread() && channel.parent?.id) || channel.id);
 }
