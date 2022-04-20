@@ -51,7 +51,14 @@ const event = {
 		];
 
 		await Promise.all([
-			channel.send({ content: greetings[Math.floor(Math.random() * greetings.length)] }),
+			channel.send({
+				content: greetings[Math.floor(Math.random() * greetings.length)],
+				files: `${member.guild.memberCount}`.includes("87")
+					? [
+							"https://cdn.discordapp.com/attachments/938438561588453438/965676538605502535/was_that_The_Bite_of_87.wav",
+					  ]
+					: [],
+			}),
 			member
 				.send({
 					components: [
