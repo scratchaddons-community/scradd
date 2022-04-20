@@ -75,7 +75,9 @@ export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId = MessageMentions.USERS_PATTERN.exec(embed.description)?.[1] ?? embed.description;
+	const userId =
+		embed.description.matchAll(MessageMentions.USERS_PATTERN).next().value?.[1] ??
+		embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
