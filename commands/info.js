@@ -129,18 +129,10 @@ const OPTIONS = [
 	},
 	{
 		description: async (client) =>
-			`**Coders**: ${await getRole(
-				CONSTANTS.roles.developers,
-				client,
-			)}.\n` +
-			`**Designers**: ${await getRole(
-				CONSTANTS.roles.designers,
-				client,
-			)}.\n` +
-			`**Beta testers**: ${await getRole(
-				CONSTANTS.roles.testers,
-				client,
-			)}.\n` +`(none in any particular order)\n\n`+
+			`**Coders**: ${await getRole(CONSTANTS.roles.developers, client)}.\n` +
+			`**Designers**: ${await getRole(CONSTANTS.roles.designers, client)}.\n` +
+			`**Beta testers**: ${await getRole(CONSTANTS.roles.testers, client)}.\n` +
+			`(none in any particular order)\n\n` +
 			`Cloud-**hosted** on [opeNode.io](https://www.openode.io/open-source/scradd).\n` +
 			`Third-party code **libraries** used: ${joinWithAnd(
 				Object.keys(pkg.dependencies),
