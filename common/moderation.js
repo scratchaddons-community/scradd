@@ -219,7 +219,7 @@ export async function censorMessage(message) {
 	let isBad = false;
 
 	/** @param {string} toCensor */
-	async function removeLanguage(toCensor) {
+	async function censorString(toCensor) {
 		const promises = [];
 		if (
 			![
@@ -334,7 +334,7 @@ export async function censorMessage(message) {
 		return promises.length ? promises : undefined;
 	}
 
-	const censoredContent = await removeLanguage(stripMarkdown(message.cleanContent));
+	const censoredContent = await censorString(stripMarkdown(message.cleanContent));
 	if (censoredContent) {
 		await Promise.all(censoredContent);
 		isBad = true;
@@ -344,7 +344,7 @@ export async function censorMessage(message) {
 		await firstPromiseValued(
 			true,
 			message.stickers.map(async ({ name }) => {
-				const censored = await removeLanguage(name);
+				const censored = await censorString(name);
 				if (censored) {
 					Promise.all(censored).then(() => {});
 					return true;
@@ -360,14 +360,14 @@ export async function censorMessage(message) {
 			true,
 			message.attachments.map(async (attachment) => {
 				if (attachment.name) {
-					const censored = await removeLanguage(attachment.name);
+					const censored = await censorString(attachment.name);
 					if (censored) {
 						await Promise.all(censored);
 						return true;
 					}
 				}
 				if (attachment.description) {
-					const censored = await removeLanguage(attachment.description);
+					const censored = await censorString(attachment.description);
 					if (censored) {
 						await Promise.all(censored);
 						return true;
@@ -379,7 +379,7 @@ export async function censorMessage(message) {
 						attachment.contentType || "",
 					)
 				) {
-					const censored = await removeLanguage(
+					const censored = await censorString(
 						await fetch(attachment.url).then((res) => res.text()),
 					);
 					if (censored) {
@@ -393,7 +393,30 @@ export async function censorMessage(message) {
 	)
 		isBad = true;
 
-	if (isBad) message.delete();
+		const animatedEmojiCount=(message.content.match(/<a:.+?:\d+>/gi)?.length || 0)
+	if (
+		!(
+			((message.channel.isThread() && message.channel.parent?.id) || message.channel.id) ===
+			process.env.BOTS_CHANNEL
+		) &&
+		animatedEmojiCount > 9
+	) {
+		await Promise.all([
+			warn(
+				message.member || message.author,
+				`Please don\'t post ${animatedEmojiCount} animated emojis!`,
+				Math.round(animatedEmojiCount / 25),
+			),
+			message.channel.send({
+				content:
+					CONSTANTS.emojis.statuses.no +
+					` ${message.author.toString()}, that's too many animated emojis!`,
+			}),
+		]);
+		isBad = true;
+	}
+
+	if (isBad) await message.delete();
 
 	return isBad;
 }
