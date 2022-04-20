@@ -11,6 +11,7 @@ import {
 	COLORS,
 	generateConfirm,
 	generateMessage,
+	generateReactionFunctions,
 	getMemberFromThread,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
@@ -59,11 +60,7 @@ const event = {
 				promises.push(
 					webhook
 						.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
-						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
-						.catch(async (error) => {
-							console.error(error);
-							return await message.react(CONSTANTS.emojis.statuses.no);
-						}),
+						.then(...generateReactionFunctions(message)),
 				);
 			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
@@ -113,13 +110,7 @@ const event = {
 									threadId: newThread.id,
 									...(await generateMessage(message)),
 								})
-								.then(
-									async () => await message.react(CONSTANTS.emojis.statuses.yes),
-								)
-								.catch(async (error) => {
-									console.error(error);
-									return await message.react(CONSTANTS.emojis.statuses.no);
-								}),
+								.then(...generateReactionFunctions(message)),
 						]);
 					},
 					async (options) => {
@@ -160,11 +151,7 @@ const event = {
 				promises.push(
 					member
 						?.send(messageToSend)
-						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
-						.catch(async (error) => {
-							console.error(error);
-							return await message.react(CONSTANTS.emojis.statuses.no);
-						}),
+						.then(...generateReactionFunctions(message)),
 				);
 			}
 		}

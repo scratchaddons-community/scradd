@@ -273,3 +273,27 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 		return collector;
 	}
 }
+
+/**
+ * @param {import("discord.js").Message} message
+ *
+ * @returns
+ */
+export function generateReactionFunctions(message) {
+	return [
+		async () => {
+			const reaction = await message.react(CONSTANTS.emojis.statuses.yes);
+			message.channel
+				.createMessageCollector({ maxProcessed: 1, time: 5_000 })
+				.on("end", async () => {
+					await reaction.users.remove(reaction.client.user || "");
+				});
+			return reaction;
+		},
+		/** @param {any} error */
+		async (error) => {
+			console.error(error);
+			return await message.react(CONSTANTS.emojis.statuses.no);
+		},
+	];
+}
