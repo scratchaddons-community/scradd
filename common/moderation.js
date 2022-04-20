@@ -1,4 +1,4 @@
-import { Constants, GuildChannel, GuildMember, GuildTemplate, Invite, Util } from "discord.js";
+import { Constants, GuildMember, GuildTemplate, Invite, Util } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "./databases.js";
 import { Embed } from "@discordjs/builders";
