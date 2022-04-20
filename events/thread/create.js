@@ -1,4 +1,4 @@
-import { censor, warn } from "../../common/mod.js";
+import { censor, warn } from "../../common/moderation.js";
 
 /** @type {import("../../types/event").default<"threadCreate">} */
 const event = {

@@ -1,6 +1,6 @@
-import { Constants, GuildChannel, GuildMember, Util } from "discord.js";
+import { Constants, GuildChannel, GuildMember, GuildTemplate, Invite, Util } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
-import { extractData, getDatabases, writeToDatabase } from "./database.js";
+import { extractData, getDatabases, writeToDatabase } from "./databases.js";
 import { Embed } from "@discordjs/builders";
 import { stripMarkdown } from "../lib/markdown.js";
 import { firstPromiseValued } from "../lib/promises.js";
@@ -216,52 +216,158 @@ export function censor(text) {
 
 /** @param {import("discord.js").Message} message */
 export async function censorMessage(message) {
-	/** @param {string} toCensor */
-	function removeLanguage(toCensor) {
-		const censored = censor(toCensor);
-		if (!censored) return;
+	let isBad = false;
 
-		return [
-			message.delete(),
-			warn(message.member || message.author, "Watch your language!", censored.strikes),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
-					` ${message.author.toString()}, watch your language!`,
-			}),
-		];
+	/** @param {string} toCensor */
+	async function removeLanguage(toCensor) {
+		const promises = [];
+		if (
+			![
+				"816329956074061867",
+				message.guild?.publicUpdatesChannel?.id || message.channel.id,
+				process.env.LOG_CHANNEL,
+				process.env.MODMAIL_CHANNEL,
+				"853256939089559583",
+				"894314668317880321",
+				"869662117651955802",
+			].includes(
+				(message.channel.isThread() && message.channel.parent?.id) || message.channel.id,
+			)
+		) {
+			const censored = censor(toCensor);
+			if (censored) {
+				promises.push(
+					warn(
+						message.member || message.author,
+						"Watch your language!",
+						censored.strikes,
+					),
+					message.channel.send({
+						content:
+							CONSTANTS.emojis.statuses.no +
+							` ${message.author.toString()}, watch your language!`,
+					}),
+				);
+			}
+		}
+
+		if (
+			![
+				message.guild?.rulesChannel?.id || message.channel.id,
+				"806605043817644074",
+				"874743757210275860",
+				"816329956074061867",
+				message.guild?.publicUpdatesChannel?.id || message.channel.id,
+				process.env.LOG_CHANNEL,
+				process.env.MODMAIL_CHANNEL,
+				"806624037224185886",
+			].includes(
+				(message.channel.isThread() && message.channel.parent?.id) || message.channel.id,
+			)
+		) {
+			const templates = toCensor.match(GuildTemplate.GUILD_TEMPLATES_PATTERN);
+			if (templates)
+				promises.push(
+					warn(
+						message.member || message.author,
+						"Please don't post server templates!",
+						templates.length - 2,
+					),
+					message.channel.send({
+						content:
+							CONSTANTS.emojis.statuses.no +
+							` ${message.author.toString()}, server templates go to <#806624037224185886>!`,
+					}),
+				);
+
+			const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
+			if (botLinks)
+				promises.push(
+					warn(
+						message.member || message.author,
+						"Please don't post bot invite links!",
+						botLinks.length - 1,
+					),
+					message.channel.send({
+						content:
+							CONSTANTS.emojis.statuses.no +
+							` ${message.author.toString()}, bot invites go to <#806624037224185886>!`,
+					}),
+				);
+
+			const inviteCodes = toCensor.match(Invite.INVITES_PATTERN);
+			if (inviteCodes) {
+				const invitesToDelete = [
+					...new Set(
+						(
+							await Promise.all(
+								inviteCodes.map(async (code) => {
+									const invite = await message.client
+										?.fetchInvite(code)
+										.catch(() => {});
+									if (!invite) return [];
+									if (!invite.guild) return [code];
+									if (invite.guild?.id === message.guild?.id) return [];
+									return [invite.guild?.id];
+								}),
+							)
+						).flat(),
+					),
+				].length;
+
+				if (invitesToDelete)
+					promises.push(
+						warn(
+							message.member || message.author,
+							"Please don't post invite links!",
+							invitesToDelete,
+						),
+						message.channel.send({
+							content:
+								CONSTANTS.emojis.statuses.no +
+								` ${message.author.toString()}, invite links go to <#806624037224185886>!`,
+						}),
+					);
+			}
+		}
+
+		return promises.length ? promises : undefined;
 	}
-	const censoredContent = removeLanguage(stripMarkdown(message.cleanContent));
+
+	const censoredContent = await removeLanguage(stripMarkdown(message.cleanContent));
 	if (censoredContent) {
 		await Promise.all(censoredContent);
-		return true;
+		isBad = true;
 	}
 
 	if (
-		message.stickers.find(({ name }) => {
-			const censored = removeLanguage(name);
-			if (censored) {
-				Promise.all(censored).then(() => {});
-				return true;
-			}
-			return false;
-		})
+		await firstPromiseValued(
+			true,
+			message.stickers.map(async ({ name }) => {
+				const censored = await removeLanguage(name);
+				if (censored) {
+					Promise.all(censored).then(() => {});
+					return true;
+				}
+				return false;
+			}),
+		)
 	)
-		return true;
+		isBad = true;
 
 	if (
 		await firstPromiseValued(
 			true,
 			message.attachments.map(async (attachment) => {
 				if (attachment.name) {
-					const censored = removeLanguage(attachment.name);
+					const censored = await removeLanguage(attachment.name);
 					if (censored) {
 						await Promise.all(censored);
 						return true;
 					}
 				}
 				if (attachment.description) {
-					const censored = removeLanguage(attachment.description);
+					const censored = await removeLanguage(attachment.description);
 					if (censored) {
 						await Promise.all(censored);
 						return true;
@@ -273,7 +379,7 @@ export async function censorMessage(message) {
 						attachment.contentType || "",
 					)
 				) {
-					const censored = removeLanguage(
+					const censored = await removeLanguage(
 						await fetch(attachment.url).then((res) => res.text()),
 					);
 					if (censored) {
@@ -285,22 +391,9 @@ export async function censorMessage(message) {
 			}),
 		)
 	)
-		return true;
-}
+		isBad = true;
 
-/**
- * @param {import("discord.js").AnyChannel} channel
- *
- * @returns
- */
-export function badWordsAllowed(channel) {
-	return [
-		"816329956074061867",
-		channel instanceof GuildChannel ? channel.guild.publicUpdatesChannel?.id : channel.id,
-		process.env.MODLOG_CHANNEL,
-		process.env.MODMAIL_CHANNEL,
-		"853256939089559583",
-		"894314668317880321",
-		"869662117651955802",
-	].includes((channel.isThread() && channel.parent?.id) || channel.id);
+	if (isBad) message.delete();
+
+	return isBad;
 }

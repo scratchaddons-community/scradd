@@ -1,4 +1,4 @@
-import { badWordsAllowed, censorMessage } from "../../common/mod.js";
+import { censorMessage } from "../../common/moderation.js";
 
 /**
  * @file Enables Error reporting.
@@ -8,9 +8,7 @@ import { badWordsAllowed, censorMessage } from "../../common/mod.js";
 const event = {
 	async event(_, newMessage) {
 		if (newMessage.partial) newMessage = await newMessage.fetch();
-		if (!badWordsAllowed(newMessage.channel)) {
-			if (await censorMessage(newMessage)) return;
-		}
+		if (await censorMessage(newMessage)) return;
 	},
 };
 

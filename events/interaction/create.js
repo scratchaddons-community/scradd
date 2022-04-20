@@ -1,6 +1,6 @@
 /** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
-import { censor, warn } from "../../common/mod.js";
+import { censor, warn } from "../../common/moderation.js";
 import commands from "../../common/commands.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
@@ -55,7 +55,6 @@ function censorOptions(options) {
 		}
 		if (option.options) {
 			const censored = censorOptions(option.options);
-			console.log(censored);
 			if (censored.isBad) {
 				isBad = true;
 				strikes += censored.strikes;

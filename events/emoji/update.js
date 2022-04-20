@@ -1,4 +1,4 @@
-import { censor } from "../../common/mod.js";
+import { censor } from "../../common/moderation.js";
 
 /** @type {import("../../types/event").default<"emojiUpdate">} */
 const event = {

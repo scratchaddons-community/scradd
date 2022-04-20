@@ -5,7 +5,7 @@
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { badWordsAllowed, censorMessage, warn } from "../../common/mod.js";
+import { censorMessage, warn } from "../../common/moderation.js";
 
 import {
 	COLORS,
@@ -149,9 +149,7 @@ const event = {
 				reactions++;
 
 				promises.push(
-					member
-						?.send(messageToSend)
-						.then(...generateReactionFunctions(message)),
+					member?.send(messageToSend).then(...generateReactionFunctions(message)),
 				);
 			}
 		}
@@ -184,9 +182,7 @@ const event = {
 			);
 		}
 
-		if (!badWordsAllowed(message.channel)) {
-			if (await censorMessage(message)) return;
-		}
+		if (await censorMessage(message)) return;
 
 		if (process.env.LOG_CHANNEL !== message.channel.id) {
 			// eslint-disable-next-line no-irregular-whitespace -- This is intended.

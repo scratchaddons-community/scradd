@@ -89,6 +89,7 @@ let timeouts = {};
  * @param {T[]} content
  */
 export async function writeToDatabase(database, content) {
+	cache[database.id] = content;
 	const timeoutId = timeouts[database.id];
 	const callback = async () => {
 		timeouts[database.id] = undefined;
@@ -107,7 +108,6 @@ export async function writeToDatabase(database, content) {
 	};
 	timeouts[database.id] = { timeout: setTimeout(callback, 60_000), callback };
 	timeoutId && clearTimeout(timeoutId.timeout);
-	cache[database.id] = content;
 }
 
 process.on("beforeExit", async () => {

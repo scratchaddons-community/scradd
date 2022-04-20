@@ -6,6 +6,7 @@ import {
 	MessageActionRow,
 	MessageButton,
 	Constants,
+	MessageMentions,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
 import { Embed } from "@discordjs/builders";
@@ -74,8 +75,7 @@ export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId =
-		/<@!?(?<userId>\d+)>/.exec(embed.description)?.groups?.userId ?? embed.description;
+	const userId = MessageMentions.USERS_PATTERN.exec(embed.description)?.[1] ?? embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
