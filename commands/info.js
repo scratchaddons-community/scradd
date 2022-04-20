@@ -129,15 +129,18 @@ const OPTIONS = [
 	},
 	{
 		description: async (client) =>
-			`**Code** written by (in no particular order): ${await getRole(
+			`**Coders**: ${await getRole(
 				CONSTANTS.roles.developers,
 				client,
 			)}.\n` +
-			`**Design** by <@691223009515667457>, <@765910070222913556>, and <@752972078579449888>.\n` +
-			`Beta **testers** (also in no particular order): ${await getRole(
-				CONSTANTS.roles.testers,
+			`**Designers**: ${await getRole(
+				CONSTANTS.roles.designers,
 				client,
 			)}.\n` +
+			`**Beta testers**: ${await getRole(
+				CONSTANTS.roles.testers,
+				client,
+			)}.\n` +`(none in any particular order)\n\n`+
 			`Cloud-**hosted** on [opeNode.io](https://www.openode.io/open-source/scradd).\n` +
 			`Third-party code **libraries** used: ${joinWithAnd(
 				Object.keys(pkg.dependencies),
