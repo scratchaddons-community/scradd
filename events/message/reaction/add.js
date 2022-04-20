@@ -9,6 +9,7 @@ import {
 	updateReactionCount,
 } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
+import { censor, warn } from "../../../common/moderation.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
@@ -24,20 +25,30 @@ const event = {
 
 		if (user.partial) user = await user.fetch();
 
+		const { emoji } = reaction;
+
+		if (emoji.name) {
+			const censored = censor(emoji.name);
+			if (censored) {
+				await warn(user, "Watch your language!", censored.strikes);
+				await reaction.remove();
+				return;
+			}
+		}
+
 		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && !reaction.me) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
-				emojis.includes(reaction.emoji.id ?? reaction.emoji.name ?? ""),
-			)?.find((emoji) => emoji !== (reaction.emoji.id ?? reaction.emoji.name ?? ""));
+				emojis.includes(emoji.id ?? emoji.name ?? ""),
+			)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
 
 			if (otherReaction) {
 				await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
-				return;
 			}
 		}
 
 		if (
 			// Ignore when it’s the wrong emoji
-			reaction.emoji.name !== BOARD_EMOJI
+			emoji.name !== BOARD_EMOJI
 		)
 			return;
 
