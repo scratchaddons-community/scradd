@@ -5,7 +5,8 @@
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { censorMessage, warn } from "../../common/moderation.js";
+import { warn } from "../../common/moderation/warns.js";
+import { censorMessage } from "../../common/moderation/automod.js";
 
 import {
 	COLORS,

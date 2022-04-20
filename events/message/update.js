@@ -1,4 +1,4 @@
-import { censorMessage } from "../../common/moderation.js";
+import { censorMessage } from "../../common/moderation/automod.js";
 
 /**
  * @file Enables Error reporting.

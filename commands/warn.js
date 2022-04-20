@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { warn } from "../common/moderation.js";
+import { warn } from "../common/moderation/warns.js";
 
 /** @type {import("../types/command").default} */
 const info = {

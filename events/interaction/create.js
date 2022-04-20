@@ -1,6 +1,7 @@
 /** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
-import { censor, warn } from "../../common/moderation.js";
+import { warn } from "../../common/moderation/warns.js";
+import { censor } from "../../common/moderation/automod.js";
 import commands from "../../common/commands.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */

@@ -9,7 +9,8 @@ import {
 	updateReactionCount,
 } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
-import { censor, warn } from "../../../common/moderation.js";
+import { warn } from "../../../common/moderation/warns.js";
+import { censor } from "../../../common/moderation/automod.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
