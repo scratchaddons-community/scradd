@@ -9,9 +9,6 @@
 		"type": "git",
 		"url": "git+https://github.com/scratchaddons-community/scradd.git"
 	},
-	"bugs": {
-		"url": "https://github.com/scratchaddons-community/scradd/issues"
-	},
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
