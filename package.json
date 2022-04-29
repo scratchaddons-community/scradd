@@ -36,7 +36,7 @@
 		"openode": "2.1.6",
 		"prettier": "2.5.1",
 		"prettier-package-json": "2.6.3",
-		"typescript": "4.5.5"
+		"typescript": "4.6.4"
 	},
 	"prettier": "@redguy12/prettier-config",
 	"prettier-package-json": {
