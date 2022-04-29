@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
@@ -15,8 +14,6 @@ const info = {
 		);
 		process.exit();
 	},
-
-	permissions: [{ id: CONSTANTS.roles.developers, permission: true, type: "ROLE" }],
 };
 
 export default info;

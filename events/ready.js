@@ -32,7 +32,7 @@ const event = {
 				if (!channel?.isText())
 					throw new ReferenceError("Could not find error reporting channel");
 
-				return await channel?.send({
+				await channel?.send({
 					embeds: [
 						new Embed()
 							.setTitle("Bot restarted!")
@@ -40,65 +40,31 @@ const event = {
 							.setColor(Math.floor(Math.random() * (0xffffff + 1))),
 					],
 				});
+			} else {
+				client.application.commands.set([], guild.id).catch(()=>{});
 			}
-
-			const guildCommands = await client.application?.commands
-				.fetch({ guildId: guild.id })
-				.catch(() => {});
-			guildCommands?.forEach(async (command) => await command.delete());
 		});
 
-		const prexistingCommands = await client.application.commands.fetch({ guildId: GUILD_ID });
-
-		const prexistingDmCommands = await client.application.commands.fetch();
-
-		/** @type {Collection<string, import("../types/command").default>} */
-		const slashes = new Collection();
-
-		for (const [key, command] of commands.entries()) {
-			if (command.apply !== false) slashes.set(key, command);
-		}
+		const [dmCommands, serverCommands] = commands.toJSON().reduce(
+			([dmCommands, serverCommands], curr) => {
+				if (!(curr.apply ?? true)) return [dmCommands, serverCommands];
+				if (curr.dm && process.env.NODE_ENV === "production")
+					dmCommands.push(curr.data.toJSON());
+				else serverCommands.push(curr.data.toJSON());
+				return [dmCommands, serverCommands];
+			},
+			/**
+			 * @type {[
+			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
+			 * ]}
+			 */ ([[], []]),
+		);
 
 		await Promise.all([
-			...prexistingCommands.map((command) => {
-				if (
-					slashes.has(command.name) ||
-					(slashes.get(command.name)?.permissions !== "DM" &&
-						process.env.NODE_ENV === "production")
-				)
-					return;
-
-				return command.delete();
-			}),
-			prexistingDmCommands.map((command) => {
-				if (
-					slashes.has(command.name) ||
-					(slashes.get(command.name)?.permissions === "DM" &&
-						process.env.NODE_ENV === "production")
-				)
-					return;
-
-				return command.delete();
-			}),
+			client.application.commands.set(dmCommands),
+			client.application.commands.set(serverCommands, GUILD_ID),
 		]);
-
-		await Promise.all(
-			slashes.map(async ({ data: command, permissions }, name) => {
-				const newCommand = await (prexistingCommands.has(name)
-					? permissions === "DM" && process.env.NODE_ENV === "production"
-						? client.application?.commands.edit(name, command.toJSON())
-						: client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
-					: client.application?.commands.create(
-							command.toJSON(),
-							permissions === "DM" && process.env.NODE_ENV === "production"
-								? undefined
-								: GUILD_ID,
-					  ));
-
-				if (permissions && permissions !== "DM")
-					await newCommand?.permissions.add({ guild: GUILD_ID, permissions });
-			}),
-		);
 	},
 
 	once: true,

@@ -173,8 +173,6 @@ const info = {
 			}
 		}
 	},
-
-	permissions: [{ id: process.env.MODERATOR_ROLE ?? "", permission: true, type: "ROLE" }],
 };
 
 export default info;

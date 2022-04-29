@@ -198,7 +198,7 @@ const info = {
 		await interaction.reply({ embeds: [embed] });
 	},
 
-	permissions: "DM",
+	dm:true
 };
 
 export default info;
