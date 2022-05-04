@@ -45,28 +45,21 @@ export function censor(text) {
 }
 
 /** @param {import("discord.js").Message} message */
-export async function censorMessage(message) {
+export async function automodMessage(
+	message,
+	{ emojis = true, language = true, invites = true } = {},
+	silent = false,
+) {
 	let isBad = false;
 
 	/** @param {string} toCensor */
 	async function censorString(toCensor) {
 		const promises = [];
-		if (
-			![
-				"816329956074061867",
-				message.guild?.publicUpdatesChannel?.id || message.channel.id,
-				process.env.LOG_CHANNEL,
-				process.env.MODMAIL_CHANNEL,
-				"853256939089559583",
-				"894314668317880321",
-				"869662117651955802",
-			].includes(
-				(message.channel.isThread() && message.channel.parent?.id) || message.channel.id,
-			)
-		) {
+		if (language && (silent || !badWordsAllowed(message.channel))) {
 			const censored = censor(toCensor);
 			if (censored) {
-				promises.push(
+				if (silent) return [];
+				promises.push([
 					warn(
 						message.member || message.author,
 						"Watch your language!",
@@ -77,31 +70,35 @@ export async function censorMessage(message) {
 							CONSTANTS.emojis.statuses.no +
 							` ${message.author.toString()}, watch your language!`,
 					}),
-				);
+				]);
 			}
 		}
 
 		if (
-			![
-				message.guild?.rulesChannel?.id || message.channel.id,
-				"806605043817644074",
-				"874743757210275860",
-				"816329956074061867",
-				message.guild?.publicUpdatesChannel?.id || message.channel.id,
-				process.env.LOG_CHANNEL,
-				process.env.MODMAIL_CHANNEL,
-				"806624037224185886",
-			].includes(
-				(message.channel.isThread() && message.channel.parent?.id) || message.channel.id,
-			)
+			invites &&
+			(silent ||
+				![
+					message.guild?.rulesChannel?.id,
+					"806605043817644074",
+					"874743757210275860",
+					"816329956074061867",
+					message.guild?.publicUpdatesChannel?.id,
+					process.env.LOG_CHANNEL,
+					process.env.MODMAIL_CHANNEL,
+					"806624037224185886",
+				].includes(
+					(message.channel.isThread() && message.channel.parent?.id) ||
+						message.channel.id,
+				))
 		) {
 			const templates = toCensor.match(GuildTemplate.GUILD_TEMPLATES_PATTERN);
-			if (templates)
+			if (templates) {
+				if (silent) return [];
 				promises.push(
 					warn(
 						message.member || message.author,
 						"Please don't post server templates!",
-						templates.length - 2,
+						Math.max(0, templates.length - 2),
 					),
 					message.channel.send({
 						content:
@@ -109,14 +106,16 @@ export async function censorMessage(message) {
 							` ${message.author.toString()}, server templates go to <#806624037224185886>!`,
 					}),
 				);
+			}
 
 			const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
-			if (botLinks)
+			if (botLinks) {
+				if (silent) return [];
 				promises.push(
 					warn(
 						message.member || message.author,
 						"Please don't post bot invite links!",
-						botLinks.length - 1,
+						Math.max(0, botLinks.length - 1),
 					),
 					message.channel.send({
 						content:
@@ -124,6 +123,7 @@ export async function censorMessage(message) {
 							` ${message.author.toString()}, bot invites go to <#806624037224185886>!`,
 					}),
 				);
+			}
 
 			const inviteCodes = toCensor.match(Invite.INVITES_PATTERN);
 			if (inviteCodes) {
@@ -145,7 +145,8 @@ export async function censorMessage(message) {
 					),
 				].length;
 
-				if (invitesToDelete)
+				if (invitesToDelete) {
+					if (silent) return [];
 					promises.push(
 						warn(
 							message.member || message.author,
@@ -158,6 +159,7 @@ export async function censorMessage(message) {
 								` ${message.author.toString()}, invite links go to <#806624037224185886>!`,
 						}),
 					);
+				}
 			}
 		}
 
@@ -165,6 +167,7 @@ export async function censorMessage(message) {
 	}
 
 	const censoredContent = await censorString(stripMarkdown(message.cleanContent));
+
 	if (censoredContent) {
 		await Promise.all(censoredContent);
 		isBad = true;
@@ -222,31 +225,47 @@ export async function censorMessage(message) {
 		)
 	)
 		isBad = true;
-
-	const animatedEmojiCount = message.content.match(/<a:.+?:\d+>/gi)?.length || 0;
-	if (
-		!(
-			((message.channel.isThread() && message.channel.parent?.id) || message.channel.id) ===
-			process.env.BOTS_CHANNEL
-		) &&
-		animatedEmojiCount > 9
-	) {
-		await Promise.all([
-			warn(
-				message.member || message.author,
-				`Please don\'t post ${animatedEmojiCount} animated emojis!`,
-				Math.round(animatedEmojiCount / 25),
-			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
-					` ${message.author.toString()}, that's too many animated emojis!`,
-			}),
-		]);
-		isBad = true;
+	if (emojis) {
+		const animatedEmojiCount = message.content.match(/<a:.+?:\d+>/gi)?.length || 0;
+		if (
+			(silent ||
+				!(
+					((message.channel.isThread() && message.channel.parent?.id) ||
+						message.channel.id) === process.env.BOTS_CHANNEL
+				)) &&
+			animatedEmojiCount > 9
+		) {
+			await Promise.all([
+				warn(
+					message.member || message.author,
+					`Please don\'t post ${animatedEmojiCount} animated emojis!`,
+					Math.round(animatedEmojiCount / 25),
+				),
+				message.channel.send({
+					content:
+						CONSTANTS.emojis.statuses.no +
+						` ${message.author.toString()}, that's too many animated emojis!`,
+				}),
+			]);
+			isBad = true;
+		}
 	}
 
-	if (isBad) await message.delete();
+	if (isBad && !silent) await message.delete();
 
 	return isBad;
+}
+
+/** @param {import("discord.js").TextBasedChannel} channel */
+function badWordsAllowed(channel) {
+	if (channel.type === "DM") return true;
+	return [
+		"816329956074061867", // admin-talk
+		channel.guild.publicUpdatesChannel?.id, // mod-talk
+		process.env.LOG_CHANNEL, // mod-logs
+		process.env.MODMAIL_CHANNEL, // scradd-mail
+		"853256939089559583",
+		"894314668317880321",
+		"869662117651955802",
+	].includes((channel.isThread() && channel.parent?.id) || channel.id);
 }

@@ -34,7 +34,7 @@ const event = {
 			await channel.send({
 				content:
 					boosts[Math.floor(Math.random() * boosts.length)] +
-					"!".repeat(newMember.guild.premiumSubscriptionCount),
+					"!".repeat(newMember.guild.premiumSubscriptionCount || 0),
 			});
 		}
 		const censored = censor(newMember.displayName);

@@ -6,7 +6,7 @@ import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { warn } from "../../common/moderation/warns.js";
-import { censorMessage } from "../../common/moderation/automod.js";
+import { automodMessage } from "../../common/moderation/automod.js";
 
 import {
 	COLORS,
@@ -183,7 +183,7 @@ const event = {
 			);
 		}
 
-		if (await censorMessage(message)) return;
+		if (await automodMessage(message)) return;
 
 		if (process.env.LOG_CHANNEL !== message.channel.id) {
 			// eslint-disable-next-line no-irregular-whitespace -- This is intended.
@@ -279,7 +279,8 @@ const event = {
 		if (
 			content === "e" ||
 			(content === "." && message.author.id === "761276793666797589") ||
-			content.includes("<:e_:847428533432090665>")
+			content.includes("<:e_:847428533432090665>") ||
+			content.includes("æ")
 		)
 			react(CONSTANTS.emojis.autoreact.e);
 

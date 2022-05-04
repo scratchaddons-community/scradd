@@ -8,8 +8,13 @@ import commands from "../../common/commands.js";
 const event = {
 	async event(interaction) {
 		if (!interaction.isCommand()) return;
+		const command = commands.get(interaction.commandName);
+
+		if (!command)
+			throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
+
 		try {
-			if (interaction.commandName !== "is-bad-word") {
+			if (!command.uncensored ) {
 				const censored = censorOptions(interaction.options.data);
 
 				if (censored.isBad) {
@@ -26,11 +31,6 @@ const event = {
 					return;
 				}
 			}
-
-			const command = commands.get(interaction.commandName);
-
-			if (!command)
-				throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
 
 			await command.interaction(interaction);
 		} catch (error) {

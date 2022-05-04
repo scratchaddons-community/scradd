@@ -10,7 +10,7 @@ import {
 } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import { warn } from "../../../common/moderation/warns.js";
-import { censor } from "../../../common/moderation/automod.js";
+import { censor, automodMessage } from "../../../common/moderation/automod.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
@@ -64,6 +64,12 @@ const event = {
 			// Or they reacted to an /explorepotatoes message
 			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
 		) {
+			// Remove the reaction
+			await reaction.users.remove(user);
+
+			return;
+		}
+		if (await automodMessage(message, { language: true }, true)) {
 			// Remove the reaction
 			await reaction.users.remove(user);
 

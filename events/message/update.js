@@ -1,4 +1,4 @@
-import { censorMessage } from "../../common/moderation/automod.js";
+import { automodMessage } from "../../common/moderation/automod.js";
 
 /**
  * @file Enables Error reporting.
@@ -8,7 +8,7 @@ import { censorMessage } from "../../common/moderation/automod.js";
 const event = {
 	async event(_, newMessage) {
 		if (newMessage.partial) newMessage = await newMessage.fetch();
-		if (await censorMessage(newMessage)) return;
+		if (await automodMessage(newMessage)) return;
 	},
 };
 

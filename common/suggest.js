@@ -1,5 +1,5 @@
 /** @file Code Shared between suggestions and bug reports. */
-import { Constants, GuildMember, Message, MessageEmbed } from "discord.js";
+import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 
 import CONSTANTS from "./CONSTANTS.js";
@@ -47,15 +47,7 @@ export default class SuggestionChannel {
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (data.title.length > MAX_TITLE_LENGTH) {
-			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} The title can not be longer than ${MAX_TITLE_LENGTH} characters.`,
-
-				ephemeral: true,
-			});
-
-			return false;
-		}
+		const title = Util.escapeMarkdown(data.title);
 
 		const embed = new Embed()
 			.setColor(DEFAULT_ANSWER.color)
@@ -63,7 +55,7 @@ export default class SuggestionChannel {
 				iconURL: author.displayAvatarURL(),
 				name: author?.displayName ?? interaction.user.username,
 			})
-			.setTitle(data.title)
+			.setTitle(title)
 			.setDescription(data.description)
 			.setFooter({ text: `${DEFAULT_ANSWER.name}` });
 
@@ -74,7 +66,7 @@ export default class SuggestionChannel {
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: 1_440, // 24 hours
-			name: `${embed.title ?? ""} | ${DEFAULT_ANSWER.name}`,
+			name: `${title ?? ""} | ${DEFAULT_ANSWER.name}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
 
@@ -202,11 +194,13 @@ export default class SuggestionChannel {
 
 		const promises = [];
 
+		const title = Util.escapeMarkdown(updated.title ?? "");
+
 		promises.push(
-			updated.title
+			title
 				? Promise.race([
 						interaction.channel.setName(
-							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, updated.title),
+							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, title),
 							"Suggestion/report edited",
 						),
 						new Promise((resolve) => setTimeout(resolve, 3_000)),
@@ -214,13 +208,13 @@ export default class SuggestionChannel {
 				: Promise.resolve(interaction.channel),
 		);
 
-		embed.setTitle(updated.title ?? embed.title ?? "");
+		embed.setTitle(title || embed.title || "");
 
 		promises.push(starterMessage.edit({ embeds: [embed] }));
 
 		await Promise.all(promises);
 
-		return (updated.title ? interaction.channel.name.endsWith(updated.title) : true)
+		return (title ? (await interaction.channel.fetch()).name.endsWith(title) : true)
 			? true
 			: "ratelimit";
 	}
@@ -237,7 +231,7 @@ export default class SuggestionChannel {
  *   https://canary.discord.com/channels/806602307750985799/939350305311715358/947385068660359278 was
  *   never fixed?
  */
- export async function getUserFromSuggestion(message) {
+export async function getUserFromSuggestion(message) {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]

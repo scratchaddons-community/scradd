@@ -173,6 +173,8 @@ const info = {
 			}
 		}
 	},
+
+	uncensored: true,
 };
 
 export default info;
