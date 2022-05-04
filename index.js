@@ -62,7 +62,7 @@ for (const [event, execute] of events.entries()) {
 
 	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {
-			return await execute.event(...args);
+			return await execute.event.call(client, ...args);
 		} catch (error) {
 			logError(error, event, client);
 		}

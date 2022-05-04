@@ -11,7 +11,7 @@ const event = {
 	async event(client) {
 		console.log(
 			`Connected to Discord with ID ${client.application.id} and tag ${
-				client.user?.tag ?? ""
+				client.user.tag ?? ""
 			}`,
 		);
 
@@ -41,16 +41,16 @@ const event = {
 					],
 				});
 			} else {
-				client.application.commands.set([], guild.id).catch(()=>{});
+				client.application.commands.set([], guild.id).catch(() => {});
 			}
 		});
 
-		const [dmCommands, serverCommands] = commands.toJSON().reduce(
-			([dmCommands, serverCommands], curr) => {
-				if (!(curr.apply ?? true)) return [dmCommands, serverCommands];
-				if (curr.dm && process.env.NODE_ENV === "production")
-					dmCommands.push(curr.data.toJSON());
-				else serverCommands.push(curr.data.toJSON());
+		const [dmCommands, serverCommands] = (await commands(client)).toJSON().reduce(
+			([dmCommands, serverCommands], command) => {
+				if (!(command.apply ?? true)) return [dmCommands, serverCommands];
+				if (command.dm && process.env.NODE_ENV === "production")
+					dmCommands.push(command.data.toJSON());
+				else serverCommands.push(command.data.toJSON());
 				return [dmCommands, serverCommands];
 			},
 			/**

@@ -256,9 +256,10 @@ export async function automodMessage(
 	return isBad;
 }
 
-/** @param {import("discord.js").TextBasedChannel} channel */
-function badWordsAllowed(channel) {
-	if (channel.type === "DM") return true;
+/** @param {import("discord.js").TextBasedChannel | null} channel */ export function badWordsAllowed(
+	channel,
+) {
+	if (!channel || channel.type === "DM") return true;
 	return [
 		"816329956074061867", // admin-talk
 		channel.guild.publicUpdatesChannel?.id, // mod-talk

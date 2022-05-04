@@ -5,7 +5,7 @@ import { censor } from "../../common/moderation/automod.js";
 const event = {
 	async event(_, newUser) {
 		if (newUser.partial) newUser = await newUser.fetch();
-		const guild = await newUser.client.guilds.fetch(process.env.GUILD_ID || "");
+		const guild = await this.guilds.fetch(process.env.GUILD_ID || "");
 
 		const member = await guild.members.fetch(newUser.id).catch(() => {});
 		if (!member || member.nickname) return;

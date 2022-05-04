@@ -37,9 +37,9 @@ const event = {
 		if (
 			!message.content.startsWith("=") &&
 			message.channel.type === "DM" &&
-			(message.author.id !== message.client.user?.id || message.interaction)
+			(message.author.id !== this.user.id || message.interaction)
 		) {
-			const guild = await message.client.guilds.fetch(GUILD_ID);
+			const guild = await this.guilds.fetch(GUILD_ID);
 			const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 			if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
@@ -132,8 +132,8 @@ const event = {
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
 			!message.content.startsWith("=") &&
-			(message.webhookId && message.author.id !== message.client.user?.id
-				? (await message.fetchWebhook()).owner?.id !== message.client.user?.id
+			(message.webhookId && message.author.id !== this.user?.id
+				? (await message.fetchWebhook()).owner?.id !== this.user?.id
 				: true) &&
 			message.interaction?.commandName !== "modmail"
 		) {
@@ -324,8 +324,8 @@ const event = {
 		if (/\b(NO+)+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
-			message.mentions.users.has(message.client.user?.id ?? "") &&
-			message.mentions.repliedUser?.id !== (message.client.user?.id ?? "")
+			message.mentions.users.has(this.user?.id ?? "") &&
+			message.mentions.repliedUser?.id !== (this.user?.id ?? "")
 		)
 			react("👋");
 

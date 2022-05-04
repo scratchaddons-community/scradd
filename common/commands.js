@@ -2,6 +2,7 @@
 import { importScripts } from "../lib/files.js";
 import path from "path";
 import url from "url";
+import { Collection } from "discord.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -11,10 +12,24 @@ const commands = await /**
  * >}
  */ (importScripts(path.resolve(dirname, "../commands")));
 
-for (const [name, command] of commands.entries()) {
-	if (command.data.name)
-		throw new Error("Don't manually set the command name, it will use the file name.");
-	command.data.setName(name);
-}
-
-export default commands;
+/** @param {import("discord.js").Client<true>} client */
+export default async (client) => {
+	return new Collection(
+		await Promise.all(
+			commands.map(
+				/** @returns {Promise<[string, import("../types/command").CommandInfo]>} */ async (
+					curr,
+					name,
+				) => {
+					const command = typeof curr === "function" ? await curr.call(client) : curr;
+					if (command.data.name)
+						throw new Error(
+							"Don't manually set the command name, it will use the file name.",
+						);
+					command.data = command.data.setName(name);
+					return [name, command];
+				},
+			),
+		),
+	);
+};

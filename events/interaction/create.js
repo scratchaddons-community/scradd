@@ -1,20 +1,27 @@
 /** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
 import { warn } from "../../common/moderation/warns.js";
-import { censor } from "../../common/moderation/automod.js";
-import commands from "../../common/commands.js";
+import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
+import fetchCommands from "../../common/commands.js";
+
+/**
+ * @type {| import("discord.js").Collection<string, import("../../types/command").CommandInfo>
+ * 	| undefined}
+ */
+let commands;
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
 	async event(interaction) {
 		if (!interaction.isCommand()) return;
-		const command = commands.get(interaction.commandName);
+		const command = (commands ||= await fetchCommands(interaction.client)).get(
+			interaction.commandName,
+		);
 
-		if (!command)
-			throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
+		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
 
 		try {
-			if (!command.uncensored ) {
+			if (!command.uncensored && !badWordsAllowed(interaction.channel)) {
 				const censored = censorOptions(interaction.options.data);
 
 				if (censored.isBad) {
