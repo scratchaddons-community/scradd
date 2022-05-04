@@ -73,7 +73,7 @@ export default class SuggestionChannel {
 
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
-			autoArchiveDuration: 1_440,
+			autoArchiveDuration: 1_440, // 24 hours
 			name: `${embed.title ?? ""} | ${DEFAULT_ANSWER.name}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
@@ -233,19 +233,22 @@ export default class SuggestionChannel {
  *
  * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
  *   made the suggestion.
+ * @todo
+ *   https://canary.discord.com/channels/806602307750985799/939350305311715358/947385068660359278 was
+ *   never fixed?
  */
-export async function getUserFromSuggestion(message) {
+ export async function getUserFromSuggestion(message) {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]
 			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups?.userId;
 
 	if (author) {
-		const fetchedMember = await message.guild?.members.fetch(author).catch(() => undefined);
+		const fetchedMember =
+			(await message.guild?.members.fetch(author).catch(() => undefined)) ||
+			(await message.client?.users.fetch(author).catch(() => undefined));
 		if (fetchedMember) return fetchedMember;
 	}
 
-	const user = author && (await message.client?.users.fetch(author).catch(() => undefined));
-
-	return user || (message.member ?? message.author);
+	return message.member ?? message.author;
 }
