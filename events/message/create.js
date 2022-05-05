@@ -5,7 +5,7 @@
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { warn } from "../../common/moderation/warns.js";
+import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
 
 import {
@@ -185,7 +185,7 @@ const event = {
 
 		if (await automodMessage(message)) return;
 
-		if (process.env.LOG_CHANNEL !== message.channel.id) {
+		if (process.env.LOGS_CHANNEL !== message.channel.id) {
 			// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 			const spoilerHack = "||​||".repeat(200);
 
@@ -222,7 +222,7 @@ const event = {
 				SUGGESTION_CHANNEL,
 				process.env.BUGS_CHANNEL,
 				BOARD_CHANNEL,
-				process.env.LOG_CHANNEL,
+				process.env.LOGS_CHANNEL,
 			].includes(message.channel.id)
 		) {
 			await Promise.all(promises);

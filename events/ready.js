@@ -1,7 +1,7 @@
 /** @file Initialize Bot on ready. Register commands and etc. */
 
 import { Collection } from "discord.js";
-import { Embed } from "@discordjs/builders";
+import log from "../common/moderation/logging.js";
 
 import commands from "../common/commands.js";
 import { pkg } from "../lib/files.js";
@@ -23,23 +23,16 @@ const event = {
 				if (process.env.NODE_ENV !== "production") return;
 
 				const { channels } = await guild.fetch();
-				const { LOG_CHANNEL } = process.env;
+				const { LOGS_CHANNEL } = process.env;
 
-				if (!LOG_CHANNEL) throw new ReferenceError("LOG_CHANNEL is not set in the .env");
+				if (!LOGS_CHANNEL) throw new ReferenceError("LOGS_CHANNEL is not set in the .env");
 
-				const channel = await channels.fetch(LOG_CHANNEL);
+				const channel = await channels.fetch(LOGS_CHANNEL);
 
 				if (!channel?.isText())
 					throw new ReferenceError("Could not find error reporting channel");
 
-				await channel?.send({
-					embeds: [
-						new Embed()
-							.setTitle("Bot restarted!")
-							.setDescription(`Version **v${pkg.version}**`)
-							.setColor(Math.floor(Math.random() * (0xffffff + 1))),
-					],
-				});
+				await log(`Bot restarted! Version **v${pkg.version}**`)
 			} else {
 				client.application.commands.set([], guild.id).catch(() => {});
 			}

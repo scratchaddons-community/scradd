@@ -1,6 +1,6 @@
 /** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
-import { warn } from "../../common/moderation/warns.js";
+import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import fetchCommands from "../../common/commands.js";
 

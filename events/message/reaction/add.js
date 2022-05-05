@@ -9,7 +9,7 @@ import {
 	updateReactionCount,
 } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
-import { warn } from "../../../common/moderation/warns.js";
+import warn from "../../../common/moderation/warns.js";
 import { censor, automodMessage } from "../../../common/moderation/automod.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */

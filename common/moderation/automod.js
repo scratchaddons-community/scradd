@@ -1,10 +1,9 @@
 import { GuildTemplate, Invite } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
-import { stripMarkdown } from "../../lib/markdown.js";
 import { firstPromiseValued } from "../../lib/promises.js";
 import fetch from "node-fetch";
-import { warn } from "./warns.js";
-
+import warn from "./warns.js";
+import { stripMarkdown } from "../../lib/markdown.js";
 const regexps = [
 	// Just Delete
 	/[+g][*3r][$5f][+g][!*1v][(<p](?:[*@n][y|]|[y|][*3r])|[$5f](?:[(<p][#u]z[*h][(<p]x|[*@n]q[!*1v][$5f][+g])|o[*h][+g]{1,2}(?:[ -]?c[!*1v]e[*@n][+g][*3r]|j[!*1v]c[*3r])|q[!*1v][y|]{1,2}q[*0b]|e[*3r][(<p][+g][*h]z|i(?:[*@n]t[!*1v]a[*@n][y|]|[*h][y|]i[*@n])|(?<![a-z])(?:i[*@n]t[!*1v]a[*@n](?:[$*35ryf|]|yl)?|c[*3r]a[!*1v][$5f](?:[*3r][$5f])?|[*@n]a[*h][$5f](?:[*3r][$5f])?|(?:oe[*3r][*@n][$5f][+g]|[$5f][*3r]z[*3r]a|[(<p](?:[*h]z|[y|][!*1v][+g])|[+g][*3r]{2}[+g])[$5f]?)(?![a-z])|🖕/gi,
@@ -29,7 +28,7 @@ export function censor(text) {
 	const censored = caesar(
 		regexps.reduce((string, regexp, index) => {
 			words[index] ??= [];
-			return string.replaceAll(regexp, (censored) => {
+			return string.replaceAll((regexp), (censored) => {
 				words[index]?.push(caesar(censored));
 				return "#".repeat(censored.length);
 			});
@@ -83,7 +82,7 @@ export async function automodMessage(
 					"874743757210275860",
 					"816329956074061867",
 					message.guild?.publicUpdatesChannel?.id,
-					process.env.LOG_CHANNEL,
+					process.env.LOGS_CHANNEL,
 					process.env.MODMAIL_CHANNEL,
 					"806624037224185886",
 				].includes(
@@ -165,7 +164,7 @@ export async function automodMessage(
 
 		return promises.length ? promises : undefined;
 	}
-
+	
 	const censoredContent = await censorString(stripMarkdown(message.cleanContent));
 
 	if (censoredContent) {
@@ -263,7 +262,7 @@ export async function automodMessage(
 	return [
 		"816329956074061867", // admin-talk
 		channel.guild.publicUpdatesChannel?.id, // mod-talk
-		process.env.LOG_CHANNEL, // mod-logs
+		process.env.LOGS_CHANNEL, // mod-logs
 		process.env.MODMAIL_CHANNEL, // scradd-mail
 		"853256939089559583",
 		"894314668317880321",

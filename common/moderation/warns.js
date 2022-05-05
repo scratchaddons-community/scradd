@@ -28,7 +28,7 @@ let /** @type {import("discord.js").Message} */ warnLog,
  * @param {number} [strikes]
  * @param {string} [reason]
  */
-export async function warn(user, reason, strikes = 1) {
+export default async function warn(user, reason, strikes = 1) {
 	const guild =
 		user instanceof GuildMember
 			? user.guild

@@ -9,7 +9,7 @@ import {
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 import { Embed } from "@discordjs/builders";
-import { warn } from "../../common/moderation/warns.js";
+import warn from "../../common/moderation/warns.js";
 import { censor } from "../../common/moderation/automod.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */

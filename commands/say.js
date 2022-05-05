@@ -2,7 +2,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import { replaceBackticks } from "../lib/markdown.js";
+import log from "../common/moderation/logging.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -21,18 +21,9 @@ const info = {
 		const message = await interaction.channel?.send({ content });
 
 		if (message) {
-			const channel = await interaction.guild?.channels.fetch(process.env.LOG_CHANNEL ?? "");
-
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
-				channel?.isText() &&
-					channel.send({
-						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${replaceBackticks(
-							content,
-						)}\` (${message.url})`,
-
-						allowedMentions: { users: [] },
-					}),
+				log(`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}: ${message.url}`),
 			]);
 		}
 	},
