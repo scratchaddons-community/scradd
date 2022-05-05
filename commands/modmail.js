@@ -174,7 +174,7 @@ const info = {
 		}
 	},
 
-	uncensored: true,
+	censored: false,
 };
 
 export default info;

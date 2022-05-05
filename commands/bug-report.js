@@ -12,6 +12,11 @@ if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
 	{
+		name: "Unverified",
+		color: Constants.Colors.GREYPLE,
+		description: "This bug hasn't been verified as an actual bug yet",
+	},
+	{
 		color: Constants.Colors.GREEN,
 		description: "This bug has been verified and it will be fixed soon",
 		name: "Valid Bug",
@@ -80,8 +85,13 @@ const info = {
 						.setDescription("Answer to the bug report")
 						.setRequired(true);
 
-					for (const answer of ANSWERS)
-						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+					for (const [index, answer] of ANSWERS.entries()) {
+						if (index)
+							newOption.addChoice(
+								`${answer.name} (${answer.description})`,
+								answer.name,
+							);
+					}
 
 					return newOption;
 				}),
@@ -115,10 +125,14 @@ const info = {
 
 		switch (command) {
 			case "create": {
-				const success = await channel.createMessage(interaction, {
-					description: interaction.options.getString("bugreport") ?? "",
-					title: interaction.options.getString("title") ?? "",
-				});
+				const success = await channel.createMessage(
+					interaction,
+					{
+						description: interaction.options.getString("bugreport") ?? "",
+						title: interaction.options.getString("title") ?? "",
+					},
+					ANSWERS[0]?.name,
+				);
 
 				if (success) {
 					await interaction.reply({
@@ -142,7 +156,9 @@ const info = {
 								CONSTANTS.emojis.statuses.yes
 							} Successfully answered bug report as **${Util.escapeMarkdown(
 								answer,
-							)}**!` + (result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							)}**! __${Util.escapeMarkdown(
+								ANSWERS.find(({ name }) => name === answer)?.description || "",
+							)}__.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});

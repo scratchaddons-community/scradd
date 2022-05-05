@@ -51,8 +51,6 @@ const info = {
 			ephemeral: true,
 		});
 	},
-
-	uncensored: true,
 };
 
 export default info;

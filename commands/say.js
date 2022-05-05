@@ -36,6 +36,7 @@ const info = {
 			]);
 		}
 	},
+	censored:"channel"
 };
 
 export default info;

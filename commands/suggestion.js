@@ -4,7 +4,6 @@ import { Constants, MessageActionRow, MessageButton, MessageEmbed, Util } from "
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
-	DEFAULT_ANSWER,
 	getUserFromSuggestion,
 	MAX_TITLE_LENGTH,
 	RATELIMT_MESSAGE,
@@ -35,6 +34,11 @@ export const SUGGESTION_EMOJIS = [
 
 /** @type {import("../common/suggest.js").Answer[]} */
 export const ANSWERS = [
+	{
+		name: "Unanswered",
+		color: Constants.Colors.GREYPLE,
+		description: "This has not yet been answered",
+	},
 	{
 		color: Constants.Colors.GREEN,
 		description: "This will probably be added if anyone codes it",
@@ -117,8 +121,13 @@ const info = {
 						.setDescription("Answer to the suggestion")
 						.setRequired(true);
 
-					for (const answer of ANSWERS)
-						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+					for (const [index, answer] of ANSWERS.entries()) {
+						if (index)
+							newOption.addChoice(
+								`${answer.name} (${answer.description})`,
+								answer.name,
+							);
+					}
 
 					return newOption;
 				}),
@@ -163,7 +172,7 @@ const info = {
 						)
 						.setRequired(false);
 
-					for (const answer of [DEFAULT_ANSWER, ...ANSWERS])
+					for (const answer of ANSWERS)
 						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
 
 					return newOption;
@@ -206,7 +215,9 @@ const info = {
 								CONSTANTS.emojis.statuses.yes
 							} Successfully answered suggestion as **${Util.escapeMarkdown(
 								answer,
-							)}**!` + (result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							)}**! __${Util.escapeMarkdown(
+								ANSWERS.find(({ name }) => name === answer)?.description || "",
+							)}__.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});
@@ -260,7 +271,9 @@ const info = {
 							if (typeof count !== "number") return;
 
 							const answer =
-								message.thread?.name.split(" | ")[1]?.trim() ?? DEFAULT_ANSWER.name;
+								message.thread?.name.split(" | ")[1]?.trim() ??
+								ANSWERS[0]?.name ??
+								"";
 
 							if (
 								requestedAnswer &&

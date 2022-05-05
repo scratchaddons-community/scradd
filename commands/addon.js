@@ -198,7 +198,8 @@ const info = {
 		await interaction.reply({ embeds: [embed] });
 	},
 
-	dm:true
+	dm: true,
+	censored:"channel"
 };
 
 export default info;

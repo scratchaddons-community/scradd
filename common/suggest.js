@@ -11,12 +11,7 @@ export const MAX_TITLE_LENGTH = 50;
 export const RATELIMT_MESSAGE =
 	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-/** @type {Answer} */
-export const DEFAULT_ANSWER = {
-	name: "Unanswered",
-	color: Constants.Colors.GREYPLE,
-	description: "This has not yet been answered",
-};
+export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
 
 export const NO_SERVER_START =
 	"In an effort to help SA developers find meaningful information, we have disabled server-related suggestions and bug reports. With this off, when a developer looks in ";
@@ -41,7 +36,7 @@ export default class SuggestionChannel {
 	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the
 	 *   suggestion message on success.
 	 */
-	async createMessage(interaction, data) {
+	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
 
 		if (!(author instanceof GuildMember))
@@ -50,14 +45,14 @@ export default class SuggestionChannel {
 		const title = Util.escapeMarkdown(data.title);
 
 		const embed = new Embed()
-			.setColor(DEFAULT_ANSWER.color)
+			.setColor(DEFAULT_COLOR)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
 				name: author?.displayName ?? interaction.user.username,
 			})
 			.setTitle(title)
 			.setDescription(data.description)
-			.setFooter({ text: `${DEFAULT_ANSWER.name}` });
+			.setFooter({ text: `${defaultAnswer}` });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
@@ -66,7 +61,7 @@ export default class SuggestionChannel {
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: 1_440, // 24 hours
-			name: `${title ?? ""} | ${DEFAULT_ANSWER.name}`,
+			name: `${title ?? ""} | ${defaultAnswer}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
 
@@ -132,7 +127,7 @@ export default class SuggestionChannel {
 			const embed = new MessageEmbed(starter.embeds[0]);
 
 			embed
-				.setColor((answers.find(({ name }) => answer === name) ?? DEFAULT_ANSWER).color)
+				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
 				.setFooter({ text: answer });
 
 			promises.push(starter.edit({ embeds: [embed] }));

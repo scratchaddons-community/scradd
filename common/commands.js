@@ -12,9 +12,15 @@ const commands = await /**
  * >}
  */ (importScripts(path.resolve(dirname, "../commands")));
 
+/**
+ * @type {| import("discord.js").Collection<string, import("../types/command").CommandInfo>
+ * 	| undefined}
+ */
+let processed;
+
 /** @param {import("discord.js").Client<true>} client */
 export default async (client) => {
-	return new Collection(
+	return (processed ||= new Collection(
 		await Promise.all(
 			commands.map(
 				/** @returns {Promise<[string, import("../types/command").CommandInfo]>} */ async (
@@ -24,12 +30,13 @@ export default async (client) => {
 					const command = typeof curr === "function" ? await curr.call(client) : curr;
 					if (command.data.name)
 						throw new Error(
-							"Don't manually set the command name, it will use the file name.",
+							`${command.data.name}/${name}: ` +
+								"Don't manually set the command name, it will use the file name.",
 						);
 					command.data = command.data.setName(name);
 					return [name, command];
 				},
 			),
 		),
-	);
+	));
 };
