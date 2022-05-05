@@ -9,7 +9,7 @@ const event = {
 	async event(member) {
 		if (member.guild.id !== process.env.GUILD_ID) return;
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-		if (!channel?.isText()) throw new Error("PUBLIC_LOGS_CHANNEL is not a text channel.");
+		if (!channel?.isText()) throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
 		const byes = [
 			`Welp… ${member.toString()} decided to leave… what a shame…`,

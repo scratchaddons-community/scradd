@@ -199,7 +199,7 @@ const info = {
 	},
 
 	dm: true,
-	censored:"channel"
+	censored: "channel",
 };
 
 export default info;

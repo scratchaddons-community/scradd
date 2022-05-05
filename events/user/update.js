@@ -12,7 +12,7 @@ const event = {
 		const censored = censor(member.displayName);
 		if (censored) {
 			const modTalk = guild.publicUpdatesChannel;
-			if (!modTalk) throw new TypeError("Could not find mod talk");
+			if (!modTalk) throw new ReferenceError("Could not find mod talk");
 			await (member.moderatable
 				? member.setNickname(censored.censored)
 				: modTalk.send({

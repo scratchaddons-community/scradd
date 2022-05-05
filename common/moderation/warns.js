@@ -34,7 +34,7 @@ export default async function warn(user, reason, strikes = 1) {
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
 	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new TypeError("Could not find mod talk");
+	if (!modTalk) throw new ReferenceError("Could not find mod talk");
 	if (!warnLog || !muteLog) {
 		const databases = await getDatabases(["warn", "mute"], modTalk);
 		warnLog = databases.warn;

@@ -106,9 +106,6 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== process.env.GUILD_ID)
-			throw new Error("Ran command in the wrong server!");
-
 		const deferPromise = interaction.deferReply({
 			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 		});

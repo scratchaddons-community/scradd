@@ -5,7 +5,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { MAX_TITLE_LENGTH, RATELIMT_MESSAGE } from "../common/suggest.js";
 
-const { BUGS_CHANNEL, GUILD_ID } = process.env;
+const { BUGS_CHANNEL } = process.env;
 
 if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env.");
 
@@ -119,8 +119,6 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== GUILD_ID) throw new Error("Ran command in the wrong server!");
-
 		const command = interaction.options.getSubcommand();
 
 		switch (command) {

@@ -9,7 +9,8 @@ const event = {
 			const channel = await newMember.guild.channels.fetch(
 				process.env.PUBLIC_LOGS_CHANNEL || "",
 			);
-			if (!channel?.isText()) throw new Error("PUBLIC_LOGS_CHANNEL is not a text channel.");
+			if (!channel?.isText())
+				throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
 			const boosts = [
 				`YO! ${newMember.toString()} just BOOSTED THE SERVER!!! ${
@@ -40,7 +41,7 @@ const event = {
 		const censored = censor(newMember.displayName);
 		if (censored) {
 			const modTalk = newMember.guild.publicUpdatesChannel;
-			if (!modTalk) throw new TypeError("Could not find mod talk");
+			if (!modTalk) throw new ReferenceError("Could not find mod talk");
 			await (newMember.moderatable
 				? newMember.setNickname(censored.censored)
 				: modTalk.send({

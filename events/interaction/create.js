@@ -8,7 +8,7 @@ import fetchCommands from "../../common/commands.js";
 const event = {
 	async event(interaction) {
 		if (!interaction.isCommand()) return;
-		const command = (await fetchCommands(interaction.client)).get(interaction.commandName);
+		const command = (await fetchCommands(this)).get(interaction.commandName);
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
 

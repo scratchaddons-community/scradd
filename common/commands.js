@@ -29,7 +29,7 @@ export default async (client) => {
 				) => {
 					const command = typeof curr === "function" ? await curr.call(client) : curr;
 					if (command.data.name)
-						throw new Error(
+						throw new TypeError(
 							`${command.data.name}/${name}: ` +
 								"Don't manually set the command name, it will use the file name.",
 						);

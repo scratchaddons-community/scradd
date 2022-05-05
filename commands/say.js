@@ -23,11 +23,18 @@ const info = {
 		if (message) {
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
-				log(`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}: ${message.url}`),
+				interaction.guild &&
+					log(
+						interaction.guild,
+						`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}: ${
+							message.url
+						}`,
+						"messages",
+					),
 			]);
 		}
 	},
-	censored:"channel"
+	censored: "channel",
 };
 
 export default info;

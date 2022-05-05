@@ -28,7 +28,7 @@ export function censor(text) {
 	const censored = caesar(
 		regexps.reduce((string, regexp, index) => {
 			words[index] ??= [];
-			return string.replaceAll((regexp), (censored) => {
+			return string.replaceAll(regexp, (censored) => {
 				words[index]?.push(caesar(censored));
 				return "#".repeat(censored.length);
 			});
@@ -164,7 +164,7 @@ export async function automodMessage(
 
 		return promises.length ? promises : undefined;
 	}
-	
+
 	const censoredContent = await censorString(stripMarkdown(message.cleanContent));
 
 	if (censoredContent) {

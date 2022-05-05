@@ -34,7 +34,7 @@ const info = {
 			});
 	},
 
-	censored:false
+	censored: false,
 };
 
 export default info;

@@ -59,8 +59,7 @@ const event = {
 			// Or if they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			// Or if they reacted to a message on the board
-			(message.channel.id === BOARD_CHANNEL &&
-				message.author.id === this.user.id) ||
+			(message.channel.id === BOARD_CHANNEL && message.author.id === this.user.id) ||
 			// Or they reacted to an /explorepotatoes message
 			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
 		) {
