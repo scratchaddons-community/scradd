@@ -39,11 +39,11 @@ const event = {
 		}
 		const censored = censor(newMember.displayName);
 		if (censored) {
-			const modLog = newMember.guild.publicUpdatesChannel;
-			if (!modLog) throw new TypeError("Could not find mod log");
+			const modTalk = newMember.guild.publicUpdatesChannel;
+			if (!modTalk) throw new TypeError("Could not find mod talk");
 			await (newMember.moderatable
 				? newMember.setNickname(censored.censored)
-				: modLog.send({
+				: modTalk.send({
 						allowedMentions: { users: [] },
 						content: `Missing permissions to change ${newMember.toString()}'s nickname to \`${
 							censored.censored

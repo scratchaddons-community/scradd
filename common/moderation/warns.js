@@ -33,10 +33,10 @@ export async function warn(user, reason, strikes = 1) {
 		user instanceof GuildMember
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-	const modLog = guild.publicUpdatesChannel;
-	if (!modLog) throw new TypeError("Could not find mod log");
+	const modTalk = guild.publicUpdatesChannel;
+	if (!modTalk) throw new TypeError("Could not find mod talk");
 	if (!warnLog || !muteLog) {
-		const databases = await getDatabases(["warn", "mute"], modLog);
+		const databases = await getDatabases(["warn", "mute"], modTalk);
 		warnLog = databases.warn;
 		muteLog = databases.mute;
 	}
@@ -81,11 +81,11 @@ export async function warn(user, reason, strikes = 1) {
 					? process.env.NODE_ENV === "production" ||
 					  member.roles.highest.name === "@everyone"
 						? member.ban({ reason: "Too many infractions" })
-						: modLog.send({
+						: modTalk.send({
 								allowedMentions: { users: [] },
 								content: `(Just pretend like ${user.toString()} is banned now okay?)`,
 						  })
-					: modLog.send({
+					: modTalk.send({
 							allowedMentions: { users: [] },
 							content: `Missing permissions to ban ${user.toString()}.`,
 					  }),
@@ -112,7 +112,7 @@ export async function warn(user, reason, strikes = 1) {
 					writeToDatabase(muteLog, allMutes),
 					member.moderatable
 						? member.disableCommunicationUntil(timeoutLength * 3600000 + Date.now())
-						: modLog.send({
+						: modTalk.send({
 								allowedMentions: { users: [] },
 								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hours.`,
 						  }),
