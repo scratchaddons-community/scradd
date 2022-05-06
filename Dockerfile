@@ -19,4 +19,4 @@ RUN npm install --production
 # Bundle app source
 COPY . .
 
-CMD sh /boot.sh && npm start
+CMD sh /boot.sh && npm start -- --production

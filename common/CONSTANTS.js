@@ -51,4 +51,5 @@ export default {
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: { general: "806602307750985803" },
+	prodScradd: "929928324959055932",
 };

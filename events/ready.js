@@ -1,16 +1,43 @@
 /** @file Initialize Bot on ready. Register commands and etc. */
 
 import log from "../common/moderation/logging.js";
-
 import commands from "../common/commands.js";
 import { pkg } from "../lib/files.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+import logError from "../lib/logError.js";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {
 	async event() {
-		console.log(
-			`Connected to Discord with ID ${this.application.id} and tag ${this.user.tag ?? ""}`,
-		);
+		console.log(`Connected to Discord with tag ${this.user.tag ?? ""}`);
+
+		console.log(process.argv.includes("--production"));
+
+		if (CONSTANTS.prodScradd === this.user.id && !process.argv.includes("--production")) {
+			await logError(
+				new OverconstrainedError(
+					CONSTANTS.prodScradd,
+					"Refusing to reset commands on prod",
+				),
+				"ready",
+				this,
+			);
+			process.exit();
+		}
+
+		this.user.setPresence({
+			activities: [
+				{
+					name:
+						process.env.NODE_ENV === "production" ||
+						CONSTANTS.prodScradd === this.user.id
+							? "the SA server!"
+							: "for bugs…",
+					type: "WATCHING",
+					url: pkg.homepage,
+				},
+			],
+		});
 
 		const GUILD_ID = process.env.GUILD_ID ?? "";
 		const guilds = await this.guilds.fetch();

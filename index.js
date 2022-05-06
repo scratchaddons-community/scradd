@@ -16,16 +16,6 @@ const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const client = new Client({
 	allowedMentions: { parse: ["users"], roles: [] },
 
-	presence: {
-		activities: [
-			{
-				name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
-				type: "WATCHING",
-				url: pkg.homepage,
-			},
-		],
-	},
-
 	intents: [
 		"GUILDS",
 		"GUILD_MESSAGES",
