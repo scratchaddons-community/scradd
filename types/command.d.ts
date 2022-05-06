@@ -1,3 +1,4 @@
+import { AssertionError } from "assert";
 import type { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
 import type { CommandInteraction, ApplicationCommandPermissionData, Client } from "discord.js";
 
@@ -10,7 +11,8 @@ export type CommandInfo = {
 	/**
 	 * A builder instance that has constructed the command.
 	 *
-	 * @throws {Error} An error is thrown if `.setName` is called on this builder - the file name is used.
+	 * @throws {AssertionError} An AssertionError is thrown if `.setName` is called on this builder
+	 *   - the file name is used.
 	 */
 	data: Command;
 	/**

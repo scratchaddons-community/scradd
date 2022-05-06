@@ -7,7 +7,7 @@ import logError from "../lib/logError.js";
  */
 const event = {
 	async event() {
-		await logError("Session is invalid!", "invalidated", this);
+		await logError(new ReferenceError("Session is invalid!"), "invalidated", this);
 		process.exit();
 	},
 };

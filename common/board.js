@@ -76,8 +76,6 @@ export async function sourceToBoardMessage(message) {
  * @param {import("discord.js").Message} message - Message to add.
  */
 export async function postMessageToBoard(message) {
-	if (!message.guild) throw new TypeError("Cannot post DMs to potatoboard");
-
 	const { files, embeds } = await extractMessageExtremities(message);
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);

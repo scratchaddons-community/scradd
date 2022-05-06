@@ -3,6 +3,7 @@ import { importScripts } from "../lib/files.js";
 import path from "path";
 import url from "url";
 import { Collection } from "discord.js";
+import { AssertionError } from "assert";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -29,10 +30,13 @@ export default async (client) => {
 				) => {
 					const command = typeof curr === "function" ? await curr.call(client) : curr;
 					if (command.data.name)
-						throw new TypeError(
-							`${command.data.name}/${name}: ` +
+						throw new AssertionError({
+							actual: command.data.name,
+							expected: "",
+							operator: name,
+							message:
 								"Don't manually set the command name, it will use the file name.",
-						);
+						});
 					command.data = command.data.setName(name);
 					return [name, command];
 				},

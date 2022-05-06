@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { AbortError } from "node-fetch";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
@@ -8,7 +9,7 @@ const info = {
 	async interaction(interaction) {
 		await interaction.reply(interaction.user.tag + " is killing the bot.");
 		await logError(
-			interaction.user.tag + " is killing the bot.",
+			new AbortError(interaction.user.tag + " is killing the bot."),
 			"interactionCreate",
 			interaction.client,
 		);

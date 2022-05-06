@@ -94,7 +94,7 @@ export async function getThreadFromMember(
 	user,
 	guild = user instanceof GuildMember ? user.guild : undefined,
 ) {
-	if (!guild) throw new ReferenceError("Expected guild to be passed along with a User.");
+	if (!guild) throw new TypeError("Expected guild to be passed along with a User.");
 	const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
