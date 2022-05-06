@@ -190,7 +190,7 @@ const event = {
 			const spoilerHack = "||​||".repeat(200);
 
 			if (message.content.includes(spoilerHack)) {
-				const array = message.content.split(spoilerHack);
+				const array = message.cleanContent.split(spoilerHack);
 
 				array.shift();
 				promises.push(
@@ -278,6 +278,8 @@ const event = {
 
 		if (
 			content === "e" ||
+			content === "ae" ||
+			content === "iei" ||
 			(content === "." && message.author.id === "761276793666797589") ||
 			content.includes("<:e_:847428533432090665>") ||
 			content.includes("æ")
