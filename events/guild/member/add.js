@@ -51,6 +51,9 @@ const event = {
 			`What's that? A new member? Yes, ${member.toString()}'s our ${nth(
 				member.guild.memberCount,
 			)}!`,
+			`Welcome:tm: ${member.toString()}! You're our ${nth(
+				member.guild.memberCount,
+			)} member!`
 		];
 
 		await Promise.all([

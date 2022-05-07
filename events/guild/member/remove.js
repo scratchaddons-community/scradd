@@ -17,6 +17,7 @@ const event = {
 			`${member.toString()} made a bad decision and left! 😦 I wonder why… 🤔`,
 			`For some reason ${member.toString()} didn't like it here…`,
 			`Can we get an F in the chat for ${member.toString()}? They left! 😭`,
+			`Oop, ${member.toString()} got eaten by an evil kumquat and left!`
 		];
 
 		const banned = await member.guild.bans
@@ -33,6 +34,7 @@ const event = {
 			`Remember kids, don't follow ${member.toString()}'s example, it gets you banned.`,
 			`Oops, ${member.toString()} angered the mods and was banned!`,
 			`${member.toString()} broke the rules and took an L`,
+			`${member.toString()} was banned for talking about opacity slider too much. JK, that's not why.`
 		];
 
 		await Promise.all([

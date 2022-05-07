@@ -4,7 +4,7 @@ import { Message, MessageButton, MessageEmbed } from "discord.js";
 
 import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { asyncFilter, firstPromiseValued } from "../lib/promises.js";
+import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { getAllMessages } from "../lib/message.js";
 
@@ -54,7 +54,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 			for (const channel of channelWanted.children.values())
 				promises.push(textChannelMatches(channel, channelFound));
 
-			if (!(await firstPromiseValued(true, promises))) return false;
+			if (!(await firstTrueyPromise( promises))) return false;
 
 			break;
 		}

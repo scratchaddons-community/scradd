@@ -9,15 +9,15 @@ import logError from "../lib/logError.js";
 /** @type {import("../types/event").default<"ready">} */
 const event = {
 	async event() {
-		console.log(`Connected to Discord with tag ${this.user.tag ?? ""}`);
-
-		console.log(process.argv.includes("--production"));
+		console.log(
+			`Connected to Discord with tag ${this.user.tag ?? ""} on version v${pkg.version}`,
+		);
 
 		if (CONSTANTS.prodScradd === this.user.id && !process.argv.includes("--production")) {
 			await logError(
 				new OverconstrainedError(
 					CONSTANTS.prodScradd,
-					"Refusing to reset commands on prod",
+					"Refusing to run on prod without --production flag",
 				),
 				"ready",
 				this,
@@ -42,16 +42,19 @@ const event = {
 		const GUILD_ID = process.env.GUILD_ID ?? "";
 		const guilds = await this.guilds.fetch();
 
-		guilds.forEach(
-			async (guild) =>
-				await (guild.id === GUILD_ID
-					? log(
-							await guild.fetch(),
-							`Bot restarted! Version **v${pkg.version}**`,
-							"server",
-					  )
-					: this.application.commands.set([], guild.id).catch(() => {})),
-		);
+		guilds.forEach(async (guild) => {
+			if (guild.id === GUILD_ID && process.env.NODE_ENV === "production") {
+				await log(
+					await guild.fetch(),
+					`Bot restarted! Version **v${pkg.version}**`,
+					"server",
+				);
+			}
+
+			if (guild.id !== GUILD_ID) {
+				await this.application.commands.set([], guild.id).catch(() => {});
+			}
+		});
 
 		const [dmCommands, serverCommands] = (await commands(this)).toJSON().reduce(
 			([dmCommands, serverCommands], command) => {

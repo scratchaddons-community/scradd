@@ -3,6 +3,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { Embed } from "@discordjs/builders";
+import {  censor } from "./moderation/automod.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
@@ -76,23 +77,27 @@ export async function sourceToBoardMessage(message) {
  * @param {import("discord.js").Message} message - Message to add.
  */
 export async function postMessageToBoard(message) {
-	const { files, embeds } = await extractMessageExtremities(message);
+	const { files, embeds } = await extractMessageExtremities(message,false);
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText()) {
+	if (!board?.isText())
 		throw new ReferenceError("Could not find board channel.");
-	}
+	
 
 	const description = await messageToText(message);
 
+	const censored = description && censor(description);
+	const censoredName = censor(message.author.username);
+
 	const boardEmbed = new Embed()
 		.setColor(message.member?.displayColor ?? 0)
-		.setDescription(description ?? null)
+		.setDescription(censored ? censored.censored : description || null)
 		.setAuthor({
 			iconURL: (message.member ?? message.author).displayAvatarURL(),
-
-			name: message.member?.displayName ?? message.author.username,
+			name:
+				message.member?.displayName ??
+				(censoredName ? censoredName.censored : message.author.username),
 		})
 		.setTimestamp(message.createdTimestamp);
 
@@ -105,26 +110,21 @@ export async function postMessageToBoard(message) {
 
 	if (!reaction) return;
 
+	MESSAGES ??= await getAllMessages(board);
+
 	const boardMessage = await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
-		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${
-			message.channel.type === "DM"
-				? ""
-				: `${message.channel.toString()}${
-						message.channel.isThread()
-							? ` (${message.channel.parent?.toString() ?? ""})`
-							: ""
-				  }`
-		} | ${(message.member ?? message.author).toString()}`,
+		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
+			message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
+		} | ${message.author.toString()}`,
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
 	if (board.type === "GUILD_NEWS") {
 		await boardMessage.crosspost();
 	}
-	MESSAGES ??= await getAllMessages(board);
 	MESSAGES.push(boardMessage);
 	return boardMessage;
 }

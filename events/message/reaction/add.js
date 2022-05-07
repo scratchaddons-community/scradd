@@ -68,12 +68,6 @@ const event = {
 
 			return;
 		}
-		if (await automodMessage(message, { language: true }, true)) {
-			// Remove the reaction
-			await reaction.users.remove(user);
-
-			return;
-		}
 
 		const boardMessage = await sourceToBoardMessage(message);
 
