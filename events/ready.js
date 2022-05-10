@@ -46,7 +46,7 @@ const event = {
 			if (guild.id === GUILD_ID && process.env.NODE_ENV === "production") {
 				await log(
 					await guild.fetch(),
-					`Bot restarted! Version **v${pkg.version}**`,
+					`Bot restarted on version **v${pkg.version}**!`,
 					"server",
 				);
 			}

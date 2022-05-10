@@ -53,7 +53,7 @@ export async function generateMessage(message) {
 			message.member ||
 			message.author
 		)?.displayAvatarURL(),
-		content: await messageToText(message, false),
+		content: (await messageToText(message, false)) || undefined,
 		embeds,
 		files,
 		username:
@@ -282,7 +282,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
  * @returns
  */
 export function generateReactionFunctions(message) {
-	return [
+	return /** @type {const} */ ([
 		async () => {
 			const reaction = await message.react(CONSTANTS.emojis.statuses.yes);
 			message.channel
@@ -297,5 +297,5 @@ export function generateReactionFunctions(message) {
 			console.error(error);
 			return await message.react(CONSTANTS.emojis.statuses.no);
 		},
-	];
+	]);
 }

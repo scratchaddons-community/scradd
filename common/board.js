@@ -3,7 +3,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { Embed } from "@discordjs/builders";
-import {  censor } from "./moderation/automod.js";
+import { censor } from "./moderation/automod.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
@@ -77,13 +77,11 @@ export async function sourceToBoardMessage(message) {
  * @param {import("discord.js").Message} message - Message to add.
  */
 export async function postMessageToBoard(message) {
-	const { files, embeds } = await extractMessageExtremities(message,false);
+	const { files, embeds } = await extractMessageExtremities(message, false);
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText())
-		throw new ReferenceError("Could not find board channel.");
-	
+	if (!board?.isText()) throw new ReferenceError("Could not find board channel.");
 
 	const description = await messageToText(message);
 

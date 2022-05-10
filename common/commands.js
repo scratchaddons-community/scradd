@@ -23,24 +23,18 @@ let processed;
 export default async (client) => {
 	return (processed ||= new Collection(
 		await Promise.all(
-			commands.map(
-				/** @returns {Promise<[string, import("../types/command").CommandInfo]>} */ async (
-					curr,
-					name,
-				) => {
-					const command = typeof curr === "function" ? await curr.call(client) : curr;
-					if (command.data.name)
-						throw new AssertionError({
-							actual: command.data.name,
-							expected: "",
-							operator: name,
-							message:
-								"Don't manually set the command name, it will use the file name.",
-						});
-					command.data = command.data.setName(name);
-					return [name, command];
-				},
-			),
+			commands.map(async (curr, name) => {
+				const command = typeof curr === "function" ? await curr.call(client) : curr;
+				if (command.data.name)
+					throw new AssertionError({
+						actual: command.data.name,
+						expected: "",
+						operator: name,
+						message: "Don't manually set the command name, it will use the file name.",
+					});
+				command.data = command.data.setName(name);
+				return /** @type {const} */ ([name, command]);
+			}),
 		),
 	));
 };

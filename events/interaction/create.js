@@ -22,7 +22,7 @@ const event = {
 
 				if (censored.isBad) {
 					await Promise.all([
-						interaction.reply({ ephemeral: true, content: "Watch your language!" }),
+						interaction.reply({ ephemeral: true, content: "Language!" }),
 						warn(
 							interaction.member instanceof GuildMember
 								? interaction.member

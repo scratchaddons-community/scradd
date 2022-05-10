@@ -27,10 +27,7 @@ export async function getDatabases(names, channel) {
 		pins
 			.map(
 				(message) =>
-					/** @type {[T, import("discord.js").Message]} */ ([
-						names[comments.indexOf(message.content)],
-						message,
-					]),
+					/** @type {const} */ ([names[comments.indexOf(message.content)], message]),
 			)
 			.filter(([name, message]) => name && message.author.id === message.client.user?.id),
 	);

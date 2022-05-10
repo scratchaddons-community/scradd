@@ -11,8 +11,8 @@ export type CommandInfo = {
 	/**
 	 * A builder instance that has constructed the command.
 	 *
-	 * @throws {AssertionError} An AssertionError is thrown if `.setName` is called on this builder
-	 *   - the file name is used.
+	 * @throws {AssertionError} An AssertionError is thrown if `.setName` is called on this builder.
+	 *   The file name is used automatically.
 	 */
 	data: Command;
 	/**

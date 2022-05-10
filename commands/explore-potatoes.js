@@ -54,7 +54,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 			for (const channel of channelWanted.children.values())
 				promises.push(textChannelMatches(channel, channelFound));
 
-			if (!(await firstTrueyPromise( promises))) return false;
+			if (!(await firstTrueyPromise(promises))) return false;
 
 			break;
 		}

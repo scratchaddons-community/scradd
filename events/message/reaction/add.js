@@ -31,6 +31,7 @@ const event = {
 		if (emoji.name) {
 			const censored = censor(emoji.name);
 			if (censored) {
+				await message.channel.send({ content: `${user.toString()}, language!` });
 				await warn(user, "Watch your language!", censored.strikes);
 				await reaction.remove();
 				return;

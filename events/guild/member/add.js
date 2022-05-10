@@ -5,6 +5,7 @@ import { Embed } from "@discordjs/builders";
 import { censor } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { escapeMessage } from "../../../lib/markdown.js";
+import log from "../../../common/moderation/logging.js";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
@@ -20,6 +21,7 @@ const count = new Intl.NumberFormat().format(
 const event = {
 	async event(member) {
 		if (member.guild.id !== process.env.GUILD_ID) return;
+		await log(member.guild, `${member.toString()} joined!`, "members");
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
 		if (!channel?.isText()) return;
 
@@ -51,9 +53,7 @@ const event = {
 			`What's that? A new member? Yes, ${member.toString()}'s our ${nth(
 				member.guild.memberCount,
 			)}!`,
-			`Welcome:tm: ${member.toString()}! You're our ${nth(
-				member.guild.memberCount,
-			)} member!`
+			`Welcome:tm: ${member.toString()}! You're our ${nth(member.guild.memberCount)} member!`,
 		];
 
 		await Promise.all([
@@ -81,9 +81,9 @@ const event = {
 					embeds: [
 						new Embed()
 							.setDescription(
-								`Welcome, ${member.toString()}, to the official ${escapeMessage(
+								`**Welcome, ${member.toString()}, to the official ${escapeMessage(
 									member.guild.name,
-								)} Discord server. Here, you will find lots of useful channels, friendly members, a [fair amount of bots](https://discord.com/channels/${
+								)} Discord server!** Here, you will find lots of useful channels, friendly members, a [fair amount of bots](https://discord.com/channels/${
 									member.guild.id
 								}/${
 									process.env.BOTS_CHANNEL
@@ -99,14 +99,17 @@ const event = {
 									member.guild.id
 								}/${
 									member.guild.rulesChannel?.id
-								}) and get some <#806896002479947827>. If you never need any help, feel free to send me a DM to contact the mods!\n\nThanks for being part of the ${count}+ users who have installed Scratch Addons!\n\n*Also, sorry if you can’t talk yet. We get raided whenever we turn that off 😔.*`,
+								}) and get some <#806896002479947827>. If you never need any help, feel free to send me a DM to contact the mods!\n\nThanks for being part of the ${count}+ users who have installed Scratch Addons!${
+									member.guild.verificationLevel === "HIGH"
+										? "\n\n*Also, sorry if you can’t talk yet. We get raided whenever we turn that off 😔.*"
+										: ""
+								}`,
 							)
 							.setFooter({ text: `~ the ${escapeMessage(member.guild.name)} Team` })
 							.setAuthor({
 								name: member.guild.name,
 								iconURL: member.guild.iconURL() ?? undefined,
-							})
-							.setTimestamp(member.joinedAt),
+							}),
 					],
 				})
 				.catch(() => {}),

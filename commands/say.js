@@ -1,5 +1,6 @@
 /** @file Have The bot mimic what you say but don’t tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageActionRow, MessageButton } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
@@ -26,10 +27,19 @@ const info = {
 				interaction.guild &&
 					log(
 						interaction.guild,
-						`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}: ${
-							message.url
-						}`,
+						`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
 						"messages",
+						{
+							components: [
+								new MessageActionRow().addComponents(
+									new MessageButton()
+										.setEmoji("👀")
+										.setLabel("View Context")
+										.setStyle("LINK")
+										.setURL(message.url),
+								),
+							],
+						},
 					),
 			]);
 		}

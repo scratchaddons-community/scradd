@@ -126,7 +126,10 @@ const event = {
 			}
 		}
 
-		if (message.guild?.id !== process.env.GUILD_ID) return;
+		if (message.guild?.id !== process.env.GUILD_ID) {
+			await Promise.all(promises);
+			return;
+		}
 
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -183,7 +186,10 @@ const event = {
 			);
 		}
 
-		if (await automodMessage(message)) return;
+		if (await automodMessage(message)) {
+			await Promise.all(promises);
+			return;
+		}
 
 		if (process.env.LOGS_CHANNEL !== message.channel.id) {
 			// eslint-disable-next-line no-irregular-whitespace -- This is intended.

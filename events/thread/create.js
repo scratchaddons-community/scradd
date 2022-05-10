@@ -9,8 +9,10 @@ const event = {
 		if (censored) {
 			await thread.setName(censored.censored);
 			const owner = await thread.fetchOwner();
-			if (owner?.guildMember)
+			if (owner?.guildMember) {
+				await thread.send(owner.toString() + ", language!");
 				await warn(owner.guildMember, "Watch your language!", censored.strikes);
+			}
 		}
 	},
 };
