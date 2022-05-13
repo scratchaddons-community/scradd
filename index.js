@@ -1,63 +1,75 @@
-import { Client, Intents, MessageEmbed } from "discord.js";
-import importScripts from "./lib/importScripts.js";
-import dotenv from "dotenv";
+/** @file Run Bot. */
 import http from "http";
+import path from "path";
+import url from "url";
+
+import { Client, Collection } from "discord.js";
+import dotenv from "dotenv";
+
+import { importScripts, pkg } from "./lib/files.js";
+import logError from "./lib/logError.js";
 
 dotenv.config();
-process.on("unhandledException", console.error);
-process.on("unhandledRejection", console.error);
+
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const client = new Client({
+	allowedMentions: { parse: ["users"], roles: [] },
+
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-		Intents.FLAGS.DIRECT_MESSAGES,
+		"GUILDS",
+		"GUILD_MESSAGES",
+		"GUILD_MESSAGE_REACTIONS",
+		"DIRECT_MESSAGES",
+		"GUILD_MEMBERS",
+		"GUILD_BANS",
+		"GUILD_EMOJIS_AND_STICKERS",
+		"GUILD_INTEGRATIONS",
+		"GUILD_WEBHOOKS",
+		"GUILD_INVITES",
+		"GUILD_VOICE_STATES",
+		"GUILD_PRESENCES",
+		"GUILD_MESSAGE_TYPING",
+		"DIRECT_MESSAGE_REACTIONS",
+		"DIRECT_MESSAGE_TYPING",
+		"GUILD_SCHEDULED_EVENTS",
 	],
-	partials: ["USER", "REACTION", "MESSAGE", "CHANNEL"],
+
+	failIfNotExists: false,
+	restWsBridgeTimeout: 30_000,
+
+	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
 });
 
-const events = await importScripts("events");
+const events = await /**
+ * @template {keyof import("discord.js").ClientEvents} K
+ *
+ * @type {Promise<Collection<K, import("./types/event").default<K>>>}
+ */ (importScripts(path.resolve(dirname, "./events")));
 
-events.forEach(async (execute, event) =>
-	client.on(event, async (...args) => {
+for (const [event, execute] of events.entries()) {
+	if (execute.apply === false) continue;
+
+	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {
-			return await execute(...args);
+			return await execute.event.call(client, ...args);
 		} catch (error) {
-			try {
-				console.error(error);
-
-				const embed = new MessageEmbed()
-					.setTitle("Error!")
-					.setDescription(
-						`Uhoh! I found an error! (event ${event})\n\`\`\`json\n${JSON.stringify(
-							error,
-						).replaceAll("[3 backticks]", "```")}\`\`\``,
-					)
-					.setColor("RANDOM");
-				const { ERROR_CHANNEL } = process.env;
-				if (!ERROR_CHANNEL) throw new Error("ERROR_CHANNEL is not set in the .env");
-				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
-
-				if (!testingChannel || !("send" in testingChannel))
-					throw new Error("Could not find error reporting channel");
-
-				testingChannel.send({
-					embeds: [embed],
-				});
-			} catch (errorError) {
-				console.error(errorError);
-			}
+			logError(error, event, client);
 		}
-	}),
-);
-
-client.login(process.env.BOT_TOKEN);
-
-const server = http.createServer((_, res) => {
-	res.writeHead(302, {
-		location: "https://discord.gg/Cs25kzs889",
 	});
-	res.end();
-});
-server.listen(process.env.PORT || 80);
+}
+
+await client.login(process.env.BOT_TOKEN);
+
+process
+	.on("uncaughtException", (err, origin) => logError(err, origin, client))
+	.on("warning", (err) => logError(err, "warning", client));
+
+if (process.env.NODE_ENV === "production") {
+	const server = http.createServer((_, response) => {
+		response.writeHead(302, { location: pkg.homepage });
+		response.end();
+	});
+
+	server.listen(process.env.PORT ?? 80);
+}

@@ -5,8 +5,8 @@ WORKDIR /opt/app
 ENV PORT=80
 
 # daemon for cron jobs
-RUN echo 'crond' > /boot.sh
-# RUN echo 'crontab .openode.cron' >> /boot.sh
+RUN echo "crond" > /boot.sh
+# RUN echo "crontab .openode.cron" >> /boot.sh
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -19,4 +19,4 @@ RUN npm install --production
 # Bundle app source
 COPY . .
 
-CMD sh /boot.sh && npm start
+CMD sh /boot.sh && npm start -- --production

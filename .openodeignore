@@ -2,7 +2,6 @@
 .github
 types
 .gitignore
-.openode
 .openodeignore
-jsconifg.json
+jsconfig.json
 README.md

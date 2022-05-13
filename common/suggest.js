@@ -1,270 +1,243 @@
-import { GuildMember, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import generateHash from "../lib/generateHash.js";
+/** @file Code Shared between suggestions and bug reports. */
+import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
+import { Embed } from "@discordjs/builders";
+
+import CONSTANTS from "./CONSTANTS.js";
+
+/** @typedef {{ description: string; color: number; name: string }} Answer */
+
 export const MAX_TITLE_LENGTH = 50;
 
-export default class SuggestionBuilder {
-	CHANNEL_ID = "";
+export const RATELIMT_MESSAGE =
+	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-	/** @param {string} CHANNEL_ID */
+export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
+
+export const NO_SERVER_START =
+	"In an effort to help SA developers find meaningful information, we have disabled server-related suggestions and bug reports. With this off, when a developer looks in ";
+
+export default class SuggestionChannel {
+	/**
+	 * Initialize a suggestion channel.
+	 *
+	 * @param {string} CHANNEL_ID - The ID of the channel to use.
+	 */
 	constructor(CHANNEL_ID) {
+		/** @type {string} */
 		this.CHANNEL_ID = CHANNEL_ID;
 	}
 
 	/**
-	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: string; description: string; type: string; category: string }} data
+	 * Post a message in a suggestion channel.
+	 *
+	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {{ title: string; description: string }} data - The suggestion information.
+	 *
+	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the
+	 *   suggestion message on success.
 	 */
-	async createMessage(interaction, data) {
+	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
-		if (!(author instanceof GuildMember)) return;
 
-		if (data.title.length > MAX_TITLE_LENGTH) {
-			interaction.reply({
-				content:
-					`<:no:940054047854047282> The title can not be longer than ` +
-					MAX_TITLE_LENGTH +
-					` characters.`,
-				ephemeral: true,
-			});
-			return false;
-		}
+		if (!(author instanceof GuildMember))
+			throw new TypeError("interaction.member must be a GuildMember");
 
-		const embed = new MessageEmbed()
-			.setColor(0x222)
+		const title = Util.escapeMarkdown(data.title);
+
+		const embed = new Embed()
+			.setColor(DEFAULT_COLOR)
 			.setAuthor({
-				name: data.type + " from " + author?.displayName || interaction.user.username,
-				iconURL:
-					author?.displayAvatarURL() ||
-					interaction.user.displayAvatarURL() ||
-					interaction.user.defaultAvatarURL ||
-					"",
+				iconURL: author.displayAvatarURL(),
+				name: author?.displayName ?? interaction.user.username,
 			})
-			.setTitle(data.title)
+			.setTitle(title)
 			.setDescription(data.description)
-			.setFooter({ text: data.category + " • Unanswered" });
+			.setFooter({ text: `${defaultAnswer}` });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
-		if (!channel?.isText()) throw new Error(data.type + " channel not found");
+
+		if (!channel?.isText()) throw new ReferenceError(`Channel not found`);
+
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
-			name: "Unanswered | " + embed.title,
-			autoArchiveDuration: 1440,
-			reason: data.type + " by " + interaction.user.tag,
+			autoArchiveDuration: 1_440, // 24 hours
+			name: `${title ?? ""} | ${defaultAnswer}`,
+			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
+
 		await thread.members.add(interaction.user.id);
-		return { thread, message };
+
+		return message;
 	}
 
 	/**
-	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {string} answer
-	 * @param {{ [key: string]: import("discord.js").ColorResolvable }} colors
+	 * Answer a suggestion.
 	 *
-	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
-	 *   message yourself.
+	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {string} answer - The answer to the suggestion.
+	 * @param {Answer[]} answers - An object that maps answers to colors.
+	 *
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
+	 *   a success message yourself.
 	 */
-	async answerSuggestion(interaction, answer, colors) {
-		if (!interaction.guild) {
-			await interaction.reply({
-				content: "<:no:940054047854047282> Command unavailable in DMs.",
-			});
-			return false;
-		}
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
-			interaction.reply({
-				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
-				ephemeral: true,
-			});
-			return false;
-		}
-		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
-
-		if (!roles.has(process.env.DEVELOPER_ROLE || "")) {
-			interaction.reply({
-				content: "<:no:940054047854047282> You don't have permission to run this command!",
-				ephemeral: true,
-			});
-			return false;
-		}
-
-		await Promise.all([
-			interaction.channel.setName(
-				interaction.channel.name.replace(/^[^|]+?(?=( \| .+)?$)/i, answer),
-				"Thread answered by " + interaction.user.tag,
-			),
-
-			interaction.channel
-				.fetchStarterMessage()
-				.catch(() => {})
-				.then(async (message) => {
-					if (!message || message.author.id !== interaction.client.user?.id) return;
-					const embed = new MessageEmbed(message.embeds[0]);
-					const category = embed.footer?.text.split(" • ")[0];
-					embed
-						.setColor(colors[answer] || 0x000)
-						.setFooter({ text: (category ? category + " • " : "") + answer });
-
-					message.edit({ embeds: [embed] });
-				}),
-		]);
-		return true;
-	}
-
-	/** @param {import("discord.js").CommandInteraction} interaction */
-	async deleteSuggestion(interaction) {
-		if (!interaction.guild)
-			return interaction.reply({
-				content: "<:no:940054047854047282> This command is unavailable in DMs.",
-			});
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID)
-			return interaction.reply({
-				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
-				ephemeral: true,
-			});
-		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
-		const user =
-			starter &&
-			(
-				await interaction.channel?.messages.fetch({
-					limit: 2,
-					after: starter.id,
-				})
-			)
-				?.first()
-				?.mentions.users.first();
-
-		const roles = (await interaction.guild.members.fetch(interaction.user?.id)).roles.valueOf();
-
+	async answerSuggestion(interaction, answer, answers) {
 		if (
-			!(
-				roles.hasAny(process.env.MODERATOR_ROLE || "", process.env.DEVELOPER_ROLE || "") ||
-				(user && interaction.user.id === user?.id)
-			)
+			!interaction.channel?.isThread() ||
+			interaction.channel.parent?.id !== this.CHANNEL_ID
 		) {
-			return interaction.reply({
-				content: "<:no:940054047854047282> You don't have permission to run this command!",
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
+
+			return false;
 		}
 
-		const deleteButton = new MessageButton()
-			.setLabel("Delete")
-			.setCustomId(generateHash("delete"))
-			.setStyle("DANGER");
-		const cancelButton = new MessageButton()
-			.setLabel("Cancel")
-			.setCustomId(generateHash("cancel"))
-			.setStyle("SECONDARY");
+		const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
+		if (!(interaction.member instanceof GuildMember))
+			throw new TypeError("interaction.member must be a GuildMember");
 
-		await interaction.reply({
-			content: `Are you really sure you want to do this?`,
-			components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
-			ephemeral: true,
-		});
-
-		interaction.channel
-			.createMessageComponentCollector({
-				filter: (i) =>
-					[deleteButton.customId, cancelButton.customId].includes(i.customId) &&
-					i.user.id === interaction.user.id,
-				time: 15_000,
-			})
-			.on("collect", async (i) => {
-				switch (i.customId) {
-					case deleteButton.customId: {
-						if (
-							!interaction.channel?.isThread() ||
-							interaction.channel.parentId !== this.CHANNEL_ID
-						)
-							return i.reply({
-								content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
-								ephemeral: true,
-							});
-						interaction.channel.delete();
-						starter?.delete();
-						break;
-					}
-					case cancelButton.customId: {
-						deleteButton.setDisabled(true);
-						cancelButton.setDisabled(true);
-						i.deferUpdate();
-						interaction.editReply({
-							content: "<:no:940054047854047282> Deletion canceled.",
-							components: [
-								new MessageActionRow().addComponents(deleteButton, cancelButton),
-							],
-						});
-						break;
-					}
-				}
-			})
-			.on("end", (collected) => {
-				if (collected.size !== 0) return;
-				deleteButton.setDisabled(true);
-				cancelButton.setDisabled(true);
-				interaction.editReply({
-					content: "<:no:940054047854047282> Deletion timed out.",
-					components: [new MessageActionRow().addComponents(deleteButton, cancelButton)],
-				});
+		if (!interaction.member?.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
+				ephemeral: true,
 			});
+
+			return false;
+		}
+
+		if (interaction.channel.archived) {
+			await interaction.channel.setArchived(
+				false,
+				`Thread answered by ${interaction.user.tag}`,
+			);
+		}
+
+		const promises = [
+			Promise.race([
+				new Promise((resolve) => setTimeout(resolve, 3_000)),
+				interaction.channel.setName(
+					interaction.channel.name.replace(/^(.+? \| )?[^|]+$/, "$1" + answer),
+					`Thread answered by ${interaction.user.tag}`,
+				),
+			]),
+		];
+
+		if (starter && starter?.author.id === interaction.client.user?.id) {
+			const embed = new MessageEmbed(starter.embeds[0]);
+
+			embed
+				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
+				.setFooter({ text: answer });
+
+			promises.push(starter.edit({ embeds: [embed] }));
+		}
+
+		await Promise.all(promises);
+
+		return interaction.channel.name.startsWith(answer + " |") ? true : "ratelimit";
 	}
 
 	/**
-	 * @param {import("discord.js").CommandInteraction} interaction
-	 * @param {{ title: null | string; body: null | string; category: null | string }} newSuggestion
+	 * Edit a suggestion.
 	 *
-	 * @returns {Promise<boolean>} - If true, you must repond to the interaction with a success
-	 *   message yourself.
+	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
+	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
+	 *
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
+	 *   a success message yourself.
 	 */
-	async editSuggestion(interaction, newSuggestion) {
-		if (!interaction.guild) {
-			interaction.reply({
-				content: "<:no:940054047854047282> The command is unavailable in DMs.",
-			});
-			return false;
-		}
-		if (!interaction.channel?.isThread() || interaction.channel.parentId !== this.CHANNEL_ID) {
-			interaction.reply({
-				content: `<:no:940054047854047282> This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+	async editSuggestion(interaction, updated) {
+		if (
+			!interaction.channel?.isThread() ||
+			interaction.channel.parent?.id !== this.CHANNEL_ID
+		) {
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.CHANNEL_ID}>.`,
 				ephemeral: true,
 			});
+
 			return false;
 		}
+		if (interaction.channel.archived)
+			await interaction.channel.setArchived(false, "Thread edited");
 		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
+
 		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
-			interaction.reply({
-				content: "<:no:940054047854047282> This suggestion can not be edited.",
+			await interaction.reply({
+				// TODO: it doesn’t have to be a suggestion here
+				content: `${CONSTANTS.emojis.statuses.no} This suggestion can not be edited.`,
 				ephemeral: true,
 			});
+
 			return false;
 		}
-		const embed = new MessageEmbed(starterMessage.embeds[0]);
-		const initingMessages = await interaction.channel.messages.fetch({
-			limit: 2,
-			after: starterMessage.id,
-		});
-		const user = initingMessages.first()?.mentions.users.first();
+		const user = await getUserFromSuggestion(starterMessage);
+
 		if (interaction.user.id !== user?.id) {
-			interaction.reply({
-				content: "<:no:940054047854047282> You do not have permision to use this command.",
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} You do not have permission to use this command.`,
 				ephemeral: true,
 			});
+
 			return false;
 		}
 
-		if (newSuggestion.body) embed?.setDescription(newSuggestion.body);
-		if (newSuggestion.title) {
-			interaction.channel.setName(
-				interaction.channel.name.replace(/(?<=^.+ \| )(.+)$/i, newSuggestion.title),
-				"Suggestion/report edited",
-			);
-			embed?.setTitle(newSuggestion.title);
-		}
-		if (newSuggestion.category) {
-			const answer = embed.footer?.text.split(" • ").at(-1);
-			embed.setFooter({ text: newSuggestion.category + " • " + answer });
-		}
-		starterMessage.edit({ embeds: [embed] });
-		return true;
+		const embed = new MessageEmbed(starterMessage.embeds[0]);
+
+		if (updated.body) embed.setDescription(updated.body);
+
+		const promises = [];
+
+		const title = Util.escapeMarkdown(updated.title ?? "");
+
+		promises.push(
+			title
+				? Promise.race([
+						interaction.channel.setName(
+							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, title),
+							"Suggestion/report edited",
+						),
+						new Promise((resolve) => setTimeout(resolve, 3_000)),
+				  ])
+				: Promise.resolve(interaction.channel),
+		);
+
+		embed.setTitle(title || embed.title || "");
+
+		promises.push(starterMessage.edit({ embeds: [embed] }));
+
+		await Promise.all(promises);
+
+		return (title ? (await interaction.channel.fetch()).name.endsWith(title) : true)
+			? true
+			: "ratelimit";
 	}
+}
+
+/**
+ * Get the member who made a suggestion.
+ *
+ * @param {Message} message - The message to get the member from.
+ *
+ * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
+ *   made the suggestion.
+ * @todo
+ *   https://canary.discord.com/channels/806602307750985799/939350305311715358/947385068660359278 was
+ *   never fixed?
+ */
+export async function getUserFromSuggestion(message) {
+	const author =
+		message.author.id === CONSTANTS.robotop
+			? message.embeds[0]?.footer?.text.split(": ")[1]
+			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups?.userId;
+
+	if (author) {
+		const fetchedMember =
+			(await message.guild?.members.fetch(author).catch(() => undefined)) ||
+			(await message.client?.users.fetch(author).catch(() => undefined));
+		if (fetchedMember) return fetchedMember;
+	}
+
+	return message.member ?? message.author;
 }

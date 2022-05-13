@@ -1,38 +1,42 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import dotenv from "dotenv";
+/** @file Commands To manage modmails. */
+import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { GuildMember } from "discord.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+
 import {
-	generateMessage,
-	getMemberFromThread,
+	closeModmail,
+	COLORS,
+	generateConfirm,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
-	WH_NAME,
+	sendOpenedMessage,
+	UNSUPPORTED,
 } from "../common/modmail.js";
-import generateHash from "../lib/generateHash.js";
-
-dotenv.config();
 
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
 		.setDefaultPermission(false)
-		.setDescription(" ")
+		.setDescription("(Mods only) Commands to manage modmail tickets")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")
 				.setDescription("(Mods only) Close a modmail ticket.")
+				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identiy.")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
-						.setDescription("Reason for closing the ticket")
-						.setRequired(true),
+						.setDescription(
+							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
+						)
+						.setRequired(false),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("start")
 				.setDescription(
-					"(Mods only) Start a modmail ticket with a user. If a non-mod wants to start a ticket, please DM me.",
+					"(Mods only) Start a modmail ticket with a user. (Non-mods may start a ticket by DMing me.)",
 				)
 				.addUserOption((input) =>
 					input
@@ -44,181 +48,133 @@ const info = {
 
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
+
 		switch (command) {
 			case "close": {
 				if (
 					interaction.channel?.type !== "GUILD_PUBLIC_THREAD" ||
-					interaction.channel.parentId !== MODMAIL_CHANNEL ||
+					interaction.channel.parent?.id !== MODMAIL_CHANNEL ||
 					!interaction.guild
 				) {
-					interaction.reply({
-						content: `<:no:940054047854047282> This command can only be used in threads in <#${MODMAIL_CHANNEL}>.`,
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${MODMAIL_CHANNEL}>.`,
 						ephemeral: true,
 					});
+
 					return;
 				}
-				const reason = interaction.options.getString("reason") || "";
-				/** @type {Promise<any>[]} */
-				const promises = [
-					interaction.reply({
-						content: `<:yes:940054094272430130> Modmail ticket closed! ${reason}`,
-					}),
-				];
-				promises.push(
-					getMemberFromThread(interaction.guild, interaction.channel).then(
-						async (user) => {
-							const dm = await user?.createDM().catch(() => {});
-							dm?.send({
-								embeds: [
-									new MessageEmbed()
-										.setTitle("Modmail ticket closed!")
-										.setDescription(reason)
-										.setTimestamp(interaction.channel?.createdTimestamp)
-										.setColor(0x008000),
-								],
-							});
-						},
-					),
+
+				const reason = interaction.options.getString("reason") ?? null;
+
+				await interaction.reply({
+					embeds: [
+						new Embed()
+							.setTitle("Modmail ticket closed!")
+							.setTimestamp(interaction.channel.createdTimestamp)
+							.setDescription(reason)
+							.setFooter({
+								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
+							})
+							.setColor(COLORS.closed),
+					],
+				});
+
+				await closeModmail(
+					interaction.channel,
+					interaction.member instanceof GuildMember
+						? interaction.member
+						: interaction.user,
+					reason ?? "",
 				);
 
-				promises.push(
-					interaction.channel
-						.fetchStarterMessage()
-						.catch(() => {})
-						.then((starter) =>
-							starter?.edit({
-								embeds: [
-									{
-										title: "Modmail ticket closed!",
-										description: starter.embeds[0]?.description || "",
-										color: 0x008000,
-									},
-								],
-							}),
-						),
-				);
-				await Promise.all(promises);
-				await interaction.channel.setLocked(true, "Closed by " + interaction.user.tag);
-				await interaction.channel.setArchived(true, "Closed by " + interaction.user.tag);
 				break;
 			}
 			case "start": {
 				const user = await interaction.guild?.members.fetch(
-					interaction.options.getUser("user") || "",
+					interaction.options.getUser("user") ?? "",
 				);
+
 				if (!user || !interaction.guild) {
-					interaction.reply({
-						content: "<:no:940054047854047282> Could not find user.",
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
 						ephemeral: true,
 					});
+
 					return;
 				}
-				const thread = await getThreadFromMember(interaction.guild, user);
-				if (thread)
-					return interaction.reply({
+
+				const existingThread = await getThreadFromMember(user);
+
+				if (existingThread) {
+					await interaction.reply({
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} User already has a ticket open (${existingThread.toString()}).`,
 						ephemeral: true,
-						content: "<:no:940054047854047282> User already has a ticket open.",
 					});
-				const dm = await user.createDM().catch(() => {
-					interaction.reply({
-						ephemeral: true,
-						content:
-							"<:no:940054047854047282> Could not DM user. Ask them to open their DMs.",
-					});
-				});
-				if (!dm) return;
+
+					return;
+				}
+
 				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
-				if (!mailChannel) throw new Error("Could not find modmail channel");
+
+				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
+
 				if (mailChannel.type !== "GUILD_TEXT")
-					throw new Error("Modmail channel is not a text channel");
-				const embed = new MessageEmbed()
-					.setTitle("Confimation")
-					.setDescription(
-						"Are you sure you want to send this message to " +
-							user?.user.toString() +
-							"?",
-					)
-					.setColor("BLURPLE")
-					.setAuthor({
-						name: user.displayName || user.user.username,
-						iconURL: user?.avatarURL() || user?.user.avatarURL() || undefined,
-					});
+					throw new TypeError("Modmail channel is not a text channel");
 
-				const button = new MessageButton()
-					.setLabel("Confirm")
-					.setStyle("PRIMARY")
-					.setCustomId(generateHash("confirm"));
-				const cancelButton = new MessageButton()
-					.setLabel("Cancel")
-					.setCustomId(generateHash("cancel"))
-					.setStyle("SECONDARY");
-				await interaction.reply({
-					ephemeral: true,
-					embeds: [embed],
-					components: [new MessageActionRow().addComponents(button, cancelButton)],
-					fetchReply: true,
-				});
+				await generateConfirm(
+					new Embed()
+						.setTitle("Confirmation")
+						.setDescription(
+							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
+						)
+						.setColor(COLORS.confirm)
+						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
+					async (buttonInteraction) => {
+						const openedEmbed = new Embed()
+							.setTitle("Modmail ticket opened!")
+							.setDescription(
+								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
+							)
+							.setFooter({ text: UNSUPPORTED })
+							.setColor(COLORS.opened);
 
-				interaction.channel
-					?.createMessageComponentCollector({
-						filter: (i) =>
-							[button.customId, cancelButton.customId].includes(i.customId) &&
-							i.user.id === interaction.user.id,
-						time: 15_000,
-					})
-					.on("collect", async (i) => {
-						switch (i.customId) {
-							case button.customId: {
-								const embed = new MessageEmbed()
-									.setTitle("Modmail ticket opened")
-									.setDescription(
-										"Ticket to " +
-											user.toString() +
-											" (by " +
-											interaction.user.toString() +
-											")",
-									)
-									.setColor("BLURPLE");
-
-								const starterMsg = await mailChannel.send({
-									embeds: [embed],
+						await sendOpenedMessage(user).then(async (success) => {
+							if (success) {
+								const starterMessage = await mailChannel.send({
+									embeds: [openedEmbed],
 								});
-								await starterMsg.startThread({
-									name: `${user.user.username} (${user.id})`,
+								const thread = await starterMessage.startThread({
+									name: `${user.user.username}`,
+									autoArchiveDuration: "MAX",
 								});
-								dm.send({
-									embeds: [
-										new MessageEmbed()
-											.setTitle("Modmail ticket opened")
-											.setDescription(
-												"The moderation team of " +
-													interaction.guild?.name +
-													" would like to talk to you.",
-											)
-											.setColor("BLURPLE"),
-									],
-								});
-								i.reply({
-									content: "<:yes:940054094272430130> Modmail ticket opened",
+								await buttonInteraction.reply({
+									content: `${
+										CONSTANTS.emojis.statuses.yes
+									} **Modmail ticket opened!** Send ${user.toString()} a message in ${thread.toString()}.`,
 									ephemeral: true,
 								});
-								button.setDisabled(true);
-								break;
-							}
-							case cancelButton.customId: {
-								i.reply({
-									content: "<:no:940054047854047282> Modmail canceled",
+							} else {
+								await buttonInteraction.reply({
+									content: `${CONSTANTS.emojis.statuses.no} Could not DM user. Ask them to open their DMs.`,
+
 									ephemeral: true,
 								});
-								break;
 							}
-						}
-					});
+						});
+					},
+					(options) =>
+						interaction.reply({ ...options, ephemeral: true, fetchReply: true }),
+					(options) => interaction.editReply(options),
+				);
+
 				break;
 			}
 		}
 	},
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", type: "ROLE", permission: true }],
+
+	censored: false,
 };
 
 export default info;
