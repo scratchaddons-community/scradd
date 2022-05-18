@@ -1,4 +1,3 @@
-/** @file Show Information about the bot. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js";
 

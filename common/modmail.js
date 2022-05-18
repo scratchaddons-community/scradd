@@ -1,4 +1,3 @@
-/** @file Code To perform operations related to modmail tickets. */
 import {
 	GuildMember,
 	Message,
@@ -172,7 +171,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
-	await thread.setLocked(
+	await thread.setArchived(
 		true,
 		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
 	);

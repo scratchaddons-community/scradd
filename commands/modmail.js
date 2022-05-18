@@ -1,4 +1,3 @@
-/** @file Commands To manage modmails. */
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -149,6 +148,7 @@ const info = {
 									name: `${user.user.username}`,
 									autoArchiveDuration: "MAX",
 								});
+								await thread.setLocked(true);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes

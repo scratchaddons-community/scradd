@@ -1,4 +1,3 @@
-/** @file Command To get information about an addon. */
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { Util } from "discord.js";
 import Fuse from "fuse.js";

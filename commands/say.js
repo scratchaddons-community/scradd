@@ -1,4 +1,3 @@
-/** @file Have The bot mimic what you say but don’t tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";

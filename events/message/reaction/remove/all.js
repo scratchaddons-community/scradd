@@ -1,5 +1,3 @@
-/** @file Update Potatoboard when reactions are cleared. */
-
 import {
 	BOARD_EMOJI,
 	sourceToBoardMessage,

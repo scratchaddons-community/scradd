@@ -217,7 +217,7 @@ export async function automodMessage(
 			message.channel.send({
 				content:
 					CONSTANTS.emojis.statuses.no +
-					` ${message.author.toString()}, please don't flood the chat!`,
+					` ${message.author.toString()}, please be a bit more consise!`,
 			}),
 		);
 	}

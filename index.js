@@ -1,4 +1,3 @@
-/** @file Run Bot. */
 import http from "http";
 import path from "path";
 import url from "url";

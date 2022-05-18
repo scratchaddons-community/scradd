@@ -1,4 +1,3 @@
-/** @file Command To get a random message from the #potatoboard. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Message, MessageButton, MessageEmbed } from "discord.js";
 

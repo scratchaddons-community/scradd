@@ -46,7 +46,11 @@ const info = {
 			content:
 				CONSTANTS.emojis.statuses.yes +
 				` ${actualStrikes > 0 ? "Warned" : "Unwarned"} ${user.toString()}${
-					Math.abs(actualStrikes) !== 1 ? ` ${Math.abs(actualStrikes)} times` : ""
+					Math.abs(actualStrikes) !== 1
+						? ` ${Math.abs(actualStrikes)} time${
+								Math.abs(actualStrikes) === 1 ? "" : "s"
+						  }`
+						: ""
 				}.${reason ? " " + reason : ""}`,
 			ephemeral: true,
 		});

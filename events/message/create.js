@@ -95,6 +95,7 @@ const event = {
 							name: `${message.author.username}`,
 							autoArchiveDuration: "MAX",
 						});
+						await newThread.setLocked(true);
 
 						if (!webhook) throw new ReferenceError("Could not find webhook");
 
@@ -286,6 +287,7 @@ const event = {
 			content === "e" ||
 			content === "ae" ||
 			content === "iei" ||
+			(content === "a" && message.author.id === "765910070222913556") ||
 			(content === "." && message.author.id === "761276793666797589") ||
 			content.includes("<:e_:847428533432090665>") ||
 			content.includes("æ")

@@ -1,5 +1,3 @@
-/** @file Update Potatoboard when reactions are added. */
-
 import {
 	BOARD_CHANNEL,
 	BOARD_EMOJI,

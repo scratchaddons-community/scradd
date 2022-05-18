@@ -1,4 +1,3 @@
-/** @file Commands To manage suggestions. */
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { Constants, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";

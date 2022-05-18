@@ -1,4 +1,3 @@
-/** @file Let A user know when their Modmail thread is deleted. */
 import log from "../../common/moderation/logging.js";
 import { MODMAIL_CHANNEL, sendClosedMessage } from "../../common/modmail.js";
 

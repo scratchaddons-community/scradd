@@ -1,5 +1,3 @@
-/** @file Initialize Bot on ready. Register commands and etc. */
-
 import log from "../common/moderation/logging.js";
 import commands from "../common/commands.js";
 import { pkg } from "../lib/files.js";

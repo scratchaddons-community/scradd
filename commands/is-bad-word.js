@@ -21,9 +21,9 @@ const info = {
 				content:
 					CONSTANTS.emojis.statuses.no +
 					` **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
-					`Posting that text would give you **${result.strikes} strikes**, ${
-						result.strikes ? "so don't" : "but please don't still"
-					}.\n\n` +
+					`Posting that text would give you **${result.strikes} strike${
+						result.strikes === 1 ? "" : "s"
+					}**, ${result.strikes ? "so don't" : "but please don't still"}.\n\n` +
 					"**I detected the following words as bad**:" +
 					joinWithAnd(words, (word) => "*" + Util.escapeMarkdown(word) + "*"),
 			});

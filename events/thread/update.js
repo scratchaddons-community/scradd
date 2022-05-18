@@ -1,4 +1,3 @@
-/** @file Let A user know when their Modmail thread is archived or unarchived. */
 import { GuildMember, MessageEmbed } from "discord.js";
 import {
 	COLORS,
@@ -35,7 +34,11 @@ const event = {
 			);
 		}
 		if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
-			logs.push("'s slowmode was set to " + newThread.rateLimitPerUser + " seconds");
+			logs.push(
+				"'s slowmode was set to " +
+					newThread.rateLimitPerUser +
+					` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
+			);
 		}
 
 		await Promise.all(

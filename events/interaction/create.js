@@ -1,4 +1,3 @@
-/** @file Runs Commands when used. */
 import { GuildMember } from "discord.js";
 import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
@@ -37,7 +36,13 @@ const event = {
 
 			await command.interaction(interaction);
 		} catch (error) {
-			await interaction.reply({ ephemeral: true, content: "An error occurred." });
+			await interaction[interaction.replied ? "editReply" : "reply"]({
+				ephemeral: true,
+				content: "An error occurred.",
+				embeds: [],
+				components: [],
+				files: [],
+			});
 			throw error;
 		}
 	},

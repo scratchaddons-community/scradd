@@ -80,7 +80,7 @@ export default async function warn(user, reason, strikes = 1) {
 				member.bannable
 					? process.env.NODE_ENV === "production" ||
 					  member.roles.highest.name === "@everyone"
-						? member.ban({ reason: "Too many infractions" })
+						? member.ban({ reason: "Too many warning" })
 						: modTalk.send({
 								allowedMentions: { users: [] },
 								content: `(Just pretend like ${user.toString()} is banned now okay?)`,
@@ -114,7 +114,9 @@ export default async function warn(user, reason, strikes = 1) {
 						? member.disableCommunicationUntil(timeoutLength * 3600000 + Date.now())
 						: modTalk.send({
 								allowedMentions: { users: [] },
-								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hours.`,
+								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hour${
+									timeoutLength === 1 ? "" : "s"
+								}.`,
 						  }),
 				],
 			);
@@ -132,7 +134,7 @@ export default async function warn(user, reason, strikes = 1) {
 						new Embed()
 							.setTitle(`You were warned in ${Util.escapeMarkdown(guild.name)}!`)
 							.setDescription(
-								`You earned ${Math.max(1, strikes)} strikes.${
+								`You earned ${strikes} strike${strikes === 1 ? "" : "s"}.${
 									reason ? ` **${stripMarkdown(reason)}**` : ""
 								}`,
 							)

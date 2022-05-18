@@ -1,4 +1,3 @@
-/** @file Code Shared between suggestions and bug reports. */
 import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 

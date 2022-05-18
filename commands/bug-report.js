@@ -1,4 +1,3 @@
-/** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Constants, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";

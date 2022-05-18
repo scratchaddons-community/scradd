@@ -4,6 +4,7 @@ import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
 import { MessageAttachment } from "discord.js";
 import diffLib from "difflib";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /**
  * @file Enables Error reporting.
@@ -16,17 +17,27 @@ const event = {
 		if (!newMessage.guild || newMessage.guild.id !== process.env.GUILD_ID) return;
 		const logs = [];
 		if (oldMessage.flags.has("CROSSPOSTED") !== newMessage.flags.has("CROSSPOSTED")) {
-			logs.push(`Message ${newMessage.flags.has("CROSSPOSTED") ? "" : "un"}published`);
+			logs.push(
+				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+					newMessage.flags.has("CROSSPOSTED") ? "" : "un"
+				}published`,
+			);
 		}
 		if (oldMessage.flags.has("SUPPRESS_EMBEDS") !== newMessage.flags.has("SUPPRESS_EMBEDS")) {
 			logs.push(
-				`Embeds ${newMessage.flags.has("SUPPRESS_EMBEDS") ? "hidden" : "shown"} on message`,
+				`Embeds ${
+					newMessage.flags.has("SUPPRESS_EMBEDS") ? "hidden" : "shown"
+				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
 			);
 		}
 		if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
-			logs.push(`Message ${newMessage.pinned ? "" : "un"}pinned`);
+			logs.push(
+				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+					newMessage.pinned ? "" : "un"
+				}pinned`,
+			);
 		}
-		if (!newMessage.author.bot) {
+		if (newMessage.author.id !== CONSTANTS.robotop) {
 			const files = [];
 			const contentDiff =
 				oldMessage.content !== null &&
@@ -67,15 +78,7 @@ const event = {
 		}
 
 		await Promise.all(
-			logs.map(
-				(edit) =>
-					newMessage.guild &&
-					log(
-						newMessage.guild,
-						edit + ` in ${newMessage.channel.toString()}!`,
-						"messages",
-					),
-			),
+			logs.map((edit) => newMessage.guild && log(newMessage.guild, edit + "!", "messages")),
 		);
 		if (await automodMessage(newMessage)) return;
 	},
