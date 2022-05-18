@@ -10,7 +10,7 @@ import {
 } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import warn from "../../../common/moderation/warns.js";
-import { censor, automodMessage } from "../../../common/moderation/automod.js";
+import { censor, automodMessage, badWordsAllowed } from "../../../common/moderation/automod.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
@@ -28,7 +28,7 @@ const event = {
 
 		const { emoji } = reaction;
 
-		if (emoji.name) {
+		if (emoji.name && !badWordsAllowed(message.channel)) {
 			const censored = censor(emoji.name);
 			if (censored) {
 				await message.channel.send({ content: `${user.toString()}, language!` });

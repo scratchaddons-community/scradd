@@ -1,13 +1,18 @@
 import log from "../../../common/moderation/logging.js";
 
+/** no idea why we need this but fsr we do*/
+const ALREADY_ENDED = new Set();
+
 /** @type {import("../../../types/event").default<"stageInstanceCreate">} */
 const event = {
 	async event(instance) {
-		if (!instance.guild || instance.guild.id !== process.env.GUILD_ID) return;
+		const guild=instance.guild||await instance.client.guilds.fetch(instance.guildId);
+		if (guild.id !== process.env.GUILD_ID||ALREADY_ENDED.has(instance.id)) return;
+		ALREADY_ENDED.add(instance.id);
 		await log(
-			instance.guild,
+			guild,
 			`Stage ${instance.channel?.toString()} is no longer live!`,
-			"channels",
+			"voice",
 		);
 	},
 };

@@ -10,33 +10,24 @@ import { extractMessageExtremities, messageToText } from "../../../lib/message.j
 const event = {
 	async event(messages) {
 		const last = messages.last();
-		if (!last?.guild || process.env.GUILD_ID !== last.guild.id) return;
-		if (last.guild.id !== process.env.GUILD_ID) return;
+		if (!last?.guild || last.guild.id !== process.env.GUILD_ID) return;
 		const messagesInfo = (
 			await Promise.all(
 				messages.reverse().map(async (message) => {
 					const content = await messageToText(message);
 
-					return `${
-						message.partial
-							? ""
-							: `${message.author.tag || "[unknown}"}${
-									message.embeds.length && message.attachments.size ? " (" : ""
-							  }${message.embeds.length ? message.embeds.length + " embeds" : ""}${
-									message.embeds.length && message.attachments.size ? ", " : ""
-							  }${
-									message.attachments.size
-										? message.attachments.size + " attachments"
-										: ""
-							  }${message.embeds.length && message.attachments.size ? ")" : ""}${
-									content ? ":\n" + content : ""
-							  }`
-					}`;
+					return `${message.author?.tag || "[unknown]"}${
+						message.embeds.length && message.attachments.size ? " (" : ""
+					}${message.embeds.length ? message.embeds.length + " embeds" : ""}${
+						message.embeds.length && message.attachments.size ? ", " : ""
+					}${message.attachments.size ? message.attachments.size + " attachments" : ""}${
+						message.embeds.length && message.attachments.size ? ")" : ""
+					}${content ? ":\n" + content : ""}`;
 				}),
 			)
 		).join("\n\n---\n\n");
 
-		log(last.guild, `Bulk deleted ${messages.size} messages!`, "messages", {
+		log(last.guild, `${messages.size} messages in ${last.channel.toString()} bulk deleted!`, "messages", {
 			files: [new MessageAttachment(Buffer.from(messagesInfo, "utf-8"), "message.txt")],
 			components: [
 				new MessageActionRow().addComponents(

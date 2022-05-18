@@ -6,7 +6,7 @@ import log from "../../common/moderation/logging.js";
 const event = {
 	async event(sticker) {
 		if (!sticker.guild || sticker.guild.id !== process.env.GUILD_ID) return;
-		await log(sticker.guild, `Emoji ${sticker.toString()} deleted!`, "messages");
+		await log(sticker.guild, `Sticker ${sticker.toString()} deleted!`, "messages");
 	},
 };
 

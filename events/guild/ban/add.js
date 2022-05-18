@@ -7,7 +7,7 @@ const event = {
 		if (ban.guild.id !== process.env.GUILD_ID) return;
 		await log(
 			ban.guild,
-			`${ban.user.toString()} banned${ban.reason ? ` - ${ban.reason}` : "!"}`,
+			`User ${ban.user.toString()} banned${ban.reason ? ` - ${ban.reason}` : "!"}`,
 			"members",
 		);
 	},

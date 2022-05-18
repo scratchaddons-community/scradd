@@ -7,7 +7,7 @@ import fetch from "node-fetch";
  *
  * @returns {string}
  */
-export function getComment(name) {
+function getComment(name) {
 	return `**__SCRADD ${name.toUpperCase()} LOG__**\n\n*Please do not delete nor unpin this message. If you do, all current ${name}s will be reset.*`;
 }
 
@@ -48,7 +48,7 @@ export async function getDatabases(names, channel) {
 }
 
 /**
- * @template {{ [key: string]: any }} T
+ * @template {{ [key: string]: string | number | boolean }} T
  *
  * @param {import("discord.js").Message} database
  *

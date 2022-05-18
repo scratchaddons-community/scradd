@@ -9,8 +9,7 @@ import { extractMessageExtremities, messageToText } from "../../lib/message.js";
  */
 const event = {
 	async event(message) {
-		const guild = message.guild;
-		if (!guild || guild.id !== process.env.GUILD_ID) return;
+		if (!message.guild||message.guild.id !== process.env.GUILD_ID) return;
 		const content = await messageToText(message);
 		const { embeds, files } = await extractMessageExtremities(message);
 		if (content)
@@ -19,7 +18,7 @@ const event = {
 		while (files.length > 10) files.pop();
 
 		await log(
-			guild,
+			message.guild,
 			`${message.partial ? "Unknown message" : "Message"}${
 				message.author ? " by " + message.author.toString() : ""
 			} in ${message.channel.toString()} deleted!`,

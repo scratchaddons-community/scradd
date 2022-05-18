@@ -9,8 +9,6 @@ import {
 /** @type {import("../../../../types/event").default<"messageReactionRemoveEmoji">} */
 const event = {
 	async event(reaction) {
-		if (reaction.partial) reaction = await reaction.fetch();
-
 		const message = reaction.message.partial
 			? await reaction.message.fetch()
 			: reaction.message;

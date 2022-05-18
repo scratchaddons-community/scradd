@@ -6,7 +6,7 @@ regexps.forEach(({ source, flags }) =>
 		new RegExp(
 			caesar(
 				source
-					.replaceAll("[a-z]", "[n-m]")
+					.replaceAll("[a-z0-9]", "[n-m0-9]")
 					.replaceAll(/(?<=\\)[a-z]/gi, (letter) => caesar(letter)),
 			),
 			flags,

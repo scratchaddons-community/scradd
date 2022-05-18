@@ -11,8 +11,6 @@ import {
 /** @type {import("../../../types/event").default<"messageReactionRemove">} */
 const event = {
 	async event(reaction, user) {
-		if (reaction.partial) reaction = await reaction.fetch();
-
 		const message = reaction.message.partial
 			? await reaction.message.fetch()
 			: reaction.message;

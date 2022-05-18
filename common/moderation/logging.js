@@ -3,6 +3,7 @@ export const LOG_GROUPS = /** @type {const} */ ([
 	"messages",
 	"channels",
 	"members",
+	"voice",
 	"databases",
 ]);
 /**

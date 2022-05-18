@@ -8,7 +8,7 @@ const event = {
 		await log(
 			invite.guild,
 			`Invite ${invite.code} deleted` +
-				(invite.uses === null ? ` with ${invite.uses} uses` : "") +
+				(invite.uses === null ? "" : ` with ${invite.uses} uses`) +
 				"!",
 			"server",
 		);

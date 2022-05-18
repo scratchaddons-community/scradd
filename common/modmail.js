@@ -129,7 +129,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getMemberFromThread(thread);
 	const embed = new Embed()
 		.setTitle("Modmail ticket closed!")
-		.setTimestamp(thread.createdTimestamp)
+		.setTimestamp(thread.createdAt)
 		.setFooter({
 			iconURL: thread.guild.iconURL() ?? undefined,
 			text: "Any future messages will start a new ticket.",
@@ -173,10 +173,6 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
 	await thread.setLocked(
-		true,
-		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
-	);
-	await thread.setArchived(
 		true,
 		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
 	);

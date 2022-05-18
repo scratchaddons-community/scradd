@@ -3,15 +3,20 @@ import log from "../../../../common/moderation/logging.js";
 /** @type {import("../../../../types/event").default<"guildScheduledEventCreate">} */
 const event = {
 	async event(event) {
-		if (!event.guild || event.guild.id !== process.env.GUILD_ID) return;
+		const guild = event.guild || (await event.client.guilds.fetch(event.guildId));
+		if (guild.id !== process.env.GUILD_ID) return;
 
 		const start = event.scheduledStartAt,
 			end = event.scheduledEndAt;
 
 		await log(
-			event.guild,
+			guild,
 			`Event ${event.name} scheduled${
-				start || end ? ` for ${start || end}${end && start ? "-" + end : ""}` : ""
+				start || end
+					? ` for <t:${Math.round(+(start || end) / 1000)}>${
+							end && start ? "-<t:" + Math.round(+end / 1000) + ">" : ""
+					  }`
+					: ""
 			} in ${
 				event.channel?.toString() || event.entityMetadata.location || "an external location"
 			}${event.creator ? " by " + event.creator.toString() : ""}${
@@ -23,8 +28,3 @@ const event = {
 };
 
 export default event;
-
-// Neither:
-// Both: for ${start}-${end}
-
-// Start: start || end?`for ${start || end}${end&&start?"-"+end:""}`:""

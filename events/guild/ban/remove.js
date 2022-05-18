@@ -4,7 +4,7 @@ import log from "../../../common/moderation/logging.js";
 const event = {
 	async event(ban) {
 		if (ban.guild.id !== process.env.GUILD_ID) return;
-		await log(ban.guild, `${ban.user.toString()} unbanned!`, "members");
+		await log(ban.guild, `User ${ban.user.toString()} unbanned!`, "members");
 	},
 };
 

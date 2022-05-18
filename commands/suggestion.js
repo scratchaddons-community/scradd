@@ -281,7 +281,11 @@ const info = {
 
 							const description =
 								message.embeds[0]?.title ??
-								message.embeds[0]?.description ??
+								(message.embeds[0]?.description &&
+									Util.cleanContent(
+										message.embeds[0]?.description,
+										message.channel,
+									)) ??
 								(message.embeds[0]?.image?.url
 									? message.embeds[0]?.image?.url
 									: message.content);

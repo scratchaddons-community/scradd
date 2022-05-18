@@ -97,7 +97,7 @@ export async function postMessageToBoard(message) {
 				message.member?.displayName ??
 				(censoredName ? censoredName.censored : message.author.username),
 		})
-		.setTimestamp(message.createdTimestamp);
+		.setTimestamp(message.createdAt);
 
 	const button = new MessageButton()
 		.setEmoji("👀")

@@ -70,7 +70,7 @@ const info = {
 					embeds: [
 						new Embed()
 							.setTitle("Modmail ticket closed!")
-							.setTimestamp(interaction.channel.createdTimestamp)
+							.setTimestamp(interaction.channel.createdAt)
 							.setDescription(reason)
 							.setFooter({
 								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
