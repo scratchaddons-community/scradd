@@ -13,7 +13,7 @@ const event = {
 			}deleted! (ID ${thread.id})`,
 			"channels",
 		);
-		if (thread.parent?.id !== MODMAIL_CHANNEL || thread.archived ) return;
+		if (thread.parent?.id !== MODMAIL_CHANNEL || thread.archived) return;
 
 		await sendClosedMessage(thread);
 	},

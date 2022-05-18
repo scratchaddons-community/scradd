@@ -39,7 +39,7 @@ const client = new Client({
 	restWsBridgeTimeout: 30_000,
 
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
-	ws:{large_threshold: 250},
+	ws: { large_threshold: 250 },
 });
 
 const events = await /**

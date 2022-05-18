@@ -1,6 +1,6 @@
 import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import log from "../../../common/moderation/logging.js";
-import { extractMessageExtremities, messageToText } from "../../../lib/message.js";
+import { messageToText } from "../../../lib/message.js";
 
 /**
  * @file Enables Error reporting.
@@ -27,18 +27,23 @@ const event = {
 			)
 		).join("\n\n---\n\n");
 
-		log(last.guild, `${messages.size} messages in ${last.channel.toString()} bulk deleted!`, "messages", {
-			files: [new MessageAttachment(Buffer.from(messagesInfo, "utf-8"), "message.txt")],
-			components: [
-				new MessageActionRow().addComponents(
-					new MessageButton()
-						.setEmoji("👀")
-						.setLabel("View Context")
-						.setStyle("LINK")
-						.setURL(last.url),
-				),
-			],
-		});
+		log(
+			last.guild,
+			`${messages.size} messages in ${last.channel.toString()} bulk deleted!`,
+			"messages",
+			{
+				files: [new MessageAttachment(Buffer.from(messagesInfo, "utf-8"), "message.txt")],
+				components: [
+					new MessageActionRow().addComponents(
+						new MessageButton()
+							.setEmoji("👀")
+							.setLabel("View Context")
+							.setStyle("LINK")
+							.setURL(last.url),
+					),
+				],
+			},
+		);
 	},
 };
 

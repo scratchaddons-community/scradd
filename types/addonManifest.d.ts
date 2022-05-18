@@ -5,8 +5,8 @@ type definitions_cssManipulator =
 	| string
 	| number
 	| {
-			/** The type of the manipulator. */
-			type?: "settingValue";
+		/** The type of the manipulator. */
+		type?: "settingValue";
 			/** The setting ID to reference. */
 			settingId: string;
 	  }

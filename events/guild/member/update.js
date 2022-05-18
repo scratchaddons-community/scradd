@@ -10,7 +10,7 @@ const event = {
 		if (oldMember.avatar !== newMember.avatar) {
 			logs.push(
 				newMember.avatar
-					? " set their server avatar to <" + newMember.avatarURL()+">"
+					? " set their server avatar to <" + newMember.avatarURL() + ">"
 					: " removed their server avatar",
 			);
 		}
@@ -32,7 +32,9 @@ const event = {
 			);
 		}
 		await Promise.all(
-			logs.map((edit) => log(newMember.guild, `Member ${newMember.toString()}${edit}!`, "members")),
+			logs.map((edit) =>
+				log(newMember.guild, `Member ${newMember.toString()}${edit}!`, "members"),
+			),
 		);
 		if (!oldMember.roles.premiumSubscriberRole && newMember.roles.premiumSubscriberRole) {
 			const channel = await newMember.guild.channels.fetch(
@@ -41,7 +43,8 @@ const event = {
 			if (!channel?.isText())
 				throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
-			const boosts = [ // todo: unreliable
+			const boosts = [
+				// todo: unreliable
 				`YO! ${newMember.toString()} just BOOSTED THE SERVER!!! ${
 					newMember.guild.name
 				} now has **${newMember.guild.premiumSubscriptionCount} BOOSTS**`,

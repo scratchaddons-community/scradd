@@ -167,7 +167,7 @@ export async function automodMessage(
 		? false
 		: message.embeds
 				.map((embed) => [
-					embed.description&&	Util.cleanContent(embed.description, message.channel),
+					embed.description && Util.cleanContent(embed.description, message.channel),
 					embed.title,
 					embed.url,
 					embed.image?.url,
@@ -242,7 +242,8 @@ export async function automodMessage(
 	return toStrike.length;
 }
 
-/** @param {import("discord.js").TextBasedChannel | null} channel */ export function badWordsAllowed(
+/** @param {import("discord.js").TextBasedChannel | null} channel */
+export function badWordsAllowed(
 	channel,
 ) {
 	if (!channel || channel.type === "DM") return true;

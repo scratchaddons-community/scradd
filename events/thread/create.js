@@ -4,7 +4,7 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 /** @type {import("../../types/event").default<"threadCreate">} */
 const event = {
 	async event(thread) {
-		if (thread.guild.id !== process.env.GUILD_ID||badWordsAllowed(thread)) return;
+		if (thread.guild.id !== process.env.GUILD_ID || badWordsAllowed(thread)) return;
 		const censored = censor(thread.name);
 		if (censored) {
 			await thread.setName(censored.censored);

@@ -1,5 +1,3 @@
-import warn from "../../common/moderation/warns.js";
-import { censor } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"stickerDelete">} */

@@ -10,9 +10,7 @@ const event = {
 
 		const logs = [];
 		if (oldUser.tag !== newUser.tag) {
-			logs.push(
-				`changed their username from ${oldUser.tag} to ${newUser.tag}`,
-			);
+			logs.push(`changed their username from ${oldUser.tag} to ${newUser.tag}`);
 		}
 		if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
 			logs.push(

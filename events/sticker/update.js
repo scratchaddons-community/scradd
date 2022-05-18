@@ -19,8 +19,10 @@ const event = {
 		}
 
 		await Promise.all(
-			logs.map((edit) =>
-			newSticker.guild&&			log(newSticker.guild, `Sticker ${oldSticker.name}` + edit + `!`, "messages"),
+			logs.map(
+				(edit) =>
+					newSticker.guild &&
+					log(newSticker.guild, `Sticker ${oldSticker.name}` + edit + `!`, "messages"),
 			),
 		);
 	},

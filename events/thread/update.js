@@ -28,13 +28,9 @@ const event = {
 		if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 			logs.push(
 				`'s archive after inactivity time set to ${
-					{
-						60: "1 Hour",
-						1440: "24 Hours",
-						4320: "3 Days",
-						10080: "1 Week",
-						MAX: "",
-					}[newThread.autoArchiveDuration || 1440] || newThread.autoArchiveDuration
+					{ 60: "1 Hour", 1440: "24 Hours", 4320: "3 Days", 10080: "1 Week", MAX: "" }[
+						newThread.autoArchiveDuration || 1440
+					] || newThread.autoArchiveDuration
 				}`,
 			);
 		}
@@ -50,7 +46,7 @@ const event = {
 			),
 		);
 		const censored = censor(newThread.name);
-		if (censored&& !badWordsAllowed(newThread)) {
+		if (censored && !badWordsAllowed(newThread)) {
 			await newThread.setName(censored.censored);
 			const owner = await newThread.fetchOwner();
 			if (owner?.guildMember)
@@ -59,10 +55,12 @@ const event = {
 
 		if (
 			newThread.archived &&
+			// @ts-expect-error -- We are trying to tell if the type matches.
 			LOG_GROUPS.includes(newThread.name) &&
 			newThread.parent?.id === process.env.LOGS_CHANNEL
 		) {
-			return await newThread.setArchived(false);
+			await newThread.setArchived(false);
+			return;
 		}
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 		if (

@@ -13,9 +13,13 @@ const event = {
 				invite.inviter ? ` by ${invite.inviter.toString()}` : ""
 			}${
 				invite.expiresAt || invite.maxUses
-					? ` expiring ${invite.expiresAt ? "<t:" + Math.round(+invite.expiresAt / 1000) + ">" : ""}${
-							invite.expiresAt && invite.maxUses ? " or " : ""
-					  }${invite.maxUses ? "after " + invite.maxUses + " uses" : ""}`
+					? ` expiring ${
+							invite.expiresAt
+								? "<t:" + Math.round(+invite.expiresAt / 1000) + ">"
+								: ""
+					  }${invite.expiresAt && invite.maxUses ? " or " : ""}${
+							invite.maxUses ? "after " + invite.maxUses + " uses" : ""
+					  }`
 					: ""
 			}!`,
 			"server",

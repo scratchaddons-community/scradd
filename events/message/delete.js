@@ -9,7 +9,7 @@ import { extractMessageExtremities, messageToText } from "../../lib/message.js";
  */
 const event = {
 	async event(message) {
-		if (!message.guild||message.guild.id !== process.env.GUILD_ID) return;
+		if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
 		const content = await messageToText(message);
 		const { embeds, files } = await extractMessageExtremities(message);
 		if (content)

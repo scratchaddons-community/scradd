@@ -36,7 +36,7 @@ const event = {
 						newMessage.content.split("\n"),
 					)
 					.join("\n");
-			
+
 			const extraDiff = jsonDiff.diffString(
 				await getMessageJSON(oldMessage),
 				await getMessageJSON(newMessage),
@@ -93,3 +93,5 @@ async function getMessageJSON(message) {
 		files: files.map((file) => file.toJSON()),
 	};
 }
+
+// todo add button to view the msg
