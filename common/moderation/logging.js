@@ -19,5 +19,5 @@ export default async function log(guild, content, group, extra = {}) {
 	const thread =
 		threads.threads.find((thread) => thread.name === group) ||
 		(await channel.threads.create({ name: group, autoArchiveDuration: "MAX" }));
-	await thread.send({ ...extra, content, allowedMentions: { users: [] } });
+	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
 }

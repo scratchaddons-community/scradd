@@ -3,18 +3,27 @@ import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "../databases.js";
 import { Embed } from "@discordjs/builders";
 import { stripMarkdown } from "../../lib/markdown.js";
+import log from "./logging.js";
+
+/** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
 /**
- * @param {import("discord.js").Message} log
+ * @param {import("discord.js").Message} message
  *
  * @returns
  */
-async function getData(log) {
-	return (
-		await /** @type {Promise<{ user: string; expiresAt: number }[]>} */ (extractData(log))
-	).filter((warn) => {
+async function getData(message, sendLog = false) {
+	return (await /** @type {Promise<WarnDatabase>} */ (extractData(message))).filter((warn) => {
 		const expiresAt = new Date(warn.expiresAt);
 		if (expiresAt.getTime() < Date.now()) {
+			if (sendLog && message.guild)
+				log(
+					message.guild,
+					`Member <@${
+						warn.user
+					}> lost 1 strike from ${message.guild.me?.toString()}. (Automatically unwarned.)`,
+					"members",
+				);
 			return false;
 		} else return true;
 	});
@@ -26,9 +35,9 @@ let /** @type {import("discord.js").Message} */ warnLog,
 /**
  * @param {import("discord.js").GuildMember | import("discord.js").User} user
  * @param {number} [strikes]
- * @param {string} [reason]
+ * @param {string} reason
  */
-export default async function warn(user, reason, strikes = 1) {
+export default async function warn(user, reason, strikes = 1, warner = user.client.user) {
 	const guild =
 		user instanceof GuildMember
 			? user.guild
@@ -43,6 +52,29 @@ export default async function warn(user, reason, strikes = 1) {
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog), getData(muteLog)]);
 	const oldLength = allWarns.length;
 
+	if (strikes < 0) {
+		unwarn(user.id, strikes * -1, allWarns);
+	}
+	const userWarns = allWarns.filter((warn) => warn.user === user.id).length;
+
+	const newMutes = Math.floor(userWarns / 3);
+
+	const promises = [];
+
+	const actualStrikes = allWarns.length + (strikes > 0 ? strikes : 0) - oldLength;
+
+	const logMessage = actualStrikes
+		? await log(
+				guild,
+				`Member ${user.toString()} ${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(
+					actualStrikes,
+				)} strike${
+					Math.abs(actualStrikes) === 1 ? "" : "s"
+				} from ${warner?.toString()}. (${stripMarkdown(reason)})`,
+				"members",
+		  )
+		: undefined;
+
 	if (strikes > 0) {
 		allWarns.push(
 			...Array(strikes).fill({
@@ -52,19 +84,11 @@ export default async function warn(user, reason, strikes = 1) {
 					new Date()[process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"]() +
 						2,
 				),
+				info: logMessage?.id,
 				user: user.id,
 			}),
 		);
-	} else {
-		unwarn(user.id, strikes * -1, allWarns);
 	}
-	const userWarns = allWarns.filter((warn) => warn.user === user.id).length;
-
-	const newMutes = Math.floor(userWarns / 3);
-
-	const promises = [];
-
-	const actualStrikes = allWarns.length - oldLength;
 
 	if (newMutes) {
 		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id);
@@ -83,7 +107,7 @@ export default async function warn(user, reason, strikes = 1) {
 						? member.ban({ reason: "Too many warning" })
 						: modTalk.send({
 								allowedMentions: { users: [] },
-								content: `(Just pretend like ${user.toString()} is banned now okay?)`,
+								content: `(Just pretend like ${user.toString()} is banned now, okay?)`,
 						  })
 					: modTalk.send({
 							allowedMentions: { users: [] },
@@ -134,9 +158,9 @@ export default async function warn(user, reason, strikes = 1) {
 						new Embed()
 							.setTitle(`You were warned in ${Util.escapeMarkdown(guild.name)}!`)
 							.setDescription(
-								`You earned ${strikes} strike${strikes === 1 ? "" : "s"}.${
-									reason ? ` **${stripMarkdown(reason)}**` : ""
-								}`,
+								`You earned ${strikes} strike${
+									strikes === 1 ? "" : "s"
+								}. **${stripMarkdown(reason)}**`,
 							)
 							.setColor(Constants.Colors.DARK_RED)
 							.setFooter({
@@ -162,7 +186,7 @@ export default async function warn(user, reason, strikes = 1) {
 /**
  * @param {string} user
  * @param {number} strikes
- * @param {{ user: string; expiresAt: number }[]} warns
+ * @param {WarnDatabase} warns
  */
 function unwarn(user, strikes, warns) {
 	for (var i = 0; i < strikes; i++) {

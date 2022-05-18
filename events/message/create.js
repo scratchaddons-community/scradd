@@ -306,7 +306,7 @@ const event = {
 
 		if (includes(/te(?:r|w)+a/)) react(CONSTANTS.emojis.autoreact.tera);
 
-		if (includes("sat on addon")) {
+		if (includes("on addon")) {
 			if (reactions < 2) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
