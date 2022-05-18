@@ -108,14 +108,21 @@ async function checkString(
 	if (emojis) {
 		const animatedEmojiCount =
 			(message.content && message.content.match(/<a:.+?:\d+>/gi)?.length) || 0;
+		const emojiCount = (message.content && message.content.match(/<:.+?:\d+>/gi)?.length) || 0;
 		if (
 			!(
 				((message.channel.isThread() && message.channel.parent?.id) ||
 					message.channel.id) === process.env.BOTS_CHANNEL
-			) &&
-			animatedEmojiCount > 9
+			)
 		) {
-			bad.emojis = Math.round(animatedEmojiCount / 15);
+			if (animatedEmojiCount > 9) {
+				bad.emojis ??= 0;
+				bad.emojis += Math.round(animatedEmojiCount / 15);
+			}
+			if (emojiCount > 19) {
+				bad.emojis ??= 0;
+				bad.emojis += Math.round(animatedEmojiCount / 30);
+			}
 		}
 	}
 
@@ -125,42 +132,48 @@ async function checkString(
 /** @param {import("discord.js").Message} message */
 export async function automodMessage(
 	message,
-	{ emojis = true, language = true, invites = true } = {},
+	{ emojis = true, language = true, invites = true, flood = true } = {},
 ) {
-	let bad = (
-		await Promise.all([
-			checkString(stripMarkdown(message.cleanContent), message, {
-				language,
-				invites,
-				emojis,
-			}),
+	let bad = {
+		...(
+			await Promise.all([
+				checkString(stripMarkdown(message.cleanContent), message, {
+					language,
+					invites,
+					emojis,
+				}),
 
-			badAttachments(message),
+				badAttachments(message),
 
-			badStickers(message),
-		])
-	).reduce(
-		(bad, censored) => {
-			return {
-				language:
-					typeof censored.language === "number"
-						? +bad.language + censored.language
-						: bad.language,
+				badStickers(message),
+			])
+		).reduce(
+			(bad, censored) => {
+				return {
+					language:
+						typeof censored.language === "number"
+							? +bad.language + censored.language
+							: bad.language,
 
-				invites:
-					typeof censored.invites === "number"
-						? +bad.invites + censored.invites
-						: bad.invites,
-				emojis:
-					typeof censored.emojis === "number"
-						? +bad.emojis + censored.emojis
-						: bad.emojis,
+					invites:
+						typeof censored.invites === "number"
+							? +bad.invites + censored.invites
+							: bad.invites,
+					emojis:
+						typeof censored.emojis === "number"
+							? +bad.emojis + censored.emojis
+							: bad.emojis,
 
-				bots: typeof censored.bots === "number" ? +bad.bots + censored.bots : bad.bots,
-			};
-		},
-		{ language: false, invites: false, bots: false, emojis: false },
-	);
+					bots: typeof censored.bots === "number" ? +bad.bots + censored.bots : bad.bots,
+				};
+			},
+			{ language: false, invites: false, bots: false, emojis: false },
+		),
+		flood:
+			((flood && message.content.length > 3_000) ||
+				message.content.split("\n").length > 15) &&
+			1,
+	};
 
 	const toStrike = Object.entries(bad).filter(([, strikes]) => strikes !== false);
 	const embedStrikes = badWordsAllowed(message.channel)
@@ -195,6 +208,16 @@ export async function automodMessage(
 			warn(message.member || message.author, "Watch your language!", bad.language),
 			message.channel.send({
 				content: CONSTANTS.emojis.statuses.no + ` ${message.author.toString()}, language!`,
+			}),
+		);
+	}
+	if (typeof bad.flood === "number") {
+		promises.push(
+			warn(message.member || message.author, "Don't flood the chat!", bad.flood),
+			message.channel.send({
+				content:
+					CONSTANTS.emojis.statuses.no +
+					` ${message.author.toString()}, please don't flood the chat!`,
 			}),
 		);
 	}
@@ -243,9 +266,7 @@ export async function automodMessage(
 }
 
 /** @param {import("discord.js").TextBasedChannel | null} channel */
-export function badWordsAllowed(
-	channel,
-) {
+export function badWordsAllowed(channel) {
 	if (!channel || channel.type === "DM") return true;
 	return [
 		"816329956074061867", // admin-talk
