@@ -30,7 +30,7 @@
 	"devDependencies": {
 		"@redguy12/prettier-config": "1.1.1",
 		"@types/json-diff": "0.7.0",
-		"@types/node": "17.0.33",
+		"@types/node": "17.0.38",
 		"@types/papaparse": "5.3.2",
 		"nodemon": "2.0.16",
 		"openode": "2.1.6",
