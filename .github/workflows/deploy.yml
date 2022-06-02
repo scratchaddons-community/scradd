@@ -22,4 +22,6 @@ jobs:
                    heroku_app_name: "scradd"
                    heroku_email: "paul@reid-family.org"
                    branch: "v1.9.4"
-                   procfile: "worker: npm start"
+                   usedocker: true
+                   docker_heroku_process_type: worker
+#                    procfile: "worker: npm start"
