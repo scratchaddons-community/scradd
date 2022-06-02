@@ -10,11 +10,10 @@ jobs:
         runs-on: ubuntu-20.04
 
         steps:
-            - run: echo ${{ github.head_ref }}
             - name: Checkout
               uses: actions/checkout@v3.0.2
               with:
-                  ref: ${{ github.head_ref }}
+                  ref: "v1.0.0"
 
             - name: Deploy
               uses: akhileshns/heroku-deploy@v3.12.12
@@ -22,4 +21,4 @@ jobs:
                    heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
                    heroku_app_name: "scradd"
                    heroku_email: "paul@reid-family.org"
-                   branch: ${{ github.head_ref }}
+                   branch: "v1.0.0"
