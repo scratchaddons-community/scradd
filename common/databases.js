@@ -107,12 +107,13 @@ export async function writeToDatabase(database, content) {
 	timeoutId && clearTimeout(timeoutId.timeout);
 }
 
-process.on("beforeExit", async () => {
+export async function cleanListeners() {
 	await Promise.all(
 		Object.values(timeouts).map(async (info) => {
+			console.log(info);
 			if (!info) return;
 			clearTimeout(info.timeout);
 			return await info.callback();
 		}),
 	);
-});
+}

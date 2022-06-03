@@ -2,10 +2,22 @@ import { GuildMember } from "discord.js";
 import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import fetchCommands from "../../common/commands.js";
+import { getWarns } from "../../commands/view-warns.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
 	async event(interaction) {
+		if (
+			interaction.isButton() &&
+			interaction.customId.endsWith("_strike") &&
+			interaction.member instanceof GuildMember
+		) {
+			return await getWarns(
+				(data) => interaction.reply(data),
+				interaction.customId.split("_strike")[0] ?? null,
+				interaction.member,
+			);
+		}
 		if (!interaction.isCommand()) return;
 		const command = (await fetchCommands(this)).get(interaction.commandName);
 
@@ -26,8 +38,9 @@ const event = {
 							interaction.member instanceof GuildMember
 								? interaction.member
 								: interaction.user,
-							"Watch your language!",
+							`Watch your language!`,
 							censored.strikes,
+							censored.words.join("\n"),
 						),
 					]);
 					return;
@@ -53,13 +66,15 @@ export default event;
 /** @param {readonly import("discord.js").CommandInteractionOption[]} options */
 function censorOptions(options) {
 	let strikes = 0,
-		isBad = false;
+		isBad = false,
+		/** @type {string[]} */ words = [];
 	options.forEach((option) => {
 		if (typeof option.value === "string") {
 			const censored = censor(option.value);
 			if (censored) {
 				isBad = true;
 				strikes += censored.strikes;
+				words.push(option.value);
 			}
 		}
 		if (option.options) {
@@ -67,9 +82,10 @@ function censorOptions(options) {
 			if (censored.isBad) {
 				isBad = true;
 				strikes += censored.strikes;
+				words.push(...censored.words);
 			}
 		}
 	});
 
-	return { isBad, strikes };
+	return { isBad, strikes, words };
 }

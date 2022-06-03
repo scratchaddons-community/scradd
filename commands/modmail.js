@@ -8,6 +8,7 @@ import {
 	generateConfirm,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
+	openModmail,
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../common/modmail.js";
@@ -141,14 +142,11 @@ const info = {
 
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {
-								const starterMessage = await mailChannel.send({
-									embeds: [openedEmbed],
-								});
-								const thread = await starterMessage.startThread({
-									name: `${user.user.username}`,
-									autoArchiveDuration: "MAX",
-								});
-								await thread.setLocked(true);
+								const thread = await openModmail(
+									mailChannel,
+									openedEmbed,
+									user.user.username,
+								);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes

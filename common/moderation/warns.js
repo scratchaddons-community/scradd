@@ -1,4 +1,4 @@
-import { Constants, GuildMember, Util } from "discord.js";
+import { Constants, GuildMember, MessageAttachment, User, Util } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "../databases.js";
 import { Embed } from "@discordjs/builders";
@@ -12,21 +12,45 @@ import log from "./logging.js";
  *
  * @returns
  */
-async function getData(message, sendLog = false) {
-	return (await /** @type {Promise<WarnDatabase>} */ (extractData(message))).filter((warn) => {
-		const expiresAt = new Date(warn.expiresAt);
-		if (expiresAt.getTime() < Date.now()) {
-			if (sendLog && message.guild)
-				log(
-					message.guild,
-					`Member <@${
-						warn.user
-					}> lost 1 strike from ${message.guild.me?.toString()}. (Automatically unwarned.)`,
-					"members",
-				);
-			return false;
-		} else return true;
-	});
+export async function getData(message, sendLog = false) {
+	/** @type {{ [key: string]: number }} */
+	const losers = {};
+	const newData = (await /** @type {Promise<WarnDatabase>} */ (extractData(message))).filter(
+		(warn) => {
+			const expiresAt = new Date(warn.expiresAt);
+			if (expiresAt.getTime() < Date.now()) {
+				losers[warn.user] ??= 0;
+				losers[warn.user]++;
+				return false;
+			} else return true;
+		},
+	);
+
+	if (sendLog) {
+		await Promise.all(
+			Object.entries(losers).map(
+				([user, strikes]) =>
+					message.guild &&
+					log(
+						message.guild,
+						`Member <@${user}> lost ${strikes} strike${
+							strikes === 1 ? "" : "s"
+						} from ${message.guild.me?.toString()}!`,
+						"members",
+						{
+							files: [
+								new MessageAttachment(
+									Buffer.from("Automatically unwarned.", "utf-8"),
+									"warn.json",
+								),
+							],
+						},
+					),
+			),
+		);
+	}
+
+	return newData;
 }
 
 let /** @type {import("discord.js").Message} */ warnLog,
@@ -34,10 +58,11 @@ let /** @type {import("discord.js").Message} */ warnLog,
 
 /**
  * @param {import("discord.js").GuildMember | import("discord.js").User} user
- * @param {number} [strikes]
  * @param {string} reason
+ * @param {number} strikes
+ * @param {import("discord.js").User | string} context
  */
-export default async function warn(user, reason, strikes = 1, warner = user.client.user) {
+export default async function warn(user, reason, strikes, context) {
 	const guild =
 		user instanceof GuildMember
 			? user.guild
@@ -48,32 +73,43 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 		const databases = await getDatabases(["warn", "mute"], modTalk);
 		warnLog = databases.warn;
 		muteLog = databases.mute;
+	} else {
+		warnLog = await warnLog.fetch();
+		muteLog = await muteLog.fetch();
 	}
-	const [allWarns, allMutes] = await Promise.all([getData(warnLog), getData(muteLog)]);
+	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
 
 	if (strikes < 0) {
 		unwarn(user.id, strikes * -1, allWarns);
 	}
-	const userWarns = allWarns.filter((warn) => warn.user === user.id).length;
-
-	const newMutes = Math.floor(userWarns / 3);
 
 	const promises = [];
 
 	const actualStrikes = allWarns.length + (strikes > 0 ? strikes : 0) - oldLength;
 
-	const logMessage = actualStrikes
-		? await log(
-				guild,
-				`Member ${user.toString()} ${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(
-					actualStrikes,
-				)} strike${
-					Math.abs(actualStrikes) === 1 ? "" : "s"
-				} from ${warner?.toString()}. (${stripMarkdown(reason)})`,
-				"members",
-		  )
-		: undefined;
+	const logMessage = await log(
+		guild,
+		`Member ${user.toString()} ` +
+			(actualStrikes
+				? `${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(actualStrikes)} strike${
+						Math.abs(actualStrikes) === 1 ? "" : "s"
+				  } from`
+				: "verbally warned by") +
+			` ${(context instanceof User ? context : guild.client.user)?.toString()}!`,
+		"members",
+		{
+			files: [
+				new MessageAttachment(
+					Buffer.from(
+						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
+						"utf-8",
+					),
+					"warn.json",
+				),
+			],
+		},
+	);
 
 	if (strikes > 0) {
 		allWarns.push(
@@ -82,13 +118,17 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 					process.env.NODE_ENV === "production" ? "setDate" : "setMinutes"
 				](
 					new Date()[process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"]() +
-						2,
+						3,
 				),
-				info: logMessage?.id,
+				info: logMessage?.id || "",
 				user: user.id,
 			}),
 		);
 	}
+
+	const userWarns = allWarns.filter((warn) => warn.user === user.id).length;
+
+	const newMutes = Math.floor(userWarns / 3);
 
 	if (newMutes) {
 		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id);
@@ -101,10 +141,10 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 		if (userMutes > 3) {
 			//ban
 			promises.push(
-				member.bannable
+				member.bannable && !member.roles.premiumSubscriberRole
 					? process.env.NODE_ENV === "production" ||
 					  member.roles.highest.name === "@everyone"
-						? member.ban({ reason: "Too many warning" })
+						? member.ban({ reason: "Too many warnings" })
 						: modTalk.send({
 								allowedMentions: { users: [] },
 								content: `(Just pretend like ${user.toString()} is banned now, okay?)`,
@@ -118,10 +158,10 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 			allMutes.push(
 				...Array(newMutes).fill({
 					expiresAt: new Date()[
-						process.env.NODE_ENV === "production" ? "setDate" : "setHours"
+						process.env.NODE_ENV === "production" ? "setDate" : "setMinutes"
 					](
 						new Date()[
-							process.env.NODE_ENV === "production" ? "getDate" : "getHours"
+							process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"
 						]() + 14,
 					),
 					user: user.id,
@@ -135,7 +175,11 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 				...[
 					writeToDatabase(muteLog, allMutes),
 					member.moderatable
-						? member.disableCommunicationUntil(timeoutLength * 3600000 + Date.now())
+						? member.disableCommunicationUntil(
+								timeoutLength *
+									(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+									Date.now(),
+						  )
 						: modTalk.send({
 								allowedMentions: { users: [] },
 								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hour${
@@ -151,30 +195,41 @@ export default async function warn(user, reason, strikes = 1, warner = user.clie
 		...promises,
 		writeToDatabase(warnLog, allWarns),
 
-		strikes > 0 &&
+		strikes >= 0 &&
 			user
 				.send({
 					embeds: [
 						new Embed()
-							.setTitle(`You were warned in ${Util.escapeMarkdown(guild.name)}!`)
+							.setTitle(
+								`You were ${
+									strikes === 0 ? "verbally " : ""
+								}warned in ${Util.escapeMarkdown(guild.name)}!`,
+							)
 							.setDescription(
-								`You earned ${strikes} strike${
-									strikes === 1 ? "" : "s"
-								}. **${stripMarkdown(reason)}**`,
+								strikes === 0
+									? reason
+									: `You earned ${strikes} strike${
+											strikes === 1 ? "" : "s"
+									  }. **${stripMarkdown(reason)}**`,
 							)
 							.setColor(Constants.Colors.DARK_RED)
-							.setFooter({
-								text:
-									`${
-										strikes === 1 ? "This strike" : "These strikes"
-									} will automatically be removed in ${
-										process.env.NODE_ENV === "production"
-											? "48 hours"
-											: "120 seconds"
-									}.` +
-									CONSTANTS.footerSeperator +
-									"You may DM me to discuss this strike with the mods if you want.",
-							}),
+							.setFooter(
+								strikes === 0
+									? null
+									: {
+											iconURL: guild.iconURL() ?? undefined,
+											text:
+												`${
+													strikes === 1 ? "This strike" : "These strikes"
+												} will automatically be removed in 3 ${
+													process.env.NODE_ENV === "production"
+														? "day"
+														: "minute"
+												}s.` +
+												CONSTANTS.footerSeperator +
+												"You may DM me to discuss this strike with the mods if you want.",
+									  },
+							),
 					],
 				})
 				.catch(() => false),

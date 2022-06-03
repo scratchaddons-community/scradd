@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { AbortError } from "node-fetch";
+import { cleanListeners } from "../common/databases.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
@@ -7,7 +8,8 @@ const info = {
 	data: new SlashCommandBuilder().setDescription("Kills the bot.").setDefaultPermission(false),
 
 	async interaction(interaction) {
-		await interaction.reply(interaction.user.tag + " is killing the bot.");
+		await cleanListeners();
+		await interaction.reply("Killing bot...");
 		await logError(
 			new AbortError(interaction.user.tag + " is killing the bot."),
 			"interactionCreate",

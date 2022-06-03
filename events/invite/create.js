@@ -15,7 +15,7 @@ const event = {
 				invite.expiresAt || invite.maxUses
 					? ` expiring ${
 							invite.expiresAt
-								? "<t:" + Math.round(+invite.expiresAt / 1000) + ">"
+								? "<t:" + Math.round(+invite.expiresAt / 1_000) + ">"
 								: ""
 					  }${invite.expiresAt && invite.maxUses ? " or " : ""}${
 							invite.maxUses ? "after " + invite.maxUses + " uses" : ""

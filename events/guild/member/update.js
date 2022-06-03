@@ -19,7 +19,7 @@ const event = {
 			logs.push(
 				newMember.communicationDisabledUntil
 					? " timed out until <t:" +
-							Math.round(+newMember.communicationDisabledUntil / 1000) +
+							Math.round(+newMember.communicationDisabledUntil / 1_000) +
 							">"
 					: " un timed out",
 			);
@@ -82,7 +82,7 @@ const event = {
 							censored.censored
 						}\`.`,
 				  }));
-			await warn(newMember, "Watch your language!", censored.strikes);
+			await warn(newMember, `Watch your language!`, censored.strikes, newMember.displayName);
 		}
 	},
 };

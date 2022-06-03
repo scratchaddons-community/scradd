@@ -11,7 +11,12 @@ const event = {
 			const owner = await thread.fetchOwner();
 			if (owner?.guildMember) {
 				await thread.send(owner.toString() + ", language!");
-				await warn(owner.guildMember, "Watch your language!", censored.strikes);
+				await warn(
+					owner.guildMember,
+					`Watch your language!`,
+					censored.strikes,
+					thread.name,
+				);
 			}
 		}
 	},

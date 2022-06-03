@@ -13,11 +13,20 @@ export const LOG_GROUPS = /** @type {const} */ ([
  * @param {Pick<import("discord.js").MessageOptions, "embeds" | "files" | "components">} [extra]
  */
 export default async function log(guild, content, group, extra = {}) {
+	const thread = await getThread(group, guild);
+	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
+}
+
+/**
+ * @param {typeof LOG_GROUPS[number]} group
+ * @param {import("discord.js").Guild} guild
+ */
+export async function getThread(group, guild) {
 	const channel = await guild.channels.fetch(process.env.LOGS_CHANNEL || "");
 	if (!channel?.isText()) throw new TypeError("Channel is not a text channel");
 	const threads = await channel.threads.fetchActive();
-	const thread =
-		threads.threads.find((thread) => thread.name === group) ||
-		(await channel.threads.create({ name: group, autoArchiveDuration: "MAX" }));
-	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
+	return (
+		threads.threads.find((/** @type {{ name: string }} */ thread) => thread.name === group) ||
+		(await channel.threads.create({ name: group, autoArchiveDuration: "MAX" }))
+	);
 }

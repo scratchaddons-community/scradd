@@ -46,19 +46,18 @@ export const UNSUPPORTED =
 export async function generateMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
 
+	const member =
+		(message.interaction &&
+			(await message.guild?.members.fetch(message.interaction.user.id))) ||
+		message.member ||
+		(await message.guild?.members.fetch(message.author.id));
+
 	return {
-		avatarURL: (
-			message.interaction?.user ||
-			message.member ||
-			message.author
-		)?.displayAvatarURL(),
+		avatarURL: (member || message.interaction?.user || message.author)?.displayAvatarURL(),
 		content: (await messageToText(message, false)) || undefined,
 		embeds,
 		files,
-		username:
-			message.interaction?.user.username ??
-			message.member?.displayName ??
-			message.author.username,
+		username: member?.displayName ?? (message.interaction?.user || message.author).username,
 	};
 }
 
@@ -136,11 +135,17 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 		.setColor(Constants.Colors.DARK_GREEN);
 
 	if (reason) embed.setDescription(reason);
-	if (user)
+
+	if (user) {
+		const member =
+			user instanceof GuildMember
+				? user
+				: (await thread.guild.members.fetch(user.id).catch(() => {})) || user;
 		embed.setAuthor({
-			iconURL: user.displayAvatarURL(),
-			name: user instanceof GuildMember ? user.displayName : user.username,
+			iconURL: member.displayAvatarURL(),
+			name: member instanceof GuildMember ? member.displayName : member.username,
 		});
+	}
 
 	return (
 		await Promise.all([
@@ -293,4 +298,23 @@ export function generateReactionFunctions(message) {
 			return await message.react(CONSTANTS.emojis.statuses.no);
 		},
 	]);
+}
+
+/**
+ * @param {import("discord.js").TextChannel} mailChannel
+ * @param {Embed} openedEmbed
+ * @param {string} name
+ */
+export async function openModmail(mailChannel, openedEmbed, name, ping = false) {
+	const starterMessage = await mailChannel.send({
+		allowedMentions: { parse: ["everyone"] },
+		content: process.env.NODE_ENV === "production" && ping ? "@here" : undefined,
+		embeds: [openedEmbed],
+	});
+	const thread = await starterMessage.startThread({
+		name: `${name} (${new Date().getUTCFullYear()}-${new Date().getUTCMonth()}-${new Date().getUTCDate()})`,
+		autoArchiveDuration: "MAX",
+	});
+	await thread.setLocked(true);
+	return thread;
 }

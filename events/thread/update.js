@@ -27,8 +27,8 @@ const event = {
 		if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 			logs.push(
 				`'s archive after inactivity time set to ${
-					{ 60: "1 Hour", 1440: "24 Hours", 4320: "3 Days", 10080: "1 Week", MAX: "" }[
-						newThread.autoArchiveDuration || 1440
+					{ 60: "1 Hour", 1_440: "24 Hours", 4_320: "3 Days", 10_080: "1 Week", MAX: "" }[
+						newThread.autoArchiveDuration || 1_440
 					] || newThread.autoArchiveDuration
 				}`,
 			);
@@ -45,7 +45,15 @@ const event = {
 			logs.map(
 				(edit) =>
 					newThread.guild &&
-					log(newThread.guild, `Thread ${oldThread.toString()}` + edit + `!`, "channels"),
+					log(
+						newThread.guild,
+						`Thread [${oldThread.toString()}](https://discord.com/${
+							newThread.guild.id
+						}/${oldThread.id})` +
+							edit +
+							`!`,
+						"channels",
+					),
 			),
 		);
 		const censored = censor(newThread.name);
@@ -53,7 +61,12 @@ const event = {
 			await newThread.setName(censored.censored);
 			const owner = await newThread.fetchOwner();
 			if (owner?.guildMember)
-				await warn(owner.guildMember, "Watch your language!", censored.strikes);
+				await warn(
+					owner.guildMember,
+					`Watch your language!`,
+					censored.strikes,
+					newThread.name,
+				);
 		}
 
 		if (

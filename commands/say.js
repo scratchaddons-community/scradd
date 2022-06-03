@@ -33,7 +33,7 @@ const info = {
 								new MessageActionRow().addComponents(
 									new MessageButton()
 										.setEmoji("👀")
-										.setLabel("View Context")
+										.setLabel("View Message")
 										.setStyle("LINK")
 										.setURL(message.url),
 								),

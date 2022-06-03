@@ -39,11 +39,11 @@ const event = {
 					"'s default archive after inactivity time was set to " +
 						{
 							60: "1 Hour",
-							1440: "24 Hours",
-							4320: "3 Days",
-							10080: "1 Week",
+							1_440: "24 Hours",
+							4_320: "3 Days",
+							10_080: "1 Week",
 							MAX: "",
-						}[newChannel.defaultAutoArchiveDuration || 1440] ||
+						}[newChannel.defaultAutoArchiveDuration || 1_440] ||
 						newChannel.defaultAutoArchiveDuration,
 				);
 		}

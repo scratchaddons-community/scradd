@@ -16,13 +16,14 @@ import {
 	getMemberFromThread,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
+	openModmail,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
 
-const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
+const { GUILD_ID = "", SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 
@@ -85,17 +86,11 @@ const event = {
 							.setFooter({ text: UNSUPPORTED })
 							.setColor(COLORS.opened);
 
-						const starterMessage = await mailChannel.send({
-							allowedMentions: { parse: ["everyone"] },
-							content: NODE_ENV === "production" ? "@here" : undefined,
-
-							embeds: [openedEmbed],
-						});
-						const newThread = await starterMessage.startThread({
-							name: `${message.author.username}`,
-							autoArchiveDuration: "MAX",
-						});
-						await newThread.setLocked(true);
+						const newThread = await openModmail(
+							mailChannel,
+							openedEmbed,
+							message.author.username,
+						);
 
 						if (!webhook) throw new ReferenceError("Could not find webhook");
 
@@ -169,7 +164,12 @@ const event = {
 
 		if (mentions > 4 && message.member) {
 			promises.push(
-				warn(message.member, "Please don’t ping so many people!", Math.round(mentions / 5)),
+				warn(
+					message.member,
+					`Please don’t ping so many people!`,
+					Math.round(mentions / 5),
+					message.content,
+				),
 				message.reply({
 					content: CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!",
 				}),
@@ -287,7 +287,7 @@ const event = {
 			content === "e" ||
 			content === "ae" ||
 			content === "iei" ||
-			(content === "a" && message.author.id === "765910070222913556") ||
+			content === "a" ||
 			(content === "." && message.author.id === "761276793666797589") ||
 			content.includes("<:e_:847428533432090665>") ||
 			content.includes("æ")
@@ -319,8 +319,6 @@ const event = {
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
 			}
 		}
-
-		if (includes(/amon?g ?us/, { plural: false })) react(CONSTANTS.emojis.autoreact.amongus);
 
 		if (includes("sus", { plural: false })) react(CONSTANTS.emojis.autoreact.sus);
 

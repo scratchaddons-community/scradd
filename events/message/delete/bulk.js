@@ -32,7 +32,7 @@ const event = {
 			`${messages.size} messages in ${last.channel.toString()} bulk deleted!`,
 			"messages",
 			{
-				files: [new MessageAttachment(Buffer.from(messagesInfo, "utf-8"), "message.txt")],
+				files: [new MessageAttachment(Buffer.from(messagesInfo, "utf-8"), "messages.txt")],
 				components: [
 					new MessageActionRow().addComponents(
 						new MessageButton()

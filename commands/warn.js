@@ -26,7 +26,7 @@ const info = {
 		),
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");
-		const reason = interaction.options.getString("reason") || "";
+		const reason = interaction.options.getString("reason") || "No reason given.";
 		const strikes = interaction.options.getInteger("strikes") ?? 1;
 
 		if (!(user instanceof GuildMember))
@@ -35,17 +35,13 @@ const info = {
 				ephemeral: true,
 			});
 
-		const actualStrikes = await warn(user, reason, strikes);
-		if (actualStrikes === 0)
-			return interaction.reply({
-				content: CONSTANTS.emojis.statuses.no + " Could not issue 0 strikes.",
-				ephemeral: true,
-			});
+		const actualStrikes = await warn(user, reason, strikes, interaction.user);
+
 		return await interaction.reply({
 			allowedMentions: { users: [] },
 			content:
 				CONSTANTS.emojis.statuses.yes +
-				` ${actualStrikes > 0 ? "Warned" : "Unwarned"} ${user.toString()}${
+				` ${actualStrikes < 0 ? "Unwarned" : "Warned"} ${user.toString()}${
 					Math.abs(actualStrikes) !== 1
 						? ` ${Math.abs(actualStrikes)} time${
 								Math.abs(actualStrikes) === 1 ? "" : "s"

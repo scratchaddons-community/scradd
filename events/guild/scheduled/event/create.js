@@ -13,8 +13,8 @@ const event = {
 			guild,
 			`Event ${event.name} scheduled${
 				start || end
-					? ` for <t:${Math.round(+(start || end) / 1000)}>${
-							end && start ? "-<t:" + Math.round(+end / 1000) + ">" : ""
+					? ` for <t:${Math.round(+(start || end) / 1_000)}>${
+							end && start ? "-<t:" + Math.round(+end / 1_000) + ">" : ""
 					  }`
 					: ""
 			} in ${

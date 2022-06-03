@@ -2,7 +2,7 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { MessageAttachment } from "discord.js";
+import { MessageAttachment, MessageEmbed } from "discord.js";
 import diffLib from "difflib";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
@@ -24,10 +24,14 @@ const event = {
 			);
 		}
 		if (oldMessage.flags.has("SUPPRESS_EMBEDS") !== newMessage.flags.has("SUPPRESS_EMBEDS")) {
-			logs.push(
+			log(
+				newMessage.guild,
 				`Embeds ${
 					newMessage.flags.has("SUPPRESS_EMBEDS") ? "hidden" : "shown"
-				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
+				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
+					"!",
+				"messages",
+				{ embeds: newMessage.embeds.map((embed) => new MessageEmbed(embed)) },
 			);
 		}
 		if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
@@ -37,7 +41,11 @@ const event = {
 				}pinned`,
 			);
 		}
-		if (newMessage.author.id !== CONSTANTS.robotop) {
+		if (
+			newMessage.author.id !== CONSTANTS.robotop &&
+			!oldMessage.partial &&
+			!newMessage.interaction
+		) {
 			const files = [];
 			const contentDiff =
 				oldMessage.content !== null &&
@@ -71,7 +79,7 @@ const event = {
 			if (files.length > 0)
 				log(
 					newMessage.guild,
-					`Message edited in ${newMessage.channel.toString()}!`,
+					`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,
 					"messages",
 					{ files },
 				);
