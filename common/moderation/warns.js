@@ -2,7 +2,6 @@ import { Constants, GuildMember, MessageAttachment, User, Util } from "discord.j
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, writeToDatabase } from "../databases.js";
 import { Embed } from "@discordjs/builders";
-import { stripMarkdown } from "../../lib/markdown.js";
 import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
@@ -210,7 +209,7 @@ export default async function warn(user, reason, strikes, context) {
 									? reason
 									: `You earned ${strikes} strike${
 											strikes === 1 ? "" : "s"
-									  }. **${stripMarkdown(reason)}**`,
+									  }.\n\n>>> ${(reason)}`,
 							)
 							.setColor(Constants.Colors.DARK_RED)
 							.setFooter(
