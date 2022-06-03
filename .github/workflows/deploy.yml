@@ -13,19 +13,15 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3.0.2
               with:
-                  ref: ${{ github.head_ref }}
-
-            - name: Setup Node.JS
-              uses: actions/setup-node@v3.1.1
-              with:
-                  node-version: 16
-                  cache: "npm"
-
-            - name: Install
-              run: npm ci --force
-
-            - name: Configure
-              run: npx openode ci-conf "${{ secrets.OPENODE }}" "scradd"
+                  ref: "v1.9.4"#${{ github.head_ref }}
 
             - name: Deploy
-              run: npx openode deploy
+              uses: akhileshns/heroku-deploy@v3.12.12
+              with:
+                   heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+                   heroku_app_name: "scradd"
+                   heroku_email: "paul@reid-family.org"
+                   branch: "v1.9.4"
+                   usedocker: true
+                   docker_heroku_process_type: worker
+#                    procfile: "worker: npm start"

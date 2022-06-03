@@ -64,12 +64,3 @@ await client.login(process.env.BOT_TOKEN);
 process
 	.on("uncaughtException", (err, origin) => logError(err, origin, client))
 	.on("warning", (err) => logError(err, "warning", client));
-
-if (process.env.NODE_ENV === "production") {
-	const server = http.createServer((_, response) => {
-		response.writeHead(302, { location: pkg.homepage });
-		response.end();
-	});
-
-	server.listen(process.env.PORT ?? 80);
-}
