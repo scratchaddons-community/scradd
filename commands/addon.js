@@ -4,7 +4,7 @@ import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import { escapeMessage, replaceBackticks, escapeLinks, generateTooltip } from "../lib/markdown.js";
+import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
 
 const addons = await fetch(
@@ -37,7 +37,8 @@ const info = {
 		.addStringOption((option) =>
 			option
 				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon."),
+				.setDescription("The name of the addon. Defaults to a random addon.")
+				.setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
@@ -67,10 +68,8 @@ const info = {
 			);
 		}
 
-		const input = interaction.options.getString("addon");
-		const { item: addon, score = 0 } = input
-			? fuse.search(input)[0] ?? {}
-			: { item: addons[Math.floor(Math.random() * addons.length)] };
+		const input = interaction.options.getString("addon") || "";
+		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
 			interaction.options.getBoolean("compact") ??
@@ -78,9 +77,7 @@ const info = {
 
 		if (!addon || (score > 0.5 && compact)) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Could not find that addon${
-					input ? ` (\`${replaceBackticks(input)}\`)` : ""
-				}.`,
+				content: `${CONSTANTS.emojis.statuses.no} Could not find a matching addon!`,
 
 				ephemeral: true,
 			});
@@ -99,15 +96,10 @@ const info = {
 			)
 			.setFooter({
 				text:
-					(input
-						? Math.round((1 - score) * 100) +
-						  "% match" +
-						  CONSTANTS.footerSeperator +
-						  "Input: " +
-						  input
-						: "Random addon") +
+					Math.round((1 - score) * 100) +
+					"% match" +
 					CONSTANTS.footerSeperator +
-					(compact ? "Compact mode" : "Addon ID: " + addon.id),
+					(compact ? "Compact mode" : addon.id),
 			})
 			[compact ? "setThumbnail" : "setImage"](
 				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(addon.id)}.png`,
