@@ -13,7 +13,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3.0.2
               with:
-                  ref: "v1.9.4"#${{ github.head_ref }}
+                  ref: ${{ github.head_ref }}
 
             - name: Deploy
               uses: akhileshns/heroku-deploy@v3.12.12
@@ -21,7 +21,5 @@ jobs:
                    heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
                    heroku_app_name: "scradd"
                    heroku_email: "paul@reid-family.org"
-                   branch: "v1.9.4"
-                   usedocker: true
-                   docker_heroku_process_type: worker
-#                    procfile: "worker: npm start"
+                   branch: ${{ github.head_ref }}
+                   procfile: "worker: npm start"
