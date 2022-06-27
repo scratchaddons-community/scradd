@@ -12,8 +12,9 @@ export const RATELIMT_MESSAGE =
 
 export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
 
-export const NO_SERVER_START =
-	"In an effort to help SA developers find meaningful information, we have disabled server-related suggestions and bug reports. With this off, when a developer looks in ";
+/** @type {{ [key: string]: number }} */
+const cooldowns = {};
+export const FEEDBACK_COOLDOWN = 60_000;
 
 export default class SuggestionChannel {
 	/**
@@ -57,6 +58,23 @@ export default class SuggestionChannel {
 
 		if (!channel?.isText()) throw new ReferenceError(`Channel not found`);
 
+		if ((cooldowns[author.id] || 0) > Date.now()) {
+			await interaction.reply({
+				content: `${
+					CONSTANTS.emojis.statuses.no
+				} You can only post a feedback every ${Math.max(
+					1,
+					Math.round(FEEDBACK_COOLDOWN / 1000),
+				)} seconds. Please wait ${Math.max(
+					1,
+					Math.round(((cooldowns[author.id] || 0) - Date.now()) / 1000),
+				)} seconds before posting another feedback.`,
+				ephemeral: true,
+			});
+
+			return false;
+		}
+		cooldowns[author.id] = Date.now() + FEEDBACK_COOLDOWN;
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: 1_440, // 24 hours
