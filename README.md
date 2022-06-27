@@ -53,7 +53,10 @@ What strings? Well... find out yourself! ![](https://cdn.discordapp.com/emojis/9
 
 ### Suggestions
 
-Create and manage suggestions in the #suggestions channel.
+Create and manage suggestions in the #suggestions channel using the `/suggest` slash command <!--preferably?--> in #bots or #sa-chat.
+
+![image](https://user-images.githubusercontent.com/75680333/175952258-9988d196-eade-4373-9294-63207f66d2af.png)
+
 
 **Subcommands:** create | edit | answer | delete
 
@@ -62,27 +65,28 @@ A typical suggestion looks something like this:
 ![](https://user-images.githubusercontent.com/75680333/152417553-31b2c407-e74b-4143-915b-5c00b76bce01.png)
 
 
-#### /suggestion create (title) (description) (category)
+#### /suggestion create
 
 Creates a new suggestion.
 
-| Argument | Required?|
-| --- | --- |
-| title | yes |
-| description | yes |
-| category | yes |
+| Argument | Description | Required?|
+| --- | --- | --- |
+| title | The title of the suggestion. Briefly explains the general idea. Can't be longer than 50 characters. | yes |
+| description | Detailed description of the suggestion. Can include implementation details, the benefits, suggestions to expand on the idea, alternatives and more.| yes |
+| category | The category  of the suggestion.  | yes |
 
 A suggestion can be created in one of the following categories:
 
-- New Addon
-- New Feature (in existing addon)
-- Settings page addition
-- Other
+![image](https://user-images.githubusercontent.com/75680333/175952810-d639c3a6-ef4a-4c4a-9a69-32f2d2dba69c.png)
 
+Please note that server suggestions are only here to tell new users to only suggest about extension features. Lack of it might cause misuse of the other categories to suggest features for the server and most people don't read direct info for some reason.
+
+This feature might be available in the feature but for now it's best to suggest features for Scradd in the Scradd Discord Server, (Scratch Addons) Development Discord Server,
 
 #### /suggestion edit
 
-Edits the title and/or the content of suggestions. Only the suggestion author can use it. Run it in the thread on the suggestion.
+Edits the title and/or the content of suggestions. 
+Can only be used by the suggestion author in the thread of the suggestion.
 
 #### /suggestion answer
 
@@ -200,9 +204,22 @@ Little helper scripts to use in other files.
 ## Contributing
 
 ### How to contribute
-For feature suggestions, create an issue or use the [/suggest command](#suggestions) in the Discord server with category argument selected as "Server / Scradd suggestions".
-For bugs, create an issue or use the [/bugreport command](#bug-reports) in the Discord server.
-For code changes, create a pull request.
+
+For code changes, create a [pull request](https://github.com/scratchaddons-community/scradd/pulls).
+
+---
+
+For feature suggestions or bug reports,
+- Create an [Issue](https://github.com/scratchaddons-community/scradd/issues) (or [Discussion](https://github.com/scratchaddons-community/scradd/discussions)) on the Scradd Repository
+
+Issues are the preferred way. Also, your suggestion will probably get more attention, discussion and more chance to be implemented if you create an issue.
+
+You can still send a message in one of the following, though: 
+- Official Discord server, #general
+- Official Discord server, #general, Scradd suggestions/bugs (thread)
+- Scradd Discord server, #discussion
+
+
 
 
 ### [Contributors](https://github.com/scratchaddons-community/scradd/graphs/contributors)
