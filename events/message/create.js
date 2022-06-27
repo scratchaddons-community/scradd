@@ -304,7 +304,8 @@ const event = {
 
 		if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 
-		if (includes(/te(?:r|w)+a/)) react(CONSTANTS.emojis.autoreact.tera);
+		if (/\bte(?:r|w)+a|(👉|:point_right:) ?(👈|:point_left:)\b/.test(message.content))
+			react(CONSTANTS.emojis.autoreact.tera);
 
 		if (includes("on addon")) {
 			if (reactions < 2) {
@@ -323,13 +324,13 @@ const event = {
 		if (includes("sus", { plural: false })) react(CONSTANTS.emojis.autoreact.sus);
 
 		if (
-			/gives? ?you ?up/.test(content) ||
-			includes("rickroll") ||
-			includes(/(?:rick(roll(?:ed|ing))?|dqw4w9wgxcq)/i, { plural: false })
+			includes(/gives? ?you ?up/i, { plural: false }) ||
+			content.includes("rickroll") ||
+			content.includes("dqw4w9wgxcq")
 		)
 			react(CONSTANTS.emojis.autoreact.rick);
 
-		if (/\b(NO+)+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
+		if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
 			message.mentions.users.has(this.user?.id ?? "") &&
