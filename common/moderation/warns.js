@@ -209,7 +209,7 @@ export default async function warn(user, reason, strikes, context) {
 									? reason
 									: `You earned ${strikes} strike${
 											strikes === 1 ? "" : "s"
-									  }.\n\n>>> ${(reason)}`,
+									  }.\n\n>>> ${reason}`,
 							)
 							.setColor(Constants.Colors.DARK_RED)
 							.setFooter(

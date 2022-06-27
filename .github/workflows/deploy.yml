@@ -18,8 +18,8 @@ jobs:
             - name: Deploy
               uses: akhileshns/heroku-deploy@v3.12.12
               with:
-                   heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-                   heroku_app_name: "scradd"
-                   heroku_email: "paul@reid-family.org"
-                   branch: ${{ github.head_ref }}
-                   procfile: "worker: npm start"
+                  heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+                  heroku_app_name: "scradd"
+                  heroku_email: "paul@reid-family.org"
+                  branch: ${{ github.head_ref }}
+                  procfile: "worker: npm start"
