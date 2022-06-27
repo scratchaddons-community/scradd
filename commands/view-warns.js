@@ -107,6 +107,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 			  ]
 			: [],
 		embeds: [embed],
+		ephemeral: true,
 	};
 }
 
@@ -128,7 +129,11 @@ export async function getWarns(reply, filter, interactor) {
 		if (pinged) {
 			const user = await interactor.client.users.fetch(pinged);
 
-			if (!user) return await reply(`${CONSTANTS.emojis.statuses.no} Invalid filter!`);
+			if (!user)
+				return await reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
+				});
 
 			await reply(await getWarnsForMember(user, interactor.guild));
 		} else {
@@ -138,7 +143,11 @@ export async function getWarns(reply, filter, interactor) {
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
 			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
 
-			if (!message) return await reply(`${CONSTANTS.emojis.statuses.no} Invalid filter!`);
+			if (!message)
+				return await reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
+				});
 
 			const reason = await fetch(message.attachments.first()?.url || "").then((response) =>
 				response.text(),
@@ -209,6 +218,7 @@ export async function getWarns(reply, filter, interactor) {
 				});
 
 			await reply({
+				ephemeral: true,
 				embeds: [embed],
 			});
 		}
