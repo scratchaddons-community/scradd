@@ -19,11 +19,12 @@ const event = {
 			);
 		}
 		if (!interaction.isCommand()) return;
-		const command = (await fetchCommands(this)).get(interaction.commandName);
-
-		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
-
 		try {
+			const command = (await fetchCommands(this)).get(interaction.commandName);
+
+			if (!command)
+				throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
+
 			if (
 				command.censored === "channel"
 					? !badWordsAllowed(interaction.channel)
@@ -40,7 +41,9 @@ const event = {
 								: interaction.user,
 							`Watch your language!`,
 							censored.strikes,
-							censored.words.join("\n"),
+							`Used command:\n/${interaction.commandName} ${stringifyOptions(
+								interaction.options.data,
+							)}`,
 						),
 					]);
 					return;
@@ -63,6 +66,20 @@ const event = {
 
 export default event;
 
+/**
+ * @param {readonly import("discord.js").CommandInteractionOption[]} options
+ *
+ * @returns {string}
+ */
+function stringifyOptions(options) {
+	return options
+		.map((option) =>
+			option.options
+				? option.name + " " + stringifyOptions(option.options)
+				: option.name + ": " + option.value,
+		)
+		.join(" ");
+}
 /** @param {readonly import("discord.js").CommandInteractionOption[]} options */
 function censorOptions(options) {
 	let strikes = 0,

@@ -195,7 +195,7 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				"Watch your language!",
 				bad.language,
-				bad.words.language.join("\n"),
+				"Sent message with words:\n" + bad.words.language.join("\n"),
 			),
 			message.channel.send({
 				content:
@@ -208,7 +208,7 @@ export async function automodMessage(message) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				`Don't flood the chat!\n>>> ${message.content}`,
+				`Don't flood the chat!`,
 				bad.flood,
 				message.content,
 			),

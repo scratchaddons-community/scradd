@@ -82,7 +82,12 @@ const event = {
 							censored.censored
 						}\`.`,
 				  }));
-			await warn(newMember, `Watch your language!`, censored.strikes, newMember.displayName);
+			await warn(
+				newMember,
+				`Watch your language!`,
+				censored.strikes,
+				"Changed nickname to:\n" + newMember.displayName,
+			);
 		}
 	},
 };

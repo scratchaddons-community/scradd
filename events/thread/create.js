@@ -7,7 +7,10 @@ const event = {
 		if (thread.guild.id !== process.env.GUILD_ID || badWordsAllowed(thread)) return;
 		const censored = censor(thread.name);
 		if (censored) {
-			await thread.setName(censored.censored);
+			await thread
+				.setName(censored.censored)
+				.catch(async () => await thread.setName("censored"));
+
 			const owner = await thread.fetchOwner();
 			if (owner?.guildMember) {
 				await thread.send(owner.toString() + ", language!");
@@ -15,7 +18,7 @@ const event = {
 					owner.guildMember,
 					`Watch your language!`,
 					censored.strikes,
-					thread.name,
+					"Made thread titled:\n" + thread.name,
 				);
 			}
 		}

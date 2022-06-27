@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn from "../common/moderation/warns.js";
+import { stripMarkdown } from "../lib/markdown.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -26,7 +27,7 @@ const info = {
 		),
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");
-		const reason = interaction.options.getString("reason") || "No reason given.";
+		const reason = stripMarkdown(interaction.options.getString("reason") || "No reason given.");
 		const strikes = interaction.options.getInteger("strikes") ?? 1;
 
 		if (!(user instanceof GuildMember))

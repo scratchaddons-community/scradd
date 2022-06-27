@@ -58,14 +58,14 @@ const event = {
 		);
 		const censored = censor(newThread.name);
 		if (censored && !badWordsAllowed(newThread)) {
-			await newThread.setName(censored.censored);
+			await newThread.setName(oldThread.name);
 			const owner = await newThread.fetchOwner();
 			if (owner?.guildMember)
 				await warn(
 					owner.guildMember,
 					`Watch your language!`,
 					censored.strikes,
-					newThread.name,
+					"Renamed thread to:\n" + newThread.name,
 				);
 		}
 
