@@ -13,7 +13,7 @@ const event = {
 					newSticker.description ? `set to ${newSticker.description}` : "removed"
 				}`,
 			);
-		} //todo
+		}
 		if (oldSticker.name !== newSticker.name) {
 			logs.push(` renamed to ${newSticker.name}`);
 		}
@@ -29,5 +29,3 @@ const event = {
 };
 
 export default event;
-
-//todo: perms

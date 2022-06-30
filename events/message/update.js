@@ -104,5 +104,3 @@ async function getMessageJSON(message) {
 		files: files.map((file) => file.toJSON()),
 	};
 }
-
-// todo add button to view the msg

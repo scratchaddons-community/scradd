@@ -6,6 +6,10 @@ import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
+const EXPIRY_LENGTH = 21,
+	WARNS_PER_MUTE = 2,
+	MUTES_TILL_BAN = 4;
+
 /**
  * @param {import("discord.js").Message} message
  *
@@ -117,7 +121,7 @@ export default async function warn(user, reason, strikes, context) {
 					process.env.NODE_ENV === "production" ? "setDate" : "setMinutes"
 				](
 					new Date()[process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"]() +
-						3,
+						EXPIRY_LENGTH,
 				),
 				info: logMessage?.id || "",
 				user: user.id,
@@ -127,7 +131,7 @@ export default async function warn(user, reason, strikes, context) {
 
 	const userWarns = allWarns.filter((warn) => warn.user === user.id).length;
 
-	const newMutes = Math.floor(userWarns / 3);
+	const newMutes = Math.floor(userWarns / WARNS_PER_MUTE);
 
 	if (newMutes) {
 		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id);
@@ -135,9 +139,9 @@ export default async function warn(user, reason, strikes, context) {
 
 		const userMutes = oldMutes + newMutes;
 
-		unwarn(user.id, newMutes * 3, allWarns);
+		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
 
-		if (userMutes > 3) {
+		if (userMutes > MUTES_TILL_BAN) {
 			//ban
 			promises.push(
 				member.bannable && !member.roles.premiumSubscriberRole
@@ -161,14 +165,14 @@ export default async function warn(user, reason, strikes, context) {
 					](
 						new Date()[
 							process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"
-						]() + 14,
+						]() + EXPIRY_LENGTH,
 					),
 					user: user.id,
 				}),
 			);
 			let timeoutLength = 0;
 			for (let index = oldMutes; index < userMutes; index++) {
-				timeoutLength += [2, 12, 36][index] || 1;
+				timeoutLength += [2, 6, 12, 24][index] || 1;
 			}
 			promises.push(
 				...[
@@ -181,9 +185,9 @@ export default async function warn(user, reason, strikes, context) {
 						  )
 						: modTalk.send({
 								allowedMentions: { users: [] },
-								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} hour${
-									timeoutLength === 1 ? "" : "s"
-								}.`,
+								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
+									process.env.NODE_ENV === "production" ? "hour" : "minute"
+								}${timeoutLength === 1 ? "" : "s"}.`,
 						  }),
 				],
 			);
@@ -220,11 +224,13 @@ export default async function warn(user, reason, strikes, context) {
 											text:
 												`${
 													strikes === 1 ? "This strike" : "These strikes"
-												} will automatically be removed in 3 ${
+												} will automatically be removed in 21 ${
 													process.env.NODE_ENV === "production"
 														? "day"
-														: "minute"
+														: "second"
 												}s.` +
+												CONSTANTS.footerSeperator +
+												"Tip: Use the /view-warns command to see how many active strikes you have!" +
 												CONSTANTS.footerSeperator +
 												"You may DM me to discuss this strike with the mods if you want.",
 									  },

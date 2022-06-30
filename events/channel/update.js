@@ -28,12 +28,12 @@ const event = {
 			);
 
 		oldChannel.rawPosition !== newChannel.rawPosition &&
-			edits.push(" was moved to position " + newChannel.rawPosition); // todo
+			edits.push(" was moved to position " + newChannel.rawPosition);
 		if (oldChannel.isText() && newChannel.isText()) {
 			!oldChannel.nsfw && newChannel.nsfw && edits.push(" was made age-restricted");
 			oldChannel.nsfw && !newChannel.nsfw && edits.push(" was made non-age-restricted");
 			oldChannel.topic !== newChannel.topic &&
-				edits.push("'s topic was set to " + newChannel.topic); // todo
+				edits.push("'s topic was set to " + newChannel.topic);
 			oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration &&
 				edits.push(
 					"'s default archive after inactivity time was set to " +
@@ -69,5 +69,3 @@ const event = {
 };
 
 export default event;
-
-// todo: permissions updates are not logged but they should be

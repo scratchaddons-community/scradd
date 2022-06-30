@@ -47,7 +47,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread [${oldThread.toString()}](https://discord.com/${
+						`Thread ${oldThread.toString()} (https://discord.com/${
 							newThread.guild.id
 						}/${oldThread.id})` +
 							edit +

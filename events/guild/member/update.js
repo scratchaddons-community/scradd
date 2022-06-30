@@ -44,7 +44,6 @@ const event = {
 				throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
 			const boosts = [
-				// todo: unreliable
 				`YO! ${newMember.toString()} just BOOSTED THE SERVER!!! ${
 					newMember.guild.name
 				} now has **${newMember.guild.premiumSubscriptionCount} BOOSTS**`,
@@ -93,5 +92,3 @@ const event = {
 };
 
 export default event;
-
-// todo: permissions and roles updates are not logged but they should be

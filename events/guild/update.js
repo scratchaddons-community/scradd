@@ -33,7 +33,7 @@ const event = {
 			);
 		}
 		if (oldGuild.description !== newGuild.description) {
-			logs.push(`Server description set to ${newGuild.description}`); //todo
+			logs.push(`Server description set to ${newGuild.description}`);
 		}
 		if (oldGuild.discoverySplashURL() !== newGuild.discoverySplashURL()) {
 			logs.push(
@@ -189,5 +189,3 @@ const event = {
 };
 
 export default event;
-
-// todo: SystemChannelFlags

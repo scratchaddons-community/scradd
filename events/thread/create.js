@@ -7,9 +7,7 @@ const event = {
 		if (thread.guild.id !== process.env.GUILD_ID || badWordsAllowed(thread)) return;
 		const censored = censor(thread.name);
 		if (censored) {
-			await thread
-				.setName(censored.censored)
-				.catch(async () => await thread.setName("censored"));
+			await thread.setName(censored.censored.replaceAll(/#+/g, "x"));
 
 			const owner = await thread.fetchOwner();
 			if (owner?.guildMember) {

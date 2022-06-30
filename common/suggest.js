@@ -182,8 +182,7 @@ export default class SuggestionChannel {
 
 		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
 			await interaction.reply({
-				// TODO: it doesn’t have to be a suggestion here
-				content: `${CONSTANTS.emojis.statuses.no} This suggestion can not be edited.`,
+				content: `${CONSTANTS.emojis.statuses.no} This feedback can not be edited.`,
 				ephemeral: true,
 			});
 
@@ -239,9 +238,6 @@ export default class SuggestionChannel {
  *
  * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
  *   made the suggestion.
- * @todo
- *   https://canary.discord.com/channels/806602307750985799/939350305311715358/947385068660359278 was
- *   never fixed?
  */
 export async function getUserFromSuggestion(message) {
 	const author =
