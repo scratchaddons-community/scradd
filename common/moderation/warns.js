@@ -44,7 +44,7 @@ export async function getData(message, sendLog = false) {
 							files: [
 								new MessageAttachment(
 									Buffer.from("Automatically unwarned.", "utf-8"),
-									"warn.json",
+									"warn.txt",
 								),
 							],
 						},
@@ -108,7 +108,7 @@ export default async function warn(user, reason, strikes, context) {
 						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
 						"utf-8",
 					),
-					"warn.json",
+					"warn.txt",
 				),
 			],
 		},
