@@ -41,6 +41,15 @@ const event = {
 			);
 		}
 
+		if (
+			newThread.archived &&
+			// @ts-expect-error -- We are trying to tell if the type matches.
+			LOG_GROUPS.includes(newThread.name) &&
+			newThread.parent?.id === process.env.LOGS_CHANNEL
+		) {
+			await newThread.setArchived(false);
+		}
+
 		await Promise.all(
 			logs.map(
 				(edit) =>
@@ -69,15 +78,6 @@ const event = {
 				);
 		}
 
-		if (
-			newThread.archived &&
-			// @ts-expect-error -- We are trying to tell if the type matches.
-			LOG_GROUPS.includes(newThread.name) &&
-			newThread.parent?.id === process.env.LOGS_CHANNEL
-		) {
-			await newThread.setArchived(false);
-			return;
-		}
 		const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 		if (
 			newThread.parent?.id !== MODMAIL_CHANNEL ||
