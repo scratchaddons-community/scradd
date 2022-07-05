@@ -1,11 +1,10 @@
-import http from "http";
 import path from "path";
 import url from "url";
 
 import { Client, Collection } from "discord.js";
 import dotenv from "dotenv";
 
-import { importScripts, pkg } from "./lib/files.js";
+import { importScripts } from "./lib/files.js";
 import logError from "./lib/logError.js";
 
 dotenv.config();
