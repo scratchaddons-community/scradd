@@ -20,7 +20,7 @@ const event = {
 			);
 
 		if (oldEvent.description !== newEvent.description)
-			logs.push("'s description set to `" + newEvent.description + "`")
+			logs.push("'s description set to `" + newEvent.description + "`");
 
 		if (
 			oldEvent.scheduledStartAt.valueOf() !== newEvent.scheduledStartAt.valueOf() ||

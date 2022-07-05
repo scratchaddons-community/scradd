@@ -252,7 +252,7 @@ const event = {
 							1,
 							Math.round(
 								(NORMAL_XP_PER_MESSAGE -
-									(newChannel ? lastInChannel.length-1 : spam)) /
+									(newChannel ? lastInChannel.length - 1 : spam)) /
 									bot /
 									(1 +
 										+![

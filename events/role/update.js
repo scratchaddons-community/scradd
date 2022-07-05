@@ -22,7 +22,7 @@ const event = {
 			logs.push(`renamed to ${newRole.name}`);
 		}
 		if (oldRole.position !== newRole.position) {
-			logs.push(`moved to position ${newRole.position}`)
+			logs.push(`moved to position ${newRole.position}`);
 		}
 		if (
 			oldRole.iconURL() !== newRole.iconURL() ||
