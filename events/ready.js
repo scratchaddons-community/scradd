@@ -8,7 +8,7 @@ import logError from "../lib/logError.js";
 const event = {
 	async event() {
 		console.log(
-			`Connected to Discord with tag ${this.user.tag ?? ""} on version v${pkg.version}`,
+			`Connected to Discord with tag ${this.user.tag ?? ""} on version ${pkg.version}`,
 		);
 
 		if (CONSTANTS.prodScradd === this.user.id && !process.argv.includes("--production")) {
