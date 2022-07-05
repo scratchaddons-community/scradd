@@ -291,7 +291,7 @@ export function generateReactionFunctions(message) {
 				});
 			return reaction;
 		},
-		/** @param {any} error */
+		/** @param {unknown} error */
 		async (error) => {
 			console.error(error);
 			return await message.react(CONSTANTS.emojis.statuses.no);
