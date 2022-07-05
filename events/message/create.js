@@ -22,10 +22,14 @@ import {
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
+import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 
-const { GUILD_ID = "", SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
+const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
+
+/** @type {{ [key: string]: import("discord.js").Message[] }} */
+const latestMessages = {};
 
 /** @type {import("../../types/event").default<"messageCreate">} */
 const event = {
@@ -220,6 +224,50 @@ const event = {
 		) {
 			await Promise.all([...promises, message.delete()]);
 			return;
+		}
+
+		// XP
+		if (!message.author.bot || message.interaction) {
+			const lastInChannel = (latestMessages[message.channel.id] ||=
+				await message.channel.messages
+					.fetch({ limit: NORMAL_XP_PER_MESSAGE, before: message.id })
+					.then((messages) => messages.toJSON()));
+			//todo: filter bots ^^^
+			const spam = lastInChannel.findIndex((foundMessage) => {
+				return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
+					[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
+				);
+			});
+			const newChannel = lastInChannel.length !== NORMAL_XP_PER_MESSAGE;
+			if (!newChannel) lastInChannel.pop();
+			lastInChannel.unshift(message);
+			const bot =
+				1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w/.test(message.content));
+
+			await giveXp(
+				message.interaction?.user || message.author,
+				spam === -1 && !newChannel
+					? 1
+					: Math.max(
+							1,
+							Math.round(
+								(NORMAL_XP_PER_MESSAGE -
+									(newChannel ? lastInChannel.length-1 : spam)) /
+									bot /
+									(1 +
+										+![
+											"DEFAULT",
+											"USER_PREMIUM_GUILD_SUBSCRIPTION",
+											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1",
+											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2",
+											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3",
+											"REPLY",
+											"APPLICATION_COMMAND",
+											"CONTEXT_MENU_COMMAND",
+										].includes(message.type)),
+							),
+					  ),
+			);
 		}
 
 		// Autoreactions start here. Return early in some channels.
