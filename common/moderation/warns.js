@@ -18,16 +18,14 @@ const EXPIRY_LENGTH = 21,
 export async function getData(message, sendLog = false) {
 	/** @type {{ [key: string]: number }} */
 	const losers = {};
-	const newData = (await /** @type {Promise<WarnDatabase>} */ (extractData(message))).filter(
-		(warn) => {
-			const expiresAt = new Date(warn.expiresAt);
-			if (expiresAt.getTime() < Date.now()) {
-				losers[warn.user] ??= 0;
-				losers[warn.user]++;
-				return false;
-			} else return true;
-		},
-	);
+	const newData = /** @type {WarnDatabase} */ (await extractData(message)).filter((warn) => {
+		const expiresAt = new Date(warn.expiresAt);
+		if (expiresAt.getTime() < Date.now()) {
+			losers[warn.user] ??= 0;
+			losers[warn.user]++;
+			return false;
+		} else return true;
+	});
 
 	if (sendLog) {
 		await Promise.all(
