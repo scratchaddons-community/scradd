@@ -3,6 +3,12 @@ import papaparse from "papaparse";
 import fetch from "node-fetch";
 
 /**
+ * @typedef DatabaseItem
+ *
+ * @type {{ [key: string]: string | number | boolean }}
+ */
+
+/**
  * @param {string} name
  *
  * @returns {string}
@@ -34,12 +40,12 @@ export async function getDatabases(names, channel) {
 
 	return Object.fromEntries(
 		await Promise.all(
-			names.map(async (name) => {
+			names.map(async (name, index) => {
 				return [
 					name,
 					databases[name] ||
 						(await channel
-							.send({ content: getComment(name) })
+							.send({ content: comments[index] })
 							.then((message) => message.pin())),
 				];
 			}),
@@ -48,14 +54,12 @@ export async function getDatabases(names, channel) {
 }
 
 /**
- * @template {{ [key: string]: string | number | boolean }} T
- *
  * @param {import("discord.js").Message} database
  *
- * @returns {Promise<T[]>}
+ * @returns {Promise<DatabaseItem[]>}
  */
 export async function extractData(database) {
-	if (cache[database.id]) return /** @type {T[]} */ (cache[database.id] || []);
+	if (cache[database.id]) return cache[database.id] || [];
 	const attachment = database?.attachments.first()?.url;
 
 	return (cache[database.id] = attachment
@@ -69,7 +73,7 @@ export async function extractData(database) {
 		: []);
 }
 
-/** @type {{ [key: string]: { [key: string]: any }[] }} */
+/** @type {{ [key: string]: DatabaseItem[] }} */
 const cache = {};
 
 /**
@@ -80,10 +84,8 @@ const cache = {};
 let timeouts = {};
 
 /**
- * @template {{ [key: string]: any }} T
- *
  * @param {import("discord.js").Message} database
- * @param {T[]} content
+ * @param {DatabaseItem[]} content
  */
 export async function writeToDatabase(database, content) {
 	cache[database.id] = content;
