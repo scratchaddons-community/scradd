@@ -84,7 +84,7 @@ export async function postMessageToBoard(message) {
 
 	const description = await messageToText(message);
 
-	const censored = description && censor(description);
+	const censored = censor(description);
 	const censoredName = censor(message.author.username);
 
 	const boardEmbed = new Embed()

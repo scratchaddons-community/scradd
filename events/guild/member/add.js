@@ -6,16 +6,12 @@ import { censor } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { escapeMessage } from "../../../lib/markdown.js";
 import log from "../../../common/moderation/logging.js";
+import { roundDownToMultipleTen } from "../../../lib/numbers.js";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
 
-const count = new Intl.NumberFormat().format(
-	+(
-		Math.floor(rawCount / +("1" + "0".repeat(`${rawCount}`.length - 1))) +
-		"0".repeat(`${rawCount}`.length - 1)
-	),
-);
+const count = new Intl.NumberFormat().format(roundDownToMultipleTen(rawCount));
 
 /** @type {import("../../../types/event").default<"guildMemberAdd">} */
 const event = {

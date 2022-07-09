@@ -14,7 +14,7 @@ const event = {
 		const messagesInfo = (
 			await Promise.all(
 				messages.reverse().map(async (message) => {
-					const content = await messageToText(message);
+					const content = !message.partial && (await messageToText(message));
 
 					return `${message.author?.tag || "[unknown]"}${
 						message.embeds.length && message.attachments.size ? " (" : ""

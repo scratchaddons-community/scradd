@@ -5,7 +5,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
 import { getData } from "../common/moderation/warns.js";
-import { convertBase } from "../lib/text.js";
+import { convertBase } from "../lib/numbers.js";
 
 /** @type {import("../types/command").default} */
 const info = {

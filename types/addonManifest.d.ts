@@ -354,8 +354,7 @@ type AddonManifest = {
 	 */
 	info?: ArrayOfAtLeastOne<{
 		/** Type of the information. */
-
-		type: "warning" | "notice";
+		type?: "warning" | "notice" | "info";
 		/** ID of the information. */
 		id: string;
 		/** Text of the information. */
