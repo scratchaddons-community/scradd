@@ -87,7 +87,7 @@ let timeouts = {};
  * @param {import("discord.js").Message} database
  * @param {DatabaseItem[]} content
  */
-export async function writeToDatabase(database, content) {
+export function queueDatabaseWrite(database, content) {
 	cache[database.id] = content;
 	const timeoutId = timeouts[database.id];
 	const callback = async () => {

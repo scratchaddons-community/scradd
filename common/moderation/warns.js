@@ -1,6 +1,6 @@
 import { Constants, GuildMember, MessageAttachment, User, Util } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
-import { extractData, getDatabases, writeToDatabase } from "../databases.js";
+import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
 import { Embed } from "@discordjs/builders";
 import log from "./logging.js";
 
@@ -172,29 +172,27 @@ export default async function warn(user, reason, strikes, context) {
 			for (let index = oldMutes; index < userMutes; index++) {
 				timeoutLength += [2, 6, 12, 24][index] || 1;
 			}
+			queueDatabaseWrite(muteLog, allMutes);
 			promises.push(
-				...[
-					writeToDatabase(muteLog, allMutes),
-					member.moderatable
-						? member.disableCommunicationUntil(
-								timeoutLength *
-									(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
-									Date.now(),
-						  )
-						: modTalk.send({
-								allowedMentions: { users: [] },
-								content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
-									process.env.NODE_ENV === "production" ? "hour" : "minute"
-								}${timeoutLength === 1 ? "" : "s"}.`,
-						  }),
-				],
+				member.moderatable
+					? member.disableCommunicationUntil(
+							timeoutLength *
+								(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+								Date.now(),
+					  )
+					: modTalk.send({
+							allowedMentions: { users: [] },
+							content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
+								process.env.NODE_ENV === "production" ? "hour" : "minute"
+							}${timeoutLength === 1 ? "" : "s"}.`,
+					  }),
 			);
 		}
 	}
 
+	queueDatabaseWrite(warnLog, allWarns);
 	await Promise.all([
 		...promises,
-		writeToDatabase(warnLog, allWarns),
 
 		strikes >= 0 &&
 			user

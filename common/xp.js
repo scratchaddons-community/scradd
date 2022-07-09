@@ -1,4 +1,4 @@
-import { extractData, getDatabases, writeToDatabase } from "./databases.js";
+import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 /** @type {undefined | import("discord.js").Message} */
@@ -19,5 +19,5 @@ export default async function giveXp(user, amount = NORMAL_XP_PER_MESSAGE) {
 		xp[index] = { user: user.id, xp: (xp[index]?.xp || 0) + amount };
 	}
 
-	await writeToDatabase(database, xp);
+	queueDatabaseWrite(database, xp);
 }
