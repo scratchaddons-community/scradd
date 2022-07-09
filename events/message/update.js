@@ -4,7 +4,6 @@ import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
 import { MessageAttachment, MessageEmbed } from "discord.js";
 import diffLib from "difflib";
-import CONSTANTS from "../../common/CONSTANTS.js";
 
 /**
  * @file Enables Error reporting.
@@ -41,11 +40,7 @@ const event = {
 				}pinned`,
 			);
 		}
-		if (
-			newMessage.author.id !== CONSTANTS.robotop &&
-			!oldMessage.partial &&
-			!newMessage.interaction
-		) {
+		if (!oldMessage.partial && !newMessage.author.bot) {
 			const files = [];
 			const contentDiff =
 				oldMessage.content !== null &&
