@@ -64,10 +64,10 @@ export default class SuggestionChannel {
 					CONSTANTS.emojis.statuses.no
 				} You can only post a feedback every ${Math.max(
 					1,
-					Math.round(FEEDBACK_COOLDOWN / 1000),
+					Math.round(FEEDBACK_COOLDOWN / 1_000),
 				)} seconds. Please wait ${Math.max(
 					1,
-					Math.round(((cooldowns[author.id] || 0) - Date.now()) / 1000),
+					Math.round(((cooldowns[author.id] || 0) - Date.now()) / 1_000),
 				)} seconds before posting another feedback.`,
 				ephemeral: true,
 			});
