@@ -47,7 +47,7 @@ const event = {
 					: byes[Math.floor(Math.random() * byes.length)],
 			}),
 			getThreadFromMember(member).then(async (thread) => {
-				if (thread) closeModmail(thread, member,"Member left");
+				if (thread) closeModmail(thread, member, "Member left");
 			}),
 		]);
 	},
