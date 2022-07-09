@@ -89,7 +89,7 @@ const event = {
 			return;
 
 		if (newThread.archived) {
-			await sendClosedMessage(newThread);
+			await sendClosedMessage(newThread, ({reason:"Inactivity"}));
 			return;
 		}
 		const member = await getMemberFromThread(newThread);
