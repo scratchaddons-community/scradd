@@ -18,7 +18,7 @@
 		"types": "tsc --project jsconfig.json"
 	},
 	"dependencies": {
-		"@discordjs/builders": "0.12.0",
+		"@discordjs/builders": "1.0.0",
 		"async-exit-hook": "2.0.1",
 		"difflib": "0.2.4",
 		"discord.js": "13.6.0",
