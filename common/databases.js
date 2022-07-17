@@ -1,6 +1,7 @@
-import { MessageAttachment } from "discord.js";
+import { Message, MessageAttachment } from "discord.js";
 import papaparse from "papaparse";
 import fetch from "node-fetch";
+import exitHook from "async-exit-hook";
 
 /**
  * @typedef DatabaseItem
@@ -17,6 +18,14 @@ function getComment(name) {
 	return `**__SCRADD ${name.toUpperCase()} LOG__**\n\n*Please do not delete nor unpin this message. If you do, all current ${name}s will be reset.*`;
 }
 
+/** @param {string} content */
+function getDatabaseName(content) {
+	return /SCRADD (?<name>.+) LOG/.exec(content)?.groups?.name?.toLowerCase();
+}
+
+/** @type {{ [key: string]: Message }} */
+const databases = {};
+
 /**
  * @template {string} T
  *
@@ -26,27 +35,25 @@ function getComment(name) {
  * @returns {Promise<{ [value in T]: import("discord.js").Message }>}
  */
 export async function getDatabases(names, channel) {
-	const comments = names.map(getComment);
-	const pins = await channel.messages.fetchPinned();
+	if (!Object.values(databases).length) {
+		const pins = await channel.messages.fetchPinned();
 
-	const databases = Object.fromEntries(
-		pins
-			.map(
-				(message) =>
-					/** @type {const} */ ([names[comments.indexOf(message.content)], message]),
-			)
-			.filter(([name, message]) => name && message.author.id === message.client.user?.id),
-	);
+		for (let pin of pins.toJSON()) {
+			const name = getDatabaseName(pin.content) || "";
+			if (name && pin.author.id === pin.client.user?.id) {
+				databases[name] = pin;
+			}
+		}
+	}
 
 	return Object.fromEntries(
 		await Promise.all(
-			names.map(async (name, index) => {
+			names.map(async (name) => {
 				return [
 					name,
-					databases[name] ||
-						(await channel
-							.send({ content: comments[index] })
-							.then((message) => message.pin())),
+					(databases[name] ||= await channel
+						.send({ content: getComment(name) })
+						.then((message) => message.pin())),
 				];
 			}),
 		),
@@ -59,10 +66,10 @@ export async function getDatabases(names, channel) {
  * @returns {Promise<DatabaseItem[]>}
  */
 export async function extractData(database) {
-	if (cache[database.id]) return cache[database.id] || [];
+	if (dataCache[database.id]) return dataCache[database.id] || [];
 	const attachment = database?.attachments.first()?.url;
 
-	return (cache[database.id] = attachment
+	return (dataCache[database.id] = attachment
 		? await fetch(attachment)
 				.then((res) => res.text())
 				.then(
@@ -74,11 +81,13 @@ export async function extractData(database) {
 }
 
 /** @type {{ [key: string]: DatabaseItem[] }} */
-const cache = {};
+const dataCache = {};
 
 /**
  * @type {{
- * 	[key: string]: { callback: () => Promise<void>; timeout: NodeJS.Timeout } | undefined;
+ * 	[key: string]:
+ * 		| { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout }
+ * 		| undefined;
  * }}
  */
 let timeouts = {};
@@ -88,34 +97,27 @@ let timeouts = {};
  * @param {DatabaseItem[]} content
  */
 export function queueDatabaseWrite(database, content) {
-	cache[database.id] = content;
+	dataCache[database.id] = content;
 	const timeoutId = timeouts[database.id];
-	const callback = async () => {
+	const files = content.length
+		? [
+				new MessageAttachment(
+					Buffer.from(papaparse.unparse(content), "utf-8"),
+					getDatabaseName(database.content) + ".csv",
+				),
+		  ]
+		: [];
+	const callback = () => {
+		const promise = database.edit({ files });
 		timeouts[database.id] = undefined;
-		await database.edit({
-			files: content.length
-				? [
-						new MessageAttachment(
-							Buffer.from(papaparse.unparse(content), "utf-8"),
-							/SCRADD (?<name>.+) LOG/
-								.exec(database.content)
-								?.groups?.name?.toLowerCase() + ".csv",
-						),
-				  ]
-				: [],
-		});
+		return promise;
 	};
 	timeouts[database.id] = { timeout: setTimeout(callback, 60_000), callback };
 	timeoutId && clearTimeout(timeoutId.timeout);
 }
 
-export async function cleanListeners() {
-	await Promise.all(
-		Object.values(timeouts).map(async (info) => {
-			console.log(info);
-			if (!info) return;
-			clearTimeout(info.timeout);
-			return await info.callback();
-		}),
-	);
+export function cleanListeners() {
+	return Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 }
+
+exitHook((callback) => cleanListeners().then(callback));

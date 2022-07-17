@@ -22,7 +22,7 @@ import {
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
-import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 
 const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
@@ -40,7 +40,6 @@ const event = {
 		let reactions = 0;
 
 		if (
-			!message.content.startsWith("=") &&
 			message.channel.type === "DM" &&
 			(message.author.id !== this.user.id || message.interaction)
 		) {
@@ -228,6 +227,7 @@ const event = {
 
 		// XP
 		if (!message.author.bot || message.interaction) {
+			// todo: modmail
 			const lastInChannel = (latestMessages[message.channel.id] ||=
 				await message.channel.messages
 					.fetch({ limit: NORMAL_XP_PER_MESSAGE, before: message.id })
@@ -242,7 +242,7 @@ const event = {
 			if (!newChannel) lastInChannel.pop();
 			lastInChannel.unshift(message);
 			const bot =
-				1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w/.test(message.content));
+				1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content));
 
 			await giveXp(
 				message.interaction?.user || message.author,
@@ -320,9 +320,7 @@ const event = {
 		function react(emoji) {
 			if (reactions > 2) return;
 			reactions++;
-			const promise = message.react(emoji).catch((error) => {
-				console.error(error);
-			});
+			const promise = message.react(emoji).catch(console.error);
 			promises.push(promise);
 			return promise;
 		}
@@ -340,7 +338,8 @@ const event = {
 
 		if (includes(/griff(?:patch)?y?'?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
 
-		if (includes("cubot")) react(CONSTANTS.emojis.autoreact.cubot);
+		if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
+		if (includes("bob", { plural: false })) react(CONSTANTS.emojis.autoreact.bob);
 
 		if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 

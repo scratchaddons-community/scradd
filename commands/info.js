@@ -207,14 +207,6 @@ const info = {
 					}),
 				)
 				.setRequired(false),
-		)
-		.addBooleanOption((input) =>
-			input
-				.setName("ephemeral")
-				.setRequired(false)
-				.setDescription(
-					"Whether to hide the message from other people. Defaults to False in #bots and True everywhere else.",
-				),
 		),
 
 	async interaction(interaction) {
@@ -246,9 +238,6 @@ const info = {
 			],
 
 			content: defaultContent,
-			ephemeral:
-				interaction.options.getBoolean("ephemeral") ??
-				interaction.channel?.id !== process.env.BOTS_CHANNEL,
 			fetchReply: true,
 		});
 		if (!(message instanceof Message)) throw new TypeError("Result not a Message");

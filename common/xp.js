@@ -4,10 +4,9 @@ import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
 export const NORMAL_XP_PER_MESSAGE = 5;
-/** @type {undefined | import("discord.js").Message} */
-let database;
+
 /** @param {User | GuildMember} to */
-export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
+export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const guild =
 		to instanceof GuildMember
 			? to.guild
@@ -19,7 +18,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const modTalk = guild.publicUpdatesChannel;
 	if (!modTalk) throw new ReferenceError("Could not find mod talk");
 
-	database ||= (await getDatabases(["xp"], modTalk)).xp;
+	const database = (await getDatabases(["xp"], modTalk)).xp;
 
 	const xp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
 	const index = xp.findIndex((entry) => entry.user === user.id);
@@ -103,12 +102,12 @@ function getIncrementForLevel(level) {
  *
  * @returns {number}
  */
-function getXpForLevel(level) {
+export function getXpForLevel(level) {
 	return XP_PER_LEVEL[level] ?? getXpForLevel(level - 1) + getIncrementForLevel(level);
 }
 
 /** @param {number} xp */
-function getLevelForXp(xp) {
+export function getLevelForXp(xp) {
 	let level = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
 	if (level === -2) {
 		let found = 0;
@@ -116,9 +115,7 @@ function getLevelForXp(xp) {
 		while (!(found > xp)) {
 			found = getXpForLevel(level);
 			level++;
-			console.log(level, found);
 		}
 	}
-	console.log(xp, level);
 	return level;
 }

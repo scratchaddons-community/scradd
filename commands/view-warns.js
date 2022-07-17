@@ -34,9 +34,6 @@ const info = {
 
 export default info;
 
-let /** @type {import("discord.js").Message} */ warnLog,
-	/** @type {import("discord.js").Message} */ muteLog;
-
 /**
  * @param {import("discord.js").User | import("discord.js").GuildMember} user
  * @param {import("discord.js").Guild | null} guild
@@ -46,14 +43,8 @@ let /** @type {import("discord.js").Message} */ warnLog,
 async function getWarnsForMember(user, guild = user instanceof GuildMember ? user.guild : null) {
 	const modTalk = guild?.publicUpdatesChannel;
 	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	if (!warnLog || !muteLog) {
-		const databases = await getDatabases(["warn", "mute"], modTalk);
-		warnLog = databases.warn;
-		muteLog = databases.mute;
-	} else {
-		warnLog = await warnLog.fetch();
-		muteLog = await muteLog.fetch();
-	}
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const warns = allWarns.filter((warn) => warn.user === user.id);
 	const mutes = allMutes.filter((mute) => mute.user === user.id);
@@ -170,7 +161,7 @@ export async function getWarns(reply, filter, interactor) {
 
 			const modTalk = interactor.guild?.publicUpdatesChannel;
 			if (!modTalk) throw new ReferenceError("Could not find mod talk");
-			warnLog = (await warnLog?.fetch()) || (await getDatabases(["warn"], modTalk)).warn;
+			const warnLog = (await getDatabases(["warn"], modTalk)).warn;
 			const allWarns = await getData(warnLog, true);
 			const caseId = idMessage ? filter : convertBase(filter, 10, 64);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};

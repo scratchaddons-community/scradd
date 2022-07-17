@@ -1,5 +1,4 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -81,9 +80,7 @@ const info = {
 
 				await closeModmail(
 					interaction.channel,
-					interaction.member instanceof GuildMember
-						? interaction.member
-						: interaction.user,
+					interaction.user,
 					reason ?? "",
 				);
 

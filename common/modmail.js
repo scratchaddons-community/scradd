@@ -170,14 +170,14 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  * Close a Modmail ticket.
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
- * @param {import("discord.js").GuildMember | import("discord.js").User} user - User who closed the ticket.
+ * @param {import("discord.js").User} user - User who closed the ticket.
  * @param {string} [reason] - The reason for closing the ticket.
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
 	await thread.setArchived(
 		true,
-		`Closed by ${(user instanceof GuildMember ? user.user : user).tag}: ${reason}`,
+		`Closed by ${user.tag}: ${reason}`,
 	);
 }
 

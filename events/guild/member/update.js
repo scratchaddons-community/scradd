@@ -36,39 +36,7 @@ const event = {
 				log(newMember.guild, `Member ${newMember.toString()}${edit}!`, "members"),
 			),
 		);
-		if (!oldMember.roles.premiumSubscriberRole && newMember.roles.premiumSubscriberRole) {
-			const channel = await newMember.guild.channels.fetch(
-				process.env.PUBLIC_LOGS_CHANNEL || "",
-			);
-			if (!channel?.isText())
-				throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel.");
 
-			const boosts = [
-				`YO! ${newMember.toString()} just BOOSTED THE SERVER!!! ${
-					newMember.guild.name
-				} now has **${newMember.guild.premiumSubscriptionCount} BOOSTS**`,
-				`Hype, ${newMember.toString()} just BOOSTED! Thanks! We're at **${
-					newMember.guild.premiumSubscriptionCount
-				} boosts** now`,
-				`POG - we now have **${
-					newMember.guild.premiumSubscriptionCount
-				} boosts**, THANKS TO ${newMember.toString()}`,
-				`Someone with presumably nothing better to do just BOOSTED ${
-					newMember.guild.name
-				}, which now has **${
-					newMember.guild.premiumSubscriptionCount
-				} BOOSTS**! Hooray! (${newMember.toString()}, to be specific)`,
-				`${newMember.toString()} just boosted the server! I hope they didn't have to steal their parents' credit card… But it doesn't matter, as we have **${
-					newMember.guild.premiumSubscriptionCount
-				} boosts** now!`,
-			];
-
-			await channel.send({
-				content:
-					boosts[Math.floor(Math.random() * boosts.length)] +
-					"!".repeat(newMember.guild.premiumSubscriptionCount || 0),
-			});
-		}
 		const censored = censor(newMember.displayName);
 		if (censored) {
 			const modTalk = newMember.guild.publicUpdatesChannel;

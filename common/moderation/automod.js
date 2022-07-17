@@ -153,15 +153,9 @@ export async function automodMessage(message) {
 				words: { language: [], invites: [], bots: [] },
 			},
 		),
-		flood:
-			(message.content.length > 3_000 || message.content.split("\n").length > 20) &&
-			message.channel.type !== "GUILD_NEWS" &&
-			1,
 	};
 
-	const toStrike = [bad.language, bad.invites, bad.bots, bad.flood].filter(
-		(strikes) => strikes !== false,
-	);
+	const toStrike = [bad.language, bad.invites, bad.bots].filter((strikes) => strikes !== false);
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds
@@ -204,23 +198,6 @@ export async function automodMessage(message) {
 			}),
 		);
 	}
-	if (typeof bad.flood === "number") {
-		promises.push(
-			warn(
-				message.interaction?.user || message.author,
-				`Don't flood the chat!`,
-				bad.flood,
-				message.content,
-			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, please be a bit more consise!`,
-			}),
-		);
-	}
 	if (typeof bad.invites === "number") {
 		promises.push(
 			warn(
@@ -240,22 +217,20 @@ export async function automodMessage(message) {
 	}
 
 	const animatedEmojiCount =
-			(message.content && message.content.match(/<a:.+?:\d+>/gi)?.length) || 0,
-		emojiCount = (message.content && message.content.match(/<:.+?:\d+>/gi)?.length) || 0;
+		(message.content && message.content.match(/<a:.+?:\d+>/gi)?.length) || 0;
 
-	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false,
-		badEmojis = emojiCount > 19 ? Math.round(animatedEmojiCount / 30) : false;
+	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false;
 
 	if (
 		((message.channel.isThread() && message.channel.parent?.id) || message.channel.id) ===
 			process.env.BOTS_CHANNEL &&
-		(typeof badAnimatedEmojis === "number" || typeof badEmojis === "number")
+		typeof badAnimatedEmojis === "number"
 	) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				`Please don\'t post that many emojis!`,
-				+badAnimatedEmojis + +badEmojis,
+				`Please don\'t post that many animated emojis!`,
+				+badAnimatedEmojis,
 				message.content,
 			),
 			message.channel.send({
@@ -263,7 +238,7 @@ export async function automodMessage(message) {
 					CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, lay off on the emojis please!`,
+					).toString()}, lay off on the animated emojis please!`,
 			}),
 		);
 	}

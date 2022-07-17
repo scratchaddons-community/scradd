@@ -377,7 +377,7 @@ const info = {
 							new Embed()
 								.setTitle(
 									`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
-										requestedAnswer ? ` labeled ${requestedAnswer}` : ""
+										requestedAnswer ? ` answered with ${requestedAnswer}` : ""
 									}`,
 								)
 								.setDescription(content)

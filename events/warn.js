@@ -1,5 +1,3 @@
-import { emitWarning } from "process";
-
 /**
  * @file Enables Reporting warnings.
  *
@@ -7,7 +5,7 @@ import { emitWarning } from "process";
  */
 const event = {
 	event(message) {
-		emitWarning(message);
+		process.emitWarning(message);
 	},
 };
 

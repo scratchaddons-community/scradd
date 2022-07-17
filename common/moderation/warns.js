@@ -54,9 +54,6 @@ export async function getData(message, sendLog = false) {
 	return newData;
 }
 
-let /** @type {import("discord.js").Message} */ warnLog,
-	/** @type {import("discord.js").Message} */ muteLog;
-
 /**
  * @param {import("discord.js").GuildMember | import("discord.js").User} user
  * @param {string} reason
@@ -70,14 +67,8 @@ export default async function warn(user, reason, strikes, context) {
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
 	const modTalk = guild.publicUpdatesChannel;
 	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	if (!warnLog || !muteLog) {
-		const databases = await getDatabases(["warn", "mute"], modTalk);
-		warnLog = databases.warn;
-		muteLog = databases.mute;
-	} else {
-		warnLog = await warnLog.fetch();
-		muteLog = await muteLog.fetch();
-	}
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
 
