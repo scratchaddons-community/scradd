@@ -49,7 +49,6 @@ const info = {
 						  }`
 						: ""
 				}.${reason ? " " + reason : ""}`,
-			ephemeral: true,
 		});
 	},
 };

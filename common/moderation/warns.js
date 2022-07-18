@@ -7,8 +7,8 @@ import log from "./logging.js";
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
 const EXPIRY_LENGTH = 21,
-	WARNS_PER_MUTE = 2,
-	MUTES_TILL_BAN = 4;
+	WARNS_PER_MUTE = 3,
+	MUTES_TILL_BAN = 3;
 
 /**
  * @param {import("discord.js").Message} message
@@ -161,7 +161,7 @@ export default async function warn(user, reason, strikes, context) {
 			);
 			let timeoutLength = 0;
 			for (let index = oldMutes; index < userMutes; index++) {
-				timeoutLength += [2, 6, 12, 24][index] || 1;
+				timeoutLength += [3, 12, 24][index] || 1;
 			}
 			queueDatabaseWrite(muteLog, allMutes);
 			promises.push(
