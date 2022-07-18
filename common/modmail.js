@@ -175,10 +175,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
-	await thread.setArchived(
-		true,
-		`Closed by ${user.tag}: ${reason}`,
-	);
+	await thread.setArchived(true, `Closed by ${user.tag}: ${reason}`);
 }
 
 /**

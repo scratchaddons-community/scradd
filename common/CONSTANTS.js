@@ -22,7 +22,7 @@ export default {
 				"<:snakes2:962795778638762004>",
 				"<:snakes3:962800682061140019>",
 			],
-			bob:"<:bob:todo>",
+			bob: "<:bob:todo>",
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",

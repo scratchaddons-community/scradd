@@ -193,21 +193,19 @@ const OPTIONS = [
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder()
-		.setDescription("Learn about me!")
-		.addStringOption((input) =>
-			input
-				.setName("tab")
-				.setDescription(
-					"Which tab to open by default. You may still swap between tabs after it has loaded.",
-				)
-				.addChoices(
-					OPTIONS.map(({ emoji, name }) => {
-						return [emoji + " " + name, name];
-					}),
-				)
-				.setRequired(false),
-		),
+	data: new SlashCommandBuilder().setDescription("Learn about me!").addStringOption((input) =>
+		input
+			.setName("tab")
+			.setDescription(
+				"Which tab to open by default. You may still swap between tabs after it has loaded.",
+			)
+			.addChoices(
+				OPTIONS.map(({ emoji, name }) => {
+					return [emoji + " " + name, name];
+				}),
+			)
+			.setRequired(false),
+	),
 
 	async interaction(interaction) {
 		const hash = generateHash("info");

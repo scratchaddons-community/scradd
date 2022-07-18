@@ -95,8 +95,8 @@ const info = {
 								},
 								{ name: "\u200b", value: "\u200b", inline: true },
 								{
-									value		: "\u200b",
-									name			: makeProgressBar(progress) ,
+									value: "\u200b",
+									name: makeProgressBar(progress),
 								},
 							)
 							.setFooter({

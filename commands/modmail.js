@@ -78,11 +78,7 @@ const info = {
 					],
 				});
 
-				await closeModmail(
-					interaction.channel,
-					interaction.user,
-					reason ?? "",
-				);
+				await closeModmail(interaction.channel, interaction.user, reason ?? "");
 
 				break;
 			}
