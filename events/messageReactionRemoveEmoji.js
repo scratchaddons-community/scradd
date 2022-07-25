@@ -1,5 +1,3 @@
-/** @file Update Potatoboard when an emoji is removed from reactions. */
-
 import { BOARD_EMOJI, sourceToBoardMessage, updateReactionCount } from "../common/board.js";
 
 /** @type {import("../types/event").default<"messageReactionRemoveEmoji">} */

@@ -1,11 +1,8 @@
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../types/event").default<"invalidated">}
- */
+import logError from "../lib/logError.js";
+/** @type {import("../types/event").default<"invalidated">} */
 const event = {
-	event() {
-		console.error("Session is invalid!");
+	async event() {
+		await logError(new ReferenceError("Session is invalid!"), "invalidated", this);
 		process.exit();
 	},
 };

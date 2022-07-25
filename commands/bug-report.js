@@ -1,27 +1,28 @@
-/** @file Commands To manage bug reports. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { Constants } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, {
-	MAX_TITLE_LENGTH,
-	NO_SERVER_START,
-	RATELIMT_MESSAGE,
-} from "../common/suggest.js";
+import SuggestionChannel, { MAX_TITLE_LENGTH, RATELIMT_MESSAGE } from "../common/suggest.js";
 import escapeMessage from "../lib/escape.js";
 
-const { BUGS_CHANNEL, GUILD_ID } = process.env;
+const { BUGS_CHANNEL } = process.env;
 
 if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env.");
 
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
 	{
-		color: "GREEN",
+		name: "Unverified",
+		color: Constants.Colors.GREYPLE,
+		description: "This bug hasn't been verified as an actual bug yet",
+	},
+	{
+		color: Constants.Colors.GREEN,
 		description: "This bug has been verified and it will be fixed soon",
 		name: "Valid Bug",
 	},
 	{
-		color: "DARK_GREEN",
+		color: Constants.Colors.DARK_GREEN,
 
 		description:
 			"This bug is not a high priority to fix it as it does not affect usage of the addon",
@@ -29,54 +30,30 @@ const ANSWERS = [
 		name: "Minor Bug",
 	},
 	{
-		color: "GOLD",
+		color: Constants.Colors.GOLD,
 		description: "A contributor is currently working to fix this bug",
 		name: "In Development",
 	},
 	{
-		color: "BLUE",
+		color: Constants.Colors.BLUE,
 		description: "This bug has been fixed in the next version of Scratch Addons",
 		name: "Fixed",
 	},
 	{
-		color: "RED",
+		color: Constants.Colors.RED,
 		description: "This is not something that we can or will change",
 		name: "Invalid Bug",
 	},
 ];
 
-/** @type {import("../common/suggest.js").Category[]} */
-const CATEGORIES = [
-	{
-		description: "A bug that is only reproduced on Scratch when one or more addons are enabled",
-
-		name: "Addon bug",
-	},
-
-	{
-		description: "A bug found on the settings page or in non-addon-specific areas of popup",
-		name: "Settings bug",
-	},
-
-	{ description: "A bug happening with no addons enabled", name: "Core bug" },
-
-	{
-		description: "A bug in me or a mistake made with the server",
-		customResponse: `${NO_SERVER_START}<#${BUGS_CHANNEL}>, they can see SA bugs they can fix without having to dig through tons of bug reports for me. If I have a bug or the server has a mistake, please send me a DM to let the mods know.`,
-		name: "Server bug",
-	},
-
-	{ description: "Anything not listed above", name: "Other" },
-];
-
 export const CHANNEL_TAG = "#bugs";
 
-const channel = new SuggestionChannel(BUGS_CHANNEL, CATEGORIES);
+const channel = new SuggestionChannel(BUGS_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(".")
+		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}.`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
@@ -91,25 +68,10 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option
-						.setName("bugreport")
+						.setName("bug-report")
 						.setDescription("A detailed description of the bug")
 						.setRequired(true),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Bug report category")
-						.setRequired(true);
-
-					for (const category of CATEGORIES) {
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -123,8 +85,13 @@ const info = {
 						.setDescription("Answer to the bug report")
 						.setRequired(true);
 
-					for (const answer of ANSWERS)
-						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+					for (const [index, answer] of ANSWERS.entries()) {
+						if (index)
+							newOption.addChoice(
+								`${answer.name} (${answer.description})`,
+								answer.name,
+							);
+					}
 
 					return newOption;
 				}),
@@ -145,47 +112,31 @@ const info = {
 				)
 				.addStringOption((option) =>
 					option
-						.setName("bugreport")
+						.setName("bug-report")
 						.setDescription("A detailed description of the bug")
 						.setRequired(false),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Bug report category")
-						.setRequired(false);
-
-					for (const category of CATEGORIES) {
-						if (category.customResponse) continue;
-
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		),
 
 	async interaction(interaction) {
-		if (interaction.guild?.id !== GUILD_ID) return;
-
 		const command = interaction.options.getSubcommand();
 
 		switch (command) {
 			case "create": {
-				const success = await channel.createMessage(interaction, {
-					category: interaction.options.getString("category") || "",
-					description: interaction.options.getString("bugreport") || "",
-					title: interaction.options.getString("title") || "",
-				});
+				const success = await channel.createMessage(
+					interaction,
+					{
+						description: interaction.options.getString("bug-report") ?? "",
+						title: interaction.options.getString("title") ?? "",
+					},
+					ANSWERS[0]?.name,
+				);
 
 				if (success) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Bug report posted! See ${
-							success.thread?.toString() || ""
-						}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
+							success.thread?.toString() ?? ""
+						}. If you made any mistakes, you can fix them with \`/bug-report edit\`.`,
 
 						ephemeral: true,
 					});
@@ -194,15 +145,18 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") || "";
+				const answer = interaction.options.getString("answer") ?? "";
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered bug report as **${escapeMessage(answer)}**!` +
-							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							} Successfully answered bug report as **${escapeMessage(
+								answer,
+							)}**! *${escapeMessage(
+								ANSWERS.find(({ name }) => name === answer)?.description || "",
+							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});
@@ -215,7 +169,6 @@ const info = {
 
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("report"),
-					category: interaction.options.getString("category"),
 					title,
 				});
 				if (result) {

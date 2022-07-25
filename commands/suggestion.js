@@ -1,13 +1,10 @@
-/** @file Commands To manage suggestions. */
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Constants, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
-	DEFAULT_ANSWER,
 	getUserFromSuggestion,
 	MAX_TITLE_LENGTH,
-	NO_SERVER_START,
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
 import escapeMessage, { escapeLinks } from "../lib/escape.js";
@@ -40,84 +37,63 @@ export const OLD_EMOJIS = [
 export const EMOJIS = ["👍", "👎"];
 
 /** @type {import("../common/suggest.js").Answer[]} */
-const ANSWERS = [
+export const ANSWERS = [
 	{
-		color: "GREEN",
+		name: "Unanswered",
+		color: Constants.Colors.GREYPLE,
+		description: "This has not yet been answered",
+	},
+	{
+		color: Constants.Colors.GREEN,
 		description: "This will probably be added if anyone codes it",
 		name: "Good Idea",
 	},
 	{
-		color: "ORANGE",
+		color: Constants.Colors.ORANGE,
 		description: "This already exists in Scratch or in Scratch Addons",
 		name: "Implemented",
 	},
 	{
-		color: "RED",
+		color: Constants.Colors.RED,
 		description: "This is not something we may add for technical reasons",
 		name: "Impossible",
 	},
 	{
-		color: "LUMINOUS_VIVID_PINK",
+		color: Constants.Colors.LUMINOUS_VIVID_PINK,
 		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
 	{
-		color: "GOLD",
+		color: Constants.Colors.GOLD,
 		description: "Someone is currently working on this",
 		name: "In Development",
 	},
 	{
-		color: "DARK_GREEN",
+		color: Constants.Colors.DARK_GREEN,
 		description:
 			"This is possible, but it could be rejected for things like ethical or technical reasons",
 		name: "Possible",
 	},
 	{
-		color: "DARK_RED",
+		color: Constants.Colors.DARK_RED,
 		description: "Wouldn’t work for non-SA users or users who don’t have the addon/option on",
 		name: "Incompatible",
 	},
-	{ color: "PURPLE", description: "We don’t want to add this for some reason", name: "Rejected" },
-];
-
-/** @type {import("../common/suggest.js").Category[]} */
-const CATEGORIES = [
 	{
-		description: "A feature that has no similar features in other addons already",
-		name: "New addon",
+		color: Constants.Colors.PURPLE,
+		description: "We don’t want to add this for some reason",
+		name: "Rejected",
 	},
-
-	{ description: "A feature that would be added to an existing addon", name: "New feature" },
-	{
-		description: "A feature for the settings page or popup, shown without any addons enabled",
-
-		name: "Settings addition",
-	},
-
-	{
-		description: "A suggestion to improve the server or something to add to me",
-		customResponse: `${NO_SERVER_START}<#${SUGGESTION_CHANNEL}>, they can see SA suggestions they can add without having to dig through tons of server suggestions. If you have a suggestion to improve me or the server, please post it in <#${CONSTANTS.channels.general}> for discussion.`,
-		name: "Server suggestion",
-	},
-
-	{
-		description: "Something that has no effect for users",
-		customResponse:
-			"Please suggest things that do not affect users in the development server or on GitHub.",
-		name: "Technical suggestion",
-	},
-
-	{ description: "Anything not listed above", name: "Other" },
 ];
 
 export const CHANNEL_TAG = "#suggestions";
 
-const channel = new SuggestionChannel(SUGGESTION_CHANNEL, CATEGORIES);
+const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
 
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(".")
+		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}.`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
@@ -135,22 +111,7 @@ const info = {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(true),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Suggestion category")
-						.setRequired(true);
-
-					for (const category of CATEGORIES) {
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -164,8 +125,13 @@ const info = {
 						.setDescription("Answer to the suggestion")
 						.setRequired(true);
 
-					for (const answer of ANSWERS)
-						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+					for (const [index, answer] of ANSWERS.entries()) {
+						if (index)
+							newOption.addChoice(
+								`${answer.name} (${answer.description})`,
+								answer.name,
+							);
+					}
 
 					return newOption;
 				}),
@@ -189,24 +155,7 @@ const info = {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(false),
-				)
-				.addStringOption((option) => {
-					const newOption = option
-						.setName("category")
-						.setDescription("Suggestion category")
-						.setRequired(false);
-
-					for (const category of CATEGORIES) {
-						if (category.customResponse) continue;
-
-						newOption.addChoice(
-							`${category.name} (${category.description})`,
-							category.name,
-						);
-					}
-
-					return newOption;
-				}),
+				),
 		)
 
 		.addSubcommand((subcommand) =>
@@ -227,7 +176,7 @@ const info = {
 						)
 						.setRequired(false);
 
-					for (const answer of [DEFAULT_ANSWER, ...ANSWERS])
+					for (const answer of ANSWERS)
 						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
 
 					return newOption;
@@ -238,11 +187,12 @@ const info = {
 		if (interaction.guild?.id !== GUILD_ID) return;
 
 		const command = interaction.options.getSubcommand();
+		const message =
+			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
 
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					category: interaction.options.getString("category") || "",
 					description: interaction.options.getString("suggestion") || "",
 					title: interaction.options.getString("title") || "",
 				});
@@ -265,12 +215,17 @@ const info = {
 				const answer = interaction.options.getString("answer") || "";
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
+					if (message && message.author.id === interaction.client.user?.id)
+						await reactAll(message, EMOJIS);
 					await interaction.reply({
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered suggestion as ${escapeMessage(answer)}!` +
-							(result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""),
+							} Successfully answered suggestion as **${escapeMessage(
+								answer,
+							)}**! *${escapeMessage(
+								ANSWERS.find(({ name }) => name === answer)?.description || "",
+							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});
@@ -283,10 +238,11 @@ const info = {
 
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("suggestion"),
-					category: interaction.options.getString("category"),
 					title,
 				});
 				if (result) {
+					if (message && message.author.id === interaction.client.user?.id)
+						await reactAll(message, EMOJIS);
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Successfully edited suggestion!${
 							result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""
@@ -325,7 +281,9 @@ const info = {
 							if (typeof count !== "number") return;
 
 							const answer =
-								message.thread?.name.split("|")[0]?.trim() || DEFAULT_ANSWER.name;
+								message.thread?.name.split(" | ")[0]?.trim() ??
+								ANSWERS[0]?.name ??
+								"";
 
 							if (
 								requestedAnswer &&
@@ -334,9 +292,15 @@ const info = {
 								return;
 
 							const description =
-								message.embeds[0]?.title ||
-								message.embeds[0]?.description ||
-								message.content;
+								message.embeds[0]?.title ??
+								(message.embeds[0]?.description &&
+									Util.cleanContent(
+										message.embeds[0]?.description,
+										message.channel,
+									)) ??
+								(message.embeds[0]?.image?.url
+									? message.embeds[0]?.image?.url
+									: message.content);
 
 							const author = await getUserFromSuggestion(message);
 
@@ -347,10 +311,7 @@ const info = {
 								count,
 								id: message.id,
 
-								title: truncateText(
-									description.split("/n")[0] || "",
-									MAX_TITLE_LENGTH,
-								),
+								title: truncateText(description, MAX_TITLE_LENGTH),
 							};
 						}),
 					)
@@ -427,7 +388,7 @@ const info = {
 							new MessageEmbed()
 								.setTitle(
 									`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
-										requestedAnswer ? ` labeled ${requestedAnswer}` : ""
+										requestedAnswer ? ` answered with ${requestedAnswer}` : ""
 									}`,
 								)
 								.setDescription(content)

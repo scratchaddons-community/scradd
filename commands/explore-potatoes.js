@@ -1,4 +1,3 @@
-/** @file Command To get a random message from the #potatoboard. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Message, MessageButton, MessageEmbed } from "discord.js";
 
@@ -184,7 +183,7 @@ const info = {
 			if (!current?.components[0]?.components[0]) {
 				return {
 					allowedMentions: { users: [] },
-					attachments: [],
+					files: [],
 					components: [],
 
 					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,

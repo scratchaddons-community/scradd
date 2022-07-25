@@ -1,4 +1,3 @@
-/** @file Code To perform operations related to the potatoboard. */
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import extractMessageExtremities from "../lib/extractMessageExtremities.js";
 
@@ -7,7 +6,7 @@ import messageToText from "../lib/messageToText.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL || "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
+export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
 
 /**
  * Supplied a message in #potatoboard, get the original message that was reacted to.
@@ -77,9 +76,7 @@ export async function sourceToBoardMessage(message) {
  * @param {import("discord.js").Message} message - Message to add.
  */
 export async function postMessageToBoard(message) {
-	if (!message.guild) throw new TypeError("Cannot post DMs to potatoboard");
-
-	const { author, files, embeds } = await extractMessageExtremities(message);
+	const { files, embeds } = await extractMessageExtremities(message);
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
@@ -90,45 +87,39 @@ export async function postMessageToBoard(message) {
 	const description = await messageToText(message);
 
 	const boardEmbed = new MessageEmbed()
-		.setColor(("displayColor" in author && author.displayColor) || "DEFAULT")
+		.setColor(message.member?.displayColor ?? 0)
 		.setDescription(description)
 		.setAuthor({
-			iconURL: author?.displayAvatarURL() || message.author.displayAvatarURL(),
-
-			name: "displayName" in author ? author.displayName : author.username,
+			iconURL: (message.member ?? message.author).displayAvatarURL(),
+			name: message.member?.displayName ?? message.author.username,
 		})
-		.setTimestamp(message.createdTimestamp);
+		.setTimestamp(message.createdAt);
 
 	const button = new MessageButton()
 		.setEmoji("👀")
 		.setLabel("View Context")
 		.setStyle("LINK")
-		.setURL(
-			`https://discord.com/channels/${message.guild?.id || "@me"}/${message.channel.id}/${
-				message.id
-			}`,
-		);
+
+		.setURL(message.url);
 	const reaction = message.reactions.resolve(BOARD_EMOJI);
 
 	if (!reaction) return;
+
+	MESSAGES ??= await getAllMessages(board);
 
 	const boardMessage = await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
-		content: `**${BOARD_EMOJI} ${(reaction?.count || 0) - (reaction.me ? 1 : 0)}** | ${
-			message.channel.type === "DM"
-				? ""
-				: `${message.channel.toString()}${
-						message.channel.isThread()
-							? ` (${message.channel.parent?.toString() || ""})`
-							: ""
-				  }`
-		}${author ? ` | ${author.toString()}` : ""}`,
+		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
+			message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
+		} | ${message.author.toString()}`,
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
-	MESSAGES ??= await getAllMessages(board);
+	if (board.type === "GUILD_NEWS") {
+		await boardMessage.crosspost();
+	}
 	MESSAGES.push(boardMessage);
 	return boardMessage;
 }

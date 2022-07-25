@@ -1,11 +1,10 @@
-/** @file Command To get information about an addon. */
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { Util } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import escapeMessage, { escapeForInlineCode, escapeLinks } from "../lib/escape.js";
+import escapeMessage, { escapeLinks } from "../lib/escape.js";
 import generateTooltip from "../lib/generateTooltip.js";
 import joinWithAnd from "../lib/joinWithAnd.js";
 
@@ -13,9 +12,8 @@ const addons = await fetch(
 	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",
 ).then(
 	async (response) =>
-		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */ (
-			await response.json()
-		),
+		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */
+		(await response.json()),
 );
 
 /** @type {{ [key: string]: import("../types/addonManifest").default }} */
@@ -27,18 +25,9 @@ const fuse = new Fuse(addons, {
 	includeScore: true,
 
 	keys: [
-		{
-			name: "id",
-			weight: 1,
-		},
-		{
-			name: "name",
-			weight: 1,
-		},
-		{
-			name: "description",
-			weight: 0.5,
-		},
+		{ name: "id", weight: 1 },
+		{ name: "name", weight: 1 },
+		{ name: "description", weight: 0.5 },
 	],
 });
 
@@ -47,9 +36,7 @@ const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with information about a specific addon.")
 		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon."),
+			option.setName("addon").setDescription("The name of the addon.").setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
@@ -71,7 +58,7 @@ const info = {
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
-				credits?.map(({ name, link, note = "" }) =>
+				credits?.map(({ name, link, note }) =>
 					link
 						? `[${escapeLinks(name)}](${link} "${note}")`
 						: note
@@ -81,20 +68,16 @@ const info = {
 			);
 		}
 
-		const input = interaction.options.getString("addon");
-		const { item, score = 0 } = input
-			? fuse.search(input)[0] || {}
-			: { item: addons[Math.floor(Math.random() * addons.length)] };
+		const input = interaction.options.getString("addon") || "";
+		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
 			interaction.options.getBoolean("compact") ??
 			interaction.channel?.id !== process.env.BOTS_CHANNEL;
 
-		if (!item) {
+		if (!addon || (score > 0.5 && compact)) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Could not find that addon${
-					input ? ` (\`${escapeForInlineCode(input)}\`)` : ""
-				}.`,
+				content: `${CONSTANTS.emojis.statuses.no} Could not find a matching addon!`,
 
 				ephemeral: true,
 			});
@@ -102,77 +85,80 @@ const info = {
 			return;
 		}
 
-		const embed = new MessageEmbed()
-			.setTitle(item.name)
+		const embed = new Embed()
+			.setTitle(addon.name)
 			.setColor(CONSTANTS.colors.theme)
 			.setDescription(
-				`${escapeMessage(item.description)}\n` +
+				`${escapeMessage(addon.description)}\n` +
 					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(
-						item.id,
+						addon.id,
 					)}/)`,
 			)
 			.setFooter({
 				text:
-					(input
-						? Math.round((1 - score) * 100) +
-						  "% match" +
-						  CONSTANTS.footerSeperator +
-						  "Input: " +
-						  input
-						: "Random addon") +
-					(compact ? CONSTANTS.footerSeperator + "Compact mode" : ""),
+					Math.round((1 - score) * 100) +
+					"% match" +
+					CONSTANTS.footerSeperator +
+					(compact ? "Compact mode" : addon.id),
 			})
 			[compact ? "setThumbnail" : "setImage"](
-				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(item.id)}.png`,
+				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(addon.id)}.png`,
 			);
 
-		const group = item.tags.includes("popup")
+		const group = addon.tags.includes("popup")
 			? "Extension Popup Features"
-			: item.tags.includes("easterEgg")
+			: addon.tags.includes("easterEgg")
 			? "Easter Eggs"
-			: item.tags.includes("theme")
-			? "Themes"
-			: item.tags.includes("community")
-			? "Scratch Website Features"
-			: "Scratch Editor Features";
+			: addon.tags.includes("theme")
+			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes?`
+			: addon.tags.includes("community")
+			? "Scratch Website Features -> " +
+			  (addon.tags.includes("profiles")
+					? "Profiles"
+					: addon.tags.includes("projectPage")
+					? "Project Pages"
+					: addon.tags.includes("forums")
+					? "Forums"
+					: "Others")
+			: "Scratch Editor Features -> " +
+			  (addon.tags.includes("codeEditor")
+					? "Code Editor"
+					: addon.tags.includes("costumeEditor")
+					? "Costume Editor"
+					: addon.tags.includes("projectPlayer")
+					? "Project Player"
+					: "Others");
 
 		if (group !== "Easter Eggs") {
 			embed.setURL(
 				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
-					item.id,
+					addon.id,
 				)}`,
 			);
 		}
 
 		if (!compact) {
-			const addon = (manifestCache[item.id] ||= await fetch(
-				`${CONSTANTS.repos.sa}/addons/${item.id}/addon.json?date=${Date.now()}`,
+			const manifest = (manifestCache[addon.id] ??= await fetch(
+				`${CONSTANTS.repos.sa}/addons/${addon.id}/addon.json?date=${Date.now()}`,
 			).then(async (response) => {
-				return await /** @type {Promise<import("../types/addonManifest").default>} */ (
-					response.json()
-				);
+				return await /** @type {Promise<import("../types/addonManifest").default>} */
+				(response.json());
 			}));
 
-			const lastUpdatedIn = `last updated in ${
-				addon.latestUpdate?.version || "<unknown version>"
+			const lastUpdatedIn = `last updated in v${
+				manifest.latestUpdate?.version ?? "<unknown version>"
 			}`;
-			const latestUpdateInfo = addon.latestUpdate
-				? ` (${
-						addon.latestUpdate.temporaryNotice
-							? generateTooltip(
-									interaction,
-									lastUpdatedIn,
-									`${addon.latestUpdate?.temporaryNotice}`,
-							  )
-							: lastUpdatedIn
-				  })`
-				: "";
 
 			const credits = generateCredits(addon.credits);
 
-			if (credits) embed.addField("Contributors", credits, true);
+			if (credits)
+				embed.addField({
+					name: "Contributors",
+					value: Util.escapeMarkdown(credits),
+					inline: true,
+				});
 
-			if (addon.permissions?.length)
+			if (manifest.permissions?.length)
 				embed.setDescription(
 					embed.description +
 						"\n" +
@@ -180,18 +166,24 @@ const info = {
 						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
-			embed.addFields([
-				{
-					inline: true,
-					name: "Group",
-					value: escapeMessage(group),
-				},
+			embed.addFields(
+				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
 				{
 					inline: true,
 					name: "Version added",
-					value: escapeMessage(addon.versionAdded + latestUpdateInfo),
+					value: Util.escapeMarkdown(
+						"v" +
+							manifest.versionAdded +
+							(manifest.latestUpdate
+								? ` (${generateTooltip(
+										interaction,
+										lastUpdatedIn,
+										`${manifest.latestUpdate?.temporaryNotice}`,
+								  )})`
+								: ""),
+					),
 				},
-			]);
+			);
 		}
 
 		await interaction.reply({ embeds: [embed] });

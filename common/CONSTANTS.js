@@ -1,27 +1,28 @@
 export default {
 	emojis: {
-		statuses: {
-			yes: "<:yes:940054094272430130>",
-			no: "<:no:940054047854047282>",
-		},
+		statuses: { yes: "<:yes:940054094272430130>", no: "<:no:940054047854047282>" },
 		autoreact: {
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",
-			sus: "<:sus_pepe:938548233385414686>",
-			amongus: "<:sus:938441549660975136>",
+			sus: "<:sus:938548233385414686>",
+			amongus: "<:amogus:938441549660975136>",
 			appel: "<:appel:938818517535440896>",
 			cubot: "<:cubot:939336981601722428>",
-			splory: "<:splory:942561415594663966>",
 			tera: "<:tewwa:938486033274785832>",
-			rick: "<a:rick:938547171366682624>",
-			sxd: "<:sxd:939985869421547520>",
-			angery: "<:angery:939337168780943390>",
-			nope: "<a:no:947888617953574912>",
+			rick: "<a:rick:962421165295554601>",
+			sxd: "<:sxd:962798819572056164>",
+			nope: "<a:nope:947888617953574912>",
 			soa: [
-				"<:sa_full1:939336189880713287>",
-				"<:soa_full1:939336229449789510>",
-				"<:sa_full3:939336281454936095>",
+				"<:soa1:939336189880713287>",
+				"<:soa2:939336229449789510>",
+				"<:soa3:939336281454936095>",
 			],
+			snakes: [
+				"<:snakes1:962795689660788819>",
+				"<:snakes2:962795778638762004>",
+				"<:snakes3:962800682061140019>",
+			],
+			bob: "<:bob:todo>",
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",
@@ -37,10 +38,9 @@ export default {
 		},
 	},
 	robotop: "323630372531470346",
-	servers: {
-		testing: "938438560925761619",
-	},
+	servers: { testing: "938438560925761619" },
 	roles: {
+		designers: "966174686142672917",
 		developers: "938439909742616616",
 		testers: "938440159102386276",
 	},
@@ -48,12 +48,9 @@ export default {
 		sa: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
 		scradd: { root: "https://github.com/scratchaddons-community/scradd", branch: "main" },
 	},
-	colors: {
-		theme: 0xff7b26,
-	},
+	colors: { theme: 0xff7b26 },
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	channels: {
-		general: "806602307750985803",
-	},
+	channels: { general: "806602307750985803" },
+	prodScradd: "929928324959055932",
 };

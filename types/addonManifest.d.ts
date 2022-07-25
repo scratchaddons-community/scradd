@@ -12,6 +12,7 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "ternary";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
@@ -22,6 +23,7 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "textColor";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
@@ -33,6 +35,7 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "multiply" | "brighten";
 			/** The source to manipulate. */
 			source: definitions_cssManipulator;
@@ -47,6 +50,7 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "alphaBlend";
 			/** The source that provides opaque color. */
 			opaqueSource: definitions_cssManipulator;
@@ -55,12 +59,14 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "recolorFilter";
 			/** The source that provides the color. */
 			source: definitions_cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "makeHsv";
 			/** The source that provides hue. */
 			h: definitions_cssManipulator;
@@ -71,23 +77,22 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
+
 			type?: "map";
 			/** The source that provides the color. */
 			source: definitions_cssManipulator;
 			/** The possible options. */
-			options: {
-				[key: string]: definitions_cssManipulator;
-			};
+			options: { [key: string]: definitions_cssManipulator };
 	  };
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
  *
- * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
  * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
- * `[...]`: An array that contains match rules. The script will execute if it matches any of the rules.
+ * `[…]`: An array that contains match rules. The script will execute if it matches any of the rules.
  *
- * `"^..."`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
  * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
  *
  * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`,
@@ -95,7 +100,7 @@ type definitions_cssManipulator =
  *
  * `"isNotScratchWWW"`: A match rule shortcut matcher.
  *
- * `"https://..."`: A URL match rule.
+ * `"https://…"`: A URL match rule.
  */
 type definitions_matches =
 	| "*"
@@ -130,6 +135,7 @@ type definitions_if = {
  */
 type AddonManifest = {
 	/** The URL to the schema. */
+
 	$schema?: string;
 	/** The name of the addon. Don’t make it too long. */
 	name: string;
@@ -183,6 +189,7 @@ type AddonManifest = {
 	 */
 	userscripts?: ArrayOfAtLeastOne<{
 		/** The path to the userscript. */
+
 		url: `${string}.js`;
 		matches: definitions_matches;
 		/** Determines whether the addon should be run after the document is complete loading. */
@@ -197,6 +204,7 @@ type AddonManifest = {
 	 */
 	userstyles?: ArrayOfAtLeastOne<{
 		/** The path to the userstyle. */
+
 		url: `${string}.css`;
 		matches: definitions_matches;
 		if?: definitions_if;
@@ -211,6 +219,7 @@ type AddonManifest = {
 	settings?: (
 		| ({
 				/** The name of the setting. */
+
 				name: string;
 				/* The identifier of the setting to get the specified value from your code. */
 				id: string;
@@ -221,6 +230,7 @@ type AddonManifest = {
 				if?: definitions_if;
 		  } & {
 				/** The type of the setting. */
+
 				type: "select";
 				/**
 				 * The potential values for the select setting.
@@ -231,6 +241,7 @@ type AddonManifest = {
 					| string
 					| {
 							/** The name of the potential value. */
+
 							name: string;
 							/** The identifier of the potential value. */
 							id: string;
@@ -241,18 +252,21 @@ type AddonManifest = {
 		  })
 		| {
 				/** The type of the setting. */
+
 				type: "boolean";
 				/** The default value of the setting. */
 				default: boolean;
 		  }
 		| {
 				/** The type of the setting. */
+
 				type: "positive_integer";
 				/** The default value of the setting. */
 				default: number;
 		  }
 		| {
 				/** The type of the setting. */
+
 				type: "string";
 				/** The default value of the setting. */
 				default: string;
@@ -263,6 +277,7 @@ type AddonManifest = {
 		  }
 		| {
 				/** The type of the setting. */
+
 				type: "color";
 				/** The default value of the setting. */
 				default: `#${string}`;
@@ -274,6 +289,7 @@ type AddonManifest = {
 		  }
 		| {
 				/** The type of the setting. */
+
 				type: "integer";
 				/** The default value of the setting. */
 				default: number;
@@ -291,6 +307,7 @@ type AddonManifest = {
 	credits?: ArrayOfAtLeastOne<
 		{
 			/** The name of the credited person. */
+
 			name: string;
 			/** The link relevant to the credit. */
 			link?: `http${string}`;
@@ -298,6 +315,7 @@ type AddonManifest = {
 			| { id: never; note: never }
 			| {
 					/** The ID for the credit. Required if note is in use. */
+
 					id: string;
 					/** The note for the credit. */
 					note?: string;
@@ -314,15 +332,14 @@ type AddonManifest = {
 	/** An array containing presets for settings. */
 	presets?: ArrayOfAtLeastOne<{
 		/** The name of the preset. */
+
 		name: string;
 		/** The identifier of the preset. */
 		id: string;
 		/** The description of the preset. */
 		description?: string;
 		/** An object containing preset values of the settings. */
-		values: {
-			[key: string]: boolean | number | string;
-		};
+		values: { [key: string]: boolean | number | string };
 	}>;
 	/**
 	 * An array of libraries that the addon uses.
@@ -337,7 +354,7 @@ type AddonManifest = {
 	 */
 	info?: ArrayOfAtLeastOne<{
 		/** Type of the information. */
-		type: "warning" | "notice";
+		type?: "warning" | "notice" | "info";
 		/** ID of the information. */
 		id: string;
 		/** Text of the information. */
@@ -345,6 +362,7 @@ type AddonManifest = {
 	}>;
 	popup?: {
 		/** The path to the popup icon. */
+
 		icon: string;
 		/** The name of the popup. */
 		name: string;
@@ -379,6 +397,7 @@ type AddonManifest = {
 	 */
 	customCssVariables?: {
 		/** The name of the CSS variable. */
+
 		name: string;
 		value: definitions_cssManipulator;
 		/** Whether to drop the variable entirely when it evaluates to null. */
@@ -389,17 +408,20 @@ type AddonManifest = {
 	/** The preview used for the addon. */
 	addonPreview?: {
 		/** The type of the preview. */
+
 		type: "editor-dark-mode";
 	};
 	/** The preview used for presets. */
 	presetPreview?: {
 		/** The type of the preview. */
+
 		type: "palette";
 		colors?: string[];
 	};
 	/** The information about the latest update. */
 	latestUpdate?: {
 		/** The version of the update. */
+
 		version: string;
 		/** Whether to list the addon on "Featured new addons and updates". */
 		isMajor?: boolean;

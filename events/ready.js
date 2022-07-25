@@ -1,7 +1,4 @@
-/** @file Initialize Bot on ready. Register commands and etc. */
-
-import { Collection, MessageEmbed } from "discord.js";
-
+import { Collection } from "discord.js";
 import commands from "../lib/commands.js";
 import pkg from "../lib/package.js";
 
@@ -9,9 +6,7 @@ import pkg from "../lib/package.js";
 const event = {
 	async event(client) {
 		console.log(
-			`Connected to Discord with ID ${client.application.id} and tag ${
-				client.user?.tag || ""
-			}`,
+			`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`,
 		);
 
 		const GUILD_ID = process.env.GUILD_ID || "";
@@ -32,14 +27,7 @@ const event = {
 				if (!channel?.isText())
 					throw new ReferenceError("Could not find error reporting channel");
 
-				return await channel?.send({
-					embeds: [
-						new MessageEmbed()
-							.setTitle("Bot restarted!")
-							.setDescription(`Version **v${pkg.version}**`)
-							.setColor("RANDOM"),
-					],
-				});
+				return await channel?.send(`Bot restarted on version **v${pkg.version}**!`);
 			}
 
 			const guildCommands = await client.application?.commands
@@ -54,20 +42,11 @@ const event = {
 		const prexistingCommands = await client.application.commands.fetch({
 			guildId: GUILD_ID,
 		});
-		/**
-		 * @type {Collection<
-		 * 	string,
-		 * 	{
-		 * 		command: import("../types/command").Command;
-		 * 		permissions?: import("discord.js").ApplicationCommandPermissionData[];
-		 * 	}
-		 * >}
-		 */
+		/** @type {Collection<string, import("../types/command").Command>} */
 		const slashes = new Collection();
 
 		for (const [key, command] of commands.entries()) {
-			if (command.apply !== false)
-				slashes.set(key, { command: command.data, permissions: command.permissions });
+			if (command.apply !== false) slashes.set(key, command.data);
 		}
 
 		await Promise.all(
@@ -79,14 +58,12 @@ const event = {
 		);
 
 		await Promise.all(
-			slashes.map(async ({ command, permissions }, name) => {
-				const newCommand = await (prexistingCommands.has(name)
-					? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
-					: client.application?.commands.create(command.toJSON(), GUILD_ID));
-
-				if (permissions)
-					await newCommand?.permissions.add({ guild: GUILD_ID, permissions });
-			}),
+			slashes.map(
+				async (command, name) =>
+					await (prexistingCommands.has(name)
+						? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
+						: client.application?.commands.create(command.toJSON(), GUILD_ID)),
+			),
 		);
 	},
 

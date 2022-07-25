@@ -1,12 +1,10 @@
-/** @file Run Bot. */
-import http from "http";
 import path from "path";
 import url from "url";
 
-import { Client, MessageEmbed } from "discord.js";
+import logError from "./lib/logError.js";
+import { Client } from "discord.js";
 import dotenv from "dotenv";
 
-import escapeMessage, { escapeForCodeblock } from "./lib/escape.js";
 import importScripts from "./lib/importScripts.js";
 import pkg from "./lib/package.js";
 
@@ -15,7 +13,7 @@ dotenv.config();
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const client = new Client({
-	allowedMentions: { parse: [], roles: [] },
+	allowedMentions: { parse: ["users"], roles: [] },
 
 	presence: {
 		activities: [
@@ -46,11 +44,11 @@ const client = new Client({
 		"GUILD_SCHEDULED_EVENTS",
 	],
 
-	restGlobalRateLimit: 50,
 	failIfNotExists: false,
 	restWsBridgeTimeout: 30_000,
 
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
+	ws: { large_threshold: 250 },
 });
 
 const events = await importScripts(
@@ -62,48 +60,15 @@ for (const [event, execute] of events.entries()) {
 
 	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {
-			return await execute.event(...args);
+			return await execute.event.call(client, ...args);
 		} catch (error) {
-			try {
-				console.error(error);
-
-				const embed = new MessageEmbed()
-					.setTitle("Error!")
-					.setDescription(
-						`Uh-oh! I found an error! (event **${escapeMessage(event)}**)\n` +
-							`\`\`\`json\n` +
-							`${escapeForCodeblock(JSON.stringify(error))}\`\`\``,
-					)
-					.setColor("LUMINOUS_VIVID_PINK");
-				const { ERROR_CHANNEL } = process.env;
-
-				if (!ERROR_CHANNEL)
-					throw new ReferenceError("ERROR_CHANNEL is not set in the .env");
-
-				const testingChannel = await client.channels.fetch(ERROR_CHANNEL);
-
-				if (!testingChannel?.isText())
-					throw new ReferenceError("Could not find error reporting channel");
-
-				await testingChannel.send({
-					embeds: [embed],
-				});
-			} catch (errorError) {
-				console.error(errorError);
-			}
+			logError(error, event, client);
 		}
 	});
 }
 
 await client.login(process.env.BOT_TOKEN);
 
-if (process.env.NODE_ENV === "production") {
-	const server = http.createServer((_, response) => {
-		response.writeHead(302, {
-			location: pkg.homepage,
-		});
-		response.end();
-	});
-
-	server.listen(process.env.PORT || 80);
-}
+process
+	.on("uncaughtException", (err, origin) => logError(err, origin, client))
+	.on("warning", (err) => logError(err, "warning", client));

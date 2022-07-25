@@ -1,11 +1,7 @@
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../types/event").default<"error">}
- */
+/** @type {import("../types/event").default<"error">} */
 const event = {
-	event(...args) {
-		throw new Error(args.join(" "));
+	event(error) {
+		throw error;
 	},
 };
 

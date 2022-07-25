@@ -1,8 +1,4 @@
-/**
- * @file Run Actions on posted messages.Send modmails, autoreact if contains certain triggers, and
- *   autoreply if contains certain triggers.
- */
-import { MessageEmbed } from "discord.js";
+import { GuildMember, MessageEmbed, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -12,27 +8,26 @@ import {
 	getMemberFromThread,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
+	openModmail,
 	UNSUPPORTED,
 } from "../common/modmail.js";
 
-import escapeMessage, { escapeForCodeblock } from "../lib/escape.js";
+import escapeMessage, { stripMarkdown } from "../lib/escape.js";
 import reactAll from "../lib/reactAll.js";
 
-const { GUILD_ID = "", NODE_ENV, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
+const { GUILD_ID = "", SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
 
 /** @type {import("../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
-		if (message.flags.has("EPHEMERAL")) return;
+		if (message.flags.has("EPHEMERAL") || message.type === "THREAD_STARTER_MESSAGE") return;
 		const promises = [];
 
-		if (
-			!message.content.startsWith("=") &&
-			message.channel.type === "DM" &&
-			message.author.id !== message.client.user?.id
-		) {
+		let reactions = 0;
+
+		if (message.channel.type === "DM" && message.author.id !== message.client.user?.id) {
 			const guild = await message.client.guilds.fetch(GUILD_ID);
 			const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
@@ -43,56 +38,55 @@ const event = {
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
-				webhooks.find(
-					(possibleWebhook) => possibleWebhook.name === CONSTANTS.webhookName,
-				) || (await mailChannel.createWebhook(CONSTANTS.webhookName));
-			const existingThread = await getThreadFromMember(guild, message.author);
+				webhooks.find((possibleWebhook) => !!possibleWebhook.token) ??
+				(await mailChannel.createWebhook(CONSTANTS.webhookName));
+			const existingThread = await getThreadFromMember(
+				message.interaction?.user || message.author,
+				guild,
+			);
 
 			if (existingThread) {
+				reactions++;
 				promises.push(
 					webhook
 						.send({
 							threadId: existingThread.id,
-							...(await generateMessage(message, guild)),
+							...(await generateMessage(message)),
 						})
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
 						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
 				);
-			} else if (
-				[
-					"DEFAULT",
-					"REPLY",
-					"APPLICATION_COMMAND",
-					"THREAD_STARTER_MESSAGE",
-					"CONTEXT_MENU_COMMAND",
-				].includes(message.type)
-			) {
+			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
 				const collector = await generateConfirm(
-					{
-						display: `the ${escapeMessage(mailChannel.guild.name)} Server’s mod team`,
-						name: mailChannel.guild.name,
-						icon: mailChannel.guild.iconURL() || undefined,
-					},
+					new MessageEmbed()
+						.setTitle("Confirmation")
+						.setDescription(
+							`Are you sure you want to send this message to **the ${escapeMessage(
+								mailChannel.guild.name,
+							)} server’s mod team**? This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
+						)
+						.setColor(COLORS.confirm)
+						.setAuthor({
+							iconURL: mailChannel.guild.iconURL() ?? undefined,
+							name: mailChannel.guild.name,
+						}),
 					async (buttonInteraction) => {
 						const openedEmbed = new MessageEmbed()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
 							.setFooter({
-								text: UNSUPPORTED,
+								text: UNSUPPORTED+
+								CONSTANTS.footerSeperator +
+								"Messages starting with an equals sign (=) are ignored.",
 							})
 							.setColor(COLORS.opened);
 
-						const starterMessage = await mailChannel.send({
-							allowedMentions: { parse: ["everyone"] },
-							content: NODE_ENV === "production" ? "@here" : undefined,
-
-							embeds: [openedEmbed],
-						});
-						const newThread = await starterMessage.startThread({
-							name: `${message.author.username}`,
-							autoArchiveDuration: "MAX",
-						});
+						const newThread = await openModmail(
+							mailChannel,
+							openedEmbed,
+							message.author.username,
+						);
 
 						if (!webhook) throw new ReferenceError("Could not find webhook");
 
@@ -107,7 +101,7 @@ const event = {
 							webhook
 								.send({
 									threadId: newThread.id,
-									...(await generateMessage(message, guild)),
+									...(await generateMessage(message)),
 								})
 								.then(
 									async () => await message.react(CONSTANTS.emojis.statuses.yes),
@@ -129,8 +123,10 @@ const event = {
 			}
 		}
 
-		if (message.guild !== null && message.guild.id !== GUILD_ID)
-			return await Promise.all(promises);
+		if (message.guild !== null && message.guild.id !== GUILD_ID) {
+			await Promise.all(promises);
+			return;
+		}
 
 		if (
 			message.channel.type === "GUILD_PUBLIC_THREAD" &&
@@ -139,16 +135,11 @@ const event = {
 			(message.webhookId && message.author.id !== message.client.user?.id
 				? (await message.fetchWebhook()).owner?.id !== message.client.user?.id
 				: true) &&
-			message.interaction?.commandName !== "modmail"
+			message.interaction?.commandName !== "modmail close"
 		) {
 			const member = await getMemberFromThread(message.channel);
 
-			if (member) {
-				const channel =
-					member.user.dmChannel ||
-					(await member.createDM().catch(async () => {
-						await message.react(CONSTANTS.emojis.statuses.no);
-					}));
+			if (member instanceof GuildMember) {
 				const messageToSend = await generateMessage(message);
 
 				messageToSend.content =
@@ -156,8 +147,10 @@ const event = {
 					":" +
 					(messageToSend.content ? " " + messageToSend.content : "");
 
+				reactions++;
+
 				promises.push(
-					channel
+					member
 						?.send(messageToSend)
 						.then(async () => await message.react(CONSTANTS.emojis.statuses.yes))
 						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
@@ -165,138 +158,142 @@ const event = {
 			}
 		}
 
-		if (message.type === "THREAD_CREATED" && message.channel.id === SUGGESTION_CHANNEL)
-			return await message.delete();
+		if (process.env.LOGS_CHANNEL !== message.channel.id) {
+			// eslint-disable-next-line no-irregular-whitespace -- This is intended.
+			const spoilerHack = "||​||".repeat(200);
 
-		const content = message.content
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(
-				/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
-				"",
-			);
+			if (message.content.includes(spoilerHack)) {
+				const array = message.cleanContent.split(spoilerHack);
+
+				array.shift();
+				promises.push(
+					message.reply({
+						allowedMentions: { users: [] },
+
+						content:
+							`You used the spoiler hack to hide: \`\`\`\n` +
+							`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
+							`\`\`\``,
+					}),
+				);
+			}
+		}
+
+		if (
+			message.type === "THREAD_CREATED" &&
+			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id) &&
+			message.reference
+		) {
+			await Promise.all([...promises, message.delete()]);
+			return;
+		}
+
+		// Autoreactions start here. Return early in some channels.
+
+		if (
+			[
+				SUGGESTION_CHANNEL,
+				process.env.BUGS_CHANNEL,
+				BOARD_CHANNEL,
+				process.env.LOGS_CHANNEL,
+			].includes(message.channel.id)
+		) {
+			await Promise.all(promises);
+			return;
+		}
+
+		const content = stripMarkdown(
+			message.content
+				.toLowerCase()
+				.normalize("NFD")
+				.replace(
+					/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
+					"",
+				)
+				.replace(/<.+?>/, ""),
+		);
 
 		/**
 		 * Determines whether the message contains a word.
 		 *
-		 * @param {string} text - The word to check for.
-		 * @param {boolean} [plural] - Whether to account for plurals.
+		 * @param {string | RegExp} text - The word to check for.
 		 *
 		 * @returns {boolean} Whether the message contains the word.
 		 */
-		function includes(text, plural = true) {
-			const split = content.split(/[^\da-z]+/i);
-			return (
-				split.includes(text) ||
-				(plural && (split.includes(`${text}s`) || split.includes(`${text}es`)))
-			);
+		function includes(text, { full = false, plural = true } = {}) {
+			return new RegExp(
+				(full ? "^" : "\\b") +
+					(typeof text === "string" ? text : text.source) +
+					(plural ? "(e?s)?" : "") +
+					(full ? "$" : "\\b"),
+				"i",
+			).test(content);
 		}
 
-		if (includes("dango") || content.includes("🍡")) promises.push(message.react("🍡"));
+		/**
+		 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
+		 *
+		 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
+		 */
+		function react(emoji) {
+			if (reactions > 2) return;
+			reactions++;
+			const promise = message.react(emoji).catch(console.error);
+			promises.push(promise);
+			return promise;
+		}
 
-		if (content === "e" || content === "." || content.includes("<:e_:847428533432090665>"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.e));
+		if (includes("dango") || content.includes("🍡")) react("🍡");
+
+		if (includes(/av[ao]cado/) || content.includes("🥑")) react("🥑");
+
+		if (["e", "ae", "iei", "a", "."].includes(content) || content.includes("æ"))
+			react(CONSTANTS.emojis.autoreact.e);
+
+		if (includes("quack") || includes("duck") || content.includes("🦆")) react("🦆");
+
+		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
+
+		if (includes(/griff(?:patch)?y?'?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
+
+		if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
+		if (includes("bob", { plural: false })) react(CONSTANTS.emojis.autoreact.bob);
+
+		if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
+
+		if (/\bte(?:r|w)+a|(👉|:point_right:) ?(👈|:point_left:)\b/.test(message.content))
+			react(CONSTANTS.emojis.autoreact.tera);
+
+		if (includes("on addon")) {
+			if (reactions < 2) {
+				reactions = reactions + 3;
+				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
+			}
+		}
+
+		if (includes("snake")) {
+			if (reactions < 2) {
+				reactions = reactions + 3;
+				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
+			}
+		}
+
+		if (includes("sus", { plural: false })) react(CONSTANTS.emojis.autoreact.sus);
 
 		if (
-			content === "potato" ||
-			content === "potatoes" ||
-			content === "potatos" ||
-			(content.includes("🥔") && message.channel.id !== BOARD_CHANNEL)
+			includes(/gives? ?you ?up/i, { plural: false }) ||
+			content.includes("rickroll") ||
+			content.includes("dqw4w9wgxcq")
 		)
-			promises.push(message.react("🥔"));
+			react(CONSTANTS.emojis.autoreact.rick);
 
-		if (includes("griff") || includes("griffpatch"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.griffpatch));
-
-		if (includes("amongus") || includes("amogus"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.amongus));
-
-		if (includes("sus", false)) promises.push(message.react(CONSTANTS.emojis.autoreact.sus));
-
-		if (includes("appel")) promises.push(message.react(CONSTANTS.emojis.autoreact.appel));
-
-		if (includes("cubot")) promises.push(message.react(CONSTANTS.emojis.autoreact.cubot));
-
-		if (includes("splory")) promises.push(message.react(CONSTANTS.emojis.autoreact.splory));
-
-		if (includes("tera") || content.includes("tewwa"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.tera));
+		if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
-			/gives? ?you ?up/.test(content) ||
-			includes("rick") ||
-			includes("rickroll") ||
-			includes("rickrolled", false) ||
-			includes("rickrolling", false) ||
-			message.content.includes("dQw4w9WgXcQ")
+			message.mentions.users.has(this.user?.id ?? "") &&
+			message.mentions.repliedUser?.id !== (this.user?.id ?? "")
 		)
-			promises.push(message.react(CONSTANTS.emojis.autoreact.rick));
-
-		if (message.content.includes("( ^∘^)つ"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.sxd));
-
-		if (content.includes("scradd bad"))
-			promises.push(message.react(CONSTANTS.emojis.autoreact.angery));
-
-		if (message.content === "NO") promises.push(message.react(CONSTANTS.emojis.autoreact.nope));
-
-		if (message.mentions.users.has(message.client.user?.id || "") && message.type !== "REPLY")
-			promises.push(message.react("👋"));
-
-		if (content.includes("sat on addons")) {
-			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
-		}
-
-		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-		const spoilerHack = "||​||".repeat(200);
-
-		if (message.content.includes(spoilerHack)) {
-			const array = message.content.split(spoilerHack);
-
-			array.shift();
-			promises.push(
-				message.reply({
-					allowedMentions: { roles: [], users: [] },
-
-					content:
-						`You used the spoiler hack to hide: \`\`\`\n` +
-						`${escapeForCodeblock(array.join(spoilerHack))}\n` +
-						`\`\`\``,
-				}),
-			);
-		}
-
-		const firstMention = message.mentions.users.first();
-
-		if (
-			/^r!(?:impersonate|mimic|possess|salas|speaks|sudo)\s+<@!?\d+>/iu.test(
-				message.content,
-			) &&
-			firstMention?.id !== message.author.id &&
-			!firstMention?.bot &&
-			!message.author?.bot &&
-			!firstMention?.system
-		) {
-			const member = await message.guild?.members.fetch(firstMention?.id || "");
-
-			promises.push(
-				message.reply({
-					content: `Please don’t ping people when using \`r!mimic\` - use their username instead. Example: \`r!mimic ${escapeMessage(
-						member?.user.username || "",
-					)}\` instead of \`r!mimic @${escapeMessage(
-						member?.displayName || "",
-					)}\`. This command had to be disabled in the past because people kept pinging Griffpatch while using it. Please let us keep this on. Thanks!`,
-				}),
-			);
-		}
-
-		if (/^r!(?:idea|sg|suggest(?:ion)?)/diu.test(message.content) && !message.author?.bot) {
-			promises.push(
-				message.reply({
-					content: "`r!suggest` has been removed, please use `/suggestion create`.",
-				}),
-			);
-		}
+			react("👋");
 
 		await Promise.all(promises);
 	},

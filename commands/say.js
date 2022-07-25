@@ -1,8 +1,6 @@
-/** @file Have The bot mimic what you say but don’t tell anyone who said it first. */
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageActionRow, MessageButton } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-
-import { escapeForInlineCode } from "../lib/escape.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -18,10 +16,7 @@ const info = {
 	async interaction(interaction) {
 		const content = interaction.options.getString("message") || "";
 
-		const message = await interaction.channel?.send({
-			allowedMentions: { parse: ["users"], roles: [] },
-			content,
-		});
+		const message = await interaction.channel?.send({ content });
 
 		if (message) {
 			const channel = await interaction.guild?.channels.fetch(
@@ -29,25 +24,25 @@ const info = {
 			);
 
 			await Promise.all([
-				interaction.reply({
-					content: CONSTANTS.emojis.statuses.yes,
-					ephemeral: true,
-				}),
+				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				channel?.isText() &&
 					channel.send({
-						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()} to say \`${escapeForInlineCode(
-							content,
-						)}\` (https://discord.com/channels/${process.env.GUILD_ID || "@me"}/${
-							message.channel.id
-						}/${message.id})`,
+						content: `${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
 
 						allowedMentions: { users: [] },
+						components: [
+							new MessageActionRow().addComponents(
+								new MessageButton()
+									.setEmoji("👀")
+									.setLabel("View Message")
+									.setStyle("LINK")
+									.setURL(message.url),
+							),
+						],
 					}),
 			]);
 		}
 	},
-
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", permission: true, type: "ROLE" }],
 };
 
 export default info;

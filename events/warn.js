@@ -1,11 +1,7 @@
-/**
- * @file Enables Reporting warnings.
- *
- * @type {import("../types/event").default<"warn">}
- */
+/** @type {import("../types/event").default<"warn">} */
 const event = {
-	event(...args) {
-		throw new Error(args.join(" "));
+	event(message) {
+		process.emitWarning(message);
 	},
 };
 

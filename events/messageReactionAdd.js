@@ -1,5 +1,3 @@
-/** @file Update Potatoboard when reactions are added. */
-
 import {
 	BOARD_CHANNEL,
 	BOARD_EMOJI,
@@ -21,38 +19,33 @@ const event = {
 
 		if (user.partial) user = await user.fetch();
 
-		if (
-			reaction.message.channel.id === process.env.SUGGESTION_CHANNEL &&
-			user.id !== user.client.user?.id
-		) {
+		const emoji = reaction.emoji;
+		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && !reaction.me) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
-				emojis.includes(reaction.emoji.id || reaction.emoji.name || ""),
-			)?.find((emoji) => emoji !== (reaction.emoji.id || reaction.emoji.name || ""));
+				emojis.includes(emoji.id ?? emoji.name ?? ""),
+			)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
 
-			if (otherReaction)
-				return await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+			if (otherReaction) {
+				await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
+			}
 		}
 
 		if (
 			// Ignore other servers
 			message.guild?.id !== process.env.GUILD_ID ||
 			// Ignore when it’s the wrong emoji
-			reaction.emoji.name !== BOARD_EMOJI ||
-			// Ignore when it’s me
-			user.id === message.client.user?.id
+			reaction.emoji.name !== BOARD_EMOJI
 		)
 			return;
 
 		if (
-			// if a bot reacted
-			(user.bot && user.id !== message.client.user?.id) ||
-			// Or if they self-reacted
+			// If they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			// Or if they reacted to a message on the board
 			(message.channel.id === BOARD_CHANNEL &&
 				message.author.id === message.client.user?.id) ||
-			// Or they reacted to an /explorepotatoes message
-			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
+			// Or they reacted to an /explore-potatoes message
+			(message.interaction?.commandName === "explore-potatoes" && message.embeds.length > 0)
 		) {
 			// Remove the reaction
 			await reaction.users.remove(user);
@@ -63,7 +56,7 @@ const event = {
 		const boardMessage = await sourceToBoardMessage(message);
 
 		const fetched = message.reactions.resolve(BOARD_EMOJI);
-		const count = (fetched?.count || 0) - (fetched?.me ? 1 : 0);
+		const count = fetched?.count ?? 0;
 
 		if (boardMessage?.embeds[0]) {
 			await updateReactionCount(count, boardMessage);

@@ -1,4 +1,3 @@
-/** @file Commands To manage modmails. */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -6,6 +5,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import {
 	closeModmail,
 	COLORS,
+	openModmail,
 	generateConfirm,
 	getThreadFromMember,
 	MODMAIL_CHANNEL,
@@ -17,7 +17,7 @@ import {
 const info = {
 	data: new SlashCommandBuilder()
 		.setDefaultPermission(false)
-		.setDescription(".")
+		.setDescription("(Mods only) Commands to manage modmail tickets")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")
@@ -28,7 +28,7 @@ const info = {
 						.setDescription(
 							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
 						)
-						.setRequired(true),
+						.setRequired(false),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -66,7 +66,16 @@ const info = {
 				const reason = interaction.options.getString("reason") || "";
 
 				await interaction.reply({
-					content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket closed!** ${reason}`,
+					embeds: [
+						new MessageEmbed()
+							.setTitle("Modmail ticket closed!")
+							.setTimestamp(interaction.channel.createdAt)
+							.setDescription(reason)
+							.setFooter({
+								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
+							})
+							.setColor(COLORS.closed),
+					],
 				});
 
 				await closeModmail(interaction.channel, interaction.user, reason);
@@ -87,7 +96,7 @@ const info = {
 					return;
 				}
 
-				const existingThread = await getThreadFromMember(interaction.guild, user);
+				const existingThread = await getThreadFromMember(user);
 
 				if (existingThread) {
 					await interaction.reply({
@@ -108,11 +117,13 @@ const info = {
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(
-					{
-						display: user?.user.toString(),
-						icon: user.displayAvatarURL(),
-						name: user.displayName,
-					},
+					new MessageEmbed()
+						.setTitle("Confirmation")
+						.setDescription(
+							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
+						)
+						.setColor(COLORS.confirm)
+						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 
 					async (buttonInteraction) => {
 						const openedEmbed = new MessageEmbed()
@@ -121,19 +132,20 @@ const info = {
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 							)
 							.setFooter({
-								text: UNSUPPORTED,
+								text:
+									UNSUPPORTED +
+									CONSTANTS.footerSeperator +
+									"Messages starting with an equals sign (=) are ignored.",
 							})
 							.setColor(COLORS.opened);
 
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {
-								const starterMessage = await mailChannel.send({
-									embeds: [openedEmbed],
-								});
-								const thread = await starterMessage.startThread({
-									name: `${user.user.username}`,
-									autoArchiveDuration: "MAX",
-								});
+								const thread = await openModmail(
+									mailChannel,
+									openedEmbed,
+									user.user.username,
+								);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes
@@ -158,8 +170,6 @@ const info = {
 			}
 		}
 	},
-
-	permissions: [{ id: process.env.MODERATOR_ROLE || "", permission: true, type: "ROLE" }],
 };
 
 export default info;
