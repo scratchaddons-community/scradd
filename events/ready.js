@@ -61,8 +61,8 @@ const event = {
 			slashes.map(
 				async (command, name) =>
 					await (prexistingCommands.has(name)
-						? client.application?.commands.edit(name, command.toJSON(), GUILD_ID)
-						: client.application?.commands.create(command.toJSON(), GUILD_ID)),
+						? client.application.commands.edit(name, command.toJSON(), GUILD_ID)
+						: client.application.commands.create(command.toJSON(), GUILD_ID)),
 			),
 		);
 	},

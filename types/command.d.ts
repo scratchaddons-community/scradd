@@ -9,8 +9,5 @@ type ComandInfo = {
 
 export default ComandInfo;
 export type Command =
-	| import("@discordjs/builders").SlashCommandSubcommandsOnlyBuilder
-	| Omit<
-			import("@discordjs/builders").SlashCommandBuilder,
-			"addSubcommand" | "addSubcommandGroup"
-	  >;
+	| SlashCommandSubcommandsOnlyBuilder
+	| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;

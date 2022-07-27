@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { SlashCommandBuilder, EmbedBuilder } from "@discordjs/builders";
 import { Util } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
@@ -85,7 +85,7 @@ const info = {
 			return;
 		}
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setTitle(addon.name)
 			.setColor(CONSTANTS.colors.theme)
 			.setDescription(
@@ -152,7 +152,7 @@ const info = {
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addField({
+				embed.addFields({
 					name: "Contributors",
 					value: Util.escapeMarkdown(credits),
 					inline: true,
@@ -160,7 +160,7 @@ const info = {
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
-					embed.description +
+					embed.data.description +
 						"\n" +
 						"\n" +
 						"**This addon may require additional permissions to be granted in order to function.**",
@@ -186,7 +186,7 @@ const info = {
 			);
 		}
 
-		await interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed.toJSON()] });
 	},
 };
 

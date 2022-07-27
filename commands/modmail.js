@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -161,9 +161,15 @@ const info = {
 							}
 						});
 					},
-					(options) =>
-						interaction.reply({ ...options, ephemeral: true, fetchReply: true }),
-					(options) => interaction.editReply(options),
+					async (options) => {
+						const message = await interaction.reply({
+							...options,
+							ephemeral: true,
+							fetchReply: true,
+						});
+						if (message instanceof Message) return message;
+						else throw new TypeError("message must be a Message");
+					},
 				);
 
 				break;

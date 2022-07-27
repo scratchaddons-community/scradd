@@ -184,7 +184,7 @@ const OPTIONS = [
 			`**Board** channel: ${
 				process.env.BOARD_CHANNEL ? `<#${process.env.BOARD_CHANNEL}>` : "*None*"
 			}\n` +
-			`**Modmaill** channel: ${
+			`**Modmail** channel: ${
 				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
 			}\n` +
 			`**Logs** channel: ${
@@ -212,8 +212,8 @@ const info = {
 					"Which tab to open by default. You may still swap between tabs after it has loaded.",
 				)
 				.addChoices(
-					OPTIONS.map(({ emoji, name }) => {
-						return [emoji + " " + name, name];
+					...OPTIONS.map(({ emoji, name }) => {
+						return { name: emoji + " " + name, value: name };
 					}),
 				)
 				.setRequired(false),
@@ -268,12 +268,7 @@ const info = {
 				content: await currentOption?.edit(interaction, message),
 			});
 
-		/**
-		 * Disable the select menu.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The
-		 *   original message.
-		 */
+		/** Disable the select menu. */
 		async function disable() {
 			if (!(message instanceof Message)) {
 				return await interaction.editReply({
@@ -295,12 +290,7 @@ const info = {
 			});
 		}
 
-		/**
-		 * Add a collector to the message to update it when an option in the select menu is selected.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The
-		 *   original message.
-		 */
+		/** Add a collector to the message to update it when an option in the select menu is selected. */
 		async function addCollector() {
 			if (!(message instanceof Message)) return await disable();
 

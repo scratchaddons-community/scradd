@@ -87,10 +87,10 @@ const info = {
 
 					for (const [index, answer] of ANSWERS.entries()) {
 						if (index)
-							newOption.addChoice(
-								`${answer.name} (${answer.description})`,
-								answer.name,
-							);
+							newOption.addChoices({
+								name: `${answer.name} (${answer.description})`,
+								value: answer.name,
+							});
 					}
 
 					return newOption;

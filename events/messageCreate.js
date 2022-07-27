@@ -57,7 +57,6 @@ const event = {
 						.catch(async () => await message.react(CONSTANTS.emojis.statuses.no)),
 				);
 			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
-				let toEdit = message;
 				const collector = await generateConfirm(
 					new MessageEmbed()
 						.setTitle("Confirmation")
@@ -112,10 +111,8 @@ const event = {
 						]);
 					},
 					async (options) => {
-						toEdit = await message.reply(options);
-						return toEdit;
+						return await message.reply(options);
 					},
-					(options) => toEdit.edit(options),
 				);
 				message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
 					collector?.stop();

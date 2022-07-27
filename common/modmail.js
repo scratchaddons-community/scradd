@@ -129,7 +129,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 		.setColor(COLORS.closed);
 
 	if (reason) embed.setDescription(reason);
-	
+
 	if (user) {
 		const member =
 			user instanceof GuildMember
@@ -202,15 +202,12 @@ export async function sendOpenedMessage(user) {
  * @param {MessageEmbed} confirmEmbed
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
- * @param {(
- * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
+ * ) => Promise<Message>} reply
  * @param {(
  * 	buttonInteraction: import("discord.js").MessageComponentInteraction,
  * ) => Promise<void>} onConfirm
  */
-export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
+export async function generateConfirm(confirmEmbed, onConfirm, reply) {
 	const button = new MessageButton()
 		.setLabel("Confirm")
 		.setStyle("PRIMARY")
@@ -225,46 +222,44 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 		embeds: [confirmEmbed],
 	});
 
-	if (message instanceof Message) {
-		const collector = message.channel.createMessageComponentCollector({
-			filter: (buttonInteraction) =>
-				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
+	const collector = message.channel.createMessageComponentCollector({
+		filter: (buttonInteraction) =>
+			[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
 
-			time: 30_000,
-		});
-		collector
-			.on("collect", async (buttonInteraction) => {
-				collector.stop();
-				switch (buttonInteraction.customId) {
-					case button.customId: {
-						await onConfirm(buttonInteraction);
+		time: 30_000,
+	});
+	collector
+		.on("collect", async (buttonInteraction) => {
+			collector.stop();
+			switch (buttonInteraction.customId) {
+				case button.customId: {
+					await onConfirm(buttonInteraction);
 
-						break;
-					}
-					case cancelButton.customId: {
-						await buttonInteraction.reply({
-							content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
-							ephemeral: true,
-						});
-
-						break;
-					}
+					break;
 				}
-			})
-			.on("end", async () => {
-				await edit({
-					components: [
-						new MessageActionRow().addComponents(
-							button.setDisabled(true),
-							cancelButton.setDisabled(true),
-						),
-					],
+				case cancelButton.customId: {
+					await buttonInteraction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
+						ephemeral: true,
+					});
 
-					embeds: [confirmEmbed],
-				});
+					break;
+				}
+			}
+		})
+		.on("end", async () => {
+			await message.edit({
+				components: [
+					new MessageActionRow().addComponents(
+						button.setDisabled(true),
+						cancelButton.setDisabled(true),
+					),
+				],
+
+				embeds: [confirmEmbed],
 			});
-		return collector;
-	}
+		});
+	return collector;
 }
 
 /**
