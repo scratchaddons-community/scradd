@@ -37,5 +37,9 @@
 		"tabWidth": 4,
 		"useTabs": true,
 		"expandUsers": true
+	},
+	"engines": {
+		"node": "16.13.0",
+		"npm": "8.13.2"
 	}
 }
