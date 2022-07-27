@@ -23,3 +23,4 @@ jobs:
                   heroku_email: "paul@reid-family.org"
                   branch: ${{ github.head_ref }}
                   procfile: "worker: npm start"
+                  dontuseforce: 1
