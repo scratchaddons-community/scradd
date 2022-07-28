@@ -75,9 +75,10 @@ const event = {
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
 							.setFooter({
-								text: UNSUPPORTED+
-								CONSTANTS.footerSeperator +
-								"Messages starting with an equals sign (=) are ignored.",
+								text:
+									UNSUPPORTED +
+									CONSTANTS.footerSeperator +
+									"Messages starting with an equals sign (=) are ignored.",
 							})
 							.setColor(COLORS.opened);
 
@@ -85,6 +86,7 @@ const event = {
 							mailChannel,
 							openedEmbed,
 							message.author.username,
+							true,
 						);
 
 						if (!webhook) throw new ReferenceError("Could not find webhook");
