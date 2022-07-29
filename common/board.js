@@ -108,7 +108,7 @@ export async function postMessageToBoard(message) {
 	MESSAGES ??= await getAllMessages(board);
 
 	const boardMessage = await board.send({
-		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+		allowedMentions: { users: [] },
 		components: [new MessageActionRow().addComponents(button)],
 
 		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
@@ -138,7 +138,7 @@ export async function updateReactionCount(count, boardMessage) {
 		await boardMessage.delete();
 	} else {
 		const newMessage = await boardMessage.edit({
-			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+			allowedMentions: { users: [] },
 			content: boardMessage.content.replace(/\d+/, `${count}`),
 			embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
 			files: boardMessage.attachments.map((attachment) => attachment),

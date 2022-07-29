@@ -20,14 +20,12 @@ const event = {
 		if (user.partial) user = await user.fetch();
 
 		const emoji = reaction.emoji;
-		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && !reaction.me) {
+		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && user.id !== reaction.client?.user?.id) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 				emojis.includes(emoji.id ?? emoji.name ?? ""),
 			)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
 
-			if (otherReaction) {
-				await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
-			}
+			await reaction.message.reactions.resolve(otherReaction || (emoji.id ?? emoji.name ?? ""))?.users.remove(user);
 		}
 
 		if (
