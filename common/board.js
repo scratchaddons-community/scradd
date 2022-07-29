@@ -31,7 +31,7 @@ export async function boardMessageToSource(boardMessage) {
 
 	if (!channel?.isText()) return;
 
-	const message = await channel.messages.fetch(messageId).catch(()=>{});
+	const message = await channel.messages.fetch(messageId).catch(() => {});
 
 	if (!message) return;
 

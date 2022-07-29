@@ -38,9 +38,12 @@ const event = {
 						embeds: [
 							new MessageEmbed(starter.embeds[0])
 								.setTitle("Modmail ticket opened!")
-								.setFooter({ text: UNSUPPORTED +
-									CONSTANTS.footerSeperator +
-									"Messages starting with an equals sign (=) are ignored."})
+								.setFooter({
+									text:
+										UNSUPPORTED +
+										CONSTANTS.footerSeperator +
+										"Messages starting with an equals sign (=) are ignored.",
+								})
 								.setColor(COLORS.opened),
 						],
 					})

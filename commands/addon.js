@@ -152,11 +152,13 @@ const info = {
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addFields({
-					name: "Contributors",
-					value: Util.escapeMarkdown(credits),
-					inline: true,
-				});
+				embed.addFields([
+					{
+						name: "Contributors",
+						value: Util.escapeMarkdown(credits),
+						inline: true,
+					},
+				]);
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
@@ -166,7 +168,7 @@ const info = {
 						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
-			embed.addFields(
+			embed.addFields([
 				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
 				{
 					inline: true,
@@ -183,7 +185,7 @@ const info = {
 								: ""),
 					),
 				},
-			);
+			]);
 		}
 
 		await interaction.reply({ embeds: [embed.toJSON()] });
