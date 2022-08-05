@@ -187,9 +187,10 @@ const event = {
 			return;
 		}
 
-		// Autoreactions start here. Return early in some channels.
+		// Autoreactions start here. Don't react to bots.
 
 		if (
+			message.interaction ||
 			[
 				SUGGESTION_CHANNEL,
 				process.env.BUGS_CHANNEL,
@@ -249,7 +250,7 @@ const event = {
 		if (["e", "ae", "iei", "a", "."].includes(content) || content.includes("æ"))
 			react(CONSTANTS.emojis.autoreact.e);
 
-		if (includes("quack") || includes("duck") || content.includes("🦆")) react("🦆");
+		if (includes("quack") || includes("duck")) react("🦆");
 
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 
@@ -286,7 +287,8 @@ const event = {
 		)
 			react(CONSTANTS.emojis.autoreact.rick);
 
-		if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
+		if (/^(NO+)+|\b([Nn][oO]{2,})+\b/.test(message.content))
+			react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
 			message.mentions.users.has(this.user?.id ?? "") &&
