@@ -2,7 +2,7 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { MessageAttachment, MessageEmbed } from "discord.js";
+import { MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } from "discord.js";
 import diffLib from "difflib";
 
 /**
@@ -81,7 +81,21 @@ const event = {
 		}
 
 		await Promise.all(
-			logs.map((edit) => newMessage.guild && log(newMessage.guild, edit + "!", "messages")),
+			logs.map(
+				(edit) =>
+					newMessage.guild &&
+					log(newMessage.guild, edit + "!", "messages", {
+						components: [
+							new MessageActionRow().addComponents(
+								new MessageButton()
+									.setEmoji("👀")
+									.setLabel("View Message")
+									.setStyle("LINK")
+									.setURL(newMessage.url),
+							),
+						],
+					}),
+			),
 		);
 		if (await automodMessage(newMessage)) return;
 	},

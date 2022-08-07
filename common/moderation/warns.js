@@ -8,7 +8,7 @@ import log from "./logging.js";
 
 const EXPIRY_LENGTH = 21,
 	WARNS_PER_MUTE = 3,
-	MUTES_TILL_BAN = 3;
+	MUTE_LENGTHS = [4, 12, 24];
 
 /**
  * @param {import("discord.js").Message} message
@@ -130,7 +130,7 @@ export default async function warn(user, reason, strikes, context) {
 
 		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
 
-		if (userMutes > MUTES_TILL_BAN) {
+		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(
 				member.bannable && !member.roles.premiumSubscriberRole
@@ -161,7 +161,7 @@ export default async function warn(user, reason, strikes, context) {
 			);
 			let timeoutLength = 0;
 			for (let index = oldMutes; index < userMutes; index++) {
-				timeoutLength += [3, 12, 24][index] || 1;
+				timeoutLength += MUTE_LENGTHS[index] || 1;
 			}
 			queueDatabaseWrite(muteLog, allMutes);
 			promises.push(
