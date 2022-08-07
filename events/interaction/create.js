@@ -3,6 +3,7 @@ import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import fetchCommands from "../../common/commands.js";
 import { getWarns } from "../../commands/view-warns.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
@@ -54,7 +55,7 @@ const event = {
 		} catch (error) {
 			await interaction[interaction.replied ? "editReply" : "reply"]({
 				ephemeral: true,
-				content: "An error occurred.",
+				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
 				components: [],
 				files: [],

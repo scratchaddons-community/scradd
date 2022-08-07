@@ -21,7 +21,7 @@ const info = {
 			subcommand
 				.setName("close")
 				.setDescription("(Mods only) Close a modmail ticket.")
-				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identiy.")
+				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity.")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
