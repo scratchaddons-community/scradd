@@ -3,7 +3,7 @@ import log from "../../../../common/moderation/logging.js";
 /** @type {import("../../../../types/event").default<"guildScheduledEventUpdate">} */
 const event = {
 	async event(oldEvent, newEvent) {
-		const guild = newEvent.guild || (await newEvent.client.guilds.fetch(newEvent.guildId));
+		const guild = newEvent.guild || (await this.guilds.fetch(newEvent.guildId));
 		if (guild.id !== process.env.GUILD_ID) return;
 		const logs = [];
 		if (oldEvent.name !== newEvent.name) logs.push(" renamed to `" + newEvent.name + "`");

@@ -3,8 +3,7 @@ import log from "../../../common/moderation/logging.js";
 /** @type {import("../../../types/event").default<"stageInstanceUpdate">} */
 const event = {
 	async event(oldInstance, newInstance) {
-		const guild =
-			newInstance.guild || (await newInstance.client.guilds.fetch(newInstance.guildId));
+		const guild = newInstance.guild || (await this.guilds.fetch(newInstance.guildId));
 		if (!oldInstance || guild.id !== process.env.GUILD_ID) return;
 
 		const logs = [];
