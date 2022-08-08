@@ -3,7 +3,8 @@ import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
 import { stripMarkdown } from "../../lib/markdown.js";
-import { caesar } from "../../lib/text.js";
+import { caesar, joinWithAnd, pingablify } from "../../lib/text.js";
+import { nth, removeNth } from "../../lib/numbers.js";
 export const regexps = [
 	// Just Delete
 	/c[*0b]ea|a[*hi]q[*3r]|[+g][*3r][$5f][+g][!*1v¡][(<p](?:[*@n][y|]|[y|][*3r])|[$5f](?:[(<p][#u]z[*hi][(<p]x)|o[*hi][+g]{1,2}(?:[ -]?c[!*1v¡]e[*@n][+g][*3r]|j[!*1v¡]c[*3r])|q[!*1v¡][y|]{1,2}q[*0b]|e[*3r][(<p][+g][*hi]z|i(?:[*@n]t[!*1v¡]a[*@n][y|]|[*hi][y|]i[*@n])|(?<![a-z0-9])(?:i[*@n]t[!*1v¡]a[*@n](?:[$*35ryf|]|yl)?|c[*3r]a[!*1v¡][$5f](?:[*3r][$5f])?|[*@n]a[*hi][$5f](?:[*3r][$5f])?|(?:oe[*3r][*@n][$5f][+g]|[$5f][*3r]z[*3r]a|[(<p](?:[*hi]z|[y|][!*1v¡][+g])|[+g][*3r]{2}[+g])[$5f]?)(?![a-z0-9])|🖕/gi,
@@ -394,4 +395,111 @@ export async function badStickers(message) {
 	);
 
 	return bad;
+}
+
+/** @param {import("discord.js").GuildMember} member */
+export async function changeNickname(member, strike = true) {
+	const censored = censor(member.displayName);
+	if (censored) {
+		await Promise.all([
+			strike
+				? warn(member, "Watch your language!", censored.strikes, member.displayName)
+				: member
+						.send({
+							content:
+								CONSTANTS.emojis.statuses.no +
+								" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
+						})
+						.catch(() => {}),
+			setNickname(member, pingablify(censored.censored)),
+			removeDuplicateNicknames(member),
+		]);
+		return;
+	}
+
+	const pingablified = pingablify(member.displayName);
+
+	if (pingablified !== member.displayName) {
+		await Promise.all([
+			setNickname(member, pingablified),
+			member
+				.send({
+					content:
+						"For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule 7. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.",
+				})
+				.catch(() => {}),
+			removeDuplicateNicknames(member),
+		]);
+		return;
+	}
+	await removeDuplicateNicknames(member, true);
+}
+
+/** @param {import("discord.js").GuildMember} member */
+async function removeDuplicateNicknames(member, dm = false) {
+	const members = (
+		await member.guild.members.fetch({ query: member.displayName, limit: 100 })
+	).filter((found) => found.displayName === member.displayName);
+
+	/** @type {any[]} */
+	const promises = [];
+	if (members.size > 1) {
+		const [safe, unsafe] = members.partition(
+			(found) => found.user.username === member.displayName,
+		);
+
+		const modTalk = member.guild.publicUpdatesChannel;
+		if (!modTalk) throw new ReferenceError("Could not find mod talk");
+		if (safe.size) {
+			promises.push(
+				...unsafe
+					.map((found) => [
+						setNickname(found, found.user.username),
+						dm &&
+							found
+								.send(
+									"Your nickname conflicted with someone else's nickname, so I unfortunately had to change it to comply with rule 7.",
+								)
+								.catch(() => false),
+					])
+					.flat(),
+			);
+			if (safe.size > 1) {
+				promises.push(
+					modTalk.send({
+						allowedMentions: { users: [] },
+						content: `Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
+					}),
+				);
+			}
+		} else if (unsafe.size > 1) {
+			if (unsafe.has(member.id)) {
+				(await setNickname(member, member.user.username)) && unsafe.delete(member.id);
+			}
+			if (unsafe.size > 1)
+				promises.push(
+					modTalk.send({
+						allowedMentions: { users: [] },
+						content: `Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
+					}),
+				);
+		}
+	}
+	await Promise.all(promises);
+}
+
+/**
+ * @param {import("discord.js").GuildMember} member
+ * @param {string} newNickname
+ */
+async function setNickname(member, newNickname) {
+	if (member.nickname === newNickname) return member;
+	if (member.moderatable) return await member.setNickname(newNickname);
+	const modTalk = member.guild.publicUpdatesChannel;
+	if (!modTalk) throw new ReferenceError("Could not find mod talk");
+	await modTalk.send({
+		allowedMentions: { users: [] },
+		content: `Missing permissions to change ${member.toString()}'s nickname to \`${newNickname}\`.`,
+	});
+	return false;
 }

@@ -1,5 +1,5 @@
 import warn from "../../../common/moderation/warns.js";
-import { censor } from "../../../common/moderation/automod.js";
+import { censor, changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
 /** @type {import("../../../types/event").default<"guildMemberUpdate">} */
@@ -16,13 +16,17 @@ const event = {
 		}
 
 		if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
-			logs.push(
-				newMember.communicationDisabledUntil
-					? " timed out until <t:" +
-							Math.round(+newMember.communicationDisabledUntil / 1_000) +
-							">"
-					: " un timed out",
-			);
+			if (
+				newMember.communicationDisabledUntil &&
+				newMember.communicationDisabledUntil < new Date()
+			)
+				logs.push(
+					" timed out until <t:" +
+						Math.round(+newMember.communicationDisabledUntil / 1_000) +
+						">",
+				);
+
+			if (!newMember.communicationDisabledUntil) logs.push(" un timed out");
 		}
 		if (oldMember.nickname !== newMember.nickname) {
 			logs.push(
@@ -37,25 +41,7 @@ const event = {
 			),
 		);
 
-		const censored = censor(newMember.displayName);
-		if (censored) {
-			const modTalk = newMember.guild.publicUpdatesChannel;
-			if (!modTalk) throw new ReferenceError("Could not find mod talk");
-			await (newMember.moderatable
-				? newMember.setNickname(censored.censored)
-				: modTalk.send({
-						allowedMentions: { users: [] },
-						content: `Missing permissions to change ${newMember.toString()}'s nickname to \`${
-							censored.censored
-						}\`.`,
-				  }));
-			await warn(
-				newMember,
-				`Watch your language!`,
-				censored.strikes,
-				"Changed nickname to:\n" + newMember.displayName,
-			);
-		}
+		await changeNickname(newMember);
 	},
 };
 

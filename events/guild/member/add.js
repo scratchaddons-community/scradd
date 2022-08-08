@@ -2,11 +2,11 @@ import { MessageActionRow, MessageButton } from "discord.js";
 import fetch from "node-fetch";
 
 import { Embed } from "@discordjs/builders";
-import { censor } from "../../../common/moderation/automod.js";
+import { censor, changeNickname } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { escapeMessage } from "../../../lib/markdown.js";
 import log from "../../../common/moderation/logging.js";
-import { roundDownToMultipleTen } from "../../../lib/numbers.js";
+import { nth, roundDownToMultipleTen } from "../../../lib/numbers.js";
 const rawCount =
 	/** @type {{ count: number; _chromeCountDate: string }} */
 	(await fetch("https://scratchaddons.com/usercount.json").then((res) => res.json())).count;
@@ -20,18 +20,6 @@ const event = {
 		await log(member.guild, `Member ${member.toString()} joined!`, "members");
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
 		if (!channel?.isText()) return;
-
-		/** @param {number} number */
-		const nth = (number) =>
-			"**" +
-			number +
-			([, "st", "nd", "rd"][(number / 10) % 10 ^ 1 && number % 10] || "th") +
-			"**" +
-			(`${number}`.includes("69")
-				? " (nic" + "e".repeat(Math.floor(number.toString().length / 2)) + ")"
-				: /^[1-9]0+$/.test(number + "")
-				? " (" + "🥳".repeat(number.toString().length - 1) + ")"
-				: "");
 
 		const greetings = [
 			`Everybody please welcome ${member.toString()} to ${
@@ -111,17 +99,7 @@ const event = {
 				.catch(() => {}),
 		]);
 
-		const censored = censor(member.displayName);
-		if (censored) {
-			await member.setNickname(censored.censored);
-			await member
-				.send({
-					content:
-						CONSTANTS.emojis.statuses.no +
-						" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
-				})
-				.catch(() => {});
-		}
+		await changeNickname(member, false);
 	},
 };
 
