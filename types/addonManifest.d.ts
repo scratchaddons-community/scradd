@@ -87,16 +87,16 @@ type definitions_cssManipulator =
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
  *
- * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
- * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start will
+ * be treated as an relative RegEx pattern.
  *
  * `[…]`: An array that contains match rules. The script will execute if it matches any of the rules.
  *
- * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx
- * pattern, and patterns that don’t start will be treated as an relative RegEx pattern.
+ * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start will
+ * be treated as an relative RegEx pattern.
  *
- * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`,
- * `"newPostScreens"`, `"editingScreens"`, `"forums"`, `"scratchWWWNoProject"`: A match rule shortcut.
+ * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`, `"newPostScreens"`, `"editingScreens"`,
+ * `"forums"`, `"scratchWWWNoProject"`: A match rule shortcut.
  *
  * `"isNotScratchWWW"`: A match rule shortcut matcher.
  *
@@ -173,8 +173,7 @@ type AddonManifest = {
 	 */
 	permissions?: ArrayOfAtLeastOne<"notifications" | "badge" | "clipboardWrite">;
 	/**
-	 * You can add persistent scripts by providing a "persistentScripts" array conformed of JS files
-	 * (e.g. ["example.js"]).
+	 * You can add persistent scripts by providing a "persistentScripts" array conformed of JS files (e.g. ["example.js"]).
 	 *
 	 * The path to the persistent script.
 	 */
@@ -184,8 +183,7 @@ type AddonManifest = {
 	 *
 	 * Unlike persistent scripts, this is an array of objects, not strings.
 	 *
-	 * Each object must specify the url to the userscript through the "url" property, and provide an
-	 * array of URL matches.
+	 * Each object must specify the url to the userscript through the "url" property, and provide an array of URL matches.
 	 */
 	userscripts?: ArrayOfAtLeastOne<{
 		/** The path to the userscript. */
@@ -199,8 +197,7 @@ type AddonManifest = {
 	/**
 	 * Similarly to userscripts, you can specify a "userstyles" array.
 	 *
-	 * Each object must specify the url to the stylesheet through the "url" property, and provide an
-	 * array of URL matches.
+	 * Each object must specify the url to the stylesheet through the "url" property, and provide an array of URL matches.
 	 */
 	userstyles?: ArrayOfAtLeastOne<{
 		/** The path to the userstyle. */
@@ -210,9 +207,8 @@ type AddonManifest = {
 		if?: definitions_if;
 	}>;
 	/**
-	 * The "settings" object allow the addon’s users to specify settings in Scratch Addons’ settings
-	 * panel. Inside your persistent scripts and userscripts, you can then access those settings
-	 * with the "addon.settings" API.
+	 * The "settings" object allow the addon’s users to specify settings in Scratch Addons’ settings panel. Inside your persistent scripts
+	 * and userscripts, you can then access those settings with the "addon.settings" API.
 	 *
 	 * Specify an "settings" property and provide an array of setting objects.
 	 */
@@ -281,10 +277,7 @@ type AddonManifest = {
 				type: "color";
 				/** The default value of the setting. */
 				default: `#${string}`;
-				/**
-				 * Determines whether the transparency/opacity/alpha value can be changed when
-				 * choosing a color.
-				 */
+				/** Determines whether the transparency/opacity/alpha value can be changed when choosing a color. */
 				allowTransparency?: boolean;
 		  }
 		| {
@@ -325,8 +318,7 @@ type AddonManifest = {
 	/**
 	 * You can provide the "enabledByDefault" property and set it to true. Its default value is false.
 	 *
-	 * Keep in mind, few addons will be enabled by default. If you want your addon to be enabled by
-	 * default, please open a discussion issue.
+	 * Keep in mind, few addons will be enabled by default. If you want your addon to be enabled by default, please open a discussion issue.
 	 */
 	enabledByDefault?: boolean;
 	/** An array containing presets for settings. */
@@ -373,20 +365,11 @@ type AddonManifest = {
 		/** The filename of the popup script. */
 		script: string;
 	};
-	/**
-	 * Determines whether the addon’s scripts should be considered disabled when disabled as the
-	 * page is running.
-	 */
+	/** Determines whether the addon’s scripts should be considered disabled when disabled as the page is running. */
 	dynamicDisable?: boolean;
-	/**
-	 * Determines whether the addon’s scripts should be considered enabled when enabled as the page
-	 * is running.
-	 */
+	/** Determines whether the addon’s scripts should be considered enabled when enabled as the page is running. */
 	dynamicEnable?: boolean;
-	/**
-	 * Determines whether the addon’s userstyles should be injected as style elements rather than
-	 * link elements.
-	 */
+	/** Determines whether the addon’s userstyles should be injected as style elements rather than link elements. */
 	injectAsStyleElt?: boolean;
 	/** Determines whether the addon’s userstyles should be removed and rematched to the new settings. */
 	updateUserstylesOnSettingsChange?: boolean;

@@ -103,12 +103,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 }
 
 /**
- * @param {(
- * 	options:
- * 		| string
- * 		| import("discord.js").InteractionReplyOptions
- * 		| import("discord.js").MessagePayload,
- * ) => Promise<void>} reply
+ * @param {(options: string | import("discord.js").InteractionReplyOptions | import("discord.js").MessagePayload) => Promise<void>} reply
  * @param {string | null} filter
  * @param {import("discord.js").GuildMember} interactor
  *

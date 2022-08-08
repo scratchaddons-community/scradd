@@ -85,9 +85,7 @@ const dataCache = {};
 
 /**
  * @type {{
- * 	[key: string]:
- * 		| { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout }
- * 		| undefined;
+ * 	[key: string]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined;
  * }}
  */
 let timeouts = {};

@@ -6,16 +6,12 @@ import { AssertionError } from "assert";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands = await /**
- * @type {Promise<
- * 	import("discord.js").Collection<string, import("../types/command").default>
- * >}
- */ (importScripts(path.resolve(dirname, "../commands")));
+const commands =
+	await /** @type {Promise<import("discord.js").Collection<string, import("../types/command").default>>} */ (
+		importScripts(path.resolve(dirname, "../commands"))
+	);
 
-/**
- * @type {| import("discord.js").Collection<string, import("../types/command").CommandInfo>
- * 	| undefined}
- */
+/** @type {import("discord.js").Collection<string, import("../types/command").CommandInfo> | undefined} */
 let processed;
 
 /** @param {import("discord.js").Client<true>} client */

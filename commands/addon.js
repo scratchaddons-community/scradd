@@ -55,8 +55,7 @@ const info = {
 		 *
 		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
-		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
-		 *   available.
+		 * @returns {string | undefined} - Returns credit information or undefined if no credits are available.
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(

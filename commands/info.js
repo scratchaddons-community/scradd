@@ -34,10 +34,7 @@ const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scrad
 /**
  * @type {{
  * 	description(client: Client): string | Promise<string>;
- * 	edit?: (
- * 		interaction: import("discord.js").CommandInteraction,
- * 		Reply: Message,
- * 	) => string | Promise<string>;
+ * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => string | Promise<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
@@ -250,8 +247,7 @@ const info = {
 		/**
 		 * Disable the select menu.
 		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The
-		 *   original message.
+		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
 		 */
 		async function disable() {
 			if (!(message instanceof Message)) {
@@ -277,8 +273,7 @@ const info = {
 		/**
 		 * Add a collector to the message to update it when an option in the select menu is selected.
 		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The
-		 *   original message.
+		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
 		 */
 		async function addCollector() {
 			if (!(message instanceof Message)) return await disable();

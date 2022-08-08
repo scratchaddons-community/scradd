@@ -65,8 +65,7 @@ export async function generateMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages
- *   are being sent to.
+ * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages are being sent to.
  */
 export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
@@ -116,9 +115,7 @@ export async function getThreadFromMember(
  * @param {{
  * 	reason?: string;
  * 	user?: import("discord.js").User | import("discord.js").GuildMember;
- * }} [meta]
- *   - The reason for closing the ticket.
- *
+ * }} [meta] - The reason for closing the ticket.
  *
  * @returns {Promise<Message<boolean> | false>} - Message sent to user.
  */
@@ -211,9 +208,7 @@ export async function sendOpenedMessage(user) {
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
  * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
- * @param {(
- * 	buttonInteraction: import("discord.js").MessageComponentInteraction,
- * ) => Promise<void>} onConfirm
+ * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 	const button = new MessageButton()
