@@ -2,8 +2,7 @@ import { MessageActionRow, MessageButton } from "discord.js";
 import fetch from "node-fetch";
 
 import { Embed } from "@discordjs/builders";
-import { censor, changeNickname } from "../../../common/moderation/automod.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import {  changeNickname } from "../../../common/moderation/automod.js";
 import { escapeMessage } from "../../../lib/markdown.js";
 import log from "../../../common/moderation/logging.js";
 import { nth, roundDownToMultipleTen } from "../../../lib/numbers.js";
