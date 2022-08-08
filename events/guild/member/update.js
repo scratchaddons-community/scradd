@@ -1,4 +1,4 @@
-import {  changeNickname } from "../../../common/moderation/automod.js";
+import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
 /** @type {import("../../../types/event").default<"guildMemberUpdate">} */
