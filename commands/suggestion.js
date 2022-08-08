@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Constants, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { Constants, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, {
@@ -8,14 +8,12 @@ import SuggestionChannel, {
 	RATELIMT_MESSAGE,
 } from "../common/suggest.js";
 import { escapeLinks } from "../lib/markdown.js";
-import { getAllMessages, reactAll } from "../lib/message.js";
-import { generateHash, truncateText } from "../lib/text.js";
+import { getAllMessages, paginate, reactAll } from "../lib/message.js";
+import { truncateText } from "../lib/text.js";
 
 const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
 
 if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env.");
-
-const PAGE_OFFSET = 15;
 
 /** @type {[string, string][]} */
 export const SUGGESTION_EMOJIS = [
@@ -242,8 +240,6 @@ const info = {
 				break;
 			}
 			case "get-top": {
-				const deferPromise = interaction.deferReply();
-
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 
 				if (!channel?.isText())
@@ -252,7 +248,8 @@ const info = {
 				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
 
-				const [, unfiltered] = await Promise.all([deferPromise, getAllMessages(channel)]);
+				await interaction.deferReply();
+				const unfiltered = await getAllMessages(channel);
 				const all = (
 					await Promise.all(
 						unfiltered.map(async (message) => {
@@ -310,125 +307,29 @@ const info = {
 							(suggestionTwo?.count ?? 0) - (suggestionOne?.count ?? 0),
 					);
 
-				const previousButton = new MessageButton()
-					.setLabel("<< Previous")
-					.setStyle("PRIMARY")
-					.setDisabled(true)
-					.setCustomId(generateHash("previous"));
-				const numberOfPages = Math.ceil(all.length / PAGE_OFFSET);
-				const nextButton = new MessageButton()
-					.setLabel("Next >>")
-					.setStyle("PRIMARY")
-					.setDisabled(numberOfPages === 1)
-					.setCustomId(generateHash("next"));
-
 				const nick =
 					requestedUser &&
 					(await interaction.guild?.members.fetch(requestedUser.id))?.displayName;
-
-				// eslint-disable-next-line fp/no-let -- This must be changable.
-				let offset = 0;
-
-				/**
-				 * Generate an embed that lists the top suggestions.
-				 *
-				 * @returns {import("discord.js").MessagePayload | import("discord.js").InteractionReplyOptions} - Embed with top suggestions.
-				 */
-				function generateMessage() {
-					const content = all
-						.filter(
-							(suggestion, index) =>
-								suggestion && index >= offset && index < offset + PAGE_OFFSET,
-						)
-						.map((suggestion, index) => {
-							if (!suggestion) return ""; // Impossible
-
-							return `${index + offset + 1}) **${suggestion.count}** ${
-								suggestion.count > 0
-									? SUGGESTION_EMOJIS[0]?.[0]
-									: SUGGESTION_EMOJIS[0]?.[1]
-							} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
-								GUILD_ID ?? "@me"
-							}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
-								suggestion.author && !requestedUser
-									? ` by ${suggestion.author.toString()}`
-									: ""
-							}`;
-						})
-						.join("\n")
-						.trim();
-
-					if (!content) {
-						return {
-							content: `${CONSTANTS.emojis.statuses.no} No suggestions found. Try changing any filters you may have used.`,
-
-							ephemeral: true,
-						};
-					}
-
-					return {
-						components: [
-							new MessageActionRow().addComponents(previousButton, nextButton),
-						],
-
-						embeds: [
-							new Embed()
-								.setTitle(
-									`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
-										requestedAnswer ? ` answered with ${requestedAnswer}` : ""
-									}`,
-								)
-								.setDescription(content)
-								.setFooter({
-									text: `Page ${
-										Math.floor(offset / PAGE_OFFSET) + 1
-									}/${numberOfPages}`,
-								})
-								.setColor(Math.floor(Math.random() * (0xffffff + 1))),
-						],
-					};
-				}
-
-				const reply = await interaction.editReply(generateMessage());
-
-				const collector =
-					reply.embeds[0] &&
-					interaction.channel?.createMessageComponentCollector({
-						filter: (buttonInteraction) =>
-							[previousButton.customId, nextButton.customId].includes(
-								buttonInteraction.customId,
-							) && buttonInteraction.user.id === interaction.user.id,
-
-						time: 30_000,
-					});
-
-				collector
-					?.on("collect", async (buttonInteraction) => {
-						if (buttonInteraction.customId === nextButton.customId)
-							offset += PAGE_OFFSET;
-						else offset -= PAGE_OFFSET;
-
-						previousButton.setDisabled(offset === 0);
-						nextButton.setDisabled(offset + PAGE_OFFSET >= all.length - 1);
-						await Promise.all([
-							interaction.editReply(generateMessage()),
-							buttonInteraction.deferUpdate(),
-						]);
-						collector.resetTimer();
-					})
-					.on("end", async () => {
-						previousButton.setDisabled(true);
-						nextButton.setDisabled(true);
-						await interaction.editReply({
-							components: [
-								new MessageActionRow().addComponents(previousButton, nextButton),
-							],
-
-							embeds: (
-								await interaction.fetchReply()
-							).embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
-						});
-					});
+				await paginate(
+					all,
+					(suggestion) =>
+						`**${suggestion.count}** ${
+							suggestion.count > 0
+								? SUGGESTION_EMOJIS[0]?.[0]
+								: SUGGESTION_EMOJIS[0]?.[1]
+						} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
+							GUILD_ID ?? "@me"
+						}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
+							suggestion.author && !requestedUser
+								? ` by ${suggestion.author.toString()}`
+								: ""
+						}`,
+					"No suggestions found. Try changing any filters you may have used.",
+					`Top suggestions${requestedUser ? ` by ${nick}` : ""}${
+						requestedAnswer ? ` answered with ${requestedAnswer}` : ""
+					}`,
+					(data) => interaction.editReply(data),
+				);
 			}
 		}
 	},

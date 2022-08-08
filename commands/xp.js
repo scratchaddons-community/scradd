@@ -3,6 +3,7 @@ import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { extractData, getDatabases } from "../common/databases.js";
 import { getLevelForXp, getXpForLevel } from "../common/xp.js";
+import { paginate } from "../lib/message.js";
 import { makeProgressBar } from "../lib/numbers.js";
 
 /** @type {import("../types/command").default} */
@@ -23,32 +24,24 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("top")
-				.setDescription("View the users with the most XP in the server")
-				.addNumberOption((input) =>
-					input
-						.setName("page")
-						.setDescription("The page to view (defaults to 1).")
-						.setRequired(false),
-				),
+				.setDescription("View the users with the most XP in the server"),
 		),
 
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 
+		const modTalk = interaction.guild?.publicUpdatesChannel;
+		if (!modTalk) throw new ReferenceError("Could not find mod talk");
+
+		const database = (await getDatabases(["xp"], modTalk)).xp;
+		const allXp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
+
 		switch (command) {
 			case "rank": {
 				const user = interaction.options.getUser("user") || interaction.user;
 
-				const modTalk = interaction.guild?.publicUpdatesChannel;
-				if (!modTalk) throw new ReferenceError("Could not find mod talk");
-
-				const database = (await getDatabases(["xp"], modTalk)).xp;
-
 				const member = await interaction.guild?.members.fetch(user.id).catch(() => {});
 
-				const allXp = /** @type {{ user: string; xp: number }[]} */ (
-					await extractData(database)
-				);
 				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
 				const level = getLevelForXp(xp);
 				const nextLevel = level + 1;
@@ -108,6 +101,21 @@ const info = {
 				});
 			}
 			case "top": {
+				const top = allXp.sort((one, two) => two.xp - one.xp);
+				await paginate(
+					top,
+					(xp) => {
+						return `**Level ${getLevelForXp(xp.xp)}** - <@${
+							xp.user
+						}> (${xp.xp.toLocaleString()} XP)`;
+					},
+					"No users found.",
+					`Leaderboard for ${interaction.guild?.name}`,
+					(data) =>
+						interaction[
+							interaction.replied || interaction.deferred ? "editReply" : "reply"
+						](data),
+				);
 			}
 		}
 	},
