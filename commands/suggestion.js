@@ -332,9 +332,7 @@ const info = {
 				/**
 				 * Generate an embed that lists the top suggestions.
 				 *
-				 * @returns {| import("discord.js").MessagePayload
-				 * 	| import("discord.js").InteractionReplyOptions}
-				 *   - Embed with top suggestions.
+				 * @returns {import("discord.js").MessagePayload | import("discord.js").InteractionReplyOptions} - Embed with top suggestions.
 				 */
 				function generateMessage() {
 					const content = all
