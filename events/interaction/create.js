@@ -4,6 +4,7 @@ import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import fetchCommands from "../../common/commands.js";
 import { getWarns } from "../../commands/view-warns.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import logError from "../../lib/logError.js";
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 const event = {
@@ -53,13 +54,13 @@ const event = {
 
 			await command.interaction(interaction);
 		} catch (error) {
-			await interaction[interaction.replied ? "editReply" : "reply"]({
+			await interaction[interaction.replied || interaction.deferred ? "editReply" : "reply"]({
 				ephemeral: true,
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
 				components: [],
 				files: [],
-			});
+			}).catch((error) => logError(error, "interactionCreate", this));
 			throw error;
 		}
 	},
