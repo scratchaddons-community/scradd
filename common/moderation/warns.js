@@ -6,8 +6,8 @@ import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
-const EXPIRY_LENGTH = 21,
-	WARNS_PER_MUTE = 3,
+const EXPIRY_LENGTH = 21;
+export const WARNS_PER_MUTE = 3,
 	MUTE_LENGTHS = [4, 12, 24];
 
 /**

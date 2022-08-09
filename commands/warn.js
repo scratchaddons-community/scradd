@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import warn from "../common/moderation/warns.js";
+import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
 import { stripMarkdown } from "../lib/markdown.js";
 
 /** @type {import("../types/command").default} */
@@ -23,7 +23,9 @@ const info = {
 				.setDescription(
 					"How many strikes to add. Use a negative number here to remove strikes. Defaults to 1",
 				)
-				.setName("strikes"),
+				.setName("strikes")
+				.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1)
+				.setMinValue(-1 * WARNS_PER_MUTE),
 		),
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");
