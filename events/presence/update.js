@@ -1,5 +1,4 @@
-import warn from "../../common/moderation/warns.js";
-import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
+import { censor } from "../../common/moderation/automod.js";
 
 /** @type {import("../../types/event").default<"presenceUpdate">} */
 const event = {

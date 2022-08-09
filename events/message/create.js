@@ -1,7 +1,4 @@
-/**
- * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
- *   autoreply if contains certain triggers.
- */
+/** @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and autoreply if contains certain triggers. */
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
