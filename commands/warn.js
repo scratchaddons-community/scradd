@@ -25,7 +25,7 @@ const info = {
 				)
 				.setName("strikes")
 				.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1)
-				.setMinValue(-1 * WARNS_PER_MUTE),
+				// .setMinValue(-1 * WARNS_PER_MUTE),
 		),
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");
