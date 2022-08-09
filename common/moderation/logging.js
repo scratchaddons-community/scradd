@@ -4,7 +4,6 @@ export const LOG_GROUPS = /** @type {const} */ ([
 	"channels",
 	"members",
 	"voice",
-	"databases",
 ]);
 /**
  * @param {import("discord.js").Guild} guild
@@ -18,7 +17,7 @@ export default async function log(guild, content, group, extra = {}) {
 }
 
 /**
- * @param {typeof LOG_GROUPS[number]} group
+ * @param {typeof LOG_GROUPS[number] | typeof import("../databases.js").DATABASE_THREAD} group
  * @param {import("discord.js").Guild} guild
  */
 export async function getThread(group, guild) {

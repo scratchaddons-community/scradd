@@ -65,9 +65,8 @@ export default async function warn(user, reason, strikes, context) {
 		user instanceof GuildMember
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
@@ -130,6 +129,9 @@ export default async function warn(user, reason, strikes, context) {
 
 		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
 
+		const modTalk = guild.publicUpdatesChannel;
+		if (!modTalk) throw new ReferenceError("Could not find mod talk");
+		
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(

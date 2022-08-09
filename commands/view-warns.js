@@ -41,9 +41,8 @@ export default info;
  * @returns {Promise<import("discord.js").InteractionReplyOptions>}
  */
 async function getWarnsForMember(user, guild = user instanceof GuildMember ? user.guild : null) {
-	const modTalk = guild?.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+	if (!guild) throw new TypeError("Expected guild to be passed as user is not a GuildMember");
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const warns = allWarns.filter((warn) => warn.user === user.id);
@@ -154,9 +153,7 @@ export async function getWarns(reply, filter, interactor) {
 				(await interactor.guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await interactor.client.users.fetch(moderatorId).catch(() => {}));
 
-			const modTalk = interactor.guild?.publicUpdatesChannel;
-			if (!modTalk) throw new ReferenceError("Could not find mod talk");
-			const warnLog = (await getDatabases(["warn"], modTalk)).warn;
+			const warnLog = (await getDatabases(["warn"], interactor.guild)).warn;
 			const allWarns = await getData(warnLog, true);
 			const caseId = idMessage ? filter : convertBase(filter, 10, 64);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};

@@ -11,6 +11,7 @@ import { Embed } from "@discordjs/builders";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
+import { DATABASE_THREAD } from "../../common/databases.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
@@ -44,7 +45,7 @@ const event = {
 		if (
 			newThread.archived &&
 			// @ts-expect-error -- We are trying to tell if the type matches.
-			LOG_GROUPS.includes(newThread.name) &&
+			(LOG_GROUPS.includes(newThread.name) || newThread.name === DATABASE_THREAD) &&
 			newThread.parent?.id === process.env.LOGS_CHANNEL
 		) {
 			await newThread.setArchived(false);

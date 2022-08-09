@@ -30,10 +30,9 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand();
 
-		const modTalk = interaction.guild?.publicUpdatesChannel;
-		if (!modTalk) throw new ReferenceError("Could not find mod talk");
+		if (!interaction.guild) throw new TypeError("Cannot use /xp command in DMs");
 
-		const database = (await getDatabases(["xp"], modTalk)).xp;
+		const database = (await getDatabases(["xp"], interaction.guild)).xp;
 		const allXp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
 
 		switch (command) {
