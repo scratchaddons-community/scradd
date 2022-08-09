@@ -75,9 +75,11 @@ export default async function warn(user, reason, strikes, context) {
 		unwarn(user.id, strikes * -1, allWarns);
 	}
 
-	const promises = [];
-
 	const actualStrikes = allWarns.length + (strikes > 0 ? strikes : 0) - oldLength;
+
+	if (strikes < 0 && actualStrikes === 0) return false;
+
+	const promises = [];
 
 	const logMessage = await log(
 		guild,
@@ -131,7 +133,7 @@ export default async function warn(user, reason, strikes, context) {
 
 		const modTalk = guild.publicUpdatesChannel;
 		if (!modTalk) throw new ReferenceError("Could not find mod talk");
-		
+
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(
