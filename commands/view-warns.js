@@ -14,7 +14,9 @@ const info = {
 		.addStringOption((input) =>
 			input
 				.setName("filter")
-				.setDescription("A case ID to see its details or a ping to see their strikes (defaults to you)")
+				.setDescription(
+					"A case ID to see its details or a ping to see their strikes (defaults to you)",
+				)
 				.setRequired(false),
 		),
 
