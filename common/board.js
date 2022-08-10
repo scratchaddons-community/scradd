@@ -6,7 +6,7 @@ import { censor } from "./moderation/automod.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 6 : 1;
+export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
 
 /**
  * Supplied a message in #potatoboard, get the original message that was reacted to.
@@ -31,7 +31,7 @@ export async function boardMessageToSource(boardMessage) {
 
 	if (!channel?.isText()) return;
 
-	const message = await channel.messages.fetch(messageId);
+	const message = await channel.messages.fetch(messageId).catch(() => {});
 
 	if (!message) return;
 
@@ -54,7 +54,7 @@ export async function sourceToBoardMessage(message) {
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isText()) {
-		throw new ReferenceError("Could not find board channel.");
+		throw new ReferenceError("Could not find board channel");
 	}
 
 	MESSAGES ??= await getAllMessages(board);
@@ -80,7 +80,7 @@ export async function postMessageToBoard(message) {
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText()) throw new ReferenceError("Could not find board channel.");
+	if (!board?.isText()) throw new ReferenceError("Could not find board channel");
 
 	const description = await messageToText(message);
 

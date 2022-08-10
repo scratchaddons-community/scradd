@@ -31,7 +31,7 @@ const event = {
 			logs.push(
 				newMember.nickname
 					? " was nicknamed " + newMember.nickname
-					: "'s nickname was removed",
+					: "’s nickname was removed",
 			);
 		}
 		await Promise.all(

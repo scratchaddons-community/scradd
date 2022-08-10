@@ -4,10 +4,6 @@
 .git/
 .replit
 
-/dist
-
-node_modules
-
 # Log files
 .bashrc
 logs

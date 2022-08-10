@@ -80,11 +80,7 @@ export async function extractData(database) {
 /** @type {{ [key: string]: DatabaseItem[] }} */
 const dataCache = {};
 
-/**
- * @type {{
- * 	[key: string]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined;
- * }}
- */
+/** @type {{ [key: string]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined }} */
 let timeouts = {};
 
 /**

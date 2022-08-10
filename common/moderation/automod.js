@@ -41,18 +41,8 @@ export function censor(text) {
  * @param {import("discord.js").Message | import("discord.js").PartialMessage} message
  */
 async function checkString(toCensor, message) {
-	/**
-	 * @type {{
-	 * 	language: false | number;
-	 * 	invites: false | number;
-	 * 	bots: false | number;
-	 * }}
-	 */
-	let bad = {
-		language: false,
-		invites: false,
-		bots: false,
-	};
+	/** @type {{ language: false | number; invites: false | number; bots: false | number }} */
+	let bad = { language: false, invites: false, bots: false };
 	if (!badWordsAllowed(message.channel)) {
 		const censored = censor(toCensor);
 		if (censored) {
@@ -204,7 +194,7 @@ export async function automodMessage(message) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				"Please don't send server invites in that channel!",
+				"Please don’t send server invites in that channel!",
 				bad.invites,
 				bad.words.invites.join("\n"),
 			),
@@ -231,7 +221,7 @@ export async function automodMessage(message) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				`Please don\'t post that many animated emojis!`,
+				`Please don’t post that many animated emojis!`,
 				+badAnimatedEmojis,
 				message.content,
 			),
@@ -248,7 +238,7 @@ export async function automodMessage(message) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				"Please don't post bot invite links!",
+				"Please don’t post bot invite links!",
 				bad.bots,
 				bad.words.bots.join("\n"),
 			),
@@ -372,16 +362,8 @@ export async function badAttachments(message) {
 
 /** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
 export async function badStickers(message) {
-	/**
-	 * @type {{
-	 * 	strikes: false | number;
-	 * 	words: string[];
-	 * }}
-	 */
-	let bad = {
-		strikes: false,
-		words: [],
-	};
+	/** @type {{ strikes: false | number; words: string[] }} */
+	let bad = { strikes: false, words: [] };
 
 	await Promise.all(
 		message.stickers.map(async ({ name }) => {
@@ -458,7 +440,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 						dm &&
 							found
 								.send(
-									`Your nickname conflicted with someone else's nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
+									`Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 								)
 								.catch(() => false),
 					])
@@ -499,7 +481,7 @@ async function setNickname(member, newNickname) {
 	if (!modTalk) throw new ReferenceError("Could not find mod talk");
 	await modTalk.send({
 		allowedMentions: { users: [] },
-		content: `Missing permissions to change ${member.toString()}'s nickname to \`${newNickname}\`.`,
+		content: `Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
 	});
 	return false;
 }

@@ -56,7 +56,7 @@ const event = {
 
 		const [dmCommands, serverCommands] = (await commands(this)).toJSON().reduce(
 			([dmCommands, serverCommands], command) => {
-				if (!(command.apply ?? true)) return [dmCommands, serverCommands];
+				if (!(command.enable ?? true)) return [dmCommands, serverCommands];
 				if (command.dm && process.env.NODE_ENV === "production")
 					dmCommands.push(command.data.toJSON());
 				else serverCommands.push(command.data.toJSON());

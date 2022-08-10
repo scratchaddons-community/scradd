@@ -53,7 +53,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 								).toLocaleString()} XP remaining`,
 							)
 							.setFooter({
-								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone's XP with /xp rank`,
+								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
 							}),
 					],
 				});

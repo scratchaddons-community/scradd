@@ -10,13 +10,11 @@ import { convertBase } from "../lib/numbers.js";
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("View your or (Mods only) someone else's active strikes.")
+		.setDescription("View your or (Mods only) someone else’s active strikes")
 		.addStringOption((input) =>
 			input
 				.setName("filter")
-				.setDescription(
-					"Type a case ID to see its details, a ping to see their strikes, or leave blank to see your strikes.",
-				)
+				.setDescription("A case ID to see its details or a ping to see their strikes (defaults to you)")
 				.setRequired(false),
 		),
 
@@ -91,7 +89,9 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 							new MessageButton()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
 								.setStyle("SECONDARY")
-								.setCustomId(`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`),
+								.setCustomId(
+									`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`,
+								),
 						),
 					),
 			  ]
@@ -159,23 +159,14 @@ export async function getWarns(reply, filter, interactor) {
 			const embed = new Embed()
 				.setColor(member?.displayColor ?? null)
 				.setAuthor(
-					nick
-						? {
-								iconURL: (member || user)?.displayAvatarURL(),
-								name: nick,
-						  }
-						: null,
+					nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null,
 				)
 				.setTitle(`Case \`${caseId}\``)
 				.setDescription(reason)
 				.setTimestamp(message.createdAt);
 
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
-			embed.addField({
-				name: "Strikes",
-				value: strikes,
-				inline: true,
-			});
+			embed.addField({ name: "Strikes", value: strikes, inline: true });
 
 			if (
 				mod &&
@@ -184,12 +175,7 @@ export async function getWarns(reply, filter, interactor) {
 			)
 				embed.addField({ name: "Moderator", value: mod.toString(), inline: true });
 
-			if (user)
-				embed.addField({
-					name: "Target user",
-					value: user.toString(),
-					inline: true,
-				});
+			if (user) embed.addField({ name: "Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
 				embed.addField({
@@ -198,10 +184,7 @@ export async function getWarns(reply, filter, interactor) {
 					inline: true,
 				});
 
-			await reply({
-				ephemeral: true,
-				embeds: [embed],
-			});
+			await reply({ ephemeral: true, embeds: [embed] });
 		}
 	} else {
 		await reply(await getWarnsForMember(interactor, interactor.guild));

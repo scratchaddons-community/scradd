@@ -2,11 +2,7 @@ import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, messageToText } from "../../lib/message.js";
 
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../../types/event").default<"messageDelete">}
- */
+/** @type {import("../../types/event").default<"messageDelete">} */
 const event = {
 	async event(message) {
 		if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;

@@ -162,7 +162,7 @@ const OPTIONS = [
 			`**Logs** channel: ${
 				process.env.LOGS_CHANNEL ? `<#${process.env.LOGS_CHANNEL}>` : "*None*"
 			}\n` +
-			`**Modmaill** channel: ${
+			`**Modmail** channel: ${
 				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
 			}\n` +
 			`**Public logs** channel: ${
@@ -190,12 +190,10 @@ const OPTIONS = [
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Learn about me!").addStringOption((input) =>
+	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input
 			.setName("tab")
-			.setDescription(
-				"Which tab to open by default. You may still swap between tabs after it has loaded.",
-			)
+			.setDescription("Which tab to open first")
 			.addChoices(
 				OPTIONS.map(({ emoji, name }) => {
 					return [emoji + " " + name, name];
@@ -244,11 +242,7 @@ const info = {
 				content: await currentOption?.edit(interaction, message),
 			});
 
-		/**
-		 * Disable the select menu.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
-		 */
+		/** Disable the select menu. */
 		async function disable() {
 			if (!(message instanceof Message)) {
 				return await interaction.editReply({
@@ -270,11 +264,7 @@ const info = {
 			});
 		}
 
-		/**
-		 * Add a collector to the message to update it when an option in the select menu is selected.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
-		 */
+		/** Add a collector to the message to update it when an option in the select menu is selected. */
 		async function addCollector() {
 			if (!(message instanceof Message)) return await disable();
 
@@ -325,6 +315,7 @@ const info = {
 
 		addCollector().catch(disable);
 	},
+	enable: false,
 };
 
 export default info;

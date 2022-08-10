@@ -5,13 +5,19 @@ import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Kills the bot.").setDefaultPermission(false),
+	data: new SlashCommandBuilder()
+		.setDescription(
+			`(${
+				process.env.NODE_ENV === "production" ? "Admin" : "Dev (non-fake)"
+			} only) Kills the bot.`,
+		)
+		.setDefaultPermission(false),
 
 	async interaction(interaction) {
 		await cleanListeners();
 		await interaction.reply("Killing bot...");
 		await logError(
-			new AbortError(interaction.user.tag + " is killing the bot."),
+			new AbortError(interaction.user.tag + " is killing the bot"),
 			"interactionCreate",
 			interaction.client,
 		);

@@ -1,8 +1,4 @@
-/**
- * @file Enables Debug output.
- *
- * @type {import("../types/event").default<"debug">}
- */
+/** @type {import("../types/event").default<"debug">} */
 const event = {
 	event(message) {
 		if (

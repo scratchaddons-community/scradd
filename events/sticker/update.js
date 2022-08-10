@@ -9,7 +9,7 @@ const event = {
 		const logs = [];
 		if (oldSticker.description !== newSticker.description) {
 			logs.push(
-				`'s description ${
+				`’s description ${
 					newSticker.description ? `set to ${newSticker.description}` : "removed"
 				}`,
 			);

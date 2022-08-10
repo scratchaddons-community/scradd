@@ -9,11 +9,11 @@ import { makeProgressBar } from "../lib/numbers.js";
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Commands to view users' XP amounts.")
+		.setDescription("Commands to view users’ XP amounts")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("rank")
-				.setDescription("View a users' XP rank.")
+				.setDescription("View a users’ XP rank")
 				.addUserOption((input) =>
 					input
 						.setName("user")
@@ -60,7 +60,11 @@ const info = {
 							.addFields(
 								{ name: "Level", value: level.toLocaleString(), inline: true },
 								{ name: "XP", value: xp.toLocaleString(), inline: true },
-								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
+								{
+									name: CONSTANTS.zeroWidthSpace,
+									value: CONSTANTS.zeroWidthSpace,
+									inline: true,
+								},
 								{
 									name: "Next level",
 									value: nextLevel.toLocaleString(),
@@ -71,7 +75,11 @@ const info = {
 									value: xpForNextLevel.toLocaleString(),
 									inline: true,
 								},
-								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
+								{
+									name: CONSTANTS.zeroWidthSpace,
+									value: CONSTANTS.zeroWidthSpace,
+									inline: true,
+								},
 								{
 									name: "Remaining XP",
 									value: (xpForNextLevel - xp).toLocaleString(),
@@ -85,7 +93,11 @@ const info = {
 									}),
 									inline: true,
 								},
-								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
+								{
+									name: CONSTANTS.zeroWidthSpace,
+									value: CONSTANTS.zeroWidthSpace,
+									inline: true,
+								},
 								{
 									value: CONSTANTS.zeroWidthSpace,
 									name: makeProgressBar(progress),
@@ -93,7 +105,7 @@ const info = {
 							)
 							.setFooter({
 								text: `Ranked ${
-									(1).toLocaleString() + "/" + (122).toLocaleString() // todo
+									(1).toLocaleString() + "/" + (122).toLocaleString()
 								}${CONSTANTS.footerSeperator}View the leaderboard with /xp top`,
 							}),
 					],

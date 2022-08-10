@@ -20,8 +20,8 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")
-				.setDescription("(Mods only) Close a modmail ticket.")
-				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity.")
+				.setDescription("(Mods only) Close a modmail ticket")
+				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
@@ -34,13 +34,11 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("start")
-				.setDescription(
-					"(Mods only) Start a modmail ticket with a user. (Non-mods may start a ticket by DMing me.)",
-				)
+				.setDescription("(Mods only) Start a modmail ticket with a user")
 				.addUserOption((input) =>
 					input
 						.setName("user")
-						.setDescription("The user to start a ticket with.")
+						.setDescription("The user to start a ticket with")
 						.setRequired(true),
 				),
 		),
@@ -130,7 +128,12 @@ const info = {
 							.setDescription(
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 							)
-							.setFooter({ text: UNSUPPORTED })
+							.setFooter({
+								text:
+									UNSUPPORTED +
+									CONSTANTS.footerSeperator +
+									"Messages starting with an equals sign (=) are ignored.",
+							})
 							.setColor(COLORS.opened);
 
 						await sendOpenedMessage(user).then(async (success) => {

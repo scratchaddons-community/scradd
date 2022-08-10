@@ -8,8 +8,6 @@ import CONSTANTS from "./CONSTANTS.js";
 
 const RATELIMIT_TIMEOUT = 3_000;
 
-export const MAX_TITLE_LENGTH = 50;
-
 export const RATELIMT_MESSAGE =
 	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
@@ -36,8 +34,7 @@ export default class SuggestionChannel {
 	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
-	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the
-	 *   suggestion message on success.
+	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the suggestion message on success.
 	 */
 	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
@@ -55,7 +52,7 @@ export default class SuggestionChannel {
 			})
 			.setTitle(title)
 			.setDescription(data.description)
-			.setFooter({ text: `${defaultAnswer}` });
+			.setFooter({ text: defaultAnswer });
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
@@ -97,8 +94,7 @@ export default class SuggestionChannel {
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answer[]} answers - An object that maps answers to colors.
 	 *
-	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
-	 *   a success message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
 	 */
 	async answerSuggestion(interaction, answer, answers) {
 		if (
@@ -164,8 +160,7 @@ export default class SuggestionChannel {
 	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
 	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
 	 *
-	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
-	 *   a success message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
 	 */
 	async editSuggestion(interaction, updated) {
 		if (
@@ -215,7 +210,7 @@ export default class SuggestionChannel {
 				? Promise.race([
 						interaction.channel.setName(
 							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, title),
-							"Suggestion/report edited",
+							"Feedback edited",
 						),
 						new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
 				  ])
@@ -239,8 +234,7 @@ export default class SuggestionChannel {
  *
  * @param {Message} message - The message to get the member from.
  *
- * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
- *   made the suggestion.
+ * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who made the suggestion.
  */
 export async function getUserFromSuggestion(message) {
 	const author =

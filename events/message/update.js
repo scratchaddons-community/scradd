@@ -5,11 +5,7 @@ import jsonDiff from "json-diff";
 import { MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } from "discord.js";
 import diffLib from "difflib";
 
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../../types/event").default<"messageUpdate">}
- */
+/** @type {import("../../types/event").default<"messageUpdate">} */
 const event = {
 	async event(oldMessage, newMessage) {
 		if (newMessage.partial) newMessage = await newMessage.fetch();
@@ -71,7 +67,7 @@ const event = {
 			if (extraDiff)
 				files.push(new MessageAttachment(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
 
-			if (files.length )
+			if (files.length)
 				log(
 					newMessage.guild,
 					`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,

@@ -47,7 +47,7 @@ const events = await /**
  */ (importScripts(path.resolve(dirname, "./events")));
 
 for (const [event, execute] of events.entries()) {
-	if (execute.apply === false) continue;
+	if (execute.enable === false) continue;
 
 	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {

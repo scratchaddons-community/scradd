@@ -34,31 +34,33 @@ const event = {
 			!oldChannel.nsfw && newChannel.nsfw && edits.push(" was made age-restricted");
 			oldChannel.nsfw && !newChannel.nsfw && edits.push(" was made non-age-restricted");
 			oldChannel.topic !== newChannel.topic &&
-				edits.push("'s topic was set to " + newChannel.topic);
+				edits.push("’s topic was set to " + newChannel.topic);
 			oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration &&
 				edits.push(
-					"'s default archive after inactivity time was set to " +
+					"’s default archive after inactivity time was set to " +
 						{
 							[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 							[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 							[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 							[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
 							MAX: "1 Week",
-						}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
-						newChannel.defaultAutoArchiveDuration,
+						}[
+							newChannel.defaultAutoArchiveDuration ||
+								ThreadAutoArchiveDuration.OneDay
+						] || newChannel.defaultAutoArchiveDuration,
 				);
 		}
 		oldChannel.type === "GUILD_TEXT" &&
 			newChannel.type === "GUILD_TEXT" &&
 			oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
-			edits.push("'s slowmode was set to " + newChannel.rateLimitPerUser + " seconds");
+			edits.push("’s slowmode was set to " + newChannel.rateLimitPerUser + " seconds");
 		if (oldChannel.isVoice() && newChannel.isVoice()) {
 			oldChannel.bitrate !== newChannel.bitrate &&
-				edits.push("'s bitrate was set to " + newChannel.bitrate + "kbps");
+				edits.push("’s bitrate was set to " + newChannel.bitrate + "kbps");
 			oldChannel.userLimit !== newChannel.userLimit &&
-				edits.push("'s user limit was set to " + newChannel.userLimit + " users");
+				edits.push("’s user limit was set to " + newChannel.userLimit + " users");
 			oldChannel.rtcRegion !== newChannel.rtcRegion &&
-				edits.push("'s region override was set to " + newChannel.rtcRegion);
+				edits.push("’s region override was set to " + newChannel.rtcRegion);
 		}
 
 		await Promise.all(

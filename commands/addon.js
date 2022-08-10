@@ -33,19 +33,14 @@ const fuse = new Fuse(addons, {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with information about a specific addon.")
+		.setDescription("Replies with information about a specific addon")
 		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon.")
-				.setRequired(true),
+			option.setName("addon").setDescription("The name of the addon").setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("compact")
-				.setDescription(
-					"Whether to show misc information and the image. Defaults to false in #bots and true everywhere else.",
-				)
+				.setDescription("Whether to show misc information and the image")
 				.setRequired(false),
 		),
 

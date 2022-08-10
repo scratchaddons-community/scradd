@@ -13,6 +13,7 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/databases.js";
 import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
@@ -28,7 +29,7 @@ const event = {
 		}
 		if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 			logs.push(
-				`'s archive after inactivity time set to ${
+				`’s archive after inactivity time set to ${
 					{
 						[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
@@ -42,7 +43,7 @@ const event = {
 		}
 		if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
 			logs.push(
-				"'s slowmode was set to " +
+				"’s slowmode was set to " +
 					newThread.rateLimitPerUser +
 					` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 			);
@@ -63,7 +64,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread ${oldThread.toString()} (https://discord.com/${
+						`Thread ${oldThread.toString()} (https://discord.com/channels/${
 							newThread.guild.id
 						}/${oldThread.id})` +
 							edit +
@@ -90,7 +91,7 @@ const event = {
 			newThread.parent?.id !== MODMAIL_CHANNEL ||
 			oldThread.archived === newThread.archived ||
 			(newThread.archived &&
-				latestMessage?.interaction?.commandName === "modmail" &&
+				latestMessage?.interaction?.commandName === "modmail close" &&
 				Date.now() - +latestMessage.createdAt < 60_000)
 		)
 			return;
@@ -109,7 +110,12 @@ const event = {
 						embeds: [
 							(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
 								.setTitle("Modmail ticket opened!")
-								.setFooter({ text: UNSUPPORTED })
+								.setFooter({
+									text:
+										UNSUPPORTED +
+										CONSTANTS.footerSeperator +
+										"Messages starting with an equals sign (=) are ignored.",
+								})
 								.setColor(COLORS.opened),
 						],
 					})

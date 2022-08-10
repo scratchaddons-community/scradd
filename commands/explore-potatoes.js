@@ -70,12 +70,12 @@ async function textChannelMatches(channelWanted, channelFound) {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potatoboard.")
+		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
 			input
 				.setName("minimum-reactions")
 				.setDescription(
-					"Filter messages to only get those with at least this many reactions.",
+					"Filter messages to only get those with at least this many reactions",
 				)
 				.setRequired(false)
 				.setMinValue(MIN_REACTIONS),
@@ -83,13 +83,13 @@ const info = {
 		.addUserOption((input) =>
 			input
 				.setName("user")
-				.setDescription("Filter messages to only get those by a certain user.")
+				.setDescription("Filter messages to only get those by a certain user")
 				.setRequired(false),
 		)
 		.addChannelOption((input) =>
 			input
 				.setName("channel")
-				.setDescription("Filter messages to only get those in a certain channel.")
+				.setDescription("Filter messages to only get those in a certain channel")
 				.setRequired(false)
 				.addChannelTypes([
 					ChannelType.GuildText,
@@ -109,7 +109,7 @@ const info = {
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
 		if (!board?.isText()) {
-			throw new ReferenceError("Could not find board channel.");
+			throw new ReferenceError("Could not find board channel");
 		}
 
 		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
@@ -231,7 +231,7 @@ const info = {
 			.on("end", async () => {
 				const source = await interaction.fetchReply();
 
-				if (!(source instanceof Message)) throw new TypeError("Source is not a message.");
+				if (!(source instanceof Message)) throw new TypeError("source is not a Message");
 
 				await interaction.editReply({
 					allowedMentions: { users: [] },

@@ -6,23 +6,23 @@ const MAX_FETCH_COUNT = 100;
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Bulk deletes a specified amount of messages.")
+		.setDescription("Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
 			input
 				.setName("count")
 				.setDescription(
-					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to.`,
+					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to`,
 				)
 				.setRequired(true),
 		)
 		.addUserOption((input) =>
-			input.setName("user").setDescription("Only delete messages from this user."),
+			input.setName("user").setDescription("Only delete messages from this user"),
 		)
 		.setDefaultPermission(false),
 
 	async interaction(interaction) {
 		if (!interaction.channel || interaction.channel?.type === "DM")
-			throw new TypeError("Can not run this command in a DM.");
+			throw new TypeError("Can not run this command in a DM");
 
 		const count = interaction.options.getString("count") ?? "";
 		const user = interaction.options.getUser("user");

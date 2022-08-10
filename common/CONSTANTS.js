@@ -7,7 +7,6 @@ export default {
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",
 			sus: "<:sus:938548233385414686>",
-			amongus: "<:amogus:938441549660975136>",
 			appel: "<:appel:938818517535440896>",
 			cubot: "<:cubot:939336981601722428>",
 			tera: "<:tewwa:938486033274785832>",
@@ -24,7 +23,7 @@ export default {
 				"<:snakes2:962795778638762004>",
 				"<:snakes3:962800682061140019>",
 			],
-			bob: "<:bob:todo>",
+			bob: "<:bob:1001977844894810243>",
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",
@@ -53,6 +52,5 @@ export default {
 	themeColor: process.env.NODE_ENV === "production" ? 0xff7b26 : 0x175ef8,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	channels: { general: "806602307750985803" },
 	prodScradd: "929928324959055932",
 };

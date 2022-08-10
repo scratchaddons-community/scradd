@@ -25,7 +25,7 @@ export default async (client) => {
 						actual: command.data.name,
 						expected: "",
 						operator: name,
-						message: "Don't manually set the command name, it will use the file name.",
+						message: "Don’t manually set the command name, it will use the file name",
 					});
 				command.data = command.data.setName(name);
 				return /** @type {const} */ ([name, command]);

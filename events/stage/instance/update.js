@@ -11,7 +11,7 @@ const event = {
 			logs.push(` discovery ${newInstance.discoverableDisabled ?? true ? "dis" : "en"}abled`);
 		}
 		if (oldInstance.topic !== newInstance.topic) {
-			logs.push(`'s topic set to ${newInstance.topic}`);
+			logs.push(`’s topic set to ${newInstance.topic}`);
 		}
 
 		await Promise.all(

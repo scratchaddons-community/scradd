@@ -2,11 +2,7 @@ import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import log from "../../../common/moderation/logging.js";
 import { messageToText } from "../../../lib/message.js";
 
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../../../types/event").default<"messageDeleteBulk">}
- */
+/** @type {import("../../../types/event").default<"messageDeleteBulk">} */
 const event = {
 	async event(messages) {
 		const last = messages.last();
