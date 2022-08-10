@@ -285,7 +285,7 @@ const info = {
 					filter: (selectInteraction) =>
 						selectInteraction.user.id === interaction.user.id,
 
-					time: 30_000,
+					time: CONSTANTS.collectorTime,
 				})
 				.then(async (selectInteraction) => {
 					const promises = [];

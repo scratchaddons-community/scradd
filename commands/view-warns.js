@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
-import { getData } from "../common/moderation/warns.js";
+import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
 
 /** @type {import("../types/command").default} */
@@ -69,7 +69,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 					strikes.map(async (warn) => {
 						const strikes = warns.filter(({ info }) => info === warn.info).length;
 
-						return `\`${convertBase(warn.info || "", 10, 64)}\`${
+						return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
 							strikes === 1 ? "" : ` (*${strikes})`
 						}: expiring <t:${Math.round(warn.expiresAt / 1_000)}:R>`;
 					}),
@@ -89,9 +89,9 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 					new MessageActionRow().addComponents(
 						strikes.map((warn) =>
 							new MessageButton()
-								.setLabel(convertBase(warn.info || "", 10, 64))
+								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
 								.setStyle("SECONDARY")
-								.setCustomId(`${convertBase(warn.info || "", 10, 64)}_strike`),
+								.setCustomId(`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`),
 						),
 					),
 			  ]
@@ -110,7 +110,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
  */
 export async function getWarns(reply, filter, interactor) {
 	if (filter) {
-		const pinged = filter.matchAll(MessageMentions.USERS_PATTERN).next().value?.[1];
+		const pinged = filter.match(MessageMentions.USERS_PATTERN)?.[1];
 		if (pinged) {
 			const user = await interactor.client.users.fetch(pinged);
 
@@ -122,7 +122,7 @@ export async function getWarns(reply, filter, interactor) {
 
 			await reply(await getWarnsForMember(user, interactor.guild));
 		} else {
-			const id = convertBase(filter, 64, 10);
+			const id = convertBase(filter, WARN_INFO_BASE, 10);
 			const channel = interactor.guild && (await getThread("members", interactor.guild));
 
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
@@ -137,8 +137,8 @@ export async function getWarns(reply, filter, interactor) {
 			const reason = await fetch(message.attachments.first()?.url || "").then((response) =>
 				response.text(),
 			);
-			const matched = message.content.matchAll(MessageMentions.USERS_PATTERN);
-			const userId = matched.next().value?.[1];
+			const [, userId = "", moderatorId = ""] =
+				message.content.match(MessageMentions.USERS_PATTERN) || [];
 
 			const member = await interactor.guild?.members.fetch(userId).catch(() => {});
 
@@ -147,15 +147,13 @@ export async function getWarns(reply, filter, interactor) {
 
 			const nick = member?.displayName ?? user?.username;
 
-			const moderatorId = matched.next().value?.[1];
-
 			const mod =
 				(await interactor.guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await interactor.client.users.fetch(moderatorId).catch(() => {}));
 
 			const warnLog = (await getDatabases(["warn"], interactor.guild)).warn;
 			const allWarns = await getData(warnLog, true);
-			const caseId = idMessage ? filter : convertBase(filter, 10, 64);
+			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
 
 			const embed = new Embed()

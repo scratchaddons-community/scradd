@@ -86,7 +86,7 @@ const info = {
 
 		const embed = new Embed()
 			.setTitle(addon.name)
-			.setColor(CONSTANTS.colors.theme)
+			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
 					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(

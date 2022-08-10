@@ -1,5 +1,6 @@
 import { Util } from "discord.js";
 import log from "../../common/moderation/logging.js";
+import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 
 /** @type {import("../../types/event").default<"channelUpdate">} */
 const event = {
@@ -38,12 +39,12 @@ const event = {
 				edits.push(
 					"'s default archive after inactivity time was set to " +
 						{
-							60: "1 Hour",
-							1_440: "24 Hours",
-							4_320: "3 Days",
-							10_080: "1 Week",
-							MAX: "",
-						}[newChannel.defaultAutoArchiveDuration || 1_440] ||
+							[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
+							[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
+							[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
+							[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
+							MAX: "1 Week",
+						}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
 						newChannel.defaultAutoArchiveDuration,
 				);
 		}

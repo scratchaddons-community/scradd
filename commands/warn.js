@@ -4,6 +4,8 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
 import { stripMarkdown } from "../lib/markdown.js";
 
+const DEFAULT_STRIKES=1
+
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
@@ -22,7 +24,7 @@ const info = {
 			(input) =>
 				input
 					.setDescription(
-						"How many strikes to add. Use a negative number here to remove strikes. Defaults to 1",
+						`How many strikes to add. Use a negative number here to remove strikes. Defaults to ${DEFAULT_STRIKES}`,
 					)
 					.setName("strikes")
 					.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1),
@@ -31,7 +33,7 @@ const info = {
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");
 		const reason = stripMarkdown(interaction.options.getString("reason") || "No reason given.");
-		const strikes = interaction.options.getInteger("strikes") ?? 1;
+		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
 
 		if (!(user instanceof GuildMember))
 			return interaction.reply({

@@ -8,7 +8,8 @@ import log from "./logging.js";
 
 const EXPIRY_LENGTH = 21;
 export const WARNS_PER_MUTE = 3,
-	MUTE_LENGTHS = [4, 12, 24];
+	MUTE_LENGTHS = [4, 12, 24],
+	WARN_INFO_BASE = 64;
 
 /**
  * @param {import("discord.js").Message} message

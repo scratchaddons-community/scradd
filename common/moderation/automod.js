@@ -3,7 +3,7 @@ import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
 import { stripMarkdown } from "../../lib/markdown.js";
-import { caesar, joinWithAnd, pingablify } from "../../lib/text.js";
+import { caesar, joinWithAnd, pingablify, normalize } from "../../lib/text.js";
 export const regexps = [
 	// Just Delete
 	/c[*0b]ea|a[*hi]q[*3r]|[+g][*3r][$5f][+g][!*1v¡][(<p](?:[*@n][y|]|[y|][*3r])|[$5f](?:[(<p][#u]z[*hi][(<p]x)|o[*hi][+g]{1,2}(?:[ -]?c[!*1v¡]e[*@n][+g][*3r]|j[!*1v¡]c[*3r])|q[!*1v¡][y|]{1,2}q[*0b]|e[*3r][(<p][+g][*hi]z|i(?:[*@n]t[!*1v¡]a[*@n][y|]|[*hi][y|]i[*@n])|(?<![a-z0-9])(?:i[*@n]t[!*1v¡]a[*@n](?:[$*35ryf|]|yl)?|c[*3r]a[!*1v¡][$5f](?:[*3r][$5f])?|[*@n]a[*hi][$5f](?:[*3r][$5f])?|(?:oe[*3r][*@n][$5f][+g]|[$5f][*3r]z[*3r]a|[(<p](?:[*hi]z|[y|][!*1v¡][+g])|[+g][*3r]{2}[+g])[$5f]?)(?![a-z0-9])|🖕/gi,
@@ -24,7 +24,7 @@ export function censor(text) {
 				words[index]?.push(caesar(censored));
 				return "#".repeat(censored.length);
 			});
-		}, caesar(text.normalize("NFD").replace(/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu, ""))),
+		}, caesar(normalize(text))),
 	);
 
 	return words.flat().length
@@ -396,6 +396,8 @@ export async function badStickers(message) {
 	return bad;
 }
 
+const NICKNAME_RULE = 7;
+
 /** @param {import("discord.js").GuildMember} member */
 export async function changeNickname(member, strike = true) {
 	const censored = censor(member.displayName);
@@ -423,8 +425,7 @@ export async function changeNickname(member, strike = true) {
 			setNickname(member, pingablified),
 			member
 				.send({
-					content:
-						"For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule 7. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.",
+					content: `For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
 				})
 				.catch(() => {}),
 			removeDuplicateNicknames(member),
@@ -457,7 +458,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 						dm &&
 							found
 								.send(
-									"Your nickname conflicted with someone else's nickname, so I unfortunately had to change it to comply with rule 7.",
+									`Your nickname conflicted with someone else's nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 								)
 								.catch(() => false),
 					])

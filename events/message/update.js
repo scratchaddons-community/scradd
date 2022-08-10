@@ -71,7 +71,7 @@ const event = {
 			if (extraDiff)
 				files.push(new MessageAttachment(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
 
-			if (files.length > 0)
+			if (files.length )
 				log(
 					newMessage.guild,
 					`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,

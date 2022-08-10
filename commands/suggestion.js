@@ -274,17 +274,12 @@ const info = {
 								answer.toLowerCase() !== requestedAnswer.toLowerCase()
 							)
 								return;
-
+							const embed = message.embeds[0];
 							const description =
-								message.embeds[0]?.title ??
-								(message.embeds[0]?.description &&
-									Util.cleanContent(
-										message.embeds[0]?.description,
-										message.channel,
-									)) ??
-								(message.embeds[0]?.image?.url
-									? message.embeds[0]?.image?.url
-									: message.content);
+								embed?.title ??
+								(embed?.description &&
+									Util.cleanContent(embed?.description, message.channel)) ??
+								(embed?.image?.url ? embed?.image?.url : message.content);
 
 							const author = await getUserFromSuggestion(message);
 

@@ -60,7 +60,7 @@ const info = {
 							.addFields(
 								{ name: "Level", value: level.toLocaleString(), inline: true },
 								{ name: "XP", value: xp.toLocaleString(), inline: true },
-								{ name: "\u200b", value: "\u200b", inline: true },
+								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
 								{
 									name: "Next level",
 									value: nextLevel.toLocaleString(),
@@ -71,7 +71,7 @@ const info = {
 									value: xpForNextLevel.toLocaleString(),
 									inline: true,
 								},
-								{ name: "\u200b", value: "\u200b", inline: true },
+								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
 								{
 									name: "Remaining XP",
 									value: (xpForNextLevel - xp).toLocaleString(),
@@ -85,9 +85,9 @@ const info = {
 									}),
 									inline: true,
 								},
-								{ name: "\u200b", value: "\u200b", inline: true },
+								{ name: CONSTANTS.zeroWidthSpace, value: CONSTANTS.zeroWidthSpace, inline: true },
 								{
-									value: "\u200b",
+									value: CONSTANTS.zeroWidthSpace,
 									name: makeProgressBar(progress),
 								},
 							)

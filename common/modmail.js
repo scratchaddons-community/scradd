@@ -71,9 +71,7 @@ export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId =
-		embed.description.matchAll(MessageMentions.USERS_PATTERN).next().value?.[1] ??
-		embed.description;
+	const userId = embed.description.match(MessageMentions.USERS_PATTERN)?.[1] ?? embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
@@ -230,7 +228,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 			filter: (buttonInteraction) =>
 				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
 
-			time: 30_000,
+			time: CONSTANTS.collectorTime,
 		});
 		collector
 			.on("collect", async (buttonInteraction) => {

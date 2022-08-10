@@ -1,4 +1,6 @@
 export default {
+	collectorTime: 30_000,
+	zeroWidthSpace: "\u200b",
 	emojis: {
 		statuses: { yes: "<:yes:940054094272430130>", no: "<:no:940054047854047282>" },
 		autoreact: {
@@ -48,7 +50,7 @@ export default {
 		sa: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
 		scradd: { root: "https://github.com/scratchaddons-community/scradd", branch: "main" },
 	},
-	colors: { theme: 0xff7b26 },
+	themeColor: process.env.NODE_ENV === "production" ? 0xff7b26 : 0x175ef8,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: { general: "806602307750985803" },

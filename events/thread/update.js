@@ -12,6 +12,7 @@ import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/databases.js";
+import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
@@ -28,9 +29,14 @@ const event = {
 		if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 			logs.push(
 				`'s archive after inactivity time set to ${
-					{ 60: "1 Hour", 1_440: "24 Hours", 4_320: "3 Days", 10_080: "1 Week", MAX: "" }[
-						newThread.autoArchiveDuration || 1_440
-					] || newThread.autoArchiveDuration
+					{
+						[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
+						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
+						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
+						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
+						MAX: "1 Week",
+					}[newThread.autoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
+					newThread.autoArchiveDuration
 				}`,
 			);
 		}

@@ -1,4 +1,7 @@
-/** @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and autoreply if contains certain triggers. */
+/**
+ * @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and
+ *   autoreply if contains certain triggers.
+ */
 import { GuildMember, Util } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
@@ -20,6 +23,7 @@ import {
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
 import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import { normalize } from "../../lib/text.js";
 
 const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
@@ -116,9 +120,11 @@ const event = {
 					},
 					(options) => toEdit.edit(options),
 				);
-				message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
-					collector?.stop();
-				});
+				message.channel
+					.createMessageCollector({ time: CONSTANTS.collectorTime })
+					.on("collect", async () => {
+						collector?.stop();
+					});
 			}
 		}
 
@@ -285,16 +291,7 @@ const event = {
 			return;
 		}
 
-		const content = stripMarkdown(
-			message.content
-				.toLowerCase()
-				.normalize("NFD")
-				.replace(
-					/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
-					"",
-				)
-				.replace(/<.+?>/, ""),
-		);
+		const content = stripMarkdown(normalize(message.content).replace(/<.+?>/, ""));
 
 		/**
 		 * Determines whether the message contains a word.
@@ -313,13 +310,15 @@ const event = {
 			).test(content);
 		}
 
+		const REACTION_CAP = 2;
+
 		/**
 		 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
 		 *
 		 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
 		 */
 		function react(emoji) {
-			if (reactions > 2) return;
+			if (reactions > REACTION_CAP) return;
 			reactions++;
 			const promise = message.react(emoji).catch(console.error);
 			promises.push(promise);
@@ -348,14 +347,14 @@ const event = {
 			react(CONSTANTS.emojis.autoreact.tera);
 
 		if (includes("on addon")) {
-			if (reactions < 2) {
+			if (reactions < REACTION_CAP) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
 			}
 		}
 
 		if (includes("snake")) {
-			if (reactions < 2) {
+			if (reactions < REACTION_CAP) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
 			}

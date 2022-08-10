@@ -65,7 +65,7 @@ const event = {
 			// Or if they reacted to a message on the board
 			(message.channel.id === BOARD_CHANNEL && message.author.id === this.user.id) ||
 			// Or they reacted to an /explorepotatoes message
-			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
+			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length)
 		) {
 			// Remove the reaction
 			await reaction.users.remove(user);
