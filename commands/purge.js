@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 const MAX_FETCH_COUNT = 100;

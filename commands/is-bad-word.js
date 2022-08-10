@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { escapeMarkdown } from "discord.js";
+import { SlashCommandBuilder, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
 import { joinWithAnd } from "../lib/text.js";

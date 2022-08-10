@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { GuildMember } from "discord.js";
+import { SlashCommandBuilder, Embed } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { extractData, getDatabases } from "../common/databases.js";
 import { getLevelForXp, getXpForLevel } from "../common/xp.js";

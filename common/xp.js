@@ -1,5 +1,4 @@
-import { Embed } from "@discordjs/builders";
-import { GuildMember, User } from "discord.js";
+import { Embed, GuildMember, User } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 

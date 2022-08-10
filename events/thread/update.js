@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed, ThreadAutoArchiveDuration } from "discord.js";
+import { Embed, GuildMember, MessageEmbed, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -7,7 +7,6 @@ import {
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
-import { Embed } from "@discordjs/builders";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";

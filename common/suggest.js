@@ -5,8 +5,8 @@ import {
 	MessageEmbed,
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
+	Embed,
 } from "discord.js";
-import { Embed } from "@discordjs/builders";
 
 import CONSTANTS from "./CONSTANTS.js";
 

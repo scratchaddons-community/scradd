@@ -1,7 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, MessageEmbed, Embed } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
-import { Embed } from "@discordjs/builders";
 import { censor } from "./moderation/automod.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";

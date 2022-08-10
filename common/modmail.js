@@ -1,4 +1,5 @@
 import {
+	Embed,
 	GuildMember,
 	Message,
 	MessageEmbed,
@@ -9,7 +10,6 @@ import {
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
-import { Embed } from "@discordjs/builders";
 
 import { escapeMessage } from "../lib/markdown.js";
 import { asyncFilter } from "../lib/promises.js";

@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Colors, escapeMarkdown } from "discord.js";
+import { SlashCommandBuilder, Colors, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";

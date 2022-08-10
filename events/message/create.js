@@ -1,5 +1,4 @@
-import { GuildMember, cleanCodeBlockContent } from "discord.js";
-import { Embed } from "@discordjs/builders";
+import { GuildMember, cleanCodeBlockContent, Embed } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";

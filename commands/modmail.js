@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { SlashCommandBuilder, Embed } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {

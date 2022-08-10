@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { GuildMember } from "discord.js";
+import { SlashCommandBuilder, GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
 import { stripMarkdown } from "../lib/markdown.js";

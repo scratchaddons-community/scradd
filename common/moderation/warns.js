@@ -1,7 +1,6 @@
-import { Colors, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
+import { Embed, Colors, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
-import { Embed } from "@discordjs/builders";
 import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */

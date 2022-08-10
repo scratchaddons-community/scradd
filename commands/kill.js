@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
 import { cleanListeners } from "../common/databases.js";
 import logError from "../lib/logError.js";

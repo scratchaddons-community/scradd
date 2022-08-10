@@ -1,5 +1,12 @@
-import { Embed, SlashCommandBuilder } from "@discordjs/builders";
-import { GuildMember, ActionRowBuilder, ButtonBuilder, MessageMentions, time } from "discord.js";
+import {
+	Embed,
+	SlashCommandBuilder,
+	GuildMember,
+	ActionRowBuilder,
+	ButtonBuilder,
+	MessageMentions,
+	time,
+} from "discord.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
@@ -171,10 +178,7 @@ export async function getWarns(reply, filter, interactor) {
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
 			embed.addFields({ name: "Strikes", value: strikes, inline: true });
 
-			if (
-				mod &&
-				interactor.roles.resolve(process.env.MODERATOR_ROLE || "")
-			)
+			if (mod && interactor.roles.resolve(process.env.MODERATOR_ROLE || ""))
 				embed.addFields({ name: "Moderator", value: mod.toString(), inline: true });
 
 			if (user)

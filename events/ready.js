@@ -65,8 +65,8 @@ const event = {
 			},
 			/**
 			 * @type {[
-			 * 	import("discord-api-types/v10").RESTPostAPIApplicationCommandsJSONBody[],
-			 * 	import("discord-api-types/v10").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
 			 * ]}
 			 */ ([[], []]),
 		);

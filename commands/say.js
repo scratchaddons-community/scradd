@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder } from "discord.js";
+import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";

@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { escapeMarkdown } from "discord.js";
+import { SlashCommandBuilder, Embed, escapeMarkdown } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";

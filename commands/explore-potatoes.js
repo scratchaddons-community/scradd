@@ -1,5 +1,11 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, ButtonBuilder, MessageEmbed, MessageMentions, ChannelType } from "discord.js";
+import {
+	SlashCommandBuilder,
+	Message,
+	ButtonBuilder,
+	MessageEmbed,
+	MessageMentions,
+	ChannelType,
+} from "discord.js";
 
 import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";

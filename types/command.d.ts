@@ -1,6 +1,10 @@
 import { AssertionError } from "assert";
-import type { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
-import type { CommandInteraction, Client } from "discord.js";
+import type {
+	SlashCommandBuilder,
+	SlashCommandSubcommandsOnlyBuilder,
+	CommandInteraction,
+	Client,
+} from "discord.js";
 
 export type CommandInfo = {
 	/** Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words. */
