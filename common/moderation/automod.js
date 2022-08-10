@@ -1,4 +1,4 @@
-import { Invite, Util } from "discord.js";
+import { Invite, cleanContent, FormattingPatterns } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
@@ -149,7 +149,7 @@ export async function automodMessage(message) {
 		? false
 		: message.embeds
 				.map((embed) => [
-					embed.description && Util.cleanContent(embed.description, message.channel),
+					embed.description && cleanContent(embed.description, message.channel),
 					embed.title,
 					embed.url,
 					embed.image?.url,
@@ -209,7 +209,8 @@ export async function automodMessage(message) {
 	}
 
 	const animatedEmojiCount =
-		(message.content && message.content.match(/<a:.+?:\d+>/gi)?.length) || 0;
+		(message.content && message.content.match(FormattingPatterns.AnimatedEmoji)?.length) || 0;
+	// todo: it isn't global anymore
 
 	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false;
 

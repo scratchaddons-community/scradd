@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
@@ -28,8 +28,8 @@ const info = {
 						"messages",
 						{
 							components: [
-								new MessageActionRow().addComponents(
-									new MessageButton()
+								new ActionRowBuilder().addComponents(
+									new ButtonBuilder()
 										.setEmoji("👀")
 										.setLabel("View Message")
 										.setStyle("LINK")

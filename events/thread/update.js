@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from "discord.js";
+import { GuildMember, MessageEmbed, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -12,7 +12,6 @@ import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/databases.js";
-import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
@@ -35,7 +34,6 @@ const event = {
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-						MAX: "1 Week",
 					}[newThread.autoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
 					newThread.autoArchiveDuration
 				}`,
@@ -64,11 +62,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread ${oldThread.toString()} (https://discord.com/channels/${
-							newThread.guild.id
-						}/${oldThread.id})` +
-							edit +
-							`!`,
+						`Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`,
 						"channels",
 					),
 			),

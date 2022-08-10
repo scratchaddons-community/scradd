@@ -20,15 +20,14 @@ const info = {
 				.setName("reason")
 				.setRequired(process.env.NODE_ENV === "production"),
 		)
-		.addIntegerOption(
-			(input) =>
-				input
-					.setDescription(
-						`How many strikes to add. Use a negative number here to remove strikes. Defaults to ${DEFAULT_STRIKES}`,
-					)
-					.setName("strikes")
-					.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1),
-			// .setMinValue(-1 * WARNS_PER_MUTE),
+		.addIntegerOption((input) =>
+			input
+				.setDescription(
+					`How many strikes to add. Use a negative number here to remove strikes. Defaults to ${DEFAULT_STRIKES}`,
+				)
+				.setName("strikes")
+				.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1)
+				.setMinValue(-1 * WARNS_PER_MUTE),
 		),
 	async interaction(interaction) {
 		const user = interaction.options.getMember("user");

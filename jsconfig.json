@@ -11,7 +11,7 @@
 		"importsNotUsedAsValues": "error",
 		"lib": ["dom", "ES2021"],
 		"maxNodeModuleJsDepth": 0,
-		"module": "esnext",
+		"module": "node16",
 		"moduleResolution": "node",
 		"noEmit": true,
 		"noErrorTruncation": true,

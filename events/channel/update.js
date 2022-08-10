@@ -1,6 +1,5 @@
-import { Util } from "discord.js";
+import { escapeMarkdown, ThreadAutoArchiveDuration } from "discord.js";
 import log from "../../common/moderation/logging.js";
-import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 
 /** @type {import("../../types/event").default<"channelUpdate">} */
 const event = {
@@ -13,7 +12,7 @@ const event = {
 			return;
 		const edits = [];
 		oldChannel.name !== newChannel.name &&
-			edits.push(" was renamed to " + Util.escapeMarkdown(newChannel.name));
+			edits.push(" was renamed to " + escapeMarkdown(newChannel.name));
 		oldChannel.type !== newChannel.type &&
 			edits.push(
 				" was made into a" +
@@ -43,7 +42,6 @@ const event = {
 							[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 							[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 							[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-							MAX: "1 Week",
 						}[
 							newChannel.defaultAutoArchiveDuration ||
 								ThreadAutoArchiveDuration.OneDay
@@ -61,6 +59,7 @@ const event = {
 				edits.push("’s user limit was set to " + newChannel.userLimit + " users");
 			oldChannel.rtcRegion !== newChannel.rtcRegion &&
 				edits.push("’s region override was set to " + newChannel.rtcRegion);
+			oldChannel.videoQualityMode !== newChannel.videoQualityMode && edits.push("TODO");
 		}
 
 		await Promise.all(

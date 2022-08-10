@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Util } from "discord.js";
+import { escapeMarkdown } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -146,9 +146,9 @@ const info = {
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addField({
+				embed.addFields({
 					name: "Contributors",
-					value: Util.escapeMarkdown(credits),
+					value: escapeMarkdown(credits),
 					inline: true,
 				});
 
@@ -161,11 +161,11 @@ const info = {
 				);
 
 			embed.addFields(
-				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
+				{ inline: true, name: "Group", value: escapeMarkdown(group) },
 				{
 					inline: true,
 					name: "Version added",
-					value: Util.escapeMarkdown(
+					value: escapeMarkdown(
 						"v" +
 							manifest.versionAdded +
 							(manifest.latestUpdate

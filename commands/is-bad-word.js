@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Util } from "discord.js";
+import { escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -25,7 +25,7 @@ const info = {
 						result.strikes === 1 ? "" : "s"
 					}**, ${result.strikes ? "so don’t" : "but please don’t still"}.\n\n` +
 					"**I detected the following words as bad**: " +
-					joinWithAnd(words, (word) => "*" + Util.escapeMarkdown(word) + "*"),
+					joinWithAnd(words, (word) => "*" + escapeMarkdown(word) + "*"),
 			});
 		} else
 			await interaction.reply({

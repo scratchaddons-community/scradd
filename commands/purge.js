@@ -13,7 +13,8 @@ const info = {
 				.setDescription(
 					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to`,
 				)
-				.setRequired(true),
+				.setRequired(true)
+				.setMaxLength(22),
 		)
 		.addUserOption((input) =>
 			input.setName("user").setDescription("Only delete messages from this user"),

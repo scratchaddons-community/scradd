@@ -1,6 +1,12 @@
-import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
+import {
+	Colors,
+	GuildMember,
+	Message,
+	MessageEmbed,
+	escapeMarkdown,
+	ThreadAutoArchiveDuration,
+} from "discord.js";
 import { Embed } from "@discordjs/builders";
-import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 
 import CONSTANTS from "./CONSTANTS.js";
 
@@ -11,7 +17,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 export const RATELIMT_MESSAGE =
 	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
+export const DEFAULT_COLOR = Colors.GREYPLE;
 
 /** @type {{ [key: string]: number }} */
 const cooldowns = {};
@@ -42,7 +48,7 @@ export default class SuggestionChannel {
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const title = Util.escapeMarkdown(data.title);
+		const title = escapeMarkdown(data.title);
 
 		const embed = new Embed()
 			.setColor(DEFAULT_COLOR)
@@ -113,7 +119,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!interaction.member?.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
+		if (!interaction.member.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -203,7 +209,7 @@ export default class SuggestionChannel {
 
 		const promises = [];
 
-		const title = Util.escapeMarkdown(updated.title ?? "");
+		const title = escapeMarkdown(updated.title ?? "");
 
 		promises.push(
 			title

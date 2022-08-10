@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Constants, Util } from "discord.js";
+import { Colors, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";
@@ -12,16 +12,16 @@ if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env
 const ANSWERS = [
 	{
 		name: "Unverified",
-		color: Constants.Colors.GREYPLE,
+		color: Colors.Greyple,
 		description: "This bug hasn’t been verified as an actual bug yet",
 	},
 	{
-		color: Constants.Colors.GREEN,
+		color: Colors.Green,
 		description: "This bug has been verified and it will be fixed soon",
 		name: "Valid Bug",
 	},
 	{
-		color: Constants.Colors.DARK_GREEN,
+		color: Colors.DarkGreen,
 
 		description:
 			"This bug is not a high priority to fix it as it does not affect usage of the addon",
@@ -29,17 +29,17 @@ const ANSWERS = [
 		name: "Minor Bug",
 	},
 	{
-		color: Constants.Colors.GOLD,
+		color: Colors.Gold,
 		description: "A contributor is currently working to fix this bug",
 		name: "In Development",
 	},
 	{
-		color: Constants.Colors.BLUE,
+		color: Colors.Blue,
 		description: "This bug has been fixed in the next version of Scratch Addons",
 		name: "Fixed",
 	},
 	{
-		color: Constants.Colors.RED,
+		color: Colors.Red,
 		description: "This is not something that we can or will change",
 		name: "Invalid Bug",
 	},
@@ -61,13 +61,15 @@ const info = {
 					option
 						.setName("title")
 						.setDescription(`A short summary of the bug report`)
-						.setRequired(true),
+						.setRequired(true)
+						.setMaxLength(100),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("bug-report")
 						.setDescription("A detailed description of the bug")
-						.setRequired(true),
+						.setRequired(true)
+						.setMinLength(30),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -84,10 +86,10 @@ const info = {
 
 					for (const [index, answer] of ANSWERS.entries()) {
 						if (index)
-							newOption.addChoice(
-								`${answer.name} (${answer.description})`,
-								answer.name,
-							);
+							newOption.addChoices({
+								name: `${answer.name} (${answer.description})`,
+								value: answer.name,
+							});
 					}
 
 					return newOption;
@@ -103,13 +105,15 @@ const info = {
 					option
 						.setName("title")
 						.setDescription(`A short summary of the bug report`)
-						.setRequired(false),
+						.setRequired(false)
+						.setMaxLength(100),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("bug-report")
 						.setDescription("(OP only) A detailed description of the bug")
-						.setRequired(false),
+						.setRequired(false)
+						.setMinLength(30),
 				),
 		),
 
@@ -146,9 +150,9 @@ const info = {
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered bug report as **${Util.escapeMarkdown(
+							} Successfully answered bug report as **${escapeMarkdown(
 								answer,
-							)}**! *${Util.escapeMarkdown(
+							)}**! *${escapeMarkdown(
 								ANSWERS.find(({ name }) => name === answer)?.description || "",
 							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 

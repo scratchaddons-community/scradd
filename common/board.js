@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, MessageEmbed } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { Embed } from "@discordjs/builders";
@@ -98,7 +98,7 @@ export async function postMessageToBoard(message) {
 		})
 		.setTimestamp(message.createdAt);
 
-	const button = new MessageButton()
+	const button = new ButtonBuilder()
 		.setEmoji("👀")
 		.setLabel("View Context")
 		.setStyle("LINK")
@@ -111,7 +111,7 @@ export async function postMessageToBoard(message) {
 
 	const boardMessage = await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-		components: [new MessageActionRow().addComponents(button)],
+		components: [new ActionRowBuilder().addComponents(button)],
 
 		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
 			message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""

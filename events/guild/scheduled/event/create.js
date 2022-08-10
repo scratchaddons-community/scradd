@@ -1,3 +1,4 @@
+import { time } from "discord.js";
 import log from "../../../../common/moderation/logging.js";
 
 /** @type {import("../../../../types/event").default<"guildScheduledEventCreate">} */
@@ -13,8 +14,8 @@ const event = {
 			guild,
 			`Event ${event.name} scheduled${
 				start || end
-					? ` for <t:${Math.round(+(start || end) / 1_000)}>${
-							end && start ? "-<t:" + Math.round(+end / 1_000) + ">" : ""
+					? ` for ${time(start || end || new Date())}${
+							end && start ? "-" + time(end) : ""
 					  }`
 					: ""
 			} in ${

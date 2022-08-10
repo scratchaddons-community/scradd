@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageButton, MessageEmbed, MessageMentions, Channel } from "discord.js";
-import { ChannelType } from "discord-api-types/v9";
+import { Message, ButtonBuilder, MessageEmbed, MessageMentions, ChannelType } from "discord.js";
 
 import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -103,7 +102,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const deferPromise = interaction.deferReply({
+		const deferred = await interaction.deferReply({
 			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 		});
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
@@ -115,53 +114,47 @@ const info = {
 		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
 		const user = interaction.options.getUser("user")?.id;
 		const channelWanted = interaction.options.getChannel("channel");
-		const [, fetchedMessages] = await Promise.all([
-			deferPromise,
-			getAllMessages(board).then((messages) =>
-				asyncFilter(
-					messages
-						.filter((message) => {
-							if (
-								!message.content ||
-								!message.embeds[0] ||
-								!message.author.bot ||
-								(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
-							)
-								return false;
-							return message;
-						})
-						.sort(() => Math.random() - 0.5),
-					async (message) => {
-						// "**🥔 8** | <#1001943698323554334> (<#811065897057255424>) | <@891316244580544522>"
-						// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
+		const fetchedMessages = await getAllMessages(board).then((messages) =>
+			asyncFilter(
+				messages
+					.filter((message) => {
 						if (
-							user &&
-							message.content.match(MessageMentions.USERS_PATTERN)?.[1] !== user
+							!message.content ||
+							!message.embeds[0] ||
+							!message.author.bot ||
+							(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
 						)
 							return false;
-						const channels = message.content.match(MessageMentions.CHANNELS_PATTERN);
-						const channelFound = channels?.[2] || channels?.[1];
-
-						const channelWantedFetched =
-							channelWanted &&
-							(channelWanted instanceof Channel
-								? channelWanted
-								: await interaction.guild?.channels.fetch(channelWanted.id));
-
-						if (
-							channelWantedFetched &&
-							channelFound &&
-							!(await textChannelMatches(channelWantedFetched, channelFound))
-						)
-							return false;
-
 						return message;
-					},
-				),
-			),
-		]);
+					})
+					.sort(() => Math.random() - 0.5),
+				async (message) => {
+					// "**🥔 8** | <#1001943698323554334> (<#811065897057255424>) | <@891316244580544522>"
+					// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
+					if (user && message.content.match(MessageMentions.USERS_PATTERN)?.[1] !== user)
+						return false;
+					const channels = message.content.match(MessageMentions.CHANNELS_PATTERN);
+					const channelFound = channels?.[2] || channels?.[1];
 
-		const nextButton = new MessageButton()
+					const channelWantedFetched =
+						channelWanted &&
+						(channelWanted instanceof Channel
+							? channelWanted
+							: await interaction.guild?.channels.fetch(channelWanted.id));
+
+					if (
+						channelWantedFetched &&
+						channelFound &&
+						!(await textChannelMatches(channelWantedFetched, channelFound))
+					)
+						return false;
+
+					return message;
+				},
+			),
+		);
+
+		const nextButton = new ButtonBuilder()
 			.setLabel("Next")
 			.setCustomId(generateHash("next"))
 			.setStyle("SECONDARY")
@@ -213,7 +206,7 @@ const info = {
 
 		await interaction.editReply(await generateMessage(source));
 
-		const collector = interaction.channel?.createMessageComponentCollector({
+		const collector = deferred.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
 				buttonInteraction.customId === nextButton.customId &&
 				buttonInteraction.user.id === interaction.user.id,
@@ -230,8 +223,6 @@ const info = {
 			})
 			.on("end", async () => {
 				const source = await interaction.fetchReply();
-
-				if (!(source instanceof Message)) throw new TypeError("source is not a Message");
 
 				await interaction.editReply({
 					allowedMentions: { users: [] },

@@ -1,3 +1,5 @@
+import { ThreadAutoArchiveDuration } from "discord.js";
+
 export const LOG_GROUPS = /** @type {const} */ ([
 	"server",
 	"messages",
@@ -26,6 +28,9 @@ export async function getThread(group, guild) {
 	const threads = await channel.threads.fetchActive();
 	return (
 		threads.threads.find((/** @type {{ name: string }} */ thread) => thread.name === group) ||
-		(await channel.threads.create({ name: group, autoArchiveDuration: "MAX" }))
+		(await channel.threads.create({
+			name: group,
+			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+		}))
 	);
 }

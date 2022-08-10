@@ -1,4 +1,4 @@
-import { GuildMember, Util } from "discord.js";
+import { GuildMember, cleanCodeBlockContent } from "discord.js";
 import { Embed } from "@discordjs/builders";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
@@ -50,8 +50,9 @@ const event = {
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
-				webhooks.find((possibleWebhook) => !!possibleWebhook.token) ??
-				(await mailChannel.createWebhook(CONSTANTS.webhookName));
+				webhooks.find(
+					(possibleWebhook) => possibleWebhook.applicationId === this.application.id,
+				) ?? (await mailChannel.createWebhook(CONSTANTS.webhookName));
 			const existingThread = await getThreadFromMember(
 				message.interaction?.user || message.author,
 				guild,
@@ -207,7 +208,7 @@ const event = {
 
 						content:
 							`You used the spoiler hack to hide: \`\`\`\n` +
-							`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
+							`${cleanCodeBlockContent(array.join(spoilerHack))}\n` +
 							`\`\`\``,
 					}),
 				);
@@ -249,7 +250,7 @@ const event = {
 											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2",
 											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3",
 											"REPLY",
-											"APPLICATION_COMMAND",
+											"CHAT_INPUT_COMMAND",
 											"CONTEXT_MENU_COMMAND",
 										].includes(message.type)),
 							),
@@ -349,8 +350,11 @@ const event = {
 		if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
-			message.mentions.users.has(this.user?.id ?? "") &&
-			message.mentions.repliedUser?.id !== (this.user?.id ?? "")
+			message.mentions.has(this.user?.id ?? "", {
+				ignoreEveryone: true,
+				ignoreRoles: true,
+				ignoreRepliedUser: true,
+			})
 		)
 			react("👋");
 

@@ -2,7 +2,7 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, MessageEmbed } from "discord.js";
 import diffLib from "difflib";
 
 /** @type {import("../../types/event").default<"messageUpdate">} */
@@ -55,7 +55,7 @@ const event = {
 
 			if (contentDiff)
 				files.push(
-					new MessageAttachment(
+					new AttachmentBuilder(
 						Buffer.from(
 							contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 							"utf-8",
@@ -65,7 +65,7 @@ const event = {
 				);
 
 			if (extraDiff)
-				files.push(new MessageAttachment(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
+				files.push(new AttachmentBuilder(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
 
 			if (files.length)
 				log(
@@ -82,8 +82,8 @@ const event = {
 					newMessage.guild &&
 					log(newMessage.guild, edit + "!", "messages", {
 						components: [
-							new MessageActionRow().addComponents(
-								new MessageButton()
+							new ActionRowBuilder().addComponents(
+								new ButtonBuilder()
 									.setEmoji("👀")
 									.setLabel("View Message")
 									.setStyle("LINK")

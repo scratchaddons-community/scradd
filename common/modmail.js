@@ -2,10 +2,11 @@ import {
 	GuildMember,
 	Message,
 	MessageEmbed,
-	MessageActionRow,
-	MessageButton,
-	Constants,
+	ActionRowBuilder,
+	ButtonBuilder,
+	Colors,
 	MessageMentions,
+	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
 import { Embed } from "@discordjs/builders";
@@ -21,9 +22,9 @@ export const { MODMAIL_CHANNEL = "" } = process.env;
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
 
 export const COLORS = {
-	opened: Constants.Colors.GOLD,
-	closed: Constants.Colors.DARK_GREEN,
-	confirm: Constants.Colors.BLURPLE,
+	opened: Colors.GOLD,
+	closed: Colors.DARK_GREEN,
+	confirm: Colors.BLURPLE,
 };
 
 export const UNSUPPORTED =
@@ -147,7 +148,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 							embeds: [
 								new MessageEmbed(starter.embeds[0])
 									.setTitle("Modmail ticket closed!")
-									.setColor(Constants.Colors.DARK_GREEN),
+									.setColor(COLORS.closed),
 							],
 						})
 						.catch(console.error);
@@ -195,69 +196,63 @@ export async function sendOpenedMessage(user) {
 
 /**
  * @param {Embed} confirmEmbed
- * @param {(
- * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
- * @param {(
- * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
+ * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
+ * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} edit
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
-	const button = new MessageButton()
+	const button = new ButtonBuilder()
 		.setLabel("Confirm")
 		.setStyle("PRIMARY")
 		.setCustomId(generateHash("confirm"));
-	const cancelButton = new MessageButton()
+	const cancelButton = new ButtonBuilder()
 		.setLabel("Cancel")
 		.setCustomId(generateHash("cancel"))
 		.setStyle("SECONDARY");
 
 	const message = await reply({
-		components: [new MessageActionRow().addComponents(button, cancelButton)],
+		components: [new ActionRowBuilder().addComponents(button, cancelButton)],
 		embeds: [confirmEmbed],
 	});
 
-	if (message instanceof Message) {
-		const collector = message.channel.createMessageComponentCollector({
-			filter: (buttonInteraction) =>
-				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
+	const collector = message.createMessageComponentCollector({
+		filter: (buttonInteraction) =>
+			[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
 
-			time: CONSTANTS.collectorTime,
-		});
-		collector
-			.on("collect", async (buttonInteraction) => {
-				collector.stop();
-				switch (buttonInteraction.customId) {
-					case button.customId: {
-						await onConfirm(buttonInteraction);
+		time: CONSTANTS.collectorTime,
+	});
+	collector
+		.on("collect", async (buttonInteraction) => {
+			collector.stop();
+			switch (buttonInteraction.customId) {
+				case button.customId: {
+					await onConfirm(buttonInteraction);
 
-						break;
-					}
-					case cancelButton.customId: {
-						await buttonInteraction.reply({
-							content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
-							ephemeral: true,
-						});
-
-						break;
-					}
+					break;
 				}
-			})
-			.on("end", async () => {
-				await edit({
-					components: [
-						new MessageActionRow().addComponents(
-							button.setDisabled(true),
-							cancelButton.setDisabled(true),
-						),
-					],
+				case cancelButton.customId: {
+					await buttonInteraction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
+						ephemeral: true,
+					});
 
-					embeds: [confirmEmbed],
-				});
+					break;
+				}
+			}
+		})
+		.on("end", async () => {
+			await edit({
+				components: [
+					new ActionRowBuilder().addComponents(
+						button.setDisabled(true),
+						cancelButton.setDisabled(true),
+					),
+				],
+
+				embeds: [confirmEmbed],
 			});
-		return collector;
-	}
+		});
+	return collector;
 }
 
 /**
@@ -302,7 +297,7 @@ export async function openModmail(mailChannel, openedEmbed, name, ping = false) 
 			.toLocaleString([], { minimumIntegerDigits: 2 })}-${date
 			.getUTCDate()
 			.toLocaleString([], { minimumIntegerDigits: 2 })})`,
-		autoArchiveDuration: "MAX",
+		autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 	});
 	await thread.setLocked(true);
 	return thread;

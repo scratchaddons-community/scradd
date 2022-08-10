@@ -51,7 +51,7 @@ const info = {
 				return interaction.reply({
 					embeds: [
 						new Embed()
-							.setColor(member instanceof GuildMember ? member.displayColor : null)
+							.setColor(member ? member.displayColor : null)
 							.setAuthor({
 								iconURL: (member || user).displayAvatarURL(),
 								name: member?.displayName ?? user.username,

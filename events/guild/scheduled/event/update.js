@@ -1,3 +1,4 @@
+import { time } from "discord.js";
 import log from "../../../../common/moderation/logging.js";
 
 /** @type {import("../../../../types/event").default<"guildScheduledEventUpdate">} */
@@ -22,6 +23,8 @@ const event = {
 		if (oldEvent.description !== newEvent.description)
 			logs.push("’s description set to `" + newEvent.description + "`");
 
+		if (oldEvent.image !== newEvent.image) logs.push("’s TODO");
+
 		if (
 			oldEvent.scheduledStartAt.valueOf() !== newEvent.scheduledStartAt.valueOf() ||
 			oldEvent.scheduledEndAt?.valueOf() !== newEvent.scheduledEndAt?.valueOf()
@@ -31,8 +34,8 @@ const event = {
 			logs.push(
 				` rescheduled${
 					start || end
-						? ` to <t:${Math.round(+(start || end) / 1_000)}>${
-								end && start ? "-<t:" + Math.round(+end / 1_000) + ">" : ""
+						? ` to ${time(start || end || new Date())}${
+								end && start ? "-" + time(end) : ""
 						  }`
 						: ""
 				}`,

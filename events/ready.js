@@ -3,6 +3,7 @@ import commands from "../common/commands.js";
 import { pkg } from "../lib/files.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../lib/logError.js";
+import { ActivityType } from "discord.js";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {
@@ -31,7 +32,7 @@ const event = {
 						CONSTANTS.prodScradd === this.user.id
 							? "the SA server!"
 							: "for bugs…",
-					type: "WATCHING",
+					type: ActivityType.Watching,
 					url: pkg.homepage,
 				},
 			],
@@ -64,8 +65,8 @@ const event = {
 			},
 			/**
 			 * @type {[
-			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
-			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	import("discord-api-types/v10").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	import("discord-api-types/v10").RESTPostAPIApplicationCommandsJSONBody[],
 			 * ]}
 			 */ ([[], []]),
 		);

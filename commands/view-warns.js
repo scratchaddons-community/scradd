@@ -1,5 +1,5 @@
 import { Embed, SlashCommandBuilder } from "@discordjs/builders";
-import { GuildMember, MessageActionRow, MessageButton, MessageMentions } from "discord.js";
+import { GuildMember, ActionRowBuilder, ButtonBuilder, MessageMentions, time } from "discord.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
@@ -71,7 +71,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 
 						return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
 							strikes === 1 ? "" : ` (*${strikes})`
-						}: expiring <t:${Math.round(warn.expiresAt / 1_000)}:R>`;
+						}: expiring ${time(warn.expiresAt, "R")}`;
 					}),
 				)
 			).join("\n") || `${user.toString()} has no recent strikes!`,
@@ -86,9 +86,9 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 	return {
 		components: strikes.length
 			? [
-					new MessageActionRow().addComponents(
+					new ActionRowBuilder().addComponents(
 						strikes.map((warn) =>
-							new MessageButton()
+							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
 								.setStyle("SECONDARY")
 								.setCustomId(
@@ -141,6 +141,7 @@ export async function getWarns(reply, filter, interactor) {
 			);
 			const [, userId = "", moderatorId = ""] =
 				message.content.match(MessageMentions.USERS_PATTERN) || [];
+			// todo: this isn't global anymore
 
 			const member = await interactor.guild?.members.fetch(userId).catch(() => {});
 
@@ -168,21 +169,21 @@ export async function getWarns(reply, filter, interactor) {
 				.setTimestamp(message.createdAt);
 
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
-			embed.addField({ name: "Strikes", value: strikes, inline: true });
+			embed.addFields({ name: "Strikes", value: strikes, inline: true });
 
 			if (
 				mod &&
-				interactor instanceof GuildMember &&
 				interactor.roles.resolve(process.env.MODERATOR_ROLE || "")
 			)
-				embed.addField({ name: "Moderator", value: mod.toString(), inline: true });
+				embed.addFields({ name: "Moderator", value: mod.toString(), inline: true });
 
-			if (user) embed.addField({ name: "Target user", value: user.toString(), inline: true });
+			if (user)
+				embed.addFields({ name: "Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
-				embed.addField({
+				embed.addFields({
 					name: "Expirery",
-					value: `<t:${Math.round(expiresAt / 1_000)}:R>`,
+					value: time(expiresAt, "R"),
 					inline: true,
 				});
 

@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, messageToText } from "../../lib/message.js";
 
@@ -9,7 +9,7 @@ const event = {
 		const content = !message.partial && (await messageToText(message));
 		const { embeds, files } = await extractMessageExtremities(message);
 		if (content)
-			files.unshift(new MessageAttachment(Buffer.from(content, "utf-8"), "message.txt"));
+			files.unshift(new AttachmentBuilder(Buffer.from(content, "utf-8"), "message.txt"));
 
 		while (files.length > 10) files.pop();
 
@@ -23,8 +23,8 @@ const event = {
 				embeds,
 				files,
 				components: [
-					new MessageActionRow().addComponents(
-						new MessageButton()
+					new ActionRowBuilder().addComponents(
+						new ButtonBuilder()
 							.setEmoji("👀")
 							.setLabel("View Context")
 							.setStyle("LINK")

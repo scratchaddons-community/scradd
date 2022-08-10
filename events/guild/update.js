@@ -184,6 +184,8 @@ const event = {
 			logs.push(`Server widget ${newGuild.partnered ? "en" : "dis"}abled`);
 		}
 
+		// TODO: maxVideoChannelUsers
+
 		await Promise.all(logs.map((edit) => log(newGuild, edit + `!`, "server")));
 	},
 };
