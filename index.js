@@ -37,7 +37,7 @@ const client = new Client({
 	restWsBridgeTimeout: 30_000,
 
 	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
-	ws: { large_threshold: 250 },
+	ws: { large_threshold: 0 },
 });
 
 const events = await /**
@@ -47,7 +47,7 @@ const events = await /**
  */ (importScripts(path.resolve(dirname, "./events")));
 
 for (const [event, execute] of events.entries()) {
-	if (execute.apply === false) continue;
+	if (execute.enable === false) continue;
 
 	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {

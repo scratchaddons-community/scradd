@@ -18,7 +18,7 @@ import CONSTANTS from "./CONSTANTS.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
-if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env.");
+if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
 
 export const COLORS = {
 	opened: Constants.Colors.GOLD,
@@ -27,9 +27,7 @@ export const COLORS = {
 };
 
 export const UNSUPPORTED =
-	"Please note that reactions, replies, edits, and deletions are not supported" +
-	CONSTANTS.footerSeperator +
-	"Messages starting with an equals sign (=) are ignored.";
+	"Please note that reactions, replies, edits, and deletions are not supported";
 
 /**
  * Generate a webhook message from a message sent by a user.
@@ -52,11 +50,11 @@ export async function generateMessage(message) {
 		(await message.guild?.members.fetch(message.author.id));
 
 	return {
-		avatarURL: (member || message.interaction?.user || message.author)?.displayAvatarURL(),
+		avatarURL: (member || message.author)?.displayAvatarURL(),
 		content: (await messageToText(message, false)) || undefined,
 		embeds,
 		files,
-		username: member?.displayName ?? (message.interaction?.user || message.author).username,
+		username: member?.displayName ?? message.author.username,
 	};
 }
 
@@ -65,16 +63,13 @@ export async function generateMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages
- *   are being sent to.
+ * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages are being sent to.
  */
 export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId =
-		embed.description.matchAll(MessageMentions.USERS_PATTERN).next().value?.[1] ??
-		embed.description;
+	const userId = embed.description.match(MessageMentions.USERS_PATTERN)?.[1] ?? embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
@@ -91,7 +86,7 @@ export async function getThreadFromMember(
 	user,
 	guild = user instanceof GuildMember ? user.guild : undefined,
 ) {
-	if (!guild) throw new TypeError("Expected guild to be passed along with a User.");
+	if (!guild) throw new TypeError("Expected guild to be passed along with a User");
 	const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
@@ -113,12 +108,7 @@ export async function getThreadFromMember(
  * Let a user know that their ticket has been closed.
  *
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
- * @param {{
- * 	reason?: string;
- * 	user?: import("discord.js").User | import("discord.js").GuildMember;
- * }} [meta]
- *   - The reason for closing the ticket.
- *
+ * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} [meta] - The reason for closing the ticket.
  *
  * @returns {Promise<Message<boolean> | false>} - Message sent to user.
  */
@@ -131,7 +121,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 			iconURL: thread.guild.iconURL() ?? undefined,
 			text: "Any future messages will start a new ticket.",
 		})
-		.setColor(Constants.Colors.DARK_GREEN);
+		.setColor(COLORS.closed);
 
 	if (reason) embed.setDescription(reason);
 
@@ -175,7 +165,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
-	await thread.setArchived(true, `Closed by ${user.tag}: ${reason}`);
+	await thread.setArchived(true, `Closed by ${user.tag}${reason ? ": " + reason : ""}`);
 }
 
 /**
@@ -211,9 +201,7 @@ export async function sendOpenedMessage(user) {
  * @param {(
  * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
  * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
- * @param {(
- * 	buttonInteraction: import("discord.js").MessageComponentInteraction,
- * ) => Promise<void>} onConfirm
+ * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 	const button = new MessageButton()
@@ -235,7 +223,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 			filter: (buttonInteraction) =>
 				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
 
-			time: 30_000,
+			time: CONSTANTS.collectorTime,
 		});
 		collector
 			.on("collect", async (buttonInteraction) => {
@@ -307,8 +295,13 @@ export async function openModmail(mailChannel, openedEmbed, name, ping = false) 
 		content: process.env.NODE_ENV === "production" && ping ? "@here" : undefined,
 		embeds: [openedEmbed],
 	});
+	const date = new Date();
 	const thread = await starterMessage.startThread({
-		name: `${name} (${new Date().getUTCFullYear()}-${new Date().getUTCMonth()}-${new Date().getUTCDate()})`,
+		name: `${name} (${date.getUTCFullYear().toLocaleString([], { useGrouping: false })}-${date
+			.getUTCMonth()
+			.toLocaleString([], { minimumIntegerDigits: 2 })}-${date
+			.getUTCDate()
+			.toLocaleString([], { minimumIntegerDigits: 2 })})`,
 		autoArchiveDuration: "MAX",
 	});
 	await thread.setLocked(true);

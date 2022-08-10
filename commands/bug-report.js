@@ -2,18 +2,18 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { Constants, Util } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { MAX_TITLE_LENGTH, RATELIMT_MESSAGE } from "../common/suggest.js";
+import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";
 
 const { BUGS_CHANNEL } = process.env;
 
-if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env.");
+if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env");
 
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
 	{
 		name: "Unverified",
 		color: Constants.Colors.GREYPLE,
-		description: "This bug hasn't been verified as an actual bug yet",
+		description: "This bug hasn’t been verified as an actual bug yet",
 	},
 	{
 		color: Constants.Colors.GREEN,
@@ -52,22 +52,20 @@ const channel = new SuggestionChannel(BUGS_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}.`)
+		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription(`Create a new bug report in ${CHANNEL_TAG}.`)
+				.setDescription(`Create a new bug report in ${CHANNEL_TAG}`)
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription(
-							`A short summary of the bug report (maximum ${MAX_TITLE_LENGTH} characters)`,
-						)
+						.setDescription(`A short summary of the bug report`)
 						.setRequired(true),
 				)
 				.addStringOption((option) =>
 					option
-						.setName("bugreport")
+						.setName("bug-report")
 						.setDescription("A detailed description of the bug")
 						.setRequired(true),
 				),
@@ -76,7 +74,7 @@ const info = {
 			subcommand
 				.setName("answer")
 				.setDescription(
-					`(Devs only) Answer a bug report. Use this in threads in ${CHANNEL_TAG}.`,
+					`(Devs only; For use in ${CHANNEL_TAG}’s threads) Answer a bug report`,
 				)
 				.addStringOption((option) => {
 					const newOption = option
@@ -99,20 +97,18 @@ const info = {
 			subcommand
 				.setName("edit")
 				.setDescription(
-					`(OP Only) Edit a bug report. Use this in threads in ${CHANNEL_TAG}.`,
+					`(OP/Mods only; For use in ${CHANNEL_TAG}’s threads) Edit a bug report`,
 				)
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription(
-							`A short summary of the bug report (maximum ${MAX_TITLE_LENGTH} characters)`,
-						)
+						.setDescription(`A short summary of the bug report`)
 						.setRequired(false),
 				)
 				.addStringOption((option) =>
 					option
-						.setName("bugreport")
-						.setDescription("A detailed description of the bug")
+						.setName("bug-report")
+						.setDescription("(OP only) A detailed description of the bug")
 						.setRequired(false),
 				),
 		),
@@ -136,7 +132,6 @@ const info = {
 						content: `${CONSTANTS.emojis.statuses.yes} Bug report posted! See ${
 							success.thread?.toString() ?? ""
 						}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
-
 						ephemeral: true,
 					});
 				}
@@ -153,9 +148,9 @@ const info = {
 								CONSTANTS.emojis.statuses.yes
 							} Successfully answered bug report as **${Util.escapeMarkdown(
 								answer,
-							)}**! __${Util.escapeMarkdown(
+							)}**! *${Util.escapeMarkdown(
 								ANSWERS.find(({ name }) => name === answer)?.description || "",
-							)}__.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
+							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});

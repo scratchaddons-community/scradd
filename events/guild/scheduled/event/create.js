@@ -3,7 +3,7 @@ import log from "../../../../common/moderation/logging.js";
 /** @type {import("../../../../types/event").default<"guildScheduledEventCreate">} */
 const event = {
 	async event(event) {
-		const guild = event.guild || (await event.client.guilds.fetch(event.guildId));
+		const guild = event.guild || (await this.guilds.fetch(event.guildId));
 		if (guild.id !== process.env.GUILD_ID) return;
 
 		const start = event.scheduledStartAt,

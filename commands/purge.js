@@ -1,33 +1,35 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import CONSTANTS from "../common/CONSTANTS.js";
 
+const MAX_FETCH_COUNT = 100;
+
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Bulk deletes a specified amount of messages.")
+		.setDescription("Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
 			input
 				.setName("count")
 				.setDescription(
-					"The number of messages to delete, or a message ID within the last 100 messages to delete up to.",
+					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to`,
 				)
 				.setRequired(true),
 		)
 		.addUserOption((input) =>
-			input.setName("user").setDescription("Only delete messages from this user."),
+			input.setName("user").setDescription("Only delete messages from this user"),
 		)
 		.setDefaultPermission(false),
 
 	async interaction(interaction) {
 		if (!interaction.channel || interaction.channel?.type === "DM")
-			throw new TypeError("Can not run this command in a DM.");
+			throw new TypeError("Can not run this command in a DM");
 
 		const count = interaction.options.getString("count") ?? "";
 		const user = interaction.options.getUser("user");
 		const numberCount = +count;
-		const messages = await interaction.channel.messages.fetch({ limit: 100 });
+		const messages = await interaction.channel.messages.fetch({ limit: MAX_FETCH_COUNT });
 
-		if (isNaN(numberCount) || numberCount > 100) {
+		if (isNaN(numberCount) || numberCount > MAX_FETCH_COUNT) {
 			const deleteTo = Object.keys(Object.fromEntries([...messages])).indexOf(count) + 1;
 			if (!deleteTo) {
 				return await interaction.reply(
@@ -62,7 +64,7 @@ async function deleteMessages(unfiltered, channel, count, user) {
 				(user ? message.author.id === user.id : true) &&
 				+message.createdAt > twoWeeksAgo,
 		);
-	if (filtered.length > 0) {
+	if (filtered.length) {
 		await channel.bulkDelete(filtered);
 		return `${CONSTANTS.emojis.statuses.yes} Deleted ${filtered.length} messages!`;
 	}

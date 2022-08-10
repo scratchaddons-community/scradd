@@ -7,12 +7,10 @@ import log from "../common/moderation/logging.js";
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(
-			"(Mods only) Say what you tell me to say. Won’t publically share the author.",
-		)
+		.setDescription("(Mods only) Mimic what you tell me to")
 		.setDefaultPermission(false)
 		.addStringOption((input) =>
-			input.setName("message").setDescription("What you want me to say").setRequired(true),
+			input.setName("message").setDescription("What to mimic").setRequired(true),
 		),
 
 	async interaction(interaction) {

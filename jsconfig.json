@@ -9,7 +9,6 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importsNotUsedAsValues": "error",
-		"isolatedModules": true,
 		"lib": ["dom", "ES2021"],
 		"maxNodeModuleJsDepth": 0,
 		"module": "esnext",

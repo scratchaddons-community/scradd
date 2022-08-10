@@ -33,19 +33,14 @@ const fuse = new Fuse(addons, {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with information about a specific addon.")
+		.setDescription("Replies with information about a specific addon")
 		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon.")
-				.setRequired(true),
+			option.setName("addon").setDescription("The name of the addon").setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("compact")
-				.setDescription(
-					"Whether to show misc information and the image. Defaults to false in #bots and true everywhere else.",
-				)
+				.setDescription("Whether to show misc information and the image")
 				.setRequired(false),
 		),
 
@@ -55,8 +50,7 @@ const info = {
 		 *
 		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
-		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
-		 *   available.
+		 * @returns {string | undefined} - Returns credit information or undefined if no credits are available.
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
@@ -87,7 +81,7 @@ const info = {
 
 		const embed = new Embed()
 			.setTitle(addon.name)
-			.setColor(CONSTANTS.colors.theme)
+			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
 					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(

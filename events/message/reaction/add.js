@@ -41,14 +41,17 @@ const event = {
 			}
 		}
 
-		if (reaction.message.channel.id === process.env.SUGGESTION_CHANNEL && !reaction.me) {
+		if (
+			reaction.message.channel.id === process.env.SUGGESTION_CHANNEL &&
+			user.id !== reaction.client?.user?.id
+		) {
 			const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
 				emojis.includes(emoji.id ?? emoji.name ?? ""),
 			)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
 
-			if (otherReaction) {
-				await reaction.message.reactions.resolve(otherReaction)?.users.remove(user);
-			}
+			await reaction.message.reactions
+				.resolve(otherReaction || (emoji.id ?? emoji.name ?? ""))
+				?.users.remove(user);
 		}
 
 		if (
@@ -58,14 +61,13 @@ const event = {
 			return;
 
 		if (
-			// if a bot reacted
-			user.bot ||
-			// Or if they self-reacted
+			// If they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			// Or if they reacted to a message on the board
-			(message.channel.id === BOARD_CHANNEL && message.author.id === this.user.id) ||
-			// Or they reacted to an /explorepotatoes message
-			(message.interaction?.commandName === "explorepotatoes" && message.embeds.length > 0)
+			(message.channel.id === BOARD_CHANNEL &&
+				message.author.id === message.client.user?.id) ||
+			// Or they reacted to an /explore-potatoes message
+			(message.interaction?.commandName === "explore-potatoes" && message.embeds.length > 0)
 		) {
 			// Remove the reaction
 			await reaction.users.remove(user);

@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageButton, MessageEmbed } from "discord.js";
+import { Message, MessageButton, MessageEmbed, MessageMentions, Channel } from "discord.js";
+import { ChannelType } from "discord-api-types/v9";
 
-import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
+import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
@@ -14,7 +15,7 @@ const threadsFound = {};
  * Determine if a text-based channel is a match of a guild-based channel.
  *
  * @param {import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
- * @param {import("discord.js").TextBasedChannel | string} channelFound - Text based channel.
+ * @param {string} channelFound - Text based channel.
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
@@ -23,28 +24,21 @@ async function textChannelMatches(channelWanted, channelFound) {
 		case "GUILD_TEXT":
 		case "GUILD_NEWS": {
 			// Text
-			if (typeof channelFound === "string") {
-				// We likely found an archived thread. We have the id insted of the channel object.
-				// Try to see if we can find it by name instead of checking parentId.
-				if (threadsFound[`${channelWanted.id}`]?.[`${channelFound}`] !== undefined)
-					return !!threadsFound[`${channelFound}`];
+			if (channelFound === channelWanted.id) return true;
 
-				const thread = (
-					await channelWanted.threads.fetchArchived({ before: channelFound, limit: 2 })
-				).threads.first();
+			if (threadsFound[`${channelWanted.id}`]?.[`${channelFound}`] !== undefined)
+				return !!threadsFound[`${channelFound}`];
 
-				threadsFound[channelWanted.id] = {
-					...threadsFound[channelWanted.id],
-					[channelFound]: !!(thread && channelFound === thread?.id),
-				};
+			const thread = (
+				await channelWanted.threads.fetchArchived({ before: channelFound, limit: 2 })
+			).threads.first();
 
-				if (thread && channelFound === thread.id) break;
-				else return false;
-			}
+			(threadsFound[channelWanted.id] ??= {})[channelFound] = !!(
+				thread && channelFound === thread?.id
+			);
 
-			if (channelFound.id === channelWanted.id) break;
-
-			return channelFound.isThread() && channelFound.parent?.id === channelWanted.id;
+			if (thread && channelFound === thread.id) return true;
+			else return false;
 		}
 		case "GUILD_CATEGORY": {
 			// category
@@ -60,11 +54,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 		case "GUILD_NEWS_THREAD":
 		case "GUILD_PUBLIC_THREAD": {
 			// other public thread
-			if (
-				(typeof channelFound === "string" && channelWanted.id === channelFound) ||
-				(typeof channelFound === "object" && channelWanted.id === channelFound.id)
-			)
-				break;
+			if (typeof channelFound === "string" && channelWanted.id === channelFound) break;
 			else return false;
 		}
 
@@ -80,12 +70,12 @@ async function textChannelMatches(channelWanted, channelFound) {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potatoboard.")
+		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
 			input
 				.setName("minimum-reactions")
 				.setDescription(
-					"Filter messages to only get those with at least this many reactions.",
+					"Filter messages to only get those with at least this many reactions",
 				)
 				.setRequired(false)
 				.setMinValue(MIN_REACTIONS),
@@ -93,15 +83,23 @@ const info = {
 		.addUserOption((input) =>
 			input
 				.setName("user")
-				.setDescription("Filter messages to only get those by a certain user.")
+				.setDescription("Filter messages to only get those by a certain user")
 				.setRequired(false),
 		)
 		.addChannelOption((input) =>
 			input
 				.setName("channel")
-				.setDescription("Filter messages to only get those in a certain channel.")
+				.setDescription("Filter messages to only get those in a certain channel")
 				.setRequired(false)
-				.addChannelTypes([0, 4, 5, 6, 10, 11]),
+				.addChannelTypes([
+					ChannelType.GuildText,
+					ChannelType.GuildVoice,
+					ChannelType.GuildCategory,
+					ChannelType.GuildNews,
+					ChannelType.GuildNewsThread,
+					ChannelType.GuildPublicThread,
+					ChannelType.GuildPrivateThread,
+				]),
 		),
 
 	async interaction(interaction) {
@@ -111,13 +109,12 @@ const info = {
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
 		if (!board?.isText()) {
-			throw new ReferenceError("Could not find board channel.");
+			throw new ReferenceError("Could not find board channel");
 		}
 
 		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
 		const user = interaction.options.getUser("user")?.id;
-		const channelId = interaction.options.getChannel("channel")?.id;
-		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
+		const channelWanted = interaction.options.getChannel("channel");
 		const [, fetchedMessages] = await Promise.all([
 			deferPromise,
 			getAllMessages(board).then((messages) =>
@@ -135,21 +132,26 @@ const info = {
 						})
 						.sort(() => Math.random() - 0.5),
 					async (message) => {
-						const source = await boardMessageToSource(message);
-
+						// "**🥔 8** | <#1001943698323554334> (<#811065897057255424>) | <@891316244580544522>"
+						// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
 						if (
 							user &&
-							source?.author.id !== user &&
-							message.mentions.users.first()?.id !== user
+							message.content.match(MessageMentions.USERS_PATTERN)?.[1] !== user
 						)
 							return false;
+						const channels = message.content.match(MessageMentions.CHANNELS_PATTERN);
+						const channelFound = channels?.[2] || channels?.[1];
 
-						const channelFound = source?.channel ?? message.mentions.channels.first();
+						const channelWantedFetched =
+							channelWanted &&
+							(channelWanted instanceof Channel
+								? channelWanted
+								: await interaction.guild?.channels.fetch(channelWanted.id));
 
 						if (
-							channelWanted &&
+							channelWantedFetched &&
 							channelFound &&
-							!(await textChannelMatches(channelWanted, channelFound))
+							!(await textChannelMatches(channelWantedFetched, channelFound))
 						)
 							return false;
 
@@ -216,7 +218,7 @@ const info = {
 				buttonInteraction.customId === nextButton.customId &&
 				buttonInteraction.user.id === interaction.user.id,
 
-			time: 30_000,
+			time: CONSTANTS.collectorTime,
 		});
 
 		collector
@@ -229,7 +231,7 @@ const info = {
 			.on("end", async () => {
 				const source = await interaction.fetchReply();
 
-				if (!(source instanceof Message)) throw new TypeError("Source is not a message.");
+				if (!(source instanceof Message)) throw new TypeError("source is not a Message");
 
 				await interaction.editReply({
 					allowedMentions: { users: [] },

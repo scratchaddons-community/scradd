@@ -2,6 +2,9 @@ import { Message, MessageAttachment } from "discord.js";
 import papaparse from "papaparse";
 import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
+import { getThread } from "./moderation/logging.js";
+
+export const DATABASE_THREAD = "databases";
 
 /**
  * @typedef DatabaseItem
@@ -9,18 +12,9 @@ import exitHook from "async-exit-hook";
  * @type {{ [key: string]: string | number | boolean }}
  */
 
-/**
- * @param {string} name
- *
- * @returns {string}
- */
-function getComment(name) {
-	return `**__SCRADD ${name.toUpperCase()} LOG__**\n\n*Please do not delete nor unpin this message. If you do, all current ${name}s will be reset.*`;
-}
-
 /** @param {string} content */
 function getDatabaseName(content) {
-	return /SCRADD (?<name>.+) LOG/.exec(content)?.groups?.name?.toLowerCase();
+	return content.split(" ")[1]?.toLowerCase();
 }
 
 /** @type {{ [key: string]: Message }} */
@@ -30,18 +24,21 @@ const databases = {};
  * @template {string} T
  *
  * @param {T[]} names
- * @param {import("discord.js").TextBasedChannel} channel
+ * @param {import("discord.js").Guild} guild
  *
- * @returns {Promise<{ [value in T]: import("discord.js").Message }>}
+ * @returns {Promise<{
+ * 	[value in T]: import("discord.js").Message;
+ * }>}
  */
-export async function getDatabases(names, channel) {
+export async function getDatabases(names, guild) {
+	const thread = await getThread(DATABASE_THREAD, guild);
 	if (!Object.values(databases).length) {
-		const pins = await channel.messages.fetchPinned();
+		const messages = await thread.messages.fetch({ limit: 100 });
 
-		for (let pin of pins.toJSON()) {
-			const name = getDatabaseName(pin.content) || "";
-			if (name && pin.author.id === pin.client.user?.id) {
-				databases[name] = pin;
+		for (let message of messages.toJSON()) {
+			const name = getDatabaseName(message.content);
+			if (name && message.author.id === message.client.user?.id) {
+				databases[name] = message;
 			}
 		}
 	}
@@ -51,9 +48,9 @@ export async function getDatabases(names, channel) {
 			names.map(async (name) => {
 				return [
 					name,
-					(databases[name] ||= await channel
-						.send({ content: getComment(name) })
-						.then((message) => message.pin())),
+					(databases[name] ||= await thread.send({
+						content: `**__SCRADD ${name.toUpperCase()} DATABASES__**\n\n*Please do not delete this message. If you do, all ${name.toLowerCase()} information will be reset.*`,
+					})),
 				];
 			}),
 		),
@@ -83,13 +80,7 @@ export async function extractData(database) {
 /** @type {{ [key: string]: DatabaseItem[] }} */
 const dataCache = {};
 
-/**
- * @type {{
- * 	[key: string]:
- * 		| { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout }
- * 		| undefined;
- * }}
- */
+/** @type {{ [key: string]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined }} */
 let timeouts = {};
 
 /**

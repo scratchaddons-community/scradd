@@ -6,9 +6,10 @@ import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
-const EXPIRY_LENGTH = 21,
-	WARNS_PER_MUTE = 3,
-	MUTE_LENGTHS = [4, 12, 24];
+const EXPIRY_LENGTH = 21;
+export const WARNS_PER_MUTE = 3,
+	MUTE_LENGTHS = [4, 12, 24],
+	WARN_INFO_BASE = 64;
 
 /**
  * @param {import("discord.js").Message} message
@@ -65,9 +66,8 @@ export default async function warn(user, reason, strikes, context) {
 		user instanceof GuildMember
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
@@ -76,9 +76,11 @@ export default async function warn(user, reason, strikes, context) {
 		unwarn(user.id, strikes * -1, allWarns);
 	}
 
-	const promises = [];
-
 	const actualStrikes = allWarns.length + (strikes > 0 ? strikes : 0) - oldLength;
+
+	if (strikes < 0 && actualStrikes === 0) return false;
+
+	const promises = [];
 
 	const logMessage = await log(
 		guild,
@@ -129,6 +131,9 @@ export default async function warn(user, reason, strikes, context) {
 		const userMutes = oldMutes + newMutes;
 
 		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
+
+		const modTalk = guild.publicUpdatesChannel;
+		if (!modTalk) throw new ReferenceError("Could not find mod talk");
 
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
