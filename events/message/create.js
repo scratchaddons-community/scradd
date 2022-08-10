@@ -1,4 +1,4 @@
-import { GuildMember, cleanCodeBlockContent, Embed } from "discord.js";
+import { GuildMember, cleanCodeBlockContent, EmbedBuilder } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
@@ -67,7 +67,7 @@ const event = {
 			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
 				let toEdit = message;
 				const collector = await generateConfirm(
-					new Embed()
+					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to send this message to **the ${escapeMessage(
@@ -80,7 +80,7 @@ const event = {
 							name: mailChannel.guild.name,
 						}),
 					async (buttonInteraction) => {
-						const openedEmbed = new Embed()
+						const openedEmbed = new EmbedBuilder()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
 							.setFooter({

@@ -1,8 +1,8 @@
 import {
-	Embed,
+	EmbedBuilder,
 	GuildMember,
 	Message,
-	MessageEmbed,
+	EmbedBuilder,
 	ActionRowBuilder,
 	ButtonBuilder,
 	Colors,
@@ -115,7 +115,7 @@ export async function getThreadFromMember(
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getMemberFromThread(thread);
-	const embed = new Embed()
+	const embed = new EmbedBuilder()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdAt)
 		.setFooter({
@@ -146,7 +146,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 					starter
 						?.edit({
 							embeds: [
-								new MessageEmbed(starter.embeds[0])
+								EmbedBuilder.from(starter.embeds[0])
 									.setTitle("Modmail ticket closed!")
 									.setColor(COLORS.closed),
 							],
@@ -180,7 +180,7 @@ export async function sendOpenedMessage(user) {
 	return await user
 		.send({
 			embeds: [
-				new Embed()
+				new EmbedBuilder()
 					.setTitle("Modmail ticket opened!")
 					.setDescription(
 						`The moderation team of **${escapeMessage(
@@ -195,7 +195,7 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {Embed} confirmEmbed
+ * @param {EmbedBuilder} confirmEmbed
  * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
  * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} edit
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
@@ -281,7 +281,7 @@ export function generateReactionFunctions(message) {
 
 /**
  * @param {import("discord.js").TextChannel} mailChannel
- * @param {Embed} openedEmbed
+ * @param {EmbedBuilder} openedEmbed
  * @param {string} name
  */
 export async function openModmail(mailChannel, openedEmbed, name, ping = false) {

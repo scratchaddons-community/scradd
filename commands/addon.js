@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed, escapeMarkdown } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -61,7 +61,7 @@ const info = {
 			);
 		}
 
-		const input = interaction.options.getString("addon") || "";
+		const input = interaction.options.getString("addon", true);
 		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
@@ -78,7 +78,7 @@ const info = {
 			return;
 		}
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setTitle(addon.name)
 			.setColor(CONSTANTS.themeColor)
 			.setDescription(
@@ -153,7 +153,7 @@ const info = {
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
-					embed.description +
+					embed.data.description +
 						"\n" +
 						"\n" +
 						"**This addon may require additional permissions to be granted in order to function.**",

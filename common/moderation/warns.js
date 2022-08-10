@@ -1,4 +1,11 @@
-import { Embed, Colors, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
+import {
+	EmbedBuilder,
+	Colors,
+	GuildMember,
+	AttachmentBuilder,
+	User,
+	escapeMarkdown,
+} from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
 import log from "./logging.js";
@@ -193,7 +200,7 @@ export default async function warn(user, reason, strikes, context) {
 			user
 				.send({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setTitle(
 								`You were ${
 									strikes === 0 ? "verbally " : ""

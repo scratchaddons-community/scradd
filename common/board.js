@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, MessageEmbed, Embed } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, EmbedBuilder } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { censor } from "./moderation/automod.js";
@@ -28,7 +28,7 @@ export async function boardMessageToSource(boardMessage) {
 
 	const channel = await boardMessage.guild?.channels.fetch(channelId).catch(() => {});
 
-	if (!channel?.isText()) return;
+	if (!channel?.isTextBased()) return;
 
 	const message = await channel.messages.fetch(messageId).catch(() => {});
 
@@ -52,7 +52,7 @@ export async function sourceToBoardMessage(message) {
 
 	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText()) {
+	if (!board?.isTextBased()) {
 		throw new ReferenceError("Could not find board channel");
 	}
 
@@ -79,14 +79,14 @@ export async function postMessageToBoard(message) {
 
 	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
 
-	if (!board?.isText()) throw new ReferenceError("Could not find board channel");
+	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
 	const description = await messageToText(message);
 
 	const censored = censor(description);
 	const censoredName = censor(message.author.username);
 
-	const boardEmbed = new Embed()
+	const boardEmbed = new EmbedBuilder()
 		.setColor(message.member?.displayColor ?? 0)
 		.setDescription(censored ? censored.censored : description || null)
 		.setAuthor({
@@ -141,7 +141,7 @@ export async function updateReactionCount(count, boardMessage) {
 		const newMessage = await boardMessage.edit({
 			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 			content: boardMessage.content.replace(/\d+/, `${count}`),
-			embeds: boardMessage.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+			embeds: boardMessage.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
 			files: boardMessage.attachments.map((attachment) => attachment),
 		});
 		MESSAGES = MESSAGES.map((msg) => (msg.id === newMessage.id ? newMessage : msg));

@@ -12,7 +12,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const result = censor(interaction.options.getString("text") || "");
+		const result = censor(interaction.options.getString("text", true));
 		if (result) {
 			const words = result.words.flat();
 			await interaction.reply({

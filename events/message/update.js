@@ -2,7 +2,7 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, MessageEmbed } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";
 
 /** @type {import("../../types/event").default<"messageUpdate">} */
@@ -26,7 +26,7 @@ const event = {
 				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 					"!",
 				"messages",
-				{ embeds: newMessage.embeds.map((embed) => new MessageEmbed(embed)) },
+				{ embeds: newMessage.embeds.map((embed) => EmbedBuilder.from(embed)) },
 			);
 		}
 		if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {

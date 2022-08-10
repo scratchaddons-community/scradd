@@ -6,7 +6,7 @@ import { escapeLinks } from "../lib/markdown.js";
 import { getAllMessages, paginate, reactAll } from "../lib/message.js";
 import { truncateText } from "../lib/text.js";
 
-const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
+const { SUGGESTION_CHANNEL } = process.env;
 
 if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env");
 
@@ -175,7 +175,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
 
 		const message =
 			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
@@ -186,8 +186,8 @@ const info = {
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					description: interaction.options.getString("suggestion") ?? "",
-					title: interaction.options.getString("title") ?? "",
+					description: interaction.options.getString("suggestion", true),
+					title: interaction.options.getString("title", true),
 				});
 
 				if (success) {
@@ -205,7 +205,7 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") ?? "";
+				const answer = interaction.options.getString("answer", true);
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
@@ -225,11 +225,9 @@ const info = {
 				break;
 			}
 			case "edit": {
-				const title = interaction.options.getString("title");
-
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("suggestion"),
-					title,
+					title: interaction.options.getString("title"),
 				});
 				if (result) {
 					await interaction.reply({
@@ -246,7 +244,7 @@ const info = {
 			case "get-top": {
 				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
 
-				if (!channel?.isText())
+				if (!channel?.isTextBased())
 					throw new ReferenceError("Could not find suggestion channel");
 
 				const requestedUser = interaction.options.getUser("user");

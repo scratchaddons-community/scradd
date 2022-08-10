@@ -29,40 +29,37 @@ const info = {
 				.setMinValue(-1 * WARNS_PER_MUTE),
 		),
 	async interaction(interaction) {
-		const user = interaction.options.getMember("user");
+		const user = interaction.options.getUser("user", true);
 		const reason = stripMarkdown(interaction.options.getString("reason") || "No reason given.");
 		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
 
-		if (!(user instanceof GuildMember))
-			return interaction.reply({
-				content: CONSTANTS.emojis.statuses.no + " Could not find that user.",
-				ephemeral: true,
-			});
-
 		const actualStrikes = await warn(user, reason, strikes, interaction.user);
 
-		if (actualStrikes === false)
-			return await interaction.reply({
-				content: `${
-					CONSTANTS.emojis.statuses.no
-				} Cannot unwarn ${user.toString()} as they do not have any active strikes.`,
-				ephemeral: true,
-			});
-
-		return await interaction.reply({
-			allowedMentions: { users: [] },
-			content:
-				CONSTANTS.emojis.statuses.yes +
-				` ${
-					["Unwarned", "Verbally warned", "Warned"][Math.sign(actualStrikes) + 1]
-				} ${user.toString()}${
-					Math.abs(actualStrikes) > 1
-						? ` ${Math.abs(actualStrikes)} time${
-								Math.abs(actualStrikes) === 1 ? "" : "s"
-						  }`
-						: ""
-				}.${reason ? " " + reason : ""}`,
-		});
+		await interaction.reply(
+			actualStrikes === false
+				? {
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} Cannot unwarn ${user.toString()} as they do not have any active strikes.`,
+						ephemeral: true,
+				  }
+				: {
+						allowedMentions: { users: [] },
+						content:
+							CONSTANTS.emojis.statuses.yes +
+							` ${
+								["Unwarned", "Verbally warned", "Warned"][
+									Math.sign(actualStrikes) + 1
+								]
+							} ${user.toString()}${
+								Math.abs(actualStrikes) > 1
+									? ` ${Math.abs(actualStrikes)} time${
+											Math.abs(actualStrikes) === 1 ? "" : "s"
+									  }`
+									: ""
+							}.${reason ? " " + reason : ""}`,
+				  },
+		);
 	},
 };
 

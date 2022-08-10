@@ -20,7 +20,7 @@ const event = {
 				interaction.member,
 			);
 		}
-		if (!interaction.isCommand()) return;
+		if (!interaction.isChatInputCommand()) return;
 		try {
 			const command = (await fetchCommands(this)).get(interaction.commandName);
 

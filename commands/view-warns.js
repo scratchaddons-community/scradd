@@ -1,5 +1,5 @@
 import {
-	Embed,
+	EmbedBuilder,
 	SlashCommandBuilder,
 	GuildMember,
 	ActionRowBuilder,
@@ -62,7 +62,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 			.filter((warn, index) => warns.findIndex((w) => w.info == warn.info) == index)
 			.sort((one, two) => two.expiresAt - one.expiresAt),
 	);
-	const embed = new Embed()
+	const embed = new EmbedBuilder()
 		.setTitle(
 			`${member.displayName} has ${warns.length} active strike${
 				warns.length === 1 ? "" : "s"
@@ -166,7 +166,7 @@ export async function getWarns(reply, filter, interactor) {
 			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
 
-			const embed = new Embed()
+			const embed = new EmbedBuilder()
 				.setColor(member?.displayColor ?? null)
 				.setAuthor(
 					nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null,

@@ -200,7 +200,7 @@ const info = {
 			.setDescription("Which tab to open first")
 			.addChoices(
 				...OPTIONS.map(({ emoji, name }) => {
-					return [emoji + " " + name, name];
+					return { name: emoji + " " + name, value: name };
 				}),
 			)
 			.setRequired(false),
@@ -208,7 +208,7 @@ const info = {
 
 	async interaction(interaction) {
 		const hash = generateHash("info");
-		const defaultKey = interaction.options.getString("tab") ?? "Hello!";
+		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
 		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
 		const message = await interaction.reply({

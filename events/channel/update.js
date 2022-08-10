@@ -29,7 +29,7 @@ const event = {
 
 		oldChannel.rawPosition !== newChannel.rawPosition &&
 			edits.push(" was moved to position " + newChannel.rawPosition);
-		if (oldChannel.isText() && newChannel.isText()) {
+		if (oldChannel.isTextBased() && newChannel.isTextBased()) {
 			!oldChannel.nsfw && newChannel.nsfw && edits.push(" was made age-restricted");
 			oldChannel.nsfw && !newChannel.nsfw && edits.push(" was made non-age-restricted");
 			oldChannel.topic !== newChannel.topic &&
@@ -52,7 +52,7 @@ const event = {
 			newChannel.type === "GUILD_TEXT" &&
 			oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
 			edits.push("’s slowmode was set to " + newChannel.rateLimitPerUser + " seconds");
-		if (oldChannel.isVoice() && newChannel.isVoice()) {
+		if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
 			oldChannel.bitrate !== newChannel.bitrate &&
 				edits.push("’s bitrate was set to " + newChannel.bitrate + "kbps");
 			oldChannel.userLimit !== newChannel.userLimit &&

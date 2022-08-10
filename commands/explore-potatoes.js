@@ -2,7 +2,7 @@ import {
 	SlashCommandBuilder,
 	Message,
 	ButtonBuilder,
-	MessageEmbed,
+	EmbedBuilder,
 	MessageMentions,
 	ChannelType,
 } from "discord.js";
@@ -113,7 +113,7 @@ const info = {
 		});
 		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
 
-		if (!board?.isText()) {
+		if (!board?.isTextBased()) {
 			throw new ReferenceError("Could not find board channel");
 		}
 
@@ -204,7 +204,7 @@ const info = {
 				],
 
 				content: current.content,
-				embeds: current.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+				embeds: current.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
 				ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 				files: current.attachments.map((attachment) => attachment),
 			};
@@ -246,7 +246,7 @@ const info = {
 					),
 
 					content: source.content,
-					embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+					embeds: source.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
 					files: source.attachments.map((attachment) => attachment),
 				});
 			});

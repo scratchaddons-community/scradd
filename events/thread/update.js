@@ -1,4 +1,4 @@
-import { Embed, GuildMember, MessageEmbed, ThreadAutoArchiveDuration } from "discord.js";
+import { EmbedBuilder, GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -101,7 +101,10 @@ const event = {
 				starter
 					.edit({
 						embeds: [
-							(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
+							(starter.embeds[0]
+								? EmbedBuilder.from(starter.embeds[0])
+								: new EmbedBuilder()
+							)
 								.setTitle("Modmail ticket opened!")
 								.setFooter({
 									text:

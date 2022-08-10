@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { extractData, getDatabases } from "../common/databases.js";
 import { getLevelForXp, getXpForLevel } from "../common/xp.js";
@@ -27,7 +27,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
 
 		if (!interaction.guild) throw new TypeError("Cannot use /xp command in DMs");
 
@@ -47,9 +47,9 @@ const info = {
 				const xpForPreviousLevel = getXpForLevel(level);
 				const increment = xpForNextLevel - xpForPreviousLevel;
 				const progress = (xp - xpForPreviousLevel) / increment;
-				return interaction.reply({
+				interaction.reply({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setColor(member ? member.displayColor : null)
 							.setAuthor({
 								iconURL: (member || user).displayAvatarURL(),
@@ -109,6 +109,7 @@ const info = {
 							}),
 					],
 				});
+				return;
 			}
 			case "top": {
 				const top = allXp.sort((one, two) => two.xp - one.xp);

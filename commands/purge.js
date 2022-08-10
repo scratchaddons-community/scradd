@@ -25,7 +25,7 @@ const info = {
 		if (!interaction.channel || interaction.channel?.type === "DM")
 			throw new TypeError("Can not run this command in a DM");
 
-		const count = interaction.options.getString("count") ?? "";
+		const count = interaction.options.getString("count", true);
 		const user = interaction.options.getUser("user");
 		const numberCount = +count;
 		const messages = await interaction.channel.messages.fetch({ limit: MAX_FETCH_COUNT });

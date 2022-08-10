@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -44,7 +44,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
 
 		switch (command) {
 			case "close": {
@@ -65,7 +65,7 @@ const info = {
 
 				await interaction.reply({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setTitle("Modmail ticket closed!")
 							.setTimestamp(interaction.channel.createdAt)
 							.setDescription(reason)
@@ -81,11 +81,9 @@ const info = {
 				break;
 			}
 			case "start": {
-				const user = await interaction.guild?.members.fetch(
-					interaction.options.getUser("user") ?? "",
-				);
+				const user = interaction.options.getMember("user");
 
-				if (!user || !interaction.guild) {
+				if (!(user instanceof GuildMember) || !interaction.guild) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
 						ephemeral: true,
@@ -115,7 +113,7 @@ const info = {
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(
-					new Embed()
+					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
@@ -123,7 +121,7 @@ const info = {
 						.setColor(COLORS.confirm)
 						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 					async (buttonInteraction) => {
-						const openedEmbed = new Embed()
+						const openedEmbed = new EmbedBuilder()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,

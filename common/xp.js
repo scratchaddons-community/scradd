@@ -1,4 +1,4 @@
-import { Embed, GuildMember, User } from "discord.js";
+import { EmbedBuilder, GuildMember, User } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
@@ -29,11 +29,11 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		if (oldLevel !== newLevel) {
 			const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
 			const date = new Date();
-			if (bots?.isText())
+			if (bots?.isTextBased())
 				await bots.send({
 					content: to.toString(),
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setColor(member?.displayColor ?? null)
 							.setAuthor({
 								iconURL: to.displayAvatarURL(),

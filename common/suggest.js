@@ -2,10 +2,10 @@ import {
 	Colors,
 	GuildMember,
 	Message,
-	MessageEmbed,
+	EmbedBuilder,
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
-	Embed,
+	EmbedBuilder,
 } from "discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
@@ -50,7 +50,7 @@ export default class SuggestionChannel {
 
 		const title = escapeMarkdown(data.title);
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setColor(DEFAULT_COLOR)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
@@ -62,7 +62,7 @@ export default class SuggestionChannel {
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
-		if (!channel?.isText()) throw new ReferenceError(`Channel not found`);
+		if (!channel?.isTextBased()) throw new ReferenceError(`Channel not found`);
 
 		if ((cooldowns[author.id] || 0) > Date.now()) {
 			await interaction.reply({
@@ -146,7 +146,7 @@ export default class SuggestionChannel {
 		];
 
 		if (starter && starter?.author.id === interaction.client.user?.id) {
-			const embed = new MessageEmbed(starter.embeds[0]);
+			const embed = EmbedBuilder.from(starter.embeds[0]);
 
 			embed
 				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
@@ -203,7 +203,7 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		const embed = new MessageEmbed(starterMessage.embeds[0]);
+		const embed = EmbedBuilder.from(starterMessage.embeds[0]);
 
 		if (updated.body) embed.setDescription(updated.body);
 

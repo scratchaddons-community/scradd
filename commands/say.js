@@ -13,7 +13,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const content = interaction.options.getString("message") ?? "";
+		const content = interaction.options.getString("message", true);
 
 		const message = await interaction.channel?.send({ content });
 

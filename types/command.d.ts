@@ -2,7 +2,7 @@ import { AssertionError } from "assert";
 import type {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
-	CommandInteraction,
+	ChatInputCommandInteraction,
 	Client,
 } from "discord.js";
 
@@ -20,7 +20,7 @@ export type CommandInfo = {
 	/** Pass `false` to disable this command. */
 	enable?: boolean = true;
 	/** A function that processes interactions to this command. */
-	interaction: (interaction: CommandInteraction) => Promise<void> | void;
+	interaction: (interaction: ChatInputCommandInteraction) => Promise<void> | void;
 };
 type CommandFunction = (this: Client<true>) => CommandInfo | Promise<CommandInfo>;
 type CommandFile = CommandFunction | CommandInfo;

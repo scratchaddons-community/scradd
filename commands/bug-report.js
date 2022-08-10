@@ -117,15 +117,15 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
 
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(
 					interaction,
 					{
-						description: interaction.options.getString("bugreport") ?? "",
-						title: interaction.options.getString("title") ?? "",
+						description: interaction.options.getString("bugreport", true),
+						title: interaction.options.getString("title", true),
 					},
 					ANSWERS[0]?.name,
 				);
@@ -142,7 +142,7 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") ?? "";
+				const answer = interaction.options.getString("answer", true);
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
@@ -162,11 +162,9 @@ const info = {
 				break;
 			}
 			case "edit": {
-				const title = interaction.options.getString("title");
-
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("report"),
-					title,
+					title: interaction.options.getString("title"),
 				});
 				if (result) {
 					await interaction.reply({
