@@ -13,7 +13,7 @@ import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
 import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
-import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
 const info = {

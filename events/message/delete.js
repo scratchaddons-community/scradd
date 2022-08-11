@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, messageToText } from "../../lib/message.js";
-import {MessageActionRowBuilder} from "../../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 
 /** @type {import("../../types/event").default<"messageDelete">} */
 const event = {

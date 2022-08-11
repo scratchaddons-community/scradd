@@ -16,7 +16,7 @@ import { asyncFilter } from "../lib/promises.js";
 import { extractMessageExtremities, messageToText } from "../lib/message.js";
 
 import CONSTANTS from "./CONSTANTS.js";
-import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 

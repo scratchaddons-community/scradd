@@ -2,7 +2,7 @@ import { SlashCommandBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
-import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
 const info = {
