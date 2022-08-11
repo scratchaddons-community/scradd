@@ -1,4 +1,4 @@
-/** @see [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/0530d12/1/1.18.json) */
+/** @author TypeScript implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/0530d12/1/1.18.json) */
 import type { ArrayOfAtLeastOne } from "./helpers";
 
 /** The value manipulator. */
