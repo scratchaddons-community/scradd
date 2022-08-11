@@ -22,7 +22,7 @@ export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
  * @returns {Promise<import("discord.js").Message<boolean> | undefined>} - Source message.
  */
 export async function boardMessageToSource(boardMessage) {
-	const component = boardMessage?.components[0]?.components?.[0];
+	const component = boardMessage.components[0]?.components?.[0];
 
 	if (component?.type !== ComponentType.Button) return;
 
@@ -66,7 +66,7 @@ export async function sourceToBoardMessage(message) {
 	MESSAGES ??= await getAllMessages(board);
 
 	return MESSAGES.find((boardMessage) => {
-		const component = boardMessage?.components[0]?.components?.[0];
+		const component = boardMessage.components[0]?.components?.[0];
 
 		if (component?.type !== ComponentType.Button) return;
 

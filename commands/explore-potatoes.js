@@ -13,7 +13,8 @@ import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
-import { getAllMessages } from "../lib/message.js";
+import { disableComponents, getAllMessages } from "../lib/message.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {{ [key: string]: { [key: string]: boolean } }} */
 const threadsFound = {};
@@ -178,7 +179,7 @@ const info = {
 		 * @returns {Promise<import("discord.js").InteractionReplyOptions>} - Reply to post next.
 		 */
 		async function generateMessage(current) {
-			if (!current?.components[0]?.components[0]) {
+			if (!current) {
 				return {
 					allowedMentions: { users: [] },
 					files: [],
@@ -192,18 +193,15 @@ const info = {
 			}
 			source = (await fetchedMessages.next()).value;
 
-			if (!source?.components[0]?.components[0]) nextButton.setDisabled(true);
-
+			const row = current.components?.[0];
 			return {
 				allowedMentions: { users: [] },
 
 				components: [
-					current.components[0]?.components[0]
-						? current.components[0]?.setComponents(
-								current.components[0].components[0],
-								nextButton,
-						  )
-						: current.components[0],
+					new MessageActionRowBuilder(row).setComponents(
+						row?.components?.[0],
+						nextButton,
+					),
 				],
 
 				content: current.content,
@@ -236,17 +234,7 @@ const info = {
 				await interaction.editReply({
 					allowedMentions: { users: [] },
 
-					components: source.components.map((components) =>
-						components.setComponents(
-							components.components.map(
-								(component) =>
-									component.setDisabled(
-										!(component.type === "BUTTON" && component.url),
-									),
-								// Disable it if it’s not a button with a URL
-							),
-						),
-					),
+					components: disableComponents(source.components),
 
 					content: source.content,
 					embeds: source.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),

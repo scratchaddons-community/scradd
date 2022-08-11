@@ -6,6 +6,7 @@ import {
 	SlashCommandBuilder,
 	time,
 	ComponentType,
+	ButtonBuilder,
 } from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
@@ -16,6 +17,8 @@ import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { disableComponents } from "../lib/message.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
@@ -216,7 +219,7 @@ const info = {
 			allowedMentions: { users: [] },
 
 			components: [
-				new ActionRowBuilder().addComponents(
+				new MessageActionRowBuilder().addComponents(
 					new SelectMenuBuilder()
 						.setMinValues(1)
 						.setMaxValues(1)
@@ -249,11 +252,7 @@ const info = {
 			return await interaction.editReply({
 				allowedMentions: { users: [] },
 
-				components: message.components.map((components) =>
-					components.setComponents(
-						components.components.map((component) => component.setDisabled(true)),
-					),
-				),
+				components: disableComponents(message.components),
 
 				content: message.content,
 			});
@@ -275,22 +274,22 @@ const info = {
 
 					promises.push(selectInteraction.deferUpdate());
 
-					const select = message.components[0]?.components[0];
+					const select = SelectMenuBuilder.from(selectInteraction.component);
+					const chosen = selectInteraction.values[0];
 
-					if (select?.type !== ComponentType.SelectMenu)
-						throw new TypeError("Expected first component to be a select menu");
-
-					const chosen = selectInteraction.values[0] ?? "";
-
-					select.options = select.options.map((option) => ({
-						...option,
-						default: option.value === chosen,
-					}));
 					const option = OPTIONS.find((option) => option.name === chosen);
 					promises.push(
 						interaction.editReply({
 							allowedMentions: { users: [] },
-							components: [new ActionRowBuilder().addComponents(select)],
+							components: [
+								new MessageActionRowBuilder().addComponents(
+									select.setOptions(
+										select.options.map((option) =>
+											option.setDefault(option.data.value === chosen),
+										),
+									),
+								),
+							],
 
 							content:
 								(await (option?.edit
