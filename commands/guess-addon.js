@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageActionRow, MessageButton, MessageSelectMenu, MessageEmbed, Util } from "discord.js";
+import { Message, MessageActionRow, MessageActionRowComponent, MessageButton, MessageSelectMenu, MessageEmbed, Util } from "discord.js";
 import Fuse from "fuse.js";
 
 import addons from "../common/20addons/addons.js";
@@ -43,7 +43,7 @@ const questions = Object.values(questionsByAddon)
 			accumulator[`${group}`] ??= [];
 
 			if ((accumulator[`${group}`]?.[+index]?.length || 0) < 25) {
-				accumulator[`${group}`][+index] ??= [];
+				/** @type {string[][]} */ (accumulator[`${group}`])[+index] ??= [];
 				accumulator[`${group}`]?.[+index]?.push(userAsking);
 			} else {
 				addToGroup(index + 1);
@@ -287,7 +287,7 @@ const info = {
 							(addonProbabilities[0]?.[1] || 0)
 						) {
 							await answerWithAddon(
-								oldMessage,
+								/** @type {Message<boolean>} */ (oldMessage),
 								addonProbabilities,
 								askedCount,
 								askedQuestions,
@@ -304,7 +304,7 @@ const info = {
 								(addonProbabilities[0]?.[1] || 0)
 							) {
 								await answerWithAddon(
-									oldMessage,
+									/** @type {Message<boolean>} */ (oldMessage),
 									addonProbabilities,
 									askedCount,
 									askedQuestions,
@@ -316,10 +316,10 @@ const info = {
 							}
 
 							await interaction.editReply({
-								components: oldMessage.components.map((row) =>
-									row.setComponents(
+								components: /** @type{MessageActionRow[]} */ (oldMessage.components).map((row) =>
+									/** @type {MessageActionRow} */ (row).setComponents(
 										row.components.map((component) =>
-											component.setDisabled(true),
+											/** @type {MessageActionRowComponent} */ (component).setDisabled(true),
 										),
 									),
 								),
@@ -327,7 +327,7 @@ const info = {
 								embeds: [new MessageEmbed(oldMessage.embeds[0])],
 							});
 
-							await oldMessage.reply({
+							await /** @type {Message<boolean>} */ (oldMessage).reply({
 								content: `${interaction.user.toString()}, you beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
 									manifest.version
 								})`,
@@ -883,9 +883,10 @@ const info = {
 						messageCollector.resetTimer();
 
 						if (!item || (score && score > 1)) {
-							return await collectedMessage.reply({
+							await collectedMessage.reply({
 								content: `I couldn't find that addon!`,
 							});
+							return;
 						}
 
 						const editPromise = interaction.editReply({
@@ -912,12 +913,13 @@ const info = {
 						});
 
 						if (item.id !== addon.id) {
-							return await Promise.all([
+							await Promise.all([
 								editPromise,
 								collectedMessage.reply({
 									content: `${interaction.user.toString()}, that's not the right addon!`,
 								}),
 							]);
+							return;
 						}
 
 						await Promise.all([
@@ -1073,7 +1075,7 @@ const info = {
 													`${
 														message.embeds[0]?.description || ""
 													}\n* ${question} ${
-														questionsByAddon[addon.id]?.find(
+														questionsByAddon[/** @type {import("../types/addonManifest") & { id: string }} */ (addon).id]?.find?.(
 															({ userAsking }) =>
 																userAsking === question,
 														)
