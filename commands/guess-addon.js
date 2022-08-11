@@ -1,5 +1,13 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageActionRow, MessageActionRowComponent, MessageButton, MessageSelectMenu, MessageEmbed, Util } from "discord.js";
+import {
+	Message,
+	MessageActionRow,
+	MessageActionRowComponent,
+	MessageButton,
+	MessageSelectMenu,
+	MessageEmbed,
+	Util,
+} from "discord.js";
 import Fuse from "fuse.js";
 
 import addons from "../common/20addons/addons.js";
@@ -316,10 +324,14 @@ const info = {
 							}
 
 							await interaction.editReply({
-								components: /** @type{MessageActionRow[]} */ (oldMessage.components).map((row) =>
+								components: /** @type {MessageActionRow[]} */ (
+									oldMessage.components
+								).map((row) =>
 									/** @type {MessageActionRow} */ (row).setComponents(
 										row.components.map((component) =>
-											/** @type {MessageActionRowComponent} */ (component).setDisabled(true),
+											/** @type {MessageActionRowComponent} */ (
+												component
+											).setDisabled(true),
 										),
 									),
 								),
@@ -1075,7 +1087,11 @@ const info = {
 													`${
 														message.embeds[0]?.description || ""
 													}\n* ${question} ${
-														questionsByAddon[/** @type {import("../types/addonManifest") & { id: string }} */ (addon).id]?.find?.(
+														questionsByAddon[
+															/** @type {import("../types/addonManifest") & { id: string }} */ (
+																addon
+															).id
+														]?.find?.(
 															({ userAsking }) =>
 																userAsking === question,
 														)
