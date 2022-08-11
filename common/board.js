@@ -1,5 +1,4 @@
 import {
-	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
@@ -7,6 +6,7 @@ import {
 	EmbedBuilder,
 } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
+import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
 
 import { censor } from "./moderation/automod.js";
 
@@ -117,7 +117,7 @@ export async function postMessageToBoard(message) {
 
 	const boardMessage = await board.send({
 		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-		components: [new ActionRowBuilder().addComponents(button)],
+		components: [new MessageActionRowBuilder().addComponents(button)],
 
 		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
 			message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""

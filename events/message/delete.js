@@ -1,6 +1,7 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, messageToText } from "../../lib/message.js";
+import {MessageActionRowBuilder} from "../../types/ActionRowBuilder.js";
 
 /** @type {import("../../types/event").default<"messageDelete">} */
 const event = {
@@ -25,7 +26,7 @@ const event = {
 				embeds,
 				files,
 				components: [
-					new ActionRowBuilder().addComponents(
+					new MessageActionRowBuilder().addComponents(
 						new ButtonBuilder()
 							.setEmoji("👀")
 							.setLabel("View Context")

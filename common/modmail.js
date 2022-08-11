@@ -2,7 +2,6 @@ import {
 	GuildMember,
 	Message,
 	EmbedBuilder,
-	ActionRowBuilder,
 	ButtonBuilder,
 	Colors,
 	MessageMentions,
@@ -17,6 +16,7 @@ import { asyncFilter } from "../lib/promises.js";
 import { extractMessageExtremities, messageToText } from "../lib/message.js";
 
 import CONSTANTS from "./CONSTANTS.js";
+import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
@@ -214,7 +214,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 		.setStyle(ButtonStyle.Secondary);
 
 	const message = await reply({
-		components: [new ActionRowBuilder().addComponents(button, cancelButton)],
+		components: [new MessageActionRowBuilder().addComponents(button, cancelButton)],
 		embeds: [confirmEmbed],
 	});
 
@@ -245,7 +245,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 		.on("end", async () => {
 			await edit({
 				components: [
-					new ActionRowBuilder().addComponents(
+					new MessageActionRowBuilder().addComponents(
 						button.setDisabled(true),
 						cancelButton.setDisabled(true),
 					),

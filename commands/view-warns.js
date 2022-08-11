@@ -2,7 +2,6 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 	GuildMember,
-	ActionRowBuilder,
 	ButtonBuilder,
 	MessageMentions,
 	time,
@@ -14,6 +13,7 @@ import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
 import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
+import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -94,7 +94,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 	return {
 		components: strikes.length
 			? [
-					new ActionRowBuilder().addComponents(
+					new MessageActionRowBuilder().addComponents(
 						strikes.map((warn) =>
 							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))

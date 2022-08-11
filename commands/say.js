@@ -1,7 +1,8 @@
-import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { SlashCommandBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
+import {MessageActionRowBuilder} from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -27,7 +28,7 @@ const info = {
 						"messages",
 						{
 							components: [
-								new ActionRowBuilder().addComponents(
+								new MessageActionRowBuilder().addComponents(
 									new ButtonBuilder()
 										.setEmoji("👀")
 										.setLabel("View Message")

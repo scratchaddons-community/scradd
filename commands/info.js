@@ -1,12 +1,10 @@
 import {
 	Client,
 	Message,
-	ActionRowBuilder,
 	SelectMenuBuilder,
 	SlashCommandBuilder,
 	time,
 	ComponentType,
-	ButtonBuilder,
 } from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
