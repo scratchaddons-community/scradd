@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
+import { Message, MessageActionRow, MessageButton, MessageSelectMenu, MessageEmbed, Util } from "discord.js";
 import Fuse from "fuse.js";
 
 import addons from "../common/20addons/addons.js";
@@ -214,7 +214,7 @@ function answerQuestion(justAsked, probabilityShift, probabilitiesBefore, askedQ
 	return result;
 }
 
-/** @type {import("../../types/command").default} */
+/** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to play a game where I or a user guess an addon.")
@@ -670,7 +670,7 @@ const info = {
 													name: interaction.user.username,
 											  },
 									)
-									.setColor(CONSTANTS.themeColor)
+									.setColor(CONSTANTS.colors.theme)
 									.setThumbnail(
 										`https://scratchaddons.com/assets/img/addons/${encodeURI(
 											foundAddon.id,
@@ -835,7 +835,7 @@ const info = {
 
 					embeds: [
 						new MessageEmbed()
-							.setColor(CONSTANTS.themeColor)
+							.setColor(CONSTANTS.colors.theme)
 							.setAuthor(
 								interaction.member && "displayAvatarURL" in interaction.member
 									? {
@@ -882,7 +882,7 @@ const info = {
 						componentCollector.resetTimer();
 						messageCollector.resetTimer();
 
-						if (!item || score > 1) {
+						if (!item || (score && score > 1)) {
 							return await collectedMessage.reply({
 								content: `I couldn't find that addon!`,
 							});
@@ -954,7 +954,7 @@ const info = {
 														name: interaction.user.username,
 												  },
 										)
-										.setColor(CONSTANTS.themeColor)
+										.setColor(CONSTANTS.colors.theme)
 										.setThumbnail(
 											`https://scratchaddons.com/assets/img/addons/${encodeURI(
 												addon.id,
