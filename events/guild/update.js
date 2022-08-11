@@ -176,10 +176,14 @@ const event = {
 				`Verification level set to "${
 					{
 						[GuildVerificationLevel.None]: "Unrestricted",
-						[GuildVerificationLevel.Low]: "Must have a verified email on their Discord account.",
-						[GuildVerificationLevel.Medium]: "Must also be registered on Discord for longer than 5 minutes.",
-						[GuildVerificationLevel.High]: "Must also be a member of this server for longer than 10 minutes.",
-						[GuildVerificationLevel.VeryHigh]: "Must have a verified phone on their Discord account.",
+						[GuildVerificationLevel.Low]:
+							"Must have a verified email on their Discord account.",
+						[GuildVerificationLevel.Medium]:
+							"Must also be registered on Discord for longer than 5 minutes.",
+						[GuildVerificationLevel.High]:
+							"Must also be a member of this server for longer than 10 minutes.",
+						[GuildVerificationLevel.VeryHigh]:
+							"Must have a verified phone on their Discord account.",
 					}[newGuild.verificationLevel]
 				}"`,
 			);

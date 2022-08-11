@@ -1,4 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	EmbedBuilder,
+} from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { censor } from "./moderation/automod.js";

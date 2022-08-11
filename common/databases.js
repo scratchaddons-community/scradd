@@ -92,10 +92,9 @@ export function queueDatabaseWrite(database, content) {
 	const timeoutId = timeouts[database.id];
 	const files = content.length
 		? [
-				new AttachmentBuilder(
-					Buffer.from(papaparse.unparse(content), "utf-8"),
-					{name:getDatabaseName(database.content) + ".csv"},
-				),
+				new AttachmentBuilder(Buffer.from(papaparse.unparse(content), "utf-8"), {
+					name: getDatabaseName(database.content) + ".csv",
+				}),
 		  ]
 		: [];
 	const callback = () => {

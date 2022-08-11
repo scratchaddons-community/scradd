@@ -26,11 +26,7 @@ export const SUGGESTION_EMOJIS = [
 
 /** @type {import("../common/suggest.js").Answer[]} */
 export const ANSWERS = [
-	{
-		name: "Unanswered",
-		color: Colors.Greyple,
-		description: "This has not yet been answered",
-	},
+	{ name: "Unanswered", color: Colors.Greyple, description: "This has not yet been answered" },
 	{
 		color: Colors.Green,
 		description: "This will probably be added if anyone codes it",

@@ -277,7 +277,7 @@ const info = {
 
 					const select = message.components[0]?.components[0];
 
-					if (select?.type !==  ComponentType.SelectMenu)
+					if (select?.type !== ComponentType.SelectMenu)
 						throw new TypeError("Expected first component to be a select menu");
 
 					const chosen = selectInteraction.values[0] ?? "";

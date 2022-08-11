@@ -1,4 +1,4 @@
-import {ChannelType} from "discord.js";
+import { ChannelType } from "discord.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"channelCreate">} */

@@ -187,11 +187,7 @@ export async function getWarns(reply, filter, interactor) {
 				embed.addFields({ name: "Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
-				embed.addFields({
-					name: "Expirery",
-					value: time(expiresAt, "R"),
-					inline: true,
-				});
+				embed.addFields({ name: "Expirery", value: time(expiresAt, "R"), inline: true });
 
 			await reply({ ephemeral: true, embeds: [embed] });
 		}

@@ -22,11 +22,7 @@ export const { MODMAIL_CHANNEL = "" } = process.env;
 
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
 
-export const COLORS = {
-	opened: Colors.Gold,
-	closed: Colors.DarkGreen,
-	confirm: Colors.Blurple,
-};
+export const COLORS = { opened: Colors.Gold, closed: Colors.DarkGreen, confirm: Colors.Blurple };
 
 export const UNSUPPORTED =
 	"Please note that reactions, replies, edits, and deletions are not supported";

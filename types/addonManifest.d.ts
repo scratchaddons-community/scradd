@@ -367,16 +367,9 @@ type AddonManifest = {
 	/** The version that introduced the addon. */
 	versionAdded: string;
 	/** The preview used for the addon. */
-	addonPreview?: {
-		/** The type of the preview. */
-		type: "editor-dark-mode";
-	};
+	addonPreview?: { /** The type of the preview. */ type: "editor-dark-mode" };
 	/** The preview used for presets. */
-	presetPreview?: {
-		/** The type of the preview. */
-		type: "palette";
-		colors?: string[];
-	};
+	presetPreview?: { /** The type of the preview. */ type: "palette"; colors?: string[] };
 	/** The information about the latest update. */
 	latestUpdate?: {
 		/** The version of the update. */
