@@ -19,7 +19,7 @@ const event = {
 					  }`
 					: ""
 			} in ${
-				event.channel?.toString() || event.entityMetadata.location || "an external location"
+				event.channel?.toString() || event.entityMetadata?.location || "an external location"
 			}${event.creator ? " by " + event.creator.toString() : ""}${
 				event.description ? ":\n" + event.description : "!"
 			}`,

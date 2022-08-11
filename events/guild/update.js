@@ -1,3 +1,10 @@
+import {
+	GuildDefaultMessageNotifications,
+	GuildExplicitContentFilter,
+	GuildMFALevel,
+	GuildNSFWLevel,
+	GuildVerificationLevel,
+} from "discord.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"guildUpdate">} */
@@ -26,9 +33,10 @@ const event = {
 		if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications) {
 			logs.push(
 				`Default notification settings set to "${
-					{ ALL_MESSAGES: "All messages", ONLY_MENTIONS: "Only @mentions" }[
-						newGuild.defaultMessageNotifications
-					]
+					{
+						[GuildDefaultMessageNotifications.AllMessages]: "All messages",
+						[GuildDefaultMessageNotifications.OnlyMentions]: "Only @mentions",
+					}[newGuild.defaultMessageNotifications]
 				}"`,
 			);
 		}
@@ -48,9 +56,11 @@ const event = {
 			logs.push(
 				`Explicit media content filter set to "${
 					{
-						DISABLED: "Don't scan any media content.",
-						MEMBERS_WITHOUT_ROLES: "Scan media content from members without a role.",
-						ALL_MEMBERS: "Scan media content from all members.",
+						[GuildExplicitContentFilter.Disabled]: "Don't scan any media content.",
+						[GuildExplicitContentFilter.MembersWithoutRoles]:
+							"Scan media content from members without a role.",
+						[GuildExplicitContentFilter.AllMembers]:
+							"Scan media content from all members.",
 					}[newGuild.explicitContentFilter]
 				}"`,
 			);
@@ -90,7 +100,9 @@ const event = {
 		if (oldGuild.mfaLevel !== newGuild.mfaLevel) {
 			logs.push(
 				`2FA requirement for moderation ${
-					{ NONE: "dis", ELEVATED: "en" }[newGuild.mfaLevel]
+					{ [GuildMFALevel.None]: "dis", [GuildMFALevel.Elevated]: "en" }[
+						newGuild.mfaLevel
+					]
 				}abled`,
 			);
 		}
@@ -100,12 +112,14 @@ const event = {
 		if (oldGuild.nsfwLevel !== newGuild.nsfwLevel) {
 			logs.push(
 				"Server " +
-					(newGuild.nsfwLevel === "DEFAULT"
+					(newGuild.nsfwLevel === GuildNSFWLevel.Default
 						? "unmarked as NSFW"
 						: `marked as ${
-								{ EXPLICIT: "18+", SAFE: "safe", AGE_RESTRICTED: "13+" }[
-									newGuild.nsfwLevel
-								]
+								{
+									[GuildNSFWLevel.Explicit]: "18+",
+									[GuildNSFWLevel.Safe]: "safe",
+									[GuildNSFWLevel.AgeRestricted]: "13+",
+								}[newGuild.nsfwLevel]
 						  }`),
 			);
 		}
@@ -161,11 +175,11 @@ const event = {
 			logs.push(
 				`Verification level set to "${
 					{
-						NONE: "Unrestricted",
-						LOW: "Must have a verified email on their Discord account.",
-						MEDIUM: "Must also be registered on Discord for longer than 5 minutes.",
-						HIGH: "Must also be a member of this server for longer than 10 minutes.",
-						VERY_HIGH: "Must have a verified phone on their Discord account.",
+						[GuildVerificationLevel.None]: "Unrestricted",
+						[GuildVerificationLevel.Low]: "Must have a verified email on their Discord account.",
+						[GuildVerificationLevel.Medium]: "Must also be registered on Discord for longer than 5 minutes.",
+						[GuildVerificationLevel.High]: "Must also be a member of this server for longer than 10 minutes.",
+						[GuildVerificationLevel.VeryHigh]: "Must have a verified phone on their Discord account.",
 					}[newGuild.verificationLevel]
 				}"`,
 			);

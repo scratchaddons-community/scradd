@@ -49,8 +49,8 @@ export async function getData(message, sendLog = false) {
 							files: [
 								new AttachmentBuilder(
 									Buffer.from("Automatically unwarned.", "utf-8"),
-									"warn.txt",
-								),
+									{name:"warn.txt",
+								}),
 							],
 						},
 					),
@@ -105,7 +105,7 @@ export default async function warn(user, reason, strikes, context) {
 						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
 						"utf-8",
 					),
-					"warn.txt",
+					{name:"warn.txt"},
 				),
 			],
 		},
@@ -213,7 +213,7 @@ export default async function warn(user, reason, strikes, context) {
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)
-							.setColor(Colors.DARK_RED)
+							.setColor(Colors.DarkRed)
 							.setFooter(
 								strikes === 0
 									? null

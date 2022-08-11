@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder } from "discord.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 
 import { censor } from "./moderation/automod.js";
@@ -17,7 +17,7 @@ export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
 export async function boardMessageToSource(boardMessage) {
 	const component = boardMessage?.components[0]?.components?.[0];
 
-	if (component?.type !== "BUTTON") return;
+	if (component?.type !== ComponentType.Button) return;
 
 	const { guildId, channelId, messageId } =
 		/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+|@me)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu.exec(
@@ -61,7 +61,7 @@ export async function sourceToBoardMessage(message) {
 	return MESSAGES.find((boardMessage) => {
 		const component = boardMessage?.components[0]?.components?.[0];
 
-		if (component?.type !== "BUTTON") return false;
+		if (component?.type !== ComponentType.Button) return;
 
 		const messageId = /\d+$/.exec(component.url ?? "")?.[0];
 
@@ -100,7 +100,7 @@ export async function postMessageToBoard(message) {
 	const button = new ButtonBuilder()
 		.setEmoji("👀")
 		.setLabel("View Context")
-		.setStyle("LINK")
+		.setStyle(ButtonStyle.Link)
 		.setURL(message.url);
 	const reaction = message.reactions.resolve(BOARD_EMOJI);
 
@@ -118,7 +118,7 @@ export async function postMessageToBoard(message) {
 		embeds: [boardEmbed, ...embeds],
 		files,
 	});
-	if (board.type === "GUILD_NEWS") {
+	if (board.type === ChannelType.GuildNews) {
 		await boardMessage.crosspost();
 	}
 	MESSAGES.push(boardMessage);

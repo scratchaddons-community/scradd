@@ -1,4 +1,4 @@
-import { EmbedBuilder, GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -99,7 +99,7 @@ const event = {
 		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
 				starter
-					.edit({
+					?.edit({
 						embeds: [
 							(starter.embeds[0]
 								? EmbedBuilder.from(starter.embeds[0])

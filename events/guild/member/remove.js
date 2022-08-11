@@ -33,7 +33,7 @@ const event = {
 			`Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
 			`Oops, **${member.user.username}** angered the mods and was banned!`,
 			`**${member.user.username}** broke the rules and took an L`,
-			`**${member.user.username}** was banned for talking about opacity slider too much. JK, that’s not why.`,
+			`**${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
 		];
 
 		await Promise.all([

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, GuildMember } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, GuildMember, ChannelType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -49,7 +49,7 @@ const info = {
 		switch (command) {
 			case "close": {
 				if (
-					interaction.channel?.type !== "GUILD_PUBLIC_THREAD" ||
+					!interaction.channel?.isThread() ||
 					interaction.channel.parent?.id !== MODMAIL_CHANNEL ||
 					!interaction.guild
 				) {
@@ -109,7 +109,7 @@ const info = {
 
 				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-				if (mailChannel.type !== "GUILD_TEXT")
+				if (mailChannel.type !== ChannelType.GuildText)
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(

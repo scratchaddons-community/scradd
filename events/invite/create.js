@@ -9,7 +9,7 @@ const event = {
 			invite.guild,
 			`${invite.temporary ? "Temporary invite" : "Invite"} ${
 				invite.code
-			} for ${invite.channel.toString()} created${
+			} for ${invite.channel?.toString()} created${
 				invite.inviter ? ` by ${invite.inviter.toString()}` : ""
 			}${
 				invite.expiresAt || invite.maxUses

@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import log from "../../../common/moderation/logging.js";
 import { messageToText } from "../../../lib/message.js";
 
@@ -28,13 +28,17 @@ const event = {
 			`${messages.size} messages in ${channel.toString()} bulk deleted!`,
 			"messages",
 			{
-				files: [new AttachmentBuilder(Buffer.from(messagesInfo, "utf-8"), "messages.txt")],
+				files: [
+					new AttachmentBuilder(Buffer.from(messagesInfo, "utf-8"), {
+						name: "messages.txt",
+					}),
+				],
 				components: [
 					new ActionRowBuilder().addComponents(
 						new ButtonBuilder()
 							.setEmoji("👀")
 							.setLabel("View Context")
-							.setStyle("LINK")
+							.setStyle(ButtonStyle.Link)
 							.setURL(last.url),
 					),
 				],

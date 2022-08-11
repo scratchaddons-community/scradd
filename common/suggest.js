@@ -2,7 +2,6 @@ import {
 	Colors,
 	GuildMember,
 	Message,
-	EmbedBuilder,
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
 	EmbedBuilder,
@@ -17,7 +16,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 export const RATELIMT_MESSAGE =
 	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-export const DEFAULT_COLOR = Colors.GREYPLE;
+export const DEFAULT_COLOR = Colors.Greyple;
 
 /** @type {{ [key: string]: number }} */
 const cooldowns = {};
@@ -146,7 +145,9 @@ export default class SuggestionChannel {
 		];
 
 		if (starter && starter?.author.id === interaction.client.user?.id) {
-			const embed = EmbedBuilder.from(starter.embeds[0]);
+			const embed = starter.embeds[0]
+				? EmbedBuilder.from(starter.embeds[0])
+				: new EmbedBuilder();
 
 			embed
 				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
@@ -203,7 +204,9 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		const embed = EmbedBuilder.from(starterMessage.embeds[0]);
+		const embed = starterMessage.embeds[0]
+			? EmbedBuilder.from(starterMessage.embeds[0])
+			: new EmbedBuilder();
 
 		if (updated.body) embed.setDescription(updated.body);
 
@@ -223,7 +226,7 @@ export default class SuggestionChannel {
 				: Promise.resolve(interaction.channel),
 		);
 
-		embed.setTitle(title || embed.title || "");
+		embed.setTitle(title || embed.data.title || "");
 
 		promises.push(starterMessage.edit({ embeds: [embed] }));
 

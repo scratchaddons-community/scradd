@@ -94,7 +94,7 @@ export function queueDatabaseWrite(database, content) {
 		? [
 				new AttachmentBuilder(
 					Buffer.from(papaparse.unparse(content), "utf-8"),
-					getDatabaseName(database.content) + ".csv",
+					{name:getDatabaseName(database.content) + ".csv"},
 				),
 		  ]
 		: [];

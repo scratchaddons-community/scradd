@@ -5,6 +5,7 @@ import {
 	SelectMenuBuilder,
 	SlashCommandBuilder,
 	time,
+	ComponentType,
 } from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
@@ -262,7 +263,7 @@ const info = {
 		async function addCollector() {
 			return await message
 				.awaitMessageComponent({
-					componentType: "SELECT_MENU",
+					componentType: ComponentType.SelectMenu,
 
 					filter: (selectInteraction) =>
 						selectInteraction.user.id === interaction.user.id,
@@ -276,7 +277,7 @@ const info = {
 
 					const select = message.components[0]?.components[0];
 
-					if (select?.type !== "SELECT_MENU")
+					if (select?.type !==  ComponentType.SelectMenu)
 						throw new TypeError("Expected first component to be a select menu");
 
 					const chosen = selectInteraction.values[0] ?? "";

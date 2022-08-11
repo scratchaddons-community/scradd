@@ -1,4 +1,10 @@
-import { GuildMember, cleanCodeBlockContent, EmbedBuilder } from "discord.js";
+import {
+	GuildMember,
+	cleanCodeBlockContent,
+	EmbedBuilder,
+	MessageType,
+	ChannelType,
+} from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
@@ -30,13 +36,14 @@ const latestMessages = {};
 /** @type {import("../../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
-		if (message.flags.has("EPHEMERAL") || message.type === "THREAD_STARTER_MESSAGE") return;
+		if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
+			return;
 		const promises = [];
 
 		let reactions = 0;
 
 		if (
-			message.channel.type === "DM" &&
+			message.channel.isDMBased() &&
 			(message.author.id !== this.user.id || message.interaction)
 		) {
 			const guild = await this.guilds.fetch(GUILD_ID);
@@ -44,14 +51,14 @@ const event = {
 
 			if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-			if (mailChannel.type !== "GUILD_TEXT")
+			if (mailChannel.type !== ChannelType.GuildText)
 				throw new TypeError("Modmail channel is not a text channel");
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
 				webhooks.find(
 					(possibleWebhook) => possibleWebhook.applicationId === this.application.id,
-				) ?? (await mailChannel.createWebhook(CONSTANTS.webhookName));
+				) ?? (await mailChannel.createWebhook({ name: CONSTANTS.webhookName }));
 			const existingThread = await getThreadFromMember(
 				message.interaction?.user || message.author,
 				guild,
@@ -64,7 +71,11 @@ const event = {
 						.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
 						.then(...generateReactionFunctions(message)),
 				);
-			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
+			} else if (
+				[MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(
+					message.type,
+				)
+			) {
 				let toEdit = message;
 				const collector = await generateConfirm(
 					new EmbedBuilder()
@@ -136,7 +147,7 @@ const event = {
 		}
 
 		if (
-			message.channel.type === "GUILD_PUBLIC_THREAD" &&
+			message.channel.type === ChannelType.GuildPublicThread &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
 			!message.content.startsWith("=") &&
 			(message.webhookId && message.author.id !== this.user?.id
@@ -243,14 +254,14 @@ const event = {
 									bot /
 									(1 +
 										+![
-											"DEFAULT",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3",
-											"REPLY",
-											"CHAT_INPUT_COMMAND",
-											"CONTEXT_MENU_COMMAND",
+											MessageType.Default,
+											MessageType.GuildBoost,
+											MessageType.GuildBoostTier1,
+											MessageType.GuildBoostTier2,
+											MessageType.GuildBoostTier3,
+											MessageType.Reply,
+											MessageType.ChatInputCommand,
+											MessageType.ContextMenuCommand,
 										].includes(message.type)),
 							),
 					  ),

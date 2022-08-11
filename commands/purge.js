@@ -22,7 +22,7 @@ const info = {
 		.setDefaultPermission(false),
 
 	async interaction(interaction) {
-		if (!interaction.channel || interaction.channel?.type === "DM")
+		if (!interaction.channel || interaction.channel.isDMBased())
 			throw new TypeError("Can not run this command in a DM");
 
 		const count = interaction.options.getString("count", true);
@@ -33,17 +33,17 @@ const info = {
 		if (isNaN(numberCount) || numberCount > MAX_FETCH_COUNT) {
 			const deleteTo = Object.keys(Object.fromEntries([...messages])).indexOf(count) + 1;
 			if (!deleteTo) {
-				return await interaction.reply(
+				await interaction.reply(
 					`${CONSTANTS.emojis.statuses.no} Could not find a message with that ID!`,
 				);
-			}
-			return await interaction.reply(
-				await deleteMessages(messages, interaction.channel, deleteTo, user),
+			} else
+				await interaction.reply(
+					await deleteMessages(messages, interaction.channel, deleteTo, user),
+				);
+		} else
+			await interaction.reply(
+				await deleteMessages(messages, interaction.channel, numberCount, user),
 			);
-		}
-		return await interaction.reply(
-			await deleteMessages(messages, interaction.channel, numberCount, user),
-		);
 	},
 };
 

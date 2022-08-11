@@ -2,7 +2,13 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	AttachmentBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+} from "discord.js";
 import diffLib from "difflib";
 
 /** @type {import("../../types/event").default<"messageUpdate">} */
@@ -11,18 +17,18 @@ const event = {
 		if (newMessage.partial) newMessage = await newMessage.fetch();
 		if (!newMessage.guild || newMessage.guild.id !== process.env.GUILD_ID) return;
 		const logs = [];
-		if (oldMessage.flags.has("CROSSPOSTED") !== newMessage.flags.has("CROSSPOSTED")) {
+		if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 			logs.push(
 				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-					newMessage.flags.has("CROSSPOSTED") ? "" : "un"
+					newMessage.flags.has("Crossposted") ? "" : "un"
 				}published`,
 			);
 		}
-		if (oldMessage.flags.has("SUPPRESS_EMBEDS") !== newMessage.flags.has("SUPPRESS_EMBEDS")) {
+		if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
 			log(
 				newMessage.guild,
 				`Embeds ${
-					newMessage.flags.has("SUPPRESS_EMBEDS") ? "hidden" : "shown"
+					newMessage.flags.has("SuppressEmbeds") ? "hidden" : "shown"
 				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 					"!",
 				"messages",
@@ -60,12 +66,14 @@ const event = {
 							contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 							"utf-8",
 						),
-						"content.diff",
+						{ name: "content.diff" },
 					),
 				);
 
 			if (extraDiff)
-				files.push(new AttachmentBuilder(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
+				files.push(
+					new AttachmentBuilder(Buffer.from(extraDiff, "utf-8"), { name: "extra.diff" }),
+				);
 
 			if (files.length)
 				log(
@@ -86,7 +94,7 @@ const event = {
 								new ButtonBuilder()
 									.setEmoji("👀")
 									.setLabel("View Message")
-									.setStyle("LINK")
+									.setStyle(ButtonStyle.Link)
 									.setURL(newMessage.url),
 							),
 						],
@@ -105,7 +113,7 @@ async function getMessageJSON(message) {
 
 	return {
 		components: message.components.map((component) => component.toJSON()),
-		embeds: embeds.map((embed) => embed.toJSON()),
-		files: files.map((file) => file.toJSON()),
+		embeds: embeds,
+		files: files,
 	};
 }

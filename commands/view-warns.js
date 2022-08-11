@@ -6,6 +6,7 @@ import {
 	ButtonBuilder,
 	MessageMentions,
 	time,
+	ButtonStyle,
 } from "discord.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -30,7 +31,7 @@ const info = {
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("Member is not a GuildMember");
-		return getWarns(
+		getWarns(
 			async (data) => await interaction.reply(data),
 			interaction.options.getString("filter"),
 			interaction.member,
@@ -97,7 +98,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 						strikes.map((warn) =>
 							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
-								.setStyle("SECONDARY")
+								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(
 									`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`,
 								),
@@ -111,7 +112,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 }
 
 /**
- * @param {(options: string | import("discord.js").InteractionReplyOptions | import("discord.js").MessagePayload) => Promise<void>} reply
+ * @param {(options: string | import("discord.js").InteractionReplyOptions) => Promise<import("discord.js").InteractionResponse>} reply
  * @param {string | null} filter
  * @param {import("discord.js").GuildMember} interactor
  *
@@ -119,17 +120,16 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
  */
 export async function getWarns(reply, filter, interactor) {
 	if (filter) {
-		const pinged = filter.match(MessageMentions.USERS_PATTERN)?.[1];
+		const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
 		if (pinged) {
 			const user = await interactor.client.users.fetch(pinged);
 
 			if (!user)
-				return await reply({
+				await reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
 				});
-
-			await reply(await getWarnsForMember(user, interactor.guild));
+			else await reply(await getWarnsForMember(user, interactor.guild));
 		} else {
 			const id = convertBase(filter, WARN_INFO_BASE, 10);
 			const channel = interactor.guild && (await getThread("members", interactor.guild));
@@ -137,17 +137,19 @@ export async function getWarns(reply, filter, interactor) {
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
 			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
 
-			if (!message)
-				return await reply({
+			if (!message) {
+				await reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
 				});
+				return;
+			}
 
 			const reason = await fetch(message.attachments.first()?.url || "").then((response) =>
 				response.text(),
 			);
 			const [, userId = "", moderatorId = ""] =
-				message.content.match(MessageMentions.USERS_PATTERN) || [];
+				message.content.match(MessageMentions.UsersPattern) || [];
 			// todo: this isn't global anymore
 
 			const member = await interactor.guild?.members.fetch(userId).catch(() => {});

@@ -19,7 +19,6 @@
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@discordjs/builders": "1.1.0",
 		"async-exit-hook": "2.0.1",
 		"difflib": "0.2.4",
 		"discord.js": "14.2.0",

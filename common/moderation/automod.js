@@ -67,7 +67,7 @@ async function checkString(toCensor, message) {
 			bad.bots = botLinks.length;
 		}
 
-		const inviteCodes = toCensor.match(Invite.INVITES_PATTERN);
+		const inviteCodes = toCensor.match(Invite.InvitesPattern);
 		if (inviteCodes) {
 			const invitesToDelete = [
 				...new Set(
@@ -259,7 +259,7 @@ export async function automodMessage(message) {
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
-	if (!channel || channel.type === "DM") return true;
+	if (!channel || channel.isDMBased()) return true;
 	return [
 		"816329956074061867", // admin-talk
 		channel.guild.publicUpdatesChannel?.id, // mod-talk

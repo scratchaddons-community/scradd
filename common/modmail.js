@@ -1,5 +1,4 @@
 import {
-	EmbedBuilder,
 	GuildMember,
 	Message,
 	EmbedBuilder,
@@ -8,6 +7,8 @@ import {
 	Colors,
 	MessageMentions,
 	ThreadAutoArchiveDuration,
+	ChannelType,
+	ButtonStyle,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
 
@@ -22,9 +23,9 @@ export const { MODMAIL_CHANNEL = "" } = process.env;
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
 
 export const COLORS = {
-	opened: Colors.GOLD,
-	closed: Colors.DARK_GREEN,
-	confirm: Colors.BLURPLE,
+	opened: Colors.Gold,
+	closed: Colors.DarkGreen,
+	confirm: Colors.Blurple,
 };
 
 export const UNSUPPORTED =
@@ -70,7 +71,7 @@ export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId = embed.description.match(MessageMentions.USERS_PATTERN)?.[1] ?? embed.description;
+	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
@@ -92,7 +93,7 @@ export async function getThreadFromMember(
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-	if (mailChannel.type !== "GUILD_TEXT")
+	if (mailChannel.type !== ChannelType.GuildText)
 		throw new TypeError("Modmail channel is not a text channel");
 
 	const { threads } = await mailChannel.threads.fetchActive();
@@ -146,7 +147,10 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 					starter
 						?.edit({
 							embeds: [
-								EmbedBuilder.from(starter.embeds[0])
+								(starter.embeds[0]
+									? EmbedBuilder.from(starter.embeds[0])
+									: new EmbedBuilder()
+								)
 									.setTitle("Modmail ticket closed!")
 									.setColor(COLORS.closed),
 							],
@@ -203,12 +207,12 @@ export async function sendOpenedMessage(user) {
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 	const button = new ButtonBuilder()
 		.setLabel("Confirm")
-		.setStyle("PRIMARY")
+		.setStyle(ButtonStyle.Primary)
 		.setCustomId(generateHash("confirm"));
 	const cancelButton = new ButtonBuilder()
 		.setLabel("Cancel")
 		.setCustomId(generateHash("cancel"))
-		.setStyle("SECONDARY");
+		.setStyle(ButtonStyle.Secondary);
 
 	const message = await reply({
 		components: [new ActionRowBuilder().addComponents(button, cancelButton)],

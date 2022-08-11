@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } from "discord.js";
+import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
@@ -31,7 +31,7 @@ const info = {
 									new ButtonBuilder()
 										.setEmoji("👀")
 										.setLabel("View Message")
-										.setStyle("LINK")
+										.setStyle(ButtonStyle.Link)
 										.setURL(message.url),
 								),
 							],

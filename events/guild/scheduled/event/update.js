@@ -5,7 +5,7 @@ import log from "../../../../common/moderation/logging.js";
 const event = {
 	async event(oldEvent, newEvent) {
 		const guild = newEvent.guild || (await this.guilds.fetch(newEvent.guildId));
-		if (guild.id !== process.env.GUILD_ID) return;
+		if (guild.id !== process.env.GUILD_ID || !oldEvent) return;
 		const logs = [];
 		if (oldEvent.name !== newEvent.name) logs.push(" renamed to `" + newEvent.name + "`");
 
@@ -16,7 +16,7 @@ const event = {
 			logs.push(
 				" moved to " +
 					(oldEvent.channel?.toString() ||
-						oldEvent.entityMetadata.location ||
+						oldEvent.entityMetadata?.location ||
 						"an external location"),
 			);
 
@@ -26,7 +26,7 @@ const event = {
 		if (oldEvent.image !== newEvent.image) logs.push("’s TODO");
 
 		if (
-			oldEvent.scheduledStartAt.valueOf() !== newEvent.scheduledStartAt.valueOf() ||
+			oldEvent.scheduledStartAt?.valueOf() !== newEvent.scheduledStartAt?.valueOf() ||
 			oldEvent.scheduledEndAt?.valueOf() !== newEvent.scheduledEndAt?.valueOf()
 		) {
 			const start = newEvent.scheduledStartAt,

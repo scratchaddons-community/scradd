@@ -14,11 +14,12 @@ const event = {
 			interaction.customId.endsWith("_strike") &&
 			interaction.member instanceof GuildMember
 		) {
-			return await getWarns(
+			await getWarns(
 				(data) => interaction.reply(data),
 				interaction.customId.split("_strike")[0] ?? null,
 				interaction.member,
 			);
+			return;
 		}
 		if (!interaction.isChatInputCommand()) return;
 		try {
