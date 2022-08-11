@@ -5,6 +5,7 @@ import {
 	EmbedBuilder,
 	MessageMentions,
 	ChannelType,
+	ButtonStyle,
 } from "discord.js";
 
 import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
@@ -160,10 +161,11 @@ const info = {
 			),
 		);
 
+		const customId = generateHash("next");
 		const nextButton = new ButtonBuilder()
 			.setLabel("Next")
-			.setCustomId(generateHash("next"))
-			.setStyle("SECONDARY")
+			.setCustomId(customId)
+			.setStyle(ButtonStyle.Secondary)
 			.setEmoji("➡");
 
 		let source = (await fetchedMessages.next()).value;
@@ -214,7 +216,7 @@ const info = {
 
 		const collector = deferred.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
-				buttonInteraction.customId === nextButton.customId &&
+				buttonInteraction.customId === customId &&
 				buttonInteraction.user.id === interaction.user.id,
 
 			time: CONSTANTS.collectorTime,

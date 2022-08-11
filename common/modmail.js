@@ -205,13 +205,16 @@ export async function sendOpenedMessage(user) {
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
+	const confirmId = generateHash("confirm");
 	const button = new ButtonBuilder()
 		.setLabel("Confirm")
 		.setStyle(ButtonStyle.Primary)
-		.setCustomId(generateHash("confirm"));
+		.setCustomId(confirmId);
+
+	const cancelId = generateHash("cancel");
 	const cancelButton = new ButtonBuilder()
 		.setLabel("Cancel")
-		.setCustomId(generateHash("cancel"))
+		.setCustomId(cancelId)
 		.setStyle(ButtonStyle.Secondary);
 
 	const message = await reply({
@@ -220,8 +223,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 	});
 
 	const collector = message.createMessageComponentCollector({
-		filter: (buttonInteraction) =>
-			[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
+		filter: (buttonInteraction) => [confirmId, cancelId].includes(buttonInteraction.customId),
 
 		time: CONSTANTS.collectorTime,
 	});
@@ -229,12 +231,12 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 		.on("collect", async (buttonInteraction) => {
 			collector.stop();
 			switch (buttonInteraction.customId) {
-				case button.customId: {
+				case confirmId: {
 					await onConfirm(buttonInteraction);
 
 					break;
 				}
-				case cancelButton.customId: {
+				case cancelId: {
 					await buttonInteraction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
 						ephemeral: true,
