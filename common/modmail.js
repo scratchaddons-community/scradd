@@ -196,9 +196,9 @@ export async function sendOpenedMessage(user) {
 
 /**
  * @param {EmbedBuilder} confirmEmbed
- * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
- * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} edit
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
+ * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
+ * @param {(options: import("discord.js").WebhookEditMessageOptions) => Promise<Message>} edit
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 	const confirmId = generateHash("confirm");
