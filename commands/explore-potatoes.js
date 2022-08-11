@@ -1,4 +1,3 @@
-// @ts-nocheck -- TODO: re-eneable
 import {
 	SlashCommandBuilder,
 	Message,
@@ -7,6 +6,8 @@ import {
 	MessageMentions,
 	ChannelType,
 	ButtonStyle,
+	GuildChannel,
+	ComponentType,
 } from "discord.js";
 
 import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
@@ -99,7 +100,7 @@ const info = {
 				.setName("channel")
 				.setDescription("Filter messages to only get those in a certain channel")
 				.setRequired(false)
-				.addChannelTypes([
+				.addChannelTypes(
 					ChannelType.GuildText,
 					ChannelType.GuildVoice,
 					ChannelType.GuildCategory,
@@ -107,7 +108,7 @@ const info = {
 					ChannelType.GuildNewsThread,
 					ChannelType.GuildPublicThread,
 					ChannelType.GuildPrivateThread,
-				]),
+				),
 		),
 
 	async interaction(interaction) {
@@ -140,14 +141,15 @@ const info = {
 				async (message) => {
 					// "**🥔 8** | <#1001943698323554334> (<#811065897057255424>) | <@891316244580544522>"
 					// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
-					if (user && message.content.match(MessageMentions.USERS_PATTERN)?.[1] !== user)
+					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
 						return false;
-					const channels = message.content.match(MessageMentions.CHANNELS_PATTERN);
+					const channels = message.content.match(MessageMentions.ChannelsPattern);
+					// todo this isn't global anymore
 					const channelFound = channels?.[2] || channels?.[1];
 
 					const channelWantedFetched =
 						channelWanted &&
-						(channelWanted instanceof Channel
+						(channelWanted instanceof GuildChannel
 							? channelWanted
 							: await interaction.guild?.channels.fetch(channelWanted.id));
 
@@ -192,15 +194,13 @@ const info = {
 				};
 			}
 			source = (await fetchedMessages.next()).value;
-
-			const row = current.components?.[0];
+			const linkButton = current.components?.[0]?.components?.[0];
 			return {
 				allowedMentions: { users: [] },
 
 				components: [
-					new MessageActionRowBuilder(row).setComponents(
-						row?.components?.[0],
-						nextButton,
+					new MessageActionRowBuilder().setComponents(
+						linkButton?.type===ComponentType.Button ? [ButtonBuilder.from(linkButton), nextButton] : [nextButton],
 					),
 				],
 
