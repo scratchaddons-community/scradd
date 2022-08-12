@@ -126,8 +126,6 @@ const info = {
 					})
 					.sort(() => Math.random() - 0.5),
 				async (message) => {
-					// "**🥔 8** | <#1001943698323554334> (<#811065897057255424>) | <@891316244580544522>"
-					// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
 					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
 						return false;
 
