@@ -208,9 +208,10 @@ export async function automodMessage(message) {
 		);
 	}
 
-	const animatedEmojiCount =
-		(message.content && message.content.match(FormattingPatterns.AnimatedEmoji)?.length) || 0;
-	// todo: it isn't global anymore
+	/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
+	const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji.source, "g");
+
+	const animatedEmojiCount = [...message.content.matchAll(GlobalAnimatedEmoji)].length;
 
 	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false;
 

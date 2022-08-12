@@ -22,12 +22,11 @@ import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
  *
  * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
  * @param {string} channelFound - Text based channel.
- * @param {string} [parent]
  * @param {import("discord.js").Guild} guild
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
-async function textChannelMatches(guild, channelWanted, channelFound, parent) {
+async function textChannelMatches(guild, channelWanted, channelFound) {
 	if (channelWanted.id === channelFound) return true;
 
 	switch (channelWanted.type) {
@@ -50,8 +49,6 @@ async function textChannelMatches(guild, channelWanted, channelFound, parent) {
 		case ChannelType.GuildText:
 		case ChannelType.GuildNews: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			if (parent) return channelWanted.id === parent;
-
 			const thread = await guild.channels.fetch(channelFound).catch(() => {});
 			return thread?.parent?.id === channelWanted.id;
 		}
@@ -129,18 +126,14 @@ const info = {
 					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
 						return false;
 
-					const channels = message.content.match(MessageMentions.ChannelsPattern);
-					// todo this isn't global anymore
+					const channelFound = message.content.match(
+						MessageMentions.ChannelsPattern,
+					)?.[1];
 
 					if (
-						channels?.[1] &&
+						channelFound &&
 						channelWanted &&
-						!(await textChannelMatches(
-							interaction.guild,
-							channelWanted,
-							channels[1],
-							channels[2],
-						))
+						!(await textChannelMatches(interaction.guild, channelWanted, channelFound))
 					)
 						return false;
 

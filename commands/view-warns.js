@@ -148,9 +148,11 @@ export async function getWarns(reply, filter, interactor) {
 			const reason = await fetch(message.attachments.first()?.url || "").then((response) =>
 				response.text(),
 			);
-			const [, userId = "", moderatorId = ""] =
-				message.content.match(MessageMentions.UsersPattern) || [];
-			// todo: this isn't global anymore
+
+			/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
+			const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern.source, "g");
+
+			const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 
 			const member = await interactor.guild?.members.fetch(userId).catch(() => {});
 
@@ -159,6 +161,7 @@ export async function getWarns(reply, filter, interactor) {
 
 			const nick = member?.displayName ?? user?.username;
 
+			const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 			const mod =
 				(await interactor.guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await interactor.client.users.fetch(moderatorId).catch(() => {}));
