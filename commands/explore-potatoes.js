@@ -6,8 +6,8 @@ import {
 	MessageMentions,
 	ChannelType,
 	ButtonStyle,
-	GuildChannel,
 	ComponentType,
+	CategoryChannel,
 } from "discord.js";
 
 import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
@@ -17,63 +17,50 @@ import { generateHash } from "../lib/text.js";
 import { disableComponents, getAllMessages } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
-/** @type {{ [key: string]: { [key: string]: boolean } }} */
-const threadsFound = {};
-
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
  *
- * @param {import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
+ * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
  * @param {string} channelFound - Text based channel.
+ * @param {string} [parent]
+ * @param {import("discord.js").Guild} guild
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
-async function textChannelMatches(channelWanted, channelFound) {
+async function textChannelMatches(guild, channelWanted, channelFound, parent) {
+	if (channelWanted.id === channelFound) return true;
+
 	switch (channelWanted.type) {
-		case "GUILD_TEXT":
-		case "GUILD_NEWS": {
-			// Text
-			if (channelFound === channelWanted.id) return true;
+		case ChannelType.GuildCategory: {
+			const fetchedChannel =
+				channelWanted instanceof CategoryChannel
+					? channelWanted
+					: await guild.channels.fetch(channelWanted.id);
 
-			if (threadsFound[`${channelWanted.id}`]?.[`${channelFound}`] !== undefined)
-				return !!threadsFound[`${channelFound}`];
+			if (fetchedChannel?.type !== ChannelType.GuildCategory)
+				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
 
-			const thread = (
-				await channelWanted.threads.fetchArchived({ before: channelFound, limit: 2 })
-			).threads.first();
-
-			(threadsFound[channelWanted.id] ??= {})[channelFound] = !!(
-				thread && channelFound === thread?.id
+			return await firstTrueyPromise(
+				fetchedChannel.children
+					.valueOf()
+					.map((child) => textChannelMatches(guild, child, channelFound)),
 			);
-
-			if (thread && channelFound === thread.id) return true;
-			else return false;
 		}
-		case "GUILD_CATEGORY": {
-			// category
-			const promises = [];
+		case ChannelType.GuildForum:
+		case ChannelType.GuildText:
+		case ChannelType.GuildNews: {
+			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
+			if (parent) return channelWanted.id === parent;
 
-			for (const channel of channelWanted.children.values())
-				promises.push(textChannelMatches(channel, channelFound));
-
-			if (!(await firstTrueyPromise(promises))) return false;
-
-			break;
-		}
-		case "GUILD_NEWS_THREAD":
-		case "GUILD_PUBLIC_THREAD": {
-			// other public thread
-			if (typeof channelFound === "string" && channelWanted.id === channelFound) break;
-			else return false;
+			const thread = await guild.channels.fetch(channelFound).catch(() => {});
+			return thread?.parent?.id === channelWanted.id;
 		}
 
 		default: {
-			// It’s likely a VC
+			// It’s a DM, stage, directory, non-matching thread, non-matching VC, or an unimplemented channel type.
 			return false;
 		}
 	}
-
-	return true;
 }
 
 /** @type {import("../types/command").default} */
@@ -108,15 +95,15 @@ const info = {
 					ChannelType.GuildNewsThread,
 					ChannelType.GuildPublicThread,
 					ChannelType.GuildPrivateThread,
+					// ChannelType.GuildForum,
 				),
-		),
-
+	),
+	
 	async interaction(interaction) {
 		const deferred = await interaction.deferReply({
 			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 		});
-		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
-
+		const board = await interaction.guild.channels.fetch(BOARD_CHANNEL);
 		if (!board?.isTextBased()) {
 			throw new ReferenceError("Could not find board channel");
 		}
@@ -143,20 +130,19 @@ const info = {
 					// "**🥔 11** | <#811065897057255424> | <@771422735486156811>"
 					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
 						return false;
+
 					const channels = message.content.match(MessageMentions.ChannelsPattern);
 					// todo this isn't global anymore
-					const channelFound = channels?.[2] || channels?.[1];
-
-					const channelWantedFetched =
-						channelWanted &&
-						(channelWanted instanceof GuildChannel
-							? channelWanted
-							: await interaction.guild?.channels.fetch(channelWanted.id));
 
 					if (
-						channelWantedFetched &&
-						channelFound &&
-						!(await textChannelMatches(channelWantedFetched, channelFound))
+						channels?.[1] &&
+						channelWanted &&
+						!(await textChannelMatches(
+							interaction.guild,
+							channelWanted,
+							channels[1],
+							channels[2],
+						))
 					)
 						return false;
 
@@ -200,7 +186,9 @@ const info = {
 
 				components: [
 					new MessageActionRowBuilder().setComponents(
-						linkButton?.type===ComponentType.Button ? [ButtonBuilder.from(linkButton), nextButton] : [nextButton],
+						linkButton?.type === ComponentType.Button
+							? [ButtonBuilder.from(linkButton), nextButton]
+							: [nextButton],
 					),
 				],
 
