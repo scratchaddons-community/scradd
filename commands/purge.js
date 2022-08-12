@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 const MAX_FETCH_COUNT = 100;
@@ -6,7 +6,7 @@ const MAX_FETCH_COUNT = 100;
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Bulk deletes a specified amount of messages")
+		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
 			input
 				.setName("count")
@@ -19,7 +19,7 @@ const info = {
 		.addUserOption((input) =>
 			input.setName("user").setDescription("Only delete messages from this user"),
 		)
-		.setDefaultPermission(false),
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
 		if (!interaction.channel || interaction.channel.isDMBased())

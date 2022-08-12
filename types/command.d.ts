@@ -21,7 +21,9 @@ type CommandInfo = {
 	/**
 	 * A builder instance that has constructed the command.
 	 *
-	 * @throws {AssertionError} An AssertionError is thrown if `.setName` is called on this builder. The file name is used automatically.
+	 * @throws {AssertionError} If {@link Command.setName} is called on this builder. The file name is used automatically.
+	 * @throws {AssertionError} If {@link Command.setDMPermission} is called on this builder. Use {@link CommandInfo.dm} to set the
+	 *   availability of this command in DMs.
 	 */
 	data: ((this: Client<true>) => Awaitable<Command>) | Command;
 	/** Pass `false` to disable this command. */

@@ -52,9 +52,8 @@ const event = {
 				);
 			}
 
-			if (guild.id !== GUILD_ID) {
+			if (guild.id !== GUILD_ID)
 				await this.application.commands.set([], guild.id).catch(() => {});
-			}
 		});
 
 		const dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -80,10 +79,23 @@ const event = {
 						operator: name,
 						message: "Don’t manually set the command name, it will use the file name",
 					});
+
 				data.setName(name);
-				if (command.dm && process.env.NODE_ENV === "production")
-					dmCommands.push(data.toJSON());
-				else serverCommands.push(data.toJSON());
+
+				const json = data.toJSON();
+
+				if (typeof json.dm_permission !== "undefined")
+					throw new AssertionError({
+						actual: json.dm_permission,
+						expected: undefined,
+						message: "Don’t set DM permissions, set `dm: true` instead",
+					});
+
+				(command.dm && process.env.NODE_ENV === "production"
+					? dmCommands
+					: serverCommands
+				).push(json);
+
 				return [dmCommands, serverCommands];
 			},
 			/**

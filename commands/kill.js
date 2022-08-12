@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
 import { cleanListeners } from "../common/databases.js";
 import logError from "../lib/logError.js";
@@ -8,10 +8,10 @@ const info = {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`(${
-				process.env.NODE_ENV === "production" ? "Admin" : "Dev (non-fake)"
+				process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"
 			} only) Kills the bot.`,
 		)
-		.setDefaultPermission(false),
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
 		await cleanListeners();
