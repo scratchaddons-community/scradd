@@ -1,3 +1,4 @@
+import { time } from "discord.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
@@ -19,11 +20,7 @@ const event = {
 				newMember.communicationDisabledUntil &&
 				newMember.communicationDisabledUntil < new Date()
 			)
-				logs.push(
-					" timed out until <t:" +
-						Math.round(+newMember.communicationDisabledUntil / 1_000) +
-						">",
-				);
+				logs.push(" timed out until " + time(newMember.communicationDisabledUntil));
 
 			if (!newMember.communicationDisabledUntil) logs.push(" un timed out");
 		}

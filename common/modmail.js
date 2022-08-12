@@ -1,30 +1,28 @@
 import {
 	GuildMember,
 	Message,
-	MessageEmbed,
-	MessageActionRow,
-	MessageButton,
-	Constants,
+	EmbedBuilder,
+	ButtonBuilder,
+	Colors,
 	MessageMentions,
+	ThreadAutoArchiveDuration,
+	ChannelType,
+	ButtonStyle,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
-import { Embed } from "@discordjs/builders";
 
 import { escapeMessage } from "../lib/markdown.js";
 import { asyncFilter } from "../lib/promises.js";
 import { extractMessageExtremities, messageToText } from "../lib/message.js";
 
 import CONSTANTS from "./CONSTANTS.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
 if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
 
-export const COLORS = {
-	opened: Constants.Colors.GOLD,
-	closed: Constants.Colors.DARK_GREEN,
-	confirm: Constants.Colors.BLURPLE,
-};
+export const COLORS = { opened: Colors.Gold, closed: Colors.DarkGreen, confirm: Colors.Blurple };
 
 export const UNSUPPORTED =
 	"Please note that reactions, replies, edits, and deletions are not supported";
@@ -69,7 +67,7 @@ export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
-	const userId = embed.description.match(MessageMentions.USERS_PATTERN)?.[1] ?? embed.description;
+	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
 	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
@@ -91,7 +89,7 @@ export async function getThreadFromMember(
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-	if (mailChannel.type !== "GUILD_TEXT")
+	if (mailChannel.type !== ChannelType.GuildText)
 		throw new TypeError("Modmail channel is not a text channel");
 
 	const { threads } = await mailChannel.threads.fetchActive();
@@ -114,7 +112,7 @@ export async function getThreadFromMember(
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getMemberFromThread(thread);
-	const embed = new Embed()
+	const embed = new EmbedBuilder()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdAt)
 		.setFooter({
@@ -145,9 +143,12 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 					starter
 						?.edit({
 							embeds: [
-								new MessageEmbed(starter.embeds[0])
+								(starter.embeds[0]
+									? EmbedBuilder.from(starter.embeds[0])
+									: new EmbedBuilder()
+								)
 									.setTitle("Modmail ticket closed!")
-									.setColor(Constants.Colors.DARK_GREEN),
+									.setColor(COLORS.closed),
 							],
 						})
 						.catch(console.error);
@@ -179,7 +180,7 @@ export async function sendOpenedMessage(user) {
 	return await user
 		.send({
 			embeds: [
-				new Embed()
+				new EmbedBuilder()
 					.setTitle("Modmail ticket opened!")
 					.setDescription(
 						`The moderation team of **${escapeMessage(
@@ -194,70 +195,66 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {Embed} confirmEmbed
- * @param {(
- * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} reply
- * @param {(
- * 	options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions,
- * ) => Promise<Message | import("discord-api-types").APIMessage>} edit
+ * @param {EmbedBuilder} confirmEmbed
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
+ * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
+ * @param {(options: import("discord.js").WebhookEditMessageOptions) => Promise<Message>} edit
  */
 export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
-	const button = new MessageButton()
+	const confirmId = generateHash("confirm");
+	const button = new ButtonBuilder()
 		.setLabel("Confirm")
-		.setStyle("PRIMARY")
-		.setCustomId(generateHash("confirm"));
-	const cancelButton = new MessageButton()
+		.setStyle(ButtonStyle.Primary)
+		.setCustomId(confirmId);
+
+	const cancelId = generateHash("cancel");
+	const cancelButton = new ButtonBuilder()
 		.setLabel("Cancel")
-		.setCustomId(generateHash("cancel"))
-		.setStyle("SECONDARY");
+		.setCustomId(cancelId)
+		.setStyle(ButtonStyle.Secondary);
 
 	const message = await reply({
-		components: [new MessageActionRow().addComponents(button, cancelButton)],
+		components: [new MessageActionRowBuilder().addComponents(button, cancelButton)],
 		embeds: [confirmEmbed],
 	});
 
-	if (message instanceof Message) {
-		const collector = message.channel.createMessageComponentCollector({
-			filter: (buttonInteraction) =>
-				[button.customId, cancelButton.customId].includes(buttonInteraction.customId),
+	const collector = message.createMessageComponentCollector({
+		filter: (buttonInteraction) => [confirmId, cancelId].includes(buttonInteraction.customId),
 
-			time: CONSTANTS.collectorTime,
-		});
-		collector
-			.on("collect", async (buttonInteraction) => {
-				collector.stop();
-				switch (buttonInteraction.customId) {
-					case button.customId: {
-						await onConfirm(buttonInteraction);
+		time: CONSTANTS.collectorTime,
+	});
+	collector
+		.on("collect", async (buttonInteraction) => {
+			collector.stop();
+			switch (buttonInteraction.customId) {
+				case confirmId: {
+					await onConfirm(buttonInteraction);
 
-						break;
-					}
-					case cancelButton.customId: {
-						await buttonInteraction.reply({
-							content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
-							ephemeral: true,
-						});
-
-						break;
-					}
+					break;
 				}
-			})
-			.on("end", async () => {
-				await edit({
-					components: [
-						new MessageActionRow().addComponents(
-							button.setDisabled(true),
-							cancelButton.setDisabled(true),
-						),
-					],
+				case cancelId: {
+					await buttonInteraction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} Modmail canceled!`,
+						ephemeral: true,
+					});
 
-					embeds: [confirmEmbed],
-				});
+					break;
+				}
+			}
+		})
+		.on("end", async () => {
+			await edit({
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						button.setDisabled(true),
+						cancelButton.setDisabled(true),
+					),
+				],
+
+				embeds: [confirmEmbed],
 			});
-		return collector;
-	}
+		});
+	return collector;
 }
 
 /**
@@ -286,7 +283,7 @@ export function generateReactionFunctions(message) {
 
 /**
  * @param {import("discord.js").TextChannel} mailChannel
- * @param {Embed} openedEmbed
+ * @param {EmbedBuilder} openedEmbed
  * @param {string} name
  */
 export async function openModmail(mailChannel, openedEmbed, name, ping = false) {
@@ -302,7 +299,7 @@ export async function openModmail(mailChannel, openedEmbed, name, ping = false) 
 			.toLocaleString([], { minimumIntegerDigits: 2 })}-${date
 			.getUTCDate()
 			.toLocaleString([], { minimumIntegerDigits: 2 })})`,
-		autoArchiveDuration: "MAX",
+		autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 	});
 	await thread.setLocked(true);
 	return thread;

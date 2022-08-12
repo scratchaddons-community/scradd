@@ -1,19 +1,19 @@
+import { ChannelType } from "discord.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"channelDelete">} */
 const event = {
 	async event(channel) {
-		if (channel.type === "DM" || channel.guild.id !== process.env.GUILD_ID) return;
+		if (channel.isDMBased() || channel.guild.id !== process.env.GUILD_ID) return;
 		await log(
 			channel.guild,
 			`${
 				{
-					GUILD_CATEGORY: "Category",
-					GUILD_NEWS: "Announcement",
-					GUILD_STAGE_VOICE: "Stage",
-					GUILD_STORE: "Store",
-					GUILD_TEXT: "Text",
-					GUILD_VOICE: "Voice",
+					[ChannelType.GuildText]: "Text",
+					[ChannelType.GuildVoice]: "Voice",
+					[ChannelType.GuildCategory]: "Category",
+					[ChannelType.GuildNews]: "Announcement",
+					[ChannelType.GuildStageVoice]: "Stage",
 				}[channel.type]
 			} channel #${channel.name} deleted! (ID ${channel.id})`,
 			"channels",

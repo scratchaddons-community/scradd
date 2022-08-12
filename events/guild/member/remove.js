@@ -7,7 +7,8 @@ const event = {
 		if (member.guild.id !== process.env.GUILD_ID) return;
 		await log(member.guild, `Member ${member.toString()} left!`, "members");
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-		if (!channel?.isText()) throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel");
+		if (!channel?.isTextBased())
+			throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel");
 
 		const byes = [
 			`Welp… **${member.user.username}** decided to leave… what a shame…`,
@@ -32,7 +33,7 @@ const event = {
 			`Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
 			`Oops, **${member.user.username}** angered the mods and was banned!`,
 			`**${member.user.username}** broke the rules and took an L`,
-			`**${member.user.username}** was banned for talking about opacity slider too much. JK, that’s not why.`,
+			`**${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
 		];
 
 		await Promise.all([

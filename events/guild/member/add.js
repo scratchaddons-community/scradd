@@ -8,7 +8,7 @@ const event = {
 		if (member.guild.id !== process.env.GUILD_ID) return;
 		await log(member.guild, `Member ${member.toString()} joined!`, "members");
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-		if (!channel?.isText()) return;
+		if (!channel?.isTextBased()) return;
 
 		const greetings = [
 			`Everybody please welcome ${member.toString()} to ${

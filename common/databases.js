@@ -1,4 +1,4 @@
-import { Message, MessageAttachment } from "discord.js";
+import { Message, AttachmentBuilder } from "discord.js";
 import papaparse from "papaparse";
 import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
@@ -92,10 +92,9 @@ export function queueDatabaseWrite(database, content) {
 	const timeoutId = timeouts[database.id];
 	const files = content.length
 		? [
-				new MessageAttachment(
-					Buffer.from(papaparse.unparse(content), "utf-8"),
-					getDatabaseName(database.content) + ".csv",
-				),
+				new AttachmentBuilder(Buffer.from(papaparse.unparse(content), "utf-8"), {
+					name: getDatabaseName(database.content) + ".csv",
+				}),
 		  ]
 		: [];
 	const callback = () => {

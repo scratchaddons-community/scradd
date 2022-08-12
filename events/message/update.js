@@ -2,8 +2,9 @@ import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../lib/message.js";
 import jsonDiff from "json-diff";
-import { MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } from "discord.js";
+import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";
+import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 
 /** @type {import("../../types/event").default<"messageUpdate">} */
 const event = {
@@ -11,22 +12,22 @@ const event = {
 		if (newMessage.partial) newMessage = await newMessage.fetch();
 		if (!newMessage.guild || newMessage.guild.id !== process.env.GUILD_ID) return;
 		const logs = [];
-		if (oldMessage.flags.has("CROSSPOSTED") !== newMessage.flags.has("CROSSPOSTED")) {
+		if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 			logs.push(
 				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-					newMessage.flags.has("CROSSPOSTED") ? "" : "un"
+					newMessage.flags.has("Crossposted") ? "" : "un"
 				}published`,
 			);
 		}
-		if (oldMessage.flags.has("SUPPRESS_EMBEDS") !== newMessage.flags.has("SUPPRESS_EMBEDS")) {
+		if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
 			log(
 				newMessage.guild,
 				`Embeds ${
-					newMessage.flags.has("SUPPRESS_EMBEDS") ? "hidden" : "shown"
+					newMessage.flags.has("SuppressEmbeds") ? "hidden" : "shown"
 				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 					"!",
 				"messages",
-				{ embeds: newMessage.embeds.map((embed) => new MessageEmbed(embed)) },
+				{ embeds: newMessage.embeds.map((embed) => EmbedBuilder.from(embed)) },
 			);
 		}
 		if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
@@ -55,17 +56,19 @@ const event = {
 
 			if (contentDiff)
 				files.push(
-					new MessageAttachment(
+					new AttachmentBuilder(
 						Buffer.from(
 							contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 							"utf-8",
 						),
-						"content.diff",
+						{ name: "content.diff" },
 					),
 				);
 
 			if (extraDiff)
-				files.push(new MessageAttachment(Buffer.from(extraDiff, "utf-8"), "extra.diff"));
+				files.push(
+					new AttachmentBuilder(Buffer.from(extraDiff, "utf-8"), { name: "extra.diff" }),
+				);
 
 			if (files.length)
 				log(
@@ -82,11 +85,11 @@ const event = {
 					newMessage.guild &&
 					log(newMessage.guild, edit + "!", "messages", {
 						components: [
-							new MessageActionRow().addComponents(
-								new MessageButton()
+							new MessageActionRowBuilder().addComponents(
+								new ButtonBuilder()
 									.setEmoji("👀")
 									.setLabel("View Message")
-									.setStyle("LINK")
+									.setStyle(ButtonStyle.Link)
 									.setURL(newMessage.url),
 							),
 						],
@@ -105,7 +108,7 @@ async function getMessageJSON(message) {
 
 	return {
 		components: message.components.map((component) => component.toJSON()),
-		embeds: embeds.map((embed) => embed.toJSON()),
-		files: files.map((file) => file.toJSON()),
+		embeds: embeds,
+		files: files,
 	};
 }

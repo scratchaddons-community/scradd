@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from "discord.js";
+import { GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -7,12 +7,10 @@ import {
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
-import { Embed } from "@discordjs/builders";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/databases.js";
-import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
@@ -35,7 +33,6 @@ const event = {
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-						MAX: "1 Week",
 					}[newThread.autoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
 					newThread.autoArchiveDuration
 				}`,
@@ -64,11 +61,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread ${oldThread.toString()} (https://discord.com/channels/${
-							newThread.guild.id
-						}/${oldThread.id})` +
-							edit +
-							`!`,
+						`Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`,
 						"channels",
 					),
 			),
@@ -106,9 +99,12 @@ const event = {
 		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
 				starter
-					.edit({
+					?.edit({
 						embeds: [
-							(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
+							(starter.embeds[0]
+								? EmbedBuilder.from(starter.embeds[0])
+								: new EmbedBuilder()
+							)
 								.setTitle("Modmail ticket opened!")
 								.setFooter({
 									text:

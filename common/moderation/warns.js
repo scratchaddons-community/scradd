@@ -1,7 +1,13 @@
-import { Constants, GuildMember, MessageAttachment, User, Util } from "discord.js";
+import {
+	EmbedBuilder,
+	Colors,
+	GuildMember,
+	AttachmentBuilder,
+	User,
+	escapeMarkdown,
+} from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
-import { Embed } from "@discordjs/builders";
 import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
@@ -37,13 +43,13 @@ export async function getData(message, sendLog = false) {
 						message.guild,
 						`Member <@${user}> lost ${strikes} strike${
 							strikes === 1 ? "" : "s"
-						} from ${message.guild.me?.toString()}!`,
+						} from ${message.guild.members.me?.toString()}!`,
 						"members",
 						{
 							files: [
-								new MessageAttachment(
+								new AttachmentBuilder(
 									Buffer.from("Automatically unwarned.", "utf-8"),
-									"warn.txt",
+									{ name: "warn.txt" },
 								),
 							],
 						},
@@ -94,12 +100,12 @@ export default async function warn(user, reason, strikes, context) {
 		"members",
 		{
 			files: [
-				new MessageAttachment(
+				new AttachmentBuilder(
 					Buffer.from(
 						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
 						"utf-8",
 					),
-					"warn.txt",
+					{ name: "warn.txt" },
 				),
 			],
 		},
@@ -194,11 +200,11 @@ export default async function warn(user, reason, strikes, context) {
 			user
 				.send({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setTitle(
 								`You were ${
 									strikes === 0 ? "verbally " : ""
-								}warned in ${Util.escapeMarkdown(guild.name)}!`,
+								}warned in ${escapeMarkdown(guild.name)}!`,
 							)
 							.setDescription(
 								strikes === 0
@@ -207,7 +213,7 @@ export default async function warn(user, reason, strikes, context) {
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)
-							.setColor(Constants.Colors.DARK_RED)
+							.setColor(Colors.DarkRed)
 							.setFooter(
 								strikes === 0
 									? null
