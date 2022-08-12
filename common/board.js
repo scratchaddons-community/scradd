@@ -13,7 +13,7 @@ export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
  *
  * @param {import("discord.js").Message} boardMessage - Message in #potatoboard.
  *
- * @returns {Promise<import("discord.js").Message<boolean> | undefined>} - Source message.
+ * @returns {Promise<import("discord.js").Message | undefined>} - Source message.
  */
 export async function boardMessageToSource(boardMessage) {
 	const component = boardMessage.components[0]?.components?.[0];
