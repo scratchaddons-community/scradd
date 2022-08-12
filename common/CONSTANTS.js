@@ -1,4 +1,4 @@
-export default {
+export default /** @type {const} */ ({
 	collectorTime: 30_000,
 	zeroWidthSpace: "\u200b",
 	emojis: {
@@ -39,7 +39,7 @@ export default {
 		},
 	},
 	robotop: "323630372531470346",
-	servers: { testing: "938438560925761619" },
+	testingServer: "938438560925761619",
 	roles: {
 		designers: "966174686142672917",
 		developers: "938439909742616616",
@@ -53,4 +53,4 @@ export default {
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	prodScradd: "929928324959055932",
-};
+});

@@ -30,7 +30,7 @@ const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
  * @returns {Promise<string>} - Users with the role.
  */
 async function getRole(roleId, client) {
-	const guild = await client.guilds.fetch(CONSTANTS.servers.testing);
+	const guild = await client.guilds.fetch(CONSTANTS.testingServer);
 	const role = await guild.roles.fetch(roleId);
 	const members = Array.from(role?.members.values() ?? []);
 
