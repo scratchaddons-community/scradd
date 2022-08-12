@@ -50,7 +50,7 @@ const info = {
 export default info;
 
 /**
- * @param {import("discord.js").Collection<string, import("discord.js").Message<boolean>>} unfiltered
+ * @param {import("discord.js").Collection<string, import("discord.js").Message>} unfiltered
  * @param {import("discord.js").GuildTextBasedChannel} channel
  * @param {number} count
  * @param {null | import("discord.js").User} user

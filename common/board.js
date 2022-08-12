@@ -46,7 +46,7 @@ let MESSAGES;
  *
  * @param {import("discord.js").Message} message - Message to find.
  *
- * @returns {Promise<import("discord.js").Message<boolean> | undefined>} Message on #potatoboard.
+ * @returns {Promise<import("discord.js").Message | undefined>} Message on #potatoboard.
  */
 export async function sourceToBoardMessage(message) {
 	if (!message.guild) return;

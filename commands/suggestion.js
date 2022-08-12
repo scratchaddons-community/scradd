@@ -175,9 +175,16 @@ const info = {
 
 		const message =
 			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
-		if (message && message.author.id === interaction.client.user?.id)
-			// todo: what if they have changed
-			await reactAll(message, SUGGESTION_EMOJIS[0] || []);
+
+		if (message && message.author.id === interaction.client.user?.id) {
+			const emoji = message.reactions.valueOf().first()?.emoji;
+			await reactAll(
+				message,
+				SUGGESTION_EMOJIS.find(([one]) => one === emoji?.id || emoji?.name) ||
+					SUGGESTION_EMOJIS[0] ||
+					[],
+			);
+		}
 
 		switch (command) {
 			case "create": {

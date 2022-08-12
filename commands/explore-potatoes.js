@@ -153,7 +153,7 @@ const info = {
 		/**
 		 * Grab a new message from the board.
 		 *
-		 * @param {void | Message<boolean>} current
+		 * @param {void | Message} current
 		 *
 		 * @returns {Promise<import("discord.js").InteractionReplyOptions>} - Reply to post next.
 		 */
