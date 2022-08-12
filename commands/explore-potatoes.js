@@ -97,8 +97,8 @@ const info = {
 					ChannelType.GuildPrivateThread,
 					// ChannelType.GuildForum,
 				),
-	),
-	
+		),
+
 	async interaction(interaction) {
 		const deferred = await interaction.deferReply({
 			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,

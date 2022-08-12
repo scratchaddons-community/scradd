@@ -41,8 +41,8 @@ const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scrad
 
 /**
  * @type {{
- * 	description(client: Client): string | Promise<string>;
- * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => string | Promise<string>;
+ * 	description(client: Client): import("discord.js").Awaitable<string>;
+ * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => import("discord.js").Awaitable<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
@@ -207,7 +207,7 @@ const info = {
 			)
 			.setRequired(false),
 	),
-
+	dm: true,
 	async interaction(interaction) {
 		const hash = generateHash("info");
 		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;

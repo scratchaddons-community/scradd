@@ -10,7 +10,7 @@ const info = {
 		.addStringOption((input) =>
 			input.setName("text").setRequired(true).setDescription("Text to check"),
 		),
-
+	dm: true,
 	async interaction(interaction) {
 		const result = censor(interaction.options.getString("text", true));
 		if (result) {
