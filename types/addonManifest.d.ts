@@ -1,5 +1,4 @@
 /** @author TypeScript Implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/0530d12/1/1.18.json) */
-import type { ArrayOfAtLeastOne } from "./helpers";
 
 /** The value manipulator. */
 type definitions_cssManipulator =
@@ -99,7 +98,7 @@ type definitions_cssManipulator =
 type definitions_matches =
 	| "*"
 	| `^${string}`
-	| ArrayOfAtLeastOne<
+	| (
 			| `^${string}`
 			| (
 					| "projects"
@@ -115,11 +114,11 @@ type definitions_matches =
 			  )
 			| "isNotScratchWWW"
 			| `https://${string}`
-	  >;
+	  )[];
 
 type definitions_if = {
 	settings: { [key: string]: unknown };
-	addonEnabled: string | ArrayOfAtLeastOne<string>;
+	addonEnabled: string | string[];
 };
 
 /**
@@ -139,7 +138,7 @@ type AddonManifest = {
 	 *
 	 * A tag.
 	 */
-	tags: ArrayOfAtLeastOne<
+	tags: (
 		| "community"
 		| "editor"
 		| "popup"
@@ -158,19 +157,19 @@ type AddonManifest = {
 		| "profiles"
 		| "studios"
 		| "comments"
-	>;
+	)[];
 	/**
 	 * You can specify permissions by providing a "permissions" array.
 	 *
 	 * A permission.
 	 */
-	permissions?: ArrayOfAtLeastOne<"notifications" | "badge" | "clipboardWrite">;
+	permissions?: ("notifications" | "badge" | "clipboardWrite")[];
 	/**
 	 * You can add persistent scripts by providing a "persistentScripts" array conformed of JS files (e.g. ["example.js"]).
 	 *
 	 * The path to the persistent script.
 	 */
-	persistentScripts?: ArrayOfAtLeastOne<`${string}.js`>;
+	persistentScripts?: `${string}.js`[];
 	/**
 	 * You can add userscripts by providing a "userscripts" array.
 	 *
@@ -178,25 +177,25 @@ type AddonManifest = {
 	 *
 	 * Each object must specify the url to the userscript through the "url" property, and provide an array of URL matches.
 	 */
-	userscripts?: ArrayOfAtLeastOne<{
+	userscripts?: {
 		/** The path to the userscript. */
 		url: `${string}.js`;
 		matches: definitions_matches;
 		/** Determines whether the addon should be run after the document is complete loading. */
 		runAtComplete?: boolean;
 		if?: definitions_if;
-	}>;
+	}[];
 	/**
 	 * Similarly to userscripts, you can specify a "userstyles" array.
 	 *
 	 * Each object must specify the url to the stylesheet through the "url" property, and provide an array of URL matches.
 	 */
-	userstyles?: ArrayOfAtLeastOne<{
+	userstyles?: {
 		/** The path to the userstyle. */
 		url: `${string}.css`;
 		matches: definitions_matches;
 		if?: definitions_if;
-	}>;
+	}[];
 	/**
 	 * The "settings" object allow the addon’s users to specify settings in Scratch Addons’ settings panel. Inside your persistent scripts
 	 * and userscripts, you can then access those settings with the "addon.settings" API.
@@ -280,22 +279,20 @@ type AddonManifest = {
 	 *
 	 * A credited author/contributor.
 	 */
-	credits?: ArrayOfAtLeastOne<
-		{
-			/** The name of the credited person. */
-			name: string;
-			/** The link relevant to the credit. */
-			link?: `http${string}`;
-		} & (
-			| { id: never; note: never }
-			| {
-					/** The ID for the credit. Required if note is in use. */
-					id: string;
-					/** The note for the credit. */
-					note?: string;
-			  }
-		)
-	>;
+	credits?: ({
+		/** The name of the credited person. */
+		name: string;
+		/** The link relevant to the credit. */
+		link?: `http${string}`;
+	} & (
+		| { id: never; note: never }
+		| {
+				/** The ID for the credit. Required if note is in use. */
+				id: string;
+				/** The note for the credit. */
+				note?: string;
+		  }
+	))[];
 	/**
 	 * You can provide the "enabledByDefault" property and set it to true. Its default value is false.
 	 *
@@ -303,7 +300,7 @@ type AddonManifest = {
 	 */
 	enabledByDefault?: boolean;
 	/** An array containing presets for settings. */
-	presets?: ArrayOfAtLeastOne<{
+	presets?: {
 		/** The name of the preset. */
 		name: string;
 		/** The identifier of the preset. */
@@ -312,26 +309,26 @@ type AddonManifest = {
 		description?: string;
 		/** An object containing preset values of the settings. */
 		values: { [key: string]: boolean | number | string };
-	}>;
+	}[];
 	/**
 	 * An array of libraries that the addon uses.
 	 *
 	 * A library identifier.
 	 */
-	libraries?: ArrayOfAtLeastOne<string>;
+	libraries?: string[];
 	/**
 	 * An array of additional information (e.g. warnings, notices) about the addon.
 	 *
 	 * Information about the addon.
 	 */
-	info?: ArrayOfAtLeastOne<{
+	info?: {
 		/** Type of the information. */
 		type?: "warning" | "notice" | "info";
 		/** ID of the information. */
 		id: string;
 		/** Text of the information. */
 		text: string;
-	}>;
+	}[];
 	popup?: {
 		/** The path to the popup icon. */
 		icon: string;
@@ -385,10 +382,10 @@ type AddonManifest = {
 
 export default AddonManifest;
 
-export type WebsiteData = ArrayOfAtLeastOne<{
+export type WebsiteData = {
 	id: string;
 	name: AddonManifest["name"];
 	description: AddonManifest["description"];
 	tags: AddonManifest["tags"];
 	credits: AddonManifest["credits"];
-}>;
+}[];
