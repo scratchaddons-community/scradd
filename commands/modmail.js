@@ -1,4 +1,10 @@
-import { SlashCommandBuilder, EmbedBuilder, GuildMember, ChannelType, PermissionsBitField } from "discord.js";
+import {
+	SlashCommandBuilder,
+	EmbedBuilder,
+	GuildMember,
+	ChannelType,
+	PermissionsBitField,
+} from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -15,7 +21,7 @@ import {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-	.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
 		.setDescription("(Mods only) Commands to manage modmail tickets")
 		.addSubcommand((subcommand) =>
 			subcommand
