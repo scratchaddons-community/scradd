@@ -23,7 +23,10 @@ const event = {
 		if (oldEvent.description !== newEvent.description)
 			logs.push("’s description set to `" + newEvent.description + "`");
 
-		if (oldEvent.image !== newEvent.image) logs.push("’s TODO");
+		if (oldEvent.image !== newEvent.image)
+			logs.push(
+				`’s image changed from <${oldEvent.coverImageURL()}> to <${newEvent.coverImageURL()}>`,
+			); //TODO: it'll be 404
 
 		if (
 			oldEvent.scheduledStartAt?.valueOf() !== newEvent.scheduledStartAt?.valueOf() ||

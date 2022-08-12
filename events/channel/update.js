@@ -1,4 +1,9 @@
-import { ChannelType, escapeMarkdown, ThreadAutoArchiveDuration } from "discord.js";
+import {
+	ChannelType,
+	escapeMarkdown,
+	ThreadAutoArchiveDuration,
+	VideoQualityMode,
+} from "discord.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"channelUpdate">} */
@@ -83,7 +88,15 @@ const event = {
 			oldChannel.type === ChannelType.GuildVoice &&
 			newChannel.type === ChannelType.GuildVoice
 		)
-			oldChannel.videoQualityMode !== newChannel.videoQualityMode && edits.push("TODO");
+			oldChannel.videoQualityMode !== newChannel.videoQualityMode &&
+				edits.push(
+					`'s video quality set to ${
+						{
+							[VideoQualityMode.Auto]: "Auto",
+							[VideoQualityMode.Full]: "720p",
+						}[newChannel.videoQualityMode || VideoQualityMode.Auto]
+					}`,
+				);
 
 		await Promise.all(
 			edits.map((edit) =>

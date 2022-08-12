@@ -201,8 +201,11 @@ const event = {
 		if (oldGuild.widgetEnabled !== newGuild.widgetEnabled) {
 			logs.push(`Server widget ${newGuild.partnered ? "en" : "dis"}abled`);
 		}
-
-		// TODO: maxVideoChannelUsers
+		if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
+			logs.push(
+				`The max number of users allowed in a video channel changed to ${newGuild.maxVideoChannelUsers}`,
+			);
+		}
 
 		await Promise.all(logs.map((edit) => log(newGuild, edit + `!`, "server")));
 	},
