@@ -29,8 +29,6 @@ const info = {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand(true);
 
-		if (!interaction.guild) throw new TypeError("Cannot use /xp command in DMs");
-
 		const database = (await getDatabases(["xp"], interaction.guild)).xp;
 		const allXp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
 
@@ -38,7 +36,7 @@ const info = {
 			case "rank": {
 				const user = interaction.options.getUser("user") || interaction.user;
 
-				const member = await interaction.guild?.members.fetch(user.id).catch(() => {});
+				const member = await interaction.guild.members.fetch(user.id).catch(() => {});
 
 				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
 				const level = getLevelForXp(xp);
@@ -121,7 +119,7 @@ const info = {
 						}> (${xp.xp.toLocaleString()} XP)`;
 					},
 					"No users found.",
-					`Leaderboard for ${interaction.guild?.name}`,
+					`Leaderboard for ${interaction.guild.name}`,
 					(data) =>
 						interaction[
 							interaction.replied || interaction.deferred ? "editReply" : "reply"

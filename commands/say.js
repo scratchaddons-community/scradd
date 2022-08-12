@@ -21,23 +21,22 @@ const info = {
 		if (message) {
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
-				interaction.guild &&
-					log(
-						interaction.guild,
-						`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
-						"messages",
-						{
-							components: [
-								new MessageActionRowBuilder().addComponents(
-									new ButtonBuilder()
-										.setEmoji("👀")
-										.setLabel("View Message")
-										.setStyle(ButtonStyle.Link)
-										.setURL(message.url),
-								),
-							],
-						},
-					),
+				log(
+					interaction.guild,
+					`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
+					"messages",
+					{
+						components: [
+							new MessageActionRowBuilder().addComponents(
+								new ButtonBuilder()
+									.setEmoji("👀")
+									.setLabel("View Message")
+									.setStyle(ButtonStyle.Link)
+									.setURL(message.url),
+							),
+						],
+					},
+				),
 			]);
 		}
 	},

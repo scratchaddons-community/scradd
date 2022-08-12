@@ -1,9 +1,11 @@
 import log from "../common/moderation/logging.js";
-import commands from "../common/commands.js";
-import { pkg } from "../lib/files.js";
+import { pkg, importScripts } from "../lib/files.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../lib/logError.js";
 import { ActivityType } from "discord.js";
+import { AssertionError } from "assert";
+import path from "path";
+import url from "url";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {
@@ -55,19 +57,42 @@ const event = {
 			}
 		});
 
-		const [dmCommands, serverCommands] = (await commands(this)).toJSON().reduce(
-			([dmCommands, serverCommands], command) => {
+		const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+		const commands =
+			await /** @type {Promise<import("discord.js").Collection<string, import("../types/command").default>>} */ (
+				importScripts(path.resolve(dirname, "../commands"))
+			);
+
+		const [dmCommands, serverCommands] = await commands.reduce(
+			async (promise, command, name) => {
+				const [dmCommands, serverCommands] = await promise;
 				if (!(command.enable ?? true)) return [dmCommands, serverCommands];
+
+				const data =
+					typeof command.data === "function"
+						? await command.data.call(this)
+						: command.data;
+				if (data.name)
+					throw new AssertionError({
+						actual: data.name,
+						expected: "",
+						operator: name,
+						message: "Don’t manually set the command name, it will use the file name",
+					});
+				data.setName(name);
 				if (command.dm && process.env.NODE_ENV === "production")
-					dmCommands.push(command.data.toJSON());
-				else serverCommands.push(command.data.toJSON());
+					dmCommands.push(data.toJSON());
+				else serverCommands.push(data.toJSON());
 				return [dmCommands, serverCommands];
 			},
 			/**
-			 * @type {[
-			 * 	import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
-			 * 	import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
-			 * ]}
+			 * @type {import("discord.js").Awaitable<
+			 * 	[
+			 * 		import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 		import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	]
+			 * >}
 			 */ ([[], []]),
 		);
 

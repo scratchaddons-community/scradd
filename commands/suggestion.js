@@ -238,7 +238,7 @@ const info = {
 				break;
 			}
 			case "get-top": {
-				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
+				const channel = await interaction.guild.channels.fetch(SUGGESTION_CHANNEL);
 
 				if (!channel?.isTextBased())
 					throw new ReferenceError("Could not find suggestion channel");
@@ -302,7 +302,7 @@ const info = {
 
 				const nick =
 					requestedUser &&
-					(await interaction.guild?.members.fetch(requestedUser.id))?.displayName;
+					(await interaction.guild.members.fetch(requestedUser.id))?.displayName;
 				await paginate(
 					all,
 					(suggestion) =>

@@ -50,8 +50,7 @@ const info = {
 			case "close": {
 				if (
 					!interaction.channel?.isThread() ||
-					interaction.channel.parent?.id !== MODMAIL_CHANNEL ||
-					!interaction.guild
+					interaction.channel.parent?.id !== MODMAIL_CHANNEL
 				) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${MODMAIL_CHANNEL}>.`,
@@ -83,7 +82,7 @@ const info = {
 			case "start": {
 				const user = interaction.options.getMember("user");
 
-				if (!(user instanceof GuildMember) || !interaction.guild) {
+				if (!(user instanceof GuildMember)) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
 						ephemeral: true,
