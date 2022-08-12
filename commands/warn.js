@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
 import { stripMarkdown } from "../lib/markdown.js";
@@ -8,8 +8,8 @@ const DEFAULT_STRIKES = 1;
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Warns a user")
-		.setDefaultPermission(false)
+		.setDescription("(Mod only) Warns a user")
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
 		.addUserOption((input) =>
 			input.setDescription("The user to warn").setName("user").setRequired(true),
 		)
