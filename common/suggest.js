@@ -34,7 +34,7 @@ export default class SuggestionChannel {
 	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
-	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the suggestion message on success.
+	 * @returns {Promise<false | import("discord.js").Message>} - `false` on errors and the suggestion message on success.
 	 */
 	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
