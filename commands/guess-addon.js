@@ -1,12 +1,16 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+	SlashCommandBuilder,
 	Message,
-	MessageActionRow,
-	MessageActionRowComponent,
-	MessageButton,
-	MessageSelectMenu,
-	MessageEmbed,
-	Util,
+	ButtonBuilder,
+	ButtonComponent,
+	SelectMenuBuilder,
+	EmbedBuilder,
+	escapeMarkdown,
+	ButtonStyle,
+	MessageType,
+	ComponentType,
+	Embed,
+	SelectMenuComponentOptionData,
 } from "discord.js";
 import Fuse from "fuse.js";
 
@@ -16,6 +20,7 @@ import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/20addons/gameUt
 import manifest from "../common/20addons/manifest.js";
 import questionsByAddon from "../common/20addons/questions.js";
 import { generateHash } from "../lib/text.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -64,7 +69,7 @@ const questions = Object.values(questionsByAddon)
 	}, /** @type {{ [key: string]: string[][] }} */ ({}));
 
 const selectGroupButton = (/** @type {string | undefined} */ defaultValue) =>
-	new MessageSelectMenu()
+	new SelectMenuBuilder()
 		.setPlaceholder("Select a group")
 		.setCustomId(generateHash("group"))
 		.setOptions(
@@ -324,19 +329,19 @@ const info = {
 							}
 
 							await interaction.editReply({
-								components: /** @type {MessageActionRow[]} */ (
-									oldMessage.components
-								).map((row) =>
-									/** @type {MessageActionRow} */ (row).setComponents(
+								components: oldMessage.components.map((row) =>
+									MessageActionRowBuilder.from(row).setComponents(
 										row.components.map((component) =>
-											/** @type {MessageActionRowComponent} */ (
-												component
-											).setDisabled(true),
+											component.setDisabled(true),
 										),
 									),
 								),
 
-								embeds: [new MessageEmbed(oldMessage.embeds[0])],
+								embeds: [
+									new EmbedBuilder(
+										/** @type {!Embed} */ (oldMessage.embeds[0]).toJSON(),
+									),
+								],
 							});
 
 							await /** @type {Message<boolean>} */ (oldMessage).reply({
@@ -352,46 +357,48 @@ const info = {
 
 						const message = await interaction.editReply({
 							components: [
-								new MessageActionRow().addComponents(
-									new MessageButton()
+								new MessageActionRowBuilder().addComponents(
+									new ButtonBuilder()
 										.setLabel("Yes")
-										.setStyle("SUCCESS")
+										.setStyle(ButtonStyle.Success)
 										.setCustomId(generateHash("yes")),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I think so")
-										.setStyle("SUCCESS")
+										.setStyle(ButtonStyle.Success)
 										.setCustomId(generateHash("probably")),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I don’t know")
-										.setStyle("PRIMARY")
+										.setStyle(ButtonStyle.Primary)
 										.setCustomId(generateHash("dontKnow")),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I don’t think so")
-										.setStyle("DANGER")
+										.setStyle(ButtonStyle.Danger)
 										.setCustomId(generateHash("not")),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("No")
-										.setStyle("DANGER")
+										.setStyle(ButtonStyle.Danger)
 										.setCustomId(generateHash("no")),
 								),
-								new MessageActionRow().addComponents(
+								new MessageActionRowBuilder().addComponents(
 									...(typeof backInfo === "object"
 										? [
-												new MessageButton()
+												new ButtonBuilder()
 													.setLabel("Back")
-													.setStyle("SECONDARY")
+													.setStyle(ButtonStyle.Secondary)
 													.setCustomId(generateHash("back")),
 										  ]
 										: []),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("End")
-										.setStyle("SECONDARY")
+										.setStyle(ButtonStyle.Secondary)
 										.setCustomId(generateHash("end")),
 								),
 							],
 
 							embeds: [
-								new MessageEmbed(oldMessage.embeds[0]).setDescription(
+								new EmbedBuilder(
+									/** @type {!Embed} */ (oldMessage.embeds[0]).toJSON(),
+								).setDescription(
 									(oldMessage.embeds[0]?.description
 										? `${
 												oldMessage.embeds[0]?.description || ""
@@ -407,7 +414,7 @@ const info = {
 						CURRENTLY_PLAYING.set(interaction.user.id, message);
 
 						const collector = message.createMessageComponentCollector({
-							componentType: "BUTTON",
+							componentType: ComponentType.Button,
 
 							filter: (buttonInteraction) =>
 								buttonInteraction.user.id === interaction.user.id,
@@ -425,14 +432,20 @@ const info = {
 										}),
 										interaction.editReply({
 											components: message.components.map((row) =>
-												row.setComponents(
+												MessageActionRowBuilder.from(row).setComponents(
 													row.components.map((component) =>
 														component.setDisabled(true),
 													),
 												),
 											),
 
-											embeds: [new MessageEmbed(oldMessage.embeds[0])],
+											embeds: [
+												new EmbedBuilder(
+													/** @type {!Embed} */ (
+														oldMessage.embeds[0]
+													).toJSON(),
+												),
+											],
 										}),
 									]);
 
@@ -516,7 +529,7 @@ const info = {
 										),
 										interaction.editReply({
 											components: message.components.map((row) =>
-												row.setComponents(
+												MessageActionRowBuilder.from(row).setComponents(
 													row.components.map((component) =>
 														component.setDisabled(true),
 													),
@@ -574,53 +587,55 @@ const info = {
 
 						await oldMessage.edit({
 							components: [
-								new MessageActionRow().addComponents(
-									new MessageButton()
+								new MessageActionRowBuilder().addComponents(
+									new ButtonBuilder()
 										.setLabel("Yes")
-										.setStyle("SUCCESS")
+										.setStyle(ButtonStyle.Success)
 										.setCustomId(generateHash("yes"))
 										.setDisabled(true),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I think so")
-										.setStyle("SUCCESS")
+										.setStyle(ButtonStyle.Success)
 										.setCustomId(generateHash("probably"))
 										.setDisabled(true),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I don’t know")
-										.setStyle("PRIMARY")
+										.setStyle(ButtonStyle.Primary)
 										.setCustomId(generateHash("dontKnow"))
 										.setDisabled(true),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("I don’t think so")
-										.setStyle("DANGER")
+										.setStyle(ButtonStyle.Danger)
 										.setCustomId(generateHash("not"))
 										.setDisabled(true),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("No")
-										.setStyle("DANGER")
+										.setStyle(ButtonStyle.Danger)
 										.setCustomId(generateHash("no"))
 										.setDisabled(true),
 								),
-								new MessageActionRow().addComponents(
+								new MessageActionRowBuilder().addComponents(
 									...(typeof backInfo === "object"
 										? [
-												new MessageButton()
+												new ButtonBuilder()
 													.setLabel("Back")
-													.setStyle("SECONDARY")
+													.setStyle(ButtonStyle.Secondary)
 													.setCustomId(generateHash("back"))
 													.setDisabled(true),
 										  ]
 										: []),
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("End")
-										.setStyle("SECONDARY")
+										.setStyle(ButtonStyle.Secondary)
 										.setCustomId(generateHash("end"))
 										.setDisabled(true),
 								),
 							],
 
 							embeds: [
-								new MessageEmbed(oldMessage.embeds[0]).setDescription(
+								new EmbedBuilder(
+									/** @type {!Embed} */ (oldMessage.embeds[0]).toJSON(),
+								).setDescription(
 									`${
 										oldMessage.embeds[0]?.description || ""
 											? `${
@@ -634,29 +649,29 @@ const info = {
 
 						const message = await oldMessage.reply({
 							components: [
-								new MessageActionRow().addComponents(
+								new MessageActionRowBuilder().addComponents(
 									...(typeof backInfo === "object"
 										? [
-												new MessageButton()
+												new ButtonBuilder()
 													.setLabel("Back")
-													.setStyle("SECONDARY")
+													.setStyle(ButtonStyle.Secondary)
 													.setCustomId(generateHash("back")),
 										  ]
 										: []),
 
-									new MessageButton()
+									new ButtonBuilder()
 										.setLabel("No it’s not, continue!")
-										.setStyle("PRIMARY")
+										.setStyle(ButtonStyle.Primary)
 										.setCustomId(generateHash("continue")),
 								),
 							],
 
-							content: `${interaction.user.toString()}, your addon is **${Util.escapeMarkdown(
+							content: `${interaction.user.toString()}, your addon is **${escapeMarkdown(
 								foundAddon.name,
 							)}**!`,
 
 							embeds: [
-								new MessageEmbed()
+								new EmbedBuilder()
 									.setTitle(foundAddon.name)
 									.setDescription(
 										`${
@@ -682,7 +697,7 @@ const info = {
 													name: interaction.user.username,
 											  },
 									)
-									.setColor(CONSTANTS.colors.theme)
+									.setColor(CONSTANTS.themeColor)
 									.setThumbnail(
 										`https://scratchaddons.com/assets/img/addons/${encodeURI(
 											foundAddon.id,
@@ -711,7 +726,7 @@ const info = {
 						CURRENTLY_PLAYING.delete(interaction.user.id);
 
 						const collector = message.createMessageComponentCollector({
-							componentType: "BUTTON",
+							componentType: ComponentType.Button,
 
 							filter: (buttonInteraction) =>
 								buttonInteraction.user.id === interaction.user.id,
@@ -737,10 +752,10 @@ const info = {
 
 									await buttonInteraction.reply({
 										components: [
-											new MessageActionRow().addComponents(
-												new MessageButton()
+											new MessageActionRowBuilder().addComponents(
+												new ButtonBuilder()
 													.setLabel("Go to game")
-													.setStyle("LINK")
+													.setStyle(ButtonStyle.Link)
 													.setURL(
 														`https://discord.com/channels/${encodeURI(
 															oldMessage.guild?.id || "@me",
@@ -759,7 +774,11 @@ const info = {
 										backInfo.probabilities,
 										askedCount - 1,
 										backInfo.justAsked,
-										buttonInteraction.component.label || "",
+										ButtonBuilder.from(
+											/** @type {ButtonComponent} */ (
+												buttonInteraction.component
+											),
+										).data.label || "",
 									);
 
 									if (nextMessage)
@@ -770,10 +789,10 @@ const info = {
 
 								await buttonInteraction.reply({
 									components: [
-										new MessageActionRow().addComponents(
-											new MessageButton()
+										new MessageActionRowBuilder().addComponents(
+											new ButtonBuilder()
 												.setLabel("Go to game")
-												.setStyle("LINK")
+												.setStyle(ButtonStyle.Link)
 												.setURL(
 													`https://discord.com/channels/${encodeURI(
 														oldMessage.guild?.id || "@me",
@@ -802,14 +821,18 @@ const info = {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
 								await message.edit({
 									components: message.components.map((row) =>
-										row.setComponents(
+										MessageActionRowBuilder.from(row).setComponents(
 											row.components.map((component) =>
 												component.setDisabled(true),
 											),
 										),
 									),
 
-									embeds: [new MessageEmbed(message.embeds[0])],
+									embeds: [
+										new EmbedBuilder(
+											/** @type {!Embed} */ (message.embeds[0]).toJSON(),
+										),
+									],
 								});
 							});
 					}
@@ -829,15 +852,15 @@ const info = {
 
 				const message = await interaction.reply({
 					components: [
-						new MessageActionRow().addComponents(selectGroupButton()),
-						new MessageActionRow().addComponents([
-							new MessageButton()
+						new MessageActionRowBuilder().addComponents(selectGroupButton()),
+						new MessageActionRowBuilder().addComponents([
+							new ButtonBuilder()
 								.setLabel("End")
-								.setStyle("SECONDARY")
+								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(generateHash("end")),
-							new MessageButton()
+							new ButtonBuilder()
 								.setLabel("Hint")
-								.setStyle("SECONDARY")
+								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(generateHash("hint")),
 						]),
 					],
@@ -846,8 +869,8 @@ const info = {
 						"Select a question for me to answer from one of the dropdowns below. When you have an idea of what the addon I'm thinking of might be, reply to this message with its name!",
 
 					embeds: [
-						new MessageEmbed()
-							.setColor(CONSTANTS.colors.theme)
+						new EmbedBuilder()
+							.setColor(CONSTANTS.themeColor)
 							.setAuthor(
 								interaction.member && "displayAvatarURL" in interaction.member
 									? {
@@ -883,7 +906,7 @@ const info = {
 				const messageCollector = message.channel.createMessageCollector({
 					filter: (collectedMessage) =>
 						collectedMessage.author.id === interaction.user.id &&
-						collectedMessage.type === "REPLY" &&
+						collectedMessage.type === MessageType.Reply &&
 						collectedMessage.reference?.messageId === message.id,
 				});
 
@@ -903,7 +926,7 @@ const info = {
 
 						const editPromise = interaction.editReply({
 							embeds: [
-								new MessageEmbed(message.embeds[0])
+								new EmbedBuilder(/** @type {!Embed} */ (message.embeds[0]).toJSON())
 									.setDescription(
 										`${message.embeds[0]?.description || ""}\n* Is it the ${
 											item.name
@@ -937,12 +960,12 @@ const info = {
 						await Promise.all([
 							editPromise,
 							collectedMessage.reply({
-								content: `${interaction.user.toString()}, the addon *is* **${Util.escapeMarkdown(
+								content: `${interaction.user.toString()}, the addon *is* **${escapeMarkdown(
 									addon.name,
 								)}**! You got it right!`,
 
 								embeds: [
-									new MessageEmbed()
+									new EmbedBuilder()
 										.setTitle(addon.name)
 										.setDescription(
 											`${
@@ -968,7 +991,7 @@ const info = {
 														name: interaction.user.username,
 												  },
 										)
-										.setColor(CONSTANTS.colors.theme)
+										.setColor(CONSTANTS.themeColor)
 										.setThumbnail(
 											`https://scratchaddons.com/assets/img/addons/${encodeURI(
 												addon.id,
@@ -1030,7 +1053,7 @@ const info = {
 											}))
 											.filter(({ label }) => !doneQuestions.has(label));
 
-										const select = new MessageSelectMenu()
+										const select = new SelectMenuBuilder()
 											.setCustomId(generateHash(groupName))
 											.setPlaceholder(
 												`Select a question (${
@@ -1039,50 +1062,57 @@ const info = {
 											)
 											.setOptions(options);
 
-										const row = new MessageActionRow().setComponents(select);
+										const row = new MessageActionRowBuilder().setComponents(
+											select,
+										);
 
 										if (options.length > 0) accumulator.push(row);
 
 										return accumulator;
 									},
-									/** @type {MessageActionRow[]} */ ([]),
+									/** @type {MessageActionRowBuilder[]} */ ([]),
 								) || [];
 
 							const groupSelection = selectGroupButton(split[0] || "");
 
 							const groupsToSelect = groupSelection.options
-								.map((option) => ({
-									default: option.default,
-									label: option.label,
-									value: option.value,
-								}))
+								.map(
+									(option) =>
+										/** @type {SelectMenuComponentOptionData} */ ({
+											default: option.data.default,
+											label: option.data.label,
+											value: option.data.value || "",
+										}),
+								)
 								.filter((o) => !doneGroups.has(o.value));
 
 							await interaction.editReply({
 								components: [
 									...(groupsToSelect.length > 0
 										? [
-												new MessageActionRow().setComponents([
+												new MessageActionRowBuilder().setComponents([
 													groupSelection.setOptions(...groupsToSelect),
 												]),
 												...groupSelects,
 										  ]
 										: []),
-									new MessageActionRow().setComponents([
-										new MessageButton()
+									new MessageActionRowBuilder().setComponents([
+										new ButtonBuilder()
 											.setLabel("End")
-											.setStyle("SECONDARY")
+											.setStyle(ButtonStyle.Secondary)
 											.setCustomId(generateHash("end")),
-										new MessageButton()
+										new ButtonBuilder()
 											.setLabel("Hint")
-											.setStyle("SECONDARY")
+											.setStyle(ButtonStyle.Secondary)
 											.setCustomId(generateHash("hint")),
 									]),
 								],
 
 								embeds: updateEmbed
 									? [
-											new MessageEmbed(message.embeds[0])
+											new EmbedBuilder(
+												/** @type {!Embed} */ (message.embeds[0]).toJSON(),
+											)
 												.setDescription(
 													`${
 														message.embeds[0]?.description || ""
@@ -1186,7 +1216,7 @@ const info = {
 								  ),
 							interaction.editReply({
 								components: message.components.map((row) =>
-									row.setComponents(
+									MessageActionRowBuilder.from(row).setComponents(
 										row.components.map((component) =>
 											component.setDisabled(true),
 										),

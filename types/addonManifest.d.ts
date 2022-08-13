@@ -309,7 +309,7 @@ type AddonManifest = {
 				/** The ID for the credit. Required if note is in use. */
 				id: string;
 				/** The note for the credit. */
-				note?: string;
+				note: string;
 		  }
 	))[];
 	/**

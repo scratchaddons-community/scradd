@@ -1,4 +1,4 @@
-import { Util } from "discord.js";
+import { escapeMarkdown } from "discord.js";
 
 import addons from "./addons.js";
 import manifest from "./manifest.js";
@@ -149,7 +149,7 @@ const QUESTIONS = {
 
 	history: {
 		new: {
-			question: `Was your addon added in the latest version (**[${Util.escapeMarkdown(
+			question: `Was your addon added in the latest version (**[${escapeMarkdown(
 				version,
 			)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 				version,
@@ -160,7 +160,7 @@ const QUESTIONS = {
 		},
 
 		updated: {
-			question: `Was your addon updated (not including completely new addons) in the latest version (**[${Util.escapeMarkdown(
+			question: `Was your addon updated (not including completely new addons) in the latest version (**[${escapeMarkdown(
 				version,
 			)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 				version,
@@ -264,7 +264,7 @@ for (const addon of addons) {
 			dependencies: Object.fromEntries(
 				addons
 					.map(({ name }) => [
-						`Does your addon’s name **start** with **${Util.escapeMarkdown(
+						`Does your addon’s name **start** with **${escapeMarkdown(
 							name[0]?.toUpperCase() || "",
 						)}**?`,
 						false,
@@ -272,7 +272,7 @@ for (const addon of addons) {
 					.filter(
 						([question]) =>
 							question !==
-							`Does your addon’s name **start** with **${Util.escapeMarkdown(
+							`Does your addon’s name **start** with **${escapeMarkdown(
 								addon.name[0]?.toUpperCase() || "",
 							)}**?`,
 					),
@@ -281,11 +281,11 @@ for (const addon of addons) {
 			group: "Addon name",
 			order: 1,
 
-			question: `Does your addon’s name **start** with **${Util.escapeMarkdown(
+			question: `Does your addon’s name **start** with **${escapeMarkdown(
 				addon.name[0]?.toUpperCase() || "",
 			)}**?`,
 
-			statement: `This addon’s name starts with **${Util.escapeMarkdown(
+			statement: `This addon’s name starts with **${escapeMarkdown(
 				addon.name[0]?.toUpperCase() || "",
 			)}**!`,
 
@@ -295,7 +295,7 @@ for (const addon of addons) {
 			dependencies: Object.fromEntries(
 				addons
 					.map(({ name }) => [
-						`Does your addon’s name **end** with **${Util.escapeMarkdown(
+						`Does your addon’s name **end** with **${escapeMarkdown(
 							name.at(-1)?.toUpperCase() || "",
 						)}**?`,
 						false,
@@ -303,7 +303,7 @@ for (const addon of addons) {
 					.filter(
 						([question]) =>
 							question !==
-							`Does your addon’s name **end** with **${Util.escapeMarkdown(
+							`Does your addon’s name **end** with **${escapeMarkdown(
 								addon.name.at(-1)?.toUpperCase() || "",
 							)}**?`,
 					),
@@ -312,11 +312,11 @@ for (const addon of addons) {
 			group: "Addon name",
 			order: 2,
 
-			question: `Does your addon’s name **end** with **${Util.escapeMarkdown(
+			question: `Does your addon’s name **end** with **${escapeMarkdown(
 				addon.name.at(-1)?.toUpperCase() || "",
 			)}**?`,
 
-			statement: `This addon’s name ends with **${Util.escapeMarkdown(
+			statement: `This addon’s name ends with **${escapeMarkdown(
 				addon.name.at(-1)?.toUpperCase() || "",
 			)}**!`,
 
@@ -723,8 +723,8 @@ for (const addon of addons) {
 				dependencies: { [QUESTIONS.settings.credits.question]: true },
 				group: "Credits",
 				order: 2,
-				question: `Did **${Util.escapeMarkdown(name)}** contribute to your addon?`,
-				statement: `**${Util.escapeMarkdown(name)}** contributed to this addon!`,
+				question: `Did **${escapeMarkdown(name)}** contribute to your addon?`,
+				statement: `**${escapeMarkdown(name)}** contributed to this addon!`,
 				userAsking: `Did ${name} contribute to this addon?`,
 			})),
 		);
@@ -789,7 +789,7 @@ for (const addon of addons) {
 						addon.tags.includes("recommended") || addon.tags.includes("featured")
 							? "Other"
 							: "Featured"
-					} new addons and updates** as of version **[${Util.escapeMarkdown(
+					} new addons and updates** as of version **[${escapeMarkdown(
 						version,
 					)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 						version,
@@ -803,7 +803,7 @@ for (const addon of addons) {
 					addon.tags.includes("recommended") || addon.tags.includes("featured")
 						? "Featured"
 						: "Other"
-				} new addons and updates** as of version **[${Util.escapeMarkdown(
+				} new addons and updates** as of version **[${escapeMarkdown(
 					version,
 				)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 					version,
@@ -862,7 +862,7 @@ for (const addon of addons) {
 
 					[`Is your addon found under **${
 						addon.latestUpdate.isMajor ? "Other" : "Featured"
-					} new addons and updates** as of **[${Util.escapeMarkdown(
+					} new addons and updates** as of **[${escapeMarkdown(
 						version,
 					)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 						version,
@@ -874,7 +874,7 @@ for (const addon of addons) {
 
 				question: `Is your addon found under **${
 					addon.latestUpdate.isMajor ? "Featured" : "Other"
-				} new addons and updates** as of **[${Util.escapeMarkdown(
+				} new addons and updates** as of **[${escapeMarkdown(
 					version,
 				)}](https://github.com/ScratchAddons/ScratchAddons/releases/tag/v${encodeURI(
 					version,

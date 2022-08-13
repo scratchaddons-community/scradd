@@ -1,4 +1,5 @@
-import { Collection, MessageActionRow, MessageButton } from "discord.js";
+import { Collection, ButtonBuilder, ButtonStyle } from "discord.js";
+import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 
 /** @type {Collection<string, import("discord.js").Message>} */
 export const CURRENTLY_PLAYING = new Collection();
@@ -6,7 +7,7 @@ export const CURRENTLY_PLAYING = new Collection();
 /**
  * Reply to the interaction if the interaction user is already playing a game.
  *
- * @param {import("discord.js").MessageComponentInteraction | import("discord.js").BaseCommandInteraction} interaction - The interaction to analyze.
+ * @param {import("discord.js").MessageComponentInteraction | import("discord.js").CommandInteraction} interaction - The interaction to analyze.
  *
  * @returns {Promise<boolean>} Whether or not the user is already playing.
  */
@@ -17,10 +18,10 @@ export async function checkIfUserPlaying(interaction) {
 
 	await interaction.reply({
 		components: [
-			new MessageActionRow().addComponents(
-				new MessageButton()
+			new MessageActionRowBuilder().addComponents(
+				new ButtonBuilder()
 					.setLabel("Go to game")
-					.setStyle("LINK")
+					.setStyle(ButtonStyle.Link)
 					.setURL(
 						`https://discord.com/channels/${encodeURI(
 							current.guild?.id || "@me",
