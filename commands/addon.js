@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -53,11 +53,12 @@ const info = {
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
-				credits?.map(({ name, link, note }) =>
-					link
-						? `[${escapeLinks(name)}](${link} "${note}")`
-						: generateTooltip(interaction, name, note),
-				) ?? [],
+				credits?.map((credit) => {
+					const note = ("note" in credit ? credit.note : undefined) || "";
+					return credit.link
+						? hyperlink(escapeLinks(credit.name), credit.link, note)
+						: generateTooltip(interaction, credit.name, note);
+				}) ?? [],
 			);
 		}
 
