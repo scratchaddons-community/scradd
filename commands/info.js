@@ -1,5 +1,11 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Client, Message, MessageActionRow, MessageSelectMenu } from "discord.js";
+import {
+	Client,
+	Message,
+	SelectMenuBuilder,
+	SlashCommandBuilder,
+	time,
+	ComponentType,
+} from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
 import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
@@ -9,6 +15,8 @@ import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { disableComponents } from "../lib/message.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
@@ -22,7 +30,7 @@ const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
  * @returns {Promise<string>} - Users with the role.
  */
 async function getRole(roleId, client) {
-	const guild = await client.guilds.fetch(CONSTANTS.servers.testing);
+	const guild = await client.guilds.fetch(CONSTANTS.testingServer);
 	const role = await guild.roles.fetch(roleId);
 	const members = Array.from(role?.members.values() ?? []);
 
@@ -33,8 +41,8 @@ const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scrad
 
 /**
  * @type {{
- * 	description(client: Client): string | Promise<string>;
- * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => string | Promise<string>;
+ * 	description(client: Client): import("discord.js").Awaitable<string>;
+ * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => import("discord.js").Awaitable<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
@@ -150,9 +158,7 @@ const OPTIONS = [
 		edit: (interaction, reply) =>
 			`__**Bot info:**__\n` +
 			`**Ping**: ${Math.abs(+reply.createdAt - +interaction.createdAt)}ms\n` +
-			`Last **restarted**  <t:${Math.round(
-				+(interaction.client.readyAt ?? 0) / 1_000,
-			)}:R>\n` +
+			`Last **restarted**  ${time(interaction.client.readyAt ?? new Date(), "R")}\n` +
 			`Current **version**: v${pkg.version}\n` +
 			`\n__**Configuration:**__\n` +
 			`**Mode**: ${process.env.NODE_ENV === "production" ? "Production" : "Testing"}\n` +
@@ -162,7 +168,7 @@ const OPTIONS = [
 			`**Logs** channel: ${
 				process.env.LOGS_CHANNEL ? `<#${process.env.LOGS_CHANNEL}>` : "*None*"
 			}\n` +
-			`**Modmaill** channel: ${
+			`**Modmail** channel: ${
 				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
 			}\n` +
 			`**Public logs** channel: ${
@@ -190,44 +196,40 @@ const OPTIONS = [
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Learn about me!").addStringOption((input) =>
+	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input
 			.setName("tab")
-			.setDescription(
-				"Which tab to open by default. You may still swap between tabs after it has loaded.",
-			)
+			.setDescription("Which tab to open first")
 			.addChoices(
-				OPTIONS.map(({ emoji, name }) => {
-					return [emoji + " " + name, name];
+				...OPTIONS.map(({ emoji, name }) => {
+					return { name: emoji + " " + name, value: name };
 				}),
 			)
 			.setRequired(false),
 	),
-
+	dm: true,
 	async interaction(interaction) {
 		const hash = generateHash("info");
-		const defaultKey = interaction.options.getString("tab") ?? "Hello!";
+		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
 		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
 
 			components: [
-				new MessageActionRow().addComponents(
-					new MessageSelectMenu()
+				new MessageActionRowBuilder().addComponents(
+					new SelectMenuBuilder()
 						.setMinValues(1)
 						.setMaxValues(1)
 						.setPlaceholder("Select one")
 						.setCustomId(hash)
 						.addOptions(
-							Array.from(
-								Object.values(OPTIONS).map(({ emoji, name }) => ({
-									default: name === defaultKey,
-									emoji,
-									label: name,
-									value: name,
-								})),
-							),
+							Object.values(OPTIONS).map(({ emoji, name }) => ({
+								default: name === defaultKey,
+								emoji,
+								label: name,
+								value: name,
+							})),
 						),
 				),
 			],
@@ -235,7 +237,6 @@ const info = {
 			content: defaultContent,
 			fetchReply: true,
 		});
-		if (!(message instanceof Message)) throw new TypeError("Result not a Message");
 		if (currentOption?.edit)
 			await interaction.editReply({
 				allowedMentions: { users: [] },
@@ -244,70 +245,49 @@ const info = {
 				content: await currentOption?.edit(interaction, message),
 			});
 
-		/**
-		 * Disable the select menu.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
-		 */
+		/** Disable the select menu. */
 		async function disable() {
-			if (!(message instanceof Message)) {
-				return await interaction.editReply({
-					allowedMentions: { users: [] },
-					content: message.content,
-				});
-			}
-
 			return await interaction.editReply({
 				allowedMentions: { users: [] },
 
-				components: message.components.map((components) =>
-					components.setComponents(
-						components.components.map((component) => component.setDisabled(true)),
-					),
-				),
+				components: disableComponents(message.components),
 
 				content: message.content,
 			});
 		}
 
-		/**
-		 * Add a collector to the message to update it when an option in the select menu is selected.
-		 *
-		 * @returns {Promise<import("discord-api-types").APIMessage | Message<boolean>>} - The original message.
-		 */
+		/** Add a collector to the message to update it when an option in the select menu is selected. */
 		async function addCollector() {
-			if (!(message instanceof Message)) return await disable();
-
 			return await message
 				.awaitMessageComponent({
-					componentType: "SELECT_MENU",
+					componentType: ComponentType.SelectMenu,
 
 					filter: (selectInteraction) =>
 						selectInteraction.user.id === interaction.user.id,
 
-					time: 30_000,
+					time: CONSTANTS.collectorTime,
 				})
 				.then(async (selectInteraction) => {
 					const promises = [];
 
 					promises.push(selectInteraction.deferUpdate());
 
-					const select = message.components[0]?.components[0];
+					const select = SelectMenuBuilder.from(selectInteraction.component);
+					const chosen = selectInteraction.values[0];
 
-					if (select?.type !== "SELECT_MENU")
-						throw new TypeError("Expected first component to be a select menu");
-
-					const chosen = selectInteraction.values[0] ?? "";
-
-					select.options = select.options.map((option) => ({
-						...option,
-						default: option.value === chosen,
-					}));
 					const option = OPTIONS.find((option) => option.name === chosen);
 					promises.push(
 						interaction.editReply({
 							allowedMentions: { users: [] },
-							components: [new MessageActionRow().addComponents(select)],
+							components: [
+								new MessageActionRowBuilder().addComponents(
+									select.setOptions(
+										select.options.map((option) =>
+											option.setDefault(option.data.value === chosen),
+										),
+									),
+								),
+							],
 
 							content:
 								(await (option?.edit
@@ -325,6 +305,7 @@ const info = {
 
 		addCollector().catch(disable);
 	},
+	enable: false,
 };
 
 export default info;

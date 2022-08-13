@@ -1,19 +1,14 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Constants, Util } from "discord.js";
+import { SlashCommandBuilder, Colors, escapeMarkdown, cleanContent } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, {
-	getUserFromSuggestion,
-	MAX_TITLE_LENGTH,
-	RATELIMT_MESSAGE,
-} from "../common/suggest.js";
+import SuggestionChannel, { getUserFromSuggestion, RATELIMT_MESSAGE } from "../common/suggest.js";
 import { escapeLinks } from "../lib/markdown.js";
 import { getAllMessages, paginate, reactAll } from "../lib/message.js";
 import { truncateText } from "../lib/text.js";
 
-const { SUGGESTION_CHANNEL, GUILD_ID } = process.env;
+const { SUGGESTION_CHANNEL } = process.env;
 
-if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env.");
+if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env");
 
 /** @type {[string, string][]} */
 export const SUGGESTION_EMOJIS = [
@@ -31,49 +26,45 @@ export const SUGGESTION_EMOJIS = [
 
 /** @type {import("../common/suggest.js").Answer[]} */
 export const ANSWERS = [
+	{ name: "Unanswered", color: Colors.Greyple, description: "This has not yet been answered" },
 	{
-		name: "Unanswered",
-		color: Constants.Colors.GREYPLE,
-		description: "This has not yet been answered",
-	},
-	{
-		color: Constants.Colors.GREEN,
+		color: Colors.Green,
 		description: "This will probably be added if anyone codes it",
 		name: "Good Idea",
 	},
 	{
-		color: Constants.Colors.ORANGE,
+		color: Colors.Orange,
 		description: "This already exists in Scratch or in Scratch Addons",
 		name: "Implemented",
 	},
 	{
-		color: Constants.Colors.RED,
+		color: Colors.Red,
 		description: "This is not something we may add for technical reasons",
 		name: "Impossible",
 	},
 	{
-		color: Constants.Colors.LUMINOUS_VIVID_PINK,
+		color: Colors.LuminousVividPink,
 		description: "This is possible, but it would require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
 	{
-		color: Constants.Colors.GOLD,
+		color: Colors.Gold,
 		description: "Someone is currently working on this",
 		name: "In Development",
 	},
 	{
-		color: Constants.Colors.DARK_GREEN,
+		color: Colors.DarkGreen,
 		description:
 			"This is possible, but it could be rejected for things like ethical or technical reasons",
 		name: "Possible",
 	},
 	{
-		color: Constants.Colors.DARK_RED,
+		color: Colors.DarkRed,
 		description: "Wouldn’t work for non-SA users or users who don’t have the addon/option on",
 		name: "Incompatible",
 	},
 	{
-		color: Constants.Colors.PURPLE,
+		color: Colors.Purple,
 		description: "We don’t want to add this for some reason",
 		name: "Rejected",
 	},
@@ -86,31 +77,31 @@ const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}.`)
+		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription(`Create a new suggestion in ${CHANNEL_TAG}.`)
+				.setDescription(`Create a new suggestion in ${CHANNEL_TAG}`)
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription(
-							`A short summary of the suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
-						)
-						.setRequired(true),
+						.setDescription(`A short summary of the suggestion `)
+						.setRequired(true)
+						.setMaxLength(100),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
-						.setRequired(true),
+						.setRequired(true)
+						.setMinLength(30),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("answer")
 				.setDescription(
-					`(Devs only) Answer a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
+					`(Devs only; For use in ${CHANNEL_TAG}’s threads) Answer a suggestion`,
 				)
 				.addStringOption((option) => {
 					const newOption = option
@@ -120,10 +111,10 @@ const info = {
 
 					for (const [index, answer] of ANSWERS.entries()) {
 						if (index)
-							newOption.addChoice(
-								`${answer.name} (${answer.description})`,
-								answer.name,
-							);
+							newOption.addChoices({
+								name: `${answer.name} (${answer.description})`,
+								value: answer.name,
+							});
 					}
 
 					return newOption;
@@ -133,21 +124,21 @@ const info = {
 			subcommand
 				.setName("edit")
 				.setDescription(
-					`(OP Only) Edit a suggestion. Use this in threads in ${CHANNEL_TAG}.`,
+					`(OP/Mods only; For use in ${CHANNEL_TAG}’s threads) Edit a suggestion`,
 				)
 				.addStringOption((option) =>
 					option
 						.setName("title")
-						.setDescription(
-							`A short summary of the suggestion (maximum ${MAX_TITLE_LENGTH} characters)`,
-						)
-						.setRequired(false),
+						.setDescription(`A short summary of the suggestion`)
+						.setRequired(false)
+						.setMaxLength(100),
 				)
 				.addStringOption((option) =>
 					option
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
-						.setRequired(false),
+						.setRequired(false)
+						.setMinLength(30),
 				),
 		)
 
@@ -158,32 +149,48 @@ const info = {
 				.addUserOption((input) =>
 					input
 						.setName("user")
-						.setDescription("Filter suggestions to only get those by a certain user.")
+						.setDescription("Filter suggestions to only get those by a certain user")
 						.setRequired(false),
 				)
 				.addStringOption((option) => {
 					const newOption = option
 						.setName("answer")
 						.setDescription(
-							"Filter suggestions to only get those with a certain answer.",
+							"Filter suggestions to only get those with a certain answer",
 						)
 						.setRequired(false);
 
 					for (const answer of ANSWERS)
-						newOption.addChoice(`${answer.name} (${answer.description})`, answer.name);
+						newOption.addChoices({
+							name: `${answer.name} (${answer.description})`,
+							value: answer.name,
+						});
 
 					return newOption;
 				}),
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
+
+		const message =
+			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
+
+		if (message && message.author.id === interaction.client.user?.id) {
+			const emoji = message.reactions.valueOf().first()?.emoji;
+			await reactAll(
+				message,
+				SUGGESTION_EMOJIS.find(([one]) => one === emoji?.id || emoji?.name) ||
+					SUGGESTION_EMOJIS[0] ||
+					[],
+			);
+		}
 
 		switch (command) {
 			case "create": {
 				const success = await channel.createMessage(interaction, {
-					description: interaction.options.getString("suggestion") ?? "",
-					title: interaction.options.getString("title") ?? "",
+					description: interaction.options.getString("suggestion", true),
+					title: interaction.options.getString("title", true),
 				});
 
 				if (success) {
@@ -201,18 +208,18 @@ const info = {
 				break;
 			}
 			case "answer": {
-				const answer = interaction.options.getString("answer") ?? "";
+				const answer = interaction.options.getString("answer", true);
 				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
 				if (result) {
 					await interaction.reply({
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
-							} Successfully answered suggestion as **${Util.escapeMarkdown(
+							} Successfully answered suggestion as **${escapeMarkdown(
 								answer,
-							)}**! __${Util.escapeMarkdown(
+							)}**! *${escapeMarkdown(
 								ANSWERS.find(({ name }) => name === answer)?.description || "",
-							)}__.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
+							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
 
 						ephemeral: false,
 					});
@@ -221,11 +228,9 @@ const info = {
 				break;
 			}
 			case "edit": {
-				const title = interaction.options.getString("title");
-
 				const result = await channel.editSuggestion(interaction, {
 					body: interaction.options.getString("suggestion"),
-					title,
+					title: interaction.options.getString("title"),
 				});
 				if (result) {
 					await interaction.reply({
@@ -240,10 +245,10 @@ const info = {
 				break;
 			}
 			case "get-top": {
-				const channel = await interaction.guild?.channels.fetch(SUGGESTION_CHANNEL);
+				const channel = await interaction.guild.channels.fetch(SUGGESTION_CHANNEL);
 
-				if (!channel?.isText())
-					throw new ReferenceError("Could not find suggestion channel.");
+				if (!channel?.isTextBased())
+					throw new ReferenceError("Could not find suggestion channel");
 
 				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
@@ -274,17 +279,12 @@ const info = {
 								answer.toLowerCase() !== requestedAnswer.toLowerCase()
 							)
 								return;
-
+							const embed = message.embeds[0];
 							const description =
-								message.embeds[0]?.title ??
-								(message.embeds[0]?.description &&
-									Util.cleanContent(
-										message.embeds[0]?.description,
-										message.channel,
-									)) ??
-								(message.embeds[0]?.image?.url
-									? message.embeds[0]?.image?.url
-									: message.content);
+								embed?.title ??
+								(embed?.description &&
+									cleanContent(embed?.description, message.channel)) ??
+								(embed?.image?.url ? embed?.image?.url : message.content);
 
 							const author = await getUserFromSuggestion(message);
 
@@ -293,9 +293,9 @@ const info = {
 								answer,
 								author,
 								count,
-								id: message.id,
+								url: message.url,
 
-								title: truncateText(description, MAX_TITLE_LENGTH),
+								title: truncateText(description, 100),
 							};
 						}),
 					)
@@ -309,7 +309,7 @@ const info = {
 
 				const nick =
 					requestedUser &&
-					(await interaction.guild?.members.fetch(requestedUser.id))?.displayName;
+					(await interaction.guild.members.fetch(requestedUser.id))?.displayName;
 				await paginate(
 					all,
 					(suggestion) =>
@@ -317,9 +317,9 @@ const info = {
 							suggestion.count > 0
 								? SUGGESTION_EMOJIS[0]?.[0]
 								: SUGGESTION_EMOJIS[0]?.[1]
-						} [${escapeLinks(suggestion.title)}](https://discord.com/channels/${
-							GUILD_ID ?? "@me"
-						}/${SUGGESTION_CHANNEL}/${suggestion.id} "${suggestion.answer}")${
+						} [${escapeLinks(suggestion.title)}](${suggestion.url} "${
+							suggestion.answer
+						}")${
 							suggestion.author && !requestedUser
 								? ` by ${suggestion.author.toString()}`
 								: ""

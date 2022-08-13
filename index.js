@@ -1,7 +1,7 @@
 import path from "path";
 import url from "url";
 
-import { Client, Collection } from "discord.js";
+import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 
 import { importScripts } from "./lib/files.js";
@@ -15,29 +15,37 @@ const client = new Client({
 	allowedMentions: { parse: ["users"], roles: [] },
 
 	intents: [
-		"GUILDS",
-		"GUILD_MESSAGES",
-		"GUILD_MESSAGE_REACTIONS",
-		"DIRECT_MESSAGES",
-		"GUILD_MEMBERS",
-		"GUILD_BANS",
-		"GUILD_EMOJIS_AND_STICKERS",
-		"GUILD_INTEGRATIONS",
-		"GUILD_WEBHOOKS",
-		"GUILD_INVITES",
-		"GUILD_VOICE_STATES",
-		"GUILD_PRESENCES",
-		"GUILD_MESSAGE_TYPING",
-		"DIRECT_MESSAGE_REACTIONS",
-		"DIRECT_MESSAGE_TYPING",
-		"GUILD_SCHEDULED_EVENTS",
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildBans,
+		GatewayIntentBits.GuildEmojisAndStickers,
+		GatewayIntentBits.GuildIntegrations,
+		GatewayIntentBits.GuildWebhooks,
+		GatewayIntentBits.GuildInvites,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMessageReactions,
+		GatewayIntentBits.GuildMessageTyping,
+		GatewayIntentBits.DirectMessages,
+		GatewayIntentBits.DirectMessageReactions,
+		GatewayIntentBits.DirectMessageTyping,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildScheduledEvents,
 	],
 
 	failIfNotExists: false,
-	restWsBridgeTimeout: 30_000,
 
-	partials: ["USER", "MESSAGE", "CHANNEL", "GUILD_MEMBER", "REACTION", "GUILD_SCHEDULED_EVENT"],
-	ws: { large_threshold: 250 },
+	partials: [
+		Partials.User,
+		Partials.Channel,
+		Partials.GuildMember,
+		Partials.Message,
+		Partials.Reaction,
+		Partials.GuildScheduledEvent,
+		Partials.ThreadMember,
+	],
+	ws: { large_threshold: 0 },
 });
 
 const events = await /**
@@ -47,7 +55,7 @@ const events = await /**
  */ (importScripts(path.resolve(dirname, "./events")));
 
 for (const [event, execute] of events.entries()) {
-	if (execute.apply === false) continue;
+	if (execute.enable === false) continue;
 
 	client[execute.once ? "once" : "on"](event, async (...args) => {
 		try {

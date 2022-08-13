@@ -1,19 +1,18 @@
-import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
+import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, messageToText } from "../../lib/message.js";
+import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 
-/**
- * @file Enables Error reporting.
- *
- * @type {import("../../types/event").default<"messageDelete">}
- */
+/** @type {import("../../types/event").default<"messageDelete">} */
 const event = {
 	async event(message) {
 		if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
 		const content = !message.partial && (await messageToText(message));
 		const { embeds, files } = await extractMessageExtremities(message);
 		if (content)
-			files.unshift(new MessageAttachment(Buffer.from(content, "utf-8"), "message.txt"));
+			files.unshift(
+				new AttachmentBuilder(Buffer.from(content, "utf-8"), { name: "message.txt" }),
+			);
 
 		while (files.length > 10) files.pop();
 
@@ -27,11 +26,11 @@ const event = {
 				embeds,
 				files,
 				components: [
-					new MessageActionRow().addComponents(
-						new MessageButton()
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
 							.setEmoji("👀")
 							.setLabel("View Context")
-							.setStyle("LINK")
+							.setStyle(ButtonStyle.Link)
 							.setURL(message.url),
 					),
 				],

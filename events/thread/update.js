@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from "discord.js";
+import { GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
 	getMemberFromThread,
@@ -7,10 +7,11 @@ import {
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
-import { Embed } from "@discordjs/builders";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
+import { DATABASE_THREAD } from "../../common/databases.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */
 const event = {
@@ -26,16 +27,20 @@ const event = {
 		}
 		if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 			logs.push(
-				`'s archive after inactivity time set to ${
-					{ 60: "1 Hour", 1_440: "24 Hours", 4_320: "3 Days", 10_080: "1 Week", MAX: "" }[
-						newThread.autoArchiveDuration || 1_440
-					] || newThread.autoArchiveDuration
+				`’s archive after inactivity time set to ${
+					{
+						[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
+						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
+						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
+						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
+					}[newThread.autoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
+					newThread.autoArchiveDuration
 				}`,
 			);
 		}
 		if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
 			logs.push(
-				"'s slowmode was set to " +
+				"’s slowmode was set to " +
 					newThread.rateLimitPerUser +
 					` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 			);
@@ -44,7 +49,7 @@ const event = {
 		if (
 			newThread.archived &&
 			// @ts-expect-error -- We are trying to tell if the type matches.
-			LOG_GROUPS.includes(newThread.name) &&
+			(LOG_GROUPS.includes(newThread.name) || newThread.name === DATABASE_THREAD) &&
 			newThread.parent?.id === process.env.LOGS_CHANNEL
 		) {
 			await newThread.setArchived(false);
@@ -56,11 +61,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread ${oldThread.toString()} (https://discord.com/${
-							newThread.guild.id
-						}/${oldThread.id})` +
-							edit +
-							`!`,
+						`Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`,
 						"channels",
 					),
 			),
@@ -83,7 +84,7 @@ const event = {
 			newThread.parent?.id !== MODMAIL_CHANNEL ||
 			oldThread.archived === newThread.archived ||
 			(newThread.archived &&
-				latestMessage?.interaction?.commandName === "modmail" &&
+				latestMessage?.interaction?.commandName === "modmail close" &&
 				Date.now() - +latestMessage.createdAt < 60_000)
 		)
 			return;
@@ -98,11 +99,19 @@ const event = {
 		await Promise.all([
 			newThread.fetchStarterMessage().then((starter) => {
 				starter
-					.edit({
+					?.edit({
 						embeds: [
-							(starter.embeds[0] ? new MessageEmbed(starter.embeds[0]) : new Embed())
+							(starter.embeds[0]
+								? EmbedBuilder.from(starter.embeds[0])
+								: new EmbedBuilder()
+							)
 								.setTitle("Modmail ticket opened!")
-								.setFooter({ text: UNSUPPORTED })
+								.setFooter({
+									text:
+										UNSUPPORTED +
+										CONSTANTS.footerSeperator +
+										"Messages starting with an equals sign (=) are ignored.",
+								})
 								.setColor(COLORS.opened),
 						],
 					})

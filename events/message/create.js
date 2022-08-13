@@ -1,6 +1,10 @@
-/** @file Run Actions on posted messages. Send modmails, autoreact if contains certain triggers, and autoreply if contains certain triggers. */
-import { GuildMember, Util } from "discord.js";
-import { Embed } from "@discordjs/builders";
+import {
+	GuildMember,
+	cleanCodeBlockContent,
+	EmbedBuilder,
+	MessageType,
+	ChannelType,
+} from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
@@ -20,10 +24,11 @@ import {
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
 import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import { normalize } from "../../lib/text.js";
 
 const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
-if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env.");
+if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env");
 
 /** @type {{ [key: string]: import("discord.js").Message[] }} */
 const latestMessages = {};
@@ -31,13 +36,14 @@ const latestMessages = {};
 /** @type {import("../../types/event").default<"messageCreate">} */
 const event = {
 	async event(message) {
-		if (message.flags.has("EPHEMERAL") || message.type === "THREAD_STARTER_MESSAGE") return;
+		if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
+			return;
 		const promises = [];
 
 		let reactions = 0;
 
 		if (
-			message.channel.type === "DM" &&
+			message.channel.isDMBased() &&
 			(message.author.id !== this.user.id || message.interaction)
 		) {
 			const guild = await this.guilds.fetch(GUILD_ID);
@@ -45,13 +51,14 @@ const event = {
 
 			if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-			if (mailChannel.type !== "GUILD_TEXT")
+			if (mailChannel.type !== ChannelType.GuildText)
 				throw new TypeError("Modmail channel is not a text channel");
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
-				webhooks.find((possibleWebhook) => !!possibleWebhook.token) ??
-				(await mailChannel.createWebhook(CONSTANTS.webhookName));
+				webhooks.find(
+					(possibleWebhook) => possibleWebhook.applicationId === this.application.id,
+				) ?? (await mailChannel.createWebhook({ name: CONSTANTS.webhookName }));
 			const existingThread = await getThreadFromMember(
 				message.interaction?.user || message.author,
 				guild,
@@ -64,10 +71,14 @@ const event = {
 						.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
 						.then(...generateReactionFunctions(message)),
 				);
-			} else if (["DEFAULT", "REPLY", "THREAD_STARTER_MESSAGE"].includes(message.type)) {
+			} else if (
+				[MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(
+					message.type,
+				)
+			) {
 				let toEdit = message;
 				const collector = await generateConfirm(
-					new Embed()
+					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to send this message to **the ${escapeMessage(
@@ -80,16 +91,22 @@ const event = {
 							name: mailChannel.guild.name,
 						}),
 					async (buttonInteraction) => {
-						const openedEmbed = new Embed()
+						const openedEmbed = new EmbedBuilder()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(`Ticket by ${message.author.toString()}`)
-							.setFooter({ text: UNSUPPORTED })
+							.setFooter({
+								text:
+									UNSUPPORTED +
+									CONSTANTS.footerSeperator +
+									"Messages starting with an equals sign (=) are ignored.",
+							})
 							.setColor(COLORS.opened);
 
 						const newThread = await openModmail(
 							mailChannel,
 							openedEmbed,
 							message.author.username,
+							true,
 						);
 
 						if (!webhook) throw new ReferenceError("Could not find webhook");
@@ -116,25 +133,27 @@ const event = {
 					},
 					(options) => toEdit.edit(options),
 				);
-				message.channel.createMessageCollector({ time: 30_000 }).on("collect", async () => {
-					collector?.stop();
-				});
+				message.channel
+					.createMessageCollector({ time: CONSTANTS.collectorTime })
+					.on("collect", async () => {
+						collector?.stop();
+					});
 			}
 		}
 
-		if (message.guild?.id !== process.env.GUILD_ID) {
+		if (message.guild !== null && message.guild.id !== GUILD_ID) {
 			await Promise.all(promises);
 			return;
 		}
 
 		if (
-			message.channel.type === "GUILD_PUBLIC_THREAD" &&
+			message.channel.type === ChannelType.GuildPublicThread &&
 			message.channel.parent?.id === MODMAIL_CHANNEL &&
 			!message.content.startsWith("=") &&
 			(message.webhookId && message.author.id !== this.user?.id
 				? (await message.fetchWebhook()).owner?.id !== this.user?.id
 				: true) &&
-			message.interaction?.commandName !== "modmail"
+			message.interaction?.commandName !== "modmail close"
 		) {
 			const member = await getMemberFromThread(message.channel);
 
@@ -162,7 +181,11 @@ const event = {
 				: message.mentions.users
 		).size;
 
-		if (mentions > 4 && message.member) {
+		if (
+			mentions > 4 &&
+			message.member &&
+			!message.member.roles.resolve(process.env.MODERATOR_ROLE || "")
+		) {
 			promises.push(
 				warn(
 					message.member,
@@ -172,17 +195,6 @@ const event = {
 				),
 				message.reply({
 					content: CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!",
-				}),
-			);
-		}
-
-		if (
-			/^r!(?:idea|sg|suggest(?:ion)?)(?: |$)/diu.test(message.content) &&
-			!message.author?.bot
-		) {
-			promises.push(
-				message.reply({
-					content: "`r!suggest` has been removed, please use `/suggestion create`.",
 				}),
 			);
 		}
@@ -206,30 +218,19 @@ const event = {
 
 						content:
 							`You used the spoiler hack to hide: \`\`\`\n` +
-							`${Util.cleanCodeBlockContent(array.join(spoilerHack))}\n` +
+							`${cleanCodeBlockContent(array.join(spoilerHack))}\n` +
 							`\`\`\``,
 					}),
 				);
 			}
 		}
 
-		if (
-			message.type === "THREAD_CREATED" &&
-			[process.env.BUGS_CHANNEL, SUGGESTION_CHANNEL].includes(message.channel.id) &&
-			message.reference
-		) {
-			await Promise.all([...promises, message.delete()]);
-			return;
-		}
-
 		// XP
 		if (!message.author.bot || message.interaction) {
-			// todo: modmail
 			const lastInChannel = (latestMessages[message.channel.id] ||=
 				await message.channel.messages
 					.fetch({ limit: NORMAL_XP_PER_MESSAGE, before: message.id })
 					.then((messages) => messages.toJSON()));
-			//todo: filter bots ^^^
 			const spam = lastInChannel.findIndex((foundMessage) => {
 				return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
 					[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
@@ -253,23 +254,24 @@ const event = {
 									bot /
 									(1 +
 										+![
-											"DEFAULT",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2",
-											"USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3",
-											"REPLY",
-											"APPLICATION_COMMAND",
-											"CONTEXT_MENU_COMMAND",
+											MessageType.Default,
+											MessageType.GuildBoost,
+											MessageType.GuildBoostTier1,
+											MessageType.GuildBoostTier2,
+											MessageType.GuildBoostTier3,
+											MessageType.Reply,
+											MessageType.ChatInputCommand,
+											MessageType.ContextMenuCommand,
 										].includes(message.type)),
 							),
 					  ),
 			);
 		}
 
-		// Autoreactions start here. Return early in some channels.
+		// Autoreactions start here. Don’t react to bots.
 
 		if (
+			message.interaction ||
 			[
 				SUGGESTION_CHANNEL,
 				process.env.BUGS_CHANNEL,
@@ -281,16 +283,7 @@ const event = {
 			return;
 		}
 
-		const content = stripMarkdown(
-			message.content
-				.toLowerCase()
-				.normalize("NFD")
-				.replace(
-					/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F𝅳�\uFEFF\uFFA0]/gu,
-					"",
-				)
-				.replace(/<.+?>/, ""),
-		);
+		const content = stripMarkdown(normalize(message.content).replace(/<.+?>/, ""));
 
 		/**
 		 * Determines whether the message contains a word.
@@ -309,49 +302,46 @@ const event = {
 			).test(content);
 		}
 
+		const REACTION_CAP = 2;
+
 		/**
 		 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
 		 *
 		 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
 		 */
 		function react(emoji) {
-			if (reactions > 2) return;
+			if (reactions > REACTION_CAP) return;
 			reactions++;
 			const promise = message.react(emoji).catch(console.error);
 			promises.push(promise);
 			return promise;
 		}
 
-		if (includes("dango") || content.includes("🍡")) react("🍡");
-
-		if (includes(/av[ao]cado/) || content.includes("🥑")) react("🥑");
+		if (includes("dango")) react("🍡");
+		if (includes(/av[ao]cado/)) react("🥑");
 
 		if (["e", "ae", "iei", "a", "."].includes(content) || content.includes("æ"))
 			react(CONSTANTS.emojis.autoreact.e);
 
-		if (includes("quack") || includes("duck") || content.includes("🦆")) react("🦆");
-
+		if (includes("quack") || includes("duck")) react("🦆");
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
-
-		if (includes(/griff(?:patch)?y?'?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
-
+		if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
 		if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
 		if (includes("bob", { plural: false })) react(CONSTANTS.emojis.autoreact.bob);
-
 		if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 
 		if (/\bte(?:r|w)+a|(👉|:point_right:) ?(👈|:point_left:)\b/.test(message.content))
 			react(CONSTANTS.emojis.autoreact.tera);
 
 		if (includes("on addon")) {
-			if (reactions < 2) {
+			if (reactions < REACTION_CAP) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
 			}
 		}
 
 		if (includes("snake")) {
-			if (reactions < 2) {
+			if (reactions < REACTION_CAP) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
 			}
@@ -362,6 +352,7 @@ const event = {
 		if (
 			includes(/gives? ?you ?up/i, { plural: false }) ||
 			content.includes("rickroll") ||
+			content.includes("astley") ||
 			content.includes("dqw4w9wgxcq")
 		)
 			react(CONSTANTS.emojis.autoreact.rick);
@@ -369,8 +360,11 @@ const event = {
 		if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
 
 		if (
-			message.mentions.users.has(this.user?.id ?? "") &&
-			message.mentions.repliedUser?.id !== (this.user?.id ?? "")
+			message.mentions.has(this.user?.id ?? "", {
+				ignoreEveryone: true,
+				ignoreRoles: true,
+				ignoreRepliedUser: true,
+			})
 		)
 			react("👋");
 

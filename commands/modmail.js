@@ -1,4 +1,10 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import {
+	SlashCommandBuilder,
+	EmbedBuilder,
+	GuildMember,
+	ChannelType,
+	PermissionsBitField,
+} from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -15,13 +21,13 @@ import {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDefaultPermission(false)
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
 		.setDescription("(Mods only) Commands to manage modmail tickets")
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("close")
-				.setDescription("(Mods only) Close a modmail ticket.")
-				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity.")
+				.setDescription("(Mods only) Close a modmail ticket")
+				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
@@ -34,26 +40,23 @@ const info = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("start")
-				.setDescription(
-					"(Mods only) Start a modmail ticket with a user. (Non-mods may start a ticket by DMing me.)",
-				)
+				.setDescription("(Mods only) Start a modmail ticket with a user")
 				.addUserOption((input) =>
 					input
 						.setName("user")
-						.setDescription("The user to start a ticket with.")
+						.setDescription("The user to start a ticket with")
 						.setRequired(true),
 				),
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
+		const command = interaction.options.getSubcommand(true);
 
 		switch (command) {
 			case "close": {
 				if (
-					interaction.channel?.type !== "GUILD_PUBLIC_THREAD" ||
-					interaction.channel.parent?.id !== MODMAIL_CHANNEL ||
-					!interaction.guild
+					!interaction.channel?.isThread() ||
+					interaction.channel.parent?.id !== MODMAIL_CHANNEL
 				) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${MODMAIL_CHANNEL}>.`,
@@ -67,7 +70,7 @@ const info = {
 
 				await interaction.reply({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setTitle("Modmail ticket closed!")
 							.setTimestamp(interaction.channel.createdAt)
 							.setDescription(reason)
@@ -83,11 +86,9 @@ const info = {
 				break;
 			}
 			case "start": {
-				const user = await interaction.guild?.members.fetch(
-					interaction.options.getUser("user") ?? "",
-				);
+				const user = interaction.options.getMember("user");
 
-				if (!user || !interaction.guild) {
+				if (!(user instanceof GuildMember)) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
 						ephemeral: true,
@@ -113,11 +114,11 @@ const info = {
 
 				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
-				if (mailChannel.type !== "GUILD_TEXT")
+				if (mailChannel.type !== ChannelType.GuildText)
 					throw new TypeError("Modmail channel is not a text channel");
 
 				await generateConfirm(
-					new Embed()
+					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
@@ -125,12 +126,17 @@ const info = {
 						.setColor(COLORS.confirm)
 						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 					async (buttonInteraction) => {
-						const openedEmbed = new Embed()
+						const openedEmbed = new EmbedBuilder()
 							.setTitle("Modmail ticket opened!")
 							.setDescription(
 								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
 							)
-							.setFooter({ text: UNSUPPORTED })
+							.setFooter({
+								text:
+									UNSUPPORTED +
+									CONSTANTS.footerSeperator +
+									"Messages starting with an equals sign (=) are ignored.",
+							})
 							.setColor(COLORS.opened);
 
 						await sendOpenedMessage(user).then(async (success) => {

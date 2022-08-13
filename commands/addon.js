@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Util } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -33,19 +32,14 @@ const fuse = new Fuse(addons, {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with information about a specific addon.")
+		.setDescription("Replies with information about a specific addon")
 		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon.")
-				.setRequired(true),
+			option.setName("addon").setDescription("The name of the addon").setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("compact")
-				.setDescription(
-					"Whether to show misc information and the image. Defaults to false in #bots and true everywhere else.",
-				)
+				.setDescription("Whether to show misc information and the image")
 				.setRequired(false),
 		),
 
@@ -67,7 +61,7 @@ const info = {
 			);
 		}
 
-		const input = interaction.options.getString("addon") || "";
+		const input = interaction.options.getString("addon", true);
 		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
@@ -84,9 +78,9 @@ const info = {
 			return;
 		}
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setTitle(addon.name)
-			.setColor(CONSTANTS.colors.theme)
+			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
 					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(
@@ -151,26 +145,26 @@ const info = {
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addField({
+				embed.addFields({
 					name: "Contributors",
-					value: Util.escapeMarkdown(credits),
+					value: escapeMarkdown(credits),
 					inline: true,
 				});
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
-					embed.description +
+					embed.data.description +
 						"\n" +
 						"\n" +
 						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
 			embed.addFields(
-				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
+				{ inline: true, name: "Group", value: escapeMarkdown(group) },
 				{
 					inline: true,
 					name: "Version added",
-					value: Util.escapeMarkdown(
+					value: escapeMarkdown(
 						"v" +
 							manifest.versionAdded +
 							(manifest.latestUpdate

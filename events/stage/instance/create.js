@@ -8,7 +8,11 @@ const event = {
 		if (guild.id !== process.env.GUILD_ID) return;
 		await log(
 			guild,
-			`Stage ${instance.channel?.toString()} went live - ${instance.topic}`,
+			`Stage ${instance.channel?.toString()} went live${
+				instance.guildScheduledEvent
+					? `for the ${instance.guildScheduledEvent.name} event`
+					: ""
+			} - ${instance.topic}`,
 			"voice",
 		);
 	},

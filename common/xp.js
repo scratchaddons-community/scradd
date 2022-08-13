@@ -1,5 +1,4 @@
-import { Embed } from "@discordjs/builders";
-import { GuildMember, User } from "discord.js";
+import { EmbedBuilder, GuildMember, User } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
@@ -15,10 +14,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const member =
 		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
 
-	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-
-	const database = (await getDatabases(["xp"], modTalk)).xp;
+	const database = (await getDatabases(["xp"], guild)).xp;
 
 	const xp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
 	const index = xp.findIndex((entry) => entry.user === user.id);
@@ -33,11 +29,11 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		if (oldLevel !== newLevel) {
 			const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
 			const date = new Date();
-			if (bots?.isText())
+			if (bots?.isTextBased())
 				await bots.send({
 					content: to.toString(),
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setColor(member?.displayColor ?? null)
 							.setAuthor({
 								iconURL: to.displayAvatarURL(),
@@ -56,7 +52,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 								).toLocaleString()} XP remaining`,
 							)
 							.setFooter({
-								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone's XP with /xp rank`,
+								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
 							}),
 					],
 				});

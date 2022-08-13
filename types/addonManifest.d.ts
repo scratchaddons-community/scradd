@@ -1,44 +1,41 @@
-import type { ArrayOfAtLeastOne } from "./helpers";
+/** @author TypeScript Implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/0530d12/1/1.18.json) */
 
 /** The value manipulator. */
-type definitions_cssManipulator =
+type cssManipulator =
 	| string
 	| number
 	| {
 			/** The type of the manipulator. */
-			type?: "settingValue";
+			type: "settingValue";
 			/** The setting ID to reference. */
 			settingId: string;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "ternary";
+			type: "ternary";
 			/** The source to manipulate. */
-			source: definitions_cssManipulator;
+			source: cssManipulator;
 			/** The value in case the source is truthy. */
-			true: definitions_cssManipulator | null;
+			true: cssManipulator | null;
 			/** The value in case the source is falsy. */
-			false: definitions_cssManipulator | null;
+			false: cssManipulator | null;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "textColor";
+			type: "textColor";
 			/** The source to manipulate. */
-			source: definitions_cssManipulator;
-			threshold: definitions_cssManipulator;
+			source: cssManipulator;
+			threshold?: cssManipulator;
 			/** The value for black text. */
-			black?: definitions_cssManipulator;
+			black?: cssManipulator;
 			/** The value for white text. */
-			white?: definitions_cssManipulator;
+			white?: cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "multiply" | "brighten";
+			type: "multiply" | "brighten";
 			/** The source to manipulate. */
-			source: definitions_cssManipulator;
+			source: cssManipulator;
 			/** The red value of the color. */
 			r?: number;
 			/** The green value of the color. */
@@ -50,62 +47,55 @@ type definitions_cssManipulator =
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "alphaBlend";
+			type: "alphaBlend";
 			/** The source that provides opaque color. */
-			opaqueSource: definitions_cssManipulator;
+			opaqueSource: cssManipulator;
 			/** The source that provides transparent color. */
-			transparentSource: definitions_cssManipulator;
+			transparentSource: cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "recolorFilter";
+			type: "recolorFilter";
 			/** The source that provides the color. */
-			source: definitions_cssManipulator;
+			source: cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "makeHsv";
+			type: "makeHsv";
 			/** The source that provides hue. */
-			h: definitions_cssManipulator;
+			h: cssManipulator;
 			/** The source that provides saturation. */
-			s: definitions_cssManipulator;
+			s: cssManipulator;
 			/** The source that provides value. */
-			v: definitions_cssManipulator;
+			v: cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */
-
-			type?: "map";
+			type: "map";
 			/** The source that provides the color. */
-			source: definitions_cssManipulator;
+			source: cssManipulator;
 			/** The possible options. */
-			options: { [key: string]: definitions_cssManipulator };
+			options: { [key: string]: cssManipulator };
 	  };
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.
  *
- * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start will
- * be treated as an relative RegEx pattern.
+ * `/^\^/`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start
+ * will be treated as an relative RegEx pattern.
  *
  * `[…]`: An array that contains match rules. The script will execute if it matches any of the rules.
  *
- * `"^…"`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start will
- * be treated as an relative RegEx pattern.
- *
- * `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`, `"newPostScreens"`, `"editingScreens"`,
- * `"forums"`, `"scratchWWWNoProject"`: A match rule shortcut.
- *
- * `"isNotScratchWWW"`: A match rule shortcut matcher.
- *
- * `"https://…"`: A URL match rule.
+ * - `/^\^/`: A RegEx match rule. Patterns starting with https will be treated as an absolute RegEx pattern, and patterns that don’t start
+ *   will be treated as an relative RegEx pattern.
+ * - `"projects"`, `"projectEmbeds"`, `"studios"`, `"studioComments"`, `"profiles"`, `"topics"`, `"newPostScreens"`, `"editingScreens"`,
+ *   `"forums"`, `"scratchWWWNoProject"`: A match rule shortcut.
+ * - `"isNotScratchWWW"`: A match rule shortcut matcher.
+ * - `/^https://…/`: A URL match rule. TODO: Clarify this. This seemed only for absolute patterns. Is the relative is on the top?
  */
-type definitions_matches =
+type matches =
 	| "*"
 	| `^${string}`
-	| ArrayOfAtLeastOne<
+	| (
 			| `^${string}`
 			| (
 					| "projects"
@@ -121,12 +111,89 @@ type definitions_matches =
 			  )
 			| "isNotScratchWWW"
 			| `https://${string}`
-	  >;
+	  )[];
 
-type definitions_if = {
-	settings: { [key: string]: unknown };
-	addonEnabled: string | ArrayOfAtLeastOne<string>;
-};
+type _if = { settings: { [key: string]: unknown }; addonEnabled: string | string[] };
+type serializedTableNestableSetting = boolean | number | string;
+type serializedTableNestableSettings = { [key: string]: serializedTableNestableSetting };
+type tableNestableSettings = {
+	/** The name of the setting. */
+	name: string;
+	/** The identifier of the setting to get the specified value from your code. */
+	id: string;
+	if?: _if;
+} & (
+	| {
+			/** The type of the setting. */
+			type: "select";
+			/**
+			 * The potential values for the select setting.
+			 *
+			 * A potential value for the select setting.
+			 */
+			potentialValues: (
+				| string
+				| {
+						/** The name of the potential value. */
+						name: string;
+						/** The identifier of the potential value. */
+						id: string;
+				  }
+			)[];
+			/** The default value of the setting. */
+			default: string;
+	  }
+	| {
+			/** The type of the setting. */
+			type: "boolean";
+
+			/** The default value of the setting. */
+			default: boolean;
+	  }
+	| {
+			/** The type of the setting. */
+			type: "positive_integer";
+
+			/** The default value of the setting. */
+			default: number;
+	  }
+	| {
+			/** The type of the setting. */
+			type: "string" | "untranslated";
+
+			/** The default value of the setting. */
+			default: string;
+
+			/** The minimum length of the string. */
+			min?: number;
+
+			/** The maximum length of the string. */
+			max?: number;
+	  }
+	| {
+			/** The type of the setting. */
+			type: "color";
+
+			/** The default value of the setting. */
+			default: `#${string}`;
+
+			/** Determines whether the transparency/opacity/alpha value can be changed when choosing a color. */
+			allowTransparency?: boolean;
+	  }
+	| {
+			/** The type of the setting. */
+			type: "integer";
+
+			/** The default value of the setting. */
+			default: number;
+
+			/** The minimum value of the integer. */
+			min?: number;
+
+			/** The maximum value of the integer. */
+			max?: number;
+	  }
+);
 
 /**
  * Scratch Addons addon manifest.
@@ -135,7 +202,6 @@ type definitions_if = {
  */
 type AddonManifest = {
 	/** The URL to the schema. */
-
 	$schema?: string;
 	/** The name of the addon. Don’t make it too long. */
 	name: string;
@@ -146,7 +212,7 @@ type AddonManifest = {
 	 *
 	 * A tag.
 	 */
-	tags: ArrayOfAtLeastOne<
+	tags: (
 		| "community"
 		| "editor"
 		| "popup"
@@ -165,19 +231,13 @@ type AddonManifest = {
 		| "profiles"
 		| "studios"
 		| "comments"
-	>;
+	)[];
 	/**
 	 * You can specify permissions by providing a "permissions" array.
 	 *
 	 * A permission.
 	 */
-	permissions?: ArrayOfAtLeastOne<"notifications" | "badge" | "clipboardWrite">;
-	/**
-	 * You can add persistent scripts by providing a "persistentScripts" array conformed of JS files (e.g. ["example.js"]).
-	 *
-	 * The path to the persistent script.
-	 */
-	persistentScripts?: ArrayOfAtLeastOne<`${string}.js`>;
+	permissions?: ("notifications" | "clipboardWrite")[];
 	/**
 	 * You can add userscripts by providing a "userscripts" array.
 	 *
@@ -185,111 +245,52 @@ type AddonManifest = {
 	 *
 	 * Each object must specify the url to the userscript through the "url" property, and provide an array of URL matches.
 	 */
-	userscripts?: ArrayOfAtLeastOne<{
+	userscripts?: {
 		/** The path to the userscript. */
-
 		url: `${string}.js`;
-		matches: definitions_matches;
+		matches: matches;
 		/** Determines whether the addon should be run after the document is complete loading. */
 		runAtComplete?: boolean;
-		if?: definitions_if;
-	}>;
+		if?: _if;
+	}[];
 	/**
-	 * Similarly to userscripts, you can specify a "userstyles" array.
+	 * Similarly to {@link AddonManifest.userscripts userscripts}, you can specify a "userstyles" array.
 	 *
 	 * Each object must specify the url to the stylesheet through the "url" property, and provide an array of URL matches.
 	 */
-	userstyles?: ArrayOfAtLeastOne<{
+	userstyles?: {
 		/** The path to the userstyle. */
-
 		url: `${string}.css`;
-		matches: definitions_matches;
-		if?: definitions_if;
-	}>;
+		matches: matches;
+		if?: _if;
+	}[];
 	/**
 	 * The "settings" object allow the addon’s users to specify settings in Scratch Addons’ settings panel. Inside your persistent scripts
 	 * and userscripts, you can then access those settings with the "addon.settings" API.
 	 *
 	 * Specify an "settings" property and provide an array of setting objects.
+	 *
+	 * A table setting.
 	 */
 	settings?: (
-		| ({
+		| tableNestableSettings
+		| {
 				/** The name of the setting. */
-
 				name: string;
-				/* The identifier of the setting to get the specified value from your code. */
+				/** The identifier of the setting to get the specified value from your code. */
 				id: string;
-				/** The type of the setting. */
-				type: "boolean" | "positive_integer" | "string" | "select" | "color" | "integer";
-				/** The default value of the setting. */
-				default: boolean | number | string;
-				if?: definitions_if;
-		  } & {
-				/** The type of the setting. */
-
-				type: "select";
+				type: "table";
+				/** The array that contains default table items. */
+				default?: serializedTableNestableSettings[];
+				if?: _if;
+				/** The rows of the table. The ordering is used in default and presets. */
+				row: tableNestableSettings[];
 				/**
-				 * The potential values for the select setting.
+				 * The table presets.
 				 *
-				 * A potential value for the select setting.
+				 * The table preset.
 				 */
-				potentialValues: (
-					| string
-					| {
-							/** The name of the potential value. */
-
-							name: string;
-							/** The identifier of the potential value. */
-							id: string;
-					  }
-				)[];
-				/** The default value of the setting. */
-				default: string;
-		  })
-		| {
-				/** The type of the setting. */
-
-				type: "boolean";
-				/** The default value of the setting. */
-				default: boolean;
-		  }
-		| {
-				/** The type of the setting. */
-
-				type: "positive_integer";
-				/** The default value of the setting. */
-				default: number;
-		  }
-		| {
-				/** The type of the setting. */
-
-				type: "string";
-				/** The default value of the setting. */
-				default: string;
-				/** The minimum length of the string. */
-				min?: number;
-				/** The maximum length of the string. */
-				max?: number;
-		  }
-		| {
-				/** The type of the setting. */
-
-				type: "color";
-				/** The default value of the setting. */
-				default: `#${string}`;
-				/** Determines whether the transparency/opacity/alpha value can be changed when choosing a color. */
-				allowTransparency?: boolean;
-		  }
-		| {
-				/** The type of the setting. */
-
-				type: "integer";
-				/** The default value of the setting. */
-				default: number;
-				/** The minimum value of the integer. */
-				min?: number;
-				/** The maximum value of the integer. */
-				max?: number;
+				presets?: { name: string; value: serializedTableNestableSettings }[];
 		  }
 	)[];
 	/**
@@ -297,24 +298,20 @@ type AddonManifest = {
 	 *
 	 * A credited author/contributor.
 	 */
-	credits?: ArrayOfAtLeastOne<
-		{
-			/** The name of the credited person. */
-
-			name: string;
-			/** The link relevant to the credit. */
-			link?: `http${string}`;
-		} & (
-			| { id: never; note: never }
-			| {
-					/** The ID for the credit. Required if note is in use. */
-
-					id: string;
-					/** The note for the credit. */
-					note?: string;
-			  }
-		)
-	>;
+	credits?: ({
+		/** The name of the credited person. */
+		name: string;
+		/** The link relevant to the credit. */
+		link?: `http${string}`;
+	} & (
+		| {}
+		| {
+				/** The ID for the credit. Required if note is in use. */
+				id: string;
+				/** The note for the credit. */
+				note?: string;
+		  }
+	))[];
 	/**
 	 * You can provide the "enabledByDefault" property and set it to true. Its default value is false.
 	 *
@@ -322,39 +319,43 @@ type AddonManifest = {
 	 */
 	enabledByDefault?: boolean;
 	/** An array containing presets for settings. */
-	presets?: ArrayOfAtLeastOne<{
+	presets?: {
 		/** The name of the preset. */
-
 		name: string;
 		/** The identifier of the preset. */
 		id: string;
 		/** The description of the preset. */
 		description?: string;
-		/** An object containing preset values of the settings. */
-		values: { [key: string]: boolean | number | string };
-	}>;
+		/**
+		 * An object containing preset values of the settings.
+		 *
+		 * The preset value of the setting.
+		 */
+		values: {
+			[key: string]: serializedTableNestableSetting | serializedTableNestableSettings[];
+		};
+	}[];
 	/**
 	 * An array of libraries that the addon uses.
 	 *
 	 * A library identifier.
 	 */
-	libraries?: ArrayOfAtLeastOne<string>;
+	libraries?: string[];
 	/**
 	 * An array of additional information (e.g. warnings, notices) about the addon.
 	 *
 	 * Information about the addon.
 	 */
-	info?: ArrayOfAtLeastOne<{
+	info?: {
 		/** Type of the information. */
 		type?: "warning" | "notice" | "info";
 		/** ID of the information. */
 		id: string;
 		/** Text of the information. */
 		text: string;
-	}>;
+	}[];
 	popup?: {
 		/** The path to the popup icon. */
-
 		icon: string;
 		/** The name of the popup. */
 		name: string;
@@ -380,31 +381,20 @@ type AddonManifest = {
 	 */
 	customCssVariables?: {
 		/** The name of the CSS variable. */
-
 		name: string;
-		value: definitions_cssManipulator;
+		value: cssManipulator;
 		/** Whether to drop the variable entirely when it evaluates to null. */
 		dropNull?: boolean;
 	}[];
 	/** The version that introduced the addon. */
-	versionAdded: string;
+	versionAdded: `1.${number}.${number}`;
 	/** The preview used for the addon. */
-	addonPreview?: {
-		/** The type of the preview. */
-
-		type: "editor-dark-mode";
-	};
+	addonPreview?: { /** The type of the preview. */ type: "editor-dark-mode" };
 	/** The preview used for presets. */
-	presetPreview?: {
-		/** The type of the preview. */
-
-		type: "palette";
-		colors?: string[];
-	};
+	presetPreview?: { /** The type of the preview. */ type: "palette"; colors?: string[] };
 	/** The information about the latest update. */
 	latestUpdate?: {
 		/** The version of the update. */
-
 		version: string;
 		/** Whether to list the addon on "Featured new addons and updates". */
 		isMajor?: boolean;
@@ -417,10 +407,10 @@ type AddonManifest = {
 
 export default AddonManifest;
 
-export type WebsiteData = ArrayOfAtLeastOne<{
+export type WebsiteData = {
 	id: string;
 	name: AddonManifest["name"];
 	description: AddonManifest["description"];
 	tags: AddonManifest["tags"];
 	credits: AddonManifest["credits"];
-}>;
+}[];

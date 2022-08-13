@@ -1,8 +1,11 @@
 import log from "../common/moderation/logging.js";
-import commands from "../common/commands.js";
-import { pkg } from "../lib/files.js";
+import { pkg, importScripts } from "../lib/files.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../lib/logError.js";
+import { ActivityType } from "discord.js";
+import { AssertionError } from "assert";
+import path from "path";
+import url from "url";
 
 /** @type {import("../types/event").default<"ready">} */
 const event = {
@@ -31,7 +34,7 @@ const event = {
 						CONSTANTS.prodScradd === this.user.id
 							? "the SA server!"
 							: "for bugs…",
-					type: "WATCHING",
+					type: ActivityType.Watching,
 					url: pkg.homepage,
 				},
 			],
@@ -49,24 +52,59 @@ const event = {
 				);
 			}
 
-			if (guild.id !== GUILD_ID) {
+			if (guild.id !== GUILD_ID)
 				await this.application.commands.set([], guild.id).catch(() => {});
-			}
 		});
 
-		const [dmCommands, serverCommands] = (await commands(this)).toJSON().reduce(
-			([dmCommands, serverCommands], command) => {
-				if (!(command.apply ?? true)) return [dmCommands, serverCommands];
-				if (command.dm && process.env.NODE_ENV === "production")
-					dmCommands.push(command.data.toJSON());
-				else serverCommands.push(command.data.toJSON());
+		const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+		const commands =
+			await /** @type {Promise<import("discord.js").Collection<string, import("../types/command").default>>} */ (
+				importScripts(path.resolve(dirname, "../commands"))
+			);
+
+		const [dmCommands, serverCommands] = await commands.reduce(
+			async (promise, command, name) => {
+				const [dmCommands, serverCommands] = await promise;
+				if (!(command.enable ?? true)) return [dmCommands, serverCommands];
+
+				const data =
+					typeof command.data === "function"
+						? await command.data.call(this)
+						: command.data;
+				if (data.name)
+					throw new AssertionError({
+						actual: data.name,
+						expected: "",
+						operator: name,
+						message: "Don’t manually set the command name, it will use the file name",
+					});
+
+				data.setName(name);
+
+				const json = data.toJSON();
+
+				if (typeof json.dm_permission !== "undefined")
+					throw new AssertionError({
+						actual: json.dm_permission,
+						expected: undefined,
+						message: "Don’t set DM permissions, set `dm: true` instead",
+					});
+
+				(command.dm && process.env.NODE_ENV === "production"
+					? dmCommands
+					: serverCommands
+				).push(json);
+
 				return [dmCommands, serverCommands];
 			},
 			/**
-			 * @type {[
-			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
-			 * 	import("discord-api-types").RESTPostAPIApplicationCommandsJSONBody[],
-			 * ]}
+			 * @type {import("discord.js").Awaitable<
+			 * 	[
+			 * 		import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 		import("discord.js").RESTPostAPIApplicationCommandsJSONBody[],
+			 * 	]
+			 * >}
 			 */ ([[], []]),
 		);
 

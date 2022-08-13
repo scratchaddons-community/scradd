@@ -1,14 +1,21 @@
-import { Constants, GuildMember, MessageAttachment, User, Util } from "discord.js";
+import {
+	EmbedBuilder,
+	Colors,
+	GuildMember,
+	AttachmentBuilder,
+	User,
+	escapeMarkdown,
+} from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
-import { Embed } from "@discordjs/builders";
 import log from "./logging.js";
 
 /** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
 
-const EXPIRY_LENGTH = 21,
-	WARNS_PER_MUTE = 3,
-	MUTE_LENGTHS = [4, 12, 24];
+const EXPIRY_LENGTH = 21;
+export const WARNS_PER_MUTE = 3,
+	MUTE_LENGTHS = [4, 12, 24],
+	WARN_INFO_BASE = 64;
 
 /**
  * @param {import("discord.js").Message} message
@@ -36,13 +43,13 @@ export async function getData(message, sendLog = false) {
 						message.guild,
 						`Member <@${user}> lost ${strikes} strike${
 							strikes === 1 ? "" : "s"
-						} from ${message.guild.me?.toString()}!`,
+						} from ${message.guild.members.me?.toString()}!`,
 						"members",
 						{
 							files: [
-								new MessageAttachment(
+								new AttachmentBuilder(
 									Buffer.from("Automatically unwarned.", "utf-8"),
-									"warn.txt",
+									{ name: "warn.txt" },
 								),
 							],
 						},
@@ -65,9 +72,8 @@ export default async function warn(user, reason, strikes, context) {
 		user instanceof GuildMember
 			? user.guild
 			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], modTalk);
+
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
@@ -76,9 +82,11 @@ export default async function warn(user, reason, strikes, context) {
 		unwarn(user.id, strikes * -1, allWarns);
 	}
 
-	const promises = [];
-
 	const actualStrikes = allWarns.length + (strikes > 0 ? strikes : 0) - oldLength;
+
+	if (strikes < 0 && actualStrikes === 0) return false;
+
+	const promises = [];
 
 	const logMessage = await log(
 		guild,
@@ -92,12 +100,12 @@ export default async function warn(user, reason, strikes, context) {
 		"members",
 		{
 			files: [
-				new MessageAttachment(
+				new AttachmentBuilder(
 					Buffer.from(
 						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
 						"utf-8",
 					),
-					"warn.txt",
+					{ name: "warn.txt" },
 				),
 			],
 		},
@@ -129,6 +137,9 @@ export default async function warn(user, reason, strikes, context) {
 		const userMutes = oldMutes + newMutes;
 
 		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
+
+		const modTalk = guild.publicUpdatesChannel;
+		if (!modTalk) throw new ReferenceError("Could not find mod talk");
 
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
@@ -189,11 +200,11 @@ export default async function warn(user, reason, strikes, context) {
 			user
 				.send({
 					embeds: [
-						new Embed()
+						new EmbedBuilder()
 							.setTitle(
 								`You were ${
 									strikes === 0 ? "verbally " : ""
-								}warned in ${Util.escapeMarkdown(guild.name)}!`,
+								}warned in ${escapeMarkdown(guild.name)}!`,
 							)
 							.setDescription(
 								strikes === 0
@@ -202,7 +213,7 @@ export default async function warn(user, reason, strikes, context) {
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)
-							.setColor(Constants.Colors.DARK_RED)
+							.setColor(Colors.DarkRed)
 							.setFooter(
 								strikes === 0
 									? null

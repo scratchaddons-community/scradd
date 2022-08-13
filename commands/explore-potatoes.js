@@ -1,91 +1,74 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message, MessageButton, MessageEmbed } from "discord.js";
+import {
+	SlashCommandBuilder,
+	Message,
+	ButtonBuilder,
+	EmbedBuilder,
+	MessageMentions,
+	ChannelType,
+	ButtonStyle,
+	ComponentType,
+	CategoryChannel,
+} from "discord.js";
 
-import { BOARD_CHANNEL, boardMessageToSource, MIN_REACTIONS } from "../common/board.js";
+import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
-import { getAllMessages } from "../lib/message.js";
-
-/** @type {{ [key: string]: { [key: string]: boolean } }} */
-const threadsFound = {};
+import { disableComponents, getAllMessages } from "../lib/message.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
  *
- * @param {import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
- * @param {import("discord.js").TextBasedChannel | string} channelFound - Text based channel.
+ * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
+ * @param {string} channelFound - Text based channel.
+ * @param {import("discord.js").Guild} guild
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
-async function textChannelMatches(channelWanted, channelFound) {
+async function textChannelMatches(guild, channelWanted, channelFound) {
+	if (channelWanted.id === channelFound) return true;
+
 	switch (channelWanted.type) {
-		case "GUILD_TEXT":
-		case "GUILD_NEWS": {
-			// Text
-			if (typeof channelFound === "string") {
-				// We likely found an archived thread. We have the id insted of the channel object.
-				// Try to see if we can find it by name instead of checking parentId.
-				if (threadsFound[`${channelWanted.id}`]?.[`${channelFound}`] !== undefined)
-					return !!threadsFound[`${channelFound}`];
+		case ChannelType.GuildCategory: {
+			const fetchedChannel =
+				channelWanted instanceof CategoryChannel
+					? channelWanted
+					: await guild.channels.fetch(channelWanted.id);
 
-				const thread = (
-					await channelWanted.threads.fetchArchived({ before: channelFound, limit: 2 })
-				).threads.first();
+			if (fetchedChannel?.type !== ChannelType.GuildCategory)
+				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
 
-				threadsFound[channelWanted.id] = {
-					...threadsFound[channelWanted.id],
-					[channelFound]: !!(thread && channelFound === thread?.id),
-				};
-
-				if (thread && channelFound === thread.id) break;
-				else return false;
-			}
-
-			if (channelFound.id === channelWanted.id) break;
-
-			return channelFound.isThread() && channelFound.parent?.id === channelWanted.id;
+			return await firstTrueyPromise(
+				fetchedChannel.children
+					.valueOf()
+					.map((child) => textChannelMatches(guild, child, channelFound)),
+			);
 		}
-		case "GUILD_CATEGORY": {
-			// category
-			const promises = [];
-
-			for (const channel of channelWanted.children.values())
-				promises.push(textChannelMatches(channel, channelFound));
-
-			if (!(await firstTrueyPromise(promises))) return false;
-
-			break;
-		}
-		case "GUILD_NEWS_THREAD":
-		case "GUILD_PUBLIC_THREAD": {
-			// other public thread
-			if (
-				(typeof channelFound === "string" && channelWanted.id === channelFound) ||
-				(typeof channelFound === "object" && channelWanted.id === channelFound.id)
-			)
-				break;
-			else return false;
+		case ChannelType.GuildForum:
+		case ChannelType.GuildText:
+		case ChannelType.GuildNews: {
+			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
+			const thread = await guild.channels.fetch(channelFound).catch(() => {});
+			return thread?.parent?.id === channelWanted.id;
 		}
 
 		default: {
-			// It’s likely a VC
+			// It’s a DM, stage, directory, non-matching thread, non-matching VC, or an unimplemented channel type.
 			return false;
 		}
 	}
-
-	return true;
 }
 
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potatoboard.")
+		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
 			input
 				.setName("minimum-reactions")
 				.setDescription(
-					"Filter messages to only get those with at least this many reactions.",
+					"Filter messages to only get those with at least this many reactions",
 				)
 				.setRequired(false)
 				.setMinValue(MIN_REACTIONS),
@@ -93,88 +76,89 @@ const info = {
 		.addUserOption((input) =>
 			input
 				.setName("user")
-				.setDescription("Filter messages to only get those by a certain user.")
+				.setDescription("Filter messages to only get those by a certain user")
 				.setRequired(false),
 		)
 		.addChannelOption((input) =>
 			input
 				.setName("channel")
-				.setDescription("Filter messages to only get those in a certain channel.")
+				.setDescription("Filter messages to only get those in a certain channel")
 				.setRequired(false)
-				.addChannelTypes([0, 4, 5, 6, 10, 11]),
+				.addChannelTypes(
+					ChannelType.GuildText,
+					ChannelType.GuildVoice,
+					ChannelType.GuildCategory,
+					ChannelType.GuildNews,
+					ChannelType.GuildNewsThread,
+					ChannelType.GuildPublicThread,
+					ChannelType.GuildPrivateThread,
+					// ChannelType.GuildForum,
+				),
 		),
 
 	async interaction(interaction) {
-		const deferPromise = interaction.deferReply({
+		const deferred = await interaction.deferReply({
 			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 		});
-		const board = await interaction.guild?.channels.fetch(BOARD_CHANNEL);
-
-		if (!board?.isText()) {
-			throw new ReferenceError("Could not find board channel.");
+		const board = await interaction.guild.channels.fetch(BOARD_CHANNEL);
+		if (!board?.isTextBased()) {
+			throw new ReferenceError("Could not find board channel");
 		}
 
 		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
 		const user = interaction.options.getUser("user")?.id;
-		const channelId = interaction.options.getChannel("channel")?.id;
-		const channelWanted = channelId && (await interaction.guild?.channels.fetch(channelId));
-		const [, fetchedMessages] = await Promise.all([
-			deferPromise,
-			getAllMessages(board).then((messages) =>
-				asyncFilter(
-					messages
-						.filter((message) => {
-							if (
-								!message.content ||
-								!message.embeds[0] ||
-								!message.author.bot ||
-								(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
-							)
-								return false;
-							return message;
-						})
-						.sort(() => Math.random() - 0.5),
-					async (message) => {
-						const source = await boardMessageToSource(message);
-
+		const channelWanted = interaction.options.getChannel("channel");
+		const fetchedMessages = await getAllMessages(board).then((messages) =>
+			asyncFilter(
+				messages
+					.filter((message) => {
 						if (
-							user &&
-							source?.author.id !== user &&
-							message.mentions.users.first()?.id !== user
+							!message.content ||
+							!message.embeds[0] ||
+							!message.author.bot ||
+							(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
 						)
 							return false;
-
-						const channelFound = source?.channel ?? message.mentions.channels.first();
-
-						if (
-							channelWanted &&
-							channelFound &&
-							!(await textChannelMatches(channelWanted, channelFound))
-						)
-							return false;
-
 						return message;
-					},
-				),
-			),
-		]);
+					})
+					.sort(() => Math.random() - 0.5),
+				async (message) => {
+					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
+						return false;
 
-		const nextButton = new MessageButton()
+					const channelFound = message.content.match(
+						MessageMentions.ChannelsPattern,
+					)?.[1];
+
+					if (
+						channelFound &&
+						channelWanted &&
+						!(await textChannelMatches(interaction.guild, channelWanted, channelFound))
+					)
+						return false;
+
+					return message;
+				},
+			),
+		);
+
+		const customId = generateHash("next");
+		const nextButton = new ButtonBuilder()
 			.setLabel("Next")
-			.setCustomId(generateHash("next"))
-			.setStyle("SECONDARY")
+			.setCustomId(customId)
+			.setStyle(ButtonStyle.Secondary)
 			.setEmoji("➡");
 
 		let source = (await fetchedMessages.next()).value;
 		/**
 		 * Grab a new message from the board.
 		 *
-		 * @param {void | Message<boolean>} current
+		 * @param {void | Message} current
 		 *
 		 * @returns {Promise<import("discord.js").InteractionReplyOptions>} - Reply to post next.
 		 */
 		async function generateMessage(current) {
-			if (!current?.components[0]?.components[0]) {
+			if (!current) {
 				return {
 					allowedMentions: { users: [] },
 					files: [],
@@ -187,23 +171,20 @@ const info = {
 				};
 			}
 			source = (await fetchedMessages.next()).value;
-
-			if (!source?.components[0]?.components[0]) nextButton.setDisabled(true);
-
+			const linkButton = current.components?.[0]?.components?.[0];
 			return {
 				allowedMentions: { users: [] },
 
 				components: [
-					current.components[0]?.components[0]
-						? current.components[0]?.setComponents(
-								current.components[0].components[0],
-								nextButton,
-						  )
-						: current.components[0],
+					new MessageActionRowBuilder().setComponents(
+						linkButton?.type === ComponentType.Button
+							? [ButtonBuilder.from(linkButton), nextButton]
+							: [nextButton],
+					),
 				],
 
 				content: current.content,
-				embeds: current.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+				embeds: current.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
 				ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
 				files: current.attachments.map((attachment) => attachment),
 			};
@@ -211,12 +192,12 @@ const info = {
 
 		await interaction.editReply(await generateMessage(source));
 
-		const collector = interaction.channel?.createMessageComponentCollector({
+		const collector = deferred.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
-				buttonInteraction.customId === nextButton.customId &&
+				buttonInteraction.customId === customId &&
 				buttonInteraction.user.id === interaction.user.id,
 
-			time: 30_000,
+			time: CONSTANTS.collectorTime,
 		});
 
 		collector
@@ -229,25 +210,13 @@ const info = {
 			.on("end", async () => {
 				const source = await interaction.fetchReply();
 
-				if (!(source instanceof Message)) throw new TypeError("Source is not a message.");
-
 				await interaction.editReply({
 					allowedMentions: { users: [] },
 
-					components: source.components.map((components) =>
-						components.setComponents(
-							components.components.map(
-								(component) =>
-									component.setDisabled(
-										!(component.type === "BUTTON" && component.url),
-									),
-								// Disable it if it’s not a button with a URL
-							),
-						),
-					),
+					components: disableComponents(source.components),
 
 					content: source.content,
-					embeds: source.embeds.map((oldEmbed) => new MessageEmbed(oldEmbed)),
+					embeds: source.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
 					files: source.attachments.map((attachment) => attachment),
 				});
 			});
