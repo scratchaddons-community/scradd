@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { GuildMember } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { extractData, getDatabases } from "../common/databases.js";
 import { getLevelForXp, getXpForLevel } from "../common/xp.js";
@@ -28,9 +27,7 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const command = interaction.options.getSubcommand();
-
-		if (!interaction.guild) throw new TypeError("Cannot use /xp command in DMs");
+		const command = interaction.options.getSubcommand(true);
 
 		const database = (await getDatabases(["xp"], interaction.guild)).xp;
 		const allXp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
@@ -39,7 +36,7 @@ const info = {
 			case "rank": {
 				const user = interaction.options.getUser("user") || interaction.user;
 
-				const member = await interaction.guild?.members.fetch(user.id).catch(() => {});
+				const member = await interaction.guild.members.fetch(user.id).catch(() => {});
 
 				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
 				const level = getLevelForXp(xp);
@@ -48,10 +45,10 @@ const info = {
 				const xpForPreviousLevel = getXpForLevel(level);
 				const increment = xpForNextLevel - xpForPreviousLevel;
 				const progress = (xp - xpForPreviousLevel) / increment;
-				return interaction.reply({
+				interaction.reply({
 					embeds: [
-						new Embed()
-							.setColor(member instanceof GuildMember ? member.displayColor : null)
+						new EmbedBuilder()
+							.setColor(member ? member.displayColor : null)
 							.setAuthor({
 								iconURL: (member || user).displayAvatarURL(),
 								name: member?.displayName ?? user.username,
@@ -110,6 +107,7 @@ const info = {
 							}),
 					],
 				});
+				return;
 			}
 			case "top": {
 				const top = allXp.sort((one, two) => two.xp - one.xp);
@@ -121,7 +119,7 @@ const info = {
 						}> (${xp.xp.toLocaleString()} XP)`;
 					},
 					"No users found.",
-					`Leaderboard for ${interaction.guild?.name}`,
+					`Leaderboard for ${interaction.guild.name}`,
 					(data) =>
 						interaction[
 							interaction.replied || interaction.deferred ? "editReply" : "reply"

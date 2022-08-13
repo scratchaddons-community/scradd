@@ -1,11 +1,19 @@
-import { Embed, SlashCommandBuilder } from "@discordjs/builders";
-import { GuildMember, MessageActionRow, MessageButton, MessageMentions } from "discord.js";
+import {
+	EmbedBuilder,
+	SlashCommandBuilder,
+	GuildMember,
+	ButtonBuilder,
+	MessageMentions,
+	time,
+	ButtonStyle,
+} from "discord.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
 import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
 const info = {
@@ -23,7 +31,7 @@ const info = {
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("Member is not a GuildMember");
-		return getWarns(
+		getWarns(
 			async (data) => await interaction.reply(data),
 			interaction.options.getString("filter"),
 			interaction.member,
@@ -55,7 +63,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 			.filter((warn, index) => warns.findIndex((w) => w.info == warn.info) == index)
 			.sort((one, two) => two.expiresAt - one.expiresAt),
 	);
-	const embed = new Embed()
+	const embed = new EmbedBuilder()
 		.setTitle(
 			`${member.displayName} has ${warns.length} active strike${
 				warns.length === 1 ? "" : "s"
@@ -71,7 +79,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 
 						return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
 							strikes === 1 ? "" : ` (*${strikes})`
-						}: expiring <t:${Math.round(warn.expiresAt / 1_000)}:R>`;
+						}: expiring ${time(warn.expiresAt, "R")}`;
 					}),
 				)
 			).join("\n") || `${user.toString()} has no recent strikes!`,
@@ -86,11 +94,11 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 	return {
 		components: strikes.length
 			? [
-					new MessageActionRow().addComponents(
+					new MessageActionRowBuilder().addComponents(
 						strikes.map((warn) =>
-							new MessageButton()
+							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
-								.setStyle("SECONDARY")
+								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(
 									`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`,
 								),
@@ -104,7 +112,7 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
 }
 
 /**
- * @param {(options: string | import("discord.js").InteractionReplyOptions | import("discord.js").MessagePayload) => Promise<void>} reply
+ * @param {(options: string | import("discord.js").InteractionReplyOptions) => Promise<import("discord.js").InteractionResponse>} reply
  * @param {string | null} filter
  * @param {import("discord.js").GuildMember} interactor
  *
@@ -112,17 +120,16 @@ async function getWarnsForMember(user, guild = user instanceof GuildMember ? use
  */
 export async function getWarns(reply, filter, interactor) {
 	if (filter) {
-		const pinged = filter.match(MessageMentions.USERS_PATTERN)?.[1];
+		const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
 		if (pinged) {
 			const user = await interactor.client.users.fetch(pinged);
 
 			if (!user)
-				return await reply({
+				await reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
 				});
-
-			await reply(await getWarnsForMember(user, interactor.guild));
+			else await reply(await getWarnsForMember(user, interactor.guild));
 		} else {
 			const id = convertBase(filter, WARN_INFO_BASE, 10);
 			const channel = interactor.guild && (await getThread("members", interactor.guild));
@@ -130,17 +137,22 @@ export async function getWarns(reply, filter, interactor) {
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
 			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
 
-			if (!message)
-				return await reply({
+			if (!message) {
+				await reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
 				});
+				return;
+			}
 
 			const reason = await fetch(message.attachments.first()?.url || "").then((response) =>
 				response.text(),
 			);
-			const [, userId = "", moderatorId = ""] =
-				message.content.match(MessageMentions.USERS_PATTERN) || [];
+
+			/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
+			const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern.source, "g");
+
+			const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 
 			const member = await interactor.guild?.members.fetch(userId).catch(() => {});
 
@@ -149,6 +161,7 @@ export async function getWarns(reply, filter, interactor) {
 
 			const nick = member?.displayName ?? user?.username;
 
+			const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 			const mod =
 				(await interactor.guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await interactor.client.users.fetch(moderatorId).catch(() => {}));
@@ -158,7 +171,7 @@ export async function getWarns(reply, filter, interactor) {
 			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
 
-			const embed = new Embed()
+			const embed = new EmbedBuilder()
 				.setColor(member?.displayColor ?? null)
 				.setAuthor(
 					nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null,
@@ -168,23 +181,16 @@ export async function getWarns(reply, filter, interactor) {
 				.setTimestamp(message.createdAt);
 
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
-			embed.addField({ name: "Strikes", value: strikes, inline: true });
+			embed.addFields({ name: "Strikes", value: strikes, inline: true });
 
-			if (
-				mod &&
-				interactor instanceof GuildMember &&
-				interactor.roles.resolve(process.env.MODERATOR_ROLE || "")
-			)
-				embed.addField({ name: "Moderator", value: mod.toString(), inline: true });
+			if (mod && interactor.roles.resolve(process.env.MODERATOR_ROLE || ""))
+				embed.addFields({ name: "Moderator", value: mod.toString(), inline: true });
 
-			if (user) embed.addField({ name: "Target user", value: user.toString(), inline: true });
+			if (user)
+				embed.addFields({ name: "Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
-				embed.addField({
-					name: "Expirery",
-					value: `<t:${Math.round(expiresAt / 1_000)}:R>`,
-					inline: true,
-				});
+				embed.addFields({ name: "Expirery", value: time(expiresAt, "R"), inline: true });
 
 			await reply({ ephemeral: true, embeds: [embed] });
 		}

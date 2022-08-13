@@ -1,4 +1,4 @@
-import { Guild } from "discord.js";
+import { Guild, time } from "discord.js";
 import log from "../../common/moderation/logging.js";
 
 /** @type {import("../../types/event").default<"inviteCreate">} */
@@ -9,17 +9,13 @@ const event = {
 			invite.guild,
 			`${invite.temporary ? "Temporary invite" : "Invite"} ${
 				invite.code
-			} for ${invite.channel.toString()} created${
+			} for ${invite.channel?.toString()} created${
 				invite.inviter ? ` by ${invite.inviter.toString()}` : ""
 			}${
 				invite.expiresAt || invite.maxUses
-					? ` expiring ${
-							invite.expiresAt
-								? "<t:" + Math.round(+invite.expiresAt / 1_000) + ">"
-								: ""
-					  }${invite.expiresAt && invite.maxUses ? " or " : ""}${
-							invite.maxUses ? "after " + invite.maxUses + " uses" : ""
-					  }`
+					? ` expiring ${invite.expiresAt ? time(+invite.expiresAt) : ""}${
+							invite.expiresAt && invite.maxUses ? " or " : ""
+					  }${invite.maxUses ? "after " + invite.maxUses + " uses" : ""}`
 					: ""
 			}!`,
 			"server",

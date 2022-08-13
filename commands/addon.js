@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Util } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown } from "discord.js";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -62,7 +61,7 @@ const info = {
 			);
 		}
 
-		const input = interaction.options.getString("addon") || "";
+		const input = interaction.options.getString("addon", true);
 		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
@@ -79,7 +78,7 @@ const info = {
 			return;
 		}
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setTitle(addon.name)
 			.setColor(CONSTANTS.themeColor)
 			.setDescription(
@@ -146,26 +145,26 @@ const info = {
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addField({
+				embed.addFields({
 					name: "Contributors",
-					value: Util.escapeMarkdown(credits),
+					value: escapeMarkdown(credits),
 					inline: true,
 				});
 
 			if (manifest.permissions?.length)
 				embed.setDescription(
-					embed.description +
+					embed.data.description +
 						"\n" +
 						"\n" +
 						"**This addon may require additional permissions to be granted in order to function.**",
 				);
 
 			embed.addFields(
-				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
+				{ inline: true, name: "Group", value: escapeMarkdown(group) },
 				{
 					inline: true,
 					name: "Version added",
-					value: Util.escapeMarkdown(
+					value: escapeMarkdown(
 						"v" +
 							manifest.versionAdded +
 							(manifest.latestUpdate

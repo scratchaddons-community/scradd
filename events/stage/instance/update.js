@@ -7,9 +7,7 @@ const event = {
 		if (!oldInstance || guild.id !== process.env.GUILD_ID) return;
 
 		const logs = [];
-		if (oldInstance.discoverableDisabled !== newInstance.discoverableDisabled) {
-			logs.push(` discovery ${newInstance.discoverableDisabled ?? true ? "dis" : "en"}abled`);
-		}
+
 		if (oldInstance.topic !== newInstance.topic) {
 			logs.push(`’s topic set to ${newInstance.topic}`);
 		}

@@ -1,6 +1,11 @@
-import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
-import { Embed } from "@discordjs/builders";
-import { ThreadAutoArchiveDuration } from "discord-api-types/v9";
+import {
+	Colors,
+	GuildMember,
+	Message,
+	escapeMarkdown,
+	ThreadAutoArchiveDuration,
+	EmbedBuilder,
+} from "discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 
@@ -11,7 +16,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 export const RATELIMT_MESSAGE =
 	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
+export const DEFAULT_COLOR = Colors.Greyple;
 
 /** @type {{ [key: string]: number }} */
 const cooldowns = {};
@@ -42,9 +47,9 @@ export default class SuggestionChannel {
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const title = Util.escapeMarkdown(data.title);
+		const title = escapeMarkdown(data.title);
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setColor(DEFAULT_COLOR)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
@@ -56,7 +61,7 @@ export default class SuggestionChannel {
 
 		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
 
-		if (!channel?.isText()) throw new ReferenceError(`Channel not found`);
+		if (!channel?.isTextBased()) throw new ReferenceError(`Channel not found`);
 
 		if ((cooldowns[author.id] || 0) > Date.now()) {
 			await interaction.reply({
@@ -113,7 +118,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!interaction.member?.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
+		if (!interaction.member.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -140,7 +145,9 @@ export default class SuggestionChannel {
 		];
 
 		if (starter && starter?.author.id === interaction.client.user?.id) {
-			const embed = new MessageEmbed(starter.embeds[0]);
+			const embed = starter.embeds[0]
+				? EmbedBuilder.from(starter.embeds[0])
+				: new EmbedBuilder();
 
 			embed
 				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
@@ -197,13 +204,15 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		const embed = new MessageEmbed(starterMessage.embeds[0]);
+		const embed = starterMessage.embeds[0]
+			? EmbedBuilder.from(starterMessage.embeds[0])
+			: new EmbedBuilder();
 
 		if (updated.body) embed.setDescription(updated.body);
 
 		const promises = [];
 
-		const title = Util.escapeMarkdown(updated.title ?? "");
+		const title = escapeMarkdown(updated.title ?? "");
 
 		promises.push(
 			title
@@ -217,7 +226,7 @@ export default class SuggestionChannel {
 				: Promise.resolve(interaction.channel),
 		);
 
-		embed.setTitle(title || embed.title || "");
+		embed.setTitle(title || embed.data.title || "");
 
 		promises.push(starterMessage.edit({ embeds: [embed] }));
 

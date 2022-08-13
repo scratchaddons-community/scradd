@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 const MAX_FETCH_COUNT = 100;
@@ -6,25 +6,26 @@ const MAX_FETCH_COUNT = 100;
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Bulk deletes a specified amount of messages")
+		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
 			input
 				.setName("count")
 				.setDescription(
 					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to`,
 				)
-				.setRequired(true),
+				.setRequired(true)
+				.setMaxLength(22),
 		)
 		.addUserOption((input) =>
 			input.setName("user").setDescription("Only delete messages from this user"),
 		)
-		.setDefaultPermission(false),
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
-		if (!interaction.channel || interaction.channel?.type === "DM")
+		if (!interaction.channel || interaction.channel.isDMBased())
 			throw new TypeError("Can not run this command in a DM");
 
-		const count = interaction.options.getString("count") ?? "";
+		const count = interaction.options.getString("count", true);
 		const user = interaction.options.getUser("user");
 		const numberCount = +count;
 		const messages = await interaction.channel.messages.fetch({ limit: MAX_FETCH_COUNT });
@@ -32,17 +33,17 @@ const info = {
 		if (isNaN(numberCount) || numberCount > MAX_FETCH_COUNT) {
 			const deleteTo = Object.keys(Object.fromEntries([...messages])).indexOf(count) + 1;
 			if (!deleteTo) {
-				return await interaction.reply(
+				await interaction.reply(
 					`${CONSTANTS.emojis.statuses.no} Could not find a message with that ID!`,
 				);
-			}
-			return await interaction.reply(
-				await deleteMessages(messages, interaction.channel, deleteTo, user),
+			} else
+				await interaction.reply(
+					await deleteMessages(messages, interaction.channel, deleteTo, user),
+				);
+		} else
+			await interaction.reply(
+				await deleteMessages(messages, interaction.channel, numberCount, user),
 			);
-		}
-		return await interaction.reply(
-			await deleteMessages(messages, interaction.channel, numberCount, user),
-		);
 	},
 };
 
