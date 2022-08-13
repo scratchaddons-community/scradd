@@ -52,9 +52,12 @@ export default /** @type {const} */ ({
 		developers: "938439909742616616",
 		testers: "938440159102386276",
 	},
-	repos: {
-		sa: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
-		scradd: { root: "https://github.com/scratchaddons-community/scradd", branch: "main" },
+	urls: {
+		saSource: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
+		saRepo: "https://github.com/ScratchAddons/ScratchAddons",
+		scraddRepo: "https://github.com/scratchaddons-community/scradd",
+		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
+		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
 	},
 	themeColor: process.env.NODE_ENV === "production" ? 0xff7b26 : 0x175ef8,
 	footerSeperator: " • ",

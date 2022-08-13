@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "di
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
+import { manifest } from "../common/extension.js";
 
 import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -32,7 +33,9 @@ const fuse = new Fuse(addons, {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with information about a specific addon")
+		.setDescription(
+			`Replies with information about a specific addon available in v${manifest.version_name}`,
+		)
 		.addStringOption((option) =>
 			option.setName("addon").setDescription("The name of the addon").setRequired(true),
 		)
@@ -84,7 +87,7 @@ const info = {
 			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
-					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(
+					`[See source code](${CONSTANTS.urls.saSource}/addons/${encodeURIComponent(
 						addon.id,
 					)}/)`,
 			)
@@ -96,7 +99,7 @@ const info = {
 					(compact ? "Compact mode" : addon.id),
 			})
 			[compact ? "setThumbnail" : "setImage"](
-				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(addon.id)}.png`,
+				`${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
 			);
 
 		const group = addon.tags.includes("popup")
@@ -133,7 +136,7 @@ const info = {
 
 		if (!compact) {
 			const manifest = (manifestCache[addon.id] ??= await fetch(
-				`${CONSTANTS.repos.sa}/addons/${addon.id}/addon.json?date=${Date.now()}`,
+				`${CONSTANTS.urls.saSource}/addons/${addon.id}/addon.json?date=${Date.now()}`,
 			).then(async (response) => {
 				return await /** @type {Promise<import("../types/addonManifest").default>} */
 				(response.json());
