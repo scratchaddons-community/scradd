@@ -17,6 +17,7 @@ import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../lib/text.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/message.js";
+import addonCommandInfo from "./addon.js";
 
 const COLLECTOR_TIME = 120_000;
 
@@ -30,8 +31,6 @@ const fuse = new Fuse(addons, {
 		{ name: "name", weight: 1 },
 	],
 });
-
-const version = trimPatchVersion(manifest.version);
 
 export const GROUP_NAMES = /** @type {const} */ ([
 	"Addon name",
@@ -60,9 +59,13 @@ const addonEndings = Object.fromEntries(
 		false,
 	]),
 );
-const versionMarkdown = `**[${escapeMarkdown(version)}](${
+const versionMarkdown = `**[${escapeMarkdown(manifest.version_name || manifest.version)}](${
 	CONSTANTS.urls.saRepo
-}/releases/tag/v${encodeURI(version)}.0)**`;
+}${
+	manifest.version_name?.endsWith("-prerelease")
+		? ``
+		: `/releases/tag/v${encodeURI(manifest.version)}`
+})**`;
 const QUESTIONS = {
 	categories: {
 		easterEgg: {
@@ -191,9 +194,9 @@ const QUESTIONS = {
 			userAsking: "Is this addon enabled by default?",
 		},
 		info: {
-			question: "Does your addon have any warnings and/or notices on the settings page?",
-			statement: "This addon has warnings and/or notices on the settings page!",
-			userAsking: "Does this addon have any warnings and/or notices on the settings page?",
+			question: "Does your addon have any notices on the settings page?",
+			statement: "This addon has notice(s) on the settings page!",
+			userAsking: "Does this addon have any notices on the settings page?",
 		},
 		presets: {
 			question: "Does your addon have any presets for its settings?",
@@ -629,92 +632,80 @@ const questionsByAddon = Object.fromEntries(
 				userAsking: QUESTIONS.tags.dangerous.userAsking,
 			});
 		}
+		const brandNew =
+			addon.versionAdded &&
+			trimPatchVersion(manifest.version) === trimPatchVersion(addon.versionAdded);
+		const updated =
+			addon.latestUpdate &&
+			trimPatchVersion(manifest.version) === trimPatchVersion(addon.latestUpdate.version);
 
-		if (addon.versionAdded && version === trimPatchVersion(addon.versionAdded)) {
-			result.push(
-				{
-					dependencies: {
-						[QUESTIONS.history.new.question]: true,
-						[`Is your addon found under **${
-							addon.tags.includes("recommended") || addon.tags.includes("featured")
-								? "Other"
-								: "Featured"
-						} new addons and updates** as of version ${versionMarkdown}?`]: false,
-					},
-					group: "Categorization",
-					order: 9,
-					question: `Is your addon found under **${
+		if (brandNew || updated) {
+			result.push({
+				dependencies: {
+					[QUESTIONS.history.new.question]: true,
+					[`Is your addon found under **${
 						addon.tags.includes("recommended") || addon.tags.includes("featured")
-							? "Featured"
-							: "Other"
-					} new addons and updates** as of version ${versionMarkdown}?`,
-					userAsking: `Is this addon currently found under ${
-						addon.tags.includes("recommended") || addon.tags.includes("featured")
-							? "Featured"
-							: "Other"
-					} new addons and updates?`,
-					statement: `This addon is currently found under **${
-						addon.tags.includes("recommended") || addon.tags.includes("featured")
-							? "Featured"
-							: "Other"
-					} new addons and updates**!`,
+							? "Other"
+							: "Featured"
+					} new addons and updates** as of version ${versionMarkdown}?`]: false,
 				},
-				{
+				group: "Categorization",
+				order: 9,
+				question: `Is your addon found under **${
+					addon.tags.includes("recommended") || addon.tags.includes("featured")
+						? "Featured"
+						: "Other"
+				} new addons and updates** as of version ${versionMarkdown}?`,
+				userAsking: `Is this addon currently found under ${
+					addon.tags.includes("recommended") || addon.tags.includes("featured")
+						? "Featured"
+						: "Other"
+				} new addons and updates?`,
+				statement: `This addon is currently found under **${
+					addon.tags.includes("recommended") || addon.tags.includes("featured")
+						? "Featured"
+						: "Other"
+				} new addons and updates**!`,
+			});
+			if (brandNew)
+				result.push({
 					group: "Misc",
 					order: 6,
 					question: QUESTIONS.history.new.question,
 					statement: QUESTIONS.history.new.statement,
 					userAsking: QUESTIONS.history.new.userAsking,
-				},
-			);
-		}
+				});
 
-		if (addon.latestUpdate && version === trimPatchVersion(addon.latestUpdate.version)) {
-			result.push(
-				{
-					group: "Misc",
-					question: QUESTIONS.history.updated.question,
-					statement: QUESTIONS.history.updated.statement,
-					userAsking: QUESTIONS.history.updated.userAsking,
-				},
-				{
-					dependencies: {
-						[QUESTIONS.history.updated.question]: true,
-						[`Does your addon have the **${
-							addon.latestUpdate.newSettings?.length ? "New features" : "New settings"
-						}** tag?`]: false,
+			if (addon.latestUpdate && updated) {
+				result.push(
+					{
+						group: "Misc",
+						question: QUESTIONS.history.updated.question,
+						statement: QUESTIONS.history.updated.statement,
+						userAsking: QUESTIONS.history.updated.userAsking,
 					},
-					group: "Misc",
-					question: `Does your addon have the **${
-						addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
-					}** tag?`,
-					statement: `This addon has the **${
-						addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
-					}** tag!`,
-					userAsking: `Does this addon have the ${
-						addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
-					} tag?`,
-				},
-				{
-					dependencies: {
-						[QUESTIONS.history.updated.question]: true,
-						[`Is your addon found under **${
-							addon.latestUpdate.isMajor ? "Other" : "Featured"
-						} new addons and updates** as of ${versionMarkdown}?`]: false,
+					{
+						dependencies: {
+							[QUESTIONS.history.updated.question]: true,
+							[`Does your addon have the **${
+								addon.latestUpdate.newSettings?.length
+									? "New features"
+									: "New settings"
+							}** tag?`]: false,
+						},
+						group: "Misc",
+						question: `Does your addon have the **${
+							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
+						}** tag?`,
+						statement: `This addon has the **${
+							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
+						}** tag!`,
+						userAsking: `Does this addon have the ${
+							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
+						} tag?`,
 					},
-					group: "Categorization",
-					order: 9,
-					question: `Is your addon found under **${
-						addon.latestUpdate.isMajor ? "Featured" : "Other"
-					} new addons and updates** as of ${versionMarkdown}?`,
-					userAsking: `Is this addon currently found under ${
-						addon.latestUpdate.isMajor ? "Featured" : "Other"
-					} new addons and updates?`,
-					statement: `This addon is currently found under **${
-						addon.latestUpdate.isMajor ? "Featured" : "Other"
-					} new addons and updates**!`,
-				},
-			);
+				);
+			}
 		}
 
 		if (addon.credits) {
@@ -825,6 +816,8 @@ const questions = Object.values(questionsByAddon)
 		return accumulator;
 	}, /** @type {{ [K in GroupName]: string[][] }} */ ({ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] }));
 
+const BULLET_POINT = CONSTANTS.footerSeperator.trim();
+
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
@@ -836,16 +829,28 @@ const info = {
 			subcommand.setName("player").setDescription("I think of an addon and you guess"),
 		),
 
+	dm: true,
+
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;
 		const command = interaction.options.getSubcommand(true);
 
+		const addonCommand = (
+			await interaction.client.application?.commands.fetch({
+				guildId:
+					addonCommandInfo.dm && process.env.NODE_ENV === "production"
+						? undefined
+						: interaction.guild?.id,
+			})
+		)?.find((command) => command.name === "addon");
+		const commandMarkdown = addonCommand
+			? `\n\n*Run the </addon:${
+					addonCommand.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
+			  }> command for more information about this addon!*`
+			: addonCommand;
+
 		switch (command) {
-			case "bot":
-				await interaction.reply({
-					content:
-						"Think of an addon. Answer my questions about it and I will try to guess which one you are thinking of!",
-				});
+			case "bot": {
 				await reply();
 
 				/**
@@ -854,15 +859,15 @@ const info = {
 				 * @param {[string, number][]} addonProbabilities - The probabilities of each addon being the answer.
 				 * @param {string[]} [askedQuestions] - Questions to ignore.
 				 *
-				 * @returns {string[] | undefined} - A new question to ask.
+				 * @returns {string[]} - A new question to ask.
 				 */
 				function getNextQuestions(addonProbabilities, askedQuestions = []) {
 					/** @type {{ [key: string]: number }} */
 					const frequencies = {};
 
-					for (const question of Object.entries(questionsByAddon)
+					const questions = Object.entries(questionsByAddon)
 						.map(
-							/** @returns {AddonQuestions} */
+							/** @returns {AddonQuestions[]} */
 							([addon, questions]) =>
 								Array.from({
 									length: Math.round(
@@ -883,14 +888,14 @@ const info = {
 									),
 								),
 						)
-						.flat()) {
+						.flat(2);
+
+					for (const question of questions) {
 						frequencies[`${question.question}`] ??= 0;
 						frequencies[`${question.question}`]++;
 					}
 
 					const frequenciesArray = Object.entries(frequencies);
-
-					if (frequenciesArray.length === 0) return;
 
 					return frequenciesArray
 						.sort(() => Math.random() - 0.5)
@@ -941,8 +946,8 @@ const info = {
 								Object.assign(dependencies, questionInfo.dependencies);
 
 							const allDependencies = addon.reduce(
-								(accumulator, { dependencies: addonDependencies = {} }) => ({
-									...accumulator,
+								(accumulated, { dependencies: addonDependencies = {} }) => ({
+									...accumulated,
 									...addonDependencies,
 								}),
 								/** @type {Dependencies} */ ({}),
@@ -983,7 +988,7 @@ const info = {
 									? accumulated
 									: answerQuestion(
 											current[0],
-											(current[1] ? +1 : -1) * probabilityShift,
+											(current[1] ? 1 : -1) * probabilityShift,
 											accumulated.sort((one, two) => two[1] - one[1]),
 											askedQuestions,
 									  ),
@@ -998,8 +1003,6 @@ const info = {
 				/**
 				 * Respond to an interaction with a question.
 				 *
-				 * - The interaction to respond to.
-				 *
 				 * @param {string[]} [askedQuestions] - Questions to ignore.
 				 * @param {[string, number][]} [addonProbabilities] - Current probabilities of each addon being correct. MUST be sorted.
 				 * @param {number} [askedCount] - Count of messages that have already been asked.
@@ -1012,8 +1015,8 @@ const info = {
 				async function reply(
 					askedQuestions = [],
 					addonProbabilities = addons
-						.sort(() => Math.random() - 0.5)
-						.map((addon) => /** @type {[string, 0]} */ ([addon.id, 0])),
+						.map((addon) => /** @type {[string, 0]} */ ([addon.id, 0]))
+						.sort(() => Math.random() - 0.5),
 					askedCount = 0,
 					backInfo = false,
 					justAnswered = "",
@@ -1023,11 +1026,12 @@ const info = {
 							? [backInfo]
 							: getNextQuestions(addonProbabilities, askedQuestions);
 
-					const oldMessage = await interaction.fetchReply();
+					const oldMessage = interaction.replied
+						? await interaction.fetchReply()
+						: undefined;
 
 					if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0)) {
 						await answerWithAddon(
-							oldMessage,
 							addonProbabilities,
 							askedCount,
 							askedQuestions,
@@ -1041,7 +1045,6 @@ const info = {
 					if (!questions?.[0]) {
 						if ((addonProbabilities[1]?.[1] || 0) < (addonProbabilities[0]?.[1] || 0)) {
 							await answerWithAddon(
-								oldMessage,
 								addonProbabilities,
 								askedCount,
 								askedQuestions,
@@ -1052,13 +1055,18 @@ const info = {
 							return;
 						}
 
+						if (!oldMessage)
+							throw new ReferenceError("No questions exist on initialization");
+
 						await interaction.editReply({
 							components: disableComponents(oldMessage.components),
 							embeds: [new EmbedBuilder(oldMessage.embeds[0]?.toJSON())],
 						});
 
 						await oldMessage.reply({
-							content: `${interaction.user.toString()}, you beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${version})`,
+							content: `${interaction.user.toString()}, you beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
+								manifest.version_name || manifest.version
+							})`,
 						});
 
 						CURRENTLY_PLAYING.delete(interaction.user.id);
@@ -1066,7 +1074,7 @@ const info = {
 						return;
 					}
 
-					const message = await interaction.editReply({
+					const message = await interaction[oldMessage ? "editReply" : "reply"]({
 						components: [
 							new MessageActionRowBuilder().addComponents(
 								new ButtonBuilder()
@@ -1107,14 +1115,46 @@ const info = {
 						],
 
 						embeds: [
-							new EmbedBuilder(oldMessage.embeds[0]?.toJSON()).setDescription(
-								(oldMessage.embeds[0]?.description
-									? `${
-											oldMessage.embeds[0]?.description || ""
-									  } **${justAnswered}**\n`
-									: "") + questions[0],
-							),
+							new EmbedBuilder()
+								.setColor(CONSTANTS.themeColor)
+								.setAuthor({
+									iconURL: (interaction.member instanceof GuildMember
+										? interaction.member
+										: interaction.user
+									).displayAvatarURL(),
+
+									name:
+										interaction.member instanceof GuildMember
+											? interaction.member.displayName
+											: interaction.user.username,
+								})
+								.setTitle("Think of an addon…")
+								.setDescription(
+									(oldMessage?.embeds[0]?.description
+										? `${
+												oldMessage?.embeds[0]?.description || ""
+										  } **${justAnswered}**\n`
+										: "") +
+										BULLET_POINT +
+										" " +
+										questions[0],
+								)
+								.setFooter({
+									text:
+										oldMessage?.embeds[0]?.footer?.text.replace(
+											/\d+ questions?/,
+											(previousCount) =>
+												`${
+													1 + +(previousCount.split(" ")[0] || 0)
+												} question${
+													previousCount === "0 questions" ? "" : "s"
+												}`,
+										) ||
+										`Answer my questions using the buttons below${CONSTANTS.footerSeperator}0 questions asked`,
+								}),
 						],
+
+						fetchReply: true,
 					});
 
 					CURRENTLY_PLAYING.set(interaction.user.id, message.url);
@@ -1139,7 +1179,7 @@ const info = {
 									interaction.editReply({
 										components: disableComponents(message.components),
 
-										embeds: [new EmbedBuilder(oldMessage.embeds[0]?.toJSON())],
+										embeds: [new EmbedBuilder(message.embeds[0]?.toJSON())],
 									}),
 								]);
 
@@ -1153,7 +1193,7 @@ const info = {
 							if (buttonInteraction.customId.startsWith("back.")) {
 								if (typeof backInfo !== "object") {
 									await buttonInteraction.reply({
-										content: "You can't go back here!",
+										content: "You can’t go back here!",
 										ephemeral: true,
 									});
 									collector.resetTimer();
@@ -1166,7 +1206,7 @@ const info = {
 									backInfo.probabilities,
 									askedCount - 1,
 									backInfo.justAsked,
-									buttonInteraction.component.label || "",
+									buttonInteraction.component.label || undefined,
 								);
 
 								if (nextMessage)
@@ -1215,17 +1255,17 @@ const info = {
 							}
 						})
 						.on("end", async (collected) => {
-							if (collected.size === 0) {
-								CURRENTLY_PLAYING.delete(interaction.user.id);
-								await Promise.all([
-									interaction.followUp(
-										`${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
-									),
-									interaction.editReply({
-										components: disableComponents(message.components),
-									}),
-								]);
-							}
+							if (collected.size) return;
+
+							CURRENTLY_PLAYING.delete(interaction.user.id);
+							await Promise.all([
+								interaction.followUp(
+									`${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
+								),
+								interaction.editReply({
+									components: disableComponents(message.components),
+								}),
+							]);
 						});
 
 					return message;
@@ -1234,21 +1274,19 @@ const info = {
 				/**
 				 * Reply to an interaction with an embed saying that the addon has been guessed and a button to keep playing.
 				 *
-				 * @param {import("discord.js").Message} oldMessage - Interaction to reply to.
 				 * @param {[string, number][]} addonProbabilities - The probabilities of each addon being correct.
 				 * @param {number} askedCount - How many questions have been asked already.
 				 * @param {string[]} askedQuestions - Questions that should not be asked.
 				 * @param {false | string | { probabilities: [string, number][]; askedQuestions: string[]; justAsked: string }} backInfo -
 				 *   Information about the previous question.
-				 * @param justAnswered
+				 * @param {string} justAnswered
 				 */
 				async function answerWithAddon(
-					oldMessage,
 					addonProbabilities,
 					askedCount,
 					askedQuestions,
 					backInfo,
-					justAnswered = "",
+					justAnswered,
 				) {
 					const foundAddon = addons.find(({ id }) => id === addonProbabilities[0]?.[0]);
 
@@ -1256,7 +1294,7 @@ const info = {
 						throw new ReferenceError(
 							`Addon ${
 								addonProbabilities[0]?.[0] || ""
-							} referenced in addonProbabilities not found in addons!`,
+							} referenced in addonProbabilities not found in addons`,
 						);
 					}
 
@@ -1264,52 +1302,9 @@ const info = {
 						({ id }) => id === addonProbabilities[1]?.[0],
 					)?.name;
 
+					const oldMessage = await interaction.fetchReply();
 					await oldMessage.edit({
-						components: [
-							new MessageActionRowBuilder().addComponents(
-								new ButtonBuilder()
-									.setLabel("Yes")
-									.setStyle(ButtonStyle.Success)
-									.setCustomId(generateHash("yes"))
-									.setDisabled(true),
-								new ButtonBuilder()
-									.setLabel("I think so")
-									.setStyle(ButtonStyle.Success)
-									.setCustomId(generateHash("probably"))
-									.setDisabled(true),
-								new ButtonBuilder()
-									.setLabel("I don’t know")
-									.setStyle(ButtonStyle.Primary)
-									.setCustomId(generateHash("dontKnow"))
-									.setDisabled(true),
-								new ButtonBuilder()
-									.setLabel("I don’t think so")
-									.setStyle(ButtonStyle.Danger)
-									.setCustomId(generateHash("not"))
-									.setDisabled(true),
-								new ButtonBuilder()
-									.setLabel("No")
-									.setStyle(ButtonStyle.Danger)
-									.setCustomId(generateHash("no"))
-									.setDisabled(true),
-							),
-							new MessageActionRowBuilder().addComponents(
-								...(typeof backInfo === "object"
-									? [
-											new ButtonBuilder()
-												.setLabel("Back")
-												.setStyle(ButtonStyle.Secondary)
-												.setCustomId(generateHash("back"))
-												.setDisabled(true),
-									  ]
-									: []),
-								new ButtonBuilder()
-									.setLabel("End")
-									.setStyle(ButtonStyle.Secondary)
-									.setCustomId(generateHash("end"))
-									.setDisabled(true),
-							),
-						],
+						components: disableComponents(oldMessage.components),
 
 						embeds: [
 							new EmbedBuilder(oldMessage.embeds[0]?.toJSON()).setDescription(
@@ -1319,7 +1314,7 @@ const info = {
 												oldMessage.embeds[0]?.description || ""
 										  } **${justAnswered}**\n`
 										: ""
-								}Is it the **${foundAddon.name}** addon?`,
+								}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
 							),
 						],
 					});
@@ -1354,10 +1349,10 @@ const info = {
 									`${
 										Object.entries(questionsByAddon)
 											.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
-											?.map(({ statement }) => `* ${statement}`)
+											?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 											.join("\n") || ""
-									}\n\n*Run <@929928324959055932>'s \`/addon\` command for more information about this addon!*`,
-								) // todo: command mention
+									}${commandMarkdown}`,
+								)
 								.setAuthor({
 									iconURL: (interaction.member instanceof GuildMember
 										? interaction.member
@@ -1382,10 +1377,18 @@ const info = {
 								)
 								.setFooter({
 									text: `Guessed after ${askedCount} questions.${
-										CONSTANTS.footerSeperator
-									}Probability: ${addonProbabilities[0]?.[1]}${
+										process.env.NODE_ENV === "production"
+											? ""
+											: `${CONSTANTS.footerSeperator}Probability: ${addonProbabilities[0]?.[1]}`
+									}${
 										nextChoice
-											? `${CONSTANTS.footerSeperator}Next choice: ${nextChoice} (probability ${addonProbabilities[1]?.[1]})`
+											? `${
+													CONSTANTS.footerSeperator
+											  }Next choice: ${nextChoice}${
+													process.env.NODE_ENV === "production"
+														? ""
+														: ` (probability ${addonProbabilities[1]?.[1]})`
+											  }`
 											: ""
 									}`,
 								}),
@@ -1411,7 +1414,7 @@ const info = {
 							if (buttonInteraction.customId.startsWith("back.")) {
 								if (typeof backInfo !== "object") {
 									await buttonInteraction.reply({
-										content: `${interaction.user.toString()}, you can't go back here!`,
+										content: `${interaction.user.toString()}, you can’t go back here!`,
 										ephemeral: true,
 									});
 									collector.resetTimer();
@@ -1437,8 +1440,7 @@ const info = {
 									backInfo.probabilities,
 									askedCount - 1,
 									backInfo.justAsked,
-									ButtonBuilder.from(buttonInteraction.component).data.label ||
-										"",
+									buttonInteraction.component.label || undefined,
 								);
 
 								if (nextMessage)
@@ -1482,20 +1484,21 @@ const info = {
 				}
 
 				break;
-			case "player":
+			}
+			case "player": {
 				/** @type {Set<string>} */
 				const doneQuestions = new Set();
 
 				const addon = addons[Math.floor(Math.random() * addons.length)];
 
-				if (!addon) throw new ReferenceError("No addons exist!");
+				if (!addon) throw new ReferenceError("No addons exist");
 
 				const message = await interaction.reply({
 					components: [
-						new MessageActionRowBuilder().addComponents(selectGroupButton()),
+						selectGroupButton(),
 						new MessageActionRowBuilder().addComponents([
 							new ButtonBuilder()
-								.setLabel("End")
+								.setLabel("Give up")
 								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(generateHash("end")),
 							new ButtonBuilder()
@@ -1504,9 +1507,6 @@ const info = {
 								.setCustomId(generateHash("hint")),
 						]),
 					],
-
-					content:
-						"Select a question for me to answer from one of the dropdowns below. When you have an idea of what the addon I'm thinking of might be, reply to this message with its name!",
 
 					embeds: [
 						new EmbedBuilder()
@@ -1547,29 +1547,32 @@ const info = {
 							collectedMessage.reference?.messageId === message.id,
 					})
 					.on("collect", async (collectedMessage) => {
-						const { item, score } = fuse.search(collectedMessage.content)[0] ?? {};
+						const { item, score = 2 } = fuse.search(collectedMessage.content)[0] ?? {};
 
 						componentCollector.resetTimer();
 						messageCollector.resetTimer();
 
-						if (!item || (score && score > 1)) {
+						if (!item || score > 1) {
 							await collectedMessage.reply({
-								content: `I couldn't find that addon!`,
+								content: `${interaction.user.toString()} I couldn’t find that addon!`,
 							});
 							return;
 						}
 
+						const reply = await interaction.fetchReply();
 						const editPromise = interaction.editReply({
 							embeds: [
-								new EmbedBuilder(message.embeds[0]?.toJSON())
+								new EmbedBuilder(reply.embeds[0]?.toJSON())
 									.setDescription(
-										`${message.embeds[0]?.description || ""}\n* Is it the ${
-											item.name
-										} addon? **${item.id === addon.id ? "Yes" : "No"}**`.trim(),
+										`${
+											reply.embeds[0]?.description || ""
+										}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
+											item.id === addon.id ? "Yes" : "No"
+										}**`.trim(),
 									)
 									.setFooter({
 										text:
-											message.embeds[0]?.footer?.text.replace(
+											reply.embeds[0]?.footer?.text.replace(
 												/\d+ questions?/,
 												(previousCount) =>
 													`${
@@ -1586,7 +1589,7 @@ const info = {
 							await Promise.all([
 								editPromise,
 								collectedMessage.reply({
-									content: `${interaction.user.toString()}, that's not the right addon!`,
+									content: `${interaction.user.toString()}, that’s not the right addon!`,
 								}),
 							]);
 							return;
@@ -1606,10 +1609,13 @@ const info = {
 											`${
 												Object.entries(questionsByAddon)
 													.find(([id]) => id === addon.id)?.[1]
-													?.map(({ statement }) => `* ${statement}`)
+													?.map(
+														({ statement }) =>
+															`${BULLET_POINT} ${statement}`,
+													)
 													.join("\n") || ""
-											}\n\n*Run <@929928324959055932>'s \`/addon\` command for more information about this addon!*`,
-										) //todo: command mention
+											}${commandMarkdown}`,
+										)
 										.setAuthor({
 											iconURL: (interaction.member instanceof GuildMember
 												? interaction.member
@@ -1637,8 +1643,8 @@ const info = {
 						]);
 
 						messageCollector.stop();
-					})
-					.on("end", () => componentCollector.stop("GOT_CORRECT_ANSWER"));
+						componentCollector.stop("GOT_CORRECT_ANSWER");
+					});
 
 				componentCollector
 					.on("collect", async (componentInteraction) => {
@@ -1650,9 +1656,10 @@ const info = {
 							await componentInteraction.reply({
 								content: `${interaction.user.toString()}, ${
 									hint
-										? `here's a hint. ${hint.statement}`
-										: "I don't have a hint for you!"
+										? `here’s a hint. ${hint.statement}`
+										: "I don’t have a hint for you!"
 								}`,
+								ephemeral: !hint,
 							});
 
 							if (hint) await answerQuestion(hint.userAsking, hint.group);
@@ -1683,29 +1690,27 @@ const info = {
 						const split = /** @type {[GroupName, string, string]} */ (
 							selected.split(".")
 						);
-						const question = questions[split[0]][+split[1]]?.[+split[2]] || "";
+						const question = questions[split[0]][+split[1]]?.[+split[2]];
 
 						await componentInteraction.deferUpdate();
 
-						await answerQuestion(question, split[0], split.length === 3);
+						await answerQuestion(question, split[0]);
 
 						componentCollector.resetTimer();
 						messageCollector.resetTimer();
 					})
-					.on("end", async (collected) => {
+					.on("end", async (_, reason) => {
 						CURRENTLY_PLAYING.delete(interaction.user.id);
 
+						const reply = await interaction.fetchReply();
 						await Promise.all([
-							collected.size > 0 &&
-							componentCollector.endReason !== "GOT_CORRECT_ANSWER"
+							reason === "GOT_CORRECT_ANSWER"
 								? Promise.resolve()
-								: message.reply(
+								: reply.reply(
 										`${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
 								  ),
 							interaction.editReply({
-								components: disableComponents(message.components),
-
-								content: message.content || undefined,
+								components: disableComponents(reply.components),
 							}),
 						]);
 					});
@@ -1714,27 +1719,28 @@ const info = {
 				 * @param {GroupName} [defaultValue]
 				 */
 				function selectGroupButton(doneGroups = new Set(), defaultValue) {
-					return new SelectMenuBuilder()
-						.setPlaceholder("Select a group")
-						.setCustomId(generateHash("group"))
-						.setOptions(
-							GROUP_NAMES.filter((group) => !doneGroups.has(group))
-								.map((group) => ({
-									default: group === defaultValue,
-									label: group,
-									value: group,
-								}))
-								.sort(({ label: one }, { label: two }) =>
-									one === two ? 0 : one < two ? -1 : 1,
-								),
-						);
+					return new MessageActionRowBuilder().addComponents(
+						new SelectMenuBuilder()
+							.setPlaceholder("Select a group")
+							.setCustomId(generateHash("group"))
+							.setOptions(
+								GROUP_NAMES.filter((group) => !doneGroups.has(group))
+									.map((group) => ({
+										default: group === defaultValue,
+										label: group,
+										value: group,
+									}))
+									.sort(({ label: one }, { label: two }) =>
+										one === two ? 0 : one < two ? -1 : 1,
+									),
+							),
+					);
 				}
 				/**
-				 * @param {string} question
+				 * @param {string | undefined} question
 				 * @param {GroupName} groupName
-				 * @param {boolean} updateEmbed
 				 */
-				async function answerQuestion(question, groupName, updateEmbed = true) {
+				async function answerQuestion(question, groupName) {
 					if (question) doneQuestions.add(question);
 
 					/** @type {Set<GroupName>} */
@@ -1779,19 +1785,19 @@ const info = {
 						/** @type {MessageActionRowBuilder[]} */ ([]),
 					);
 
-					const groupSelection = selectGroupButton(doneGroups, groupName);
+					const reply = await interaction.fetchReply();
 
-					await interaction.editReply({
+					const foundInAddon = questionsByAddon[addon?.id || ""]?.find?.(
+						({ userAsking }) => userAsking === question,
+					);
+
+					await reply.edit({
 						components: [
-							...(groupSelects.length > 0
-								? [
-										new MessageActionRowBuilder().addComponents(groupSelection),
-										...groupSelects,
-								  ]
-								: []),
+							selectGroupButton(doneGroups, groupName),
+							...(groupSelects.length > 0 ? groupSelects : []),
 							new MessageActionRowBuilder().setComponents([
 								new ButtonBuilder()
-									.setLabel("End")
+									.setLabel("Give up")
 									.setStyle(ButtonStyle.Secondary)
 									.setCustomId(generateHash("end")),
 								new ButtonBuilder()
@@ -1801,27 +1807,27 @@ const info = {
 							]),
 						],
 
-						embeds: updateEmbed
+						embeds: question
 							? [
-									new EmbedBuilder(message.embeds[0]?.toJSON())
+									new EmbedBuilder(reply.embeds[0]?.toJSON())
 										.setDescription(
 											`${
-												message.embeds[0]?.description || ""
-											}\n* ${question} **${
-												questionsByAddon[
-													/** @type {import("../types/addonManifest") & { id: string }} */ (
-														addon
-													).id
-												]?.find?.(
-													({ userAsking }) => userAsking === question,
-												)
-													? "Yes"
-													: "No"
-											}**`.trim(),
+												reply.embeds[0]?.description || ""
+											}\n${BULLET_POINT} ${
+												(
+													foundInAddon ||
+													Object.values(questionsByAddon)
+														.flat()
+														.find?.(
+															({ userAsking }) =>
+																userAsking === question,
+														)
+												)?.question || question
+											} **${foundInAddon ? "Yes" : "No"}**`.trim(),
 										)
 										.setFooter({
 											text:
-												message.embeds[0]?.footer?.text.replace(
+												reply.embeds[0]?.footer?.text.replace(
 													/\d+ questions?/,
 													(previousCount) =>
 														`${
@@ -1838,6 +1844,7 @@ const info = {
 					});
 				}
 				break;
+			}
 		}
 	},
 };

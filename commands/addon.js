@@ -1,22 +1,10 @@
 import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
-import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { manifest } from "../common/extension.js";
+import { manifest, addons } from "../common/extension.js";
 
 import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
-
-const addons = await fetch(
-	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",
-).then(
-	async (response) =>
-		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */
-		(await response.json()),
-);
-
-/** @type {{ [key: string]: import("../types/addonManifest").default }} */
-const manifestCache = {};
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -34,7 +22,9 @@ const fuse = new Fuse(addons, {
 const info = {
 	data: new SlashCommandBuilder()
 		.setDescription(
-			`Replies with information about a specific addon available in v${manifest.version_name}`,
+			`Replies with information about a specific addon available in v${
+				manifest.version_name || manifest.version
+			}`,
 		)
 		.addStringOption((option) =>
 			option.setName("addon").setDescription("The name of the addon").setRequired(true),
@@ -135,15 +125,8 @@ const info = {
 		}
 
 		if (!compact) {
-			const manifest = (manifestCache[addon.id] ??= await fetch(
-				`${CONSTANTS.urls.saSource}/addons/${addon.id}/addon.json?date=${Date.now()}`,
-			).then(async (response) => {
-				return await /** @type {Promise<import("../types/addonManifest").default>} */
-				(response.json());
-			}));
-
 			const lastUpdatedIn = `last updated in v${
-				manifest.latestUpdate?.version ?? "<unknown version>"
+				addon.latestUpdate?.version ?? "<unknown version>"
 			}`;
 
 			const credits = generateCredits(addon.credits);
@@ -155,7 +138,7 @@ const info = {
 					inline: true,
 				});
 
-			if (manifest.permissions?.length)
+			if (addon.permissions?.length)
 				embed.setDescription(
 					embed.data.description +
 						"\n" +
@@ -170,12 +153,12 @@ const info = {
 					name: "Version added",
 					value: escapeMarkdown(
 						"v" +
-							manifest.versionAdded +
-							(manifest.latestUpdate
+							addon.versionAdded +
+							(addon.latestUpdate
 								? ` (${generateTooltip(
 										interaction,
 										lastUpdatedIn,
-										`${manifest.latestUpdate?.temporaryNotice}`,
+										`${addon.latestUpdate?.temporaryNotice}`,
 								  )})`
 								: ""),
 					),

@@ -3,13 +3,6 @@ export default /** @type {const} */ ({
 	zeroWidthSpace: "\u200b",
 	emojis: {
 		statuses: { yes: "<:yes:940054094272430130>", no: "<:no:940054047854047282>" },
-		addonGuess: {
-			dontKnow: "<:gray:954021160813727764>",
-			no: "<:no:954021184461238272>",
-			not: "<:x_:954021198906404905>",
-			probably: "<:check:954021123899678770>",
-			yes: "<:yes:954021054572023828>",
-		},
 		autoreact: {
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",
@@ -53,7 +46,9 @@ export default /** @type {const} */ ({
 		testers: "938440159102386276",
 	},
 	urls: {
-		saSource: "https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons",
+		saSource:
+			"https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons" +
+			(process.env.NODE_ENV == "production" ? "" : "@master"),
 		saRepo: "https://github.com/ScratchAddons/ScratchAddons",
 		scraddRepo: "https://github.com/scratchaddons-community/scradd",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",

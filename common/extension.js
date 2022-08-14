@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import CONSTANTS from "./CONSTANTS.js";
 
 export const manifest = await fetch(`${CONSTANTS.urls.saSource}/manifest.json`).then(
-	async (response) => await /** @type {Promise<chrome.runtime.ManifestV2>} */ (response.json()),
+	async (response) => await /** @type {Promise<chrome.runtime.Manifest>} */ (response.json()),
 );
 
 const addonIds = await fetch(`${CONSTANTS.urls.saSource}/addons/addons.json`).then(
