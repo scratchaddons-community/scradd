@@ -1,5 +1,6 @@
 import { Collection, ButtonBuilder, ButtonStyle } from "discord.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import CONSTANTS from "./CONSTANTS.js";
 
 /** @type {Collection<string, string>} */
 export const CURRENTLY_PLAYING = new Collection();
@@ -30,7 +31,7 @@ export async function checkIfUserPlaying(interaction) {
 			),
 		],
 
-		content: `${interaction.user.toString()}, you already have an ongoing game!`,
+		content: `${CONSTANTS.emojis.statuses.no} You already have an ongoing game!`,
 		ephemeral: true,
 		fetchReply: true,
 	});

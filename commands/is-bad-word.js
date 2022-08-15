@@ -18,8 +18,8 @@ const info = {
 			await interaction.reply({
 				ephemeral: true,
 				content:
-					CONSTANTS.emojis.statuses.no +
-					` **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
+
+					`⚠ **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
 					`Posting that text would give you **${result.strikes} strike${
 						result.strikes === 1 ? "" : "s"
 					}**, ${result.strikes ? "so don’t" : "but please don’t still"}.\n\n` +

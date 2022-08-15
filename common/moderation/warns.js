@@ -144,17 +144,14 @@ export default async function warn(user, reason, strikes, context) {
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(
-				member.bannable && !member.roles.premiumSubscriberRole
-					? process.env.NODE_ENV === "production" ||
-					  member.roles.highest.name === "@everyone"
-						? member.ban({ reason: "Too many warnings" })
-						: modTalk.send({
-								allowedMentions: { users: [] },
-								content: `(Just pretend like ${user.toString()} is banned now, okay?)`,
-						  })
+				member.bannable &&
+					!member.roles.premiumSubscriberRole &&
+					(process.env.NODE_ENV === "production" ||
+						member.roles.highest.name === "@everyone")
+					? member.ban({ reason: "Too many warnings" })
 					: modTalk.send({
 							allowedMentions: { users: [] },
-							content: `Missing permissions to ban ${user.toString()}.`,
+							content: `⚠ Missing permissions to ban ${user.toString()}.`,
 					  }),
 			);
 		} else {
@@ -184,7 +181,7 @@ export default async function warn(user, reason, strikes, context) {
 					  )
 					: modTalk.send({
 							allowedMentions: { users: [] },
-							content: `Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
+							content: `⚠ Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
 								process.env.NODE_ENV === "production" ? "hour" : "minute"
 							}${timeoutLength === 1 ? "" : "s"}.`,
 					  }),

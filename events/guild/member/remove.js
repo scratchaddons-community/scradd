@@ -1,3 +1,4 @@
+import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
 
@@ -11,12 +12,12 @@ const event = {
 			throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel");
 
 		const byes = [
-			`Welp… **${member.user.username}** decided to leave… what a shame…`,
-			`Ahh… **${member.user.username}** left us… hope they’ll have safe travels!`,
+			`😩 Welp… **${member.user.username}** decided to leave… what a shame…`,
+			`⬅ Ahh… **${member.user.username}** left us… hope they’ll have safe travels!`,
 			`**${member.user.username}** made a bad decision and left! 😦 I wonder why… 🤔`,
-			`For some reason **${member.user.username}** didn’t like it here…`,
+			`👎 For some reason **${member.user.username}** didn’t like it here…`,
 			`Can we get an F in the chat for **${member.user.username}**? They left! 😭`,
-			`Oop, **${member.user.username}** got eaten by an evil kumquat and left!`,
+			`🍴 Oop, **${member.user.username}** got eaten by an evil kumquat and left!`,
 		];
 
 		const banned = await member.guild.bans
@@ -28,12 +29,12 @@ const event = {
 			.catch(() => {});
 
 		const bans = [
-			`Oof… **${member.user.username}** got banned…`,
-			`There’s no turning back for the banned **${member.user.username}**…`,
-			`Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
-			`Oops, **${member.user.username}** angered the mods and was banned!`,
-			`**${member.user.username}** broke the rules and took an L`,
-			`**${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
+			`😦 Oof… **${member.user.username}** got banned…`,
+			`${CONSTANTS.emojis.statuses.no} There’s no turning back for the banned **${member.user.username}**…`,
+			`👨‍🏫 Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
+			`😡 Oops, **${member.user.username}** angered the mods and was banned!`,
+			`📜 **${member.user.username}** broke the rules and took an L`,
+			`💬 **${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
 		];
 
 		await Promise.all([

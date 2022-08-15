@@ -9,6 +9,7 @@ import {
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
 
 /** @type {import("../../../types/event").default<"messageReactionAdd">} */
 const event = {
@@ -29,7 +30,7 @@ const event = {
 		if (emoji.name && !badWordsAllowed(message.channel)) {
 			const censored = censor(emoji.name);
 			if (censored) {
-				await message.channel.send({ content: `${user.toString()}, language!` });
+				await message.channel.send({ content: `${CONSTANTS.emojis.statuses.no} ${user.toString()}, language!` });
 				await warn(
 					user,
 					`Watch your language!`,

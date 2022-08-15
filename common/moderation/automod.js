@@ -409,7 +409,7 @@ export async function changeNickname(member, strike = true) {
 			setNickname(member, pingablified),
 			member
 				.send({
-					content: `For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
+					content: `⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
 				})
 				.catch(() => {}),
 			removeDuplicateNicknames(member),
@@ -442,7 +442,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 						dm &&
 							found
 								.send(
-									`Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
+									`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 								)
 								.catch(() => false),
 					])
@@ -452,7 +452,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 				promises.push(
 					modTalk.send({
 						allowedMentions: { users: [] },
-						content: `Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
+						content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
 					}),
 				);
 			}
@@ -464,7 +464,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 				promises.push(
 					modTalk.send({
 						allowedMentions: { users: [] },
-						content: `Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
+						content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
 					}),
 				);
 		}
@@ -483,7 +483,7 @@ async function setNickname(member, newNickname) {
 	if (!modTalk) throw new ReferenceError("Could not find mod talk");
 	await modTalk.send({
 		allowedMentions: { users: [] },
-		content: `Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
+		content: `⚠ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
 	});
 	return false;
 }

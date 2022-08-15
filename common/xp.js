@@ -31,7 +31,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			const date = new Date();
 			if (bots?.isTextBased())
 				await bots.send({
-					content: to.toString(),
+					content: "🎉 "+to.toString(),
 					embeds: [
 						new EmbedBuilder()
 							.setColor(member?.displayColor ?? null)

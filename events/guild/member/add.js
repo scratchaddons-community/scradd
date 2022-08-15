@@ -11,19 +11,19 @@ const event = {
 		if (!channel?.isTextBased()) return;
 
 		const greetings = [
-			`Everybody please welcome ${member.toString()} to ${
+			`👋 Everybody please welcome ${member.toString()} to ${
 				member.guild.name
 			}; they’re our ${nth(member.guild.memberCount)} member!`,
-			`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
+			`📢 A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
 				member.guild.memberCount,
 			)} member!`,
-			`Here we go again… ${member.toString()} is here, as our ${nth(
+			`➡ Here we go again… ${member.toString()} is here, our ${nth(
 				member.guild.memberCount,
 			)} member!`,
-			`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
+			`||🙄 Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
 				member.guild.memberCount,
-			)}), so everyone wave hello!`,
-			`What’s that? A new member? Yes, ${member.toString()}’s our ${nth(
+			)})!`,
+			`🧐 What’s that? A new member? Yes, ${member.toString()}’s our ${nth(
 				member.guild.memberCount,
 			)}!`,
 			`Welcome:tm: ${member.toString()}! You’re our ${nth(member.guild.memberCount)} member!`,

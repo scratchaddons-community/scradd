@@ -53,7 +53,7 @@ const event = {
 
 				if (censored.isBad) {
 					await Promise.all([
-						interaction.reply({ ephemeral: true, content: "Language!" }),
+						interaction.reply({ ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Language!` }),
 						warn(
 							interaction.member instanceof GuildMember
 								? interaction.member
