@@ -38,11 +38,11 @@ const event = {
 		];
 
 		await Promise.all([
-			channel.send({
-				content: banned
+			channel.send(
+				(banned
 					? bans[Math.floor(Math.random() * bans.length)]
-					: byes[Math.floor(Math.random() * byes.length)],
-			}),
+					: byes[Math.floor(Math.random() * byes.length)]) || "",
+			),
 			getThreadFromMember(member).then(async (thread) => {
 				if (thread) closeModmail(thread, member.user, "Member left");
 			}),

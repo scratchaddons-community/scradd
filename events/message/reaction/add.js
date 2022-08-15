@@ -30,7 +30,9 @@ const event = {
 		if (emoji.name && !badWordsAllowed(message.channel)) {
 			const censored = censor(emoji.name);
 			if (censored) {
-				await message.channel.send({ content: `${CONSTANTS.emojis.statuses.no} ${user.toString()}, language!` });
+				await message.channel.send(
+					`${CONSTANTS.emojis.statuses.no} ${user.toString()}, language!`,
+				);
 				await warn(
 					user,
 					`Watch your language!`,

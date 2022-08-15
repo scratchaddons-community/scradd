@@ -14,9 +14,9 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const content = interaction.options.getString("message", true);
-
-		const message = await interaction.channel?.send({ content });
+		const message = await interaction.channel?.send(
+			interaction.options.getString("message", true),
+		);
 
 		if (message) {
 			await Promise.all([

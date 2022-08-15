@@ -193,9 +193,7 @@ const event = {
 					Math.round(mentions / 5),
 					message.content,
 				),
-				message.reply({
-					content: CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!",
-				}),
+				message.reply(CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!"),
 			);
 		}
 

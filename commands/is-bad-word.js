@@ -18,7 +18,6 @@ const info = {
 			await interaction.reply({
 				ephemeral: true,
 				content:
-
 					`⚠ **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
 					`Posting that text would give you **${result.strikes} strike${
 						result.strikes === 1 ? "" : "s"

@@ -1077,11 +1077,11 @@ const info = {
 							embeds: [new EmbedBuilder(oldMessage.embeds[0]?.toJSON())],
 						});
 
-						await oldMessage.reply({
-							content: `🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
+						await oldMessage.reply(
+							`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
 								manifest.version_name || manifest.version
 							})`,
-						});
+						);
 
 						CURRENTLY_PLAYING.delete(interaction.user.id);
 
@@ -1187,7 +1187,7 @@ const info = {
 							if (buttonInteraction.customId.startsWith("end.")) {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
 								await Promise.all([
-									buttonInteraction.reply({ content: `Ended the game` }),
+									buttonInteraction.reply(`Ended the game`),
 									interaction.editReply({
 										components: disableComponents(message.components),
 
@@ -1350,7 +1350,9 @@ const info = {
 							),
 						],
 
-						content: `<:addon:1008842100764332142> Your addon is **${escapeMarkdown(foundAddon.name)}**!`,
+						content: `<:addon:1008842100764332142> Your addon is **${escapeMarkdown(
+							foundAddon.name,
+						)}**!`,
 
 						embeds: [
 							new EmbedBuilder()
@@ -1591,9 +1593,9 @@ const info = {
 						}
 
 						if (componentInteraction.customId.startsWith("end.")) {
-							await componentInteraction.reply({
-								content: `😦 Why did you quit? That's no fun! PS, the addon I was thinking of was ${addon.name}.`,
-							});
+							await componentInteraction.reply(
+								`😦 Why did you quit? That's no fun! (PS, the addon I was thinking of was **${addon.name}**.)`,
+							);
 
 							collector.stop();
 
@@ -1791,6 +1793,7 @@ export async function guessAddon(interaction) {
 	if (!item || score > 0.3) {
 		await interaction.reply({
 			content: `${CONSTANTS.emojis.statuses.no} I couldn’t find the **${query}** addon!`,
+			ephemeral: true,
 		});
 		return;
 	}
@@ -1820,9 +1823,9 @@ export async function guessAddon(interaction) {
 	if (item.id !== game.addon.id) {
 		await Promise.all([
 			editPromise,
-			interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Nope, the addon isn’t **${item.name}**!`,
-			}),
+			interaction.reply(
+				`${CONSTANTS.emojis.statuses.no} Nope, the addon isn’t **${item.name}**…`,
+			),
 		]);
 		return;
 	}

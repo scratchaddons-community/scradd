@@ -183,11 +183,10 @@ export async function automodMessage(message) {
 				bad.language,
 				"Sent message with words:\n" + bad.words.language.join("\n"),
 			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
+			message.channel.send(
+				CONSTANTS.emojis.statuses.no +
 					` ${(message.interaction?.user || message.author).toString()}, language!`,
-			}),
+			),
 		);
 	}
 	if (typeof bad.invites === "number") {
@@ -198,13 +197,12 @@ export async function automodMessage(message) {
 				bad.invites,
 				bad.words.invites.join("\n"),
 			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
+			message.channel.send(
+				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
 					).toString()}, only post invite links in <#806624037224185886>!`,
-			}),
+			),
 		);
 	}
 
@@ -227,13 +225,12 @@ export async function automodMessage(message) {
 				+badAnimatedEmojis,
 				message.content,
 			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
+			message.channel.send(
+				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
 					).toString()}, lay off on the animated emojis please!`,
-			}),
+			),
 		);
 	}
 	if (typeof bad.bots === "number") {
@@ -244,13 +241,12 @@ export async function automodMessage(message) {
 				bad.bots,
 				bad.words.bots.join("\n"),
 			),
-			message.channel.send({
-				content:
-					CONSTANTS.emojis.statuses.no +
+			message.channel.send(
+				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
 					).toString()}, bot invites go to <#806624037224185886>!`,
-			}),
+			),
 		);
 	}
 
@@ -390,11 +386,10 @@ export async function changeNickname(member, strike = true) {
 			strike
 				? warn(member, "Watch your language!", censored.strikes, member.displayName)
 				: member
-						.send({
-							content:
-								CONSTANTS.emojis.statuses.no +
+						.send(
+							CONSTANTS.emojis.statuses.no +
 								" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
-						})
+						)
 						.catch(() => {}),
 			setNickname(member, pingablify(censored.censored)),
 			removeDuplicateNicknames(member),
@@ -408,9 +403,9 @@ export async function changeNickname(member, strike = true) {
 		await Promise.all([
 			setNickname(member, pingablified),
 			member
-				.send({
-					content: `⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
-				})
+				.send(
+					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
+				)
 				.catch(() => {}),
 			removeDuplicateNicknames(member),
 		]);
