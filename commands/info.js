@@ -37,7 +37,7 @@ async function getRole(roleId, client) {
 	return joinWithAnd(members);
 }
 
-const BLOB_ROOT = CONSTANTS.repos.scradd.root + "/blob/" + CONSTANTS.repos.scradd.branch;
+const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
 
 /**
  * @type {{
@@ -148,7 +148,7 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			`I am **open-source**! The source code is available [**on GitHub**](${CONSTANTS.repos.scradd.root}).`,
+			`I am **open-source**! The source code is available [**on GitHub**](${CONSTANTS.urls.scraddRepo}).`,
 
 		emoji: "💻",
 		name: "Source Code",

@@ -8,6 +8,7 @@ import logError from "../../lib/logError.js";
 import { importScripts } from "../../lib/files.js";
 import path from "path";
 import url from "url";
+import { guessAddon } from "../../commands/guess-addon.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -30,6 +31,11 @@ const event = {
 				interaction.member,
 			);
 			return;
+		}
+		if (interaction.isModalSubmit()) {
+			if (interaction.customId.startsWith("guessModal.")) {
+				return await guessAddon(interaction);
+			}
 		}
 		if (!interaction.isChatInputCommand()) return;
 		try {
