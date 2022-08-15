@@ -12,7 +12,7 @@ dotenv.config();
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const client = new Client({
-	allowedMentions: { parse: ["users"], roles: [] },
+	allowedMentions: { parse: ["users"], roles: [], repliedUser: true },
 
 	intents: [
 		GatewayIntentBits.Guilds,

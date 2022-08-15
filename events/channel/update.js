@@ -90,7 +90,7 @@ const event = {
 		)
 			oldChannel.videoQualityMode !== newChannel.videoQualityMode &&
 				edits.push(
-					`'s video quality set to ${
+					`’s video quality set to ${
 						{
 							[VideoQualityMode.Auto]: "Auto",
 							[VideoQualityMode.Full]: "720p",

@@ -15,7 +15,7 @@ const info = {
 
 	async interaction(interaction) {
 		await cleanListeners();
-		await interaction.reply("Killing bot...");
+		await interaction.reply("Killing bot…");
 		await logError(
 			new AbortError(interaction.user.tag + " is killing the bot"),
 			"interactionCreate",

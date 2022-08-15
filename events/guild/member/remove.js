@@ -29,7 +29,7 @@ const event = {
 
 		const bans = [
 			`Oof… **${member.user.username}** got banned…`,
-			`There’s no turning back for the banned **${member.user.username}**...`,
+			`There’s no turning back for the banned **${member.user.username}**…`,
 			`Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
 			`Oops, **${member.user.username}** angered the mods and was banned!`,
 			`**${member.user.username}** broke the rules and took an L`,

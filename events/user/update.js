@@ -14,7 +14,7 @@ const event = {
 		if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
 			logs.push(
 				`changed their avatar from <${oldUser.displayAvatarURL()}> to <${newUser.displayAvatarURL()}>`,
-			); // TODO: it'll be 404
+			); // TODO: it’ll be 404
 		}
 
 		await Promise.all(
