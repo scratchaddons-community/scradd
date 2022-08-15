@@ -26,7 +26,7 @@ const event = {
 		if (oldEvent.image !== newEvent.image)
 			logs.push(
 				`’s image changed from <${oldEvent.coverImageURL()}> to <${newEvent.coverImageURL()}>`,
-			); //TODO: it'll be 404
+			); //TODO: it’ll be 404
 
 		if (
 			oldEvent.scheduledStartAt?.valueOf() !== newEvent.scheduledStartAt?.valueOf() ||
