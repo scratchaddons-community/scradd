@@ -6,16 +6,20 @@ import {
 	EmbedBuilder,
 	escapeMarkdown,
 	ButtonStyle,
-	MessageType,
 	ComponentType,
 	GuildMember,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	InteractionCollector,
+	BaseInteraction,
 } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../lib/text.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder, ModalActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/message.js";
 import addonCommandInfo from "./addon.js";
 
@@ -29,8 +33,20 @@ const fuse = new Fuse(addons, {
 	keys: [
 		{ name: "id", weight: 1 },
 		{ name: "name", weight: 1 },
+		{ name: "description", weight: 2 },
 	],
 });
+const commandMarkdown = async (/** @type {BaseInteraction} */ interaction) =>
+	`\n\n*Run the </addon:${
+		(
+			await interaction.client.application?.commands.fetch({
+				guildId:
+					addonCommandInfo.dm && process.env.NODE_ENV === "production"
+						? undefined
+						: interaction.guild?.id,
+			})
+		)?.find((command) => command.name === "addon")?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
+	}> command for more information about this addon!*`;
 
 export const GROUP_NAMES = /** @type {const} */ ([
 	"Addon name",
@@ -818,6 +834,18 @@ const questions = Object.values(questionsByAddon)
 
 const BULLET_POINT = CONSTANTS.footerSeperator.trim();
 
+/**
+ * @type {{
+ * 	[key: string]:
+ * 		| undefined
+ * 		| {
+ * 				collector: InteractionCollector<import("discord.js").MappedInteractionTypes[import("discord.js").MessageComponentType]>;
+ * 				addon: { id: string } & import("../types/addonManifest").default;
+ * 		  };
+ * }}
+ */
+const games = {};
+
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
@@ -834,20 +862,6 @@ const info = {
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;
 		const command = interaction.options.getSubcommand(true);
-
-		const addonCommand = (
-			await interaction.client.application?.commands.fetch({
-				guildId:
-					addonCommandInfo.dm && process.env.NODE_ENV === "production"
-						? undefined
-						: interaction.guild?.id,
-			})
-		)?.find((command) => command.name === "addon");
-		const commandMarkdown = addonCommand
-			? `\n\n*Run the </addon:${
-					addonCommand.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
-			  }> command for more information about this addon!*`
-			: addonCommand;
 
 		switch (command) {
 			case "bot": {
@@ -1351,7 +1365,7 @@ const info = {
 											.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
 											?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 											.join("\n") || ""
-									}${commandMarkdown}`,
+									}${await commandMarkdown(interaction)}`,
 								)
 								.setAuthor({
 									iconURL: (interaction.member instanceof GuildMember
@@ -1499,12 +1513,16 @@ const info = {
 						new MessageActionRowBuilder().addComponents([
 							new ButtonBuilder()
 								.setLabel("Give up")
-								.setStyle(ButtonStyle.Secondary)
+								.setStyle(ButtonStyle.Danger)
 								.setCustomId(generateHash("end")),
 							new ButtonBuilder()
 								.setLabel("Hint")
 								.setStyle(ButtonStyle.Secondary)
 								.setCustomId(generateHash("hint")),
+							new ButtonBuilder()
+								.setLabel("Guess")
+								.setStyle(ButtonStyle.Success)
+								.setCustomId(generateHash("guess")),
 						]),
 					],
 
@@ -1533,120 +1551,14 @@ const info = {
 
 				CURRENTLY_PLAYING.set(interaction.user.id, message.url);
 
-				const componentCollector = message.createMessageComponentCollector({
+				const collector = message.createMessageComponentCollector({
 					filter: (componentInteraction) =>
 						componentInteraction.user.id === interaction.user.id,
 					time: COLLECTOR_TIME,
 				});
+				games[interaction.user.id] = { addon, collector };
 
-				const messageCollector = message.channel
-					.createMessageCollector({
-						filter: (collectedMessage) =>
-							collectedMessage.author.id === interaction.user.id &&
-							collectedMessage.type === MessageType.Reply &&
-							collectedMessage.reference?.messageId === message.id,
-					})
-					.on("collect", async (collectedMessage) => {
-						const { item, score = 2 } = fuse.search(collectedMessage.content)[0] ?? {};
-
-						componentCollector.resetTimer();
-						messageCollector.resetTimer();
-
-						if (!item || score > 1) {
-							await collectedMessage.reply({
-								content: `${interaction.user.toString()} I couldn’t find that addon!`,
-							});
-							return;
-						}
-
-						const reply = await interaction.fetchReply();
-						const editPromise = interaction.editReply({
-							embeds: [
-								new EmbedBuilder(reply.embeds[0]?.toJSON())
-									.setDescription(
-										`${
-											reply.embeds[0]?.description || ""
-										}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
-											item.id === addon.id ? "Yes" : "No"
-										}**`.trim(),
-									)
-									.setFooter({
-										text:
-											reply.embeds[0]?.footer?.text.replace(
-												/\d+ questions?/,
-												(previousCount) =>
-													`${
-														1 + +(previousCount.split(" ")[0] || 0)
-													} question${
-														previousCount === "0 questions" ? "" : "s"
-													}`,
-											) || "",
-									}),
-							],
-						});
-
-						if (item.id !== addon.id) {
-							await Promise.all([
-								editPromise,
-								collectedMessage.reply({
-									content: `${interaction.user.toString()}, that’s not the right addon!`,
-								}),
-							]);
-							return;
-						}
-
-						await Promise.all([
-							editPromise,
-							collectedMessage.reply({
-								content: `${interaction.user.toString()}, the addon *is* **${escapeMarkdown(
-									addon.name,
-								)}**! You got it right!`,
-
-								embeds: [
-									new EmbedBuilder()
-										.setTitle(addon.name)
-										.setDescription(
-											`${
-												Object.entries(questionsByAddon)
-													.find(([id]) => id === addon.id)?.[1]
-													?.map(
-														({ statement }) =>
-															`${BULLET_POINT} ${statement}`,
-													)
-													.join("\n") || ""
-											}${commandMarkdown}`,
-										)
-										.setAuthor({
-											iconURL: (interaction.member instanceof GuildMember
-												? interaction.member
-												: interaction.user
-											).displayAvatarURL(),
-
-											name:
-												interaction.member instanceof GuildMember
-													? interaction.member.displayName
-													: interaction.user.username,
-										})
-										.setColor(CONSTANTS.themeColor)
-										.setThumbnail(
-											`${CONSTANTS.urls.addonImageRoot}/${encodeURI(
-												addon.id,
-											)}.png`,
-										)
-										.setURL(
-											`${
-												CONSTANTS.urls.settingsPage
-											}#addon-${encodeURIComponent(addon.id)}`,
-										),
-								],
-							}),
-						]);
-
-						messageCollector.stop();
-						componentCollector.stop("GOT_CORRECT_ANSWER");
-					});
-
-				componentCollector
+				collector
 					.on("collect", async (componentInteraction) => {
 						if (componentInteraction.customId.startsWith("hint.")) {
 							const hint = questionsByAddon[addon.id]
@@ -1664,8 +1576,7 @@ const info = {
 
 							if (hint) await answerQuestion(hint.userAsking, hint.group);
 
-							componentCollector.resetTimer();
-							messageCollector.resetTimer();
+							collector.resetTimer();
 
 							return;
 						}
@@ -1677,8 +1588,26 @@ const info = {
 								}.`,
 							});
 
-							componentCollector.stop();
-							messageCollector.stop();
+							collector.stop();
+
+							return;
+						}
+
+						if (componentInteraction.customId.startsWith("guess.")) {
+							await componentInteraction.showModal(
+								new ModalBuilder()
+									.setTitle("Guess the addon!")
+									.setCustomId(generateHash("guessModal"))
+									.addComponents(
+										new ModalActionRowBuilder().addComponents(
+											new TextInputBuilder()
+												.setCustomId("addon")
+												.setLabel("Which addon do you think it is?")
+												.setRequired(true)
+												.setStyle(TextInputStyle.Short),
+										),
+									),
+							);
 
 							return;
 						}
@@ -1696,19 +1625,18 @@ const info = {
 
 						await answerQuestion(question, split[0]);
 
-						componentCollector.resetTimer();
-						messageCollector.resetTimer();
+						collector.resetTimer();
 					})
 					.on("end", async (_, reason) => {
 						CURRENTLY_PLAYING.delete(interaction.user.id);
+						games[interaction.user.id] = undefined;
 
 						const reply = await interaction.fetchReply();
 						await Promise.all([
-							reason === "GOT_CORRECT_ANSWER"
-								? Promise.resolve()
-								: reply.reply(
-										`${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
-								  ),
+							reason !== "GOT_CORRECT_ANSWER" &&
+								reply.reply(
+									`${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
+								),
 							interaction.editReply({
 								components: disableComponents(reply.components),
 							}),
@@ -1786,6 +1714,7 @@ const info = {
 					);
 
 					const reply = await interaction.fetchReply();
+					const buttons = reply.components.at(-1);
 
 					const foundInAddon = questionsByAddon[addon?.id || ""]?.find?.(
 						({ userAsking }) => userAsking === question,
@@ -1795,16 +1724,7 @@ const info = {
 						components: [
 							selectGroupButton(doneGroups, groupName),
 							...(groupSelects.length > 0 ? groupSelects : []),
-							new MessageActionRowBuilder().setComponents([
-								new ButtonBuilder()
-									.setLabel("Give up")
-									.setStyle(ButtonStyle.Secondary)
-									.setCustomId(generateHash("end")),
-								new ButtonBuilder()
-									.setLabel("Hint")
-									.setStyle(ButtonStyle.Secondary)
-									.setCustomId(generateHash("hint")),
-							]),
+							...(buttons ? [buttons] : []),
 						],
 
 						embeds: question
@@ -1850,3 +1770,95 @@ const info = {
 };
 
 export default info;
+
+/** @param {import("discord.js").ModalSubmitInteraction} interaction */
+export async function guessAddon(interaction) {
+	const game = games[interaction.user.id];
+	if (!game) return;
+
+	const query = interaction.fields.getTextInputValue("addon");
+	const { item, score = 1 } = fuse.search(query)[0] ?? {};
+
+	game.collector.resetTimer();
+
+	if (!item || score > 0.3) {
+		await interaction.reply({
+			content: `${interaction.user.toString()} I couldn’t find the **${query}** addon!`,
+		});
+		return;
+	}
+	const editPromise = interaction.message?.edit({
+		embeds: [
+			new EmbedBuilder(interaction.message.embeds[0]?.toJSON())
+				.setDescription(
+					`${
+						interaction.message.embeds[0]?.description || ""
+					}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
+						item.id === game.addon.id ? "Yes" : "No"
+					}**`.trim(),
+				)
+				.setFooter({
+					text:
+						interaction.message.embeds[0]?.footer?.text.replace(
+							/\d+ questions?/,
+							(previousCount) =>
+								`${1 + +(previousCount.split(" ")[0] || 0)} question${
+									previousCount === "0 questions" ? "" : "s"
+								}`,
+						) || "",
+				}),
+		],
+	});
+
+	if (item.id !== game.addon.id) {
+		await Promise.all([
+			editPromise,
+			interaction.reply({
+				content: `${interaction.user.toString()}, the addon isn’t **${item.name}**!`,
+			}),
+		]);
+		return;
+	}
+
+	await Promise.all([
+		editPromise,
+		interaction.reply({
+			content: `${interaction.user.toString()}, the addon *is* **${escapeMarkdown(
+				game.addon.name,
+			)}**! You got it right!`,
+
+			embeds: [
+				new EmbedBuilder()
+					.setTitle(game.addon.name)
+					.setDescription(
+						`${
+							Object.entries(questionsByAddon)
+								.find(([id]) => id === game.addon.id)?.[1]
+								?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+								.join("\n") || ""
+						}${await commandMarkdown(interaction)}`,
+					)
+					.setAuthor({
+						iconURL: (interaction.member instanceof GuildMember
+							? interaction.member
+							: interaction.user
+						).displayAvatarURL(),
+
+						name:
+							interaction.member instanceof GuildMember
+								? interaction.member.displayName
+								: interaction.user.username,
+					})
+					.setColor(CONSTANTS.themeColor)
+					.setThumbnail(
+						`${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
+					)
+					.setURL(
+						`${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(game.addon.id)}`,
+					),
+			],
+		}),
+	]);
+
+	game.collector.stop("GOT_CORRECT_ANSWER");
+}
