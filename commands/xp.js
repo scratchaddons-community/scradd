@@ -55,20 +55,20 @@ const info = {
 							})
 							.setTitle("XP Rank")
 							.addFields(
-								{ name: "Level", value: level.toLocaleString(), inline: true },
-								{ name: "XP", value: xp.toLocaleString(), inline: true },
+								{ name: "📊 Level", value: level.toLocaleString(), inline: true },
+								{ name: "🔢 XP", value: xp.toLocaleString(), inline: true },
 								{
 									name: CONSTANTS.zeroWidthSpace,
 									value: CONSTANTS.zeroWidthSpace,
 									inline: true,
 								},
 								{
-									name: "Next level",
+									name: "⬆ Next level",
 									value: nextLevel.toLocaleString(),
 									inline: true,
 								},
 								{
-									name: "Total XP Required",
+									name: "💯 Total XP Required",
 									value: xpForNextLevel.toLocaleString(),
 									inline: true,
 								},
@@ -78,12 +78,12 @@ const info = {
 									inline: true,
 								},
 								{
-									name: "Remaining XP",
+									name: "✨ Remaining XP",
 									value: (xpForNextLevel - xp).toLocaleString(),
 									inline: true,
 								},
 								{
-									name: "Progress",
+									name: "<:percent:1009144273331040296> Progress",
 									value: progress.toLocaleString([], {
 										maximumFractionDigits: 2,
 										style: "percent",

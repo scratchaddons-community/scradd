@@ -146,8 +146,7 @@ const info = {
 		const nextButton = new ButtonBuilder()
 			.setLabel("Next")
 			.setCustomId(customId)
-			.setStyle(ButtonStyle.Secondary)
-			.setEmoji("➡");
+			.setStyle(ButtonStyle.Secondary);
 
 		let source = (await fetchedMessages.next()).value;
 		/**

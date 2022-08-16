@@ -181,16 +181,16 @@ export async function getWarns(reply, filter, interactor) {
 				.setTimestamp(message.createdAt);
 
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
-			embed.addFields({ name: "Strikes", value: strikes, inline: true });
+			embed.addFields({ name: "⚠ Strikes", value: strikes, inline: true });
 
 			if (mod && interactor.roles.resolve(process.env.MODERATOR_ROLE || ""))
-				embed.addFields({ name: "Moderator", value: mod.toString(), inline: true });
+				embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
 
 			if (user)
-				embed.addFields({ name: "Target user", value: user.toString(), inline: true });
+				embed.addFields({ name: "🫂 Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
-				embed.addFields({ name: "Expirery", value: time(expiresAt, "R"), inline: true });
+				embed.addFields({ name: "⏲ Expirery", value: time(expiresAt, "R"), inline: true });
 
 			await reply({ ephemeral: true, embeds: [embed] });
 		}

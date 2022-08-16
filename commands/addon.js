@@ -133,7 +133,7 @@ const info = {
 
 			if (credits)
 				embed.addFields({
-					name: "Contributors",
+					name: "🫂 Contributors",
 					value: escapeMarkdown(credits),
 					inline: true,
 				});
@@ -143,14 +143,14 @@ const info = {
 					embed.data.description +
 						"\n" +
 						"\n" +
-						"**This addon may require additional permissions to be granted in order to function.**",
+						"**⚠ This addon may require additional permissions to be granted in order to function.**",
 				);
 
 			embed.addFields(
-				{ inline: true, name: "Group", value: escapeMarkdown(group) },
+				{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
 				{
 					inline: true,
-					name: "Version added",
+					name: "📝 Version added",
 					value: escapeMarkdown(
 						"v" +
 							addon.versionAdded +

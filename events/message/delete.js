@@ -28,7 +28,6 @@ const event = {
 				components: [
 					new MessageActionRowBuilder().addComponents(
 						new ButtonBuilder()
-							.setEmoji("👀")
 							.setLabel("View Context")
 							.setStyle(ButtonStyle.Link)
 							.setURL(message.url),

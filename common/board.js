@@ -99,7 +99,6 @@ export async function postMessageToBoard(message) {
 		.setTimestamp(message.createdAt);
 
 	const button = new ButtonBuilder()
-		.setEmoji("👀")
 		.setLabel("View Context")
 		.setStyle(ButtonStyle.Link)
 		.setURL(message.url);

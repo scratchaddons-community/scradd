@@ -1142,7 +1142,7 @@ const info = {
 											? interaction.member.displayName
 											: interaction.user.username,
 								})
-								.setTitle("Think of an addon…")
+								.setTitle("🤔 Think of an addon…")
 								.setDescription(
 									(oldMessage?.embeds[0]?.description
 										? `${
