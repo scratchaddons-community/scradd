@@ -31,6 +31,7 @@ const info = {
 
 		const database = (await getDatabases(["xp"], interaction.guild)).xp;
 		const allXp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
+		const top = allXp.sort((one, two) => two.xp - one.xp);
 
 		switch (command) {
 			case "rank": {
@@ -45,6 +46,7 @@ const info = {
 				const xpForPreviousLevel = getXpForLevel(level);
 				const increment = xpForNextLevel - xpForPreviousLevel;
 				const progress = (xp - xpForPreviousLevel) / increment;
+				const rank = top.findIndex((info) => info.user === user.id) + 1;
 				interaction.reply({
 					embeds: [
 						new EmbedBuilder()
@@ -101,16 +103,20 @@ const info = {
 								},
 							)
 							.setFooter({
-								text: `Ranked ${
-									(1).toLocaleString() + "/" + (122).toLocaleString()
-								}${CONSTANTS.footerSeperator}View the leaderboard with /xp top`,
+								text:
+									(rank
+										? `Ranked ${
+												rank.toLocaleString() +
+												"/" +
+												top.length.toLocaleString()
+										  }${CONSTANTS.footerSeperator}`
+										: "") + `View the leaderboard with /xp top`,
 							}),
 					],
 				});
 				return;
 			}
 			case "top": {
-				const top = allXp.sort((one, two) => two.xp - one.xp);
 				await paginate(
 					top,
 					(xp) => {
