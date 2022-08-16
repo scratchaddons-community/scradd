@@ -49,7 +49,7 @@ const event = {
 					newState.member &&
 					log(
 						newState.guild,
-						`Member ${newState.member.toString()} ` + edit + `!`,
+						`🔊 Member ${newState.member.toString()} ` + edit + `!`,
 						"voice",
 					),
 			),

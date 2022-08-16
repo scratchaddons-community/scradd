@@ -43,7 +43,7 @@ const event = {
 
 		await Promise.all(
 			logs.map((edit) =>
-				log(newRole.guild, `Role ${newRole.toString()} ` + edit + `!`, "server"),
+				log(newRole.guild, `✏ Role ${newRole.toString()} ` + edit + `!`, "server"),
 			),
 		);
 	},

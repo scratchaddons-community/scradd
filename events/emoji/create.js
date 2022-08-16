@@ -6,7 +6,7 @@ const event = {
 		if (emoji.guild.id !== process.env.GUILD_ID) return;
 		await log(
 			emoji.guild,
-			`Emoji ${emoji.toString()} created${
+			`🙂 Emoji ${emoji.toString()} created${
 				emoji.author ? " by " + emoji.author.toString() : ""
 			}!`,
 			"messages",

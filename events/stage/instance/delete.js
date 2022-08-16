@@ -9,7 +9,7 @@ const event = {
 		const guild = instance.guild || (await this.guilds.fetch(instance.guildId));
 		if (guild.id !== process.env.GUILD_ID || ALREADY_ENDED.has(instance.id)) return;
 		ALREADY_ENDED.add(instance.id);
-		await log(guild, `Stage ${instance.channel?.toString()} is no longer live!`, "voice");
+		await log(guild, `📷 Stage ${instance.channel?.toString()} is no longer live!`, "voice");
 	},
 };
 

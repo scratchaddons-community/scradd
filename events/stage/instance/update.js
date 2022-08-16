@@ -14,7 +14,7 @@ const event = {
 
 		await Promise.all(
 			logs.map((edit) =>
-				log(guild, `Stage ${newInstance.channel?.toString()}` + edit + `!`, "voice"),
+				log(guild, `✏ Stage ${newInstance.channel?.toString()}` + edit + `!`, "voice"),
 			),
 		);
 	},

@@ -100,7 +100,7 @@ const event = {
 
 		await Promise.all(
 			edits.map((edit) =>
-				log(newChannel.guild, `Channel ${newChannel.toString()}${edit}!`, "channels"),
+				log(newChannel.guild, `✏ Channel ${newChannel.toString()}${edit}!`, "channels"),
 			),
 		);
 	},

@@ -41,7 +41,7 @@ export async function getData(message, sendLog = false) {
 					message.guild &&
 					log(
 						message.guild,
-						`Member <@${user}> lost ${strikes} strike${
+						`${CONSTANTS.emojis.statuses.yes} Member <@${user}> lost ${strikes} strike${
 							strikes === 1 ? "" : "s"
 						} from ${message.guild.members.me?.toString()}!`,
 						"members",
@@ -90,7 +90,7 @@ export default async function warn(user, reason, strikes, context) {
 
 	const logMessage = await log(
 		guild,
-		`Member ${user.toString()} ` +
+		`${actualStrikes > 0 ? CONSTANTS.emojis.statuses.yes : "⚠"} Member ${user.toString()} ` +
 			(actualStrikes
 				? `${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(actualStrikes)} strike${
 						Math.abs(actualStrikes) === 1 ? "" : "s"

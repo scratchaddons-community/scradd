@@ -14,7 +14,7 @@ const event = {
 		const logs = [];
 		if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 			logs.push(
-				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				`📢 Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
 					newMessage.flags.has("Crossposted") ? "" : "un"
 				}published`,
 			);
@@ -22,7 +22,7 @@ const event = {
 		if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
 			log(
 				newMessage.guild,
-				`Embeds ${
+				`🗄 Embeds ${
 					newMessage.flags.has("SuppressEmbeds") ? "hidden" : "shown"
 				} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 					"!",
@@ -32,7 +32,7 @@ const event = {
 		}
 		if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
 			logs.push(
-				`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				`📌 Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
 					newMessage.pinned ? "" : "un"
 				}pinned`,
 			);
@@ -73,7 +73,7 @@ const event = {
 			if (files.length)
 				log(
 					newMessage.guild,
-					`Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,
+					`✏ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,
 					"messages",
 					{ files },
 				);

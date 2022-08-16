@@ -22,7 +22,7 @@ const event = {
 			logs.map(
 				(edit) =>
 					newSticker.guild &&
-					log(newSticker.guild, `Sticker ${oldSticker.name}` + edit + `!`, "messages"),
+					log(newSticker.guild, `✏ Sticker ${oldSticker.name}` + edit + `!`, "messages"),
 			),
 		);
 	},

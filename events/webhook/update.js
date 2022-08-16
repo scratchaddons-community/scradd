@@ -5,7 +5,7 @@ const event = {
 	async event(channel) {
 		if (channel.guild.id !== process.env.GUILD_ID) return;
 
-		await log(channel.guild, `Webhooks updated in ${channel.toString()}!`, "voice");
+		await log(channel.guild, `🌐 Webhooks updated in ${channel.toString()}!`, "voice");
 	},
 };
 

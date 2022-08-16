@@ -46,7 +46,7 @@ const event = {
 		}
 
 		await Promise.all(
-			logs.map((edit) => log(guild, `Event ${oldEvent.name}${edit}!`, "server")),
+			logs.map((edit) => log(guild, `📆 Event ${oldEvent.name}${edit}!`, "server")),
 		);
 	},
 };

@@ -4,7 +4,7 @@ import log from "../../common/moderation/logging.js";
 const event = {
 	async event(role) {
 		if (role.guild.id !== process.env.GUILD_ID) return;
-		await log(role.guild, `Role @${role.name} deleted! (ID ${role.id})`, "server");
+		await log(role.guild, `🗄 Role @${role.name} deleted! (ID ${role.id})`, "server");
 	},
 };
 

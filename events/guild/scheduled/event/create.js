@@ -12,7 +12,7 @@ const event = {
 
 		await log(
 			guild,
-			`Event ${event.name} scheduled${
+			`🗓 Event ${event.name} scheduled${
 				start || end
 					? ` for ${time(start || end || new Date())}${
 							end && start ? "-" + time(end) : ""

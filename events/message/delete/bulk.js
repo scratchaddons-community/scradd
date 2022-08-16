@@ -26,7 +26,7 @@ const event = {
 
 		log(
 			last.guild,
-			`${messages.size} messages in ${channel.toString()} bulk deleted!`,
+			`💥 ${messages.size} messages in ${channel.toString()} bulk deleted!`,
 			"messages",
 			{
 				files: [

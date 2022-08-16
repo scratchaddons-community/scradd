@@ -207,7 +207,7 @@ const event = {
 			);
 		}
 
-		await Promise.all(logs.map((edit) => log(newGuild, edit + `!`, "server")));
+		await Promise.all(logs.map((edit) => log(newGuild, "✏" + edit + `!`, "server")));
 	},
 };
 

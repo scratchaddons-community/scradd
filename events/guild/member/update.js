@@ -33,7 +33,7 @@ const event = {
 		}
 		await Promise.all(
 			logs.map((edit) =>
-				log(newMember.guild, `Member ${newMember.toString()}${edit}!`, "members"),
+				log(newMember.guild, `🫂 Member ${newMember.toString()}${edit}!`, "members"),
 			),
 		);
 

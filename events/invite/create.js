@@ -7,7 +7,7 @@ const event = {
 		if (!(invite.guild instanceof Guild) || invite.guild.id !== process.env.GUILD_ID) return;
 		await log(
 			invite.guild,
-			`${invite.temporary ? "Temporary invite" : "Invite"} ${
+			`➕ ${invite.temporary ? "Temporary invite" : "Invite"} ${
 				invite.code
 			} for ${invite.channel?.toString()} created${
 				invite.inviter ? ` by ${invite.inviter.toString()}` : ""

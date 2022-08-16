@@ -18,7 +18,7 @@ const event = {
 
 		await log(
 			message.guild,
-			`${message.partial ? "Unknown message" : "Message"}${
+			`🗑 ${message.partial ? "Unknown message" : "Message"}${
 				message.author ? " by " + message.author.toString() : ""
 			} in ${message.channel.toString()} deleted!`,
 			"messages",

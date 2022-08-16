@@ -6,7 +6,7 @@ const event = {
 		const guild = event.guild || (await this.guilds.fetch(event.guildId));
 		if (guild.id !== process.env.GUILD_ID) return;
 
-		await log(guild, `Event ${event.name} removed!`, "server");
+		await log(guild, `📅 Event ${event.name} removed!`, "server");
 	},
 };
 

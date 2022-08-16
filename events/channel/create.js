@@ -7,7 +7,7 @@ const event = {
 		if (channel.guild.id !== process.env.GUILD_ID) return;
 		await log(
 			channel.guild,
-			`${
+			`📃 ${
 				{
 					[ChannelType.GuildText]: "Text",
 					[ChannelType.GuildVoice]: "Voice",

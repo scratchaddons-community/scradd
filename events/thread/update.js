@@ -61,7 +61,7 @@ const event = {
 					newThread.guild &&
 					log(
 						newThread.guild,
-						`Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`,
+						`📃 Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`,
 						"channels",
 					),
 			),

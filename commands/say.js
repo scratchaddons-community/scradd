@@ -23,7 +23,7 @@ const info = {
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				log(
 					interaction.guild,
-					`${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
+					`💬 ${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
 					"messages",
 					{
 						components: [
