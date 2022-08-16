@@ -7,8 +7,14 @@ import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 const event = {
 	async event(message) {
 		if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
-		const content = !message.partial && (await messageToText(message));
-		const { embeds, files } = await extractMessageExtremities(message);
+		const shush =
+			message.partial ||
+			(message.channel.isThread() && message.channel.parent?.id === process.env.LOGS_CHANNEL);
+		
+		const content = !shush && (await messageToText(message));
+		const { embeds, files } = shush
+			? { embeds: [], files: [] }
+			: await extractMessageExtremities(message);
 		if (content)
 			files.unshift(
 				new AttachmentBuilder(Buffer.from(content, "utf-8"), { name: "message.txt" }),
