@@ -75,7 +75,7 @@ const info = {
 							.setTimestamp(interaction.channel.createdAt)
 							.setDescription(reason)
 							.setFooter({
-								text: "While any future messages will reopen this ticket, it is recommended to create a new one instead by using /modmail start.",
+								text: "While any future messages will reopen this ticket, it’s recommended to create a new one instead by using /modmail start.",
 							})
 							.setColor(COLORS.closed),
 					],
@@ -115,7 +115,7 @@ const info = {
 				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
 				if (mailChannel.type !== ChannelType.GuildText)
-					throw new TypeError("Modmail channel is not a text channel");
+					throw new TypeError("Modmail channel isn’t a text channel");
 
 				await generateConfirm(
 					new EmbedBuilder()

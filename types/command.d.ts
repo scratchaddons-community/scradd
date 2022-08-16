@@ -39,20 +39,20 @@ type CommandInfo = {
 			/** Pass `true` to make this a global command. This has the side effect of allowing the command to be used in DMs. */
 			dm?: false;
 			/** A function that processes interactions to this command. */
-			interaction: (
-				interaction: ChatInputCommandInteraction<"raw" | "cached"> & {
-					guild: Guild;
-					guildId: Snowflake;
-					member: APIInteractionGuildMember | GuildMember;
-					memberPermissions: PermissionsBitField;
-					guildLocale: Locale;
-					commandGuildId: Snowflake;
-					get command(): ApplicationCommand<{ guild: GuildResolvable }> | null;
-				},
-			) => Awaitable<void>;
+			interaction: (interaction: GuildInteraction) => Awaitable<void>;
 	  }
 );
 export default CommandInfo;
 export type Command =
 	| SlashCommandSubcommandsOnlyBuilder
 	| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+
+export type GuildInteraction = ChatInputCommandInteraction<"raw" | "cached"> & {
+	guild: Guild;
+	guildId: Snowflake;
+	member: APIInteractionGuildMember | GuildMember;
+	memberPermissions: PermissionsBitField;
+	guildLocale: Locale;
+	commandGuildId: Snowflake;
+	get command(): ApplicationCommand<{ guild: GuildResolvable }> | null;
+};

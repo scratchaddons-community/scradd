@@ -8,7 +8,7 @@ import { truncateText } from "../lib/text.js";
 
 const { SUGGESTION_CHANNEL } = process.env;
 
-if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL is not set in the .env");
+if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL isn’t set in the .env");
 
 /** @type {[string, string][]} */
 export const SUGGESTION_EMOJIS = [
@@ -26,7 +26,7 @@ export const SUGGESTION_EMOJIS = [
 
 /** @type {import("../common/suggest.js").Answer[]} */
 export const ANSWERS = [
-	{ name: "Unanswered", color: Colors.Greyple, description: "This has not yet been answered" },
+	{ name: "Unanswered", color: Colors.Greyple, description: "This hasn’t yet been answered" },
 	{
 		color: Colors.Green,
 		description: "This will probably be added if anyone codes it",
@@ -39,12 +39,12 @@ export const ANSWERS = [
 	},
 	{
 		color: Colors.Red,
-		description: "This is not something we may add for technical reasons",
+		description: "This isn’t something we may add for technical reasons",
 		name: "Impossible",
 	},
 	{
 		color: Colors.LuminousVividPink,
-		description: "This is possible, but it would require lots of code and isn’t worth it",
+		description: "This is possible, but it’d require lots of code and isn’t worth it",
 		name: "Impractical",
 	},
 	{

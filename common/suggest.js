@@ -14,7 +14,7 @@ import CONSTANTS from "./CONSTANTS.js";
 const RATELIMIT_TIMEOUT = 3_000;
 
 export const RATELIMT_MESSAGE =
-	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
+	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
 export const DEFAULT_COLOR = Colors.Greyple;
 
@@ -36,7 +36,7 @@ export default class SuggestionChannel {
 	/**
 	 * Post a message in a suggestion channel.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
 	 * @returns {Promise<false | import("discord.js").Message>} - `false` on errors and the suggestion message on success.
@@ -53,7 +53,7 @@ export default class SuggestionChannel {
 			.setColor(DEFAULT_COLOR)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
-				name: author?.displayName ?? interaction.user.username,
+				name: author.displayName ?? interaction.user.username,
 			})
 			.setTitle(title)
 			.setDescription(data.description)
@@ -95,7 +95,7 @@ export default class SuggestionChannel {
 	/**
 	 * Answer a suggestion.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answer[]} answers - An object that maps answers to colors.
 	 *
@@ -125,13 +125,6 @@ export default class SuggestionChannel {
 			});
 
 			return false;
-		}
-
-		if (interaction.channel.archived) {
-			await interaction.channel.setArchived(
-				false,
-				`Thread answered by ${interaction.user.tag}`,
-			);
 		}
 
 		const promises = [
@@ -164,7 +157,7 @@ export default class SuggestionChannel {
 	/**
 	 * Edit a suggestion.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - Interaction to respond to on errors.
 	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
 	 *
 	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
@@ -181,23 +174,25 @@ export default class SuggestionChannel {
 
 			return false;
 		}
-		if (interaction.channel.archived)
-			await interaction.channel.setArchived(false, "Thread edited");
+
 		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
 
 		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This feedback can not be edited.`,
+				content: `${CONSTANTS.emojis.statuses.no} Cannot edit this feedback.`,
 				ephemeral: true,
 			});
 
 			return false;
 		}
 		const user = await getUserFromSuggestion(starterMessage);
+		if (!(interaction.member instanceof GuildMember))
+			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (interaction.user.id !== user?.id) {
+		const isMod = !!interaction.member.roles.resolve(process.env.MODERATOR_ROLE ?? "");
+		if (interaction.user.id !== user?.id && (!isMod || (isMod && updated.body))) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} You do not have permission to use this command.`,
+				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,
 				ephemeral: true,
 			});
 

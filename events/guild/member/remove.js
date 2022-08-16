@@ -9,7 +9,7 @@ const event = {
 		await log(member.guild, `💨 Member ${member.toString()} left!`, "members");
 		const channel = await member.guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
 		if (!channel?.isTextBased())
-			throw new TypeError("PUBLIC_LOGS_CHANNEL is not a text channel");
+			throw new TypeError("PUBLIC_LOGS_CHANNEL isn’t a text channel");
 
 		const byes = [
 			`😩 Welp… **${member.user.username}** decided to leave… what a shame…`,

@@ -48,7 +48,7 @@ const event = {
 
 		if (
 			newThread.archived &&
-			// @ts-expect-error -- We are trying to tell if the type matches.
+			// @ts-expect-error -- We’re trying to tell if the type matches.
 			(LOG_GROUPS.includes(newThread.name) || newThread.name === DATABASE_THREAD) &&
 			newThread.parent?.id === process.env.LOGS_CHANNEL
 		) {

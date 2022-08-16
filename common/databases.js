@@ -49,7 +49,7 @@ export async function getDatabases(names, guild) {
 				return [
 					name,
 					(databases[name] ||= await thread.send(
-						`**__SCRADD ${name.toUpperCase()} DATABASES__**\n\n*Please do not delete this message. If you do, all ${name.toLowerCase()} information will be reset.*`,
+						`**__SCRADD ${name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${name.toLowerCase()} information will be reset.*`,
 					)),
 				];
 			}),

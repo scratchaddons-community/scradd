@@ -20,7 +20,7 @@ import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
-if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL is not set in the .env");
+if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL isn’t set in the .env");
 
 export const COLORS = { opened: Colors.Gold, closed: Colors.DarkGreen, confirm: Colors.Blurple };
 
@@ -90,7 +90,7 @@ export async function getThreadFromMember(
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
 	if (mailChannel.type !== ChannelType.GuildText)
-		throw new TypeError("Modmail channel is not a text channel");
+		throw new TypeError("Modmail channel isn’t a text channel");
 
 	const { threads } = await mailChannel.threads.fetchActive();
 

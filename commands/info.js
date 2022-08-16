@@ -42,7 +42,7 @@ const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
 /**
  * @type {{
  * 	description(client: Client): import("discord.js").Awaitable<string>;
- * 	edit?: (interaction: import("discord.js").CommandInteraction, Reply: Message) => import("discord.js").Awaitable<string>;
+ * 	edit?: (interaction: import("discord.js").ChatInputCommandInteraction<undefined>, Reply: Message) => import("discord.js").Awaitable<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
@@ -50,7 +50,7 @@ const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
 const OPTIONS = [
 	{
 		description: () =>
-			`Hello! I am **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
+			`Hello! I'm **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
 
 		emoji: "👋",
 		name: "Hello!",
@@ -148,7 +148,7 @@ const OPTIONS = [
 	},
 	{
 		description: () =>
-			`I am **open-source**! The source code is available [**on GitHub**](${CONSTANTS.urls.scraddRepo}).`,
+			`I'm **open-source**! The source code is available [**on GitHub**](${CONSTANTS.urls.scraddRepo}).`,
 
 		emoji: "💻",
 		name: "Source Code",

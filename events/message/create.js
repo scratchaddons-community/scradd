@@ -28,7 +28,7 @@ import { normalize } from "../../lib/text.js";
 
 const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
-if (!GUILD_ID) throw new ReferenceError("GUILD_ID is not set in the .env");
+if (!GUILD_ID) throw new ReferenceError("GUILD_ID isn’t set in the .env");
 
 /** @type {{ [key: string]: import("discord.js").Message[] }} */
 const latestMessages = {};
@@ -52,7 +52,7 @@ const event = {
 			if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 
 			if (mailChannel.type !== ChannelType.GuildText)
-				throw new TypeError("Modmail channel is not a text channel");
+				throw new TypeError("Modmail channel isn’t a text channel");
 
 			const webhooks = await mailChannel.fetchWebhooks();
 			const webhook =
@@ -83,7 +83,7 @@ const event = {
 						.setDescription(
 							`Are you sure you want to send this message to **the ${escapeMessage(
 								mailChannel.guild.name,
-							)} server’s mod team**? This will ping all online mods, so please do not abuse this if you do not have a genuine reason for contacting us.`,
+							)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
 						)
 						.setColor(COLORS.confirm)
 						.setAuthor({

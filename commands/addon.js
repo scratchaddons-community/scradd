@@ -50,7 +50,9 @@ const info = {
 					const note = ("note" in credit ? credit.note : undefined) || "";
 					return credit.link
 						? hyperlink(escapeLinks(credit.name), credit.link, note)
-						: generateTooltip(interaction, credit.name, note);
+						: interaction.channel
+						? generateTooltip(interaction.channel, credit.name, note)
+						: credit.name;
 				}) ?? [],
 			);
 		}
@@ -155,11 +157,15 @@ const info = {
 						"v" +
 							addon.versionAdded +
 							(addon.latestUpdate
-								? ` (${generateTooltip(
-										interaction,
-										lastUpdatedIn,
-										`${addon.latestUpdate?.temporaryNotice}`,
-								  )})`
+								? ` (${
+										interaction.channel
+											? generateTooltip(
+													interaction.channel,
+													lastUpdatedIn,
+													`${addon.latestUpdate?.temporaryNotice}`,
+											  )
+											: lastUpdatedIn
+								  })`
 								: ""),
 					),
 				},

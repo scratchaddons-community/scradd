@@ -5,7 +5,7 @@ import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";
 
 const { BUGS_CHANNEL } = process.env;
 
-if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL is not set in the .env");
+if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL isn’t set in the .env");
 
 /** @type {import("../common/suggest.js").Answer[]} */
 const ANSWERS = [
@@ -23,7 +23,7 @@ const ANSWERS = [
 		color: Colors.DarkGreen,
 
 		description:
-			"This bug is not a high priority to fix it as it does not affect usage of the addon",
+			"This bug isn’t a high priority to fix it as it doesn’t affect usage of the addon",
 
 		name: "Minor Bug",
 	},
@@ -39,7 +39,7 @@ const ANSWERS = [
 	},
 	{
 		color: Colors.Red,
-		description: "This is not something that we can or will change",
+		description: "This isn’t something that we can or will change",
 		name: "Invalid Bug",
 	},
 ];

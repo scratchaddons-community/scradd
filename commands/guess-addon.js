@@ -1204,13 +1204,7 @@ const info = {
 
 							if (buttonInteraction.customId.startsWith("back.")) {
 								if (typeof backInfo !== "object") {
-									await buttonInteraction.reply({
-										content: `${CONSTANTS.emojis.statuses.no} You can’t go back here!`,
-										ephemeral: true,
-									});
-									collector.resetTimer();
-
-									return;
+									throw new TypeError("backInfo must be an object to go back")
 								}
 
 								const nextMessage = await reply(
@@ -1425,13 +1419,7 @@ const info = {
 
 							if (buttonInteraction.customId.startsWith("back.")) {
 								if (typeof backInfo !== "object") {
-									await buttonInteraction.reply({
-										content: `${CONSTANTS.emojis.statuses.no} You can’t go back here!`,
-										ephemeral: true,
-									});
-									collector.resetTimer();
-
-									return;
+									throw new TypeError("backInfo must be an object to go back");
 								}
 
 								await buttonInteraction.reply({
@@ -1792,7 +1780,7 @@ export async function guessAddon(interaction) {
 
 	if (!item || score > 0.3) {
 		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} I couldn’t find the **${query}** addon!`,
+			content: `${CONSTANTS.emojis.statuses.no} Could not find the **${query}** addon!`,
 			ephemeral: true,
 		});
 		return;

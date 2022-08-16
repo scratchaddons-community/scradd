@@ -40,7 +40,7 @@ const info = {
 				? {
 						content: `${
 							CONSTANTS.emojis.statuses.no
-						} Cannot unwarn ${user.toString()} as they do not have any active strikes.`,
+						} Cannot unwarn ${user.toString()} as they don’t have any active strikes.`,
 						ephemeral: true,
 				  }
 				: {

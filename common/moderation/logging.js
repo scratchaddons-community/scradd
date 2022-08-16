@@ -25,7 +25,7 @@ export default async function log(guild, content, group, extra = {}) {
 export async function getThread(group, guild) {
 	const channel = await guild.channels.fetch(process.env.LOGS_CHANNEL || "");
 	if (channel?.type !== ChannelType.GuildText)
-		throw new TypeError("Channel is not a text channel");
+		throw new TypeError("Channel isn’t a text channel");
 	const threads = await channel.threads.fetchActive();
 	return (
 		threads.threads.find((/** @type {{ name: string }} */ thread) => thread.name === group) ||

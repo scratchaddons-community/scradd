@@ -23,7 +23,7 @@ const info = {
 
 	async interaction(interaction) {
 		if (!interaction.channel || interaction.channel.isDMBased())
-			throw new TypeError("Can not run this command in a DM");
+			throw new TypeError("Cannot run this command in a DM");
 
 		const count = interaction.options.getString("count", true);
 		const user = interaction.options.getUser("user");

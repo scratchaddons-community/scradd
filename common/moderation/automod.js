@@ -404,7 +404,7 @@ export async function changeNickname(member, strike = true) {
 			setNickname(member, pingablified),
 			member
 				.send(
-					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that is easily typable on American English keyboards if you dislike what I chose.`,
+					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`,
 				)
 				.catch(() => {}),
 			removeDuplicateNicknames(member),

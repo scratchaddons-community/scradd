@@ -30,7 +30,7 @@ const info = {
 
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
-			throw new TypeError("Member is not a GuildMember");
+			throw new TypeError("Member isn’t a GuildMember");
 		getWarns(
 			async (data) => await interaction.reply(data),
 			interaction.options.getString("filter"),
@@ -49,7 +49,7 @@ export default info;
  * @returns {Promise<import("discord.js").InteractionReplyOptions>}
  */
 async function getWarnsForMember(user, guild = user instanceof GuildMember ? user.guild : null) {
-	if (!guild) throw new TypeError("Expected guild to be passed as user is not a GuildMember");
+	if (!guild) throw new TypeError("Expected guild to be passed as user isn’t a GuildMember");
 	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
