@@ -210,7 +210,7 @@ export default async function warn(user, reason, strikes, context) {
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)
-							.setColor(Colors.DarkRed)
+							.setColor(user instanceof GuildMember ? user.displayColor : null)
 							.setFooter(
 								strikes === 0
 									? null
