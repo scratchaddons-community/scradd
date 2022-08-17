@@ -321,7 +321,7 @@ const event = {
 		if (["e", "ae", "iei", "a", "."].includes(content) || content.includes("æ"))
 			react(CONSTANTS.emojis.autoreact.e);
 
-		if (includes("quack") || includes("duck")) react("🦆");
+		if (content.includes("quack") || includes("duck")) react("🦆");
 		if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 		if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
 		if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
@@ -338,7 +338,7 @@ const event = {
 			}
 		}
 
-		if (includes("snake")) {
+		if (includes("snake") || includes("snek")) {
 			if (reactions < REACTION_CAP) {
 				reactions = reactions + 3;
 				promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
