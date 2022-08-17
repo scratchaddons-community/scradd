@@ -124,7 +124,7 @@ const info = {
 				const success = await channel.createMessage(
 					interaction,
 					{
-						description: interaction.options.getString("bugreport", true),
+						description: interaction.options.getString("bug-report", true),
 						title: interaction.options.getString("title", true),
 					},
 					ANSWERS[0]?.name,
@@ -134,7 +134,7 @@ const info = {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Bug report posted! See ${
 							success.thread?.toString() ?? ""
-						}. If you made any mistakes, you can fix them with \`/bugreport edit\`.`,
+						}. If you made any mistakes, you can fix them with \`/bug-report edit\`.`,
 						ephemeral: true,
 					});
 				}
