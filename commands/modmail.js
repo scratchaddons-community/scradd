@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	PermissionsBitField,
 } from "discord.js";
+import { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -110,7 +111,7 @@ const info = {
 					return;
 				}
 
-				const mailChannel = await interaction.guild.channels.fetch(MODMAIL_CHANNEL);
+				const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
 

@@ -25,7 +25,7 @@ type CommandInfo = {
 	 * @throws {AssertionError} If {@link Command.setDMPermission} is called on this builder. Use {@link CommandInfo.dm} to set the
 	 *   availability of this command in DMs.
 	 */
-	data: ((this: Client<true>) => Awaitable<Command>) | Command;
+	data: Command;
 	/** Pass `false` to disable this command. */
 	enable?: boolean = true;
 } & (

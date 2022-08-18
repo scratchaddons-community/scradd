@@ -1,4 +1,5 @@
 import { ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder } from "discord.js";
+import { guild } from "../client.js";
 import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
@@ -25,9 +26,9 @@ export async function boardMessageToSource(boardMessage) {
 			component.url ?? "",
 		)?.groups ?? {};
 
-	if (boardMessage.guild?.id !== guildId || !channelId || !messageId) return;
+	if (!guildId || !channelId || !messageId) return;
 
-	const channel = await boardMessage.guild?.channels.fetch(channelId).catch(() => {});
+	const channel = await guild.channels.fetch(channelId).catch(() => {});
 
 	if (!channel?.isTextBased()) return;
 
@@ -49,9 +50,7 @@ let MESSAGES;
  * @returns {Promise<import("discord.js").Message | undefined>} Message on #potatoboard.
  */
 export async function sourceToBoardMessage(message) {
-	if (!message.guild) return;
-
-	const board = await message.guild.channels.fetch(BOARD_CHANNEL);
+	const board = await guild.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isTextBased()) {
 		throw new ReferenceError("Could not find board channel");
@@ -78,7 +77,7 @@ export async function sourceToBoardMessage(message) {
 export async function postMessageToBoard(message) {
 	const { files, embeds } = await extractMessageExtremities(message, false);
 
-	const board = await message.guild?.channels.fetch(BOARD_CHANNEL);
+	const board = await guild?.channels.fetch(BOARD_CHANNEL);
 
 	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 

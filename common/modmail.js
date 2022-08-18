@@ -17,6 +17,7 @@ import { extractMessageExtremities, messageToText } from "../lib/message.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import client, { guild } from "../client.js";
 
 export const { MODMAIL_CHANNEL = "" } = process.env;
 
@@ -42,10 +43,9 @@ export async function generateMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
 
 	const member =
-		(message.interaction &&
-			(await message.guild?.members.fetch(message.interaction.user.id))) ||
+		(message.interaction && (await guild?.members.fetch(message.interaction.user.id))) ||
 		message.member ||
-		(await message.guild?.members.fetch(message.author.id));
+		(await guild?.members.fetch(message.author.id));
 
 	return {
 		avatarURL: (member || message.author)?.displayAvatarURL(),
@@ -69,22 +69,17 @@ export async function getMemberFromThread(thread) {
 	if (!embed?.description) return;
 	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
-	return (await thread.guild.members.fetch(userId).catch(() => {})) || { id: userId };
+	return (await guild.members.fetch(userId).catch(() => {})) || { id: userId };
 }
 
 /**
  * Given a user, find a ticket thread that sends messages to them.
  *
  * @param {import("discord.js").GuildMember | import("discord.js").User} user - The user to search for.
- * @param {import("discord.js").Guild} [guild] - The guild to search in.
  *
  * @returns {Promise<import("discord.js").ThreadChannel | void>} - Ticket thread.
  */
-export async function getThreadFromMember(
-	user,
-	guild = user instanceof GuildMember ? user.guild : undefined,
-) {
-	if (!guild) throw new TypeError("Expected guild to be passed along with a User");
+export async function getThreadFromMember(user) {
 	const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
 
 	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
@@ -116,7 +111,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdAt)
 		.setFooter({
-			iconURL: thread.guild.iconURL() ?? undefined,
+			iconURL: guild.iconURL() ?? undefined,
 			text: "Any future messages will start a new ticket.",
 		})
 		.setColor(COLORS.closed);
@@ -127,7 +122,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 		const member =
 			user instanceof GuildMember
 				? user
-				: (await thread.guild.members.fetch(user.id).catch(() => {})) || user;
+				: (await guild.members.fetch(user.id).catch(() => {})) || user;
 		embed.setAuthor({
 			iconURL: member.displayAvatarURL(),
 			name: member instanceof GuildMember ? member.displayName : member.username,
@@ -184,7 +179,7 @@ export async function sendOpenedMessage(user) {
 					.setTitle("Modmail ticket opened!")
 					.setDescription(
 						`The moderation team of **${escapeMessage(
-							user.guild.name,
+							guild.name,
 						)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 					)
 					.setFooter({ text: UNSUPPORTED })
@@ -269,7 +264,7 @@ export function generateReactionFunctions(message) {
 			message.channel
 				.createMessageCollector({ maxProcessed: 1, time: 5_000 })
 				.on("end", async () => {
-					await reaction.users.remove(reaction.client.user || "");
+					await reaction.users.remove(client.user || "");
 				});
 			return reaction;
 		},

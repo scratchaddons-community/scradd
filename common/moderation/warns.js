@@ -1,11 +1,5 @@
-import {
-	EmbedBuilder,
-	Colors,
-	GuildMember,
-	AttachmentBuilder,
-	User,
-	escapeMarkdown,
-} from "discord.js";
+import { EmbedBuilder, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
+import client, { guild } from "../../client.js";
 import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
 import log from "./logging.js";
@@ -36,24 +30,20 @@ export async function getData(message, sendLog = false) {
 
 	if (sendLog) {
 		await Promise.all(
-			Object.entries(losers).map(
-				([user, strikes]) =>
-					message.guild &&
-					log(
-						message.guild,
-						`${CONSTANTS.emojis.statuses.yes} Member <@${user}> lost ${strikes} strike${
-							strikes === 1 ? "" : "s"
-						} from ${message.guild.members.me?.toString()}!`,
-						"members",
-						{
-							files: [
-								new AttachmentBuilder(
-									Buffer.from("Automatically unwarned.", "utf-8"),
-									{ name: "warn.txt" },
-								),
-							],
-						},
-					),
+			Object.entries(losers).map(([user, strikes]) =>
+				log(
+					`${CONSTANTS.emojis.statuses.yes} Member <@${user}> lost ${strikes} strike${
+						strikes === 1 ? "" : "s"
+					} from ${guild.members.me?.toString()}!`,
+					"members",
+					{
+						files: [
+							new AttachmentBuilder(Buffer.from("Automatically unwarned.", "utf-8"), {
+								name: "warn.txt",
+							}),
+						],
+					},
+				),
 			),
 		);
 	}
@@ -68,12 +58,7 @@ export async function getData(message, sendLog = false) {
  * @param {import("discord.js").User | string} context
  */
 export default async function warn(user, reason, strikes, context) {
-	const guild =
-		user instanceof GuildMember
-			? user.guild
-			: await user.client.guilds.fetch(process.env.GUILD_ID || "");
-
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"]);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const oldLength = allWarns.length;
@@ -89,14 +74,13 @@ export default async function warn(user, reason, strikes, context) {
 	const promises = [];
 
 	const logMessage = await log(
-		guild,
 		`${actualStrikes > 0 ? CONSTANTS.emojis.statuses.yes : "⚠"} Member ${user.toString()} ` +
 			(actualStrikes
 				? `${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(actualStrikes)} strike${
 						Math.abs(actualStrikes) === 1 ? "" : "s"
 				  } from`
 				: "verbally warned by") +
-			` ${(context instanceof User ? context : guild.client.user)?.toString()}!`,
+			` ${(context instanceof User ? context : client.user)?.toString()}!`,
 		"members",
 		{
 			files: [

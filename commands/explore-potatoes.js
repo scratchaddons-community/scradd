@@ -16,17 +16,17 @@ import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { disableComponents, getAllMessages } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { guild } from "../client.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
  *
  * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
  * @param {string} channelFound - Text based channel.
- * @param {import("discord.js").Guild} guild
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
-async function textChannelMatches(guild, channelWanted, channelFound) {
+async function textChannelMatches(channelWanted, channelFound) {
 	if (channelWanted.id === channelFound) return true;
 
 	switch (channelWanted.type) {
@@ -42,7 +42,7 @@ async function textChannelMatches(guild, channelWanted, channelFound) {
 			return await firstTrueyPromise(
 				fetchedChannel.children
 					.valueOf()
-					.map((child) => textChannelMatches(guild, child, channelFound)),
+					.map((child) => textChannelMatches(child, channelFound)),
 			);
 		}
 		case ChannelType.GuildForum:
@@ -133,7 +133,7 @@ const info = {
 					if (
 						channelFound &&
 						channelWanted &&
-						!(await textChannelMatches(interaction.guild, channelWanted, channelFound))
+						!(await textChannelMatches(channelWanted, channelFound))
 					)
 						return false;
 

@@ -12,7 +12,6 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	InteractionCollector,
-	BaseInteraction,
 } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -22,6 +21,7 @@ import { generateHash, trimPatchVersion } from "../lib/text.js";
 import { MessageActionRowBuilder, ModalActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/message.js";
 import addonCommandInfo from "./addon.js";
+import client from "../client.js";
 
 const COLLECTOR_TIME = 120_000;
 
@@ -36,17 +36,16 @@ const fuse = new Fuse(addons, {
 		{ name: "description", weight: 2 },
 	],
 });
-const commandMarkdown = async (/** @type {BaseInteraction} */ interaction) =>
-	`\n\n*Run the </addon:${
-		(
-			await interaction.client.application?.commands.fetch({
-				guildId:
-					addonCommandInfo.dm && process.env.NODE_ENV === "production"
-						? undefined
-						: interaction.guild?.id,
-			})
-		)?.find((command) => command.name === "addon")?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
-	}> command for more information about this addon!*`;
+const commandMarkdown = `\n\n*Run the </addon:${
+	(
+		await client.application?.commands.fetch({
+			guildId:
+				addonCommandInfo.dm && process.env.NODE_ENV === "production"
+					? undefined
+					: process.env.GUILD_ID,
+		})
+	)?.find((command) => command.name === "addon")?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
+}> command for more information about this addon!*`;
 
 export const GROUP_NAMES = /** @type {const} */ ([
 	"Addon name",
@@ -1204,7 +1203,7 @@ const info = {
 
 							if (buttonInteraction.customId.startsWith("back.")) {
 								if (typeof backInfo !== "object") {
-									throw new TypeError("backInfo must be an object to go back")
+									throw new TypeError("backInfo must be an object to go back");
 								}
 
 								const nextMessage = await reply(
@@ -1357,7 +1356,7 @@ const info = {
 											.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
 											?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 											.join("\n") || ""
-									}${await commandMarkdown(interaction)}`,
+									}${commandMarkdown}`,
 								)
 								.setAuthor({
 									iconURL: (interaction.member instanceof GuildMember
@@ -1834,7 +1833,7 @@ export async function guessAddon(interaction) {
 								.find(([id]) => id === game.addon.id)?.[1]
 								?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 								.join("\n") || ""
-						}${await commandMarkdown(interaction)}`,
+						}${commandMarkdown}`,
 					)
 					.setAuthor({
 						iconURL: (interaction.member instanceof GuildMember

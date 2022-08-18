@@ -19,7 +19,6 @@ const info = {
 		await logError(
 			new AbortError(interaction.user.tag + " is killing the bot"),
 			"interactionCreate",
-			interaction.client,
 		);
 		process.exit();
 	},

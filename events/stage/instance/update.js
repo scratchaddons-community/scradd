@@ -1,23 +1,18 @@
+import client from "../../../client.js";
 import log from "../../../common/moderation/logging.js";
 
 /** @type {import("../../../types/event").default<"stageInstanceUpdate">} */
-const event = {
-	async event(oldInstance, newInstance) {
-		const guild = newInstance.guild || (await this.guilds.fetch(newInstance.guildId));
-		if (!oldInstance || guild.id !== process.env.GUILD_ID) return;
+export default async function event(oldInstance, newInstance) {
+	const guild = newInstance.guild || (await client.guilds.fetch(newInstance.guildId));
+	if (!oldInstance || guild.id !== process.env.GUILD_ID) return;
 
-		const logs = [];
+	const logs = [];
 
-		if (oldInstance.topic !== newInstance.topic) {
-			logs.push(`’s topic set to ${newInstance.topic}`);
-		}
+	if (oldInstance.topic !== newInstance.topic) {
+		logs.push(`’s topic set to ${newInstance.topic}`);
+	}
 
-		await Promise.all(
-			logs.map((edit) =>
-				log(guild, `✏ Stage ${newInstance.channel?.toString()}` + edit + `!`, "voice"),
-			),
-		);
-	},
-};
-
-export default event;
+	await Promise.all(
+		logs.map((edit) => log(`✏ Stage ${newInstance.channel?.toString()}` + edit + `!`, "voice")),
+	);
+}

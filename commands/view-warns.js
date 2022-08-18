@@ -8,6 +8,7 @@ import {
 	ButtonStyle,
 } from "discord.js";
 import fetch from "node-fetch";
+import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getDatabases } from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
@@ -44,13 +45,11 @@ export default info;
 
 /**
  * @param {import("discord.js").User | import("discord.js").GuildMember} user
- * @param {import("discord.js").Guild | null} guild
  *
  * @returns {Promise<import("discord.js").InteractionReplyOptions>}
  */
-async function getWarnsForMember(user, guild = user instanceof GuildMember ? user.guild : null) {
-	if (!guild) throw new TypeError("Expected guild to be passed as user isn’t a GuildMember");
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"], guild);
+async function getWarnsForMember(user) {
+	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"]);
 
 	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
 	const warns = allWarns.filter((warn) => warn.user === user.id);
@@ -122,17 +121,17 @@ export async function getWarns(reply, filter, interactor) {
 	if (filter) {
 		const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
 		if (pinged) {
-			const user = await interactor.client.users.fetch(pinged);
+			const user = await client.users.fetch(pinged);
 
 			if (!user)
 				await reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
 				});
-			else await reply(await getWarnsForMember(user, interactor.guild));
+			else await reply(await getWarnsForMember(user));
 		} else {
 			const id = convertBase(filter, WARN_INFO_BASE, 10);
-			const channel = interactor.guild && (await getThread("members", interactor.guild));
+			const channel = await getThread("members");
 
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
 			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
@@ -154,19 +153,18 @@ export async function getWarns(reply, filter, interactor) {
 
 			const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 
-			const member = await interactor.guild?.members.fetch(userId).catch(() => {});
+			const member = await guild?.members.fetch(userId).catch(() => {});
 
-			const user =
-				member?.user || (await interactor.client.users.fetch(userId).catch(() => {}));
+			const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
 
 			const nick = member?.displayName ?? user?.username;
 
 			const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 			const mod =
-				(await interactor.guild?.members.fetch(moderatorId).catch(() => {})) ||
-				(await interactor.client.users.fetch(moderatorId).catch(() => {}));
+				(await guild?.members.fetch(moderatorId).catch(() => {})) ||
+				(await client.users.fetch(moderatorId).catch(() => {}));
 
-			const warnLog = (await getDatabases(["warn"], interactor.guild)).warn;
+			const warnLog = (await getDatabases(["warn"])).warn;
 			const allWarns = await getData(warnLog, true);
 			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
@@ -195,7 +193,7 @@ export async function getWarns(reply, filter, interactor) {
 			await reply({ ephemeral: true, embeds: [embed] });
 		}
 	} else {
-		await reply(await getWarnsForMember(interactor, interactor.guild));
+		await reply(await getWarnsForMember(interactor));
 		return;
 	}
 }

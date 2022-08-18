@@ -6,6 +6,7 @@ import {
 	ThreadAutoArchiveDuration,
 	EmbedBuilder,
 } from "discord.js";
+import client, { guild } from "../client.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 
@@ -59,7 +60,7 @@ export default class SuggestionChannel {
 			.setDescription(data.description)
 			.setFooter({ text: defaultAnswer });
 
-		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
+		const channel = await guild?.channels.fetch(this.CHANNEL_ID);
 
 		if (!channel?.isTextBased()) throw new ReferenceError(`Channel not found`);
 
@@ -137,7 +138,7 @@ export default class SuggestionChannel {
 			]),
 		];
 
-		if (starter && starter?.author.id === interaction.client.user?.id) {
+		if (starter && starter?.author.id === client.user?.id) {
 			const embed = starter.embeds[0]
 				? EmbedBuilder.from(starter.embeds[0])
 				: new EmbedBuilder();
@@ -177,7 +178,7 @@ export default class SuggestionChannel {
 
 		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
 
-		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
+		if (!starterMessage || starterMessage.author.id !== client.user?.id) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} Cannot edit this feedback.`,
 				ephemeral: true,
@@ -248,8 +249,8 @@ export async function getUserFromSuggestion(message) {
 
 	if (author) {
 		const fetchedMember =
-			(await message.guild?.members.fetch(author).catch(() => undefined)) ||
-			(await message.client?.users.fetch(author).catch(() => undefined));
+			(await guild?.members.fetch(author).catch(() => undefined)) ||
+			(await client?.users.fetch(author).catch(() => undefined));
 		if (fetchedMember) return fetchedMember;
 	}
 

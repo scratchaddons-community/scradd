@@ -3,6 +3,7 @@ import papaparse from "papaparse";
 import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
 import { getThread } from "./moderation/logging.js";
+import client from "../client.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -24,20 +25,19 @@ const databases = {};
  * @template {string} T
  *
  * @param {T[]} names
- * @param {import("discord.js").Guild} guild
  *
  * @returns {Promise<{
  * 	[value in T]: import("discord.js").Message;
  * }>}
  */
-export async function getDatabases(names, guild) {
-	const thread = await getThread(DATABASE_THREAD, guild);
+export async function getDatabases(names) {
+	const thread = await getThread(DATABASE_THREAD);
 	if (!Object.values(databases).length) {
 		const messages = await thread.messages.fetch({ limit: 100 });
 
 		for (let message of messages.toJSON()) {
 			const name = getDatabaseName(message.content);
-			if (name && message.author.id === message.client.user?.id) {
+			if (name && message.author.id === client.user?.id) {
 				databases[name] = message;
 			}
 		}

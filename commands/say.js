@@ -22,7 +22,6 @@ const info = {
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				log(
-					interaction.guild,
 					`💬 ${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
 					"messages",
 					{

@@ -1,11 +1,4 @@
-import {
-	Client,
-	Message,
-	SelectMenuBuilder,
-	SlashCommandBuilder,
-	time,
-	ComponentType,
-} from "discord.js";
+import { Message, SelectMenuBuilder, SlashCommandBuilder, time, ComponentType } from "discord.js";
 
 import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
 import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
@@ -17,6 +10,7 @@ import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/message.js";
+import client from "../client.js";
 
 const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
 const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
@@ -25,11 +19,10 @@ const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
  * Get all users with a role.
  *
  * @param {string} roleId - Role to fetch.
- * @param {Client} client - Client to use.
  *
  * @returns {Promise<string>} - Users with the role.
  */
-async function getRole(roleId, client) {
+async function getRole(roleId) {
 	const guild = await client.guilds.fetch(CONSTANTS.testingServer);
 	const role = await guild.roles.fetch(roleId);
 	const members = Array.from(role?.members.values() ?? []);
@@ -41,35 +34,37 @@ const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
 
 /**
  * @type {{
- * 	description(client: Client): import("discord.js").Awaitable<string>;
- * 	edit?: (interaction: import("discord.js").ChatInputCommandInteraction<undefined>, Reply: Message) => import("discord.js").Awaitable<string>;
+ * 	description: (() => import("discord.js").Awaitable<string>) | string;
+ * 	edit?: (
+ * 		interaction: import("discord.js").ChatInputCommandInteraction<undefined>,
+ * 		Reply: Message,
+ * 	) => import("discord.js").Awaitable<string>;
  * 	emoji: string;
  * 	name: string;
  * }[]}
  */
 const OPTIONS = [
 	{
-		description: () =>
-			`Hello! I'm **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
+		description: `Hello! I'm **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
 
 		emoji: "👋",
 		name: "Hello!",
 	},
 	{
-		description: () =>
+		description:
 			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to <#${escapeMessage(
 				process.env.SUGGESTION_CHANNEL ?? "",
 			)}>. I will **react to the suggestion** with ${joinWithAnd(
 				SUGGESTION_EMOJIS[0] || [],
 			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
 			`\n` +
-			`Similar **[\`/bugreport\`](<${BLOB_ROOT}/commands/bugreport.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bugreport get-top\`**.`,
+			`Similar **[\`/bug-report\`](<${BLOB_ROOT}/commands/bug-report.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bug-report get-top\`**.`,
 
 		emoji: "👍",
 		name: "Suggestions",
 	},
 	{
-		description: () =>
+		description:
 			`After a message gets **${escapeMessage(`${MIN_REACTIONS}`)} ${escapeMessage(
 				BOARD_EMOJI,
 			)} reactions**, I will post it to <#${escapeMessage(
@@ -94,7 +89,7 @@ const OPTIONS = [
 		name: "Potatoboard",
 	},
 	{
-		description: () =>
+		description:
 			`Users may **DM me to send private messages to all the ${moderator}s** at once. I will send all their messages to **a thread in <#${escapeMessage(
 				MODMAIL_CHANNEL,
 			)}>** (through a webhook so the user’s original avatar and nickname is used) and **react to it with ${
@@ -113,7 +108,7 @@ const OPTIONS = [
 		name: "Modmail",
 	},
 	{
-		description: () =>
+		description:
 			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
 			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
 			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
@@ -124,7 +119,7 @@ const OPTIONS = [
 		name: "Miscellaneous commands",
 	},
 	{
-		description: () =>
+		description:
 			"I **automatically react to some messages** as easter eggs. **How many reactions can you find?** There are currently **17**! (Yes, you may just read the source code to find them, but **please don’t spoil them** - it’s more fun for people to find them themselves.)\n" +
 			`There are also **2** automatic responses. Unlike autoreactions, **these are not kept secret**, as they have a actual meaningful purpose. They are: **prompt users to use \`/suggestion create\`** instead of \`r!suggest\` and **call members out** when they abuse the spoiler hack.`,
 
@@ -132,10 +127,10 @@ const OPTIONS = [
 		name: "Autoreactions and responses",
 	},
 	{
-		description: async (client) =>
-			`**Coders**: ${await getRole(CONSTANTS.roles.developers, client)}.\n` +
-			`**Designers**: ${await getRole(CONSTANTS.roles.designers, client)}.\n` +
-			`**Beta testers**: ${await getRole(CONSTANTS.roles.testers, client)}.\n` +
+		description: async () =>
+			`**Coders**: ${await getRole(CONSTANTS.roles.developers)}.\n` +
+			`**Designers**: ${await getRole(CONSTANTS.roles.designers)}.\n` +
+			`**Beta testers**: ${await getRole(CONSTANTS.roles.testers)}.\n` +
 			`(none in any particular order)\n\n` +
 			`Cloud-**hosted** on [opeNode.io](https://www.openode.io/open-source/scradd).\n` +
 			`Third-party code **libraries** used: ${joinWithAnd(
@@ -147,14 +142,13 @@ const OPTIONS = [
 		name: "Credits",
 	},
 	{
-		description: () =>
-			`I'm **open-source**! The source code is available [**on GitHub**](${CONSTANTS.urls.scraddRepo}).`,
+		description: `I'm **open-source**! The source code is available [**on GitHub**](${CONSTANTS.urls.scraddRepo}).`,
 
 		emoji: "💻",
 		name: "Source Code",
 	},
 	{
-		description: () => "Pinging…",
+		description: "Pinging…",
 		edit: (interaction, reply) =>
 			`__**Bot info:**__\n` +
 			`**Ping**: ${Math.abs(+reply.createdAt - +interaction.createdAt)}ms\n` +
@@ -212,7 +206,7 @@ const info = {
 		const hash = generateHash("info");
 		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;
 		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
-		const defaultContent = (await currentOption?.description(interaction.client)) ?? "";
+		const defaultContent = currentOption?.description ?? "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
 

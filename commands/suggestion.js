@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, Colors, escapeMarkdown, cleanContent } from "discord.js";
+import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { getUserFromSuggestion, RATELIMT_MESSAGE } from "../common/suggest.js";
@@ -176,7 +177,7 @@ const info = {
 		const message =
 			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
 
-		if (message && message.author.id === interaction.client.user?.id) {
+		if (message && message.author.id === client.user?.id) {
 			const emoji = message.reactions.valueOf().first()?.emoji;
 			await reactAll(
 				message,
@@ -245,7 +246,7 @@ const info = {
 				break;
 			}
 			case "get-top": {
-				const channel = await interaction.guild.channels.fetch(SUGGESTION_CHANNEL);
+				const channel = await guild.channels.fetch(SUGGESTION_CHANNEL);
 
 				if (!channel?.isTextBased())
 					throw new ReferenceError("Could not find suggestion channel");
@@ -308,8 +309,7 @@ const info = {
 					);
 
 				const nick =
-					requestedUser &&
-					(await interaction.guild.members.fetch(requestedUser.id))?.displayName;
+					requestedUser && (await guild.members.fetch(requestedUser.id))?.displayName;
 				await paginate(
 					all,
 					(suggestion) =>

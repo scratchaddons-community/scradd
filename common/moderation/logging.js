@@ -1,4 +1,5 @@
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
+import { guild } from "../../client.js";
 
 export const LOG_GROUPS = /** @type {const} */ ([
 	"server",
@@ -8,21 +9,17 @@ export const LOG_GROUPS = /** @type {const} */ ([
 	"voice",
 ]);
 /**
- * @param {import("discord.js").Guild} guild
  * @param {string} content
  * @param {typeof LOG_GROUPS[number]} group
  * @param {Pick<import("discord.js").MessageOptions, "embeds" | "files" | "components">} [extra]
  */
-export default async function log(guild, content, group, extra = {}) {
-	const thread = await getThread(group, guild);
+export default async function log(content, group, extra = {}) {
+	const thread = await getThread(group);
 	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
 }
 
-/**
- * @param {typeof LOG_GROUPS[number] | typeof import("../databases.js").DATABASE_THREAD} group
- * @param {import("discord.js").Guild} guild
- */
-export async function getThread(group, guild) {
+/** @param {typeof LOG_GROUPS[number] | typeof import("../databases.js").DATABASE_THREAD} group */
+export async function getThread(group) {
 	const channel = await guild.channels.fetch(process.env.LOGS_CHANNEL || "");
 	if (channel?.type !== ChannelType.GuildText)
 		throw new TypeError("Channel isn’t a text channel");

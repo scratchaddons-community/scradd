@@ -1,4 +1,5 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
+import { guild } from "../client.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
@@ -6,15 +7,11 @@ export const NORMAL_XP_PER_MESSAGE = 5;
 
 /** @param {User | GuildMember} to */
 export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
-	const guild =
-		to instanceof GuildMember
-			? to.guild
-			: await to.client.guilds.fetch(process.env.GUILD_ID || "");
 	const user = to instanceof User ? to : to.user;
 	const member =
 		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
 
-	const database = (await getDatabases(["xp"], guild)).xp;
+	const database = (await getDatabases(["xp"])).xp;
 
 	const xp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
 	const index = xp.findIndex((entry) => entry.user === user.id);
