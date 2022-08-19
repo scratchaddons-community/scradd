@@ -18,7 +18,7 @@ const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
 /**
  * Get all users with a role.
  *
- * @param {string} roleId - Role to fetch.
+ * @param {import("discord.js").Snowflake} roleId - Role to fetch.
  *
  * @returns {Promise<string>} - Users with the role.
  */

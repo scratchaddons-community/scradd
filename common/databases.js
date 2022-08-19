@@ -58,9 +58,11 @@ export async function getDatabases(names) {
 }
 
 /**
+ * @template {DatabaseItem} Item
+ *
  * @param {import("discord.js").Message} database
  *
- * @returns {Promise<DatabaseItem[]>}
+ * @returns {Promise<Item[]>}
  */
 export async function extractData(database) {
 	if (dataCache[database.id]) return dataCache[database.id] || [];
@@ -77,10 +79,10 @@ export async function extractData(database) {
 		: []);
 }
 
-/** @type {{ [key: string]: DatabaseItem[] }} */
+/** @type {{ [key: import("discord.js").Snowflake]: DatabaseItem[] }} */
 const dataCache = {};
 
-/** @type {{ [key: string]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined }} */
+/** @type {{ [key: import("discord.js").Snowflake]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined }} */
 let timeouts = {};
 
 /**

@@ -19,7 +19,7 @@ export const RATELIMT_MESSAGE =
 
 export const DEFAULT_COLOR = Colors.Greyple;
 
-/** @type {{ [key: string]: number }} */
+/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 const cooldowns = {};
 export const FEEDBACK_COOLDOWN = 60_000;
 
@@ -27,10 +27,10 @@ export default class SuggestionChannel {
 	/**
 	 * Initialize a suggestion channel.
 	 *
-	 * @param {string} CHANNEL_ID - The ID of the channel to use.
+	 * @param {import("discord.js").Snowflake} CHANNEL_ID - The ID of the channel to use.
 	 */
 	constructor(CHANNEL_ID) {
-		/** @type {string} */
+		/** @type {import("discord.js").Snowflake} */
 		this.CHANNEL_ID = CHANNEL_ID;
 	}
 

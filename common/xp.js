@@ -13,7 +13,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	const database = (await getDatabases(["xp"])).xp;
 
-	const xp = /** @type {{ user: string; xp: number }[]} */ (await extractData(database));
+	const xp = /** @type {{ user: import("discord.js").Snowflake; xp: number }[]} */ (await extractData(database));
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 	if (index === -1) {

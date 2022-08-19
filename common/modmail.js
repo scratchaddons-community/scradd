@@ -61,7 +61,7 @@ export async function generateMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns {Promise<import("discord.js").GuildMember | void | { id: string }>} - User who messages are being sent to.
+ * @returns {Promise<import("discord.js").GuildMember | void | { id: import("discord.js").Snowflake }>} - User who messages are being sent to.
  */
 export async function getMemberFromThread(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
@@ -91,7 +91,7 @@ export async function getThreadFromMember(user) {
 
 	return (
 		await asyncFilter(
-			threads,
+			[...threads.values()],
 			async (thread) => (await getMemberFromThread(thread))?.id === user.id && thread,
 		).next()
 	).value;

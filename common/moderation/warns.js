@@ -4,7 +4,7 @@ import CONSTANTS from "../CONSTANTS.js";
 import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
 import log from "./logging.js";
 
-/** @typedef {{ user: string; expiresAt: number; info?: string }[]} WarnDatabase */
+/** @typedef {{ user: import("discord.js").Snowflake; expiresAt: number; info?: import("discord.js").Snowflake }[]} WarnDatabase */
 
 const EXPIRY_LENGTH = 21;
 export const WARNS_PER_MUTE = 3,
@@ -17,7 +17,7 @@ export const WARNS_PER_MUTE = 3,
  * @returns
  */
 export async function getData(message, sendLog = false) {
-	/** @type {{ [key: string]: number }} */
+	/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 	const losers = {};
 	const newData = /** @type {WarnDatabase} */ (await extractData(message)).filter((warn) => {
 		const expiresAt = new Date(warn.expiresAt);
@@ -223,7 +223,7 @@ export default async function warn(user, reason, strikes, context) {
 }
 
 /**
- * @param {string} user
+ * @param {import("discord.js").Snowflake} user
  * @param {number} strikes
  * @param {WarnDatabase} warns
  */

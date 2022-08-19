@@ -2,7 +2,7 @@ import { Collection, ButtonBuilder, ButtonStyle } from "discord.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import CONSTANTS from "./CONSTANTS.js";
 
-/** @type {Collection<string, string>} */
+/** @type {Collection<import("discord.js").Snowflake, string>} */
 export const CURRENTLY_PLAYING = new Collection();
 
 /**

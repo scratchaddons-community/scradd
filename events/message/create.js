@@ -31,7 +31,7 @@ const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID isn’t set in the .env");
 
-/** @type {{ [key: string]: import("discord.js").Message[] }} */
+/** @type {{ [key: import("discord.js").Snowflake]: import("discord.js").Message[] }} */
 const latestMessages = {};
 
 /** @type {import("../../types/event").default<"messageCreate">} */

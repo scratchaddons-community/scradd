@@ -835,7 +835,7 @@ const BULLET_POINT = CONSTANTS.footerSeperator.trim();
 
 /**
  * @type {{
- * 	[key: string]:
+ * 	[key: import("discord.js").Snowflake]:
  * 		| undefined
  * 		| {
  * 				collector: InteractionCollector<import("discord.js").MappedInteractionTypes[import("discord.js").MessageComponentType]>;
