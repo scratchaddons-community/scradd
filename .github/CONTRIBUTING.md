@@ -20,7 +20,7 @@ Please:
 
 -   Choose a relevant category.
 -   Mark comments that answer your question as to the answer.
--   Only use Discussions for questions, comments, and other related topics. Please do not request new features or report bugs in Discussions; they will be closed and ignored.
+-   Only use Discussions for questions, comments, and other related topics. Please don’t request new features or report bugs in Discussions; they will be closed and ignored.
 
 ## Creating [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 

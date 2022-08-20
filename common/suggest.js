@@ -1,20 +1,27 @@
-/** @file Code Shared between suggestions and bug reports. */
-import { Constants, GuildMember, Message, MessageEmbed, Util } from "discord.js";
-import { Embed } from "@discordjs/builders";
+import {
+	Colors,
+	GuildMember,
+	Message,
+	escapeMarkdown,
+	ThreadAutoArchiveDuration,
+	EmbedBuilder,
+} from "discord.js";
+import client, { guild } from "../client.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 
 /** @typedef {{ description: string; color: number; name: string }} Answer */
 
-export const MAX_TITLE_LENGTH = 50;
+const RATELIMIT_TIMEOUT = 3_000;
 
 export const RATELIMT_MESSAGE =
-	"If the thread title does not update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
+	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-export const DEFAULT_COLOR = Constants.Colors.GREYPLE;
+export const DEFAULT_COLOR = Colors.Greyple;
 
-export const NO_SERVER_START =
-	"In an effort to help SA developers find meaningful information, we have disabled server-related suggestions and bug reports. With this off, when a developer looks in ";
+/** @type {{ [key: string]: number }} */
+const cooldowns = {};
+export const FEEDBACK_COOLDOWN = 60_000;
 
 export default class SuggestionChannel {
 	/**
@@ -30,11 +37,10 @@ export default class SuggestionChannel {
 	/**
 	 * Post a message in a suggestion channel.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
-	 * @returns {Promise<false | import("discord.js").Message<boolean>>} - `false` on errors and the
-	 *   suggestion message on success.
+	 * @returns {Promise<false | import("discord.js").Message>} - `false` on errors and the suggestion message on success.
 	 */
 	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
@@ -42,25 +48,42 @@ export default class SuggestionChannel {
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const title = Util.escapeMarkdown(data.title);
+		const title = escapeMarkdown(data.title);
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setColor(DEFAULT_COLOR)
 			.setAuthor({
 				iconURL: author.displayAvatarURL(),
-				name: author?.displayName ?? interaction.user.username,
+				name: author.displayName ?? interaction.user.username,
 			})
 			.setTitle(title)
 			.setDescription(data.description)
-			.setFooter({ text: `${defaultAnswer}` });
+			.setFooter({ text: defaultAnswer });
 
-		const channel = await interaction.guild?.channels.fetch(this.CHANNEL_ID);
+		const channel = await guild?.channels.fetch(this.CHANNEL_ID);
 
-		if (!channel?.isText()) throw new ReferenceError(`Channel not found`);
+		if (!channel?.isTextBased()) throw new ReferenceError(`Channel not found`);
 
+		if ((cooldowns[author.id] || 0) > Date.now()) {
+			await interaction.reply({
+				content: `${
+					CONSTANTS.emojis.statuses.no
+				} You can only post a feedback every ${Math.max(
+					1,
+					Math.round(FEEDBACK_COOLDOWN / 1_000),
+				)} seconds. Please wait ${Math.max(
+					1,
+					Math.round(((cooldowns[author.id] || 0) - Date.now()) / 1_000),
+				)} seconds before posting another feedback.`,
+				ephemeral: true,
+			});
+
+			return false;
+		}
+		cooldowns[author.id] = Date.now() + FEEDBACK_COOLDOWN;
 		const message = await channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
-			autoArchiveDuration: 1_440, // 24 hours
+			autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
 			name: `${title ?? ""} | ${defaultAnswer}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
@@ -73,12 +96,11 @@ export default class SuggestionChannel {
 	/**
 	 * Answer a suggestion.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answer[]} answers - An object that maps answers to colors.
 	 *
-	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
-	 *   a success message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
 	 */
 	async answerSuggestion(interaction, answer, answers) {
 		if (
@@ -97,7 +119,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!interaction.member?.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
+		if (!interaction.member.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -106,16 +128,9 @@ export default class SuggestionChannel {
 			return false;
 		}
 
-		if (interaction.channel.archived) {
-			await interaction.channel.setArchived(
-				false,
-				`Thread answered by ${interaction.user.tag}`,
-			);
-		}
-
 		const promises = [
 			Promise.race([
-				new Promise((resolve) => setTimeout(resolve, 3_000)),
+				new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
 				interaction.channel.setName(
 					interaction.channel.name.replace(/^(.+? \| )?[^|]+$/, "$1" + answer),
 					`Thread answered by ${interaction.user.tag}`,
@@ -123,8 +138,10 @@ export default class SuggestionChannel {
 			]),
 		];
 
-		if (starter && starter?.author.id === interaction.client.user?.id) {
-			const embed = new MessageEmbed(starter.embeds[0]);
+		if (starter && starter?.author.id === client.user?.id) {
+			const embed = starter.embeds[0]
+				? EmbedBuilder.from(starter.embeds[0])
+				: new EmbedBuilder();
 
 			embed
 				.setColor(answers.find(({ name }) => answer === name)?.color ?? DEFAULT_COLOR)
@@ -141,11 +158,10 @@ export default class SuggestionChannel {
 	/**
 	 * Edit a suggestion.
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction - Interaction to respond to on errors.
+	 * @param {import("../types/command.js").GuildInteraction} interaction - Interaction to respond to on errors.
 	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
 	 *
-	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with
-	 *   a success message yourself.
+	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
 	 */
 	async editSuggestion(interaction, updated) {
 		if (
@@ -159,51 +175,54 @@ export default class SuggestionChannel {
 
 			return false;
 		}
-		if (interaction.channel.archived)
-			await interaction.channel.setArchived(false, "Thread edited");
+
 		const starterMessage = await interaction.channel.fetchStarterMessage().catch(() => {});
 
-		if (!starterMessage || starterMessage.author.id !== interaction.client.user?.id) {
+		if (!starterMessage || starterMessage.author.id !== client.user?.id) {
 			await interaction.reply({
-				// TODO: it doesn’t have to be a suggestion here
-				content: `${CONSTANTS.emojis.statuses.no} This suggestion can not be edited.`,
+				content: `${CONSTANTS.emojis.statuses.no} Cannot edit this feedback.`,
 				ephemeral: true,
 			});
 
 			return false;
 		}
 		const user = await getUserFromSuggestion(starterMessage);
+		if (!(interaction.member instanceof GuildMember))
+			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (interaction.user.id !== user?.id) {
+		const isMod = !!interaction.member.roles.resolve(process.env.MODERATOR_ROLE ?? "");
+		if (interaction.user.id !== user?.id && (!isMod || (isMod && updated.body))) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} You do not have permission to use this command.`,
+				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,
 				ephemeral: true,
 			});
 
 			return false;
 		}
 
-		const embed = new MessageEmbed(starterMessage.embeds[0]);
+		const embed = starterMessage.embeds[0]
+			? EmbedBuilder.from(starterMessage.embeds[0])
+			: new EmbedBuilder();
 
 		if (updated.body) embed.setDescription(updated.body);
 
 		const promises = [];
 
-		const title = Util.escapeMarkdown(updated.title ?? "");
+		const title = escapeMarkdown(updated.title ?? "");
 
 		promises.push(
 			title
 				? Promise.race([
 						interaction.channel.setName(
 							interaction.channel.name.replace(/(?<=^.+ \| ).+$/, title),
-							"Suggestion/report edited",
+							"Feedback edited",
 						),
-						new Promise((resolve) => setTimeout(resolve, 3_000)),
+						new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
 				  ])
 				: Promise.resolve(interaction.channel),
 		);
 
-		embed.setTitle(title || embed.title || "");
+		embed.setTitle(title || embed.data.title || "");
 
 		promises.push(starterMessage.edit({ embeds: [embed] }));
 
@@ -220,11 +239,7 @@ export default class SuggestionChannel {
  *
  * @param {Message} message - The message to get the member from.
  *
- * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who
- *   made the suggestion.
- * @todo
- *   https://canary.discord.com/channels/806602307750985799/939350305311715358/947385068660359278 was
- *   never fixed?
+ * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who made the suggestion.
  */
 export async function getUserFromSuggestion(message) {
 	const author =
@@ -234,8 +249,8 @@ export async function getUserFromSuggestion(message) {
 
 	if (author) {
 		const fetchedMember =
-			(await message.guild?.members.fetch(author).catch(() => undefined)) ||
-			(await message.client?.users.fetch(author).catch(() => undefined));
+			(await guild?.members.fetch(author).catch(() => undefined)) ||
+			(await client?.users.fetch(author).catch(() => undefined));
 		if (fetchedMember) return fetchedMember;
 	}
 

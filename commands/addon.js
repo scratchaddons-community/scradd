@@ -1,23 +1,10 @@
-/** @file Command To get information about an addon. */
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { Util } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
-import fetch from "node-fetch";
 import CONSTANTS from "../common/CONSTANTS.js";
+import { manifest, addons } from "../common/extension.js";
 
-import { escapeMessage, replaceBackticks, escapeLinks, generateTooltip } from "../lib/markdown.js";
+import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
-
-const addons = await fetch(
-	"https://github.com/ScratchAddons/website-v2/raw/master/data/addons/en.json",
-).then(
-	async (response) =>
-		/** @type {Promise<import("../types/addonManifest").WebsiteData>} */
-		(await response.json()),
-);
-
-/** @type {{ [key: string]: import("../types/addonManifest").default }} */
-const manifestCache = {};
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -34,18 +21,18 @@ const fuse = new Fuse(addons, {
 /** @type {import("../types/command").default} */
 const info = {
 	data: new SlashCommandBuilder()
-		.setDescription("Replies with information about a specific addon.")
+		.setDescription(
+			`Replies with information about a specific addon available in v${
+				manifest.version_name || manifest.version
+			}`,
+		)
 		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon. Defaults to a random addon."),
+			option.setName("addon").setDescription("The name of the addon").setRequired(true),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("compact")
-				.setDescription(
-					"Whether to show misc information and the image. Defaults to false in #bots and true everywhere else.",
-				)
+				.setDescription("Whether to show misc information and the image")
 				.setRequired(false),
 		),
 
@@ -55,23 +42,23 @@ const info = {
 		 *
 		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
-		 * @returns {string | undefined} - Returns credit information or undefined if no credits are
-		 *   available.
+		 * @returns {string | undefined} - Returns credit information or undefined if no credits are available.
 		 */
 		function generateCredits(credits) {
 			return joinWithAnd(
-				credits?.map(({ name, link, note }) =>
-					link
-						? `[${escapeLinks(name)}](${link} "${note}")`
-						: generateTooltip(interaction, name, note),
-				) ?? [],
+				credits?.map((credit) => {
+					const note = ("note" in credit ? credit.note : undefined) || "";
+					return credit.link
+						? hyperlink(escapeLinks(credit.name), credit.link, note)
+						: interaction.channel
+						? generateTooltip(interaction.channel, credit.name, note)
+						: credit.name;
+				}) ?? [],
 			);
 		}
 
-		const input = interaction.options.getString("addon");
-		const { item: addon, score = 0 } = input
-			? fuse.search(input)[0] ?? {}
-			: { item: addons[Math.floor(Math.random() * addons.length)] };
+		const input = interaction.options.getString("addon", true);
+		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
 		const compact =
 			interaction.options.getBoolean("compact") ??
@@ -79,9 +66,7 @@ const info = {
 
 		if (!addon || (score > 0.5 && compact)) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Could not find that addon${
-					input ? ` (\`${replaceBackticks(input)}\`)` : ""
-				}.`,
+				content: `${CONSTANTS.emojis.statuses.no} Could not find a matching addon!`,
 
 				ephemeral: true,
 			});
@@ -89,29 +74,24 @@ const info = {
 			return;
 		}
 
-		const embed = new Embed()
+		const embed = new EmbedBuilder()
 			.setTitle(addon.name)
-			.setColor(CONSTANTS.colors.theme)
+			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
-					`[See source code](${CONSTANTS.repos.sa}/addons/${encodeURIComponent(
+					`[See source code](${CONSTANTS.urls.saSource}/addons/${encodeURIComponent(
 						addon.id,
 					)}/)`,
 			)
 			.setFooter({
 				text:
-					(input
-						? Math.round((1 - score) * 100) +
-						  "% match" +
-						  CONSTANTS.footerSeperator +
-						  "Input: " +
-						  input
-						: "Random addon") +
+					Math.round((1 - score) * 100) +
+					"% match" +
 					CONSTANTS.footerSeperator +
-					(compact ? "Compact mode" : "Addon ID: " + addon.id),
+					(compact ? "Compact mode" : addon.id),
 			})
 			[compact ? "setThumbnail" : "setImage"](
-				`https://scratchaddons.com/assets/img/addons/${encodeURIComponent(addon.id)}.png`,
+				`${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
 			);
 
 		const group = addon.tags.includes("popup")
@@ -147,48 +127,45 @@ const info = {
 		}
 
 		if (!compact) {
-			const manifest = (manifestCache[addon.id] ??= await fetch(
-				`${CONSTANTS.repos.sa}/addons/${addon.id}/addon.json?date=${Date.now()}`,
-			).then(async (response) => {
-				return await /** @type {Promise<import("../types/addonManifest").default>} */
-				(response.json());
-			}));
-
 			const lastUpdatedIn = `last updated in v${
-				manifest.latestUpdate?.version ?? "<unknown version>"
+				addon.latestUpdate?.version ?? "<unknown version>"
 			}`;
 
 			const credits = generateCredits(addon.credits);
 
 			if (credits)
-				embed.addField({
-					name: "Contributors",
-					value: Util.escapeMarkdown(credits),
+				embed.addFields({
+					name: "🫂 Contributors",
+					value: escapeMarkdown(credits),
 					inline: true,
 				});
 
-			if (manifest.permissions?.length)
+			if (addon.permissions?.length)
 				embed.setDescription(
-					embed.description +
+					embed.data.description +
 						"\n" +
 						"\n" +
-						"**This addon may require additional permissions to be granted in order to function.**",
+						"**⚠ This addon may require additional permissions to be granted in order to function.**",
 				);
 
 			embed.addFields(
-				{ inline: true, name: "Group", value: Util.escapeMarkdown(group) },
+				{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
 				{
 					inline: true,
-					name: "Version added",
-					value: Util.escapeMarkdown(
+					name: "📝 Version added",
+					value: escapeMarkdown(
 						"v" +
-							manifest.versionAdded +
-							(manifest.latestUpdate
-								? ` (${generateTooltip(
-										interaction,
-										lastUpdatedIn,
-										`${manifest.latestUpdate?.temporaryNotice}`,
-								  )})`
+							addon.versionAdded +
+							(addon.latestUpdate
+								? ` (${
+										interaction.channel
+											? generateTooltip(
+													interaction.channel,
+													lastUpdatedIn,
+													`${addon.latestUpdate?.temporaryNotice}`,
+											  )
+											: lastUpdatedIn
+								  })`
 								: ""),
 					),
 				},

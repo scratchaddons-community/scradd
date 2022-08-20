@@ -1,11 +1,9 @@
-import type { ClientEvents, Client } from "discord.js";
+import type { ClientEvents, Client, Awaitable } from "discord.js";
 
-type Event<K extends keyof ClientEvents> = {
-	/** Pass `true` to make this callback only fire on the event's first fire. */
-	once?: boolean = false;
-	/** Pass `false` to disable this callback. */
-	apply?: boolean = true;
-	/** A funcion to process events. */
-	event(this: Client<true>, ...args: ClientEvents[K]): void | Promise<void>;
-};
+/** A function to process events. */
+type Event<K extends ClientEvent> = K extends "ready"
+	? never
+	: (...args: ClientEvents[K]) => Awaitable<void>;
 export default Event;
+
+export type ClientEvent = Exclude<keyof ClientEvents, "ready">;

@@ -225,5 +225,3 @@ You can still send a message in one of the following, though:
 ### [Contributors](https://github.com/scratchaddons-community/scradd/graphs/contributors)
 <!--![](https://contrib.rocks/image?repo=scratchaddons-community/scradd)-->
 
-
-

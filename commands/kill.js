@@ -1,17 +1,24 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
+import { cleanListeners } from "../common/databases.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
 const info = {
-	data: new SlashCommandBuilder().setDescription("Kills the bot.").setDefaultPermission(false),
+	data: new SlashCommandBuilder()
+		.setDescription(
+			`(${
+				process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"
+			} only) Kills the bot.`,
+		)
+		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
-		await interaction.reply(interaction.user.tag + " is killing the bot.");
+		await cleanListeners();
+		await interaction.reply("Killing bot…");
 		await logError(
-			new AbortError(interaction.user.tag + " is killing the bot."),
+			new AbortError(interaction.user.tag + " is killing the bot"),
 			"interactionCreate",
-			interaction.client,
 		);
 		process.exit();
 	},
