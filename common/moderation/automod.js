@@ -43,7 +43,7 @@ export function censor(text) {
  */
 async function checkString(toCensor, message) {
 	/** @type {{ language: false | number; invites: false | number; bots: false | number }} */
-	let bad = { language: false, invites: false, bots: false };
+	const bad = { language: false, invites: false, bots: false };
 	if (!badWordsAllowed(message.channel)) {
 		const censored = censor(toCensor);
 		if (censored) {
@@ -97,7 +97,7 @@ async function checkString(toCensor, message) {
 
 /** @param {import("discord.js").Message} message */
 export async function automodMessage(message) {
-	let bad = (
+	const bad = (
 		await Promise.all([
 			checkString(stripMarkdown(message.content), message).then((info) => ({
 				...info,
@@ -279,7 +279,7 @@ export async function badAttachments(message) {
 	 * 	words: { language: string[]; invites: string[]; bots: string[] };
 	 * }}
 	 */
-	let bad = {
+	const bad = {
 		language: false,
 		invites: false,
 		bots: false,
@@ -360,7 +360,7 @@ export async function badAttachments(message) {
 /** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
 export async function badStickers(message) {
 	/** @type {{ strikes: false | number; words: string[] }} */
-	let bad = { strikes: false, words: [] };
+	const bad = { strikes: false, words: [] };
 
 	await Promise.all(
 		message.stickers.map(async ({ name }) => {

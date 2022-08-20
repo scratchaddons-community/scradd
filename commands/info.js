@@ -205,7 +205,7 @@ const info = {
 	async interaction(interaction) {
 		const hash = generateHash("info");
 		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;
-		let currentOption = OPTIONS.find(({ name }) => name === defaultKey);
+		const currentOption = OPTIONS.find(({ name }) => name === defaultKey);
 		const defaultContent = currentOption?.description ?? "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
@@ -234,7 +234,6 @@ const info = {
 		if (currentOption?.edit)
 			await interaction.editReply({
 				allowedMentions: { users: [] },
-				components: message.components,
 
 				content: await currentOption?.edit(interaction, message),
 			});

@@ -73,7 +73,6 @@ export default async function event(message) {
 				message.type,
 			)
 		) {
-			let toEdit = message;
 			const collector = await generateConfirm(
 				new EmbedBuilder()
 					.setTitle("Confirmation")
@@ -124,11 +123,7 @@ export default async function event(message) {
 							.then(...generateReactionFunctions(message)),
 					]);
 				},
-				async (options) => {
-					toEdit = await message.reply(options);
-					return toEdit;
-				},
-				(options) => toEdit.edit(options),
+				async (options) => await message.reply(options),
 			);
 			message.channel
 				.createMessageCollector({ time: CONSTANTS.collectorTime })

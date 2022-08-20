@@ -13,7 +13,7 @@ import { generateHash } from "../lib/text.js";
 
 import { escapeMessage } from "../lib/markdown.js";
 import { asyncFilter } from "../lib/promises.js";
-import { extractMessageExtremities, messageToText } from "../lib/message.js";
+import { disableComponents, extractMessageExtremities, messageToText } from "../lib/message.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
@@ -193,9 +193,8 @@ export async function sendOpenedMessage(user) {
  * @param {EmbedBuilder} confirmEmbed
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
- * @param {(options: import("discord.js").WebhookEditMessageOptions) => Promise<Message>} edit
  */
-export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
+export async function generateConfirm(confirmEmbed, onConfirm, reply) {
 	const confirmId = generateHash("confirm");
 	const button = new ButtonBuilder()
 		.setLabel("Confirm")
@@ -238,16 +237,7 @@ export async function generateConfirm(confirmEmbed, onConfirm, reply, edit) {
 			}
 		})
 		.on("end", async () => {
-			await edit({
-				components: [
-					new MessageActionRowBuilder().addComponents(
-						button.setDisabled(true),
-						cancelButton.setDisabled(true),
-					),
-				],
-
-				embeds: [confirmEmbed],
-			});
+			await message.edit({ components: disableComponents(message.components) });
 		});
 	return collector;
 }

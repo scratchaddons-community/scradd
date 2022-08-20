@@ -35,7 +35,7 @@ export async function getDatabases(names) {
 	if (!Object.values(databases).length) {
 		const messages = await thread.messages.fetch({ limit: 100 });
 
-		for (let message of messages.toJSON()) {
+		for (const message of messages.toJSON()) {
 			const name = getDatabaseName(message.content);
 			if (name && message.author.id === client.user?.id) {
 				databases[name] = message;
@@ -83,7 +83,7 @@ export async function extractData(database) {
 const dataCache = {};
 
 /** @type {{ [key: import("discord.js").Snowflake]: { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout } | undefined }} */
-let timeouts = {};
+const timeouts = {};
 
 /**
  * @param {import("discord.js").Message} database

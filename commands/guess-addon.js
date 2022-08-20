@@ -1199,7 +1199,7 @@ const info = {
 							if (buttonInteraction.customId.startsWith("end.")) {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
 								await Promise.all([
-									buttonInteraction.reply(`Ended the game`),
+									buttonInteraction.reply(`🛑 Ended the game`),
 									interaction.editReply({
 										components: disableComponents(message.components),
 
@@ -1489,8 +1489,6 @@ const info = {
 							CURRENTLY_PLAYING.delete(interaction.user.id);
 							await message.edit({
 								components: disableComponents(message.components),
-
-								embeds: [new EmbedBuilder(message.embeds[0]?.toJSON())],
 							});
 						});
 				}

@@ -164,7 +164,6 @@ const info = {
 					},
 					(options) =>
 						interaction.reply({ ...options, ephemeral: true, fetchReply: true }),
-					(options) => interaction.editReply(options),
 				);
 
 				break;
