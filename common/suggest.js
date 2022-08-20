@@ -10,7 +10,13 @@ import client, { guild } from "../client.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 
-/** @typedef {{ description: string; color: number; name: string }} Answer */
+/**
+ * @typedef {object} Answer
+ *
+ * @property {string} name - A one-word name of the answer.
+ * @property {import("discord.js").ColorResolvable} color - A color to set the embed to when the answer is used.
+ * @property {string} description - A user-facing description of what using this answer means.
+ */
 
 const RATELIMIT_TIMEOUT = 3_000;
 
