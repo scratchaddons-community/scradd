@@ -1,11 +1,4 @@
-import {
-	BOARD_CHANNEL,
-	BOARD_EMOJI,
-	sourceToBoardMessage,
-	postMessageToBoard,
-	MIN_REACTIONS,
-	updateReactionCount,
-} from "../../../common/board.js";
+import { BOARD_CHANNEL, BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
@@ -75,16 +68,5 @@ export default async function event(reaction, user) {
 		return;
 	}
 
-	const boardMessage = await sourceToBoardMessage(message);
-
-	const fetched = message.reactions.resolve(BOARD_EMOJI);
-	const count = fetched?.count ?? 0;
-
-	if (boardMessage?.embeds[0]) {
-		await updateReactionCount(count, boardMessage);
-	} else {
-		if (count < MIN_REACTIONS) return;
-
-		await postMessageToBoard(message);
-	}
+	await updateBoard(message);
 }

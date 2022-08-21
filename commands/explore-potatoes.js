@@ -1,28 +1,26 @@
 import {
 	SlashCommandBuilder,
-	Message,
 	ButtonBuilder,
-	EmbedBuilder,
-	MessageMentions,
 	ChannelType,
 	ButtonStyle,
-	ComponentType,
 	CategoryChannel,
 } from "discord.js";
 
-import { BOARD_CHANNEL, MIN_REACTIONS } from "../common/board.js";
+import { generateMessage, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
-import { disableComponents, getAllMessages } from "../lib/message.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { disableComponents } from "../lib/message.js";
 import { guild } from "../client.js";
+import { extractData, getDatabases, queueDatabaseWrite } from "../common/databases.js";
+
+const { board: database } = await getDatabases(["board"]);
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
  *
  * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
- * @param {string} channelFound - Text based channel.
+ * @param {import("discord.js").Snowflake} channelFound - Text based channel.
  *
  * @returns {Promise<boolean>} Whether the channel is a match.
  */
@@ -68,10 +66,12 @@ const info = {
 			input
 				.setName("minimum-reactions")
 				.setDescription(
-					"Filter messages to only get those with at least this many reactions",
+					`Filter messages to only get those with at least this many reactions (defaults to ${Math.round(
+						MIN_REACTIONS * 0.4,
+					)})`,
 				)
 				.setRequired(false)
-				.setMinValue(MIN_REACTIONS),
+				.setMinValue(1),
 		)
 		.addUserOption((input) =>
 			input
@@ -97,101 +97,66 @@ const info = {
 		),
 
 	async interaction(interaction) {
-		const deferred = await interaction.deferReply({
-			ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
-		});
-		const board = await interaction.guild.channels.fetch(BOARD_CHANNEL);
-		if (!board?.isTextBased()) {
-			throw new ReferenceError("Could not find board channel");
-		}
-
-		const minReactions = interaction.options.getInteger("minimum-reactions") ?? 0;
+		const minReactions =
+			interaction.options.getInteger("minimum-reactions") ?? Math.round(MIN_REACTIONS * 0.4);
 		const user = interaction.options.getUser("user")?.id;
 		const channelWanted = interaction.options.getChannel("channel");
-		const fetchedMessages = await getAllMessages(board).then((messages) =>
-			asyncFilter(
-				messages
-					.filter((message) => {
-						if (
-							!message.content ||
-							!message.embeds[0] ||
-							!message.author.bot ||
-							(/\d+/.exec(message.content)?.[0] ?? 0) < minReactions
-						)
-							return false;
-						return message;
-					})
-					.sort(() => Math.random() - 0.5),
-				async (message) => {
-					if (user && message.content.match(MessageMentions.UsersPattern)?.[1] !== user)
-						return false;
-
-					const channelFound = message.content.match(
-						MessageMentions.ChannelsPattern,
-					)?.[1];
-
-					if (
-						channelFound &&
-						channelWanted &&
-						!(await textChannelMatches(channelWanted, channelFound))
-					)
-						return false;
-
-					return message;
-				},
-			),
+		const data =
+			await /** @type {Promise<import("../common/board.js").BoardDatabaseItem[]>} */ (
+				extractData(database)
+			);
+		const fetchedMessages = asyncFilter(
+			data.sort(() => Math.random() - 0.5),
+			async (message) => {
+				return (
+					message.reactions >= minReactions &&
+					(user ? message.user === user : true) &&
+					(channelWanted
+						? await textChannelMatches(channelWanted, message.channel)
+						: true) &&
+					message
+				);
+			},
 		);
 
 		const customId = generateHash("next");
-		const nextButton = new ButtonBuilder()
-			.setLabel("Next")
-			.setCustomId(customId)
-			.setStyle(ButtonStyle.Secondary);
+		/** @returns {Promise<import("discord.js").WebhookEditMessageOptions>} */
+		async function getNextMessage() {
+			const info = (await fetchedMessages.next()).value;
 
-		let source = (await fetchedMessages.next()).value;
-		/**
-		 * Grab a new message from the board.
-		 *
-		 * @param {void | Message} current
-		 *
-		 * @returns {Promise<import("discord.js").InteractionReplyOptions>} - Reply to post next.
-		 */
-		async function generateMessage(current) {
-			if (!current) {
-				return {
-					allowedMentions: { users: [] },
-					files: [],
-					components: [],
+			const reply = info
+				? await generateMessage(info, [
+						new ButtonBuilder()
+							.setLabel("Next >>")
+							.setCustomId(customId)
+							.setStyle(ButtonStyle.Primary),
+				  ])
+				: {
+						allowedMentions: { users: [] },
+						files: [],
+						components: [],
 
-					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
+						content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
 
-					embeds: [],
-					ephemeral: true,
-				};
+						embeds: [],
+						ephemeral: true,
+				  };
+
+			if (!reply) {
+				queueDatabaseWrite(
+					database,
+					data.filter(({ source }) => source !== info?.source),
+				);
+
+				return getNextMessage();
 			}
-			source = (await fetchedMessages.next()).value;
-			const linkButton = current.components?.[0]?.components?.[0];
-			return {
-				allowedMentions: { users: [] },
 
-				components: [
-					new MessageActionRowBuilder().setComponents(
-						linkButton?.type === ComponentType.Button
-							? [ButtonBuilder.from(linkButton), nextButton]
-							: [nextButton],
-					),
-				],
-
-				content: current.content,
-				embeds: current.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
-				ephemeral: interaction.channel?.id !== process.env.BOTS_CHANNEL,
-				files: current.attachments.map((attachment) => attachment),
-			};
+			return reply;
 		}
 
-		await interaction.editReply(await generateMessage(source));
+		const reply = await interaction.reply(await getNextMessage());
 
-		const collector = deferred.createMessageComponentCollector({
+		const collector = reply.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
 				buttonInteraction.customId === customId &&
 				buttonInteraction.user.id === interaction.user.id,
@@ -202,7 +167,7 @@ const info = {
 		collector
 			?.on("collect", async (buttonInteraction) => {
 				buttonInteraction.deferUpdate();
-				await interaction.editReply(await generateMessage(source));
+				await interaction.editReply(await getNextMessage());
 
 				collector.resetTimer();
 			})
@@ -213,10 +178,6 @@ const info = {
 					allowedMentions: { users: [] },
 
 					components: disableComponents(source.components),
-
-					content: source.content,
-					embeds: source.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
-					files: source.attachments.map((attachment) => attachment),
 				});
 			});
 	},

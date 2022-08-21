@@ -1,7 +1,15 @@
-import { ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder } from "discord.js";
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	EmbedBuilder,
+	Message,
+} from "discord.js";
 import { guild } from "../client.js";
-import { extractMessageExtremities, getAllMessages, messageToText } from "../lib/message.js";
+import { extractMessageExtremities, messageToText } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
 
 import { censor } from "./moderation/automod.js";
 
@@ -9,140 +17,162 @@ export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
 export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
 
-/**
- * Supplied a message in #potatoboard, get the original message that was reacted to.
- *
- * @param {import("discord.js").Message} boardMessage - Message in #potatoboard.
- *
- * @returns {Promise<import("discord.js").Message | undefined>} - Source message.
- */
-export async function boardMessageToSource(boardMessage) {
-	const component = boardMessage.components[0]?.components?.[0];
+const board = await guild.channels.fetch(BOARD_CHANNEL);
+if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
-	if (component?.type !== ComponentType.Button) return;
-
-	const { guildId, channelId, messageId } =
-		/^https?:\/\/(?:.+\.)?discord\.com\/channels\/(?<guildId>\d+|@me)\/(?<channelId>\d+)\/(?<messageId>\d+)\/?$/iu.exec(
-			component.url ?? "",
-		)?.groups ?? {};
-
-	if (!guildId || !channelId || !messageId) return;
-
-	const channel = await guild.channels.fetch(channelId).catch(() => {});
-
-	if (!channel?.isTextBased()) return;
-
-	const message = await channel.messages.fetch(messageId).catch(() => {});
-
-	if (!message) return;
-
-	return message;
-}
-
-/** @type {import("discord.js").Message[] | undefined} */
-let MESSAGES;
+const { board: database } = await getDatabases(["board"]);
 
 /**
- * Supplied a message, get the message in #potatoboard that references it.
+ * @param {BoardDatabaseItem | import("discord.js").Message} info
+ * @param {ButtonBuilder[]} [extraButtons]
  *
- * @param {import("discord.js").Message} message - Message to find.
- *
- * @returns {Promise<import("discord.js").Message | undefined>} Message on #potatoboard.
+ * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
  */
-export async function sourceToBoardMessage(message) {
-	const board = await guild.channels.fetch(BOARD_CHANNEL);
+export async function generateMessage(info, extraButtons = []) {
+	const count =
+		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
+	/**
+	 * @param {import("discord.js").Message} message
+	 *
+	 * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
+	 */
+	async function messageToBoardData(message) {
+		const { files, embeds } = await extractMessageExtremities(message, false);
 
-	if (!board?.isTextBased()) {
-		throw new ReferenceError("Could not find board channel");
+		const description = await messageToText(message);
+
+		const censored = censor(description);
+		const censoredName = censor(message.author.username);
+
+		const boardEmbed = new EmbedBuilder()
+			.setColor(message.member?.displayColor ?? 0)
+			.setDescription(censored ? censored.censored : description || null)
+			.setAuthor({
+				iconURL: (message.member ?? message.author).displayAvatarURL(),
+				name:
+					message.member?.displayName ??
+					(censoredName ? censoredName.censored : message.author.username),
+			})
+			.setTimestamp(message.createdAt);
+
+		const button = new ButtonBuilder()
+			.setLabel("View Context")
+			.setStyle(ButtonStyle.Link)
+			.setURL(message.url);
+
+		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
+
+		return {
+			allowedMentions: { users: [] },
+			components: [new MessageActionRowBuilder().addComponents(button, ...extraButtons)],
+
+			content: `**${BOARD_EMOJI} ${count}** | ${message.channel.toString()}${
+				message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
+			} | ${message.author.toString()}`,
+			embeds: [boardEmbed, ...embeds],
+			files,
+		};
 	}
 
-	MESSAGES ??= await getAllMessages(board);
-
-	return MESSAGES.find((boardMessage) => {
-		const component = boardMessage.components[0]?.components?.[0];
-
-		if (component?.type !== ComponentType.Button) return;
-
-		const messageId = /\d+$/.exec(component.url ?? "")?.[0];
-
-		return messageId === message.id;
-	});
-}
-
-/**
- * Add a message to the #potatoboard.
- *
- * @param {import("discord.js").Message} message - Message to add.
- */
-export async function postMessageToBoard(message) {
-	const { files, embeds } = await extractMessageExtremities(message, false);
-
-	const board = await guild?.channels.fetch(BOARD_CHANNEL);
-
+	if (info instanceof Message) return messageToBoardData(info);
 	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+	const onBoard = info.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
+	if (onBoard) {
+		const linkButton = onBoard.components?.[0]?.components?.[0];
+		const buttons =
+			linkButton?.type === ComponentType.Button
+				? [ButtonBuilder.from(linkButton), ...extraButtons]
+				: extraButtons;
+		return {
+			allowedMentions: { users: [] },
 
-	const description = await messageToText(message);
+			components: buttons.length
+				? [new MessageActionRowBuilder().setComponents(buttons)]
+				: [],
 
-	const censored = censor(description);
-	const censoredName = censor(message.author.username);
-
-	const boardEmbed = new EmbedBuilder()
-		.setColor(message.member?.displayColor ?? 0)
-		.setDescription(censored ? censored.censored : description || null)
-		.setAuthor({
-			iconURL: (message.member ?? message.author).displayAvatarURL(),
-			name:
-				message.member?.displayName ??
-				(censoredName ? censoredName.censored : message.author.username),
-		})
-		.setTimestamp(message.createdAt);
-
-	const button = new ButtonBuilder()
-		.setLabel("View Context")
-		.setStyle(ButtonStyle.Link)
-		.setURL(message.url);
-	const reaction = message.reactions.resolve(BOARD_EMOJI);
-
-	if (!reaction) return;
-
-	MESSAGES ??= await getAllMessages(board);
-
-	const boardMessage = await board.send({
-		allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-		components: [new MessageActionRowBuilder().addComponents(button)],
-
-		content: `**${BOARD_EMOJI} ${reaction?.count ?? 0}** | ${message.channel.toString()}${
-			message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
-		} | ${message.author.toString()}`,
-		embeds: [boardEmbed, ...embeds],
-		files,
-	});
-	if (board.type === ChannelType.GuildNews) {
-		await boardMessage.crosspost();
+			content: onBoard.content,
+			embeds: onBoard.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
+			files: onBoard.attachments.map((attachment) => attachment),
+		};
 	}
-	MESSAGES.push(boardMessage);
-	return boardMessage;
+	const channel = await guild.channels.fetch(info.channel);
+	if (!channel?.isTextBased()) return;
+	const message = await channel.messages.fetch(info.source).catch(() => {});
+	if (!message) return;
+	return messageToBoardData(message);
 }
 
 /**
  * Update the count on a message on #potatoboard.
  *
- * @param {number} count - The updated count.
- * @param {import("discord.js").Message} boardMessage - The message to update.
+ * @param {import("discord.js").Message} message
  */
-export async function updateReactionCount(count, boardMessage) {
-	MESSAGES ??= await getAllMessages(boardMessage.channel);
+export async function updateBoard(message) {
+	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
+	const data = await /** @type {Promise<import("../common/board.js").BoardDatabaseItem[]>} */ (
+		extractData(database)
+	);
+	const info = data.find(({ source }) => source === message.id);
+	if (info?.onBoard) {
+		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
-	if (count < Math.max(MIN_REACTIONS - 1, 1)) {
-		MESSAGES = MESSAGES.filter(({ id }) => id !== boardMessage.id);
-		await boardMessage.delete();
-	} else {
-		const newMessage = await boardMessage.edit({
+		const boardMessage = await board?.messages.fetch(info.onBoard);
+		if (count < Math.max(Math.round(MIN_REACTIONS - MIN_REACTIONS / 6), 1)) {
+			await boardMessage.delete();
+		} else {
+			await boardMessage.edit({
+				allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+				content: boardMessage.content.replace(/\d+/, `${count}`),
+			});
+		}
+	} else if (count >= MIN_REACTIONS) {
+		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+
+		const boardMessage = await board?.send({
 			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-			content: boardMessage.content.replace(/\d+/, `${count}`),
-			embeds: boardMessage.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
-			files: boardMessage.attachments.map((attachment) => attachment),
+			...(await generateMessage(message)),
 		});
-		MESSAGES = MESSAGES.map((msg) => (msg.id === newMessage.id ? newMessage : msg));
+		if (board.type === ChannelType.GuildNews) await boardMessage.crosspost();
+		if (info) {
+			queueDatabaseWrite(
+				database,
+				data.map((item) =>
+					item.source === message.id
+						? { ...item, reactions: count, onBoard: boardMessage.id }
+						: item,
+				),
+			);
+			return;
+		}
 	}
+	queueDatabaseWrite(
+		database,
+		info
+			? count
+				? data.map((item) =>
+						item.source === message.id ? { ...item, reactions: count } : item,
+				  )
+				: data.filter((item) => item.source !== message.id)
+			: count
+			? [
+					...data,
+					{
+						reactions: count,
+						user: message.author.id,
+						channel: message.channel.id,
+						source: message.id,
+					},
+			  ]
+			: data,
+	);
 }
+
+/**
+ * @typedef {object} BoardDatabaseItem
+ *
+ * @property {number} reactions - The number of reactions this message has.
+ * @property {import("discord.js").Snowflake} user - The ID of the user who posted this.
+ * @property {import("discord.js").Snowflake} channel - The ID of the channel this message is in.
+ * @property {import("discord.js").Snowflake} [onBoard] - The ID of the message on the board.
+ * @property {import("discord.js").Snowflake} source - The ID of the original message.
+ */

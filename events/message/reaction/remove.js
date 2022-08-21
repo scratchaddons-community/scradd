@@ -1,10 +1,4 @@
-import {
-	BOARD_EMOJI,
-	sourceToBoardMessage,
-	postMessageToBoard,
-	MIN_REACTIONS,
-	updateReactionCount,
-} from "../../../common/board.js";
+import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 
 /** @type {import("../../../types/event").default<"messageReactionRemove">} */
 export default async function event(reaction, user) {
@@ -20,16 +14,5 @@ export default async function event(reaction, user) {
 
 	if (user.partial) user = await user.fetch();
 
-	const boardMessage = await sourceToBoardMessage(message);
-
-	const fetched = message.reactions.resolve(BOARD_EMOJI);
-	const count = fetched?.count ?? 0;
-
-	if (boardMessage?.embeds[0]) {
-		await updateReactionCount(count, boardMessage);
-	} else {
-		if (count < MIN_REACTIONS) return;
-
-		await postMessageToBoard(message);
-	}
+	await updateBoard(message);
 }
