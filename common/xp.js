@@ -13,7 +13,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	const database = (await getDatabases(["xp"])).xp;
 
-	const xp = /** @type {{ user: import("discord.js").Snowflake; xp: number }[]} */ (await extractData(database));
+	const xp = /** @type {XpDatabase} */ (await extractData(database));
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 	if (index === -1) {
@@ -26,6 +26,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		if (oldLevel !== newLevel) {
 			const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
 			const date = new Date();
+			const nextLevelXp = getXpForLevel(newLevel + 1);
 			if (bots?.isTextBased())
 				await bots.send({
 					content: "🎉 " + to.toString(),
@@ -38,15 +39,15 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							})
 							.setTitle("A member leveled up!")
 							.setDescription(
-								`${to.toString()}${
-									date.getUTCMonth() === 4 && date.getUTCDate() === 1
-										? ", You've at"
+								`${to.toString()}**${
+									date.getUTCMonth() === 3 && date.getUTCDate() === 1
+										? ", You've at" // april fools
 										: " has reached"
-								} level ${newLevel}! (${newXp.toLocaleString()}/${getXpForLevel(
+								} level ${newLevel}!** (${newXp.toLocaleString()}/${getXpForLevel(
 									newLevel,
-								).toLocaleString()} XP)\nNext level: Level ${newLevel + 1}; ${(
-									getXpForLevel(newLevel + 1) - newXp
-								).toLocaleString()} XP remaining`,
+								).toLocaleString()} XP)\nNext level: ${(
+									nextLevelXp - newXp
+								).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
 							)
 							.setFooter({
 								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
@@ -112,3 +113,5 @@ export function getLevelForXp(xp) {
 	}
 	return level;
 }
+
+/** @typedef {{ user: import("discord.js").Snowflake; xp: number }[]} XpDatabase */

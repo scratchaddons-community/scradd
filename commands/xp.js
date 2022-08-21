@@ -31,7 +31,9 @@ const info = {
 		const command = interaction.options.getSubcommand(true);
 
 		const database = (await getDatabases(["xp"])).xp;
-		const allXp = /** @type {{ user: import("discord.js").Snowflake; xp: number }[]} */ (await extractData(database));
+		const allXp = /** @type {import("../common/xp.js").XpDatabase} */ (
+			await extractData(database)
+		);
 		const top = allXp.sort((one, two) => two.xp - one.xp);
 
 		switch (command) {
