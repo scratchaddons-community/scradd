@@ -40,7 +40,8 @@ export default async function event(interaction) {
 	try {
 		const commandPromise = commands.get(interaction.commandName);
 
-		if (!commandPromise) throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
+		if (!commandPromise)
+			throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
 
 		const command = await commandPromise();
 		if (
