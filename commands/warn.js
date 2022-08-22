@@ -22,7 +22,7 @@ const info = {
 		.addIntegerOption((input) =>
 			input
 				.setDescription(
-					`How many strikes to add. Use a negative number here to remove strikes. Defaults to ${DEFAULT_STRIKES}`,
+					`How many strikes to add. Use a negative number here to remove strikes (defaults to ${DEFAULT_STRIKES})`,
 				)
 				.setName("strikes")
 				.setMaxValue(WARNS_PER_MUTE * MUTE_LENGTHS.length + 1)
