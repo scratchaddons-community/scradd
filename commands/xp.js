@@ -40,11 +40,11 @@ export default {
 
 				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
 				const level = getLevelForXp(xp);
-				const nextLevel = level + 1;
-				const xpForNextLevel = getXpForLevel(nextLevel);
+				const xpForNextLevel = getXpForLevel(level + 1);
 				const xpForPreviousLevel = getXpForLevel(level);
 				const increment = xpForNextLevel - xpForPreviousLevel;
-				const progress = (xp - xpForPreviousLevel) / increment;
+				const xpGained = xp - xpForPreviousLevel;
+				const progress = xpGained / increment;
 				const rank = top.findIndex((info) => info.user === user.id) + 1;
 				interaction.reply({
 					embeds: [
@@ -57,38 +57,24 @@ export default {
 							.setTitle("XP Rank")
 							.addFields(
 								{ name: "📊 Level", value: level.toLocaleString(), inline: true },
-								{ name: "🔢 XP", value: xp.toLocaleString(), inline: true },
+								{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 								{
 									name: CONSTANTS.zeroWidthSpace,
 									value: CONSTANTS.zeroWidthSpace,
 									inline: true,
 								},
 								{
-									name: "⬆ Next level",
-									value: nextLevel.toLocaleString(),
-									inline: true,
-								},
-								{
-									name: "💯 Total XP Required",
+									name: "⬆ Next Level XP",
 									value: xpForNextLevel.toLocaleString(),
 									inline: true,
 								},
 								{
-									name: CONSTANTS.zeroWidthSpace,
-									value: CONSTANTS.zeroWidthSpace,
-									inline: true,
-								},
-								{
-									name: "✨ Remaining XP",
-									value: (xpForNextLevel - xp).toLocaleString(),
-									inline: true,
-								},
-								{
 									name: `${CONSTANTS.emojis.misc.percent} Progress`,
-									value: progress.toLocaleString([], {
-										maximumFractionDigits: 2,
-										style: "percent",
-									}),
+									value:
+										progress.toLocaleString([], {
+											maximumFractionDigits: 2,
+											style: "percent",
+										}) + ` (${xpGained}/${increment})`,
 									inline: true,
 								},
 								{
