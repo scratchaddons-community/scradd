@@ -37,6 +37,7 @@ export default /** @type {const} */ ({
 			typing: "<a:typing:949436374174560276>",
 			call: "<:call:950438678361161738>",
 		},
+		misc: { addon: "<:addon:1008842100764332142>", percent: "<:percent:1009144273331040296>" },
 	},
 	robotop: "323630372531470346",
 	testingServer: "938438560925761619",

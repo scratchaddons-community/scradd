@@ -84,7 +84,7 @@ export default {
 									inline: true,
 								},
 								{
-									name: "<:percent:1009144273331040296> Progress",
+									name: `${CONSTANTS.emojis.misc.percent} Progress`,
 									value: progress.toLocaleString([], {
 										maximumFractionDigits: 2,
 										style: "percent",

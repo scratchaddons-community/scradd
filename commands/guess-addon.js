@@ -1356,7 +1356,7 @@ export default {
 							),
 						],
 
-						content: `<:addon:1008842100764332142> Your addon is **${escapeMarkdown(
+						content: `${CONSTANTS.emojis.misc.addon} Your addon is **${escapeMarkdown(
 							foundAddon.name,
 						)}**!`,
 
