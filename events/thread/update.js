@@ -10,7 +10,7 @@ import {
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
-import { DATABASE_THREAD } from "../../common/databases.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"threadUpdate">} */

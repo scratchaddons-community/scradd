@@ -1,7 +1,7 @@
 import { EmbedBuilder, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
 import client, { guild } from "../../client.js";
 import CONSTANTS from "../CONSTANTS.js";
-import Database from "../databases.js";
+import Database from "../database.js";
 import log from "./logging.js";
 
 const EXPIRY_LENGTH = 21;
@@ -51,10 +51,9 @@ export async function getData(data, sendLog = false) {
 	return newData;
 }
 
-const warnLog = new Database("warn");
-const muteLog = new Database("mute");
-await warnLog.init();
-await muteLog.init();
+export const warnLog = new Database("warn");
+export const muteLog = new Database("mute");
+await Promise.all([warnLog.init(), muteLog.init()]);
 
 /**
  * @param {import("discord.js").GuildMember | import("discord.js").User} user

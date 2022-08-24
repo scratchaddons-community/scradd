@@ -10,16 +10,10 @@ import {
 import fetch from "node-fetch";
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import Database from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
-import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
+import { getData, muteLog, warnLog, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
-
-const warnLog = new Database("warn");
-const muteLog = new Database("mute");
-await warnLog.init();
-await muteLog.init();
 
 /** @type {import("../types/command").default} */
 export default {

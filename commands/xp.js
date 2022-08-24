@@ -1,13 +1,9 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import Database from "../common/databases.js";
-import { getLevelForXp, getXpForLevel } from "../common/xp.js";
+import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
 import { paginate } from "../lib/message.js";
 import { makeProgressBar } from "../lib/numbers.js";
-
-const database = new Database("xp");
-await database.init();
 
 /** @type {import("../types/command").default} */
 export default {

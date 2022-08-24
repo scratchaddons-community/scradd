@@ -9,7 +9,7 @@ import {
 import { guild } from "../client.js";
 import { extractMessageExtremities, messageToText } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
-import Database from "./databases.js";
+import Database from "./database.js";
 
 import { censor } from "./moderation/automod.js";
 
@@ -21,6 +21,8 @@ const board = await guild.channels.fetch(BOARD_CHANNEL);
 if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
 const database = new Database("board");
+await database.init();
+export { database as boardDatabase };
 
 /**
  * @param {import("../types/databases").default["board"] | import("discord.js").Message} info

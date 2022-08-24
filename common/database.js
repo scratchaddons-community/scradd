@@ -27,11 +27,18 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
  * }}
  */
 const timeouts = {};
+/** @type {(keyof import("../types/databases").default)[]} */
+const contructed = [];
 
 /** @template {keyof import("../types/databases").default} Name */
 export default class Database {
 	/** @param {Name} name */
 	constructor(name) {
+		if (contructed.includes(name))
+			throw new RangeError(
+				`Cannot create a 2nd database for ${name}, they will have conflicting data!`,
+			);
+		contructed.push(name);
 		/** @type {Name} */
 		this.name = name;
 	}
@@ -40,13 +47,13 @@ export default class Database {
 	#data = undefined;
 	async init() {
 		/** @type {Message | undefined} */
-		this.database = databases[this.name] ||= await thread.send(
+		this.message = databases[this.name] ||= await thread.send(
 			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${
 				this.name
 			} information will be reset.*`,
 		);
 
-		const attachment = this.database?.attachments.first()?.url;
+		const attachment = this.message?.attachments.first()?.url;
 
 		this.#data = attachment
 			? await fetch(attachment)
@@ -63,17 +70,17 @@ export default class Database {
 			: [];
 	}
 
-	/** @type {import("../types/databases").default[Name][]} */
 	get data() {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
+		console.log("get", this.#data[0]);
 		return this.#data;
 	}
 
-	/** @param {import("../types/databases").default[Name][]} content */
 	set data(content) {
-		if (!this.database) throw new ReferenceError("Must call `.init()` before setting `.data`");
+		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
-		const timeoutId = timeouts[this.database.id];
+		console.log("set", this.#data[0]);
+		const timeoutId = timeouts[this.message.id];
 		const files = content.length
 			? [
 					new AttachmentBuilder(Buffer.from(papaparse.unparse(content), "utf-8"), {
@@ -82,13 +89,13 @@ export default class Database {
 			  ]
 			: [];
 		const callback = () => {
-			if (!this.database)
+			if (!this.message)
 				throw new ReferenceError("Must call `.init()` before setting `.data`");
-			const promise = this.database.edit({ files });
-			timeouts[this.database.id] = undefined;
+			const promise = this.message.edit({ files });
+			timeouts[this.message.id] = undefined;
 			return promise;
 		};
-		timeouts[this.database.id] = { timeout: setTimeout(callback, 60_000), callback };
+		timeouts[this.message.id] = { timeout: setTimeout(callback, 60_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
 	}
 }

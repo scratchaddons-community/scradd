@@ -6,16 +6,12 @@ import {
 	CategoryChannel,
 } from "discord.js";
 
-import { generateMessage, MIN_REACTIONS } from "../common/board.js";
+import { boardDatabase as database, generateMessage, MIN_REACTIONS } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { disableComponents } from "../lib/message.js";
 import { guild } from "../client.js";
-import Database from "../common/databases.js";
-
-const database = new Database("board");
-database.init();
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.

@@ -1,6 +1,6 @@
 import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
-import { cleanListeners } from "../common/databases.js";
+import { cleanListeners } from "../common/database.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */

@@ -1,10 +1,11 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "./CONSTANTS.js";
-import Database from "./databases.js";
+import Database from "./database.js";
 
 const database = new Database("xp");
-database.init();
+await database.init();
+export { database as xpDatabase };
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
