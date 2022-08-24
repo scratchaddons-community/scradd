@@ -5,7 +5,7 @@ import { importScripts, pkg } from "./lib/files.js";
 import logError from "./lib/logError.js";
 
 const Handler = new Client({
-	allowedMentions: { parse: ["users"], roles: [], repliedUser: true },
+	allowedMentions: { parse: ["users"], repliedUser: true },
 
 	intents: [
 		GatewayIntentBits.Guilds,
