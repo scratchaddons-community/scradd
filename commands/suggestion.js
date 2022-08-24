@@ -256,6 +256,7 @@ export default {
 
 				await interaction.deferReply();
 				const unfiltered = await getAllMessages(channel);
+				// todo: asyncFilter
 				const all = (
 					await Promise.all(
 						unfiltered.map(async (message) => {
