@@ -25,7 +25,7 @@ export const SUGGESTION_EMOJIS = [
 	["749005259682086964", "749005284403445790"],
 ];
 
-/** @type {import("../common/suggest.js").Answer[]} */
+/** @type {import("../common/suggest").Answer[]} */
 export const ANSWERS = [
 	{ name: "Unanswered", color: Colors.Greyple, description: "This hasn’t yet been answered" },
 	{

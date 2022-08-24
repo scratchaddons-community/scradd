@@ -43,7 +43,7 @@ export default class SuggestionChannel {
 	/**
 	 * Post a message in a suggestion channel.
 	 *
-	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
 	 * @returns {Promise<false | import("discord.js").Message>} - `false` on errors and the suggestion message on success.
@@ -102,7 +102,7 @@ export default class SuggestionChannel {
 	/**
 	 * Answer a suggestion.
 	 *
-	 * @param {import("../types/command.js").GuildInteraction} interaction - The interaction to reply to on errors.
+	 * @param {import("../types/command").GuildInteraction} interaction - The interaction to reply to on errors.
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answer[]} answers - An object that maps answers to colors.
 	 *
@@ -164,7 +164,7 @@ export default class SuggestionChannel {
 	/**
 	 * Edit a suggestion.
 	 *
-	 * @param {import("../types/command.js").GuildInteraction} interaction - Interaction to respond to on errors.
+	 * @param {import("../types/command").GuildInteraction} interaction - Interaction to respond to on errors.
 	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
 	 *
 	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.

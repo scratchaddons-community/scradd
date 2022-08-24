@@ -18,7 +18,7 @@ export default async function log(content, group, extra = {}) {
 	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
 }
 
-/** @param {typeof LOG_GROUPS[number] | typeof import("../databases.js").DATABASE_THREAD} group */
+/** @param {typeof LOG_GROUPS[number] | typeof import("../databases").DATABASE_THREAD} group */
 export async function getThread(group) {
 	const channel = await guild.channels.fetch(process.env.LOGS_CHANNEL || "");
 	if (channel?.type !== ChannelType.GuildText)

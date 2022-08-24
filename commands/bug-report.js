@@ -7,7 +7,7 @@ const { BUGS_CHANNEL } = process.env;
 
 if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL isn’t set in the .env");
 
-/** @type {import("../common/suggest.js").Answer[]} */
+/** @type {import("../common/suggest").Answer[]} */
 const ANSWERS = [
 	{
 		name: "Unverified",
