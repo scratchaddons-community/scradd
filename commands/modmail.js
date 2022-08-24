@@ -20,7 +20,7 @@ import {
 } from "../common/modmail.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
 		.setDescription("(Mods only) Commands to manage modmail tickets")
@@ -173,5 +173,3 @@ const info = {
 
 	censored: false,
 };
-
-export default info;

@@ -59,7 +59,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 }
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
@@ -182,5 +182,3 @@ const info = {
 			});
 	},
 };
-
-export default info;

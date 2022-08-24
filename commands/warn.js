@@ -6,7 +6,7 @@ import { stripMarkdown } from "../lib/markdown.js";
 const DEFAULT_STRIKES = 1;
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Warns a user")
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
@@ -62,5 +62,3 @@ const info = {
 		);
 	},
 };
-
-export default info;

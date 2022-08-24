@@ -17,7 +17,7 @@ import { convertBase } from "../lib/numbers.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("View your or (Mods only) someone else’s active strikes")
 		.addStringOption((input) =>
@@ -40,8 +40,6 @@ const info = {
 	},
 	censored: false,
 };
-
-export default info;
 
 /**
  * @param {import("discord.js").User | import("discord.js").GuildMember} user

@@ -76,7 +76,7 @@ export const CHANNEL_TAG = "#suggestions";
 const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
@@ -334,5 +334,3 @@ const info = {
 		}
 	},
 };
-
-export default info;

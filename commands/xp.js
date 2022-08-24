@@ -7,7 +7,7 @@ import { paginate } from "../lib/message.js";
 import { makeProgressBar } from "../lib/numbers.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to view users’ XP amounts")
 		.addSubcommand((subcommand) =>
@@ -138,5 +138,3 @@ const info = {
 		}
 	},
 };
-
-export default info;

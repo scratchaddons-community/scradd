@@ -4,7 +4,7 @@ import { cleanListeners } from "../common/databases.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`(${
@@ -23,5 +23,3 @@ const info = {
 		process.exit();
 	},
 };
-
-export default info;

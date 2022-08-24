@@ -189,7 +189,7 @@ const OPTIONS = [
 ];
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input
 			.setName("tab")
@@ -300,5 +300,3 @@ const info = {
 	},
 	enable: false,
 };
-
-export default info;

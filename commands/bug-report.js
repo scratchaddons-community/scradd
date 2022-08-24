@@ -49,7 +49,7 @@ export const CHANNEL_TAG = "#bugs";
 const channel = new SuggestionChannel(BUGS_CHANNEL);
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
@@ -181,5 +181,3 @@ const info = {
 		}
 	},
 };
-
-export default info;

@@ -4,7 +4,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 const MAX_FETCH_COUNT = 100;
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
@@ -46,8 +46,6 @@ const info = {
 			);
 	},
 };
-
-export default info;
 
 /**
  * @param {import("discord.js").Collection<import("discord.js").Snowflake, import("discord.js").Message>} unfiltered

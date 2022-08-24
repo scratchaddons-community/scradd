@@ -859,7 +859,7 @@ const BULLET_POINT = CONSTANTS.footerSeperator.trim();
 const games = {};
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Play games where you or I guess addons")
 		.addSubcommand((subcommand) =>
@@ -1775,8 +1775,6 @@ const info = {
 		}
 	},
 };
-
-export default info;
 
 /** @param {import("discord.js").ModalSubmitInteraction} interaction */
 export async function guessAddon(interaction) {

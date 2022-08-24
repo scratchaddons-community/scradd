@@ -5,7 +5,7 @@ import log from "../common/moderation/logging.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mods only) Mimic what you tell me to")
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
@@ -40,5 +40,3 @@ const info = {
 	},
 	censored: "channel",
 };
-
-export default info;

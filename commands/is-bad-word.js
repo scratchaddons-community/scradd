@@ -4,7 +4,7 @@ import { censor } from "../common/moderation/automod.js";
 import { joinWithAnd } from "../lib/text.js";
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Checks text for language")
 		.addStringOption((input) =>
@@ -34,5 +34,3 @@ const info = {
 
 	censored: false,
 };
-
-export default info;

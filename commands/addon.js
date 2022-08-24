@@ -19,7 +19,7 @@ const fuse = new Fuse(addons, {
 });
 
 /** @type {import("../types/command").default} */
-const info = {
+export default {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`Replies with information about a specific addon available in v${
@@ -178,5 +178,3 @@ const info = {
 	dm: true,
 	censored: "channel",
 };
-
-export default info;
