@@ -12,9 +12,10 @@ import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { disableComponents } from "../lib/message.js";
 import { guild } from "../client.js";
-import { extractData, getDatabases, queueDatabaseWrite } from "../common/databases.js";
+import Database from "../common/databases.js";
 
-const { board: database } = await getDatabases(["board"]);
+const database = new Database("board");
+database.init();
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
@@ -101,10 +102,7 @@ export default {
 			interaction.options.getInteger("minimum-reactions") ?? Math.round(MIN_REACTIONS * 0.4);
 		const user = interaction.options.getUser("user")?.id;
 		const channelWanted = interaction.options.getChannel("channel");
-		const data =
-			await /** @type {Promise<import("../common/board.js").BoardDatabaseItem[]>} */ (
-				extractData(database)
-			);
+		const data = database.data;
 		const fetchedMessages = asyncFilter(
 			data.sort(() => Math.random() - 0.5),
 			async (message) => {
@@ -143,10 +141,7 @@ export default {
 				  };
 
 			if (!reply) {
-				queueDatabaseWrite(
-					database,
-					data.filter(({ source }) => source !== info?.source),
-				);
+				database.data = data.filter(({ source }) => source !== info?.source);
 
 				return getNextMessage();
 			}

@@ -1,7 +1,10 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "./CONSTANTS.js";
-import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
+import Database from "./databases.js";
+
+const database = new Database("xp");
+database.init();
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
@@ -11,9 +14,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const member =
 		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
 
-	const database = (await getDatabases(["xp"])).xp;
-
-	const xp = /** @type {XpDatabase} */ (await extractData(database));
+	const xp = database.data;
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 	if (index === -1) {
@@ -58,7 +59,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		}
 	}
 
-	queueDatabaseWrite(database, xp);
+	database.data = xp;
 }
 
 const XP_PER_LEVEL = [
@@ -113,5 +114,3 @@ export function getLevelForXp(xp) {
 	}
 	return level;
 }
-
-/** @typedef {{ user: import("discord.js").Snowflake; xp: number }[]} XpDatabase */

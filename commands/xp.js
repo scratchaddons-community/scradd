@@ -1,10 +1,13 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { extractData, getDatabases } from "../common/databases.js";
+import Database from "../common/databases.js";
 import { getLevelForXp, getXpForLevel } from "../common/xp.js";
 import { paginate } from "../lib/message.js";
 import { makeProgressBar } from "../lib/numbers.js";
+
+const database = new Database("xp");
+await database.init();
 
 /** @type {import("../types/command").default} */
 export default {
@@ -30,10 +33,7 @@ export default {
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand(true);
 
-		const database = (await getDatabases(["xp"])).xp;
-		const allXp = /** @type {import("../common/xp.js").XpDatabase} */ (
-			await extractData(database)
-		);
+		const allXp = database.data;
 		const top = allXp.sort((one, two) => two.xp - one.xp);
 
 		switch (command) {

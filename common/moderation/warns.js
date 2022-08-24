@@ -1,10 +1,8 @@
 import { EmbedBuilder, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
 import client, { guild } from "../../client.js";
 import CONSTANTS from "../CONSTANTS.js";
-import { extractData, getDatabases, queueDatabaseWrite } from "../databases.js";
+import Database from "../databases.js";
 import log from "./logging.js";
-
-/** @typedef {{ user: import("discord.js").Snowflake; expiresAt: number; info?: import("discord.js").Snowflake }[]} WarnDatabase */
 
 const EXPIRY_LENGTH = 21;
 export const WARNS_PER_MUTE = 3,
@@ -12,14 +10,16 @@ export const WARNS_PER_MUTE = 3,
 	WARN_INFO_BASE = 64;
 
 /**
- * @param {import("discord.js").Message} message
+ * @template {import("../../types/databases").default["mute"]} T
  *
- * @returns
+ * @param {T[]} data
+ *
+ * @returns {Promise<T[]>}
  */
-export async function getData(message, sendLog = false) {
+export async function getData(data, sendLog = false) {
 	/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 	const losers = {};
-	const newData = /** @type {WarnDatabase} */ (await extractData(message)).filter((warn) => {
+	const newData = data.filter((warn) => {
 		const expiresAt = new Date(warn.expiresAt);
 		if (expiresAt.getTime() < Date.now()) {
 			losers[warn.user] ??= 0;
@@ -51,6 +51,11 @@ export async function getData(message, sendLog = false) {
 	return newData;
 }
 
+const warnLog = new Database("warn");
+const muteLog = new Database("mute");
+await warnLog.init();
+await muteLog.init();
+
 /**
  * @param {import("discord.js").GuildMember | import("discord.js").User} user
  * @param {string} reason
@@ -58,9 +63,10 @@ export async function getData(message, sendLog = false) {
  * @param {import("discord.js").User | string} context
  */
 export default async function warn(user, reason, strikes, context) {
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"]);
-
-	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
+	const [allWarns, allMutes] = await Promise.all([
+		getData(warnLog.data, true),
+		getData(muteLog.data),
+	]);
 	const oldLength = allWarns.length;
 
 	if (strikes < 0) {
@@ -155,7 +161,7 @@ export default async function warn(user, reason, strikes, context) {
 			for (let index = oldMutes; index < userMutes; index++) {
 				timeoutLength += MUTE_LENGTHS[index] || 1;
 			}
-			queueDatabaseWrite(muteLog, allMutes);
+			muteLog.data = allMutes;
 			promises.push(
 				member.moderatable
 					? member.disableCommunicationUntil(
@@ -173,7 +179,7 @@ export default async function warn(user, reason, strikes, context) {
 		}
 	}
 
-	queueDatabaseWrite(warnLog, allWarns);
+	warnLog.data = allWarns;
 	await Promise.all([
 		...promises,
 
@@ -225,7 +231,7 @@ export default async function warn(user, reason, strikes, context) {
 /**
  * @param {import("discord.js").Snowflake} user
  * @param {number} strikes
- * @param {WarnDatabase} warns
+ * @param {import("../../types/databases").default["warn"][]} warns
  */
 function unwarn(user, strikes, warns) {
 	for (var i = 0; i < strikes; i++) {

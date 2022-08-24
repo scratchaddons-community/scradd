@@ -9,7 +9,7 @@ import {
 import { guild } from "../client.js";
 import { extractMessageExtremities, messageToText } from "../lib/message.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
-import { extractData, getDatabases, queueDatabaseWrite } from "./databases.js";
+import Database from "./databases.js";
 
 import { censor } from "./moderation/automod.js";
 
@@ -20,10 +20,10 @@ export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
 const board = await guild.channels.fetch(BOARD_CHANNEL);
 if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
-const { board: database } = await getDatabases(["board"]);
+const database = new Database("board");
 
 /**
- * @param {BoardDatabaseItem | import("discord.js").Message} info
+ * @param {import("../types/databases").default["board"] | import("discord.js").Message} info
  * @param {ButtonBuilder[]} [extraButtons]
  *
  * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
@@ -109,10 +109,7 @@ export async function generateMessage(info, extraButtons = []) {
  */
 export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
-	const data = await /** @type {Promise<import("../common/board.js").BoardDatabaseItem[]>} */ (
-		extractData(database)
-	);
-	const info = data.find(({ source }) => source === message.id);
+	const info = database.data.find(({ source }) => source === message.id);
 	if (info?.onBoard) {
 		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
@@ -134,45 +131,29 @@ export async function updateBoard(message) {
 		});
 		if (board.type === ChannelType.GuildNews) await boardMessage.crosspost();
 		if (info) {
-			queueDatabaseWrite(
-				database,
-				data.map((item) =>
-					item.source === message.id
-						? { ...item, reactions: count, onBoard: boardMessage.id }
-						: item,
-				),
+			database.data = database.data.map((item) =>
+				item.source === message.id
+					? { ...item, reactions: count, onBoard: boardMessage.id }
+					: item,
 			);
 			return;
 		}
 	}
-	queueDatabaseWrite(
-		database,
-		info
-			? count
-				? data.map((item) =>
-						item.source === message.id ? { ...item, reactions: count } : item,
-				  )
-				: data.filter((item) => item.source !== message.id)
-			: count
-			? [
-					...data,
-					{
-						reactions: count,
-						user: message.author.id,
-						channel: message.channel.id,
-						source: message.id,
-					},
-			  ]
-			: data,
-	);
+	database.data = info
+		? count
+			? database.data.map((item) =>
+					item.source === message.id ? { ...item, reactions: count } : item,
+			  )
+			: database.data.filter((item) => item.source !== message.id)
+		: count
+		? [
+				...database.data,
+				{
+					reactions: count,
+					user: message.author.id,
+					channel: message.channel.id,
+					source: message.id,
+				},
+		  ]
+		: database.data;
 }
-
-/**
- * @typedef {object} BoardDatabaseItem
- *
- * @property {number} reactions - The number of reactions this message has.
- * @property {import("discord.js").Snowflake} user - The ID of the user who posted this.
- * @property {import("discord.js").Snowflake} channel - The ID of the channel this message is in.
- * @property {import("discord.js").Snowflake} [onBoard] - The ID of the message on the board.
- * @property {import("discord.js").Snowflake} source - The ID of the original message.
- */

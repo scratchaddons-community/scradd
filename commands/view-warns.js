@@ -10,11 +10,16 @@ import {
 import fetch from "node-fetch";
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { getDatabases } from "../common/databases.js";
+import Database from "../common/databases.js";
 import { getThread } from "../common/moderation/logging.js";
 import { getData, WARN_INFO_BASE } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+
+const warnLog = new Database("warn");
+const muteLog = new Database("mute");
+await warnLog.init();
+await muteLog.init();
 
 /** @type {import("../types/command").default} */
 export default {
@@ -47,11 +52,8 @@ export default {
  * @returns {Promise<import("discord.js").InteractionReplyOptions>}
  */
 async function getWarnsForMember(user) {
-	const { warn: warnLog, mute: muteLog } = await getDatabases(["warn", "mute"]);
-
-	const [allWarns, allMutes] = await Promise.all([getData(warnLog, true), getData(muteLog)]);
-	const warns = allWarns.filter((warn) => warn.user === user.id);
-	const mutes = allMutes.filter((mute) => mute.user === user.id);
+	const warns = warnLog.data.filter((warn) => warn.user === user.id);
+	const mutes = muteLog.data.filter((mute) => mute.user === user.id);
 
 	const member = user instanceof GuildMember ? user : await guild?.members.fetch(user.id);
 
@@ -162,8 +164,7 @@ export async function getWarns(reply, filter, interactor) {
 				(await guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await client.users.fetch(moderatorId).catch(() => {}));
 
-			const warnLog = (await getDatabases(["warn"])).warn;
-			const allWarns = await getData(warnLog, true);
+			const allWarns = await getData(warnLog.data, true);
 			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
 
