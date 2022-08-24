@@ -7,9 +7,10 @@ import dotenv from "dotenv";
 
 import CONSTANTS from "./common/CONSTANTS.js";
 import { importScripts, pkg } from "./lib/files.js";
+import fetch from "node-fetch";
 
 dotenv.config();
-const { default: client } = await import("./client.js");
+const { default: client, guild } = await import("./client.js");
 const { default: logError } = await import("./lib/logError.js");
 
 process
@@ -44,6 +45,19 @@ if (process.env.NODE_ENV === "production")
 	await import("./common/moderation/logging.js").then(({ default: log }) =>
 		log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server"),
 	);
+
+const usersVc = await guild.channels.fetch(process.env.USERS_CHANNEL || "");
+if (!usersVc) throw new TypeError("Could not find USERS_CHANNEL");
+
+setInterval(async () => {
+	const count = (
+		await fetch(`https://scratchaddons.com/usercount.json?date=${Date.now()}`).then(
+			(res) =>
+				/** @type {Promise<{ count: number; _chromeCountDate: string }>} */ (res.json()),
+		)
+	).count;
+	await usersVc.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
+}, 300_000);
 
 const guilds = await client.guilds.fetch();
 guilds.forEach(async (guild) => {
