@@ -72,7 +72,7 @@ async function getWarnsForMember(user) {
 
 						return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
 							strikes === 1 ? "" : ` (*${strikes})`
-						}: expiring ${time(warn.expiresAt, "R")}`;
+						}: expiring ${time(new Date(warn.expiresAt), "R")}`;
 					}),
 				)
 			).join("\n") || `${user.toString()} has no recent strikes!`,
@@ -181,7 +181,11 @@ export async function getWarns(reply, filter, interactor) {
 				embed.addFields({ name: "🫂 Target user", value: user.toString(), inline: true });
 
 			if (expiresAt)
-				embed.addFields({ name: "⏲ Expirery", value: time(expiresAt, "R"), inline: true });
+				embed.addFields({
+					name: "⏲ Expirery",
+					value: time(new Date(expiresAt), "R"),
+					inline: true,
+				});
 
 			await reply({ ephemeral: true, embeds: [embed] });
 		}
