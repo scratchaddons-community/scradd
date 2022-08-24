@@ -25,7 +25,17 @@ export default async function event(oldMessage, newMessage) {
 			} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 				"!",
 			"messages",
-			{ embeds: newMessage.embeds.map((embed) => EmbedBuilder.from(embed)) },
+			{
+				embeds: newMessage.embeds.map((embed) => EmbedBuilder.from(embed)),
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel("View Message")
+							.setStyle(ButtonStyle.Link)
+							.setURL(newMessage.url),
+					),
+				],
+			},
 		);
 	}
 	if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
@@ -69,7 +79,17 @@ export default async function event(oldMessage, newMessage) {
 			log(
 				`✏ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited!`,
 				"messages",
-				{ files },
+				{
+					files,
+					components: [
+						new MessageActionRowBuilder().addComponents(
+							new ButtonBuilder()
+								.setLabel("View Message")
+								.setStyle(ButtonStyle.Link)
+								.setURL(newMessage.url),
+						),
+					],
+				},
 			);
 	}
 
