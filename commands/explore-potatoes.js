@@ -12,6 +12,7 @@ import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { disableComponents } from "../lib/message.js";
 import { guild } from "../client.js";
+import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
@@ -113,22 +114,47 @@ export default {
 			},
 		);
 
-		const customId = generateHash("next");
+		const nextId = generateHash("next");
+		const prevId = generateHash("prev");
+
+		/** @type {import("discord.js").WebhookEditMessageOptions[]} */
+		const messages = [];
+		let index = 0;
+
 		/** @returns {Promise<import("discord.js").WebhookEditMessageOptions>} */
 		async function getNextMessage() {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info
-				? await generateMessage(info, [
-						new ButtonBuilder()
-							.setLabel("Next >>")
-							.setCustomId(customId)
-							.setStyle(ButtonStyle.Primary),
-				  ])
+				? await generateMessage(info, {
+						pre:
+							index > 0
+								? [
+										new ButtonBuilder()
+											.setLabel("<< Previous")
+											.setCustomId(prevId)
+											.setStyle(ButtonStyle.Primary),
+								  ]
+								: [],
+						post: [
+							new ButtonBuilder()
+								.setLabel("Next >>")
+								.setCustomId(nextId)
+								.setStyle(ButtonStyle.Primary),
+						],
+				  })
 				: {
 						allowedMentions: { users: [] },
 						files: [],
-						components: [],
+						components:
+							index > 0
+								? [new MessageActionRowBuilder().addComponents(
+										new ButtonBuilder()
+											.setLabel("<< Previous")
+											.setCustomId(prevId)
+											.setStyle(ButtonStyle.Primary),
+								  )]
+								: [],
 
 						content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
 
@@ -141,7 +167,7 @@ export default {
 
 				return getNextMessage();
 			}
-
+			messages.push(reply);
 			return reply;
 		}
 
@@ -149,7 +175,7 @@ export default {
 
 		const collector = reply.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
-				buttonInteraction.customId === customId &&
+				[prevId, nextId].includes(buttonInteraction.customId) &&
 				buttonInteraction.user.id === interaction.user.id,
 
 			time: CONSTANTS.collectorTime,
@@ -158,7 +184,9 @@ export default {
 		collector
 			?.on("collect", async (buttonInteraction) => {
 				buttonInteraction.deferUpdate();
-				await interaction.editReply(await getNextMessage());
+				if (buttonInteraction.customId === prevId) index--;
+				else index++;
+				await interaction.editReply(messages[index] || (await getNextMessage()));
 
 				collector.resetTimer();
 			})

@@ -26,11 +26,11 @@ export { database as boardDatabase };
 
 /**
  * @param {import("../types/databases").default["board"] | import("discord.js").Message} info
- * @param {ButtonBuilder[]} [extraButtons]
+ * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
  *
  * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
  */
-export async function generateMessage(info, extraButtons = []) {
+export async function generateMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 	/**
@@ -66,7 +66,13 @@ export async function generateMessage(info, extraButtons = []) {
 
 		return {
 			allowedMentions: { users: [] },
-			components: [new MessageActionRowBuilder().addComponents(button, ...extraButtons)],
+			components: [
+				new MessageActionRowBuilder().addComponents(
+					...(extraButtons.pre || []),
+					button,
+					...(extraButtons.post || []),
+				),
+			],
 
 			content: `**${BOARD_EMOJI} ${count}** | ${message.channel.toString()}${
 				message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
@@ -83,8 +89,13 @@ export async function generateMessage(info, extraButtons = []) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
-				? [ButtonBuilder.from(linkButton), ...extraButtons]
-				: extraButtons;
+				? [
+						...(extraButtons.pre || []),
+						ButtonBuilder.from(linkButton),
+						...(extraButtons.post || []),
+				  ]
+				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
+		
 		return {
 			allowedMentions: { users: [] },
 
