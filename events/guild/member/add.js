@@ -1,3 +1,4 @@
+import { Collection } from "discord.js";
 import { guild } from "../../../client.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
@@ -35,4 +36,21 @@ export default async function event(member) {
 	});
 
 	await changeNickname(member, false);
+
+	const inviters = (await guild.invites.fetch()).reduce((acc, invite) => {
+		const inviter = invite.inviter?.id || "";
+		acc.set(inviter, (acc.get(inviter) || 0) + (invite.uses || 0));
+		return acc;
+	}, /** @type {Collection<import("discord.js").Snowflake, number>} */ (new Collection()));
+	inviters.map(async (count, user) => {
+		if (count < 20) return;
+		const member = await guild.members.fetch(user).catch(() => {});
+		if (!member || member.roles.resolve(process.env.EPIC_ROLE || "")) return;
+		await member.roles.add(process.env.EPIC_ROLE || "");
+		await channel.send(
+			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's <@&${
+				process.env.EPIC_ROLE
+			}> as a thank-you.`,
+		);
+	});
 }

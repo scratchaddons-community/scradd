@@ -1,4 +1,5 @@
 import { time } from "discord.js";
+import { guild } from "../../../client.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
@@ -27,6 +28,18 @@ export default async function event(oldMember, newMember) {
 		logs.push(
 			newMember.nickname ? " was nicknamed " + newMember.nickname : "’s nickname was removed",
 		);
+	}
+	if (
+		newMember.roles.premiumSubscriberRole &&
+		!newMember.roles.resolve(process.env.EPIC_ROLE || "")
+	) {
+		const channel = await guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
+		if (channel?.isTextBased())
+			await channel.send(
+				`🎊 ${newMember.toString()} Thanks for boosting the server! Here's <@&${
+					process.env.EPIC_ROLE
+				}> as a thank-you.`,
+			);
 	}
 	await Promise.all(
 		logs.map((edit) => log(`🫂 Member ${newMember.toString()}${edit}!`, "members")),

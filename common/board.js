@@ -95,7 +95,7 @@ export async function generateMessage(info, extraButtons = {}) {
 						...(extraButtons.post || []),
 				  ]
 				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
-		
+
 		return {
 			allowedMentions: { users: [] },
 
@@ -108,7 +108,7 @@ export async function generateMessage(info, extraButtons = {}) {
 			files: onBoard.attachments.map((attachment) => attachment),
 		};
 	}
-	const channel = await guild.channels.fetch(info.channel);
+	const channel = await guild.channels.fetch(info.channel).catch(() => {});
 	if (!channel?.isTextBased()) return;
 	const message = await channel.messages.fetch(info.source).catch(() => {});
 	if (!message) return;
@@ -123,10 +123,10 @@ export async function generateMessage(info, extraButtons = {}) {
 export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
 	const info = database.data.find(({ source }) => source === message.id);
-	if (info?.onBoard) {
-		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
-
-		const boardMessage = await board?.messages.fetch(info.onBoard);
+	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+	const boardMessage =
+		info?.onBoard && (await board?.messages.fetch(info.onBoard).catch(() => {}));
+	if (boardMessage) {
 		if (count < Math.max(Math.round(MIN_REACTIONS - MIN_REACTIONS / 6), 1)) {
 			await boardMessage.delete();
 		} else {

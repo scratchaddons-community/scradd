@@ -30,7 +30,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 			const fetchedChannel =
 				channelWanted instanceof CategoryChannel
 					? channelWanted
-					: await guild.channels.fetch(channelWanted.id);
+					: await guild.channels.fetch(channelWanted.id).catch(() => {});
 
 			if (fetchedChannel?.type !== ChannelType.GuildCategory)
 				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
@@ -148,12 +148,14 @@ export default {
 						files: [],
 						components:
 							index > 0
-								? [new MessageActionRowBuilder().addComponents(
-										new ButtonBuilder()
-											.setLabel("<< Previous")
-											.setCustomId(prevId)
-											.setStyle(ButtonStyle.Primary),
-								  )]
+								? [
+										new MessageActionRowBuilder().addComponents(
+											new ButtonBuilder()
+												.setLabel("<< Previous")
+												.setCustomId(prevId)
+												.setStyle(ButtonStyle.Primary),
+										),
+								  ]
 								: [],
 
 						content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,

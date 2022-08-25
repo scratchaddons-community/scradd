@@ -49,7 +49,8 @@ async function getWarnsForMember(user) {
 	const warns = warnLog.data.filter((warn) => warn.user === user.id);
 	const mutes = muteLog.data.filter((mute) => mute.user === user.id);
 
-	const member = user instanceof GuildMember ? user : await guild?.members.fetch(user.id);
+	const member =
+		user instanceof GuildMember ? user : await guild?.members.fetch(user.id).catch(() => {});
 
 	const strikes = await Promise.all(
 		warns
@@ -58,12 +59,16 @@ async function getWarnsForMember(user) {
 	);
 	const embed = new EmbedBuilder()
 		.setTitle(
-			`${member.displayName} has ${warns.length} active strike${
-				warns.length === 1 ? "" : "s"
-			}`,
+			`${
+				member?.displayName ||
+				(user instanceof GuildMember ? user.user.username : user.username)
+			} has ${warns.length} active strike${warns.length === 1 ? "" : "s"}`,
 		)
-		.setAuthor({ iconURL: member.displayAvatarURL(), name: member.displayName })
-		.setColor(member.displayColor)
+		.setAuthor({
+			iconURL: (member || user).displayAvatarURL(),
+			name: user instanceof GuildMember ? user.user.username : user.username,
+		})
+		.setColor(member?.displayColor || null)
 		.setDescription(
 			(
 				await Promise.all(
@@ -80,7 +85,9 @@ async function getWarnsForMember(user) {
 	if (mutes.length)
 		embed.setFooter({
 			text:
-				`${member.displayName} has been muted ` +
+				`${
+					user instanceof GuildMember ? user.user.username : user.username
+				} has been muted ` +
 				mutes.length +
 				` time${mutes.length === 1 ? "" : "s"} recently.`,
 		});
@@ -113,7 +120,7 @@ export async function getWarns(reply, filter, interactor) {
 	if (filter) {
 		const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
 		if (pinged) {
-			const user = await client.users.fetch(pinged);
+			const user = await client.users.fetch(pinged).catch(() => {});
 
 			if (!user)
 				await reply({

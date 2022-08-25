@@ -120,7 +120,7 @@ export default async function warn(user, reason, strikes, context) {
 	const newMutes = Math.floor(userWarns / WARNS_PER_MUTE);
 
 	if (newMutes) {
-		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id);
+		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(()=>{})
 		const oldMutes = allMutes.filter((mute) => mute.user === user.id).length;
 
 		const userMutes = oldMutes + newMutes;

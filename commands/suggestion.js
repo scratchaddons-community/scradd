@@ -310,7 +310,7 @@ export default {
 					);
 
 				const nick =
-					requestedUser && (await guild.members.fetch(requestedUser.id))?.displayName;
+					requestedUser && (await guild.members.fetch(requestedUser.id).catch(() => {}))?.displayName;
 				await paginate(
 					all,
 					(suggestion) =>

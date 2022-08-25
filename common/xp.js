@@ -18,6 +18,10 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const xp = database.data;
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
+
+	const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
+	if (!bots?.isTextBased()) throw new TypeError("Could not find bots channel");
+
 	if (index === -1) {
 		xp.push({ user: user.id, xp: amount });
 	} else {
@@ -26,38 +30,46 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		const oldLevel = getLevelForXp(oldXp);
 		const newLevel = getLevelForXp(newXp);
 		if (oldLevel !== newLevel) {
-			const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
 			const date = new Date();
 			const nextLevelXp = getXpForLevel(newLevel + 1);
-			if (bots?.isTextBased())
-				await bots.send({
-					content: "🎉 " + to.toString(),
-					embeds: [
-						new EmbedBuilder()
-							.setColor(member?.displayColor ?? null)
-							.setAuthor({
-								iconURL: to.displayAvatarURL(),
-								name: member?.displayName ?? user.username,
-							})
-							.setTitle("A member leveled up!")
-							.setDescription(
-								`${to.toString()}**${
-									date.getUTCMonth() === 3 && date.getUTCDate() === 1
-										? ", You've at" // april fools
-										: " has reached"
-								} level ${newLevel}!** (${newXp.toLocaleString()}/${getXpForLevel(
-									newLevel,
-								).toLocaleString()} XP)\nNext level: ${(
-									nextLevelXp - newXp
-								).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
-							)
-							.setFooter({
-								text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
-							}),
-					],
-				});
-			else throw new TypeError("Could not find bots channel");
+			await bots.send({
+				content: "🎉 " + to.toString(),
+				embeds: [
+					new EmbedBuilder()
+						.setColor(member?.displayColor ?? null)
+						.setAuthor({
+							iconURL: to.displayAvatarURL(),
+							name: member?.displayName ?? user.username,
+						})
+						.setTitle("A member leveled up!")
+						.setDescription(
+							`${to.toString()}**${
+								date.getUTCMonth() === 3 && date.getUTCDate() === 1
+									? ", You've at" // april fools
+									: " has reached"
+							} level ${newLevel}!** (${newXp.toLocaleString()}/${getXpForLevel(
+								newLevel,
+							).toLocaleString()} XP)\nNext level: ${(
+								nextLevelXp - newXp
+							).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
+						)
+						.setFooter({
+							text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
+						}),
+				],
+			});
 		}
+	}
+
+	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
+
+	if (rank / xp.length < 0.01 && member && !member.roles.resolve(process.env.EPIC_ROLE || "")) {
+		await member.roles.add(process.env.EPIC_ROLE || "");
+		await bots.send(
+			`🎊 ${member.toString()} Congratulations on being in the top 1% of the leaderboard! You have earned <@&${
+				process.env.EPIC_ROLE
+			}>.`,
+		);
 	}
 
 	database.data = xp;

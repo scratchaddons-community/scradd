@@ -43,12 +43,13 @@ export async function generateMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
 
 	const member =
-		(message.interaction && (await guild?.members.fetch(message.interaction.user.id))) ||
+		(message.interaction &&
+			(await guild?.members.fetch(message.interaction.user.id).catch(() => {}))) ||
 		message.member ||
-		(await guild?.members.fetch(message.author.id));
+		(await guild?.members.fetch(message.author.id).catch(() => {}));
 
 	return {
-		avatarURL: (member || message.author)?.displayAvatarURL(),
+		avatarURL: (member || message.author).displayAvatarURL(),
 		content: (await messageToText(message, false)) || undefined,
 		embeds,
 		files,
