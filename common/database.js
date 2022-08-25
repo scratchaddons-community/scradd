@@ -72,14 +72,12 @@ export default class Database {
 
 	get data() {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
-		console.log("get", this.#data[0]);
 		return this.#data;
 	}
 
 	set data(content) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
-		console.log("set", this.#data[0]);
 		const timeoutId = timeouts[this.message.id];
 		const files = content.length
 			? [
