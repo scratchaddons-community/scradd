@@ -15,8 +15,33 @@ import { censor } from "./moderation/automod.js";
 
 export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
-export const MIN_REACTIONS = process.env.NODE_ENV === "production" ? 8 : 2;
+/** @param {import("discord.js").TextBasedChannel} [channel] */
+export function reactionCount(channel) {
+	const COUNTS = {
+		scradd: 2,
+		devs: 6,
+		modsPlus: 5,
+		mods: 4,
+		admins: 3,
+		default: 8,
+	};
+	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
+	const textChannel = channel?.isThread() ? channel.parent : channel;
+	if (!textChannel) return COUNTS.default;
+	if (textChannel.isDMBased()) return COUNTS.mods;
+	if (textChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus;
 
+	return (
+		/** @type {{ [key: string]: number }} */ ({
+			["806895693162872892"]: COUNTS.mods,
+			["816329956074061867"]: COUNTS.admins,
+			["939350305311715358"]: COUNTS.mods,
+			["869662117651955802"]: COUNTS.devs,
+			["853256939089559583"]: COUNTS.modsPlus,
+			["894314668317880321"]: COUNTS.modsPlus,
+		})[textChannel.id] || 8
+	);
+}
 const board = await guild.channels.fetch(BOARD_CHANNEL);
 if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
@@ -122,12 +147,13 @@ export async function generateMessage(info, extraButtons = {}) {
  */
 export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
+	const minReactions = reactionCount(message.channel);
 	const info = database.data.find(({ source }) => source === message.id);
 	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 	const boardMessage =
 		info?.onBoard && (await board?.messages.fetch(info.onBoard).catch(() => {}));
 	if (boardMessage) {
-		if (count < Math.max(Math.round(MIN_REACTIONS - MIN_REACTIONS / 6), 1)) {
+		if (count < Math.max(Math.round(minReactions - minReactions / 6), 1)) {
 			await boardMessage.delete();
 		} else {
 			await boardMessage.edit({
@@ -135,7 +161,7 @@ export async function updateBoard(message) {
 				content: boardMessage.content.replace(/\d+/, `${count}`),
 			});
 		}
-	} else if (count >= MIN_REACTIONS) {
+	} else if (count >= minReactions) {
 		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
 		const boardMessage = await board?.send({

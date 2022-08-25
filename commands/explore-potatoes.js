@@ -6,7 +6,7 @@ import {
 	CategoryChannel,
 } from "discord.js";
 
-import { boardDatabase as database, generateMessage, MIN_REACTIONS } from "../common/board.js";
+import { boardDatabase as database, generateMessage, reactionCount } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
@@ -56,6 +56,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 	}
 }
 
+const defaultMinReactions = Math.round(reactionCount() * 0.4);
 /** @type {import("../types/command").default} */
 export default {
 	data: new SlashCommandBuilder()
@@ -64,9 +65,7 @@ export default {
 			input
 				.setName("minimum-reactions")
 				.setDescription(
-					`Filter messages to only get those with at least this many reactions (defaults to ${Math.round(
-						MIN_REACTIONS * 0.4,
-					)})`,
+					`Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
 				)
 				.setRequired(false)
 				.setMinValue(1),
@@ -96,7 +95,7 @@ export default {
 
 	async interaction(interaction) {
 		const minReactions =
-			interaction.options.getInteger("minimum-reactions") ?? Math.round(MIN_REACTIONS * 0.4);
+			interaction.options.getInteger("minimum-reactions") ?? defaultMinReactions;
 		const user = interaction.options.getUser("user")?.id;
 		const channelWanted = interaction.options.getChannel("channel");
 		const data = database.data;

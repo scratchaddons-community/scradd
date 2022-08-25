@@ -1,6 +1,6 @@
 import { Message, SelectMenuBuilder, SlashCommandBuilder, time, ComponentType } from "discord.js";
 
-import { BOARD_CHANNEL, BOARD_EMOJI, MIN_REACTIONS } from "../common/board.js";
+import { BOARD_CHANNEL, BOARD_EMOJI, reactionCount } from "../common/board.js";
 import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
 import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
 import { generateHash } from "../lib/text.js";
@@ -65,7 +65,7 @@ const OPTIONS = [
 	},
 	{
 		description:
-			`After a message gets **${escapeMessage(`${MIN_REACTIONS}`)} ${escapeMessage(
+			`After a message gets **${reactionCount()} ${escapeMessage(
 				BOARD_EMOJI,
 			)} reactions**, I will post it to <#${escapeMessage(
 				BOARD_CHANNEL,
