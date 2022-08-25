@@ -213,15 +213,30 @@ export default async function event(message) {
 
 	// XP
 	if (!message.author.bot || message.interaction) {
-		const lastInChannel = (latestMessages[message.channel.id] ||= await message.channel.messages
-			.fetch({ limit: NORMAL_XP_PER_MESSAGE, before: message.id })
-			.then((messages) => messages.toJSON()));
+		if (!latestMessages[message.channel.id]) {
+			const fetched = await message.channel.messages
+				.fetch({ limit: 100, before: message.id })
+				.then((messages) => messages.toJSON());
+
+			/** @type {import("discord.js").Message[]} */
+			const res = [];
+			for (
+				let index = 0;
+				index < fetched.length && res.length < NORMAL_XP_PER_MESSAGE;
+				index++
+			) {
+				const item = fetched[index];
+				item && (!item.author.bot || item.interaction) && res.push(item);
+			}
+			latestMessages[message.channel.id] = res;
+		}
+		const lastInChannel = latestMessages[message.channel.id] || [];
 		const spam = lastInChannel.findIndex((foundMessage) => {
 			return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
 				[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
 			);
 		});
-		const newChannel = lastInChannel.length !== NORMAL_XP_PER_MESSAGE;
+		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
 		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content));
