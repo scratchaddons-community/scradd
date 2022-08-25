@@ -19,17 +19,43 @@ const commands =
 
 /** @type {import("../../types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
-	if (
-		interaction.isButton() &&
-		interaction.customId.endsWith("_strike") &&
-		interaction.member instanceof GuildMember
-	) {
-		await getWarns(
-			(data) => interaction.reply(data),
-			interaction.customId.split("_strike")[0] ?? null,
-			interaction.member,
-		);
-		return;
+	if (interaction.isButton()) {
+		if (interaction.customId.endsWith("_strike")) {
+			if (!(interaction.member instanceof GuildMember))
+				throw new TypeError("interaction.member is not a GuildMember");
+
+			await getWarns(
+				(data) => interaction.reply(data),
+				interaction.customId.split("_strike")[0] ?? null,
+				interaction.member,
+			);
+			return;
+		}
+
+		if (interaction.customId.endsWith("_reaction_role")) {
+			if (!(interaction.member instanceof GuildMember))
+				throw new TypeError("interaction.member is not a GuildMember");
+
+			const role = interaction.customId.split("_reaction_role")[0];
+			if (!role)
+				throw new SyntaxError(
+					"Button customId ends in _reaction_role but no role ID was given",
+				);
+			if (interaction.member.roles.resolve(role)) {
+				await interaction.member.roles.remove(role);
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.yes} Removed <@&${role}> from you!`,
+				});
+			} else {
+				await interaction.member.roles.add(role);
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${role}>!`,
+				});
+			}
+			return;
+		}
 	}
 	if (interaction.isModalSubmit()) {
 		if (interaction.customId.startsWith("guessModal.")) {
