@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import path from "path";
 import url from "url";
+import CONSTANTS from "./common/CONSTANTS.js";
 import { importScripts, pkg } from "./lib/files.js";
 import logError from "./lib/logError.js";
 
@@ -51,6 +52,17 @@ await Handler.login(process.env.BOT_TOKEN);
 const client = await readyPromise;
 
 console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
+
+if (CONSTANTS.prodScradd === client.user.id && !process.argv.includes("--production")) {
+	await logError(
+		new OverconstrainedError(
+			CONSTANTS.prodScradd,
+			"Refusing to run on prod without --production flag",
+		),
+		"ready",
+	);
+	process.exit();
+}
 
 const events = await /**
  * @template {import("./types/event").ClientEvent} K

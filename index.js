@@ -17,22 +17,11 @@ process
 	.on("uncaughtException", (err, origin) => logError(err, origin))
 	.on("warning", (err) => logError(err, "warning"));
 
-if (CONSTANTS.prodScradd === client.user.id && !process.argv.includes("--production")) {
-	await logError(
-		new OverconstrainedError(
-			CONSTANTS.prodScradd,
-			"Refusing to run on prod without --production flag",
-		),
-		"ready",
-	);
-	process.exit();
-}
-
 client.user.setPresence({
 	activities: [
 		{
 			name:
-				process.env.NODE_ENV === "production" || CONSTANTS.prodScradd === client.user.id
+				process.env.NODE_ENV === "production"
 					? "the SA server!"
 					: "for bugs…",
 			type: ActivityType.Watching,
