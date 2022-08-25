@@ -92,9 +92,7 @@ async function getWarnsForMember(user) {
 							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
 								.setStyle(ButtonStyle.Secondary)
-								.setCustomId(
-									`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}_strike`,
-								),
+								.setCustomId(`${warn.info}_strike`),
 						),
 					),
 			  ]
