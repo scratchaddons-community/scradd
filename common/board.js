@@ -17,14 +17,7 @@ export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
 export function reactionCount(channel) {
-	const COUNTS = {
-		scradd: 2,
-		devs: 6,
-		modsPlus: 5,
-		mods: 4,
-		admins: 3,
-		default: 8,
-	};
+	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 	const textChannel = channel?.isThread() ? channel.parent : channel;
 	if (!textChannel) return COUNTS.default;
