@@ -120,7 +120,8 @@ export default async function warn(user, reason, strikes, context) {
 	const newMutes = Math.floor(userWarns / WARNS_PER_MUTE);
 
 	if (newMutes) {
-		const member = user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(()=>{})
+		const member =
+			user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(() => {});
 		const oldMutes = allMutes.filter((mute) => mute.user === user.id).length;
 
 		const userMutes = oldMutes + newMutes;
@@ -133,7 +134,7 @@ export default async function warn(user, reason, strikes, context) {
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(
-				member.bannable &&
+				member?.bannable &&
 					!member.roles.premiumSubscriberRole &&
 					(process.env.NODE_ENV === "production" ||
 						member.roles.highest.name === "@everyone")
@@ -162,7 +163,7 @@ export default async function warn(user, reason, strikes, context) {
 			}
 			muteLog.data = allMutes;
 			promises.push(
-				member.moderatable
+				member?.moderatable
 					? member.disableCommunicationUntil(
 							timeoutLength *
 								(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +

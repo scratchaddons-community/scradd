@@ -73,6 +73,7 @@ const events = await /**
 for (const [event, execute] of events.entries()) {
 	Handler.on(event, async (...args) => {
 		try {
+			// @ts-expect-error -- IDK how to fix this
 			return await (
 				await execute()
 			)(...args);

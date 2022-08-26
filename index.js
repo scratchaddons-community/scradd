@@ -5,8 +5,7 @@ import url from "url";
 import { ActivityType } from "discord.js";
 import dotenv from "dotenv";
 
-import CONSTANTS from "./common/CONSTANTS.js";
-import { importScripts, pkg } from "./lib/files.js";
+import {importScripts, pkg} from "./lib/files.js";
 import fetch from "node-fetch";
 
 dotenv.config();
