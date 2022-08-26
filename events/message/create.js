@@ -24,7 +24,7 @@ import {
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { reactAll } from "../../lib/message.js";
 import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
-import { normalize } from "../../lib/text.js";
+import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 
 const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
@@ -161,6 +161,13 @@ export default async function event(message) {
 
 			promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
 		}
+	}
+
+	if (message.channel.id === "806605006072709130") {
+		const thread = await message.startThread({
+			name: truncateText(message.cleanContent || message.embeds[0]?.title || "[image]", 50),
+		});
+		await thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" });
 	}
 
 	const mentions = (
