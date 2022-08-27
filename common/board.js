@@ -157,19 +157,32 @@ export async function updateBoard(message) {
 	} else if (count >= minReactions) {
 		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
 
-		const boardMessage = await board?.send({
+		const boardMessage = await board.send({
 			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 			...(await generateMessage(message)),
 		});
 		if (board.type === ChannelType.GuildNews) await boardMessage.crosspost();
+
 		if (info) {
 			database.data = database.data.map((item) =>
 				item.source === message.id
 					? { ...item, reactions: count, onBoard: boardMessage.id }
 					: item,
 			);
-			return;
 		}
+		const top = database.data
+			.sort((a, b) => b.reactions - a.reactions)
+			.map(({ onBoard }) => onBoard);
+		top.splice(10);
+		top.map(async (onBoard) => {
+			const toPin = onBoard && (await board.messages.fetch(onBoard).catch(() => {}));
+			toPin && toPin.pin();
+		});
+		board.messages.fetchPinned().then(async (pins) => {
+			pins.size > 10 &&
+				(await Promise.all(pins.map((pin) => !top.includes(pin.id) && pin.unpin())));
+		});
+		if (info) return;
 	}
 	database.data = info
 		? count
