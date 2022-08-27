@@ -1,10 +1,12 @@
 import {
+	AttachmentBuilder,
 	ChannelType,
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
 } from "discord.js";
 import log from "../../common/moderation/logging.js";
+import difflib from "difflib";
 
 /** @type {import("../../types/event").default<"channelUpdate">} */
 export default async function event(oldChannel, newChannel) {
@@ -60,8 +62,25 @@ export default async function event(oldChannel, newChannel) {
 		(oldChannel.type === ChannelType.GuildText || oldChannel.type === ChannelType.GuildNews) &&
 		(newChannel.type === ChannelType.GuildText || newChannel.type === ChannelType.GuildNews)
 	) {
-		oldChannel.topic !== newChannel.topic &&
-			edits.push("’s topic was set to " + newChannel.topic);
+		if (oldChannel.topic !== newChannel.topic) {
+			log(`✏ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {
+				files: [
+					new AttachmentBuilder(
+						Buffer.from(
+							difflib
+								.unifiedDiff(
+									(oldChannel.topic || "").split("\n"),
+									(newChannel.topic || "").split("\n"),
+								)
+								.join("\n")
+								.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+							"utf-8",
+						),
+						{ name: "topic.diff" },
+					),
+				],
+			});
+		}
 
 		oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration &&
 			edits.push(

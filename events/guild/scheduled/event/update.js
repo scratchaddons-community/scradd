@@ -1,6 +1,7 @@
-import { time } from "discord.js";
+import { AttachmentBuilder, time } from "discord.js";
 import client from "../../../../client.js";
 import log from "../../../../common/moderation/logging.js";
+import difflib from "difflib";
 
 /** @type {import("../../../../types/event").default<"guildScheduledEventUpdate">} */
 export default async function event(oldEvent, newEvent) {
@@ -21,7 +22,23 @@ export default async function event(oldEvent, newEvent) {
 		);
 
 	if (oldEvent.description !== newEvent.description)
-		logs.push("’s description set to `" + newEvent.description + "`");
+		log(`📆 Event ${oldEvent.name}’s description was changed!`, "server", {
+			files: [
+				new AttachmentBuilder(
+					Buffer.from(
+						difflib
+							.unifiedDiff(
+								(oldEvent.description || "").split("\n"),
+								(newEvent.description || "").split("\n"),
+							)
+							.join("\n")
+							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+						"utf-8",
+					),
+					{ name: "description.diff" },
+				),
+			],
+		});
 
 	if (oldEvent.coverImageURL() !== newEvent.coverImageURL())
 		logs.push(

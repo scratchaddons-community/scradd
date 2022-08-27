@@ -1,4 +1,5 @@
 import {
+	AttachmentBuilder,
 	GuildDefaultMessageNotifications,
 	GuildExplicitContentFilter,
 	GuildMFALevel,
@@ -6,6 +7,7 @@ import {
 	GuildVerificationLevel,
 } from "discord.js";
 import log from "../../common/moderation/logging.js";
+import difflib from "difflib";
 
 /** @type {import("../../types/event").default<"guildUpdate">} */
 export default async function event(oldGuild, newGuild) {
@@ -38,7 +40,23 @@ export default async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.description !== newGuild.description) {
-		logs.push(`Server description set to ${newGuild.description}`);
+		log(`✏ Server description was changed!`, "server", {
+			files: [
+				new AttachmentBuilder(
+					Buffer.from(
+						difflib
+							.unifiedDiff(
+								(oldGuild.description || "").split("\n"),
+								(newGuild.description || "").split("\n"),
+							)
+							.join("\n")
+							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+						"utf-8",
+					),
+					{ name: "description.diff" },
+				),
+			],
+		});
 	}
 	if (oldGuild.discoverySplashURL() !== newGuild.discoverySplashURL()) {
 		logs.push(
@@ -93,7 +111,9 @@ export default async function event(oldGuild, newGuild) {
 		oldGuild.features.includes("LINKED_TO_HUB") !== newGuild.features.includes("LINKED_TO_HUB")
 	) {
 		logs.push(
-			`Server ${newGuild.features.includes("LINKED_TO_HUB") ? "add" : "remov"}ed from a Student Hub`,
+			`Server ${
+				newGuild.features.includes("LINKED_TO_HUB") ? "add" : "remov"
+			}ed from a Student Hub`,
 		);
 	}
 	if (
