@@ -21,7 +21,7 @@ export default async function event(oldMessage, newMessage) {
 	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
 		log(
 			`🗄 Embeds ${
-				newMessage.flags.has("SuppressEmbeds") ? "hidden" : "shown"
+				newMessage.flags.has("SuppressEmbeds") ? "removed" : "shown"
 			} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 				"!",
 			"messages",

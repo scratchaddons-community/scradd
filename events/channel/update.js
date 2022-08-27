@@ -46,30 +46,26 @@ export default async function event(oldChannel, newChannel) {
 			edits.push("’s bitrate was set to " + newChannel.bitrate + "kbps");
 
 		oldChannel.userLimit !== newChannel.userLimit &&
-			edits.push("’s user limit was set to " + newChannel.userLimit + " users");
+			edits.push(
+				"’s user limit was " + newChannel.userLimit
+					? "set to " + newChannel.userLimit + " users"
+					: "removed",
+			);
 
 		oldChannel.rtcRegion !== newChannel.rtcRegion &&
-			edits.push("’s region override was set to " + newChannel.rtcRegion);
+			edits.push("’s region override was set to " + newChannel.rtcRegion || "Automatic");
 	}
-
-	if (
-		(oldChannel.type === ChannelType.GuildText ||
-			oldChannel.type === ChannelType.GuildNews ||
-			oldChannel.type === ChannelType.GuildStageVoice) &&
-		(newChannel.type === ChannelType.GuildText ||
-			newChannel.type === ChannelType.GuildNews ||
-			newChannel.type === ChannelType.GuildStageVoice)
-	)
-		oldChannel.topic !== newChannel.topic &&
-			edits.push("’s topic was set to " + newChannel.topic);
 
 	if (
 		(oldChannel.type === ChannelType.GuildText || oldChannel.type === ChannelType.GuildNews) &&
 		(newChannel.type === ChannelType.GuildText || newChannel.type === ChannelType.GuildNews)
 	) {
+		oldChannel.topic !== newChannel.topic &&
+			edits.push("’s topic was set to " + newChannel.topic);
+
 		oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration &&
 			edits.push(
-				"’s default archive after inactivity time was set to " +
+				"’s hide after inactivity time was set to " +
 					{
 						[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",

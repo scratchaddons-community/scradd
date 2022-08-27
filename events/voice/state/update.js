@@ -7,12 +7,7 @@ export default async function event(oldState, newState) {
 	const logs = [];
 	if (oldState.channel !== newState.channel || !newState.channel) {
 		oldState.channel && logs.push(`left voice channel ${oldState.channel.toString()}`);
-		newState.channel &&
-			logs.push(
-				`joined voice channel ${newState.channel.toString()}, ${
-					newState.mute ? "" : "un"
-				}muted and ${newState.deaf ? "" : "un"}deafened`,
-			);
+		newState.channel && logs.push(`joined voice channel ${newState.channel.toString()}`);
 	} else {
 		if (oldState.serverMute !== newState.serverMute) {
 			logs.push(`was${newState.serverMute ? "" : " un"} server muted`);

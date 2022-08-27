@@ -22,7 +22,7 @@ export default async function event(oldMember, newMember) {
 		)
 			logs.push(" timed out until " + time(newMember.communicationDisabledUntil));
 
-		if (!newMember.communicationDisabledUntil) logs.push(" un timed out");
+		if (!newMember.communicationDisabledUntil) logs.push("’s timeout was removed");
 	}
 	if (oldMember.nickname !== newMember.nickname) {
 		logs.push(

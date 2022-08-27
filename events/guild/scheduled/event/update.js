@@ -7,7 +7,7 @@ export default async function event(oldEvent, newEvent) {
 	const guild = newEvent.guild || (await client.guilds.fetch(newEvent.guildId));
 	if (guild.id !== process.env.GUILD_ID || !oldEvent) return;
 	const logs = [];
-	if (oldEvent.name !== newEvent.name) logs.push(" renamed to `" + newEvent.name + "`");
+	if (oldEvent.name !== newEvent.name) logs.push("’s topic changed to `" + newEvent.name + "`");
 
 	if (
 		oldEvent.channel?.id !== newEvent.channel?.id ||
@@ -23,9 +23,9 @@ export default async function event(oldEvent, newEvent) {
 	if (oldEvent.description !== newEvent.description)
 		logs.push("’s description set to `" + newEvent.description + "`");
 
-	if (oldEvent.image !== newEvent.image)
+	if (oldEvent.coverImageURL() !== newEvent.coverImageURL())
 		logs.push(
-			`’s image changed from <${oldEvent.coverImageURL()}> to <${newEvent.coverImageURL()}>`,
+			`’s cover image changed from <${oldEvent.coverImageURL()}> to <${newEvent.coverImageURL()}>`,
 		); //TODO: it’ll be 404
 
 	if (

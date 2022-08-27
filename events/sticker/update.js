@@ -17,7 +17,9 @@ export default async function event(oldSticker, newSticker) {
 		logs.push(` renamed to ${newSticker.name}`);
 	}
 	if (oldSticker.tags !== newSticker.tags) {
-		logs.push(`'s tags ` + (newSticker.tags ? `changed to ${newSticker.tags}` : "removed"));
+		logs.push(
+			`’s related emoji ` + (newSticker.tags ? `set to ${newSticker.tags}` : "removed"),
+		);
 	}
 
 	await Promise.all(

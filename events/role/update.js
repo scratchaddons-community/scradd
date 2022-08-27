@@ -6,16 +6,16 @@ export default async function event(oldRole, newRole) {
 
 	const logs = [];
 	if (oldRole.hexColor !== newRole.hexColor) {
-		logs.push(`recolored as ${newRole.hexColor}`);
+		logs.push(`’s role color set to ${newRole.hexColor}`);
 	}
 	if (oldRole.hoist !== newRole.hoist) {
-		logs.push(`${newRole.hoist ? "" : "un"}hoisted`);
+		logs.push(` set to display role members ${newRole.hoist ? "separately from" : "combined with"} online members`);
 	}
 	if (oldRole.managed !== newRole.managed) {
-		logs.push(`made ${newRole.managed ? "" : "un"}assignable`);
+		logs.push(` made ${newRole.managed ? "" : "un"}assignable`);
 	}
 	if (oldRole.mentionable !== newRole.mentionable) {
-		logs.push(`made ${newRole.mentionable ? "" : "non"}mentionable`);
+		logs.push(` set to ${newRole.mentionable ? "" : "dis"}allow anyone to @mention this role`);
 	}
 	if (oldRole.name !== newRole.name) {
 		logs.push(`renamed to ${newRole.name}`);
@@ -36,6 +36,6 @@ export default async function event(oldRole, newRole) {
 	}
 
 	await Promise.all(
-		logs.map((edit) => log(`✏ Role ${newRole.toString()} ` + edit + `!`, "server")),
+		logs.map((edit) => log(`✏ Role ${newRole.toString()}` + edit + `!`, "server")),
 	);
 }

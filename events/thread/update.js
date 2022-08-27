@@ -19,14 +19,14 @@ export default async function event(oldThread, newThread) {
 
 	const logs = [];
 	if (oldThread.archived !== newThread.archived) {
-		logs.push(` ${newThread.archived ? "archived" : "unarchived"}`);
+		logs.push(` ${newThread.archived ? "closed" : "opened"}`);
 	}
 	if (oldThread.locked !== newThread.locked) {
 		logs.push(` ${newThread.locked ? "locked" : "unlocked"}`);
 	}
 	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 		logs.push(
-			`’s archive after inactivity time set to ${
+			`’s hide after inactivity set to ${
 				{
 					[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",

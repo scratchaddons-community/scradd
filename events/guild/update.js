@@ -14,9 +14,7 @@ export default async function event(oldGuild, newGuild) {
 	const logs = [];
 	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {
 		logs.push(
-			`Inactive channel ${
-				newGuild.afkChannel ? `set to ${newGuild.afkChannel?.toString()}` : "removed"
-			}`,
+			`Inactive channel set to ${newGuild.afkChannel?.toString() || "No inactive channel"}`,
 		);
 	}
 	if (oldGuild.afkTimeout !== newGuild.afkTimeout) {
@@ -44,7 +42,7 @@ export default async function event(oldGuild, newGuild) {
 	}
 	if (oldGuild.discoverySplashURL() !== newGuild.discoverySplashURL()) {
 		logs.push(
-			`Server discovery splash image ${
+			`Server discovery listing cover image ${
 				newGuild.discoverySplashURL()
 					? `set to <${newGuild.discoverySplashURL()}>`
 					: "removed"
@@ -63,11 +61,49 @@ export default async function event(oldGuild, newGuild) {
 			}"`,
 		);
 	}
+	if (oldGuild.features.includes("COMMUNITY") !== newGuild.features.includes("COMMUNITY")) {
+		logs.push(`Community ${newGuild.features.includes("COMMUNITY") ? "en" : "dis"}abled`);
+	}
+	if (oldGuild.features.includes("DISCOVERABLE") !== newGuild.features.includes("DISCOVERABLE")) {
+		logs.push(
+			`Server Discovery ${newGuild.features.includes("DISCOVERABLE") ? "en" : "dis"}abled`,
+		);
+	}
 	if (oldGuild.features.includes("FEATURABLE") !== newGuild.features.includes("FEATURABLE")) {
 		logs.push(
 			`Server ${
-				newGuild.features.includes("FEATURABLE") ? "" : "un"
+				newGuild.features.includes("FEATURABLE") ? "" : "un "
 			}featured on Server Discovery`,
+		);
+	}
+	if (
+		oldGuild.features.includes("HAS_DIRECTORY_ENTRY") !==
+		newGuild.features.includes("HAS_DIRECTORY_ENTRY")
+	) {
+		logs.push(
+			`Server ${
+				newGuild.features.includes("HAS_DIRECTORY_ENTRY") ? "add" : "remov"
+			}ed from a directory channel`,
+		);
+	}
+	if (oldGuild.features.includes("HUB") !== newGuild.features.includes("HUB")) {
+		logs.push(`Server ${newGuild.features.includes("HUB") ? "" : "un"}made a Student Hub`);
+	}
+	if (
+		oldGuild.features.includes("LINKED_TO_HUB") !== newGuild.features.includes("LINKED_TO_HUB")
+	) {
+		logs.push(
+			`Server ${newGuild.features.includes("LINKED_TO_HUB") ? "add" : "remov"}ed from a Student Hub`,
+		);
+	}
+	if (
+		oldGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED") !==
+		newGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED")
+	) {
+		logs.push(
+			`Rules screening ${
+				newGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED") ? "en" : "dis"
+			}abled`,
 		);
 	}
 	if (
@@ -77,6 +113,16 @@ export default async function event(oldGuild, newGuild) {
 		logs.push(
 			`Monetization ${
 				newGuild.features.includes("MONETIZATION_ENABLED") ? "en" : "dis"
+			}abled`,
+		);
+	}
+	if (
+		oldGuild.features.includes("TICKETED_EVENTS_ENABLED") !==
+		newGuild.features.includes("TICKETED_EVENTS_ENABLED")
+	) {
+		logs.push(
+			`Ticketed events ${
+				newGuild.features.includes("TICKETED_EVENTS_ENABLED") ? "en" : "dis"
 			}abled`,
 		);
 	}
@@ -103,7 +149,7 @@ export default async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.name !== newGuild.name) {
-		logs.push(`Server name set to ${newGuild.name}`);
+		logs.push(`Server renamed to ${newGuild.name}`);
 	}
 	if (oldGuild.nsfwLevel !== newGuild.nsfwLevel) {
 		logs.push(
@@ -154,7 +200,7 @@ export default async function event(oldGuild, newGuild) {
 	}
 	if (oldGuild.systemChannel !== newGuild.systemChannel) {
 		logs.push(
-			"System updates channel " +
+			"System messages channel " +
 				(newGuild.systemChannel ? "set to " + newGuild.systemChannel.toString() : "unset"),
 		);
 	}
@@ -179,7 +225,7 @@ export default async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.verified !== newGuild.verified) {
-		logs.push(`Server ${newGuild.partnered ? "" : "un"}verified`);
+		logs.push(`Server ${newGuild.verified ? "" : "un"}verified`);
 	}
 	if (oldGuild.widgetChannel?.id !== newGuild.widgetChannel?.id) {
 		logs.push(
@@ -194,6 +240,46 @@ export default async function event(oldGuild, newGuild) {
 	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
 		logs.push(
 			`The max number of users allowed in a video channel changed to ${newGuild.maxVideoChannelUsers}`,
+		);
+	}
+	if (
+		oldGuild.systemChannelFlags.has("SuppressGuildReminderNotifications") !==
+		newGuild.systemChannelFlags.has("SuppressGuildReminderNotifications")
+	) {
+		logs.push(
+			`Helpful tips for server setup ${
+				newGuild.systemChannelFlags.has("SuppressGuildReminderNotifications") ? "dis" : "en"
+			}abled`,
+		);
+	}
+	if (
+		oldGuild.systemChannelFlags.has("SuppressJoinNotificationReplies") !==
+		newGuild.systemChannelFlags.has("SuppressJoinNotificationReplies")
+	) {
+		logs.push(
+			`Prompt to reply to welcome messages with a sticker ${
+				newGuild.systemChannelFlags.has("SuppressJoinNotificationReplies") ? "dis" : "en"
+			}abled`,
+		);
+	}
+	if (
+		oldGuild.systemChannelFlags.has("SuppressJoinNotifications") !==
+		newGuild.systemChannelFlags.has("SuppressJoinNotifications")
+	) {
+		logs.push(
+			`Random welcome messages when someone joins this server ${
+				newGuild.systemChannelFlags.has("SuppressJoinNotifications") ? "dis" : "en"
+			}abled`,
+		);
+	}
+	if (
+		oldGuild.systemChannelFlags.has("SuppressPremiumSubscriptions") !==
+		newGuild.systemChannelFlags.has("SuppressPremiumSubscriptions")
+	) {
+		logs.push(
+			`Messages when someone boosts this server ${
+				newGuild.systemChannelFlags.has("SuppressPremiumSubscriptions") ? "dis" : "en"
+			}abled`,
 		);
 	}
 
