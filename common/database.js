@@ -9,7 +9,7 @@ export const DATABASE_THREAD = "databases";
 
 const thread = await getThread(DATABASE_THREAD);
 
-/** @type {{ [key: string]: Message }} */
+/** @type {{ [key: string]: Message<true> }} */
 const databases = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
@@ -22,7 +22,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 /**
  * @type {{
  * 	[key: import("discord.js").Snowflake]:
- * 		| { callback: () => Promise<import("discord.js").Message>; timeout: NodeJS.Timeout }
+ * 		| { callback: () => Promise<import("discord.js").Message<true>>; timeout: NodeJS.Timeout }
  * 		| undefined;
  * }}
  */
@@ -36,7 +36,7 @@ export default class Database {
 	constructor(name) {
 		if (contructed.includes(name))
 			throw new RangeError(
-				`Cannot create a 2nd database for ${name}, they will have conflicting data!`,
+				`Cannot create a 2nd database for ${name}, they will have conflicting data`,
 			);
 		contructed.push(name);
 		/** @type {Name} */
@@ -46,7 +46,7 @@ export default class Database {
 	/** @type {import("../types/databases").default[Name][] | undefined} */
 	#data = undefined;
 	async init() {
-		/** @type {Message | undefined} */
+		/** @type {Message<true> | undefined} */
 		this.message = databases[this.name] ||= await thread.send(
 			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${
 				this.name

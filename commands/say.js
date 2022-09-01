@@ -4,7 +4,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/moderation/logging.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mods only) Mimic what you tell me to")

@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "di
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
+import { getBaseChannel } from "../lib/discord.js";
 
 import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -18,7 +19,7 @@ const fuse = new Fuse(addons, {
 	],
 });
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription(
@@ -62,7 +63,7 @@ export default {
 
 		const compact =
 			interaction.options.getBoolean("compact") ??
-			interaction.channel?.id !== process.env.BOTS_CHANNEL;
+			getBaseChannel(interaction.channel)?.id !== CONSTANTS.channels.bots;
 
 		if (!addon || (score > 0.5 && compact)) {
 			await interaction.reply({
@@ -175,6 +176,5 @@ export default {
 		await interaction.reply({ embeds: [embed] });
 	},
 
-	dm: true,
 	censored: "channel",
 };

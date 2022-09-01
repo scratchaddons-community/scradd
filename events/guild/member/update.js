@@ -1,5 +1,5 @@
 import { time } from "discord.js";
-import { guild } from "../../../client.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
@@ -31,15 +31,13 @@ export default async function event(oldMember, newMember) {
 	}
 	if (
 		newMember.roles.premiumSubscriberRole &&
-		!newMember.roles.resolve(process.env.EPIC_ROLE || "")
+		CONSTANTS.roles.epic &&
+		CONSTANTS.channels.general &&
+		!newMember.roles.resolve(CONSTANTS.roles.epic)
 	) {
-		const channel = await guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-		if (channel?.isTextBased())
-			await channel.send(
-				`🎊 ${newMember.toString()} Thanks for boosting the server! Here's <@&${
-					process.env.EPIC_ROLE
-				}> as a thank-you.`,
-			);
+		await CONSTANTS.channels.general.send(
+			`🎊 ${newMember.toString()} Thanks for boosting the server! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
+		);
 	}
 	await Promise.all(
 		logs.map((edit) => log(`🫂 Member ${newMember.toString()}${edit}!`, "members")),

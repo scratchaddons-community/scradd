@@ -19,9 +19,6 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 
-	const bots = await guild.channels.fetch(process.env.BOTS_CHANNEL || "");
-	if (!bots?.isTextBased()) throw new TypeError("Could not find bots channel");
-
 	if (index === -1) {
 		xp.push({ user: user.id, xp: amount });
 	} else {
@@ -32,7 +29,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		if (oldLevel !== newLevel) {
 			const date = new Date();
 			const nextLevelXp = getXpForLevel(newLevel + 1);
-			await bots.send({
+			await CONSTANTS.channels.bots?.send({
 				content: "🎉 " + to.toString(),
 				embeds: [
 					new EmbedBuilder()
@@ -63,12 +60,16 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
 
-	if (rank / xp.length < 0.01 && member && !member.roles.resolve(process.env.EPIC_ROLE || "")) {
-		await member.roles.add(process.env.EPIC_ROLE || "");
-		await bots.send(
-			`🎊 ${member.toString()} Congratulations on being in the top 1% of the leaderboard! You have earned <@&${
-				process.env.EPIC_ROLE
-			}>.`,
+	if (
+		CONSTANTS.roles.epic && // the role must exist
+		// in addition, they must:
+		rank / xp.length < 0.01 && // be in the top 1%
+		member && // be in the server
+		!member.roles.resolve(CONSTANTS.roles.epic) // not have the role
+	) {
+		await member.roles.add(CONSTANTS.roles.epic);
+		await CONSTANTS.channels.bots?.send(
+			`🎊 ${member.toString()} Congratulations on being in the top 1% of the leaderboard! You have earned ${CONSTANTS.roles.epic.toString()}.`,
 		);
 	}
 
@@ -81,7 +82,7 @@ const XP_PER_LEVEL = [
 	37_000, 40_000, 43_000, 46_500, 50_000, 53_500, 57_000, 61_000, 65_000, 70_000, 75_000, 80_000,
 	85_000, 90_000, 95_000, 100_000, 105_000, 110_000, 115_000, 122_500, 130_000, 137_500, 145_000,
 	152_500, 160_000, 167_500, 175_000, 185_000, 195_000, 205_000, 215_000, 225_000, 235_000,
-	245_000, 255_000, 265_000, 275_000, 285_000, 295_000, 305_000, 315_000, 325_000, 336_969,
+	245_000, 255_000, 265_000, 275_000, 285_000, 295_000, 305_000, 315_000, 325_000, 335_420,
 	350_000, 362_500, 375_000, 387_500, 400_000, 412_500, 425_000, 437_500, 450_000, 462_500,
 	475_000, 487_500, 500_000, 515_000, 530_000, 545_000, 560_000, 575_000, 590_000, 605_000,
 ];

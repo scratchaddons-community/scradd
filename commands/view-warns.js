@@ -15,7 +15,7 @@ import { getData, muteLog, warnLog, WARN_INFO_BASE } from "../common/moderation/
 import { convertBase } from "../lib/numbers.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("View your or (Mods only) someone else’s active strikes")
@@ -179,7 +179,7 @@ export async function getWarns(reply, filter, interactor) {
 			const strikes = / \d+ /.exec(message.content)?.[0]?.trim() ?? "0";
 			embed.addFields({ name: "⚠ Strikes", value: strikes, inline: true });
 
-			if (mod && interactor.roles.resolve(process.env.MODERATOR_ROLE || ""))
+			if (mod && CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod))
 				embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
 
 			if (user)

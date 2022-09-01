@@ -7,22 +7,22 @@ import {
 	Message,
 } from "discord.js";
 import { guild } from "../client.js";
-import { extractMessageExtremities, messageToText } from "../lib/message.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../lib/discord.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
 import { censor } from "./moderation/automod.js";
 
-export const BOARD_CHANNEL = process.env.BOARD_CHANNEL ?? "";
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
 export function reactionCount(channel) {
 	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
-	const textChannel = channel?.isThread() ? channel.parent : channel;
-	if (!textChannel) return COUNTS.default;
-	if (textChannel.isDMBased()) return COUNTS.mods;
-	if (textChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus;
+	const baseChannel = getBaseChannel(channel);
+	if (!baseChannel) return COUNTS.default;
+	if (baseChannel.isDMBased()) return COUNTS.mods;
+	if (baseChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus;
 
 	return (
 		/** @type {{ [key: string]: number }} */ ({
@@ -32,11 +32,11 @@ export function reactionCount(channel) {
 			["869662117651955802"]: COUNTS.devs,
 			["853256939089559583"]: COUNTS.modsPlus,
 			["894314668317880321"]: COUNTS.modsPlus,
-		})[textChannel.id] || 8
+		})[baseChannel.id] || 8
 	);
 }
-const board = await guild.channels.fetch(BOARD_CHANNEL);
-if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+
+if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
 const database = new Database("board");
 await database.init();
@@ -93,7 +93,15 @@ export async function generateMessage(info, extraButtons = {}) {
 			],
 
 			content: `**${BOARD_EMOJI} ${count}** | ${message.channel.toString()}${
-				message.channel.isThread() ? ` (${message.channel.parent?.toString() ?? ""})` : ""
+				message.channel.isThread()
+					? ` (${
+							[CONSTANTS.channels.modmail?.id, CONSTANTS.channels.admin?.id].includes(
+								message.channel.parent?.id,
+							)
+								? "#deleted-channel"
+								: message.channel.parent?.toString() ?? ""
+					  })`
+					: ""
 			} | ${message.author.toString()}`,
 			embeds: [boardEmbed, ...embeds],
 			files,
@@ -101,8 +109,10 @@ export async function generateMessage(info, extraButtons = {}) {
 	}
 
 	if (info instanceof Message) return messageToBoardData(info);
-	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
-	const onBoard = info.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
+	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+	const onBoard =
+		info.onBoard &&
+		(await CONSTANTS.channels.board.messages.fetch(info.onBoard).catch(() => {}));
 	if (onBoard) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
 		const buttons =
@@ -142,9 +152,10 @@ export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
 	const minReactions = reactionCount(message.channel);
 	const info = database.data.find(({ source }) => source === message.id);
-	if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 	const boardMessage =
-		info?.onBoard && (await board?.messages.fetch(info.onBoard).catch(() => {}));
+		info?.onBoard &&
+		(await CONSTANTS.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
 	if (boardMessage) {
 		if (count < Math.max(Math.round(minReactions - minReactions / 6), 1)) {
 			await boardMessage.delete();
@@ -155,13 +166,13 @@ export async function updateBoard(message) {
 			});
 		}
 	} else if (count >= minReactions) {
-		if (!board?.isTextBased()) throw new ReferenceError("Could not find board channel");
+		if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
-		const boardMessage = await board.send({
+		const boardMessage = await CONSTANTS.channels.board.send({
 			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 			...(await generateMessage(message)),
 		});
-		if (board.type === ChannelType.GuildNews) await boardMessage.crosspost();
+		if (CONSTANTS.channels.board.type === ChannelType.GuildNews) await boardMessage.crosspost();
 
 		if (info) {
 			database.data = database.data.map((item) =>
@@ -175,10 +186,11 @@ export async function updateBoard(message) {
 			.map(({ onBoard }) => onBoard);
 		top.splice(10);
 		top.map(async (onBoard) => {
-			const toPin = onBoard && (await board.messages.fetch(onBoard).catch(() => {}));
+			const toPin =
+				onBoard && (await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {}));
 			toPin && toPin.pin();
 		});
-		board.messages.fetchPinned().then(async (pins) => {
+		CONSTANTS.channels.board.messages.fetchPinned().then(async (pins) => {
 			pins.size > 10 &&
 				(await Promise.all(pins.map((pin) => !top.includes(pin.id) && pin.unpin())));
 		});

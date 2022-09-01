@@ -5,11 +5,12 @@ import url from "url";
 import { ActivityType } from "discord.js";
 import dotenv from "dotenv";
 
-import {importScripts, pkg} from "./lib/files.js";
+import { importScripts, pkg } from "./lib/files.js";
 import fetch from "node-fetch";
+import { asyncFilter } from "./lib/promises.js";
 
 dotenv.config();
-const { default: client, guild } = await import("./client.js");
+const { default: client } = await import("./client.js");
 const { default: logError } = await import("./lib/logError.js");
 
 process
@@ -19,10 +20,7 @@ process
 client.user.setPresence({
 	activities: [
 		{
-			name:
-				process.env.NODE_ENV === "production"
-					? "the SA server!"
-					: "for bugs…",
+			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
 			type: ActivityType.Watching,
 			url: pkg.homepage,
 		},
@@ -34,18 +32,19 @@ if (process.env.NODE_ENV === "production")
 		log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server"),
 	);
 
-const usersVc = await guild.channels.fetch(process.env.USERS_CHANNEL || "");
-if (!usersVc) throw new TypeError("Could not find USERS_CHANNEL");
-
-setInterval(async () => {
-	const count = (
-		await fetch(`https://scratchaddons.com/usercount.json?date=${Date.now()}`).then(
-			(res) =>
-				/** @type {Promise<{ count: number; _chromeCountDate: string }>} */ (res.json()),
-		)
-	).count;
-	await usersVc.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
-}, 300_000);
+const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
+CONSTANTS.channels.usersVc &&
+	setInterval(async () => {
+		const count = (
+			await fetch(`https://scratchaddons.com/usercount.json?date=${Date.now()}`).then(
+				(res) =>
+					/** @type {Promise<{ count: number; _chromeCountDate: string }>} */ (
+						res.json()
+					),
+			)
+		).count;
+		await CONSTANTS.channels.usersVc?.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
+	}, 300_000);
 
 const guilds = await client.guilds.fetch();
 guilds.forEach(async (guild) => {
@@ -54,17 +53,21 @@ guilds.forEach(async (guild) => {
 });
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const commands =
-	await /** @type {Promise<import("discord.js").Collection<string, () => Promise<import("./types/command").default>>>} */ (
-		importScripts(path.resolve(dirname, "./commands"))
-	);
 
-const [dmCommands, serverCommands] = await commands.reduce(
-	async (promise, commandPromise, name) => {
-		const [dmCommands, serverCommands] = await promise;
+/** @type {import("discord.js").RESTPostAPIApplicationCommandsJSONBody[]} */
+const commands = [];
+
+for await (const entry of asyncFilter(
+	[
+		...(
+			await /** @type {Promise<import("discord.js").Collection<string, () => Promise<import("./types/command").default>>>} */ (
+				importScripts(path.resolve(dirname, "./commands"))
+			)
+		).entries(),
+	],
+	async ([name, commandPromise]) => {
 		const command = await commandPromise();
-		if (command.enable === false) return [dmCommands, serverCommands];
-
+		if (!command) return false;
 		if (command.data.name)
 			throw new AssertionError({
 				actual: command.data.name,
@@ -77,27 +80,17 @@ const [dmCommands, serverCommands] = await commands.reduce(
 
 		const json = command.data.toJSON();
 
-		if (typeof json.dm_permission !== "undefined")
+		if (json.dm_permission !== undefined)
 			throw new AssertionError({
 				actual: json.dm_permission,
 				expected: undefined,
-				message: "Don’t set DM permissions, set `dm: true` instead",
+				operator: "!==",
+				message: "Don’t set DM permissions, all commands are server commands",
 			});
 
-		(command.dm && process.env.NODE_ENV === "production" ? dmCommands : serverCommands).push(
-			json,
-		);
-
-		return [dmCommands, serverCommands];
+		return json;
 	},
-	/**
-	 * @type {import("discord.js").Awaitable<
-	 * 	[import("discord.js").RESTPostAPIApplicationCommandsJSONBody[], import("discord.js").RESTPostAPIApplicationCommandsJSONBody[]]
-	 * >}
-	 */ ([[], []]),
-);
+))
+	commands.push(entry);
 
-await Promise.all([
-	client.application.commands.set(dmCommands),
-	client.application.commands.set(serverCommands, process.env.GUILD_ID || ""),
-]);
+await client.application.commands.set(commands, process.env.GUILD_ID || "");

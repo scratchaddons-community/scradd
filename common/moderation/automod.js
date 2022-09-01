@@ -5,6 +5,7 @@ import warn from "./warns.js";
 import { stripMarkdown } from "../../lib/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
+import { getBaseChannel } from "../../lib/discord.js";
 export const regexps = [
 	// Just Delete
 	/c[*0b]ea|a[*hi]q[*3r]|[+g][*3r][$5f][+g][!*1v¡][(<p](?:[*@n][y|]|[y|][*3r])|[$5f](?:[(<p][#u]z[*hi][(<p]x)|o[*hi][+g]{1,2}(?:[ -]?c[!*1v¡]e[*@n][+g][*3r]|j[!*1v¡]c[*3r])|q[!*1v¡][y|]{1,2}q[*0b]|e[*3r][(<p][+g][*hi]z|i(?:[*@n]t[!*1v¡]a[*@n][y|]|[*hi][y|]i[*@n])|(?<![a-z0-9])(?:i[*@n]t[!*1v¡]a[*@n](?:[$*35ryf|]|yl)?|c[*3r]a[!*1v¡][$5f](?:[*3r][$5f])?|[*@n]a[*hi][$5f](?:[*3r][$5f])?|(?:oe[*3r][*@n][$5f][+g]|[$5f][*3r]z[*3r]a|[(<p](?:[*hi]z|[y|][!*1v¡][+g])|[+g][*3r]{2}[+g])[$5f]?)(?![a-z0-9])|🖕/gi,
@@ -54,14 +55,15 @@ async function checkString(toCensor, message) {
 	if (
 		![
 			guild?.rulesChannel?.id,
-			"806605043817644074",
-			"874743757210275860",
-			"816329956074061867",
-			guild?.publicUpdatesChannel?.id,
-			process.env.LOGS_CHANNEL,
-			process.env.MODMAIL_CHANNEL,
-			"806624037224185886",
-		].includes((message.channel.isThread() && message.channel.parent?.id) || message.channel.id)
+			"806605043817644074", // announcements
+			"874743757210275860", // scratch-servers
+			CONSTANTS.channels.mod?.id,
+			CONSTANTS.channels.modlogs?.id,
+			"816329956074061867", // admin-talk
+			CONSTANTS.channels.modmail?.id,
+			"806624037224185886", // advertise
+			undefined,
+		].includes(getBaseChannel(message.channel)?.id)
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
 		if (botLinks) {
@@ -213,8 +215,8 @@ export async function automodMessage(message) {
 	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false;
 
 	if (
-		((message.channel.isThread() && message.channel.parent?.id) || message.channel.id) ===
-			process.env.BOTS_CHANNEL &&
+		CONSTANTS.channels.bots &&
+		getBaseChannel(message.channel)?.id === CONSTANTS.channels.bots.id &&
 		typeof badAnimatedEmojis === "number"
 	) {
 		promises.push(
@@ -255,16 +257,16 @@ export async function automodMessage(message) {
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
-	if (!channel || channel.isDMBased()) return true;
 	return [
+		CONSTANTS.channels.mod?.id,
+		CONSTANTS.channels.modlogs?.id,
 		"816329956074061867", // admin-talk
-		guild.publicUpdatesChannel?.id, // mod-talk
-		process.env.LOGS_CHANNEL, // mod-logs
-		process.env.MODMAIL_CHANNEL, // scradd-mail
-		"853256939089559583",
-		"894314668317880321",
-		"869662117651955802",
-	].includes((channel.isThread() && channel.parent?.id) || channel.id);
+		CONSTANTS.channels.modmail?.id,
+		"853256939089559583", // devs-only
+		"894314668317880321", // da-boosters
+		"869662117651955802", // evil-secret-youtube-plans
+		undefined,
+	].includes(getBaseChannel(channel)?.id);
 }
 
 /** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
@@ -426,8 +428,6 @@ async function removeDuplicateNicknames(member, dm = false) {
 			(found) => found.user.username === member.displayName,
 		);
 
-		const modTalk = guild.publicUpdatesChannel;
-		if (!modTalk) throw new ReferenceError("Could not find mod talk");
 		if (safe.size) {
 			promises.push(
 				...unsafe
@@ -444,7 +444,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 			);
 			if (safe.size > 1) {
 				promises.push(
-					modTalk.send({
+					CONSTANTS.channels.mod?.send({
 						allowedMentions: { users: [] },
 						content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
 					}),
@@ -456,7 +456,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 			}
 			if (unsafe.size > 1)
 				promises.push(
-					modTalk.send({
+					CONSTANTS.channels.mod?.send({
 						allowedMentions: { users: [] },
 						content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
 					}),
@@ -473,9 +473,7 @@ async function removeDuplicateNicknames(member, dm = false) {
 async function setNickname(member, newNickname) {
 	if (member.nickname === newNickname) return member;
 	if (member.moderatable) return await member.setNickname(newNickname);
-	const modTalk = guild.publicUpdatesChannel;
-	if (!modTalk) throw new ReferenceError("Could not find mod talk");
-	await modTalk.send({
+	await CONSTANTS.channels.mod?.send({
 		allowedMentions: { users: [] },
 		content: `⚠ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
 	});

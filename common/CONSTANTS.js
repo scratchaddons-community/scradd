@@ -1,3 +1,8 @@
+import { ChannelType } from "discord.js";
+import { guild } from "../client.js";
+
+const channels = await guild.channels.fetch();
+const roles = await guild.roles.fetch();
 export default /** @type {const} */ ({
 	collectorTime: 30_000,
 	zeroWidthSpace: "\u200b",
@@ -45,6 +50,9 @@ export default /** @type {const} */ ({
 		designers: "966174686142672917",
 		developers: "938439909742616616",
 		testers: "938440159102386276",
+		mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
+		dev: roles.find((role) => role.name.toLowerCase().includes("dev")),
+		epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 	},
 	urls: {
 		saSource:
@@ -58,5 +66,64 @@ export default /** @type {const} */ ({
 	themeColor: process.env.NODE_ENV === "production" ? 0xff7b26 : 0x175ef8,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	prodScradd: "929928324959055932",
+	channels: {
+		bots: enforceChannelType(
+			channels.find((channel) => /(^|-)bots(-|$)/.test(channel.name)),
+			ChannelType.GuildText,
+		),
+		bugs: enforceChannelType(
+			channels.find((channel) => "bugs" === channel.name),
+			ChannelType.GuildText,
+		),
+		suggestions: enforceChannelType(
+			channels.find((channel) => "suggestions" === channel.name),
+			ChannelType.GuildText,
+		),
+		board: enforceChannelType(
+			channels.find((channel) => channel.name.endsWith("board")),
+			[ChannelType.GuildText, ChannelType.GuildNews],
+		),
+		modmail: enforceChannelType(
+			channels.find((channel) => "modmail" === channel.name),
+			ChannelType.GuildText,
+		),
+		modlogs: enforceChannelType(
+			channels.find((channel) => channel.name.endsWith("logs")),
+			[ChannelType.GuildText, ChannelType.GuildNews],
+		),
+		mod:
+			guild.publicUpdatesChannel ||
+			enforceChannelType(
+				channels.find((channel) => "mod-talk" === channel.name),
+				ChannelType.GuildText,
+			),
+		admin: enforceChannelType(
+			channels.find((channel) => channel.name.includes("admin")),
+			ChannelType.GuildText,
+		),
+		general:
+			guild.systemChannel ||
+			enforceChannelType(
+				channels.find((channel) => "general" === channel.name),
+				ChannelType.GuildText,
+			),
+		usersVc: enforceChannelType(
+			channels.find((channel) => channel.name.startsWith("👥")),
+			ChannelType.GuildVoice,
+		),
+	},
 });
+
+/**
+ * @template {ChannelType} T
+ *
+ * @param {import("discord.js").NonThreadGuildBasedChannel | undefined} channel
+ * @param {T | T[]} type
+ *
+ * @returns {(import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined}
+ */
+function enforceChannelType(channel, type) {
+	const types = [type].flat();
+	// @ts-expect-error -- This is correct.
+	return types.includes(channel?.type) ? channel : undefined;
+}

@@ -1,6 +1,7 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
-import { extractMessageExtremities, messageToText } from "../../lib/message.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../../lib/discord.js";
 import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
 
 /** @type {import("../../types/event").default<"messageDelete">} */
@@ -8,7 +9,9 @@ export default async function event(message) {
 	if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
 	const shush =
 		message.partial ||
-		(message.channel.isThread() && message.channel.parent?.id === process.env.LOGS_CHANNEL);
+		[CONSTANTS.channels.modlogs?.id, CONSTANTS.channels.admin?.id, undefined].includes(
+			getBaseChannel(message.channel)?.id,
+		);
 
 	const content = !shush && (await messageToText(message));
 	const { embeds, files } = shush

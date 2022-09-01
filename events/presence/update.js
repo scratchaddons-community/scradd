@@ -1,4 +1,5 @@
 import { ActivityType } from "discord.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 import { censor } from "../../common/moderation/automod.js";
 
 /** @type {import("../../types/event").default<"presenceUpdate">} */
@@ -11,7 +12,7 @@ export default async function event(_, newPresence) {
 	const censored = censor(
 		(activity?.type === ActivityType.Custom ? activity?.state : activity?.name) || "",
 	);
-	if (censored && !member?.roles.resolve(process.env.MOD_ROLE || "")) {
+	if (censored && CONSTANTS.roles.mod && newPresence.member?.roles.resolve(CONSTANTS.roles.mod)) {
 		await member?.send(
 			"As a mod, you should set an example for the server, so please refrain from swears in your status. Thanks!",
 		);

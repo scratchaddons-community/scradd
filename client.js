@@ -1,9 +1,8 @@
+import { AssertionError } from "assert";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import path from "path";
 import url from "url";
-import CONSTANTS from "./common/CONSTANTS.js";
-import { importScripts, pkg } from "./lib/files.js";
-import logError from "./lib/logError.js";
+import { importScripts, pkg, sanitizePath } from "./lib/files.js";
 
 const Handler = new Client({
 	allowedMentions: { parse: ["users"], repliedUser: true },
@@ -53,12 +52,20 @@ const client = await readyPromise;
 
 console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
 
-if (CONSTANTS.prodScradd === client.user.id && !process.argv.includes("--production")) {
+export default client;
+
+export const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+
+const { default: logError } = await import("./lib/logError.js");
+
+if ("929928324959055932" === client.user.id && !process.argv.includes("--production")) {
 	await logError(
-		new OverconstrainedError(
-			CONSTANTS.prodScradd,
-			"Refusing to run on prod without --production flag",
-		),
+		new AssertionError({
+			actual: process.argv.map((arg) => sanitizePath(arg)),
+			expected: "--production",
+			operator: ".includes",
+			message: "Refusing to run on prod without --production flag",
+		}),
 		"ready",
 	);
 	process.exit();
@@ -82,6 +89,3 @@ for (const [event, execute] of events.entries()) {
 		}
 	});
 }
-export default client;
-
-export const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");

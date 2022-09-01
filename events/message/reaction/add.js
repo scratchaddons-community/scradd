@@ -1,4 +1,4 @@
-import { BOARD_CHANNEL, BOARD_EMOJI, updateBoard } from "../../../common/board.js";
+import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
@@ -36,7 +36,7 @@ export default async function event(reaction, user) {
 	}
 
 	if (
-		reaction.message.channel.id === process.env.SUGGESTION_CHANNEL &&
+		reaction.message.channel.id === CONSTANTS.channels.suggestions?.id &&
 		user.id !== client?.user?.id
 	) {
 		const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
@@ -58,9 +58,10 @@ export default async function event(reaction, user) {
 		// If they self-reacted
 		(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 		// Or if they reacted to a message on the board
-		(message.channel.id === BOARD_CHANNEL && message.author.id === client.user?.id) ||
+		(message.channel.id === CONSTANTS.channels.board?.id &&
+			message.author.id === client.user?.id) ||
 		// Or they reacted to an /explore-potatoes message
-		(message.interaction?.commandName === "explore-potatoes" && message.embeds.length > 0)
+		["explore-potatoes", "explorepotatoes"].includes(message.interaction?.commandName || "")
 	) {
 		// Remove the reaction
 		await reaction.users.remove(user);

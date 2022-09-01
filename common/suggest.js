@@ -5,6 +5,7 @@ import {
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
 	EmbedBuilder,
+	ChatInputCommandInteraction,
 } from "discord.js";
 import client, { guild } from "../client.js";
 
@@ -33,20 +34,20 @@ export default class SuggestionChannel {
 	/**
 	 * Initialize a suggestion channel.
 	 *
-	 * @param {import("discord.js").Snowflake} CHANNEL_ID - The ID of the channel to use.
+	 * @param {import("discord.js").TextChannel} channel - The channel to use.
 	 */
-	constructor(CHANNEL_ID) {
-		/** @type {import("discord.js").Snowflake} */
-		this.CHANNEL_ID = CHANNEL_ID;
+	constructor(channel) {
+		/** @type {import("discord.js").TextChannel} */
+		this.channel = channel;
 	}
 
 	/**
 	 * Post a message in a suggestion channel.
 	 *
-	 * @param {import("../types/command").GuildInteraction} interaction - The interaction to reply to on errors.
+	 * @param {ChatInputCommandInteraction<"raw" | "cached">} interaction - The interaction to reply to on errors.
 	 * @param {{ title: string; description: string }} data - The suggestion information.
 	 *
-	 * @returns {Promise<false | import("discord.js").Message>} - `false` on errors and the suggestion message on success.
+	 * @returns {Promise<false | import("discord.js").Message<true>>} - `false` on errors and the suggestion message on success.
 	 */
 	async createMessage(interaction, data, defaultAnswer = "Unanswered") {
 		const author = interaction.member;
@@ -66,10 +67,6 @@ export default class SuggestionChannel {
 			.setDescription(data.description)
 			.setFooter({ text: defaultAnswer });
 
-		const channel = await guild?.channels.fetch(this.CHANNEL_ID);
-
-		if (!channel?.isTextBased()) throw new ReferenceError(`Channel not found`);
-
 		if ((cooldowns[author.id] || 0) > Date.now()) {
 			await interaction.reply({
 				content: `${
@@ -87,7 +84,7 @@ export default class SuggestionChannel {
 			return false;
 		}
 		cooldowns[author.id] = Date.now() + FEEDBACK_COOLDOWN;
-		const message = await channel.send({ embeds: [embed] });
+		const message = await this.channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
 			name: `${title ?? ""} | ${defaultAnswer}`,
@@ -102,7 +99,7 @@ export default class SuggestionChannel {
 	/**
 	 * Answer a suggestion.
 	 *
-	 * @param {import("../types/command").GuildInteraction} interaction - The interaction to reply to on errors.
+	 * @param {ChatInputCommandInteraction<"raw" | "cached">} interaction - The interaction to reply to on errors.
 	 * @param {string} answer - The answer to the suggestion.
 	 * @param {Answer[]} answers - An object that maps answers to colors.
 	 *
@@ -111,10 +108,10 @@ export default class SuggestionChannel {
 	async answerSuggestion(interaction, answer, answers) {
 		if (
 			!interaction.channel?.isThread() ||
-			interaction.channel.parent?.id !== this.CHANNEL_ID
+			interaction.channel.parent?.id !== this.channel.id
 		) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.channel}>.`,
 				ephemeral: true,
 			});
 
@@ -125,7 +122,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!interaction.member.roles.resolve(process.env.DEVELOPER_ROLE ?? "")) {
+		if (!CONSTANTS.roles.dev || !interaction.member.roles.resolve(CONSTANTS.roles.dev)) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -164,7 +161,7 @@ export default class SuggestionChannel {
 	/**
 	 * Edit a suggestion.
 	 *
-	 * @param {import("../types/command").GuildInteraction} interaction - Interaction to respond to on errors.
+	 * @param {ChatInputCommandInteraction<"raw" | "cached">} interaction - Interaction to respond to on errors.
 	 * @param {{ title: null | string; body: null | string }} updated - Updated suggestion.
 	 *
 	 * @returns {Promise<boolean | "ratelimit">} - If true, you must respond to the interaction with a success message yourself.
@@ -172,10 +169,10 @@ export default class SuggestionChannel {
 	async editSuggestion(interaction, updated) {
 		if (
 			!interaction.channel?.isThread() ||
-			interaction.channel.parent?.id !== this.CHANNEL_ID
+			interaction.channel.parent?.id !== this.channel.id
 		) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.CHANNEL_ID}>.`,
+				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.channel}>.`,
 				ephemeral: true,
 			});
 
@@ -196,7 +193,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const isMod = !!interaction.member.roles.resolve(process.env.MODERATOR_ROLE ?? "");
+		const isMod = CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod);
 		if (interaction.user.id !== user?.id && (!isMod || (isMod && updated.body))) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,
@@ -246,6 +243,8 @@ export default class SuggestionChannel {
  * @param {Message} message - The message to get the member from.
  *
  * @returns {Promise<import("discord.js").GuildMember | import("discord.js").User>} - The member who made the suggestion.
+ *
+ * @todo Change to Message<true> after https://github.com/discordjs/discord.js/pull/8560 lands.
  */
 export async function getUserFromSuggestion(message) {
 	const author =

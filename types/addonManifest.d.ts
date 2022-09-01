@@ -1,4 +1,4 @@
-/** @author TypeScript Implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/0530d12/1/1.18.json) */
+/** @author TypeScript Implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/14ea139/1/1.19.json) */
 
 /** The value manipulator. */
 type cssManipulator =
@@ -76,6 +76,18 @@ type cssManipulator =
 			source: cssManipulator;
 			/** The possible options. */
 			options: { [key: string]: cssManipulator };
+	  }
+	| {
+			/** The type of the manipulator. */
+			type: "alphaThreshold";
+			/** The source that provides the color. */
+			source: cssManipulator;
+			/** The alpha threshold for using opaque color. */
+			threshold?: cssManipulator;
+			/** The opaque color. */
+			opaque: cssManipulator;
+			/** The transparent color. */
+			transparent: cssManipulator;
 	  };
 /**
  * `"*"`: A match rule for any URL on Scratch origin. The script will execute will execute in all pages.

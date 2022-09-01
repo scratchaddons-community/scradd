@@ -2,10 +2,10 @@ import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
-import { paginate } from "../lib/message.js";
+import { paginate } from "../lib/discord.js";
 import { makeProgressBar } from "../lib/numbers.js";
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to view users’ XP amounts")

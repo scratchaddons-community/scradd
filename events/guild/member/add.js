@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
 import { guild } from "../../../client.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 import { nth } from "../../../lib/numbers.js";
@@ -8,8 +9,6 @@ import { nth } from "../../../lib/numbers.js";
 export default async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`👋 Member ${member.toString()} joined!`, "members");
-	const channel = await guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-	if (!channel?.isTextBased()) return;
 
 	const greetings = [
 		`👋 Everybody please welcome ${member.toString()} to ${guild.name}; they’re our ${nth(
@@ -26,7 +25,7 @@ export default async function event(member) {
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(guild.memberCount)} member!`,
 	];
 
-	await channel.send({
+	await CONSTANTS.channels.general?.send({
 		content: greetings[Math.floor(Math.random() * greetings.length)],
 		files: `${guild.memberCount}`.includes("87")
 			? [
@@ -45,12 +44,17 @@ export default async function event(member) {
 	inviters.map(async (count, user) => {
 		if (count < 20) return;
 		const member = await guild.members.fetch(user).catch(() => {});
-		if (!member || member.roles.resolve(process.env.EPIC_ROLE || "")) return;
-		await member.roles.add(process.env.EPIC_ROLE || "");
-		await channel.send(
-			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's <@&${
-				process.env.EPIC_ROLE
-			}> as a thank-you.`,
+		if (
+			!member ||
+			member.id === "279855717203050496" ||
+			member.user.bot ||
+			!CONSTANTS.roles.epic ||
+			member.roles.resolve(CONSTANTS.roles.epic)
+		)
+			return;
+		await member.roles.add(CONSTANTS.roles.epic);
+		await CONSTANTS.channels.general?.send(
+			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
 		);
 	});
 }

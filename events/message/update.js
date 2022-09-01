@@ -1,15 +1,21 @@
 import { automodMessage } from "../../common/moderation/automod.js";
 import log from "../../common/moderation/logging.js";
-import { extractMessageExtremities } from "../../lib/message.js";
+import { extractMessageExtremities, getBaseChannel } from "../../lib/discord.js";
 import jsonDiff from "json-diff";
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";
 import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../types/event").default<"messageUpdate">} */
 export default async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
-	if (!newMessage.guild || newMessage.guild.id !== process.env.GUILD_ID) return;
+	if (
+		!newMessage.guild ||
+		newMessage.guild.id !== process.env.GUILD_ID ||
+		CONSTANTS.channels.admin?.id === getBaseChannel(newMessage.channel)?.id
+	)
+		return;
 	const logs = [];
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 		logs.push(

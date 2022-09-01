@@ -1,5 +1,5 @@
-import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
-import { guild } from "../../client.js";
+import { ThreadAutoArchiveDuration } from "discord.js";
+import CONSTANTS from "../CONSTANTS.js";
 
 export const LOG_GROUPS = /** @type {const} */ ([
 	"server",
@@ -20,13 +20,11 @@ export default async function log(content, group, extra = {}) {
 
 /** @param {typeof LOG_GROUPS[number] | typeof import("../database").DATABASE_THREAD} group */
 export async function getThread(group) {
-	const channel = await guild.channels.fetch(process.env.LOGS_CHANNEL || "");
-	if (channel?.type !== ChannelType.GuildText)
-		throw new TypeError("Channel isn’t a text channel");
-	const threads = await channel.threads.fetchActive();
+	if (!CONSTANTS.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
+	const threads = await CONSTANTS.channels.modlogs.threads.fetchActive();
 	return (
-		threads.threads.find((/** @type {{ name: string }} */ thread) => thread.name === group) ||
-		(await channel.threads.create({
+		threads.threads.find((thread) => thread.name === group) ||
+		(await CONSTANTS.channels.modlogs.threads.create({
 			name: group,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))

@@ -1,4 +1,4 @@
-import { GuildMember } from "discord.js";
+import { ApplicationCommandType, GuildMember, InteractionType } from "discord.js";
 import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import { getWarns } from "../../commands/view-warns.js";
@@ -62,18 +62,27 @@ export default async function event(interaction) {
 			return await guessAddon(interaction);
 		}
 	}
-	if (!interaction.isChatInputCommand()) return;
+	if (!interaction.isCommand()) return;
 	try {
 		const commandPromise = commands.get(interaction.commandName);
 
-		if (!commandPromise)
-			throw new ReferenceError(`Command \`${interaction.commandName}\` not found.`);
+		const command = await commandPromise?.();
 
-		const command = await commandPromise();
+		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
+
+		const commandType = command.data.toJSON().type;
 		if (
-			command.censored === "channel"
+			(interaction.type === InteractionType.ApplicationCommand) !==
+			(commandType === ApplicationCommandType.ChatInput)
+		) {
+			throw new TypeError("interaction type disagrees with command type");
+		}
+
+		if (
+			commandType === ApplicationCommandType.ChatInput &&
+			("censored" in command && command.censored === "channel"
 				? !badWordsAllowed(interaction.channel)
-				: command.censored ?? true
+				: ("censored" in command && command.censored) ?? true)
 		) {
 			const censored = censorOptions(interaction.options.data);
 

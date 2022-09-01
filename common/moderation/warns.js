@@ -128,9 +128,6 @@ export default async function warn(user, reason, strikes, context) {
 
 		unwarn(user.id, newMutes * WARNS_PER_MUTE, allWarns);
 
-		const modTalk = guild.publicUpdatesChannel;
-		if (!modTalk) throw new ReferenceError("Could not find mod talk");
-
 		if (userMutes > MUTE_LENGTHS.length || (userMutes === MUTE_LENGTHS.length && strikes > 0)) {
 			//ban
 			promises.push(
@@ -139,7 +136,7 @@ export default async function warn(user, reason, strikes, context) {
 					(process.env.NODE_ENV === "production" ||
 						member.roles.highest.name === "@everyone")
 					? member.ban({ reason: "Too many warnings" })
-					: modTalk.send({
+					: CONSTANTS.channels.mod?.send({
 							allowedMentions: { users: [] },
 							content: `⚠ Missing permissions to ban ${user.toString()}.`,
 					  }),
@@ -169,7 +166,7 @@ export default async function warn(user, reason, strikes, context) {
 								(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
 								Date.now(),
 					  )
-					: modTalk.send({
+					: CONSTANTS.channels.mod?.send({
 							allowedMentions: { users: [] },
 							content: `⚠ Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
 								process.env.NODE_ENV === "production" ? "hour" : "minute"

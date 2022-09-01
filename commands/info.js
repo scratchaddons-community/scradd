@@ -1,7 +1,7 @@
 import { Message, SelectMenuBuilder, SlashCommandBuilder, time, ComponentType } from "discord.js";
 
-import { BOARD_CHANNEL, BOARD_EMOJI, reactionCount } from "../common/board.js";
-import { MODMAIL_CHANNEL, UNSUPPORTED } from "../common/modmail.js";
+import { BOARD_EMOJI, reactionCount } from "../common/board.js";
+import { UNSUPPORTED } from "../common/modmail.js";
 import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
 import { generateHash } from "../lib/text.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -9,11 +9,9 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
-import { disableComponents } from "../lib/message.js";
+import { disableComponents } from "../lib/discord.js";
 import client from "../client.js";
-
-const moderator = `<@&${escapeMessage(process.env.MODERATOR_ROLE ?? "")}>`;
-const developers = `<@&${escapeMessage(process.env.DEVELOPER_ROLE ?? "")}>`;
+import { getThread } from "../common/moderation/logging.js";
 
 /**
  * Get all users with a role.
@@ -36,7 +34,7 @@ const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
  * @type {{
  * 	description: (() => import("discord.js").Awaitable<string>) | string;
  * 	edit?: (
- * 		interaction: import("discord.js").ChatInputCommandInteraction<undefined>,
+ * 		interaction: import("discord.js").ChatInputCommandInteraction<"raw" | "cached">,
  * 		Reply: Message,
  * 	) => import("discord.js").Awaitable<string>;
  * 	emoji: string;
@@ -52,11 +50,9 @@ const OPTIONS = [
 	},
 	{
 		description:
-			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to <#${escapeMessage(
-				process.env.SUGGESTION_CHANNEL ?? "",
-			)}>. I will **react to the suggestion** with ${joinWithAnd(
+			`Users can use the **[\`/suggestion create\`](<${BLOB_ROOT}/commands/suggestion.js>) command** to post a suggestion to ${CONSTANTS.channels.suggestions?.toString()}. I will **react to the suggestion** with ${joinWithAnd(
 				SUGGESTION_EMOJIS[0] || [],
-			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${developers} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
+			)} for people to vote on it, as well as **open a thread** for discussion on it. One of ${CONSTANTS.roles.dev?.toString()} can use the \`/suggestion answer\` command in the thread to **answer a suggestion**. The OP may run the \`/suggestion edit\` command to **edit the suggestion** if they made a typo or something like that. Finally, the \`/suggestion get-top\` command can be used to **get the top suggestions**. By default it returns all suggestions, but you can **filter by the suggestion’s OP and/or the suggestion’s answer**. This can be used to find things such as **your most liked suggestions**, **suggestions you could go answer** (if you are a dev), **suggestions you could implement** (also if you are a dev), and so on.\n` +
 			`\n` +
 			`Similar **[\`/bug-report\`](<${BLOB_ROOT}/commands/bug-report.js>) commands** also exist but with a few key differences: **the wording used** in the commands are slightly different, **no reactions** are added to reports, the possible **answers are different**, and there is **no \`/bug-report get-top\`**.`,
 
@@ -67,9 +63,7 @@ const OPTIONS = [
 		description:
 			`After a message gets **${reactionCount()} ${escapeMessage(
 				BOARD_EMOJI,
-			)} reactions**, I will post it to <#${escapeMessage(
-				BOARD_CHANNEL,
-			)}>. This is useful for cases such as the following:\n` +
+			)} reactions**, I will post it to ${CONSTANTS.channels.board?.toString()}. This is useful for cases such as the following:\n` +
 			`- when you want to [**highlight a good piece of work made by someone in the server**](https://discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n` +
 			`- when you want to [**give somone credit for making or saying something funny**](https://discord.com/channels/806602307750985799/938809898660155453/949148897396260904)\n` +
 			`- when someone says [**something that without context makes no sense**](https://discord.com/channels/806602307750985799/938809898660155453/941848293170876486)\n` +
@@ -90,30 +84,26 @@ const OPTIONS = [
 	},
 	{
 		description:
-			`Users may **DM me to send private messages to all the ${moderator}s** at once. I will send all their messages to **a thread in <#${escapeMessage(
-				MODMAIL_CHANNEL,
-			)}>** (through a webhook so the user’s original avatar and nickname is used) and **react to it with ${
+			`Users may **DM me to send private messages to all the ${CONSTANTS.roles.mod?.toString()}s** at once. I will send all their messages to **a thread in ${CONSTANTS.channels.modmail?.toString()}** (through a webhook so the user’s original avatar and nickname is used) and **react to it with ${
 				CONSTANTS.emojis.statuses.yes
 			}**. If sending any message fails, I will **react with ${
 				CONSTANTS.emojis.statuses.no
-			}**. I will **DM the user any messages the ${moderator}s send in the thread**, using the same reactions. ${UNSUPPORTED}\n` +
+			}**. I will **DM the user any messages the ${CONSTANTS.roles.mod?.toString()}s send in the thread**, using the same reactions. ${UNSUPPORTED}\n` +
 			`The source **code for these is in [\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.\n` +
-			`When the ticket is resolved, **a ${moderator} can use the \`/modmail close\` command** to **lock the thread**, **edit the thread starting message** to indicate its closed status, and **DM the user**. The ${moderator} **must specify a reason** for doing so that will be **posted in the thread** as well as **sent to the user**. \n` +
+			`When the ticket is resolved, **a ${CONSTANTS.roles.mod?.toString()} can use the \`/modmail close\` command** to **lock the thread**, **edit the thread starting message** to indicate its closed status, and **DM the user**. The ${CONSTANTS.roles.mod?.toString()} **must specify a reason** for doing so that will be **posted in the thread** as well as **sent to the user**. \n` +
 			`\n` +
-			`If the ${moderator}s want to contact a user for any reason, they can **use the [\`/modmail start\`](<${BLOB_ROOT}/commands/modmail.js>) command to start a modmail** with a user themselves. It will **open a new thread** in <#${escapeMessage(
-				MODMAIL_CHANNEL,
-			)}> and **DM the user** that a Modmail has been started. The ${moderator}s **can then ask the user what they need to ask**, for instance, requesting them to **change an innappropriate status**.`,
+			`If the ${CONSTANTS.roles.mod?.toString()}s want to contact a user for any reason, they can **use the [\`/modmail start\`](<${BLOB_ROOT}/commands/modmail.js>) command to start a modmail** with a user themselves. It will **open a new thread** in ${CONSTANTS.channels.modmail?.toString()} and **DM the user** that a Modmail has been started. The ${CONSTANTS.roles.mod?.toString()}s **can then ask the user what they need to ask**, for instance, requesting them to **change an innappropriate status**.`,
 
 		emoji: "🛡",
 		name: "Modmail",
 	},
 	{
 		description:
-			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in <#${process.env.BOTS_CHANNEL}>) shows **less information** to avoid **flooding the chat**.\n` +
+			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in ${CONSTANTS.channels.bots?.toString()}) shows **less information** to avoid **flooding the chat**.\n` +
 			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
-			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${moderator}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${moderator}s **are able to find out still** by looking in <#${escapeMessage(
-				process.env.LOGS_CHANNEL ?? "",
-			)}>.`,
+			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${CONSTANTS.roles.mod?.toString()}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${CONSTANTS.roles.mod?.toString()}s **are able to find out still** by looking in ${(
+				await getThread("messages")
+			).toString()}.`,
 
 		emoji: "➕",
 		name: "Miscellaneous commands",
@@ -156,39 +146,20 @@ const OPTIONS = [
 			`Current **version**: v${pkg.version}\n` +
 			`\n__**Configuration:**__\n` +
 			`**Mode**: ${process.env.NODE_ENV === "production" ? "Production" : "Testing"}\n` +
-			`**Board** channel: ${
-				process.env.BOARD_CHANNEL ? `<#${process.env.BOARD_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Logs** channel: ${
-				process.env.LOGS_CHANNEL ? `<#${process.env.LOGS_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Modmail** channel: ${
-				process.env.MODMAIL_CHANNEL ? `<#${process.env.MODMAIL_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Public logs** channel: ${
-				process.env.MODMAIL_CHANNEL ? `<#${process.env.PUBLIC_LOGS_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Suggestions** channel: ${
-				process.env.SUGGESTION_CHANNEL ? `<#${process.env.SUGGESTION_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Bugs** channel: ${
-				process.env.BUGS_CHANNEL ? `<#${process.env.BUGS_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Bots** channel: ${
-				process.env.BOTS_CHANNEL ? `<#${process.env.BOTS_CHANNEL}>` : "*None*"
-			}\n` +
-			`**Mods** role: ${
-				process.env.MODERATOR_ROLE ? `<@&${process.env.MODERATOR_ROLE}>` : "*None*"
-			}\n` +
-			`**Devs** role: ${
-				process.env.DEVELOPER_ROLE ? `<@&${process.env.DEVELOPER_ROLE}>` : "*None*"
-			}`,
+			`**Board** channel: ${CONSTANTS.channels.board || "*None*"}\n` +
+			`**Modmail** channel: ${CONSTANTS.channels.modmail || "*None*"}\n` +
+			`**Public logs** channel: ${CONSTANTS.channels.modmail || "*None*"}\n` +
+			`**Suggestions** channel: ${CONSTANTS.channels.suggestions || "*None*"}\n` +
+			`**Bugs** channel: ${CONSTANTS.channels.bugs || "*None*"}\n` +
+			`**Bots** channel: ${CONSTANTS.channels.bots || "*None*"}\n` +
+			`**Mod** role: ${CONSTANTS.roles.mod || "*None*"}\n` +
+			`**Devs** role: ${CONSTANTS.roles.dev || "*None*"}\n`,
 		emoji: "🐛",
 		name: "Debug info",
 	},
 ];
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input
@@ -201,12 +172,15 @@ export default {
 			)
 			.setRequired(false),
 	),
-	dm: true,
+
 	async interaction(interaction) {
 		const hash = generateHash("info");
 		const defaultKey = interaction.options.getString("tab") ?? OPTIONS[0]?.name;
 		const currentOption = OPTIONS.find(({ name }) => name === defaultKey);
-		const defaultContent = currentOption?.description ?? "";
+		const defaultContent =
+			typeof currentOption?.description == "function"
+				? await currentOption.description()
+				: currentOption?.description || "";
 		const message = await interaction.reply({
 			allowedMentions: { users: [] },
 
@@ -285,7 +259,9 @@ export default {
 							content:
 								(await (option?.edit
 									? option?.edit(interaction, message)
-									: option?.description(interaction.client))) ?? defaultContent,
+									: typeof option?.description === "function"
+									? await option.description()
+									: option?.description)) ?? defaultContent,
 						}),
 					);
 					await Promise.all(promises);
@@ -298,5 +274,4 @@ export default {
 
 		addCollector().catch(disable);
 	},
-	enable: false,
 };

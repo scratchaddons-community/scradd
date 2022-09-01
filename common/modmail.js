@@ -6,22 +6,17 @@ import {
 	Colors,
 	MessageMentions,
 	ThreadAutoArchiveDuration,
-	ChannelType,
 	ButtonStyle,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
 
 import { escapeMessage } from "../lib/markdown.js";
 import { asyncFilter } from "../lib/promises.js";
-import { disableComponents, extractMessageExtremities, messageToText } from "../lib/message.js";
+import { disableComponents, extractMessageExtremities, messageToText } from "../lib/discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import client, { guild } from "../client.js";
-
-export const { MODMAIL_CHANNEL = "" } = process.env;
-
-if (!MODMAIL_CHANNEL) throw new ReferenceError("MODMAIL_CHANNEL isn’t set in the .env");
 
 export const COLORS = { opened: Colors.Gold, closed: Colors.DarkGreen, confirm: Colors.Blurple };
 
@@ -81,14 +76,8 @@ export async function getMemberFromThread(thread) {
  * @returns {Promise<import("discord.js").ThreadChannel | void>} - Ticket thread.
  */
 export async function getThreadFromMember(user) {
-	const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
-
-	if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
-
-	if (mailChannel.type !== ChannelType.GuildText)
-		throw new TypeError("Modmail channel isn’t a text channel");
-
-	const { threads } = await mailChannel.threads.fetchActive();
+	if (!CONSTANTS.channels.modmail) return;
+	const { threads } = await CONSTANTS.channels.modmail.threads.fetchActive();
 
 	return (
 		await asyncFilter(
@@ -102,9 +91,9 @@ export async function getThreadFromMember(user) {
  * Let a user know that their ticket has been closed.
  *
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
- * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} [meta] - The reason for closing the ticket.
+ * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} meta - The reason for closing the ticket.
  *
- * @returns {Promise<Message | false>} - Message sent to user.
+ * @returns {Promise<Message<false> | false>} - Message sent to user.
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getMemberFromThread(thread);
@@ -170,7 +159,7 @@ export async function closeModmail(thread, user, reason) {
  *
  * @param {GuildMember} user - The user to message.
  *
- * @returns {Promise<import("discord.js").Message | false>} - The message sent.
+ * @returns {Promise<import("discord.js").Message<false> | false>} - The message sent.
  */
 export async function sendOpenedMessage(user) {
 	return await user
@@ -268,12 +257,12 @@ export function generateReactionFunctions(message) {
 }
 
 /**
- * @param {import("discord.js").TextChannel} mailChannel
  * @param {EmbedBuilder} openedEmbed
  * @param {string} name
  */
-export async function openModmail(mailChannel, openedEmbed, name, ping = false) {
-	const starterMessage = await mailChannel.send({
+export async function openModmail(openedEmbed, name, ping = false) {
+	if (!CONSTANTS.channels.modmail) throw new ReferenceError("Cannot find modmail channel");
+	const starterMessage = await CONSTANTS.channels.modmail.send({
 		allowedMentions: { parse: ["everyone"] },
 		content: process.env.NODE_ENV === "production" && ping ? "@here" : undefined,
 		embeds: [openedEmbed],

@@ -1,11 +1,4 @@
-import {
-	SlashCommandBuilder,
-	EmbedBuilder,
-	GuildMember,
-	ChannelType,
-	PermissionsBitField,
-} from "discord.js";
-import { guild } from "../client.js";
+import { SlashCommandBuilder, EmbedBuilder, GuildMember, PermissionsBitField } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -13,13 +6,12 @@ import {
 	COLORS,
 	generateConfirm,
 	getThreadFromMember,
-	MODMAIL_CHANNEL,
 	openModmail,
 	sendOpenedMessage,
 	UNSUPPORTED,
 } from "../common/modmail.js";
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
@@ -28,7 +20,6 @@ export default {
 			subcommand
 				.setName("close")
 				.setDescription("(Mods only) Close a modmail ticket")
-				// The user who closed the ticket will be shown publically -- manually archive the thread if you want to hide your identity")
 				.addStringOption((input) =>
 					input
 						.setName("reason")
@@ -57,10 +48,12 @@ export default {
 			case "close": {
 				if (
 					!interaction.channel?.isThread() ||
-					interaction.channel.parent?.id !== MODMAIL_CHANNEL
+					interaction.channel.parent?.id !== CONSTANTS.channels.modmail?.id
 				) {
 					await interaction.reply({
-						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${MODMAIL_CHANNEL}>.`,
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} This command may only be used in threads in ${CONSTANTS.channels.modmail?.toString()}.`,
 						ephemeral: true,
 					});
 
@@ -111,13 +104,6 @@ export default {
 					return;
 				}
 
-				const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
-
-				if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
-
-				if (mailChannel.type !== ChannelType.GuildText)
-					throw new TypeError("Modmail channel isn’t a text channel");
-
 				await generateConfirm(
 					new EmbedBuilder()
 						.setTitle("Confirmation")
@@ -142,11 +128,7 @@ export default {
 
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {
-								const thread = await openModmail(
-									mailChannel,
-									openedEmbed,
-									user.user.username,
-								);
+								const thread = await openModmail(openedEmbed, user.user.username);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes

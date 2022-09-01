@@ -3,7 +3,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 const MAX_FETCH_COUNT = 100;
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
@@ -22,8 +22,7 @@ export default {
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
-		if (!interaction.channel || interaction.channel.isDMBased())
-			throw new TypeError("Cannot run this command in a DM");
+		if (!interaction.channel) throw new TypeError("Cannot run this command in a DM");
 
 		const count = interaction.options.getString("count", true);
 		const user = interaction.options.getUser("user");
@@ -48,7 +47,7 @@ export default {
 };
 
 /**
- * @param {import("discord.js").Collection<import("discord.js").Snowflake, import("discord.js").Message>} unfiltered
+ * @param {import("discord.js").Collection<import("discord.js").Snowflake, import("discord.js").Message<true>>} unfiltered
  * @param {import("discord.js").GuildTextBasedChannel} channel
  * @param {number} count
  * @param {null | import("discord.js").User} user

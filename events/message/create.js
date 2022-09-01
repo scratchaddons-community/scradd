@@ -16,18 +16,17 @@ import {
 	generateReactionFunctions,
 	getMemberFromThread,
 	getThreadFromMember,
-	MODMAIL_CHANNEL,
 	openModmail,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
-import { reactAll } from "../../lib/message.js";
+import { reactAll } from "../../lib/discord.js";
 import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 
-const { GUILD_ID, SUGGESTION_CHANNEL, BOARD_CHANNEL } = process.env;
+const { GUILD_ID } = process.env;
 
 if (!GUILD_ID) throw new ReferenceError("GUILD_ID isn’t set in the .env");
 
@@ -43,20 +42,14 @@ export default async function event(message) {
 
 	if (
 		message.channel.isDMBased() &&
-		(message.author.id !== client.user.id || message.interaction)
+		(message.author.id !== client.user.id || message.interaction) &&
+		CONSTANTS.channels.modmail
 	) {
-		const mailChannel = await guild.channels.fetch(MODMAIL_CHANNEL);
-
-		if (!mailChannel) throw new ReferenceError("Could not find modmail channel");
-
-		if (mailChannel.type !== ChannelType.GuildText)
-			throw new TypeError("Modmail channel isn’t a text channel");
-
-		const webhooks = await mailChannel.fetchWebhooks();
+		const webhooks = await CONSTANTS.channels.modmail.fetchWebhooks();
 		const webhook =
 			webhooks.find(
 				(possibleWebhook) => possibleWebhook.applicationId === client.application.id,
-			) ?? (await mailChannel.createWebhook({ name: CONSTANTS.webhookName }));
+			) ?? (await CONSTANTS.channels.modmail.createWebhook({ name: CONSTANTS.webhookName }));
 		const existingThread = await getThreadFromMember(
 			message.interaction?.user || message.author,
 		);
@@ -98,12 +91,7 @@ export default async function event(message) {
 						})
 						.setColor(COLORS.opened);
 
-					const newThread = await openModmail(
-						mailChannel,
-						openedEmbed,
-						message.author.username,
-						true,
-					);
+					const newThread = await openModmail(openedEmbed, message.author.username, true);
 
 					if (!webhook) throw new ReferenceError("Could not find webhook");
 
@@ -133,14 +121,14 @@ export default async function event(message) {
 		}
 	}
 
-	if (message.guild !== null && message.guild.id !== GUILD_ID) {
+	if (message.channel.isDMBased() || message.guild?.id !== GUILD_ID) {
 		await Promise.all(promises);
 		return;
 	}
 
 	if (
 		message.channel.type === ChannelType.GuildPublicThread &&
-		message.channel.parent?.id === MODMAIL_CHANNEL &&
+		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
 		(message.webhookId && message.author.id !== client.user?.id
 			? (await message.fetchWebhook()).owner?.id !== client.user?.id
@@ -178,8 +166,9 @@ export default async function event(message) {
 
 	if (
 		mentions > 4 &&
+		CONSTANTS.roles.mod &&
 		message.member &&
-		!message.member.roles.resolve(process.env.MODERATOR_ROLE || "")
+		!message.member.roles.resolve(CONSTANTS.roles.mod)
 	) {
 		promises.push(
 			warn(
@@ -197,7 +186,7 @@ export default async function event(message) {
 		return;
 	}
 
-	if (process.env.LOGS_CHANNEL !== message.channel.id) {
+	if (CONSTANTS.channels.modlogs?.id !== message.channel.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
 
@@ -225,7 +214,7 @@ export default async function event(message) {
 				.fetch({ limit: 100, before: message.id })
 				.then((messages) => messages.toJSON());
 
-			/** @type {import("discord.js").Message[]} */
+			/** @type {import("discord.js").Message<true>[]} */
 			const res = [];
 			for (
 				let index = 0;
@@ -246,7 +235,7 @@ export default async function event(message) {
 		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
-		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content));
+		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content)); // todo: update this
 
 		await giveXp(
 			message.interaction?.user || message.author,
@@ -278,12 +267,7 @@ export default async function event(message) {
 
 	if (
 		message.interaction ||
-		[
-			SUGGESTION_CHANNEL,
-			process.env.BUGS_CHANNEL,
-			BOARD_CHANNEL,
-			process.env.LOGS_CHANNEL,
-		].includes(message.channel.id)
+		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(message.channel.id)
 	) {
 		await Promise.all(promises);
 		return;

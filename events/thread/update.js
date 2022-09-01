@@ -2,7 +2,6 @@ import { GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js
 import {
 	COLORS,
 	getMemberFromThread,
-	MODMAIL_CHANNEL,
 	sendClosedMessage,
 	sendOpenedMessage,
 	UNSUPPORTED,
@@ -47,9 +46,9 @@ export default async function event(oldThread, newThread) {
 
 	if (
 		newThread.archived &&
-		// @ts-expect-error -- We’re trying to tell if the type matches.
-		(LOG_GROUPS.includes(newThread.name) || newThread.name === DATABASE_THREAD) &&
-		newThread.parent?.id === process.env.LOGS_CHANNEL
+		(/** @type {readonly string[]} */ (LOG_GROUPS).includes(newThread.name) ||
+			newThread.name === DATABASE_THREAD) &&
+		newThread.parent?.id === CONSTANTS.channels.modlogs?.id
 	) {
 		await newThread.setArchived(false);
 	}
@@ -74,7 +73,7 @@ export default async function event(oldThread, newThread) {
 
 	const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
 	if (
-		newThread.parent?.id !== MODMAIL_CHANNEL ||
+		newThread.parent?.id !== CONSTANTS.channels.modmail?.id ||
 		oldThread.archived === newThread.archived ||
 		(newThread.archived &&
 			latestMessage?.interaction?.commandName === "modmail close" &&

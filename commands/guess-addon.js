@@ -19,8 +19,7 @@ import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../lib/text.js";
 import { MessageActionRowBuilder, ModalActionRowBuilder } from "../types/ActionRowBuilder.js";
-import { disableComponents } from "../lib/message.js";
-import addonCommandInfo from "./addon.js";
+import { disableComponents } from "../lib/discord.js";
 import client from "../client.js";
 
 const COLLECTOR_TIME = 120_000;
@@ -37,14 +36,9 @@ const fuse = new Fuse(addons, {
 	],
 });
 const commandMarkdown = `\n\n*Run the </addon:${
-	(
-		await client.application?.commands.fetch({
-			guildId:
-				addonCommandInfo.dm && process.env.NODE_ENV === "production"
-					? undefined
-					: process.env.GUILD_ID,
-		})
-	)?.find((command) => command.name === "addon")?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8280)
+	(await client.application?.commands.fetch({ guildId: process.env.GUILD_ID }))?.find(
+		(command) => command.name === "addon",
+	)?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8546)
 }> command for more information about this addon!*`;
 
 export const GROUP_NAMES = /** @type {const} */ ([
@@ -858,7 +852,7 @@ const BULLET_POINT = CONSTANTS.footerSeperator.trim();
  */
 const games = {};
 
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Play games where you or I guess addons")
@@ -868,8 +862,6 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand.setName("player").setDescription("I think of an addon and you guess"),
 		),
-
-	dm: true,
 
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;

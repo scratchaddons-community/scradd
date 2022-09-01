@@ -9,7 +9,11 @@ export default async function event(oldRole, newRole) {
 		logs.push(`’s role color set to ${newRole.hexColor}`);
 	}
 	if (oldRole.hoist !== newRole.hoist) {
-		logs.push(` set to display role members ${newRole.hoist ? "separately from" : "combined with"} online members`);
+		logs.push(
+			` set to display role members ${
+				newRole.hoist ? "separately from" : "combined with"
+			} online members`,
+		);
 	}
 	if (oldRole.managed !== newRole.managed) {
 		logs.push(` made ${newRole.managed ? "" : "un"}assignable`);

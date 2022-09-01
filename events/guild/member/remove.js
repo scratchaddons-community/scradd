@@ -7,8 +7,6 @@ import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
 export default async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`💨 Member ${member.toString()} left!`, "members");
-	const channel = await guild.channels.fetch(process.env.PUBLIC_LOGS_CHANNEL || "");
-	if (!channel?.isTextBased()) throw new TypeError("PUBLIC_LOGS_CHANNEL isn’t a text channel");
 
 	const byes = [
 		`😩 Welp… **${member.user.username}** decided to leave… what a shame…`,
@@ -16,7 +14,7 @@ export default async function event(member) {
 		`**${member.user.username}** made a bad decision and left! 😦 I wonder why… 🤔`,
 		`👎 For some reason **${member.user.username}** didn’t like it here…`,
 		`Can we get an F in the chat for **${member.user.username}**? They left! 😭`,
-		`🍴 Oop, **${member.user.username}** got eaten by an evil kumquat and left!`,
+		`🍴 Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
 	];
 
 	const banned = await guild.bans
@@ -31,13 +29,13 @@ export default async function event(member) {
 		`😦 Oof… **${member.user.username}** got banned…`,
 		`${CONSTANTS.emojis.statuses.no} There’s no turning back for the banned **${member.user.username}**…`,
 		`👨‍🏫 Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
-		`😡 Oops, **${member.user.username}** angered the mods and was banned!`,
+		`😡 Oop, **${member.user.username}** angered the mods and was banned!`,
 		`📜 **${member.user.username}** broke the rules and took an L`,
 		`💬 **${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
 	];
 
 	await Promise.all([
-		channel.send(
+		CONSTANTS.channels.general?.send(
 			(banned
 				? bans[Math.floor(Math.random() * bans.length)]
 				: byes[Math.floor(Math.random() * byes.length)]) || "",

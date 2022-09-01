@@ -10,7 +10,7 @@ import { boardDatabase as database, generateMessage, reactionCount } from "../co
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
-import { disableComponents } from "../lib/message.js";
+import { disableComponents } from "../lib/discord.js";
 import { guild } from "../client.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
@@ -57,7 +57,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 }
 
 const defaultMinReactions = Math.round(reactionCount() * 0.4);
-/** @type {import("../types/command").default} */
+/** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with a random message from the potatoboard")

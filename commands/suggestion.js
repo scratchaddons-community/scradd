@@ -4,12 +4,8 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { getUserFromSuggestion, RATELIMT_MESSAGE } from "../common/suggest.js";
 import { escapeLinks } from "../lib/markdown.js";
-import { getAllMessages, paginate, reactAll } from "../lib/message.js";
+import { getAllMessages, paginate, reactAll } from "../lib/discord.js";
 import { truncateText } from "../lib/text.js";
-
-const { SUGGESTION_CHANNEL } = process.env;
-
-if (!SUGGESTION_CHANNEL) throw new ReferenceError("SUGGESTION_CHANNEL isn’t set in the .env");
 
 /** @type {[string, string][]} */
 export const SUGGESTION_EMOJIS = [
@@ -71,12 +67,13 @@ export const ANSWERS = [
 	},
 ];
 
-export const CHANNEL_TAG = "#suggestions";
+const channel =
+	CONSTANTS.channels.suggestions && new SuggestionChannel(CONSTANTS.channels.suggestions);
 
-const channel = new SuggestionChannel(SUGGESTION_CHANNEL);
+export const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
 
-/** @type {import("../types/command").default} */
-export default {
+/** @type {import("../types/command").ChatInputCommand | undefined} */
+export default channel && {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
@@ -246,16 +243,11 @@ export default {
 				break;
 			}
 			case "get-top": {
-				const channel = await guild.channels.fetch(SUGGESTION_CHANNEL);
-
-				if (!channel?.isTextBased())
-					throw new ReferenceError("Could not find suggestion channel");
-
 				const requestedUser = interaction.options.getUser("user");
 				const requestedAnswer = interaction.options.getString("answer");
 
 				await interaction.deferReply();
-				const unfiltered = await getAllMessages(channel);
+				const unfiltered = await getAllMessages(channel.channel);
 				// todo: asyncFilter
 				const all = (
 					await Promise.all(
@@ -310,7 +302,8 @@ export default {
 					);
 
 				const nick =
-					requestedUser && (await guild.members.fetch(requestedUser.id).catch(() => {}))?.displayName;
+					requestedUser &&
+					(await guild.members.fetch(requestedUser.id).catch(() => {}))?.displayName;
 				await paginate(
 					all,
 					(suggestion) =>

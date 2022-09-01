@@ -3,10 +3,6 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";
 
-const { BUGS_CHANNEL } = process.env;
-
-if (!BUGS_CHANNEL) throw new ReferenceError("BUGS_CHANNEL isn’t set in the .env");
-
 /** @type {import("../common/suggest").Answer[]} */
 const ANSWERS = [
 	{
@@ -44,18 +40,17 @@ const ANSWERS = [
 	},
 ];
 
-export const CHANNEL_TAG = "#bugs";
+const channel = CONSTANTS.channels.bugs && new SuggestionChannel(CONSTANTS.channels.bugs);
 
-const channel = new SuggestionChannel(BUGS_CHANNEL);
-
-/** @type {import("../types/command").default} */
-export default {
+const channelTag = `#${CONSTANTS.channels.bugs?.name}`;
+/** @type {import("../types/command").ChatInputCommand | undefined} */
+export default channel && {
 	data: new SlashCommandBuilder()
-		.setDescription(`Commands to manage bug reports in ${CHANNEL_TAG}`)
+		.setDescription(`Commands to manage bug reports in ${channelTag}`)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName("create")
-				.setDescription(`Create a new bug report in ${CHANNEL_TAG}`)
+				.setDescription(`Create a new bug report in ${channelTag}`)
 				.addStringOption((option) =>
 					option
 						.setName("title")
@@ -75,7 +70,7 @@ export default {
 			subcommand
 				.setName("answer")
 				.setDescription(
-					`(Devs only; For use in ${CHANNEL_TAG}’s threads) Answer a bug report`,
+					`(Devs only; For use in ${channelTag}’s threads) Answer a bug report`,
 				)
 				.addStringOption((option) => {
 					const newOption = option
@@ -98,7 +93,7 @@ export default {
 			subcommand
 				.setName("edit")
 				.setDescription(
-					`(OP/Mods only; For use in ${CHANNEL_TAG}’s threads) Edit a bug report`,
+					`(OP/Mods only; For use in ${channelTag}’s threads) Edit a bug report`,
 				)
 				.addStringOption((option) =>
 					option

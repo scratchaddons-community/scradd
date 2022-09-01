@@ -1,5 +1,6 @@
+import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
-import { MODMAIL_CHANNEL, sendClosedMessage } from "../../common/modmail.js";
+import { sendClosedMessage } from "../../common/modmail.js";
 
 /** @type {import("../../types/event").default<"threadDelete">} */
 export default async function event(thread) {
@@ -10,7 +11,7 @@ export default async function event(thread) {
 		}deleted! (ID ${thread.id})`,
 		"channels",
 	);
-	if (thread.parent?.id !== MODMAIL_CHANNEL || thread.archived) return;
+	if (thread.parent?.id !== CONSTANTS.channels.modmail?.id || thread.archived) return;
 
 	await sendClosedMessage(thread);
 }

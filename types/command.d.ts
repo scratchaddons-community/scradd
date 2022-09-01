@@ -13,46 +13,32 @@ import type {
 	ApplicationCommand,
 	GuildResolvable,
 	Awaitable,
+	SlashCommandOptionsOnlyBuilder,
+	ContextMenuCommandBuilder,
+	ContextMenuCommandInteraction,
 } from "discord.js";
 
-type CommandInfo = {
-	/** Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words. */
-	censored?: boolean | "channel" = true;
-	/**
-	 * A builder instance that has constructed the command.
-	 *
-	 * @throws {AssertionError} If {@link Command.setName} is called on this builder. The file name is used automatically.
-	 * @throws {AssertionError} If {@link Command.setDMPermission} is called on this builder. Use {@link CommandInfo.dm} to set the
-	 *   availability of this command in DMs.
-	 */
-	data: Command;
-	/** Pass `false` to disable this command. */
-	enable?: boolean = true;
-} & (
-	| {
-			/** Pass `true` to make this a global command. This has the side effect of allowing the command to be used in DMs. */
-			dm: true;
-			/** A function that processes interactions to this command. */
-			interaction: (interaction: ChatInputCommandInteraction<undefined>) => Awaitable<void>;
-	  }
-	| {
-			/** Pass `true` to make this a global command. This has the side effect of allowing the command to be used in DMs. */
-			dm?: false;
-			/** A function that processes interactions to this command. */
-			interaction: (interaction: GuildInteraction) => Awaitable<void>;
-	  }
-);
-export default CommandInfo;
-export type Command =
-	| SlashCommandSubcommandsOnlyBuilder
-	| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+export interface ContextMenuCommand {
+	data: ContextMenuCommandBuilder;
 
-export type GuildInteraction = ChatInputCommandInteraction<"raw" | "cached"> & {
-	guild: Guild;
-	guildId: Snowflake;
-	member: APIInteractionGuildMember | GuildMember;
-	memberPermissions: PermissionsBitField;
-	guildLocale: Locale;
-	commandGuildId: Snowflake;
-	get command(): ApplicationCommand<{ guild: GuildResolvable }> | null;
-};
+	/** A function that processes interactions to this command. */
+	interaction: (interaction: ContextMenuCommandInteraction<"raw" | "cached">) => any;
+}
+export interface ChatInputCommand {
+	/**
+	 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
+	 *
+	 * @default true
+	 */
+	censored?: boolean | "channel";
+	data:
+		| SlashCommandSubcommandsOnlyBuilder
+		| SlashCommandOptionsOnlyBuilder
+		| SlashCommandBuilder
+		| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+
+	/** A function that processes interactions to this command. */
+	interaction: (interaction: ChatInputCommandInteraction<"raw" | "cached">) => any;
+}
+type Command = ContextMenuCommand | ChatInputCommand | undefined;
+export default Command;
