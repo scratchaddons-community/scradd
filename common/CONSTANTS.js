@@ -1,8 +1,21 @@
 import { ChannelType } from "discord.js";
-import { guild } from "../client.js";
+import fetch from "node-fetch";
+import client, { guild } from "../client.js";
 
 const channels = await guild.channels.fetch();
 const roles = await guild.roles.fetch();
+
+const saRepo = "ScratchAddons/ScratchAddons";
+/** @type {string} */
+const latestRelease =
+	process.env.NODE_ENV == "production"
+		? /** @type {any} */ (
+				await fetch(`https://api.github.com/repos/${saRepo}/releases/latest`).then((res) =>
+					res.json(),
+				)
+		  ).tag_name
+		: "master";
+
 export default /** @type {const} */ ({
 	collectorTime: 30_000,
 	zeroWidthSpace: "\u200b",
@@ -45,20 +58,20 @@ export default /** @type {const} */ ({
 		misc: { addon: "<:addon:1008842100764332142>", percent: "<:percent:1009144273331040296>" },
 	},
 	robotop: "323630372531470346",
-	testingServer: "938438560925761619",
+	testingServer: await client.guilds.fetch("938438560925761619").catch(() => {}),
 	roles: {
 		designers: "966174686142672917",
 		developers: "938439909742616616",
 		testers: "938440159102386276",
 		mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
-		dev: roles.find((role) => role.name.toLowerCase().includes("dev")),
+		dev: roles.find((role) => role.name.toLowerCase().includes("devs")),
 		epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 	},
 	urls: {
-		saSource:
-			"https://cdn.jsdelivr.net/gh/ScratchAddons/ScratchAddons" +
-			(process.env.NODE_ENV == "production" ? "" : "@master"),
-		saRepo: "https://github.com/ScratchAddons/ScratchAddons",
+		usercountJson: "https://scratchaddons.com/usercount.json",
+		saSource: "https://raw.githubusercontent.com/ScratchAddons/ScratchAddons/" + latestRelease,
+		saRepo,
+		latestRelease,
 		scraddRepo: "https://github.com/scratchaddons-community/scradd",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
@@ -68,7 +81,7 @@ export default /** @type {const} */ ({
 	webhookName: "scradd-webhook",
 	channels: {
 		bots: enforceChannelType(
-			channels.find((channel) => /(^|-)bots(-|$)/.test(channel.name)),
+			channels.find((channel) => channel.name.endsWith("bots")),
 			ChannelType.GuildText,
 		),
 		bugs: enforceChannelType(
@@ -87,6 +100,10 @@ export default /** @type {const} */ ({
 			channels.find((channel) => "modmail" === channel.name),
 			ChannelType.GuildText,
 		),
+		advertise: enforceChannelType(
+			channels.find((channel) => "advertise" === channel.name),
+			ChannelType.GuildText,
+		),
 		modlogs: enforceChannelType(
 			channels.find((channel) => channel.name.endsWith("logs")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
@@ -99,6 +116,18 @@ export default /** @type {const} */ ({
 			),
 		admin: enforceChannelType(
 			channels.find((channel) => channel.name.includes("admin")),
+			ChannelType.GuildText,
+		),
+		devs: enforceChannelType(
+			channels.find((channel) => channel.name.includes("devs")),
+			ChannelType.GuildText,
+		),
+		boosters: enforceChannelType(
+			channels.find((channel) => channel.name.includes("boosters")),
+			ChannelType.GuildText,
+		),
+		youtube: enforceChannelType(
+			channels.find((channel) => channel.name.includes("youtube")),
 			ChannelType.GuildText,
 		),
 		general:

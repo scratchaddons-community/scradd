@@ -3,7 +3,7 @@
 	"version": "2.0.0-prerelease",
 	"private": true,
 	"description": "Custom Discord bot for the Scratch Addons server.",
-	"homepage": "https://discord.gg/Cs25kzs889",
+	"homepage": "https://discord.gg/FPv957V6SD",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/scratchaddons-community/scradd.git"
@@ -26,7 +26,8 @@
 		"fuse.js": "6.6.2",
 		"json-diff": "0.9.0",
 		"node-fetch": "3.2.10",
-		"papaparse": "5.3.2"
+		"papaparse": "5.3.2",
+		"serialize-error": "11.0.0"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.0",

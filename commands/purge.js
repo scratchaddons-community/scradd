@@ -25,7 +25,7 @@ export default {
 		if (!interaction.channel) throw new TypeError("Cannot run this command in a DM");
 
 		const count = interaction.options.getString("count", true);
-		const user = interaction.options.getUser("user");
+		const user = interaction.options.getUser("user") || undefined;
 		const numberCount = +count;
 		const messages = await interaction.channel.messages.fetch({ limit: MAX_FETCH_COUNT });
 
@@ -50,7 +50,7 @@ export default {
  * @param {import("discord.js").Collection<import("discord.js").Snowflake, import("discord.js").Message<true>>} unfiltered
  * @param {import("discord.js").GuildTextBasedChannel} channel
  * @param {number} count
- * @param {null | import("discord.js").User} user
+ * @param {import("discord.js").User} [user]
  */
 async function deleteMessages(unfiltered, channel, count, user) {
 	const twoWeeksAgo = Date.now() - 1_209_600_000;

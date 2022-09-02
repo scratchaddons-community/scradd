@@ -10,7 +10,6 @@ import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
-import client from "../client.js";
 import { getThread } from "../common/moderation/logging.js";
 
 /**
@@ -21,8 +20,7 @@ import { getThread } from "../common/moderation/logging.js";
  * @returns {Promise<string>} - Users with the role.
  */
 async function getRole(roleId) {
-	const guild = await client.guilds.fetch(CONSTANTS.testingServer);
-	const role = await guild.roles.fetch(roleId);
+	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
 	const members = Array.from(role?.members.values() ?? []);
 
 	return joinWithAnd(members);

@@ -4,8 +4,9 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
 import { getBaseChannel } from "../lib/discord.js";
 
-import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
+import { escapeMessage, escapeLinks } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
+import { generateTooltip } from "../lib/discord.js";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,

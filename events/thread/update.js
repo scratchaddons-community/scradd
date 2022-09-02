@@ -46,8 +46,8 @@ export default async function event(oldThread, newThread) {
 
 	if (
 		newThread.archived &&
-		(/** @type {readonly string[]} */ (LOG_GROUPS).includes(newThread.name) ||
-			newThread.name === DATABASE_THREAD) &&
+		(newThread.name === DATABASE_THREAD ||
+			/** @type {readonly string[]} */ (LOG_GROUPS).includes(newThread.name)) &&
 		newThread.parent?.id === CONSTANTS.channels.modlogs?.id
 	) {
 		await newThread.setArchived(false);

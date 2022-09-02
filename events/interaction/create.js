@@ -12,11 +12,8 @@ import { guessAddon } from "../../commands/guess-addon.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands =
-	await /** @type {Promise<import("discord.js").Collection<string, () => Promise<import("../../types/command").default>>>} */ (
-		importScripts(path.resolve(dirname, "../../commands"))
-	);
-
+const commands = await /** @type {typeof importScripts<import("../../types/command").default>} */
+(importScripts)(path.resolve(dirname, "../../commands"));
 /** @type {import("../../types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
 	if (interaction.isButton()) {
@@ -36,19 +33,22 @@ export default async function event(interaction) {
 			if (!(interaction.member instanceof GuildMember))
 				throw new TypeError("interaction.member is not a GuildMember");
 
-			const role = interaction.customId.split("_reaction_role")[0];
-			if (!role)
+			const roleId = interaction.customId.split("_reaction_role")[0];
+			if (!roleId)
 				throw new SyntaxError(
 					"Button customId ends in _reaction_role but no role ID was given",
 				);
-			if (interaction.member.roles.resolve(role)) {
+			const role = interaction.member.roles.resolve(roleId);
+			if (role) {
 				await interaction.member.roles.remove(role);
 				await interaction.reply({
 					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.yes} Removed <@&${role}> from you!`,
+					content: `${
+						CONSTANTS.emojis.statuses.yes
+					} Removed ${role.toString()} from you!`,
 				});
 			} else {
-				await interaction.member.roles.add(role);
+				await interaction.member.roles.add(roleId);
 				await interaction.reply({
 					ephemeral: true,
 					content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${role}>!`,
@@ -139,7 +139,8 @@ function stringifyOptions(options) {
 function censorOptions(options) {
 	let strikes = 0,
 		isBad = false,
-		/** @type {string[]} */ words = [];
+		/** @type {string[]} */
+		words = [];
 	options.forEach((option) => {
 		if (typeof option.value === "string") {
 			const censored = censor(option.value);

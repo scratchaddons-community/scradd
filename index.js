@@ -33,10 +33,11 @@ if (process.env.NODE_ENV === "production")
 	);
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
+
 CONSTANTS.channels.usersVc &&
 	setInterval(async () => {
 		const count = (
-			await fetch(`https://scratchaddons.com/usercount.json?date=${Date.now()}`).then(
+			await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
 				(res) =>
 					/** @type {Promise<{ count: number; _chromeCountDate: string }>} */ (
 						res.json()
@@ -60,9 +61,9 @@ const commands = [];
 for await (const entry of asyncFilter(
 	[
 		...(
-			await /** @type {Promise<import("discord.js").Collection<string, () => Promise<import("./types/command").default>>>} */ (
-				importScripts(path.resolve(dirname, "./commands"))
-			)
+			await /** @type {typeof importScripts<import("./types/command").default>} */ (
+				importScripts
+			)(path.resolve(dirname, "./commands"))
 		).entries(),
 	],
 	async ([name, commandPromise]) => {

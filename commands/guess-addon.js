@@ -78,9 +78,9 @@ const addonEndings = Object.fromEntries(
 		false,
 	]),
 );
-const versionMarkdown = `**[${escapeMarkdown(manifest.version_name || manifest.version)}](${
-	CONSTANTS.urls.saRepo
-}${
+const versionMarkdown = `**[${escapeMarkdown(
+	manifest.version_name || manifest.version,
+)}](https://github.com/${CONSTANTS.urls.saRepo}${
 	manifest.version_name?.endsWith("-prerelease")
 		? ``
 		: `/releases/tag/v${encodeURI(manifest.version)}`
@@ -1615,14 +1615,15 @@ export default {
 							throw new TypeError("Unknown button pressed");
 
 						const selected = componentInteraction.values[0] || "";
-						const split = /** @type {[GroupName, string, string]} */ (
-							selected.split(".")
-						);
-						const question = questions[split[0]][+split[1]]?.[+split[2]];
+						const split = selected.split(".");
+						const question =
+							questions[/** @type {GroupName} */ (split[0])][+(split[1] || 0)]?.[
+								+(split[2] || 0)
+							];
 
 						await componentInteraction.deferUpdate();
 
-						await answerQuestion(question, split[0]);
+						await answerQuestion(question, /** @type {GroupName} */ (split[0]));
 
 						collector.resetTimer();
 					})

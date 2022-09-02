@@ -22,16 +22,16 @@ export function reactionCount(channel) {
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel) return COUNTS.default;
 	if (baseChannel.isDMBased()) return COUNTS.mods;
-	if (baseChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus;
+	if (baseChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus; // The Cache!
 
 	return (
 		/** @type {{ [key: string]: number }} */ ({
-			["806895693162872892"]: COUNTS.mods,
-			["816329956074061867"]: COUNTS.admins,
-			["939350305311715358"]: COUNTS.mods,
-			["869662117651955802"]: COUNTS.devs,
-			["853256939089559583"]: COUNTS.modsPlus,
-			["894314668317880321"]: COUNTS.modsPlus,
+			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
+			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
+			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
+			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
+			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.modsPlus,
+			[CONSTANTS.channels.youtube?.id || ""]: COUNTS.modsPlus,
 		})[baseChannel.id] || 8
 	);
 }
@@ -187,7 +187,8 @@ export async function updateBoard(message) {
 		top.splice(10);
 		top.map(async (onBoard) => {
 			const toPin =
-				onBoard && (await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {}));
+				onBoard &&
+				(await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {}));
 			toPin && toPin.pin();
 		});
 		CONSTANTS.channels.board.messages.fetchPinned().then(async (pins) => {

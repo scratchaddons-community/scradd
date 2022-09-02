@@ -1,9 +1,12 @@
-import { Collection } from "discord.js";
+import { AttachmentBuilder, Collection } from "discord.js";
 import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 import { nth } from "../../../lib/numbers.js";
+import fileSystem from "fs/promises";
+import url from "url";
+import path from "path";
 
 /** @type {import("../../../types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
@@ -29,7 +32,15 @@ export default async function event(member) {
 		content: greetings[Math.floor(Math.random() * greetings.length)],
 		files: `${guild.memberCount}`.includes("87")
 			? [
-					"https://cdn.discordapp.com/attachments/938438561588453438/965676538605502535/was_that_The_Bite_of_87.wav",
+					new AttachmentBuilder(
+						await fileSystem.readFile(
+							path.resolve(
+								path.dirname(url.fileURLToPath(import.meta.url)),
+								"../../../common/audio/biteOf87.wav",
+							),
+						),
+						{ name: `file.wav` },
+					),
 			  ]
 			: [],
 	});

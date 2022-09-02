@@ -52,30 +52,22 @@ const client = await readyPromise;
 
 console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
 
+if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production")) {
+	throw new AssertionError({
+		actual: process.argv.map((arg) => sanitizePath(arg)),
+		expected: "--production",
+		operator: ".includes",
+		message: "Refusing to run on prod without --production flag",
+	});
+}
 export default client;
 
 export const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
 
-const { default: logError } = await import("./lib/logError.js");
-
-if ("929928324959055932" === client.user.id && !process.argv.includes("--production")) {
-	await logError(
-		new AssertionError({
-			actual: process.argv.map((arg) => sanitizePath(arg)),
-			expected: "--production",
-			operator: ".includes",
-			message: "Refusing to run on prod without --production flag",
-		}),
-		"ready",
-	);
-	process.exit();
-}
-
-const events = await /**
- * @template {import("./types/event").ClientEvent} K
- *
- * @type {Promise<import("discord.js").Collection<K, () => Promise<import("./types/event").default<K>>>>}
- */ (importScripts(path.resolve(dirname, "./events")));
+const events =
+	await /** @type {typeof importScripts<import("./types/event").default<import("./types/event").ClientEvent>>} */ (
+		importScripts
+	)(path.resolve(dirname, "./events"));
 
 for (const [event, execute] of events.entries()) {
 	Handler.on(event, async (...args) => {
@@ -85,6 +77,7 @@ for (const [event, execute] of events.entries()) {
 				await execute()
 			)(...args);
 		} catch (error) {
+			const { default: logError } = await import("./lib/logError.js");
 			logError(error, event);
 		}
 	});

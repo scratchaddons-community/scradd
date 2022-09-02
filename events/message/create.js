@@ -28,8 +28,6 @@ import client, { guild } from "../../client.js";
 
 const { GUILD_ID } = process.env;
 
-if (!GUILD_ID) throw new ReferenceError("GUILD_ID isn’t set in the .env");
-
 /** @type {{ [key: import("discord.js").Snowflake]: import("discord.js").Message[] }} */
 const latestMessages = {};
 
@@ -151,11 +149,12 @@ export default async function event(message) {
 		}
 	}
 
+	// #upcoming-updates
 	if (message.channel.id === "806605006072709130") {
 		const thread = await message.startThread({
 			name: truncateText(message.cleanContent || message.embeds[0]?.title || "[image]", 50),
 		});
-		await thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" });
+		await thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" }); // @Update Tester
 	}
 
 	const mentions = (

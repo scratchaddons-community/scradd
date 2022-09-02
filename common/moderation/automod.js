@@ -59,9 +59,9 @@ async function checkString(toCensor, message) {
 			"874743757210275860", // scratch-servers
 			CONSTANTS.channels.mod?.id,
 			CONSTANTS.channels.modlogs?.id,
-			"816329956074061867", // admin-talk
+			CONSTANTS.channels.admin,
 			CONSTANTS.channels.modmail?.id,
-			"806624037224185886", // advertise
+			CONSTANTS.channels.advertise?.id,
 			undefined,
 		].includes(getBaseChannel(message.channel)?.id)
 	) {
@@ -202,7 +202,7 @@ export async function automodMessage(message) {
 				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, only post invite links in <#806624037224185886>!`,
+					).toString()}, only post invite links in ${CONSTANTS.channels.advertise?.toString()}!`,
 			),
 		);
 	}
@@ -246,7 +246,7 @@ export async function automodMessage(message) {
 				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, bot invites go to <#806624037224185886>!`,
+					).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`,
 			),
 		);
 	}
@@ -260,11 +260,11 @@ export function badWordsAllowed(channel) {
 	return [
 		CONSTANTS.channels.mod?.id,
 		CONSTANTS.channels.modlogs?.id,
-		"816329956074061867", // admin-talk
+		CONSTANTS.channels.admin?.id,
 		CONSTANTS.channels.modmail?.id,
-		"853256939089559583", // devs-only
-		"894314668317880321", // da-boosters
-		"869662117651955802", // evil-secret-youtube-plans
+		CONSTANTS.channels.devs?.id || "",
+		CONSTANTS.channels.boosters?.id || "",
+		CONSTANTS.channels.youtube?.id || "",
 		undefined,
 	].includes(getBaseChannel(channel)?.id);
 }
