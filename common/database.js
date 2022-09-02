@@ -22,7 +22,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 /**
  * @type {{
  * 	[key: import("discord.js").Snowflake]:
- * 		| { callback: () => Promise<import("discord.js").Message<true>>; timeout: NodeJS.Timeout }
+ * 		| { callback: () => Promise<import("discord.js").Message<true> | void>; timeout: NodeJS.Timeout }
  * 		| undefined;
  * }}
  */
@@ -89,7 +89,7 @@ export default class Database {
 		const callback = () => {
 			if (!this.message)
 				throw new ReferenceError("Must call `.init()` before setting `.data`");
-			const promise = this.message.edit({ files });
+			const promise = this.message.edit({ files }).catch(this.init);
 			timeouts[this.message.id] = undefined;
 			return promise;
 		};
