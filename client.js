@@ -1,5 +1,5 @@
 import { AssertionError } from "assert";
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
 import path from "path";
 import url from "url";
 import { importScripts, pkg, sanitizePath } from "./lib/files.js";
@@ -63,6 +63,16 @@ if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production"))
 export default client;
 
 export const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+
+client.user.setPresence({
+	activities: [
+		{
+			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
+			type: ActivityType.Watching,
+			url: pkg.homepage,
+		},
+	],
+});
 
 const events =
 	await /** @type {typeof importScripts<import("./types/event").default<import("./types/event").ClientEvent>>} */ (

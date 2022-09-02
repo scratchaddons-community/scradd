@@ -2,7 +2,6 @@ import { AssertionError } from "assert";
 import path from "path";
 import url from "url";
 
-import { ActivityType } from "discord.js";
 import dotenv from "dotenv";
 
 import { importScripts, pkg } from "./lib/files.js";
@@ -16,16 +15,6 @@ const { default: logError } = await import("./lib/logError.js");
 process
 	.on("uncaughtException", (err, origin) => logError(err, origin))
 	.on("warning", (err) => logError(err, "warning"));
-
-client.user.setPresence({
-	activities: [
-		{
-			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
-			type: ActivityType.Watching,
-			url: pkg.homepage,
-		},
-	],
-});
 
 if (process.env.NODE_ENV === "production")
 	await import("./common/moderation/logging.js").then(({ default: log }) =>
