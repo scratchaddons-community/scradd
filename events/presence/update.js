@@ -12,7 +12,7 @@ export default async function event(_, newPresence) {
 	const censored = censor(
 		(activity?.type === ActivityType.Custom ? activity?.state : activity?.name) || "",
 	);
-	if (censored && CONSTANTS.roles.mod && newPresence.member?.roles.resolve(CONSTANTS.roles.mod)) {
+	if (censored && CONSTANTS.roles.mod && newPresence.member?.roles.resolve(CONSTANTS.roles.mod.id)) {
 		await member?.send(
 			"As a mod, you should set an example for the server, so please refrain from swears in your status. Thanks!",
 		);

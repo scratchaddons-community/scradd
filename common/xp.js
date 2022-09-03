@@ -64,7 +64,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		// in addition, they must:
 		rank / xp.length < 0.01 && // be in the top 1%
 		member && // be in the server
-		!member.roles.resolve(CONSTANTS.roles.epic) // not have the role
+		!member.roles.resolve(CONSTANTS.roles.epic.id) // not have the role
 	) {
 		await member.roles.add(CONSTANTS.roles.epic);
 		await CONSTANTS.channels.bots?.send(

@@ -13,7 +13,8 @@ import { guessAddon } from "../../commands/guess-addon.js";
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const commands = await /** @type {typeof importScripts<import("../../types/command").default>} */
-(importScripts)(path.resolve(dirname, "../../commands"));
+	(importScripts)(path.resolve(dirname, "../../commands"));
+
 /** @type {import("../../types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
 	if (interaction.isButton()) {
@@ -23,8 +24,8 @@ export default async function event(interaction) {
 
 			await getWarns(
 				(data) => interaction.reply(data),
-				interaction.customId.split("_strike")[0] ?? null,
 				interaction.member,
+				interaction.customId.split("_strike")[0],
 			);
 			return;
 		}

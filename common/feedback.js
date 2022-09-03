@@ -122,7 +122,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		if (!CONSTANTS.roles.dev || !interaction.member.roles.resolve(CONSTANTS.roles.dev)) {
+		if (!CONSTANTS.roles.dev || !interaction.member.roles.resolve(CONSTANTS.roles.dev.id)) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
 				ephemeral: true,
@@ -193,7 +193,7 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const isMod = CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod);
+		const isMod = CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod.id);
 		if (interaction.user.id !== user?.id && (!isMod || (isMod && updated.body))) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,

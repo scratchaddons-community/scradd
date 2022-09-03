@@ -60,7 +60,7 @@ export default async function event(member) {
 			member.id === "279855717203050496" ||
 			member.user.bot ||
 			!CONSTANTS.roles.epic ||
-			member.roles.resolve(CONSTANTS.roles.epic)
+			member.roles.resolve(CONSTANTS.roles.epic.id)
 		)
 			return;
 		await member.roles.add(CONSTANTS.roles.epic);

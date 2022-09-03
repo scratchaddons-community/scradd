@@ -10,16 +10,16 @@ export const WARNS_PER_MUTE = 3,
 	WARN_INFO_BASE = 64;
 
 /**
- * @template {import("../../types/databases").default["mute"]} T
+ * @template {Database<"mute" | "warn">} T
  *
- * @param {T[]} data
+ * @param {T} database
  *
- * @returns {Promise<T[]>}
+ * @returns {Promise<T["data"]>}
  */
-export async function removeExpiredWarns(data, sendLog = false) {
+export async function removeExpiredWarns(database) {
 	/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 	const losers = {};
-	const newData = data.filter((warn) => {
+	database.data = database.data.filter((warn) => {
 		const expiresAt = new Date(warn.expiresAt);
 		if (expiresAt.getTime() < Date.now()) {
 			losers[warn.user] ??= 0;
@@ -28,7 +28,7 @@ export async function removeExpiredWarns(data, sendLog = false) {
 		} else return true;
 	});
 
-	if (sendLog) {
+	if (database.name === "warn") {
 		await Promise.all(
 			Object.entries(losers).map(([user, strikes]) =>
 				log(
@@ -48,7 +48,7 @@ export async function removeExpiredWarns(data, sendLog = false) {
 		);
 	}
 
-	return newData;
+	return database.data;
 }
 
 export const warnLog = new Database("warn");
@@ -63,8 +63,8 @@ await Promise.all([warnLog.init(), muteLog.init()]);
  */
 export default async function warn(user, reason, strikes, context) {
 	const [allWarns, allMutes] = await Promise.all([
-		removeExpiredWarns(warnLog.data, true),
-		removeExpiredWarns(muteLog.data),
+		removeExpiredWarns(warnLog),
+		removeExpiredWarns(muteLog),
 	]);
 	const oldLength = allWarns.length;
 

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, Colors, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/feedback.js";
+import SuggestionChannel, { getUserFromFeedback, RATELIMT_MESSAGE } from "../common/feedback.js";
 
 /** @type {import("../common/feedback").Answer[]} */
 const ANSWERS = [
@@ -161,13 +161,19 @@ export default channel && {
 					body: interaction.options.getString("report"),
 					title: interaction.options.getString("title"),
 				});
+				const starter =
+					interaction.channel?.isThread() &&
+					(await interaction.channel.fetchStarterMessage());
 				if (result) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Successfully edited bug report!${
 							result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""
 						}`,
 
-						ephemeral: true,
+						ephemeral: !(
+							starter &&
+							interaction.user.id === (await getUserFromFeedback(starter)).id
+						),
 					});
 				}
 

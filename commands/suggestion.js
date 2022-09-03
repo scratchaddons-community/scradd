@@ -227,19 +227,24 @@ export default channel && {
 			}
 			case "edit": {
 				const result = await channel.editSuggestion(interaction, {
-					body: interaction.options.getString("suggestion"),
+					body: interaction.options.getString("report"),
 					title: interaction.options.getString("title"),
 				});
+				const starter =
+					interaction.channel?.isThread() &&
+					(await interaction.channel.fetchStarterMessage());
 				if (result) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Successfully edited suggestion!${
 							result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""
 						}`,
 
-						ephemeral: true,
+						ephemeral: !(
+							starter &&
+							interaction.user.id === (await getUserFromFeedback(starter)).id
+						),
 					});
 				}
-
 				break;
 			}
 			case "get-top": {

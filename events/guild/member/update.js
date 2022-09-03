@@ -33,7 +33,7 @@ export default async function event(oldMember, newMember) {
 		newMember.roles.premiumSubscriberRole &&
 		CONSTANTS.roles.epic &&
 		CONSTANTS.channels.general &&
-		!newMember.roles.resolve(CONSTANTS.roles.epic)
+		!newMember.roles.resolve(CONSTANTS.roles.epic.id)
 	) {
 		await CONSTANTS.channels.general.send(
 			`🎊 ${newMember.toString()} Thanks for boosting the server! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,

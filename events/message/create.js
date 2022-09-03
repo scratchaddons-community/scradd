@@ -163,7 +163,7 @@ export default async function event(message) {
 		mentions > 4 &&
 		CONSTANTS.roles.mod &&
 		message.member &&
-		!message.member.roles.resolve(CONSTANTS.roles.mod)
+		!message.member.roles.resolve(CONSTANTS.roles.mod.id)
 	) {
 		promises.push(
 			warn(
