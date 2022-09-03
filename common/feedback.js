@@ -3,7 +3,6 @@ import {
 	GuildMember,
 	Message,
 	escapeMarkdown,
-	ThreadAutoArchiveDuration,
 	EmbedBuilder,
 	ChatInputCommandInteraction,
 } from "discord.js";
@@ -86,7 +85,6 @@ export default class SuggestionChannel {
 		cooldowns[author.id] = Date.now() + FEEDBACK_COOLDOWN;
 		const message = await this.channel.send({ embeds: [embed] });
 		const thread = await message.startThread({
-			autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
 			name: `${title ?? ""} | ${defaultAnswer}`,
 			reason: `Suggestion or bug report by ${interaction.user.tag}`,
 		});
@@ -193,7 +191,8 @@ export default class SuggestionChannel {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
-		const isMod = CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod.id);
+		const isMod =
+			CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod.id);
 		if (interaction.user.id !== user?.id && (!isMod || (isMod && updated.body))) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,

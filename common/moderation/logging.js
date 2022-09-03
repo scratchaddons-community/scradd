@@ -1,4 +1,3 @@
-import { ThreadAutoArchiveDuration } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 
 export const LOG_GROUPS = /** @type {const} */ ([
@@ -26,7 +25,6 @@ export async function getLoggingThread(group) {
 		threads.threads.find((thread) => thread.name === group) ||
 		(await CONSTANTS.channels.modlogs.threads.create({
 			name: group,
-			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);
 }

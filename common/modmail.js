@@ -5,7 +5,6 @@ import {
 	ButtonBuilder,
 	Colors,
 	MessageMentions,
-	ThreadAutoArchiveDuration,
 	ButtonStyle,
 	User,
 } from "discord.js";
@@ -282,7 +281,6 @@ export async function openModmail(openedEmbed, name, ping = false) {
 			.toLocaleString([], { minimumIntegerDigits: 2 })}-${date
 			.getUTCDate()
 			.toLocaleString([], { minimumIntegerDigits: 2 })})`,
-		autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 	});
 	await thread.setLocked(true);
 	return thread;
