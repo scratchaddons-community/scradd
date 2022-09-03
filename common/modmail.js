@@ -7,6 +7,7 @@ import {
 	MessageMentions,
 	ThreadAutoArchiveDuration,
 	ButtonStyle,
+	User,
 } from "discord.js";
 import { generateHash } from "../lib/text.js";
 
@@ -57,15 +58,18 @@ export async function generateMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns {Promise<import("discord.js").GuildMember | void | { id: import("discord.js").Snowflake }>} - User who messages are being sent to.
+ * @returns User who messages are being sent to.
  */
-export async function getMemberFromThread(thread) {
+export async function getUserFromModmail(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
 	if (!embed?.description) return;
 	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
-	return (await guild.members.fetch(userId).catch(() => {})) || { id: userId };
+	return (
+		(await guild.members.fetch(userId).catch(() => {})) ||
+		(await client.users.fetch(userId).catch(() => {}))
+	);
 }
 
 /**
@@ -82,7 +86,7 @@ export async function getThreadFromMember(user) {
 	return (
 		await asyncFilter(
 			[...threads.values()],
-			async (thread) => (await getMemberFromThread(thread))?.id === user.id && thread,
+			async (thread) => (await getUserFromModmail(thread))?.id === user.id && thread,
 		).next()
 	).value;
 }
@@ -93,10 +97,10 @@ export async function getThreadFromMember(user) {
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
  * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} meta - The reason for closing the ticket.
  *
- * @returns {Promise<Message<false> | false>} - Message sent to user.
+ * @returns {Promise<Message<false> | undefined>} - Message sent to user.
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
-	const member = await getMemberFromThread(thread);
+	const member = await getUserFromModmail(thread);
 	const embed = new EmbedBuilder()
 		.setTitle("Modmail ticket closed!")
 		.setTimestamp(thread.createdAt)
@@ -138,7 +142,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 						})
 						.catch(console.error);
 				}),
-			member instanceof GuildMember && member?.send({ embeds: [embed] }),
+			member?.send({ embeds: [embed] }),
 		])
 	)[1];
 }
@@ -157,7 +161,7 @@ export async function closeModmail(thread, user, reason) {
 /**
  * Let a user know that the Mods want to talk to them.
  *
- * @param {GuildMember} user - The user to message.
+ * @param {GuildMember | User} user - The user to message.
  *
  * @returns {Promise<import("discord.js").Message<false> | false>} - The message sent.
  */

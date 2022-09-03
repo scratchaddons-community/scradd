@@ -1,5 +1,4 @@
 import {
-	GuildMember,
 	cleanCodeBlockContent,
 	EmbedBuilder,
 	MessageType,
@@ -14,17 +13,18 @@ import {
 	generateConfirm,
 	generateMessage,
 	generateReactionFunctions,
-	getMemberFromThread,
+	getUserFromModmail,
 	getThreadFromMember,
 	openModmail,
 	UNSUPPORTED,
 } from "../../common/modmail.js";
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
-import { reactAll } from "../../lib/discord.js";
+import { getBaseChannel, reactAll } from "../../lib/discord.js";
 import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
+import { asyncFilter } from "../../lib/promises.js";
 
 const { GUILD_ID } = process.env;
 
@@ -133,20 +133,18 @@ export default async function event(message) {
 			: true) &&
 		message.interaction?.commandName !== "modmail close"
 	) {
-		const member = await getMemberFromThread(message.channel);
+		const member = await getUserFromModmail(message.channel);
 
-		if (member instanceof GuildMember) {
-			const messageToSend = await generateMessage(message);
+		const messageToSend = await generateMessage(message);
 
-			messageToSend.content =
-				message.author.toString() +
-				":" +
-				(messageToSend.content ? " " + messageToSend.content : "");
+		messageToSend.content =
+			message.author.toString() +
+			":" +
+			(messageToSend.content ? " " + messageToSend.content : "");
 
-			reactions++;
+		reactions++;
 
-			promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
-		}
+		promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
 	}
 
 	// #upcoming-updates
@@ -185,7 +183,7 @@ export default async function event(message) {
 		return;
 	}
 
-	if (CONSTANTS.channels.modlogs?.id !== message.channel.id) {
+	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
 
@@ -207,7 +205,12 @@ export default async function event(message) {
 	}
 
 	// XP
-	if (!message.author.bot || message.interaction) {
+
+	const webhook =
+		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
+		message.webhookId &&
+		(await message.fetchWebhook()).applicationId === client.application.id;
+	if (!message.author.bot || message.interaction || webhook) {
 		if (!latestMessages[message.channel.id]) {
 			const fetched = await message.channel.messages
 				.fetch({ limit: 100, before: message.id })
@@ -226,18 +229,39 @@ export default async function event(message) {
 			latestMessages[message.channel.id] = res;
 		}
 		const lastInChannel = latestMessages[message.channel.id] || [];
-		const spam = lastInChannel.findIndex((foundMessage) => {
-			return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
-				[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
-			);
-		});
+		const spam =
+			(
+				await asyncFilter(lastInChannel, async (foundMessage, index) => {
+					if (webhook) {
+						return (
+							!(
+								foundMessage.webhookId &&
+								(await foundMessage.fetchWebhook()).applicationId ===
+									client.application.id
+							) && index
+						);
+					}
+					return (
+						![message.author.id, message.interaction?.user.id || ""].some((user) =>
+							[foundMessage.author.id, foundMessage.interaction?.user.id].includes(
+								user,
+							),
+						) && index
+					);
+				}).next()
+			).value ?? -1;
+
 		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
 		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content)); // todo: update this
 
 		await giveXp(
-			message.interaction?.user || message.author,
+			(webhook &&
+				message.channel.isThread() &&
+				(await getUserFromModmail(message.channel))) ||
+				message.interaction?.user ||
+				message.author,
 			spam === -1 && !newChannel
 				? 1
 				: Math.max(

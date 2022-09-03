@@ -1,7 +1,7 @@
-import { GuildMember, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	COLORS,
-	getMemberFromThread,
+	getUserFromModmail,
 	sendClosedMessage,
 	sendOpenedMessage,
 	UNSUPPORTED,
@@ -85,8 +85,7 @@ export default async function event(oldThread, newThread) {
 		await sendClosedMessage(newThread);
 		return;
 	}
-	const member = await getMemberFromThread(newThread);
-	if (!(member instanceof GuildMember)) return;
+	const member = await getUserFromModmail(newThread);
 
 	await Promise.all([
 		newThread.fetchStarterMessage().then((starter) => {
@@ -109,6 +108,6 @@ export default async function event(oldThread, newThread) {
 				})
 				.catch(console.error);
 		}),
-		sendOpenedMessage(member),
+		member && sendOpenedMessage(member),
 	]);
 }
