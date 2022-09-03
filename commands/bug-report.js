@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, Colors, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/suggest.js";
+import SuggestionChannel, { RATELIMT_MESSAGE } from "../common/feedback.js";
 
-/** @type {import("../common/suggest").Answer[]} */
+/** @type {import("../common/feedback").Answer[]} */
 const ANSWERS = [
 	{
 		name: "Unverified",

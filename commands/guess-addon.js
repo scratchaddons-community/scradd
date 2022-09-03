@@ -41,12 +41,7 @@ const commandMarkdown = `\n\n*Run the </addon:${
 	)?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8546)
 }> command for more information about this addon!*`;
 
-export const GROUP_NAMES = /** @type {const} */ ([
-	"Addon name",
-	"Categorization",
-	"Credits",
-	"Misc",
-]);
+const GROUP_NAMES = /** @type {const} */ (["Addon name", "Categorization", "Credits", "Misc"]);
 
 /** @typedef {typeof GROUP_NAMES[number]} GroupName */
 /** @typedef {{ [key: string]: undefined | boolean }} Dependencies */

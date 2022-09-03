@@ -6,7 +6,7 @@ import { stripMarkdown } from "../../lib/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { getBaseChannel } from "../../lib/discord.js";
-export const regexps = [
+export const badWordRegexps = [
 	// Just Delete
 	/c[*0b]ea|a[*hi]q[*3r]|[+g][*3r][$5f][+g][!*1v¡][(<p](?:[*@n][y|]|[y|][*3r])|[$5f](?:[(<p][#u]z[*hi][(<p]x)|o[*hi][+g]{1,2}(?:[ -]?c[!*1v¡]e[*@n][+g][*3r]|j[!*1v¡]c[*3r])|q[!*1v¡][y|]{1,2}q[*0b]|e[*3r][(<p][+g][*hi]z|i(?:[*@n]t[!*1v¡]a[*@n][y|]|[*hi][y|]i[*@n])|(?<![a-z0-9])(?:i[*@n]t[!*1v¡]a[*@n](?:[$*35ryf|]|yl)?|c[*3r]a[!*1v¡][$5f](?:[*3r][$5f])?|[*@n]a[*hi][$5f](?:[*3r][$5f])?|(?:oe[*3r][*@n][$5f][+g]|[$5f][*3r]z[*3r]a|[(<p](?:[*hi]z|[y|][!*1v¡][+g])|[+g][*3r]{2}[+g])[$5f]?)(?![a-z0-9])|🖕/gi,
 	// 1 Strike
@@ -20,7 +20,7 @@ export function censor(text) {
 	/** @type {string[][]} */
 	const words = [];
 	const censored = caesar(
-		regexps.reduce((string, regexp, index) => {
+		badWordRegexps.reduce((string, regexp, index) => {
 			words[index] ??= [];
 			return string.replaceAll(regexp, (censored) => {
 				words[index]?.push(caesar(censored));

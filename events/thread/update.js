@@ -1,10 +1,10 @@
 import { EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
-	COLORS,
+	MODMAIL_COLORS,
 	getUserFromModmail,
 	sendClosedMessage,
 	sendOpenedMessage,
-	UNSUPPORTED,
+	MODMAIL_UNSUPPORTED,
 } from "../../common/modmail.js";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
@@ -99,11 +99,11 @@ export default async function event(oldThread, newThread) {
 							.setTitle("Modmail ticket opened!")
 							.setFooter({
 								text:
-									UNSUPPORTED +
+									MODMAIL_UNSUPPORTED +
 									CONSTANTS.footerSeperator +
 									"Messages starting with an equals sign (=) are ignored.",
 							})
-							.setColor(COLORS.opened),
+							.setColor(MODMAIL_COLORS.opened),
 					],
 				})
 				.catch(console.error);

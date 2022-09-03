@@ -3,19 +3,18 @@ import { guild } from "../client.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
-const database = new Database("xp");
-await database.init();
-export { database as xpDatabase };
+export const xpDatabase = new Database("xp");
+await xpDatabase.init();
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
 /** @param {User | GuildMember} to */
-export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
+export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const user = to instanceof User ? to : to.user;
 	const member =
 		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
 
-	const xp = database.data;
+	const xp = xpDatabase.data;
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 
@@ -73,7 +72,7 @@ export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		);
 	}
 
-	database.data = xp;
+	xpDatabase.data = xp;
 }
 
 const XP_PER_LEVEL = [

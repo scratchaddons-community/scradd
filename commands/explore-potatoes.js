@@ -6,7 +6,11 @@ import {
 	CategoryChannel,
 } from "discord.js";
 
-import { boardDatabase as database, generateMessage, reactionCount } from "../common/board.js";
+import {
+	boardDatabase as database,
+	generateBoardMessage,
+	boardReactionCount,
+} from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
@@ -56,7 +60,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 	}
 }
 
-const defaultMinReactions = Math.round(reactionCount() * 0.4);
+const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 /** @type {import("../types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
@@ -125,7 +129,7 @@ export default {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info
-				? await generateMessage(info, {
+				? await generateBoardMessage(info, {
 						pre:
 							index > 0
 								? [

@@ -14,12 +14,12 @@ export const LOG_GROUPS = /** @type {const} */ ([
  * @param {Pick<import("discord.js").MessageOptions, "embeds" | "files" | "components">} [extra]
  */
 export default async function log(content, group, extra = {}) {
-	const thread = await getThread(group);
+	const thread = await getLoggingThread(group);
 	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
 }
 
 /** @param {typeof LOG_GROUPS[number] | typeof import("../database").DATABASE_THREAD} group */
-export async function getThread(group) {
+export async function getLoggingThread(group) {
 	if (!CONSTANTS.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	const threads = await CONSTANTS.channels.modlogs.threads.fetchActive();
 	return (

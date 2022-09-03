@@ -2,12 +2,12 @@ import { Message, AttachmentBuilder } from "discord.js";
 import papaparse from "papaparse";
 import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
-import { getThread } from "./moderation/logging.js";
+import { getLoggingThread } from "./moderation/logging.js";
 import client from "../client.js";
 
 export const DATABASE_THREAD = "databases";
 
-const thread = await getThread(DATABASE_THREAD);
+const thread = await getLoggingThread(DATABASE_THREAD);
 
 /** @type {{ [key: string]: Message<true> }} */
 const databases = {};
@@ -98,8 +98,8 @@ export default class Database {
 	}
 }
 
-export function cleanListeners() {
+export function cleanDatabaseListeners() {
 	return Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 }
 
-exitHook((callback) => cleanListeners().then(callback));
+exitHook((callback) => cleanDatabaseListeners().then(callback));

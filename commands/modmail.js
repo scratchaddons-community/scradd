@@ -3,12 +3,12 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
 	closeModmail,
-	COLORS,
-	generateConfirm,
+	MODMAIL_COLORS,
+	generateModmailConfirm,
 	getThreadFromMember,
 	openModmail,
 	sendOpenedMessage,
-	UNSUPPORTED,
+	MODMAIL_UNSUPPORTED,
 } from "../common/modmail.js";
 
 /** @type {import("../types/command").ChatInputCommand} */
@@ -71,7 +71,7 @@ export default {
 							.setFooter({
 								text: "While any future messages will reopen this ticket, it’s recommended to create a new one instead by using /modmail start.",
 							})
-							.setColor(COLORS.closed),
+							.setColor(MODMAIL_COLORS.closed),
 					],
 				});
 
@@ -104,13 +104,13 @@ export default {
 					return;
 				}
 
-				await generateConfirm(
+				await generateModmailConfirm(
 					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
 							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
 						)
-						.setColor(COLORS.confirm)
+						.setColor(MODMAIL_COLORS.confirm)
 						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
 					async (buttonInteraction) => {
 						const openedEmbed = new EmbedBuilder()
@@ -120,11 +120,11 @@ export default {
 							)
 							.setFooter({
 								text:
-									UNSUPPORTED +
+									MODMAIL_UNSUPPORTED +
 									CONSTANTS.footerSeperator +
 									"Messages starting with an equals sign (=) are ignored.",
 							})
-							.setColor(COLORS.opened);
+							.setColor(MODMAIL_COLORS.opened);
 
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {

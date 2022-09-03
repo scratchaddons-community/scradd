@@ -1,6 +1,6 @@
 import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
-import { cleanListeners } from "../common/database.js";
+import { cleanDatabaseListeners } from "../common/database.js";
 import logError from "../lib/logError.js";
 
 /** @type {import("../types/command").ChatInputCommand} */
@@ -14,7 +14,7 @@ export default {
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
 	async interaction(interaction) {
-		await cleanListeners();
+		await cleanDatabaseListeners();
 		await interaction.reply("Killing bot…");
 		await logError(
 			new AbortError(interaction.user.tag + " is killing the bot"),

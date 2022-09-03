@@ -19,9 +19,13 @@ import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import client, { guild } from "../client.js";
 
-export const COLORS = { opened: Colors.Gold, closed: Colors.DarkGreen, confirm: Colors.Blurple };
+export const MODMAIL_COLORS = {
+	opened: Colors.Gold,
+	closed: Colors.DarkGreen,
+	confirm: Colors.Blurple,
+};
 
-export const UNSUPPORTED =
+export const MODMAIL_UNSUPPORTED =
 	"Please note that reactions, replies, edits, and deletions are not supported";
 
 /**
@@ -35,7 +39,7 @@ export const UNSUPPORTED =
  * >}
  *   - Webhook message.
  */
-export async function generateMessage(message) {
+export async function generateModmailMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
 
 	const member =
@@ -108,7 +112,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 			iconURL: guild.iconURL() ?? undefined,
 			text: "Any future messages will start a new ticket.",
 		})
-		.setColor(COLORS.closed);
+		.setColor(MODMAIL_COLORS.closed);
 
 	if (reason) embed.setDescription(reason);
 
@@ -137,7 +141,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 									: new EmbedBuilder()
 								)
 									.setTitle("Modmail ticket closed!")
-									.setColor(COLORS.closed),
+									.setColor(MODMAIL_COLORS.closed),
 							],
 						})
 						.catch(console.error);
@@ -176,8 +180,8 @@ export async function sendOpenedMessage(user) {
 							guild.name,
 						)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
 					)
-					.setFooter({ text: UNSUPPORTED })
-					.setColor(COLORS.opened),
+					.setFooter({ text: MODMAIL_UNSUPPORTED })
+					.setColor(MODMAIL_COLORS.opened),
 			],
 		})
 		.catch(() => false);
@@ -188,7 +192,7 @@ export async function sendOpenedMessage(user) {
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
  */
-export async function generateConfirm(confirmEmbed, onConfirm, reply) {
+export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 	const confirmId = generateHash("confirm");
 	const button = new ButtonBuilder()
 		.setLabel("Confirm")

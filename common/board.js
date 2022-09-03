@@ -16,7 +16,7 @@ import { censor } from "./moderation/automod.js";
 
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
-export function reactionCount(channel) {
+export function boardReactionCount(channel) {
 	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 	const baseChannel = getBaseChannel(channel);
@@ -38,9 +38,8 @@ export function reactionCount(channel) {
 
 if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
-const database = new Database("board");
-await database.init();
-export { database as boardDatabase };
+export const boardDatabase = new Database("board");
+await boardDatabase.init();
 
 /**
  * @param {import("../types/databases").default["board"] | import("discord.js").Message} info
@@ -48,7 +47,7 @@ export { database as boardDatabase };
  *
  * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
  */
-export async function generateMessage(info, extraButtons = {}) {
+export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 	/**
@@ -150,8 +149,8 @@ export async function generateMessage(info, extraButtons = {}) {
  */
 export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
-	const minReactions = reactionCount(message.channel);
-	const info = database.data.find(({ source }) => source === message.id);
+	const minReactions = boardReactionCount(message.channel);
+	const info = boardDatabase.data.find(({ source }) => source === message.id);
 	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 	const boardMessage =
 		info?.onBoard &&
@@ -170,18 +169,18 @@ export async function updateBoard(message) {
 
 		const boardMessage = await CONSTANTS.channels.board.send({
 			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
-			...(await generateMessage(message)),
+			...(await generateBoardMessage(message)),
 		});
 		if (CONSTANTS.channels.board.type === ChannelType.GuildNews) await boardMessage.crosspost();
 
 		if (info) {
-			database.data = database.data.map((item) =>
+			boardDatabase.data = boardDatabase.data.map((item) =>
 				item.source === message.id
 					? { ...item, reactions: count, onBoard: boardMessage.id }
 					: item,
 			);
 		}
-		const top = database.data
+		const top = boardDatabase.data
 			.sort((a, b) => b.reactions - a.reactions)
 			.map(({ onBoard }) => onBoard);
 		top.splice(10);
@@ -197,15 +196,15 @@ export async function updateBoard(message) {
 		});
 		if (info) return;
 	}
-	database.data = info
+	boardDatabase.data = info
 		? count
-			? database.data.map((item) =>
+			? boardDatabase.data.map((item) =>
 					item.source === message.id ? { ...item, reactions: count } : item,
 			  )
-			: database.data.filter((item) => item.source !== message.id)
+			: boardDatabase.data.filter((item) => item.source !== message.id)
 		: count
 		? [
-				...database.data,
+				...boardDatabase.data,
 				{
 					reactions: count,
 					user: message.author.id,
@@ -213,5 +212,5 @@ export async function updateBoard(message) {
 					source: message.id,
 				},
 		  ]
-		: database.data;
+		: boardDatabase.data;
 }

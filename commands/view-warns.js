@@ -10,8 +10,13 @@ import {
 import fetch from "node-fetch";
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { getThread } from "../common/moderation/logging.js";
-import { getData, muteLog, warnLog, WARN_INFO_BASE } from "../common/moderation/warns.js";
+import { getLoggingThread } from "../common/moderation/logging.js";
+import {
+	removeExpiredWarns,
+	muteLog,
+	warnLog,
+	WARN_INFO_BASE,
+} from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 
@@ -128,7 +133,7 @@ export async function getWarns(reply, filter, interactor) {
 			else await reply(await getWarnsForMember(user));
 		} else {
 			const id = convertBase(filter, WARN_INFO_BASE, 10);
-			const channel = await getThread("members");
+			const channel = await getLoggingThread("members");
 
 			const idMessage = await channel?.messages.fetch(id).catch(() => {});
 			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
@@ -161,7 +166,7 @@ export async function getWarns(reply, filter, interactor) {
 				(await guild?.members.fetch(moderatorId).catch(() => {})) ||
 				(await client.users.fetch(moderatorId).catch(() => {}));
 
-			const allWarns = await getData(warnLog.data, true);
+			const allWarns = await removeExpiredWarns(warnLog.data, true);
 			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
 			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
 

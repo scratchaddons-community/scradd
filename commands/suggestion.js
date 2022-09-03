@@ -2,7 +2,7 @@ import { SlashCommandBuilder, Colors, escapeMarkdown, cleanContent } from "disco
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { getUserFromSuggestion, RATELIMT_MESSAGE } from "../common/suggest.js";
+import SuggestionChannel, { getUserFromFeedback, RATELIMT_MESSAGE } from "../common/feedback.js";
 import { escapeLinks } from "../lib/markdown.js";
 import { getAllMessages, paginate, reactAll } from "../lib/discord.js";
 import { truncateText } from "../lib/text.js";
@@ -21,8 +21,8 @@ export const SUGGESTION_EMOJIS = [
 	["749005259682086964", "749005284403445790"],
 ];
 
-/** @type {import("../common/suggest").Answer[]} */
-export const ANSWERS = [
+/** @type {import("../common/feedback").Answer[]} */
+const ANSWERS = [
 	{ name: "Unanswered", color: Colors.Greyple, description: "This hasn’t yet been answered" },
 	{
 		color: Colors.Green,
@@ -70,7 +70,7 @@ export const ANSWERS = [
 const channel =
 	CONSTANTS.channels.suggestions && new SuggestionChannel(CONSTANTS.channels.suggestions);
 
-export const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
+const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
 
 /** @type {import("../types/command").ChatInputCommand | undefined} */
 export default channel && {
@@ -280,7 +280,7 @@ export default channel && {
 									cleanContent(embed?.description, message.channel)) ??
 								(embed?.image?.url ? embed?.image?.url : message.content);
 
-							const author = await getUserFromSuggestion(message);
+							const author = await getUserFromFeedback(message);
 
 							if (requestedUser && author?.id !== requestedUser?.id) return;
 							return {

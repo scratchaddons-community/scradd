@@ -1,27 +1,22 @@
-import {
-	cleanCodeBlockContent,
-	EmbedBuilder,
-	MessageType,
-	ChannelType,
-} from "discord.js";
+import { cleanCodeBlockContent, EmbedBuilder, MessageType, ChannelType } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
 
 import {
-	COLORS,
-	generateConfirm,
-	generateMessage,
+	MODMAIL_COLORS,
+	generateModmailConfirm,
+	generateModmailMessage,
 	generateReactionFunctions,
 	getUserFromModmail,
 	getThreadFromMember,
 	openModmail,
-	UNSUPPORTED,
+	MODMAIL_UNSUPPORTED,
 } from "../../common/modmail.js";
 
 import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
 import { getBaseChannel, reactAll } from "../../lib/discord.js";
-import { giveXp, NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
@@ -56,7 +51,10 @@ export default async function event(message) {
 			reactions++;
 			promises.push(
 				webhook
-					.send({ threadId: existingThread.id, ...(await generateMessage(message)) })
+					.send({
+						threadId: existingThread.id,
+						...(await generateModmailMessage(message)),
+					})
 					.then(...generateReactionFunctions(message)),
 			);
 		} else if (
@@ -64,7 +62,7 @@ export default async function event(message) {
 				message.type,
 			)
 		) {
-			const collector = await generateConfirm(
+			const collector = await generateModmailConfirm(
 				new EmbedBuilder()
 					.setTitle("Confirmation")
 					.setDescription(
@@ -72,7 +70,7 @@ export default async function event(message) {
 							guild.name,
 						)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
 					)
-					.setColor(COLORS.confirm)
+					.setColor(MODMAIL_COLORS.confirm)
 					.setAuthor({
 						iconURL: guild.iconURL() ?? undefined,
 						name: guild.name,
@@ -83,11 +81,11 @@ export default async function event(message) {
 						.setDescription(`Ticket by ${message.author.toString()}`)
 						.setFooter({
 							text:
-								UNSUPPORTED +
+								MODMAIL_UNSUPPORTED +
 								CONSTANTS.footerSeperator +
 								"Messages starting with an equals sign (=) are ignored.",
 						})
-						.setColor(COLORS.opened);
+						.setColor(MODMAIL_COLORS.opened);
 
 					const newThread = await openModmail(openedEmbed, message.author.username, true);
 
@@ -97,14 +95,14 @@ export default async function event(message) {
 						buttonInteraction.reply({
 							content:
 								`${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ` +
-								UNSUPPORTED,
+								MODMAIL_UNSUPPORTED,
 
 							ephemeral: true,
 						}),
 						webhook
 							.send({
 								threadId: newThread.id,
-								...(await generateMessage(message)),
+								...(await generateModmailMessage(message)),
 							})
 							.then(...generateReactionFunctions(message)),
 					]);
@@ -135,7 +133,7 @@ export default async function event(message) {
 	) {
 		const member = await getUserFromModmail(message.channel);
 
-		const messageToSend = await generateMessage(message);
+		const messageToSend = await generateModmailMessage(message);
 
 		messageToSend.content =
 			message.author.toString() +

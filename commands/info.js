@@ -1,7 +1,7 @@
 import { Message, SelectMenuBuilder, SlashCommandBuilder, time, ComponentType } from "discord.js";
 
-import { BOARD_EMOJI, reactionCount } from "../common/board.js";
-import { UNSUPPORTED } from "../common/modmail.js";
+import { BOARD_EMOJI, boardReactionCount } from "../common/board.js";
+import { MODMAIL_UNSUPPORTED } from "../common/modmail.js";
 import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
 import { generateHash } from "../lib/text.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -10,7 +10,7 @@ import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
-import { getThread } from "../common/moderation/logging.js";
+import { getLoggingThread } from "../common/moderation/logging.js";
 
 /**
  * Get all users with a role.
@@ -59,7 +59,7 @@ const OPTIONS = [
 	},
 	{
 		description:
-			`After a message gets **${reactionCount()} ${escapeMessage(
+			`After a message gets **${boardReactionCount()} ${escapeMessage(
 				BOARD_EMOJI,
 			)} reactions**, I will post it to ${CONSTANTS.channels.board?.toString()}. This is useful for cases such as the following:\n` +
 			`- when you want to [**highlight a good piece of work made by someone in the server**](https://discord.com/channels/806602307750985799/938809898660155453/943246143452770364) so more people see it\n` +
@@ -86,7 +86,7 @@ const OPTIONS = [
 				CONSTANTS.emojis.statuses.yes
 			}**. If sending any message fails, I will **react with ${
 				CONSTANTS.emojis.statuses.no
-			}**. I will **DM the user any messages the ${CONSTANTS.roles.mod?.toString()}s send in the thread**, using the same reactions. ${UNSUPPORTED}\n` +
+			}**. I will **DM the user any messages the ${CONSTANTS.roles.mod?.toString()}s send in the thread**, using the same reactions. ${MODMAIL_UNSUPPORTED}\n` +
 			`The source **code for these is in [\`messageCreate.js\`](<${BLOB_ROOT}/events/messageCreate.js>)**.\n` +
 			`When the ticket is resolved, **a ${CONSTANTS.roles.mod?.toString()} can use the \`/modmail close\` command** to **lock the thread**, **edit the thread starting message** to indicate its closed status, and **DM the user**. The ${CONSTANTS.roles.mod?.toString()} **must specify a reason** for doing so that will be **posted in the thread** as well as **sent to the user**. \n` +
 			`\n` +
@@ -100,7 +100,7 @@ const OPTIONS = [
 			`- [__**\`/addon\`**__](<${BLOB_ROOT}/commands/addon.js>): **Search for an addon** by name, description, or internal ID and return various information about it. Don\’t specify a filter to get **a random addon**. You can **click on the addon\’s name** to get a link straight to the settings page **to enable it**. The **\`compact\` option** (enabled by default everywhere except in ${CONSTANTS.channels.bots?.toString()}) shows **less information** to avoid **flooding the chat**.\n` +
 			`- [__**\`/info\`**__](<${BLOB_ROOT}/commands/info.js>) (this command): **A help command** to learn about **the bot**, learn how to use **its functions**, and **debug it** if it it lagging. The \`ephemeral\` option controls whether or not the information is shown publically.\n` +
 			`- [__**\`/say\`**__](<${BLOB_ROOT}/commands/say.js>): A ${CONSTANTS.roles.mod?.toString()}-only (to prevent abuse) command that **makes me mimic** what you tell me to say. Note that the person who used the command **will not be named publically**, but ${CONSTANTS.roles.mod?.toString()}s **are able to find out still** by looking in ${(
-				await getThread("messages")
+				await getLoggingThread("messages")
 			).toString()}.`,
 
 		emoji: "➕",

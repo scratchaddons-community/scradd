@@ -1,7 +1,7 @@
-import { regexps } from "./common/moderation/automod.js";
+import { badWordRegexps } from "./common/moderation/automod.js";
 import { caesar } from "./lib/text.js";
 
-regexps.forEach(({ source, flags }) =>
+badWordRegexps.forEach(({ source, flags }) =>
 	console.log(
 		new RegExp(
 			caesar(

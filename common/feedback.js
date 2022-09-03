@@ -24,11 +24,11 @@ const RATELIMIT_TIMEOUT = 3_000;
 export const RATELIMT_MESSAGE =
 	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-export const DEFAULT_COLOR = Colors.Greyple;
+const DEFAULT_COLOR = Colors.Greyple;
 
 /** @type {{ [key: import("discord.js").Snowflake]: number }} */
 const cooldowns = {};
-export const FEEDBACK_COOLDOWN = 60_000;
+const FEEDBACK_COOLDOWN = 60_000;
 
 export default class SuggestionChannel {
 	/**
@@ -189,7 +189,7 @@ export default class SuggestionChannel {
 
 			return false;
 		}
-		const user = await getUserFromSuggestion(starterMessage);
+		const user = await getUserFromFeedback(starterMessage);
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
 
@@ -246,7 +246,7 @@ export default class SuggestionChannel {
  *
  * @todo Change to Message<true> after https://github.com/discordjs/discord.js/pull/8560 lands.
  */
-export async function getUserFromSuggestion(message) {
+export async function getUserFromFeedback(message) {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]

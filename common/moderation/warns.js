@@ -16,7 +16,7 @@ export const WARNS_PER_MUTE = 3,
  *
  * @returns {Promise<T[]>}
  */
-export async function getData(data, sendLog = false) {
+export async function removeExpiredWarns(data, sendLog = false) {
 	/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 	const losers = {};
 	const newData = data.filter((warn) => {
@@ -63,8 +63,8 @@ await Promise.all([warnLog.init(), muteLog.init()]);
  */
 export default async function warn(user, reason, strikes, context) {
 	const [allWarns, allMutes] = await Promise.all([
-		getData(warnLog.data, true),
-		getData(muteLog.data),
+		removeExpiredWarns(warnLog.data, true),
+		removeExpiredWarns(muteLog.data),
 	]);
 	const oldLength = allWarns.length;
 

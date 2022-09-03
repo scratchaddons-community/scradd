@@ -1,4 +1,4 @@
-import { ApplicationCommandType, GuildMember, InteractionType } from "discord.js";
+import { ApplicationCommandType, GuildMember } from "discord.js";
 import warn from "../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
 import { getWarns } from "../../commands/view-warns.js";
