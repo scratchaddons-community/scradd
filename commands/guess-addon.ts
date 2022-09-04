@@ -12,15 +12,24 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	InteractionCollector,
+	MappedInteractionTypes,
+	MessageComponentType,
+	ModalSubmitInteraction,
+	Snowflake,
 } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../lib/text.js";
-import { MessageActionRowBuilder, ModalActionRowBuilder } from "../common/types/ActionRowBuilder.js";
+import {
+	MessageActionRowBuilder,
+	ModalActionRowBuilder,
+} from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
 import client from "../client.js";
+import type AddonManifest from "../common/types/addonManifest";
+import type { ChatInputCommand } from "../common/types/command";
 
 const COLLECTOR_TIME = 120_000;
 
@@ -41,21 +50,25 @@ const commandMarkdown = `\n\n*Run the </addon:${
 	)?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8546)
 }> command for more information about this addon!*`;
 
-const GROUP_NAMES = /** @type {const} */ (["Addon name", "Categorization", "Credits", "Misc"]);
+const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 
-/** @typedef {typeof GROUP_NAMES[number]} GroupName */
-/** @typedef {{ [key: string]: undefined | boolean }} Dependencies */
-/**
- * @typedef {object} AddonQuestion
- *
- * @property {Dependencies} [dependencies] - Questions that, if this question is `true`, must have this answer.
- * @property {GroupName} group - The group to put this question in for `/guess-addon player`.
- * @property {string} question - The question to ask. Supports Markdown formatting.
- * @property {string} statement - A statement that says this question is `true`. Supports Markdown formatting.
- * @property {string} markdownless - The question to ask, but without any Markdown formatting (and may also be a bit shorter)
- * @property {number} [order] - The order to put this question in `/guess-addon player`.
- */
-/** @typedef {AddonQuestion[]} AddonQuestions */
+type GroupName = typeof GROUP_NAMES[number];
+type Dependencies = { [key: string]: undefined | boolean };
+type AddonQuestion = {
+	/** Questions that, if this question is `true`, must have this answer. */
+	dependencies?: Dependencies;
+	/** The group to put this question in for `/guess-addon player`. */
+	group: GroupName;
+	/** The question to ask. Supports Markdown formatting. */
+	question: string;
+	/** A statement that says this question is `true`. Supports Markdown formatting. */
+	statement: string;
+	/** The question to ask, but without any Markdown formatting (and may also be a bit shorter) */
+	markdownless: string;
+	/** The order to put this question in `/guess-addon player`. */
+	order?: number;
+};
+type AddonQuestions = AddonQuestion[];
 
 const addonStartings = Object.fromEntries(
 	addons.map(({ name }) => [
@@ -258,8 +271,7 @@ const forcedEasterEgg = "cat-blocks";
 
 const questionsByAddon = Object.fromEntries(
 	addons.map((addon) => {
-		/** @type {AddonQuestions} */
-		const result = [];
+		const result: AddonQuestions = [];
 
 		result.push(
 			{
@@ -736,14 +748,14 @@ const questionsByAddon = Object.fromEntries(
 				},
 				...addon.credits.map(
 					({ name }) =>
-						/** @type {const} */ ({
+						({
 							dependencies: { [QUESTIONS.settings.credits.question]: true },
 							group: "Credits",
 							order: 2,
 							question: `Did **${escapeMarkdown(name)}** contribute to your addon?`,
 							statement: `**${escapeMarkdown(name)}** contributed to this addon!`,
 							markdownless: `Did ${name} contribute to this addon?`,
-						}),
+						} as const),
 				),
 			);
 		}
@@ -799,7 +811,7 @@ const questionsByAddon = Object.fromEntries(
 				markdownless: QUESTIONS.settings.info.markdownless,
 			});
 		}
-		return /** @type {const} */ ([addon.id, result]);
+		return [addon.id, result] as const;
 	}),
 );
 
@@ -814,41 +826,41 @@ const questions = Object.values(questionsByAddon)
 			(one.order || Number.POSITIVE_INFINITY) - (two.order || Number.POSITIVE_INFINITY) ||
 			(one.markdownless.toLowerCase() < two.markdownless.toLowerCase() ? -1 : 1),
 	)
-	.reduce((accumulator, { group, markdownless }) => {
-		/** @param {number} [index] */
-		function addToGroup(index = 0) {
-			const accumulated = accumulator[group];
+	.reduce(
+		(accumulator, { group, markdownless }) => {
+			function addToGroup(index: number = 0) {
+				const accumulated = accumulator[group];
 
-			if ((accumulated[+index]?.length || 0) < 25) {
-				accumulated[+index] ??= [];
-				accumulated[+index]?.push(markdownless);
-				accumulator[group] = accumulated;
-			} else {
-				addToGroup(index + 1);
+				if ((accumulated[+index]?.length || 0) < 25) {
+					accumulated[+index] ??= [];
+					accumulated[+index]?.push(markdownless);
+					accumulator[group] = accumulated;
+				} else {
+					addToGroup(index + 1);
+				}
 			}
-		}
 
-		addToGroup();
+			addToGroup();
 
-		return accumulator;
-	}, /** @type {{ [K in GroupName]: string[][] }} */ ({ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] }));
+			return accumulator;
+		},
+		{ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] } as {
+			[K in GroupName]: string[][];
+		},
+	);
 
 const BULLET_POINT = CONSTANTS.footerSeperator.trim();
 
-/**
- * @type {{
- * 	[key: import("discord.js").Snowflake]:
- * 		| undefined
- * 		| {
- * 				collector: InteractionCollector<import("discord.js").MappedInteractionTypes[import("discord.js").MessageComponentType]>;
- * 				addon: { id: string } & import("../common/types/addonManifest").default;
- * 		  };
- * }}
- */
-const games = {};
+const games: {
+	[key: Snowflake]:
+		| undefined
+		| {
+				collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
+				addon: { id: string } & AddonManifest;
+		  };
+} = {};
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Play games where you or I guess addons")
 		.addSubcommand((subcommand) =>
@@ -869,18 +881,19 @@ export default {
 				/**
 				 * Determine the best question to ask next.
 				 *
-				 * @param {[string, number][]} addonProbabilities - The probabilities of each addon being the answer.
-				 * @param {string[]} [askedQuestions] - Questions to ignore.
+				 * @param addonProbabilities - The probabilities of each addon being the answer.
+				 * @param askedQuestions - Questions to ignore.
 				 *
-				 * @returns {string[]} - A new question to ask.
+				 * @returns - A new question to ask.
 				 */
-				function getNextQuestions(addonProbabilities, askedQuestions = []) {
-					/** @type {{ [key: string]: number }} */
-					const frequencies = {};
+				function getNextQuestions(
+					addonProbabilities: [string, number][],
+					askedQuestions: string[] = [],
+				): string[] {
+					const frequencies: { [key: string]: number } = {};
 
 					const questions = Object.entries(questionsByAddon)
 						.map(
-							/** @returns {AddonQuestions[]} */
 							([addon, questions]) =>
 								Array.from({
 									length: Math.round(
@@ -899,7 +912,7 @@ export default {
 										(questionInfo) =>
 											!askedQuestions.includes(questionInfo.question),
 									),
-								),
+								) as AddonQuestions[],
 						)
 						.flat(2);
 
@@ -925,31 +938,30 @@ export default {
 								: currentDistance > previousDistance
 								? previous
 								: [...previous, current];
-						}, /** @type {typeof frequenciesArray} */ ([]))
+						}, [] as typeof frequenciesArray)
 						.map(([question]) => question);
 				}
 				/**
 				 * Update probabilities based on an answered question.
 				 *
-				 * @param {string} justAsked - The question that was answered.
-				 * @param {number} probabilityShift - How much to care.
-				 * @param {[string, number][]} probabilitiesBefore - The probabilities of addons before this question.
-				 * @param {string[]} [askedQuestions] - Questions that were already asked. This function will be modify this array.
+				 * @param justAsked - The question that was answered.
+				 * @param probabilityShift - How much to care.
+				 * @param probabilitiesBefore - The probabilities of addons before this question.
+				 * @param askedQuestions - Questions that were already asked. This function will be modify this array.
 				 *
-				 * @returns {[string, number][]} - The new probabilities.
+				 * @returns The new probabilities.
 				 */
 				function answerQuestion(
-					justAsked,
-					probabilityShift,
-					probabilitiesBefore,
-					askedQuestions = [],
-				) {
+					justAsked: string,
+					probabilityShift: number,
+					probabilitiesBefore: [string, number][],
+					askedQuestions: string[] = [],
+				): [string, number][] {
 					const justAskedQuestions = [justAsked];
 
-					/** @type {Dependencies} */
-					const dependencies = {};
+					const dependencies: Dependencies = {};
 					const initialUpdated = probabilitiesBefore.map(
-						/** @returns {[string, number]} */ ([addonId, probability]) => {
+						([addonId, probability]): [string, number] => {
 							const addon = questionsByAddon[`${addonId}`] || [];
 							const questionInfo = addon.find(
 								({ question }) => question === justAsked,
@@ -963,7 +975,7 @@ export default {
 									...accumulated,
 									...addonDependencies,
 								}),
-								/** @type {Dependencies} */ ({}),
+								{} as Dependencies,
 							);
 
 							if (
@@ -1016,24 +1028,29 @@ export default {
 				/**
 				 * Respond to an interaction with a question.
 				 *
-				 * @param {string[]} [askedQuestions] - Questions to ignore.
-				 * @param {[string, number][]} [addonProbabilities] - Current probabilities of each addon being correct. MUST be sorted.
-				 * @param {number} [askedCount] - Count of messages that have already been asked.
-				 * @param {false | string | { probabilities: [string, number][]; askedQuestions: string[]; justAsked: string }} [backInfo]
-				 *   - Information about the previous question.
+				 * @param askedQuestions - Questions to ignore.
+				 * @param addonProbabilities - Current probabilities of each addon being correct. MUST be sorted.
+				 * @param askedCount - Count of messages that have already been asked.
+				 * @param backInfo - Information about the previous question.
 				 *
-				 *
-				 * @returns {Promise<Message | undefined>} - Sent message.
+				 * @returns Sent message.
 				 */
 				async function reply(
-					askedQuestions = [],
-					addonProbabilities = addons
-						.map((addon) => /** @type {[string, 0]} */ ([addon.id, 0]))
+					askedQuestions: string[] = [],
+					addonProbabilities: [string, number][] = addons
+						.map((addon) => [addon.id, 0] as [string, 0])
 						.sort(() => Math.random() - 0.5),
-					askedCount = 0,
-					backInfo = false,
+					askedCount: number = 0,
+					backInfo:
+						| false
+						| string
+						| {
+								probabilities: [string, number][];
+								askedQuestions: string[];
+								justAsked: string;
+						  } = false,
 					justAnswered = "",
-				) {
+				): Promise<Message | undefined> {
 					const questions =
 						typeof backInfo === "string"
 							? [backInfo]
@@ -1279,19 +1296,24 @@ export default {
 				/**
 				 * Reply to an interaction with an embed saying that the addon has been guessed and a button to keep playing.
 				 *
-				 * @param {[string, number][]} addonProbabilities - The probabilities of each addon being correct.
-				 * @param {number} askedCount - How many questions have been asked already.
-				 * @param {string[]} askedQuestions - Questions that should not be asked.
-				 * @param {false | string | { probabilities: [string, number][]; askedQuestions: string[]; justAsked: string }} backInfo -
-				 *   Information about the previous question.
-				 * @param {string} justAnswered
+				 * @param addonProbabilities - The probabilities of each addon being correct.
+				 * @param askedCount - How many questions have been asked already.
+				 * @param askedQuestions - Questions that should not be asked.
+				 * @param backInfo - Information about the previous question.
 				 */
 				async function answerWithAddon(
-					addonProbabilities,
-					askedCount,
-					askedQuestions,
-					backInfo,
-					justAnswered,
+					addonProbabilities: [string, number][],
+					askedCount: number,
+					askedQuestions: string[],
+					backInfo:
+						| false
+						| string
+						| {
+								probabilities: [string, number][];
+								askedQuestions: string[];
+								justAsked: string;
+						  },
+					justAnswered: string,
 				) {
 					const foundAddon = addons.find(({ id }) => id === addonProbabilities[0]?.[0]);
 
@@ -1483,8 +1505,7 @@ export default {
 				break;
 			}
 			case "player": {
-				/** @type {Set<string>} */
-				const doneQuestions = new Set();
+				const doneQuestions: Set<string> = new Set();
 
 				const addon = addons[Math.floor(Math.random() * addons.length)];
 
@@ -1611,14 +1632,12 @@ export default {
 
 						const selected = componentInteraction.values[0] || "";
 						const split = selected.split(".");
-						const question =
-							questions[/** @type {GroupName} */ (split[0])][+(split[1] || 0)]?.[
-								+(split[2] || 0)
-							];
+						const groupName = split[0] as GroupName;
+						const question = questions[groupName][+(split[1] || 0)]?.[+(split[2] || 0)];
 
 						await componentInteraction.deferUpdate();
 
-						await answerQuestion(question, /** @type {GroupName} */ (split[0]));
+						await answerQuestion(question, groupName);
 
 						collector.resetTimer();
 					})
@@ -1637,11 +1656,11 @@ export default {
 							}),
 						]);
 					});
-				/**
-				 * @param {Set<GroupName>} doneGroups
-				 * @param {GroupName} [defaultValue]
-				 */
-				function selectGroupButton(doneGroups = new Set(), defaultValue) {
+
+				function selectGroupButton(
+					doneGroups: Set<GroupName> = new Set(),
+					defaultValue?: GroupName,
+				) {
 					return new MessageActionRowBuilder().addComponents(
 						new SelectMenuBuilder()
 							.setPlaceholder("Select a group")
@@ -1659,14 +1678,10 @@ export default {
 							),
 					);
 				}
-				/**
-				 * @param {string | undefined} question
-				 * @param {GroupName} groupName
-				 */
-				async function answerQuestion(question, groupName) {
+
+				async function answerQuestion(question: string | undefined, groupName: GroupName) {
 					if (question) doneQuestions.add(question);
 
-					/** @type {Set<GroupName>} */
 					const doneGroups = Object.entries(questions).reduce(
 						(accumulator, [group, questions]) => {
 							if (
@@ -1674,11 +1689,11 @@ export default {
 									subQuestions.every((question) => doneQuestions.has(question)),
 								)
 							)
-								accumulator.add(group);
+								accumulator.add(group as GroupName);
 
 							return accumulator;
 						},
-						new Set(),
+						new Set<GroupName>(),
 					);
 
 					const groupSelects = questions[groupName].reduce(
@@ -1705,7 +1720,7 @@ export default {
 
 							return accumulator;
 						},
-						/** @type {MessageActionRowBuilder[]} */ ([]),
+						[] as MessageActionRowBuilder[],
 					);
 
 					const reply = await interaction.fetchReply();
@@ -1763,9 +1778,9 @@ export default {
 		}
 	},
 };
+export default info;
 
-/** @param {import("discord.js").ModalSubmitInteraction} interaction */
-export async function guessAddon(interaction) {
+export async function guessAddon(interaction: ModalSubmitInteraction) {
 	const game = games[interaction.user.id];
 	if (!game) return;
 

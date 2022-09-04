@@ -6,16 +6,12 @@ import { Collection } from "discord.js";
 
 export const pkg = JSON.parse(
 	await fileSystem.readFile(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../package.json"),
+		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../../package.json"),
 		"utf-8",
 	),
 );
-/**
- * @param {string} directory
- *
- * @returns {Promise<string[]>}
- */
-export async function getFileNames(directory) {
+
+export async function getFileNames(directory: string): Promise<string[]> {
 	return (
 		await Promise.all(
 			(
@@ -30,18 +26,10 @@ export async function getFileNames(directory) {
 	).flat();
 }
 
-/**
- * Import all JavaScript files in a directory.
- *
- * @template T
- *
- * @param {string} directory - The directory to import from.
- *
- * @returns {Promise<Collection<string, () => Promise<T>>>} - The imported modules.
- */
-export async function importScripts(directory) {
-	/** @type {Collection<string, () => Promise<T>>} */
-	const collection = new Collection();
+export async function importScripts<T>(
+	directory: string,
+): Promise<Collection<string, () => Promise<T>>> {
+	const collection: Collection<string, () => Promise<T>> = new Collection();
 
 	const siblings = (await getFileNames(directory)).filter((file) => path.extname(file) === ".js");
 
@@ -62,10 +50,8 @@ export async function importScripts(directory) {
 		collection.set(
 			filename,
 			async () =>
-				/** @type {T} */ (
-					(await import(url.pathToFileURL(path.resolve(directory, sibling)).toString()))
-						.default
-				),
+				(await import(url.pathToFileURL(path.resolve(directory, sibling)).toString()))
+					.default as T,
 		);
 	});
 
@@ -74,12 +60,7 @@ export async function importScripts(directory) {
 	return collection;
 }
 
-/**
- * @param {string} unclean
- *
- * @returns {string}
- */
-export function sanitizePath(unclean, noDoxx = true) {
+export function sanitizePath(unclean: string, noDoxx = true): string {
 	const sanitized = decodeURIComponent(unclean)
 		.replaceAll("\\", "/")
 

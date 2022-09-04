@@ -2,6 +2,8 @@ import { AssertionError } from "assert";
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
 import path from "path";
 import url from "url";
+import type { ClientEvent } from "./common/types/event";
+import type Event from "./common/types/event";
 import { importScripts, pkg, sanitizePath } from "./lib/files.js";
 
 const Handler = new Client({
@@ -41,10 +43,9 @@ const Handler = new Client({
 	ws: { large_threshold: 0 },
 });
 
-const dirname = path.dirname(url.fileURLToPath(import.meta.url));
-
-/** @type {Promise<Client<true>>} */
-const readyPromise = new Promise((resolve) => Handler.once("ready", resolve));
+const readyPromise: Promise<Client<true>> = new Promise((resolve) =>
+	Handler.once("ready", resolve),
+);
 
 await Handler.login(process.env.BOT_TOKEN);
 
@@ -74,10 +75,9 @@ client.user.setPresence({
 	],
 });
 
-const events =
-	await /** @type {typeof importScripts<import("./common/types/event").default<import("./common/types/event").ClientEvent>>} */ (
-		importScripts
-	)(path.resolve(dirname, "./events"));
+const events = await importScripts<Event<ClientEvent>>(
+	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
+);
 
 for (const [event, execute] of events.entries()) {
 	Handler.on(event, async (...args) => {

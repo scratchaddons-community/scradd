@@ -1,33 +1,9 @@
 !**
-
-.DS_Store
+**/.DS_Store
 .git/
-.replit
-
-# Log files
-.bashrc
-logs
-*.log
-npm-debug.log*
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Dependency directories
-node_modules/
-
-# Optional npm cache directory
-.npm
-.upm
-.nvm
-
-# Optional eslint cache
 .eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# env environment variables file
 .env
 .env.*
-
-.vscode
-.openode
+dist/
+node_modules/
+.vscode/

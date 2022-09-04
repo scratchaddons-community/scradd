@@ -13,7 +13,7 @@
 		"maxNodeModuleJsDepth": 0,
 		"module": "ES2022",
 		"moduleResolution": "Node",
-		"noEmit": true,
+		"noEmitOnError": true,
 		"noErrorTruncation": true,
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
@@ -25,9 +25,13 @@
 		"stripInternal": true,
 		"target": "ES2021",
 		"useDefineForClassFields": true,
-		"useUnknownInCatchVariables": true
+		"useUnknownInCatchVariables": true,
+		"importHelpers": true,
+		"outDir": "dist",
+		"watch": true,
+		"skipLibCheck": true
 	},
-	"exclude": ["node_modules", ".git"],
+	"exclude": ["node_modules", ".git", "dist"],
 	"include": ["./*", "./.*", "./**/*", "./.**/*"],
 	"typeAcquisition": { "enable": true }
 }

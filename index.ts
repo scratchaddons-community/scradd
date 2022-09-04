@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import { importScripts, pkg } from "./lib/files.js";
 import fetch from "node-fetch";
 import { asyncFilter } from "./lib/promises.js";
+import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
+import type Command from "./common/types/command";
 
 dotenv.config();
 const { default: client } = await import("./client.js");
@@ -27,10 +29,7 @@ CONSTANTS.channels.usersVc &&
 	setInterval(async () => {
 		const count = (
 			await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
-				(res) =>
-					/** @type {Promise<{ count: number; _chromeCountDate: string }>} */ (
-						res.json()
-					),
+				(res) => res.json() as Promise<{ count: number; _chromeCountDate: string }>,
 			)
 		).count;
 		await CONSTANTS.channels.usersVc?.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
@@ -44,17 +43,10 @@ guilds.forEach(async (guild) => {
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-/** @type {import("discord.js").RESTPostAPIApplicationCommandsJSONBody[]} */
-const commands = [];
+const commands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 
 for await (const entry of asyncFilter(
-	[
-		...(
-			await /** @type {typeof importScripts<import("./common/types/command").default>} */ (
-				importScripts
-			)(path.resolve(dirname, "./commands"))
-		).entries(),
-	],
+	[...(await importScripts<Command>(path.resolve(dirname, "./commands"))).entries()],
 	async ([name, commandPromise]) => {
 		const command = await commandPromise();
 		if (!command) return false;
