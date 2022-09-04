@@ -149,6 +149,8 @@ export async function generateBoardMessage(info, extraButtons = {}) {
  * @param {import("discord.js").Message} message
  */
 export async function updateBoard(message) {
+	/** @type {Promise<any>[]} */
+	const promises = [];
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
 	const minReactions = boardReactionCount(message.channel);
 	const info = boardDatabase.data.find(({ source }) => source === message.id);
@@ -162,7 +164,7 @@ export async function updateBoard(message) {
 		true;
 
 	if (boardMessage) {
-		if (count < Math.max(Math.round(minReactions - minReactions / 6), 1)) {
+		if (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)) {
 			await boardMessage.delete();
 		} else {
 			await boardMessage.edit({
@@ -177,46 +179,59 @@ export async function updateBoard(message) {
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },
 		});
-		if (CONSTANTS.channels.board.type === ChannelType.GuildNews) await boardMessage.crosspost();
 
-		if (info) {
-			boardDatabase.data = boardDatabase.data.map((item) =>
-				item.source === message.id
-					? { ...item, reactions: count, onBoard: boardMessage.id }
-					: item,
-			);
-		}
-		const top = boardDatabase.data
-			.sort((a, b) => b.reactions - a.reactions)
-			.map(({ onBoard }) => onBoard);
-		top.splice(10);
-		top.map(async (onBoard) => {
-			const toPin =
-				onBoard &&
-				(await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {}));
-			toPin && toPin.pin();
-		});
-		CONSTANTS.channels.board.messages.fetchPinned().then(async (pins) => {
-			pins.size > 10 &&
-				(await Promise.all(pins.map((pin) => !top.includes(pin.id) && pin.unpin())));
-		});
-		if (info) return;
+		if (CONSTANTS.channels.board.type === ChannelType.GuildNews)
+			promises.push(boardMessage.crosspost());
+
+		boardDatabase.data = info
+			? boardDatabase.data.map((item) =>
+					item.source === message.id
+						? { ...item, onBoard: boardMessage.id, reactions: count }
+						: item,
+			  )
+			: [
+					...boardDatabase.data,
+					{
+						reactions: count,
+						user: message.author.id,
+						channel: message.channel.id,
+						source: message.id,
+						onBoard: boardMessage.id,
+					},
+			  ];
 	}
-	boardDatabase.data = info
-		? count
+
+	if (boardMessage || count < minReactions) {
+		boardDatabase.data = count
 			? boardDatabase.data.map((item) =>
 					item.source === message.id ? { ...item, reactions: count } : item,
 			  )
-			: boardDatabase.data.filter((item) => item.source !== message.id)
-		: count
-		? [
-				...boardDatabase.data,
-				{
-					reactions: count,
-					user: message.author.id,
-					channel: message.channel.id,
-					source: message.id,
-				},
-		  ]
-		: boardDatabase.data;
+			: boardDatabase.data.filter((item) => item.source !== message.id);
+	}
+
+	const top = boardDatabase.data
+		.sort((a, b) => b.reactions - a.reactions)
+		.filter(({ onBoard }) => onBoard)
+		.map(({ onBoard }) => /** @type {string} */ (onBoard));
+	top.splice(5);
+
+	promises.push(
+		...top.map(async (onBoard) => {
+			const toPin = await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {});
+			toPin && (await toPin.pin());
+		}),
+	);
+
+	promises.push(
+		CONSTANTS.channels.board.messages.fetchPinned().then(async (pins) => {
+			return (
+				pins.size > 5 &&
+				(await Promise.all(
+					pins.map(async (pin) => !top.includes(pin.id) && (await pin.unpin())),
+				))
+			);
+		}),
+	);
+
+	await Promise.all(promises);
 }

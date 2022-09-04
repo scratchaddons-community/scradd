@@ -124,6 +124,14 @@ export default async function event(message) {
 	}
 
 	if (
+		message.channel.id === CONSTANTS.channels.board?.id &&
+		message.type === MessageType.ChannelPinnedMessage
+	) {
+		await Promise.all([...promises, message.delete()]);
+		return;
+	}
+
+	if (
 		message.channel.type === ChannelType.GuildPublicThread &&
 		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
