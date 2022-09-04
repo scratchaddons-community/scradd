@@ -52,7 +52,7 @@ export default async function event(interaction) {
 				await interaction.member.roles.add(roleId);
 				await interaction.reply({
 					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${role}>!`,
+					content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${roleId}>!`,
 				});
 			}
 			return;
