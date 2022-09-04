@@ -93,7 +93,7 @@ export default class Database {
 			timeouts[this.message.id] = undefined;
 			return promise;
 		};
-		timeouts[this.message.id] = { timeout: setTimeout(callback, 60_000), callback };
+		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
 	}
 }
