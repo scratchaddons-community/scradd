@@ -25,14 +25,14 @@ export function boardReactionCount(channel) {
 	if (baseChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus; // The Cache!
 
 	return (
-		/** @type {{ [key: string]: number }} */ ({
+		{
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
 			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.modsPlus,
 			[CONSTANTS.channels.youtube?.id || ""]: COUNTS.modsPlus,
-		})[baseChannel.id] || 8
+		}[baseChannel.id] || 8
 	);
 }
 
