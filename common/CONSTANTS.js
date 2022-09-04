@@ -20,7 +20,7 @@ export default /** @type {const} */ ({
 	collectorTime: 30_000,
 	zeroWidthSpace: "\u200b",
 	emojis: {
-		statuses: { yes: "<:yes:940054094272430130>", no: "<:no:940054047854047282>" },
+		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
 		autoreact: {
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",

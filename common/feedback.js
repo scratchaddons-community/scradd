@@ -109,7 +109,7 @@ export default class SuggestionChannel {
 			interaction.channel.parent?.id !== this.channel.id
 		) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in <#${this.channel}>.`,
+				content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in ${this.channel}.`,
 				ephemeral: true,
 			});
 
@@ -170,7 +170,7 @@ export default class SuggestionChannel {
 			interaction.channel.parent?.id !== this.channel.id
 		) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in <#${this.channel}>.`,
+				content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in ${this.channel}.`,
 				ephemeral: true,
 			});
 

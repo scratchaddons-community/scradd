@@ -14,7 +14,7 @@ export default async function event(channel) {
 				[ChannelType.GuildStageVoice]: "Stage",
 			}[channel.type]
 		} channel ${channel.toString()} (${channel.name}) created${
-			channel.parent ? ` under <#${channel.parent.id}>` : ""
+			channel.parent ? ` under ${channel.parent}` : ""
 		}!`,
 		"channels",
 	);
