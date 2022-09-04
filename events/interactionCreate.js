@@ -12,7 +12,8 @@ import { guessAddon } from "../commands/guess-addon.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands = await /** @type {typeof importScripts<import("../common/types/command").default>} */
+const commands =
+	await /** @type {typeof importScripts<import("../common/types/command").default>} */
 	(importScripts)(path.resolve(dirname, "../commands"));
 
 /** @type {import("../common/types/event").default<"interactionCreate">} */

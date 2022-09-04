@@ -12,10 +12,10 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"serve": "nodemon . --watch dist",
+		"dev": "tsc --project tsconfig.json",
 		"format": "prettier --write \"**\" --ignore-unknown",
-		"start": "node .",
-		"dev": "tsc --project tsconfig.json"
+		"serve": "nodemon . --watch dist",
+		"start": "node ."
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {

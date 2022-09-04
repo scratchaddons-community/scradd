@@ -38,7 +38,9 @@ const info: ChatInputCommand = {
 				.setRequired(false),
 		),
 	async interaction(interaction) {
-		const settingsForUser = userSettingsDatabase.data.find(({ user }) => user === interaction.user.id);
+		const settingsForUser = userSettingsDatabase.data.find(
+			({ user }) => user === interaction.user.id,
+		);
 		const boardPings =
 				interaction.options.getBoolean("board-pings") ??
 				settingsForUser?.boardPings ??
