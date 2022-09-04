@@ -32,5 +32,17 @@ type Databases = {
 		/** How much XP they have. */
 		xp: number;
 	};
+	user_settings: {
+		/** The ID of the user. */
+		user: Snowflake;
+		/** Whether to ping the user when their message gets on the board. */
+		boardPings: boolean;
+		/** Whether to ping the user when they level up. */
+		levelUpPings: boolean;
+		/** Whether to ping the user when they are a top poster of the week. */
+		weeklyPings: boolean;
+		/** Whether to automatically react to their messages with random emojis. */
+		autoreactions: boolean;
+	};
 };
 export default Databases;

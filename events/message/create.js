@@ -20,6 +20,7 @@ import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
+import { userSettingsDatabase } from "../../commands/settings.js";
 
 const { GUILD_ID } = process.env;
 
@@ -288,7 +289,13 @@ export default async function event(message) {
 
 	if (
 		message.interaction ||
-		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(message.channel.id)
+		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(
+			message.channel.id,
+		) ||
+		!(
+			userSettingsDatabase.data.find(({ user }) => user === message.author.id)
+				?.autoreactions ?? true
+		)
 	) {
 		await Promise.all(promises);
 		return;

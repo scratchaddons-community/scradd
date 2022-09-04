@@ -1,5 +1,6 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
+import { userSettingsDatabase } from "../commands/settings.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
@@ -28,8 +29,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		if (oldLevel !== newLevel) {
 			const date = new Date();
 			const nextLevelXp = getXpForLevel(newLevel + 1);
+			const pings =
+				userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ?? true;
 			await CONSTANTS.channels.bots?.send({
-				content: "🎉 " + to.toString(),
+				content: "🎉" + (pings ? " " + to.toString() : ""),
 				embeds: [
 					new EmbedBuilder()
 						.setColor(member?.displayColor ?? null)

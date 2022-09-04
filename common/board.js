@@ -13,6 +13,7 @@ import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
 import { censor } from "./moderation/automod.js";
+import { userSettingsDatabase } from "../commands/settings.js";
 
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
@@ -155,12 +156,17 @@ export async function updateBoard(message) {
 	const boardMessage =
 		info?.onBoard &&
 		(await CONSTANTS.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
+
+	const pings =
+		userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.boardPings ??
+		true;
+
 	if (boardMessage) {
 		if (count < Math.max(Math.round(minReactions - minReactions / 6), 1)) {
 			await boardMessage.delete();
 		} else {
 			await boardMessage.edit({
-				allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
+				allowedMentions: pings ? undefined : { users: [] },
 				content: boardMessage.content.replace(/\d+/, `${count}`),
 			});
 		}
@@ -168,8 +174,8 @@ export async function updateBoard(message) {
 		if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
 		const boardMessage = await CONSTANTS.channels.board.send({
-			allowedMentions: process.env.NODE_ENV === "production" ? undefined : { users: [] },
 			...(await generateBoardMessage(message)),
+			allowedMentions: pings ? undefined : { users: [] },
 		});
 		if (CONSTANTS.channels.board.type === ChannelType.GuildNews) await boardMessage.crosspost();
 
