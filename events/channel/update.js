@@ -8,7 +8,7 @@ import {
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 
-/** @type {import("../../types/event").default<"channelUpdate">} */
+/** @type {import("../../common/types/event").default<"channelUpdate">} */
 export default async function event(oldChannel, newChannel) {
 	if (
 		newChannel.isDMBased() ||

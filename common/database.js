@@ -27,10 +27,10 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
  * }}
  */
 const timeouts = {};
-/** @type {(keyof import("../types/databases").default)[]} */
+/** @type {(keyof import("./types/databases").default)[]} */
 const contructed = [];
 
-/** @template {keyof import("../types/databases").default} Name */
+/** @template {keyof import("./types/databases").default} Name */
 export default class Database {
 	/** @param {Name} name */
 	constructor(name) {
@@ -43,7 +43,7 @@ export default class Database {
 		this.name = name;
 	}
 
-	/** @type {import("../types/databases").default[Name][] | undefined} */
+	/** @type {import("./types/databases").default[Name][] | undefined} */
 	#data = undefined;
 	async init() {
 		/** @type {Message<true> | undefined} */
@@ -60,7 +60,7 @@ export default class Database {
 					.then((res) => res.text())
 					.then(
 						(csv) =>
-							/** @type {import("../types/databases").default[Name][]} */ (
+							/** @type {import("./types/databases").default[Name][]} */ (
 								papaparse.parse(csv.trim(), {
 									dynamicTyping: true,
 									header: true,

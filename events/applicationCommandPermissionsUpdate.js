@@ -1,6 +1,6 @@
-import log from "../../../../common/moderation/logging.js";
+import log from "../common/moderation/logging.js";
 
-/** @type {import("../../../../types/event").default<"applicationCommandPermissionsUpdate">} */
+/** @type {import("../common/types/event").default<"applicationCommandPermissionsUpdate">} */
 export default async function event(permissions) {
 	if (permissions.guildId !== process.env.GUILD_ID) return;
 

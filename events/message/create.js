@@ -26,7 +26,7 @@ const { GUILD_ID } = process.env;
 /** @type {{ [key: import("discord.js").Snowflake]: import("discord.js").Message[] }} */
 const latestMessages = {};
 
-/** @type {import("../../types/event").default<"messageCreate">} */
+/** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
 	const promises = [];

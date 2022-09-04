@@ -1,4 +1,4 @@
-/** @type {import("../types/event").default<"debug">} */
+/** @type {import("../common/types/event").default<"debug">} */
 export default function event(message) {
 	if (
 		(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged")) &&

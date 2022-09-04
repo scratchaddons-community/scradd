@@ -1,8 +1,8 @@
 import { time } from "discord.js";
-import client from "../../../../client.js";
-import log from "../../../../common/moderation/logging.js";
+import client from "../../../client.js";
+import log from "../../../common/moderation/logging.js";
 
-/** @type {import("../../../../types/event").default<"guildScheduledEventCreate">} */
+/** @type {import("../../../common/types/event").default<"guildScheduledEventCreate">} */
 export default async function event(event) {
 	const guild = event.guild || (await client.guilds.fetch(event.guildId));
 	if (guild.id !== process.env.GUILD_ID) return;
@@ -20,6 +20,6 @@ export default async function event(event) {
 		}${event.creator ? " by " + event.creator.toString() : ""}${
 			event.description ? ":\n" + event.description : "!"
 		}`,
-		"server",
+		"voice",
 	);
 }

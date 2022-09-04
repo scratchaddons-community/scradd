@@ -9,7 +9,7 @@ import {
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 
-/** @type {import("../../types/event").default<"guildUpdate">} */
+/** @type {import("../../common/types/event").default<"guildUpdate">} */
 export default async function event(oldGuild, newGuild) {
 	if (newGuild.id !== process.env.GUILD_ID) return;
 

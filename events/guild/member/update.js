@@ -3,7 +3,7 @@ import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
 
-/** @type {import("../../../types/event").default<"guildMemberUpdate">} */
+/** @type {import("../../../common/types/event").default<"guildMemberUpdate">} */
 export default async function event(oldMember, newMember) {
 	if (newMember.guild.id !== process.env.GUILD_ID) return;
 	const logs = [];

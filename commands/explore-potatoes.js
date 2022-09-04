@@ -16,7 +16,7 @@ import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
 import { generateHash } from "../lib/text.js";
 import { disableComponents } from "../lib/discord.js";
 import { guild } from "../client.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
@@ -61,7 +61,7 @@ async function textChannelMatches(channelWanted, channelFound) {
 }
 
 const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with a random message from the potatoboard")

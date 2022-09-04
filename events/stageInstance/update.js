@@ -1,9 +1,9 @@
-import client from "../../../client.js";
-import log from "../../../common/moderation/logging.js";
+import client from "../../client.js";
+import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 import { AttachmentBuilder } from "discord.js";
 
-/** @type {import("../../../types/event").default<"stageInstanceUpdate">} */
+/** @type {import("../../common/types/event").default<"stageInstanceUpdate">} */
 export default async function event(oldInstance, newInstance) {
 	const guild = newInstance.guild || (await client.guilds.fetch(newInstance.guildId));
 	if (!oldInstance || guild.id !== process.env.GUILD_ID) return;

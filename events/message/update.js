@@ -4,10 +4,10 @@ import { extractMessageExtremities, getBaseChannel } from "../../lib/discord.js"
 import jsonDiff from "json-diff";
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";
-import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
-/** @type {import("../../types/event").default<"messageUpdate">} */
+/** @type {import("../../common/types/event").default<"messageUpdate">} */
 export default async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
 	if (

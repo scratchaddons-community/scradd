@@ -1,7 +1,7 @@
-import client from "../../../client.js";
-import log from "../../../common/moderation/logging.js";
+import client from "../../client.js";
+import log from "../../common/moderation/logging.js";
 
-/** @type {import("../../../types/event").default<"stageInstanceCreate">} */
+/** @type {import("../../common/types/event").default<"stageInstanceCreate">} */
 export default async function event(instance) {
 	const guild = instance.guild || (await client.guilds.fetch(instance.guildId));
 

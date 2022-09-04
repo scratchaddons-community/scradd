@@ -1,6 +1,6 @@
-import log from "../../../common/moderation/logging.js";
+import log from "../common/moderation/logging.js";
 
-/** @type {import("../../../types/event").default<"voiceStateUpdate">} */
+/** @type {import("../common/types/event").default<"voiceStateUpdate">} */
 export default async function event(oldState, newState) {
 	if (!newState.member || newState.guild.id !== process.env.GUILD_ID) return;
 

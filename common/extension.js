@@ -15,7 +15,7 @@ for (const addonId of addonIds.filter((item) => !item.startsWith("//"))) {
 	addonPromises.push(
 		fetch(`${CONSTANTS.urls.saSource}/addons/${encodeURI(addonId)}/addon.json`).then(
 			async (response) => ({
-				...(await /** @type {Promise<import("../types/addonManifest").default>} */ (
+				...(await /** @type {Promise<import("./types/addonManifest").default>} */ (
 					response.json()
 				)),
 

@@ -11,7 +11,7 @@ import {
 	MODMAIL_UNSUPPORTED,
 } from "../common/modmail.js";
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())

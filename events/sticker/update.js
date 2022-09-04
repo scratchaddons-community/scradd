@@ -2,7 +2,7 @@ import { AttachmentBuilder } from "discord.js";
 import difflib from "difflib";
 import log from "../../common/moderation/logging.js";
 
-/** @type {import("../../types/event").default<"stickerUpdate">} */
+/** @type {import("../../common/types/event").default<"stickerUpdate">} */
 export default async function event(oldSticker, newSticker) {
 	if (newSticker.partial) newSticker = await newSticker.fetch();
 	if (!newSticker.guild || newSticker.guild.id !== process.env.GUILD_ID) return;

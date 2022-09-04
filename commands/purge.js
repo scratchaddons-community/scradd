@@ -3,7 +3,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 
 const MAX_FETCH_COUNT = 100;
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Bulk deletes a specified amount of messages")

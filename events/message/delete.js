@@ -2,9 +2,9 @@ import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../lib/discord.js";
-import { MessageActionRowBuilder } from "../../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 
-/** @type {import("../../types/event").default<"messageDelete">} */
+/** @type {import("../../common/types/event").default<"messageDelete">} */
 export default async function event(message) {
 	if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
 	const shush =

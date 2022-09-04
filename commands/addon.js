@@ -20,7 +20,7 @@ const fuse = new Fuse(addons, {
 	],
 });
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription(
@@ -42,7 +42,7 @@ export default {
 		/**
 		 * Generate a string of Markdown that credits the makers of an addon.
 		 *
-		 * @param {import("../types/addonManifest").default["credits"]} credits - Addon manifest.
+		 * @param {import("../common/types/addonManifest").default["credits"]} credits - Addon manifest.
 		 *
 		 * @returns {string | undefined} - Returns credit information or undefined if no credits are available.
 		 */

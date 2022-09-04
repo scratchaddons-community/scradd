@@ -3,7 +3,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
 import { joinWithAnd } from "../lib/text.js";
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Checks text for language")

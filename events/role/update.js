@@ -1,6 +1,6 @@
 import log from "../../common/moderation/logging.js";
 
-/** @type {import("../../types/event").default<"roleUpdate">} */
+/** @type {import("../../common/types/event").default<"roleUpdate">} */
 export default async function event(oldRole, newRole) {
 	if (newRole.guild.id !== process.env.GUILD_ID) return;
 

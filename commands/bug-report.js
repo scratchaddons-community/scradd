@@ -43,7 +43,7 @@ const ANSWERS = [
 const channel = CONSTANTS.channels.bugs && new SuggestionChannel(CONSTANTS.channels.bugs);
 
 const channelTag = `#${CONSTANTS.channels.bugs?.name}`;
-/** @type {import("../types/command").ChatInputCommand | undefined} */
+/** @type {import("../common/types/command").ChatInputCommand | undefined} */
 export default channel && {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage bug reports in ${channelTag}`)

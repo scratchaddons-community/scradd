@@ -50,7 +50,7 @@ const commands = [];
 for await (const entry of asyncFilter(
 	[
 		...(
-			await /** @type {typeof importScripts<import("./types/command").default>} */ (
+			await /** @type {typeof importScripts<import("./common/types/command").default>} */ (
 				importScripts
 			)(path.resolve(dirname, "./commands"))
 		).entries(),

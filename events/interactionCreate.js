@@ -1,21 +1,21 @@
 import { ApplicationCommandType, GuildMember } from "discord.js";
-import warn from "../../common/moderation/warns.js";
-import { censor, badWordsAllowed } from "../../common/moderation/automod.js";
-import { getWarns } from "../../commands/view-warns.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import logError from "../../lib/logError.js";
+import warn from "../common/moderation/warns.js";
+import { censor, badWordsAllowed } from "../common/moderation/automod.js";
+import { getWarns } from "../commands/view-warns.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+import logError from "../lib/logError.js";
 
-import { importScripts } from "../../lib/files.js";
+import { importScripts } from "../lib/files.js";
 import path from "path";
 import url from "url";
-import { guessAddon } from "../../commands/guess-addon.js";
+import { guessAddon } from "../commands/guess-addon.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands = await /** @type {typeof importScripts<import("../../types/command").default>} */
-	(importScripts)(path.resolve(dirname, "../../commands"));
+const commands = await /** @type {typeof importScripts<import("../common/types/command").default>} */
+	(importScripts)(path.resolve(dirname, "../commands"));
 
-/** @type {import("../../types/event").default<"interactionCreate">} */
+/** @type {import("../common/types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
 	if (interaction.isButton()) {
 		if (interaction.customId.endsWith("_strike")) {

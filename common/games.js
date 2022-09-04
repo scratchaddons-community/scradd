@@ -1,5 +1,5 @@
 import { Collection, ButtonBuilder, ButtonStyle } from "discord.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import CONSTANTS from "./CONSTANTS.js";
 
 /** @type {Collection<import("discord.js").Snowflake, string>} */

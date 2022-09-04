@@ -1,6 +1,6 @@
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 
-/** @type {import("../../../types/event").default<"messageReactionRemove">} */
+/** @type {import("../../../common/types/event").default<"messageReactionRemove">} */
 export default async function event(reaction, user) {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 

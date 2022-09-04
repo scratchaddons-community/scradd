@@ -18,7 +18,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../lib/text.js";
-import { MessageActionRowBuilder, ModalActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder, ModalActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
 import client from "../client.js";
 
@@ -841,13 +841,13 @@ const BULLET_POINT = CONSTANTS.footerSeperator.trim();
  * 		| undefined
  * 		| {
  * 				collector: InteractionCollector<import("discord.js").MappedInteractionTypes[import("discord.js").MessageComponentType]>;
- * 				addon: { id: string } & import("../types/addonManifest").default;
+ * 				addon: { id: string } & import("../common/types/addonManifest").default;
  * 		  };
  * }}
  */
 const games = {};
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Play games where you or I guess addons")

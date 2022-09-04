@@ -3,7 +3,7 @@ import { AbortError } from "node-fetch";
 import { cleanDatabaseListeners } from "../common/database.js";
 import logError from "../lib/logError.js";
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription(

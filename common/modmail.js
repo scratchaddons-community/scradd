@@ -15,7 +15,7 @@ import { asyncFilter } from "../lib/promises.js";
 import { disableComponents, extractMessageExtremities, messageToText } from "../lib/discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import client, { guild } from "../client.js";
 
 export const MODMAIL_COLORS = {

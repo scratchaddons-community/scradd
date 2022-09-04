@@ -12,7 +12,7 @@ import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
-/** @type {import("../../types/event").default<"threadUpdate">} */
+/** @type {import("../../common/types/event").default<"threadUpdate">} */
 export default async function event(oldThread, newThread) {
 	if (newThread.guild.id !== process.env.GUILD_ID) return;
 

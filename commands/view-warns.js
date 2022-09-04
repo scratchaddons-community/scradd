@@ -18,9 +18,9 @@ import {
 	WARN_INFO_BASE,
 } from "../common/moderation/warns.js";
 import { convertBase } from "../lib/numbers.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("View your or (Mods only) someone else’s active strikes")

@@ -5,7 +5,7 @@ import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
 
-/** @type {import("../../../types/event").default<"messageReactionAdd">} */
+/** @type {import("../../../common/types/event").default<"messageReactionAdd">} */
 export default async function event(reaction, user) {
 	if (reaction.partial) reaction = await reaction.fetch();
 

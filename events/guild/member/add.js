@@ -8,7 +8,7 @@ import fileSystem from "fs/promises";
 import url from "url";
 import path from "path";
 
-/** @type {import("../../../types/event").default<"guildMemberAdd">} */
+/** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`👋 Member ${member.toString()} joined!`, "members");

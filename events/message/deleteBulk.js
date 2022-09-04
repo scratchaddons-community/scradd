@@ -1,9 +1,9 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import log from "../../../common/moderation/logging.js";
-import { messageToText } from "../../../lib/discord.js";
-import { MessageActionRowBuilder } from "../../../types/ActionRowBuilder.js";
+import log from "../../common/moderation/logging.js";
+import { messageToText } from "../../lib/discord.js";
+import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 
-/** @type {import("../../../types/event").default<"messageDeleteBulk">} */
+/** @type {import("../../common/types/event").default<"messageDeleteBulk">} */
 export default async function event(messages, channel) {
 	const last = messages.last();
 	if (!last?.guild || last.guild.id !== process.env.GUILD_ID) return;

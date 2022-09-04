@@ -8,7 +8,7 @@ import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
 import { pkg } from "../lib/files.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
 import { getLoggingThread } from "../common/moderation/logging.js";
 
@@ -157,7 +157,7 @@ const OPTIONS = [
 	},
 ];
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input

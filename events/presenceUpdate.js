@@ -1,8 +1,8 @@
 import { ActivityType } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { censor } from "../../common/moderation/automod.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+import { censor } from "../common/moderation/automod.js";
 
-/** @type {import("../../types/event").default<"presenceUpdate">} */
+/** @type {import("../common/types/event").default<"presenceUpdate">} */
 export default async function event(_, newPresence) {
 	if (newPresence.guild?.id !== process.env.GUILD_ID) return;
 

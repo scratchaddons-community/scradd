@@ -1,8 +1,8 @@
-import { guild } from "../../client.js";
-import { changeNickname } from "../../common/moderation/automod.js";
-import log from "../../common/moderation/logging.js";
+import { guild } from "../client.js";
+import { changeNickname } from "../common/moderation/automod.js";
+import log from "../common/moderation/logging.js";
 
-/** @type {import("../../types/event").default<"userUpdate">} */
+/** @type {import("../common/types/event").default<"userUpdate">} */
 export default async function event(oldUser, newUser) {
 	newUser = await newUser.fetch();
 

@@ -5,7 +5,7 @@ import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/
 import { paginate } from "../lib/discord.js";
 import { makeProgressBar } from "../lib/numbers.js";
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to view users’ XP amounts")

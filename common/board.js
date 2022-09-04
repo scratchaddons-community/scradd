@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { guild } from "../client.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../lib/discord.js";
-import { MessageActionRowBuilder } from "../types/ActionRowBuilder.js";
+import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
@@ -42,7 +42,7 @@ export const boardDatabase = new Database("board");
 await boardDatabase.init();
 
 /**
- * @param {import("../types/databases").default["board"] | import("discord.js").Message} info
+ * @param {import("./types/databases").default["board"] | import("discord.js").Message} info
  * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
  *
  * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}

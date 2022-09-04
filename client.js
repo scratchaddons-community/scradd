@@ -75,7 +75,7 @@ client.user.setPresence({
 });
 
 const events =
-	await /** @type {typeof importScripts<import("./types/event").default<import("./types/event").ClientEvent>>} */ (
+	await /** @type {typeof importScripts<import("./common/types/event").default<import("./common/types/event").ClientEvent>>} */ (
 		importScripts
 	)(path.resolve(dirname, "./events"));
 

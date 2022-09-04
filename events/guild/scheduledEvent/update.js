@@ -1,9 +1,9 @@
 import { AttachmentBuilder, time } from "discord.js";
-import client from "../../../../client.js";
-import log from "../../../../common/moderation/logging.js";
+import client from "../../../client.js";
+import log from "../../../common/moderation/logging.js";
 import difflib from "difflib";
 
-/** @type {import("../../../../types/event").default<"guildScheduledEventUpdate">} */
+/** @type {import("../../../common/types/event").default<"guildScheduledEventUpdate">} */
 export default async function event(oldEvent, newEvent) {
 	const guild = newEvent.guild || (await client.guilds.fetch(newEvent.guildId));
 	if (guild.id !== process.env.GUILD_ID || !oldEvent) return;
@@ -62,5 +62,5 @@ export default async function event(oldEvent, newEvent) {
 		);
 	}
 
-	await Promise.all(logs.map((edit) => log(`📆 Event ${oldEvent.name}${edit}!`, "server")));
+	await Promise.all(logs.map((edit) => log(`📆 Event ${oldEvent.name}${edit}!`, "voice")));
 }

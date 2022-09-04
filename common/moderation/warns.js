@@ -228,7 +228,7 @@ export default async function warn(user, reason, strikes, context) {
 /**
  * @param {import("discord.js").Snowflake} user
  * @param {number} strikes
- * @param {import("../../types/databases").default["warn"][]} warns
+ * @param {import("../types/databases").default["warn"][]} warns
  */
 function unwarn(user, strikes, warns) {
 	for (var i = 0; i < strikes; i++) {

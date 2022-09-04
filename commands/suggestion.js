@@ -72,7 +72,7 @@ const channel =
 
 const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
 
-/** @type {import("../types/command").ChatInputCommand | undefined} */
+/** @type {import("../common/types/command").ChatInputCommand | undefined} */
 export default channel && {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)

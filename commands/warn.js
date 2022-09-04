@@ -5,7 +5,7 @@ import { stripMarkdown } from "../lib/markdown.js";
 
 const DEFAULT_STRIKES = 1;
 
-/** @type {import("../types/command").ChatInputCommand} */
+/** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Warns a user")
