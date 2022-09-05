@@ -129,6 +129,16 @@ export default class SuggestionChannel {
 			return false;
 		}
 
+		const oldAnswer = interaction.channel?.name.split(" | ")[1]?.trim();
+		if (oldAnswer === answer) {
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} That's already the answer!`,
+				ephemeral: true,
+			});
+
+			return false;
+		}
+
 		const promises = [
 			Promise.race([
 				new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
