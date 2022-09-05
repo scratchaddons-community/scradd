@@ -884,7 +884,7 @@ const info: ChatInputCommand = {
 				 * @param addonProbabilities - The probabilities of each addon being the answer.
 				 * @param askedQuestions - Questions to ignore.
 				 *
-				 * @returns - A new question to ask.
+				 * @returns A new question to ask.
 				 */
 				function getNextQuestions(
 					addonProbabilities: [string, number][],

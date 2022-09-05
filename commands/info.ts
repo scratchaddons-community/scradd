@@ -1,4 +1,13 @@
-import { Message, SelectMenuBuilder, SlashCommandBuilder, time, ComponentType } from "discord.js";
+import {
+	Message,
+	SelectMenuBuilder,
+	SlashCommandBuilder,
+	time,
+	ComponentType,
+	Awaitable,
+	ChatInputCommandInteraction,
+	Snowflake,
+} from "discord.js";
 
 import { BOARD_EMOJI, boardReactionCount } from "../common/board.js";
 import { MODMAIL_UNSUPPORTED } from "../common/modmail.js";
@@ -11,15 +20,16 @@ import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
 import { getLoggingThread } from "../common/moderation/logging.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 
 /**
  * Get all users with a role.
  *
- * @param {import("discord.js").Snowflake} roleId - Role to fetch.
+ * @param roleId - Role to fetch.
  *
- * @returns {Promise<string>} - Users with the role.
+ * @returns Users with the role.
  */
-async function getRole(roleId) {
+async function getRole(roleId: Snowflake): Promise<string> {
 	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
 	const members = Array.from(role?.members.values() ?? []);
 
@@ -28,18 +38,15 @@ async function getRole(roleId) {
 
 const BLOB_ROOT = CONSTANTS.urls.scraddRepo + "/blob/main";
 
-/**
- * @type {{
- * 	description: (() => import("discord.js").Awaitable<string>) | string;
- * 	edit?: (
- * 		interaction: import("discord.js").ChatInputCommandInteraction<"raw" | "cached">,
- * 		Reply: Message,
- * 	) => import("discord.js").Awaitable<string>;
- * 	emoji: string;
- * 	name: string;
- * }[]}
- */
-const OPTIONS = [
+const OPTIONS: {
+	description: (() => Awaitable<string>) | string;
+	edit?: (
+		interaction: ChatInputCommandInteraction<"raw" | "cached">,
+		Reply: Message,
+	) => Awaitable<string>;
+	emoji: string;
+	name: string;
+}[] = [
 	{
 		description: `Hello! I'm **Scradd v${pkg.version}**, a Discord bot for the **Scratch Addons** community! **Pick an option** in the dropdown below to **learn more about my features**.`,
 
@@ -157,8 +164,7 @@ const OPTIONS = [
 	},
 ];
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) =>
 		input
 			.setName("tab")
@@ -273,3 +279,4 @@ export default {
 		addCollector().catch(disable);
 	},
 };
+export default info;
