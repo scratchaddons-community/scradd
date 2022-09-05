@@ -1,15 +1,15 @@
 import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
 import { cleanDatabaseListeners } from "../common/database.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 import logError from "../lib/logError.js";
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription(
-			`(${
-				process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"
-			} only) Kills the bot.`,
+			`(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
+				process.env.NODE_ENV === "production" ? "Restarts" : "Kills"
+			} the bot.`,
 		)
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
 
@@ -23,3 +23,4 @@ export default {
 		process.exit();
 	},
 };
+export default info;
