@@ -48,9 +48,10 @@ export default class Database {
 	async init() {
 		/** @type {Message<true> | undefined} */
 		this.message = databases[this.name] ||= await thread.send(
-			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${
-				this.name
-			} information will be reset.*`,
+			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+				"_",
+				" ",
+			)} will be reset.*`,
 		);
 
 		const attachment = this.message?.attachments.first()?.url;
