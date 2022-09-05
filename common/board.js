@@ -44,7 +44,7 @@ export const boardDatabase = new Database("board");
 await boardDatabase.init();
 
 /**
- * @param {import("./types/databases").default["board"] | import("discord.js").Message} info
+ * @param {import("./database").Databases["board"] | import("discord.js").Message} info
  * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
  *
  * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
