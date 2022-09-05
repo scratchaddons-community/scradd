@@ -217,7 +217,12 @@ export default async function event(message) {
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
 		message.webhookId &&
 		(await message.fetchWebhook()).applicationId === client.application.id;
-	if (!message.author.bot || message.interaction || webhook) {
+	if (
+		process.env.NODE_ENV !== "production" ||
+		!message.author.bot ||
+		message.interaction ||
+		webhook
+	) {
 		if (!latestMessages[message.channel.id]) {
 			const fetched = await message.channel.messages
 				.fetch({ limit: 100, before: message.id })
