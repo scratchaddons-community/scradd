@@ -4,6 +4,10 @@ import {
 	ChannelType,
 	ButtonStyle,
 	CategoryChannel,
+	APIInteractionDataResolvedChannel,
+	GuildBasedChannel,
+	Snowflake,
+	WebhookEditMessageOptions,
 } from "discord.js";
 
 import {
@@ -17,16 +21,20 @@ import { generateHash } from "../lib/text.js";
 import { disableComponents } from "../lib/discord.js";
 import { guild } from "../client.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
  *
- * @param {import("discord.js").APIInteractionDataResolvedChannel | import("discord.js").GuildBasedChannel} channelWanted - Guild based channel.
- * @param {import("discord.js").Snowflake} channelFound - Text based channel.
+ * @param channelWanted - Guild based channel.
+ * @param channelFound - Text based channel.
  *
- * @returns {Promise<boolean>} Whether the channel is a match.
+ * @returns Whether the channel is a match.
  */
-async function textChannelMatches(channelWanted, channelFound) {
+async function textChannelMatches(
+	channelWanted: APIInteractionDataResolvedChannel | GuildBasedChannel,
+	channelFound: Snowflake,
+): Promise<boolean> {
 	if (channelWanted.id === channelFound) return true;
 
 	switch (channelWanted.type) {
@@ -61,8 +69,8 @@ async function textChannelMatches(channelWanted, channelFound) {
 }
 
 const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
@@ -120,12 +128,10 @@ export default {
 		const nextId = generateHash("next");
 		const prevId = generateHash("prev");
 
-		/** @type {import("discord.js").WebhookEditMessageOptions[]} */
-		const messages = [];
+		const messages: WebhookEditMessageOptions[] = [];
 		let index = 0;
 
-		/** @returns {Promise<import("discord.js").WebhookEditMessageOptions>} */
-		async function getNextMessage() {
+		async function getNextMessage(): Promise<WebhookEditMessageOptions> {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info
@@ -206,3 +212,4 @@ export default {
 			});
 	},
 };
+export default info;
