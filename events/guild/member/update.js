@@ -18,11 +18,10 @@ export default async function event(oldMember, newMember) {
 	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
 		if (
 			newMember.communicationDisabledUntil &&
-			newMember.communicationDisabledUntil < new Date()
+			newMember.communicationDisabledUntil > new Date()
 		)
 			logs.push(" timed out until " + time(newMember.communicationDisabledUntil));
-
-		if (!newMember.communicationDisabledUntil) logs.push("’s timeout was removed");
+		else logs.push("’s timeout was removed");
 	}
 	if (oldMember.nickname !== newMember.nickname) {
 		logs.push(
