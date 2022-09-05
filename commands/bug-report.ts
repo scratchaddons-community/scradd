@@ -1,10 +1,14 @@
 import { SlashCommandBuilder, Colors, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { getUserFromFeedback, RATELIMT_MESSAGE } from "../common/feedback.js";
+import SuggestionChannel, {
+	Answer,
+	getUserFromFeedback,
+	RATELIMT_MESSAGE,
+} from "../common/feedback.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 
-/** @type {import("../common/feedback").Answer[]} */
-const ANSWERS = [
+const ANSWERS: Answer[] = [
 	{
 		name: "Unverified",
 		color: Colors.Greyple,
@@ -43,8 +47,8 @@ const ANSWERS = [
 const channel = CONSTANTS.channels.bugs && new SuggestionChannel(CONSTANTS.channels.bugs);
 
 const channelTag = `#${CONSTANTS.channels.bugs?.name}`;
-/** @type {import("../common/types/command").ChatInputCommand | undefined} */
-export default channel && {
+
+const info: ChatInputCommand | undefined = channel && {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage bug reports in ${channelTag}`)
 		.addSubcommand((subcommand) =>
@@ -182,3 +186,4 @@ export default channel && {
 		}
 	},
 };
+export default info;
