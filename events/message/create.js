@@ -1,4 +1,10 @@
-import { cleanCodeBlockContent, EmbedBuilder, MessageType, ChannelType } from "discord.js";
+import {
+	cleanCodeBlockContent,
+	EmbedBuilder,
+	MessageType,
+	ChannelType,
+	PermissionsBitField,
+} from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
@@ -21,6 +27,7 @@ import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
+import { breakRecord, recordsDatabase } from "../../common/records.js";
 
 const { GUILD_ID } = process.env;
 
@@ -124,6 +131,33 @@ export default async function event(message) {
 	}
 
 	if (
+		message.channel.type === ChannelType.GuildText &&
+		message.channel
+			.permissionsFor(message.guild.id)
+			?.has(PermissionsBitField.Flags.SendMessages)
+	) {
+		const messages = await message.channel.messages.fetch({ limit: 2 });
+		const first = messages.first(),
+			last = messages.last();
+		if (first && last) {
+			const oldRecord = recordsDatabase.data.find(
+				(record) => record.record === 0,
+			);
+			const newCount = first.createdTimestamp - last.createdTimestamp;
+			const same = first.author.id === last.author.id;
+			if (!oldRecord || oldRecord.count < newCount)
+				promises.push(
+					breakRecord(
+						0,
+						same ? [first.author] : [first.author, last.author],
+						newCount,
+						message.channel,
+					),
+				);
+		}
+	}
+
+	if (
 		message.channel.id === CONSTANTS.channels.board?.id &&
 		message.type === MessageType.ChannelPinnedMessage
 	) {
@@ -156,10 +190,19 @@ export default async function event(message) {
 
 	// #upcoming-updates
 	if (message.channel.id === "806605006072709130") {
-		const thread = await message.startThread({
-			name: truncateText(message.cleanContent || message.embeds[0]?.title || "[image]", 50),
-		});
-		await thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" }); // @Update Tester
+		promises.push(
+			message
+				.startThread({
+					name: truncateText(
+						message.cleanContent || message.embeds[0]?.title || "[image]",
+						50,
+					),
+				})
+				.then(
+					(thread) =>
+						thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" }), // @Update Tester
+				),
+		);
 	}
 
 	const mentions = (
@@ -268,37 +311,39 @@ export default async function event(message) {
 		lastInChannel.unshift(message);
 		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content)); // todo: update this
 
-		await giveXp(
-			(webhook &&
-				message.channel.isThread() &&
-				(await getUserFromModmail(message.channel))) ||
-				message.interaction?.user ||
-				message.author,
-			spam === -1 && !newChannel
-				? 1
-				: Math.max(
-						1,
-						Math.round(
-							(NORMAL_XP_PER_MESSAGE -
-								(newChannel ? lastInChannel.length - 1 : spam)) /
-								bot /
-								(1 +
-									+![
-										MessageType.Default,
-										MessageType.GuildBoost,
-										MessageType.GuildBoostTier1,
-										MessageType.GuildBoostTier2,
-										MessageType.GuildBoostTier3,
-										MessageType.Reply,
-										MessageType.ChatInputCommand,
-										MessageType.ContextMenuCommand,
-									].includes(message.type)),
-						),
-				  ),
+		promises.push(
+			giveXp(
+				(webhook &&
+					message.channel.isThread() &&
+					(await getUserFromModmail(message.channel))) ||
+					message.interaction?.user ||
+					message.author,
+				spam === -1 && !newChannel
+					? 1
+					: Math.max(
+							1,
+							Math.round(
+								(NORMAL_XP_PER_MESSAGE -
+									(newChannel ? lastInChannel.length - 1 : spam)) /
+									bot /
+									(1 +
+										+![
+											MessageType.Default,
+											MessageType.GuildBoost,
+											MessageType.GuildBoostTier1,
+											MessageType.GuildBoostTier2,
+											MessageType.GuildBoostTier3,
+											MessageType.Reply,
+											MessageType.ChatInputCommand,
+											MessageType.ContextMenuCommand,
+										].includes(message.type)),
+							),
+					  ),
+			),
 		);
 	}
 
-	// Autoreactions start here. Don’t react to bots.
+	// Autoreactions start here. Don’t react to bots or users who disabled the setting.
 
 	if (
 		message.interaction ||
@@ -395,7 +440,8 @@ export default async function event(message) {
 			ignoreEveryone: true,
 			ignoreRoles: true,
 			ignoreRepliedUser: true,
-		})
+		}) &&
+		message.author.id !== client.user?.id
 	)
 		react("👋");
 

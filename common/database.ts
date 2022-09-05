@@ -4,6 +4,8 @@ import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./moderation/logging.js";
 import client from "../client.js";
+import type { RECORDS } from "./records.js";
+import type { NumberSmallerThan } from "../lib/numbers.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -153,5 +155,12 @@ export type Databases = {
 		xp: number;
 		/** The timestamp when they gained it at. */
 		timestamp: number;
+	};
+	records: {
+		record: NumberSmallerThan<typeof RECORDS.length>;
+		users: string;
+		count: number;
+		channel?: string;
+		message?: string;
 	};
 };
