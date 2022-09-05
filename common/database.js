@@ -9,7 +9,7 @@ export const DATABASE_THREAD = "databases";
 
 const thread = await getLoggingThread(DATABASE_THREAD);
 
-/** @type {{ [key: string]: Message<true> }} */
+/** @type {{ [key: string]: undefined | Message<true> }} */
 const databases = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
@@ -22,7 +22,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 /**
  * @type {{
  * 	[key: import("discord.js").Snowflake]:
- * 		| { callback: () => Promise<import("discord.js").Message<true> | void>; timeout: NodeJS.Timeout }
+ * 		| { callback: () => Promise<import("discord.js").Message<true>>; timeout: NodeJS.Timeout }
  * 		| undefined;
  * }}
  */
@@ -87,10 +87,16 @@ export default class Database {
 					}),
 			  ]
 			: [];
+
+		/** @returns {Promise<Message<true>>} */
 		const callback = () => {
 			if (!this.message)
 				throw new ReferenceError("Must call `.init()` before setting `.data`");
-			const promise = this.message.edit({ files }).catch(this.init);
+			const promise = this.message.edit({ files }).catch(async () => {
+				databases[this.name] = undefined;
+				await this.init();
+				return callback();
+			});
 			timeouts[this.message.id] = undefined;
 			return promise;
 		};
