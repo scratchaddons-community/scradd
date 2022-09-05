@@ -10,6 +10,16 @@ import { asyncFilter } from "./lib/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import type Command from "./common/types/command";
 
+declare global {
+	namespace NodeJS {
+		interface ProcessEnv {
+			GUILD_ID: string;
+			BOT_TOKEN: string;
+			NODE_ENV: "development" | "production";
+		}
+	}
+}
+
 dotenv.config();
 const { default: client } = await import("./client.js");
 const { default: logError } = await import("./lib/logError.js");
