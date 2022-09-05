@@ -1,16 +1,20 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
+import { nth } from "../lib/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
 export const xpDatabase = new Database("xp");
+export const hourlyDatabase = new Database("recent_xp");
 await xpDatabase.init();
+await hourlyDatabase.init();
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
 /** @param {User | GuildMember} to */
 export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
+	// give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
 		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
@@ -18,48 +22,52 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const xp = xpDatabase.data;
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
+	const newXp = oldXp + amount;
 
 	if (index === -1) {
 		xp.push({ user: user.id, xp: amount });
 	} else {
-		const newXp = oldXp + amount;
 		xp[index] = { user: user.id, xp: newXp };
-		const oldLevel = getLevelForXp(oldXp);
-		const newLevel = getLevelForXp(newXp);
-		if (oldLevel !== newLevel) {
-			const date = new Date();
-			const nextLevelXp = getXpForLevel(newLevel + 1);
-			const pings =
-				userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ?? true;
-			await CONSTANTS.channels.bots?.send({
-				content: "🎉" + (pings ? " " + to.toString() : ""),
-				embeds: [
-					new EmbedBuilder()
-						.setColor(member?.displayColor ?? null)
-						.setAuthor({
-							iconURL: to.displayAvatarURL(),
-							name: member?.displayName ?? user.username,
-						})
-						.setTitle("A member leveled up!")
-						.setDescription(
-							`${to.toString()}**${
-								date.getUTCMonth() === 3 && date.getUTCDate() === 1
-									? ", You've at" // april fools
-									: " has reached"
-							} level ${newLevel}!** (${newXp.toLocaleString()}/${getXpForLevel(
-								newLevel,
-							).toLocaleString()} XP)\nNext level: ${(
-								nextLevelXp - newXp
-							).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
-						)
-						.setFooter({
-							text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
-						}),
-				],
-			});
-		}
+	}
+	xpDatabase.data = xp;
+
+	// send level up message
+	const oldLevel = getLevelForXp(oldXp);
+	const newLevel = getLevelForXp(newXp);
+	if (oldLevel !== newLevel) {
+		const date = new Date();
+		const nextLevelXp = getXpForLevel(newLevel + 1);
+		const pings =
+			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ?? true;
+		await CONSTANTS.channels.bots?.send({
+			content: "🎉" + (pings ? " " + to.toString() : ""),
+			embeds: [
+				new EmbedBuilder()
+					.setColor(member?.displayColor ?? null)
+					.setAuthor({
+						iconURL: to.displayAvatarURL(),
+						name: member?.displayName ?? user.username,
+					})
+					.setTitle("A member leveled up!")
+					.setDescription(
+						`${to.toString()}**${
+							date.getUTCMonth() === 3 && date.getUTCDate() === 1
+								? ", You've at" // april fools
+								: " has reached"
+						} level ${newLevel}!** (${newXp.toLocaleString()}/${getXpForLevel(
+							newLevel,
+						).toLocaleString()} XP)\nNext level: ${(
+							nextLevelXp - newXp
+						).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
+					)
+					.setFooter({
+						text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
+					}),
+			],
+		});
 	}
 
+	// Give them epic people
 	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
 
 	if (
@@ -75,7 +83,77 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		);
 	}
 
-	xpDatabase.data = xp;
+	// Update recent DB & send weekly winners
+	const { weekly, hourly } = hourlyDatabase.data.reduce(
+		({ weekly, hourly }, gain) => {
+			if (gain.timestamp + 3_600_000 > Date.now()) {
+				hourly.push(gain);
+			} else {
+				weekly[gain.user] ??= 0;
+				weekly[gain.user] += gain.xp;
+			}
+			return { weekly, hourly };
+		},
+		{
+			/** @type {{ [key: string]: number }} */
+			weekly: {},
+			/** @type {typeof hourlyDatabase["data"]} */
+			hourly: [],
+		},
+	);
+	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, timestamp: 0 }));
+
+	const date = new Date();
+	if (date.getUTCDay() === 0 && date.getUTCHours() === 0 && weeklyArray.length) {
+		hourlyDatabase.data = [...hourly, { user: to.id, xp: amount, timestamp: Date.now() }];
+		const threads = CONSTANTS.channels.announcements?.threads;
+		const thread =
+			(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
+			(await threads?.create({ name: "Weekly Winners" }));
+		const sorted = weeklyArray.sort((a, b) => b.xp - a.xp);
+		sorted.splice(5);
+		date.setUTCDate(date.getUTCDate() - 7);
+		await thread?.send({
+			allowedMentions: {
+				users: sorted
+					.map((gain) => gain.user)
+					.filter(
+						(user) =>
+							userSettingsDatabase.data.find((settings) => user === settings.user)
+								?.weeklyPings ?? true,
+					),
+			},
+			content:
+				`__**Weekly Winners week of ${
+					[
+						"January",
+						"February",
+						"March",
+						"April",
+						"May",
+						"June",
+						"July",
+						"August",
+						"September",
+						"October",
+						"November",
+						"December",
+					][date.getUTCMonth()]
+				} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n` +
+				sorted
+					.map(
+						(gain, index) =>
+							`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${gain.xp} XP`,
+					)
+					.join("\n"),
+		});
+	} else {
+		hourlyDatabase.data = [
+			...hourly,
+			...weeklyArray,
+			{ user: to.id, xp: amount, timestamp: Date.now() },
+		];
+	}
 }
 
 const XP_PER_LEVEL = [

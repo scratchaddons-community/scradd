@@ -96,6 +96,10 @@ export default /** @type {const} */ ({
 			channels.find((channel) => channel.name.endsWith("board")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
 		),
+		announcements: enforceChannelType(
+			channels.find((channel) => "announcements" === channel.name),
+			ChannelType.GuildNews,
+		),
 		modmail: enforceChannelType(
 			channels.find((channel) => "modmail" === channel.name),
 			ChannelType.GuildText,

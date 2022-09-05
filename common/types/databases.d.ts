@@ -44,5 +44,13 @@ type Databases = {
 		/** Whether to automatically react to their messages with random emojis. */
 		autoreactions: boolean;
 	};
+	recent_xp: {
+		/** The ID of the user. */
+		user: Snowflake;
+		/** How much XP they gained. */
+		xp: number;
+		/** The timestamp when they gained it at. */
+		timestamp: number;
+	};
 };
 export default Databases;
