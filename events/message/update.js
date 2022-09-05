@@ -32,7 +32,7 @@ export default async function event(oldMessage, newMessage) {
 				"!",
 			"messages",
 			{
-				embeds: newMessage.embeds.map((embed) => EmbedBuilder.from(embed)),
+				embeds: oldMessage.embeds.map((embed) => EmbedBuilder.from(embed)),
 				components: [
 					new MessageActionRowBuilder().addComponents(
 						new ButtonBuilder()
@@ -122,7 +122,7 @@ async function getMessageJSON(message) {
 
 	return {
 		components: message.components.map((component) => component.toJSON()),
-		embeds: embeds,
+		embeds: message.author?.bot ?? true ? embeds : [],
 		files: files,
 	};
 }
