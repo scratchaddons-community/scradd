@@ -7,6 +7,8 @@ import { getBaseChannel } from "../lib/discord.js";
 import { escapeMessage, escapeLinks } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
 import { generateTooltip } from "../lib/discord.js";
+import type { ChatInputCommand } from "../common/types/command";
+import addonManifest from "../common/types/addonManifest";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -20,8 +22,7 @@ const fuse = new Fuse(addons, {
 	],
 });
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`Replies with information about a specific addon available in v${
@@ -39,26 +40,6 @@ export default {
 		),
 
 	async interaction(interaction) {
-		/**
-		 * Generate a string of Markdown that credits the makers of an addon.
-		 *
-		 * @param {import("../common/types/addonManifest").default["credits"]} credits - Addon manifest.
-		 *
-		 * @returns {string | undefined} - Returns credit information or undefined if no credits are available.
-		 */
-		function generateCredits(credits) {
-			return joinWithAnd(
-				credits?.map((credit) => {
-					const note = ("note" in credit ? credit.note : undefined) || "";
-					return credit.link
-						? hyperlink(escapeLinks(credit.name), credit.link, note)
-						: interaction.channel
-						? generateTooltip(interaction.channel, credit.name, note)
-						: credit.name;
-				}) ?? [],
-			);
-		}
-
 		const input = interaction.options.getString("addon", true);
 		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
 
@@ -133,7 +114,16 @@ export default {
 				addon.latestUpdate?.version ?? "<unknown version>"
 			}`;
 
-			const credits = generateCredits(addon.credits);
+			const credits = joinWithAnd(
+				addon.credits?.map((credit) => {
+					const note = ("note" in credit ? credit.note : undefined) || "";
+					return credit.link
+						? hyperlink(escapeLinks(credit.name), credit.link, note)
+						: interaction.channel
+						? generateTooltip(interaction.channel, credit.name, note)
+						: credit.name;
+				}) ?? [],
+			);
 
 			if (credits)
 				embed.addFields({
@@ -179,3 +169,4 @@ export default {
 
 	censored: "channel",
 };
+export default info;
