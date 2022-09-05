@@ -32,7 +32,7 @@ export async function removeExpiredWarns(database) {
 		await Promise.all(
 			Object.entries(losers).map(([user, strikes]) =>
 				log(
-					`${CONSTANTS.emojis.statuses.yes} Member <@${user}> lost ${strikes} strike${
+					`${CONSTANTS.emojis.statuses.yes} <@${user}> lost ${strikes} strike${
 						strikes === 1 ? "" : "s"
 					} from ${guild.members.me?.toString()}!`,
 					"members",
@@ -79,7 +79,7 @@ export default async function warn(user, reason, strikes, context) {
 	const promises = [];
 
 	const logMessage = await log(
-		`${actualStrikes > 0 ? CONSTANTS.emojis.statuses.yes : "⚠"} Member ${user.toString()} ` +
+		`${actualStrikes < 0 ? CONSTANTS.emojis.statuses.yes : "⚠"} ${user.toString()} ` +
 			(actualStrikes
 				? `${actualStrikes > 0 ? "gained" : "lost"} ${Math.abs(actualStrikes)} strike${
 						Math.abs(actualStrikes) === 1 ? "" : "s"
