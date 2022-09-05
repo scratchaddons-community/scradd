@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 import { joinWithAnd } from "../lib/text.js";
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Checks text for language")
 		.addStringOption((input) =>
@@ -34,3 +34,4 @@ export default {
 
 	censored: false,
 };
+export default info;
