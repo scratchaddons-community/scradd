@@ -9,6 +9,7 @@ import {
 import client, { guild } from "../client.js";
 
 import CONSTANTS from "./CONSTANTS.js";
+import giveXp from "./xp.js";
 
 /**
  * @typedef {object} Answer
@@ -53,6 +54,8 @@ export default class SuggestionChannel {
 
 		if (!(author instanceof GuildMember))
 			throw new TypeError("interaction.member must be a GuildMember");
+
+		await giveXp(author);
 
 		const title = escapeMarkdown(data.title);
 
