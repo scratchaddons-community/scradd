@@ -12,7 +12,8 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"dev": "tsc --project tsconfig.json",
+		"dev": "tsc --project tsconfig.json --watch",
+		"build": "tsc --project tsconfig.json",
 		"format": "prettier --write \"**\" --ignore-unknown",
 		"serve": "nodemon . --watch dist",
 		"start": "node ."
@@ -30,6 +31,7 @@
 		"serialize-error": "11.0.0"
 	},
 	"devDependencies": {
+		"@railway/cli": "2.0.10",
 		"@redguy12/prettier-config": "2.0.0",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "0.0.196",
