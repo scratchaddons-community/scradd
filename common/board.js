@@ -15,6 +15,7 @@ import Database from "./database.js";
 import { censor } from "./moderation/automod.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import giveXp from "./xp.js";
+import breakRecord from "./records.js";
 
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
@@ -210,27 +211,30 @@ export async function updateBoard(message) {
 			: boardDatabase.data.filter((item) => item.source !== message.id);
 	}
 
-	const top = boardDatabase.data
-		.sort((a, b) => b.reactions - a.reactions)
-		.filter(({ onBoard }) => onBoard)
-		.map(({ onBoard }) => /** @type {string} */ (onBoard));
+	const top = boardDatabase.data.sort((a, b) => b.reactions - a.reactions);
 	top.splice(5);
 
-	promises.push(
-		...top.map(async (onBoard) => {
-			const toPin = await CONSTANTS.channels.board?.messages.fetch(onBoard).catch(() => {});
-			toPin && (await toPin.pin());
-		}),
-	);
+	if (top[0]?.source === message.id)
+		promises.push(breakRecord(3, [message.author], top[0].reactions, message));
 
 	promises.push(
-		CONSTANTS.channels.board.messages.fetchPinned().then(async (pins) => {
-			return (
-				pins.size > 5 &&
-				(await Promise.all(
-					pins.map(async (pin) => !top.includes(pin.id) && (await pin.unpin())),
-				))
-			);
+		Promise.all(
+			top.map(async ({ onBoard }) => {
+				const toPin =
+					onBoard &&
+					(await CONSTANTS.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+				toPin && (await toPin.pin());
+				return onBoard;
+			}),
+		).then((top) => {
+			CONSTANTS.channels.board?.messages.fetchPinned().then(async (pins) => {
+				return (
+					pins.size > 5 &&
+					(await Promise.all(
+						pins.map(async (pin) => !top.includes(pin.id) && (await pin.unpin())),
+					))
+				);
+			});
 		}),
 	);
 

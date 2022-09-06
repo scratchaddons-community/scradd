@@ -1,4 +1,4 @@
-import { User, TextBasedChannel, EmbedBuilder, GuildMember } from "discord.js";
+import { User, TextBasedChannel, EmbedBuilder, GuildMember, Message } from "discord.js";
 import { convertSnowflakeToDate, millisecondsToTime } from "../lib/numbers.js";
 import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "./CONSTANTS.js";
@@ -11,7 +11,7 @@ export default async function breakRecord(
 	brokenRecord: Databases["records"]["record"],
 	users: (User | GuildMember)[],
 	count: number,
-	channel: TextBasedChannel = CONSTANTS.channels.general ||
+	channel: TextBasedChannel | Message = CONSTANTS.channels.general ||
 		(() => {
 			throw new ReferenceError("Could not find general channel");
 		})(),
@@ -34,7 +34,10 @@ export default async function breakRecord(
 			);
 		oldRecord.message && embed.setTimestamp(convertSnowflakeToDate(oldRecord.message));
 
-		const message = await channel.send({ content: "🎊", embeds: [embed] });
+		const message = await (channel instanceof Message ? channel.reply : channel.send)({
+			content: "🎊",
+			embeds: [embed],
+		});
 
 		recordsDatabase.data = recordsDatabase.data.map((foundRecord) =>
 			foundRecord.record === brokenRecord
@@ -59,4 +62,9 @@ export default async function breakRecord(
 	}
 }
 
-export const RECORDS = ["Most dead channel", "Most people in VC", "Most XP in an hour"] as const;
+export const RECORDS = [
+	"Most dead channel",
+	"Most people in VC",
+	"Most XP in an hour",
+	"Most potatoed message",
+] as const;
