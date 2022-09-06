@@ -145,7 +145,7 @@ export default async function event(message) {
 				breakRecord(
 					0,
 					same ? [first.author] : [first.author, last.author],
-					first.createdTimestamp - last.createdTimestamp,
+					+first.createdAt - +last.createdAt,
 					message.channel,
 				),
 			);

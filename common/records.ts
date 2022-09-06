@@ -1,4 +1,5 @@
 import { User, TextBasedChannel, EmbedBuilder, GuildMember, Message } from "discord.js";
+import { guild } from "../client.js";
 import { convertSnowflakeToDate, millisecondsToTime } from "../lib/numbers.js";
 import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "./CONSTANTS.js";
@@ -21,7 +22,7 @@ export default async function breakRecord(
 		if (oldRecord.count > count) return;
 
 		const embed = new EmbedBuilder()
-			.setTitle(`${RECORDS[brokenRecord]} record broken!`)
+			.setTitle(`${RECORDS[brokenRecord].name} record broken!`)
 			.setDescription(
 				`__${joinWithAnd(users)}__ broke __${joinWithAnd(
 					oldRecord.users.split("|"),
@@ -63,8 +64,14 @@ export default async function breakRecord(
 }
 
 export const RECORDS = [
-	"Most dead channel",
-	"Most people in VC",
-	"Most XP in an hour",
-	"Most potatoed message",
+	{ name: "Most dead channel", type: "time" },
+	{ name: "Most people in VC", type: "count" },
+	{ name: "Most XP in an hour", type: "count" },
+	{ name: "Most potatoed message", type: "time" },
+	{
+		name: `${
+			guild.nameAcronym.length === 2 ? guild.nameAcronym : guild.name
+		} server ban speedrun any%`,
+		type: "time",
+	},
 ] as const;

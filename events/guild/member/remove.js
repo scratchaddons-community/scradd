@@ -2,6 +2,7 @@ import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
+import breakRecord from "../../../common/records.js";
 
 /** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
@@ -34,7 +35,7 @@ export default async function event(member) {
 		`💬 **${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
 	];
 
-	await Promise.all([
+	const promises = [
 		CONSTANTS.channels.general?.send(
 			(banned
 				? bans[Math.floor(Math.random() * bans.length)]
@@ -43,5 +44,8 @@ export default async function event(member) {
 		getThreadFromMember(member).then(async (thread) => {
 			if (thread) closeModmail(thread, member.user, "Member left");
 		}),
-	]);
+	];
+	if (banned && member.joinedAt)
+		promises.push(breakRecord(4, [member], Date.now() - +member.joinedAt));
+	await Promise.all(promises);
 }
