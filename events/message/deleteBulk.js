@@ -5,8 +5,7 @@ import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js"
 
 /** @type {import("../../common/types/event").default<"messageDeleteBulk">} */
 export default async function event(messages, channel) {
-	const last = messages.last();
-	if (!last?.guild || last.guild.id !== process.env.GUILD_ID) return;
+	if (!channel.guild || channel.guild.id !== process.env.GUILD_ID) return;
 	const messagesInfo = (
 		await Promise.all(
 			messages.reverse().map(async (message) => {
@@ -32,7 +31,7 @@ export default async function event(messages, channel) {
 				new ButtonBuilder()
 					.setLabel("View Context")
 					.setStyle(ButtonStyle.Link)
-					.setURL(last.url),
+					.setURL(messages.first()?.url || ""),
 			),
 		],
 	});

@@ -4,6 +4,7 @@ import {
 	MessageType,
 	ChannelType,
 	PermissionsBitField,
+	User,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
@@ -28,11 +29,15 @@ import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import breakRecord from "../../common/records.js";
+import Database from "../../common/database.js";
 
 const { GUILD_ID } = process.env;
 
 /** @type {{ [key: import("discord.js").Snowflake]: import("discord.js").Message[] }} */
 const latestMessages = {};
+
+const messagesDatabase = new Database("messages");
+await messagesDatabase.init();
 
 /** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
@@ -228,6 +233,31 @@ export default async function event(message) {
 		return;
 	}
 
+	messagesDatabase.data = [
+		{ author: message.author.id, timestamp: Date.now() },
+		...messagesDatabase.data.filter(({ timestamp }) => timestamp < Date.now()),
+	];
+
+	const messagesbyUser = messagesDatabase.data.reduce(
+		(acc, gain) => {
+			acc[gain.author] ??= 0;
+			acc[gain.author] += 1;
+
+			return acc;
+		},
+		/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+		({}),
+	);
+	const users = (
+		await Promise.all(
+			Object.keys(messagesbyUser).map((user) => client.users.fetch(user).catch(() => {})),
+		)
+	).filter(/** @returns {user is User} */ (user) => !!user);
+
+	const messageCount = Object.values(messagesbyUser).reduce((sum, count) => sum + count, 0);
+	await breakRecord(6, users, users.length);
+	await breakRecord(8, users, messageCount);
+
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
 		const spoilerHack = "||​||".repeat(200);
@@ -338,7 +368,7 @@ export default async function event(message) {
 		);
 	}
 
-	// Autoreactions start here. Don’t react to bots or users who disabled the setting.
+	// Autoreactions start here. Don’t react to users who disabled the setting.
 
 	if (
 		message.interaction ||

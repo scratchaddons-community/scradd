@@ -46,7 +46,7 @@ export default class Database<Name extends keyof Databases> {
 			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
 				" ",
-			)} will be reset.*`,
+			)} may be reset.*`,
 		);
 
 		const attachment = this.message?.attachments.first()?.url;
@@ -164,4 +164,5 @@ export type Databases = {
 		message?: Snowflake;
 	};
 	vc_users: { user: Snowflake; timestamp: number; channel: Snowflake };
+	messages: { author: Snowflake; timestamp: number };
 };
