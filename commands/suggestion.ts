@@ -2,13 +2,17 @@ import { SlashCommandBuilder, Colors, escapeMarkdown, cleanContent } from "disco
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
-import SuggestionChannel, { getUserFromFeedback, RATELIMT_MESSAGE } from "../common/feedback.js";
+import SuggestionChannel, {
+	Answer,
+	getUserFromFeedback,
+	RATELIMT_MESSAGE,
+} from "../common/feedback.js";
 import { escapeLinks } from "../lib/markdown.js";
 import { getAllMessages, paginate, reactAll } from "../lib/discord.js";
 import { truncateText } from "../lib/text.js";
+import type { ChatInputCommand } from "../common/types/command.js";
 
-/** @type {[string, string][]} */
-export const SUGGESTION_EMOJIS = [
+export const SUGGESTION_EMOJIS: [string, string][] = [
 	["👍", "👎"], // These are the emojis that are currently used.
 	["959117513088720926", "🍅"],
 	["575851403558256642", "575851403600330792"],
@@ -21,8 +25,7 @@ export const SUGGESTION_EMOJIS = [
 	["749005259682086964", "749005284403445790"],
 ];
 
-/** @type {import("../common/feedback").Answer[]} */
-const ANSWERS = [
+const ANSWERS: Answer[] = [
 	{ name: "Unanswered", color: Colors.Greyple, description: "This hasn’t yet been answered" },
 	{
 		color: Colors.Green,
@@ -72,8 +75,7 @@ const channel =
 
 const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
 
-/** @type {import("../common/types/command").ChatInputCommand | undefined} */
-export default channel && {
+const info: ChatInputCommand | undefined = channel && {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
@@ -300,7 +302,10 @@ export default channel && {
 					)
 				)
 
-					.filter((suggestion) => suggestion)
+					.filter(
+						(suggestion): suggestion is NonNullable<typeof suggestion> =>
+							suggestion !== undefined,
+					)
 					.sort(
 						(suggestionOne, suggestionTwo) =>
 							(suggestionTwo?.count ?? 0) - (suggestionOne?.count ?? 0),
@@ -333,3 +338,4 @@ export default channel && {
 		}
 	},
 };
+export default info;

@@ -8,7 +8,6 @@ import { escapeMessage, escapeLinks } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
 import { generateTooltip } from "../lib/discord.js";
 import type { ChatInputCommand } from "../common/types/command";
-import addonManifest from "../common/types/addonManifest";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,

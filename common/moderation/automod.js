@@ -145,7 +145,9 @@ export async function automodMessage(message) {
 		bad.words.language.push(...stickerRating.words);
 		bad.language = (bad.language || 0) + stickerRating.strikes;
 	}
-	const toStrike = [bad.language, bad.invites, bad.bots].filter((strikes) => strikes !== false);
+	const toStrike = [bad.language, bad.invites, bad.bots].filter(
+		/** @returns {strikes is false} */ (strikes) => strikes !== false,
+	);
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds

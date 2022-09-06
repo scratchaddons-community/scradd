@@ -893,26 +893,24 @@ const info: ChatInputCommand = {
 					const frequencies: { [key: string]: number } = {};
 
 					const questions = Object.entries(questionsByAddon)
-						.map(
-							([addon, questions]) =>
-								Array.from({
-									length: Math.round(
-										((Array.from(addonProbabilities)
-											.reverse()
-											.findIndex(([id]) => id === addon) || 0) +
-											1) /
-											addonProbabilities.length +
-											((addonProbabilities.find(
-												([id]) => id === addon,
-											)?.[1] || 0) +
-												1),
-									),
-								}).fill(
-									questions.filter(
-										(questionInfo) =>
-											!askedQuestions.includes(questionInfo.question),
-									),
-								) as AddonQuestions[],
+						.map(([addon, questions]) =>
+							Array.from<AddonQuestions>({
+								length: Math.round(
+									((Array.from(addonProbabilities)
+										.reverse()
+										.findIndex(([id]) => id === addon) || 0) +
+										1) /
+										addonProbabilities.length +
+										((addonProbabilities.find(([id]) => id === addon)?.[1] ||
+											0) +
+											1),
+								),
+							}).fill(
+								questions.filter(
+									(questionInfo) =>
+										!askedQuestions.includes(questionInfo.question),
+								),
+							),
 						)
 						.flat(2);
 
