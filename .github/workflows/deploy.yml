@@ -25,4 +25,6 @@ jobs:
               run: npm ci --force
 
             - name: Deploy
-              run: RAILWAY_TOKEN = ${{ secrets.RAILWAY_TOKEN }} npx railway up --detach
+              run: npx railway up --detach
+              env:
+                  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
