@@ -67,11 +67,12 @@ export const RECORDS = [
 	{ name: "Most dead channel", type: "time" },
 	{ name: "Most people in VC", type: "count" },
 	{ name: "Most XP in an hour", type: "count" },
-	{ name: "Most potatoed message", type: "time" },
+	{ name: "Most potatoed message", type: "count" },
 	{
 		name: `${
 			guild.nameAcronym.length === 2 ? guild.nameAcronym : guild.name
 		} server ban speedrun any%`,
 		type: "time",
 	},
+	{ name: "Most reactions on a message", type: "count" },
 ] as const;
