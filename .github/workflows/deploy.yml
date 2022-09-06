@@ -24,8 +24,5 @@ jobs:
             - name: Install
               run: npm ci --force
 
-            - name: Configure
-              run: npx openode ci-conf "${{ secrets.OPENODE }}" "scradd"
-
             - name: Deploy
               run: npx railway up --detach
