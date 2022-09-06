@@ -88,7 +88,7 @@ export async function getThreadFromMember(user) {
 
 	return (
 		await asyncFilter(
-			[...threads.values()],
+			threads.toJSON(),
 			async (thread) => (await getUserFromModmail(thread))?.id === user.id && thread,
 		).next()
 	).value;

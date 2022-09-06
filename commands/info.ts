@@ -31,7 +31,7 @@ import type { ChatInputCommand } from "../common/types/command.js";
  */
 async function getRole(roleId: Snowflake): Promise<string> {
 	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
-	const members = Array.from(role?.members.values() ?? []);
+	const members = role?.members.toJSON() ?? [];
 
 	return joinWithAnd(members);
 }

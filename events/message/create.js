@@ -27,7 +27,7 @@ import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
-import { breakRecord, recordsDatabase } from "../../common/records.js";
+import breakRecord from "../../common/records.js";
 
 const { GUILD_ID } = process.env;
 
@@ -140,20 +140,15 @@ export default async function event(message) {
 		const first = messages.first(),
 			last = messages.last();
 		if (first && last) {
-			const oldRecord = recordsDatabase.data.find(
-				(record) => record.record === 0,
-			);
-			const newCount = first.createdTimestamp - last.createdTimestamp;
 			const same = first.author.id === last.author.id;
-			if (!oldRecord || oldRecord.count < newCount)
-				promises.push(
-					breakRecord(
-						0,
-						same ? [first.author] : [first.author, last.author],
-						newCount,
-						message.channel,
-					),
-				);
+			promises.push(
+				breakRecord(
+					0,
+					same ? [first.author] : [first.author, last.author],
+					first.createdTimestamp - last.createdTimestamp,
+					message.channel,
+				),
+			);
 		}
 	}
 
