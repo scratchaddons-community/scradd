@@ -163,4 +163,5 @@ export type Databases = {
 		channel?: Snowflake;
 		message?: Snowflake;
 	};
+	vc_users: { user: Snowflake; timestamp: number; channel: Snowflake };
 };

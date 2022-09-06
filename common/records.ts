@@ -76,4 +76,5 @@ export const RECORDS = [
 	},
 	{ name: "Most reactions on a message", type: "count" },
 	{ name: "Most people talking in an hour", type: "count" },
+	{ name: "Longest time in vc", type: "time" },
 ] as const;

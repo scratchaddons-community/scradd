@@ -1,26 +1,65 @@
 import { ChannelType } from "discord.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+import Database from "../common/database.js";
 import log from "../common/moderation/logging.js";
 import breakRecord from "../common/records.js";
+
+export const vcUsersDatabase = new Database("vc_users");
+await vcUsersDatabase.init();
 
 /** @type {import("../common/types/event").default<"voiceStateUpdate">} */
 export default async function event(oldState, newState) {
 	if (!newState.member || newState.guild.id !== process.env.GUILD_ID) return;
 
 	const logs = [];
-	if (oldState.channel !== newState.channel || !newState.channel) {
+	if (oldState.channel?.id !== newState.channel?.id || !newState.channel) {
 		if (newState.channel) {
-			logs.push(`joined voice channel ${newState.channel.toString()}`);
+			logs.push(
+				`joined voice channel ${newState.channel.toString()}, ${
+					newState.mute ? "" : "un"
+				}muted and ${newState.deaf ? "" : "un"}deafened`,
+			);
 
 			await breakRecord(
 				1,
 				newState.channel.members.toJSON(),
 				newState.channel.members.size,
-				newState.channel.type === ChannelType.GuildVoice
-					? newState.channel
-					: CONSTANTS.channels.general,
+				newState.channel.type === ChannelType.GuildVoice ? newState.channel : undefined,
 			);
-		} else if (oldState.channel) logs.push(`left voice channel ${oldState.channel.toString()}`);
+		}
+		if (oldState.channel) {
+			logs.push(`left voice channel ${oldState.channel.toString()}`);
+		}
+
+		if (newState.channel && oldState.channel) {
+			vcUsersDatabase.data = vcUsersDatabase.data.map((data) =>
+				data.user === newState.member?.id
+					? {
+							user: data.user,
+							channel: newState.channel?.id || "",
+							timestamp: Date.now(),
+					  }
+					: data,
+			);
+		} else if (!newState.channel) {
+			vcUsersDatabase.data = vcUsersDatabase.data.filter(
+				(data) => data.user !== newState.member?.id,
+			);
+			const longest = vcUsersDatabase.data.sort((a, b) => a.timestamp - b.timestamp)[0];
+			longest?.user === newState.member.id &&
+				(await breakRecord(
+					7,
+					[newState.member],
+					Date.now() - longest.timestamp,
+					oldState.channel?.type === ChannelType.GuildVoice
+						? oldState.channel
+						: undefined,
+				));
+		} else {
+			vcUsersDatabase.data = [
+				...vcUsersDatabase.data,
+				{ user: newState.member.id, channel: newState.channel?.id, timestamp: Date.now() },
+			];
+		}
 	} else {
 		if (oldState.serverMute !== newState.serverMute) {
 			logs.push(`was${newState.serverMute ? "" : " un"} server muted`);
