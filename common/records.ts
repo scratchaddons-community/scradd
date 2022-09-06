@@ -59,4 +59,4 @@ export default async function breakRecord(
 	}
 }
 
-export const RECORDS = ["Most dead channel", "Most people in VC"] as const;
+export const RECORDS = ["Most dead channel", "Most people in VC", "Most XP in an hour"] as const;

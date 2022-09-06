@@ -1,9 +1,10 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
-import { guild } from "../client.js";
+import client, { guild } from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../lib/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
+import breakRecord from "./records.js";
 
 export const xpDatabase = new Database("xp");
 export const hourlyDatabase = new Database("recent_xp");
@@ -95,7 +96,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			return { weekly, hourly };
 		},
 		{
-			/** @type {{ [key: string]: number }} */
+			/** @type {{ [key: import("discord.js").Snowflake]: number }} */
 			weekly: {},
 			/** @type {typeof hourlyDatabase["data"]} */
 			hourly: [],
@@ -103,13 +104,14 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	);
 	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, timestamp: 0 }));
 
+	const threads = CONSTANTS.channels.announcements?.threads;
+	const thread =
+		(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
+		(await threads?.create({ name: "Weekly Winners" }));
+
 	const date = new Date();
 	if (date.getUTCDay() === 0 && date.getUTCHours() === 0 && weeklyArray.length) {
 		hourlyDatabase.data = [...hourly, { user: to.id, xp: amount, timestamp: Date.now() }];
-		const threads = CONSTANTS.channels.announcements?.threads;
-		const thread =
-			(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
-			(await threads?.create({ name: "Weekly Winners" }));
 		const sorted = weeklyArray.sort((a, b) => b.xp - a.xp);
 		sorted.splice(5);
 		date.setUTCDate(date.getUTCDate() - 7);
@@ -154,6 +156,21 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			{ user: to.id, xp: amount, timestamp: Date.now() },
 		];
 	}
+
+	const hourlyByUser = hourly.reduce(
+		(acc, gain) => {
+			acc[gain.user] ??= 0;
+			acc[gain.user] += gain.xp;
+
+			return acc;
+		},
+		/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+		({}),
+	);
+
+	const topInHour = Object.entries(hourlyByUser).sort(([, a], [, b]) => b - a)[0];
+	if (topInHour)
+		await breakRecord(2, [await client.users.fetch(topInHour[0])], topInHour[1], thread);
 }
 
 const XP_PER_LEVEL = [

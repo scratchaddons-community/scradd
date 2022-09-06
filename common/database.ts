@@ -160,7 +160,7 @@ export type Databases = {
 		record: NumberSmallerThan<typeof RECORDS.length>;
 		users: string;
 		count: number;
-		channel?: string;
-		message?: string;
+		channel?: Snowflake;
+		message?: Snowflake;
 	};
 };
