@@ -39,10 +39,6 @@ const info: ChatInputCommand = {
 			case "status": {
 				const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
-				const memoryUsage = process.memoryUsage();
-				const usedMemory = memoryUsage.heapUsed / 1_024 / 1_024,
-					totalMemory = memoryUsage.heapTotal / 1_024 / 1_024;
-
 				await interaction.editReply({
 					content: "",
 
@@ -81,16 +77,6 @@ const info: ChatInputCommand = {
 									inline: true,
 								},
 								{ name: "Node version", value: process.version, inline: true },
-								{
-									name: "Memory",
-									value: `${usedMemory.toLocaleString()}/${totalMemory.toLocaleString()} MB (${(
-										usedMemory / totalMemory
-									).toLocaleString([], {
-										maximumFractionDigits: 2,
-										style: "percent",
-									})})`,
-									inline: true,
-								},
 							)
 							.setThumbnail(client.user.displayAvatarURL())
 							.setColor(CONSTANTS.themeColor),
