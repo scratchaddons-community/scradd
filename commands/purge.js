@@ -11,7 +11,7 @@ export default {
 			input
 				.setName("count")
 				.setDescription(
-					`The number of messages to delete, or a message ID within the last ${MAX_FETCH_COUNT} messages to delete up to`,
+					`The number of messages to delete or a message ID to delete to (inclusive)`,
 				)
 				.setRequired(true)
 				.setMaxLength(22),
@@ -32,17 +32,20 @@ export default {
 		if (isNaN(numberCount) || numberCount > MAX_FETCH_COUNT) {
 			const deleteTo = Object.keys(Object.fromEntries([...messages])).indexOf(count) + 1;
 			if (!deleteTo) {
-				await interaction.reply(
-					`${CONSTANTS.emojis.statuses.no} Could not find a message with that ID!`,
-				);
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} Could not find a message with that ID! Note: I cannot delete messages older than 2 weeks or more than 100 messages at a time.`,
+				});
 			} else
-				await interaction.reply(
-					await deleteMessages(messages, interaction.channel, deleteTo, user),
-				);
+				await interaction.reply({
+					ephemeral: true,
+					content: await deleteMessages(messages, interaction.channel, deleteTo, user),
+				});
 		} else
-			await interaction.reply(
-				await deleteMessages(messages, interaction.channel, numberCount, user),
-			);
+			await interaction.reply({
+				ephemeral: true,
+				content: await deleteMessages(messages, interaction.channel, numberCount, user),
+			});
 	},
 };
 
@@ -60,11 +63,12 @@ async function deleteMessages(unfiltered, channel, count, user) {
 			(message, index) =>
 				index < count &&
 				(user ? message.author.id === user.id : true) &&
-				+message.createdAt > twoWeeksAgo,
+				+message.createdAt > twoWeeksAgo &&
+				message.deletable,
 		);
 	if (filtered.length) {
 		await channel.bulkDelete(filtered);
 		return `${CONSTANTS.emojis.statuses.yes} Deleted ${filtered.length} messages!`;
 	}
-	return `${CONSTANTS.emojis.statuses.no} No messages matched those filters!`;
+	return `${CONSTANTS.emojis.statuses.no} No messages matched those filters! Note: I cannot delete messages older than 2 weeks or more than 100 messages at a time.`;
 }

@@ -36,7 +36,7 @@ export async function importScripts<T>(
 			.split(path.sep)
 			.reduce((accumulated, item) =>
 				accumulated
-					? accumulated + (item[0] || "").toUpperCase() + item.slice(1).toLowerCase()
+					? accumulated + (item[0] || "").toUpperCase() + item.slice(1)
 					: item.toLowerCase(),
 			);
 
