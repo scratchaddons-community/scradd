@@ -1642,7 +1642,7 @@ const info: ChatInputCommand = {
 
 						const reply = await interaction.fetchReply();
 						await Promise.all([
-							reason !== "GOT_CORRECT_ANSWER" &&
+							reason === "time" &&
 								reply.reply(
 									`${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
 								),
@@ -1864,5 +1864,5 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 		}),
 	]);
 
-	game.collector.stop("GOT_CORRECT_ANSWER");
+	game.collector.stop();
 }
