@@ -19,6 +19,7 @@ declare global {
 			GUILD_ID: string;
 			BOT_TOKEN: string;
 			NODE_ENV: "development" | "production";
+			PORT?: number;
 		}
 	}
 }
@@ -101,4 +102,4 @@ if (process.env.NODE_ENV === "production")
 			}
 			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
 		})
-		.listen(443);
+		.listen(process.env.PORT ?? 443);
