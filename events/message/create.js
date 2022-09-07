@@ -235,7 +235,7 @@ export default async function event(message) {
 
 	messagesDatabase.data = [
 		{ author: message.author.id, timestamp: Date.now() },
-		...messagesDatabase.data.filter(({ timestamp }) => timestamp < Date.now()),
+		...messagesDatabase.data.filter(({ timestamp }) => timestamp + 3_600_000 > Date.now()),
 	];
 
 	const messagesbyUser = messagesDatabase.data.reduce(

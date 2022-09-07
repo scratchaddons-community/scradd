@@ -1,5 +1,5 @@
-import { AttachmentBuilder, Collection } from "discord.js";
-import { guild } from "../../../client.js";
+import { AttachmentBuilder, Collection, User } from "discord.js";
+import client, { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
@@ -7,6 +7,11 @@ import { nth } from "../../../lib/numbers.js";
 import fileSystem from "fs/promises";
 import url from "url";
 import path from "path";
+import Database from "../../../common/database.js";
+import breakRecord from "../../../common/records.js";
+
+const usersDatabase = new Database("joins");
+await usersDatabase.init();
 
 /** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
@@ -68,4 +73,15 @@ export default async function event(member) {
 			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
 		);
 	});
+
+	usersDatabase.data = [
+		{ user: member.id, timestamp: Date.now() },
+		...usersDatabase.data.filter(({ timestamp }) => timestamp + 86_400_000 > Date.now()),
+	];
+	const users = (
+		await Promise.all(
+			usersDatabase.data.map(({ user }) => client.users.fetch(user).catch(() => {})),
+		)
+	).filter(/** @returns {user is User} */ (user) => !!user);
+	await breakRecord(9, users, users.length);
 }

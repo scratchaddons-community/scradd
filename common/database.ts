@@ -177,4 +177,5 @@ export type Databases = {
 	};
 	vc_users: { user: Snowflake; timestamp: number; channel: Snowflake };
 	messages: { author: Snowflake; timestamp: number };
+	joins: { user: Snowflake; timestamp: number };
 };
