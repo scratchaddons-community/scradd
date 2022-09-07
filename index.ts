@@ -35,21 +35,15 @@ if (process.env.NODE_ENV === "production")
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
-CONSTANTS.channels.usersVc &&
+CONSTANTS.channels.users &&
 	setInterval(async () => {
 		const count = (
 			await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
 				(res) => res.json() as Promise<{ count: number; _chromeCountDate: string }>,
 			)
 		).count;
-		await CONSTANTS.channels.usersVc?.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
+		await CONSTANTS.channels.users?.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
 	}, 300_000);
-
-const guilds = await client.guilds.fetch();
-guilds.forEach(async (guild) => {
-	if (guild.id !== process.env.GUILD_ID)
-		await client.application.commands.set([], guild.id).catch(() => {});
-});
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -86,3 +80,9 @@ for await (const entry of asyncFilter(
 	commands.push(entry);
 
 await client.application.commands.set(commands, process.env.GUILD_ID || "");
+
+const guilds = await client.guilds.fetch();
+guilds.forEach(async (guild) => {
+	if (guild.id !== process.env.GUILD_ID)
+		await client.application.commands.set([], guild.id).catch(() => {});
+});

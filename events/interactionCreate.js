@@ -74,7 +74,7 @@ export default async function event(interaction) {
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
 
-		const commandType = command.data.setName(interaction.commandName).toJSON().type;
+		const commandType = command.data.toJSON().type;
 
 		if (
 			commandType === ApplicationCommandType.ChatInput &&
