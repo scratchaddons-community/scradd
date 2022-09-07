@@ -4,13 +4,6 @@ import url from "url";
 
 import { Collection } from "discord.js";
 
-export const pkg = JSON.parse(
-	await fileSystem.readFile(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "../../package.json"),
-		"utf-8",
-	),
-);
-
 export async function getFileNames(directory: string): Promise<string[]> {
 	return (
 		await Promise.all(

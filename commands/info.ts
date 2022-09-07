@@ -16,10 +16,10 @@ import { generateHash } from "../lib/text.js";
 import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { SUGGESTION_EMOJIS } from "./suggestion.js";
-import { pkg } from "../lib/files.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../lib/discord.js";
 import { getLoggingThread } from "../common/moderation/logging.js";
+import pkg from "../package.json" assert { type: "json" };
 import type { ChatInputCommand } from "../common/types/command.js";
 
 /**

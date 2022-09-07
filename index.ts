@@ -4,7 +4,8 @@ import url from "url";
 
 import dotenv from "dotenv";
 
-import { importScripts, pkg } from "./lib/files.js";
+import { importScripts } from "./lib/files.js";
+import pkg from "./package.json" assert { type: 'json' };
 import fetch from "node-fetch";
 import { asyncFilter } from "./lib/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";

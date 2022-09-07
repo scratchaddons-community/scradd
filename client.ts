@@ -4,7 +4,8 @@ import path from "path";
 import url from "url";
 import type { ClientEvent } from "./common/types/event";
 import type Event from "./common/types/event";
-import { importScripts, pkg, sanitizePath } from "./lib/files.js";
+import { importScripts, sanitizePath } from "./lib/files.js";
+import pkg from "./package.json" assert { type: "json" };
 
 const Handler = new Client({
 	allowedMentions: { parse: ["users"], repliedUser: true },

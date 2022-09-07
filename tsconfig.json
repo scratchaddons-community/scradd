@@ -11,7 +11,7 @@
 		"importsNotUsedAsValues": "error",
 		"lib": ["dom", "ES2022"],
 		"maxNodeModuleJsDepth": 0,
-		"module": "ES2022",
+		"module": "ESNext",
 		"moduleResolution": "Node",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
@@ -28,7 +28,8 @@
 		"useUnknownInCatchVariables": true,
 		"importHelpers": true,
 		"outDir": "dist",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"resolveJsonModule": true
 	},
 	"exclude": ["node_modules", ".git", "dist"],
 	"include": ["./*", "./.*", "./**/*", "./.**/*"],
