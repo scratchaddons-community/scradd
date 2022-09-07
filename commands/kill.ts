@@ -20,7 +20,7 @@ const info: ChatInputCommand = {
 			new AbortError(interaction.user.tag + " is killing the bot"),
 			"interactionCreate",
 		);
-		process.exit();
+		process.exit(1);
 	},
 };
 export default info;
