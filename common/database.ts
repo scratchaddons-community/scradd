@@ -20,7 +20,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	}
 }
 
-const timeouts: {
+let timeouts: {
 	[key: Snowflake]:
 		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
 		| undefined;
@@ -112,10 +112,13 @@ export default class Database<Name extends keyof Databases> {
 }
 
 export function cleanDatabaseListeners() {
-	return Promise.all(Object.values(timeouts).map((info) => info?.callback()));
+	console.log(`cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts)}`);
+	return Promise.all(Object.values(timeouts).map((info) => info?.callback())).then(
+		() => (timeouts = {}) && console.log("listeners cleaned"),
+	);
 }
 
-exitHook((callback) => cleanDatabaseListeners().then(callback));
+exitHook(cleanDatabaseListeners().then);
 
 export type Databases = {
 	board: {

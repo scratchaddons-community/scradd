@@ -72,7 +72,7 @@ const info: ChatInputCommand = {
 									inline: true,
 								},
 								{
-									name: "Heartbeat",
+									name: "WebSocket latency",
 									value: client.ws.ping.toLocaleString() + "ms",
 									inline: true,
 								},
