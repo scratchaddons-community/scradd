@@ -118,7 +118,7 @@ export function cleanDatabaseListeners() {
 	);
 }
 
-exitHook(cleanDatabaseListeners().then);
+exitHook((callback) => cleanDatabaseListeners().then(callback));
 
 export type Databases = {
 	board: {

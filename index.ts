@@ -10,7 +10,7 @@ import fetch from "node-fetch";
 import { asyncFilter } from "./lib/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import type Command from "./common/types/command";
-import https from "node:https";
+import http from "node:http";
 import { cleanDatabaseListeners } from "./common/database.js";
 
 declare global {
@@ -91,15 +91,15 @@ guilds.forEach(async (guild) => {
 		await client.application.commands.set([], guild.id).catch(() => {});
 });
 
-if (process.env.NODE_ENV === "production")
-	https
-		.createServer(async function (request, response) {
-			const url = new URL(request.url || "", `http://${request.headers.host}`);
+console.log(process.env);
 
-			if ((url.pathname = "/cleanDatabaseListeners")) {
-				await cleanDatabaseListeners();
-				response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
-			}
-			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
-		})
-		.listen(process.env.PORT ?? 443);
+if (process.env.NODE_ENV === "production")
+	http.createServer(async function (request, response) {
+		const url = new URL(request.url || "", `https://${request.headers.host}`);
+
+		if (url.pathname === "/cleanDatabaseListeners") {
+			await cleanDatabaseListeners();
+			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
+		}
+		response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+	}).listen(process.env.PORT ?? 443);
