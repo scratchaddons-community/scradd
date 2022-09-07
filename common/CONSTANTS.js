@@ -72,7 +72,6 @@ export default /** @type {const} */ ({
 		saSource: "https://raw.githubusercontent.com/ScratchAddons/ScratchAddons/" + latestRelease,
 		saRepo,
 		latestRelease,
-		scraddRepo: "https://github.com/scratchaddons-community/scradd",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
 	},
@@ -80,37 +79,17 @@ export default /** @type {const} */ ({
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: {
-		bots: enforceChannelType(
-			channels.find((channel) => channel.name.endsWith("bots")),
-			ChannelType.GuildText,
-		),
-		bugs: enforceChannelType(
-			channels.find((channel) => "bugs" === channel.name),
-			ChannelType.GuildText,
-		),
-		suggestions: enforceChannelType(
-			channels.find((channel) => "suggestions" === channel.name),
-			ChannelType.GuildText,
+		announcements: enforceChannelType(
+			channels.find((channel) => "announcements" === channel.name),
+			ChannelType.GuildNews,
 		),
 		board: enforceChannelType(
 			channels.find((channel) => channel.name.endsWith("board")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
 		),
-		announcements: enforceChannelType(
-			channels.find((channel) => "announcements" === channel.name),
-			ChannelType.GuildNews,
-		),
-		modmail: enforceChannelType(
-			channels.find((channel) => "modmail" === channel.name),
-			ChannelType.GuildText,
-		),
-		advertise: enforceChannelType(
-			channels.find((channel) => "advertise" === channel.name),
-			ChannelType.GuildText,
-		),
-		modlogs: enforceChannelType(
-			channels.find((channel) => channel.name.endsWith("logs")),
-			[ChannelType.GuildText, ChannelType.GuildNews],
+		users: enforceChannelType(
+			channels.find((channel) => channel.name.startsWith("👥")),
+			ChannelType.GuildVoice,
 		),
 		mod:
 			guild.publicUpdatesChannel ||
@@ -118,8 +97,16 @@ export default /** @type {const} */ ({
 				channels.find((channel) => "mod-talk" === channel.name),
 				ChannelType.GuildText,
 			),
+		modlogs: enforceChannelType(
+			channels.find((channel) => channel.name.endsWith("logs")),
+			[ChannelType.GuildText, ChannelType.GuildNews],
+		),
 		admin: enforceChannelType(
 			channels.find((channel) => channel.name.includes("admin")),
+			ChannelType.GuildText,
+		),
+		modmail: enforceChannelType(
+			channels.find((channel) => "modmail" === channel.name),
 			ChannelType.GuildText,
 		),
 		devs: enforceChannelType(
@@ -130,7 +117,7 @@ export default /** @type {const} */ ({
 			channels.find((channel) => channel.name.includes("boosters")),
 			ChannelType.GuildText,
 		),
-		youtube: enforceChannelType(
+		youTube: enforceChannelType(
 			channels.find((channel) => channel.name.includes("youtube")),
 			ChannelType.GuildText,
 		),
@@ -140,9 +127,21 @@ export default /** @type {const} */ ({
 				channels.find((channel) => "general" === channel.name),
 				ChannelType.GuildText,
 			),
-		usersVc: enforceChannelType(
-			channels.find((channel) => channel.name.startsWith("👥")),
-			ChannelType.GuildVoice,
+		suggestions: enforceChannelType(
+			channels.find((channel) => "suggestions" === channel.name),
+			ChannelType.GuildText,
+		),
+		bugs: enforceChannelType(
+			channels.find((channel) => "bugs" === channel.name),
+			ChannelType.GuildText,
+		),
+		bots: enforceChannelType(
+			channels.find((channel) => channel.name.endsWith("bots")),
+			ChannelType.GuildText,
+		),
+		advertise: enforceChannelType(
+			channels.find((channel) => "advertise" === channel.name),
+			ChannelType.GuildText,
 		),
 	},
 });

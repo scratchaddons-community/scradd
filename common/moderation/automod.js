@@ -266,7 +266,7 @@ export function badWordsAllowed(channel) {
 		CONSTANTS.channels.modmail?.id,
 		CONSTANTS.channels.devs?.id || "",
 		CONSTANTS.channels.boosters?.id || "",
-		CONSTANTS.channels.youtube?.id || "",
+		CONSTANTS.channels.youTube?.id || "",
 		undefined,
 	].includes(getBaseChannel(channel)?.id);
 }

@@ -34,7 +34,7 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
 			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.modsPlus,
-			[CONSTANTS.channels.youtube?.id || ""]: COUNTS.modsPlus,
+			[CONSTANTS.channels.youTube?.id || ""]: COUNTS.modsPlus,
 		}[baseChannel.id] || 8
 	);
 }
