@@ -91,8 +91,6 @@ guilds.forEach(async (guild) => {
 		await client.application.commands.set([], guild.id).catch(() => {});
 });
 
-console.log(process.env);
-
 if (process.env.NODE_ENV === "production")
 	http.createServer(async function (request, response) {
 		const url = new URL(request.url || "", `https://${request.headers.host}`);
@@ -100,6 +98,5 @@ if (process.env.NODE_ENV === "production")
 		if (url.pathname === "/cleanDatabaseListeners") {
 			await cleanDatabaseListeners();
 			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
-		}
-		response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+		} else response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
 	}).listen(process.env.PORT ?? 443);
