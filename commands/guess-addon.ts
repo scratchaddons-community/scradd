@@ -1088,7 +1088,6 @@ const info: ChatInputCommand = {
 
 						await interaction.editReply({
 							components: disableComponents(oldMessage.components),
-							embeds: [new EmbedBuilder(oldMessage.embeds[0]?.toJSON())],
 						});
 
 						await oldMessage.reply(
@@ -1204,8 +1203,6 @@ const info: ChatInputCommand = {
 									buttonInteraction.reply(`🛑 Ended the game`),
 									interaction.editReply({
 										components: disableComponents(message.components),
-
-										embeds: [new EmbedBuilder(message.embeds[0]?.toJSON())],
 									}),
 								]);
 
