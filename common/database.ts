@@ -65,13 +65,15 @@ export default class Database<Name extends keyof Databases> {
 			? ([
 					{ record: 0, count: 3395539621, users: "913260298155204619" },
 					{ record: 1, count: 1, users: "771422735486156811" },
-					{ record: 2, count: 100, users: "771422735486156811" },
+					{ record: 2, count: 500, users: "771422735486156811" },
 					{ record: 3, count: 4, users: "765910070222913556" },
 					{ record: 4, count: 172800000, users: "1015260570473214014" },
 					{ record: 5, count: 10, users: "559426966151757824" },
 					{ record: 6, count: 5, users: "771422735486156811" },
 					{ record: 7, count: 600000, users: "771422735486156811" },
 					{ record: 8, count: 1000, users: "771422735486156811" },
+					{ record: 9, count: 3, users: "771422735486156811" },
+					{ record: 10, count: 7, users: "771422735486156811" },
 			  ] as Databases[Name][])
 			: [];
 	}
@@ -172,10 +174,10 @@ export type Databases = {
 		record: NumberSmallerThan<typeof RECORDS.length>;
 		users: string;
 		count: number;
-		channel?: Snowflake;
-		message?: Snowflake;
+		timestamp?: number;
 	};
 	vc_users: { user: Snowflake; timestamp: number; channel: Snowflake };
 	messages: { author: Snowflake; timestamp: number };
 	joins: { user: Snowflake; timestamp: number };
+	chain: { channel: Snowflake; count: number; users: string };
 };

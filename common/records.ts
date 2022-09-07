@@ -1,6 +1,6 @@
 import { User, TextBasedChannel, EmbedBuilder, GuildMember, Message } from "discord.js";
 import { guild } from "../client.js";
-import { convertSnowflakeToDate, millisecondsToTime } from "../lib/numbers.js";
+import { millisecondsToTime } from "../lib/numbers.js";
 import { joinWithAnd } from "../lib/text.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database, { Databases } from "./database.js";
@@ -17,9 +17,19 @@ export default async function breakRecord(
 			throw new ReferenceError("Could not find general channel");
 		})(),
 ) {
-	const oldRecord = recordsDatabase.data.find((record) => RECORDS[record.record]);
+	const oldRecord = recordsDatabase.data.find((record) => index === record.record);
 	if (oldRecord) {
 		if (oldRecord.count >= count) return;
+		recordsDatabase.data = recordsDatabase.data.map((foundRecord) =>
+			foundRecord.record === index
+				? {
+						record: index,
+						count,
+						timestamp: Date.now(),
+						users: users.map((user) => user.id).join("|"),
+				  }
+				: foundRecord,
+		);
 
 		const brokenRecord = RECORDS[index];
 
@@ -47,24 +57,10 @@ export default async function breakRecord(
 							: count.toLocaleString(),
 				},
 			);
-		oldRecord.message && embed.setTimestamp(convertSnowflakeToDate(oldRecord.message));
-
-		const message =
-			channel instanceof Message
-				? await channel.reply({ content: "🎊", embeds: [embed] })
-				: await channel.send({ content: "🎊", embeds: [embed] });
-
-		recordsDatabase.data = recordsDatabase.data.map((foundRecord) =>
-			foundRecord.record === index
-				? {
-						record: index,
-						channel: channel.id,
-						count,
-						message: message.id,
-						users: users.map((user) => user.id).join("|"),
-				  }
-				: foundRecord,
-		);
+		oldRecord.timestamp && embed.setTimestamp(oldRecord.timestamp);
+		channel instanceof Message
+			? await channel.reply({ content: "🎊", embeds: [embed] })
+			: await channel.send({ content: "🎊", embeds: [embed] });
 	} else {
 		recordsDatabase.data = [
 			...recordsDatabase.data,
@@ -93,4 +89,5 @@ export const RECORDS = [
 	{ name: "Longest time in VC", type: "time" },
 	{ name: "Most messages sent in an hour", type: "count" },
 	{ name: "Most new members in a day", type: "count" },
+	{ name: "Longest chain", type: "count" },
 ] as const;

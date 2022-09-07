@@ -38,6 +38,8 @@ const latestMessages = {};
 
 const messagesDatabase = new Database("messages");
 await messagesDatabase.init();
+const chainDatabase = new Database("chain");
+await chainDatabase.init();
 
 /** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
@@ -135,21 +137,22 @@ export default async function event(message) {
 		return;
 	}
 
+	const messages = await message.channel.messages.fetch({ limit: 2 });
+	const first = messages.first(),
+		last = messages.last();
 	if (
 		message.channel.type === ChannelType.GuildText &&
 		message.channel
 			.permissionsFor(message.guild.id)
 			?.has(PermissionsBitField.Flags.SendMessages)
 	) {
-		const messages = await message.channel.messages.fetch({ limit: 2 });
-		const first = messages.first(),
-			last = messages.last();
 		if (first && last) {
-			const same = first.author.id === last.author.id;
 			promises.push(
 				breakRecord(
 					0,
-					same ? [first.author] : [first.author, last.author],
+					first.author.id === last.author.id
+						? [first.author]
+						: [first.author, last.author],
 					+first.createdAt - +last.createdAt,
 					message.channel,
 				),
@@ -254,9 +257,51 @@ export default async function event(message) {
 		)
 	).filter(/** @returns {user is User} */ (user) => !!user);
 
-	const messageCount = Object.values(messagesbyUser).reduce((sum, count) => sum + count, 0);
+	const messageCount = Object.values(messagesbyUser).reduce((sum, count) => sum + count);
 	await breakRecord(6, users, users.length);
 	await breakRecord(8, users, messageCount);
+
+	const currentChain = chainDatabase.data.find(({ channel }) => channel === message.channel.id);
+	if (
+		message.content &&
+		first &&
+		last &&
+		first.content === last.content &&
+		first.author.id !== last.author.id
+	) {
+		chainDatabase.data = currentChain
+			? chainDatabase.data.map((data) =>
+					data.channel === message.channel.id
+						? {
+								channel: data.channel,
+								count: data.count + 1,
+								users: [
+									...new Set([...data.users.split("|"), message.author.id]),
+								].join("|"),
+						  }
+						: data,
+			  )
+			: [
+					...chainDatabase.data,
+					{
+						channel: message.channel.id,
+						count: 2,
+						users: first.author.id + "|" + last.author.id,
+					},
+			  ];
+	} else if (currentChain) {
+		chainDatabase.data = chainDatabase.data.filter(
+			({ channel }) => channel !== message.channel.id,
+		);
+		const users = (
+			await Promise.all(
+				currentChain.users
+					.split("|")
+					.map((user) => client.users.fetch(user).catch(() => {})),
+			)
+		).filter(/** @returns {user is User} */ (user) => !!user);
+		await breakRecord(10, users, currentChain.count, message.channel);
+	}
 
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
@@ -280,7 +325,6 @@ export default async function event(message) {
 	}
 
 	// XP
-
 	const webhook =
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
 		message.webhookId &&

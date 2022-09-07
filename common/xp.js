@@ -169,8 +169,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	);
 
 	const topInHour = Object.entries(hourlyByUser).sort(([, a], [, b]) => b - a)[0];
-	if (topInHour)
-		await breakRecord(2, [await client.users.fetch(topInHour[0])], topInHour[1], thread);
+	if (topInHour) {
+		const user = await client.users.fetch(topInHour[0]).catch(() => {});
+		if (user) await breakRecord(2, [user], topInHour[1], thread);
+	}
 }
 
 const XP_PER_LEVEL = [

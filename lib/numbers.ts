@@ -1,5 +1,3 @@
-import type { Snowflake } from "discord.js";
-
 export function convertBase(
 	value: string,
 	sourceBase: number,
@@ -55,18 +53,6 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 				: ""
 			: "")
 	);
-}
-
-/**
- * Converts a snowflake ID string into a JS Date object.
- *
- * @author [vegeta/snow-stamp](https://github.com/vegeta897/snow-stamp/blob/5f2f9c2/src/convert.js#L1L9)
- */
-export function convertSnowflakeToDate(snowflake: Snowflake) {
-	// Convert snowflake to BigInt to extract timestamp bits
-	// https://discord.com/developers/docs/reference#snowflakes
-	const milliseconds = BigInt(snowflake) >> 22n;
-	return new Date(Number(milliseconds) + 1_420_070_400_000);
 }
 
 /**
