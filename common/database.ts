@@ -112,9 +112,9 @@ export default class Database<Name extends keyof Databases> {
 }
 
 export function cleanDatabaseListeners() {
-	console.log(`cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts)}`);
+	console.log(`Cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts)}`);
 	return Promise.all(Object.values(timeouts).map((info) => info?.callback())).then(
-		() => (timeouts = {}) && console.log("listeners cleaned"),
+		() => (timeouts = {}) && console.log("Listeners cleaned"),
 	);
 }
 
