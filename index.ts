@@ -5,11 +5,13 @@ import url from "url";
 import dotenv from "dotenv";
 
 import { importScripts } from "./lib/files.js";
-import pkg from "./package.json" assert { type: 'json' };
+import pkg from "./package.json" assert { type: "json" };
 import fetch from "node-fetch";
 import { asyncFilter } from "./lib/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import type Command from "./common/types/command";
+import https from "node:https";
+import { cleanDatabaseListeners } from "./common/database.js";
 
 declare global {
 	namespace NodeJS {
@@ -87,3 +89,16 @@ guilds.forEach(async (guild) => {
 	if (guild.id !== process.env.GUILD_ID)
 		await client.application.commands.set([], guild.id).catch(() => {});
 });
+
+if (process.env.NODE_ENV === "production")
+	https
+		.createServer(async function (request, response) {
+			const url = new URL(request.url || "", `http://${request.headers.host}`);
+
+			if ((url.pathname = "/cleanDatabaseListeners")) {
+				await cleanDatabaseListeners();
+				response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
+			}
+			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+		})
+		.listen(443);
