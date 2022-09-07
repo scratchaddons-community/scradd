@@ -18,61 +18,63 @@ const commands =
 
 /** @type {import("../common/types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
-	if (interaction.isButton()) {
-		if (interaction.customId.endsWith("_strike")) {
-			if (!(interaction.member instanceof GuildMember))
-				throw new TypeError("interaction.member is not a GuildMember");
-
-			await getWarns(
-				(data) => interaction.reply(data),
-				interaction.member,
-				interaction.customId.split("_strike")[0],
-			);
-			return;
-		}
-
-		if (interaction.customId.endsWith("_reaction_role")) {
-			if (!(interaction.member instanceof GuildMember))
-				throw new TypeError("interaction.member is not a GuildMember");
-
-			const roleId = interaction.customId.split("_reaction_role")[0];
-			if (!roleId)
-				throw new SyntaxError(
-					"Button customId ends in _reaction_role but no role ID was given",
-				);
-			const role = interaction.member.roles.resolve(roleId);
-			if (role) {
-				await interaction.member.roles.remove(role);
-				await interaction.reply({
-					ephemeral: true,
-					content: `${
-						CONSTANTS.emojis.statuses.yes
-					} Removed ${role.toString()} from you!`,
-				});
-			} else {
-				await interaction.member.roles.add(roleId);
-				await interaction.reply({
-					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${roleId}>!`,
-				});
-			}
-			return;
-		}
-	}
-	if (interaction.isModalSubmit()) {
-		if (interaction.customId.startsWith("guessModal.")) {
-			return await guessAddon(interaction);
-		}
-	}
-	if (!interaction.isCommand()) return;
+	if (!interaction.isRepliable()) return;
 	try {
+		if (interaction.isButton()) {
+			if (interaction.customId.endsWith("_strike")) {
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member is not a GuildMember");
+
+				await getWarns(
+					(data) => interaction.reply(data),
+					interaction.member,
+					interaction.customId.split("_strike")[0],
+				);
+				return;
+			}
+
+			if (interaction.customId.endsWith("_reaction_role")) {
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member is not a GuildMember");
+
+				const roleId = interaction.customId.split("_reaction_role")[0];
+				if (!roleId)
+					throw new SyntaxError(
+						"Button customId ends in _reaction_role but no role ID was given",
+					);
+				const role = interaction.member.roles.resolve(roleId);
+				if (role) {
+					await interaction.member.roles.remove(role);
+					await interaction.reply({
+						ephemeral: true,
+						content: `${
+							CONSTANTS.emojis.statuses.yes
+						} Removed ${role.toString()} from you!`,
+					});
+				} else {
+					await interaction.member.roles.add(roleId);
+					await interaction.reply({
+						ephemeral: true,
+						content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${roleId}>!`,
+					});
+				}
+				return;
+			}
+		}
+		if (interaction.isModalSubmit()) {
+			if (interaction.customId.startsWith("guessModal.")) {
+				return await guessAddon(interaction);
+			}
+		}
+		if (!interaction.isCommand()) return;
+
 		const commandPromise = commands.get(interaction.commandName);
 
 		const command = await commandPromise?.();
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
 
-		const commandType = command.data.toJSON().type;
+		const commandType = command.data.setName(interaction.commandName).toJSON().type;
 
 		if (
 			commandType === ApplicationCommandType.ChatInput &&
