@@ -11,7 +11,6 @@ import { asyncFilter } from "./lib/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import type Command from "./common/types/command";
 import http from "node:http";
-import { cleanDatabaseListeners } from "./common/database.js";
 
 declare global {
 	namespace NodeJS {
@@ -25,8 +24,10 @@ declare global {
 }
 
 dotenv.config();
+
 const { default: client } = await import("./client.js");
 const { default: logError } = await import("./lib/logError.js");
+const { cleanDatabaseListeners } = await import("./common/database.js");
 
 process
 	.on("uncaughtException", (err, origin) => logError(err, origin))
