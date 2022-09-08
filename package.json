@@ -12,8 +12,8 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"dev": "tsc --project tsconfig.json --watch",
 		"build": "tsc --project tsconfig.json",
+		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" --ignore-unknown",
 		"serve": "nodemon . --watch dist",
 		"start": "node ."
