@@ -32,11 +32,7 @@ export const MODMAIL_UNSUPPORTED =
  *
  * @param {import("discord.js").Message} message - Message sent by a user.
  *
- * @returns {Promise<
- * 	(import("discord.js").WebhookMessageOptions & { threadId?: undefined }) &
- * 		(import("discord.js").MessagePayload | import("discord.js").MessageOptions)
- * >}
- *   - Webhook message.
+ * @returns {Promise<import("discord.js").WebhookCreateMessageOptions>} - Webhook message.
  */
 export async function generateModmailMessage(message) {
 	const { files, embeds } = await extractMessageExtremities(message);
@@ -189,7 +185,7 @@ export async function sendOpenedMessage(user) {
 /**
  * @param {EmbedBuilder} confirmEmbed
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
- * @param {(options: import("discord.js").InteractionReplyOptions & import("discord.js").MessageOptions) => Promise<Message>} reply
+ * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message>} reply
  */
 export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 	const confirmId = generateHash("confirm");

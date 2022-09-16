@@ -7,7 +7,7 @@ import {
 	APIInteractionDataResolvedChannel,
 	GuildBasedChannel,
 	Snowflake,
-	WebhookEditMessageOptions,
+	BaseMessageOptions,
 } from "discord.js";
 
 import {
@@ -128,10 +128,10 @@ const info: ChatInputCommand = {
 		const nextId = generateHash("next");
 		const prevId = generateHash("prev");
 
-		const messages: WebhookEditMessageOptions[] = [];
+		const messages: BaseMessageOptions[] = [];
 		let index = 0;
 
-		async function getNextMessage(): Promise<WebhookEditMessageOptions> {
+		async function getNextMessage(): Promise<BaseMessageOptions> {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info

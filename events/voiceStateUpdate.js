@@ -36,7 +36,7 @@ export default async function event(oldState, newState) {
 					? {
 							user: data.user,
 							channel: newState.channel?.id || "",
-							timestamp: Date.now(),
+							time: Date.now(),
 					  }
 					: data,
 			);
@@ -44,12 +44,12 @@ export default async function event(oldState, newState) {
 			vcUsersDatabase.data = vcUsersDatabase.data.filter(
 				(data) => data.user !== newState.member?.id,
 			);
-			const longest = vcUsersDatabase.data.sort((a, b) => a.timestamp - b.timestamp)[0];
+			const longest = vcUsersDatabase.data.sort((a, b) => a.time - b.time)[0];
 			longest?.user === newState.member.id &&
 				(await breakRecord(
-					7,
+					6,
 					[newState.member],
-					Date.now() - longest.timestamp,
+					Date.now() - longest.time,
 					oldState.channel?.type === ChannelType.GuildVoice
 						? oldState.channel
 						: undefined,
@@ -57,7 +57,7 @@ export default async function event(oldState, newState) {
 		} else {
 			vcUsersDatabase.data = [
 				...vcUsersDatabase.data,
-				{ user: newState.member.id, channel: newState.channel?.id, timestamp: Date.now() },
+				{ user: newState.member.id, channel: newState.channel?.id, time: Date.now() },
 			];
 		}
 	} else {

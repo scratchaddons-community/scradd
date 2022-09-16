@@ -10,7 +10,7 @@ import path from "path";
 import Database from "../../../common/database.js";
 import breakRecord from "../../../common/records.js";
 
-const usersDatabase = new Database("joins");
+export const usersDatabase = new Database("joins");
 await usersDatabase.init();
 
 /** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
@@ -33,7 +33,7 @@ export default async function event(member) {
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(guild.memberCount)} member!`,
 	];
 
-	await CONSTANTS.channels.general?.send({
+	await CONSTANTS.channels.welcome?.send({
 		content: greetings[Math.floor(Math.random() * greetings.length)],
 		files: `${guild.memberCount}`.includes("87")
 			? [
@@ -75,13 +75,13 @@ export default async function event(member) {
 	});
 
 	usersDatabase.data = [
-		{ user: member.id, timestamp: Date.now() },
-		...usersDatabase.data.filter(({ timestamp }) => timestamp + 86_400_000 > Date.now()),
+		{ user: member.id, time: Date.now() },
+		...usersDatabase.data.filter(({ time }) => time + 86_400_000 > Date.now()),
 	];
 	const users = (
 		await Promise.all(
 			usersDatabase.data.map(({ user }) => client.users.fetch(user).catch(() => {})),
 		)
 	).filter(/** @returns {user is User} */ (user) => !!user);
-	await breakRecord(9, users, users.length);
+	await breakRecord(8, users, users.length);
 }

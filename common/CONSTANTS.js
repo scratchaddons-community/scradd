@@ -22,6 +22,8 @@ export default /** @type {const} */ ({
 	emojis: {
 		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
 		autoreact: {
+			jeffalo: "<:jeffalo:1019771285850554419>",
+			tw: "<:tw:1019771807450026084>",
 			e: "<:e_:939986562937151518>",
 			griffpatch: "<:griffpatch:938441399936909362>",
 			sus: "<:sus:938548233385414686>",
@@ -66,6 +68,7 @@ export default /** @type {const} */ ({
 		mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
 		dev: roles.find((role) => role.name.toLowerCase().includes("devs")),
 		epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
+		weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 	},
 	urls: {
 		usercountJson: "https://scratchaddons.com/usercount.json",
@@ -80,67 +83,67 @@ export default /** @type {const} */ ({
 	webhookName: "scradd-webhook",
 	channels: {
 		announcements: enforceChannelType(
-			channels.find((channel) => "announcements" === channel.name),
+			channels.find((channel) => "announcements" === channel?.name),
 			ChannelType.GuildNews,
 		),
 		board: enforceChannelType(
-			channels.find((channel) => channel.name.endsWith("board")),
+			channels.find((channel) => !!channel?.name.endsWith("board")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
 		),
 		users: enforceChannelType(
-			channels.find((channel) => channel.name.startsWith("👥")),
+			channels.find((channel) => !!channel?.name.startsWith("👥")),
 			ChannelType.GuildVoice,
 		),
 		mod:
 			guild.publicUpdatesChannel ||
 			enforceChannelType(
-				channels.find((channel) => "mod-talk" === channel.name),
+				channels.find((channel) => "mod-talk" === channel?.name),
 				ChannelType.GuildText,
 			),
 		modlogs: enforceChannelType(
-			channels.find((channel) => channel.name.endsWith("logs")),
+			channels.find((channel) => !!channel?.name.endsWith("logs")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
 		),
 		admin: enforceChannelType(
-			channels.find((channel) => channel.name.includes("admin")),
+			channels.find((channel) => !!channel?.name.includes("admin")),
 			ChannelType.GuildText,
 		),
 		modmail: enforceChannelType(
-			channels.find((channel) => "modmail" === channel.name),
+			channels.find((channel) => "modmail" === channel?.name),
 			ChannelType.GuildText,
 		),
 		devs: enforceChannelType(
-			channels.find((channel) => channel.name.includes("devs")),
+			channels.find((channel) => !!channel?.name.includes("devs")),
 			ChannelType.GuildText,
 		),
 		boosters: enforceChannelType(
-			channels.find((channel) => channel.name.includes("boosters")),
+			channels.find((channel) => !!channel?.name.includes("boosters")),
 			ChannelType.GuildText,
 		),
 		youTube: enforceChannelType(
-			channels.find((channel) => channel.name.includes("youtube")),
+			channels.find((channel) => !!channel?.name.includes("youtube")),
 			ChannelType.GuildText,
 		),
-		general:
+		welcome:
 			guild.systemChannel ||
 			enforceChannelType(
-				channels.find((channel) => "general" === channel.name),
+				channels.find((channel) => "welcome" === channel?.name),
 				ChannelType.GuildText,
 			),
-		suggestions: enforceChannelType(
-			channels.find((channel) => "suggestions" === channel.name),
+		general: enforceChannelType(
+			channels.find((channel) => "general" === channel?.name),
 			ChannelType.GuildText,
 		),
-		bugs: enforceChannelType(
-			channels.find((channel) => "bugs" === channel.name),
+		suggestions: enforceChannelType(
+			channels.find((channel) => "suggestions" === channel?.name),
 			ChannelType.GuildText,
 		),
 		bots: enforceChannelType(
-			channels.find((channel) => channel.name.endsWith("bots")),
+			channels.find((channel) => !!channel?.name.endsWith("bots")),
 			ChannelType.GuildText,
 		),
 		advertise: enforceChannelType(
-			channels.find((channel) => "advertise" === channel.name),
+			channels.find((channel) => "advertise" === channel?.name),
 			ChannelType.GuildText,
 		),
 	},
@@ -149,7 +152,7 @@ export default /** @type {const} */ ({
 /**
  * @template {ChannelType} T
  *
- * @param {import("discord.js").NonThreadGuildBasedChannel | undefined} channel
+ * @param {import("discord.js").NonThreadGuildBasedChannel | undefined | null} channel
  * @param {T | T[]} type
  *
  * @returns {(import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined}

@@ -28,6 +28,7 @@ export default async function event(oldChannel, newChannel) {
 					[ChannelType.GuildCategory]: " category",
 					[ChannelType.GuildNews]: "n announcement",
 					[ChannelType.GuildStageVoice]: " stage",
+					[ChannelType.GuildForum]: " forum",
 				}[newChannel.type] +
 				" channel",
 		);

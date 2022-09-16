@@ -3,6 +3,7 @@ import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
 import breakRecord from "../../../common/records.js";
+import { usersDatabase } from "./add.js";
 
 /** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
@@ -36,7 +37,7 @@ export default async function event(member) {
 	];
 
 	const promises = [
-		CONSTANTS.channels.general?.send(
+		CONSTANTS.channels.welcome?.send(
 			(banned
 				? bans[Math.floor(Math.random() * bans.length)]
 				: byes[Math.floor(Math.random() * byes.length)]) || "",
@@ -46,6 +47,13 @@ export default async function event(member) {
 		}),
 	];
 	if (banned && member.joinedAt)
-		promises.push(breakRecord(4, [member], Date.now() - +member.joinedAt));
+		promises.push(breakRecord(3, [member], Date.now() - +member.joinedAt));
+
+	usersDatabase.data = [
+		...usersDatabase.data.filter(
+			({ user, time }) => user === member.id || time + 86_400_000 > Date.now(),
+		),
+	];
+
 	await Promise.all(promises);
 }

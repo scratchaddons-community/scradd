@@ -22,7 +22,7 @@ export default async function event(oldEvent, newEvent) {
 		);
 
 	if (oldEvent.description !== newEvent.description)
-		log(`📆 Event ${oldEvent.name}’s description was changed!`, "server", {
+		log(`📆 Event ${oldEvent.name}’s description was changed!`, "voice", {
 			files: [
 				new AttachmentBuilder(
 					Buffer.from(

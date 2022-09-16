@@ -5,6 +5,7 @@ import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
 import breakRecord from "../../../common/records.js";
+import { PermissionsBitField } from "discord.js";
 
 /** @type {import("../../../common/types/event").default<"messageReactionAdd">} */
 export default async function event(reaction, user) {
@@ -13,7 +14,7 @@ export default async function event(reaction, user) {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
 	// Ignore other servers
-	if (message.guild?.id !== process.env.GUILD_ID) return;
+	if (!message.inGuild() || message.guild.id !== process.env.GUILD_ID) return;
 
 	if (user.partial) user = await user.fetch();
 
@@ -68,10 +69,15 @@ export default async function event(reaction, user) {
 		await updateBoard(message);
 	}
 
-	await breakRecord(
-		5,
-		[message.author],
-		message.reactions.valueOf().reduce((acc, reaction) => acc + reaction.count, 0),
-		message,
-	);
+	if (
+		message.channel
+			.permissionsFor(message.guild.id)
+			?.has(PermissionsBitField.Flags.SendMessages)
+	)
+		await breakRecord(
+			4,
+			[message.author],
+			message.reactions.valueOf().reduce((acc, reaction) => acc + reaction.count, 0),
+			message,
+		);
 }

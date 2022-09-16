@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	PermissionsBitField,
 	User,
+	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import warn from "../../common/moderation/warns.js";
@@ -30,6 +31,7 @@ import { asyncFilter } from "../../lib/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import breakRecord from "../../common/records.js";
 import Database from "../../common/database.js";
+import logError from "../../lib/logError.js";
 
 const { GUILD_ID } = process.env;
 
@@ -43,7 +45,7 @@ await chainDatabase.init();
 
 /** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
-	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
+	if (message.flags.has("Ephemeral")) return;
 	const promises = [];
 
 	let reactions = 0;
@@ -192,6 +194,7 @@ export default async function event(message) {
 	}
 
 	// #upcoming-updates
+	// TODO forum
 	if (message.channel.id === "806605006072709130") {
 		promises.push(
 			message
@@ -238,12 +241,12 @@ export default async function event(message) {
 
 	if (messagesDatabase.message?.id !== message.id) {
 		messagesDatabase.data = [
-			{ author: message.author.id, timestamp: Date.now() },
-			...messagesDatabase.data.filter(({ timestamp }) => timestamp + 3_600_000 > Date.now()),
+			{ author: message.author.id, time: Date.now() },
+			...messagesDatabase.data.filter(({ time }) => time + 3_600_000 > Date.now()),
 		];
 	}
 
-	const messagesbyUser = messagesDatabase.data.reduce(
+	const messagesByUser = messagesDatabase.data.reduce(
 		(acc, gain) => {
 			acc[gain.author] ??= 0;
 			acc[gain.author] += 1;
@@ -255,13 +258,13 @@ export default async function event(message) {
 	);
 	const users = (
 		await Promise.all(
-			Object.keys(messagesbyUser).map((user) => client.users.fetch(user).catch(() => {})),
+			Object.keys(messagesByUser).map((user) => client.users.fetch(user).catch(() => {})),
 		)
 	).filter(/** @returns {user is User} */ (user) => !!user);
 
-	const messageCount = Object.values(messagesbyUser).reduce((sum, count) => sum + count);
-	await breakRecord(6, users, users.length);
-	await breakRecord(8, users, messageCount);
+	const messageCount = Object.values(messagesByUser).reduce((sum, count) => sum + count);
+	await breakRecord(5, users, users.length);
+	await breakRecord(7, users, messageCount);
 
 	const currentChain = chainDatabase.data.find(({ channel }) => channel === message.channel.id);
 	if (
@@ -302,7 +305,7 @@ export default async function event(message) {
 					.map((user) => client.users.fetch(user).catch(() => {})),
 			)
 		).filter(/** @returns {user is User} */ (user) => !!user);
-		await breakRecord(10, users, currentChain.count, message.channel);
+		await breakRecord(9, users, currentChain.count, message.channel);
 	}
 
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
@@ -331,6 +334,20 @@ export default async function event(message) {
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
 		message.webhookId &&
 		(await message.fetchWebhook()).applicationId === client.application.id;
+	if (message.channel.id === "1018702459776028782") {
+		const embed = message?.embeds[0];
+		if (!embed?.description) return;
+		const userId = embed.description.match(MessageMentions.UsersPattern)?.[1];
+
+		if (userId)
+			promises.push(
+				client.users
+					.fetch(userId)
+					.then(giveXp)
+					.catch((error) => logError(error, "messageCreate")),
+			);
+	}
+
 	if (
 		process.env.NODE_ENV !== "production" ||
 		!message.author.bot ||
@@ -380,7 +397,8 @@ export default async function event(message) {
 		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
-		const bot = 1 + +(!!message.interaction || /^(([crm]!|!d)\s*|=)\w+/.test(message.content)); // todo: update this
+		const bot =
+			1 + +(message.interaction || /^(r!|<@323630372531470346>)\s*\w+/.test(message.content));
 
 		promises.push(
 			giveXp(
@@ -416,6 +434,31 @@ export default async function event(message) {
 
 	// Autoreactions start here. Don’t react to users who disabled the setting.
 
+	const REACTION_CAP = 2;
+
+	/**
+	 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
+	 *
+	 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
+	 */
+	function react(emoji) {
+		if (reactions > REACTION_CAP) return;
+		reactions++;
+		const promise = message.react(emoji).catch(console.error);
+		promises.push(promise);
+		return promise;
+	}
+
+	if (
+		[
+			MessageType.GuildBoost,
+			MessageType.GuildBoostTier1,
+			MessageType.GuildBoostTier2,
+			MessageType.GuildBoostTier3,
+		].includes(message.type)
+	)
+		react("🥔");
+
 	if (
 		message.interaction ||
 		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(
@@ -449,21 +492,6 @@ export default async function event(message) {
 		).test(content);
 	}
 
-	const REACTION_CAP = 2;
-
-	/**
-	 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
-	 *
-	 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
-	 */
-	function react(emoji) {
-		if (reactions > REACTION_CAP) return;
-		reactions++;
-		const promise = message.react(emoji).catch(console.error);
-		promises.push(promise);
-		return promise;
-	}
-
 	if (includes("dango")) react("🍡");
 	if (includes(/av[ao]cado/)) react("🥑");
 
@@ -473,6 +501,10 @@ export default async function event(message) {
 	if (content.includes("quack") || includes("duck")) react("🦆");
 	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
+	if (includes(/jef+[oa]l+o/)) react(CONSTANTS.emojis.autoreact.jeffalo);
+	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
+		react(CONSTANTS.emojis.autoreact.tw);
+	if (includes("mee6")) react("🤮");
 	if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
 	if (includes("bob", { plural: false })) react(CONSTANTS.emojis.autoreact.bob);
 	if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);

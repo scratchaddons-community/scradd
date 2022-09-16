@@ -115,7 +115,7 @@ async function getWarnsForMember(user) {
 }
 
 /**
- * @param {(options: string | import("discord.js").InteractionReplyOptions) => Promise<import("discord.js").InteractionResponse>} reply
+ * @param {(options: import("discord.js").InteractionReplyOptions) => Promise<import("discord.js").InteractionResponse>} reply
  * @param {import("discord.js").GuildMember} interactor
  * @param {string} [filter]
  */

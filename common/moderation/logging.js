@@ -10,7 +10,7 @@ export const LOG_GROUPS = /** @type {const} */ ([
 /**
  * @param {string} content
  * @param {typeof LOG_GROUPS[number]} group
- * @param {Pick<import("discord.js").MessageOptions, "embeds" | "files" | "components">} [extra]
+ * @param {Pick<import("discord.js").BaseMessageOptions, "embeds" | "files" | "components">} [extra]
  */
 export default async function log(content, group, extra = {}) {
 	const thread = await getLoggingThread(group);

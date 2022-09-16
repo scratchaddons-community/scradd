@@ -15,7 +15,6 @@ import Database from "./database.js";
 import { censor } from "./moderation/automod.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import giveXp from "./xp.js";
-import breakRecord from "./records.js";
 
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
@@ -48,7 +47,7 @@ await boardDatabase.init();
  * @param {import("./database").Databases["board"] | import("discord.js").Message} info
  * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
  *
- * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
+ * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
  */
 export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
@@ -56,7 +55,7 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 	/**
 	 * @param {import("discord.js").Message} message
 	 *
-	 * @returns {Promise<import("discord.js").WebhookEditMessageOptions | undefined>}
+	 * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
 	 */
 	async function messageToBoardData(message) {
 		const { files, embeds } = await extractMessageExtremities(message, false);
@@ -213,10 +212,6 @@ export async function updateBoard(message) {
 
 	const top = boardDatabase.data.sort((a, b) => b.reactions - a.reactions);
 	top.splice(5);
-
-	if (top[0]?.source === message.id)
-		promises.push(breakRecord(3, [message.author], top[0].reactions, message));
-
 	promises.push(
 		Promise.all(
 			top.map(async ({ onBoard }) => {

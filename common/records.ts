@@ -1,4 +1,4 @@
-import { User, TextBasedChannel, EmbedBuilder, GuildMember, Message } from "discord.js";
+import { User, GuildTextBasedChannel, EmbedBuilder, GuildMember, Message } from "discord.js";
 import { guild } from "../client.js";
 import { millisecondsToTime } from "../lib/numbers.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -12,7 +12,7 @@ export default async function breakRecord(
 	index: Databases["records"]["record"],
 	users: (User | GuildMember)[],
 	count: number,
-	channel: TextBasedChannel | Message = CONSTANTS.channels.general ||
+	channel: GuildTextBasedChannel | Message = CONSTANTS.channels.general ||
 		(() => {
 			throw new ReferenceError("Could not find general channel");
 		})(),
@@ -25,7 +25,7 @@ export default async function breakRecord(
 				? {
 						record: index,
 						count,
-						timestamp: Date.now(),
+						time: Date.now(),
 						users: users.map((user) => user.id).join("|"),
 				  }
 				: foundRecord,
@@ -57,7 +57,7 @@ export default async function breakRecord(
 							: count.toLocaleString(),
 				},
 			);
-		oldRecord.timestamp && embed.setTimestamp(oldRecord.timestamp);
+		oldRecord.time && embed.setTimestamp(oldRecord.time);
 		channel instanceof Message
 			? await channel.reply({ content: "🎊", embeds: [embed] })
 			: await channel.send({ content: "🎊", embeds: [embed] });
@@ -65,6 +65,7 @@ export default async function breakRecord(
 		recordsDatabase.data = [
 			...recordsDatabase.data,
 			{
+				time: Date.now(),
 				record: index,
 				count,
 				users: users.map((user) => user.id).join("|"),
@@ -77,7 +78,6 @@ export const RECORDS = [
 	{ name: "Most dead channel", type: "time" },
 	{ name: "Most people in VC", type: "count" },
 	{ name: "Most XP in an hour", type: "count" },
-	{ name: "Most potatoed message", type: "count" },
 	{
 		name: `${
 			guild.nameAcronym.length === 2 ? guild.nameAcronym : guild.name

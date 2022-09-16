@@ -1,12 +1,17 @@
-import { SlashCommandBuilder, Colors, escapeMarkdown, cleanContent } from "discord.js";
+import {
+	SlashCommandBuilder,
+	Colors,
+	escapeMarkdown,
+	cleanContent,
+	GuildMember,
+	EmbedBuilder,
+	Message,
+	Snowflake,
+	User,
+} from "discord.js";
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-
-import SuggestionChannel, {
-	Answer,
-	getUserFromFeedback,
-	RATELIMT_MESSAGE,
-} from "../common/feedback.js";
+import giveXp from "../common/xp.js";
 import { escapeLinks } from "../lib/markdown.js";
 import { getAllMessages, paginate, reactAll } from "../lib/discord.js";
 import { truncateText } from "../lib/text.js";
@@ -25,7 +30,7 @@ export const SUGGESTION_EMOJIS: [string, string][] = [
 	["749005259682086964", "749005284403445790"],
 ];
 
-const ANSWERS: Answer[] = [
+const ANSWERS = [
 	{ name: "Unanswered", color: Colors.Greyple, description: "This hasn’t yet been answered" },
 	{
 		color: Colors.Green,
@@ -68,14 +73,57 @@ const ANSWERS: Answer[] = [
 		description: "We don’t want to add this for some reason",
 		name: "Rejected",
 	},
-];
+] as const;
 
-const channel =
-	CONSTANTS.channels.suggestions && new SuggestionChannel(CONSTANTS.channels.suggestions);
+const RATELIMIT_TIMEOUT = 3_000;
+
+const RATELIMT_MESSAGE =
+	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
+
+const cooldowns: { [key: Snowflake]: number } = {};
+const COOLDOWN = 60_000;
+
+/**
+ * Get the member who made a suggestion.
+ *
+ * @param message - The message to get the member from.
+ *
+ * @returns The member who made the suggestion.
+ */
+async function getUserFromSuggestion(message: Message<true>): Promise<GuildMember | User> {
+	const author =
+		message.author.id === CONSTANTS.robotop
+			? message.embeds[0]?.footer?.text.split(": ")[1]
+			: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups?.userId;
+
+	if (author) {
+		const fetchedMember =
+			(await guild?.members.fetch(author).catch(() => undefined)) ||
+			(await client?.users.fetch(author).catch(() => undefined));
+		if (fetchedMember) return fetchedMember;
+	}
+
+	return message.member ?? message.author;
+}
+
+function parseSuggestionTitle(title: string) {
+	const segments = title.split(" | ");
+	const found = ANSWERS.find(({ name }) => name === segments[0]);
+	if (found) {
+		segments.shift();
+		return { answer: found, name: segments.join(" | ") };
+	} else {
+		const found = ANSWERS.find(({ name }) => name === segments.at(-1));
+		segments.pop();
+		return { answer: found || ANSWERS[0], name: segments.join(" | ") };
+	}
+}
 
 const CHANNEL_TAG = `#${CONSTANTS.channels.suggestions?.name}`;
 
-const info: ChatInputCommand | undefined = channel && {
+const minDescLength = 30 * +(process.env.NODE_ENV === "production");
+
+const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription(`Commands to manage suggestions in ${CHANNEL_TAG}`)
 		.addSubcommand((subcommand) =>
@@ -94,7 +142,7 @@ const info: ChatInputCommand | undefined = channel && {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(true)
-						.setMinLength(30),
+						.setMinLength(minDescLength),
 				),
 		)
 		.addSubcommand((subcommand) =>
@@ -138,7 +186,7 @@ const info: ChatInputCommand | undefined = channel && {
 						.setName("suggestion")
 						.setDescription("A detailed description of the suggestion")
 						.setRequired(false)
-						.setMinLength(30),
+						.setMinLength(minDescLength),
 				),
 		)
 
@@ -171,6 +219,8 @@ const info: ChatInputCommand | undefined = channel && {
 		),
 
 	async interaction(interaction) {
+		if (!CONSTANTS.channels.suggestions)
+			throw new ReferenceError("Could not find suggestions channel!");
 		const command = interaction.options.getSubcommand(true);
 
 		const message =
@@ -188,30 +238,124 @@ const info: ChatInputCommand | undefined = channel && {
 
 		switch (command) {
 			case "create": {
-				const success = await channel.createMessage(interaction, {
-					description: interaction.options.getString("suggestion", true),
-					title: interaction.options.getString("title", true),
+				const author = interaction.member;
+
+				if (!(author instanceof GuildMember))
+					throw new TypeError("interaction.member must be a GuildMember");
+
+				const title = escapeMarkdown(interaction.options.getString("title", true));
+
+				const embed = new EmbedBuilder()
+					.setColor(ANSWERS[0].color)
+					.setAuthor({
+						iconURL: author.displayAvatarURL(),
+						name: author.displayName ?? interaction.user.username,
+					})
+					.setTitle(title)
+					.setDescription(interaction.options.getString("suggestion", true))
+					.setFooter({ text: ANSWERS[0].name });
+
+				if ((cooldowns[author.id] || 0) > Date.now()) {
+					return await interaction.reply({
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} You can only post a suggestion every ${Math.max(
+							1,
+							Math.round(COOLDOWN / 1_000),
+						)} seconds. Please wait ${Math.max(
+							1,
+							Math.round(((cooldowns[author.id] || 0) - Date.now()) / 1_000),
+						)} seconds before posting another suggestion.`,
+						ephemeral: true,
+					});
+				}
+				cooldowns[author.id] = Date.now() + COOLDOWN;
+				const message = await CONSTANTS.channels.suggestions.send({ embeds: [embed] });
+				const thread = await message.startThread({
+					name: `${title ?? ""} | Unanswered`,
+					reason: `Suggestion by ${interaction.user.tag}`,
 				});
 
-				if (success) {
-					await Promise.all([
-						reactAll(success, SUGGESTION_EMOJIS[0] || []),
-						interaction.reply({
-							content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
-								success.thread?.toString() ?? ""
-							}. If you made any mistakes, you can fix them with \`/suggestion edit\`.`,
-							ephemeral: true,
-						}),
-					]);
-				}
+				await Promise.all([
+					thread.members.add(interaction.user.id),
+					reactAll(message, SUGGESTION_EMOJIS[0] || []),
+					giveXp(author),
+					interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.yes} Suggestion posted! See ${
+							message.thread?.toString() ?? ""
+						}. If you made any mistakes, you can fix them with \`/suggestion edit\`.`,
+						ephemeral: true,
+					}),
+				]);
 
 				break;
 			}
 			case "answer": {
 				const answer = interaction.options.getString("answer", true);
-				const result = await channel.answerSuggestion(interaction, answer, ANSWERS);
-				if (result) {
+				if (
+					!interaction.channel?.isThread() ||
+					interaction.channel.parent?.id !== CONSTANTS.channels.suggestions?.id
+				) {
 					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} This command can only be used in threads in ${CONSTANTS.channels.suggestions}.`,
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member must be a GuildMember");
+
+				if (
+					!CONSTANTS.roles.dev ||
+					!interaction.member.roles.resolve(CONSTANTS.roles.dev.id)
+				) {
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to run this command!`,
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				const { name, answer: oldAnswer } = parseSuggestionTitle(interaction.channel.name);
+				if (oldAnswer.name === answer) {
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} That's already the answer!`,
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				const promises = [
+					Promise.race([
+						new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
+						interaction.channel.setName(
+							(name ? name + " | " : "") + answer,
+							`Suggestion answered by ${interaction.user.tag}`,
+						),
+					]),
+				];
+
+				if (starter && starter?.author.id === client.user?.id) {
+					const embed = starter.embeds[0]
+						? EmbedBuilder.from(starter.embeds[0])
+						: new EmbedBuilder();
+
+					embed
+						.setColor(
+							ANSWERS.find(({ name }) => answer === name)?.color ?? ANSWERS[0].color,
+						)
+						.setFooter({ text: answer });
+
+					promises.push(starter.edit({ embeds: [embed] }));
+				}
+
+				promises.push(
+					interaction.reply({
 						content:
 							`${
 								CONSTANTS.emojis.statuses.yes
@@ -219,34 +363,95 @@ const info: ChatInputCommand | undefined = channel && {
 								answer,
 							)}**! *${escapeMarkdown(
 								ANSWERS.find(({ name }) => name === answer)?.description || "",
-							)}*.` + (result === "ratelimit" ? "\n" + RATELIMT_MESSAGE : ""),
+							)}*.` +
+							(interaction.channel.name.startsWith(answer + " |")
+								? ""
+								: "\n" + RATELIMT_MESSAGE),
 
 						ephemeral: false,
-					});
-				}
+					}),
+				);
 
+				await Promise.all(promises);
 				break;
 			}
 			case "edit": {
-				const result = await channel.editSuggestion(interaction, {
-					body: interaction.options.getString("report"),
-					title: interaction.options.getString("title"),
-				});
-				const starter =
-					interaction.channel?.isThread() &&
-					(await interaction.channel.fetchStarterMessage());
-				if (result) {
+				const body = interaction.options.getString("suggestion"),
+					title = escapeMarkdown(interaction.options.getString("title") ?? "");
+
+				if (
+					!interaction.channel?.isThread() ||
+					interaction.channel.parent?.id !== CONSTANTS.channels.suggestions?.id
+				) {
 					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} This command may only be used in threads in ${CONSTANTS.channels.suggestions}.`,
+						ephemeral: true,
+					});
+
+					return false;
+				}
+
+				const starterMessage = await interaction.channel
+					.fetchStarterMessage()
+					.catch(() => {});
+
+				if (!starterMessage || starterMessage.author.id !== client.user?.id) {
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} Cannot edit this suggestion.`,
+						ephemeral: true,
+					});
+
+					return false;
+				}
+				const user = await getUserFromSuggestion(starterMessage);
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member must be a GuildMember");
+
+				const isMod =
+					CONSTANTS.roles.mod && interaction.member.roles.resolve(CONSTANTS.roles.mod.id);
+				if (interaction.user.id !== user?.id && (!isMod || (isMod && body))) {
+					await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to use this command.`,
+						ephemeral: true,
+					});
+
+					return false;
+				}
+
+				const embed = starterMessage.embeds[0]
+					? EmbedBuilder.from(starterMessage.embeds[0])
+					: new EmbedBuilder();
+
+				if (body) embed.setDescription(body);
+
+				const { answer } = parseSuggestionTitle(interaction.channel.name);
+
+				await Promise.all([
+					Promise.race([
+						interaction.channel.setName(
+							(title || embed.data.title) + " | " + answer.name,
+							"Suggestion edited",
+						),
+						new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
+					]),
+					starterMessage.edit({
+						embeds: [embed.setTitle(title || embed.data.title || "")],
+					}),
+					interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.yes} Successfully edited suggestion!${
-							result === "ratelimit" ? " " + RATELIMT_MESSAGE : ""
+							title && (await interaction.channel.fetch()).name.endsWith(title)
+								? " " + RATELIMT_MESSAGE
+								: ""
 						}`,
 
-						ephemeral: !(
-							starter &&
-							interaction.user.id === (await getUserFromFeedback(starter)).id
-						),
-					});
-				}
+						ephemeral:
+							interaction.user.id ===
+							(
+								await getUserFromSuggestion(starterMessage)
+							).id,
+					}),
+				]);
+
 				break;
 			}
 			case "get-top": {
@@ -254,7 +459,7 @@ const info: ChatInputCommand | undefined = channel && {
 				const requestedAnswer = interaction.options.getString("answer");
 
 				await interaction.deferReply();
-				const unfiltered = await getAllMessages(channel.channel);
+				const unfiltered = await getAllMessages(CONSTANTS.channels.suggestions);
 				// todo: asyncFilter
 				const all = (
 					await Promise.all(
@@ -270,14 +475,13 @@ const info: ChatInputCommand | undefined = channel && {
 
 							if (typeof count !== "number") return;
 
-							const answer =
-								message.thread?.name.split(" | ")[1]?.trim() ??
-								ANSWERS[0]?.name ??
-								"";
+							const answer = message.thread
+								? parseSuggestionTitle(message.thread.name).answer
+								: ANSWERS[0];
 
 							if (
 								requestedAnswer &&
-								answer.toLowerCase() !== requestedAnswer.toLowerCase()
+								answer.name.toLowerCase() !== requestedAnswer.toLowerCase()
 							)
 								return;
 							const embed = message.embeds[0];
@@ -287,11 +491,11 @@ const info: ChatInputCommand | undefined = channel && {
 									cleanContent(embed?.description, message.channel)) ??
 								(embed?.image?.url ? embed?.image?.url : message.content);
 
-							const author = await getUserFromFeedback(message);
+							const author = await getUserFromSuggestion(message);
 
 							if (requestedUser && author?.id !== requestedUser?.id) return;
 							return {
-								answer,
+								answer: answer.name,
 								author,
 								count,
 								url: message.url,

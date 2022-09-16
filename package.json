@@ -1,6 +1,6 @@
 {
 	"name": "scradd",
-	"version": "2.0.0-prerelease",
+	"version": "2.0.0",
 	"private": true,
 	"description": "Custom Discord bot for the Scratch Addons server.",
 	"homepage": "https://discord.gg/FPv957V6SD",
@@ -43,7 +43,7 @@
 		"typescript": "4.8.3"
 	},
 	"engines": {
-		"node": "v16.17.0",
+		"node": "16.17.0",
 		"npm": "8.13.2"
 	}
 }

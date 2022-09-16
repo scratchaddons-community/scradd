@@ -32,6 +32,7 @@ export default class Database<Name extends keyof Databases> {
 	name: Name;
 	message: Message<true> | undefined;
 	#data: Databases[Name][] | undefined;
+	#extra: string | undefined;
 	constructor(name: Name) {
 		if (contructed.includes(name))
 			throw new RangeError(
@@ -71,11 +72,13 @@ export default class Database<Name extends keyof Databases> {
 					{ record: 5, count: 10, users: "559426966151757824" },
 					{ record: 6, count: 5, users: "771422735486156811" },
 					{ record: 7, count: 600000, users: "771422735486156811" },
-					{ record: 8, count: 1000, users: "771422735486156811" },
+					{ record: 8, count: 50, users: "771422735486156811" },
 					{ record: 9, count: 3, users: "771422735486156811" },
 					{ record: 10, count: 7, users: "771422735486156811" },
 			  ] as Databases[Name][])
 			: [];
+
+		this.#extra = this.message.content.split("\n")[5];
 	}
 
 	get data() {
@@ -86,26 +89,62 @@ export default class Database<Name extends keyof Databases> {
 	set data(content) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
+		this.#queueWrite();
+	}
+
+	get extra() {
+		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.extra`");
+		return this.#extra;
+	}
+	set extra(content) {
+		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
+		this.#extra = content;
+		this.#queueWrite();
+	}
+
+	#queueWrite() {
+		if (!this.message)
+			throw new ReferenceError(
+				"Must call `.init()` before reading or setting `.data` or `.extra`",
+			);
+
 		const timeoutId = timeouts[this.message.id];
-		const files = content.length
-			? [
-					new AttachmentBuilder(Buffer.from(papaparse.unparse(content), "utf-8"), {
-						name: this.name + ".csv",
-					}),
-			  ]
-			: [];
 
 		const callback = (): Promise<Message<true>> => {
 			if (!this.message)
-				throw new ReferenceError("Must call `.init()` before setting `.data`");
-			const promise = this.message.edit({ files }).catch(async () => {
-				databases[this.name] = undefined;
-				await this.init();
-				return callback();
-			});
+				throw new ReferenceError(
+					"Must call `.init()` before reading or setting `.data` or `.extra`",
+				);
+
+			const files = this.#data?.length
+				? [
+						new AttachmentBuilder(Buffer.from(papaparse.unparse(this.#data), "utf-8"), {
+							name: this.name + ".csv",
+						}),
+				  ]
+				: [];
+			const messageContent = this.message.content.split("\n");
+			messageContent[3] = "";
+			if (this.#extra) {
+				messageContent[4] = "Extra misc info:";
+				messageContent[5] = this.#extra;
+			} else {
+				messageContent[4] = "";
+				messageContent[5] = "";
+			}
+
+			const promise = this.message
+				.edit({ content: messageContent.join("\n").trim(), files })
+				.catch(async () => {
+					databases[this.name] = undefined;
+					await this.init();
+					return callback();
+				});
+
 			timeouts[this.message.id] = undefined;
 			return promise;
 		};
+
 		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
 	}
@@ -136,7 +175,7 @@ export type Databases = {
 	warn: {
 		/** The ID of the user who was warned. */
 		user: Snowflake;
-		/** The timestamp when this warn expires. */
+		/** The time when this warn expires. */
 		expiresAt: number;
 		/** The ID of the message in #mod-log with more information. */
 		info: Snowflake;
@@ -144,7 +183,7 @@ export type Databases = {
 	mute: {
 		/** The ID of the user who was muted. */
 		user: Snowflake;
-		/** The timestamp when this mute is no longer taken into account when calculating future mute times. */
+		/** The time when this mute is no longer taken into account when calculating future mute times. */
 		expiresAt: number;
 	};
 	xp: {
@@ -170,17 +209,17 @@ export type Databases = {
 		user: Snowflake;
 		/** How much XP they gained. */
 		xp: number;
-		/** The timestamp when they gained it at. */
-		timestamp: number;
+		/** The time when they gained it at. */
+		time: number;
 	};
 	records: {
 		record: NumberSmallerThan<typeof RECORDS.length>;
 		users: string;
 		count: number;
-		timestamp?: number;
+		time: number;
 	};
-	vc_users: { user: Snowflake; timestamp: number; channel: Snowflake };
-	messages: { author: Snowflake; timestamp: number };
-	joins: { user: Snowflake; timestamp: number };
+	vc_users: { user: Snowflake; time: number; channel: Snowflake };
+	messages: { author: Snowflake; time: number };
+	joins: { user: Snowflake; time: number };
 	chain: { channel: Snowflake; count: number; users: string };
 };

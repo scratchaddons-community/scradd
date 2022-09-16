@@ -122,9 +122,13 @@ const info: ChatInputCommand = {
 									.map((role) => {
 										return {
 											name:
-												(role[0][0] || "").toUpperCase() +
-												role[0].slice(1) +
-												" role",
+												role[0]
+													.split("_")
+													.map(
+														(name) =>
+															(name[0] || "").toUpperCase() +
+															name.slice(1),
+													) + " role",
 											value: role[1]?.toString() || "*None*",
 											inline: true,
 										};

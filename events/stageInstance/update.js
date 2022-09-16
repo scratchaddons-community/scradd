@@ -11,7 +11,7 @@ export default async function event(oldInstance, newInstance) {
 	const logs = [];
 
 	if (oldInstance.topic !== newInstance.topic) {
-		log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "server", {
+		log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "voice", {
 			files: [
 				new AttachmentBuilder(
 					Buffer.from(

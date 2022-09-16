@@ -18,7 +18,8 @@ declare global {
 			GUILD_ID: string;
 			BOT_TOKEN: string;
 			NODE_ENV: "development" | "production";
-			PORT?: number;
+			PORT?: `${number}`;
+			CDBL_AUTH?: string;
 		}
 	}
 }
@@ -96,8 +97,13 @@ if (process.env.NODE_ENV === "production")
 	http.createServer(async function (request, response) {
 		const url = new URL(request.url || "", `https://${request.headers.host}`);
 
-		if (url.pathname === "/cleanDatabaseListeners") {
+		if (
+			url.pathname === "/cleanDatabaseListeners" &&
+			url.searchParams.get("auth") === process.env.CDBL_AUTH
+		) {
+			process.emitWarning("cleanDatabaseListeners called");
 			await cleanDatabaseListeners();
+			process.emitWarning("cleanDatabaseListeners ran");
 			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
 		} else response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
 	}).listen(process.env.PORT ?? 443);

@@ -87,7 +87,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	// Update recent DB & send weekly winners
 	const { weekly, hourly } = hourlyDatabase.data.reduce(
 		({ weekly, hourly }, gain) => {
-			if (gain.timestamp + 3_600_000 > Date.now()) {
+			if (gain.time + 3_600_000 > Date.now()) {
 				hourly.push(gain);
 			} else {
 				weekly[gain.user] ??= 0;
@@ -102,16 +102,22 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			hourly: [],
 		},
 	);
-	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, timestamp: 0 }));
+	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, time: 0 }));
 
 	const threads = CONSTANTS.channels.announcements?.threads;
-	const thread =
+
+	const thread = /** @type {undefined | import("discord.js").PublicThreadChannel} */ (
 		(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
-		(await threads?.create({ name: "Weekly Winners" }));
+			(await threads?.create({ name: "Weekly Winners" }))
+	);
 
 	const date = new Date();
-	if (date.getUTCDay() === 0 && date.getUTCHours() === 0 && weeklyArray.length) {
-		hourlyDatabase.data = [...hourly, { user: to.id, xp: amount, timestamp: Date.now() }];
+	if (
+		+new Date() - +new Date(hourlyDatabase.extra || 1_662_854_400_000) > 604_800_000 && // More than a week since last weekly
+		weeklyArray.length
+	) {
+		hourlyDatabase.data = [...hourly, { user: to.id, xp: amount, time: Date.now() }];
+		hourlyDatabase.extra = Date.now() + "";
 		const sorted = weeklyArray.sort((a, b) => b.xp - a.xp);
 		sorted.splice(5);
 		date.setUTCDate(date.getUTCDate() - 7);
@@ -145,15 +151,30 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 				sorted
 					.map(
 						(gain, index) =>
-							`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${gain.xp} XP`,
+							`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${
+								gain.user
+							}> - ${gain.xp.toLocaleString()} XP`,
 					)
 					.join("\n"),
 		});
+
+		const role = CONSTANTS.roles.weekly_winner;
+		const ids = sorted.map(({ user }) => user);
+		if (role) {
+			await Promise.all([
+				...role.members.map((member) => {
+					if (!ids.includes(member.id)) return member.roles.remove(role);
+				}),
+				...sorted.map(({ user }) =>
+					guild.members.fetch(user).then((member) => member.roles.add(role)),
+				),
+			]);
+		}
 	} else {
 		hourlyDatabase.data = [
 			...hourly,
 			...weeklyArray,
-			{ user: to.id, xp: amount, timestamp: Date.now() },
+			{ user: to.id, xp: amount, time: Date.now() },
 		];
 	}
 
@@ -169,7 +190,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	);
 
 	const topInHour = Object.entries(hourlyByUser).sort(([, a], [, b]) => b - a)[0];
-	if (topInHour) {
+	if (topInHour && thread) {
 		const user = await client.users.fetch(topInHour[0]).catch(() => {});
 		if (user) await breakRecord(2, [user], topInHour[1], thread);
 	}
@@ -186,24 +207,27 @@ const XP_PER_LEVEL = [
 	475_000, 487_500, 500_000, 515_000, 530_000, 545_000, 560_000, 575_000, 590_000, 605_000,
 ];
 
-const INCREMENT_FREQUENCY = 10;
+// const INCREMENT_FREQUENCY = 10;
 
-/**
- * @param {number} level
- *
- * @returns {number}
- */
-function getIncrementForLevel(level) {
-	if (level < XP_PER_LEVEL.length) {
-		return (XP_PER_LEVEL[level] || 0) - (XP_PER_LEVEL[level - 1] || 0);
-	}
-	if (level % INCREMENT_FREQUENCY === 0) {
-		const x = (level - XP_PER_LEVEL.length) / INCREMENT_FREQUENCY + 3;
-		// Credit to idkhow2type (and Jazza 😉) on the SA Discord for the following line
-		return ((x % 9) + 1) * 10 ** Math.floor(x / 9) * 5_000;
-	}
-	return getIncrementForLevel(Math.floor(level / INCREMENT_FREQUENCY) * INCREMENT_FREQUENCY);
-}
+// /**
+//  * @param {number} level
+//  *
+//  * @returns {number}
+//  */
+// function getIncrementForLevel(level) {
+// 	const xpForLevel = XP_PER_LEVEL[level];
+// 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
+
+// 	if (xpForLevel !== undefined && xpForPreviousLevel !== undefined) {
+// 		return xpForLevel - xpForPreviousLevel;
+// 	}
+// 	if (level % INCREMENT_FREQUENCY === 0) {
+// 		const x = (level - XP_PER_LEVEL.length) / INCREMENT_FREQUENCY + 3;
+// 		// Credit to idkhow2type (and Jazza 😉) on the SA Discord for the following line
+// 		return ((x % 9) + 1) * 10 ** Math.floor(x / 9) * 5_000;
+// 	}
+// 	return getIncrementForLevel(Math.floor(level / INCREMENT_FREQUENCY) * INCREMENT_FREQUENCY);
+// }
 
 /**
  * @param {number} level
@@ -211,7 +235,10 @@ function getIncrementForLevel(level) {
  * @returns {number}
  */
 export function getXpForLevel(level) {
-	return XP_PER_LEVEL[level] ?? getXpForLevel(level - 1) + getIncrementForLevel(level);
+	const xpForLevel = XP_PER_LEVEL[level];
+	if (xpForLevel !== undefined) return xpForLevel;
+	throw new RangeError("Asked for XP for level " + level);
+	// return getXpForLevel(level - 1) + getIncrementForLevel(level);
 }
 
 /** @param {number} xp */
