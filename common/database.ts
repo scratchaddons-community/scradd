@@ -46,7 +46,7 @@ export default class Database<Name extends keyof Databases> {
 			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
 				" ",
-			)} may be reset.*`,
+			)} information may be reset.*`,
 		);
 
 		const attachment = this.message?.attachments.first()?.url;
