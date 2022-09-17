@@ -46,17 +46,12 @@ await boardDatabase.init();
 /**
  * @param {import("./database").Databases["board"] | import("discord.js").Message} info
  * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
- *
- * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
  */
 export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
-	/**
-	 * @param {import("discord.js").Message} message
-	 *
-	 * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
-	 */
+	
+	/** @param {import("discord.js").Message} message */
 	async function messageToBoardData(message) {
 		const { files, embeds } = await extractMessageExtremities(message, false);
 

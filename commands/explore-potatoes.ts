@@ -7,7 +7,7 @@ import {
 	APIInteractionDataResolvedChannel,
 	GuildBasedChannel,
 	Snowflake,
-	BaseMessageOptions,
+	InteractionReplyOptions,
 } from "discord.js";
 
 import {
@@ -128,10 +128,10 @@ const info: ChatInputCommand = {
 		const nextId = generateHash("next");
 		const prevId = generateHash("prev");
 
-		const messages: BaseMessageOptions[] = [];
+		const messages: InteractionReplyOptions[] = [];
 		let index = 0;
 
-		async function getNextMessage(): Promise<BaseMessageOptions> {
+		async function getNextMessage(): Promise<InteractionReplyOptions> {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info

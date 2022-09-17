@@ -80,7 +80,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 const RATELIMT_MESSAGE =
 	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-const cooldowns: Record<Snowflake, number> = {};
+const cooldowns: Record<Snowflake,number> = {};
 const COOLDOWN = 60_000;
 
 /**
@@ -90,7 +90,7 @@ const COOLDOWN = 60_000;
  *
  * @returns The member who made the suggestion.
  */
-async function getUserFromSuggestion(message: Message<true>): Promise<GuildMember | User> {
+async function getUserFromSuggestion(message: Message): Promise<GuildMember | User> {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]

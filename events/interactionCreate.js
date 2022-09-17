@@ -108,9 +108,7 @@ export default async function event(interaction) {
 		// @ts-expect-error -- No concrete fix to this
 		await command.interaction(interaction);
 	} catch (error) {
-		await (interaction.replied || interaction.deferred
-			? interaction.reply
-			: interaction.editReply)({
+		await interaction[interaction.replied || interaction.deferred ? "reply" : "editReply"]({
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 			embeds: [],
