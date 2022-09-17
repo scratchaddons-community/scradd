@@ -75,7 +75,7 @@ type cssManipulator =
 			/** The source that provides the color. */
 			source: cssManipulator;
 			/** The possible options. */
-			options: { [key: string]: cssManipulator };
+			options: Record<string, cssManipulator>;
 	  }
 	| {
 			/** The type of the manipulator. */
@@ -125,9 +125,9 @@ type matches =
 			| `https://${string}`
 	  )[];
 
-type _if = { settings: { [key: string]: unknown }; addonEnabled: string | string[] };
+type _if = { settings: Record<string, unknown>; addonEnabled: string | string[] };
 type serializedTableNestableSetting = boolean | number | string;
-type serializedTableNestableSettings = { [key: string]: serializedTableNestableSetting };
+type serializedTableNestableSettings = Record<string, serializedTableNestableSetting>;
 type tableNestableSettings = {
 	/** The name of the setting. */
 	name: string;
@@ -343,9 +343,7 @@ type AddonManifest = {
 		 *
 		 * The preset value of the setting.
 		 */
-		values: {
-			[key: string]: serializedTableNestableSetting | serializedTableNestableSettings[];
-		};
+		values: Record<string, serializedTableNestableSetting | serializedTableNestableSettings[]>;
 	}[];
 	/**
 	 * An array of libraries that the addon uses.

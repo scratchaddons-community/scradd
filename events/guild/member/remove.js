@@ -49,11 +49,9 @@ export default async function event(member) {
 	if (banned && member.joinedAt)
 		promises.push(breakRecord(3, [member], Date.now() - +member.joinedAt));
 
-	usersDatabase.data = [
-		...usersDatabase.data.filter(
-			({ user, time }) => user === member.id || time + 86_400_000 > Date.now(),
-		),
-	];
+	usersDatabase.data = usersDatabase.data.filter(
+		({ user, time }) => user === member.id || time + 86_400_000 > Date.now(),
+	);
 
 	await Promise.all(promises);
 }

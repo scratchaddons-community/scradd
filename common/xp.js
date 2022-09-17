@@ -96,7 +96,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			return { weekly, hourly };
 		},
 		{
-			/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+			/** @type {Record<import("discord.js").Snowflake, number>} */
 			weekly: {},
 			/** @type {typeof hourlyDatabase["data"]} */
 			hourly: [],
@@ -185,7 +185,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 			return acc;
 		},
-		/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+		/** @type {Record<import("discord.js").Snowflake, number>} */
 		({}),
 	);
 

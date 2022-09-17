@@ -11,7 +11,7 @@ export const DATABASE_THREAD = "databases";
 
 const thread = await getLoggingThread(DATABASE_THREAD);
 
-const databases: { [key: string]: undefined | Message<true> } = {};
+const databases: Record<string, undefined | Message<true>> = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
@@ -20,11 +20,10 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	}
 }
 
-let timeouts: {
-	[key: Snowflake]:
-		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
-		| undefined;
-} = {};
+let timeouts: Record<
+	Snowflake,
+	{ callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
+> = {};
 
 const contructed: (keyof Databases)[] = [];
 

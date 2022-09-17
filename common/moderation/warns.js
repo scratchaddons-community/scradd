@@ -17,7 +17,7 @@ export const WARNS_PER_MUTE = 3,
  * @returns {Promise<T["data"]>}
  */
 export async function removeExpiredWarns(database) {
-	/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+	/** @type {Record<import("discord.js").Snowflake, number>} */
 	const losers = {};
 	database.data = database.data.filter((warn) => {
 		const expiresAt = new Date(warn.expiresAt);

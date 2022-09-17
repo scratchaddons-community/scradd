@@ -80,7 +80,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 const RATELIMT_MESSAGE =
 	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-const cooldowns: { [key: Snowflake]: number } = {};
+const cooldowns: Record<Snowflake, number> = {};
 const COOLDOWN = 60_000;
 
 /**

@@ -53,7 +53,7 @@ const commandMarkdown = `\n\n*Run the </addon:${
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 
 type GroupName = typeof GROUP_NAMES[number];
-type Dependencies = { [key: string]: undefined | boolean };
+type Dependencies = Record<string, undefined | boolean>;
 type AddonQuestion = {
 	/** Questions that, if this question is `true`, must have this answer. */
 	dependencies?: Dependencies;
@@ -890,7 +890,7 @@ const info: ChatInputCommand = {
 					addonProbabilities: [string, number][],
 					askedQuestions: string[] = [],
 				): string[] {
-					const frequencies: { [key: string]: number } = {};
+					const frequencies: Record<string, number> = {};
 
 					const questions = Object.entries(questionsByAddon)
 						.map(([addon, questions]) =>

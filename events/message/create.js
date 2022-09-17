@@ -35,7 +35,7 @@ import logError from "../../lib/logError.js";
 
 const { GUILD_ID } = process.env;
 
-/** @type {{ [key: import("discord.js").Snowflake]: import("discord.js").Message[] }} */
+/** @type {Record<import("discord.js").Snowflake, import("discord.js").Message[]>} */
 const latestMessages = {};
 
 const messagesDatabase = new Database("messages");
@@ -253,7 +253,7 @@ export default async function event(message) {
 
 			return acc;
 		},
-		/** @type {{ [key: import("discord.js").Snowflake]: number }} */
+		/** @type {Record<import("discord.js").Snowflake, number>} */
 		({}),
 	);
 	const users = (
