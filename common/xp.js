@@ -254,3 +254,5 @@ export function getLevelForXp(xp) {
 	}
 	return level;
 }
+
+await giveXp(await guild.members.fetch("987265192327004214"));

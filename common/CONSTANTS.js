@@ -102,7 +102,7 @@ export default /** @type {const} */ ({
 			),
 		modlogs: enforceChannelType(
 			channels.find((channel) => !!channel?.name.endsWith("logs")),
-			[ChannelType.GuildText, ChannelType.GuildNews],
+			ChannelType.GuildText,
 		),
 		admin: enforceChannelType(
 			channels.find((channel) => !!channel?.name.includes("admin")),
