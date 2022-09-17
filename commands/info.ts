@@ -128,7 +128,8 @@ const info: ChatInputCommand = {
 														(name) =>
 															(name[0] || "").toUpperCase() +
 															name.slice(1),
-													) + " role",
+													)
+													.join(" ") + " role",
 											value: role[1]?.toString() || "*None*",
 											inline: true,
 										};

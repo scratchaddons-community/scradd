@@ -247,12 +247,10 @@ export function getLevelForXp(xp) {
 	if (level === -2) {
 		let found = 0;
 		level = XP_PER_LEVEL.length;
-		while (!(found > xp)) {
+		while (found < xp) {
 			found = getXpForLevel(level);
 			level++;
 		}
 	}
 	return level;
 }
-
-await giveXp(await guild.members.fetch("987265192327004214"));
