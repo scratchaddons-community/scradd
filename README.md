@@ -17,10 +17,11 @@ Pull requests are welcome if you would like to help contribute. However, before 
 #### Create a bot
 
 1. Visit [the Discord Developer Portal](https://discord.com/developers/applications) and create a new application.
-2. Go to the "Bot" tab and add a bot to the app.
-3. Highly recommended: Disable the "Public Bot" switch so random people don't add it to their servers.
-4. Make sure to toggle all three of the Privileged Gateway Intents (the Presence, Server Members, and Message Content Intents) on.
-5. Click "Reset Token" and note it for future use.
+2. Note the "Application ID" for future use.
+3. Go to the "Bot" tab and add a bot to the app.
+4. Highly recommended: Disable the "Public Bot" switch so random people don't add it to their servers.
+5. Make sure to toggle all three of the Privileged Gateway Intents (the Presence, Server Members, and Message Content Intents) on.
+6. Click "Reset Token" and note it for future use.
 
 #### Set up the testing server
 
@@ -29,7 +30,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 3. Manually create a `#potatoboard` Announcement channel inside of the `Mock` category.
 4. Enable Developer Mode in your User Settings -> Advanced.
 5. Right-click on your new testing server, copy its id, and note it for future use.
-6. Invite your bot using https://discord.com/api/oauth2/authorize?client_id=<INSERT BOT'S ID HERE>&permissions=8&scope=applications.commands%20bot
+6. Invite your bot at https://discord.com/api/oauth2/authorize?client_id=[application_id_here]&permissions=8&scope=applications.commands%20bot
 
 #### Set up the repository locally
 
