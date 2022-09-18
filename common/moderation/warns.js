@@ -193,7 +193,7 @@ export default async function warn(user, reason, strikes, context) {
 							.setDescription(
 								strikes === 0
 									? reason
-									: `You earned ${strikes} strike${
+									: `You gained ${strikes} strike${
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)

@@ -43,7 +43,7 @@ export default class Database<Name extends keyof Databases> {
 
 	async init() {
 		this.message = databases[this.name] ||= await thread.send(
-			`**__SCRADD ${this.name.toUpperCase()} DATABASES__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+			`**__SCRADD ${this.name.toUpperCase()} DATABASE__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
 				" ",
 			)} information may be reset.*`,
@@ -59,22 +59,9 @@ export default class Database<Name extends keyof Databases> {
 							papaparse.parse<Databases[Name]>(csv.trim(), {
 								dynamicTyping: true,
 								header: true,
+								delimiter: ",",
 							}).data,
 					)
-			: this.name === "records"
-			? ([
-					{ record: 0, count: 3395539621, users: "913260298155204619" },
-					{ record: 1, count: 1, users: "771422735486156811" },
-					{ record: 2, count: 500, users: "771422735486156811" },
-					{ record: 3, count: 4, users: "765910070222913556" },
-					{ record: 4, count: 172800000, users: "1015260570473214014" },
-					{ record: 5, count: 10, users: "559426966151757824" },
-					{ record: 6, count: 5, users: "771422735486156811" },
-					{ record: 7, count: 600000, users: "771422735486156811" },
-					{ record: 8, count: 50, users: "771422735486156811" },
-					{ record: 9, count: 3, users: "771422735486156811" },
-					{ record: 10, count: 7, users: "771422735486156811" },
-			  ] as Databases[Name][])
 			: [];
 
 		this.#extra = this.message.content.split("\n")[5];
@@ -167,7 +154,7 @@ export type Databases = {
 		/** The ID of the channel this message is in. */
 		channel: Snowflake;
 		/** The ID of the message on the board. */
-		onBoard?: Snowflake;
+		onBoard: 0 | Snowflake;
 		/** The ID of the original message. */
 		source: Snowflake;
 	};

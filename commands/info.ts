@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, time, Snowflake, ChannelType, EmbedBuilder, Role } from "discord.js";
+import { SlashCommandBuilder, time, Snowflake, EmbedBuilder, Role } from "discord.js";
 
 import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
 import { joinWithAnd } from "../lib/text.js";
@@ -37,7 +37,11 @@ const info: ChatInputCommand = {
 	async interaction(interaction) {
 		switch (interaction.options.getString("type", true)) {
 			case "status": {
-				const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
+				const message = await interaction.reply({
+					ephemeral: true,
+					content: "Pinging…",
+					fetchReply: true,
+				});
 
 				await interaction.editReply({
 					content: "",
@@ -86,6 +90,7 @@ const info: ChatInputCommand = {
 			}
 			case "config": {
 				await interaction.reply({
+					ephemeral: true,
 					embeds: [
 						new EmbedBuilder()
 							.setTitle("Configuration")
@@ -101,10 +106,7 @@ const info: ChatInputCommand = {
 										name:
 											(channel[0][0] || "").toUpperCase() +
 											channel[0].slice(1) +
-											" " +
-											(channel[1]?.type === ChannelType.GuildVoice
-												? "VC"
-												: "channel"),
+											" channel",
 										value: channel[1]?.toString() || "*None*",
 										inline: true,
 									};
@@ -142,6 +144,7 @@ const info: ChatInputCommand = {
 			}
 			case "credits": {
 				await interaction.reply({
+					ephemeral: true,
 					embeds: [
 						new EmbedBuilder()
 							.setTitle("Credits")
@@ -175,7 +178,7 @@ const info: ChatInputCommand = {
 								},
 							)
 							.setFooter({
-								text: "None of the above are in any particular order.",
+								text: "None of the above users are in any particular order.",
 							})
 							.setColor(CONSTANTS.themeColor),
 					],

@@ -18,8 +18,15 @@ export default async function breakRecord(
 		})(),
 ) {
 	const oldRecord = recordsDatabase.data.find((record) => index === record.record);
+	const brokenRecord = RECORDS[index];
+
 	if (oldRecord) {
-		if (oldRecord.count >= count) return;
+		if (
+			"check" in brokenRecord
+				? brokenRecord.check(oldRecord.count, count)
+				: oldRecord.count >= count
+		)
+			return;
 		recordsDatabase.data = recordsDatabase.data.map((foundRecord) =>
 			foundRecord.record === index
 				? {
@@ -30,8 +37,6 @@ export default async function breakRecord(
 				  }
 				: foundRecord,
 		);
-
-		const brokenRecord = RECORDS[index];
 
 		const embed = new EmbedBuilder()
 			.setTitle(`${brokenRecord.name} record broken!`)
@@ -83,6 +88,7 @@ export const RECORDS = [
 			guild.nameAcronym.length === 2 ? guild.nameAcronym : guild.name
 		} server ban speedrun any%`,
 		type: "time",
+		check: (oldCount: number, newCount: number) => oldCount <= newCount,
 	},
 	{ name: "Most reactions on a message", type: "count" },
 	{ name: "Most people talking in an hour", type: "count" },

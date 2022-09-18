@@ -62,7 +62,8 @@ const badWords = [
 			/oybj[ -]?wbo/,
 			/shpx/,
 			/svpx/,
-			/wv(?:f|z|m){2}/,
+			/wvfz/,
+			/wvmm/,
 			/xvxr/,
 			/xhxfhtre/,
 			/znfg(?:h|r)eong/,
@@ -113,6 +114,8 @@ const badWords = [
 		],
 	],
 ];
+
+if (process.env.NODE_ENV !== "production") badWords[1]?.[0].push(/automodmute/);
 
 /** @param {RegExp[]} regexes */
 function decodeRegexes(regexes) {

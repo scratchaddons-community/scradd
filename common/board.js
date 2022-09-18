@@ -50,7 +50,7 @@ await boardDatabase.init();
 export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
-	
+
 	/** @param {import("discord.js").Message} message */
 	async function messageToBoardData(message) {
 		const { files, embeds } = await extractMessageExtremities(message, false);
@@ -150,6 +150,7 @@ export async function updateBoard(message) {
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
 	const minReactions = boardReactionCount(message.channel);
 	const info = boardDatabase.data.find(({ source }) => source === message.id);
+
 	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 	const boardMessage =
 		info?.onBoard &&
@@ -199,13 +200,24 @@ export async function updateBoard(message) {
 
 	if (boardMessage || count < minReactions) {
 		boardDatabase.data = count
-			? boardDatabase.data.map((item) =>
-					item.source === message.id ? { ...item, reactions: count } : item,
-			  )
+			? boardMessage
+				? boardDatabase.data.map((item) =>
+						item.source === message.id ? { ...item, reactions: count } : item,
+				  )
+				: [
+						...boardDatabase.data,
+						{
+							channel: message.channel.id,
+							onBoard: 0,
+							reactions: count,
+							source: message.id,
+							user: message.author.id,
+						},
+				  ]
 			: boardDatabase.data.filter((item) => item.source !== message.id);
 	}
 
-	const top = boardDatabase.data.sort((a, b) => b.reactions - a.reactions);
+	const top = [...boardDatabase.data.sort((a, b) => b.reactions - a.reactions)];
 	top.splice(5);
 	promises.push(
 		Promise.all(

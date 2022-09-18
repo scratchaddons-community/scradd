@@ -12,11 +12,11 @@ export default async function event(messages, channel) {
 				const content = !message.partial && (await messageToText(message));
 
 				return `${message.author?.tag || "[unknown]"}${
-					message.embeds.length && message.attachments.size ? " (" : ""
+					message.embeds.length || message.attachments.size ? " (" : ""
 				}${message.embeds.length ? message.embeds.length + " embeds" : ""}${
 					message.embeds.length && message.attachments.size ? ", " : ""
 				}${message.attachments.size ? message.attachments.size + " attachments" : ""}${
-					message.embeds.length && message.attachments.size ? ")" : ""
+					message.embeds.length || message.attachments.size ? ")" : ""
 				}${content ? ":\n" + content : ""}`;
 			}),
 		)

@@ -262,7 +262,7 @@ export default async function event(message) {
 		)
 	).filter(/** @returns {user is User} */ (user) => !!user);
 
-	const messageCount = Object.values(messagesByUser).reduce((sum, count) => sum + count);
+	const messageCount = Object.values(messagesByUser).reduce((sum, count) => sum + count, 0);
 	await breakRecord(5, users, users.length);
 	await breakRecord(7, users, messageCount);
 

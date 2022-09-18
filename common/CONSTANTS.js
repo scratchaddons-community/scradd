@@ -82,18 +82,20 @@ export default /** @type {const} */ ({
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: {
-		announcements: enforceChannelType(
-			channels.find((channel) => "announcements" === channel?.name),
-			ChannelType.GuildNews,
+		info: enforceChannelType(
+			channels.find((channel) => !!channel?.name.startsWith("📜")),
+			ChannelType.GuildCategory,
 		),
 		board: enforceChannelType(
 			channels.find((channel) => !!channel?.name.endsWith("board")),
 			[ChannelType.GuildText, ChannelType.GuildNews],
 		),
-		users: enforceChannelType(
-			channels.find((channel) => !!channel?.name.startsWith("👥")),
-			ChannelType.GuildVoice,
-		),
+		welcome:
+			guild.systemChannel ||
+			enforceChannelType(
+				channels.find((channel) => "welcome" === channel?.name),
+				ChannelType.GuildText,
+			),
 		mod:
 			guild.publicUpdatesChannel ||
 			enforceChannelType(
@@ -124,12 +126,10 @@ export default /** @type {const} */ ({
 			channels.find((channel) => !!channel?.name.includes("youtube")),
 			ChannelType.GuildText,
 		),
-		welcome:
-			guild.systemChannel ||
-			enforceChannelType(
-				channels.find((channel) => "welcome" === channel?.name),
-				ChannelType.GuildText,
-			),
+		chat: enforceChannelType(
+			channels.find((channel) => !!channel?.name.startsWith("💬")),
+			ChannelType.GuildCategory,
+		),
 		general: enforceChannelType(
 			channels.find((channel) => "general" === channel?.name),
 			ChannelType.GuildText,

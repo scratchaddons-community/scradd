@@ -26,7 +26,7 @@ declare global {
 
 dotenv.config();
 
-const { default: client } = await import("./client.js");
+const { default: client, guild } = await import("./client.js");
 const { default: logError } = await import("./lib/logError.js");
 const { cleanDatabaseListeners } = await import("./common/database.js");
 
@@ -41,15 +41,27 @@ if (process.env.NODE_ENV === "production")
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
-CONSTANTS.channels.users &&
-	setInterval(async () => {
-		const count = (
-			await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
-				(res) => res.json() as Promise<{ count: number; _chromeCountDate: string }>,
-			)
-		).count;
-		await CONSTANTS.channels.users?.edit({ name: `👥 ${count.toLocaleString()} SA Users!` });
-	}, 300_000);
+setInterval(async () => {
+	const count = (
+		await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
+			(res) => res.json() as Promise<{ count: number; _chromeCountDate: string }>,
+		)
+	).count;
+	await CONSTANTS.channels.info?.edit({
+		name: `📜 Info - ${count.toLocaleString([], {
+			maximumFractionDigits: 2,
+			notation: "compact",
+			compactDisplay: "short",
+		})} SA users!`,
+	});
+	await CONSTANTS.channels.chat?.edit({
+		name: `💬 Chat - ${guild.memberCount.toLocaleString([], {
+			maximumFractionDigits: 2,
+			notation: "compact",
+			compactDisplay: "short",
+		})} members!`,
+	});
+}, 300_000);
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 

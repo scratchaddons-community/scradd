@@ -104,7 +104,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	);
 	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, time: 0 }));
 
-	const threads = CONSTANTS.channels.announcements?.threads;
+	const threads = CONSTANTS.channels.bots?.threads;
 
 	const thread = /** @type {undefined | import("discord.js").PublicThreadChannel} */ (
 		(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
