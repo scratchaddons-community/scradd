@@ -29,6 +29,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 3. Manually create a `#potatoboard` Announcement channel inside of the `Mock` category.
 4. Enable Developer Mode in your User Settings -> Advanced.
 5. Right-click on your new testing server, copy its id, and note it for future use.
+6. Invite your bot using https://discord.com/api/oauth2/authorize?client_id=<INSERT BOT'S ID HERE>&permissions=8&scope=applications.commands%20bot
 
 #### Set up the repository locally
 
