@@ -37,7 +37,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) if you haven't already.
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
-4. Set up the .env file as described in [`globals.d.ts`](/common/types/globals.d.ts).
+4. Set up the .env file as described in [`index.ts`](/index.ts).
 5. Code!
 
 ### File structure
