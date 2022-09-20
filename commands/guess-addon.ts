@@ -31,7 +31,7 @@ import client from "../client.js";
 import type AddonManifest from "../common/types/addonManifest";
 import type { ChatInputCommand } from "../common/types/command";
 
-const COLLECTOR_TIME = 120_000;
+const COLLECTOR_TIME = CONSTANTS.collectorTime * 4;
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,

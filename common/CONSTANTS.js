@@ -17,7 +17,7 @@ const latestRelease =
 		: "master";
 
 export default /** @type {const} */ ({
-	collectorTime: 30_000,
+	collectorTime: 45_000,
 	zeroWidthSpace: "\u200b",
 	emojis: {
 		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
