@@ -210,7 +210,7 @@ async function checkString(toCensor, message) {
 						return invite?.guild?.id === message.guild?.id;
 					}),
 				)
-			).filter(/** @returns {toWarn is true} */ (toWarn) => toWarn).length;
+			).filter(/** @returns {toWarn is true} */ (toWarn) => !toWarn).length;
 
 			if (invitesToDelete) {
 				bad.invites = invitesToDelete;
