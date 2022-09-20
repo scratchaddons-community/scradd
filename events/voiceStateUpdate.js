@@ -64,12 +64,12 @@ export default async function event(oldState, newState) {
 		if (oldState.serverMute !== newState.serverMute) {
 			logs.push(`was${newState.serverMute ? "" : " un"} server muted`);
 		} else if (oldState.mute !== newState.mute) {
-			logs.push(`${newState.mute ? "" : " un"}muted in ${newState.channel.toString()}`);
+			logs.push(`${newState.mute ? "" : "un"}muted in ${newState.channel.toString()}`);
 		}
 		if (oldState.serverDeaf !== newState.serverDeaf) {
 			logs.push(`was${newState.serverDeaf ? "" : " un"} server deafened`);
 		} else if (oldState.deaf !== newState.deaf) {
-			logs.push(`${newState.deaf ? "" : " un"}deafened in ${newState.channel.toString()}`);
+			logs.push(`${newState.deaf ? "" : "un"}deafened in ${newState.channel.toString()}`);
 		}
 		if (oldState.suppress !== newState.suppress) {
 			logs.push(

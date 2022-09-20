@@ -8,7 +8,7 @@ export default async function event(thread) {
 	log(
 		`🗑 Thread #${thread.name} ${
 			thread.parent ? `in ${thread.parent?.toString()} ` : ""
-		}deleted! (ID ${thread.id})`,
+		}deleted! (ID: ${thread.id})`,
 		"channels",
 	);
 	if (thread.parent?.id !== CONSTANTS.channels.modmail?.id || thread.archived) return;
