@@ -121,7 +121,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		const sorted = weeklyArray.sort((a, b) => b.xp - a.xp);
 		sorted.splice(5);
 		date.setUTCDate(date.getUTCDate() - 7);
-		await thread?.send({
+		await (await thread?.messages.fetchPinned())?.first()?.unpin();
+		const message = await thread?.send({
 			allowedMentions: {
 				users: sorted
 					.map((gain) => gain.user)
@@ -157,6 +158,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					)
 					.join("\n"),
 		});
+		await message?.pin();
 
 		const role = CONSTANTS.roles.weekly_winner;
 		const ids = sorted.map(({ user }) => user);
