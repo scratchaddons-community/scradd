@@ -432,7 +432,7 @@ export default async function event(message) {
 		);
 	}
 
-	// Autoreactions start here. Don’t react to users who disabled the setting.
+	// Autoreactions start here.
 
 	const REACTION_CAP = 2;
 
@@ -459,10 +459,11 @@ export default async function event(message) {
 	)
 		react("🥔");
 
+	// Don’t react to users who disabled the setting.
 	if (
 		message.interaction ||
 		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(
-			message.channel.id,
+			getBaseChannel(message.channel)?.id,
 		) ||
 		!(
 			userSettingsDatabase.data.find(({ user }) => user === message.author.id)
@@ -482,12 +483,12 @@ export default async function event(message) {
 	 *
 	 * @returns {boolean} Whether the message contains the word.
 	 */
-	function includes(text, { full = false, plural = true } = {}) {
+	function includes(text, plural = true) {
 		return new RegExp(
-			(full ? "^" : "\\b") +
-				(typeof text === "string" ? text : text.source) +
-				(plural ? "(e?s)?" : "") +
-				(full ? "$" : "\\b"),
+			"\\b" +
+				(typeof text === "string" ? text : "(?:" + text.source + ")") +
+				(plural ? "(?:e?s)?" : "") +
+				"\\b",
 			"i",
 		).test(content);
 	}
@@ -501,15 +502,16 @@ export default async function event(message) {
 	if (content.includes("quack") || includes("duck")) react("🦆");
 	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
-	if (includes(/jef+[oa]l+o/)) react(CONSTANTS.emojis.autoreact.jeffalo);
+	if (includes(/jef+[oa]l+o/) || includes(/buf+[oa]l+o/))
+		react(CONSTANTS.emojis.autoreact.jeffalo);
 	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
 		react(CONSTANTS.emojis.autoreact.tw);
 	if (includes("mee6")) react("🤮");
-	if (includes("cubot", { plural: false })) react(CONSTANTS.emojis.autoreact.cubot);
-	if (includes("bob", { plural: false })) react(CONSTANTS.emojis.autoreact.bob);
-	if (message.content.includes("( ^∘^)つ")) react(CONSTANTS.emojis.autoreact.sxd);
+	if (includes("cubot", false)) react(CONSTANTS.emojis.autoreact.cubot);
+	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
+	if (includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 
-	if (/\bte(?:r|w)+a|(👉|:point_right:) ?(👈|:point_left:)\b/.test(message.content))
+	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);
 
 	if (includes("on addon")) {
@@ -526,12 +528,12 @@ export default async function event(message) {
 		}
 	}
 
-	if (includes("sus", { plural: false })) react(CONSTANTS.emojis.autoreact.sus);
+	if (includes("sus", false)) react(CONSTANTS.emojis.autoreact.sus);
 
 	if (
-		includes(/gives? ?you ?up/i, { plural: false }) ||
+		includes(/gives? ?you ?up/i, false) ||
 		content.includes("rickroll") ||
-		content.includes("astley") ||
+		includes("astley") ||
 		content.includes("dqw4w9wgxcq")
 	)
 		react(CONSTANTS.emojis.autoreact.rick);
