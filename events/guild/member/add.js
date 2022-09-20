@@ -41,7 +41,7 @@ export default async function event(member) {
 						await fileSystem.readFile(
 							path.resolve(
 								path.dirname(url.fileURLToPath(import.meta.url)),
-								"../../../common/audio/biteOf87.wav",
+								"../../../../common/audio/biteOf87.wav",
 							),
 						),
 						{ name: `file.wav` },
