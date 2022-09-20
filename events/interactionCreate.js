@@ -96,9 +96,7 @@ export default async function event(interaction) {
 							: interaction.user,
 						`Watch your language!`,
 						censored.strikes,
-						`Used command:\n/${interaction.commandName} ${stringifyOptions(
-							interaction.options.data,
-						)}`,
+						`Used command:\n${interaction.toString()}`,
 					),
 				]);
 				return;
@@ -119,20 +117,6 @@ export default async function event(interaction) {
 	}
 }
 
-/**
- * @param {readonly import("discord.js").CommandInteractionOption[]} options
- *
- * @returns {string}
- */
-function stringifyOptions(options) {
-	return options
-		.map((option) =>
-			option.options
-				? option.name + " " + stringifyOptions(option.options)
-				: option.name + ": " + option.value,
-		)
-		.join(" ");
-}
 /** @param {readonly import("discord.js").CommandInteractionOption[]} options */
 function censorOptions(options) {
 	let strikes = 0,
