@@ -169,7 +169,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					if (!ids.includes(member.id)) return member.roles.remove(role);
 				}),
 				...sorted.map(({ user }) =>
-					guild.members.fetch(user).then((member) => member.roles.add(role)),
+					guild.members
+						.fetch(user)
+						.catch(() => {})
+						.then((member) => member?.roles.add(role)),
 				),
 			]);
 		}
