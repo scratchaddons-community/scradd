@@ -10,14 +10,15 @@ export default async function event(thread, newlyCreated) {
 		await thread.setName(censored.censored.replaceAll(/#+/g, "x"));
 
 		const owner = await thread.fetchOwner();
-		if (owner?.guildMember) {
+		if (owner) {
 			await thread.send(owner.toString() + ", language!");
-			await warn(
-				owner.guildMember,
-				`Watch your language!`,
-				censored.strikes,
-				"Made thread titled:\n" + thread.name,
-			);
+			if (owner.guildMember)
+				await warn(
+					owner.guildMember,
+					`Watch your language!`,
+					censored.strikes,
+					"Made thread titled:\n" + thread.name,
+				);
 		}
 	}
 }
