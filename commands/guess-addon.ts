@@ -47,7 +47,7 @@ const fuse = new Fuse(addons, {
 const commandMarkdown = `\n\n*Run the </addon:${
 	(await client.application?.commands.fetch({ guildId: process.env.GUILD_ID }))?.find(
 		(command) => command.name === "addon",
-	)?.id // TODO: addonCommand.toString() (waiting on https://github.com/discordjs/discord.js/pull/8546)
+	)?.id // TODO: chatInputApplicationCommandMention() (waiting on https://github.com/discordjs/discord.js/pull/8546)
 }> command for more information about this addon!*`;
 
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
@@ -844,9 +844,10 @@ const questions = Object.values(questionsByAddon)
 
 			return accumulator;
 		},
-		{ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] } as {
-			[K in GroupName]: string[][];
-		},
+		{ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] } as Record<
+			GroupName,
+			string[][]
+		>,
 	);
 
 const BULLET_POINT = CONSTANTS.footerSeperator.trim();
@@ -1230,46 +1231,44 @@ const info: ChatInputCommand = {
 									CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
 								else CURRENTLY_PLAYING.delete(interaction.user.id);
 
-								collector.stop();
-							} else {
-								const probabilityShift = buttonInteraction.customId.startsWith(
-									"yes.",
-								)
-									? 2
-									: buttonInteraction.customId.startsWith("probably.")
-									? 1
-									: buttonInteraction.customId.startsWith("not.")
-									? -1
-									: buttonInteraction.customId.startsWith("no.")
-									? -2
-									: 0;
-
-								const previouslyAsked = Array.from(askedQuestions);
-								const newProbabilities = answerQuestion(
-									questions[0] || "",
-									probabilityShift,
-									addonProbabilities,
-									askedQuestions,
-								);
-
-								const nextMessage = await reply(
-									askedQuestions,
-									newProbabilities,
-									askedCount + 1,
-									{
-										askedQuestions: previouslyAsked,
-										justAsked: questions[0] || "",
-										probabilities: addonProbabilities,
-									},
-									buttonInteraction.component.label || "",
-								);
-
-								if (nextMessage)
-									CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
-								else CURRENTLY_PLAYING.delete(interaction.user.id);
-
-								collector.stop();
+								return collector.stop();
 							}
+
+							const probabilityShift = buttonInteraction.customId.startsWith("yes.")
+								? 2
+								: buttonInteraction.customId.startsWith("probably.")
+								? 1
+								: buttonInteraction.customId.startsWith("not.")
+								? -1
+								: buttonInteraction.customId.startsWith("no.")
+								? -2
+								: 0;
+
+							const previouslyAsked = Array.from(askedQuestions);
+							const newProbabilities = answerQuestion(
+								questions[0] || "",
+								probabilityShift,
+								addonProbabilities,
+								askedQuestions,
+							);
+
+							const nextMessage = await reply(
+								askedQuestions,
+								newProbabilities,
+								askedCount + 1,
+								{
+									askedQuestions: previouslyAsked,
+									justAsked: questions[0] || "",
+									probabilities: addonProbabilities,
+								},
+								buttonInteraction.component.label || "",
+							);
+
+							if (nextMessage)
+								CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
+							else CURRENTLY_PLAYING.delete(interaction.user.id);
+
+							collector.stop();
 						})
 						.on("end", async (collected) => {
 							if (collected.size) return;
@@ -1277,7 +1276,7 @@ const info: ChatInputCommand = {
 							CURRENTLY_PLAYING.delete(interaction.user.id);
 							await Promise.all([
 								interaction.followUp(
-									`${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
+									`🛑 ${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
 								),
 								interaction.editReply({
 									components: disableComponents(message.components),
@@ -1569,7 +1568,7 @@ const info: ChatInputCommand = {
 								ephemeral: !hint,
 							});
 
-							if (hint) await answerQuestion(hint.markdownless, hint.group);
+							if (hint) await answerQuestion(hint.group, hint.markdownless);
 							else {
 								await message.edit({
 									components: message.components?.map((row) =>
@@ -1626,15 +1625,26 @@ const info: ChatInputCommand = {
 							throw new TypeError("Unknown button pressed");
 
 						const selected = componentInteraction.values[0] || "";
-						const split = selected.split(".");
-						const groupName = split[0] as GroupName;
-						const question = questions[groupName][+(split[1] || 0)]?.[+(split[2] || 0)];
+						const split = selected.split(".") as
+							| [GroupName]
+							| [GroupName, string, string];
+						const [groupName, selectIndex, questionIndex] = split;
+
+						if (!groupName || !GROUP_NAMES.includes(groupName))
+							throw new ReferenceError("Unknown group: " + groupName);
 
 						await componentInteraction.deferUpdate();
-
-						await answerQuestion(question, groupName);
-
 						collector.resetTimer();
+
+						await (typeof selectIndex === "undefined" ||
+						typeof questionIndex === "undefined"
+							? answerQuestion(groupName)
+							: answerQuestion(
+									groupName,
+									questions[groupName as GroupName][+selectIndex]?.[
+										+questionIndex
+									],
+							  ));
 					})
 					.on("end", async (_, reason) => {
 						CURRENTLY_PLAYING.delete(interaction.user.id);
@@ -1644,7 +1654,7 @@ const info: ChatInputCommand = {
 						await Promise.all([
 							reason === "time" &&
 								reply.reply(
-									`${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
+									`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
 								),
 							interaction.editReply({
 								components: disableComponents(reply.components),
@@ -1674,7 +1684,7 @@ const info: ChatInputCommand = {
 					);
 				}
 
-				async function answerQuestion(question: string | undefined, groupName: GroupName) {
+				async function answerQuestion(groupName: GroupName, question?: string) {
 					if (question) doneQuestions.add(question);
 
 					const doneGroups = Object.entries(questions).reduce(
