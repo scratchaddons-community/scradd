@@ -36,7 +36,6 @@ const badWords = [
 			/intva(?:n|r|y|f|l)+/,
 			/cravf(?:rf)?/,
 			/nahf(?:rf)?/,
-			/oernfgf?/,
 			/frzra/,
 			/(?:c(?:er|bfg)[ -]?)?phz/,
 			/pyvg/,
