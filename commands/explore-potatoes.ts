@@ -106,6 +106,7 @@ const info: ChatInputCommand = {
 		),
 
 	async interaction(interaction) {
+		await interaction.deferReply()
 		const minReactions =
 			interaction.options.getInteger("minimum-reactions") ?? defaultMinReactions;
 		const user = interaction.options.getUser("user")?.id;
@@ -182,7 +183,7 @@ const info: ChatInputCommand = {
 			return reply;
 		}
 
-		const reply = await interaction.reply(await getNextMessage());
+		const reply = await interaction.editReply(await getNextMessage());
 
 		const collector = reply.createMessageComponentCollector({
 			filter: (buttonInteraction) =>
