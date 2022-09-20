@@ -1,11 +1,14 @@
 import { automodMessage } from "../../common/moderation/automod.js";
-import log from "../../common/moderation/logging.js";
+import log, { getLoggingThread } from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel } from "../../lib/discord.js";
 import jsonDiff from "json-diff";
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import client from "../../client.js";
+
+const loggingThread = await getLoggingThread("databases");
 
 /** @type {import("../../common/types/event").default<"messageUpdate">} */
 export default async function event(oldMessage, newMessage) {
@@ -44,14 +47,24 @@ export default async function event(oldMessage, newMessage) {
 			},
 		);
 	}
-	if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
+	if (
+		oldMessage.pinned !== null &&
+		(newMessage.author.id === client.user.id) !==
+			(newMessage.channel.id === CONSTANTS.channels.board?.id) &&
+		oldMessage.pinned !== newMessage.pinned
+	) {
 		logs.push(
 			`📌 Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
 				newMessage.pinned ? "" : "un"
 			}pinned`,
 		);
 	}
-	if (!oldMessage.partial && !newMessage.author.bot) {
+	if (
+		!oldMessage.partial &&
+		!newMessage.interaction &&
+		loggingThread.id !== newMessage.channel.id &&
+		newMessage.author.id !== CONSTANTS.robotop
+	) {
 		const files = [];
 		const contentDiff =
 			oldMessage.content !== null &&

@@ -6,12 +6,15 @@ import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js"
 
 /** @type {import("../../common/types/event").default<"messageDelete">} */
 export default async function event(message) {
-	if (!message.guild || message.guild.id !== process.env.GUILD_ID) return;
+	if (
+		!message.guild ||
+		message.guild.id !== process.env.GUILD_ID ||
+		CONSTANTS.channels.admin?.id === getBaseChannel(message.channel)?.id
+	)
+		return;
+
 	const shush =
-		message.partial ||
-		[CONSTANTS.channels.modlogs?.id, CONSTANTS.channels.admin?.id, undefined].includes(
-			getBaseChannel(message.channel)?.id,
-		);
+		message.partial || CONSTANTS.channels.modlogs?.id === getBaseChannel(message.channel)?.id;
 
 	const content = !shush && (await messageToText(message));
 	const { embeds, files } = shush
