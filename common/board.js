@@ -158,7 +158,7 @@ export async function updateBoard(message) {
 
 	const pings =
 		userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.boardPings ??
-		true;
+		process.env.NODE_ENV === "production";
 
 	if (boardMessage) {
 		if (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)) {

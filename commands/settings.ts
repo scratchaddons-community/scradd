@@ -44,15 +44,15 @@ const info: ChatInputCommand = {
 		const boardPings =
 				interaction.options.getBoolean("board-pings") ??
 				settingsForUser?.boardPings ??
-				true,
+				process.env.NODE_ENV === "production",
 			levelUpPings =
 				interaction.options.getBoolean("level-up-pings") ??
 				settingsForUser?.levelUpPings ??
-				true,
+				process.env.NODE_ENV === "production",
 			weeklyPings =
 				interaction.options.getBoolean("weekly-pings") ??
 				settingsForUser?.weeklyPings ??
-				true,
+				process.env.NODE_ENV === "production",
 			autoreactions =
 				interaction.options.getBoolean("autoreactions") ??
 				settingsForUser?.autoreactions ??

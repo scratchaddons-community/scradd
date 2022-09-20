@@ -39,7 +39,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		const date = new Date();
 		const nextLevelXp = getXpForLevel(newLevel + 1);
 		const pings =
-			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ?? true;
+			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ??
+			process.env.NODE_ENV === "production";
 		await CONSTANTS.channels.bots?.send({
 			content: "🎉" + (pings ? " " + to.toString() : ""),
 			embeds: [
@@ -129,7 +130,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					.filter(
 						(user) =>
 							userSettingsDatabase.data.find((settings) => user === settings.user)
-								?.weeklyPings ?? true,
+								?.weeklyPings ?? process.env.NODE_ENV === "production",
 					),
 			},
 			content:
