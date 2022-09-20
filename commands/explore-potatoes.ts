@@ -106,7 +106,7 @@ const info: ChatInputCommand = {
 		),
 
 	async interaction(interaction) {
-		await interaction.deferReply()
+		await interaction.deferReply();
 		const minReactions =
 			interaction.options.getInteger("minimum-reactions") ?? defaultMinReactions;
 		const user = interaction.options.getUser("user")?.id;

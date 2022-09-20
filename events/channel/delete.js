@@ -14,7 +14,7 @@ export default async function event(channel) {
 				[ChannelType.GuildStageVoice]: "Stage",
 				[ChannelType.GuildForum]: "Forum",
 			}[channel.type]
-		} channel #${channel.name} deleted! (ID ${channel.id})`,
+		} channel #${channel.name} deleted! (ID: ${channel.id})`,
 		"channels",
 	);
 }

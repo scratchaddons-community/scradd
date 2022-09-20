@@ -80,7 +80,7 @@ const RATELIMIT_TIMEOUT = 3_000;
 const RATELIMT_MESSAGE =
 	"If the thread title doesn’t update immediately, you may have been ratelimited. I will automatically change the title once the ratelimit is up (within the next hour).";
 
-const cooldowns: Record<Snowflake,number> = {};
+const cooldowns: Record<Snowflake, number> = {};
 const COOLDOWN = 60_000;
 
 /**
@@ -223,13 +223,13 @@ const info: ChatInputCommand = {
 			throw new ReferenceError("Could not find suggestions channel!");
 		const command = interaction.options.getSubcommand(true);
 
-		const message =
+		const starter =
 			interaction.channel?.isThread() && (await interaction.channel?.fetchStarterMessage());
 
-		if (message && message.author.id === client.user?.id) {
-			const emoji = message.reactions.valueOf().first()?.emoji;
+		if (starter && starter.author.id === client.user?.id) {
+			const emoji = starter.reactions.valueOf().first()?.emoji;
 			await reactAll(
-				message,
+				starter,
 				SUGGESTION_EMOJIS.find(([one]) => one === emoji?.id || emoji?.name) ||
 					SUGGESTION_EMOJIS[0] ||
 					[],
@@ -304,7 +304,6 @@ const info: ChatInputCommand = {
 					return;
 				}
 
-				const starter = await interaction.channel.fetchStarterMessage().catch(() => {});
 				if (!(interaction.member instanceof GuildMember))
 					throw new TypeError("interaction.member must be a GuildMember");
 
@@ -391,11 +390,7 @@ const info: ChatInputCommand = {
 					return false;
 				}
 
-				const starterMessage = await interaction.channel
-					.fetchStarterMessage()
-					.catch(() => {});
-
-				if (!starterMessage || starterMessage.author.id !== client.user?.id) {
+				if (!starter || starter.author.id !== client.user?.id) {
 					await interaction.reply({
 						content: `${CONSTANTS.emojis.statuses.no} Cannot edit this suggestion.`,
 						ephemeral: true,
@@ -403,7 +398,7 @@ const info: ChatInputCommand = {
 
 					return false;
 				}
-				const user = await getUserFromSuggestion(starterMessage);
+				const user = await getUserFromSuggestion(starter);
 				if (!(interaction.member instanceof GuildMember))
 					throw new TypeError("interaction.member must be a GuildMember");
 
@@ -418,8 +413,8 @@ const info: ChatInputCommand = {
 					return false;
 				}
 
-				const embed = starterMessage.embeds[0]
-					? EmbedBuilder.from(starterMessage.embeds[0])
+				const embed = starter.embeds[0]
+					? EmbedBuilder.from(starter.embeds[0])
 					: new EmbedBuilder();
 
 				if (body) embed.setDescription(body);
@@ -434,7 +429,7 @@ const info: ChatInputCommand = {
 						),
 						new Promise((resolve) => setTimeout(resolve, RATELIMIT_TIMEOUT)),
 					]),
-					starterMessage.edit({
+					starter.edit({
 						embeds: [embed.setTitle(title || embed.data.title || "")],
 					}),
 					interaction.reply({
@@ -445,10 +440,7 @@ const info: ChatInputCommand = {
 						}`,
 
 						ephemeral:
-							interaction.user.id ===
-							(
-								await getUserFromSuggestion(starterMessage)
-							).id,
+							interaction.user.id === (await getUserFromSuggestion(starter)).id,
 					}),
 				]);
 

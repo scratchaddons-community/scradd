@@ -398,7 +398,8 @@ export default async function event(message) {
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
 		const bot =
-			1 + +(!!message.interaction || /^(r!|<@323630372531470346>)\s*\w+/.test(message.content));
+			1 +
+			+(!!message.interaction || /^(r!|<@323630372531470346>)\s*\w+/.test(message.content));
 
 		promises.push(
 			giveXp(

@@ -43,7 +43,7 @@ export default class Database<Name extends keyof Databases> {
 
 	async init() {
 		this.message = databases[this.name] ||= await thread.send(
-			`**__SCRADD ${this.name.toUpperCase()} DATABASE__**\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
 				" ",
 			)} information may be reset.*`,
