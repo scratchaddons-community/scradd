@@ -175,7 +175,7 @@ export default async function event(message) {
 		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
 		(message.webhookId && message.author.id !== client.user?.id
-			? (await message.fetchWebhook()).owner?.id !== client.user?.id
+			? message.applicationId === client.application.id
 			: true) &&
 		message.interaction?.commandName !== "modmail close"
 	) {
@@ -333,7 +333,7 @@ export default async function event(message) {
 	const webhook =
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
 		message.webhookId &&
-		(await message.fetchWebhook()).applicationId === client.application.id;
+		message.webhookId === client.application.id;
 	if (message.channel.id === "1018702459776028782") {
 		const embed = message?.embeds[0];
 		if (!embed?.description) return;
@@ -379,8 +379,7 @@ export default async function event(message) {
 						return (
 							!(
 								foundMessage.webhookId &&
-								(await foundMessage.fetchWebhook()).applicationId ===
-									client.application.id
+								foundMessage.applicationId === client.application.id
 							) && index
 						);
 					}
