@@ -88,16 +88,16 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 				),
 			],
 
-			content: `**${BOARD_EMOJI} ${count}** | ${message.channel.toString()}${
-				message.channel.isThread()
-					? ` (${
+			content: `**${BOARD_EMOJI} ${count}** | ${
+				message.channel.isThread() && message.channel.parent
+					? `${
 							[CONSTANTS.channels.modmail?.id, CONSTANTS.channels.admin?.id].includes(
-								message.channel.parent?.id,
+								message.channel.parent.id,
 							)
 								? "#deleted-channel"
-								: message.channel.parent?.toString() ?? ""
-					  })`
-					: ""
+								: message.channel.toString()
+					  } (${message.channel.parent.toString()})`
+					: message.channel.toString()
 			} | ${message.author.toString()}`,
 			embeds: [boardEmbed, ...embeds],
 			files,
