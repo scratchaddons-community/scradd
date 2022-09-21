@@ -107,7 +107,9 @@ export default async function event(interaction) {
 		await command.interaction(interaction);
 	} catch (error) {
 		logError(error, interaction.toString());
-		await interaction[interaction.replied || interaction.deferred ? "reply" : "editReply"]({
+		await interaction[
+			interaction.replied ? "followUp" : interaction.deferred ? "editReply" : "reply"
+		]({
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 			embeds: [],
