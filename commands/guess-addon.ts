@@ -1633,15 +1633,15 @@ const info: ChatInputCommand = {
 						await componentInteraction.deferUpdate();
 						collector.resetTimer();
 
-						await (typeof selectIndex === "undefined" ||
-						typeof questionIndex === "undefined"
-							? answerQuestion(groupName)
-							: answerQuestion(
-									groupName,
-									questions[groupName as GroupName][+selectIndex]?.[
-										+questionIndex
-									],
-							  ));
+						await answerQuestion(
+							groupName,
+							(typeof selectIndex === "number" &&
+								typeof questionIndex === "number" &&
+								questions[groupName as GroupName][+selectIndex]?.[
+									+questionIndex
+								]) ||
+								undefined,
+						);
 					})
 					.on("end", async (_, reason) => {
 						CURRENTLY_PLAYING.delete(interaction.user.id);

@@ -121,90 +121,88 @@ async function getWarnsForMember(user) {
  */
 export async function getWarns(reply, interactor, filter) {
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	if (filter) {
-		const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
-		if (pinged) {
-			const user =
-				pinged === interactor.id
-					? interactor
-					: isMod && (await client.users.fetch(pinged).catch(() => {}));
+	if (!filter) return await reply(await getWarnsForMember(interactor));
 
-			if (user) return await reply(await getWarnsForMember(user));
-		} else {
-			const id = convertBase(filter, WARN_INFO_BASE, 10);
-			const channel = await getLoggingThread("members");
+	const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
+	if (pinged) {
+		const user =
+			pinged === interactor.id
+				? interactor
+				: isMod && (await client.users.fetch(pinged).catch(() => {}));
 
-			const idMessage = await channel?.messages.fetch(id).catch(() => {});
-			const message = idMessage || (await channel?.messages.fetch(filter).catch(() => {}));
+		return await reply(
+			user
+				? await getWarnsForMember(user)
+				: {
+						ephemeral: true,
+						content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
+				  },
+		);
+	}
+	const id = convertBase(filter, WARN_INFO_BASE, 10);
+	const channel = await getLoggingThread("members");
 
-			if (!message) {
-				await reply({
-					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-				});
-				return;
-			}
+	const idMessage =
+		(await channel?.messages.fetch(id).catch(() => {})) ||
+		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => { }));
 
-			/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
-			const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern.source, "g");
+	const message =
+		idMessage ||
+		(await channel?.messages.fetch(filter).catch(() => {})) ||
+		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
 
-			const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
-			if (userId !== interactor.id && !isMod)
-				return await reply({
-					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-				});
-			const member = await guild?.members.fetch(userId).catch(() => {});
-
-			const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
-
-			const nick = member?.displayName ?? user?.username;
-			const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
-			const embed = new EmbedBuilder()
-				.setColor(member?.displayColor ?? null)
-				.setAuthor(
-					nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null,
-				)
-				.setTitle(`Case \`${caseId}\``)
-				.setDescription(
-					await fetch(message.attachments.first()?.url || "").then((response) =>
-						response.text(),
-					),
-				)
-				.setTimestamp(message.createdAt)
-				.addFields({
-					name: "⚠ Strikes",
-					value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
-					inline: true,
-				});
-
-			const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
-			const mod =
-				isMod &&
-				((await guild?.members.fetch(moderatorId).catch(() => {})) ||
-					(await client.users.fetch(moderatorId).catch(() => {})));
-			if (mod) embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
-
-			if (user)
-				embed.addFields({ name: "🫂 Target user", value: user.toString(), inline: true });
-
-			const allWarns = await removeExpiredWarns(warnLog);
-			const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
-			if (expiresAt)
-				embed.addFields({
-					name: "⏲ Expirery",
-					value: time(new Date(expiresAt), "R"),
-					inline: true,
-				});
-
-			return await reply({ ephemeral: true, embeds: [embed] });
-		}
-	} else {
-		return await reply(await getWarnsForMember(interactor));
+	if (!message) {
+		return await reply({
+			ephemeral: true,
+			content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
+		});
 	}
 
-	await reply({
-		ephemeral: true,
-		content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-	});
+	/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
+	const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern.source, "g");
+
+	const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
+	if (userId !== interactor.id && !isMod)
+		return await reply({
+			ephemeral: true,
+			content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
+		});
+
+	const member = await guild?.members.fetch(userId).catch(() => {});
+	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
+	const nick = member?.displayName ?? user?.username;
+	const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
+
+	const embed = new EmbedBuilder()
+		.setColor(member?.displayColor ?? null)
+		.setAuthor(nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null)
+		.setTitle(`Case \`${caseId}\``)
+		.setDescription(
+			await fetch(message.attachments.first()?.url || "").then((response) => response.text()),
+		)
+		.setTimestamp(message.createdAt)
+		.addFields({
+			name: "⚠ Strikes",
+			value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
+			inline: true,
+		});
+
+	const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
+	const mod =
+		isMod &&
+		((await guild?.members.fetch(moderatorId).catch(() => {})) ||
+			(await client.users.fetch(moderatorId).catch(() => {})));
+	if (mod) embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
+	if (user) embed.addFields({ name: "🫂 Target user", value: user.toString(), inline: true });
+
+	const allWarns = await removeExpiredWarns(warnLog);
+	const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
+	if (expiresAt)
+		embed.addFields({
+			name: "⏲ Expirery",
+			value: time(new Date(expiresAt), "R"),
+			inline: true,
+		});
+
+	await reply({ ephemeral: true, embeds: [embed] });
 }

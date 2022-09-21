@@ -63,9 +63,11 @@ export default async function breakRecord(
 				},
 			);
 		oldRecord.time && embed.setTimestamp(oldRecord.time);
-		channel instanceof Message
-			? await channel.reply({ content: "🎊", embeds: [embed] })
-			: await channel.send({ content: "🎊", embeds: [embed] });
+
+		await (channel instanceof Message ? channel.reply : channel.send)({
+			content: "🎊",
+			embeds: [embed],
+		});
 	} else {
 		recordsDatabase.data = [
 			...recordsDatabase.data,

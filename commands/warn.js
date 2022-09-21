@@ -35,30 +35,25 @@ export default {
 
 		const actualStrikes = await warn(user, reason, strikes, interaction.user);
 
-		await interaction.reply(
-			actualStrikes === false
-				? {
-						content: `${
+		await interaction.reply({
+			allowedMentions: { users: [] },
+			content:
+				actualStrikes === false
+					? `${
 							CONSTANTS.emojis.statuses.no
-						} Cannot unwarn ${user.toString()} as they don’t have any active strikes.`,
-						ephemeral: true,
-				  }
-				: {
-						allowedMentions: { users: [] },
-						content:
-							CONSTANTS.emojis.statuses.yes +
-							` ${
-								["Unwarned", "Verbally warned", "Warned"][
-									Math.sign(actualStrikes) + 1
-								]
-							} ${user.toString()}${
-								Math.abs(actualStrikes) > 1
-									? ` ${Math.abs(actualStrikes)} time${
-											Math.abs(actualStrikes) === 1 ? "" : "s"
-									  }`
-									: ""
-							}.${reason ? " " + reason : ""}`,
-				  },
-		);
+					  } Cannot unwarn ${user.toString()} as they don’t have any active strikes.`
+					: CONSTANTS.emojis.statuses.yes +
+					  ` ${
+							["Unwarned", "Verbally warned", "Warned"][Math.sign(actualStrikes) + 1]
+					  } ${user.toString()}${
+							Math.abs(actualStrikes) > 1
+								? ` ${Math.abs(actualStrikes)} time${
+										Math.abs(actualStrikes) === 1 ? "" : "s"
+								  }`
+								: ""
+					  }.${reason ? " " + reason : ""}`,
+
+			ephemeral: actualStrikes === false,
+		});
 	},
 };

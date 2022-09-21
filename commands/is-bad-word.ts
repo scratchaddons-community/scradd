@@ -13,23 +13,19 @@ const info: ChatInputCommand = {
 
 	async interaction(interaction) {
 		const result = censor(interaction.options.getString("text", true));
-		if (result) {
-			const words = result.words.flat();
-			await interaction.reply({
-				ephemeral: true,
-				content:
-					`⚠ **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
-					`Posting that text would give you **${result.strikes} strike${
+
+		const words = result && result.words.flat();
+		await interaction.reply({
+			ephemeral: true,
+			content: words
+				? `⚠ **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
+				  `Posting that text would give you **${result.strikes} strike${
 						result.strikes === 1 ? "" : "s"
-					}**, ${result.strikes ? "so don’t" : "but please don’t still"}.\n\n` +
-					"**I detected the following words as bad**: " +
-					joinWithAnd(words, (word) => "*" + escapeMarkdown(word) + "*"),
-			});
-		} else
-			await interaction.reply({
-				ephemeral: true,
-				content: CONSTANTS.emojis.statuses.yes + " No bad words found.",
-			});
+				  }**, ${result.strikes ? "so don’t" : "but please don’t still"}.\n\n` +
+				  "**I detected the following words as bad**: " +
+				  joinWithAnd(words, (word) => "*" + escapeMarkdown(word) + "*")
+				: CONSTANTS.emojis.statuses.yes + " No bad words found.",
+		});
 	},
 
 	censored: false,
