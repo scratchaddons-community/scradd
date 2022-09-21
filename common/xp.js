@@ -213,27 +213,27 @@ const XP_PER_LEVEL = [
 	475_000, 487_500, 500_000, 515_000, 530_000, 545_000, 560_000, 575_000, 590_000, 605_000,
 ];
 
-// const INCREMENT_FREQUENCY = 10;
+const INCREMENT_FREQUENCY = 10;
 
-// /**
-//  * @param {number} level
-//  *
-//  * @returns {number}
-//  */
-// function getIncrementForLevel(level) {
-// 	const xpForLevel = XP_PER_LEVEL[level];
-// 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
+/**
+ * @param {number} level
+ *
+ * @returns {number}
+ */
+function getIncrementForLevel(level) {
+	const xpForLevel = XP_PER_LEVEL[level];
+	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 
-// 	if (xpForLevel !== undefined && xpForPreviousLevel !== undefined) {
-// 		return xpForLevel - xpForPreviousLevel;
-// 	}
-// 	if (level % INCREMENT_FREQUENCY === 0) {
-// 		const x = (level - XP_PER_LEVEL.length) / INCREMENT_FREQUENCY + 3;
-// 		// Credit to idkhow2type (and Jazza 😉) on the SA Discord for the following line
-// 		return ((x % 9) + 1) * 10 ** Math.floor(x / 9) * 5_000;
-// 	}
-// 	return getIncrementForLevel(Math.floor(level / INCREMENT_FREQUENCY) * INCREMENT_FREQUENCY);
-// }
+	if (xpForLevel !== undefined && xpForPreviousLevel !== undefined) {
+		return xpForLevel - xpForPreviousLevel;
+	}
+	if (level % INCREMENT_FREQUENCY === 0) {
+		const x = (level - XP_PER_LEVEL.length) / INCREMENT_FREQUENCY + 3;
+		// Credit to idkhow2type (and Jazza 😉) on the SA Discord for the following line
+		return ((x % 9) + 1) * 10 ** Math.floor(x / 9) * 5_000;
+	}
+	return getIncrementForLevel(Math.floor(level / INCREMENT_FREQUENCY) * INCREMENT_FREQUENCY);
+}
 
 /**
  * @param {number} level
@@ -243,8 +243,8 @@ const XP_PER_LEVEL = [
 export function getXpForLevel(level) {
 	const xpForLevel = XP_PER_LEVEL[level];
 	if (xpForLevel !== undefined) return xpForLevel;
-	throw new RangeError("Asked for XP for level " + level);
-	// return getXpForLevel(level - 1) + getIncrementForLevel(level);
+	
+	return getXpForLevel(level - 1) + getIncrementForLevel(level);
 }
 
 /** @param {number} xp */
