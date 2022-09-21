@@ -1055,9 +1055,7 @@ const info: ChatInputCommand = {
 							? [backInfo]
 							: getNextQuestions(addonProbabilities, askedQuestions);
 
-					const oldMessage = interaction.replied
-						? await interaction.fetchReply()
-						: undefined;
+					const oldMessage = interaction.replied && (await interaction.fetchReply());
 
 					if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0)) {
 						await answerWithAddon(
@@ -1091,7 +1089,7 @@ const info: ChatInputCommand = {
 							components: disableComponents(oldMessage.components),
 						});
 
-						await oldMessage.reply(
+						await interaction.followUp(
 							`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
 								manifest.version_name || manifest.version
 							})`,
@@ -1102,7 +1100,7 @@ const info: ChatInputCommand = {
 						return;
 					}
 
-					const message = await interaction[oldMessage ? "editReply" : "reply"]({
+					const message = await interaction[interaction.replied ? "editReply" : "reply"]({
 						components: [
 							new MessageActionRowBuilder().addComponents(
 								new ButtonBuilder()
@@ -1158,10 +1156,8 @@ const info: ChatInputCommand = {
 								})
 								.setTitle("🤔 Think of an addon…")
 								.setDescription(
-									(oldMessage?.embeds[0]?.description
-										? `${
-												oldMessage?.embeds[0]?.description || ""
-										  } **${justAnswered}**\n`
+									(oldMessage && oldMessage.embeds[0]?.description
+										? `${oldMessage.embeds[0].description} **${justAnswered}**\n`
 										: "") +
 										BULLET_POINT +
 										" " +
@@ -1169,15 +1165,16 @@ const info: ChatInputCommand = {
 								)
 								.setFooter({
 									text:
-										oldMessage?.embeds[0]?.footer?.text.replace(
-											/\d+ questions?/,
-											(previousCount) =>
-												`${
-													1 + +(previousCount.split(" ")[0] || 0)
-												} question${
-													previousCount === "0 questions" ? "" : "s"
-												}`,
-										) ||
+										(oldMessage &&
+											oldMessage.embeds[0]?.footer?.text.replace(
+												/\d+ questions?/,
+												(previousCount) =>
+													`${
+														1 + +(previousCount.split(" ")[0] || 0)
+													} question${
+														previousCount === "0 questions" ? "" : "s"
+													}`,
+											)) ||
 										`Answer my questions using the buttons below${CONSTANTS.footerSeperator}0 questions asked`,
 								}),
 						],
@@ -1324,7 +1321,7 @@ const info: ChatInputCommand = {
 					)?.name;
 
 					const oldMessage = await interaction.fetchReply();
-					await oldMessage.edit({
+					await interaction.editReply({
 						components: disableComponents(oldMessage.components),
 
 						embeds: [
@@ -1340,7 +1337,7 @@ const info: ChatInputCommand = {
 						],
 					});
 
-					const message = await oldMessage.reply({
+					const message = await interaction.followUp({
 						components: [
 							new MessageActionRowBuilder().addComponents(
 								...(typeof backInfo === "object"
@@ -1490,7 +1487,7 @@ const info: ChatInputCommand = {
 						})
 						.on("end", async () => {
 							CURRENTLY_PLAYING.delete(interaction.user.id);
-							await message.edit({
+							await interaction.editReply({
 								components: disableComponents(message.components),
 							});
 						});
@@ -1570,7 +1567,7 @@ const info: ChatInputCommand = {
 
 							if (hint) await answerQuestion(hint.group, hint.markdownless);
 							else {
-								await message.edit({
+								await interaction.editReply({
 									components: message.components?.map((row) =>
 										new MessageActionRowBuilder().setComponents(
 											row.components
@@ -1653,7 +1650,7 @@ const info: ChatInputCommand = {
 						const reply = await interaction.fetchReply();
 						await Promise.all([
 							reason === "time" &&
-								reply.reply(
+								interaction.followUp(
 									`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
 								),
 							interaction.editReply({
@@ -1735,7 +1732,7 @@ const info: ChatInputCommand = {
 						({ markdownless }) => markdownless === question,
 					);
 
-					await reply.edit({
+					await interaction.editReply({
 						components: [
 							selectGroupButton(doneGroups, groupName),
 							...(groupSelects.length > 0 ? groupSelects : []),

@@ -33,7 +33,6 @@ export async function checkIfUserPlaying(interaction) {
 
 		content: `${CONSTANTS.emojis.statuses.no} You already have an ongoing game!`,
 		ephemeral: true,
-		fetchReply: true,
 	});
 
 	return true;
