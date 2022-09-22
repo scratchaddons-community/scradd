@@ -2,7 +2,7 @@ import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { AbortError } from "node-fetch";
 import { cleanDatabaseListeners } from "../common/database.js";
 import type { ChatInputCommand } from "../common/types/command.js";
-import logError from "../lib/logError.js";
+import logError from "../util/logError.js";
 
 const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()

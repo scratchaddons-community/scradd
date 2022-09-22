@@ -12,9 +12,9 @@ import {
 import client, { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import giveXp from "../common/xp.js";
-import { escapeLinks } from "../lib/markdown.js";
-import { getAllMessages, paginate, reactAll } from "../lib/discord.js";
-import { truncateText } from "../lib/text.js";
+import { escapeLinks } from "../util/markdown.js";
+import { getAllMessages, paginate, reactAll } from "../util/discord.js";
+import { truncateText } from "../util/text.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 
 export const SUGGESTION_EMOJIS: [string, string][] = [

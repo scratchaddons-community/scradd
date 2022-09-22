@@ -16,17 +16,16 @@ import {
 	MessageComponentType,
 	ModalSubmitInteraction,
 	Snowflake,
+	ActionRowBuilder,
+	ModalActionRowComponentBuilder,
 } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
-import { generateHash, trimPatchVersion } from "../lib/text.js";
-import {
-	MessageActionRowBuilder,
-	ModalActionRowBuilder,
-} from "../common/types/ActionRowBuilder.js";
-import { disableComponents } from "../lib/discord.js";
+import { generateHash, trimPatchVersion } from "../util/text.js";
+import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
+import { disableComponents } from "../util/discord.js";
 import client from "../client.js";
 import type AddonManifest from "../common/types/addonManifest";
 import type { ChatInputCommand } from "../common/types/command";
@@ -1605,7 +1604,7 @@ const info: ChatInputCommand = {
 									.setTitle("Guess the addon!")
 									.setCustomId(generateHash("guessModal"))
 									.addComponents(
-										new ModalActionRowBuilder().addComponents(
+										new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
 											new TextInputBuilder()
 												.setCustomId("addon")
 												.setLabel("Which addon do you think it is?")

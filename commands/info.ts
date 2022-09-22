@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, time, Snowflake, EmbedBuilder, Role } from "discord.js";
 
-import { escapeMessage, replaceBackticks } from "../lib/markdown.js";
-import { joinWithAnd } from "../lib/text.js";
+import { escapeMessage } from "../util/markdown.js";
+import { joinWithAnd } from "../util/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import pkg from "../package.json" assert { type: "json" };
 import type { ChatInputCommand } from "../common/types/command.js";
@@ -170,9 +170,7 @@ const info: ChatInputCommand = {
 									value: joinWithAnd(
 										Object.entries(pkg.dependencies),
 										([dependency, version]) =>
-											`\`${replaceBackticks(
-												escapeMessage(dependency + "@" + version),
-											)}\``,
+											`\`${escapeMessage(dependency + "@" + version)}\``,
 									),
 									inline: true,
 								},

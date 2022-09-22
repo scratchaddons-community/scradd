@@ -10,16 +10,6 @@ import { escapeMarkdown, hyperlink } from "discord.js";
 export function escapeMessage(text) {
 	return escapeLinks(escapeMarkdown(text));
 }
-/**
- * Escape text for use inside inline code strings.
- *
- * @param {string} text - The text to escape.
- *
- * @returns {string} The escaped text.
- */
-export function replaceBackticks(text) {
-	return text.replaceAll("`", "'");
-}
 
 /**
  * Escape text for use in a link’s display or in a message sent by a webhook.

@@ -56,6 +56,6 @@ This directory contains files each exporting a [Command object](/common/types/co
 
 This directory contains functions used for a feature (like potatoboard) that are used across multiple files. The `audio` subdirectory contains audio files used in some commands. The `types` subdirectory contins types used across the codebase.
 
-#### `lib`
+#### `util`
 
 This directory contains utility functions used across the codebase. It is different from `common` as its functions are not specific to this bot but could be useful in other apps as well. Each file in this directory contains multiple utility commands that each deal with the same type of data.

@@ -1,4 +1,4 @@
-import logError from "../lib/logError.js";
+import logError from "../util/logError.js";
 
 /** @type {import("../common/types/event").default<"invalidated">} */
 export default async function event() {

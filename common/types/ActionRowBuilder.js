@@ -6,10 +6,3 @@ export class MessageActionRowBuilder extends ActionRowBuilder {
 		super();
 	}
 }
-
-/** @extends {ActionRowBuilder<import("discord.js").TextInputBuilder>} */
-export class ModalActionRowBuilder extends ActionRowBuilder {
-	constructor() {
-		super();
-	}
-}

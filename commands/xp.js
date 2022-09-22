@@ -2,8 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { guild } from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
-import { paginate } from "../lib/discord.js";
-import { makeProgressBar } from "../lib/numbers.js";
+import { paginate } from "../util/discord.js";
+import { makeProgressBar } from "../util/numbers.js";
 
 /** @type {import("../common/types/command").ChatInputCommand} */
 export default {

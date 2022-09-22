@@ -2,7 +2,7 @@ import { SlashCommandBuilder, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
 import type { ChatInputCommand } from "../common/types/command.js";
-import { joinWithAnd } from "../lib/text.js";
+import { joinWithAnd } from "../util/text.js";
 
 const info: ChatInputCommand = {
 	data: new SlashCommandBuilder()

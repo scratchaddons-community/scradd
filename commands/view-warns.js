@@ -17,7 +17,7 @@ import {
 	warnLog,
 	WARN_INFO_BASE,
 } from "../common/moderation/warns.js";
-import { convertBase } from "../lib/numbers.js";
+import { convertBase } from "../util/numbers.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 
 /** @type {import("../common/types/command").ChatInputCommand} */

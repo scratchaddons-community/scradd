@@ -2,10 +2,10 @@ import { Invite, cleanContent, FormattingPatterns } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
-import { stripMarkdown } from "../../lib/markdown.js";
-import { caesar, joinWithAnd, pingablify, normalize } from "../../lib/text.js";
+import { stripMarkdown } from "../../util/markdown.js";
+import { caesar, joinWithAnd, pingablify, normalize } from "../../util/text.js";
 import client, { guild } from "../../client.js";
-import { getBaseChannel } from "../../lib/discord.js";
+import { getBaseChannel } from "../../util/discord.js";
 /**
  * The index of each array determines how many strikes the word gives.
  *

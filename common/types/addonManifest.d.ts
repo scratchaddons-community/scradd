@@ -423,11 +423,3 @@ type AddonManifest = {
 };
 
 export default AddonManifest;
-
-export type WebsiteData = {
-	id: string;
-	name: AddonManifest["name"];
-	description: AddonManifest["description"];
-	tags: AddonManifest["tags"];
-	credits: AddonManifest["credits"];
-}[];

@@ -1,7 +1,7 @@
 import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
-import { stripMarkdown } from "../lib/markdown.js";
+import { stripMarkdown } from "../util/markdown.js";
 
 const DEFAULT_STRIKES = 1;
 

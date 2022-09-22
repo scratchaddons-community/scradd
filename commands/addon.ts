@@ -2,10 +2,10 @@ import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "di
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
-import { getBaseChannel } from "../lib/discord.js";
+import { getBaseChannel } from "../util/discord.js";
 
-import { escapeMessage, escapeLinks, generateTooltip } from "../lib/markdown.js";
-import { joinWithAnd } from "../lib/text.js";
+import { escapeMessage, escapeLinks, generateTooltip } from "../util/markdown.js";
+import { joinWithAnd } from "../util/text.js";
 import type { ChatInputCommand } from "../common/types/command";
 
 const fuse = new Fuse(addons, {

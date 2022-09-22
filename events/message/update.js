@@ -1,6 +1,6 @@
 import { automodMessage } from "../../common/moderation/automod.js";
 import log, { getLoggingThread } from "../../common/moderation/logging.js";
-import { extractMessageExtremities, getBaseChannel } from "../../lib/discord.js";
+import { extractMessageExtremities, getBaseChannel } from "../../util/discord.js";
 import jsonDiff from "json-diff";
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import diffLib from "difflib";

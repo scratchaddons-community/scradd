@@ -3,9 +3,9 @@ import warn from "../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../common/moderation/automod.js";
 import { getWarns } from "../commands/view-warns.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import logError from "../lib/logError.js";
+import logError from "../util/logError.js";
 
-import { importScripts } from "../lib/files.js";
+import { importScripts } from "../util/files.js";
 import path from "path";
 import url from "url";
 import { guessAddon } from "../commands/guess-addon.js";

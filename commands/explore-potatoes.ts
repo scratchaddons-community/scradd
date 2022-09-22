@@ -16,9 +16,9 @@ import {
 	boardReactionCount,
 } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { asyncFilter, firstTrueyPromise } from "../lib/promises.js";
-import { generateHash } from "../lib/text.js";
-import { disableComponents } from "../lib/discord.js";
+import { asyncFilter, firstTrueyPromise } from "../util/promises.js";
+import { generateHash } from "../util/text.js";
+import { disableComponents } from "../util/discord.js";
 import { guild } from "../client.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import type { ChatInputCommand } from "../common/types/command.js";

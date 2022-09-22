@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import log from "../../common/moderation/logging.js";
-import { getBaseChannel, messageToText } from "../../lib/discord.js";
+import { getBaseChannel, messageToText } from "../../util/discord.js";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 

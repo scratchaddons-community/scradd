@@ -20,14 +20,14 @@ import {
 	MODMAIL_UNSUPPORTED,
 } from "../../common/modmail.js";
 
-import { escapeMessage, stripMarkdown } from "../../lib/markdown.js";
-import { getBaseChannel, reactAll } from "../../lib/discord.js";
+import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
+import { getBaseChannel, reactAll } from "../../util/discord.js";
 import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
-import { normalize, truncateText } from "../../lib/text.js";
+import { normalize, truncateText } from "../../util/text.js";
 import client, { guild } from "../../client.js";
-import { asyncFilter } from "../../lib/promises.js";
+import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
-import logError from "../../lib/logError.js";
+import logError from "../../util/logError.js";
 
 const { GUILD_ID } = process.env;
 

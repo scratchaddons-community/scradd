@@ -1,7 +1,7 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
-import { nth } from "../lib/numbers.js";
+import { nth } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 

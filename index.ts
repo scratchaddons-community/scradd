@@ -4,10 +4,10 @@ import url from "url";
 
 import dotenv from "dotenv";
 
-import { importScripts } from "./lib/files.js";
+import { importScripts } from "./util/files.js";
 import pkg from "./package.json" assert { type: "json" };
 import fetch from "node-fetch";
-import { asyncFilter } from "./lib/promises.js";
+import { asyncFilter } from "./util/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import type Command from "./common/types/command";
 import http from "node:http";
@@ -27,7 +27,7 @@ declare global {
 dotenv.config();
 
 const { default: client, guild } = await import("./client.js");
-const { default: logError } = await import("./lib/logError.js");
+const { default: logError } = await import("./util/logError.js");
 const { cleanDatabaseListeners } = await import("./common/database.js");
 
 process

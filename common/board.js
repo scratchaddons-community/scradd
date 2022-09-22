@@ -7,7 +7,7 @@ import {
 	Message,
 } from "discord.js";
 import { guild } from "../client.js";
-import { extractMessageExtremities, getBaseChannel, messageToText } from "../lib/discord.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
 import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";

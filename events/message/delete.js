@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
-import { extractMessageExtremities, getBaseChannel, messageToText } from "../../lib/discord.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 
 /** @type {import("../../common/types/event").default<"messageDelete">} */

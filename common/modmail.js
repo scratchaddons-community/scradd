@@ -8,11 +8,11 @@ import {
 	ButtonStyle,
 	User,
 } from "discord.js";
-import { generateHash } from "../lib/text.js";
+import { generateHash } from "../util/text.js";
 
-import { escapeMessage } from "../lib/markdown.js";
-import { asyncFilter } from "../lib/promises.js";
-import { disableComponents, extractMessageExtremities, messageToText } from "../lib/discord.js";
+import { escapeMessage } from "../util/markdown.js";
+import { asyncFilter } from "../util/promises.js";
+import { disableComponents, extractMessageExtremities, messageToText } from "../util/discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
