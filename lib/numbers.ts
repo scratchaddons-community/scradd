@@ -54,34 +54,3 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 			: "")
 	);
 }
-
-/**
- * Convert milliseconds to time string (hh:mm:ss:mss).
- *
- * @author VisioN [`toTimeString`](https://stackoverflow.com/a/35890816/11866686)
- */
-export function millisecondsToTime(milliseconds: number) {
-	const timeString = new Date(milliseconds).toISOString().slice(11, -1);
-
-	if (milliseconds >= 86_400_000) {
-		// to extract ["hh", "mm:ss[.mss]"]
-		const [hours = 0, rest = ""] = timeString.split(/:(?=\d{2}:)/);
-		return (
-			+hours -
-			-24 * Math.floor(milliseconds / 86_400_000) +
-			"h " +
-			rest.replace(":", "m ") +
-			"s"
-		);
-	}
-
-	return timeString.replace(":", "h ").replace(":", "m ") + "s";
-}
-
-/** @author captain-yossarian From Ukraine [`Mapped`](https://stackoverflow.com/a/69090186/11866686) */
-export type NumberSmallerThan<
-	N extends number,
-	Result extends Array<unknown> = [],
-> = Result["length"] extends N
-	? Result[number]
-	: NumberSmallerThan<N, [...Result, Result["length"]]>;

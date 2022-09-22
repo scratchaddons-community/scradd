@@ -2,8 +2,6 @@ import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
-import breakRecord from "../../../common/records.js";
-import { usersDatabase } from "./add.js";
 
 /** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
 export default async function event(member) {
@@ -46,12 +44,6 @@ export default async function event(member) {
 			if (thread) closeModmail(thread, member.user, "Member left");
 		}),
 	];
-	if (banned && member.joinedAt)
-		promises.push(breakRecord(3, [member], Date.now() - +member.joinedAt));
-
-	usersDatabase.data = usersDatabase.data.filter(
-		({ user, time }) => user === member.id || time + 86_400_000 > Date.now(),
-	);
 
 	await Promise.all(promises);
 }

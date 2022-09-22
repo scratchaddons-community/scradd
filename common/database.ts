@@ -4,8 +4,6 @@ import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./moderation/logging.js";
 import client from "../client.js";
-import type { RECORDS } from "./records.js";
-import type { NumberSmallerThan } from "../lib/numbers.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -195,17 +193,5 @@ export type Databases = {
 		user: Snowflake;
 		/** How much XP they gained. */
 		xp: number;
-		/** The time when they gained it at. */
-		time: number;
 	};
-	records: {
-		record: NumberSmallerThan<typeof RECORDS.length>;
-		users: string;
-		count: number;
-		time: number;
-	};
-	vc_users: { user: Snowflake; time: number; channel: Snowflake };
-	messages: { author: Snowflake; time: number };
-	joins: { user: Snowflake; time: number };
-	chain: { channel: Snowflake; count: number; users: string };
 };

@@ -3,8 +3,6 @@ import {
 	EmbedBuilder,
 	MessageType,
 	ChannelType,
-	PermissionsBitField,
-	User,
 	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
@@ -29,19 +27,12 @@ import { normalize, truncateText } from "../../lib/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../lib/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
-import breakRecord from "../../common/records.js";
-import Database from "../../common/database.js";
 import logError from "../../lib/logError.js";
 
 const { GUILD_ID } = process.env;
 
 /** @type {Record<import("discord.js").Snowflake, import("discord.js").Message[]>} */
 const latestMessages = {};
-
-const messagesDatabase = new Database("messages");
-await messagesDatabase.init();
-const chainDatabase = new Database("chain");
-await chainDatabase.init();
 
 /** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
@@ -139,29 +130,6 @@ export default async function event(message) {
 		return;
 	}
 
-	const messages = await message.channel.messages.fetch({ limit: 2 });
-	const first = messages.first(),
-		last = messages.last();
-	if (
-		message.channel.type === ChannelType.GuildText &&
-		message.channel
-			.permissionsFor(message.guild.id)
-			?.has(PermissionsBitField.Flags.SendMessages)
-	) {
-		if (first && last) {
-			promises.push(
-				breakRecord(
-					0,
-					first.author.id === last.author.id
-						? [first.author]
-						: [first.author, last.author],
-					+first.createdAt - +last.createdAt,
-					message.channel,
-				),
-			);
-		}
-	}
-
 	if (
 		message.channel.id === CONSTANTS.channels.board?.id &&
 		message.type === MessageType.ChannelPinnedMessage
@@ -237,75 +205,6 @@ export default async function event(message) {
 	if (await automodMessage(message)) {
 		await Promise.all(promises);
 		return;
-	}
-
-	if (messagesDatabase.message?.id !== message.id) {
-		messagesDatabase.data = [
-			{ author: message.author.id, time: Date.now() },
-			...messagesDatabase.data.filter(({ time }) => time + 3_600_000 > Date.now()),
-		];
-	}
-
-	const messagesByUser = messagesDatabase.data.reduce(
-		(acc, gain) => {
-			acc[gain.author] ??= 0;
-			acc[gain.author] += 1;
-
-			return acc;
-		},
-		/** @type {Record<import("discord.js").Snowflake, number>} */
-		({}),
-	);
-	const users = (
-		await Promise.all(
-			Object.keys(messagesByUser).map((user) => client.users.fetch(user).catch(() => {})),
-		)
-	).filter(/** @returns {user is User} */ (user) => !!user);
-
-	const messageCount = Object.values(messagesByUser).reduce((sum, count) => sum + count, 0);
-	await breakRecord(5, users, users.length);
-	await breakRecord(7, users, messageCount);
-
-	const currentChain = chainDatabase.data.find(({ channel }) => channel === message.channel.id);
-	if (
-		message.content &&
-		first &&
-		last &&
-		first.content === last.content &&
-		first.author.id !== last.author.id
-	) {
-		chainDatabase.data = currentChain
-			? chainDatabase.data.map((data) =>
-					data.channel === message.channel.id
-						? {
-								channel: data.channel,
-								count: data.count + 1,
-								users: [
-									...new Set([...data.users.split("|"), message.author.id]),
-								].join("|"),
-						  }
-						: data,
-			  )
-			: [
-					...chainDatabase.data,
-					{
-						channel: message.channel.id,
-						count: 2,
-						users: first.author.id + "|" + last.author.id,
-					},
-			  ];
-	} else if (currentChain) {
-		chainDatabase.data = chainDatabase.data.filter(
-			({ channel }) => channel !== message.channel.id,
-		);
-		const users = (
-			await Promise.all(
-				currentChain.users
-					.split("|")
-					.map((user) => client.users.fetch(user).catch(() => {})),
-			)
-		).filter(/** @returns {user is User} */ (user) => !!user);
-		await breakRecord(9, users, currentChain.count, message.channel);
 	}
 
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {

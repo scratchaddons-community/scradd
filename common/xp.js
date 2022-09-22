@@ -1,15 +1,14 @@
 import { EmbedBuilder, GuildMember, User } from "discord.js";
-import client, { guild } from "../client.js";
+import { guild } from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../lib/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
-import breakRecord from "./records.js";
 
 export const xpDatabase = new Database("xp");
-export const hourlyDatabase = new Database("recent_xp");
+const weeklyXpDatabase = new Database("recent_xp");
 await xpDatabase.init();
-await hourlyDatabase.init();
+await weeklyXpDatabase.init();
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
@@ -35,8 +34,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	// send level up message
 	const oldLevel = getLevelForXp(oldXp);
 	const newLevel = getLevelForXp(newXp);
+	const date = new Date();
 	if (oldLevel !== newLevel) {
-		const date = new Date();
 		const nextLevelXp = getXpForLevel(newLevel + 1);
 		const pings =
 			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ??
@@ -86,24 +85,14 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	}
 
 	// Update recent DB & send weekly winners
-	const { weekly, hourly } = hourlyDatabase.data.reduce(
-		({ weekly, hourly }, gain) => {
-			if (gain.time + 3_600_000 > Date.now()) {
-				hourly.push(gain);
-			} else {
-				weekly[gain.user] ??= 0;
-				weekly[gain.user] += gain.xp;
-			}
-			return { weekly, hourly };
-		},
-		{
-			/** @type {Record<import("discord.js").Snowflake, number>} */
-			weekly: {},
-			/** @type {typeof hourlyDatabase["data"]} */
-			hourly: [],
-		},
-	);
-	const weeklyArray = Object.entries(weekly).map(([user, xp]) => ({ user, xp, time: 0 }));
+	weeklyXpDatabase.data = Object.entries(
+		[...weeklyXpDatabase.data, { user: to.id, xp: amount }].reduce((weekly, gain) => {
+			weekly[gain.user] ??= 0;
+			weekly[gain.user] += gain.xp;
+
+			return weekly;
+		}, /** @type {Record<import("discord.js").Snowflake, number>} */ ({})),
+	).map(([user, xp]) => ({ user, xp }));
 
 	const threads = CONSTANTS.channels.bots?.threads;
 
@@ -112,93 +101,66 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			(await threads?.create({ name: "Weekly Winners" }))
 	);
 
-	const date = new Date();
-	if (
-		+new Date() - +new Date(hourlyDatabase.extra || 1_662_854_400_000) > 604_800_000 && // More than a week since last weekly
-		weeklyArray.length
-	) {
-		hourlyDatabase.data = [...hourly, { user: to.id, xp: amount, time: Date.now() }];
-		hourlyDatabase.extra = Date.now() + "";
-		const sorted = weeklyArray.sort((a, b) => b.xp - a.xp);
-		sorted.splice(5);
-		date.setUTCDate(date.getUTCDate() - 7);
-		await (await thread?.messages.fetchPinned())?.first()?.unpin();
-		const message = await thread?.send({
-			allowedMentions: {
-				users: sorted
-					.map((gain) => gain.user)
-					.filter(
-						(user) =>
-							userSettingsDatabase.data.find((settings) => user === settings.user)
-								?.weeklyPings ?? process.env.NODE_ENV === "production",
-					),
-			},
-			content:
-				`__**Weekly Winners week of ${
-					[
-						"January",
-						"February",
-						"March",
-						"April",
-						"May",
-						"June",
-						"July",
-						"August",
-						"September",
-						"October",
-						"November",
-						"December",
-					][date.getUTCMonth()]
-				} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n` +
-				sorted
-					.map(
-						(gain, index) =>
-							`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${
-								gain.user
-							}> - ${gain.xp.toLocaleString()} XP`,
-					)
-					.join("\n"),
-		});
-		await message?.pin();
+	if (+date - +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000)) < 604_800_000) return;
+	// More than a week since last weekly
 
-		const role = CONSTANTS.roles.weekly_winner;
-		const ids = sorted.map(({ user }) => user);
-		if (role) {
-			await Promise.all([
-				...role.members.map((member) => {
-					if (!ids.includes(member.id)) return member.roles.remove(role);
-				}),
-				...sorted.map(({ user }) =>
-					guild.members
-						.fetch(user)
-						.catch(() => {})
-						.then((member) => member?.roles.add(role)),
+	weeklyXpDatabase.extra = +date + "";
+	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
+	sorted.splice(5);
+	date.setUTCDate(date.getUTCDate() - 7);
+	await (await thread?.messages.fetchPinned())?.first()?.unpin();
+	const message = await thread?.send({
+		allowedMentions: {
+			users: sorted
+				.map((gain) => gain.user)
+				.filter(
+					(user) =>
+						userSettingsDatabase.data.find((settings) => user === settings.user)
+							?.weeklyPings ?? process.env.NODE_ENV === "production",
 				),
-			]);
-		}
-	} else {
-		hourlyDatabase.data = [
-			...hourly,
-			...weeklyArray,
-			{ user: to.id, xp: amount, time: Date.now() },
-		];
-	}
-
-	const hourlyByUser = hourly.reduce(
-		(acc, gain) => {
-			acc[gain.user] ??= 0;
-			acc[gain.user] += gain.xp;
-
-			return acc;
 		},
-		/** @type {Record<import("discord.js").Snowflake, number>} */
-		({}),
-	);
+		content:
+			`__**Weekly Winners week of ${
+				[
+					"January",
+					"February",
+					"March",
+					"April",
+					"May",
+					"June",
+					"July",
+					"August",
+					"September",
+					"October",
+					"November",
+					"December",
+				][date.getUTCMonth()]
+			} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n` +
+			(sorted
+				.map(
+					(gain, index) =>
+						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${
+							gain.user
+						}> - ${gain.xp.toLocaleString()} XP`,
+				)
+				.join("\n") || "*Nobody got any XP this week!*"),
+	});
+	await message?.pin();
 
-	const topInHour = Object.entries(hourlyByUser).sort(([, a], [, b]) => b - a)[0];
-	if (topInHour && thread) {
-		const user = await client.users.fetch(topInHour[0]).catch(() => {});
-		if (user) await breakRecord(2, [user], topInHour[1], thread);
+	const role = CONSTANTS.roles.weekly_winner;
+	const ids = sorted.map(({ user }) => user);
+	if (role) {
+		await Promise.all([
+			...role.members.map((member) => {
+				if (!ids.includes(member.id)) return member.roles.remove(role);
+			}),
+			...sorted.map(({ user }) =>
+				guild.members
+					.fetch(user)
+					.catch(() => {})
+					.then((member) => member?.roles.add(role)),
+			),
+		]);
 	}
 }
 

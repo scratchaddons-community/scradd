@@ -4,8 +4,6 @@ import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
-import breakRecord from "../../../common/records.js";
-import { PermissionsBitField } from "discord.js";
 
 /** @type {import("../../../common/types/event").default<"messageReactionAdd">} */
 export default async function event(reaction, user) {
@@ -68,16 +66,4 @@ export default async function event(reaction, user) {
 
 		await updateBoard(message);
 	}
-
-	if (
-		message.channel
-			.permissionsFor(message.guild.id)
-			?.has(PermissionsBitField.Flags.SendMessages)
-	)
-		await breakRecord(
-			4,
-			[message.author],
-			message.reactions.valueOf().reduce((acc, reaction) => acc + reaction.count, 0),
-			message,
-		);
 }
