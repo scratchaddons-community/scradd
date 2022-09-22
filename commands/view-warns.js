@@ -144,7 +144,7 @@ export async function getWarns(reply, interactor, filter) {
 
 	const idMessage =
 		(await channel?.messages.fetch(id).catch(() => {})) ||
-		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => { }));
+		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
 
 	const message =
 		idMessage ||

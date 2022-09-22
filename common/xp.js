@@ -243,7 +243,7 @@ function getIncrementForLevel(level) {
 export function getXpForLevel(level) {
 	const xpForLevel = XP_PER_LEVEL[level];
 	if (xpForLevel !== undefined) return xpForLevel;
-	
+
 	return getXpForLevel(level - 1) + getIncrementForLevel(level);
 }
 
