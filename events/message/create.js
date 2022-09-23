@@ -139,7 +139,7 @@ export default async function event(message) {
 	}
 
 	if (
-		message.channel.type === ChannelType.GuildPublicThread &&
+		message.channel.type === ChannelType.PublicThread &&
 		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
 		(message.webhookId && message.author.id !== client.user?.id
@@ -209,7 +209,7 @@ export default async function event(message) {
 
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-		const spoilerHack = "||​||".repeat(200);
+		const spoilerHack = "||​||".repeat(199);
 
 		if (message.content.includes(spoilerHack)) {
 			const array = message.cleanContent.split(spoilerHack);

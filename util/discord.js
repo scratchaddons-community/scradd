@@ -8,6 +8,7 @@ import {
 	Message,
 	MessageType,
 	SelectMenuBuilder,
+	ChannelType,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks } from "./markdown.js";
@@ -18,7 +19,7 @@ import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 /**
  * @param {import("discord.js").Message | import("discord.js").PartialMessage} message
  *
- * @returns {Promise<Required<Pick<import("discord.js").MessageOptions, "embeds" | "files">>>}
+ * @returns {Promise<Required<Pick<import("discord.js").BaseMessageOptions, "embeds" | "files">>>}
  */
 export async function extractMessageExtremities(message, allowLanguage = true) {
 	const embeds = [
@@ -182,8 +183,10 @@ export async function messageToText(message, replies = true) {
 			return (
 				CONSTANTS.emojis.discord.edit +
 				` ${message.author.toString()} changed the ${
-					// message.channel.type === ChannelType.GuildForum ? "post title" :
-					"channel name"
+					message.channel.isThread() &&
+					message.channel.parent?.type === ChannelType.GuildForum
+						? "post title"
+						: "channel name"
 				}: **${escapeMessage(message.content)}**`
 			);
 		}
@@ -358,9 +361,7 @@ export async function reactAll(message, reactions) {
  * @param {(value: T, index: number, array: (T | undefined)[]) => string} toString
  * @param {string} failMessage
  * @param {string} title
- * @param {(
- * 	options: import("discord.js").WebhookEditMessageOptions,
- * ) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
+ * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
  */
 
 export async function paginate(array, toString, failMessage, title, reply) {

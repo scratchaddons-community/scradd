@@ -18,6 +18,7 @@ import {
 	Snowflake,
 	ActionRowBuilder,
 	ModalActionRowComponentBuilder,
+	chatInputApplicationCommandMention,
 } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -43,11 +44,12 @@ const fuse = new Fuse(addons, {
 		{ name: "description", weight: 2 },
 	],
 });
-const commandMarkdown = `\n\n*Run the </addon:${
+const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
+	"addon",
 	(await client.application?.commands.fetch({ guildId: process.env.GUILD_ID }))?.find(
 		(command) => command.name === "addon",
-	)?.id // TODO: chatInputApplicationCommandMention() (waiting on https://github.com/discordjs/discord.js/pull/8546)
-}> command for more information about this addon!*`;
+	)?.id,
+)} command for more information about this addon!*`;
 
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 

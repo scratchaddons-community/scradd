@@ -1,4 +1,4 @@
-import { EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { EmbedBuilder, ThreadAutoArchiveDuration, ButtonBuilder, ButtonStyle } from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
@@ -11,6 +11,7 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 
 /** @type {import("../../common/types/event").default<"threadUpdate">} */
 export default async function event(oldThread, newThread) {
@@ -43,7 +44,25 @@ export default async function event(oldThread, newThread) {
 				` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 		);
 	}
-
+	newThread.appliedTags; // TODO
+	if (oldThread.flags.has("Pinned") !== newThread.flags.has("Pinned")) {
+		await log(
+			`📌 Post ${
+				newThread.flags.has("Pinned") ? "" : "un"
+			}pinned in ${newThread.parent?.toString()}!`,
+			"messages",
+			{
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel("View Post")
+							.setStyle(ButtonStyle.Link)
+							.setURL(newThread.url),
+					),
+				],
+			},
+		);
+	}
 	if (
 		newThread.archived &&
 		(newThread.name === DATABASE_THREAD ||

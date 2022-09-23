@@ -10,7 +10,7 @@ export default async function event(channel) {
 				[ChannelType.GuildText]: "Text",
 				[ChannelType.GuildVoice]: "Voice",
 				[ChannelType.GuildCategory]: "Category",
-				[ChannelType.GuildNews]: "Announcement",
+				[ChannelType.GuildAnnouncement]: "Announcement",
 				[ChannelType.GuildStageVoice]: "Stage",
 				[ChannelType.GuildForum]: "Forum",
 			}[channel.type]

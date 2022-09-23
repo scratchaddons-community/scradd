@@ -88,7 +88,7 @@ export default /** @type {const} */ ({
 		),
 		board: enforceChannelType(
 			channels.find((channel) => !!channel?.name.endsWith("board")),
-			[ChannelType.GuildText, ChannelType.GuildNews],
+			[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 		),
 		welcome:
 			guild.systemChannel ||
