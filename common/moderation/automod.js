@@ -128,7 +128,7 @@ function decodeRegexes(regexes) {
 						e: "[*3e]",
 						h: "[#h]",
 						i: "[!*1i¡l|]",
-						l: "[!1i¡l|]",
+						l: "[l|]",
 						o: "[*0o]",
 						s: "[$5s]",
 						t: "[+t]",
