@@ -9,12 +9,12 @@ export default async function event(member) {
 	await log(`💨 Member ${member.toString()} left!`, "members");
 
 	const byes = [
-		`😩 Welp… **${member.user.username}** decided to leave… what a shame…`,
-		`⬅ Ahh… **${member.user.username}** left us… hope they’ll have safe travels!`,
-		`**${member.user.username}** made a bad decision and left! 😦 I wonder why… 🤔`,
-		`👎 For some reason **${member.user.username}** didn’t like it here…`,
-		`Can we get an F in the chat for **${member.user.username}**? They left! 😭`,
-		`🍴 Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
+		`Welp… **${member.user.username}** decided to leave… what a shame…`,
+		`Ahh… **${member.user.username}** left us… hope they’ll have safe travels!`,
+		`There goes another, bye **${member.user.username}**!`,
+		`Oop, **${member.user.username}** left… will they ever come back?`,
+		`Can we get an F in the chat for **${member.user.username}**? They left!`,
+		`Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
 	];
 
 	const banned = await guild.bans
@@ -26,16 +26,16 @@ export default async function event(member) {
 		.catch(() => {});
 
 	const bans = [
-		`😦 Oof… **${member.user.username}** got banned…`,
-		`${CONSTANTS.emojis.statuses.no} There’s no turning back for the banned **${member.user.username}**…`,
-		`👨‍🏫 Remember kids, don’t follow **${member.user.username}**’s example, it gets you banned.`,
-		`😡 Oop, **${member.user.username}** angered the mods and was banned!`,
-		`📜 **${member.user.username}** broke the rules and took an L`,
-		`💬 **${member.user.username}** was banned for talking about opacity slider too much. (JK, that’s not why.)`,
+		`Oof… **${member.user.username}** got banned…`,
+		`There’s no turning back for **${member.user.username}**…`,
+		`I don't think this was the best place for **${member.user.username}**…`,
+		`Oop, **${member.user.username}** angered the mods!`,
+		`**${member.user.username}** broke the rules and took an L`,
+		`**${member.user.username}** was banned ~~(he talked about opacity slider too much)~~`,
 	];
 
 	const promises = [
-		CONSTANTS.channels.welcome?.send(
+		CONSTANTS.channels.airport?.send(
 			(banned
 				? bans[Math.floor(Math.random() * bans.length)]
 				: byes[Math.floor(Math.random() * byes.length)]) || "",
