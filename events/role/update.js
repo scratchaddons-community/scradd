@@ -22,7 +22,7 @@ export default async function event(oldRole, newRole) {
 		logs.push(` set to ${newRole.mentionable ? "" : "dis"}allow anyone to @mention this role`);
 	}
 	if (oldRole.name !== newRole.name) {
-		logs.push(`renamed to ${newRole.name}`);
+		logs.push(` renamed to ${newRole.name}`);
 	}
 	if (oldRole.position !== newRole.position) {
 		logs.push(`moved to position ${newRole.position}`);
