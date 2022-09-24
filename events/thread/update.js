@@ -1,4 +1,4 @@
-import { EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
@@ -11,6 +11,7 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 
 /** @type {import("../../common/types/event").default<"threadUpdate">} */
 export default async function event(oldThread, newThread) {
@@ -55,7 +56,16 @@ export default async function event(oldThread, newThread) {
 
 	await Promise.all(
 		logs.map((edit) =>
-			log(`📃 Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`, "channels"),
+			log(`📃 Thread ${newThread.toString()}` + edit + `!`, "channels", {
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel("View Thread")
+							.setStyle(ButtonStyle.Link)
+							.setURL(newThread.url),
+					),
+				],
+			}),
 		),
 	);
 	const censored = censor(newThread.name);
