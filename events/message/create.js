@@ -165,17 +165,12 @@ export default async function event(message) {
 	// TODO forum
 	if (message.channel.id === "806605006072709130") {
 		promises.push(
-			message
-				.startThread({
-					name: truncateText(
-						message.cleanContent || message.embeds[0]?.title || "[image]",
-						50,
-					),
-				})
-				.then(
-					(thread) =>
-						thread.send({ allowedMentions: {}, content: "<@&809063330857615361>" }), // @Update Tester
+			message.startThread({
+				name: truncateText(
+					message.cleanContent || message.embeds[0]?.title || "[image]",
+					50,
 				),
+			}),
 		);
 	}
 
@@ -399,6 +394,7 @@ export default async function event(message) {
 		react(CONSTANTS.emojis.autoreact.e);
 
 	if (content.includes("quack") || includes("duck")) react("🦆");
+	if (includes("radio")) react("📻");
 	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
 	if (includes(/jef+[oa]l+o/) || includes(/buf+[oa]l+o/))
