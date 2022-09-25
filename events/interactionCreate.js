@@ -1,4 +1,4 @@
-import { ApplicationCommandType, GuildMember } from "discord.js";
+import { GuildMember } from "discord.js";
 import warn from "../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../common/moderation/automod.js";
 import { getWarns } from "../commands/view-warns.js";
@@ -74,10 +74,8 @@ export default async function event(interaction) {
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
 
-		const commandType = command.data.toJSON().type;
-
 		if (
-			commandType === ApplicationCommandType.ChatInput &&
+			interaction.isChatInputCommand() &&
 			("censored" in command && command.censored === "channel"
 				? !badWordsAllowed(interaction.channel)
 				: ("censored" in command && command.censored) ?? true)
