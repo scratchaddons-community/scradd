@@ -1320,20 +1320,17 @@ const info: ChatInputCommand = {
 					)?.name;
 
 					const oldMessage = await interaction.fetchReply();
+					const embed = new EmbedBuilder(oldMessage.embeds[0]?.toJSON()).setDescription(
+						`${
+							oldMessage.embeds[0]?.description || ""
+								? `${oldMessage.embeds[0]?.description || ""} **${justAnswered}**\n`
+								: ""
+						}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
+					);
 					await interaction.editReply({
 						components: disableComponents(oldMessage.components),
 
-						embeds: [
-							new EmbedBuilder(oldMessage.embeds[0]?.toJSON()).setDescription(
-								`${
-									oldMessage.embeds[0]?.description || ""
-										? `${
-												oldMessage.embeds[0]?.description || ""
-										  } **${justAnswered}**\n`
-										: ""
-								}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
-							),
-						],
+						embeds: [embed],
 					});
 
 					const message = await interaction.followUp({
@@ -1487,7 +1484,9 @@ const info: ChatInputCommand = {
 						.on("end", async () => {
 							CURRENTLY_PLAYING.delete(interaction.user.id);
 							await interaction.editReply({
-								components: disableComponents(message.components),
+								embeds: [
+									embed.setDescription(`${embed.data.description || ""} **Yes**`),
+								],
 							});
 						});
 				}
