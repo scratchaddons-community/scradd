@@ -36,14 +36,6 @@ export default async function event(oldChannel, newChannel) {
 	if (oldChannel.rawPosition !== newChannel.rawPosition)
 		edits.push(" was moved to position " + newChannel.rawPosition);
 
-	if (oldChannel.isTextBased() && newChannel.isTextBased()) {
-		if (oldChannel.nsfw !== newChannel.nsfw)
-			edits.push(` was made ${newChannel.nsfw ? "" : "non-"}age-restricted`);
-
-		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
-			edits.push("’s slowmode was set to " + newChannel.rateLimitPerUser + " seconds");
-	}
-
 	if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
 		oldChannel.bitrate !== newChannel.bitrate &&
 			edits.push("’s bitrate was set to " + newChannel.bitrate + "kbps");
@@ -67,6 +59,18 @@ export default async function event(oldChannel, newChannel) {
 			newChannel.type === ChannelType.GuildForum ||
 			newChannel.type === ChannelType.GuildAnnouncement)
 	) {
+		if (oldChannel.nsfw !== newChannel.nsfw)
+			edits.push(` was made ${newChannel.nsfw ? "" : "non-"}age-restricted`);
+
+		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
+			edits.push(
+				`’s ${
+					newChannel.type === ChannelType.GuildForum ? "post " : ""
+				}slowmode was set to ` +
+					newChannel.rateLimitPerUser +
+					" seconds",
+			);
+
 		if (oldChannel.topic !== newChannel.topic) {
 			log(`✏ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {
 				files: [
@@ -101,10 +105,26 @@ export default async function event(oldChannel, newChannel) {
 	}
 
 	if (oldChannel.type === ChannelType.GuildForum && newChannel.type === ChannelType.GuildForum) {
-		// TODO
-		oldChannel.availableTags;
-		oldChannel.defaultReactionEmoji;
-		oldChannel.defaultThreadRateLimitPerUser;
+		oldChannel.availableTags; // TODO
+
+		if (
+			oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
+			oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name
+		) {
+			edits.push(
+				"’s default reaction" +
+					(newChannel.defaultReactionEmoji
+						? " was set to " +
+						  (newChannel.defaultReactionEmoji.name ||
+								`<:${newChannel.defaultReactionEmoji.name}:${newChannel.defaultReactionEmoji.id}>`)
+						: " removed"),
+			);
+		}
+
+		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
+			edits.push(
+				`’s message slowmode was set to ` + newChannel.rateLimitPerUser + " seconds",
+			);
 	}
 
 	if (oldChannel.type === ChannelType.GuildVoice && newChannel.type === ChannelType.GuildVoice)
