@@ -22,7 +22,9 @@ export default {
 			await Promise.all([
 				interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 				log(
-					`💬 ${interaction.user.toString()} used \`/say\` in ${message.channel.toString()}!`,
+					`💬 ${interaction.user.toString()} used </${interaction.command?.name}:${
+						interaction.command?.id // TODO: chatInputApplicationCommandMention
+					}> in ${message.channel.toString()}!`,
 					"messages",
 					{
 						components: [

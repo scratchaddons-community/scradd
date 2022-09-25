@@ -13,7 +13,7 @@
 		"maxNodeModuleJsDepth": 0,
 		"module": "ESNext",
 		"moduleResolution": "Node",
-		"noEmitOnError": true,
+		"noEmitOnError": false,
 		"noErrorTruncation": true,
 		"noImplicitAny": true,
 		"noImplicitOverride": true,

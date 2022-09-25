@@ -90,7 +90,7 @@ const COOLDOWN = 60_000;
  *
  * @returns The member who made the suggestion.
  */
-async function getUserFromSuggestion(message: Message): Promise<GuildMember | User> {
+async function getUserFromSuggestion(message: Message<true>): Promise<GuildMember | User> {
 	const author =
 		message.author.id === CONSTANTS.robotop
 			? message.embeds[0]?.footer?.text.split(": ")[1]

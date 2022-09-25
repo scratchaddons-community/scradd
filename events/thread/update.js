@@ -44,7 +44,25 @@ export default async function event(oldThread, newThread) {
 				` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 		);
 	}
-
+	newThread.appliedTags; // TODO
+	if (oldThread.flags.has("Pinned") !== newThread.flags.has("Pinned")) {
+		await log(
+			`📌 Post ${
+				newThread.flags.has("Pinned") ? "" : "un"
+			}pinned in ${newThread.parent?.toString()}!`,
+			"messages",
+			{
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel("View Post")
+							.setStyle(ButtonStyle.Link)
+							.setURL(newThread.url),
+					),
+				],
+			},
+		);
+	}
 	if (
 		newThread.archived &&
 		(newThread.name === DATABASE_THREAD ||

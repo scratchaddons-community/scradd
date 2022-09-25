@@ -46,6 +46,8 @@ await boardDatabase.init();
 /**
  * @param {import("./database").Databases["board"] | import("discord.js").Message} info
  * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
+ *
+ * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
  */
 export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
@@ -177,7 +179,7 @@ export async function updateBoard(message) {
 			allowedMentions: pings ? undefined : { users: [] },
 		});
 
-		if (CONSTANTS.channels.board.type === ChannelType.GuildNews)
+		if (CONSTANTS.channels.board.type === ChannelType.GuildAnnouncement)
 			promises.push(boardMessage.crosspost());
 
 		boardDatabase.data = info

@@ -26,7 +26,7 @@ export default async function event(oldChannel, newChannel) {
 					[ChannelType.GuildText]: " text",
 					[ChannelType.GuildVoice]: " voice",
 					[ChannelType.GuildCategory]: " category",
-					[ChannelType.GuildNews]: "n announcement",
+					[ChannelType.GuildAnnouncement]: "n announcement",
 					[ChannelType.GuildStageVoice]: " stage",
 					[ChannelType.GuildForum]: " forum",
 				}[newChannel.type] +
@@ -60,8 +60,12 @@ export default async function event(oldChannel, newChannel) {
 	}
 
 	if (
-		(oldChannel.type === ChannelType.GuildText || oldChannel.type === ChannelType.GuildNews) &&
-		(newChannel.type === ChannelType.GuildText || newChannel.type === ChannelType.GuildNews)
+		(oldChannel.type === ChannelType.GuildText ||
+			oldChannel.type === ChannelType.GuildForum ||
+			oldChannel.type === ChannelType.GuildAnnouncement) &&
+		(newChannel.type === ChannelType.GuildText ||
+			newChannel.type === ChannelType.GuildForum ||
+			newChannel.type === ChannelType.GuildAnnouncement)
 	) {
 		if (oldChannel.topic !== newChannel.topic) {
 			log(`✏ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {
@@ -94,6 +98,13 @@ export default async function event(oldChannel, newChannel) {
 					}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
 					newChannel.defaultAutoArchiveDuration,
 			);
+	}
+
+	if (oldChannel.type === ChannelType.GuildForum && newChannel.type === ChannelType.GuildForum) {
+		// TODO
+		oldChannel.availableTags;
+		oldChannel.defaultReactionEmoji;
+		oldChannel.defaultThreadRateLimitPerUser;
 	}
 
 	if (oldChannel.type === ChannelType.GuildVoice && newChannel.type === ChannelType.GuildVoice)

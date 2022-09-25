@@ -7,7 +7,7 @@ import {
 	APIInteractionDataResolvedChannel,
 	GuildBasedChannel,
 	Snowflake,
-	InteractionReplyOptions,
+	BaseMessageOptions,
 } from "discord.js";
 
 import {
@@ -55,7 +55,7 @@ async function textChannelMatches(
 		}
 		case ChannelType.GuildForum:
 		case ChannelType.GuildText:
-		case ChannelType.GuildNews: {
+		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
 			const thread = await guild.channels.fetch(channelFound).catch(() => {});
 			return thread?.parent?.id === channelWanted.id;
@@ -97,11 +97,11 @@ const info: ChatInputCommand = {
 					ChannelType.GuildText,
 					ChannelType.GuildVoice,
 					ChannelType.GuildCategory,
-					ChannelType.GuildNews,
-					ChannelType.GuildNewsThread,
-					ChannelType.GuildPublicThread,
-					ChannelType.GuildPrivateThread,
-					// ChannelType.GuildForum,
+					ChannelType.GuildAnnouncement,
+					ChannelType.AnnouncementThread,
+					ChannelType.PublicThread,
+					ChannelType.PrivateThread,
+					// TODO: ChannelType.GuildForum,
 				),
 		),
 
@@ -129,10 +129,10 @@ const info: ChatInputCommand = {
 		const nextId = generateHash("next");
 		const prevId = generateHash("prev");
 
-		const messages: InteractionReplyOptions[] = [];
+		const messages: BaseMessageOptions[] = [];
 		let index = 0;
 
-		async function getNextMessage(): Promise<InteractionReplyOptions> {
+		async function getNextMessage(): Promise<BaseMessageOptions> {
 			const info = (await fetchedMessages.next()).value;
 
 			const reply = info

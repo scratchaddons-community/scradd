@@ -18,7 +18,7 @@ export default async function logError(error, event) {
 			"server",
 			{
 				files: [
-					new AttachmentBuilder(Buffer.from(generateError(error), "utf-8"), {
+					new AttachmentBuilder(Buffer.from(generateError(error).toString(), "utf-8"), {
 						name: "error.json",
 					}),
 				],
@@ -33,24 +33,28 @@ export default async function logError(error, event) {
 }
 
 /**
- * @param {any} error
+ * -
  *
- * @returns {string}
+ * @param {any} error
+ * @param {boolean} [returnObject]
+ *
+ * @returns {Record<string, any> | string}
  */
-const generateError = (error) => {
+const generateError = (error, returnObject = false) => {
 	if (typeof error === "object" || error.toString !== "function") {
 		const serialized = serializeError(error);
-		return typeof serialized === "string"
-			? serialized
-			: JSON.stringify(
-					{
-						...serialized,
-						stack: sanitizePath(error.stack).split("\n"),
-						errors: error.errors?.map(generateError),
-					},
-					undefined,
-					"  ",
-			  );
+
+		if (typeof serialized === "string") return serialized;
+		/** @type {unknown[]} */
+		const subErrors =
+			"errors" in error && error.errors instanceof Array ? error.errors : undefined;
+
+		const object = {
+			...serialized,
+			stack: sanitizePath(error.stack).split("\n"),
+			errors: subErrors?.map((sub) => generateError(sub, true)),
+		};
+		return returnObject ? object : JSON.stringify(object, null, "  ");
 	}
 	return error.toString();
 };
