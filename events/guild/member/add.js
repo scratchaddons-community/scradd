@@ -28,7 +28,7 @@ export default async function event(member) {
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(guild.memberCount)} member!`,
 	];
 
-	await CONSTANTS.channels.airport?.send({
+	await CONSTANTS.channels.welcome?.send({
 		content: greetings[Math.floor(Math.random() * greetings.length)],
 		files: `${guild.memberCount}`.includes("87")
 			? [

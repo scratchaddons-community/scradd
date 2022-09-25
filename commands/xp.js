@@ -111,10 +111,7 @@ export default {
 					},
 					"No users found.",
 					`Leaderboard for ${guild.name}`,
-					(data) =>
-						interaction[
-							interaction.replied || interaction.deferred ? "editReply" : "reply"
-						](data),
+					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 				);
 			}
 		}

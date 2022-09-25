@@ -6,17 +6,16 @@ const channels = await guild.channels.fetch();
 const roles = await guild.roles.fetch();
 
 const saRepo = "ScratchAddons/ScratchAddons";
-/** @type {string} */
-const latestRelease =
+const latestRelease: string =
 	process.env.NODE_ENV == "production"
-		? /** @type {any} */ (
-				await fetch(`https://api.github.com/repos/${saRepo}/releases/latest`).then((res) =>
+		? (
+				(await fetch(`https://api.github.com/repos/${saRepo}/releases/latest`).then((res) =>
 					res.json(),
-				)
+				)) as any
 		  ).tag_name
 		: "master";
 
-export default /** @type {const} */ ({
+export default {
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200b",
 	emojis: {
@@ -72,7 +71,7 @@ export default /** @type {const} */ ({
 	},
 	urls: {
 		usercountJson: "https://scratchaddons.com/usercount.json",
-		saSource: "https://raw.githubusercontent.com/ScratchAddons/ScratchAddons/" + latestRelease,
+		saSource: `https://raw.githubusercontent.com/ScratchAddons/ScratchAddons/${latestRelease}`,
 		saRepo,
 		latestRelease,
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
@@ -82,83 +81,52 @@ export default /** @type {const} */ ({
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: {
-		info: enforceChannelType(
-			channels.find((channel) => !!channel?.name.startsWith("📜")),
-			ChannelType.GuildCategory,
-		),
-		board: enforceChannelType(
-			channels.find((channel) => !!channel?.name.endsWith("board")),
-			[ChannelType.GuildText, ChannelType.GuildAnnouncement],
-		),
-		airport:
-			guild.systemChannel ||
-			enforceChannelType(
-				channels.find((channel) => "airport" === channel?.name),
-				ChannelType.GuildText,
-			),
-		mod:
-			guild.publicUpdatesChannel ||
-			enforceChannelType(
-				channels.find((channel) => "mod-talk" === channel?.name),
-				ChannelType.GuildText,
-			),
-		modlogs: enforceChannelType(
-			channels.find((channel) => !!channel?.name.endsWith("logs")),
-			ChannelType.GuildText,
-		),
-		admin: enforceChannelType(
-			channels.find((channel) => !!channel?.name.includes("admin")),
-			ChannelType.GuildText,
-		),
-		modmail: enforceChannelType(
-			channels.find((channel) => "modmail" === channel?.name),
-			ChannelType.GuildText,
-		),
-		devs: enforceChannelType(
-			channels.find((channel) => !!channel?.name.includes("devs")),
-			ChannelType.GuildText,
-		),
-		boosters: enforceChannelType(
-			channels.find((channel) => !!channel?.name.includes("boosters")),
-			ChannelType.GuildText,
-		),
-		youTube: enforceChannelType(
-			channels.find((channel) => !!channel?.name.includes("youtube")),
-			ChannelType.GuildText,
-		),
-		chat: enforceChannelType(
-			channels.find((channel) => !!channel?.name.startsWith("💬")),
-			ChannelType.GuildCategory,
-		),
-		general: enforceChannelType(
-			channels.find((channel) => "general" === channel?.name),
-			ChannelType.GuildText,
-		),
-		suggestions: enforceChannelType(
-			channels.find((channel) => "suggestions" === channel?.name),
-			ChannelType.GuildText,
-		),
-		bots: enforceChannelType(
-			channels.find((channel) => !!channel?.name.endsWith("bots")),
-			ChannelType.GuildText,
-		),
-		advertise: enforceChannelType(
-			channels.find((channel) => "advertise" === channel?.name),
-			ChannelType.GuildText,
-		),
-	},
-});
+		info: getChannel("📜", ChannelType.GuildCategory, "start"),
+		board: getChannel("board", [ChannelType.GuildText, ChannelType.GuildAnnouncement], "end"),
+		welcome: guild.systemChannel || getChannel("welcome", ChannelType.GuildText),
 
-/**
- * @template {ChannelType} T
- *
- * @param {import("discord.js").NonThreadGuildBasedChannel | undefined | null} channel
- * @param {T | T[]} type
- *
- * @returns {(import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined}
- */
-function enforceChannelType(channel, type) {
+		mod: guild.publicUpdatesChannel || getChannel("mod-talk", ChannelType.GuildText),
+		modlogs: getChannel("logs", ChannelType.GuildText, "end"),
+		admin: getChannel("admin", ChannelType.GuildText, "partial"),
+		modmail: getChannel("modmail", ChannelType.GuildText),
+
+		devs: getChannel("devs", ChannelType.GuildText, "partial"),
+		boosters: getChannel("boosters", ChannelType.GuildText, "partial"),
+		youTube: getChannel("youtube", ChannelType.GuildText, "partial"),
+
+		chat: getChannel("💬", ChannelType.GuildCategory, "start"),
+		general: getChannel("general", ChannelType.GuildText),
+		suggestions: getChannel("suggestions", ChannelType.GuildForum),
+
+		bots: getChannel("bots", ChannelType.GuildText, "end"),
+		advertise: getChannel("advertise", ChannelType.GuildText),
+
+		suggestionsOld: getChannel("suggestions", ChannelType.GuildText, "partial"),
+	},
+} as const;
+
+function getChannel<T extends ChannelType>(
+	name: string,
+	type: T | T[] = [],
+	matchType: "full" | "partial" | "start" | "end" = "full",
+): (import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined {
 	const types = [type].flat();
-	// @ts-expect-error -- This is correct.
-	return types.includes(channel?.type) ? channel : undefined;
+	return channels.find((channel): channel is typeof channel & { type: T } => {
+		// @ts-expect-error -- We want to see if the types match.
+		if (!channel || !types.includes(channel.type)) return false;
+
+		switch (matchType) {
+			case "full":
+				return channel.name === name;
+
+			case "partial":
+				return channel.name.includes(name);
+
+			case "start":
+				return channel.name.startsWith(name);
+
+			case "end":
+				return channel.name.endsWith(name);
+		}
+	});
 }

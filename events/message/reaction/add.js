@@ -1,5 +1,4 @@
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
-import { SUGGESTION_EMOJIS } from "../../../commands/suggestion.js";
 import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
@@ -35,15 +34,15 @@ export default async function event(reaction, user) {
 		}
 	}
 
-	if (message.channel.id === CONSTANTS.channels.suggestions?.id && user.id !== client?.user?.id) {
-		const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
-			emojis.includes(emoji.id ?? emoji.name ?? ""),
-		)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
+	// if (message.channel.id === CONSTANTS.channels.suggestions?.id && user.id !== client?.user?.id) {
+	// 	const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
+	// 		emojis.includes(emoji.id ?? emoji.name ?? ""),
+	// 	)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
 
-		await message.reactions
-			.resolve(otherReaction || (emoji.id ?? emoji.name ?? ""))
-			?.users.remove(user);
-	}
+	// 	await message.reactions
+	// 		.resolve(otherReaction || (emoji.id ?? emoji.name ?? ""))
+	// 		?.users.remove(user);
+	// }
 
 	if (
 		// Ignore when it’s the wrong emoji

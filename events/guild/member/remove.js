@@ -35,7 +35,7 @@ export default async function event(member) {
 	];
 
 	const promises = [
-		CONSTANTS.channels.airport?.send(
+		CONSTANTS.channels.welcome?.send(
 			(banned
 				? bans[Math.floor(Math.random() * bans.length)]
 				: byes[Math.floor(Math.random() * byes.length)]) || "",
