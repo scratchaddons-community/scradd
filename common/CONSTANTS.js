@@ -90,10 +90,10 @@ export default /** @type {const} */ ({
 			channels.find((channel) => !!channel?.name.endsWith("board")),
 			[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 		),
-		welcome:
+		airport:
 			guild.systemChannel ||
 			enforceChannelType(
-				channels.find((channel) => "welcome" === channel?.name),
+				channels.find((channel) => "airport" === channel?.name),
 				ChannelType.GuildText,
 			),
 		mod:

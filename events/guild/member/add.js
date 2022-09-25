@@ -14,21 +14,21 @@ export default async function event(member) {
 	await log(`👋 Member ${member.toString()} joined!`, "members");
 
 	const greetings = [
-		`👋 Everybody please welcome ${member.toString()} to ${guild.name}; they’re our ${nth(
+		`Everybody please welcome ${member.toString()} to ${guild.name}; they’re our ${nth(
 			guild.memberCount,
 		)} member!`,
-		`📢 A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
+		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
 			guild.memberCount,
 		)} member!`,
-		`➡ Here we go again… ${member.toString()} is here, our ${nth(guild.memberCount)} member!`,
-		`||🙄 Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
+		`Here we go again… ${member.toString()} is here, our ${nth(guild.memberCount)} member!`,
+		`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
 			guild.memberCount,
 		)})!`,
-		`🧐 What’s that? A new member? Yes, ${member.toString()}’s our ${nth(guild.memberCount)}!`,
+		`What’s that? A new member? Yes, ${member.toString()}’s our ${nth(guild.memberCount)}!`,
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(guild.memberCount)} member!`,
 	];
 
-	await CONSTANTS.channels.welcome?.send({
+	await CONSTANTS.channels.airport?.send({
 		content: greetings[Math.floor(Math.random() * greetings.length)],
 		files: `${guild.memberCount}`.includes("87")
 			? [

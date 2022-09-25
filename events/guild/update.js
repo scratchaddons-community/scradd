@@ -311,5 +311,5 @@ export default async function event(oldGuild, newGuild) {
 		);
 	}
 
-	await Promise.all(logs.map((edit) => log("✏" + edit + `!`, "server")));
+	await Promise.all(logs.map((edit) => log("✏ " + edit + `!`, "server")));
 }

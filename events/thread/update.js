@@ -1,4 +1,4 @@
-import { EmbedBuilder, ThreadAutoArchiveDuration, ButtonBuilder, ButtonStyle } from "discord.js";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
@@ -74,7 +74,16 @@ export default async function event(oldThread, newThread) {
 
 	await Promise.all(
 		logs.map((edit) =>
-			log(`📃 Thread ${oldThread.toString()} (${newThread.url})` + edit + `!`, "channels"),
+			log(`📃 Thread ${newThread.toString()}` + edit + `!`, "channels", {
+				components: [
+					new MessageActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel("View Thread")
+							.setStyle(ButtonStyle.Link)
+							.setURL(newThread.url),
+					),
+				],
+			}),
 		),
 	);
 	const censored = censor(newThread.name);
