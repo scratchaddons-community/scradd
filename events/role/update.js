@@ -25,11 +25,11 @@ export default async function event(oldRole, newRole) {
 		logs.push(` renamed to ${newRole.name}`);
 	}
 	if (oldRole.position !== newRole.position) {
-		logs.push(`moved to position ${newRole.position}`);
+		logs.push(` moved to position ${newRole.position}`);
 	}
 	if (oldRole.iconURL() !== newRole.iconURL() || oldRole.unicodeEmoji !== newRole.unicodeEmoji) {
 		logs.push(
-			`icon ${
+			`’s icon ${
 				newRole.iconURL() || newRole.unicodeEmoji
 					? `set to ${
 							newRole.iconURL() ? "<" + newRole.iconURL() + ">" : newRole.unicodeEmoji
