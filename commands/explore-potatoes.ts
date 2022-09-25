@@ -101,7 +101,7 @@ const info: ChatInputCommand = {
 					ChannelType.AnnouncementThread,
 					ChannelType.PublicThread,
 					ChannelType.PrivateThread,
-					ChannelType.GuildForum,
+					// TODO: ChannelType.GuildForum,
 				),
 		),
 
