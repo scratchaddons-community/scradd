@@ -49,7 +49,8 @@ setInterval(async () => {
 	).count;
 	await CONSTANTS.channels.info?.edit({
 		name: `📜 Info - ${count.toLocaleString([], {
-			maximumFractionDigits: 2,
+			maximumFractionDigits: 1,
+			minimumFractionDigits: 1,
 			notation: "compact",
 			compactDisplay: "short",
 		})} SA users!`,
@@ -57,6 +58,7 @@ setInterval(async () => {
 	await CONSTANTS.channels.chat?.edit({
 		name: `💬 Chat - ${guild.memberCount.toLocaleString([], {
 			maximumFractionDigits: 2,
+			minimumFractionDigits: 2,
 			notation: "compact",
 			compactDisplay: "short",
 		})} members!`,
