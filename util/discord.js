@@ -13,7 +13,7 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
-import { badAttachments, badStickers, censor } from "../common/moderation/automod.js";
+import { badAttachments, censor } from "../common/moderation/automod.js";
 import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 
 /**
@@ -23,11 +23,11 @@ import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
  */
 export async function extractMessageExtremities(message, allowLanguage = true) {
 	const embeds = [
-		...(!allowLanguage && typeof (await badStickers(message)).strikes === "number"
-			? []
-			: message.stickers.map((sticker) =>
-					new EmbedBuilder().setImage(sticker.url).setColor(Colors.Blurple),
-			  )),
+		...message.stickers
+			.filter((sticker) => {
+				return allowLanguage || !censor(sticker.name);
+			})
+			.map((sticker) => new EmbedBuilder().setImage(sticker.url).setColor(Colors.Blurple)),
 		...message.embeds
 			.filter((embed) => !embed.video)
 			.map((oldEmbed) => {

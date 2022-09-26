@@ -169,11 +169,24 @@ export function censor(text) {
  * @param {import("discord.js").Message | import("discord.js").PartialMessage} message
  */
 async function checkString(toCensor, message) {
-	/** @type {{ language: false | number; invites: false | number; bots: false | number }} */
-	const bad = { language: false, invites: false, bots: false };
+	/**
+	 * @type {{
+	 * 	language: false | number;
+	 * 	invites: false | number;
+	 * 	bots: false | number;
+	 * 	words: { language: string[]; invites: string[]; bots: string[] };
+	 * }}
+	 */
+	const bad = {
+		language: false,
+		invites: false,
+		bots: false,
+		words: { language: [], invites: [], bots: [] },
+	};
 	if (!badWordsAllowed(message.channel)) {
 		const censored = censor(toCensor);
 		if (censored) {
+			bad.words.language.push(...censored.words.flat());
 			bad.language = censored.strikes;
 		}
 	}
@@ -194,6 +207,7 @@ async function checkString(toCensor, message) {
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
 		if (botLinks) {
+			bad.words.bots.push(...botLinks);
 			bad.bots = botLinks.length;
 		}
 
@@ -207,13 +221,14 @@ async function checkString(toCensor, message) {
 				await Promise.all(
 					inviteCodes.map(async (code) => {
 						const invite = await client?.fetchInvite(code).catch(() => {});
-						return invite?.guild?.id === message.guild?.id;
+						return invite?.guild?.id === message.guild?.id || code;
 					}),
 				)
-			).filter(/** @returns {toWarn is true} */ (toWarn) => !toWarn).length;
+			).filter(/** @returns {toWarn is string} */ (toWarn) => toWarn !== true);
 
 			if (invitesToDelete) {
-				bad.invites = invitesToDelete;
+				bad.words.invites.push(...invitesToDelete);
+				bad.invites = invitesToDelete.length;
 			}
 		}
 	}
@@ -225,16 +240,9 @@ async function checkString(toCensor, message) {
 export async function automodMessage(message) {
 	const bad = (
 		await Promise.all([
-			checkString(stripMarkdown(message.content), message).then((info) => ({
-				...info,
-				words: {
-					language: typeof info.language === "number" ? [message.content] : [],
-					invites: typeof info.invites === "number" ? [message.content] : [],
-					bots: typeof info.bots === "number" ? [message.content] : [],
-				},
-			})),
-
+			checkString(stripMarkdown(message.content), message),
 			badAttachments(message),
+			...message.stickers.map(({ name }) => checkString(name, message)),
 		])
 	).reduce(
 		(bad, censored) => {
@@ -264,23 +272,18 @@ export async function automodMessage(message) {
 			words: { language: [], invites: [], bots: [] },
 		},
 	);
-	const stickerRating = await badStickers(message);
-	if (stickerRating.strikes) {
-		bad.words.language.push(...stickerRating.words);
-		bad.language = (bad.language || 0) + stickerRating.strikes;
-	}
+
 	const toStrike = [bad.language, bad.invites, bad.bots].filter(
 		/** @returns {strikes is false} */ (strikes) => strikes !== false,
 	);
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds
+				.filter(console.log)
 				.map((embed) => [
 					embed.description && cleanContent(embed.description, message.channel),
 					embed.title,
-					embed.url,
-					embed.image?.url,
-					embed.thumbnail?.url,
+					embed.video && embed.url,
 					embed.footer?.text,
 					embed.author?.name,
 					embed.author?.url,
@@ -289,11 +292,13 @@ export async function automodMessage(message) {
 				.flat()
 				.reduce((strikes, current) => {
 					const censored = current && censor(current);
+					console.log({ current, censored });
 					if (censored) {
 						bad.words.language.push(...censored.words.flat());
 					}
 					return censored ? +strikes + censored.strikes : strikes;
 				}, /** @type {number | false} */ (false));
+
 	if (typeof embedStrikes === "number") {
 		bad.language = (bad.language || 0) + embedStrikes;
 	}
@@ -332,33 +337,6 @@ export async function automodMessage(message) {
 			),
 		);
 	}
-
-	/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
-	const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji.source, "g");
-
-	const animatedEmojiCount = [...message.content.matchAll(GlobalAnimatedEmoji)].length;
-
-	const badAnimatedEmojis = animatedEmojiCount > 9 ? Math.round(animatedEmojiCount / 15) : false;
-
-	if (
-		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
-		typeof badAnimatedEmojis === "number"
-	) {
-		promises.push(
-			warn(
-				message.interaction?.user || message.author,
-				`Please don’t post that many animated emojis!`,
-				+badAnimatedEmojis,
-				message.content,
-			),
-			message.channel.send(
-				CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, lay off on the animated emojis please!`,
-			),
-		);
-	}
 	if (typeof bad.bots === "number") {
 		promises.push(
 			warn(
@@ -372,6 +350,33 @@ export async function automodMessage(message) {
 					` ${(
 						message.interaction?.user || message.author
 					).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`,
+			),
+		);
+	}
+
+	/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
+	const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji.source, "g");
+
+	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
+
+	const badAnimatedEmojis = animatedEmojis.length > 9 && Math.round(animatedEmojis.length / 15);
+
+	if (
+		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
+		typeof badAnimatedEmojis === "number"
+	) {
+		promises.push(
+			warn(
+				message.interaction?.user || message.author,
+				`Please don’t post that many animated emojis!`,
+				badAnimatedEmojis,
+				animatedEmojis.join("\n"),
+			),
+			message.channel.send(
+				CONSTANTS.emojis.statuses.no +
+					` ${(
+						message.interaction?.user || message.author
+					).toString()}, lay off on the animated emojis please!`,
 			),
 		);
 	}
@@ -396,14 +401,12 @@ export function badWordsAllowed(channel) {
 
 /** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
 export async function badAttachments(message) {
-	const censorString = async (/** @type {string} */ string) => await checkString(string, message);
-
 	/**
 	 * @type {{
 	 * 	language: false | number;
-	 * 	invites: false | number;
-	 * 	bots: false | number;
-	 * 	words: { language: string[]; invites: string[]; bots: string[] };
+	 * 	invites: false;
+	 * 	bots: false;
+	 * 	words: { language: string[]; invites: never[]; bots: never[] };
 	 * }}
 	 */
 	const bad = {
@@ -415,86 +418,24 @@ export async function badAttachments(message) {
 
 	await Promise.all(
 		message.attachments.map(async (attachment) => {
-			if (attachment.name) {
-				const censored = await censorString(attachment.name);
-				if (censored) {
-					if (typeof censored.language === "number") {
-						bad.language = (bad.language || 0) + censored.language;
-						bad.words.language.push(attachment.name);
-					}
+			for (const toCensor of [
+				attachment.name,
+				attachment.description,
+				(attachment.contentType?.startsWith("text/") ||
+					["application/json", "application/xml", "application/rss+xml"].includes(
+						attachment.contentType || "",
+					)) &&
+					(await fetch(attachment.url).then((res) => res.text())),
+			]) {
+				if (!toCensor) continue;
 
-					if (typeof censored.invites === "number") {
-						bad.invites = (bad.invites || 0) + censored.invites;
-						bad.words.invites.push(attachment.name);
-					}
+				const censored = await checkString(toCensor, message);
+				if (!censored) continue;
 
-					if (typeof censored.bots === "number") {
-						bad.bots = (bad.bots || 0) + censored.bots;
-						bad.words.bots.push(attachment.name);
-					}
+				if (typeof censored.language === "number") {
+					bad.language = (bad.language || 0) + censored.language;
+					bad.words.language.push(...censored.words.language);
 				}
-			}
-			if (attachment.description) {
-				const censored = await censorString(attachment.description);
-				if (censored) {
-					if (typeof censored.language === "number") {
-						bad.language = (bad.language || 0) + censored.language;
-						bad.words.language.push(attachment.description);
-					}
-
-					if (typeof censored.invites === "number") {
-						bad.invites = (bad.invites || 0) + censored.invites;
-						bad.words.invites.push(attachment.description);
-					}
-
-					if (typeof censored.bots === "number") {
-						bad.bots = (bad.bots || 0) + censored.bots;
-						bad.words.bots.push(attachment.description);
-					}
-				}
-			}
-			if (
-				attachment.contentType?.startsWith("text/") ||
-				["application/json", "application/xml", "application/rss+xml"].includes(
-					attachment.contentType || "",
-				)
-			) {
-				const content = await fetch(attachment.url).then((res) => res.text());
-				const censored = await censorString(content);
-				if (censored) {
-					if (typeof censored.language === "number") {
-						bad.language = (bad.language || 0) + censored.language;
-						bad.words.language.push(content);
-					}
-
-					if (typeof censored.invites === "number") {
-						bad.invites = (bad.invites || 0) + censored.invites;
-						bad.words.invites.push(content);
-					}
-
-					if (typeof censored.bots === "number") {
-						bad.bots = (bad.bots || 0) + censored.bots;
-						bad.words.bots.push(content);
-					}
-				}
-			}
-		}),
-	);
-
-	return bad;
-}
-
-/** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
-export async function badStickers(message) {
-	/** @type {{ strikes: false | number; words: string[] }} */
-	const bad = { strikes: false, words: [] };
-
-	await Promise.all(
-		message.stickers.map(async ({ name }) => {
-			const censored = await checkString(name, message);
-			if (typeof censored.language === "number") {
-				bad.strikes = (bad.strikes || 0) + censored.language;
-				bad.words.push(name);
 			}
 		}),
 	);
