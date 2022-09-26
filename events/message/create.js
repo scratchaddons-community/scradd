@@ -35,7 +35,7 @@ const latestMessages = {};
 
 /** @type {import("../../common/types/event").default<"messageCreate">} */
 export default async function event(message) {
-	if (message.flags.has("Ephemeral")) return;
+	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
 	const promises = [];
 
 	let reactions = 0;
@@ -142,7 +142,7 @@ export default async function event(message) {
 		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
 		(message.webhookId && message.author.id !== client.user?.id
-			? message.applicationId === client.application.id
+			? message.applicationId !== client.application.id
 			: true) &&
 		message.interaction?.commandName !== "modmail close"
 	) {
