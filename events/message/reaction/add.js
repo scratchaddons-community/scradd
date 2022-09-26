@@ -3,6 +3,7 @@ import warn from "../../../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
+import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
 
 /** @type {import("../../../common/types/event").default<"messageReactionAdd">} */
 export default async function event(reaction, user) {
@@ -34,20 +35,23 @@ export default async function event(reaction, user) {
 		}
 	}
 
-	// if (message.channel.id === CONSTANTS.channels.suggestions?.id && user.id !== client?.user?.id) {
-	// 	const otherReaction = SUGGESTION_EMOJIS.find((emojis) =>
-	// 		emojis.includes(emoji.id ?? emoji.name ?? ""),
-	// 	)?.find((otherEmoji) => otherEmoji !== (emoji.id ?? emoji.name ?? ""));
-
-	// 	await message.reactions
-	// 		.resolve(otherReaction || (emoji.id ?? emoji.name ?? ""))
-	// 		?.users.remove(user);
-	// }
-
 	if (
-		// Ignore when it’s the wrong emoji
-		emoji.name === BOARD_EMOJI
+		message.channel.parent?.id === CONSTANTS.channels.suggestions?.id &&
+		message.channel.isThread() &&
+		(await message.channel.fetchStarterMessage())?.id === message.id
 	) {
+		const defaultEmoji = CONSTANTS.channels.suggestions?.defaultReactionEmoji;
+		if (defaultEmoji?.id === emoji.id || defaultEmoji?.name === emoji.name) {
+			suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>
+				suggestion.id === message.id
+					? { ...suggestion, count: reaction.count || 0 }
+					: suggestion,
+			);
+		} else await message.reactions.resolve(reaction)?.users.remove(user);
+	}
+
+	// Ignore when it’s the wrong emoji
+	if (emoji.name === BOARD_EMOJI) {
 		if (
 			// If they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||

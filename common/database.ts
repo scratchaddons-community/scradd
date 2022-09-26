@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./moderation/logging.js";
 import client from "../client.js";
+import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -134,11 +135,11 @@ export default class Database<Name extends keyof Databases> {
 	}
 }
 
-export function cleanDatabaseListeners() {
+export async function cleanDatabaseListeners() {
 	console.log(`Cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts)}`);
-	return Promise.all(Object.values(timeouts).map((info) => info?.callback())).then(
-		() => (timeouts = {}) && console.log("Listeners cleaned"),
-	);
+	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
+	timeouts = {};
+	console.log("Listeners cleaned");
 }
 
 exitHook((callback) => cleanDatabaseListeners().then(callback));
@@ -189,9 +190,18 @@ export type Databases = {
 		autoreactions: boolean;
 	};
 	recent_xp: {
+		/** @deprecated */
+		date?: number;
 		/** The ID of the user. */
 		user: Snowflake;
 		/** How much XP they gained. */
 		xp: number;
+	};
+	suggestions: {
+		answer: typeof suggestionAnswers[number];
+		author: string;
+		count: number;
+		id: string;
+		title: string;
 	};
 };

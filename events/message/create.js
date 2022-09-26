@@ -6,7 +6,6 @@ import {
 	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import warn from "../../common/moderation/warns.js";
 import { automodMessage } from "../../common/moderation/automod.js";
 
 import {
@@ -171,29 +170,6 @@ export default async function event(message) {
 					50,
 				),
 			}),
-		);
-	}
-
-	const mentions = (
-		process.env.NODE_ENV === "production"
-			? message.mentions.users.filter((user) => user.id !== message.author.id && !user.bot)
-			: message.mentions.users
-	).size;
-
-	if (
-		mentions > 4 &&
-		CONSTANTS.roles.mod &&
-		message.member &&
-		!message.member.roles.resolve(CONSTANTS.roles.mod.id)
-	) {
-		promises.push(
-			warn(
-				message.member,
-				`Please don’t ping so many people!`,
-				Math.round(mentions / 5),
-				message.content,
-			),
-			message.reply(CONSTANTS.emojis.statuses.no + " Please don’t ping so many people!"),
 		);
 	}
 

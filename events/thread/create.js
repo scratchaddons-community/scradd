@@ -1,10 +1,27 @@
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
+import { suggestionAnswers, suggestionsDatabase } from "../../commands/get-top-suggestions.js";
+import client from "../../client.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../common/types/event").default<"threadCreate">} */
 export default async function event(thread, newlyCreated) {
-	if (thread.guild.id !== process.env.GUILD_ID || badWordsAllowed(thread) || !newlyCreated)
-		return;
+	if (thread.guild.id !== process.env.GUILD_ID || !newlyCreated) return;
+
+	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
+		suggestionsDatabase.data = [
+			...suggestionsDatabase.data,
+			{
+				answer: suggestionAnswers[0],
+				author: thread.ownerId || client.user.id,
+				count: 0,
+				id: thread.id,
+				title: thread.name,
+			},
+		];
+	}
+
+	if (badWordsAllowed(thread)) return;
 	const censored = censor(thread.name);
 	if (censored) {
 		await thread.setName(censored.censored.replaceAll(/#+/g, "x"));

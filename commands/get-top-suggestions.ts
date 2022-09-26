@@ -4,8 +4,10 @@ import { escapeLinks } from "../util/markdown.js";
 import { getAllMessages, paginate } from "../util/discord.js";
 import { truncateText } from "../util/text.js";
 import type { ChatInputCommand } from "../common/types/command.js";
+import Database from "../common/database.js";
+import { guild } from "../client.js";
 
-const ANSWERS = [
+export const suggestionAnswers = [
 	"Unanswered",
 	"Good Idea",
 	"Implemented",
@@ -17,14 +19,18 @@ const ANSWERS = [
 	"Rejected",
 ] as const;
 
+export const suggestionsDatabase = new Database("suggestions");
+await suggestionsDatabase.init();
+
 const old = CONSTANTS.channels.suggestionsOld
 	? (await getAllMessages(CONSTANTS.channels.suggestionsOld)).map((message) => {
 			const embed = message.embeds[0];
 
 			return {
 				answer:
-					ANSWERS.find((answer)=>[message.thread?.name[0], message.thread?.name.at(-1)].includes(answer)) ||
-					ANSWERS[0],
+					suggestionAnswers.find((answer) =>
+						[message.thread?.name[0], message.thread?.name.at(-1)].includes(answer),
+					) || suggestionAnswers[0],
 
 				author:
 					(message.author.id === CONSTANTS.robotop
@@ -62,7 +68,9 @@ const info: ChatInputCommand = {
 				.setName("answer")
 				.setDescription("Filter suggestions to only get those with a certain answer")
 				.setRequired(false)
-				.addChoices(...ANSWERS.map((answer) => ({ name: answer, value: answer }))),
+				.addChoices(
+					...suggestionAnswers.map((answer) => ({ name: answer, value: answer })),
+				),
 		),
 
 	async interaction(interaction) {
@@ -73,7 +81,8 @@ const info: ChatInputCommand = {
 		const nick = author instanceof GuildMember && author?.displayName;
 
 		await paginate(
-			old
+			[old, suggestionsDatabase.data]
+				.flat()
 				.filter(
 					(item) =>
 						!(
@@ -85,9 +94,11 @@ const info: ChatInputCommand = {
 			(suggestion) =>
 				`**${suggestion.count}** ${suggestions?.defaultReactionEmoji?.name} ${hyperlink(
 					escapeLinks(suggestion.title),
-					suggestion.url,
+					"url" in suggestion
+						? suggestion.url
+						: `https://discord.com/channels/${guild.id}/${suggestion.id}/${suggestion.id}`,
 					suggestion.answer,
-				)}${nick ? "" : ` by ${suggestion.author.toString()}`}`,
+				)}${nick ? "" : ` by <@${suggestion.author}>`}`,
 			"No suggestions found. Try changing any filters you may have used.",
 			`Top suggestions${nick ? ` by ${nick}` : ""}${
 				answer ? `${nick ? " &" : ""} answered with ${answer}` : ""

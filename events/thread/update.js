@@ -12,10 +12,32 @@ import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
+import { suggestionsDatabase } from "../../commands/get-top-suggestions.js";
+import { suggestionAnswers } from "../../commands/get-top-suggestions.js";
 
 /** @type {import("../../common/types/event").default<"threadUpdate">} */
 export default async function event(oldThread, newThread) {
 	if (newThread.guild.id !== process.env.GUILD_ID) return;
+
+	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
+		suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>
+			suggestion.id === newThread.id
+				? {
+						...suggestion,
+						answer:
+							/** @type {typeof suggestionAnswers[number] | undefined} */ (
+								CONSTANTS.channels.suggestions?.availableTags.find(
+									(tag) =>
+										// @ts-expect-error -- We want to see if the types match.
+										suggestionAnswers.includes(tag.name) &&
+										newThread.appliedTags.includes(tag.id),
+								)?.name
+							) || suggestionAnswers[0],
+						title: newThread.name,
+				  }
+				: suggestion,
+		);
+	}
 
 	const logs = [];
 	if (oldThread.archived !== newThread.archived) {

@@ -85,14 +85,12 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	}
 
 	// Update recent DB & send weekly winners
-	weeklyXpDatabase.data = Object.entries(
-		[...weeklyXpDatabase.data, { user: to.id, xp: amount }].reduce((weekly, gain) => {
-			weekly[gain.user] ??= 0;
-			weekly[gain.user] += gain.xp;
-
-			return weekly;
-		}, /** @type {Record<import("discord.js").Snowflake, number>} */ ({})),
-	).map(([user, xp]) => ({ user, xp }));
+	const weeklyObject = Object.fromEntries(
+		weeklyXpDatabase.data.filter((gain) => !gain.date).map((gain) => [gain.user, gain.xp]),
+	);
+	weeklyObject[to.id] ??= 0;
+	weeklyObject[to.id] += amount;
+	weeklyXpDatabase.data = Object.entries(weeklyObject).map(([user, xp]) => ({ user, xp }));
 
 	const threads = CONSTANTS.channels.bots?.threads;
 
