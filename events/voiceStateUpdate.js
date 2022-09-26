@@ -1,3 +1,4 @@
+import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/moderation/logging.js";
 
 /** @type {import("../common/types/event").default<"voiceStateUpdate">} */
@@ -5,7 +6,7 @@ export default async function event(oldState, newState) {
 	if (!newState.member || newState.guild.id !== process.env.GUILD_ID) return;
 
 	const logs = [];
-	if (oldState.channel?.id !== newState.channel?.id || !newState.channel) {
+	if (oldState.channel?.id !== newState.channel?.id && newState.member.id !== CONSTANTS.robotop) {
 		if (newState.channel) {
 			logs.push(
 				`joined voice channel ${newState.channel.toString()}, ${
@@ -16,7 +17,7 @@ export default async function event(oldState, newState) {
 		if (oldState.channel) {
 			logs.push(`left voice channel ${oldState.channel.toString()}`);
 		}
-	} else {
+	} else if (newState.channel) {
 		if (oldState.serverMute !== newState.serverMute) {
 			logs.push(`was${newState.serverMute ? "" : " un"} server muted`);
 		} else if (oldState.mute !== newState.mute) {

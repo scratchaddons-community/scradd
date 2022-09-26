@@ -95,20 +95,18 @@ export default async function event(oldGuild, newGuild) {
 		);
 	}
 	if (
+		oldGuild.features.includes("INVITES_DISABLED") !==
+		newGuild.features.includes("INVITES_DISABLED")
+	) {
+		logs.push(`➕ Invites ${newGuild.features.includes("INVITES_DISABLED") ? "" : "un"}paused`);
+	}
+	if (
 		oldGuild.features.includes("HAS_DIRECTORY_ENTRY") !==
 		newGuild.features.includes("HAS_DIRECTORY_ENTRY")
 	) {
 		logs.push(
-			`➕ Invites ${newGuild.features.includes("HAS_DIRECTORY_ENTRY") ? "" : "un"}paused`,
-		);
-	}
-	if (
-		oldGuild.features.includes("INVITES_DISABLED") !==
-		newGuild.features.includes("INVITES_DISABLED")
-	) {
-		logs.push(
 			`Server ${
-				newGuild.features.includes("INVITES_DISABLED") ? "add" : "remov"
+				newGuild.features.includes("HAS_DIRECTORY_ENTRY") ? "add" : "remov"
 			}ed from a directory channel`,
 		);
 	}
