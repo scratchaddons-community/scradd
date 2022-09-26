@@ -280,7 +280,6 @@ export async function automodMessage(message) {
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds
-				.filter(console.log)
 				.map((embed) => [
 					embed.description && cleanContent(embed.description, message.channel),
 					embed.title,
@@ -293,7 +292,6 @@ export async function automodMessage(message) {
 				.flat()
 				.reduce((strikes, current) => {
 					const censored = current && censor(current);
-					console.log({ current, censored });
 					if (censored) {
 						bad.words.language.push(...censored.words.flat());
 					}
