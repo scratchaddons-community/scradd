@@ -20,6 +20,7 @@ const badWords = [
 		[
 			/cbea/,
 			/ahqr/,
+			/ahqvgl/,
 			/grfgvpyr/,
 			/fpuzhpx/,
 			/ohgg(?:[ -]?cvengr)/,
