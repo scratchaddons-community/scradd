@@ -11,12 +11,11 @@ export const suggestionAnswers = [
 	"Unanswered",
 	"Good Idea",
 	"Implemented",
-	"Impossible",
-	"Impractical",
 	"In Development",
-	"Possible",
 	"Incompatible",
+	"Impractical",
 	"Rejected",
+	"Impossible",
 ] as const;
 
 export const suggestionsDatabase = new Database("suggestions");
@@ -26,10 +25,12 @@ const old = CONSTANTS.channels.suggestionsOld
 	? (await getAllMessages(CONSTANTS.channels.suggestionsOld)).map((message) => {
 			const embed = message.embeds[0];
 
+			const segments = message.thread?.name.split(" | ");
+
 			return {
 				answer:
 					suggestionAnswers.find((answer) =>
-						[message.thread?.name[0], message.thread?.name.at(-1)].includes(answer),
+						[segments?.[0], segments?.at(-1)].includes(answer),
 					) || suggestionAnswers[0],
 
 				author:

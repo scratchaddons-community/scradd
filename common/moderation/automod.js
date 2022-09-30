@@ -222,12 +222,12 @@ async function checkString(toCensor, message) {
 				await Promise.all(
 					inviteCodes.map(async (code) => {
 						const invite = await client?.fetchInvite(code).catch(() => {});
-						return invite?.guild?.id === message.guild?.id || code;
+						return invite?.guild && invite.guild.id !== message.guild?.id && code;
 					}),
 				)
-			).filter(/** @returns {toWarn is string} */ (toWarn) => toWarn !== true);
+			).filter(/** @returns {toWarn is string} */ (toWarn) => !!toWarn);
 
-			if (invitesToDelete) {
+			if (invitesToDelete.length) {
 				bad.words.invites.push(...invitesToDelete);
 				bad.invites = invitesToDelete.length;
 			}

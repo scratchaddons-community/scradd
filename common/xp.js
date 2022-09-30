@@ -2,6 +2,7 @@ import { EmbedBuilder, GuildMember, User } from "discord.js";
 import { guild } from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
+import { asyncFilter } from "../util/promises.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
@@ -62,7 +63,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						).toLocaleString()}/${nextLevelXp.toLocaleString()} XP remaining`,
 					)
 					.setFooter({
-						text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank`,
+						text: `View the leaderboard with /xp top${CONSTANTS.footerSeperator}View someone’s XP with /xp rank${CONSTANTS.footerSeperator}Toggle pings with /settings`,
 					}),
 			],
 		});
@@ -104,18 +105,29 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	weeklyXpDatabase.extra = +date + "";
 	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
-	sorted.splice(5);
+
+	const nonMod = (
+		await asyncFilter(sorted.splice(5), async ({ user: userId }) => {
+			const user = await guild.members.fetch(userId).catch(() => {});
+			return CONSTANTS.roles.mod && user?.roles.resolve(CONSTANTS.roles.mod) && user;
+		}).next()
+	).value;
+
+	const ids = [...sorted, nonMod?.id].map((gain) =>
+		typeof gain === "string" ? gain : gain?.user,
+	);
+
 	date.setUTCDate(date.getUTCDate() - 7);
 	await (await thread?.messages.fetchPinned())?.first()?.unpin();
 	const message = await thread?.send({
 		allowedMentions: {
-			users: sorted
-				.map((gain) => gain.user)
-				.filter(
-					(user) =>
-						userSettingsDatabase.data.find((settings) => user === settings.user)
-							?.weeklyPings ?? process.env.NODE_ENV === "production",
-				),
+			users: ids.filter(
+				/** @returns {user is string} */ (user) =>
+					!!user &&
+					(userSettingsDatabase.data.find((settings) => user === settings.user)
+						?.weeklyPings ??
+						process.env.NODE_ENV === "production"),
+			),
 		},
 		content:
 			`__**Weekly Winners week of ${
@@ -141,12 +153,12 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							gain.user
 						}> - ${gain.xp.toLocaleString()} XP`,
 				)
-				.join("\n") || "*Nobody got any XP this week!*"),
+				.join("\n") || "*Nobody got any XP this week!*") +
+			(nonMod ? `\n\n*Next-highest non-moderator: ${nonMod.toString()}*` : ""),
 	});
 	await message?.pin();
 
 	const role = CONSTANTS.roles.weekly_winner;
-	const ids = sorted.map(({ user }) => user);
 	if (role) {
 		await Promise.all([
 			...role.members.map((member) => {
@@ -158,6 +170,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					.catch(() => {})
 					.then((member) => member?.roles.add(role)),
 			),
+			nonMod?.roles.add(role),
 		]);
 	}
 }

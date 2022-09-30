@@ -98,7 +98,7 @@ export default async function event(oldGuild, newGuild) {
 		oldGuild.features.includes("INVITES_DISABLED") !==
 		newGuild.features.includes("INVITES_DISABLED")
 	) {
-		logs.push(`➕ Invites ${newGuild.features.includes("INVITES_DISABLED") ? "" : "un"}paused`);
+		logs.push(`Invites ${newGuild.features.includes("INVITES_DISABLED") ? "" : "un"}paused`);
 	}
 	if (
 		oldGuild.features.includes("HAS_DIRECTORY_ENTRY") !==
@@ -253,15 +253,15 @@ export default async function event(oldGuild, newGuild) {
 	if (oldGuild.verified !== newGuild.verified) {
 		logs.push(`Server ${newGuild.verified ? "" : "un"}verified`);
 	}
-	if (oldGuild.widgetChannel?.id !== newGuild.widgetChannel?.id) {
+	if (newGuild.widgetEnabled && oldGuild.widgetChannel?.id !== newGuild.widgetChannel?.id) {
 		logs.push(
 			`Server widget invite channel ${
 				newGuild.widgetChannel ? "set to " + newGuild.widgetChannel.toString() : "unset"
 			}`,
 		);
 	}
-	if (oldGuild.widgetEnabled !== newGuild.widgetEnabled) {
-		logs.push(`Server widget ${newGuild.partnered ? "en" : "dis"}abled`);
+	if (!!oldGuild.widgetEnabled !== !!newGuild.widgetEnabled) {
+		logs.push(`Server widget ${newGuild.widgetEnabled ? "en" : "dis"}abled`);
 	}
 	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
 		logs.push(

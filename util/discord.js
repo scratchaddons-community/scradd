@@ -435,8 +435,8 @@ export async function paginate(array, toString, failMessage, title, reply) {
 
 			previousButton.setDisabled(offset === 0);
 			nextButton.setDisabled(offset + PAGE_OFFSET >= array.length - 1);
-			message = await reply(generateMessage());
 			await buttonInteraction.deferUpdate();
+			message = await reply(generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {

@@ -60,9 +60,11 @@ const info: ChatInputCommand = {
 			.setColor(CONSTANTS.themeColor)
 			.setDescription(
 				`${escapeMessage(addon.description)}\n` +
-					`[See source code](${CONSTANTS.urls.saSource}/addons/${encodeURIComponent(
-						addon.id,
-					)}/)`,
+					`[See source code](https://github.com/${CONSTANTS.urls.saRepo}/tree/${
+						manifest.version_name?.endsWith("-prerelease")
+							? `main`
+							: `v${encodeURI(manifest.version)}`
+					}/addons/${encodeURIComponent(addon.id)}/)`,
 			)
 			.setFooter({
 				text:
