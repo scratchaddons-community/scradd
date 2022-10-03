@@ -22,20 +22,18 @@ async function getRole(roleId: Snowflake): Promise<string> {
 }
 
 const info: ChatInputCommand = {
-	data: new SlashCommandBuilder().setDescription("Learn about me").addStringOption((input) => {
-		return input
-			.setName("type")
-			.setDescription("The information to show")
-			.setRequired(true)
-			.addChoices(
-				{ name: "Status", value: "status" },
-				{ name: "Configuration", value: "config" },
-				{ name: "Credits", value: "credits" },
-			);
-	}),
+	data: new SlashCommandBuilder()
+		.setDescription("Learn about me")
+		.addSubcommand((input) => input.setName("status").setDescription("Show bot status"))
+		.addSubcommand((input) =>
+			input.setName("config").setDescription("Show configuration settings"),
+		)
+		.addSubcommand((input) =>
+			input.setName("credits").setDescription("Show credit information"),
+		),
 
 	async interaction(interaction) {
-		switch (interaction.options.getString("type", true)) {
+		switch (interaction.options.getSubcommand(true)) {
 			case "status": {
 				const message = await interaction.reply({
 					ephemeral: true,
@@ -104,9 +102,14 @@ const info: ChatInputCommand = {
 								...Object.entries(CONSTANTS.channels).map((channel) => {
 									return {
 										name:
-											(channel[0][0] || "").toUpperCase() +
-											channel[0].slice(1) +
-											" channel",
+											channel[0]
+												.split("_")
+												.map(
+													(name) =>
+														(name[0] || "").toUpperCase() +
+														name.slice(1),
+												)
+												.join(" ") + " channel",
 										value: channel[1]?.toString() || "*None*",
 										inline: true,
 									};
@@ -151,7 +154,7 @@ const info: ChatInputCommand = {
 							.setDescription("Scradd is hosted on [Railway](https://railway.app/).")
 							.setFields(
 								{
-									name: "Coders",
+									name: "Developers",
 									value: await getRole(CONSTANTS.roles.developers),
 									inline: true,
 								},

@@ -21,8 +21,8 @@ export const suggestionAnswers = [
 export const suggestionsDatabase = new Database("suggestions");
 await suggestionsDatabase.init();
 
-const old = CONSTANTS.channels.suggestionsOld
-	? (await getAllMessages(CONSTANTS.channels.suggestionsOld)).map((message) => {
+const old = CONSTANTS.channels.old_suggestions
+	? (await getAllMessages(CONSTANTS.channels.old_suggestions)).map((message) => {
 			const embed = message.embeds[0];
 
 			const segments = message.thread?.name.split(" | ");

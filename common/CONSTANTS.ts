@@ -101,7 +101,7 @@ export default {
 		bots: getChannel("bots", ChannelType.GuildText, "end"),
 		advertise: getChannel("advertise", ChannelType.GuildText),
 
-		suggestionsOld: getChannel("suggestions", ChannelType.GuildText, "partial"),
+		old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 	},
 } as const;
 

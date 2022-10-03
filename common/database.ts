@@ -104,7 +104,7 @@ export default class Database<Name extends keyof Databases> {
 			const files = this.#data?.length
 				? [
 						new AttachmentBuilder(Buffer.from(papaparse.unparse(this.#data), "utf-8"), {
-							name: this.name + ".csv",
+							name: this.name + ".scradddb",
 						}),
 				  ]
 				: [];

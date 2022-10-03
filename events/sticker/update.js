@@ -9,7 +9,7 @@ export default async function event(oldSticker, newSticker) {
 
 	const logs = [];
 	if (oldSticker.description !== newSticker.description) {
-		log(`✏ Sticker ${oldSticker.name}’s description was changed!`, "messages", {
+		log(`✏ Sticker ${oldSticker.name}’s description was changed!`, "server", {
 			files: [
 				new AttachmentBuilder(
 					Buffer.from(
@@ -37,6 +37,6 @@ export default async function event(oldSticker, newSticker) {
 	}
 
 	await Promise.all(
-		logs.map((edit) => log(`✏ Sticker ${oldSticker.name}` + edit + `!`, "messages")),
+		logs.map((edit) => log(`✏ Sticker ${oldSticker.name}` + edit + `!`, "server")),
 	);
 }

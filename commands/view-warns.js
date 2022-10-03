@@ -29,13 +29,12 @@ export default {
 				.setName("filter")
 				.setDescription(
 					"A case ID to see its details or a ping to see their strikes (defaults to you)",
-				)
-				.setRequired(false),
+				),
 		),
 
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
-			throw new TypeError("Member isn’t a GuildMember");
+			throw new TypeError("interaction.member is not a GuildMember");
 		getWarns(
 			async (data) => await interaction.reply(data),
 			interaction.member,

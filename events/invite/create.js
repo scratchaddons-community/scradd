@@ -16,6 +16,6 @@ export default async function event(invite) {
 				  }${invite.maxUses ? "after " + invite.maxUses + " uses" : ""}`
 				: ""
 		}!`,
-		"server",
+		"members",
 	);
 }

@@ -3,7 +3,6 @@ import {
 	EmbedBuilder,
 	MessageType,
 	ChannelType,
-	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { automodMessage } from "../../common/moderation/automod.js";
@@ -26,7 +25,6 @@ import { normalize, truncateText } from "../../util/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
-import logError from "../../util/logError.js";
 
 const { GUILD_ID } = process.env;
 
@@ -204,19 +202,6 @@ export default async function event(message) {
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
 		message.webhookId &&
 		message.webhookId === client.application.id;
-	if (message.channel.id === "1018702459776028782") {
-		const embed = message?.embeds[0];
-		if (!embed?.description) return;
-		const userId = embed.description.match(MessageMentions.UsersPattern)?.[1];
-
-		if (userId)
-			promises.push(
-				client.users
-					.fetch(userId)
-					.then(giveXp)
-					.catch((error) => logError(error, "messageCreate")),
-			);
-	}
 
 	if (
 		process.env.NODE_ENV !== "production" ||

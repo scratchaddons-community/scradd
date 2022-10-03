@@ -105,7 +105,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	weeklyXpDatabase.extra = +date + "";
 	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
-
+	weeklyXpDatabase.data = [];
 	const nonMod = (
 		await asyncFilter(sorted.splice(5), async ({ user: userId }) => {
 			const user = await guild.members.fetch(userId).catch(() => {});

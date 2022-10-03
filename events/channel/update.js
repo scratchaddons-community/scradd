@@ -52,6 +52,19 @@ export default async function event(oldChannel, newChannel) {
 	}
 
 	if (
+		(oldChannel.type === ChannelType.GuildText || oldChannel.type === ChannelType.GuildForum) &&
+		(newChannel.type === ChannelType.GuildText || newChannel.type === ChannelType.GuildForum)
+	)
+		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
+			edits.push(
+				`’s ${
+					newChannel.type === ChannelType.GuildForum ? "post " : ""
+				}slowmode was set to ` +
+					newChannel.rateLimitPerUser +
+					" seconds",
+			);
+
+	if (
 		(oldChannel.type === ChannelType.GuildText ||
 			oldChannel.type === ChannelType.GuildForum ||
 			oldChannel.type === ChannelType.GuildAnnouncement) &&
@@ -61,15 +74,6 @@ export default async function event(oldChannel, newChannel) {
 	) {
 		if (oldChannel.nsfw !== newChannel.nsfw)
 			edits.push(` was made ${newChannel.nsfw ? "" : "non-"}age-restricted`);
-
-		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
-			edits.push(
-				`’s ${
-					newChannel.type === ChannelType.GuildForum ? "post " : ""
-				}slowmode was set to ` +
-					newChannel.rateLimitPerUser +
-					" seconds",
-			);
 
 		if (oldChannel.topic !== newChannel.topic) {
 			log(`✏ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {

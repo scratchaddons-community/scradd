@@ -7,6 +7,6 @@ export default async function event(emoji) {
 		`🙂 Emoji ${emoji.toString()} created${
 			emoji.author ? " by " + emoji.author.toString() : ""
 		}!`,
-		"messages",
+		"server",
 	);
 }

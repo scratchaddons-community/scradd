@@ -1634,8 +1634,8 @@ const info: ChatInputCommand = {
 
 						await answerQuestion(
 							groupName,
-							(typeof selectIndex === "number" &&
-								typeof questionIndex === "number" &&
+							(selectIndex &&
+								questionIndex &&
 								questions[groupName as GroupName][+selectIndex]?.[
 									+questionIndex
 								]) ||
@@ -1824,7 +1824,7 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 		await Promise.all([
 			editPromise,
 			interaction.reply(
-				`${CONSTANTS.emojis.statuses.no} Nope, the addon isn’t **${item.name}**…`,
+				`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
 			),
 		]);
 		return;

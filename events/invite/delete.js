@@ -8,6 +8,6 @@ export default async function event(invite) {
 		`⛔ Invite ${invite.code} deleted` +
 			(invite.uses === null ? "" : ` with ${invite.uses} uses`) +
 			"!",
-		"server",
+		"members",
 	);
 }
