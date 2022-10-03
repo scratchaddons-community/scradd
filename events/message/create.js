@@ -1,9 +1,4 @@
-import {
-	cleanCodeBlockContent,
-	EmbedBuilder,
-	MessageType,
-	ChannelType,
-} from "discord.js";
+import { cleanCodeBlockContent, EmbedBuilder, MessageType, ChannelType } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { automodMessage } from "../../common/moderation/automod.js";
 
