@@ -1,8 +1,14 @@
 import { automodMessage } from "../../common/moderation/automod.js";
 import log, { getLoggingThread } from "../../common/moderation/logging.js";
-import { extractMessageExtremities, getBaseChannel } from "../../util/discord.js";
+import { extractMessageExtremities } from "../../util/discord.js";
 import jsonDiff from "json-diff";
-import { AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import {
+	AttachmentBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	PermissionFlagsBits,
+} from "discord.js";
 import diffLib from "difflib";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
@@ -14,9 +20,11 @@ const loggingThread = await getLoggingThread("databases");
 export default async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
 	if (
-		!newMessage.guild ||
-		newMessage.guild.id !== process.env.GUILD_ID ||
-		CONSTANTS.channels.admin?.id === getBaseChannel(newMessage.channel)?.id
+		newMessage.channel.isDMBased() ||
+		newMessage.guild?.id !== process.env.GUILD_ID ||
+		!newMessage.channel
+			.permissionsFor(CONSTANTS.roles.mod || newMessage.guild.id)
+			?.has(PermissionFlagsBits.ViewChannel)
 	)
 		return;
 	const logs = [];

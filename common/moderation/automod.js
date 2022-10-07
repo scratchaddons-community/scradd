@@ -1,4 +1,10 @@
-import { Invite, cleanContent, FormattingPatterns } from "discord.js";
+import {
+	Invite,
+	cleanContent,
+	FormattingPatterns,
+	ChannelType,
+	PermissionFlagsBits,
+} from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
@@ -386,16 +392,10 @@ export async function automodMessage(message) {
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
-	return [
-		CONSTANTS.channels.mod?.id,
-		CONSTANTS.channels.modlogs?.id,
-		CONSTANTS.channels.admin?.id,
-		CONSTANTS.channels.modmail?.id,
-		CONSTANTS.channels.devs?.id || "",
-		CONSTANTS.channels.boosters?.id || "",
-		CONSTANTS.channels.youTube?.id || "",
-		undefined,
-	].includes(getBaseChannel(channel)?.id);
+	return (
+		channel?.type === ChannelType.DM ||
+		!channel?.permissionsFor(channel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+	);
 }
 
 /** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */

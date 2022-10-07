@@ -1,15 +1,17 @@
-import { AttachmentBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
 import log from "../../common/moderation/logging.js";
-import { getBaseChannel, messageToText } from "../../util/discord.js";
+import { messageToText } from "../../util/discord.js";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 
 /** @type {import("../../common/types/event").default<"messageDeleteBulk">} */
 export default async function event(messages, channel) {
 	if (
-		!channel.guild ||
-		channel.guild.id !== process.env.GUILD_ID ||
-		CONSTANTS.channels.admin?.id === getBaseChannel(channel)?.id
+		channel.isDMBased() ||
+		channel.guild?.id !== process.env.GUILD_ID ||
+		!channel
+			.permissionsFor(CONSTANTS.roles.mod || channel.guild.id)
+			?.has(PermissionFlagsBits.ViewChannel)
 	)
 		return;
 	const messagesInfo = (
