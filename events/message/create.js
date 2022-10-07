@@ -388,8 +388,6 @@ export default async function event(message) {
 	)
 		react(CONSTANTS.emojis.autoreact.rick);
 
-	if (/\b((NO+)|(n|N)o{2,})+\b/.test(message.content)) react(CONSTANTS.emojis.autoreact.nope);
-
 	if (
 		message.mentions.has(client.user?.id ?? "", {
 			ignoreEveryone: true,
