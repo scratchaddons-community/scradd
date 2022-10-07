@@ -93,7 +93,10 @@ const info: ChatInputCommand = {
 				)
 				.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 			(suggestion) =>
-				`**${suggestion.count}** ${suggestions?.defaultReactionEmoji?.name} ${hyperlink(
+				`**${suggestion.count}** ${
+					suggestions?.defaultReactionEmoji?.name ||
+					`<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`
+				} ${hyperlink(
 					escapeLinks(suggestion.title),
 					"url" in suggestion
 						? suggestion.url
