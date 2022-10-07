@@ -119,9 +119,9 @@ export default async function warn(user, reason, strikes, context) {
 
 	const newMutes = Math.floor(userWarns / WARNS_PER_MUTE);
 
+	const member =
+		user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(() => {});
 	if (newMutes) {
-		const member =
-			user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(() => {});
 		const oldMutes = allMutes.filter((mute) => mute.user === user.id).length;
 
 		const userMutes = oldMutes + newMutes;
@@ -197,7 +197,7 @@ export default async function warn(user, reason, strikes, context) {
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
 							)
-							.setColor(user instanceof GuildMember ? user.displayColor : null)
+							.setColor(member?.displayColor || null)
 							.setFooter(
 								strikes === 0
 									? null
@@ -211,10 +211,8 @@ export default async function warn(user, reason, strikes, context) {
 														? "day"
 														: "second"
 												}s.` +
-												CONSTANTS.footerSeperator +
-												"Tip: Use the /view-warns command to see how many active strikes you have!" +
-												CONSTANTS.footerSeperator +
-												"You may DM me to discuss this strike with the mods if you want.",
+												"\nTip: Use the /view-warns command to see how many active strikes you have!" +
+												"\nYou may DM me to discuss this strike with the mods if you want.",
 									  },
 							),
 					],

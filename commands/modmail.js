@@ -121,8 +121,7 @@ export default {
 							.setFooter({
 								text:
 									MODMAIL_UNSUPPORTED +
-									CONSTANTS.footerSeperator +
-									"Messages starting with an equals sign (=) are ignored.",
+									"\nMessages starting with an equals sign (=) are ignored.",
 							})
 							.setColor(MODMAIL_COLORS.opened);
 
