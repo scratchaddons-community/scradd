@@ -31,10 +31,10 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
-			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.modsPlus,
-			[CONSTANTS.channels.youTube?.id || ""]: COUNTS.modsPlus,
-		}[baseChannel.id] || 8
+			["869662117651955802"]: COUNTS.devs,
+			["853256939089559583"]: COUNTS.modsPlus,
+			["894314668317880321"]: COUNTS.modsPlus,
+		}[baseChannel.id] || COUNTS.default
 	);
 }
 

@@ -90,16 +90,14 @@ export default {
 		admin: getChannel("admin", ChannelType.GuildText, "partial"),
 		modmail: getChannel("modmail", ChannelType.GuildText),
 
-		devs: getChannel("devs", ChannelType.GuildText, "partial"),
-		boosters: getChannel("boosters", ChannelType.GuildText, "partial"),
-		youTube: getChannel("youtube", ChannelType.GuildText, "partial"),
-
 		chat: getChannel("💬", ChannelType.GuildCategory, "start"),
 		general: getChannel("general", ChannelType.GuildText),
 		suggestions: getChannel("suggestions", ChannelType.GuildForum),
 
 		bots: getChannel("bots", ChannelType.GuildText, "end"),
-		advertise: getChannel("advertise", ChannelType.GuildText),
+		advertise:
+			getChannel("advertise", ChannelType.GuildText) ||
+			getChannel("promo", ChannelType.GuildText, "partial"),
 
 		old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 	},
