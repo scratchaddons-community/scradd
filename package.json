@@ -34,7 +34,7 @@
 		"sodium": "3.0.2"
 	},
 	"devDependencies": {
-		"@railway/cli": "2.0.12",
+		"@railway/cli": "2.0.13",
 		"@redguy12/prettier-config": "2.0.0",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "0.0.197",
