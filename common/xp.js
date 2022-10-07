@@ -59,8 +59,21 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						}e at level ${newLevel}!`,
 					)
 					.addFields(
-						{ name: "✨ Current XP", value: newXp.toLocaleString() + " XP" },
-						{ name: "⬆ Next level", value: nextLevelXp.toLocaleString() + " XP" },
+						{
+							name: "✨ Current XP",
+							value: newXp.toLocaleString() + " XP",
+							inline: true,
+						},
+						{
+							name: CONSTANTS.zeroWidthSpace,
+							value: CONSTANTS.zeroWidthSpace,
+							inline: true,
+						},
+						{
+							name: "⬆ Next level",
+							value: nextLevelXp.toLocaleString() + " XP",
+							inline: true,
+						},
 					)
 					.setFooter({
 						text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank\nToggle pings with /settings`,
