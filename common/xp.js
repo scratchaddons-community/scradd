@@ -100,11 +100,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	// Update recent DB & send weekly winners
 	const weeklyObject = Object.fromEntries(
-		weeklyXpDatabase.data.filter((gain) => !gain.date).map((gain) => [gain.user, gain.xp]),
+		weeklyXpDatabase.data.map((gain) => [gain.user, gain.xp]),
 	);
 	weeklyObject[to.id] ??= 0;
 	weeklyObject[to.id] += amount;
-	weeklyXpDatabase.data = Object.entries(weeklyObject).map(([user, xp]) => ({ user, xp }));
 
 	const threads = CONSTANTS.channels.bots?.threads;
 

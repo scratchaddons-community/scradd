@@ -190,8 +190,6 @@ export type Databases = {
 		autoreactions: boolean;
 	};
 	recent_xp: {
-		/** @deprecated */
-		date?: number;
 		/** The ID of the user. */
 		user: Snowflake;
 		/** How much XP they gained. */

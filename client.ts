@@ -21,10 +21,10 @@ const Handler = new Client({
 		GatewayIntentBits.GuildPresences,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMessageReactions,
-		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.DirectMessages,
 		// GatewayIntentBits.DirectMessageReactions,
 		// GatewayIntentBits.DirectMessageTyping,
+		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildScheduledEvents,
 	],
 
