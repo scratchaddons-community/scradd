@@ -86,7 +86,11 @@ export default async function event(message) {
 						})
 						.setColor(MODMAIL_COLORS.opened);
 
-					const newThread = await openModmail(openedEmbed, message.author.username, true);
+					const newThread = await openModmail(
+						openedEmbed,
+						message.member ?? message.author,
+						true,
+					);
 
 					if (!webhook) throw new ReferenceError("Could not find webhook");
 
@@ -108,6 +112,7 @@ export default async function event(message) {
 				},
 				async (options) => await message.reply(options),
 			);
+
 			message.channel
 				.createMessageCollector({ time: CONSTANTS.collectorTime })
 				.on("collect", async () => {

@@ -10,6 +10,7 @@ import {
 	sendOpenedMessage,
 	MODMAIL_UNSUPPORTED,
 } from "../common/modmail.js";
+import { disableComponents } from "../util/discord.js";
 
 /** @type {import("../common/types/command").ChatInputCommand} */
 export default {
@@ -104,7 +105,7 @@ export default {
 					return;
 				}
 
-				await generateModmailConfirm(
+				const collector = await generateModmailConfirm(
 					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
@@ -127,7 +128,7 @@ export default {
 
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {
-								const thread = await openModmail(openedEmbed, user.user.username);
+								const thread = await openModmail(openedEmbed, user);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes
@@ -146,6 +147,12 @@ export default {
 					(options) =>
 						interaction.reply({ ...options, ephemeral: true, fetchReply: true }),
 				);
+				collector.on("end", async () => {
+					const message = await interaction.fetchReply();
+					await interaction.editReply({
+						components: disableComponents(message.components),
+					});
+				});
 
 				break;
 			}

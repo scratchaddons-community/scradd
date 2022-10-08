@@ -209,7 +209,7 @@ export default async function warn(user, reason, strikes, context) {
 												} will automatically be removed in 21 ${
 													process.env.NODE_ENV === "production"
 														? "day"
-														: "second"
+														: "minute"
 												}s.` +
 												"\nTip: Use the /view-warns command to see how many active strikes you have!" +
 												"\nYou may DM me to discuss this strike with the mods if you want.",

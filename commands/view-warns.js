@@ -23,23 +23,51 @@ import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 /** @type {import("../common/types/command").ChatInputCommand} */
 export default {
 	data: new SlashCommandBuilder()
-		.setDescription("View your or (Mods only) someone else’s active strikes")
-		.addStringOption((input) =>
+		.setDescription("Commands to view strike information")
+		.addSubcommand((input) =>
 			input
-				.setName("filter")
-				.setDescription(
-					"A case ID to see its details or a ping to see their strikes (defaults to you)",
+				.setName("user")
+				.setDescription("View your or (Mods only) someone else’s active strikes")
+				.addUserOption((input) =>
+					input.setName("user").setDescription("(Mods only) The user to see strikes for"),
+				),
+		)
+		.addSubcommand((input) =>
+			input
+				.setName("id")
+				.setDescription("View a strike by ID")
+				.addStringOption((input) =>
+					input.setName("id").setDescription("The strike's ID").setRequired(true),
 				),
 		),
 
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member is not a GuildMember");
-		getWarns(
-			async (data) => await interaction.reply(data),
-			interaction.member,
-			interaction.options.getString("filter") ?? undefined,
-		);
+		switch (interaction.options.getSubcommand(true)) {
+			case "user": {
+				const user = interaction.options.getUser("user") ?? interaction.member;
+
+				return await interaction.reply(
+					user.id === interaction.member.id ||
+						(CONSTANTS.roles.mod &&
+							interaction.member.roles.resolve(CONSTANTS.roles.mod))
+						? { ...(await getWarnsForMember(user)), ephemeral: true }
+						: {
+								ephemeral: true,
+								content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's warns!`,
+						  },
+				);
+			}
+			case "id": {
+				await interaction.reply(
+					await getWarnById(
+						interaction.member,
+						interaction.options.getString("id", true),
+					),
+				);
+			}
+		}
 	},
 	censored: false,
 };
@@ -47,9 +75,9 @@ export default {
 /**
  * @param {import("discord.js").User | import("discord.js").GuildMember} user
  *
- * @returns {Promise<import("discord.js").InteractionReplyOptions>}
+ * @returns {Promise<import("discord.js").BaseMessageOptions>}
  */
-async function getWarnsForMember(user) {
+export async function getWarnsForMember(user) {
 	const warns = (await removeExpiredWarns(warnLog)).filter((warn) => warn.user === user.id);
 	const mutes = (await removeExpiredWarns(muteLog)).filter((mute) => mute.user === user.id);
 
@@ -109,35 +137,17 @@ async function getWarnsForMember(user) {
 			  ]
 			: [],
 		embeds: [embed],
-		ephemeral: true,
 	};
 }
 
 /**
- * @param {(options: import("discord.js").InteractionReplyOptions) => Promise<import("discord.js").InteractionResponse>} reply
  * @param {import("discord.js").GuildMember} interactor
- * @param {string} [filter]
+ * @param {string} filter
+ *
+ * @returns {Promise<import("discord.js").InteractionReplyOptions>}
  */
-export async function getWarns(reply, interactor, filter) {
+export async function getWarnById(interactor, filter) {
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	if (!filter) return await reply(await getWarnsForMember(interactor));
-
-	const pinged = filter.match(MessageMentions.UsersPattern)?.[1];
-	if (pinged) {
-		const user =
-			pinged === interactor.id
-				? interactor
-				: isMod && (await client.users.fetch(pinged).catch(() => {}));
-
-		return await reply(
-			user
-				? await getWarnsForMember(user)
-				: {
-						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-				  },
-		);
-	}
 	const id = convertBase(filter, WARN_INFO_BASE, 10);
 	const channel = await getLoggingThread("members");
 
@@ -151,10 +161,10 @@ export async function getWarns(reply, interactor, filter) {
 		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
 
 	if (!message) {
-		return await reply({
+		return {
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-		});
+		};
 	}
 
 	/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
@@ -162,10 +172,10 @@ export async function getWarns(reply, interactor, filter) {
 
 	const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 	if (userId !== interactor.id && !isMod)
-		return await reply({
+		return {
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-		});
+			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's warns!`,
+		};
 
 	const member = await guild?.members.fetch(userId).catch(() => {});
 	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
@@ -203,5 +213,5 @@ export async function getWarns(reply, interactor, filter) {
 			inline: true,
 		});
 
-	await reply({ ephemeral: true, embeds: [embed] });
+	return { ephemeral: true, embeds: [embed] };
 }

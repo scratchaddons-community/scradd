@@ -22,6 +22,9 @@ const Handler = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.DirectMessages,
+		// GatewayIntentBits.DirectMessageReactions,
+		// GatewayIntentBits.DirectMessageTyping,
 		GatewayIntentBits.GuildScheduledEvents,
 	],
 

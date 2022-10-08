@@ -1,7 +1,7 @@
 import { GuildMember } from "discord.js";
 import warn from "../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../common/moderation/automod.js";
-import { getWarns } from "../commands/view-warns.js";
+import { getWarnById } from "../commands/view-warns.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
 
@@ -25,10 +25,11 @@ export default async function event(interaction) {
 				if (!(interaction.member instanceof GuildMember))
 					throw new TypeError("interaction.member is not a GuildMember");
 
-				await getWarns(
-					(data) => interaction.reply(data),
-					interaction.member,
-					interaction.customId.split("_strike")[0],
+				await interaction.reply(
+					await getWarnById(
+						interaction.member,
+						interaction.customId.split("_strike")[0] ?? "",
+					),
 				);
 				return;
 			}
@@ -105,14 +106,18 @@ export default async function event(interaction) {
 		await command.interaction(interaction);
 	} catch (error) {
 		logError(error, interaction.toString());
-		await (interaction.replied
-			? interaction.followUp
-			: interaction[interaction.deferred ? "editReply" : "reply"])({
+		if (interaction.deferred) {
+			return await interaction.editReply({
+				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
+				embeds: [],
+				components: [],
+				files: [],
+			});
+		}
+
+		await interaction[interaction.replied ? "followUp" : "reply"]({
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
-			embeds: [],
-			components: [],
-			files: [],
 		});
 	}
 }

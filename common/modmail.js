@@ -17,6 +17,7 @@ import { disableComponents, extractMessageExtremities, messageToText } from "../
 import CONSTANTS from "./CONSTANTS.js";
 import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import client, { guild } from "../client.js";
+import { getWarnsForMember } from "../commands/view-warns.js";
 
 export const MODMAIL_COLORS = {
 	opened: Colors.Gold,
@@ -230,7 +231,10 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 			}
 		})
 		.on("end", async () => {
-			await message.edit({ components: disableComponents(message.components) });
+			if (!message.interaction)
+				await message.edit({
+					components: disableComponents(message.components),
+				});
 		});
 	return collector;
 }
@@ -261,9 +265,9 @@ export function generateReactionFunctions(message) {
 
 /**
  * @param {EmbedBuilder} openedEmbed
- * @param {string} name
+ * @param {GuildMember | User} user
  */
-export async function openModmail(openedEmbed, name, ping = false) {
+export async function openModmail(openedEmbed, user, ping = false) {
 	if (!CONSTANTS.channels.modmail) throw new ReferenceError("Cannot find modmail channel");
 	const starterMessage = await CONSTANTS.channels.modmail.send({
 		allowedMentions: { parse: ["everyone"] },
@@ -272,12 +276,14 @@ export async function openModmail(openedEmbed, name, ping = false) {
 	});
 	const date = new Date();
 	const thread = await starterMessage.startThread({
-		name: `${name} (${date.getUTCFullYear().toLocaleString([], { useGrouping: false })}-${date
-			.getUTCMonth()
-			.toLocaleString([], { minimumIntegerDigits: 2 })}-${date
-			.getUTCDate()
-			.toLocaleString([], { minimumIntegerDigits: 2 })})`,
+		name: `${(user instanceof User ? user : user.user).username} (${date
+			.getUTCFullYear()
+			.toLocaleString([], { useGrouping: false })}-${(date.getUTCMonth() + 1).toLocaleString(
+			[],
+			{ minimumIntegerDigits: 2 },
+		)}-${date.getUTCDate().toLocaleString([], { minimumIntegerDigits: 2 })})`,
 	});
 	await thread.setLocked(true);
+	await thread.send({ ...(await getWarnsForMember(user)), content: "=" });
 	return thread;
 }
