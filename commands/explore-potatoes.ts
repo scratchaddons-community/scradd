@@ -70,7 +70,7 @@ async function textChannelMatches(
 
 const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Replies with a random message from the potatoboard")
 		.addIntegerOption((input) =>
@@ -79,20 +79,17 @@ const info: ChatInputCommand = {
 				.setDescription(
 					`Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
 				)
-				.setRequired(false)
 				.setMinValue(1),
 		)
 		.addUserOption((input) =>
 			input
 				.setName("user")
-				.setDescription("Filter messages to only get those by a certain user")
-				.setRequired(false),
+				.setDescription("Filter messages to only get those by a certain user"),
 		)
 		.addChannelOption((input) =>
 			input
 				.setName("channel")
 				.setDescription("Filter messages to only get those in a certain channel")
-				.setRequired(false)
 				.addChannelTypes(
 					ChannelType.GuildText,
 					ChannelType.GuildVoice,
@@ -213,4 +210,4 @@ const info: ChatInputCommand = {
 			});
 	},
 };
-export default info;
+export default command;

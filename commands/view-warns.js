@@ -161,10 +161,7 @@ export async function getWarnById(interactor, filter) {
 		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
 
 	if (!message) {
-		return {
-			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} Invalid filter!`,
-		};
+		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid filter!` };
 	}
 
 	/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
@@ -202,7 +199,7 @@ export async function getWarnById(interactor, filter) {
 		((await guild?.members.fetch(moderatorId).catch(() => {})) ||
 			(await client.users.fetch(moderatorId).catch(() => {})));
 	if (mod) embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
-	if (user) embed.addFields({ name: "🫂 Target user", value: user.toString(), inline: true });
+	if (user) embed.addFields({ name: "👤 Target user", value: user.toString(), inline: true });
 
 	const allWarns = await removeExpiredWarns(warnLog);
 	const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};

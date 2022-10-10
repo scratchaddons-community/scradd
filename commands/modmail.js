@@ -26,8 +26,7 @@ export default {
 						.setName("reason")
 						.setDescription(
 							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
-						)
-						.setRequired(false),
+						),
 				),
 		)
 		.addSubcommand((subcommand) =>

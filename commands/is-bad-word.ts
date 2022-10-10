@@ -4,7 +4,7 @@ import { censor } from "../common/moderation/automod.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 import { joinWithAnd } from "../util/text.js";
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Checks text for language")
 		.addStringOption((input) =>
@@ -30,4 +30,4 @@ const info: ChatInputCommand = {
 
 	censored: false,
 };
-export default info;
+export default command;

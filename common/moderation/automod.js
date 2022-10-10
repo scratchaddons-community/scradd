@@ -1,10 +1,4 @@
-import {
-	Invite,
-	cleanContent,
-	FormattingPatterns,
-	ChannelType,
-	PermissionFlagsBits,
-} from "discord.js";
+import { Invite, FormattingPatterns, ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "../CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
@@ -47,7 +41,7 @@ const badWords = [
 			/(?:c(?:er|bfg)[ -]?)?phz/,
 			/pyvg/,
 			/phagf?/,
-			/frk/,
+			/(?:ohg+[ -]?)?frk/,
 			/grrgf?/,
 			/gvg(?:(?:gvr)?f)?/,
 			/obbo(?:(?:ovr)?f)?/,
@@ -283,16 +277,15 @@ export async function automodMessage(message) {
 	const toStrike = [bad.language, bad.invites, bad.bots].filter(
 		/** @returns {strikes is false} */ (strikes) => strikes !== false,
 	);
+
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds
 				.map((embed) => [
-					embed.description && cleanContent(embed.description, message.channel),
+					embed.description && embed.description,
 					embed.title,
-					embed.video && embed.url,
 					embed.footer?.text,
 					embed.author?.name,
-					embed.author?.url,
 					...embed.fields.map((field) => [field.name, field.value]).flat(),
 				])
 				.flat()
@@ -447,6 +440,7 @@ const NICKNAME_RULE = 7;
 /** @param {import("discord.js").GuildMember} member */
 export async function changeNickname(member, strike = true) {
 	const censored = censor(member.displayName);
+
 	if (censored) {
 		await Promise.all([
 			strike
@@ -508,8 +502,12 @@ export async function changeNickname(member, strike = true) {
 					}),
 				);
 			}
-		} else if (unsafe.size > 1 && unsafe.has(member.id)) {
-			if (await setNickname(member, member.user.username)) unsafe.delete(member.id);
+		} else if (
+			unsafe.size > 1 &&
+			unsafe.has(member.id) &&
+			(await setNickname(member, member.user.username))
+		) {
+			unsafe.delete(member.id);
 		}
 
 		if (unsafe.size > 1)

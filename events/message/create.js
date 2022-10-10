@@ -71,10 +71,7 @@ export default async function event(message) {
 						)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
 					)
 					.setColor(MODMAIL_COLORS.confirm)
-					.setAuthor({
-						iconURL: guild.iconURL() ?? undefined,
-						name: guild.name,
-					}),
+					.setAuthor({ iconURL: guild.iconURL() ?? undefined, name: guild.name }),
 				async (buttonInteraction) => {
 					const openedEmbed = new EmbedBuilder()
 						.setTitle("Modmail ticket opened!")
@@ -177,7 +174,7 @@ export default async function event(message) {
 
 	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
 		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-		const spoilerHack = "||​||".repeat(199);
+		const spoilerHack = "||​||".repeat(199); // todo other whitespace works too?
 
 		if (message.content.includes(spoilerHack)) {
 			const array = message.cleanContent.split(spoilerHack);
@@ -252,7 +249,7 @@ export default async function event(message) {
 		lastInChannel.unshift(message);
 		const bot =
 			1 +
-			+(!!message.interaction || /^(r!|<@323630372531470346>)\s*\w+/.test(message.content));
+			+(!!message.interaction || /^(r!|<@323630372531470346>)\s*\w+/i.test(message.content));
 
 		promises.push(
 			giveXp(
@@ -260,6 +257,7 @@ export default async function event(message) {
 					message.channel.isThread() &&
 					(await getUserFromModmail(message.channel))) ||
 					message.interaction?.user ||
+					message.member ||
 					message.author,
 				spam === -1 && !newChannel
 					? 1
@@ -369,7 +367,7 @@ export default async function event(message) {
 	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);
 
-	if (includes("on addon")) {
+	if (includes("sat on addon")) {
 		if (reactions < REACTION_CAP) {
 			reactions = reactions + 3;
 			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));

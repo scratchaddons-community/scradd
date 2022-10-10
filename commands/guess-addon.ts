@@ -861,7 +861,7 @@ const games: {
 		  };
 } = {};
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Play games where you or I guess addons")
 		.addSubcommand((subcommand) =>
@@ -1779,7 +1779,7 @@ const info: ChatInputCommand = {
 		}
 	},
 };
-export default info;
+export default command;
 
 export async function guessAddon(interaction: ModalSubmitInteraction) {
 	const game = games[interaction.user.id];

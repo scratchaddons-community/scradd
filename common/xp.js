@@ -98,13 +98,18 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		);
 	}
 
-	// Update recent DB & send weekly winners
-	const weeklyObject = Object.fromEntries(
-		weeklyXpDatabase.data.map((gain) => [gain.user, gain.xp]),
-	);
-	weeklyObject[to.id] ??= 0;
-	weeklyObject[to.id] += amount;
+	// Update recent DB
+	const weeklyIndex = weeklyXpDatabase.data.findIndex((entry) => entry.user === user.id);
+	const weeklyAmount = (weeklyXpDatabase.data[weeklyIndex]?.xp || 0) + amount;
 
+	if (weeklyIndex === -1) {
+		weeklyXpDatabase.data.push({ user: user.id, xp: weeklyAmount });
+	} else {
+		weeklyXpDatabase.data[weeklyIndex] = { user: user.id, xp: weeklyAmount };
+	}
+	xpDatabase.data = xp;
+
+	//send weekly winners
 	const threads = CONSTANTS.channels.bots?.threads;
 
 	const thread = /** @type {undefined | import("discord.js").PublicThreadChannel} */ (
@@ -121,7 +126,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	const nonMod = (
 		await asyncFilter(sorted.splice(5), async ({ user: userId }) => {
 			const user = await guild.members.fetch(userId).catch(() => {});
-			return CONSTANTS.roles.mod && user?.roles.resolve(CONSTANTS.roles.mod) && user;
+			return CONSTANTS.roles.mod && !user?.roles.resolve(CONSTANTS.roles.mod) && user;
 		}).next()
 	).value;
 
@@ -176,11 +181,15 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			...role.members.map((member) => {
 				if (!ids.includes(member.id)) return member.roles.remove(role);
 			}),
-			...sorted.map(({ user }) =>
+			...sorted.map(({ user }, index) =>
 				guild.members
 					.fetch(user)
 					.catch(() => {})
-					.then((member) => member?.roles.add(role)),
+					.then((member) =>
+						member?.roles.add(
+							index || !CONSTANTS.roles.epic ? role : [role, CONSTANTS.roles.epic],
+						),
+					),
 			),
 			nonMod?.roles.add(role),
 		]);
@@ -188,14 +197,14 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 }
 
 const XP_PER_LEVEL = [
-	0, 50, 100, 250, 500, 1_000, 1_500, 2_000, 2_500, 3_250, 4_000, 5_000, 6_000, 7_250, 8_500,
-	10_000, 11_500, 13_000, 15_000, 17_000, 19_000, 21_000, 23_500, 26_000, 28_500, 31_000, 34_000,
-	37_000, 40_000, 43_000, 46_500, 50_000, 53_500, 57_000, 61_000, 65_000, 70_000, 75_000, 80_000,
-	85_000, 90_000, 95_000, 100_000, 105_000, 110_000, 115_000, 122_500, 130_000, 137_500, 145_000,
-	152_500, 160_000, 167_500, 175_000, 185_000, 195_000, 205_000, 215_000, 225_000, 235_000,
-	245_000, 255_000, 265_000, 275_000, 285_000, 295_000, 305_000, 315_000, 325_000, 335_420,
-	350_000, 362_500, 375_000, 387_500, 400_000, 412_500, 425_000, 437_500, 450_000, 462_500,
-	475_000, 487_500, 500_000, 515_000, 530_000, 545_000, 560_000, 575_000, 590_000, 605_000,
+	0, 50, 100, 300, 500, 1_000, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000, 8_500,
+	10_000, 11_500, 13_000, 15_000, 17_000, 19_000, 21_000, 23_000, 25_000, 28_000, 31_000, 34_000,
+	37_000, 40_000, 43_000, 46_000, 49_000, 53_000, 57_000, 61_000, 65_000, 69_000, 73_000, 77_000,
+	81_000, 85_000, 90_000, 95_000, 100_000, 105_000, 110_000, 115_000, 122_500, 130_000, 137_500,
+	145_000, 152_500, 160_000, 170_000, 180_000, 190_000, 200_000, 210_000, 220_000, 230_000,
+	240_000, 250_000, 261_500, 273_000, 284_500, 296_000, 307_500, 319_000, 330_500, 342_069,
+	354_000, 365_000, 376_000, 387_000, 400_000, 413_000, 426_000, 440_000, 455_000, 470_000,
+	485_000, 500_000, 515_000, 530_000, 545_000, 560_000, 575_000, 590_000,
 ];
 
 const INCREMENT_FREQUENCY = 10;

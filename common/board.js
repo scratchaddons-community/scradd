@@ -167,7 +167,7 @@ export async function updateBoard(message) {
 		}
 	} else if (count >= minReactions) {
 		if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
-		promises.push(giveXp(message.member ?? message.author));
+		!message.author.bot && promises.push(giveXp(message.member ?? message.author));
 		const boardMessage = await CONSTANTS.channels.board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },

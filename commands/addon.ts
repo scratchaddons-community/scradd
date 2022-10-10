@@ -2,7 +2,6 @@ import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "di
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
-import { getBaseChannel } from "../util/discord.js";
 
 import { escapeMessage, escapeLinks, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
@@ -20,7 +19,7 @@ const fuse = new Fuse(addons, {
 	],
 });
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`Replies with information about a specific addon available in v${
@@ -28,24 +27,18 @@ const info: ChatInputCommand = {
 			}`,
 		)
 		.addStringOption((option) =>
-			option.setName("addon").setDescription("The name of the addon").setRequired(true),
-		)
-		.addBooleanOption((input) =>
-			input
-				.setName("compact")
-				.setDescription("Whether to show misc information and the image")
-				.setRequired(false),
+			option
+				.setName("addon")
+				.setDescription("The name of the addon")
+				.setRequired(true)
+				.setAutocomplete(true),
 		),
 
 	async interaction(interaction) {
 		const input = interaction.options.getString("addon", true);
-		const { item: addon, score = 0 } = fuse.search(input)[0] ?? {};
+		const { item: addon } = fuse.search(input)[0] ?? {};
 
-		const compact =
-			interaction.options.getBoolean("compact") ??
-			getBaseChannel(interaction.channel)?.id !== CONSTANTS.channels.bots;
-
-		if (!addon || (score > 0.5 && compact)) {
+		if (!addon) {
 			await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} Could not find a matching addon!`,
 
@@ -64,18 +57,15 @@ const info: ChatInputCommand = {
 						manifest.version_name?.endsWith("-prerelease")
 							? `main`
 							: `v${encodeURI(manifest.version)}`
-					}/addons/${encodeURIComponent(addon.id)}/)`,
+					}/addons/${encodeURIComponent(addon.id)}/)
+					${
+						addon.permissions?.length
+							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
+							: ""
+					}`,
 			)
-			.setFooter({
-				text:
-					Math.round((1 - score) * 100) +
-					"% match" +
-					CONSTANTS.footerSeperator +
-					(compact ? "Compact mode" : addon.id),
-			})
-			[compact ? "setThumbnail" : "setImage"](
-				`${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
-			);
+			.setFooter({ text: addon.id })
+			.setThumbnail(`${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`);
 
 		const group = addon.tags.includes("popup")
 			? "Extension Popup Features"
@@ -109,64 +99,63 @@ const info: ChatInputCommand = {
 			);
 		}
 
-		if (!compact) {
-			const lastUpdatedIn = `last updated in v${
-				addon.latestUpdate?.version ?? "<unknown version>"
-			}`;
+		const lastUpdatedIn = `last updated in v${
+			addon.latestUpdate?.version ?? "<unknown version>"
+		}`;
 
-			const credits = joinWithAnd(
-				addon.credits?.map((credit) => {
-					const note = ("note" in credit ? credit.note : undefined) || "";
-					return credit.link
-						? hyperlink(escapeLinks(credit.name), credit.link, note)
-						: interaction.channel
-						? generateTooltip(interaction.channel, credit.name, note)
-						: credit.name;
-				}) ?? [],
-			);
+		const credits = joinWithAnd(
+			addon.credits?.map((credit) => {
+				const note = ("note" in credit ? credit.note : undefined) || "";
+				return credit.link
+					? hyperlink(escapeLinks(credit.name), credit.link, note)
+					: interaction.channel
+					? generateTooltip(interaction.channel, credit.name, note)
+					: credit.name;
+			}) ?? [],
+		);
 
-			if (credits)
-				embed.addFields({
-					name: "🫂 Contributors",
-					value: escapeMarkdown(credits),
-					inline: true,
-				});
+		if (credits)
+			embed.addFields({
+				name: "🫂 Contributors",
+				value: escapeMarkdown(credits),
+				inline: true,
+			});
 
-			if (addon.permissions?.length)
-				embed.setDescription(
-					embed.data.description +
-						"\n" +
-						"\n" +
-						"**⚠ This addon may require additional permissions to be granted in order to function.**",
-				);
-
-			embed.addFields(
-				{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
-				{
-					inline: true,
-					name: "📝 Version added",
-					value: escapeMarkdown(
-						"v" +
-							addon.versionAdded +
-							(addon.latestUpdate
-								? ` (${
-										interaction.channel
-											? generateTooltip(
-													interaction.channel,
-													lastUpdatedIn,
-													`${addon.latestUpdate?.temporaryNotice}`,
-											  )
-											: lastUpdatedIn
-								  })`
-								: ""),
-					),
-				},
-			);
-		}
+		embed.addFields(
+			{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
+			{
+				inline: true,
+				name: "📝 Version added",
+				value: escapeMarkdown(
+					"v" +
+						addon.versionAdded +
+						(addon.latestUpdate
+							? ` (${
+									interaction.channel
+										? generateTooltip(
+												interaction.channel,
+												lastUpdatedIn,
+												`${addon.latestUpdate?.temporaryNotice}`,
+										  )
+										: lastUpdatedIn
+							  })`
+							: ""),
+				),
+			},
+		);
 
 		await interaction.reply({ embeds: [embed] });
 	},
 
 	censored: "channel",
+
+	async autocomplete(interaction) {
+		await interaction.respond(
+			fuse
+				.search(interaction.options.getString("addon", true))
+				.splice(0, 25)
+				.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
+		);
+	},
 };
-export default info;
+export default command;

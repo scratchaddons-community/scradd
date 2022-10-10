@@ -9,6 +9,7 @@ import { importScripts } from "../util/files.js";
 import path from "path";
 import url from "url";
 import { guessAddon } from "../commands/guess-addon.js";
+import { say } from "../commands/say.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -18,6 +19,17 @@ const commands =
 
 /** @type {import("../common/types/event").default<"interactionCreate">} */
 export default async function event(interaction) {
+	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
+	if (interaction.isAutocomplete()) {
+		const commandPromise = commands.get(interaction.commandName);
+
+		const command = await commandPromise?.();
+
+		if (!command || !("autocomplete" in command))
+			throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
+
+		return await command.autocomplete?.(interaction);
+	}
 	if (!interaction.isRepliable()) return;
 	try {
 		if (interaction.isButton()) {
@@ -62,9 +74,13 @@ export default async function event(interaction) {
 				return;
 			}
 		}
+
 		if (interaction.isModalSubmit()) {
 			if (interaction.customId.startsWith("guessModal.")) {
 				return await guessAddon(interaction);
+			}
+			if (interaction.customId === "say") {
+				return await say(interaction, interaction.fields.getTextInputValue("message"));
 			}
 		}
 		if (!interaction.isCommand()) return;
@@ -106,7 +122,7 @@ export default async function event(interaction) {
 		await command.interaction(interaction);
 	} catch (error) {
 		logError(error, interaction.toString());
-		if (interaction.deferred) {
+		if (interaction.deferred && +interaction.createdAt - +new Date() < 900_000) {
 			return await interaction.editReply({
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
@@ -114,6 +130,8 @@ export default async function event(interaction) {
 				files: [],
 			});
 		}
+
+		if (!interaction.replied && +interaction.createdAt - +new Date() > 3_000) return;
 
 		await interaction[interaction.replied ? "followUp" : "reply"]({
 			ephemeral: true,

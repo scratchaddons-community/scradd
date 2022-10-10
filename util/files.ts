@@ -30,7 +30,6 @@ export async function importScripts<T>(
 		const filename = (
 			path
 				.relative(directory, sibling)
-
 				.split(path.extname(sibling))[0] || path.relative(directory, sibling)
 		)
 			.split(path.sep)
@@ -56,7 +55,6 @@ export async function importScripts<T>(
 export function sanitizePath(unclean: string, noDoxx = true): string {
 	const sanitized = decodeURIComponent(unclean)
 		.replaceAll("\\", "/")
-
 		.replaceAll("file:///", "");
 	return noDoxx ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;
 }

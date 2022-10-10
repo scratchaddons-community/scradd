@@ -23,8 +23,6 @@ export async function getLoggingThread(group) {
 	const threads = await CONSTANTS.channels.modlogs.threads.fetchActive();
 	return (
 		threads.threads.find((thread) => thread.name === group) ||
-		(await CONSTANTS.channels.modlogs.threads.create({
-			name: group,
-		}))
+		(await CONSTANTS.channels.modlogs.threads.create({ name: group }))
 	);
 }

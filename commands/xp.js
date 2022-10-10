@@ -14,10 +14,7 @@ export default {
 				.setName("rank")
 				.setDescription("View a users’ XP rank")
 				.addUserOption((input) =>
-					input
-						.setName("user")
-						.setDescription("User to view (defaults to you)")
-						.setRequired(false),
+					input.setName("user").setDescription("User to view (defaults to you)"),
 				),
 		)
 		.addSubcommand((subcommand) =>

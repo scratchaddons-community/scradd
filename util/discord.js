@@ -396,10 +396,7 @@ export async function paginate(array, toString, failMessage, title, reply) {
 			.trim();
 
 		if (!content) {
-			return {
-				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
-				ephemeral: true,
-			};
+			return { content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`, ephemeral: true };
 		}
 
 		return {

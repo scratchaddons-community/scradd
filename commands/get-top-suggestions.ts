@@ -30,7 +30,9 @@ const old = CONSTANTS.channels.old_suggestions
 			return {
 				answer:
 					suggestionAnswers.find((answer) =>
-						[segments?.[0], segments?.at(-1)].includes(answer),
+						[segments?.[0]?.toLowerCase(), segments?.at(-1)?.toLowerCase()].includes(
+							answer?.toLowerCase(),
+						),
 					) || suggestionAnswers[0],
 
 				author:
@@ -55,20 +57,18 @@ const old = CONSTANTS.channels.old_suggestions
 	  })
 	: [];
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Get the top suggestions")
 		.addUserOption((input) =>
 			input
 				.setName("user")
-				.setDescription("Filter suggestions to only get those by a certain user")
-				.setRequired(false),
+				.setDescription("Filter suggestions to only get those by a certain user"),
 		)
 		.addStringOption((option) =>
 			option
 				.setName("answer")
 				.setDescription("Filter suggestions to only get those with a certain answer")
-				.setRequired(false)
 				.addChoices(
 					...suggestionAnswers.map((answer) => ({ name: answer, value: answer })),
 				),
@@ -111,4 +111,4 @@ const info: ChatInputCommand = {
 		);
 	},
 };
-export default info;
+export default command;

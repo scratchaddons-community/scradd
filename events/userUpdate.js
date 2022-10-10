@@ -17,7 +17,7 @@ export default async function event(oldUser, newUser) {
 	}
 
 	await Promise.all(
-		logs.map((edit) => log(`🫂 User ${newUser.toString()} ` + edit + `!`, "members")),
+		logs.map((edit) => log(`👤 User ${newUser.toString()} ` + edit + `!`, "members")),
 	);
 
 	const member = await guild.members.fetch(newUser.id).catch(() => {});

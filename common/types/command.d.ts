@@ -16,6 +16,7 @@ import type {
 	SlashCommandOptionsOnlyBuilder,
 	ContextMenuCommandBuilder,
 	ContextMenuCommandInteraction,
+	AutocompleteInteraction,
 } from "discord.js";
 
 export interface ContextMenuCommand {
@@ -39,6 +40,7 @@ export interface ChatInputCommand {
 
 	/** A function that processes interactions to this command. */
 	interaction: (interaction: ChatInputCommandInteraction<"raw" | "cached">) => any;
+	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
 }
 type Command = ContextMenuCommand | ChatInputCommand | undefined;
 export default Command;

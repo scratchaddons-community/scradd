@@ -135,10 +135,9 @@ export default async function event(oldChannel, newChannel) {
 		oldChannel.videoQualityMode !== newChannel.videoQualityMode &&
 			edits.push(
 				`’s video quality set to ${
-					{
-						[VideoQualityMode.Auto]: "Auto",
-						[VideoQualityMode.Full]: "720p",
-					}[newChannel.videoQualityMode || VideoQualityMode.Auto]
+					{ [VideoQualityMode.Auto]: "Auto", [VideoQualityMode.Full]: "720p" }[
+						newChannel.videoQualityMode || VideoQualityMode.Auto
+					]
 				}`,
 			);
 

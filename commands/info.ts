@@ -21,7 +21,7 @@ async function getRole(roleId: Snowflake): Promise<string> {
 	return joinWithAnd(members);
 }
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Learn about me")
 		.addSubcommand((input) => input.setName("status").setDescription("Show bot status"))
@@ -188,4 +188,4 @@ const info: ChatInputCommand = {
 		}
 	},
 };
-export default info;
+export default command;

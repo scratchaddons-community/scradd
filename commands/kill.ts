@@ -4,7 +4,7 @@ import { cleanDatabaseListeners } from "../common/database.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 import logError from "../util/logError.js";
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription(
 			`(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
@@ -23,4 +23,4 @@ const info: ChatInputCommand = {
 		process.exit(1);
 	},
 };
-export default info;
+export default command;

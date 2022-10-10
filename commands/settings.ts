@@ -6,7 +6,7 @@ import type { ChatInputCommand } from "../common/types/command";
 export const userSettingsDatabase = new Database("user_settings");
 await userSettingsDatabase.init();
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Customize personal settings")
 		.addBooleanOption((input) =>
@@ -14,28 +14,24 @@ const info: ChatInputCommand = {
 				.setName("board-pings")
 				.setDescription(
 					`Whether to ping you when your messages get on #${CONSTANTS.channels.board?.name}`,
-				)
-				.setRequired(false),
+				),
 		)
 		.addBooleanOption((input) =>
-			input
-				.setName("level-up-pings")
-				.setDescription("Whether to ping you when you level up")
-				.setRequired(false),
+			input.setName("level-up-pings").setDescription("Whether to ping you when you level up"),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("weekly-pings")
 				.setDescription(
 					"Whether to ping you if you are one of the top 5 chatters in a week",
-				)
-				.setRequired(false),
+				),
 		)
 		.addBooleanOption((input) =>
 			input
 				.setName("autoreactions")
-				.setDescription("Whether to automatically react to your messages with funny emojis")
-				.setRequired(false),
+				.setDescription(
+					"Whether to automatically react to your messages with funny emojis",
+				),
 		),
 	async interaction(interaction) {
 		const settingsForUser = userSettingsDatabase.data.find(
@@ -84,4 +80,4 @@ const info: ChatInputCommand = {
 		});
 	},
 };
-export default info;
+export default command;

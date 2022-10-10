@@ -24,7 +24,7 @@ import path from "path";
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/moderation/logging.js";
 
-const info: ChatInputCommand = {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Voice channel commands")
 		.addSubcommand((input) =>
@@ -94,13 +94,13 @@ const info: ChatInputCommand = {
 							{ name: "oof", value: "oof.mp3" },
 							{ name: "Ping!1!!1!!!", value: "discord.mp3" },
 							{ name: "Somebody once told me", value: "allStar.mp3" },
+							{ name: "Stardew Valley", value: "yoshi.mp3" },
 							{ name: "Taco Bell", value: "bong.mp3" },
 							{ name: "This group is dead", value: "dead.mp3" },
 							{ name: "WAS THAT THE BITE OF 87?!?!?", value: "biteOf87.wav" },
 							{ name: "Wii", value: "wii.mp3" },
 							{ name: "Wut da dog doin?", value: "wutDaDogDoin.mp3" },
 							{ name: "YEEEET!", value: "yeet.mp3" },
-							{ name: "Yoshi", value: "yoshi.mp3" },
 						),
 				)
 				.addChannelOption((input) =>
@@ -258,4 +258,4 @@ const info: ChatInputCommand = {
 	},
 };
 
-export default info;
+export default command;
