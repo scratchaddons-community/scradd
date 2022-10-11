@@ -1,8 +1,8 @@
 import { ChannelType } from "discord.js";
 import log from "../../common/moderation/logging.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"channelCreate">} */
-export default async function event(channel) {
+const event: Event<"channelCreate"> = async function event(channel) {
 	if (channel.guild.id !== process.env.GUILD_ID) return;
 	await log(
 		`📃 ${
@@ -19,4 +19,5 @@ export default async function event(channel) {
 		}!`,
 		"channels",
 	);
-}
+};
+export default event;

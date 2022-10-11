@@ -2,9 +2,9 @@ import { suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import { sendClosedMessage } from "../../common/modmail.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"threadDelete">} */
-export default async function event(thread) {
+const event: Event<"threadDelete"> = async function event(thread) {
 	if (thread.guild.id !== process.env.GUILD_ID) return;
 
 	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
@@ -20,4 +20,5 @@ export default async function event(thread) {
 	if (thread.parent?.id !== CONSTANTS.channels.modmail?.id || thread.archived) return;
 
 	await sendClosedMessage(thread);
-}
+};
+export default event;

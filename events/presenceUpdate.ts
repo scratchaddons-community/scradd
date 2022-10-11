@@ -1,9 +1,9 @@
 import { ActivityType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
+import type Event from "../common/types/event";
 
-/** @type {import("../common/types/event").default<"presenceUpdate">} */
-export default async function event(_, newPresence) {
+const event: Event<"presenceUpdate"> = async function event(_, newPresence) {
 	if (newPresence.guild?.id !== process.env.GUILD_ID) return;
 
 	const activity = newPresence.activities[0];
@@ -21,4 +21,5 @@ export default async function event(_, newPresence) {
 			"As a mod, you should set an example for the server, so please refrain from swears in your status. Thanks!",
 		);
 	}
-}
+};
+export default event;

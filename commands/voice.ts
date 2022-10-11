@@ -238,7 +238,6 @@ const command: ChatInputCommand = {
 						} catch {
 							// Seems to be a real disconnect which SHOULDN'T be recovered from
 							connection.destroy();
-							player.stop();
 						}
 					})
 					.on("error", (error) => {

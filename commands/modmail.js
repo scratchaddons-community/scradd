@@ -108,7 +108,7 @@ export default {
 					new EmbedBuilder()
 						.setTitle("Confirmation")
 						.setDescription(
-							`Are you sure you want to start a modmail with **${user?.user.toString()}**?`,
+							`Are you sure you want to start a modmail with **${user?.toString()}**?`,
 						)
 						.setColor(MODMAIL_COLORS.confirm)
 						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),

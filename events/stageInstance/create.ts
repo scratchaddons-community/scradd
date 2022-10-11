@@ -1,8 +1,8 @@
 import client from "../../client.js";
 import log from "../../common/moderation/logging.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"stageInstanceCreate">} */
-export default async function event(instance) {
+const event: Event<"stageInstanceCreate"> = async function event(instance) {
 	const guild = instance.guild || (await client.guilds.fetch(instance.guildId));
 
 	if (guild.id !== process.env.GUILD_ID) return;
@@ -12,4 +12,5 @@ export default async function event(instance) {
 		} - ${instance.topic}`,
 		"voice",
 	);
-}
+};
+export default event;

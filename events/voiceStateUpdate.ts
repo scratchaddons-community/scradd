@@ -1,7 +1,7 @@
 import log from "../common/moderation/logging.js";
+import type Event from "../common/types/event";
 
-/** @type {import("../common/types/event").default<"voiceStateUpdate">} */
-export default async function event(oldState, newState) {
+const event: Event<"voiceStateUpdate"> = async function event(oldState, newState) {
 	if (!newState.member || newState.guild.id !== process.env.GUILD_ID) return;
 
 	const logs = [];
@@ -50,4 +50,5 @@ export default async function event(oldState, newState) {
 				log(`🔊 Member ${newState.member.toString()} ` + edit + `!`, "voice"),
 		),
 	);
-}
+};
+export default event;

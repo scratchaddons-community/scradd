@@ -2,9 +2,9 @@ import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
+import type Event from "../../../common/types/event";
 
-/** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
-export default async function event(member) {
+const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`💨 Member ${member.toString()} left!`, "members");
 
@@ -42,4 +42,5 @@ export default async function event(member) {
 	];
 
 	await Promise.all(promises);
-}
+};
+export default event;

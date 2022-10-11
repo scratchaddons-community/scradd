@@ -1,8 +1,8 @@
 import { Guild } from "discord.js";
 import log from "../../common/moderation/logging.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"inviteDelete">} */
-export default async function event(invite) {
+const event: Event<"inviteDelete"> = async function event(invite) {
 	if (!(invite.guild instanceof Guild) || invite.guild.id !== process.env.GUILD_ID) return;
 	await log(
 		`⛔ Invite ${invite.code} deleted` +
@@ -10,4 +10,5 @@ export default async function event(invite) {
 			"!",
 		"members",
 	);
-}
+};
+export default event;

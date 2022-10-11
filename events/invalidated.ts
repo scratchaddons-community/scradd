@@ -1,7 +1,8 @@
 import logError from "../util/logError.js";
+import type Event from "../common/types/event";
 
-/** @type {import("../common/types/event").default<"invalidated">} */
-export default async function event() {
+const event: Event<"invalidated"> = async function event() {
 	await logError(new ReferenceError("Session is invalid"), "invalidated");
 	process.exit(1);
-}
+};
+export default event;

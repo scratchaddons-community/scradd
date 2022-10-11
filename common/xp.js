@@ -48,7 +48,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 				new EmbedBuilder()
 					.setColor(member?.displayColor ?? null)
 					.setAuthor({
-						iconURL: to.displayAvatarURL(),
+						iconURL: (member ?? user).displayAvatarURL(),
 						name: member?.displayName ?? user.username,
 					})
 					.setTitle(
@@ -76,6 +76,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						},
 					)
 					.setFooter({
+						iconURL: guild.iconURL() ?? undefined,
 						text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank\nToggle pings with /settings`,
 					}),
 			],

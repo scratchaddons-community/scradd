@@ -1,7 +1,7 @@
 import log from "../../common/moderation/logging.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"roleUpdate">} */
-export default async function event(oldRole, newRole) {
+const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 	if (newRole.guild.id !== process.env.GUILD_ID) return;
 
 	const logs = [];
@@ -42,4 +42,5 @@ export default async function event(oldRole, newRole) {
 	await Promise.all(
 		logs.map((edit) => log(`✏ Role ${newRole.toString()}` + edit + `!`, "server")),
 	);
-}
+};
+export default event;

@@ -3,9 +3,9 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"messageDelete">} */
-export default async function event(message) {
+const event: Event<"messageDelete"> = async function event(message) {
 	if (
 		message.channel.isDMBased() ||
 		message.guild?.id !== process.env.GUILD_ID ||
@@ -47,4 +47,5 @@ export default async function event(message) {
 			],
 		},
 	);
-}
+};
+export default event;

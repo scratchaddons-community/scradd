@@ -2,9 +2,9 @@ import { time } from "discord.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
 import log from "../../../common/moderation/logging.js";
+import type Event from "../../../common/types/event";
 
-/** @type {import("../../../common/types/event").default<"guildMemberUpdate">} */
-export default async function event(oldMember, newMember) {
+const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMember) {
 	if (newMember.guild.id !== process.env.GUILD_ID) return;
 	const logs = [];
 	if (oldMember.avatar !== newMember.avatar) {
@@ -47,4 +47,5 @@ export default async function event(oldMember, newMember) {
 	);
 
 	await changeNickname(newMember);
-}
+};
+export default event;
