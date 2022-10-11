@@ -49,7 +49,7 @@ This directory contains files each exporting event functions that are passed to 
 
 #### `commands`
 
-This directory contains files each exporting a [Command object](/common/types/command.d.ts) that are each automatically registered as an Application Command. Supports chat input commands, user context menu commands, and message context menu commands. Note that there is currently no handler for autocomplete options.
+This directory contains files each exporting a [Command object](/common/types/command.d.ts) that are each automatically registered as an Application Command. Supports chat input commands, user context menu commands, and message context menu commands. In addition, autocomplete option pings are sent to `Command#autocomplete`.
 
 #### `common`
 

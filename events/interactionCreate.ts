@@ -25,7 +25,9 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		const command = await commandPromise?.();
 
 		if (!command || !("autocomplete" in command))
-			throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
+			throw new ReferenceError(
+				`Command \`${interaction.commandName}\` autocomplete handler not found`,
+			);
 
 		return await command.autocomplete?.(interaction);
 	}
