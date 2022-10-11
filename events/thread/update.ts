@@ -1,4 +1,10 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	ThreadAutoArchiveDuration,
+} from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,

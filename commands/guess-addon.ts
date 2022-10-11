@@ -1716,7 +1716,9 @@ const command: ChatInputCommand = {
 								)
 								.setOptions(options);
 
-							const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(select);
+							const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+								select,
+							);
 
 							if (options.length > 0) accumulator.push(row);
 
