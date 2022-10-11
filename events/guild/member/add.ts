@@ -1,4 +1,4 @@
-import { AttachmentBuilder, Collection } from "discord.js";
+import { AttachmentBuilder, Collection, Snowflake } from "discord.js";
 import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/moderation/automod.js";
@@ -7,9 +7,9 @@ import { nth } from "../../../util/numbers.js";
 import fileSystem from "fs/promises";
 import url from "url";
 import path from "path";
+import type Event from "../../../common/types/event";
 
-/** @type {import("../../../common/types/event").default<"guildMemberAdd">} */
-export default async function event(member) {
+const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`👋 Member ${member.toString()} joined!`, "members");
 
@@ -51,7 +51,7 @@ export default async function event(member) {
 		const inviter = invite.inviter?.id || "";
 		acc.set(inviter, (acc.get(inviter) || 0) + (invite.uses || 0));
 		return acc;
-	}, /** @type {Collection<import("discord.js").Snowflake, number>} */ (new Collection()));
+	}, new Collection<Snowflake, number>());
 	inviters.map(async (count, user) => {
 		if (count < 20) return;
 		const member = await guild.members.fetch(user).catch(() => {});
@@ -68,4 +68,5 @@ export default async function event(member) {
 			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
 		);
 	});
-}
+};
+export default event;

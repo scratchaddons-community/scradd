@@ -1,4 +1,13 @@
-import { cleanCodeBlockContent, EmbedBuilder, MessageType, ChannelType } from "discord.js";
+import {
+	cleanCodeBlockContent,
+	EmbedBuilder,
+	MessageType,
+	ChannelType,
+	Message,
+	EmojiIdentifierResolvable,
+	MessageReaction,
+	Snowflake,
+} from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { automodMessage } from "../../common/moderation/automod.js";
 
@@ -20,14 +29,13 @@ import { normalize, truncateText } from "../../util/text.js";
 import client, { guild } from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
+import type Event from "../../common/types/event";
 
 const { GUILD_ID } = process.env;
 
-/** @type {Record<import("discord.js").Snowflake, import("discord.js").Message[]>} */
-const latestMessages = {};
+const latestMessages: Record<Snowflake, Message[]> = {};
 
-/** @type {import("../../common/types/event").default<"messageCreate">} */
-export default async function event(message) {
+const event: Event<"messageCreate"> = async function event(message) {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
 	const promises = [];
 
@@ -210,8 +218,7 @@ export default async function event(message) {
 				.fetch({ limit: 100, before: message.id })
 				.then((messages) => messages.toJSON());
 
-			/** @type {import("discord.js").Message<true>[]} */
-			const res = [];
+			const res: Message<true>[] = [];
 			for (
 				let index = 0;
 				index < fetched.length && res.length < NORMAL_XP_PER_MESSAGE;
@@ -288,12 +295,7 @@ export default async function event(message) {
 
 	const REACTION_CAP = 2;
 
-	/**
-	 * @param {import("discord.js").EmojiIdentifierResolvable} emoji
-	 *
-	 * @returns {Promise<void | import("discord.js").MessageReaction> | void}
-	 */
-	function react(emoji) {
+	function react(emoji: EmojiIdentifierResolvable): Promise<void | MessageReaction> | void {
 		if (reactions > REACTION_CAP) return;
 		reactions++;
 		const promise = message.react(emoji).catch(console.error);
@@ -331,11 +333,11 @@ export default async function event(message) {
 	/**
 	 * Determines whether the message contains a word.
 	 *
-	 * @param {string | RegExp} text - The word to check for.
+	 * @param text - The word to check for.
 	 *
-	 * @returns {boolean} Whether the message contains the word.
+	 * @returns Whether the message contains the word.
 	 */
-	function includes(text, plural = true) {
+	function includes(text: string | RegExp, plural = true): boolean {
 		return new RegExp(
 			"\\b" +
 				(typeof text === "string" ? text : "(?:" + text.source + ")") +
@@ -402,4 +404,5 @@ export default async function event(message) {
 		react("👋");
 
 	await Promise.all(promises);
-}
+};
+export default event;

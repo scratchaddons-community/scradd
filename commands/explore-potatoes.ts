@@ -8,6 +8,7 @@ import {
 	GuildBasedChannel,
 	Snowflake,
 	BaseMessageOptions,
+	ActionRowBuilder,
 } from "discord.js";
 
 import {
@@ -20,7 +21,6 @@ import { asyncFilter, firstTrueyPromise } from "../util/promises.js";
 import { generateHash } from "../util/text.js";
 import { disableComponents } from "../util/discord.js";
 import { guild } from "../client.js";
-import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 
 /**
@@ -156,7 +156,7 @@ const command: ChatInputCommand = {
 						components:
 							index > 0
 								? [
-										new MessageActionRowBuilder().addComponents(
+										new ActionRowBuilder<ButtonBuilder>().addComponents(
 											new ButtonBuilder()
 												.setLabel("<< Previous")
 												.setCustomId(prevId)

@@ -1,9 +1,9 @@
 import { guild } from "../client.js";
 import { changeNickname } from "../common/moderation/automod.js";
 import log from "../common/moderation/logging.js";
+import type Event from "../common/types/event";
 
-/** @type {import("../common/types/event").default<"userUpdate">} */
-export default async function event(oldUser, newUser) {
+const event: Event<"userUpdate"> = async function event(oldUser, newUser) {
 	newUser = await newUser.fetch();
 
 	const logs = [];
@@ -23,4 +23,5 @@ export default async function event(oldUser, newUser) {
 	const member = await guild.members.fetch(newUser.id).catch(() => {});
 	if (!member) return;
 	await changeNickname(member);
-}
+};
+export default event;

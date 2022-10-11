@@ -4,9 +4,9 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
 import { paginate } from "../util/discord.js";
 import { makeProgressBar } from "../util/numbers.js";
+import type { ChatInputCommand } from "../common/types/command";
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to view users’ XP amounts")
 		.addSubcommand((subcommand) =>
@@ -114,3 +114,4 @@ export default {
 		}
 	},
 };
+export default command;

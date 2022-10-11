@@ -25,7 +25,6 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../util/text.js";
-import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 import { disableComponents } from "../util/discord.js";
 import client from "../client.js";
 import type AddonManifest from "../common/types/addonManifest";
@@ -1102,7 +1101,7 @@ const command: ChatInputCommand = {
 
 					const message = await interaction[interaction.replied ? "editReply" : "reply"]({
 						components: [
-							new MessageActionRowBuilder().addComponents(
+							new ActionRowBuilder<ButtonBuilder>().addComponents(
 								new ButtonBuilder()
 									.setLabel("Yes")
 									.setStyle(ButtonStyle.Success)
@@ -1124,7 +1123,7 @@ const command: ChatInputCommand = {
 									.setStyle(ButtonStyle.Danger)
 									.setCustomId(generateHash("no")),
 							),
-							new MessageActionRowBuilder().addComponents(
+							new ActionRowBuilder<ButtonBuilder>().addComponents(
 								...(typeof backInfo === "object"
 									? [
 											new ButtonBuilder()
@@ -1336,7 +1335,7 @@ const command: ChatInputCommand = {
 
 					const message = await interaction.followUp({
 						components: [
-							new MessageActionRowBuilder().addComponents(
+							new ActionRowBuilder<ButtonBuilder>().addComponents(
 								...(typeof backInfo === "object"
 									? [
 											new ButtonBuilder()
@@ -1433,7 +1432,7 @@ const command: ChatInputCommand = {
 
 								await buttonInteraction.reply({
 									components: [
-										new MessageActionRowBuilder().addComponents(
+										new ActionRowBuilder<ButtonBuilder>().addComponents(
 											new ButtonBuilder()
 												.setLabel("Go to game")
 												.setStyle(ButtonStyle.Link)
@@ -1460,7 +1459,7 @@ const command: ChatInputCommand = {
 
 							await buttonInteraction.reply({
 								components: [
-									new MessageActionRowBuilder().addComponents(
+									new ActionRowBuilder<ButtonBuilder>().addComponents(
 										new ButtonBuilder()
 											.setLabel("Go to game")
 											.setStyle(ButtonStyle.Link)
@@ -1504,7 +1503,7 @@ const command: ChatInputCommand = {
 				const message = await interaction.reply({
 					components: [
 						selectGroupButton(),
-						new MessageActionRowBuilder().addComponents([
+						new ActionRowBuilder<ButtonBuilder>().addComponents([
 							new ButtonBuilder()
 								.setLabel("Give up")
 								.setStyle(ButtonStyle.Danger)
@@ -1568,7 +1567,9 @@ const command: ChatInputCommand = {
 							else {
 								await interaction.editReply({
 									components: message.components?.map((row) =>
-										new MessageActionRowBuilder().setComponents(
+										new ActionRowBuilder<
+											ButtonBuilder | SelectMenuBuilder
+										>().setComponents(
 											row.components
 												?.filter(
 													(component) =>
@@ -1662,7 +1663,7 @@ const command: ChatInputCommand = {
 					doneGroups: Set<GroupName> = new Set(),
 					defaultValue?: GroupName,
 				) {
-					return new MessageActionRowBuilder().addComponents(
+					return new ActionRowBuilder<SelectMenuBuilder>().addComponents(
 						new SelectMenuBuilder()
 							.setPlaceholder("Select a group")
 							.setCustomId(generateHash("group"))
@@ -1715,13 +1716,13 @@ const command: ChatInputCommand = {
 								)
 								.setOptions(options);
 
-							const row = new MessageActionRowBuilder().setComponents(select);
+							const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(select);
 
 							if (options.length > 0) accumulator.push(row);
 
 							return accumulator;
 						},
-						[] as MessageActionRowBuilder[],
+						[] as ActionRowBuilder<SelectMenuBuilder>[],
 					);
 
 					const reply = await interaction.fetchReply();

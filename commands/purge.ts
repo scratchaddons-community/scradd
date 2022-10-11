@@ -1,10 +1,18 @@
-import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
+import {
+	Collection,
+	GuildTextBasedChannel,
+	Message,
+	PermissionsBitField,
+	SlashCommandBuilder,
+	Snowflake,
+	User,
+} from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
+import type { ChatInputCommand } from "../common/types/command";
 
 const MAX_FETCH_COUNT = 100;
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
 		.addStringOption((input) =>
@@ -48,14 +56,14 @@ export default {
 			});
 	},
 };
+export default command;
 
-/**
- * @param {import("discord.js").Collection<import("discord.js").Snowflake, import("discord.js").Message<true>>} unfiltered
- * @param {import("discord.js").GuildTextBasedChannel} channel
- * @param {number} count
- * @param {import("discord.js").User} [user]
- */
-async function deleteMessages(unfiltered, channel, count, user) {
+async function deleteMessages(
+	unfiltered: Collection<Snowflake, Message<true>>,
+	channel: GuildTextBasedChannel,
+	count: number,
+	user?: User,
+) {
 	const twoWeeksAgo = Date.now() - 1_209_600_000;
 	const filtered = unfiltered
 		.toJSON()

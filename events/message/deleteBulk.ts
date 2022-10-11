@@ -1,7 +1,6 @@
-import { AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { messageToText } from "../../util/discord.js";
-import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import type Event from "../../common/types/event";
 
@@ -35,7 +34,7 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 			new AttachmentBuilder(Buffer.from(messagesInfo, "utf-8"), { name: "messages.txt" }),
 		],
 		components: [
-			new MessageActionRowBuilder().addComponents(
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setLabel("View Context")
 					.setStyle(ButtonStyle.Link)

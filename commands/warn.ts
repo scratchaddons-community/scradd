@@ -2,11 +2,11 @@ import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
 import { stripMarkdown } from "../util/markdown.js";
+import type { ChatInputCommand } from "../common/types/command";
 
 const DEFAULT_STRIKES = 1;
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("(Mod only) Warns a user")
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
@@ -57,3 +57,4 @@ export default {
 		});
 	},
 };
+export default command;

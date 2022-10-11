@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
@@ -11,12 +11,11 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import log, { LOG_GROUPS } from "../../common/moderation/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import { suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import { suggestionAnswers } from "../../commands/get-top-suggestions.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"threadUpdate">} */
-export default async function event(oldThread, newThread) {
+const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
 	if (newThread.guild.id !== process.env.GUILD_ID) return;
 
 	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
@@ -25,14 +24,14 @@ export default async function event(oldThread, newThread) {
 				? {
 						...suggestion,
 						answer:
-							/** @type {typeof suggestionAnswers[number] | undefined} */ (
-								CONSTANTS.channels.suggestions?.availableTags.find(
-									(tag) =>
-										// @ts-expect-error -- We want to see if the types match.
-										suggestionAnswers.includes(tag.name) &&
-										newThread.appliedTags.includes(tag.id),
-								)?.name
-							) || suggestionAnswers[0],
+							CONSTANTS.channels.suggestions?.availableTags.find(
+								(
+									tag,
+								): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
+									// @ts-expect-error -- We want to see if the types match.
+									suggestionAnswers.includes(tag.name) &&
+									newThread.appliedTags.includes(tag.id),
+							)?.name || suggestionAnswers[0],
 						title: newThread.name,
 				  }
 				: suggestion,
@@ -75,7 +74,7 @@ export default async function event(oldThread, newThread) {
 			"messages",
 			{
 				components: [
-					new MessageActionRowBuilder().addComponents(
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setLabel("View Post")
 							.setStyle(ButtonStyle.Link)
@@ -88,7 +87,7 @@ export default async function event(oldThread, newThread) {
 	if (
 		newThread.archived &&
 		(newThread.name === DATABASE_THREAD ||
-			/** @type {readonly string[]} */ (LOG_GROUPS).includes(newThread.name)) &&
+			(LOG_GROUPS as readonly string[]).includes(newThread.name)) &&
 		newThread.parent?.id === CONSTANTS.channels.modlogs?.id
 	) {
 		await newThread.setArchived(false);
@@ -98,7 +97,7 @@ export default async function event(oldThread, newThread) {
 		logs.map((edit) =>
 			log(`📃 Thread ${newThread.toString()}` + edit + `!`, "channels", {
 				components: [
-					new MessageActionRowBuilder().addComponents(
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setLabel("View Thread")
 							.setStyle(ButtonStyle.Link)
@@ -159,4 +158,5 @@ export default async function event(oldThread, newThread) {
 		}),
 		member && sendOpenedMessage(member),
 	]);
-}
+};
+export default event;

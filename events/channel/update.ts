@@ -7,9 +7,9 @@ import {
 } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"channelUpdate">} */
-export default async function event(oldChannel, newChannel) {
+const event: Event<"channelUpdate"> = async function event(oldChannel, newChannel) {
 	if (
 		newChannel.isDMBased() ||
 		oldChannel.isDMBased() ||
@@ -144,4 +144,5 @@ export default async function event(oldChannel, newChannel) {
 	await Promise.all(
 		edits.map((edit) => log(`✏ Channel ${newChannel.toString()}${edit}!`, "channels")),
 	);
-}
+};
+export default event;

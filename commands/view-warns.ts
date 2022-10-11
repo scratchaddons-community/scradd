@@ -6,6 +6,10 @@ import {
 	MessageMentions,
 	time,
 	ButtonStyle,
+	BaseMessageOptions,
+	InteractionReplyOptions,
+	User,
+	ActionRowBuilder,
 } from "discord.js";
 import fetch from "node-fetch";
 import client, { guild } from "../client.js";
@@ -18,10 +22,9 @@ import {
 	WARN_INFO_BASE,
 } from "../common/moderation/warns.js";
 import { convertBase } from "../util/numbers.js";
-import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
+import type { ChatInputCommand } from "../common/types/command";
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDescription("Commands to view strike information")
 		.addSubcommand((input) =>
@@ -71,13 +74,9 @@ export default {
 	},
 	censored: false,
 };
+export default command;
 
-/**
- * @param {import("discord.js").User | import("discord.js").GuildMember} user
- *
- * @returns {Promise<import("discord.js").BaseMessageOptions>}
- */
-export async function getWarnsForMember(user) {
+export async function getWarnsForMember(user: User | GuildMember): Promise<BaseMessageOptions> {
 	const warns = (await removeExpiredWarns(warnLog)).filter((warn) => warn.user === user.id);
 	const mutes = (await removeExpiredWarns(muteLog)).filter((mute) => mute.user === user.id);
 
@@ -126,7 +125,7 @@ export async function getWarnsForMember(user) {
 	return {
 		components: strikes.length
 			? [
-					new MessageActionRowBuilder().addComponents(
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						strikes.map((warn) =>
 							new ButtonBuilder()
 								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
@@ -140,13 +139,10 @@ export async function getWarnsForMember(user) {
 	};
 }
 
-/**
- * @param {import("discord.js").GuildMember} interactor
- * @param {string} filter
- *
- * @returns {Promise<import("discord.js").InteractionReplyOptions>}
- */
-export async function getWarnById(interactor, filter) {
+export async function getWarnById(
+	interactor: GuildMember,
+	filter: string,
+): Promise<InteractionReplyOptions> {
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
 	const id = convertBase(filter, WARN_INFO_BASE, 10);
 	const channel = await getLoggingThread("members");

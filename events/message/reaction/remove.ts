@@ -1,9 +1,9 @@
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
+import type Event from "../../../common/types/event";
 
-/** @type {import("../../../common/types/event").default<"messageReactionRemove">} */
-export default async function event(reaction, user) {
+const event: Event<"messageReactionRemove"> = async function event(reaction, user) {
 	if (reaction.partial) reaction = await reaction.fetch();
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -29,4 +29,5 @@ export default async function event(reaction, user) {
 
 	// Ignore when it’s the wrong emoji
 	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
-}
+};
+export default event;

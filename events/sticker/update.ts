@@ -1,9 +1,9 @@
 import { AttachmentBuilder } from "discord.js";
 import difflib from "difflib";
 import log from "../../common/moderation/logging.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"stickerUpdate">} */
-export default async function event(oldSticker, newSticker) {
+const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticker) {
 	if (newSticker.partial) newSticker = await newSticker.fetch();
 	if (!newSticker.guild || newSticker.guild.id !== process.env.GUILD_ID) return;
 
@@ -39,4 +39,5 @@ export default async function event(oldSticker, newSticker) {
 	await Promise.all(
 		logs.map((edit) => log(`✏ Sticker ${oldSticker.name}` + edit + `!`, "server")),
 	);
-}
+};
+export default event;

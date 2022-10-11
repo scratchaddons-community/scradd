@@ -1,8 +1,7 @@
-import { AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
-import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"messageDelete"> = async function event(message) {
@@ -38,7 +37,7 @@ const event: Event<"messageDelete"> = async function event(message) {
 			embeds,
 			files,
 			components: [
-				new MessageActionRowBuilder().addComponents(
+				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
 						.setLabel("View Context")
 						.setStyle(ButtonStyle.Link)

@@ -11,9 +11,9 @@ import {
 	MODMAIL_UNSUPPORTED,
 } from "../common/modmail.js";
 import { disableComponents } from "../util/discord.js";
+import type { ChatInputCommand } from "../common/types/command";
 
-/** @type {import("../common/types/command").ChatInputCommand} */
-export default {
+const command: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
 		.setDescription("(Mods only) Commands to manage modmail tickets")
@@ -160,3 +160,4 @@ export default {
 
 	censored: false,
 };
+export default command;

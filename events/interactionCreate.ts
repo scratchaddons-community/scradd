@@ -1,4 +1,4 @@
-import { GuildMember } from "discord.js";
+import { CommandInteractionOption, GuildMember } from "discord.js";
 import warn from "../common/moderation/warns.js";
 import { censor, badWordsAllowed } from "../common/moderation/automod.js";
 import { getWarnById } from "../commands/view-warns.js";
@@ -10,15 +10,14 @@ import path from "path";
 import url from "url";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
+import type Event from "../common/types/event";
+import type Command from "../common/types/command.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands =
-	await /** @type {typeof importScripts<import("../common/types/command").default>} */
-	(importScripts)(path.resolve(dirname, "../commands"));
+const commands = await importScripts<Command>(path.resolve(dirname, "../commands"));
 
-/** @type {import("../common/types/event").default<"interactionCreate">} */
-export default async function event(interaction) {
+const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 	if (interaction.isAutocomplete()) {
 		const commandPromise = commands.get(interaction.commandName);
@@ -138,14 +137,12 @@ export default async function event(interaction) {
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 		});
 	}
-}
+};
 
-/** @param {readonly import("discord.js").CommandInteractionOption[]} options */
-function censorOptions(options) {
+function censorOptions(options: readonly CommandInteractionOption[]) {
 	let strikes = 0,
 		isBad = false,
-		/** @type {string[]} */
-		words = [];
+		words: string[] = [];
 	options.forEach((option) => {
 		if (typeof option.value === "string") {
 			const censored = censor(option.value);
@@ -167,3 +164,4 @@ function censorOptions(options) {
 
 	return { isBad, strikes, words };
 }
+export default event;

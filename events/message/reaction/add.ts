@@ -4,9 +4,9 @@ import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
+import type Event from "../../../common/types/event";
 
-/** @type {import("../../../common/types/event").default<"messageReactionAdd">} */
-export default async function event(reaction, user) {
+const event: Event<"messageReactionAdd"> = async function event(reaction, user) {
 	if (reaction.partial) reaction = await reaction.fetch();
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -69,4 +69,5 @@ export default async function event(reaction, user) {
 
 		await updateBoard(message);
 	}
-}
+};
+export default event;

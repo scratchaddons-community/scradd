@@ -3,9 +3,9 @@ import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
 import { suggestionAnswers, suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"threadCreate">} */
-export default async function event(thread, newlyCreated) {
+const event: Event<"threadCreate"> = async function event(thread, newlyCreated) {
 	if (thread.guild.id !== process.env.GUILD_ID || !newlyCreated) return;
 
 	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
@@ -38,4 +38,5 @@ export default async function event(thread, newlyCreated) {
 				);
 		}
 	}
-}
+};
+export default event;

@@ -3,21 +3,23 @@ import log, { getLoggingThread } from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../util/discord.js";
 import jsonDiff from "json-diff";
 import {
+	ActionRowBuilder,
 	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	EmbedBuilder,
+	Message,
+	PartialMessage,
 	PermissionFlagsBits,
 } from "discord.js";
 import diffLib from "difflib";
-import { MessageActionRowBuilder } from "../../common/types/ActionRowBuilder.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import client from "../../client.js";
 
 const loggingThread = await getLoggingThread("databases");
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"messageUpdate">} */
-export default async function event(oldMessage, newMessage) {
+const event: Event<"messageUpdate"> = async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
 	if (
 		newMessage.channel.isDMBased() ||
@@ -45,7 +47,7 @@ export default async function event(oldMessage, newMessage) {
 			{
 				embeds: oldMessage.embeds.map((embed) => EmbedBuilder.from(embed)),
 				components: [
-					new MessageActionRowBuilder().addComponents(
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setLabel("View Message")
 							.setStyle(ButtonStyle.Link)
@@ -109,7 +111,7 @@ export default async function event(oldMessage, newMessage) {
 				{
 					files,
 					components: [
-						new MessageActionRowBuilder().addComponents(
+						new ActionRowBuilder<ButtonBuilder>().addComponents(
 							new ButtonBuilder()
 								.setLabel("View Message")
 								.setStyle(ButtonStyle.Link)
@@ -124,7 +126,7 @@ export default async function event(oldMessage, newMessage) {
 		logs.map((edit) =>
 			log(edit + "!", "messages", {
 				components: [
-					new MessageActionRowBuilder().addComponents(
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setLabel("View Message")
 							.setStyle(ButtonStyle.Link)
@@ -135,10 +137,9 @@ export default async function event(oldMessage, newMessage) {
 		),
 	);
 	if (await automodMessage(newMessage)) return;
-}
+};
 
-/** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
-async function getMessageJSON(message) {
+async function getMessageJSON(message: Message | PartialMessage) {
 	const { embeds, files } = await extractMessageExtremities(message);
 
 	return {
@@ -147,3 +148,4 @@ async function getMessageJSON(message) {
 		files: files,
 	};
 }
+export default event;

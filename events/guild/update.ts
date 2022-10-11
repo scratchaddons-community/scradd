@@ -8,9 +8,9 @@ import {
 } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
+import type Event from "../../common/types/event";
 
-/** @type {import("../../common/types/event").default<"guildUpdate">} */
-export default async function event(oldGuild, newGuild) {
+const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	if (newGuild.id !== process.env.GUILD_ID) return;
 
 	const logs = [];
@@ -310,4 +310,5 @@ export default async function event(oldGuild, newGuild) {
 	}
 
 	await Promise.all(logs.map((edit) => log("✏ " + edit + `!`, "server")));
-}
+};
+export default event;
