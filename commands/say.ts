@@ -6,6 +6,7 @@ import {
 	ComponentType,
 	TextInputStyle,
 	ButtonStyle,
+	chatInputApplicationCommandMention,
 } from "discord.js";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -56,12 +57,6 @@ const command: ChatInputCommand = {
 };
 export default command;
 
-const commandMarkdown = `</say:${
-	(await client.application?.commands.fetch({ guildId: process.env.GUILD_ID }))?.find(
-		(command) => command.name === "say",
-	)?.id
-}>`; // TODO: chatInputApplicationCommandMention
-
 export async function say(
 	interaction: ModalSubmitInteraction | ChatInputCommandInteraction<"raw" | "cached">,
 	content: string,
@@ -72,7 +67,12 @@ export async function say(
 		await Promise.all([
 			interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
 			log(
-				`💬 ${interaction.user.toString()} used ${commandMarkdown} in ${message.channel.toString()}!`,
+				`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
+					"say",
+					(
+						await client.application?.commands.fetch({ guildId: process.env.GUILD_ID })
+					)?.find((command) => command.name === "say")?.id || "",
+				)} in ${message.channel.toString()}!`,
 				"messages",
 				{
 					components: [

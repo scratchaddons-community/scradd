@@ -1,6 +1,7 @@
 import {
 	ChannelType,
 	escapeMarkdown,
+	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
 } from "discord.js";
@@ -127,6 +128,16 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
 			edits.push(
 				`’s message slowmode was set to ` + newChannel.rateLimitPerUser + " seconds",
+			);
+
+		oldChannel.defaultSortOrder !== newChannel.defaultSortOrder &&
+			edits.push(
+				`’s sort order was set to ` +
+					{
+						[SortOrderType.CreationDate]: "Creation Time",
+						[SortOrderType.LatestActivity]: "Recent Activity",
+					}[newChannel.defaultSortOrder || 0] +
+					" seconds",
 			);
 	}
 
