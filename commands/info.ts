@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, time, Snowflake, EmbedBuilder, Role } from "discord.js";
+import { time, Snowflake, Role, ApplicationCommandOptionType } from "discord.js";
 
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
@@ -22,35 +22,40 @@ async function getRole(roleId: Snowflake): Promise<string> {
 }
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Learn about me")
-		.addSubcommand((input) => input.setName("status").setDescription("Show bot status"))
-		.addSubcommand((input) =>
-			input.setName("config").setDescription("Show configuration settings"),
-		)
-		.addSubcommand((input) =>
-			input.setName("credits").setDescription("Show credit information"),
-		),
+	data: {
+		description: "Learn about me",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "status",
+				description: "Show bot status",
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "config",
+				description: "Show configuration settings",
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "credits",
+				description: "Show credit information",
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		switch (interaction.options.getSubcommand(true)) {
 			case "status": {
-				const message = await interaction.reply({
-					ephemeral: true,
-					content: "Pinging…",
-					fetchReply: true,
-				});
+				const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
 				await interaction.editReply({
 					content: "",
 
 					embeds: [
-						new EmbedBuilder()
-							.setTitle("Status")
-							.setDescription(
-								`I'm open-source! The source code is available [on GitHub](${pkg.repository.url}).`,
-							)
-							.addFields(
+						{
+							title: "Status",
+							description: `I'm open-source! The source code is available [on GitHub](${pkg.repository.url}).`,
+							fields: [
 								{
 									name: "Mode",
 									value:
@@ -79,20 +84,20 @@ const command: ChatInputCommand = {
 									inline: true,
 								},
 								{ name: "Node version", value: process.version, inline: true },
-							)
-							.setThumbnail(client.user.displayAvatarURL())
-							.setColor(CONSTANTS.themeColor),
+							],
+							thumbnail: { url: client.user.displayAvatarURL() },
+							color: CONSTANTS.themeColor,
+						},
 					],
 				});
 				break;
 			}
 			case "config": {
 				await interaction.reply({
-					ephemeral: true,
 					embeds: [
-						new EmbedBuilder()
-							.setTitle("Configuration")
-							.addFields(
+						{
+							title: "Configuration",
+							fields: [
 								{
 									name: CONSTANTS.zeroWidthSpace,
 									value: "**CHANNELS**",
@@ -139,20 +144,20 @@ const command: ChatInputCommand = {
 											inline: true,
 										};
 									}),
-							)
-							.setColor(CONSTANTS.themeColor),
+							],
+							color: CONSTANTS.themeColor,
+						},
 					],
 				});
 				break;
 			}
 			case "credits": {
 				await interaction.reply({
-					ephemeral: true,
 					embeds: [
-						new EmbedBuilder()
-							.setTitle("Credits")
-							.setDescription("Scradd is hosted on [Railway](https://railway.app/).")
-							.setFields(
+						{
+							title: "Credits",
+							description: "Scradd is hosted on [Railway](https://railway.app/).",
+							fields: [
 								{
 									name: "Developers",
 									value: await getRole(CONSTANTS.roles.developers),
@@ -177,11 +182,12 @@ const command: ChatInputCommand = {
 									),
 									inline: true,
 								},
-							)
-							.setFooter({
+							],
+							footer: {
 								text: "None of the above users are in any particular order.",
-							})
-							.setColor(CONSTANTS.themeColor),
+							},
+							color: CONSTANTS.themeColor,
+						},
 					],
 				});
 			}

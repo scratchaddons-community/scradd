@@ -1,5 +1,5 @@
-import { EmbedBuilder, GuildMember, User } from "discord.js";
-import { guild } from "../client.js";
+import { GuildMember, User } from "discord.js";
+
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
 import { asyncFilter } from "../util/promises.js";
@@ -18,7 +18,9 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	// give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
-		user instanceof GuildMember ? user : await guild.members.fetch(user).catch(() => {});
+		user instanceof GuildMember
+			? user
+			: await CONSTANTS.guild.members.fetch(user).catch(() => {});
 
 	const xp = xpDatabase.data;
 	const index = xp.findIndex((entry) => entry.user === user.id);
@@ -45,20 +47,19 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			allowedMentions: pings ? undefined : { users: [] },
 			content: "🎉" + to.toString(),
 			embeds: [
-				new EmbedBuilder()
-					.setColor(member?.displayColor ?? null)
-					.setAuthor({
-						iconURL: (member ?? user).displayAvatarURL(),
+				{
+					color: member?.displayColor,
+					author: {
+						icon_url: (member ?? user).displayAvatarURL(),
 						name: member?.displayName ?? user.username,
-					})
-					.setTitle(
-						`You${
-							date.getUTCMonth() === 3 && date.getUTCDate() === 1
-								? "'v" // april fools
-								: "’r"
-						}e at level ${newLevel}!`,
-					)
-					.addFields(
+					},
+					title: `You${
+						date.getUTCMonth() === 3 && date.getUTCDate() === 1
+							? "'v" // april fools
+							: "’r"
+					}e at level ${newLevel}!`,
+
+					fields: [
 						{
 							name: "✨ Current XP",
 							value: newXp.toLocaleString() + " XP",
@@ -74,11 +75,12 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							value: nextLevelXp.toLocaleString() + " XP",
 							inline: true,
 						},
-					)
-					.setFooter({
-						iconURL: guild.iconURL() ?? undefined,
+					],
+					footer: {
+						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
 						text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank\nToggle pings with /settings`,
-					}),
+					},
+				},
 			],
 		});
 	}
@@ -126,7 +128,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	weeklyXpDatabase.data = [];
 	const nonMod = (
 		await asyncFilter(sorted.splice(5), async ({ user: userId }) => {
-			const user = await guild.members.fetch(userId).catch(() => {});
+			const user = await CONSTANTS.guild.members.fetch(userId).catch(() => {});
 			return CONSTANTS.roles.mod && !user?.roles.resolve(CONSTANTS.roles.mod) && user;
 		}).next()
 	).value;
@@ -183,7 +185,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 				if (!ids.includes(member.id)) return member.roles.remove(role);
 			}),
 			...sorted.map(({ user }, index) =>
-				guild.members
+				CONSTANTS.guild.members
 					.fetch(user)
 					.catch(() => {})
 					.then((member) =>

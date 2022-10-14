@@ -19,10 +19,8 @@ export async function getFileNames(directory: string): Promise<string[]> {
 	).flat();
 }
 
-export async function importScripts<T>(
-	directory: string,
-): Promise<Collection<string, () => Promise<T>>> {
-	const collection: Collection<string, () => Promise<T>> = new Collection();
+export async function importScripts<T, K extends string = string>(directory: string) {
+	const collection: Collection<K, () => Promise<T>> = new Collection();
 
 	const siblings = (await getFileNames(directory)).filter((file) => path.extname(file) === ".js");
 
@@ -36,7 +34,7 @@ export async function importScripts<T>(
 				accumulated
 					? accumulated + (item[0] || "").toUpperCase() + item.slice(1)
 					: item.toLowerCase(),
-			);
+			) as K;
 
 		collection.set(
 			filename,

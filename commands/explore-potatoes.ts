@@ -1,26 +1,25 @@
 import {
-	SlashCommandBuilder,
-	ButtonBuilder,
 	ChannelType,
 	ButtonStyle,
 	CategoryChannel,
 	APIInteractionDataResolvedChannel,
 	GuildBasedChannel,
 	Snowflake,
-	BaseMessageOptions,
-	ActionRowBuilder,
+	ComponentType,
+	InteractionReplyOptions,
+	ApplicationCommandOptionType,
 } from "discord.js";
 
 import {
-	boardDatabase as database,
+	boardDatabase,
 	generateBoardMessage,
 	boardReactionCount,
+	BOARD_EMOJI,
 } from "../common/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../util/promises.js";
 import { generateHash } from "../util/text.js";
 import { disableComponents } from "../util/discord.js";
-import { guild } from "../client.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 
 /**
@@ -42,7 +41,7 @@ async function textChannelMatches(
 			const fetchedChannel =
 				channelWanted instanceof CategoryChannel
 					? channelWanted
-					: await guild.channels.fetch(channelWanted.id).catch(() => {});
+					: await CONSTANTS.guild.channels.fetch(channelWanted.id).catch(() => {});
 
 			if (fetchedChannel?.type !== ChannelType.GuildCategory)
 				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
@@ -57,7 +56,7 @@ async function textChannelMatches(
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			const thread = await guild.channels.fetch(channelFound).catch(() => {});
+			const thread = await CONSTANTS.guild.channels.fetch(channelFound).catch(() => {});
 			return thread?.parent?.id === channelWanted.id;
 		}
 
@@ -71,26 +70,25 @@ async function textChannelMatches(
 const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Replies with a random message from the potatoboard")
-		.addIntegerOption((input) =>
-			input
-				.setName("minimum-reactions")
-				.setDescription(
-					`Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
-				)
-				.setMinValue(1),
-		)
-		.addUserOption((input) =>
-			input
-				.setName("user")
-				.setDescription("Filter messages to only get those by a certain user"),
-		)
-		.addChannelOption((input) =>
-			input
-				.setName("channel")
-				.setDescription("Filter messages to only get those in a certain channel")
-				.addChannelTypes(
+	data: {
+		description: `Replies with a random message with ${BOARD_EMOJI} reactions`,
+		options: [
+			{
+				type: ApplicationCommandOptionType.Number,
+				name: "minimum-reactions",
+				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
+				min_value: 1,
+			},
+			{
+				type: ApplicationCommandOptionType.User,
+				name: "user",
+				description: "Filter messages to only get those by a certain user",
+			},
+			{
+				type: ApplicationCommandOptionType.Channel,
+				name: "channel",
+				description: "Filter messages to only get those in a certain channel",
+				channel_types: [
 					ChannelType.GuildText,
 					ChannelType.GuildVoice,
 					ChannelType.GuildCategory,
@@ -98,9 +96,11 @@ const command: ChatInputCommand = {
 					ChannelType.AnnouncementThread,
 					ChannelType.PublicThread,
 					ChannelType.PrivateThread,
-					// TODO: ChannelType.GuildForum,
-				),
-		),
+					ChannelType.GuildForum,
+				],
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		await interaction.deferReply();
@@ -108,7 +108,7 @@ const command: ChatInputCommand = {
 			interaction.options.getInteger("minimum-reactions") ?? defaultMinReactions;
 		const user = interaction.options.getUser("user")?.id;
 		const channelWanted = interaction.options.getChannel("channel");
-		const data = database.data;
+		const data = boardDatabase.data;
 		const fetchedMessages = asyncFilter(
 			data.sort(() => Math.random() - 0.5),
 			async (message) => {
@@ -126,28 +126,32 @@ const command: ChatInputCommand = {
 		const nextId = generateHash("next");
 		const prevId = generateHash("prev");
 
-		const messages: BaseMessageOptions[] = [];
+		const messages: InteractionReplyOptions[] = [];
 		let index = 0;
 
-		async function getNextMessage(): Promise<BaseMessageOptions> {
+		async function getNextMessage(): Promise<InteractionReplyOptions> {
 			const info = (await fetchedMessages.next()).value;
 
-			const reply = info
+			const reply: InteractionReplyOptions | undefined = info
 				? await generateBoardMessage(info, {
 						pre:
 							index > 0
 								? [
-										new ButtonBuilder()
-											.setLabel("<< Previous")
-											.setCustomId(prevId)
-											.setStyle(ButtonStyle.Primary),
+										{
+											label: "<< Previous",
+											custom_id: prevId,
+											style: ButtonStyle.Primary,
+											type: ComponentType.Button,
+										},
 								  ]
 								: [],
 						post: [
-							new ButtonBuilder()
-								.setLabel("Next >>")
-								.setCustomId(nextId)
-								.setStyle(ButtonStyle.Primary),
+							{
+								label: "Next >>",
+								custom_id: nextId,
+								style: ButtonStyle.Primary,
+								type: ComponentType.Button,
+							},
 						],
 				  })
 				: {
@@ -156,12 +160,17 @@ const command: ChatInputCommand = {
 						components:
 							index > 0
 								? [
-										new ActionRowBuilder<ButtonBuilder>().addComponents(
-											new ButtonBuilder()
-												.setLabel("<< Previous")
-												.setCustomId(prevId)
-												.setStyle(ButtonStyle.Primary),
-										),
+										{
+											type: ComponentType.ActionRow,
+											components: [
+												{
+													label: "<< Previous",
+													customId: prevId,
+													style: ButtonStyle.Primary,
+													type: ComponentType.Button,
+												},
+											],
+										},
 								  ]
 								: [],
 
@@ -172,7 +181,7 @@ const command: ChatInputCommand = {
 				  };
 
 			if (!reply) {
-				database.data = data.filter(({ source }) => source !== info?.source);
+				boardDatabase.data = data.filter(({ source }) => source !== info?.source);
 
 				return getNextMessage();
 			}

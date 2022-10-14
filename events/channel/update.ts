@@ -1,5 +1,4 @@
 import {
-	AttachmentBuilder,
 	ChannelType,
 	escapeMarkdown,
 	ThreadAutoArchiveDuration,
@@ -78,8 +77,8 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 		if (oldChannel.topic !== newChannel.topic) {
 			log(`✏ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {
 				files: [
-					new AttachmentBuilder(
-						Buffer.from(
+					{
+						attachment: Buffer.from(
 							difflib
 								.unifiedDiff(
 									(oldChannel.topic || "").split("\n"),
@@ -89,8 +88,8 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 								.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 							"utf-8",
 						),
-						{ name: "topic.diff" },
-					),
+						name: "topic.diff",
+					},
 				],
 			});
 		}

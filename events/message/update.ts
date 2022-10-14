@@ -3,11 +3,8 @@ import log, { getLoggingThread } from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../util/discord.js";
 import jsonDiff from "json-diff";
 import {
-	ActionRowBuilder,
-	AttachmentBuilder,
-	ButtonBuilder,
 	ButtonStyle,
-	EmbedBuilder,
+	ComponentType,
 	Message,
 	PartialMessage,
 	PermissionFlagsBits,
@@ -45,14 +42,19 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				"!",
 			"messages",
 			{
-				embeds: oldMessage.embeds.map((embed) => EmbedBuilder.from(embed)),
+				embeds: oldMessage.embeds,
 				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setLabel("View Message")
-							.setStyle(ButtonStyle.Link)
-							.setURL(newMessage.url),
-					),
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "View Message",
+								style: ButtonStyle.Link,
+								url: newMessage.url,
+							},
+						],
+					},
 				],
 			},
 		);
@@ -89,20 +91,16 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 		);
 
 		if (contentDiff)
-			files.push(
-				new AttachmentBuilder(
-					Buffer.from(
-						contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-						"utf-8",
-					),
-					{ name: "content.diff" },
+			files.push({
+				attachment: Buffer.from(
+					contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+					"utf-8",
 				),
-			);
+				name: "content.diff",
+			});
 
 		if (extraDiff)
-			files.push(
-				new AttachmentBuilder(Buffer.from(extraDiff, "utf-8"), { name: "extra.diff" }),
-			);
+			files.push({ attachment: Buffer.from(extraDiff, "utf-8"), name: "extra.diff" });
 
 		if (files.length)
 			log(
@@ -111,12 +109,17 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				{
 					files,
 					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setLabel("View Message")
-								.setStyle(ButtonStyle.Link)
-								.setURL(newMessage.url),
-						),
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "View Message",
+									style: ButtonStyle.Link,
+									url: newMessage.url,
+								},
+							],
+						},
 					],
 				},
 			);
@@ -126,12 +129,17 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 		logs.map((edit) =>
 			log(edit + "!", "messages", {
 				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setLabel("View Message")
-							.setStyle(ButtonStyle.Link)
-							.setURL(newMessage.url),
-					),
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "View Message",
+								style: ButtonStyle.Link,
+								url: newMessage.url,
+							},
+						],
+					},
 				],
 			}),
 		),

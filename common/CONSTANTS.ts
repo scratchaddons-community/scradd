@@ -1,6 +1,8 @@
 import { ChannelType } from "discord.js";
 import fetch from "node-fetch";
-import client, { guild } from "../client.js";
+import client from "../client.js";
+
+const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
 
 const channels = await guild.channels.fetch();
 const roles = await guild.roles.fetch();
@@ -101,6 +103,7 @@ export default {
 
 		old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 	},
+	guild,
 } as const;
 
 function getChannel<T extends ChannelType>(

@@ -122,7 +122,14 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		// @ts-expect-error -- No concrete fix to this
 		await command.interaction(interaction);
 	} catch (error) {
-		logError(error, interaction.toString());
+		logError(
+			error,
+			interaction.isCommand()
+				? interaction.isChatInputCommand()
+					? interaction.toString()
+					: `/${interaction.commandName}`
+				: `${interaction.constructor.name}: ${interaction.customId}`,
+		);
 		if (interaction.deferred && +interaction.createdAt - +new Date() < 900_000) {
 			return await interaction.editReply({
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,

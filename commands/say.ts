@@ -1,14 +1,11 @@
 import {
-	SlashCommandBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	PermissionsBitField,
-	ModalBuilder,
-	ActionRowBuilder,
-	TextInputBuilder,
-	TextInputStyle,
 	ModalSubmitInteraction,
 	ChatInputCommandInteraction,
+	ApplicationCommandOptionType,
+	ComponentType,
+	TextInputStyle,
+	ButtonStyle,
 } from "discord.js";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -17,32 +14,42 @@ import log from "../common/moderation/logging.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("(Mods only) Mimic what you tell me to")
-		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
-		.addStringOption((input) =>
-			input.setName("message").setDescription("What to mimic").setMaxLength(2_000),
-		),
+	data: {
+		description: "(Mods only) Mimic what you tell me to",
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: "message",
+				description: "What to mimic",
+				max_length: 2000,
+			},
+		],
+		default_member_permissions: new PermissionsBitField().toJSON(),
+	},
 
 	async interaction(interaction) {
 		const content = interaction.options.getString("message");
 		if (content) return say(interaction, content);
 
-		await interaction.showModal(
-			new ModalBuilder()
-				.setTitle(`/${interaction.command?.name}`)
-				.setCustomId("say")
-				.addComponents(
-					new ActionRowBuilder<TextInputBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("message")
-							.setLabel("Message")
-							.setMaxLength(2_000)
-							.setRequired(true)
-							.setStyle(TextInputStyle.Paragraph),
-					),
-				),
-		);
+		await interaction.showModal({
+			title: `/${interaction.command?.name}`,
+			custom_id: "say",
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.TextInput,
+							custom_id: "message",
+							label: "Message",
+							max_length: 2000,
+							required: true,
+							style: TextInputStyle.Paragraph,
+						},
+					],
+				},
+			],
+		});
 		return await interaction.channel?.sendTyping();
 	},
 	censored: "channel",
@@ -69,12 +76,17 @@ export async function say(
 				"messages",
 				{
 					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setLabel("View Message")
-								.setStyle(ButtonStyle.Link)
-								.setURL(message.url),
-						),
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "View Message",
+									style: ButtonStyle.Link,
+									url: message.url,
+								},
+							],
+						},
 					],
 				},
 			),

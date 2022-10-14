@@ -1,9 +1,9 @@
 import {
+	ApplicationCommandOptionType,
 	Collection,
 	GuildTextBasedChannel,
 	Message,
 	PermissionsBitField,
-	SlashCommandBuilder,
 	Snowflake,
 	User,
 } from "discord.js";
@@ -13,21 +13,23 @@ import type { ChatInputCommand } from "../common/types/command";
 const MAX_FETCH_COUNT = 100;
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("(Mod only) Bulk deletes a specified amount of messages")
-		.addStringOption((input) =>
-			input
-				.setName("count")
-				.setDescription(
-					`The number of messages to delete or a message ID to delete to (inclusive)`,
-				)
-				.setRequired(true)
-				.setMaxLength(22),
-		)
-		.addUserOption((input) =>
-			input.setName("user").setDescription("Only delete messages from this user"),
-		)
-		.setDefaultMemberPermissions(new PermissionsBitField().toJSON()),
+	data: {
+		description: "(Mod only) Bulk deletes a specified amount of messages",
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: "count",
+				description: `The number of messages to delete or a message ID to delete to (inclusive)`,
+				required: true,
+			},
+			{
+				type: ApplicationCommandOptionType.User,
+				name: "user",
+				description: "Only delete messages from this user",
+			},
+		],
+		default_member_permissions: new PermissionsBitField().toJSON(),
+	},
 
 	async interaction(interaction) {
 		if (!interaction.channel) throw new TypeError("Cannot run this command in a DM");
@@ -42,7 +44,7 @@ const command: ChatInputCommand = {
 			if (!deleteTo) {
 				await interaction.reply({
 					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} Could not find a message with that ID! Note: I cannot delete messages older than 2 weeks or more than 100 messages at a time.`,
+					content: `${CONSTANTS.emojis.statuses.no} Could not find a message with that ID! Note: I cannot delete messages older than 2 weeks or more than ${MAX_FETCH_COUNT} messages at a time.`,
 				});
 			} else
 				await interaction.reply({
@@ -78,5 +80,5 @@ async function deleteMessages(
 		await channel.bulkDelete(filtered);
 		return `${CONSTANTS.emojis.statuses.yes} Deleted ${filtered.length} messages!`;
 	}
-	return `${CONSTANTS.emojis.statuses.no} No messages matched those filters! Note: I cannot delete messages older than 2 weeks or more than 100 messages at a time.`;
+	return `${CONSTANTS.emojis.statuses.no} No messages matched those filters! Note: I cannot delete messages older than 2 weeks or more than ${MAX_FETCH_COUNT} messages at a time.`;
 }

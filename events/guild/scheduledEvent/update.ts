@@ -1,4 +1,4 @@
-import { AttachmentBuilder, time } from "discord.js";
+import { time } from "discord.js";
 import client from "../../../client.js";
 import log from "../../../common/moderation/logging.js";
 import difflib from "difflib";
@@ -24,8 +24,8 @@ const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent,
 	if (oldEvent.description !== newEvent.description)
 		log(`📆 Event ${oldEvent.name}’s description was changed!`, "voice", {
 			files: [
-				new AttachmentBuilder(
-					Buffer.from(
+				{
+					attachment: Buffer.from(
 						difflib
 							.unifiedDiff(
 								(oldEvent.description || "").split("\n"),
@@ -35,8 +35,8 @@ const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent,
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
-					{ name: "description.diff" },
-				),
+					name: "description.diff",
+				},
 			],
 		});
 

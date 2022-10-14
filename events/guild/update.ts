@@ -1,5 +1,4 @@
 import {
-	AttachmentBuilder,
 	GuildDefaultMessageNotifications,
 	GuildExplicitContentFilter,
 	GuildMFALevel,
@@ -42,8 +41,8 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	if (oldGuild.description !== newGuild.description) {
 		log(`✏ Server description was changed!`, "server", {
 			files: [
-				new AttachmentBuilder(
-					Buffer.from(
+				{
+					attachment: Buffer.from(
 						difflib
 							.unifiedDiff(
 								(oldGuild.description || "").split("\n"),
@@ -53,8 +52,8 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
-					{ name: "description.diff" },
-				),
+					name: "description.diff",
+				},
 			],
 		});
 	}

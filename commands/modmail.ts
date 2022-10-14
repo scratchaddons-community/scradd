@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, GuildMember, PermissionsBitField } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, PermissionsBitField } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -14,32 +14,38 @@ import { disableComponents } from "../util/discord.js";
 import type { ChatInputCommand } from "../common/types/command";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDefaultMemberPermissions(new PermissionsBitField().toJSON())
-		.setDescription("(Mods only) Commands to manage modmail tickets")
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("close")
-				.setDescription("(Mods only) Close a modmail ticket")
-				.addStringOption((input) =>
-					input
-						.setName("reason")
-						.setDescription(
+	data: {
+		description: "(Mods only) Commands to manage modmail tickets",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "close",
+				description: "(Mods only) Close a modmail ticket",
+				options: [
+					{
+						type: ApplicationCommandOptionType.String,
+						name: "reason",
+						description:
 							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
-						),
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("start")
-				.setDescription("(Mods only) Start a modmail ticket with a user")
-				.addUserOption((input) =>
-					input
-						.setName("user")
-						.setDescription("The user to start a ticket with")
-						.setRequired(true),
-				),
-		),
+					},
+				],
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "start",
+				description: "(Mods only) Start a modmail ticket with a user",
+				options: [
+					{
+						required: true,
+						type: ApplicationCommandOptionType.User,
+						name: "user",
+						description: "The user to start a ticket with",
+					},
+				],
+			},
+		],
+		default_member_permissions: new PermissionsBitField().toJSON(),
+	},
 
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand(true);
@@ -64,14 +70,15 @@ const command: ChatInputCommand = {
 
 				await interaction.reply({
 					embeds: [
-						new EmbedBuilder()
-							.setTitle("Modmail ticket closed!")
-							.setTimestamp(interaction.channel.createdAt)
-							.setDescription(reason)
-							.setFooter({
+						{
+							title: "Modmail ticket closed!",
+							timestamp: interaction.channel.createdAt?.toISOString() || undefined,
+							description: reason || undefined,
+							footer: {
 								text: "While any future messages will reopen this ticket, it’s recommended to create a new one instead by using /modmail start.",
-							})
-							.setColor(MODMAIL_COLORS.closed),
+							},
+							color: MODMAIL_COLORS.closed,
+						},
 					],
 				});
 
@@ -105,29 +112,28 @@ const command: ChatInputCommand = {
 				}
 
 				const collector = await generateModmailConfirm(
-					new EmbedBuilder()
-						.setTitle("Confirmation")
-						.setDescription(
-							`Are you sure you want to start a modmail with **${user?.toString()}**?`,
-						)
-						.setColor(MODMAIL_COLORS.confirm)
-						.setAuthor({ iconURL: user.displayAvatarURL(), name: user.displayName }),
+					{
+						title: "Confirmation",
+						description: `Are you sure you want to start a modmail with **${user?.toString()}**?`,
+						color: MODMAIL_COLORS.confirm,
+						author: { icon_url: user.displayAvatarURL(), name: user.displayName },
+					},
 					async (buttonInteraction) => {
-						const openedEmbed = new EmbedBuilder()
-							.setTitle("Modmail ticket opened!")
-							.setDescription(
-								`Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
-							)
-							.setFooter({
-								text:
-									MODMAIL_UNSUPPORTED +
-									"\nMessages starting with an equals sign (=) are ignored.",
-							})
-							.setColor(MODMAIL_COLORS.opened);
-
 						await sendOpenedMessage(user).then(async (success) => {
 							if (success) {
-								const thread = await openModmail(openedEmbed, user);
+								const thread = await openModmail(
+									{
+										title: "Modmail ticket opened!",
+										description: `Ticket to ${user.toString()} (by ${interaction.user.toString()})`,
+										footer: {
+											text:
+												MODMAIL_UNSUPPORTED +
+												"\nMessages starting with an equals sign (=) are ignored.",
+										},
+										color: MODMAIL_COLORS.opened,
+									},
+									user,
+								);
 								await buttonInteraction.reply({
 									content: `${
 										CONSTANTS.emojis.statuses.yes

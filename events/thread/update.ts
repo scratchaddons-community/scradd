@@ -1,16 +1,9 @@
-import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	EmbedBuilder,
-	ThreadAutoArchiveDuration,
-} from "discord.js";
+import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
 	sendClosedMessage,
 	sendOpenedMessage,
-	MODMAIL_UNSUPPORTED,
 } from "../../common/modmail.js";
 import warn from "../../common/moderation/warns.js";
 import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
@@ -80,12 +73,17 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			"messages",
 			{
 				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setLabel("View Post")
-							.setStyle(ButtonStyle.Link)
-							.setURL(newThread.url),
-					),
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "View Post",
+								style: ButtonStyle.Link,
+								url: newThread.url,
+							},
+						],
+					},
 				],
 			},
 		);
@@ -103,12 +101,17 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 		logs.map((edit) =>
 			log(`📃 Thread ${newThread.toString()}` + edit + `!`, "channels", {
 				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setLabel("View Thread")
-							.setStyle(ButtonStyle.Link)
-							.setURL(newThread.url),
-					),
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "View Thread",
+								style: ButtonStyle.Link,
+								url: newThread.url,
+							},
+						],
+					},
 				],
 			}),
 		),
@@ -147,17 +150,11 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			starter
 				?.edit({
 					embeds: [
-						(starter.embeds[0]
-							? EmbedBuilder.from(starter.embeds[0])
-							: new EmbedBuilder()
-						)
-							.setTitle("Modmail ticket opened!")
-							.setFooter({
-								text:
-									MODMAIL_UNSUPPORTED +
-									"\nMessages starting with an equals sign (=) are ignored.",
-							})
-							.setColor(MODMAIL_COLORS.opened),
+						{
+							...starter.embeds[0],
+							title: "Modmail ticket opened!",
+							color: MODMAIL_COLORS.opened,
+						},
 					],
 				})
 				.catch(console.error);

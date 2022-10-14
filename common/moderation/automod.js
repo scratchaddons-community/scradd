@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import warn from "./warns.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../../util/text.js";
-import client, { guild } from "../../client.js";
+import client from "../../client.js";
 import { getBaseChannel } from "../../util/discord.js";
 /**
  * The index of each array determines how many strikes the word gives.
@@ -75,6 +75,7 @@ const badWords = [
 			/ov?gpu/,
 		],
 		[
+			/8={2,}D/,
 			/svpx/,
 			/fubeg[ -]?nefr/,
 			/fzneg[ -]?nefr/,
@@ -194,7 +195,7 @@ async function checkString(toCensor, message) {
 
 	if (
 		![
-			guild?.rulesChannel?.id,
+			CONSTANTS.guild?.rulesChannel?.id,
 			"806605043817644074", // announcements
 			"874743757210275860", // scratch-servers
 			CONSTANTS.channels.mod?.id,
@@ -469,9 +470,9 @@ export async function changeNickname(member, strike = true) {
 		return;
 	}
 
-	const members = (await guild.members.fetch({ query: member.displayName, limit: 100 })).filter(
-		(found) => found.displayName === member.displayName,
-	);
+	const members = (
+		await CONSTANTS.guild.members.fetch({ query: member.displayName, limit: 100 })
+	).filter((found) => found.displayName === member.displayName);
 
 	/** @type {any[]} */
 	const promises = [];

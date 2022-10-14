@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import type { ChatInputCommand } from "../common/types/command";
@@ -7,32 +7,32 @@ export const userSettingsDatabase = new Database("user_settings");
 await userSettingsDatabase.init();
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Customize personal settings")
-		.addBooleanOption((input) =>
-			input
-				.setName("board-pings")
-				.setDescription(
-					`Whether to ping you when your messages get on #${CONSTANTS.channels.board?.name}`,
-				),
-		)
-		.addBooleanOption((input) =>
-			input.setName("level-up-pings").setDescription("Whether to ping you when you level up"),
-		)
-		.addBooleanOption((input) =>
-			input
-				.setName("weekly-pings")
-				.setDescription(
-					"Whether to ping you if you are one of the top 5 chatters in a week",
-				),
-		)
-		.addBooleanOption((input) =>
-			input
-				.setName("autoreactions")
-				.setDescription(
-					"Whether to automatically react to your messages with funny emojis",
-				),
-		),
+	data: {
+		description: "Customize personal settings",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: "board-pings",
+				description: `Whether to ping you when your messages get on #${CONSTANTS.channels.board?.name}`,
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: "level-up-pings",
+				description: "Whether to ping you when you level up",
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: "weekly-pings",
+				description:
+					"Whether to ping you if you are one of the most active people each week",
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: "autoreactions",
+				description: "Whether to automatically react to your messages with funny emojis",
+			},
+		],
+	},
 	async interaction(interaction) {
 		const settingsForUser = userSettingsDatabase.data.find(
 			({ user }) => user === interaction.user.id,

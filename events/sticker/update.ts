@@ -1,4 +1,3 @@
-import { AttachmentBuilder } from "discord.js";
 import difflib from "difflib";
 import log from "../../common/moderation/logging.js";
 import type Event from "../../common/types/event";
@@ -11,8 +10,8 @@ const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticke
 	if (oldSticker.description !== newSticker.description) {
 		log(`✏ Sticker ${oldSticker.name}’s description was changed!`, "server", {
 			files: [
-				new AttachmentBuilder(
-					Buffer.from(
+				{
+					attachment: Buffer.from(
 						difflib
 							.unifiedDiff(
 								(oldSticker.description || "").split("\n"),
@@ -22,8 +21,8 @@ const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticke
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
-					{ name: "description.diff" },
-				),
+					name: "description.diff",
+				},
 			],
 		});
 	}

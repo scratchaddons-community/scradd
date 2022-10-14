@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { guild } from "../client.js";
+import { ApplicationCommandOptionType } from "discord.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
 import { paginate } from "../util/discord.js";
@@ -7,21 +7,28 @@ import { makeProgressBar } from "../util/numbers.js";
 import type { ChatInputCommand } from "../common/types/command";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Commands to view users’ XP amounts")
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("rank")
-				.setDescription("View a users’ XP rank")
-				.addUserOption((input) =>
-					input.setName("user").setDescription("User to view (defaults to you)"),
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("top")
-				.setDescription("View the users with the most XP in the server"),
-		),
+	data: {
+		description: "Commands to view users’ XP amounts",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "rank",
+				description: "View a users’ XP rank",
+				options: [
+					{
+						type: ApplicationCommandOptionType.User,
+						name: "user",
+						description: "User to view (defaults to you)",
+					},
+				],
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "top",
+				description: "View the users with the most XP in the server",
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		const command = interaction.options.getSubcommand(true);
@@ -33,7 +40,7 @@ const command: ChatInputCommand = {
 			case "rank": {
 				const user = interaction.options.getUser("user") || interaction.user;
 
-				const member = await guild.members.fetch(user.id).catch(() => {});
+				const member = await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 
 				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
 				const level = getLevelForXp(xp);
@@ -45,14 +52,14 @@ const command: ChatInputCommand = {
 				const rank = top.findIndex((info) => info.user === user.id) + 1;
 				interaction.reply({
 					embeds: [
-						new EmbedBuilder()
-							.setColor(member ? member.displayColor : null)
-							.setAuthor({
-								iconURL: (member || user).displayAvatarURL(),
+						{
+							color: member?.displayColor,
+							author: {
+								icon_url: (member || user).displayAvatarURL(),
 								name: member?.displayName ?? user.username,
-							})
-							.setTitle("XP Rank")
-							.addFields(
+							},
+							title: "XP Rank",
+							fields: [
 								{ name: "📊 Level", value: level.toLocaleString(), inline: true },
 								{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 								{
@@ -83,8 +90,9 @@ const command: ChatInputCommand = {
 									value: CONSTANTS.zeroWidthSpace,
 									name: makeProgressBar(progress),
 								},
-							)
-							.setFooter({
+							],
+
+							footer: {
 								text:
 									(rank
 										? `Ranked ${
@@ -93,7 +101,8 @@ const command: ChatInputCommand = {
 												top.length.toLocaleString()
 										  }${CONSTANTS.footerSeperator}`
 										: "") + `View the leaderboard with /xp top`,
-							}),
+							},
+						},
 					],
 				});
 				return;
@@ -107,7 +116,7 @@ const command: ChatInputCommand = {
 						}> (${xp.xp.toLocaleString()} XP)`;
 					},
 					"No users found.",
-					`Leaderboard for ${guild.name}`,
+					`Leaderboard for ${CONSTANTS.guild.name}`,
 					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 				);
 			}

@@ -1,25 +1,22 @@
 import {
 	ActionRow,
-	ButtonBuilder,
 	ButtonStyle,
 	Colors,
 	ComponentType,
-	EmbedBuilder,
 	Message,
 	MessageType,
-	SelectMenuBuilder,
 	ChannelType,
+	Attachment,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { badAttachments, censor } from "../common/moderation/automod.js";
-import { MessageActionRowBuilder } from "../common/types/ActionRowBuilder.js";
 
 /**
  * @param {import("discord.js").Message | import("discord.js").PartialMessage} message
  *
- * @returns {Promise<Required<Pick<import("discord.js").BaseMessageOptions, "embeds" | "files">>>}
+ * @returns {Promise<{ embeds: import("discord.js").APIEmbed[]; files: Attachment[] }>}
  */
 export async function extractMessageExtremities(message, allowLanguage = true) {
 	const embeds = [
@@ -27,68 +24,62 @@ export async function extractMessageExtremities(message, allowLanguage = true) {
 			.filter((sticker) => {
 				return allowLanguage || !censor(sticker.name);
 			})
-			.map((sticker) => new EmbedBuilder().setImage(sticker.url).setColor(Colors.Blurple)),
+			.map((sticker) => ({ image: { url: sticker.url }, color: Colors.Blurple })),
 		...message.embeds
 			.filter((embed) => !embed.video)
-			.map((oldEmbed) => {
-				const newEmbed = EmbedBuilder.from(oldEmbed);
-				const { data } = newEmbed;
+			.map(({ data }) => {
+				if (allowLanguage) return data;
 
-				if (allowLanguage) return newEmbed;
+				const newEmbed = { ...data };
 
-				if (data.description) {
-					const censored = censor(data.description);
+				if (newEmbed.description) {
+					const censored = censor(newEmbed.description);
 
-					if (censored) newEmbed.setDescription(censored.censored);
+					if (censored) newEmbed.description = censored.censored;
 				}
 
-				if (data.title) {
-					const censored = censor(data.title);
+				if (newEmbed.title) {
+					const censored = censor(newEmbed.title);
 
-					if (censored) newEmbed.setTitle(censored.censored);
+					if (censored) newEmbed.title = censored.censored;
 				}
 
-				if (data.url && censor(data.url)) newEmbed.setURL("");
+				if (newEmbed.url && censor(newEmbed.url)) newEmbed.url = "";
 
-				if (data.image?.url && censor(data.image.url)) newEmbed.setImage("");
+				if (newEmbed.image?.url && censor(newEmbed.image.url)) newEmbed.image = undefined;
 
-				if (data.thumbnail?.url && censor(data.thumbnail.url)) newEmbed.setThumbnail("");
+				if (newEmbed.thumbnail?.url && censor(newEmbed.thumbnail.url))
+					newEmbed.thumbnail = undefined;
 
-				if (data.footer?.text) {
-					const censored = censor(data.footer.text);
+				if (newEmbed.footer?.text) {
+					const censored = censor(newEmbed.footer.text);
 
 					if (censored) {
-						newEmbed.setFooter({
-							text: censored.censored,
-							iconURL: data.footer.icon_url,
-						});
+						newEmbed.footer.text = censored.censored;
 					}
 				}
 
-				if (data.author) {
-					const censoredName = censor(data.author.name);
-					const censoredUrl = data.author.url && censor(data.author.url);
+				if (newEmbed.author) {
+					const censoredName = censor(newEmbed.author.name);
+					const censoredUrl = newEmbed.author.url && censor(newEmbed.author.url);
 
-					if (censoredName || censoredUrl) {
-						newEmbed.setAuthor({
-							name: censoredName ? censoredName.censored : data.author.name,
-							iconURL: data.author.icon_url,
-							url: censoredUrl ? "" : data.author.url,
-						});
+					if (censoredName) {
+						newEmbed.author.name = censoredName.censored;
+					}
+					if (censoredUrl) {
+						newEmbed.author.url = "";
 					}
 				}
 
-				newEmbed.setFields(
-					(data.fields || []).map((field) => {
-						const censoredName = censor(field.name);
-						const censoredValue = censor(field.value);
-						return {
-							name: censoredName ? censoredName.censored : field.name,
-							value: censoredValue ? censoredValue.censored : field.value,
-							inline: field.inline,
-						};
-					}),
-				);
+				newEmbed.fields = (newEmbed.fields || []).map((field) => {
+					const censoredName = censor(field.name);
+					const censoredValue = censor(field.value);
+					return {
+						name: censoredName ? censoredName.censored : field.name,
+						value: censoredValue ? censoredValue.censored : field.value,
+						inline: field.inline,
+					};
+				});
 
 				return newEmbed;
 			}),
@@ -355,10 +346,10 @@ export async function reactAll(message, reactions) {
 }
 
 /**
- * @template {Record<string, any>} T
+ * @template T
  *
  * @param {T[]} array
- * @param {(value: T, index: number, array: (T | undefined)[]) => string} toString
+ * @param {(value: T, index: number, array: T[]) => string} toString
  * @param {string} failMessage
  * @param {string} title
  * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
@@ -367,18 +358,8 @@ export async function reactAll(message, reactions) {
 export async function paginate(array, toString, failMessage, title, reply) {
 	const PAGE_OFFSET = 15;
 	const previousId = generateHash("previous");
-	const previousButton = new ButtonBuilder()
-		.setLabel("<< Previous")
-		.setStyle(ButtonStyle.Primary)
-		.setDisabled(true)
-		.setCustomId(previousId);
-	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
 	const nextId = generateHash("next");
-	const nextButton = new ButtonBuilder()
-		.setLabel("Next >>")
-		.setStyle(ButtonStyle.Primary)
-		.setDisabled(numberOfPages === 1)
-		.setCustomId(nextId);
+	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
 
 	// eslint-disable-next-line fp/no-let -- This must be changable.
 	let offset = 0;
@@ -386,7 +367,7 @@ export async function paginate(array, toString, failMessage, title, reply) {
 	/**
 	 * Generate an embed that has the next page.
 	 *
-	 * @returns EmbedBuilder with the next page.
+	 * @returns {import("discord.js").InteractionReplyOptions} EmbedBuilder with the next page.
 	 */
 	function generateMessage() {
 		const content = array
@@ -400,16 +381,37 @@ export async function paginate(array, toString, failMessage, title, reply) {
 		}
 
 		return {
-			components: [new MessageActionRowBuilder().addComponents(previousButton, nextButton)],
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							label: "<< Previous",
+							style: ButtonStyle.Primary,
+							disabled: offset === 0,
+							customId: previousId,
+						},
+						{
+							type: ComponentType.Button,
+							label: "Next >>",
+							style: ButtonStyle.Primary,
+							disabled: offset + PAGE_OFFSET >= array.length - 1,
+							customId: nextId,
+						},
+					],
+				},
+			],
 
 			embeds: [
-				new EmbedBuilder()
-					.setTitle(title)
-					.setDescription(content)
-					.setFooter({
+				{
+					title: title,
+					description: content,
+					footer: {
 						text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}`,
-					})
-					.setColor(CONSTANTS.themeColor),
+					},
+					color: CONSTANTS.themeColor,
+				},
 			],
 			fetchReply: true,
 		};
@@ -430,8 +432,6 @@ export async function paginate(array, toString, failMessage, title, reply) {
 			if (buttonInteraction.customId === nextId) offset += PAGE_OFFSET;
 			else offset -= PAGE_OFFSET;
 
-			previousButton.setDisabled(offset === 0);
-			nextButton.setDisabled(offset + PAGE_OFFSET >= array.length - 1);
 			await buttonInteraction.deferUpdate();
 			message = await reply(generateMessage());
 			collector.resetTimer();
@@ -443,21 +443,24 @@ export async function paginate(array, toString, failMessage, title, reply) {
 		});
 }
 
-/** @param {ActionRow<import("discord.js").MessageActionRowComponent>[]} row */
-export function disableComponents(row) {
-	return row.map(({ components }) =>
-		new MessageActionRowBuilder().setComponents(
-			components.map((component) => {
-				if (component.type === ComponentType.Button) {
-					const button = ButtonBuilder.from(component);
-					if (button.data.style !== ButtonStyle.Link) button.setDisabled(true);
-					return button;
-				}
-
-				return SelectMenuBuilder.from(component).setDisabled(true);
-			}),
-		),
-	);
+/**
+ * @param {ActionRow<import("discord.js").MessageActionRowComponent>[]} rows
+ *
+ * @returns {import("discord.js").APIActionRowComponent<import("discord.js").APIMessageActionRowComponent>[]}
+ */
+export function disableComponents(rows) {
+	return rows.map(({ components }) => ({
+		type: ComponentType.ActionRow,
+		components: components.map((component) => {
+			return {
+				...component.data,
+				disabled:
+					component.type === ComponentType.Button
+						? component.style !== ButtonStyle.Link
+						: true,
+			};
+		}),
+	}));
 }
 
 /**

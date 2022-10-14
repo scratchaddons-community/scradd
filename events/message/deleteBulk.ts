@@ -1,10 +1,4 @@
-import {
-	ActionRowBuilder,
-	AttachmentBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	PermissionFlagsBits,
-} from "discord.js";
+import { ButtonStyle, ComponentType, PermissionFlagsBits } from "discord.js";
 import log from "../../common/moderation/logging.js";
 import { messageToText } from "../../util/discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
@@ -36,16 +30,19 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 	).join("\n\n---\n\n");
 
 	log(`💥 ${messages.size} messages in ${channel.toString()} bulk deleted!`, "messages", {
-		files: [
-			new AttachmentBuilder(Buffer.from(messagesInfo, "utf-8"), { name: "messages.txt" }),
-		],
+		files: [{ attachment: Buffer.from(messagesInfo, "utf-8"), name: "messages.txt" }],
 		components: [
-			new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setLabel("View Context")
-					.setStyle(ButtonStyle.Link)
-					.setURL(messages.first()?.url || ""),
-			),
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						label: "View Context",
+						style: ButtonStyle.Link,
+						type: ComponentType.Button,
+						url: messages.first()?.url ?? "",
+					},
+				],
+			},
 		],
 	});
 };

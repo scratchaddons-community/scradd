@@ -1,4 +1,3 @@
-import { AttachmentBuilder } from "discord.js";
 import { sanitizePath } from "./files.js";
 import log from "../common/moderation/logging.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -18,9 +17,10 @@ export default async function logError(error, event) {
 			"server",
 			{
 				files: [
-					new AttachmentBuilder(Buffer.from(generateError(error).toString(), "utf-8"), {
+					{
+						attachment: Buffer.from(generateError(error).toString(), "utf-8"),
 						name: "error.json",
-					}),
+					},
 				],
 			},
 		);

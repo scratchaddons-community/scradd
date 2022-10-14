@@ -1,4 +1,4 @@
-import { guild } from "../client.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 import { changeNickname } from "../common/moderation/automod.js";
 import log from "../common/moderation/logging.js";
 import type Event from "../common/types/event";
@@ -20,7 +20,7 @@ const event: Event<"userUpdate"> = async function event(oldUser, newUser) {
 		logs.map((edit) => log(`👤 User ${newUser.toString()} ` + edit + `!`, "members")),
 	);
 
-	const member = await guild.members.fetch(newUser.id).catch(() => {});
+	const member = await CONSTANTS.guild.members.fetch(newUser.id).catch(() => {});
 	if (!member) return;
 	await changeNickname(member);
 };

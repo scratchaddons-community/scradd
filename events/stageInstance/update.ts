@@ -1,7 +1,6 @@
 import client from "../../client.js";
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
-import { AttachmentBuilder } from "discord.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, newInstance) {
@@ -11,8 +10,8 @@ const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, ne
 	if (oldInstance.topic !== newInstance.topic) {
 		log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "voice", {
 			files: [
-				new AttachmentBuilder(
-					Buffer.from(
+				{
+					attachment: Buffer.from(
 						difflib
 							.unifiedDiff(
 								newInstance.topic.split("\n"),
@@ -22,8 +21,8 @@ const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, ne
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
-					{ name: "topic.diff" },
-				),
+					name: "topic.diff",
+				},
 			],
 		});
 	}

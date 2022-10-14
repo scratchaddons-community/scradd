@@ -1,5 +1,4 @@
-import { Collection, ButtonBuilder, ButtonStyle } from "discord.js";
-import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
+import { Collection, ButtonStyle, ComponentType } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 
 /** @type {Collection<import("discord.js").Snowflake, string>} */
@@ -23,12 +22,17 @@ export async function checkIfUserPlaying(interaction) {
 
 	await interaction.reply({
 		components: [
-			new MessageActionRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setLabel("Go to game")
-					.setStyle(ButtonStyle.Link)
-					.setURL(current),
-			),
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						label: "Go to game",
+						style: ButtonStyle.Link,
+						type: ComponentType.Button,
+						url: current,
+					},
+				],
+			},
 		],
 
 		content: `${CONSTANTS.emojis.statuses.no} You already have an ongoing game!`,

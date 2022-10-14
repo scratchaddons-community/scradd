@@ -1,11 +1,10 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
+	ApplicationCommandOptionType,
 	ButtonStyle,
 	ChannelType,
+	ComponentType,
 	GuildMember,
 	InviteTargetType,
-	SlashCommandBuilder,
 	VoiceChannel,
 } from "discord.js";
 import {
@@ -18,25 +17,26 @@ import {
 	AudioPlayerStatus,
 } from "@discordjs/voice";
 import type { ChatInputCommand } from "../common/types/command.js";
-import { guild } from "../client.js";
 import url from "node:url";
 import path from "path";
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/moderation/logging.js";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Voice channel commands")
-		.addSubcommand((input) =>
-			input
-				.setName("activity")
-				.setDescription("Start an activity")
-				.addStringOption((input) =>
-					input
-						.setName("activity")
-						.setDescription("The activity to start")
-						.setRequired(true)
-						.addChoices(
+	data: {
+		description: "Voice channel commands",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "activity",
+				description: "Start an activity",
+				options: [
+					{
+						required: true,
+						type: ApplicationCommandOptionType.String,
+						name: "activity",
+						description: "The activity to start",
+						choices: [
 							{ name: "Poker Night", value: "755827207812677713" },
 							{ name: "Chess in the Park", value: "832012774040141894" },
 							{ name: "Checkers in the Park", value: "832013003968348200" },
@@ -52,25 +52,27 @@ const command: ChatInputCommand = {
 							{ name: "Know What I Meme", value: "950505761862189096" },
 							{ name: "AskAway", value: "976052223358406656" },
 							{ name: "Bash Out", value: "1006584476094177371" },
-						),
-				)
-				.addChannelOption((input) =>
-					input
-						.setName("channel")
-						.setDescription("The channel to start the activity in")
-						.addChannelTypes(ChannelType.GuildVoice),
-				),
-		)
-		.addSubcommand((input) =>
-			input
-				.setName("meme-sound")
-				.setDescription("Play a meme sound")
-				.addStringOption((input) =>
-					input
-						.setName("sound")
-						.setDescription("The sound to play")
-						.setRequired(true)
-						.addChoices(
+						],
+					},
+					{
+						type: ApplicationCommandOptionType.Channel,
+						name: "channel",
+						description: "The channel to start the activity in",
+						channel_types: [ChannelType.GuildVoice],
+					},
+				],
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "meme-sound",
+				description: "Play a meme sound",
+				options: [
+					{
+						required: true,
+						type: ApplicationCommandOptionType.String,
+						name: "sound",
+						description: "The sound to play",
+						choices: [
 							{ name: "AMONGUS", value: "amongus.mp3" },
 							{ name: "And thank you!", value: "youreWelcome.mp3" },
 							{
@@ -101,25 +103,27 @@ const command: ChatInputCommand = {
 							{ name: "Wii", value: "wii.mp3" },
 							{ name: "Wut da dog doin?", value: "wutDaDogDoin.mp3" },
 							{ name: "YEEEET!", value: "yeet.mp3" },
-						),
-				)
-				.addChannelOption((input) =>
-					input
-						.setName("channel")
-						.setDescription("The channel to play the sound in")
-						.addChannelTypes(ChannelType.GuildVoice),
-				),
-		)
-		.addSubcommand((input) =>
-			input
-				.setName("quote-sound")
-				.setDescription("Play a quote sound")
-				.addStringOption((input) =>
-					input
-						.setName("sound")
-						.setDescription("The sound to play")
-						.setRequired(true)
-						.addChoices(
+						],
+					},
+					{
+						type: ApplicationCommandOptionType.Channel,
+						name: "channel",
+						description: "The channel to play the sound in",
+						channel_types: [ChannelType.GuildVoice],
+					},
+				],
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "quote-sound",
+				description: "Play a quote sound",
+				options: [
+					{
+						required: true,
+						type: ApplicationCommandOptionType.String,
+						name: "sound",
+						description: "The sound to play",
+						choices: [
 							{
 								name: "And then, Colaber, voice revealed",
 								value: "colaberVoiceReveal.wav",
@@ -149,15 +153,18 @@ const command: ChatInputCommand = {
 								name: "Welcome back to the Scratch Addons YouTube channel",
 								value: "welcomeBack.mp3",
 							},
-						),
-				)
-				.addChannelOption((input) =>
-					input
-						.setName("channel")
-						.setDescription("The channel to play the sound in")
-						.addChannelTypes(ChannelType.GuildVoice),
-				),
-		),
+						],
+					},
+					{
+						type: ApplicationCommandOptionType.Channel,
+						name: "channel",
+						description: "The channel to play the sound in",
+						channel_types: [ChannelType.GuildVoice],
+					},
+				],
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
@@ -185,19 +192,23 @@ const command: ChatInputCommand = {
 
 				return interaction.reply({
 					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setLabel(`Open ${invite.targetApplication?.name}`)
-								.setStyle(ButtonStyle.Link)
-								.setURL(invite.toString()),
-						),
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: `Open ${invite.targetApplication?.name}`,
+									style: ButtonStyle.Link,
+									url: invite.toString(),
+								},
+							],
+						},
 					],
-					ephemeral: true,
 				});
 			}
 			case "meme-sound":
 			case "quote-sound": {
-				if (guild.members.me?.voice.channel)
+				if (CONSTANTS.guild.members.me?.voice.channel)
 					return interaction.reply({
 						ephemeral: true,
 						content: `${CONSTANTS.emojis.statuses.no} I'm already playing something!`,

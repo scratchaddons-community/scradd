@@ -1,5 +1,5 @@
-import { EmbedBuilder, GuildMember, AttachmentBuilder, User, escapeMarkdown } from "discord.js";
-import client, { guild } from "../../client.js";
+import { GuildMember, User, escapeMarkdown } from "discord.js";
+import client from "../../client.js";
 import CONSTANTS from "../CONSTANTS.js";
 import Database from "../database.js";
 import log from "./logging.js";
@@ -34,13 +34,14 @@ export async function removeExpiredWarns(database) {
 				log(
 					`${CONSTANTS.emojis.statuses.yes} <@${user}> lost ${strikes} strike${
 						strikes === 1 ? "" : "s"
-					} from ${guild.members.me?.toString()}!`,
+					} from ${CONSTANTS.guild.members.me?.toString()}!`,
 					"members",
 					{
 						files: [
-							new AttachmentBuilder(Buffer.from("Automatically unwarned.", "utf-8"), {
+							{
+								attachment: Buffer.from("Automatically unwarned.", "utf-8"),
 								name: "warn.txt",
-							}),
+							},
 						],
 					},
 				),
@@ -89,13 +90,13 @@ export default async function warn(user, reason, strikes, context) {
 		"members",
 		{
 			files: [
-				new AttachmentBuilder(
-					Buffer.from(
+				{
+					attachment: Buffer.from(
 						reason + (typeof context === "string" ? `\n>>> ${context}` : ""),
 						"utf-8",
 					),
-					{ name: "warn.txt" },
-				),
+					name: "warn.txt",
+				},
 			],
 		},
 	);
@@ -120,7 +121,9 @@ export default async function warn(user, reason, strikes, context) {
 	const newMutes = Math.floor(userWarns / WARNS_PER_MUTE);
 
 	const member =
-		user instanceof GuildMember ? user : await guild.members.fetch(user.id).catch(() => {});
+		user instanceof GuildMember
+			? user
+			: await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 	if (newMutes) {
 		const oldMutes = allMutes.filter((mute) => mute.user === user.id).length;
 
@@ -184,25 +187,22 @@ export default async function warn(user, reason, strikes, context) {
 			user
 				.send({
 					embeds: [
-						new EmbedBuilder()
-							.setTitle(
-								`You were ${
-									strikes === 0 ? "verbally " : ""
-								}warned in ${escapeMarkdown(guild.name)}!`,
-							)
-							.setDescription(
+						{
+							title: `You were ${
+								strikes === 0 ? "verbally " : ""
+							}warned in ${escapeMarkdown(CONSTANTS.guild.name)}!`,
+							description:
 								strikes === 0
 									? reason
 									: `You gained ${strikes} strike${
 											strikes === 1 ? "" : "s"
 									  }.\n\n>>> ${reason}`,
-							)
-							.setColor(member?.displayColor || null)
-							.setFooter(
+							color: member?.displayColor,
+							footer:
 								strikes === 0
-									? null
+									? undefined
 									: {
-											iconURL: guild.iconURL() ?? undefined,
+											icon_url: CONSTANTS.guild.iconURL() ?? undefined,
 											text:
 												`${
 													strikes === 1 ? "This strike" : "These strikes"
@@ -214,7 +214,7 @@ export default async function warn(user, reason, strikes, context) {
 												"\nTip: Use the /view-warns command to see how many active strikes you have!" +
 												"\nYou may DM me to discuss this strike with the mods if you want.",
 									  },
-							),
+						},
 					],
 				})
 				.catch(() => false),

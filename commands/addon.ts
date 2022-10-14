@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, escapeMarkdown, hyperlink } from "discord.js";
+import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
@@ -20,19 +20,20 @@ const fuse = new Fuse(addons, {
 });
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription(
-			`Replies with information about a specific addon available in v${
-				manifest.version_name || manifest.version
-			}`,
-		)
-		.addStringOption((option) =>
-			option
-				.setName("addon")
-				.setDescription("The name of the addon")
-				.setRequired(true)
-				.setAutocomplete(true),
-		),
+	data: {
+		description: `Replies with information about a specific addon available in v${
+			manifest.version_name || manifest.version
+		}`,
+		options: [
+			{
+				name: "addon",
+				description: "The name of the addon",
+				required: true,
+				autocomplete: true,
+				type: ApplicationCommandOptionType.String,
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		const input = interaction.options.getString("addon", true);
@@ -47,25 +48,6 @@ const command: ChatInputCommand = {
 
 			return;
 		}
-
-		const embed = new EmbedBuilder()
-			.setTitle(addon.name)
-			.setColor(CONSTANTS.themeColor)
-			.setDescription(
-				`${escapeMessage(addon.description)}\n` +
-					`[See source code](https://github.com/${CONSTANTS.urls.saRepo}/tree/${
-						manifest.version_name?.endsWith("-prerelease")
-							? `main`
-							: `v${encodeURI(manifest.version)}`
-					}/addons/${encodeURIComponent(addon.id)}/)
-					${
-						addon.permissions?.length
-							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
-							: ""
-					}`,
-			)
-			.setFooter({ text: addon.id })
-			.setThumbnail(`${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`);
 
 		const group = addon.tags.includes("popup")
 			? "Extension Popup Features"
@@ -91,21 +73,9 @@ const command: ChatInputCommand = {
 					? "Project Player"
 					: "Others");
 
-		if (group !== "Easter Eggs") {
-			embed.setURL(
-				`https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
-					addon.id,
-				)}`,
-			);
-		}
-
-		const lastUpdatedIn = `last updated in v${
-			addon.latestUpdate?.version ?? "<unknown version>"
-		}`;
-
 		const credits = joinWithAnd(
 			addon.credits?.map((credit) => {
-				const note = ("note" in credit ? credit.note : undefined) || "";
+				const note = ("note" in credit && credit.note) || "";
 				return credit.link
 					? hyperlink(escapeLinks(credit.name), credit.link, note)
 					: interaction.channel
@@ -114,37 +84,70 @@ const command: ChatInputCommand = {
 			}) ?? [],
 		);
 
-		if (credits)
-			embed.addFields({
-				name: "🫂 Contributors",
-				value: escapeMarkdown(credits),
-				inline: true,
-			});
+		const lastUpdatedIn =
+			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;
 
-		embed.addFields(
-			{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
-			{
-				inline: true,
-				name: "📝 Version added",
-				value: escapeMarkdown(
-					"v" +
-						addon.versionAdded +
-						(addon.latestUpdate
-							? ` (${
-									interaction.channel
-										? generateTooltip(
-												interaction.channel,
-												lastUpdatedIn,
-												`${addon.latestUpdate?.temporaryNotice}`,
-										  )
-										: lastUpdatedIn
-							  })`
-							: ""),
-				),
-			},
-		);
-
-		await interaction.reply({ embeds: [embed] });
+		await interaction.reply({
+			embeds: [
+				{
+					title: addon.name,
+					color: CONSTANTS.themeColor,
+					description:
+						`${escapeMessage(addon.description)}\n` +
+						`[See source code](https://github.com/${CONSTANTS.urls.saRepo}/tree/${
+							manifest.version_name?.endsWith("-prerelease")
+								? `main`
+								: `v${encodeURI(manifest.version)}`
+						}/addons/${encodeURIComponent(addon.id)}/)${
+							addon.permissions?.length
+								? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
+								: ""
+						}`,
+					footer: { text: addon.id },
+					thumbnail: {
+						// todo what does height do
+						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
+					},
+					url:
+						group === "Easter Eggs"
+							? undefined
+							: `https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
+									addon.id,
+							  )}`,
+					fields: [
+						...(credits
+							? [
+									{
+										name: "🫂 Contributors",
+										value: escapeMarkdown(credits),
+										inline: true,
+									},
+							  ]
+							: []),
+						{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
+						{
+							inline: true,
+							name: "📝 Version added",
+							value: escapeMarkdown(
+								"v" +
+									addon.versionAdded +
+									(addon.latestUpdate && lastUpdatedIn
+										? ` (${
+												interaction.channel
+													? generateTooltip(
+															interaction.channel,
+															lastUpdatedIn,
+															addon.latestUpdate.temporaryNotice,
+													  )
+													: lastUpdatedIn
+										  })`
+										: ""),
+							),
+						},
+					],
+				},
+			],
+		});
 	},
 
 	censored: "channel",

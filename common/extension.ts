@@ -1,13 +1,14 @@
 import fetch from "node-fetch";
 
 import CONSTANTS from "./CONSTANTS.js";
+import type AddonManifest from "./types/addonManifest.js";
 
 export const manifest = await fetch(`${CONSTANTS.urls.saSource}/manifest.json`).then(
-	async (response) => await /** @type {Promise<chrome.runtime.Manifest>} */ (response.json()),
+	async (response) => await (response.json() as Promise<chrome.runtime.Manifest>),
 );
 
 const addonIds = await fetch(`${CONSTANTS.urls.saSource}/addons/addons.json`).then(
-	async (response) => await /** @type {Promise<string[]>} */ (response.json()),
+	async (response) => await (response.json() as Promise<string[]>),
 );
 
 export const addons = await Promise.all(
@@ -16,9 +17,7 @@ export const addons = await Promise.all(
 		.map((addonId) =>
 			fetch(`${CONSTANTS.urls.saSource}/addons/${encodeURI(addonId)}/addon.json`).then(
 				async (response) => ({
-					...(await /** @type {Promise<import("./types/addonManifest").default>} */ (
-						response.json()
-					)),
+					...(await (response.json() as Promise<AddonManifest>)),
 
 					id: addonId,
 				}),

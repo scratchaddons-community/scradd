@@ -1,23 +1,19 @@
 import {
-	SlashCommandBuilder,
 	Message,
-	ButtonBuilder,
-	SelectMenuBuilder,
-	EmbedBuilder,
 	escapeMarkdown,
-	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	ModalBuilder,
-	TextInputBuilder,
-	TextInputStyle,
 	InteractionCollector,
 	MappedInteractionTypes,
 	MessageComponentType,
 	ModalSubmitInteraction,
 	Snowflake,
-	ActionRowBuilder,
-	ModalActionRowComponentBuilder,
+	ApplicationCommandOptionType,
+	APIActionRowComponent,
+	APISelectMenuComponent,
+	Collection,
+	TextInputStyle,
+	ButtonStyle,
 	// TODO: chatInputApplicationCommandMention,
 } from "discord.js";
 import Fuse from "fuse.js";
@@ -851,25 +847,30 @@ const questions = Object.values(questionsByAddon)
 
 const BULLET_POINT = CONSTANTS.footerSeperator.trim();
 
-const games: {
-	[key: Snowflake]:
-		| undefined
-		| {
-				collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
-				addon: { id: string } & AddonManifest;
-		  };
-} = {};
+const games = new Collection<
+	Snowflake,
+	{
+		collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
+		addon: { id: string } & AddonManifest;
+	}
+>();
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Play games where you or I guess addons")
-		.addSubcommand((subcommand) =>
-			subcommand.setName("bot").setDescription("You think of an addon and I guess"),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand.setName("player").setDescription("I think of an addon and you guess"),
-		),
-
+	data: {
+		description: "Play games where you or I guess addons",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "bot",
+				description: "You think of an addon and I guess",
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "player",
+				description: "I think of an addon and you guess",
+			},
+		],
+	},
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;
 		const command = interaction.options.getSubcommand(true);
@@ -1101,49 +1102,75 @@ const command: ChatInputCommand = {
 
 					const message = await interaction[interaction.replied ? "editReply" : "reply"]({
 						components: [
-							new ActionRowBuilder<ButtonBuilder>().addComponents(
-								new ButtonBuilder()
-									.setLabel("Yes")
-									.setStyle(ButtonStyle.Success)
-									.setCustomId(generateHash("yes")),
-								new ButtonBuilder()
-									.setLabel("I think so")
-									.setStyle(ButtonStyle.Success)
-									.setCustomId(generateHash("probably")),
-								new ButtonBuilder()
-									.setLabel("I don’t know")
-									.setStyle(ButtonStyle.Primary)
-									.setCustomId(generateHash("dontKnow")),
-								new ButtonBuilder()
-									.setLabel("I don’t think so")
-									.setStyle(ButtonStyle.Danger)
-									.setCustomId(generateHash("not")),
-								new ButtonBuilder()
-									.setLabel("No")
-									.setStyle(ButtonStyle.Danger)
-									.setCustomId(generateHash("no")),
-							),
-							new ActionRowBuilder<ButtonBuilder>().addComponents(
-								...(typeof backInfo === "object"
-									? [
-											new ButtonBuilder()
-												.setLabel("Back")
-												.setStyle(ButtonStyle.Secondary)
-												.setCustomId(generateHash("back")),
-									  ]
-									: []),
-								new ButtonBuilder()
-									.setLabel("End")
-									.setStyle(ButtonStyle.Secondary)
-									.setCustomId(generateHash("end")),
-							),
+							{
+								type: ComponentType.ActionRow,
+								components: [
+									{
+										type: ComponentType.Button,
+										label: "Yes",
+										style: ButtonStyle.Success,
+										custom_id: generateHash("yes"),
+									},
+									{
+										type: ComponentType.Button,
+										label: "I think so",
+										style: ButtonStyle.Success,
+										custom_id: generateHash("probably"),
+									},
+									{
+										type: ComponentType.Button,
+										label: "I don’t know",
+										style: ButtonStyle.Primary,
+										custom_id: generateHash("dontKnow"),
+									},
+									{
+										type: ComponentType.Button,
+										label: "I don’t think so",
+										style: ButtonStyle.Danger,
+										custom_id: generateHash("not"),
+									},
+									{
+										type: ComponentType.Button,
+										label: "No",
+										style: ButtonStyle.Danger,
+										custom_id: generateHash("no"),
+									},
+								],
+							},
+							{
+								type: ComponentType.ActionRow,
+								components:
+									typeof backInfo === "object"
+										? [
+												{
+													type: ComponentType.Button,
+													label: "Back",
+													style: ButtonStyle.Secondary,
+													custom_id: generateHash("back"),
+												},
+												{
+													type: ComponentType.Button,
+													label: "End",
+													style: ButtonStyle.Secondary,
+													custom_id: generateHash("end"),
+												},
+										  ]
+										: [
+												{
+													type: ComponentType.Button,
+													label: "End",
+													style: ButtonStyle.Secondary,
+													custom_id: generateHash("end"),
+												},
+										  ],
+							},
 						],
 
 						embeds: [
-							new EmbedBuilder()
-								.setColor(CONSTANTS.themeColor)
-								.setAuthor({
-									iconURL: (interaction.member instanceof GuildMember
+							{
+								color: CONSTANTS.themeColor,
+								author: {
+									icon_url: (interaction.member instanceof GuildMember
 										? interaction.member
 										: interaction.user
 									).displayAvatarURL(),
@@ -1152,17 +1179,16 @@ const command: ChatInputCommand = {
 										interaction.member instanceof GuildMember
 											? interaction.member.displayName
 											: interaction.user.username,
-								})
-								.setTitle("🤔 Think of an addon…")
-								.setDescription(
+								},
+								title: "🤔 Think of an addon…",
+								description:
 									(oldMessage && oldMessage.embeds[0]?.description
 										? `${oldMessage.embeds[0].description} **${justAnswered}**\n`
 										: "") +
-										BULLET_POINT +
-										" " +
-										questions[0],
-								)
-								.setFooter({
+									BULLET_POINT +
+									" " +
+									questions[0],
+								footer: {
 									text:
 										(oldMessage &&
 											oldMessage.embeds[0]?.footer?.text.replace(
@@ -1175,7 +1201,8 @@ const command: ChatInputCommand = {
 													}`,
 											)) ||
 										`Answer my questions using the buttons below${CONSTANTS.footerSeperator}0 questions asked`,
-								}),
+								},
+							},
 						],
 
 						fetchReply: true,
@@ -1320,36 +1347,53 @@ const command: ChatInputCommand = {
 					)?.name;
 
 					const oldMessage = await interaction.fetchReply();
-					const embed = new EmbedBuilder(oldMessage.embeds[0]?.toJSON()).setDescription(
-						`${
-							oldMessage.embeds[0]?.description || ""
-								? `${oldMessage.embeds[0]?.description || ""} **${justAnswered}**\n`
-								: ""
-						}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
-					);
+
 					await interaction.editReply({
 						components: disableComponents(oldMessage.components),
 
-						embeds: [embed],
+						embeds: [
+							{
+								...oldMessage.embeds[0]?.toJSON(),
+								description: `${
+									oldMessage.embeds[0]?.description || ""
+										? `${
+												oldMessage.embeds[0]?.description || ""
+										  } **${justAnswered}**\n`
+										: ""
+								}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
+							},
+						],
 					});
 
 					const message = await interaction.followUp({
 						components: [
-							new ActionRowBuilder<ButtonBuilder>().addComponents(
-								...(typeof backInfo === "object"
-									? [
-											new ButtonBuilder()
-												.setLabel("Back")
-												.setStyle(ButtonStyle.Secondary)
-												.setCustomId(generateHash("back")),
-									  ]
-									: []),
-
-								new ButtonBuilder()
-									.setLabel("No it’s not, continue!")
-									.setStyle(ButtonStyle.Primary)
-									.setCustomId(generateHash("continue")),
-							),
+							{
+								type: ComponentType.ActionRow,
+								components:
+									typeof backInfo === "object"
+										? [
+												{
+													type: ComponentType.Button,
+													label: "Back",
+													style: ButtonStyle.Secondary,
+													custom_id: generateHash("back"),
+												},
+												{
+													type: ComponentType.Button,
+													label: "No it’s not, continue!",
+													style: ButtonStyle.Primary,
+													custom_id: generateHash("continue"),
+												},
+										  ]
+										: [
+												{
+													type: ComponentType.Button,
+													label: "No it’s not, continue!",
+													style: ButtonStyle.Primary,
+													custom_id: generateHash("continue"),
+												},
+										  ],
+							},
 						],
 
 						content: `${CONSTANTS.emojis.misc.addon} Your addon is **${escapeMarkdown(
@@ -1357,18 +1401,16 @@ const command: ChatInputCommand = {
 						)}**!`,
 
 						embeds: [
-							new EmbedBuilder()
-								.setTitle(foundAddon.name)
-								.setDescription(
-									`${
-										Object.entries(questionsByAddon)
-											.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
-											?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
-											.join("\n") || ""
-									}${commandMarkdown}`,
-								)
-								.setAuthor({
-									iconURL: (interaction.member instanceof GuildMember
+							{
+								title: foundAddon.name,
+								description: `${
+									Object.entries(questionsByAddon)
+										.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
+										?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+										.join("\n") || ""
+								}${commandMarkdown}`,
+								author: {
+									icon_url: (interaction.member instanceof GuildMember
 										? interaction.member
 										: interaction.user
 									).displayAvatarURL(),
@@ -1377,19 +1419,17 @@ const command: ChatInputCommand = {
 										interaction.member instanceof GuildMember
 											? interaction.member.displayName
 											: interaction.user.username,
-								})
-								.setColor(CONSTANTS.themeColor)
-								.setThumbnail(
-									`${CONSTANTS.urls.addonImageRoot}/${encodeURI(
+								},
+								color: CONSTANTS.themeColor,
+								thumbnail: {
+									url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(
 										foundAddon.id,
 									)}.png`,
-								)
-								.setURL(
-									`${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
-										foundAddon.id,
-									)}`,
-								)
-								.setFooter({
+								},
+								url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+									foundAddon.id,
+								)}`,
+								footer: {
 									text: `Guessed after ${askedCount} questions.${
 										process.env.NODE_ENV === "production"
 											? ""
@@ -1405,7 +1445,8 @@ const command: ChatInputCommand = {
 											  }`
 											: ""
 									}`,
-								}),
+								},
+							},
 						],
 					});
 
@@ -1425,67 +1466,57 @@ const command: ChatInputCommand = {
 						.on("collect", async (buttonInteraction) => {
 							if (await checkIfUserPlaying(buttonInteraction)) return;
 
-							if (buttonInteraction.customId.startsWith("back.")) {
-								if (typeof backInfo !== "object") {
-									throw new TypeError("backInfo must be an object to go back");
-								}
-
-								await buttonInteraction.reply({
-									components: [
-										new ActionRowBuilder<ButtonBuilder>().addComponents(
-											new ButtonBuilder()
-												.setLabel("Go to game")
-												.setStyle(ButtonStyle.Link)
-												.setURL(oldMessage.url),
-										),
-									],
-
-									ephemeral: true,
-								});
-
-								const nextMessage = await reply(
-									backInfo.askedQuestions,
-									backInfo.probabilities,
-									askedCount - 1,
-									backInfo.justAsked,
-									buttonInteraction.component.label || undefined,
-								);
-
-								if (nextMessage)
-									CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
-
-								return;
-							}
-
 							await buttonInteraction.reply({
 								components: [
-									new ActionRowBuilder<ButtonBuilder>().addComponents(
-										new ButtonBuilder()
-											.setLabel("Go to game")
-											.setStyle(ButtonStyle.Link)
-											.setURL(oldMessage.url),
-									),
+									{
+										type: ComponentType.ActionRow,
+										components: [
+											{
+												type: ComponentType.Button,
+												label: "Go to game",
+												style: ButtonStyle.Link,
+												url: oldMessage.url,
+											},
+										],
+									},
 								],
 
 								ephemeral: true,
 							});
 
-							const nextMessage = await reply(
-								askedQuestions,
-								addonProbabilities.slice(1),
-								askedCount + 1,
-								false,
-								"No",
-							);
+							const nextMessage = buttonInteraction.customId.startsWith("back.")
+								? typeof backInfo === "object"
+									? await reply(
+											backInfo.askedQuestions,
+											backInfo.probabilities,
+											askedCount - 1,
+											backInfo.justAsked,
+											buttonInteraction.component.label ?? undefined,
+									  )
+									: new TypeError("backInfo must be an object to go back")
+								: await reply(
+										askedQuestions,
+										addonProbabilities.slice(1),
+										askedCount + 1,
+										false,
+										"No",
+								  );
 
-							if (nextMessage)
+							if (nextMessage) {
+								if (nextMessage instanceof TypeError) throw nextMessage;
 								CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
+							}
 						})
 						.on("end", async () => {
 							CURRENTLY_PLAYING.delete(interaction.user.id);
 							await interaction.editReply({
 								embeds: [
-									embed.setDescription(`${embed.data.description || ""} **Yes**`),
+									{
+										...oldMessage.embeds[0]?.toJSON(),
+										description: `${
+											oldMessage.embeds[0]?.description || ""
+										} **Yes**`,
+									},
 								],
 							});
 						});
@@ -1494,7 +1525,7 @@ const command: ChatInputCommand = {
 				break;
 			}
 			case "player": {
-				const doneQuestions: Set<string> = new Set();
+				const doneQuestions = new Set<string>();
 
 				const addon = addons[Math.floor(Math.random() * addons.length)];
 
@@ -1503,27 +1534,36 @@ const command: ChatInputCommand = {
 				const message = await interaction.reply({
 					components: [
 						selectGroupButton(),
-						new ActionRowBuilder<ButtonBuilder>().addComponents([
-							new ButtonBuilder()
-								.setLabel("Give up")
-								.setStyle(ButtonStyle.Danger)
-								.setCustomId(generateHash("end")),
-							new ButtonBuilder()
-								.setLabel("Hint")
-								.setStyle(ButtonStyle.Secondary)
-								.setCustomId(generateHash("hint")),
-							new ButtonBuilder()
-								.setLabel("Guess")
-								.setStyle(ButtonStyle.Success)
-								.setCustomId(generateHash("guess")),
-						]),
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "Give up",
+									style: ButtonStyle.Danger,
+									custom_id: generateHash("end"),
+								},
+								{
+									type: ComponentType.Button,
+									label: "Hint",
+									style: ButtonStyle.Secondary,
+									custom_id: generateHash("hint"),
+								},
+								{
+									type: ComponentType.Button,
+									label: "Guess",
+									style: ButtonStyle.Success,
+									custom_id: generateHash("guess"),
+								},
+							],
+						},
 					],
 
 					embeds: [
-						new EmbedBuilder()
-							.setColor(CONSTANTS.themeColor)
-							.setAuthor({
-								iconURL: (interaction.member instanceof GuildMember
+						{
+							color: CONSTANTS.themeColor,
+							author: {
+								icon_url: (interaction.member instanceof GuildMember
 									? interaction.member
 									: interaction.user
 								).displayAvatarURL(),
@@ -1532,11 +1572,12 @@ const command: ChatInputCommand = {
 									interaction.member instanceof GuildMember
 										? interaction.member.displayName
 										: interaction.user.username,
-							})
-							.setTitle("Guess the addon!")
-							.setFooter({
+							},
+							title: "Guess the addon!",
+							footer: {
 								text: `Pick a question for me to answer from a dropdown below${CONSTANTS.footerSeperator}0 questions asked`,
-							}),
+							},
+						},
 					],
 
 					fetchReply: true,
@@ -1549,7 +1590,7 @@ const command: ChatInputCommand = {
 						componentInteraction.user.id === interaction.user.id,
 					time: COLLECTOR_TIME,
 				});
-				games[interaction.user.id] = { addon, collector };
+				games.set(interaction.user.id, { addon, collector });
 
 				collector
 					.on("collect", async (componentInteraction) => {
@@ -1566,22 +1607,12 @@ const command: ChatInputCommand = {
 							if (hint) await answerQuestion(hint.group, hint.markdownless);
 							else {
 								await interaction.editReply({
-									components: message.components?.map((row) =>
-										new ActionRowBuilder<
-											ButtonBuilder | SelectMenuBuilder
-										>().setComponents(
-											row.components
-												?.filter(
-													(component) =>
-														!component.customId?.startsWith("hint."),
-												)
-												.map((component) =>
-													component.type === ComponentType.Button
-														? ButtonBuilder.from(component)
-														: SelectMenuBuilder.from(component),
-												),
+									components: message.components?.map((row) => ({
+										type: ComponentType.ActionRow,
+										components: row.components?.filter(
+											(component) => !component.customId?.startsWith("hint."),
 										),
-									),
+									})),
 								});
 							}
 							collector.resetTimer();
@@ -1600,20 +1631,24 @@ const command: ChatInputCommand = {
 						}
 
 						if (componentInteraction.customId.startsWith("guess.")) {
-							await componentInteraction.showModal(
-								new ModalBuilder()
-									.setTitle("Guess the addon!")
-									.setCustomId(generateHash("guessModal"))
-									.addComponents(
-										new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-											new TextInputBuilder()
-												.setCustomId("addon")
-												.setLabel("Which addon do you think it is?")
-												.setRequired(true)
-												.setStyle(TextInputStyle.Short),
-										),
-									),
-							);
+							await componentInteraction.showModal({
+								title: "Guess the addon!",
+								custom_id: generateHash("guessModal"),
+								components: [
+									{
+										type: ComponentType.ActionRow,
+										components: [
+											{
+												type: ComponentType.TextInput,
+												custom_id: "addon",
+												label: "Which addon do you think it is?",
+												required: true,
+												style: TextInputStyle.Short,
+											},
+										],
+									},
+								],
+							});
 
 							return;
 						}
@@ -1645,7 +1680,7 @@ const command: ChatInputCommand = {
 					})
 					.on("end", async (_, reason) => {
 						CURRENTLY_PLAYING.delete(interaction.user.id);
-						games[interaction.user.id] = undefined;
+						games.delete(interaction.user.id);
 
 						const reply = await interaction.fetchReply();
 						await Promise.all([
@@ -1662,23 +1697,26 @@ const command: ChatInputCommand = {
 				function selectGroupButton(
 					doneGroups: Set<GroupName> = new Set(),
 					defaultValue?: GroupName,
-				) {
-					return new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-						new SelectMenuBuilder()
-							.setPlaceholder("Select a group")
-							.setCustomId(generateHash("group"))
-							.setOptions(
-								GROUP_NAMES.filter((group) => !doneGroups.has(group))
+				): APIActionRowComponent<APISelectMenuComponent> {
+					return {
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								type: ComponentType.SelectMenu,
+								placeholder: "Select a group",
+								custom_id: generateHash("group"),
+								options: GROUP_NAMES.filter((group) => !doneGroups.has(group))
 									.map((group) => ({
 										default: group === defaultValue,
 										label: group,
 										value: group,
 									}))
 									.sort(({ label: one }, { label: two }) =>
-										one === two ? 0 : one < two ? -1 : 1,
+										one.localeCompare(two),
 									),
-							),
-					);
+							},
+						],
+					};
 				}
 
 				async function answerQuestion(groupName: GroupName, question?: string) {
@@ -1707,24 +1745,24 @@ const command: ChatInputCommand = {
 								}))
 								.filter(({ label }) => !doneQuestions.has(label));
 
-							const select = new SelectMenuBuilder()
-								.setCustomId(generateHash(groupName))
-								.setPlaceholder(
-									`Select a question (${
-										accumulator[0] ? "continued" : "irreversible"
-									})`,
-								)
-								.setOptions(options);
-
-							const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-								select,
-							);
-
-							if (options.length > 0) accumulator.push(row);
+							if (options.length)
+								accumulator.push({
+									type: ComponentType.ActionRow,
+									components: [
+										{
+											type: ComponentType.SelectMenu,
+											placeholder: `Select a question (${
+												accumulator[0] ? "continued" : "irreversible"
+											})`,
+											custom_id: generateHash(groupName),
+											options,
+										},
+									],
+								});
 
 							return accumulator;
 						},
-						[] as ActionRowBuilder<SelectMenuBuilder>[],
+						[] as APIActionRowComponent<APISelectMenuComponent>[],
 					);
 
 					const reply = await interaction.fetchReply();
@@ -1737,29 +1775,28 @@ const command: ChatInputCommand = {
 					await interaction.editReply({
 						components: [
 							selectGroupButton(doneGroups, groupName),
-							...(groupSelects.length > 0 ? groupSelects : []),
+							...groupSelects,
 							...(buttons ? [buttons] : []),
 						],
 
 						embeds: question
 							? [
-									new EmbedBuilder(reply.embeds[0]?.toJSON())
-										.setDescription(
-											`${
-												reply.embeds[0]?.description || ""
-											}\n${BULLET_POINT} ${
-												(
-													foundInAddon ||
-													Object.values(questionsByAddon)
-														.flat()
-														.find?.(
-															({ markdownless }) =>
-																markdownless === question,
-														)
-												)?.question || question
-											} **${foundInAddon ? "Yes" : "No"}**`.trim(),
-										)
-										.setFooter({
+									{
+										...reply.embeds[0]?.toJSON(),
+										description: `${
+											reply.embeds[0]?.description || ""
+										}\n${BULLET_POINT} ${
+											(
+												foundInAddon ||
+												Object.values(questionsByAddon)
+													.flat()
+													.find?.(
+														({ markdownless }) =>
+															markdownless === question,
+													)
+											)?.question || question
+										} **${foundInAddon ? "Yes" : "No"}**`.trim(),
+										footer: {
 											text:
 												reply.embeds[0]?.footer?.text.replace(
 													/\d+ questions?/,
@@ -1772,7 +1809,8 @@ const command: ChatInputCommand = {
 																: "s"
 														}`,
 												) || "",
-										}),
+										},
+									},
 							  ]
 							: undefined,
 					});
@@ -1785,7 +1823,7 @@ const command: ChatInputCommand = {
 export default command;
 
 export async function guessAddon(interaction: ModalSubmitInteraction) {
-	const game = games[interaction.user.id];
+	const game = games.get(interaction.user.id);
 	if (!game) return;
 
 	const query = interaction.fields.getTextInputValue("addon");
@@ -1802,15 +1840,14 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 	}
 	const editPromise = interaction.message?.edit({
 		embeds: [
-			new EmbedBuilder(interaction.message.embeds[0]?.toJSON())
-				.setDescription(
-					`${
-						interaction.message.embeds[0]?.description || ""
-					}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
-						item.id === game.addon.id ? "Yes" : "No"
-					}**`.trim(),
-				)
-				.setFooter({
+			{
+				...interaction.message.embeds[0]?.toJSON(),
+				description: `${
+					interaction.message.embeds[0]?.description || ""
+				}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
+					item.id === game.addon.id ? "Yes" : "No"
+				}**`.trim(),
+				footer: {
 					text:
 						interaction.message.embeds[0]?.footer?.text.replace(
 							/\d+ questions?/,
@@ -1819,7 +1856,8 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 									previousCount === "0 questions" ? "" : "s"
 								}`,
 						) || "",
-				}),
+				},
+			},
 		],
 	});
 
@@ -1841,18 +1879,16 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 			)}**! You got it right!`,
 
 			embeds: [
-				new EmbedBuilder()
-					.setTitle(game.addon.name)
-					.setDescription(
-						`${
-							Object.entries(questionsByAddon)
-								.find(([id]) => id === game.addon.id)?.[1]
-								?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
-								.join("\n") || ""
-						}${commandMarkdown}`,
-					)
-					.setAuthor({
-						iconURL: (interaction.member instanceof GuildMember
+				{
+					title: game.addon.name,
+					description: `${
+						Object.entries(questionsByAddon)
+							.find(([id]) => id === game.addon.id)?.[1]
+							?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+							.join("\n") || ""
+					}${commandMarkdown}`,
+					author: {
+						icon_url: (interaction.member instanceof GuildMember
 							? interaction.member
 							: interaction.user
 						).displayAvatarURL(),
@@ -1861,14 +1897,15 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 							interaction.member instanceof GuildMember
 								? interaction.member.displayName
 								: interaction.user.username,
-					})
-					.setColor(CONSTANTS.themeColor)
-					.setThumbnail(
-						`${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
-					)
-					.setURL(
-						`${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(game.addon.id)}`,
-					),
+					},
+					color: CONSTANTS.themeColor,
+					thumbnail: {
+						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
+					},
+					url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+						game.addon.id,
+					)}`,
+				},
 			],
 		}),
 	]);

@@ -1,10 +1,4 @@
-import {
-	ActionRowBuilder,
-	AttachmentBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	PermissionFlagsBits,
-} from "discord.js";
+import { ButtonStyle, ComponentType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
@@ -27,12 +21,8 @@ const event: Event<"messageDelete"> = async function event(message) {
 	const { embeds, files } = shush
 		? { embeds: [], files: [] }
 		: await extractMessageExtremities(message);
-	if (content)
-		files.unshift(
-			new AttachmentBuilder(Buffer.from(content, "utf-8"), { name: "message.txt" }),
-		);
 
-	while (files.length > 10) files.pop();
+	while (files.length > 9 + +!content) files.pop();
 
 	await log(
 		`🗑 ${message.partial ? "Unknown message" : "Message"}${
@@ -41,14 +31,21 @@ const event: Event<"messageDelete"> = async function event(message) {
 		"messages",
 		{
 			embeds,
-			files,
+			files: content
+				? [{ attachment: Buffer.from(content, "utf-8"), name: "message.txt" }, ...files]
+				: files,
 			components: [
-				new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setLabel("View Context")
-						.setStyle(ButtonStyle.Link)
-						.setURL(message.url),
-				),
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "View Context",
+							style: ButtonStyle.Link,
+							type: ComponentType.Button,
+							url: message.url,
+						},
+					],
+				},
 			],
 		},
 	);

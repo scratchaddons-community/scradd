@@ -1,11 +1,10 @@
-import { SlashCommandBuilder, cleanContent, GuildMember, hyperlink } from "discord.js";
+import { ApplicationCommandOptionType, cleanContent, GuildMember, hyperlink } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeLinks } from "../util/markdown.js";
 import { getAllMessages, paginate } from "../util/discord.js";
 import { truncateText } from "../util/text.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 import Database from "../common/database.js";
-import { guild } from "../client.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
@@ -58,22 +57,22 @@ const old = CONSTANTS.channels.old_suggestions
 	: [];
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Get the top suggestions")
-		.addUserOption((input) =>
-			input
-				.setName("user")
-				.setDescription("Filter suggestions to only get those by a certain user"),
-		)
-		.addStringOption((option) =>
-			option
-				.setName("answer")
-				.setDescription("Filter suggestions to only get those with a certain answer")
-				.addChoices(
-					...suggestionAnswers.map((answer) => ({ name: answer, value: answer })),
-				),
-		),
-
+	data: {
+		description: "Get the top suggestions",
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: "user",
+				description: "Filter suggestions to only get those by a certain user",
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: "answer",
+				description: "Filter suggestions to only get those with a certain answer",
+				choices: suggestionAnswers.map((answer) => ({ name: answer, value: answer })),
+			},
+		],
+	},
 	async interaction(interaction) {
 		const author = interaction.options.getMember("user");
 		const answer = interaction.options.getString("answer");
@@ -100,7 +99,7 @@ const command: ChatInputCommand = {
 					escapeLinks(suggestion.title),
 					"url" in suggestion
 						? suggestion.url
-						: `https://discord.com/channels/${guild.id}/${suggestion.id}/${suggestion.id}`,
+						: `https://discord.com/channels/${CONSTANTS.guild.id}/${suggestion.id}/${suggestion.id}`,
 					suggestion.answer,
 				)}${nick ? "" : ` by <@${suggestion.author}>`}`,
 			"No suggestions found. Try changing any filters you may have used.",

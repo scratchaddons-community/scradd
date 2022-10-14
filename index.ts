@@ -26,21 +26,16 @@ declare global {
 
 dotenv.config();
 
-const { default: client, guild } = await import("./client.js");
 const { default: logError } = await import("./util/logError.js");
-const { cleanDatabaseListeners } = await import("./common/database.js");
-
 process
 	.on("uncaughtException", (err, origin) => logError(err, origin))
 	.on("warning", (err) => logError(err, "warning"));
 
+const { default: log } = await import("./common/moderation/logging.js");
 if (process.env.NODE_ENV === "production")
-	await import("./common/moderation/logging.js").then(({ default: log }) =>
-		log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server"),
-	);
+	log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
-
 setInterval(async () => {
 	const count = (
 		await fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`).then(
@@ -56,7 +51,7 @@ setInterval(async () => {
 		})} SA users!`,
 	});
 	await CONSTANTS.channels.chat?.edit({
-		name: `💬 Chat - ${guild.memberCount.toLocaleString([], {
+		name: `💬 Chat - ${CONSTANTS.guild.memberCount.toLocaleString([], {
 			maximumFractionDigits: 2,
 			minimumFractionDigits: 2,
 			notation: "compact",
@@ -74,31 +69,21 @@ for await (const entry of asyncFilter(
 	async ([name, commandPromise]) => {
 		const command = await commandPromise();
 		if (!command) return false;
-		if (command.data.name)
+
+		if (command.data.dm_permission !== undefined)
 			throw new AssertionError({
-				actual: command.data.name,
-				expected: "",
-				operator: name,
-				message: "Don’t manually set the command name, it will use the file name",
-			});
-
-		command.data.setName(name);
-
-		const json = command.data.toJSON();
-
-		if (json.dm_permission !== undefined)
-			throw new AssertionError({
-				actual: json.dm_permission,
+				actual: command.data.dm_permission,
 				expected: undefined,
 				operator: "!==",
 				message: "Don’t set DM permissions, all commands are server commands",
 			});
 
-		return json;
+		return { ...command.data, name: name };
 	},
 ))
 	commands.push(entry);
 
+const { default: client } = await import("./client.js");
 await client.application.commands.set(commands, process.env.GUILD_ID || "");
 
 const guilds = await client.guilds.fetch();
@@ -107,7 +92,8 @@ guilds.forEach(async (guild) => {
 		await client.application.commands.set([], guild.id).catch(() => {});
 });
 
-if (process.env.NODE_ENV === "production")
+if (process.env.NODE_ENV === "production") {
+	const { cleanDatabaseListeners } = await import("./common/database.js");
 	http.createServer(async function (request, response) {
 		const url = new URL(request.url || "", `https://${request.headers.host}`);
 
@@ -121,3 +107,4 @@ if (process.env.NODE_ENV === "production")
 			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
 		} else response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
 	}).listen(process.env.PORT ?? 443);
+}

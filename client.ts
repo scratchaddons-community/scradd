@@ -2,10 +2,10 @@ import { AssertionError } from "assert";
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
 import path from "path";
 import url from "url";
-import type { ClientEvent } from "./common/types/event";
 import type Event from "./common/types/event";
 import { importScripts, sanitizePath } from "./util/files.js";
 import pkg from "./package.json" assert { type: "json" };
+import type { ClientEvent } from "./common/types/event";
 
 const Handler = new Client({
 	allowedMentions: { parse: ["users"], repliedUser: true },
@@ -62,7 +62,7 @@ if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production"))
 }
 export default client;
 
-export const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+const { default: logError } = await import("./util/logError.js");
 
 client.user.setPresence({
 	activities: [
@@ -74,19 +74,17 @@ client.user.setPresence({
 	],
 });
 
-const events = await importScripts<Event<ClientEvent>>(
+const events = await importScripts<Event, ClientEvent>(
 	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
 );
 
 for (const [event, execute] of events.entries()) {
 	Handler.on(event, async (...args) => {
 		try {
-			// @ts-expect-error -- IDK how to fix this
 			return await (
 				await execute()
 			)(...args);
 		} catch (error) {
-			const { default: logError } = await import("./util/logError.js");
 			logError(error, event);
 		}
 	});

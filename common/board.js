@@ -1,14 +1,6 @@
-import {
-	ButtonBuilder,
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	EmbedBuilder,
-	Message,
-} from "discord.js";
-import { guild } from "../client.js";
+import { ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
+
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
-import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
@@ -24,17 +16,20 @@ export function boardReactionCount(channel) {
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel) return COUNTS.default;
 	if (baseChannel.isDMBased()) return COUNTS.mods;
-	if (baseChannel.parent?.id === "866028754962612294") return COUNTS.modsPlus; // The Cache!
 
 	return (
 		{
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
+			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.modsPlus,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
-			["869662117651955802"]: COUNTS.devs,
-			["853256939089559583"]: COUNTS.modsPlus,
-			["894314668317880321"]: COUNTS.modsPlus,
-		}[baseChannel.id] || COUNTS.default
+			"853256939089559583": COUNTS.mods, // #da-boosters
+			"869662117651955802": COUNTS.devs, // #devs-only
+			"1018702459776028782": COUNTS.mods, // #mod-applications
+			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
+			"938807989874360330": COUNTS.devs, // #old-bugs
+		}[baseChannel.id] ||
+		(baseChannel.parent?.id === "866028754962612294" ? COUNTS.modsPlus : COUNTS.default) // 💀 The Cache!
 	);
 }
 
@@ -45,7 +40,7 @@ await boardDatabase.init();
 
 /**
  * @param {import("./database").Databases["board"] | import("discord.js").Message} info
- * @param {{ pre?: ButtonBuilder[]; post?: ButtonBuilder[] }} [extraButtons]
+ * @param {{ pre?: import("discord.js").APIButtonComponent[]; post?: import("discord.js").APIButtonComponent[] }} [extraButtons]
  *
  * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
  */
@@ -53,7 +48,11 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
-	/** @param {import("discord.js").Message} message */
+	/**
+	 * @param {import("discord.js").Message} message
+	 *
+	 * @returns {Promise<import("discord.js").BaseMessageOptions>}
+	 */
 	async function messageToBoardData(message) {
 		const { files, embeds } = await extractMessageExtremities(message, false);
 
@@ -62,32 +61,25 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 		const censored = censor(description);
 		const censoredName = censor(message.author.username);
 
-		const boardEmbed = new EmbedBuilder()
-			.setColor(message.member?.displayColor ?? 0)
-			.setDescription(censored ? censored.censored : description || null)
-			.setAuthor({
-				iconURL: (message.member ?? message.author).displayAvatarURL(),
-				name:
-					message.member?.displayName ??
-					(censoredName ? censoredName.censored : message.author.username),
-			})
-			.setTimestamp(message.createdAt);
-
-		const button = new ButtonBuilder()
-			.setLabel("View Context")
-			.setStyle(ButtonStyle.Link)
-			.setURL(message.url);
-
 		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
 
 		return {
 			allowedMentions: { users: [] },
 			components: [
-				new MessageActionRowBuilder().addComponents(
-					...(extraButtons.pre || []),
-					button,
-					...(extraButtons.post || []),
-				),
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						...(extraButtons.pre || []),
+
+						{
+							label: "View Context",
+							style: ButtonStyle.Link,
+							type: ComponentType.Button,
+							url: message.url,
+						},
+						...(extraButtons.post || []),
+					],
+				},
 			],
 
 			content: `**${BOARD_EMOJI} ${count}** | ${
@@ -95,7 +87,20 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 					? `${message.channel.toString()} (${message.channel.parent.toString()})`
 					: message.channel.toString()
 			} | ${message.author.toString()}`,
-			embeds: [boardEmbed, ...embeds],
+			embeds: [
+				{
+					color: message.member?.displayColor,
+					description: censored ? censored.censored : description,
+					author: {
+						icon_url: (message.member ?? message.author).displayAvatarURL(),
+						name:
+							message.member?.displayName ??
+							(censoredName ? censoredName.censored : message.author.username),
+					},
+					timestamp: message.createdAt.toISOString(),
+				},
+				...embeds,
+			],
 			files,
 		};
 	}
@@ -109,26 +114,22 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
-				? [
-						...(extraButtons.pre || []),
-						ButtonBuilder.from(linkButton),
-						...(extraButtons.post || []),
-				  ]
+				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]
 				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
 
 		return {
 			allowedMentions: { users: [] },
 
 			components: buttons.length
-				? [new MessageActionRowBuilder().setComponents(buttons)]
+				? [{ type: ComponentType.ActionRow, components: buttons }]
 				: [],
 
 			content: onBoard.content,
-			embeds: onBoard.embeds.map((oldEmbed) => EmbedBuilder.from(oldEmbed)),
+			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),
 			files: onBoard.attachments.map((attachment) => attachment),
 		};
 	}
-	const channel = await guild.channels.fetch(info.channel).catch(() => {});
+	const channel = await CONSTANTS.guild.channels.fetch(info.channel).catch(() => {});
 	if (!channel?.isTextBased()) return;
 	const message = await channel.messages.fetch(info.source).catch(() => {});
 	if (!message) return;

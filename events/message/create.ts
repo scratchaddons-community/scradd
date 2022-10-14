@@ -1,6 +1,5 @@
 import {
 	cleanCodeBlockContent,
-	EmbedBuilder,
 	MessageType,
 	ChannelType,
 	Message,
@@ -26,7 +25,7 @@ import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
 import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
 import { normalize, truncateText } from "../../util/text.js";
-import client, { guild } from "../../client.js";
+import client from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import type Event from "../../common/types/event";
@@ -71,28 +70,29 @@ const event: Event<"messageCreate"> = async function event(message) {
 			)
 		) {
 			const collector = await generateModmailConfirm(
-				new EmbedBuilder()
-					.setTitle("Confirmation")
-					.setDescription(
-						`Are you sure you want to send client message to **the ${escapeMessage(
-							guild.name,
-						)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
-					)
-					.setColor(MODMAIL_COLORS.confirm)
-					.setAuthor({ iconURL: guild.iconURL() ?? undefined, name: guild.name }),
+				{
+					title: "Confirmation",
+					description: `Are you sure you want to send client message to **the ${escapeMessage(
+						CONSTANTS.guild.name,
+					)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
+					color: MODMAIL_COLORS.confirm,
+					author: {
+						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
+						name: CONSTANTS.guild.name,
+					},
+				},
 				async (buttonInteraction) => {
-					const openedEmbed = new EmbedBuilder()
-						.setTitle("Modmail ticket opened!")
-						.setDescription(`Ticket by ${message.author.toString()}`)
-						.setFooter({
-							text:
-								MODMAIL_UNSUPPORTED +
-								"\nMessages starting with an equals sign (=) are ignored.",
-						})
-						.setColor(MODMAIL_COLORS.opened);
-
 					const newThread = await openModmail(
-						openedEmbed,
+						{
+							title: "Modmail ticket opened!",
+							description: `Ticket by ${message.author.toString()}`,
+							footer: {
+								text:
+									MODMAIL_UNSUPPORTED +
+									"\nMessages starting with an equals sign (=) are ignored.",
+							},
+							color: MODMAIL_COLORS.opened,
+						},
 						message.member ?? message.author,
 						true,
 					);

@@ -1,26 +1,13 @@
-import { AssertionError } from "assert";
 import type {
-	SlashCommandBuilder,
-	SlashCommandSubcommandsOnlyBuilder,
 	ChatInputCommandInteraction,
-	Client,
-	Guild,
-	Snowflake,
-	APIInteractionGuildMember,
-	GuildMember,
-	PermissionsBitField,
-	Locale,
-	ApplicationCommand,
-	GuildResolvable,
-	Awaitable,
-	SlashCommandOptionsOnlyBuilder,
-	ContextMenuCommandBuilder,
 	ContextMenuCommandInteraction,
 	AutocompleteInteraction,
+	RESTPostAPIContextMenuApplicationCommandsJSONBody,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
 export interface ContextMenuCommand {
-	data: ContextMenuCommandBuilder;
+	data: Omit<RESTPostAPIContextMenuApplicationCommandsJSONBody, "name">;
 
 	/** A function that processes interactions to this command. */
 	interaction: (interaction: ContextMenuCommandInteraction<"raw" | "cached">) => any;
@@ -32,11 +19,7 @@ export interface ChatInputCommand {
 	 * @default true
 	 */
 	censored?: boolean | "channel";
-	data:
-		| SlashCommandSubcommandsOnlyBuilder
-		| SlashCommandOptionsOnlyBuilder
-		| SlashCommandBuilder
-		| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+	data: Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "name" | "type">;
 
 	/** A function that processes interactions to this command. */
 	interaction: (interaction: ChatInputCommandInteraction<"raw" | "cached">) => any;

@@ -1,12 +1,11 @@
 import {
 	GuildMember,
 	Message,
-	EmbedBuilder,
-	ButtonBuilder,
 	Colors,
 	MessageMentions,
-	ButtonStyle,
 	User,
+	ComponentType,
+	ButtonStyle,
 } from "discord.js";
 import { generateHash } from "../util/text.js";
 
@@ -15,8 +14,7 @@ import { asyncFilter } from "../util/promises.js";
 import { disableComponents, extractMessageExtremities, messageToText } from "../util/discord.js";
 
 import CONSTANTS from "./CONSTANTS.js";
-import { MessageActionRowBuilder } from "./types/ActionRowBuilder.js";
-import client, { guild } from "../client.js";
+import client from "../client.js";
 import { getWarnsForMember } from "../commands/view-warns.js";
 
 export const MODMAIL_COLORS = {
@@ -40,9 +38,9 @@ export async function generateModmailMessage(message) {
 
 	const member =
 		(message.interaction &&
-			(await guild?.members.fetch(message.interaction.user.id).catch(() => {}))) ||
+			(await CONSTANTS.guild?.members.fetch(message.interaction.user.id).catch(() => {}))) ||
 		message.member ||
-		(await guild?.members.fetch(message.author.id).catch(() => {}));
+		(await CONSTANTS.guild?.members.fetch(message.author.id).catch(() => {}));
 
 	return {
 		avatarURL: (member || message.author).displayAvatarURL(),
@@ -67,7 +65,7 @@ export async function getUserFromModmail(thread) {
 	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
 	return (
-		(await guild.members.fetch(userId).catch(() => {})) ||
+		(await CONSTANTS.guild.members.fetch(userId).catch(() => {})) ||
 		(await client.users.fetch(userId).catch(() => {}))
 	);
 }
@@ -101,27 +99,10 @@ export async function getThreadFromMember(user) {
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getUserFromModmail(thread);
-	const embed = new EmbedBuilder()
-		.setTitle("Modmail ticket closed!")
-		.setTimestamp(thread.createdAt)
-		.setFooter({
-			iconURL: guild.iconURL() ?? undefined,
-			text: "Any future messages will start a new ticket.",
-		})
-		.setColor(MODMAIL_COLORS.closed);
 
-	if (reason) embed.setDescription(reason);
-
-	if (user) {
-		const member =
-			user instanceof GuildMember
-				? user
-				: (await guild.members.fetch(user.id).catch(() => {})) || user;
-		embed.setAuthor({
-			iconURL: member.displayAvatarURL(),
-			name: member instanceof GuildMember ? member.displayName : member.username,
-		});
-	}
+	const mod =
+		(user instanceof User && (await CONSTANTS.guild.members.fetch(user.id).catch(() => {}))) ||
+		user;
 
 	return (
 		await Promise.all([
@@ -132,17 +113,33 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 					starter
 						?.edit({
 							embeds: [
-								(starter.embeds[0]
-									? EmbedBuilder.from(starter.embeds[0])
-									: new EmbedBuilder()
-								)
-									.setTitle("Modmail ticket closed!")
-									.setColor(MODMAIL_COLORS.closed),
+								{
+									...starter.embeds[0],
+									title: "Modmail ticket closed!",
+									color: MODMAIL_COLORS.closed,
+								},
 							],
 						})
 						.catch(console.error);
 				}),
-			member?.send({ embeds: [embed] }),
+			member?.send({
+				embeds: [
+					{
+						title: "Modmail ticket closed!",
+						timestamp: thread.createdAt?.toISOString(),
+						footer: {
+							icon_url: CONSTANTS.guild.iconURL() ?? undefined,
+							text: "Any future messages will start a new ticket.",
+						},
+						color: MODMAIL_COLORS.closed,
+						description: reason,
+						author: mod && {
+							icon_url: mod.displayAvatarURL(),
+							name: mod instanceof GuildMember ? mod.displayName : mod.username,
+						},
+					},
+				],
+			}),
 		])
 	)[1];
 }
@@ -169,40 +166,49 @@ export async function sendOpenedMessage(user) {
 	return await user
 		.send({
 			embeds: [
-				new EmbedBuilder()
-					.setTitle("Modmail ticket opened!")
-					.setDescription(
-						`The moderation team of **${escapeMessage(
-							guild.name,
-						)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
-					)
-					.setFooter({ text: MODMAIL_UNSUPPORTED })
-					.setColor(MODMAIL_COLORS.opened),
+				{
+					title: "Modmail ticket opened!",
+					description: `The moderation team of **${escapeMessage(
+						CONSTANTS.guild.name,
+					)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
+					footer: { text: MODMAIL_UNSUPPORTED },
+					color: MODMAIL_COLORS.opened,
+				},
 			],
 		})
 		.catch(() => false);
 }
 
 /**
- * @param {EmbedBuilder} confirmEmbed
+ * @param {import("discord.js").APIEmbed} confirmEmbed
  * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
  * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message>} reply
  */
 export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 	const confirmId = generateHash("confirm");
-	const button = new ButtonBuilder()
-		.setLabel("Confirm")
-		.setStyle(ButtonStyle.Primary)
-		.setCustomId(confirmId);
 
 	const cancelId = generateHash("cancel");
-	const cancelButton = new ButtonBuilder()
-		.setLabel("Cancel")
-		.setCustomId(cancelId)
-		.setStyle(ButtonStyle.Secondary);
 
 	const message = await reply({
-		components: [new MessageActionRowBuilder().addComponents(button, cancelButton)],
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						type: ComponentType.Button,
+						label: "Confirm",
+						style: ButtonStyle.Success,
+						custom_id: confirmId,
+					},
+					{
+						type: ComponentType.Button,
+						label: "Cancel",
+						custom_id: cancelId,
+						style: ButtonStyle.Secondary,
+					},
+				],
+			},
+		],
 		embeds: [confirmEmbed],
 	});
 
@@ -232,9 +238,7 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 		})
 		.on("end", async () => {
 			if (!message.interaction)
-				await message.edit({
-					components: disableComponents(message.components),
-				});
+				await message.edit({ components: disableComponents(message.components) });
 		});
 	return collector;
 }
@@ -264,7 +268,7 @@ export function generateReactionFunctions(message) {
 }
 
 /**
- * @param {EmbedBuilder} openedEmbed
+ * @param {import("discord.js").APIEmbed} openedEmbed
  * @param {GuildMember | User} user
  */
 export async function openModmail(openedEmbed, user, ping = false) {

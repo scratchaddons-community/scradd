@@ -1,4 +1,3 @@
-import { guild } from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/moderation/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
@@ -8,7 +7,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== process.env.GUILD_ID) return;
 	await log(`💨 Member ${member.toString()} left!`, "members");
 
-	const banned = await guild.bans
+	const banned = await CONSTANTS.guild.bans
 		.fetch(member)
 		.then((partialBan) => {
 			if (partialBan.partial) return partialBan.fetch();

@@ -1,15 +1,21 @@
-import { SlashCommandBuilder, escapeMarkdown } from "discord.js";
+import { ApplicationCommandOptionType, escapeMarkdown } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { censor } from "../common/moderation/automod.js";
 import type { ChatInputCommand } from "../common/types/command.js";
 import { joinWithAnd } from "../util/text.js";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Checks text for language")
-		.addStringOption((input) =>
-			input.setName("text").setRequired(true).setDescription("Text to check"),
-		),
+	data: {
+		description: "Checks text for language",
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: "text",
+				description: "Text to check",
+				required: true,
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		const result = censor(interaction.options.getString("text", true));

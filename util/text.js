@@ -1,11 +1,18 @@
 import { stripMarkdown } from "./markdown.js";
 
-/** @typedef {import("discord.js").ButtonBuilder | import("discord.js").ModalBuilder | import("discord.js").SelectMenuBuilder} MessageComponent */
+/**
+ * @typedef {(
+ * 	| import("discord.js").APIButtonComponentWithCustomId
+ * 	| import("discord.js").APISelectMenuComponent
+ * 	| import("discord.js").APITextInputComponent
+ * 	| import("discord.js").APIModalInteractionResponseCallbackData
+ * )["custom_id"]} custom_id
+ */
 
 /**
  * Generate a short, random string based off the date. Note that the length is not fixed.
  *
- * Intended for use on {@link MessageComponent.setCustomId}s.
+ * Intended for use on {@link custom_id}s.
  *
  * @param {string} [prefix] - An optional prefix to the hash.
  *

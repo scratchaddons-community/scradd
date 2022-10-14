@@ -1,4 +1,4 @@
-import { Message, AttachmentBuilder, Snowflake } from "discord.js";
+import type { Message, Snowflake } from "discord.js";
 import papaparse from "papaparse";
 import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
@@ -27,17 +27,15 @@ let timeouts: Record<
 const contructed: (keyof Databases)[] = [];
 
 export default class Database<Name extends keyof Databases> {
-	name: Name;
 	message: Message<true> | undefined;
 	#data: Databases[Name][] | undefined;
 	#extra: string | undefined;
-	constructor(name: Name) {
+	constructor(public name: Name) {
 		if (contructed.includes(name))
 			throw new RangeError(
 				`Cannot create a 2nd database for ${name}, they will have conflicting data`,
 			);
 		contructed.push(name);
-		this.name = name;
 	}
 
 	async init() {
@@ -103,9 +101,10 @@ export default class Database<Name extends keyof Databases> {
 
 			const files = this.#data?.length
 				? [
-						new AttachmentBuilder(Buffer.from(papaparse.unparse(this.#data), "utf-8"), {
+						{
+							attachment: Buffer.from(papaparse.unparse(this.#data), "utf-8"),
 							name: this.name + ".scradddb",
-						}),
+						},
 				  ]
 				: [];
 			const messageContent = this.message.content.split("\n");

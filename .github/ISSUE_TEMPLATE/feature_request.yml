@@ -34,15 +34,11 @@ body:
       attributes:
           label: Alternatives to this feature
           description: A clear and concise description of any alternative solutions or features.
-      validations:
-          required: false
 
     - type: textarea
       attributes:
           label: Anything else?
           description: Put any other context and/or screenshots about the feature request here.
-      validations:
-          required: false
 
     - type: checkboxes
       id: terms
@@ -61,4 +57,3 @@ body:
                 required: true
 
               - label: I'm willing to submit a PR to add this (optional).
-                required: false

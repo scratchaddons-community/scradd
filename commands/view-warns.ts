@@ -1,18 +1,16 @@
 import {
-	EmbedBuilder,
-	SlashCommandBuilder,
 	GuildMember,
-	ButtonBuilder,
 	MessageMentions,
 	time,
 	ButtonStyle,
 	BaseMessageOptions,
 	InteractionReplyOptions,
 	User,
-	ActionRowBuilder,
+	ComponentType,
+	ApplicationCommandOptionType,
 } from "discord.js";
 import fetch from "node-fetch";
-import client, { guild } from "../client.js";
+import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLoggingThread } from "../common/moderation/logging.js";
 import {
@@ -25,24 +23,36 @@ import { convertBase } from "../util/numbers.js";
 import type { ChatInputCommand } from "../common/types/command";
 
 const command: ChatInputCommand = {
-	data: new SlashCommandBuilder()
-		.setDescription("Commands to view strike information")
-		.addSubcommand((input) =>
-			input
-				.setName("user")
-				.setDescription("View your or (Mods only) someone else’s active strikes")
-				.addUserOption((input) =>
-					input.setName("user").setDescription("(Mods only) The user to see strikes for"),
-				),
-		)
-		.addSubcommand((input) =>
-			input
-				.setName("id")
-				.setDescription("View a strike by ID")
-				.addStringOption((input) =>
-					input.setName("id").setDescription("The strike's ID").setRequired(true),
-				),
-		),
+	data: {
+		description: "Commands to view strike information",
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "user",
+				description: "View your or (Mods only) someone else’s active strikes",
+				options: [
+					{
+						type: ApplicationCommandOptionType.User,
+						name: "user",
+						description: "(Mods only) The user to see strikes for",
+					},
+				],
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: "id",
+				description: "View a strike by ID",
+				options: [
+					{
+						required: true,
+						type: ApplicationCommandOptionType.String,
+						name: "id",
+						description: "The strike's ID",
+					},
+				],
+			},
+		],
+	},
 
 	async interaction(interaction) {
 		if (!(interaction.member instanceof GuildMember))
@@ -81,61 +91,67 @@ export async function getWarnsForMember(user: User | GuildMember): Promise<BaseM
 	const mutes = (await removeExpiredWarns(muteLog)).filter((mute) => mute.user === user.id);
 
 	const member =
-		user instanceof GuildMember ? user : await guild?.members.fetch(user.id).catch(() => {});
+		user instanceof GuildMember
+			? user
+			: await CONSTANTS.guild?.members.fetch(user.id).catch(() => {});
 
 	const strikes = await Promise.all(
 		warns
 			.filter((warn, index) => warns.findIndex((w) => w.info == warn.info) == index)
 			.sort((one, two) => two.expiresAt - one.expiresAt),
 	);
-	const embed = new EmbedBuilder()
-		.setTitle(
-			`${
-				member?.displayName ||
-				(user instanceof GuildMember ? user.user.username : user.username)
-			} has ${warns.length} active strike${warns.length === 1 ? "" : "s"}`,
-		)
-		.setAuthor({
-			iconURL: (member || user).displayAvatarURL(),
-			name: user instanceof GuildMember ? user.user.username : user.username,
-		})
-		.setColor(member?.displayColor || null)
-		.setDescription(
-			(
-				await Promise.all(
-					strikes.map(async (warn) => {
-						const strikes = warns.filter(({ info }) => info === warn.info).length;
 
-						return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
-							strikes === 1 ? "" : ` (*${strikes})`
-						}: expiring ${time(new Date(warn.expiresAt), "R")}`;
-					}),
-				)
-			).join("\n") || `${user.toString()} has no recent strikes!`,
-		);
-	if (mutes.length)
-		embed.setFooter({
-			text:
-				`${
-					user instanceof GuildMember ? user.user.username : user.username
-				} has been muted ` +
-				mutes.length +
-				` time${mutes.length === 1 ? "" : "s"} recently.`,
-		});
 	return {
 		components: strikes.length
 			? [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						strikes.map((warn) =>
-							new ButtonBuilder()
-								.setLabel(convertBase(warn.info || "", 10, WARN_INFO_BASE))
-								.setStyle(ButtonStyle.Secondary)
-								.setCustomId(`${warn.info}_strike`),
-						),
-					),
+					{
+						type: ComponentType.ActionRow,
+						components: strikes.map((warn) => ({
+							label: convertBase(warn.info || "", 10, WARN_INFO_BASE),
+							style: ButtonStyle.Secondary,
+							custom_id: `${warn.info}_strike`,
+							type: ComponentType.Button,
+						})),
+					},
 			  ]
 			: [],
-		embeds: [embed],
+		embeds: [
+			{
+				title: `${
+					member?.displayName ||
+					(user instanceof GuildMember ? user.user.username : user.username)
+				} has ${warns.length} active strike${warns.length === 1 ? "" : "s"}`,
+				author: {
+					icon_url: (member || user).displayAvatarURL(),
+					name: user instanceof GuildMember ? user.user.username : user.username,
+				},
+				color: member?.displayColor,
+				description:
+					(
+						await Promise.all(
+							strikes.map(async (warn) => {
+								const strikes = warns.filter(
+									({ info }) => info === warn.info,
+								).length;
+
+								return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
+									strikes === 1 ? "" : ` (*${strikes})`
+								}: expiring ${time(new Date(warn.expiresAt), "R")}`;
+							}),
+						)
+					).join("\n") || `${user.toString()} has no recent strikes!`,
+				footer: mutes.length
+					? {
+							text:
+								`${
+									user instanceof GuildMember ? user.user.username : user.username
+								} has been muted ` +
+								mutes.length +
+								` time${mutes.length === 1 ? "" : "s"} recently.`,
+					  }
+					: undefined,
+			},
+		],
 	};
 }
 
@@ -170,41 +186,54 @@ export async function getWarnById(
 			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's warns!`,
 		};
 
-	const member = await guild?.members.fetch(userId).catch(() => {});
+	const member = await CONSTANTS.guild?.members.fetch(userId).catch(() => {});
 	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
 	const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
-
-	const embed = new EmbedBuilder()
-		.setColor(member?.displayColor ?? null)
-		.setAuthor(nick ? { iconURL: (member || user)?.displayAvatarURL(), name: nick } : null)
-		.setTitle(`Case \`${caseId}\``)
-		.setDescription(
-			await fetch(message.attachments.first()?.url || "").then((response) => response.text()),
-		)
-		.setTimestamp(message.createdAt)
-		.addFields({
-			name: "⚠ Strikes",
-			value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
-			inline: true,
-		});
-
-	const moderatorId = GlobalUsersPattern.exec(message.content)?.[1] || "";
+	const { url } = message.attachments.first() || {};
 	const mod =
 		isMod &&
-		((await guild?.members.fetch(moderatorId).catch(() => {})) ||
-			(await client.users.fetch(moderatorId).catch(() => {})));
-	if (mod) embed.addFields({ name: "🛡 Moderator", value: mod.toString(), inline: true });
-	if (user) embed.addFields({ name: "👤 Target user", value: user.toString(), inline: true });
+		(await client.users
+			.fetch(GlobalUsersPattern.exec(message.content)?.[1] || "")
+			.catch(() => {}));
 
 	const allWarns = await removeExpiredWarns(warnLog);
 	const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
-	if (expiresAt)
-		embed.addFields({
-			name: "⏲ Expirery",
-			value: time(new Date(expiresAt), "R"),
-			inline: true,
-		});
 
-	return { ephemeral: true, embeds: [embed] };
+	return {
+		ephemeral: true,
+		embeds: [
+			{
+				color: member?.displayColor,
+				author: nick
+					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
+					: undefined,
+				title: `Case \`${caseId}\``,
+				description: url
+					? await fetch(url).then((response) => response.text())
+					: message.content,
+				timestamp: message.createdAt.toISOString(),
+				fields: [
+					{
+						name: "⚠ Strikes",
+						value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
+						inline: true,
+					},
+					...(mod ? [{ name: "🛡 Moderator", value: mod.toString(), inline: true }] : []),
+					...(user
+						? [{ name: "👤 Target user", value: user.toString(), inline: true }]
+						: []),
+					...(expiresAt
+						? [
+								{
+									name: "⏲ Expirery",
+									value: time(new Date(expiresAt), "R"),
+									inline: true,
+								},
+						  ]
+						: []),
+				],
+			},
+		],
+	};
 }
