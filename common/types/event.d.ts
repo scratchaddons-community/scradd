@@ -4,4 +4,5 @@ import type { ClientEvents } from "discord.js";
 type Event<K extends ClientEvent = ClientEvent> = (...args: ClientEvents[K]) => unknown;
 export default Event;
 
-export type ClientEvent = Exclude<keyof ClientEvents, "ready">;
+export type ReservedClientEvents = "ready" | "warn" | "debug" | "error";
+export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvents>;

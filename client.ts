@@ -1,11 +1,7 @@
 import { AssertionError } from "assert";
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
-import path from "path";
-import url from "url";
-import type Event from "./common/types/event";
-import { importScripts, sanitizePath } from "./util/files.js";
+import { sanitizePath } from "./util/files.js";
 import pkg from "./package.json" assert { type: "json" };
-import type { ClientEvent } from "./common/types/event";
 
 const Handler = new Client({
 	allowedMentions: { parse: ["users"], repliedUser: true },
@@ -46,8 +42,18 @@ const readyPromise: Promise<Client<true>> = new Promise((resolve) =>
 	Handler.once("ready", resolve),
 );
 
-Handler.rest
-	.on("invalidRequestWarning", (data) =>
+Handler.on("debug", (message) => {
+	if (
+		!(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged")) ||
+		process.env.NODE_ENV !== "production"
+	)
+		console.debug(message);
+})
+	.on("error", (error) => {
+		throw error;
+	})
+	.on("warn", process.emitWarning)
+	.rest.on("invalidRequestWarning", (data) =>
 		process.emitWarning(
 			`invalidRequestWarning: ${data.count} requests; ${data.remainingTime}ms left`,
 		),
@@ -60,23 +66,6 @@ Handler.rest
 		)
 			console.debug(message);
 	});
-
-const events = await importScripts<Event, ClientEvent>(
-	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
-	true,
-);
-
-for (const [event, execute] of events.entries()) {
-	Handler.on(event, async (...args) => {
-		try {
-			await (
-				await execute()
-			)(...args);
-		} catch (error) {
-			logError(error, event);
-		}
-	});
-}
 
 await Handler.login(process.env.BOT_TOKEN);
 
@@ -104,5 +93,3 @@ client.user.setPresence({
 		},
 	],
 });
-
-const { default: logError } = await import("./util/logError.js");

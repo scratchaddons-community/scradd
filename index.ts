@@ -11,6 +11,7 @@ import { asyncFilter } from "./util/promises.js";
 import type { RESTPostAPIApplicationCommandsJSONBody, Snowflake } from "discord.js";
 import type Command from "./common/types/command";
 import http from "node:http";
+import type { default as Event, ClientEvent } from "./common/types/event.js";
 
 declare global {
 	namespace NodeJS {
@@ -35,6 +36,20 @@ const { cleanDatabaseListeners } = await import("./common/database.js");
 process
 	.on("uncaughtException", (err, origin) => logError(err, origin))
 	.on("warning", (err) => logError(err, "warning"));
+
+const events = await importScripts<Event, ClientEvent>(
+	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
+);
+
+for (const [event, execute] of events.entries()) {
+	client.on(event, async (...args) => {
+		try {
+			await execute(...args);
+		} catch (error) {
+			logError(error, event);
+		}
+	});
+}
 
 if (process.env.NODE_ENV === "production")
 	log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
