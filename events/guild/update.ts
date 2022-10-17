@@ -8,9 +8,10 @@ import {
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 import type Event from "../../common/types/event";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
-	if (newGuild.id !== process.env.GUILD_ID) return;
+	if (newGuild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
 	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {

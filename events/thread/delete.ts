@@ -5,7 +5,7 @@ import { sendClosedMessage } from "../../common/modmail.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"threadDelete"> = async function event(thread) {
-	if (thread.guild.id !== process.env.GUILD_ID) return;
+	if (thread.guild.id !== CONSTANTS.guild.id) return;
 
 	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);

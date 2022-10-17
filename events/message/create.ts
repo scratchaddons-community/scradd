@@ -30,7 +30,6 @@ import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import type Event from "../../common/types/event";
 
-
 const latestMessages: Record<Snowflake, Message[]> = {};
 
 const event: Event<"messageCreate"> = async function event(message) {

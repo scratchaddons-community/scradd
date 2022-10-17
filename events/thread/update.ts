@@ -15,7 +15,7 @@ import { suggestionAnswers } from "../../commands/get-top-suggestions.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
-	if (newThread.guild.id !== process.env.GUILD_ID) return;
+	if (newThread.guild.id !== CONSTANTS.guild.id) return;
 
 	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
 		suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>

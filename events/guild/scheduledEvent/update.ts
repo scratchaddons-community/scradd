@@ -3,10 +3,11 @@ import client from "../../../client.js";
 import log from "../../../common/moderation/logging.js";
 import difflib from "difflib";
 import type Event from "../../../common/types/event";
+import CONSTANTS from "../../../common/CONSTANTS.js";
 
 const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent, newEvent) {
 	const guild = newEvent.guild || (await client.guilds.fetch(newEvent.guildId));
-	if (guild.id !== process.env.GUILD_ID || !oldEvent) return;
+	if (guild.id !== CONSTANTS.guild.id || !oldEvent) return;
 	const logs = [];
 	if (oldEvent.name !== newEvent.name) logs.push("’s topic changed to `" + newEvent.name + "`");
 

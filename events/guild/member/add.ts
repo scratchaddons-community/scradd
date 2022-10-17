@@ -9,7 +9,7 @@ import path from "path";
 import type Event from "../../../common/types/event";
 
 const event: Event<"guildMemberAdd"> = async function event(member) {
-	if (member.guild.id !== process.env.GUILD_ID) return;
+	if (member.guild.id !== CONSTANTS.guild.id) return;
 	await log(`👋 Member ${member.toString()} joined!`, "members");
 
 	const greetings = [

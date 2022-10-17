@@ -5,7 +5,7 @@ import log from "../../../common/moderation/logging.js";
 import type Event from "../../../common/types/event";
 
 const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMember) {
-	if (newMember.guild.id !== process.env.GUILD_ID) return;
+	if (newMember.guild.id !== CONSTANTS.guild.id) return;
 	const logs = [];
 	if (oldMember.avatar !== newMember.avatar) {
 		logs.push(

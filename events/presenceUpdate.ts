@@ -4,7 +4,7 @@ import { censor } from "../common/moderation/automod.js";
 import type Event from "../common/types/event";
 
 const event: Event<"presenceUpdate"> = async function event(_, newPresence) {
-	if (newPresence.guild?.id !== process.env.GUILD_ID) return;
+	if (newPresence.guild?.id !== CONSTANTS.guild.id) return;
 
 	const activity = newPresence.activities[0];
 	const member = newPresence.member;

@@ -22,7 +22,6 @@ import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../util/text.js";
 import { disableComponents } from "../util/discord.js";
-import client from "../client.js";
 import type AddonManifest from "../common/types/addonManifest";
 import type { ChatInputCommand } from "../common/types/command";
 
@@ -41,9 +40,7 @@ const fuse = new Fuse(addons, {
 });
 const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 	"addon",
-	(await client.application?.commands.fetch({ guildId: process.env.GUILD_ID }))?.find(
-		(command) => command.name === "addon",
-	)?.id || "",
+	(await CONSTANTS.guild.commands.fetch())?.find((command) => command.name === "addon")?.id || "",
 )} command for more information about this addon!*`;
 
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;

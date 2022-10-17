@@ -12,7 +12,7 @@ const event: Event<"messageReactionAdd"> = async function event(reaction, user) 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
 	// Ignore other servers
-	if (!message.inGuild() || message.guild.id !== process.env.GUILD_ID) return;
+	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
 
 	if (user.partial) user = await user.fetch();
 

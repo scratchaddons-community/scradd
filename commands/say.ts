@@ -8,7 +8,6 @@ import {
 	ButtonStyle,
 	chatInputApplicationCommandMention,
 } from "discord.js";
-import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/moderation/logging.js";
@@ -70,7 +69,7 @@ export async function say(
 				`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
 					"say",
 					(
-						await client.application?.commands.fetch({ guildId: process.env.GUILD_ID })
+						await CONSTANTS.guild.commands.fetch()
 					)?.find((command) => command.name === "say")?.id || "",
 				)} in ${message.channel.toString()}!`,
 				"messages",

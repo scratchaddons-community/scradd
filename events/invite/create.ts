@@ -1,9 +1,10 @@
 import { Guild, time } from "discord.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"inviteCreate"> = async function event(invite) {
-	if (!(invite.guild instanceof Guild) || invite.guild.id !== process.env.GUILD_ID) return;
+	if (!(invite.guild instanceof Guild) || invite.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`➕ ${invite.temporary ? "Temporary invite" : "Invite"} ${
 			invite.code

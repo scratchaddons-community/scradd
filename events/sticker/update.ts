@@ -1,10 +1,11 @@
 import difflib from "difflib";
+import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/moderation/logging.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticker) {
 	if (newSticker.partial) newSticker = await newSticker.fetch();
-	if (!newSticker.guild || newSticker.guild.id !== process.env.GUILD_ID) return;
+	if (!newSticker.guild || newSticker.guild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
 	if (oldSticker.description !== newSticker.description) {

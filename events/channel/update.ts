@@ -8,12 +8,13 @@ import {
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 import type Event from "../../common/types/event";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 const event: Event<"channelUpdate"> = async function event(oldChannel, newChannel) {
 	if (
 		newChannel.isDMBased() ||
 		oldChannel.isDMBased() ||
-		newChannel.guild.id !== process.env.GUILD_ID
+		newChannel.guild.id !== CONSTANTS.guild.id
 	)
 		return;
 	const edits = [];

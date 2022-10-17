@@ -6,7 +6,7 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"threadCreate"> = async function event(thread, newlyCreated) {
-	if (thread.guild.id !== process.env.GUILD_ID || !newlyCreated) return;
+	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
 
 	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
 		suggestionsDatabase.data = [

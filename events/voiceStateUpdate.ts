@@ -1,8 +1,9 @@
+import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/moderation/logging.js";
 import type Event from "../common/types/event";
 
 const event: Event<"voiceStateUpdate"> = async function event(oldState, newState) {
-	if (!newState.member || newState.guild.id !== process.env.GUILD_ID) return;
+	if (!newState.member || newState.guild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
 	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {

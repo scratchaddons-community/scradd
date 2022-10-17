@@ -2,10 +2,11 @@ import client from "../../client.js";
 import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 import type Event from "../../common/types/event";
+import CONSTANTS from "../../common/CONSTANTS.js";
 
 const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, newInstance) {
 	const guild = newInstance.guild || (await client.guilds.fetch(newInstance.guildId));
-	if (!oldInstance || guild.id !== process.env.GUILD_ID) return;
+	if (!oldInstance || guild.id !== CONSTANTS.guild.id) return;
 
 	if (oldInstance.topic !== newInstance.topic) {
 		log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "voice", {
