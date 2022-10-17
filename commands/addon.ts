@@ -105,7 +105,6 @@ const command: ChatInputCommand = {
 						}`,
 					footer: { text: addon.id },
 					thumbnail: {
-						// todo what does height do
 						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
 					},
 					url:
