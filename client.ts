@@ -46,6 +46,38 @@ const readyPromise: Promise<Client<true>> = new Promise((resolve) =>
 	Handler.once("ready", resolve),
 );
 
+Handler.rest
+	.on("invalidRequestWarning", (data) =>
+		process.emitWarning(
+			`invalidRequestWarning: ${data.count} requests; ${data.remainingTime}ms left`,
+		),
+	)
+	.on("rateLimited", console.log)
+	.on("restDebug", (message) => {
+		if (
+			!message.includes("Received bucket hash update") ||
+			process.env.NODE_ENV !== "production"
+		)
+			console.debug(message);
+	});
+
+const events = await importScripts<Event, ClientEvent>(
+	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
+	true,
+);
+
+for (const [event, execute] of events.entries()) {
+	Handler.on(event, async (...args) => {
+		try {
+			await (
+				await execute()
+			)(...args);
+		} catch (error) {
+			logError(error, event);
+		}
+	});
+}
+
 await Handler.login(process.env.BOT_TOKEN);
 
 const client = await readyPromise;
@@ -60,9 +92,8 @@ if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production"))
 		message: "Refusing to run on prod without --production flag",
 	});
 }
-export default client;
 
-const { default: logError } = await import("./util/logError.js");
+export default client;
 
 client.user.setPresence({
 	activities: [
@@ -74,18 +105,4 @@ client.user.setPresence({
 	],
 });
 
-const events = await importScripts<Event, ClientEvent>(
-	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./events"),
-);
-
-for (const [event, execute] of events.entries()) {
-	Handler.on(event, async (...args) => {
-		try {
-			return await (
-				await execute()
-			)(...args);
-		} catch (error) {
-			logError(error, event);
-		}
-	});
-}
+const { default: logError } = await import("./util/logError.js");

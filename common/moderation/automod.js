@@ -23,8 +23,8 @@ const badWords = [
 			/ahqvgl/,
 			/grfgvpyr/,
 			/fpuzhpx/,
-			/ohgg(?:[ -]?cvengr)/,
-			/ohgg(?:[ -]?jvcr)/,
+			/ohgg(?: ?cvengr)/,
+			/ohgg(?: ?jvcr)/,
 			/qvyqb/,
 			/erpghz/,
 			/ihyin/,
@@ -32,16 +32,17 @@ const badWords = [
 			/卐/,
 			/卍/,
 			/lvss/,
+			/bayl ?snaf/,
 		],
 		[
 			/intva(?:n|r|y|f|l)+/,
 			/cravf(?:rf)?/,
 			/nahf(?:rf)?/,
 			/frzra/,
-			/(?:c(?:er|bfg)[ -]?)?phz/,
+			/(?:c(?:er|bfg) ?)?phz/,
 			/pyvg/,
 			/phagf?/,
-			/(?:ohg+[ -]?)?frk/,
+			/(?:ohg+ ?)?frk/,
 			/grrgf?/,
 			/gvg(?:(?:gvr)?f)?/,
 			/obbo(?:(?:ovr)?f)?/,
@@ -51,7 +52,7 @@ const badWords = [
 		[
 			/fuvg(?!nx(?:v|r))/,
 			/fpurvffr/,
-			/puvat[ -]?(punat[ -]?)?puba/,
+			/puvat ?(punat ?)?puba/,
 			/nefpuybpu/,
 			/rwnphyngr/,
 			/fcyb+tr/,
@@ -59,56 +60,56 @@ const badWords = [
 			/fjnfgvxn/,
 			/fpunssre/,
 			/obyybpx/,
-			/oybj[ -]?wbo/,
+			/oybj ?wbo/,
 			/shpx/,
 			/wvfz/,
 			/wvmm/,
 			/xvxr/,
 			/xhxfhtre/,
 			/znfg(?:h|r)eong/,
-			/ahg[ -]?fnpx/,
+			/ahg ?fnpx/,
 			/cnxl/,
 			/cbynpx/,
 			/dhrrs/,
-			/wnpx[ -]?bss/,
-			/wrex[ -]?bss/,
+			/wnpx ?bss/,
+			/wrex ?bss/,
 			/ov?gpu/,
 		],
 		[
 			/8={2,}D/,
 			/svpx/,
-			/fubeg[ -]?nefr/,
-			/fzneg[ -]?nefr/,
+			/fubeg ?nefr/,
+			/fzneg ?nefr/,
 			/nefryvpx(?:vat|ref?)?/,
 			/fzhg+(?:vr|e|fg?|l)?/,
-			/(?:(?:onq|sng|wnpx|wvir|xvpx|ynzc|yneq|gvtug|jvfr|fzneg|qhzo)[ -]?)?n(?:ff|efr)(?:[ -]?(?:pybja|snpr|ung|ubyr|ybnq|enz(?:z(?:re)?(?:vat)?)?|jvcr)f?|r(?:el|fq?))?/,
+			/(?:(?:onq|sng|wnpx|wvir|xvpx|ynzc|yneq|gvtug|jvfr|fzneg|qhzo) ?)?n(?:ff|efr)(?: ?(?:pybja|snpr|ung|ubyr|ybnq|enz(?:z(?:re)?(?:vat)?)?|jvcr)f?|r(?:el|fq?))?/,
 			/vawhaf?/,
-			/pbpx(?:[ -]?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
+			/pbpx(?: ?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
 			/gjng+(?:y?rq|yre?|y?vat|f|vrf?|l)?/,
 			/fcvpf?/,
 			/yrfobf?/,
 			/obbo+(?:v(?:r|rf|at)|f|l)?/,
-			/(?:ovt[ -]?)?qvpxr?(?:[ -]?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
+			/(?:ovt ?)?qvpxr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/tbbx(?:f|l)?/,
-			/urzv[ -]?cravf/,
+			/urzv ?cravf/,
 			/onfgneq(?:vfz|(y|e)?l|evrf|f)?/,
 			/cnp?x(?:vr|l)?vf?/,
 		],
 	],
 	[
 		[
-			/pnecrg[ -]?zhapure/,
+			/pnecrg ?zhapure/,
 			/fyhg/,
-			/fur[ -]?znyr/,
+			/fur ?znyr/,
 			/yrmmvn/,
 			/qbzvangevk/,
-			/shqtr[ -]?cnpxr/,
-			/jrg[ -]?onp/,
+			/shqtr ?cnpxr/,
+			/jrg ?onp/,
 			/ergneq/,
 		],
 		[
 			/j?uber/,
-			/av+t+(?:(r|h)?e|n)(?:[ -]?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
+			/av+t+(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
 			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
 			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat)?/,
 			/jnax(?:v?ref?|v(?:rfg|at)|yr|f|l)?/,
@@ -126,15 +127,15 @@ function decodeRegexes(regexes) {
 				/[ouetsialh]/gi,
 				(letter) =>
 					({
-						a: "[*@a]",
-						e: "[*3e]",
-						h: "[#h]",
-						i: "[!*1i¡l|]",
-						l: "[l|]",
-						o: "[*0o]",
-						s: "[$5s]",
-						t: "[+t]",
-						u: "[*uv]",
+						"a": "[*@a]",
+						"e": "[*3e]",
+						"h": "[#h]",
+						"i": "[!*1i¡l|]",
+						"l": "[l|]",
+						"o": "[*0o]",
+						"s": "[$5s]",
+						"u": "[*uv]",
+						" ": "[ -]",
 					}[letter] || letter),
 			),
 		)
@@ -299,7 +300,7 @@ export async function automodMessage(message) {
 				}, /** @type {number | false} */ (false));
 
 	if (typeof embedStrikes === "number") {
-		bad.language = (bad.language || 0) + embedStrikes;
+		bad.language = (bad.language || 0) + Math.max(embedStrikes - 1, 0);
 	}
 
 	const promises = [];
@@ -358,7 +359,7 @@ export async function automodMessage(message) {
 
 	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
 
-	const badAnimatedEmojis = animatedEmojis.length > 9 && Math.round(animatedEmojis.length / 15);
+	const badAnimatedEmojis = animatedEmojis.length > 9 && Math.floor(animatedEmojis.length / 15);
 
 	if (
 		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
@@ -377,6 +378,7 @@ export async function automodMessage(message) {
 						message.interaction?.user || message.author
 					).toString()}, lay off on the animated emojis please!`,
 			),
+			message.delete(),
 		);
 	}
 
@@ -386,9 +388,10 @@ export async function automodMessage(message) {
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
+	const baseChannel = getBaseChannel(channel);
 	return (
-		channel?.type === ChannelType.DM ||
-		!channel?.permissionsFor(channel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+		baseChannel?.type === ChannelType.DM ||
+		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
 }
 
@@ -531,7 +534,7 @@ async function setNickname(member, newNickname) {
 	if (member.moderatable) {
 		if (censor(newNickname) || pingablify(newNickname) !== newNickname) return false;
 
-		return await member.setNickname(newNickname);
+		return await member.setNickname(newNickname, "To comply with rule 7");
 	}
 	await CONSTANTS.channels.mod?.send({
 		allowedMentions: { users: [] },

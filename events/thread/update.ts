@@ -94,7 +94,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			(LOG_GROUPS as readonly string[]).includes(newThread.name)) &&
 		newThread.parent?.id === CONSTANTS.channels.modlogs?.id
 	) {
-		await newThread.setArchived(false);
+		await newThread.setArchived(false, "Modlog threads must stay open");
 	}
 
 	await Promise.all(
@@ -118,7 +118,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	);
 	const censored = censor(newThread.name);
 	if (censored && !badWordsAllowed(newThread)) {
-		await newThread.setName(oldThread.name);
+		await newThread.setName(oldThread.name, "Censored bad word");
 		const owner = await newThread.fetchOwner();
 		if (owner?.guildMember)
 			await warn(

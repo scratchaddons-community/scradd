@@ -198,7 +198,7 @@ export type Databases = {
 		answer: typeof suggestionAnswers[number];
 		author: string;
 		count: number;
-		id: string;
+		id: Snowflake;
 		title: string;
 	};
 };

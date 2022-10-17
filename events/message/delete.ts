@@ -1,18 +1,11 @@
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from "discord.js";
+import { ButtonStyle, ComponentType } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log from "../../common/moderation/logging.js";
+import log, { shouldLog } from "../../common/moderation/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"messageDelete"> = async function event(message) {
-	if (
-		message.channel.isDMBased() ||
-		message.guild?.id !== process.env.GUILD_ID ||
-		!message.channel
-			.permissionsFor(CONSTANTS.roles.mod || message.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
-	)
-		return;
+	if (!shouldLog(message.channel)) return;
 
 	const shush =
 		message.partial || CONSTANTS.channels.modlogs?.id === getBaseChannel(message.channel)?.id;

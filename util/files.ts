@@ -19,8 +19,21 @@ export async function getFileNames(directory: string): Promise<string[]> {
 	).flat();
 }
 
-export async function importScripts<T, K extends string = string>(directory: string) {
-	const collection: Collection<K, () => Promise<T>> = new Collection();
+export function importScripts<T, K extends string = string>(
+	directory: string,
+	lazy?: false,
+): Promise<Collection<K, T>>;
+
+export function importScripts<T, K extends string = string>(
+	directory: string,
+	lazy: true,
+): Promise<Collection<K, () => Promise<T>>>;
+
+export async function importScripts<T, K extends string = string>(
+	directory: string,
+	lazy: boolean = false,
+) {
+	const collection: Collection<K, (() => Promise<T>) | T> = new Collection();
 
 	const siblings = (await getFileNames(directory)).filter((file) => path.extname(file) === ".js");
 
@@ -36,11 +49,13 @@ export async function importScripts<T, K extends string = string>(directory: str
 					: item.toLowerCase(),
 			) as K;
 
+		const resolved = url.pathToFileURL(path.resolve(directory, sibling)).toString();
+
 		collection.set(
 			filename,
-			async () =>
-				(await import(url.pathToFileURL(path.resolve(directory, sibling)).toString()))
-					.default as T,
+			lazy ?? false
+				? async () => (await import(resolved)).default as T
+				: ((await import(resolved)).default as T),
 		);
 	});
 

@@ -33,8 +33,6 @@ export default async function logError(error, event) {
 }
 
 /**
- * -
- *
  * @param {any} error
  * @param {boolean} [returnObject]
  *

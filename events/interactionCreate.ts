@@ -20,9 +20,7 @@ const commands = await importScripts<Command>(path.resolve(dirname, "../commands
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 	if (interaction.isAutocomplete()) {
-		const commandPromise = commands.get(interaction.commandName);
-
-		const command = await commandPromise?.();
+		const command = commands.get(interaction.commandName);
 
 		if (!command || !("autocomplete" in command))
 			throw new ReferenceError(
@@ -58,7 +56,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					);
 				const role = interaction.member.roles.resolve(roleId);
 				if (role) {
-					await interaction.member.roles.remove(role);
+					await interaction.member.roles.remove(role, "Self role");
 					await interaction.reply({
 						ephemeral: true,
 						content: `${
@@ -66,7 +64,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						} Removed ${role.toString()} from you!`,
 					});
 				} else {
-					await interaction.member.roles.add(roleId);
+					await interaction.member.roles.add(roleId, "Self role");
 					await interaction.reply({
 						ephemeral: true,
 						content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${roleId}>!`,
@@ -86,9 +84,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		}
 		if (!interaction.isCommand()) return;
 
-		const commandPromise = commands.get(interaction.commandName);
-
-		const command = await commandPromise?.();
+		const command = commands.get(interaction.commandName);
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
 

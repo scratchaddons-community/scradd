@@ -188,6 +188,7 @@ const command: ChatInputCommand = {
 					maxUses: 1,
 					targetType: InviteTargetType.EmbeddedApplication,
 					targetApplication: interaction.options.getString("activity", true),
+					reason: "Starting activity",
 				});
 
 				return interaction.reply({
@@ -224,7 +225,7 @@ const command: ChatInputCommand = {
 				const player = createAudioPlayer({
 					behaviors: { noSubscriber: NoSubscriberBehavior.Pause },
 				}).on("error", (error) => {
-					connection.disconnect();
+					connection.destroy();
 					throw error;
 				});
 				connection.subscribe(player);
@@ -236,7 +237,7 @@ const command: ChatInputCommand = {
 						),
 					),
 				);
-				player.on(AudioPlayerStatus.Idle, () => connection.disconnect());
+				player.on(AudioPlayerStatus.Idle, () => connection.destroy());
 
 				connection
 					.on(VoiceConnectionStatus.Disconnected, async () => {

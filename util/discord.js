@@ -464,11 +464,10 @@ export function disableComponents(rows) {
 }
 
 /**
- * @param {null | undefined | import("discord.js").Channel} channel
+ * @param {null | undefined | import("discord.js").TextBasedChannel} channel
  *
  * @returns {| import("discord.js").DMChannel
  * 	| import("discord.js").PartialDMChannel
- * 	| import("discord.js").PartialGroupDMChannel
  * 	| import("discord.js").NonThreadGuildBasedChannel
  * 	| undefined}
  */

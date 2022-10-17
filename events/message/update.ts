@@ -1,14 +1,8 @@
 import { automodMessage } from "../../common/moderation/automod.js";
-import log, { getLoggingThread } from "../../common/moderation/logging.js";
+import log, { getLoggingThread, shouldLog } from "../../common/moderation/logging.js";
 import { extractMessageExtremities } from "../../util/discord.js";
 import jsonDiff from "json-diff";
-import {
-	ButtonStyle,
-	ComponentType,
-	Message,
-	PartialMessage,
-	PermissionFlagsBits,
-} from "discord.js";
+import { ButtonStyle, ComponentType, Message, PartialMessage } from "discord.js";
 import diffLib from "difflib";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import client from "../../client.js";
@@ -18,14 +12,7 @@ import type Event from "../../common/types/event";
 
 const event: Event<"messageUpdate"> = async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
-	if (
-		newMessage.channel.isDMBased() ||
-		newMessage.guild?.id !== process.env.GUILD_ID ||
-		!newMessage.channel
-			.permissionsFor(CONSTANTS.roles.mod || newMessage.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
-	)
-		return;
+	if (!shouldLog(newMessage.channel)) return;
 	const logs = [];
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 		logs.push(

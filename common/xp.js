@@ -2,7 +2,6 @@ import { GuildMember, User } from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
-import { asyncFilter } from "../util/promises.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
@@ -95,7 +94,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		member && // be in the server
 		!member.roles.resolve(CONSTANTS.roles.epic.id) // not have the role
 	) {
-		await member.roles.add(CONSTANTS.roles.epic);
+		await member.roles.add(CONSTANTS.roles.epic, "Top 1% of the XP leaderboard");
 		await CONSTANTS.channels.bots?.send(
 			`🎊 ${member.toString()} Congratulations on being in the top 1% of the leaderboard! You have earned ${CONSTANTS.roles.epic.toString()}.`,
 		);
@@ -113,36 +112,22 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	xpDatabase.data = xp;
 
 	//send weekly winners
-	const threads = CONSTANTS.channels.bots?.threads;
-
-	const thread = /** @type {undefined | import("discord.js").PublicThreadChannel} */ (
-		(await threads?.fetchActive())?.threads.find(({ name }) => name === "Weekly Winners") ||
-			(await threads?.create({ name: "Weekly Winners" }))
-	);
-
 	if (+date - +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000)) < 604_800_000) return;
 	// More than a week since last weekly
 
 	weeklyXpDatabase.extra = +date + "";
 	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
 	weeklyXpDatabase.data = [];
-	const nonMod = (
-		await asyncFilter(sorted.splice(5), async ({ user: userId }) => {
-			const user = await CONSTANTS.guild.members.fetch(userId).catch(() => {});
-			return CONSTANTS.roles.mod && !user?.roles.resolve(CONSTANTS.roles.mod) && user;
-		}).next()
-	).value;
 
-	const ids = [...sorted, nonMod?.id].map((gain) =>
-		typeof gain === "string" ? gain : gain?.user,
-	);
+	sorted.splice(5);
+
+	const ids = sorted.map((gain) => (typeof gain === "string" ? gain : gain?.user));
 
 	date.setUTCDate(date.getUTCDate() - 7);
-	await (await thread?.messages.fetchPinned())?.first()?.unpin();
-	const message = await thread?.send({
+	await CONSTANTS.channels.announcements?.send({
 		allowedMentions: {
 			users: ids.filter(
-				/** @returns {user is string} */ (user) =>
+				/** @returns {user is import("discord.js").Snowflake} */ (user) =>
 					!!user &&
 					(userSettingsDatabase.data.find((settings) => user === settings.user)
 						?.weeklyPings ??
@@ -173,16 +158,15 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							gain.user
 						}> - ${gain.xp.toLocaleString()} XP`,
 				)
-				.join("\n") || "*Nobody got any XP this week!*") +
-			(nonMod ? `\n\n*Next-highest non-moderator: ${nonMod.toString()}*` : ""),
+				.join("\n") || "*Nobody got any XP this week!*"),
 	});
-	await message?.pin();
 
 	const role = CONSTANTS.roles.weekly_winner;
 	if (role) {
 		await Promise.all([
 			...role.members.map((member) => {
-				if (!ids.includes(member.id)) return member.roles.remove(role);
+				if (!ids.includes(member.id))
+					return member.roles.remove(role, "No longer weekly winner");
 			}),
 			...sorted.map(({ user }, index) =>
 				CONSTANTS.guild.members
@@ -191,10 +175,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					.then((member) =>
 						member?.roles.add(
 							index || !CONSTANTS.roles.epic ? role : [role, CONSTANTS.roles.epic],
+							"Weekly winner",
 						),
 					),
 			),
-			nonMod?.roles.add(role),
 		]);
 	}
 }

@@ -14,8 +14,7 @@ export function boardReactionCount(channel) {
 	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel) return COUNTS.default;
-	if (baseChannel.isDMBased()) return COUNTS.mods;
+	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.mods;
 
 	return (
 		{
@@ -222,7 +221,7 @@ export async function updateBoard(message) {
 				const toPin =
 					onBoard &&
 					(await CONSTANTS.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
-				toPin && (await toPin.pin());
+				toPin && (await toPin.pin("Is a top-potatoed message"));
 				return onBoard;
 			}),
 		).then((top) => {
@@ -230,7 +229,11 @@ export async function updateBoard(message) {
 				return (
 					pins.size > 5 &&
 					(await Promise.all(
-						pins.map(async (pin) => !top.includes(pin.id) && (await pin.unpin())),
+						pins.map(
+							async (pin) =>
+								!top.includes(pin.id) &&
+								(await pin.unpin("No longer a top-potatoed message")),
+						),
 					))
 				);
 			});

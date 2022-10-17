@@ -30,7 +30,6 @@ import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import type Event from "../../common/types/event";
 
-const { GUILD_ID } = process.env;
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 
@@ -49,7 +48,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 		const webhook =
 			webhooks.find(
 				(possibleWebhook) => possibleWebhook.applicationId === client.application.id,
-			) ?? (await CONSTANTS.channels.modmail.createWebhook({ name: CONSTANTS.webhookName }));
+			) ??
+			(await CONSTANTS.channels.modmail.createWebhook({
+				name: CONSTANTS.webhookName,
+				reason: "New modmail webhook",
+			}));
 		const existingThread = await getThreadFromMember(
 			message.interaction?.user || message.author,
 		);
@@ -126,7 +129,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		}
 	}
 
-	if (message.channel.isDMBased() || message.guild?.id !== GUILD_ID) {
+	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) {
 		await Promise.all(promises);
 		return;
 	}
@@ -163,7 +166,6 @@ const event: Event<"messageCreate"> = async function event(message) {
 	}
 
 	// #upcoming-updates
-	// TODO forum
 	if (message.channel.id === "806605006072709130") {
 		promises.push(
 			message.startThread({
@@ -171,6 +173,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 					message.cleanContent || message.embeds[0]?.title || "[image]",
 					50,
 				),
+				reason: "New upcoming update",
 			}),
 		);
 	}

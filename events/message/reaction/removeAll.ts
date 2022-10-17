@@ -1,17 +1,9 @@
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from "discord.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
-import log from "../../../common/moderation/logging.js";
+import { ButtonStyle, ComponentType } from "discord.js";
+import log, { shouldLog } from "../../../common/moderation/logging.js";
 import type Event from "../../../common/types/event";
 
 const event: Event<"messageReactionRemoveAll"> = async function event(message, reactions) {
-	if (
-		message.channel.isDMBased() ||
-		message.guild?.id !== process.env.GUILD_ID ||
-		!message.channel
-			.permissionsFor(CONSTANTS.roles.mod || message.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
-	)
-		return;
+	if (!shouldLog(message.channel)) return;
 
 	await log(
 		`😳 Reactions purged on message by ${message.author?.toString()} in ${message.channel.toString()}!`,

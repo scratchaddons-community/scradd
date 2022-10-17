@@ -84,8 +84,9 @@ export default {
 	webhookName: "scradd-webhook",
 	channels: {
 		info: getChannel("📜", ChannelType.GuildCategory, "start"),
+		announcements: guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
 		board: getChannel("board", [ChannelType.GuildText, ChannelType.GuildAnnouncement], "end"),
-		welcome: guild.systemChannel || getChannel("welcome", ChannelType.GuildText),
+		welcome: getChannel("welcome", ChannelType.GuildText),
 
 		mod: guild.publicUpdatesChannel || getChannel("mod-talk", ChannelType.GuildText),
 		modlogs: getChannel("logs", ChannelType.GuildText, "end"),

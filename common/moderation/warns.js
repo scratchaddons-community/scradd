@@ -168,6 +168,7 @@ export default async function warn(user, reason, strikes, context) {
 							timeoutLength *
 								(process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
 								Date.now(),
+							"Too many warns",
 					  )
 					: CONSTANTS.channels.mod?.send({
 							allowedMentions: { users: [] },

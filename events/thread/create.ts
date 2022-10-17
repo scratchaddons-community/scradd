@@ -24,7 +24,7 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 	if (badWordsAllowed(thread)) return;
 	const censored = censor(thread.name);
 	if (censored) {
-		await thread.setName(censored.censored.replaceAll(/#+/g, "x"));
+		await thread.setName(censored.censored.replaceAll(/#+/g, "x"), "Censored bad word");
 
 		const owner = await thread.fetchOwner();
 		if (owner) {

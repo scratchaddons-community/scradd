@@ -1,18 +1,10 @@
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from "discord.js";
-import log from "../../common/moderation/logging.js";
+import { ButtonStyle, ComponentType } from "discord.js";
+import log, { shouldLog } from "../../common/moderation/logging.js";
 import { messageToText } from "../../util/discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"messageDeleteBulk"> = async function event(messages, channel) {
-	if (
-		channel.isDMBased() ||
-		channel.guild?.id !== process.env.GUILD_ID ||
-		!channel
-			.permissionsFor(CONSTANTS.roles.mod || channel.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
-	)
-		return;
+	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
 			messages.reverse().map(async (message) => {

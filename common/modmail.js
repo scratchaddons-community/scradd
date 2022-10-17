@@ -152,7 +152,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
-	await thread.setArchived(true, `Closed by ${user.tag}${reason ? ": " + reason : ""}`);
+	await thread.setArchived(true, `Modmail closed`);
 }
 
 /**
@@ -286,8 +286,9 @@ export async function openModmail(openedEmbed, user, ping = false) {
 			[],
 			{ minimumIntegerDigits: 2 },
 		)}-${date.getUTCDate().toLocaleString([], { minimumIntegerDigits: 2 })})`,
+		reason: "Modmail opened",
 	});
-	await thread.setLocked(true);
+	await thread.setLocked(true, "Modmail opened");
 	await thread.send({ ...(await getWarnsForMember(user)), content: "=" });
 	return thread;
 }
