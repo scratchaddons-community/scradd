@@ -41,10 +41,15 @@ const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent,
 			],
 		});
 
-	if (oldEvent.coverImageURL() !== newEvent.coverImageURL())
-		logs.push(
-			`’s cover image changed from <${oldEvent.coverImageURL()}> to <${newEvent.coverImageURL()}>`,
-		); //TODO: it’ll be 404
+	if (oldEvent.coverImageURL() !== newEvent.coverImageURL()) {
+		const coverImageURL = newEvent.coverImageURL({ size: 128 });
+		const response = coverImageURL && (await fetch(coverImageURL));
+		await log(
+			`📆 Event ${oldEvent.name}’s cover image was ${response ? `changed` : "removed"}!`,
+			"voice",
+			{ files: response ? [Buffer.from(await response.arrayBuffer())] : [] },
+		);
+	}
 
 	if (
 		oldEvent.scheduledStartAt?.valueOf() !== newEvent.scheduledStartAt?.valueOf() ||

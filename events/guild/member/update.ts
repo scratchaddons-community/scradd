@@ -8,10 +8,14 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 	if (newMember.guild.id !== CONSTANTS.guild.id) return;
 	const logs = [];
 	if (oldMember.avatar !== newMember.avatar) {
-		logs.push(
-			newMember.avatar
-				? " set their server avatar to <" + newMember.avatarURL() + ">"
-				: " removed their server avatar",
+		const avatarURL = newMember.avatarURL({ size: 128 });
+		const response = avatarURL && (await fetch(avatarURL));
+		await log(
+			`🫂 Member ${newMember.toString()} ${
+				response ? `changed` : "removed"
+			} their server avatar!`,
+			"members",
+			{ files: response ? [Buffer.from(await response.arrayBuffer())] : [] },
 		);
 	}
 

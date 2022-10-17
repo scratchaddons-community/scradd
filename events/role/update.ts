@@ -29,14 +29,18 @@ const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 		logs.push(` moved to position ${newRole.position}`);
 	}
 	if (oldRole.iconURL() !== newRole.iconURL() || oldRole.unicodeEmoji !== newRole.unicodeEmoji) {
-		logs.push(
-			`’s icon ${
-				newRole.iconURL() || newRole.unicodeEmoji
-					? `set to ${
-							newRole.iconURL() ? "<" + newRole.iconURL() + ">" : newRole.unicodeEmoji
-					  }`
+		const iconURL = newRole.iconURL({ size: 128 });
+		const response = iconURL && (await fetch(iconURL));
+		await log(
+			`✏ Role ${newRole.toString()}’s icon was ${
+				response
+					? `changed`
+					: newRole.unicodeEmoji
+					? "set to " + newRole.unicodeEmoji
 					: "removed"
-			}`,
+			}!`,
+			"server",
+			{ files: response ? [Buffer.from(await response.arrayBuffer())] : [] },
 		);
 	}
 

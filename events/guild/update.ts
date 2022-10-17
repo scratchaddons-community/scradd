@@ -23,11 +23,11 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		logs.push(`Inactive timeout set to ${newGuild.afkTimeout}`);
 	}
 	if (oldGuild.bannerURL() !== newGuild.bannerURL()) {
-		logs.push(
-			`Server banner background ${
-				newGuild.bannerURL() ? `set to <${newGuild.bannerURL()}>` : newGuild.nameAcronym
-			}`,
-		);
+		const bannerURL = newGuild.bannerURL({ size: 128 });
+		const response = bannerURL && (await fetch(bannerURL));
+		await log(`✏ Server banner background was ${response ? `changed` : "removed"}!`, "server", {
+			files: response ? [Buffer.from(await response.arrayBuffer())] : [],
+		});
 	}
 	if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications) {
 		logs.push(
@@ -59,12 +59,12 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		});
 	}
 	if (oldGuild.discoverySplashURL() !== newGuild.discoverySplashURL()) {
-		logs.push(
-			`Server discovery listing cover image ${
-				newGuild.discoverySplashURL()
-					? `set to <${newGuild.discoverySplashURL()}>`
-					: "removed"
-			}`,
+		const discoverySplashURL = newGuild.discoverySplashURL({ size: 128 });
+		const response = discoverySplashURL && (await fetch(discoverySplashURL));
+		await log(
+			`✏ Server discovery listing cover image ${response ? `changed` : "removed"}!`,
+			"server",
+			{ files: response ? [Buffer.from(await response.arrayBuffer())] : [] },
 		);
 	}
 	if (oldGuild.explicitContentFilter !== newGuild.explicitContentFilter) {
@@ -163,9 +163,11 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.iconURL() !== newGuild.iconURL()) {
-		logs.push(
-			`Server icon ${newGuild.iconURL() ? `set to <${newGuild.iconURL()}>` : "removed"}`,
-		);
+		const iconURL = newGuild.iconURL({ size: 128 });
+		const response = iconURL && (await fetch(iconURL));
+		await log(`✏ Server icon ${response ? `changed` : "removed"}!`, "server", {
+			files: response ? [Buffer.from(await response.arrayBuffer())] : [],
+		});
 	}
 	if (oldGuild.mfaLevel !== newGuild.mfaLevel) {
 		logs.push(
@@ -218,11 +220,11 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.splashURL() !== newGuild.splashURL()) {
-		logs.push(
-			`Server invite background ${
-				newGuild.splashURL() ? `set to <${newGuild.splashURL()}>` : "removed"
-			}`,
-		);
+		const splashURL = newGuild.splashURL({ size: 128 });
+		const response = splashURL && (await fetch(splashURL));
+		await log(`✏ Server invite background ${response ? `changed` : "removed"}!`, "server", {
+			files: response ? [Buffer.from(await response.arrayBuffer())] : [],
+		});
 	}
 	if (oldGuild.systemChannel !== newGuild.systemChannel) {
 		logs.push(
