@@ -12,6 +12,7 @@ await weeklyXpDatabase.init();
 
 export const NORMAL_XP_PER_MESSAGE = 5;
 
+/** @param {any[]} args */
 export default async function abc(...args) {return args}
 /** @param {User | GuildMember} to */
 export async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
