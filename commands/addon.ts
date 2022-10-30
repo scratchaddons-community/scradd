@@ -156,6 +156,7 @@ const command: ChatInputCommand = {
 			fuse
 				.search(interaction.options.getString("addon", true))
 				.splice(0, 25)
+				.filter(({ score }) => (score || 0) < 0.5)
 				.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
 		);
 	},

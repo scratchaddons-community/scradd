@@ -9,6 +9,7 @@ import log from "../../common/moderation/logging.js";
 import difflib from "difflib";
 import type Event from "../../common/types/event";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import fetch from "node-fetch";
 
 const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	if (newGuild.id !== CONSTANTS.guild.id) return;
