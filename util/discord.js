@@ -355,14 +355,14 @@ export async function reactAll(message, reactions) {
  * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
  */
 
-export async function paginate(array, toString, failMessage, title, reply) {
+export async function paginate(array, toString, failMessage, title, reply, rawOffset = 0) {
 	const PAGE_OFFSET = 15;
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
 
 	// eslint-disable-next-line fp/no-let -- This must be changable.
-	let offset = 0;
+	let offset = Math.floor(rawOffset / PAGE_OFFSET) * PAGE_OFFSET;
 
 	/**
 	 * Generate an embed that has the next page.

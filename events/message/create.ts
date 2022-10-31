@@ -1,5 +1,4 @@
 import {
-	cleanCodeBlockContent,
 	MessageType,
 	ChannelType,
 	Message,
@@ -182,27 +181,6 @@ const event: Event<"messageCreate"> = async function event(message) {
 		return;
 	}
 
-	if (CONSTANTS.channels.modlogs?.id !== getBaseChannel(message.channel)?.id) {
-		// eslint-disable-next-line no-irregular-whitespace -- This is intended.
-		const spoilerHack = "||​||".repeat(199); // todo other whitespace works too?
-
-		if (message.content.includes(spoilerHack)) {
-			const array = message.cleanContent.split(spoilerHack);
-
-			array.shift();
-			promises.push(
-				message.reply({
-					allowedMentions: { users: [] },
-
-					content:
-						`You used the spoiler hack to hide: \`\`\`\n` +
-						`${cleanCodeBlockContent(array.join(spoilerHack))}\n` +
-						`\`\`\``,
-				}),
-			);
-		}
-	}
-
 	// XP
 	const webhook =
 		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
@@ -352,21 +330,23 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (includes("dango")) react("🍡");
 	if (includes(/av[ao]cado/)) react("🥑");
 
-	if (["e", "ae", "iei", "a", "."].includes(content) || content.includes("æ"))
+	if (
+		["e", "ae", "iei", "a", "."].includes(stripMarkdown(normalize(content))) ||
+		content.includes("æ")
+	)
 		react(CONSTANTS.emojis.autoreact.e);
 
 	if (content.includes("quack") || includes("duck")) react("🦆");
-	if (includes("radio")) react("📻");
+	if (content === "radio") react("📻");
 	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
 	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
-	if (includes(/jef+[oa]l+o/) || includes(/buf+[oa]l+o/))
+	if (includes(/j[eo]f+[oa]l+o/) || includes(/buf+[oa]l+o/))
 		react(CONSTANTS.emojis.autoreact.jeffalo);
 	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
 		react(CONSTANTS.emojis.autoreact.tw);
-	if (includes("mee6")) react("🤮");
-	if (includes("cubot", false)) react(CONSTANTS.emojis.autoreact.cubot);
+	if (includes("mee6") || includes("dyno")) react("🤮");
 	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
-	if (includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
+	if (content.includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 
 	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);

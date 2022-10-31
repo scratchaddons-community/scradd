@@ -25,7 +25,14 @@ const command: ChatInputCommand = {
 			{
 				type: ApplicationCommandOptionType.Subcommand,
 				name: "top",
-				description: "View the users with the most XP in the server",
+				description: "View all users sorted by how much XP they have",
+				options: [
+					{
+						type: ApplicationCommandOptionType.User,
+						name: "user",
+						description: "User to jump to",
+					},
+				],
 			},
 		],
 	},
@@ -108,6 +115,7 @@ const command: ChatInputCommand = {
 				return;
 			}
 			case "top": {
+				const user = interaction.options.getUser("user");
 				await paginate(
 					top,
 					(xp) => {
@@ -118,6 +126,7 @@ const command: ChatInputCommand = {
 					"No users found.",
 					`Leaderboard for ${CONSTANTS.guild.name}`,
 					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
+					user ? top.findIndex(({ user: id }) => id === user.id) : 0,
 				);
 			}
 		}
