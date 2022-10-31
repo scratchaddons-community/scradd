@@ -11,7 +11,7 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
-import { badAttachments, censor } from "../common/moderation/automod.js";
+import { badAttachments, censor } from "../common/automod.js";
 
 /**
  * @param {import("discord.js").Message | import("discord.js").PartialMessage} message

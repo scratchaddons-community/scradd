@@ -4,7 +4,7 @@ import { extractMessageExtremities, getBaseChannel, messageToText } from "../uti
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
-import { censor } from "./moderation/automod.js";
+import { censor } from "./automod.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 import giveXp from "./xp.js";
 

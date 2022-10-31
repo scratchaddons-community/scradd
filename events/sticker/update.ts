@@ -1,6 +1,6 @@
 import difflib from "difflib";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log from "../../common/moderation/logging.js";
+import log from "../../common/logging.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticker) {

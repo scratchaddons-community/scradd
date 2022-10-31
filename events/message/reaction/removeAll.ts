@@ -1,5 +1,5 @@
 import { ButtonStyle, ComponentType } from "discord.js";
-import log, { shouldLog } from "../../../common/moderation/logging.js";
+import log, { shouldLog } from "../../../common/logging.js";
 import type Event from "../../../common/types/event";
 
 const event: Event<"messageReactionRemoveAll"> = async function event(message, reactions) {

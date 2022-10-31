@@ -8,7 +8,7 @@ import {
 	Snowflake,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { automodMessage } from "../../common/moderation/automod.js";
+import { automodMessage } from "../../common/automod.js";
 
 import {
 	MODMAIL_COLORS,

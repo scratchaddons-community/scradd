@@ -12,13 +12,13 @@ import {
 import fetch from "node-fetch";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { getLoggingThread } from "../common/moderation/logging.js";
+import { getLoggingThread } from "../common/logging.js";
 import {
 	removeExpiredWarns,
 	muteLog,
 	warnLog,
 	WARN_INFO_BASE,
-} from "../common/moderation/warns.js";
+} from "../common/warns.js";
 import { convertBase } from "../util/numbers.js";
 import type { ChatInputCommand } from "../common/types/command";
 

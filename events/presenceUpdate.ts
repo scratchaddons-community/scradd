@@ -1,6 +1,6 @@
 import { ActivityType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { censor } from "../common/moderation/automod.js";
+import { censor } from "../common/automod.js";
 import type Event from "../common/types/event";
 
 const event: Event<"presenceUpdate"> = async function event(_, newPresence) {

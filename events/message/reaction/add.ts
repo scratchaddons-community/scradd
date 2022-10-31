@@ -1,6 +1,6 @@
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
-import warn from "../../../common/moderation/warns.js";
-import { censor, badWordsAllowed } from "../../../common/moderation/automod.js";
+import warn from "../../../common/warns.js";
+import { censor, badWordsAllowed } from "../../../common/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";

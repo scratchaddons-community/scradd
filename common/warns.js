@@ -1,7 +1,7 @@
 import { GuildMember, User, escapeMarkdown } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../CONSTANTS.js";
-import Database from "../database.js";
+import client from "../client.js";
+import CONSTANTS from "./CONSTANTS.js";
+import Database from "./database.js";
 import log from "./logging.js";
 
 const EXPIRY_LENGTH = 21;
@@ -227,7 +227,7 @@ export default async function warn(user, reason, strikes, context) {
 /**
  * @param {import("discord.js").Snowflake} user
  * @param {number} strikes
- * @param {import("../database").Databases["warn"][]} warns
+ * @param {import("./database").Databases["warn"][]} warns
  */
 function unwarn(user, strikes, warns) {
 	for (var i = 0; i < strikes; i++) {

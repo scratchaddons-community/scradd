@@ -12,7 +12,7 @@ import type { ChatInputCommand } from "../common/types/command.js";
 import url from "node:url";
 import path from "path";
 import CONSTANTS from "../common/CONSTANTS.js";
-import log from "../common/moderation/logging.js";
+import log from "../common/logging.js";
 
 const command: ChatInputCommand = {
 	data: {

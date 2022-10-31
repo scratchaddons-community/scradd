@@ -1,6 +1,6 @@
 import { CommandInteractionOption, GuildMember } from "discord.js";
-import warn from "../common/moderation/warns.js";
-import { censor, badWordsAllowed } from "../common/moderation/automod.js";
+import warn from "../common/warns.js";
+import { censor, badWordsAllowed } from "../common/automod.js";
 import { getWarnById } from "../commands/view-warns.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";

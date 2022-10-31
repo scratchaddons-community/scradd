@@ -1,5 +1,5 @@
-import { automodMessage } from "../../common/moderation/automod.js";
-import log, { getLoggingThread, shouldLog } from "../../common/moderation/logging.js";
+import { automodMessage } from "../../common/automod.js";
+import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
 import { extractMessageExtremities } from "../../util/discord.js";
 import jsonDiff from "json-diff";
 import { ButtonStyle, ComponentType, Message, PartialMessage } from "discord.js";

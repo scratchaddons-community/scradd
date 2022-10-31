@@ -1,6 +1,6 @@
 import { suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log from "../../common/moderation/logging.js";
+import log from "../../common/logging.js";
 import { sendClosedMessage } from "../../common/modmail.js";
 import type Event from "../../common/types/event";
 

@@ -1,7 +1,7 @@
 import { Collection, Snowflake } from "discord.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
-import { changeNickname } from "../../../common/moderation/automod.js";
-import log from "../../../common/moderation/logging.js";
+import { changeNickname } from "../../../common/automod.js";
+import log from "../../../common/logging.js";
 import { nth } from "../../../util/numbers.js";
 import fileSystem from "fs/promises";
 import url from "url";

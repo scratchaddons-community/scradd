@@ -1,5 +1,5 @@
 import { sanitizePath } from "./files.js";
-import log from "../common/moderation/logging.js";
+import log from "../common/logging.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { serializeError } from "serialize-error";
 

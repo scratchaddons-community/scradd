@@ -1,11 +1,11 @@
 import { Invite, FormattingPatterns, ChannelType, PermissionFlagsBits } from "discord.js";
-import CONSTANTS from "../CONSTANTS.js";
+import CONSTANTS from "./CONSTANTS.js";
 import fetch from "node-fetch";
 import warn from "./warns.js";
-import { stripMarkdown } from "../../util/markdown.js";
-import { caesar, joinWithAnd, pingablify, normalize } from "../../util/text.js";
-import client from "../../client.js";
-import { getBaseChannel } from "../../util/discord.js";
+import { stripMarkdown } from "../util/markdown.js";
+import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
+import client from "../client.js";
+import { getBaseChannel } from "../util/discord.js";
 /**
  * The index of each array determines how many strikes the word gives.
  *
@@ -14,17 +14,16 @@ import { getBaseChannel } from "../../util/discord.js";
  * All words are ROT13-encoded.
  *
  * @type {[RegExp[], RegExp[]][]}
+ *
+ * @todo Make index 0 give 0.25 strikes.
  */
 const badWords = [
 	[
 		[
 			/cbea/,
-			/ahqr/,
-			/ahqvgl/,
 			/grfgvpyr/,
 			/fpuzhpx/,
 			/ohgg(?: ?cvengr)/,
-			/ohgg(?: ?jvcr)/,
 			/qvyqb/,
 			/erpghz/,
 			/ihyin/,
@@ -32,7 +31,7 @@ const badWords = [
 			/卐/,
 			/卍/,
 			/lvss/,
-			/bayl ?snaf/,
+			/wvmm/,
 		],
 		[
 			/intva(?:n|r|y|f|l)+/,
@@ -41,29 +40,27 @@ const badWords = [
 			/frzra/,
 			/(?:c(?:er|bfg) ?)?phz/,
 			/pyvg/,
-			/phagf?/,
-			/(?:ohg+ ?)?frk/,
-			/grrgf?/,
 			/gvg(?:(?:gvr)?f)?/,
-			/obbo(?:(?:ovr)?f)?/,
+			/puss(?:y|ies)/,
+			/(?:ovt ?)?qvpxr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
+			/scrotum/,
+			/labia/,
+			/cervix/,
+			/horny/,
 		],
 	],
 	[
 		[
 			/fuvg(?!nx(?:v|r))/,
-			/fpurvffr/,
 			/puvat ?(punat ?)?puba/,
-			/nefpuybpu/,
 			/rwnphyngr/,
 			/fcyb+tr/,
 			/fcurapgre/,
 			/fjnfgvxn/,
 			/fpunssre/,
-			/obyybpx/,
 			/oybj ?wbo/,
 			/shpx/,
 			/wvfz/,
-			/wvmm/,
 			/xvxr/,
 			/xhxfhtre/,
 			/znfg(?:h|r)eong/,
@@ -76,24 +73,19 @@ const badWords = [
 			/ov?gpu/,
 		],
 		[
-			/8={2,}D/,
-			/svpx/,
-			/fubeg ?nefr/,
-			/fzneg ?nefr/,
+			/[8o]={2,}Q/,
 			/nefryvpx(?:vat|ref?)?/,
 			/fzhg+(?:vr|e|fg?|l)?/,
 			/(?:(?:onq|sng|wnpx|wvir|xvpx|ynzc|yneq|gvtug|jvfr|fzneg|qhzo) ?)?n(?:ff|efr)(?: ?(?:pybja|snpr|ung|ubyr|ybnq|enz(?:z(?:re)?(?:vat)?)?|jvcr)f?|r(?:el|fq?))?/,
 			/vawhaf?/,
 			/pbpx(?: ?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
-			/gjng+(?:y?rq|yre?|y?vat|f|vrf?|l)?/,
 			/fcvpf?/,
 			/yrfobf?/,
-			/obbo+(?:v(?:r|rf|at)|f|l)?/,
-			/(?:ovt ?)?qvpxr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/tbbx(?:f|l)?/,
 			/urzv ?cravf/,
 			/onfgneq(?:vfz|(y|e)?l|evrf|f)?/,
 			/cnp?x(?:vr|l)?vf?/,
+			/phagf?/,
 		],
 	],
 	[

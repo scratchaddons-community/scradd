@@ -1,6 +1,6 @@
 import client from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
-import log from "../../../common/moderation/logging.js";
+import log from "../../../common/logging.js";
 import type Event from "../../../common/types/event";
 
 const event: Event<"guildScheduledEventDelete"> = async function event(event) {

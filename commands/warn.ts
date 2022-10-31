@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, PermissionsBitField } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/moderation/warns.js";
+import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/warns.js";
 import { stripMarkdown } from "../util/markdown.js";
 import type { ChatInputCommand } from "../common/types/command";
 

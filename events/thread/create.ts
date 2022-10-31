@@ -1,5 +1,5 @@
-import warn from "../../common/moderation/warns.js";
-import { badWordsAllowed, censor } from "../../common/moderation/automod.js";
+import warn from "../../common/warns.js";
+import { badWordsAllowed, censor } from "../../common/automod.js";
 import { suggestionAnswers, suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";

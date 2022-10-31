@@ -1,6 +1,6 @@
 import { ButtonStyle, ComponentType } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log, { shouldLog } from "../../common/moderation/logging.js";
+import log, { shouldLog } from "../../common/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import type Event from "../../common/types/event";
 

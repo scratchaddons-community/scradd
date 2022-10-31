@@ -1,6 +1,6 @@
 import { time } from "discord.js";
 import client from "../../../client.js";
-import log from "../../../common/moderation/logging.js";
+import log from "../../../common/logging.js";
 import difflib from "difflib";
 import type Event from "../../../common/types/event";
 import CONSTANTS from "../../../common/CONSTANTS.js";
