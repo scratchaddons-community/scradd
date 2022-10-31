@@ -500,7 +500,7 @@ export async function changeNickname(member, strike = true) {
 			);
 			if (safe.size > 1) {
 				promises.push(
-					CONSTANTS.channels.mod?.send({
+					CONSTANTS.channels.modlogs?.send({
 						allowedMentions: { users: [] },
 						content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
 					}),
@@ -516,7 +516,7 @@ export async function changeNickname(member, strike = true) {
 
 		if (unsafe.size > 1)
 			promises.push(
-				CONSTANTS.channels.mod?.send({
+				CONSTANTS.channels.modlogs?.send({
 					allowedMentions: { users: [] },
 					content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
 				}),
@@ -536,7 +536,7 @@ async function setNickname(member, newNickname) {
 
 		return await member.setNickname(newNickname, "To comply with rule 7");
 	}
-	await CONSTANTS.channels.mod?.send({
+	await CONSTANTS.channels.modlogs?.send({
 		allowedMentions: { users: [] },
 		content: `⚠ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
 	});

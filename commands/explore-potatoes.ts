@@ -71,10 +71,10 @@ const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
 const command: ChatInputCommand = {
 	data: {
-		description: `Replies with a random message with ${BOARD_EMOJI} reactions`,
+		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
 		options: [
 			{
-				type: ApplicationCommandOptionType.Number,
+				type: ApplicationCommandOptionType.Integer,
 				name: "minimum-reactions",
 				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
 				min_value: 1,

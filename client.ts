@@ -44,8 +44,8 @@ const readyPromise: Promise<Client<true>> = new Promise((resolve) =>
 
 Handler.on("debug", (message) => {
 	if (
-		!(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged")) ||
-		process.env.NODE_ENV !== "production"
+		process.env.NODE_ENV !== "production" ||
+		!(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged"))
 	)
 		console.debug(message);
 })
@@ -58,11 +58,10 @@ Handler.on("debug", (message) => {
 			`invalidRequestWarning: ${data.count} requests; ${data.remainingTime}ms left`,
 		),
 	)
-	.on("rateLimited", console.log)
 	.on("restDebug", (message) => {
 		if (
-			!message.includes("Received bucket hash update") ||
-			process.env.NODE_ENV !== "production"
+			process.env.NODE_ENV !== "production" ||
+			!message.includes("Received bucket hash update")
 		)
 			console.debug(message);
 	});

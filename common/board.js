@@ -13,6 +13,7 @@ export const BOARD_EMOJI = "🥔";
 export function boardReactionCount(channel) {
 	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
+	if (!channel) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.mods;
 
@@ -28,7 +29,7 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 			"938807989874360330": COUNTS.devs, // #old-bugs
 		}[baseChannel.id] ||
-		(baseChannel.parent?.id === "866028754962612294" ? COUNTS.modsPlus : COUNTS.default) // 💀 The Cache!
+		COUNTS[baseChannel.parent?.id === "866028754962612294" ? "modsPlus" : "default"] // 💀 The Cache!
 	);
 }
 

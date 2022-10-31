@@ -126,8 +126,8 @@ const command: ChatInputCommand = {
 								},
 								...Object.entries(CONSTANTS.roles)
 									.filter(
-										(role): role is [Snowflake, Role] =>
-											typeof role[1] === "object",
+										(role): role is [string, Role | undefined] =>
+											typeof role[1] !== "string",
 									)
 									.map((role) => {
 										return {

@@ -15,12 +15,12 @@ import type Command from "../common/types/command.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands = await importScripts<Command>(path.resolve(dirname, "../commands"));
+const commands = importScripts<Command>(path.resolve(dirname, "../commands"));
 
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 	if (interaction.isAutocomplete()) {
-		const command = commands.get(interaction.commandName);
+		const command = (await commands).get(interaction.commandName);
 
 		if (!command || !("autocomplete" in command))
 			throw new ReferenceError(
@@ -84,7 +84,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		}
 		if (!interaction.isCommand()) return;
 
-		const command = commands.get(interaction.commandName);
+		const command = (await commands).get(interaction.commandName);
 
 		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
 

@@ -113,10 +113,28 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	//send weekly winners
 	if (+date - +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000)) < 604_800_000) return;
-	// More than a week since last weekly
 
+	// More than a week since last weekly
 	weeklyXpDatabase.extra = +date + "";
 	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
+	const active = CONSTANTS.roles.active;
+	if (active) {
+		await Promise.all([
+			...active.members.map((member) => {
+				if ((sorted.find((item) => item.user === member.id)?.xp || 0) < 350)
+					return member.roles.remove(active, "Inactive");
+			}),
+			...sorted.map(
+				({ user, xp }) =>
+					xp > 350 &&
+					CONSTANTS.guild.members
+						.fetch(user)
+						.catch(() => {})
+						.then((member) => member?.roles.add(active, "Active")),
+			),
+		]);
+	}
+
 	weeklyXpDatabase.data = [];
 
 	sorted.splice(5);

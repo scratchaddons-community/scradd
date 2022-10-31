@@ -43,14 +43,21 @@ const generateError = (error, returnObject = false) => {
 		const serialized = serializeError(error);
 
 		if (typeof serialized === "string") return serialized;
+		serialized.name = undefined;
+		serialized.message = undefined;
+		serialized.stack = undefined;
+		serialized.errors = undefined;
+
 		/** @type {unknown[]} */
 		const subErrors =
 			"errors" in error && error.errors instanceof Array ? error.errors : undefined;
 
 		const object = {
-			...serialized,
-			stack: sanitizePath(error.stack).split("\n"),
+			name: returnObject ? error.name : undefined,
+			message: error.message,
+			stack: sanitizePath(error.stack || new Error().stack).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
+			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
 		return returnObject ? object : JSON.stringify(object, null, "  ");
 	}

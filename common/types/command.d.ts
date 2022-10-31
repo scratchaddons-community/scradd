@@ -7,7 +7,7 @@ import type {
 } from "discord.js";
 
 export interface ContextMenuCommand {
-	data: Omit<RESTPostAPIContextMenuApplicationCommandsJSONBody, "name">;
+	data: Omit<RESTPostAPIContextMenuApplicationCommandsJSONBody, "name" | "dm_permission">;
 
 	/** A function that processes interactions to this command. */
 	interaction: (interaction: ContextMenuCommandInteraction<"raw" | "cached">) => any;
@@ -19,7 +19,7 @@ export interface ChatInputCommand {
 	 * @default true
 	 */
 	censored?: boolean | "channel";
-	data: Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "name" | "type">;
+	data: Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "name" | "type" | "dm_permission">;
 
 	/** A function that processes interactions to this command. */
 	interaction: (interaction: ChatInputCommandInteraction<"raw" | "cached">) => any;

@@ -67,9 +67,9 @@ export default {
 		developers: "938439909742616616",
 		testers: "938440159102386276",
 		mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
-		dev: roles.find((role) => role.name.toLowerCase().includes("devs")),
 		epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 		weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+		active: roles.find((role) => role.name.toLowerCase().includes("active")),
 	},
 	urls: {
 		usercountJson: "https://scratchaddons.com/usercount.json",
@@ -88,8 +88,8 @@ export default {
 		board: getChannel("board", [ChannelType.GuildText, ChannelType.GuildAnnouncement], "end"),
 		welcome: getChannel("welcome", ChannelType.GuildText),
 
-		mod: guild.publicUpdatesChannel || getChannel("mod-talk", ChannelType.GuildText),
-		modlogs: getChannel("logs", ChannelType.GuildText, "end"),
+		mod: getChannel("mod-talk", ChannelType.GuildText),
+		modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
 		admin: getChannel("admin", ChannelType.GuildText, "partial"),
 		modmail: getChannel("modmail", ChannelType.GuildText),
 

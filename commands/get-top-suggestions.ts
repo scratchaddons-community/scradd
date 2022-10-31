@@ -21,39 +21,43 @@ export const suggestionsDatabase = new Database("suggestions");
 await suggestionsDatabase.init();
 
 const old = CONSTANTS.channels.old_suggestions
-	? (await getAllMessages(CONSTANTS.channels.old_suggestions)).map((message) => {
-			const embed = message.embeds[0];
+	? getAllMessages(CONSTANTS.channels.old_suggestions).then((suggestions) =>
+			suggestions.map((message) => {
+				const embed = message.embeds[0];
 
-			const segments = message.thread?.name.split(" | ");
+				const segments = message.thread?.name.split(" | ");
 
-			return {
-				answer:
-					suggestionAnswers.find((answer) =>
-						[segments?.[0]?.toLowerCase(), segments?.at(-1)?.toLowerCase()].includes(
-							answer?.toLowerCase(),
-						),
-					) || suggestionAnswers[0],
+				return {
+					answer:
+						suggestionAnswers.find((answer) =>
+							[
+								segments?.[0]?.toLowerCase(),
+								segments?.at(-1)?.toLowerCase(),
+							].includes(answer?.toLowerCase()),
+						) || suggestionAnswers[0],
 
-				author:
-					(message.author.id === CONSTANTS.robotop
-						? message.embeds[0]?.footer?.text.split(": ")[1]
-						: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
-								?.groups?.userId) || message.author.id,
+					author:
+						(message.author.id === CONSTANTS.robotop
+							? message.embeds[0]?.footer?.text.split(": ")[1]
+							: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
+									?.groups?.userId) || message.author.id,
 
-				count:
-					(message.reactions.valueOf().first()?.count ?? 0) -
-					(message.reactions.valueOf().at(1)?.count ?? 0),
+					count:
+						(message.reactions.valueOf().first()?.count ?? 0) -
+						(message.reactions.valueOf().at(1)?.count ?? 0),
 
-				url: message.url,
+					url: message.url,
 
-				title: truncateText(
-					embed?.title ??
-						(embed?.description && cleanContent(embed?.description, message.channel)) ??
-						(embed?.image?.url ? embed?.image?.url : message.content),
-					100,
-				),
-			};
-	  })
+					title: truncateText(
+						embed?.title ??
+							(embed?.description &&
+								cleanContent(embed?.description, message.channel)) ??
+							(embed?.image?.url ? embed?.image?.url : message.content),
+						100,
+					),
+				};
+			}),
+	  )
 	: [];
 
 const command: ChatInputCommand = {
@@ -81,8 +85,7 @@ const command: ChatInputCommand = {
 		const nick = author instanceof GuildMember && author?.displayName;
 
 		await paginate(
-			[old, suggestionsDatabase.data]
-				.flat()
+			[...(await old), ...suggestionsDatabase.data]
 				.filter(
 					(item) =>
 						!(

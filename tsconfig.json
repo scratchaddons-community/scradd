@@ -28,7 +28,7 @@
 		"useUnknownInCatchVariables": true,
 		"importHelpers": true,
 		"outDir": "dist",
-		"skipLibCheck": true,
+		"skipLibCheck": false,
 		"resolveJsonModule": true
 	},
 	"exclude": ["node_modules", ".git", "dist"],

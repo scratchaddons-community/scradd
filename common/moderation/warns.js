@@ -136,10 +136,10 @@ export default async function warn(user, reason, strikes, context) {
 			promises.push(
 				member?.bannable &&
 					!member.roles.premiumSubscriberRole &&
-					(process.env.NODE_ENV === "production" ||
-						member.roles.highest.name === "@everyone")
+					(member.roles.highest.name === "@everyone" ||
+						process.env.NODE_ENV === "production")
 					? member.ban({ reason: "Too many warnings" })
-					: CONSTANTS.channels.mod?.send({
+					: CONSTANTS.channels.modlogs?.send({
 							allowedMentions: { users: [] },
 							content: `⚠ Missing permissions to ban ${user.toString()}.`,
 					  }),
@@ -170,7 +170,7 @@ export default async function warn(user, reason, strikes, context) {
 								Date.now(),
 							"Too many warns",
 					  )
-					: CONSTANTS.channels.mod?.send({
+					: CONSTANTS.channels.modlogs?.send({
 							allowedMentions: { users: [] },
 							content: `⚠ Missing permissions to mute ${user.toString()} for ${timeoutLength} ${
 								process.env.NODE_ENV === "production" ? "hour" : "minute"

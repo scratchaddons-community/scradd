@@ -275,7 +275,7 @@ export async function openModmail(openedEmbed, user, ping = false) {
 	if (!CONSTANTS.channels.modmail) throw new ReferenceError("Cannot find modmail channel");
 	const starterMessage = await CONSTANTS.channels.modmail.send({
 		allowedMentions: { parse: ["everyone"] },
-		content: process.env.NODE_ENV === "production" && ping ? "@here" : undefined,
+		content: ping && process.env.NODE_ENV === "production" ? "@here" : undefined,
 		embeds: [openedEmbed],
 	});
 	const date = new Date();
