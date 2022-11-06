@@ -41,17 +41,18 @@ const badWords = [
 			/(?:c(?:er|bfg) ?)?phz/,
 			/pyvg/,
 			/gvg(?:(?:gvr)?f)?/,
-			/puss(?:y|ies)/,
-			/(?:ovt ?)?qvpxr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
-			/scrotum/,
-			/labia/,
-			/cervix/,
-			/horny/,
+			/chff(?:l|vrf)/,
+			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
+			/fpebghz/,
+			/ynovn/,
+			/preivk/,
+			/ubeal/,
+			/obaref?/,
 		],
 	],
 	[
 		[
-			/fuvg(?!nx(?:v|r))/,
+			/fu[vr]+g(?!nx(?:v|r))/,
 			/puvat ?(punat ?)?puba/,
 			/rwnphyngr/,
 			/fcyb+tr/,
@@ -73,7 +74,8 @@ const badWords = [
 			/ov?gpu/,
 		],
 		[
-			/[8o]={2,}Q/,
+			/xlf/,
+			/[8o]=+Q/,
 			/nefryvpx(?:vat|ref?)?/,
 			/fzhg+(?:vr|e|fg?|l)?/,
 			/(?:(?:onq|sng|wnpx|wvir|xvpx|ynzc|yneq|gvtug|jvfr|fzneg|qhzo) ?)?n(?:ff|efr)(?: ?(?:pybja|snpr|ung|ubyr|ybnq|enz(?:z(?:re)?(?:vat)?)?|jvcr)f?|r(?:el|fq?))?/,
@@ -269,7 +271,7 @@ export async function automodMessage(message) {
 	);
 
 	const toStrike = [bad.language, bad.invites, bad.bots].filter(
-		/** @returns {strikes is false} */ (strikes) => strikes !== false,
+		/** @returns {strikes is number} */ (strikes) => strikes !== false,
 	);
 
 	const embedStrikes = badWordsAllowed(message.channel)
@@ -351,7 +353,8 @@ export async function automodMessage(message) {
 
 	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
 
-	const badAnimatedEmojis = animatedEmojis.length > 9 && Math.floor(animatedEmojis.length / 15);
+	const badAnimatedEmojis =
+		animatedEmojis.length > 9 && Math.round((animatedEmojis.length - 10) / 10);
 
 	if (
 		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
