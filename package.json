@@ -21,7 +21,7 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@discordjs/opus": "0.9.0",
-		"@discordjs/voice": "0.13.0",
+		"@discordjs/voice": "0.11.0",
 		"async-exit-hook": "2.0.1",
 		"difflib": "0.2.4",
 		"discord.js": "14.6.0",
