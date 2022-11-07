@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
 import type Event from "../../common/types/event";

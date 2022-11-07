@@ -1,5 +1,4 @@
 import { ChannelType } from "discord.js";
-import fetch from "node-fetch";
 import client from "../client.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");

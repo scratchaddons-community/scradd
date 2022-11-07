@@ -1,6 +1,5 @@
 import type { Message, Snowflake } from "discord.js";
 import papaparse from "papaparse";
-import fetch from "node-fetch";
 import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./logging.js";
 import client from "../client.js";

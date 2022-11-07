@@ -1,6 +1,5 @@
 import { Invite, FormattingPatterns, ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
-import fetch from "node-fetch";
 import warn from "./warns.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";

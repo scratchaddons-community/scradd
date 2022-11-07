@@ -896,7 +896,7 @@ const command: ChatInputCommand = {
 							Array.from<AddonQuestions>({
 								length: Math.round(
 									((Array.from(addonProbabilities)
-										.reverse()
+										.reverse() // TODO: https://github.com/microsoft/TypeScript/pull/49636
 										.findIndex(([id]) => id === addon) || 0) +
 										1) /
 										addonProbabilities.length +

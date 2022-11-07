@@ -9,7 +9,6 @@ import {
 	ComponentType,
 	ApplicationCommandOptionType,
 } from "discord.js";
-import fetch from "node-fetch";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLoggingThread } from "../common/logging.js";

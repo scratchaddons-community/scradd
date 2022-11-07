@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
-
 import CONSTANTS from "./CONSTANTS.js";
 import type AddonManifest from "./types/addonManifest.js";
+import dns from "dns";
+
+dns.setDefaultResultOrder("ipv4first");
 
 export const manifest = await fetch(`${CONSTANTS.urls.saSource}/manifest.json`).then(
 	async (response) => await (response.json() as Promise<chrome.runtime.Manifest>),

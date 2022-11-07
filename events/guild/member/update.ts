@@ -1,5 +1,4 @@
 import { time } from "discord.js";
-import fetch from "node-fetch";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/automod.js";
 import log from "../../../common/logging.js";
