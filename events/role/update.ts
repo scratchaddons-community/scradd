@@ -29,7 +29,7 @@ const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 		logs.push(` moved to position ${newRole.position}`);
 	}
 	if (oldRole.iconURL() !== newRole.iconURL() || oldRole.unicodeEmoji !== newRole.unicodeEmoji) {
-		const iconURL = newRole.iconURL({ size: 128 });
+		const iconURL = newRole.iconURL({ size: 128, forceStatic: false });
 		const response = iconURL && (await fetch(iconURL));
 		await log(
 			`✏ Role ${newRole.toString()}’s icon was ${

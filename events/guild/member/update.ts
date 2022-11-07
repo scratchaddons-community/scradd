@@ -8,7 +8,7 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 	if (newMember.guild.id !== CONSTANTS.guild.id) return;
 	const logs = [];
 	if (oldMember.avatar !== newMember.avatar) {
-		const avatarURL = newMember.avatarURL({ size: 128 });
+		const avatarURL = newMember.avatarURL({ size: 128, forceStatic: false });
 		const response = avatarURL && (await fetch(avatarURL));
 		await log(
 			`🫂 Member ${newMember.toString()} ${

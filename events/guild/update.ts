@@ -23,7 +23,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		logs.push(`Inactive timeout set to ${newGuild.afkTimeout}`);
 	}
 	if (oldGuild.bannerURL() !== newGuild.bannerURL()) {
-		const bannerURL = newGuild.bannerURL({ size: 128 });
+		const bannerURL = newGuild.bannerURL({ size: 128, forceStatic: false });
 		const response = bannerURL && (await fetch(bannerURL));
 		await log(`✏ Server banner background was ${response ? `changed` : "removed"}!`, "server", {
 			files: response ? [Buffer.from(await response.arrayBuffer())] : [],
@@ -59,7 +59,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		});
 	}
 	if (oldGuild.discoverySplashURL() !== newGuild.discoverySplashURL()) {
-		const discoverySplashURL = newGuild.discoverySplashURL({ size: 128 });
+		const discoverySplashURL = newGuild.discoverySplashURL({ size: 128, forceStatic: false });
 		const response = discoverySplashURL && (await fetch(discoverySplashURL));
 		await log(
 			`✏ Server discovery listing cover image ${response ? `changed` : "removed"}!`,
@@ -163,7 +163,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.iconURL() !== newGuild.iconURL()) {
-		const iconURL = newGuild.iconURL({ size: 128 });
+		const iconURL = newGuild.iconURL({ size: 128, forceStatic: false });
 		const response = iconURL && (await fetch(iconURL));
 		await log(`✏ Server icon ${response ? `changed` : "removed"}!`, "server", {
 			files: response ? [Buffer.from(await response.arrayBuffer())] : [],
@@ -220,7 +220,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.splashURL() !== newGuild.splashURL()) {
-		const splashURL = newGuild.splashURL({ size: 128 });
+		const splashURL = newGuild.splashURL({ size: 128, forceStatic: false });
 		const response = splashURL && (await fetch(splashURL));
 		await log(`✏ Server invite background ${response ? `changed` : "removed"}!`, "server", {
 			files: response ? [Buffer.from(await response.arrayBuffer())] : [],

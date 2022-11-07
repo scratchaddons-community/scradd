@@ -10,8 +10,7 @@ import { badWordsAllowed, censor } from "../../common/automod.js";
 import log, { LOG_GROUPS } from "../../common/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { suggestionsDatabase } from "../../commands/get-top-suggestions.js";
-import { suggestionAnswers } from "../../commands/get-top-suggestions.js";
+import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {

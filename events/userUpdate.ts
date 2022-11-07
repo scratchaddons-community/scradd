@@ -15,7 +15,7 @@ const event: Event<"userUpdate"> = async function event(oldUser, newUser) {
 		);
 	}
 	if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
-		const response = await fetch(newUser.displayAvatarURL({ size: 128 }));
+		const response = await fetch(newUser.displayAvatarURL({ size: 128, forceStatic: false }));
 		await log(`👤 User ${newUser.toString()} changed their avatar!`, "members", {
 			files: [Buffer.from(await response.arrayBuffer())],
 		});
