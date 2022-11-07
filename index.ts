@@ -34,11 +34,6 @@ dotenv.config();
 
 const { default: client } = await import("./client.js");
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
-const { default: logError } = await import("./util/logError.js");
-
-process
-	.on("uncaughtException", (err, origin) => logError(err, origin))
-	.on("warning", (err) => logError(err, "warning"));
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -165,3 +160,9 @@ if (process.env.NODE_ENV === "production") {
 	const { default: log } = await import("./common/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 }
+
+const { default: logError } = await import("./util/logError.js");
+
+process
+	.on("uncaughtException", (err, origin) => logError(err, origin))
+	.on("warning", (err) => logError(err, "warning"));

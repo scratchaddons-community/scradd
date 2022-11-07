@@ -43,10 +43,10 @@ const generateError = (error, returnObject = false) => {
 		const serialized = serializeError(error);
 
 		if (typeof serialized === "string") return serialized;
-		serialized.name = undefined;
-		serialized.message = undefined;
-		serialized.stack = undefined;
-		serialized.errors = undefined;
+		delete serialized.name;
+		delete serialized.message;
+		delete serialized.stack;
+		delete serialized.errors;
 
 		/** @type {unknown[]} */
 		const subErrors =
