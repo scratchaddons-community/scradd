@@ -3,32 +3,29 @@ import {
 	Collection,
 	GuildTextBasedChannel,
 	Message,
-	PermissionsBitField,
 	Snowflake,
 	User,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
 const MAX_FETCH_COUNT = 100;
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "(Mod only) Bulk deletes a specified amount of messages",
-		options: [
-			{
+		options: {
+			count: {
 				type: ApplicationCommandOptionType.String,
-				name: "count",
 				description: `The number of messages to delete or a message ID to delete to (inclusive)`,
 				required: true,
 			},
-			{
+			user: {
 				type: ApplicationCommandOptionType.User,
-				name: "user",
 				description: "Only delete messages from this user",
 			},
-		],
-		default_member_permissions: new PermissionsBitField().toJSON(),
+		},
+		restricted: true,
 	},
 
 	async interaction(interaction) {
@@ -57,7 +54,7 @@ const command: ChatInputCommand = {
 				content: await deleteMessages(messages, interaction.channel, numberCount, user),
 			});
 	},
-};
+});
 export default command;
 
 async function deleteMessages(

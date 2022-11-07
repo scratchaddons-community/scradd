@@ -4,37 +4,31 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
 import { paginate } from "../util/discord.js";
 import { makeProgressBar } from "../util/numbers.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Commands to view users’ XP amounts",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "rank",
+		subcommands: {
+			rank: {
 				description: "View a users’ XP rank",
-				options: [
-					{
+				options: {
+					user: {
 						type: ApplicationCommandOptionType.User,
-						name: "user",
 						description: "User to view (defaults to you)",
 					},
-				],
+				},
 			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "top",
+			top: {
 				description: "View all users sorted by how much XP they have",
-				options: [
-					{
+				options: {
+					user: {
 						type: ApplicationCommandOptionType.User,
-						name: "user",
 						description: "User to jump to",
 					},
-				],
+				},
 			},
-		],
+		},
 	},
 
 	async interaction(interaction) {
@@ -131,5 +125,5 @@ const command: ChatInputCommand = {
 			}
 		}
 	},
-};
+});
 export default command;

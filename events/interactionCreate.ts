@@ -90,9 +90,9 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 		if (
 			interaction.isChatInputCommand() &&
-			("censored" in command && command.censored === "channel"
+			(command.data.censored === "channel"
 				? !badWordsAllowed(interaction.channel)
-				: ("censored" in command && command.censored) ?? true)
+				: command.data.censored ?? true)
 		) {
 			const censored = censorOptions(interaction.options.data);
 

@@ -2,35 +2,32 @@ import { ApplicationCommandOptionType, PermissionsBitField } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, WARNS_PER_MUTE } from "../common/warns.js";
 import { stripMarkdown } from "../util/markdown.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
 const DEFAULT_STRIKES = 1;
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "(Mod only) Warns a user",
-		default_member_permissions: new PermissionsBitField().toJSON(),
-		options: [
-			{
+		restricted: true,
+		options: {
+			user: {
 				type: ApplicationCommandOptionType.User,
 				description: "The user to warn",
-				name: "user",
 				required: true,
 			},
-			{
+			reason: {
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the warning",
-				name: "reason",
 				required: process.env.NODE_ENV === "production",
 			},
-			{
+			strikes: {
 				type: ApplicationCommandOptionType.Integer,
-				name: "strikes",
 				description: `How many strikes to add. Use a negative number here to remove strikes (defaults to ${DEFAULT_STRIKES})`,
 				max_value: WARNS_PER_MUTE * MUTE_LENGTHS.length + 1,
 				min_value: -1 * WARNS_PER_MUTE,
 			},
-		],
+		},
 	},
 	async interaction(interaction) {
 		const user = interaction.options.getUser("user", true);
@@ -60,5 +57,5 @@ const command: ChatInputCommand = {
 			ephemeral: actualStrikes === false,
 		});
 	},
-};
+});
 export default command;

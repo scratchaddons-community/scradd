@@ -1,5 +1,4 @@
 import {
-	PermissionsBitField,
 	ModalSubmitInteraction,
 	ChatInputCommandInteraction,
 	ApplicationCommandOptionType,
@@ -11,20 +10,20 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import log from "../common/logging.js";
-import type { ChatInputCommand } from "../common/types/command.js";
+import { defineCommand } from "../common/types/command.js";
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "(Mods only) Mimic what you tell me to",
-		options: [
-			{
+		options: {
+			message: {
 				type: ApplicationCommandOptionType.String,
-				name: "message",
 				description: "What to mimic",
 				max_length: 2000,
 			},
-		],
-		default_member_permissions: new PermissionsBitField().toJSON(),
+		},
+		restricted: true,
+		censored: "channel",
 	},
 
 	async interaction(interaction) {
@@ -52,8 +51,7 @@ const command: ChatInputCommand = {
 		});
 		return await interaction.channel?.sendTyping();
 	},
-	censored: "channel",
-};
+});
 export default command;
 
 export async function say(

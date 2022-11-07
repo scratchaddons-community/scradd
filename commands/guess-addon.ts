@@ -8,7 +8,6 @@ import {
 	MessageComponentType,
 	ModalSubmitInteraction,
 	Snowflake,
-	ApplicationCommandOptionType,
 	APIActionRowComponent,
 	APISelectMenuComponent,
 	Collection,
@@ -23,7 +22,7 @@ import { manifest, addons } from "../common/extension.js";
 import { generateHash, trimPatchVersion } from "../util/text.js";
 import { disableComponents } from "../util/discord.js";
 import type AddonManifest from "../common/types/addonManifest";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
 const COLLECTOR_TIME = CONSTANTS.collectorTime * 4;
 
@@ -853,21 +852,13 @@ const games = new Collection<
 	}
 >();
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Play games where you or I guess addons",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "bot",
-				description: "You think of an addon and I guess",
-			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "player",
-				description: "I think of an addon and you guess",
-			},
-		],
+		subcommands: {
+			bot: { description: "You think of an addon and I guess" },
+			player: { description: "I think of an addon and you guess" },
+		},
 	},
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;
@@ -1817,7 +1808,7 @@ const command: ChatInputCommand = {
 			}
 		}
 	},
-};
+});
 export default command;
 
 export async function guessAddon(interaction: ModalSubmitInteraction) {

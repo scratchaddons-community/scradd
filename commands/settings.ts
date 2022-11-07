@@ -1,37 +1,33 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
 export const userSettingsDatabase = new Database("user_settings");
 await userSettingsDatabase.init();
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Customize personal settings",
-		options: [
-			{
+		options: {
+			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				name: "board-pings",
 				description: `Whether to ping you when your messages get on #${CONSTANTS.channels.board?.name}`,
 			},
-			{
+			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				name: "level-up-pings",
 				description: "Whether to ping you when you level up",
 			},
-			{
+			"weekly-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				name: "weekly-pings",
 				description:
 					"Whether to ping you if you are one of the most active people each week",
 			},
-			{
+			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,
-				name: "autoreactions",
 				description: "Whether to automatically react to your messages with funny emojis",
 			},
-		],
+		},
 	},
 	async interaction(interaction) {
 		const settingsForUser = userSettingsDatabase.data.find(
@@ -79,5 +75,5 @@ const command: ChatInputCommand = {
 				`Autoreactions: ${CONSTANTS.emojis.statuses[autoreactions ? "yes" : "no"]}`,
 		});
 	},
-};
+});
 export default command;

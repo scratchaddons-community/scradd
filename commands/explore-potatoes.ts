@@ -20,7 +20,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { asyncFilter, firstTrueyPromise } from "../util/promises.js";
 import { generateHash } from "../util/text.js";
 import { disableComponents } from "../util/discord.js";
-import type { ChatInputCommand } from "../common/types/command.js";
+import { defineCommand } from "../common/types/command.js";
 
 /**
  * Determine if a text-based channel is a match of a guild-based channel.
@@ -69,26 +69,23 @@ async function textChannelMatches(
 
 const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
-		options: [
-			{
+		options: {
+			"minimum-reactions": {
 				type: ApplicationCommandOptionType.Integer,
-				name: "minimum-reactions",
 				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
 				min_value: 1,
 			},
-			{
+			"user": {
 				type: ApplicationCommandOptionType.User,
-				name: "user",
 				description: "Filter messages to only get those by a certain user",
 			},
-			{
+			"channel": {
 				type: ApplicationCommandOptionType.Channel,
-				name: "channel",
 				description: "Filter messages to only get those in a certain channel",
-				channel_types: [
+				channelTypes: [
 					ChannelType.GuildText,
 					ChannelType.GuildVoice,
 					ChannelType.GuildCategory,
@@ -99,7 +96,7 @@ const command: ChatInputCommand = {
 					ChannelType.GuildForum,
 				],
 			},
-		],
+		},
 	},
 
 	async interaction(interaction) {
@@ -218,5 +215,5 @@ const command: ChatInputCommand = {
 				});
 			});
 	},
-};
+});
 export default command;

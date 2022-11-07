@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
-		"allowSyntheticDefaultImports": true,
 		"alwaysStrict": true,
 		"baseUrl": ".",
 		"checkJs": true,
@@ -29,7 +28,8 @@
 		"importHelpers": true,
 		"outDir": "dist",
 		"skipLibCheck": false,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"exactOptionalPropertyTypes": false
 	},
 	"exclude": ["node_modules", ".git", "dist"],
 	"include": ["./*", "./.*", "./**/*", "./.**/*"],

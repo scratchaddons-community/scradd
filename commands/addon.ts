@@ -5,7 +5,7 @@ import { manifest, addons } from "../common/extension.js";
 
 import { escapeMessage, escapeLinks, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -19,20 +19,21 @@ const fuse = new Fuse(addons, {
 	],
 });
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: `Replies with information about a specific addon available in v${
 			manifest.version_name || manifest.version
 		}`,
-		options: [
-			{
-				name: "addon",
+		options: {
+			addon: {
 				description: "The name of the addon",
 				required: true,
 				autocomplete: true,
 				type: ApplicationCommandOptionType.String,
 			},
-		],
+		},
+
+		censored: "channel",
 	},
 
 	async interaction(interaction) {
@@ -149,8 +150,6 @@ const command: ChatInputCommand = {
 		});
 	},
 
-	censored: "channel",
-
 	async autocomplete(interaction) {
 		await interaction.respond(
 			fuse
@@ -159,5 +158,6 @@ const command: ChatInputCommand = {
 				.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
 		);
 	},
-};
+});
+
 export default command;

@@ -3,7 +3,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeLinks } from "../util/markdown.js";
 import { getAllMessages, paginate } from "../util/discord.js";
 import { truncateText } from "../util/text.js";
-import type { ChatInputCommand } from "../common/types/command.js";
+import { defineCommand } from "../common/types/command.js";
 import Database from "../common/database.js";
 
 export const suggestionAnswers = [
@@ -60,22 +60,20 @@ const old = CONSTANTS.channels.old_suggestions
 	  )
 	: [];
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Get the top suggestions",
-		options: [
-			{
+		options: {
+			user: {
 				type: ApplicationCommandOptionType.User,
-				name: "user",
 				description: "Filter suggestions to only get those by a certain user",
 			},
-			{
+			option: {
 				type: ApplicationCommandOptionType.String,
-				name: "answer",
 				description: "Filter suggestions to only get those with a certain answer",
-				choices: suggestionAnswers.map((answer) => ({ name: answer, value: answer })),
+				choices: Object.fromEntries(suggestionAnswers.map((answer) => [answer, answer])),
 			},
-		],
+		},
 	},
 	async interaction(interaction) {
 		const author = interaction.options.getMember("user");
@@ -112,5 +110,5 @@ const command: ChatInputCommand = {
 			(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 		);
 	},
-};
+});
 export default command;

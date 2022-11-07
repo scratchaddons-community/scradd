@@ -14,38 +14,33 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import { getLoggingThread } from "../common/logging.js";
 import { removeExpiredWarns, muteLog, warnLog, WARN_INFO_BASE } from "../common/warns.js";
 import { convertBase } from "../util/numbers.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Commands to view strike information",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "user",
+		subcommands: {
+			user: {
 				description: "View your or (Mods only) someone else’s active strikes",
-				options: [
-					{
+				options: {
+					user: {
 						type: ApplicationCommandOptionType.User,
-						name: "user",
 						description: "(Mods only) The user to see strikes for",
 					},
-				],
+				},
 			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "id",
+			id: {
 				description: "View a strike by ID",
-				options: [
-					{
+				options: {
+					id: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
-						name: "id",
 						description: "The strike's ID",
 					},
-				],
+				},
 			},
-		],
+		},
+		censored: false,
 	},
 
 	async interaction(interaction) {
@@ -76,8 +71,7 @@ const command: ChatInputCommand = {
 			}
 		}
 	},
-	censored: false,
-};
+});
 export default command;
 
 export async function getWarnsForMember(user: User | GuildMember): Promise<BaseMessageOptions> {

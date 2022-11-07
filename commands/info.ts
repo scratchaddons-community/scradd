@@ -1,10 +1,10 @@
-import { time, Snowflake, Role, ApplicationCommandOptionType } from "discord.js";
+import { time, Snowflake, Role } from "discord.js";
 
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import pkg from "../package.json" assert { type: "json" };
-import type { ChatInputCommand } from "../common/types/command.js";
+import { defineCommand } from "../common/types/command.js";
 import client from "../client.js";
 
 /**
@@ -21,26 +21,14 @@ async function getRole(roleId: Snowflake): Promise<string> {
 	return joinWithAnd(members);
 }
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Learn about me",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "status",
-				description: "Show bot status",
-			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "config",
-				description: "Show configuration settings",
-			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "credits",
-				description: "Show credit information",
-			},
-		],
+		subcommands: {
+			credits: { description: "Show bot status" },
+			config: { description: "Show configuration settings" },
+			status: { description: "Show credit information" },
+		},
 	},
 
 	async interaction(interaction) {
@@ -193,5 +181,5 @@ const command: ChatInputCommand = {
 			}
 		}
 	},
-};
+});
 export default command;

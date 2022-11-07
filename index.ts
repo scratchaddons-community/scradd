@@ -6,11 +6,19 @@ import dotenv from "dotenv";
 import { importScripts } from "./util/files.js";
 import pkg from "./package.json" assert { type: "json" };
 import fetch from "node-fetch";
-import type { Snowflake } from "discord.js";
-import type Command from "./common/types/command";
+import {
+	Snowflake,
+	PermissionsBitField,
+	ApplicationCommandType,
+	ApplicationCommandData,
+	ApplicationCommandOptionData,
+	ApplicationCommandOptionChoiceData,
+	ApplicationCommandOptionType,
+} from "discord.js";
+import type Command from "./common/types/command.js";
 import http from "node:http";
 import type { default as Event, ClientEvent } from "./common/types/event.js";
-import type { ChatInputCommand, ContextMenuCommand } from "./common/types/command";
+import type { Option } from "./common/types/command.js";
 
 declare global {
 	namespace NodeJS {
@@ -36,6 +44,34 @@ process
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
+function transformOptions(options: Record<string, Option>) {
+	return Object.entries(options).map(([name, option]) =>
+		Object.assign(
+			{
+				name,
+				description: option.description,
+				required: option.required ?? false,
+				minValue: option.min,
+				maxValue: option.max,
+				type: option.type,
+				channelTypes: option.channelTypes,
+				maxLength: option.maxLength,
+				minLength: option.minLength,
+				autocomplete: option.autocomplete,
+			},
+			option.choices
+				? {
+						type: option.type,
+						choices: Object.entries(option.choices).map(([value, name]) => ({
+							name,
+							value,
+						})),
+				  }
+				: {},
+		),
+	);
+}
+
 const promises = [
 	importScripts<Event, ClientEvent>(path.resolve(dirname, "./events")).then((events) => {
 		for (const [event, execute] of events.entries()) {
@@ -51,8 +87,25 @@ const promises = [
 	importScripts<Command>(path.resolve(dirname, "./commands")).then((commands) => {
 		client.application.commands.set(
 			commands
-				.filter((command): command is ChatInputCommand | ContextMenuCommand => !!command)
-				.map((command, name) => ({ ...command.data, name })),
+				.filter((command): command is NonNullable<Command> => !!command)
+				.map(({ data }, name): ApplicationCommandData => {
+					return {
+						name,
+						description: data.description ?? "",
+						type: data.type || ApplicationCommandType.ChatInput,
+						defaultMemberPermissions: data.restricted && new PermissionsBitField(),
+						options: data.options
+							? transformOptions(data.options)
+							: data.subcommands &&
+							  Object.entries(data.subcommands).map(([name, subcommand]) => ({
+									name,
+									description: subcommand.description,
+									options:
+										subcommand.options && transformOptions(subcommand.options),
+									type: ApplicationCommandOptionType.Subcommand,
+							  })),
+					};
+				}),
 			CONSTANTS.guild.id,
 		);
 	}),

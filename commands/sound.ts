@@ -8,118 +8,89 @@ import {
 	createAudioResource,
 	AudioPlayerStatus,
 } from "@discordjs/voice";
-import type { ChatInputCommand } from "../common/types/command.js";
+import { defineCommand } from "../common/types/command.js";
 import url from "node:url";
 import path from "path";
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "Commands to play sounds in voice channels",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "meme",
+		subcommands: {
+			meme: {
 				description: "Play a meme sound",
-				options: [
-					{
+				options: {
+					sound: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
-						name: "sound",
 						description: "The sound to play",
-						choices: [
-							{ name: "AMONGUS", value: "amongus.mp3" },
-							{ name: "And thank you!", value: "youreWelcome.mp3" },
-							{
-								name: "Big Big Chungus (big chungus, big chungus)",
-								value: "bigChungus.mp3",
-							},
-							{ name: "breuh", value: "breh.mp3" },
-							{ name: "Crab Rave", value: "crabRave.mp3" },
-							{ name: "Creeper? Awww, man", value: "creeper.mp3" },
-							{ name: "E", value: "e.mp3" },
-							{ name: "E-mo-tion-al dam-age", value: "emotionalDamage.mp3" },
-							{ name: "FBI OPEN UP", value: "fbi.mp3" },
-							{ name: "Innocent song", value: "rickroll.mp3" },
-							{ name: "Ladies and Gentlemen, we got 'em!", value: "weGotEm.mp3" },
-							{ name: "Megalovania", value: "megalovania.mp3" },
-							{ name: "NANI?!", value: "nani.mp3" },
-							{
-								name: "Now that's a lotta damage!",
-								value: "nowThatsALottaDamage.m4a",
-							},
-							{ name: "oof", value: "oof.mp3" },
-							{ name: "Ping!1!!1!!!", value: "discord.mp3" },
-							{ name: "Somebody once told me", value: "allStar.mp3" },
-							{ name: "Stardew Valley", value: "yoshi.mp3" },
-							{ name: "Taco Bell", value: "bong.mp3" },
-							{ name: "This group is dead", value: "dead.mp3" },
-							{ name: "WAS THAT THE BITE OF 87?!?!?", value: "biteOf87.wav" },
-							{ name: "Wii", value: "wii.mp3" },
-							{ name: "Wut da dog doin?", value: "wutDaDogDoin.mp3" },
-							{ name: "YEEEET!", value: "yeet.mp3" },
-						],
+						choices: {
+							"amongus.mp3": "AMONGUS",
+							"youreWelcome.mp3": "And thank you!",
+							"bigChungus.mp3": "Big Big Chungus (big chungus, big chungus)",
+							"breh.mp3": "breuh",
+							"crabRave.mp3": "Crab Rave",
+							"creeper.mp3": "Creeper? Awww, man",
+							"e.mp3": "E",
+							"emotionalDamage.mp3": "E-mo-tion-al dam-age",
+							"fbi.mp3": "FBI OPEN UP",
+							"rickroll.mp3": "Innocent song",
+							"weGotEm.mp3": "Ladies and Gentlemen, we got 'em!",
+							"megalovania.mp3": "Megalovania",
+							"nani.mp3": "NANI?!",
+							"nowThatsALottaDamage.m4a": "Now that's a lotta damage!",
+							"oof.mp3": "oof",
+							"discord.mp3": "Ping!1!!1!!!",
+							"allStar.mp3": "Somebody once told me",
+							"yoshi.mp3": "Stardew Valley",
+							"bong.mp3": "Taco Bell",
+							"dead.mp3": "This group is dead",
+							"biteOf87.wav": "WAS THAT THE BITE OF 87?!?!?",
+							"wii.mp3": "Wii",
+							"wutDaDogDoin.mp3": "Wut da dog doin?",
+							"yeet.mp3": "YEEEET!",
+						},
 					},
-					{
+					channel: {
 						type: ApplicationCommandOptionType.Channel,
-						name: "channel",
 						description: "The channel to play the sound in",
-						channel_types: [ChannelType.GuildVoice],
+						channelTypes: [ChannelType.GuildVoice],
 					},
-				],
+				},
 			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "quote",
+			quote: {
 				description: "Play a quote sound",
-				options: [
-					{
+				options: {
+					sound: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
-						name: "sound",
 						description: "The sound to play",
-						choices: [
-							{
-								name: "And then, Colaber, voice revealed",
-								value: "colaberVoiceReveal.wav",
-							},
-							{ name: "Co-Lay-Burrrr", value: "squidward.mp3" },
-							{ name: "ColaberColaberColaber", value: "colaber.mp3" },
-							{ name: "I Feel Good", value: "iFeelGood.wav" },
-							{ name: "nom nom nom", value: "chips.mp3" },
-							{ name: "Not Today, Griffpatch", value: "notTodayGriffpatch.mp3" },
-							{ name: "poe-tah-toe", value: "potato.mp3" },
-							{ name: "Scratch Notifier", value: "ping.mp3" },
-							{
-								name: "The World's Smallest Violin",
-								value: "worldsSmallestViolin.wav",
-							},
-							{ name: "This Is Scratch Addons.", value: "thisIs.mp3" },
-							{
-								name: "We gotta get Red Guy back!",
-								value: "weGottaGetRedGuyBack.mp3",
-							},
-							{ name: "TED Talk", value: "tedTalk.wav" },
-							{
-								name: "We've got some REALLY good content today, though.",
-								value: "balls.wav",
-							},
-							{
-								name: "Welcome back to the Scratch Addons YouTube channel",
-								value: "welcomeBack.mp3",
-							},
-						],
+						choices: {
+							"colaberVoiceReveal.wav": "And then, Colaber, voice revealed",
+							"squidward.mp3": "Co-Lay-Burrrr",
+							"colaber.mp3": "ColaberColaberColaber",
+							"iFeelGood.wav": "I Feel Good",
+							"chips.mp3": "nom nom nom",
+							"notTodayGriffpatch.mp3": "Not Today, Griffpatch",
+							"potato.mp3": "poe-tah-toe",
+							"ping.mp3": "Scratch Notifier",
+							"worldsSmallestViolin.wav": "The World's Smallest Violin",
+							"thisIs.mp3": "This Is Scratch Addons.",
+							"weGottaGetRedGuyBack.mp3": "We gotta get Red Guy back!",
+							"tedTalk.wav": "TED Talk",
+							"balls.wav": "We've got some REALLY good content today, though.",
+							"welcomeBack.mp3": "Welcome back to the Scratch Addons YouTube channel",
+						},
 					},
-					{
+					channel: {
 						type: ApplicationCommandOptionType.Channel,
-						name: "channel",
 						description: "The channel to play the sound in",
-						channel_types: [ChannelType.GuildVoice],
+						channelTypes: [ChannelType.GuildVoice],
 					},
-				],
+				},
 			},
-		],
+		},
 	},
 
 	async interaction(interaction) {
@@ -194,6 +165,6 @@ const command: ChatInputCommand = {
 			),
 		]);
 	},
-};
+});
 
 export default command;

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, GuildMember, PermissionsBitField } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import {
@@ -11,40 +11,36 @@ import {
 	MODMAIL_UNSUPPORTED,
 } from "../common/modmail.js";
 import { disableComponents } from "../util/discord.js";
-import type { ChatInputCommand } from "../common/types/command";
+import { defineCommand } from "../common/types/command.js";
 
-const command: ChatInputCommand = {
+const command = defineCommand({
 	data: {
 		description: "(Mods only) Commands to manage modmail tickets",
-		options: [
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "close",
+		restricted: true,
+		subcommands: {
+			close: {
 				description: "(Mods only) Close a modmail ticket",
-				options: [
-					{
+				options: {
+					reason: {
 						type: ApplicationCommandOptionType.String,
-						name: "reason",
 						description:
 							"Reason for closing the ticket (this will be posted here as well as being sent to the user)",
 					},
-				],
+				},
 			},
-			{
-				type: ApplicationCommandOptionType.Subcommand,
-				name: "start",
+			start: {
 				description: "(Mods only) Start a modmail ticket with a user",
-				options: [
-					{
+				options: {
+					user: {
 						required: true,
 						type: ApplicationCommandOptionType.User,
-						name: "user",
 						description: "The user to start a ticket with",
 					},
-				],
+				},
 			},
-		],
-		default_member_permissions: new PermissionsBitField().toJSON(),
+		},
+
+		censored: false,
 	},
 
 	async interaction(interaction) {
@@ -163,7 +159,5 @@ const command: ChatInputCommand = {
 			}
 		}
 	},
-
-	censored: false,
-};
+});
 export default command;
