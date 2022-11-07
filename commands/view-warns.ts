@@ -53,7 +53,7 @@ const command = defineCommand({
 				return await interaction.reply(
 					user.id === interaction.member.id ||
 						(CONSTANTS.roles.mod &&
-							interaction.member.roles.resolve(CONSTANTS.roles.mod))
+							interaction.member.roles.resolve(CONSTANTS.roles.mod.id))
 						? { ...(await getWarnsForMember(user)), ephemeral: true }
 						: {
 								ephemeral: true,
