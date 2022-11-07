@@ -11,8 +11,6 @@ import {
 	PermissionsBitField,
 	ApplicationCommandType,
 	ApplicationCommandData,
-	ApplicationCommandOptionData,
-	ApplicationCommandOptionChoiceData,
 	ApplicationCommandOptionType,
 } from "discord.js";
 import type Command from "./common/types/command.js";

@@ -139,17 +139,15 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	sorted.splice(5);
 
-	const ids = sorted.map((gain) => (typeof gain === "string" ? gain : gain?.user));
+	const ids = sorted.map((gain) => (typeof gain === "string" ? gain : gain.user));
 
 	date.setUTCDate(date.getUTCDate() - 7);
 	await CONSTANTS.channels.announcements?.send({
 		allowedMentions: {
 			users: ids.filter(
-				/** @returns {user is import("discord.js").Snowflake} */ (user) =>
-					!!user &&
-					(userSettingsDatabase.data.find((settings) => user === settings.user)
-						?.weeklyPings ??
-						process.env.NODE_ENV === "production"),
+				(user) =>
+					userSettingsDatabase.data.find((settings) => user === settings.user)
+						?.weeklyPings ?? process.env.NODE_ENV === "production",
 			),
 		},
 		content:
