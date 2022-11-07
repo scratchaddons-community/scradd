@@ -55,7 +55,7 @@ const command = defineCommand({
 			: addon.tags.includes("easterEgg")
 			? "Easter Eggs"
 			: addon.tags.includes("theme")
-			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes?`
+			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
 			: addon.tags.includes("community")
 			? "Scratch Website Features -> " +
 			  (addon.tags.includes("profiles")
