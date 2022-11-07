@@ -158,52 +158,52 @@ export interface ChatInputSubcommands<O extends Record<string, Record<string, Op
 	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
 }
 
-// export interface ChatInputSubcommandGroups<
-// 	O extends Record<string, Record<string, Record<string, Option>>>,
-// 	Subcommand extends keyof O,
-// 	SubcommandGroup extends keyof O[Subcommand],
-// > {
-// 	data: {
-// 		type?: never;
-// 		/**
-// 		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
-// 		 *
-// 		 * @default true
-// 		 */
-// 		censored?: false | "channel";
-// 		description: string;
-// 		restricted?: true;
-// 		options?: never;
-// 		subcommands?: {
-// 			[key in keyof O]: {
-// 				description: string;
-// 				options?: never;
-// 				subcommands?: {
-// 					[subkey in keyof O[key]]: {
-// 						description: string;
-// 						options?: O[key][subkey];
-// 						subcommands?: never;
-// 					};
-// 				};
-// 			};
-// 		};
-// 	};
+export interface ChatInputSubcommandGroups<
+	O extends Record<string, Record<string, Record<string, Option>>>,
+	Subcommand extends keyof O,
+	SubcommandGroup extends keyof O[Subcommand],
+> {
+	data: {
+		type?: never;
+		/**
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
+		 *
+		 * @default true
+		 */
+		censored?: false | "channel";
+		description: string;
+		restricted?: true;
+		options?: never;
+		subcommands?: {
+			[key in keyof O]: {
+				description: string;
+				options?: never;
+				subcommands?: {
+					[subkey in keyof O[key]]: {
+						description: string;
+						options?: O[key][subkey];
+						subcommands?: never;
+					};
+				};
+			};
+		};
+	};
 
-// 	/** A function that processes interactions to this command. */
-// 	interaction: (
-// 		interaction: ChatInputCommandInteraction<"raw" | "cached">,
-// 		options: {
-// 			[SG in SubcommandGroup]: {
-// 				[S in Subcommand]: {
-// 					options: OptionsToType<O[SG][S]>;
-// 					subcommand: S;
-// 					subcommandGroup: SG;
-// 				};
-// 			}[Subcommand];
-// 		}[SubcommandGroup],
-// 	) => any;
-// 	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
-// }
+	/** A function that processes interactions to this command. */
+	interaction: (
+		interaction: ChatInputCommandInteraction<"raw" | "cached">,
+		options: {
+			[SG in SubcommandGroup]: {
+				[S in Subcommand]: {
+					options: OptionsToType<any>;
+					subcommand: S;
+					subcommandGroup: SG;
+				};
+			}[Subcommand];
+		}[SubcommandGroup],
+	) => any;
+	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
+}
 
 type Command =
 	| ContextMenuCommand
