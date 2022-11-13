@@ -433,7 +433,7 @@ export async function badAttachments(message) {
 	return bad;
 }
 
-const NICKNAME_RULE = 7;
+const NICKNAME_RULE = 8;
 
 /** @param {import("discord.js").GuildMember} member */
 export async function changeNickname(member, strike = true) {
@@ -528,7 +528,7 @@ async function setNickname(member, newNickname) {
 	if (member.moderatable) {
 		if (censor(newNickname) || pingablify(newNickname) !== newNickname) return false;
 
-		return await member.setNickname(newNickname, "To comply with rule 7");
+		return await member.setNickname(newNickname, `To comply with rule ${NICKNAME_RULE}`);
 	}
 	await CONSTANTS.channels.modlogs?.send({
 		allowedMentions: { users: [] },
