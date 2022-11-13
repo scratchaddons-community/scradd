@@ -14,7 +14,7 @@ import { generateHash, truncateText } from "./text.js";
 import { badAttachments, censor } from "../common/automod.js";
 
 /**
- * @param {import("discord.js").Message | import("discord.js").PartialMessage} message
+ * @param {import("discord.js").Message} message
  *
  * @returns {Promise<{ embeds: import("discord.js").APIEmbed[]; files: Attachment[] }>}
  */
@@ -93,6 +93,20 @@ export async function extractMessageExtremities(message, allowLanguage = true) {
 			!allowLanguage && typeof (await badAttachments(message)).language === "number"
 				? []
 				: message.attachments.toJSON(),
+	};
+}
+
+/**
+ * @param {Message} message
+ *
+ * @returns {import("discord.js").MessageEditOptions}
+ */
+export function getMessageJSON(message) {
+	return {
+		components: message.components.map((component) => component.toJSON()),
+		content: message.content,
+		embeds: message.embeds.map((embed) => embed.toJSON()),
+		files: message.attachments.map((attachment) => attachment.url),
 	};
 }
 

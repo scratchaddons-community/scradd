@@ -1,8 +1,8 @@
 import { automodMessage } from "../../common/automod.js";
 import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
-import { extractMessageExtremities } from "../../util/discord.js";
+import { getMessageJSON } from "../../util/discord.js";
 import jsonDiff from "json-diff";
-import { ButtonStyle, ComponentType, Message, PartialMessage } from "discord.js";
+import { ButtonStyle, ComponentType } from "discord.js";
 import diffLib from "difflib";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import client from "../../client.js";
@@ -72,8 +72,8 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				.join("\n");
 
 		const extraDiff = jsonDiff.diffString(
-			await getMessageJSON(oldMessage),
-			await getMessageJSON(newMessage),
+			{ ...getMessageJSON(oldMessage), content: undefined },
+			{ ...getMessageJSON(newMessage), content: undefined },
 			{ color: false },
 		);
 
@@ -134,13 +134,4 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 	if (await automodMessage(newMessage)) return;
 };
 
-async function getMessageJSON(message: Message | PartialMessage) {
-	const { embeds, files } = await extractMessageExtremities(message);
-
-	return {
-		components: message.components.map((component) => component.toJSON()),
-		embeds: message.author?.bot ?? true ? embeds : [],
-		files: files,
-	};
-}
 export default event;
