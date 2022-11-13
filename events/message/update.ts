@@ -60,9 +60,8 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 	}
 	if (
 		!oldMessage.partial &&
-		!newMessage.interaction &&
 		loggingThread.id !== newMessage.channel.id &&
-		newMessage.author.id !== CONSTANTS.robotop
+		!newMessage.author.bot
 	) {
 		const files = [];
 		const contentDiff =
