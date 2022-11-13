@@ -101,22 +101,23 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	}
 
 	// Update recent DB
-	const weeklyIndex = weeklyXpDatabase.data.findIndex((entry) => entry.user === user.id);
-	const weeklyAmount = (weeklyXpDatabase.data[weeklyIndex]?.xp || 0) + amount;
+	const weekly = weeklyXpDatabase.data;
+	const weeklyIndex = weekly.findIndex((entry) => entry.user === user.id);
+	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 
 	if (weeklyIndex === -1) {
-		weeklyXpDatabase.data.push({ user: user.id, xp: weeklyAmount });
+		weekly.push({ user: user.id, xp: weeklyAmount });
 	} else {
-		weeklyXpDatabase.data[weeklyIndex] = { user: user.id, xp: weeklyAmount };
+		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
-	xpDatabase.data = xp;
+	weeklyXpDatabase.data = weekly;
 
 	//send weekly winners
 	if (+date - +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000)) < 604_800_000) return;
 
 	// More than a week since last weekly
 	weeklyXpDatabase.extra = +date + "";
-	const sorted = weeklyXpDatabase.data.sort((a, b) => b.xp - a.xp);
+	const sorted = weekly.sort((a, b) => b.xp - a.xp);
 	const active = CONSTANTS.roles.active;
 	if (active) {
 		await Promise.all([
