@@ -1,6 +1,5 @@
 import type {
 	ChatInputCommandInteraction,
-	ContextMenuCommandInteraction,
 	AutocompleteInteraction,
 	ApplicationCommandType,
 	ApplicationCommandOptionType,
@@ -10,9 +9,11 @@ import type {
 	GuildMember,
 	Role,
 	User,
+	MessageContextMenuCommandInteraction,
+	UserContextMenuCommandInteraction,
 } from "discord.js";
 
-export interface ContextMenuCommand<T = typeof ApplicationCommandType["Message" | "User"]> {
+export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Message" | "User"]> {
 	data: {
 		type: T;
 		censored?: never;
@@ -24,7 +25,10 @@ export interface ContextMenuCommand<T = typeof ApplicationCommandType["Message" 
 
 	/** A function that processes interactions to this command. */
 	interaction: (
-		interaction: ContextMenuCommandInteraction<"raw" | "cached"> & { type: T },
+		interaction: {
+			[ApplicationCommandType.Message]: MessageContextMenuCommandInteraction;
+			[ApplicationCommandType.User]: UserContextMenuCommandInteraction;
+		}[T],
 	) => any;
 	autocomplete?: never;
 }
@@ -206,7 +210,7 @@ export interface ChatInputSubcommandGroups<
 }
 
 type Command =
-	| ContextMenuCommand
+	| ContextMenuCommand<typeof ApplicationCommandType["Message" | "User"]>
 	| ChatInputCommand<Record<string, Option>>
 	| ChatInputSubcommands<Record<string, Record<string, Option>>>
 	| undefined;
@@ -215,6 +219,9 @@ export default Command;
 export function defineCommand<O extends Record<string, Option> = {}>(
 	command: ChatInputCommand<O>,
 ): ChatInputCommand<O>;
+export function defineCommand<T extends typeof ApplicationCommandType["Message" | "User"]>(
+	command: ContextMenuCommand<T>,
+): ContextMenuCommand<T>;
 export function defineCommand<O extends Record<string, Record<string, Option>>>(
 	command: ChatInputSubcommands<O>,
 ): ChatInputSubcommands<O>;
@@ -224,6 +231,9 @@ export function defineCommand<
 	SubcommandGroup extends keyof O[Subcommand] = never,
 >(
 	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
-): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup> {
+): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>
+export function defineCommand<T extends any>(
+	command: T,
+): T {
 	return command;
-}
+};
