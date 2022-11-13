@@ -3,11 +3,7 @@ import log from "../common/logging.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { serializeError } from "serialize-error";
 
-/**
- * @param {any} error
- * @param {string} event
- */
-export default async function logError(error, event) {
+export default async function logError(error: any, event: string) {
 	try {
 		console.error(error);
 		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
@@ -18,7 +14,7 @@ export default async function logError(error, event) {
 			{
 				files: [
 					{
-						attachment: Buffer.from(generateError(error).toString(), "utf-8"),
+						attachment: Buffer.from(generateError(error), "utf-8"),
 						name: "error.json",
 					},
 				],
@@ -32,13 +28,12 @@ export default async function logError(error, event) {
 	}
 }
 
-/**
- * @param {any} error
- * @param {boolean} [returnObject]
- *
- * @returns {Record<string, any> | string}
- */
-const generateError = (error, returnObject = false) => {
+export function generateError(error: any, returnObject: true): Record<string, any>;
+export function generateError(error: any, returnObject?: false): string;
+export function generateError(
+	error: any,
+	returnObject: boolean = false,
+): Record<string, any> | string {
 	if (typeof error === "object" || error.toString !== "function") {
 		const serialized = serializeError(error);
 
@@ -49,7 +44,7 @@ const generateError = (error, returnObject = false) => {
 		delete serialized.errors;
 
 		/** @type {unknown[]} */
-		const subErrors =
+		const subErrors: unknown[] =
 			"errors" in error && error.errors instanceof Array ? error.errors : undefined;
 
 		const object = {
@@ -62,4 +57,4 @@ const generateError = (error, returnObject = false) => {
 		return returnObject ? object : JSON.stringify(object, null, "  ");
 	}
 	return error.toString();
-};
+}
