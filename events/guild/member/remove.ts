@@ -22,7 +22,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 				`I don't think this was the best place for **${member.user.username}**…`,
 				`Oop, **${member.user.username}** angered the mods!`,
 				`**${member.user.username}** broke the rules and took an L`,
-				`**${member.user.username}** was banned ~~(he talked about opacity slider too much)~~`,
+				`**${member.user.username}** talked about opacity slider too much`,
 		  ]
 		: [
 				`Welp… **${member.user.username}** decided to leave… what a shame…`,

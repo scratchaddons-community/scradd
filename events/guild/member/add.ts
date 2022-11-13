@@ -3,9 +3,6 @@ import CONSTANTS from "../../../common/CONSTANTS.js";
 import { changeNickname } from "../../../common/automod.js";
 import log from "../../../common/logging.js";
 import { nth } from "../../../util/numbers.js";
-import fileSystem from "fs/promises";
-import url from "url";
-import path from "path";
 import type Event from "../../../common/types/event";
 
 const event: Event<"guildMemberAdd"> = async function event(member) {
@@ -31,22 +28,12 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(CONSTANTS.guild.memberCount)} member!`,
 	];
 
-	await CONSTANTS.channels.welcome?.send({
-		content: greetings[Math.floor(Math.random() * greetings.length)],
-		files: `${CONSTANTS.guild.memberCount}`.includes("87")
-			? [
-					{
-						attachment: await fileSystem.readFile(
-							path.resolve(
-								path.dirname(url.fileURLToPath(import.meta.url)),
-								"../../../../common/audio/biteOf87.wav",
-							),
-						),
-						name: `file.wav`,
-					},
-			  ]
-			: [],
-	});
+	await CONSTANTS.channels.welcome?.send(
+		(greetings[Math.floor(Math.random() * greetings.length)] || "") +
+			(`${CONSTANTS.guild.memberCount}`.includes("87")
+				? " (WAS THAT THE BITE OF 87?!?!?)"
+				: ""),
+	);
 
 	await changeNickname(member, false);
 
