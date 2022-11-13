@@ -32,45 +32,42 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (!interaction.isRepliable()) return;
 	try {
 		if (interaction.isButton()) {
-			if (interaction.customId.endsWith("_strike")) {
-				if (!(interaction.member instanceof GuildMember))
-					throw new TypeError("interaction.member is not a GuildMember");
+			const [id, type] = interaction.customId.split(/(?<=^[^_]*)_/);
+			switch (type) {
+				case "strike": {
+					if (!(interaction.member instanceof GuildMember))
+						throw new TypeError("interaction.member is not a GuildMember");
 
-				await interaction.reply(
-					await getWarnById(
-						interaction.member,
-						interaction.customId.split("_strike")[0] ?? "",
-					),
-				);
-				return;
-			}
-
-			if (interaction.customId.endsWith("_reaction_role")) {
-				if (!(interaction.member instanceof GuildMember))
-					throw new TypeError("interaction.member is not a GuildMember");
-
-				const roleId = interaction.customId.split("_reaction_role")[0];
-				if (!roleId)
-					throw new SyntaxError(
-						"Button customId ends in _reaction_role but no role ID was given",
-					);
-				const role = interaction.member.roles.resolve(roleId);
-				if (role) {
-					await interaction.member.roles.remove(role, "Self role");
-					await interaction.reply({
-						ephemeral: true,
-						content: `${
-							CONSTANTS.emojis.statuses.yes
-						} Removed ${role.toString()} from you!`,
-					});
-				} else {
-					await interaction.member.roles.add(roleId, "Self role");
-					await interaction.reply({
-						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${roleId}>!`,
-					});
+					await interaction.reply(await getWarnById(interaction.member, id ?? ""));
+					return;
 				}
-				return;
+
+				case "reaction_role": {
+					if (!(interaction.member instanceof GuildMember))
+						throw new TypeError("interaction.member is not a GuildMember");
+
+					if (!id)
+						throw new SyntaxError(
+							"Button customId ends in _reaction_role but no role ID was given",
+						);
+					const role = interaction.member.roles.resolve(id);
+					if (role) {
+						await interaction.member.roles.remove(role, "Self role");
+						await interaction.reply({
+							ephemeral: true,
+							content: `${
+								CONSTANTS.emojis.statuses.yes
+							} Removed ${role.toString()} from you!`,
+						});
+					} else {
+						await interaction.member.roles.add(id, "Self role");
+						await interaction.reply({
+							ephemeral: true,
+							content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${id}>!`,
+						});
+					}
+					return;
+				}
 			}
 		}
 		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
