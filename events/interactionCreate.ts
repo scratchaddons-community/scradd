@@ -10,6 +10,7 @@ import path from "path";
 import url from "url";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
+import { edit } from "../commands/Edit Message.js";
 import type Event from "../common/types/event";
 import type Command from "../common/types/command.js";
 
@@ -73,12 +74,13 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
 		if (interaction.isModalSubmit()) {
-			if (interaction.customId.startsWith("guessModal.")) {
+			if (interaction.customId.startsWith("guessModal."))
 				return await guessAddon(interaction);
-			}
-			if (interaction.customId === "say") {
+
+			if (interaction.customId === "say")
 				return await say(interaction, interaction.fields.getTextInputValue("message"));
-			}
+
+			if (interaction.customId.startsWith("edit.")) return await edit(interaction);
 		}
 		if (!interaction.isCommand()) return;
 
