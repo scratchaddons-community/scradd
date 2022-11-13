@@ -89,9 +89,10 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	}
 	if (
 		newThread.archived &&
-		(newThread.name === DATABASE_THREAD ||
+		(((newThread.name === DATABASE_THREAD ||
 			(LOG_GROUPS as readonly string[]).includes(newThread.name)) &&
-		newThread.parent?.id === CONSTANTS.channels.modlogs?.id
+			newThread.parent?.id === CONSTANTS.channels.modlogs?.id) ||
+			newThread.id === "1029234332977602660")
 	) {
 		await newThread.setArchived(false, "Modlog threads must stay open");
 	}
