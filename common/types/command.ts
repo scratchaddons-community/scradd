@@ -231,9 +231,7 @@ export function defineCommand<
 	SubcommandGroup extends keyof O[Subcommand] = never,
 >(
 	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
-): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>
-export function defineCommand<T extends any>(
-	command: T,
-): T {
+): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>;
+export function defineCommand<T extends any>(command: T): T {
 	return command;
-};
+}
