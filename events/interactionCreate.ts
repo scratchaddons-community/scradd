@@ -20,11 +20,11 @@ const commands = importScripts<Command>(path.resolve(dirname, "../commands"));
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 	if (interaction.isAutocomplete()) {
-		const command = (await commands).get(interaction.commandName);
+		const command = (await commands).get(interaction.command?.name || "");
 
 		if (!command || !("autocomplete" in command))
 			throw new ReferenceError(
-				`Command \`${interaction.commandName}\` autocomplete handler not found`,
+				`Command \`${interaction.command?.name}\` autocomplete handler not found`,
 			);
 
 		return await command.autocomplete?.(interaction);
@@ -84,9 +84,10 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		}
 		if (!interaction.isCommand()) return;
 
-		const command = (await commands).get(interaction.commandName);
+		const command = (await commands).get(interaction.command?.name || "");
 
-		if (!command) throw new ReferenceError(`Command \`${interaction.commandName}\` not found`);
+		if (!command)
+			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
 		if (
 			interaction.isChatInputCommand() &&
@@ -123,7 +124,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			interaction.isCommand()
 				? interaction.isChatInputCommand()
 					? interaction.toString()
-					: `/${interaction.commandName}`
+					: `/${interaction.command?.name}`
 				: `${interaction.constructor.name}: ${interaction.customId}`,
 		);
 		if (interaction.deferred && +interaction.createdAt - +new Date() < 900_000) {
