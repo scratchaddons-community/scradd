@@ -157,7 +157,7 @@ const command = defineCommand({
 									inline: true,
 								},
 								{
-									name: "Beta testers",
+									name: "Additional beta testers",
 									value: await getRole(CONSTANTS.roles.testers),
 									inline: true,
 								},
