@@ -18,8 +18,8 @@ const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const commands = importScripts<Command>(path.resolve(dirname, "../commands"));
 
 const event: Event<"interactionCreate"> = async function event(interaction) {
-	if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 	if (interaction.isAutocomplete()) {
+		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 		const command = (await commands).get(interaction.command?.name || "");
 
 		if (!command || !("autocomplete" in command))
@@ -73,6 +73,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 				return;
 			}
 		}
+		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
 		if (interaction.isModalSubmit()) {
 			if (interaction.customId.startsWith("guessModal.")) {
