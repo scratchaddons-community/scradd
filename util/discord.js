@@ -9,7 +9,7 @@ import {
 	Attachment,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { escapeMessage, escapeLinks } from "./markdown.js";
+import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { badAttachments, censor } from "../common/automod.js";
 
@@ -295,7 +295,7 @@ export async function messageToText(message, replies = true) {
 
 			return (
 				`*[Replying to](${repliedMessage.url}) ${repliedMessage.author.toString()}${
-					cleanContent ? `:*\n> ${truncateText(cleanContent, 300)}` : "*"
+					cleanContent ? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "*"
 				}\n\n` + linklessContent
 			);
 		}

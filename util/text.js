@@ -1,5 +1,3 @@
-import { stripMarkdown } from "./markdown.js";
-
 /**
  * @typedef {(
  * 	| import("discord.js").APIButtonComponentWithCustomId
@@ -53,7 +51,7 @@ export function joinWithAnd(array, callback = (item) => item.toString()) {
  * @returns {string} - The truncated string.
  */
 export function truncateText(text, maxLength) {
-	const firstLine = stripMarkdown(text).split("\n")[0] ?? "";
+	const firstLine = text.replaceAll(/\s+/g, " ");
 
 	return firstLine.length > maxLength || text.includes("\n")
 		? `${firstLine.slice(0, Math.max(0, maxLength - 1))}…`
