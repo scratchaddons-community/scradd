@@ -20,8 +20,7 @@ const command = defineCommand({
 			},
 			"weekly-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description:
-					`Toggle pings if you are one of the most active people each week (#${CONSTANTS.channels.announcements?.name})`,
+				description: `Toggle pings if you are one of the most active people each week (#${CONSTANTS.channels.announcements?.name})`,
 			},
 			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,

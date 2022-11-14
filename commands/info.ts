@@ -19,9 +19,7 @@ async function getRole(roleId: Snowflake, useMentions: boolean = false): Promise
 	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
 	const members = role?.members.toJSON() ?? [];
 
-	return joinWithAnd(members, (member) =>
-		useMentions ? member.toString() : member.user.username,
-	);
+	return joinWithAnd(members, useMentions ? undefined : (member) => member.user.username);
 }
 
 const command = defineCommand({

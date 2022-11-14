@@ -44,15 +44,13 @@ const command = defineCommand({
 					content: `${CONSTANTS.emojis.statuses.no} Could not find a message with that ID! Note: I cannot delete messages older than 2 weeks or more than ${MAX_FETCH_COUNT} messages at a time.`,
 				});
 			} else
-				await interaction.reply({
-					ephemeral: true,
-					content: await deleteMessages(messages, interaction.channel, deleteTo, user),
-				});
+				await interaction.reply(
+					await deleteMessages(messages, interaction.channel, deleteTo, user),
+				);
 		} else
-			await interaction.reply({
-				ephemeral: true,
-				content: await deleteMessages(messages, interaction.channel, numberCount, user),
-			});
+			await interaction.reply(
+				await deleteMessages(messages, interaction.channel, numberCount, user),
+			);
 	},
 });
 export default command;
@@ -74,8 +72,16 @@ async function deleteMessages(
 				message.deletable,
 		);
 	if (filtered.length) {
+		// TODO: channel.createMessageComponentCollector({})
+		// return {}
 		await channel.bulkDelete(filtered);
-		return `${CONSTANTS.emojis.statuses.yes} Deleted ${filtered.length} messages!`;
+		return {
+			content: `${CONSTANTS.emojis.statuses.yes} Deleted ${filtered.length} messages!`,
+			ephemeral: true,
+		};
 	}
-	return `${CONSTANTS.emojis.statuses.no} No messages matched those filters! Note: I cannot delete messages older than 2 weeks or more than ${MAX_FETCH_COUNT} messages at a time.`;
+	return {
+		content: `${CONSTANTS.emojis.statuses.no} No messages matched those filters! Note: I cannot delete messages older than 2 weeks or more than ${MAX_FETCH_COUNT} messages at a time.`,
+		ephemeral: true,
+	};
 }

@@ -28,6 +28,7 @@ import client from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
 import type Event from "../../common/types/event";
+import { BOARD_EMOJI } from "../../common/board.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 
@@ -295,7 +296,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 			MessageType.GuildBoostTier3,
 		].includes(message.type)
 	)
-		react("🥔");
+		react(BOARD_EMOJI);
 
 	// Don’t react to users who disabled the setting.
 	if (
