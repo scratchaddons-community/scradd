@@ -12,25 +12,25 @@ const command = defineCommand({
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Whether to ping you when your messages get on #${CONSTANTS.channels.board?.name}`,
+				description: `Toggle pings when your messages get on #${CONSTANTS.channels.board?.name}`,
 			},
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Whether to ping you when you level up",
+				description: "Toggle pings you when you level up",
 			},
 			"weekly-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description:
-					"Whether to ping you if you are one of the most active people each week",
+					`Toggle pings if you are one of the most active people each week (#${CONSTANTS.channels.announcements?.name})`,
 			},
 			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Whether to automatically react to your messages with funny emojis",
+				description: "Toggle automatic funny emoji reactions to your messages",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
 				description:
-					"Whether to use mentions instead of usernames so you can view user profiles",
+					"Toggle using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
 			},
 		},
 	},

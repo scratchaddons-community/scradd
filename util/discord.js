@@ -7,11 +7,13 @@ import {
 	MessageType,
 	ChannelType,
 	Attachment,
+	User,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { badAttachments, censor } from "../common/automod.js";
+import { userSettingsDatabase } from "../commands/settings.js";
 
 /**
  * @param {import("discord.js").Message} message
@@ -366,14 +368,18 @@ export async function reactAll(message, reactions) {
  * @param {(value: T, index: number, array: T[]) => import("discord.js").Awaitable<string>} toString
  * @param {string} failMessage
  * @param {string} title
+ * @param {User} user
  * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
  */
 
-export async function paginate(array, toString, failMessage, title, reply, rawOffset = 0) {
+export async function paginate(array, toString, failMessage, title, reply, user, rawOffset = 0) {
 	const PAGE_OFFSET = 15;
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
+	const useMentions = userSettingsDatabase.data.find(
+		(settings) => user.id === settings.user,
+	)?.useMentions;
 
 	// eslint-disable-next-line fp/no-let -- This must be changable.
 	let offset = Math.floor(rawOffset / PAGE_OFFSET) * PAGE_OFFSET;
@@ -429,7 +435,11 @@ export async function paginate(array, toString, failMessage, title, reply, rawOf
 					title: title,
 					description: content,
 					footer: {
-						text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}`,
+						text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}${
+							useMentions === undefined
+								? "\nUse /settings to restore the old behavior of showing mentions instead of usernames"
+								: ""
+						}`,
 					},
 					color: CONSTANTS.themeColor,
 				},

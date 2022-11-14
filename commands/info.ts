@@ -146,7 +146,7 @@ const command = defineCommand({
 				const useMentions = userSettingsDatabase.data.find(
 					(settings) => interaction.user.id === settings.user,
 				)?.useMentions;
-				
+
 				await interaction.reply({
 					embeds: [
 						{

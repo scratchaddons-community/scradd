@@ -133,6 +133,7 @@ const command = defineCommand({
 					"No users found.",
 					`Leaderboard for ${CONSTANTS.guild.name}`,
 					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
+					interaction.user,
 					user ? top.findIndex(({ user: id }) => id === user.id) : 0,
 				);
 			}

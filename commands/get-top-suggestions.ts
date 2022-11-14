@@ -135,6 +135,7 @@ const command = defineCommand({
 				answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
 			}`,
 			(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
+			interaction.user,
 		);
 	},
 });
