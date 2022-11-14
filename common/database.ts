@@ -200,4 +200,5 @@ export type Databases = {
 		id: Snowflake;
 		title: string;
 	};
+	roles: { [role: Snowflake]: true } & { user: Snowflake };
 };

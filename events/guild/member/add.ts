@@ -4,6 +4,7 @@ import { changeNickname } from "../../../common/automod.js";
 import log from "../../../common/logging.js";
 import { nth } from "../../../util/numbers.js";
 import type Event from "../../../common/types/event";
+import { rolesDatabase } from "./remove.js";
 
 const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
@@ -58,5 +59,14 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			`🎊 ${member.toString()} Thanks for inviting 20+ people! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
 		);
 	});
+
+	const roles = rolesDatabase.data.find((entry) => entry.user === member.id);
+	if (roles) {
+		await member.roles.add(
+			Object.entries(roles)
+				.filter((role): role is [Snowflake, true] => role[1] === true)
+				.map(([id]) => id),
+		);
+	}
 };
 export default event;
