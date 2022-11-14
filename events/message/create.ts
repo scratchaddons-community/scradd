@@ -151,10 +151,14 @@ const event: Event<"messageCreate"> = async function event(message) {
 	) {
 		const member = await getUserFromModmail(message.channel);
 
+		const useMentions =
+			userSettingsDatabase.data.find((settings) => member?.id === settings.user)
+				?.useMentions ?? false;
+
 		const messageToSend = await generateModmailMessage(message);
 
 		messageToSend.content =
-			message.author.toString() +
+			(useMentions ? message.author.toString() : message.author.username) +
 			":" +
 			(messageToSend.content ? " " + messageToSend.content : "");
 

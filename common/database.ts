@@ -186,6 +186,7 @@ export type Databases = {
 		weeklyPings: boolean;
 		/** Whether to automatically react to their messages with random emojis. */
 		autoreactions: boolean;
+		useMentions: boolean;
 	};
 	recent_xp: {
 		/** The ID of the user. */

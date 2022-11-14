@@ -1,10 +1,18 @@
-import { ApplicationCommandOptionType, cleanContent, GuildMember, hyperlink } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	cleanContent,
+	GuildMember,
+	hyperlink,
+	User,
+} from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeLinks } from "../util/markdown.js";
 import { getAllMessages, paginate } from "../util/discord.js";
 import { truncateText } from "../util/text.js";
 import { defineCommand } from "../common/types/command.js";
 import Database from "../common/database.js";
+import client from "../client.js";
+import { userSettingsDatabase } from "./settings.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
@@ -40,7 +48,7 @@ const old = CONSTANTS.channels.old_suggestions
 						(message.author.id === CONSTANTS.robotop
 							? message.embeds[0]?.footer?.text.split(": ")[1]
 							: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
-									?.groups?.userId) || message.author.id,
+									?.groups?.userId) || message.author,
 
 					count:
 						(message.reactions.valueOf().first()?.count ?? 0) -
@@ -79,6 +87,9 @@ const command = defineCommand({
 		const author = interaction.options.getMember("user");
 		const answer = interaction.options.getString("answer");
 		const { suggestions } = CONSTANTS.channels;
+		const useMentions =
+			userSettingsDatabase.data.find((settings) => interaction.user.id === settings.user)
+				?.useMentions ?? false;
 
 		const nick = author instanceof GuildMember && author?.displayName;
 
@@ -88,21 +99,37 @@ const command = defineCommand({
 					(item) =>
 						!(
 							(answer && item.answer !== answer) ||
-							(author instanceof GuildMember && item.author !== author.id)
+							(author instanceof GuildMember &&
+								(item.author instanceof User ? item.author.id : item.author) !==
+									author.id)
 						),
 				)
 				.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
-			(suggestion) =>
-				`**${suggestion.count}** ${
+			async ({ answer, author, count, title, ...id }) => {
+				return `**${count}** ${
 					suggestions?.defaultReactionEmoji?.name ||
 					`<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`
 				} ${hyperlink(
-					escapeLinks(suggestion.title),
-					"url" in suggestion
-						? suggestion.url
-						: `https://discord.com/channels/${CONSTANTS.guild.id}/${suggestion.id}/${suggestion.id}`,
-					suggestion.answer,
-				)}${nick ? "" : ` by <@${suggestion.author}>`}`,
+					escapeLinks(title),
+					"url" in id
+						? id.url
+						: `https://discord.com/channels/${CONSTANTS.guild.id}/${id.id}/${id.id}`,
+					answer,
+				)}${
+					nick
+						? ""
+						: ` by ${
+								useMentions
+									? `<@${author instanceof User ? author.id : author}>`
+									: (author instanceof User
+											? author
+											: await client.users
+													.fetch(author)
+													.catch(() => ({ username: `<@${author}>` }))
+									  ).username
+						  }`
+				}`;
+			},
 			"No suggestions found. Try changing any filters you may have used.",
 			`Top suggestions${nick ? ` by ${nick}` : ""}${
 				answer ? `${nick ? " &" : ""} answered with ${answer}` : ""

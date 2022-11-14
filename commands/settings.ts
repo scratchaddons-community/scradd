@@ -27,6 +27,11 @@ const command = defineCommand({
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Whether to automatically react to your messages with funny emojis",
 			},
+			"use-mentions": {
+				type: ApplicationCommandOptionType.Boolean,
+				description:
+					"Whether to use mentions instead of usernames so you can view user profiles",
+			},
 		},
 	},
 	async interaction(interaction) {
@@ -48,11 +53,23 @@ const command = defineCommand({
 			autoreactions =
 				interaction.options.getBoolean("autoreactions") ??
 				settingsForUser?.autoreactions ??
-				true;
+				true,
+			useMentions =
+				interaction.options.getBoolean("use-mentions") ??
+				settingsForUser?.useMentions ??
+				false;
+
 		userSettingsDatabase.data = settingsForUser
 			? userSettingsDatabase.data.map((data) =>
 					data.user === interaction.user.id
-						? { user: data.user, boardPings, levelUpPings, weeklyPings, autoreactions }
+						? {
+								user: data.user,
+								boardPings,
+								levelUpPings,
+								weeklyPings,
+								autoreactions,
+								useMentions,
+						  }
 						: data,
 			  )
 			: [
@@ -63,6 +80,7 @@ const command = defineCommand({
 						levelUpPings,
 						weeklyPings,
 						autoreactions,
+						useMentions,
 					},
 			  ];
 		await interaction.reply({
@@ -72,7 +90,8 @@ const command = defineCommand({
 				`Board Pings: ${CONSTANTS.emojis.statuses[boardPings ? "yes" : "no"]}\n` +
 				`Level Up Pings: ${CONSTANTS.emojis.statuses[levelUpPings ? "yes" : "no"]}\n` +
 				`Weekly Winner Pings: ${CONSTANTS.emojis.statuses[weeklyPings ? "yes" : "no"]}\n` +
-				`Autoreactions: ${CONSTANTS.emojis.statuses[autoreactions ? "yes" : "no"]}`,
+				`Autoreactions: ${CONSTANTS.emojis.statuses[autoreactions ? "yes" : "no"]}\n` +
+				`Use Mentions: ${CONSTANTS.emojis.statuses[useMentions ? "yes" : "no"]}`,
 		});
 	},
 });

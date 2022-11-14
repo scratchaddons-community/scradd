@@ -15,6 +15,7 @@ import { getLoggingThread } from "../common/logging.js";
 import { removeExpiredWarns, muteLog, warnLog, WARN_INFO_BASE } from "../common/warns.js";
 import { convertBase } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
+import { userSettingsDatabase } from "./settings.js";
 
 const command = defineCommand({
 	data: {
@@ -147,6 +148,10 @@ export async function getWarnById(
 	interactor: GuildMember,
 	filter: string,
 ): Promise<InteractionReplyOptions> {
+	const useMentions =
+		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
+			?.useMentions ?? false;
+
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
 	const id = convertBase(filter, WARN_INFO_BASE, 10);
 	const channel = await getLoggingThread("members");
@@ -207,9 +212,23 @@ export async function getWarnById(
 						value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
 						inline: true,
 					},
-					...(mod ? [{ name: "🛡 Moderator", value: mod.toString(), inline: true }] : []),
+					...(mod
+						? [
+								{
+									name: "🛡 Moderator",
+									value: useMentions ? mod.toString() : mod.username,
+									inline: true,
+								},
+						  ]
+						: []),
 					...(user
-						? [{ name: "👤 Target user", value: user.toString(), inline: true }]
+						? [
+								{
+									name: "👤 Target user",
+									value: useMentions ? user.toString() : user.username,
+									inline: true,
+								},
+						  ]
 						: []),
 					...(expiresAt
 						? [

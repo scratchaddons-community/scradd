@@ -6,6 +6,7 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import pkg from "../package.json" assert { type: "json" };
 import { defineCommand } from "../common/types/command.js";
 import client from "../client.js";
+import { userSettingsDatabase } from "./settings.js";
 
 /**
  * Get all users with a role.
@@ -14,11 +15,13 @@ import client from "../client.js";
  *
  * @returns Users with the role.
  */
-async function getRole(roleId: Snowflake): Promise<string> {
+async function getRole(roleId: Snowflake, useMentions: boolean = false): Promise<string> {
 	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
 	const members = role?.members.toJSON() ?? [];
 
-	return joinWithAnd(members);
+	return joinWithAnd(members, (member) =>
+		useMentions ? member.toString() : member.user.username,
+	);
 }
 
 const command = defineCommand({
@@ -140,6 +143,10 @@ const command = defineCommand({
 				break;
 			}
 			case "credits": {
+				const useMentions = userSettingsDatabase.data.find(
+					(settings) => interaction.user.id === settings.user,
+				)?.useMentions;
+				
 				await interaction.reply({
 					embeds: [
 						{
@@ -148,17 +155,17 @@ const command = defineCommand({
 							fields: [
 								{
 									name: "Developers",
-									value: await getRole(CONSTANTS.roles.developers),
+									value: await getRole(CONSTANTS.roles.developers, useMentions),
 									inline: true,
 								},
 								{
 									name: "Designers",
-									value: await getRole(CONSTANTS.roles.designers),
+									value: await getRole(CONSTANTS.roles.designers, useMentions),
 									inline: true,
 								},
 								{
 									name: "Additional beta testers",
-									value: await getRole(CONSTANTS.roles.testers),
+									value: await getRole(CONSTANTS.roles.testers, useMentions),
 									inline: true,
 								},
 								{

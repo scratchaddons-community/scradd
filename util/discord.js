@@ -363,7 +363,7 @@ export async function reactAll(message, reactions) {
  * @template T
  *
  * @param {T[]} array
- * @param {(value: T, index: number, array: T[]) => string} toString
+ * @param {(value: T, index: number, array: T[]) => import("discord.js").Awaitable<string>} toString
  * @param {string} failMessage
  * @param {string} title
  * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
@@ -381,12 +381,19 @@ export async function paginate(array, toString, failMessage, title, reply, rawOf
 	/**
 	 * Generate an embed that has the next page.
 	 *
-	 * @returns {import("discord.js").InteractionReplyOptions} EmbedBuilder with the next page.
+	 * @returns {Promise<import("discord.js").InteractionReplyOptions>} EmbedBuilder with the next page.
 	 */
-	function generateMessage() {
-		const content = array
-			.filter((_, index) => index >= offset && index < offset + PAGE_OFFSET)
-			.map((current, index, all) => `${index + offset + 1}) ${toString(current, index, all)}`)
+	async function generateMessage() {
+		const content = (
+			await Promise.all(
+				array
+					.filter((_, index) => index >= offset && index < offset + PAGE_OFFSET)
+					.map(
+						async (current, index, all) =>
+							`${index + offset + 1}) ${await toString(current, index, all)}`,
+					),
+			)
+		)
 			.join("\n")
 			.trim();
 
@@ -431,7 +438,7 @@ export async function paginate(array, toString, failMessage, title, reply, rawOf
 		};
 	}
 
-	let message = await reply(generateMessage());
+	let message = await reply(await generateMessage());
 
 	const collector = message?.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
@@ -447,7 +454,7 @@ export async function paginate(array, toString, failMessage, title, reply, rawOf
 			else offset -= PAGE_OFFSET;
 
 			await buttonInteraction.deferUpdate();
-			message = await reply(generateMessage());
+			message = await reply(await generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {

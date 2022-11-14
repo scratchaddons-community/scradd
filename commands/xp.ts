@@ -5,6 +5,8 @@ import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/
 import { paginate } from "../util/discord.js";
 import { makeProgressBar } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
+import { userSettingsDatabase } from "./settings.js";
+import client from "../client.js";
 
 const command = defineCommand({
 	data: {
@@ -110,12 +112,23 @@ const command = defineCommand({
 			}
 			case "top": {
 				const user = interaction.options.getUser("user");
+				const useMentions =
+					userSettingsDatabase.data.find(
+						(settings) => interaction.user.id === settings.user,
+					)?.useMentions ?? false;
+
 				await paginate(
 					top,
-					(xp) => {
-						return `**Level ${getLevelForXp(xp.xp)}** - <@${
-							xp.user
-						}> (${xp.xp.toLocaleString()} XP)`;
+					async (xp) => {
+						return `**Level ${getLevelForXp(xp.xp)}** - ${
+							useMentions
+								? `<@${xp.user}>`
+								: (
+										await client.users
+											.fetch(xp.user)
+											.catch(() => ({ username: `<@${xp.user}>` }))
+								  ).username
+						} (${xp.xp.toLocaleString()} XP)`;
 					},
 					"No users found.",
 					`Leaderboard for ${CONSTANTS.guild.name}`,
