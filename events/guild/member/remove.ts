@@ -38,7 +38,11 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 		  ];
 
 	const promises = [
-		CONSTANTS.channels.welcome?.send(byes[Math.floor(Math.random() * byes.length)] || ""),
+		CONSTANTS.channels.welcome?.send(
+			CONSTANTS.emojis.misc[banned ? "ban" : "leave"] +
+				" " +
+				byes[Math.floor(Math.random() * byes.length)],
+		),
 		getThreadFromMember(member).then(async (thread) => {
 			if (thread) closeModmail(thread, member.user, "Member left");
 		}),

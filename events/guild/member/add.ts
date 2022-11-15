@@ -23,14 +23,14 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 		`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
 			CONSTANTS.guild.memberCount,
 		)})!`,
-		`What’s that? A new member? Yes, ${member.toString()}’s our ${nth(
+		`Is it a bird? Is it a plane? No, it’s ${member.toString()}, our ${nth(
 			CONSTANTS.guild.memberCount,
-		)}!`,
+		)} member!`,
 		`Welcome:tm: ${member.toString()}! You’re our ${nth(CONSTANTS.guild.memberCount)} member!`,
 	];
 
 	await CONSTANTS.channels.welcome?.send(
-		(greetings[Math.floor(Math.random() * greetings.length)] || "") +
+		CONSTANTS.emojis.misc.join+" "+(greetings[Math.floor(Math.random() * greetings.length)] || "") +
 			(`${CONSTANTS.guild.memberCount}`.includes("87")
 				? " (WAS THAT THE BITE OF 87?!?!?)"
 				: ""),
