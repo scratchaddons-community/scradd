@@ -71,8 +71,8 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				.join("\n");
 
 		const extraDiff = jsonDiff.diffString(
-			{ ...getMessageJSON(oldMessage), content: undefined },
-			{ ...getMessageJSON(newMessage), content: undefined },
+			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },
+			{ ...getMessageJSON(newMessage), content: undefined, embeds: undefined },
 			{ color: false },
 		);
 
