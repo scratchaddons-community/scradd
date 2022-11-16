@@ -70,6 +70,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					return;
 				}
 			}
+			return;
 		}
 		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
