@@ -86,7 +86,9 @@ const promises = [
 						name,
 						description: data.description ?? "",
 						type: data.type || ApplicationCommandType.ChatInput,
-						defaultMemberPermissions: data.restricted ? new PermissionsBitField() : undefined,
+						defaultMemberPermissions: data.restricted
+							? new PermissionsBitField()
+							: null,
 						options: data.options
 							? transformOptions(data.options)
 							: data.subcommands &&
