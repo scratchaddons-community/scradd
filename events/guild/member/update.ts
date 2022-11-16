@@ -38,12 +38,12 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 	}
 	if (
 		newMember.roles.premiumSubscriberRole &&
-		CONSTANTS.roles.epic &&
-		!newMember.roles.resolve(CONSTANTS.roles.epic.id)
+		CONSTANTS.roles.booster &&
+		!newMember.roles.resolve(CONSTANTS.roles.booster.id)
 	) {
-		await newMember.roles.add(CONSTANTS.roles.epic, "Boosted the server");
+		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
 		await CONSTANTS.channels.general?.send(
-			`🎊 ${newMember.toString()} Thanks for boosting the server! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
+			`🎊 ${newMember.toString()} Thanks for boosting the server! Here's ${CONSTANTS.roles.booster.toString()} as a thank-you.`,
 		);
 	}
 	await Promise.all(

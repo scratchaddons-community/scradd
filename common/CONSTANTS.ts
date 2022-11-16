@@ -75,6 +75,7 @@ export default {
 		epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 		weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 		active: roles.find((role) => role.name.toLowerCase().includes("active")),
+		booster: roles.find((role) => role.editable && role.name.toLowerCase().includes("booster")),
 	},
 	urls: {
 		usercountJson: "https://scratchaddons.com/usercount.json",
