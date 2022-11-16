@@ -41,7 +41,6 @@ const badWords = [
 			/pyvg/,
 			/gvg(?:(?:gvr)?f)?/,
 			/chff(?:l|vrf)/,
-			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/fpebghz/,
 			/ynovn/,
 			/preivk/,
