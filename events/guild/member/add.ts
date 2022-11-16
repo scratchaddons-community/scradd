@@ -30,7 +30,9 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	];
 
 	await CONSTANTS.channels.welcome?.send(
-		CONSTANTS.emojis.misc.join+" "+(greetings[Math.floor(Math.random() * greetings.length)] || "") +
+		CONSTANTS.emojis.misc.join +
+			" " +
+			(greetings[Math.floor(Math.random() * greetings.length)] || "") +
 			(`${CONSTANTS.guild.memberCount}`.includes("87")
 				? " (WAS THAT THE BITE OF 87?!?!?)"
 				: ""),
