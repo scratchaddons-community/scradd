@@ -51,7 +51,7 @@ const badWords = [
 	],
 	[
 		[
-			/fu(?:v|r)+g(?!nx(?:v|r))/,
+			/fuv+r*g(?!nx(?:v|r))/,
 			/puvat ?(punat ?)?puba/,
 			/rwnphyngr/,
 			/fcyb+tr/,
