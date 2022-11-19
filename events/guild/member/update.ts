@@ -36,15 +36,8 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 			newMember.nickname ? " was nicknamed " + newMember.nickname : "’s nickname was removed",
 		);
 	}
-	if (
-		newMember.roles.premiumSubscriberRole &&
-		CONSTANTS.roles.booster &&
-		!newMember.roles.resolve(CONSTANTS.roles.booster.id)
-	) {
+	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster) {
 		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
-		await CONSTANTS.channels.general?.send(
-			`🎊 ${newMember.toString()} Thanks for boosting the server! Here's ${CONSTANTS.roles.booster.toString()} as a thank-you.`,
-		);
 	}
 	await Promise.all(
 		logs.map((edit) => log(`🫂 Member ${newMember.toString()}${edit}!`, "members")),
