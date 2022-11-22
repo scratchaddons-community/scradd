@@ -70,7 +70,7 @@ const badWords = [
 			/dhrrs/,
 			/wnpx ?bss/,
 			/wrex ?bss/,
-			/ovg?(?:p|f)u/,
+			/ovg?pu/,
 		],
 		[
 			/xlf/,
@@ -86,6 +86,8 @@ const badWords = [
 			/onfgneq(?:vfz|(y|e)?l|evrf|f)?/,
 			/cnp?x(?:vr|l)?vf?/,
 			/phagf?/,
+			/fuk/,
+			/ovg?fu/,
 		],
 	],
 	[
