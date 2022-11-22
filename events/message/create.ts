@@ -332,30 +332,14 @@ const event: Event<"messageCreate"> = async function event(message) {
 		).test(content);
 	}
 
-	if (includes("dango")) react("🍡");
-	if (includes(/av[ao]cado/)) react("🥑");
-
+	// SA jokes
 	if (
 		["e", "ae", "iei", "a", "."].includes(stripMarkdown(normalize(content))) ||
 		content.includes("æ")
 	)
 		react(CONSTANTS.emojis.autoreact.e);
-
-	if (content.includes("quack") || includes("duck")) react("🦆");
-	if (content === "radio") react("📻");
-	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
-	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
-	if (includes(/j[eo]f+[oa]l+o/) || includes(/buf+[oa]l+o/))
-		react(CONSTANTS.emojis.autoreact.jeffalo);
-	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
-		react(CONSTANTS.emojis.autoreact.tw);
-	if (includes("mee6") || includes("dyno")) react("🤮");
-	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
-	if (content.includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
-
-	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
-		react(CONSTANTS.emojis.autoreact.tera);
-
+	if (includes("dango")) react("🍡");
+	if (includes(/av[ao]cado/)) react("🥑");
 	if (includes("sat on addon")) {
 		if (reactions < REACTION_CAP) {
 			reactions = reactions + 3;
@@ -363,6 +347,14 @@ const event: Event<"messageCreate"> = async function event(message) {
 		}
 	}
 
+	// Server jokes
+	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
+	if (content.includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
+	if (includes("doost") || includes("dooster")) react(CONSTANTS.emojis.autoreact.boost);
+	if (content.includes("quack") || includes("duck")) react("🦆");
+	if (content === "radio") react("📻");
+	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
+		react(CONSTANTS.emojis.autoreact.tera);
 	if (includes("snake") || includes("snek")) {
 		if (reactions < REACTION_CAP) {
 			reactions = reactions + 3;
@@ -370,16 +362,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 		}
 	}
 
-	if (includes("sus", false)) react(CONSTANTS.emojis.autoreact.sus);
-
-	if (
-		includes(/gives? ?you ?up/i, false) ||
-		content.includes("rickroll") ||
-		includes("astley") ||
-		content.includes("dqw4w9wgxcq")
-	)
-		react(CONSTANTS.emojis.autoreact.rick);
-
+	// Discord jokes
+	if (includes("mee6") || includes("dyno")) react("🤮");
 	if (
 		message.mentions.has(client.user?.id ?? "", {
 			ignoreEveryone: true,
@@ -389,6 +373,25 @@ const event: Event<"messageCreate"> = async function event(message) {
 		message.author.id !== client.user?.id
 	)
 		react("👋");
+
+	// Scratch jokes
+	if (includes(/j[eo]f+[oa]l+o/) || includes(/buf+[oa]l+o/))
+		react(CONSTANTS.emojis.autoreact.jeffalo);
+	if (includes(/wasteof\.(?!money)/, false)) react(CONSTANTS.emojis.autoreact.wasteof);
+	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
+		react(CONSTANTS.emojis.autoreact.tw);
+	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
+	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
+
+	// Internet jokes
+	if (includes("sus", false)) react(CONSTANTS.emojis.autoreact.sus);
+	if (
+		includes(/gives? ?you ?up/i, false) ||
+		content.includes("rickroll") ||
+		includes("astley") ||
+		content.includes("dqw4w9wgxcq")
+	)
+		react(CONSTANTS.emojis.autoreact.rick);
 
 	await Promise.all(promises);
 };
