@@ -11,7 +11,7 @@ import giveXp from "./xp.js";
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
 export function boardReactionCount(channel) {
-	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 3, default: 8 };
+	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, admins: 2, default: 8, welcome: 10 };
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 	if (!channel) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
@@ -19,15 +19,14 @@ export function boardReactionCount(channel) {
 
 	return (
 		{
+			[CONSTANTS.channels.welcome?.id || ""]: COUNTS.welcome,
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.modsPlus,
+			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.mods + 1,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
-			"853256939089559583": COUNTS.mods, // #da-boosters
+			"853256939089559583": COUNTS.modsPlus, // #da-boosters
 			"869662117651955802": COUNTS.devs, // #devs-only
-			"1018702459776028782": COUNTS.mods, // #mod-applications
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
-			"938807989874360330": COUNTS.devs, // #old-bugs
 		}[baseChannel.id] ||
 		COUNTS[baseChannel.parent?.id === "866028754962612294" ? "modsPlus" : "default"] // 💀 The Cache!
 	);
