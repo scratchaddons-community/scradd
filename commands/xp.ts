@@ -116,6 +116,12 @@ const command = defineCommand({
 					userSettingsDatabase.data.find(
 						(settings) => interaction.user.id === settings.user,
 					)?.useMentions ?? false;
+				const index = user ? top.findIndex(({ user: id }) => id === user.id) : 0;
+				if (index === -1)
+					return await interaction.reply({
+						content: `${CONSTANTS.emojis.statuses.no} ${user.toString()} could not be found! Do they have any XP?`,
+						ephemeral: true
+					});
 
 				await paginate(
 					top,
@@ -134,7 +140,7 @@ const command = defineCommand({
 					`Leaderboard for ${CONSTANTS.guild.name}`,
 					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 					interaction.user,
-					user ? top.findIndex(({ user: id }) => id === user.id) : 0,
+					index,
 				);
 			}
 		}
