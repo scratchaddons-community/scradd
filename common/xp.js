@@ -111,14 +111,16 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
+	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000));
 
 	//send weekly winners
-	if (+date - +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000)) < 604_800_000) return;
+	if (+date - nextWeeklyDate < 604_800_000) return;
 
 	// More than a week since last weekly
-	weeklyXpDatabase.extra = +date + "";
+	weeklyXpDatabase.extra = nextWeeklyDate + "";
 	const sorted = weekly.sort((a, b) => b.xp - a.xp);
 	const active = CONSTANTS.roles.active;
+	let activeCount = 0;
 	if (active) {
 		await Promise.all([
 			...active.members.map((member) => {
@@ -126,12 +128,14 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					return member.roles.remove(active, "Inactive");
 			}),
 			...sorted.map(
-				({ user, xp }) =>
-					xp > 350 &&
-					CONSTANTS.guild.members
-						.fetch(user)
-						.catch(() => {})
-						.then((member) => member?.roles.add(active, "Active")),
+				({ user, xp }) => {
+					if (xp > 350) {
+						activeCount++;
+						return CONSTANTS.guild.members
+							.fetch(user)
+							.catch(() => {})
+							.then((member) => member?.roles.add(active, "Active")),
+					}
 			),
 		]);
 	}
@@ -175,7 +179,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							gain.user
 						}> - ${gain.xp.toLocaleString()} XP`,
 				)
-				.join("\n") || "*Nobody got any XP this week!*"),
+				.join("\n") || "*Nobody got any XP this week!*") +
+			`\n\n*This week, ${weekly.length} people chatted, and ${activeCount} people were active.*`,
 	});
 
 	const role = CONSTANTS.roles.weekly_winner;
