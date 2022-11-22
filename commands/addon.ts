@@ -38,7 +38,7 @@ const command = defineCommand({
 
 	async interaction(interaction) {
 		const input = interaction.options.getString("addon", true);
-		const { item: addon } = fuse.search(input)[0] ?? {};
+		const addon = fuse.search(input)[0]?.item;
 
 		if (!addon) {
 			await interaction.reply({
