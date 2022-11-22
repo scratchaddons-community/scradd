@@ -76,7 +76,7 @@ const command = defineCommand({
 				type: ApplicationCommandOptionType.User,
 				description: "Filter suggestions to only get those by a certain user",
 			},
-			option: {
+			answer: {
 				type: ApplicationCommandOptionType.String,
 				description: "Filter suggestions to only get those with a certain answer",
 				choices: Object.fromEntries(suggestionAnswers.map((answer) => [answer, answer])),
