@@ -44,7 +44,8 @@ export default {
 				"<:snakes3:962800682061140019>",
 			],
 			bob: "<:bob:1001977844894810243>",
-			boost: "<:nitro:1044650827882696805>"
+			boost: "<:nitro:1044650827882696805>",
+			wasteof: "<:wasteofmoney:1044651861682176080>",
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",
