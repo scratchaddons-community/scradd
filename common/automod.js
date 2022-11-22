@@ -238,7 +238,6 @@ export async function automodMessage(message) {
 	const bad = (
 		await Promise.all([
 			checkString(stripMarkdown(message.content), message),
-			badAttachments(message),
 			...message.stickers.map(({ name }) => checkString(name, message)),
 		])
 	).reduce(
@@ -388,50 +387,6 @@ export function badWordsAllowed(channel) {
 		baseChannel?.type === ChannelType.DM ||
 		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
-}
-
-/** @param {import("discord.js").Message | import("discord.js").PartialMessage} message */
-export async function badAttachments(message) {
-	/**
-	 * @type {{
-	 * 	language: false | number;
-	 * 	invites: false;
-	 * 	bots: false;
-	 * 	words: { language: string[]; invites: never[]; bots: never[] };
-	 * }}
-	 */
-	const bad = {
-		language: false,
-		invites: false,
-		bots: false,
-		words: { language: [], invites: [], bots: [] },
-	};
-
-	await Promise.all(
-		message.attachments.map(async (attachment) => {
-			for (const toCensor of [
-				attachment.name,
-				attachment.description,
-				(attachment.contentType?.startsWith("text/") ||
-					["application/json", "application/xml", "application/rss+xml"].includes(
-						attachment.contentType || "",
-					)) &&
-					(await fetch(attachment.url).then((res) => res.text())),
-			]) {
-				if (!toCensor) continue;
-
-				const censored = await checkString(toCensor, message);
-				if (!censored) continue;
-
-				if (typeof censored.language === "number") {
-					bad.language = (bad.language || 0) + censored.language;
-					bad.words.language.push(...censored.words.language);
-				}
-			}
-		}),
-	);
-
-	return bad;
 }
 
 const NICKNAME_RULE = 8;
