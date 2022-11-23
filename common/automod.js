@@ -103,7 +103,7 @@ const badWords = [
 		],
 		[
 			/j?uber/,
-			/av+t+(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
+			/av+t{2,}(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
 			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
 			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat)?/,
 			/jnax(?:v?ref?|v(?:rfg|at)|yr|f|l)?/,
