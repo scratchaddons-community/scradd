@@ -136,6 +136,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 							.catch(() => {})
 							.then((member) => member?.roles.add(active, "Active"))
 					}
+				}
 			),
 		]);
 	}
