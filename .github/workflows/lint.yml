@@ -38,7 +38,7 @@ jobs:
 
     format:
         name: Format
-        if: ${{ steps.setup.outcome == 'success' }}
+        if: ${{ steps.setup.outcome }} == 'success'
         needs: [bump]
         runs-on: ubuntu-20.04
 
@@ -54,7 +54,7 @@ jobs:
 
     build:
         name: Build
-        if: ${{ steps.setup.outcome == 'success' }}
+        if: ${{ steps.setup.outcome }} == 'success'
         needs: [bump]
         runs-on: ubuntu-20.04
 
