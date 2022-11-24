@@ -1,9 +1,9 @@
 name: Lint
-on: [push, workflow_dispatch]
+on: [push, pull_request_target, workflow_dispatch]
 
 jobs:
-    run:
-        name: Lint
+    bump:
+        name: Bump dependencies
         runs-on: ubuntu-20.04
 
         steps:
@@ -12,14 +12,31 @@ jobs:
               with:
                   ref: ${{ github.head_ref }}
 
+            - name: Bump dependnencies
+              uses: RedGuy12/sync-types@v1.0.2
+
+            - name: Commit
+              uses: stefanzweifel/git-auto-commit-action@v4.15.4
+              with:
+                  commit_message: Bump dependencies
+                  branch: ${{ github.head_ref }}
+
+    format:
+        name: Format
+        needs: [bump]
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3.1.0
+              with:
+                  ref: ${{ github.head_ref }}
+                  
             - name: Setup Node.JS
               uses: actions/setup-node@v3.5.1
               with:
                   node-version: "18.12.1"
                   cache: "npm"
-
-            - name: Bump dependnencies
-              uses: RedGuy12/sync-types@v1.0.2
 
             - name: Install
               run: npm ci --force
@@ -30,5 +47,27 @@ jobs:
             - name: Commit
               uses: stefanzweifel/git-auto-commit-action@v4.15.4
               with:
-                  commit_message: Lint
+                  commit_message: Format
                   branch: ${{ github.head_ref }}
+
+    build:
+        name: Build
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3.1.0
+              with:
+                  ref: ${{ github.head_ref }}
+                  
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.5.1
+              with:
+                  node-version: "18.12.1"
+                  cache: "npm"
+
+            - name: Install
+              run: npm ci --force
+
+            - name: Build
+              run: npm build
