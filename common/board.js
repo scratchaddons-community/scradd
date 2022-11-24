@@ -29,10 +29,10 @@ export function boardReactionCount(channel) {
 		}[baseChannel.id] ||
 		COUNTS[
 			baseChannel.parent?.id === "866028754962612294" // 💀 The Cache!
-			? "modsPlus"
-			: baseChannel.parent?.id === CONSTANTS.channels.info?.id
-			? "info"
-			: "default"
+				? "modsPlus"
+				: baseChannel.parent?.id === CONSTANTS.channels.info?.id
+				? "info"
+				: "default"
 		]
 	);
 }

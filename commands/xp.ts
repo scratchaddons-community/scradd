@@ -119,8 +119,10 @@ const command = defineCommand({
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : 0;
 				if (index === -1)
 					return await interaction.reply({
-						content: `${CONSTANTS.emojis.statuses.no} ${user.toString()} could not be found! Do they have any XP?`,
-						ephemeral: true
+						content: `${
+							CONSTANTS.emojis.statuses.no
+						} ${user.toString()} could not be found! Do they have any XP?`,
+						ephemeral: true,
 					});
 
 				await paginate(

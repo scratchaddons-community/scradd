@@ -127,17 +127,15 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 				if ((sorted.find((item) => item.user === member.id)?.xp || 0) < 350)
 					return member.roles.remove(active, "Inactive");
 			}),
-			...sorted.map(
-				({ user, xp }) => {
-					if (xp > 350) {
-						activeCount++;
-						return CONSTANTS.guild.members
-							.fetch(user)
-							.catch(() => {})
-							.then((member) => member?.roles.add(active, "Active"))
-					}
+			...sorted.map(({ user, xp }) => {
+				if (xp > 350) {
+					activeCount++;
+					return CONSTANTS.guild.members
+						.fetch(user)
+						.catch(() => {})
+						.then((member) => member?.roles.add(active, "Active"));
 				}
-			),
+			}),
 		]);
 	}
 
@@ -199,8 +197,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						member?.roles.add(
 							index || !CONSTANTS.roles.epic ? role : [role, CONSTANTS.roles.epic],
 							"Weekly winner",
-						)
-					)
+						),
+					),
 			),
 		]);
 	}
