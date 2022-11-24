@@ -2,8 +2,8 @@ name: Lint
 on: [push, pull_request_target, workflow_dispatch]
 
 jobs:
-    bump:
-        name: Bump dependencies
+    setup:
+        name: Setup
         runs-on: ubuntu-20.04
 
         steps:
@@ -12,6 +12,18 @@ jobs:
               with:
                   ref: ${{ github.head_ref }}
 
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.5.1
+              with:
+                  node-version: "18.12.1"
+                  cache: "npm"
+
+    bump:
+        name: Bump dependencies
+        needs: [setup]
+        runs-on: ubuntu-20.04
+
+        steps:
             - name: Bump dependnencies
               uses: RedGuy12/sync-types@v1.0.2
 
@@ -21,26 +33,16 @@ jobs:
                   commit_message: Bump dependencies
                   branch: ${{ github.head_ref }}
 
+            - name: Install
+              run: npm ci
+
     format:
         name: Format
+        if: steps.setup.outcome == 'success'
         needs: [bump]
         runs-on: ubuntu-20.04
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v3.1.0
-              with:
-                  ref: ${{ github.head_ref }}
-                  
-            - name: Setup Node.JS
-              uses: actions/setup-node@v3.5.1
-              with:
-                  node-version: "18.12.1"
-                  cache: "npm"
-
-            - name: Install
-              run: npm ci --force
-
             - name: Format
               run: npm run format
 
@@ -52,22 +54,10 @@ jobs:
 
     build:
         name: Build
+        if: steps.setup.outcome == 'success'
+        needs: [bump]
         runs-on: ubuntu-20.04
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v3.1.0
-              with:
-                  ref: ${{ github.head_ref }}
-                  
-            - name: Setup Node.JS
-              uses: actions/setup-node@v3.5.1
-              with:
-                  node-version: "18.12.1"
-                  cache: "npm"
-
-            - name: Install
-              run: npm ci --force
-
             - name: Build
               run: npm build
