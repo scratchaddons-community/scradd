@@ -134,7 +134,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						return CONSTANTS.guild.members
 							.fetch(user)
 							.catch(() => {})
-							.then((member) => member?.roles.add(active, "Active")),
+							.then((member) => member?.roles.add(active, "Active"))
 					}
 			),
 		]);
@@ -198,8 +198,8 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						member?.roles.add(
 							index || !CONSTANTS.roles.epic ? role : [role, CONSTANTS.roles.epic],
 							"Weekly winner",
-						),
-					),
+						)
+					)
 			),
 		]);
 	}
