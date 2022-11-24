@@ -27,18 +27,17 @@ jobs:
             - name: Bump dependnencies
               uses: RedGuy12/sync-types@v1.0.2
 
+            - name: Install
+              run: npm ci
+
             - name: Commit
               uses: stefanzweifel/git-auto-commit-action@v4.15.4
               with:
                   commit_message: Bump dependencies
                   branch: ${{ github.head_ref }}
 
-            - name: Install
-              run: npm ci
-
     format:
         name: Format
-        if: jobs.setup.result == 'success'
         needs: [bump]
         runs-on: ubuntu-20.04
 
@@ -54,7 +53,6 @@ jobs:
 
     build:
         name: Build
-        if: jobs.setup.result == 'success'
         needs: [bump]
         runs-on: ubuntu-20.04
 
