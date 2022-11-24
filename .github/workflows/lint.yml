@@ -1,9 +1,9 @@
-name: Deploy bot
+name: Lint
 on: [push, workflow_dispatch]
 
 jobs:
     run:
-        name: Deploy bot
+        name: Lint
         runs-on: ubuntu-20.04
 
         steps:
@@ -18,6 +18,9 @@ jobs:
                   node-version: "18.12.1"
                   cache: "npm"
 
+            - name: Bump dependnencies
+              uses: RedGuy12/sync-types@v1.0.2
+
             - name: Install
               run: npm ci --force
 
@@ -27,5 +30,5 @@ jobs:
             - name: Commit
               uses: stefanzweifel/git-auto-commit-action@v4.15.4
               with:
-                  commit_message: Run Prettier
+                  commit_message: Lint
                   branch: ${{ github.head_ref }}
