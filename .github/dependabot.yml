@@ -12,4 +12,4 @@ updates:
           interval: "daily"
           time: "13:00"
       ignore:
-        - dependency-name: "@types/*"
+          - dependency-name: "@types/*"
