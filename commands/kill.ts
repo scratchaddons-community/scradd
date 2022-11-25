@@ -1,7 +1,5 @@
-import { AbortError } from "node-fetch";
 import { cleanDatabaseListeners } from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
-import logError from "../util/logError.js";
 
 const command = defineCommand({
 	data: {
@@ -14,10 +12,7 @@ const command = defineCommand({
 	async interaction(interaction) {
 		await cleanDatabaseListeners();
 		await interaction.reply("Killing bot…");
-		await logError(
-			new AbortError(interaction.user.tag + " is killing the bot"),
-			"interactionCreate",
-		);
+		process.emitWarning(interaction.user.tag + " is killing the bot");
 		process.exit(1);
 	},
 });

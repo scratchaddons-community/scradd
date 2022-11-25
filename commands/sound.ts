@@ -97,6 +97,8 @@ const command = defineCommand({
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member is not a GuildMember");
 
+		const sound = interaction.options.getString("sound", true);
+
 		const channel = [
 			interaction.options.getChannel("channel"),
 			interaction.channel,
@@ -133,7 +135,7 @@ const command = defineCommand({
 			createAudioResource(
 				path.resolve(
 					path.dirname(url.fileURLToPath(import.meta.url)),
-					`../../common/audio/${interaction.options.getString("sound", true)}`,
+					`../../common/audio/${sound}`,
 				),
 			),
 		);
@@ -160,7 +162,7 @@ const command = defineCommand({
 		await Promise.all([
 			interaction.reply(CONSTANTS.emojis.statuses.yes),
 			log(
-				`🎤 ${interaction.user.toString()} used \`${interaction?.toString()}\` in ${channel.toString()}!`,
+				`🎤 ${interaction.user.toString()} played \`${sound}\` in ${channel.toString()}!`,
 				"voice",
 			),
 		]);

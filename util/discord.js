@@ -12,7 +12,7 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
-import { badAttachments, censor } from "../common/automod.js";
+import { censor } from "../common/automod.js";
 import { userSettingsDatabase } from "../commands/settings.js";
 
 /**
@@ -89,13 +89,7 @@ export async function extractMessageExtremities(message, allowLanguage = true) {
 
 	while (embeds.length > 10) embeds.pop();
 
-	return {
-		embeds,
-		files:
-			!allowLanguage && typeof (await badAttachments(message)).language === "number"
-				? []
-				: message.attachments.toJSON(),
-	};
+	return { embeds, files: message.attachments.toJSON() };
 }
 
 /**

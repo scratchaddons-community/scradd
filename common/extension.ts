@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import CONSTANTS from "./CONSTANTS.js";
 import type AddonManifest from "./types/addonManifest.js";
 import dns from "dns";

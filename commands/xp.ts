@@ -121,7 +121,7 @@ const command = defineCommand({
 					return await interaction.reply({
 						content: `${
 							CONSTANTS.emojis.statuses.no
-						} ${user.toString()} could not be found! Do they have any XP?`,
+						} ${user?.toString()} could not be found! Do they have any XP?`,
 						ephemeral: true,
 					});
 

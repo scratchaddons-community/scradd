@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 
 import { importScripts } from "./util/files.js";
 import pkg from "./package.json" assert { type: "json" };
-import fetch from "node-fetch";
 import {
 	Snowflake,
 	PermissionsBitField,
