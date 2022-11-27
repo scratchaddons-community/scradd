@@ -108,7 +108,8 @@ export interface ChatInputCommand<O extends Record<string, Option> = {}> {
 	data: {
 		type?: never;
 		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
+		 * words.
 		 *
 		 * @default true
 		 */
@@ -131,7 +132,8 @@ export interface ChatInputSubcommands<O extends Record<string, Record<string, Op
 	data: {
 		type?: never;
 		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
+		 * words.
 		 *
 		 * @default true
 		 */
@@ -170,7 +172,8 @@ export interface ChatInputSubcommandGroups<
 	data: {
 		type?: never;
 		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad words.
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
+		 * words.
 		 *
 		 * @default true
 		 */

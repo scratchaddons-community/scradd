@@ -1,4 +1,7 @@
-/** @author TypeScript Implementation of [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/14ea139/1/1.19.json) */
+/**
+ * @author TypeScript Implementation of
+ *   [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/14ea139/1/1.19.json)
+ */
 
 /** The value manipulator. */
 type cssManipulator =
