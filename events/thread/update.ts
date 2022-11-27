@@ -15,7 +15,7 @@ import type Event from "../../common/types/event";
 
 const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
 	if (newThread.guild.id !== CONSTANTS.guild.id) return;
-	if (!shouldLog(newMessage.channel)) return;
+	if (!shouldLog(newThread)) return;
 
 	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
 		suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>

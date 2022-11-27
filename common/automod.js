@@ -209,9 +209,12 @@ async function checkString(toCensor, message) {
 		}
 	}
 
+const baseChannel=getBaseChannel(message.channel)
+const parentChannel = baseChannel&&baseChannel.isDMBased()?baseChannel:baseChannel?.parent
+
 	if (
 		!badWordsAllowed(message.channel) &&
-		CONSTANTS.channels.info?.id !== getBaseChannel(message.channel)?.parent.id &&
+		(CONSTANTS.channels.info?.id !== parentChannel?.id) &&
 		!message.author?.bot
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
