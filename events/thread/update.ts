@@ -99,7 +99,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 
 	await Promise.all(
 		logs.map((edit) =>
-			log(`📃 Thread ${newThread.toString()}` + edit + `!`, "channels", {
+			log(`📃 Thread #${newThread.name}` + edit + `!`, "channels", {
 				components: [
 					{
 						type: ComponentType.ActionRow,
