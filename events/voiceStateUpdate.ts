@@ -1,6 +1,6 @@
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
-import {ChannelType} from "discord.js"
+import { ChannelType } from "discord.js";
 import type Event from "../common/types/event";
 
 const event: Event<"voiceStateUpdate"> = async function event(oldState, newState) {
@@ -11,7 +11,7 @@ const event: Event<"voiceStateUpdate"> = async function event(oldState, newState
 		if (oldState.channel) {
 			logs.push(`left voice channel ${oldState.channel.toString()}`);
 		}
-		if (newState.channel && newState.channel.type!==ChannelType.GuildStageVoice) {
+		if (newState.channel && newState.channel.type !== ChannelType.GuildStageVoice) {
 			logs.push(
 				`joined voice channel ${newState.channel.toString()}, ${
 					newState.mute ? "" : "un"
