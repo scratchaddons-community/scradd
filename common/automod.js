@@ -123,45 +123,42 @@ function decodeRegexes(regexes) {
 				(letter) =>
 					`[${
 						{
-							q: "ϙϱ۹qℚoｑⓠ⒬",
-							w: "wｗሠⓦ⒲",
-							e: "e❸③３₃³⑶ꮛɛჳ⓷еₑ*ｅⓔℨ3⒠",
-							r: "rℝｒዪ尺ⓡ⒭",
-							t: "tｔፕⓣℑₜ⒯",
-							y: "yγሃｙⓨ⒴",
-							u: "ሁυu*ሀｕⓤ⒰",
-							i: "iⁱ*ᴉjｉіⓘℹ❶①１₁¹⑴⇂⥜⓵ⅰ❗❕!¡l|ℹ1❗❕ℑ⒤",
-							o: "ዐοoₒዕ*ｏⓞ⓪⓿０₀⁰θ○⭕⭕0⒪",
-							p: "የₚℙpｐⓟ⒫",
-							a: "aɒₐ*ａαⓐ@⒜",
-							s: "sᔆₛｓⓢ$⒮",
-							d: "ɒdｄⓓ⒟",
-							f: "⸁fᶠｆⓕ⒡",
-							g: "gｇⓖ⒢",
-							h: "ʜhₕｈክዪዘℜℍⓗℌ#⒣",
-							j: "jⱼյｊiⓙℑ⒥",
-							k: "kₖｋⓚ⒦",
-							l: "ₗｌⓛl|⒧",
-							z: "zᙆᶻｚℤ乙ⓩ⒵",
-							x: "xᕽₓｘⓧﾒ⒳",
-							c: "cᑦᶜℂｃℭⓒ⒞",
-							v: "vⱽｖ√✅☑✔ⓥ⒱",
-							b: "ｂⓑb⒝",
-							n: "ⁿₙnሸℕｎⓝ⒩",
-							m: "ₘｍʍﾶጠⓜⓂ️m⒨",
+							"q": "ϙϱ۹qℚoｑⓠ⒬",
+							"w": "wｗሠⓦ⒲",
+							"e": "e❸③３₃³⑶ꮛɛჳ⓷еₑ*ｅⓔℨ3⒠",
+							"r": "rℝｒዪ尺ⓡ⒭",
+							"t": "tｔፕⓣℑₜ⒯",
+							"y": "yγሃｙⓨ⒴",
+							"u": "ሁυu*ሀｕⓤ⒰",
+							"i": "iⁱ*ᴉjｉіⓘℹ❶①１₁¹⑴⇂⥜⓵ⅰ❗❕!¡l|ℹ1❗❕ℑ⒤",
+							"o": "ዐοoₒዕ*ｏⓞ⓪⓿０₀⁰θ○⭕⭕0⒪",
+							"p": "የₚℙpｐⓟ⒫",
+							"a": "aɒₐ*ａαⓐ@⒜",
+							"s": "sᔆₛｓⓢ$⒮",
+							"d": "ɒdｄⓓ⒟",
+							"f": "⸁fᶠｆⓕ⒡",
+							"g": "gｇⓖ⒢",
+							"h": "ʜhₕｈክዪዘℜℍⓗℌ#⒣",
+							"j": "jⱼյｊiⓙℑ⒥",
+							"k": "kₖｋⓚ⒦",
+							"l": "ₗｌⓛl|⒧",
+							"z": "zᙆᶻｚℤ乙ⓩ⒵",
+							"x": "xᕽₓｘⓧﾒ⒳",
+							"c": "cᑦᶜℂｃℭⓒ⒞",
+							"v": "vⱽｖ√✅☑✔ⓥ⒱",
+							"b": "ｂⓑb⒝",
+							"n": "ⁿₙnሸℕｎⓝ⒩",
+							"m": "ₘｍʍﾶጠⓜⓂ️m⒨",
 							" ": "-",
 						}[letter] || ""
-					}${letter}]`
-			)
+					}${letter}]`,
+			),
 		)
 		.join("|");
 }
 const badWordRegexps = badWords.map(
 	([strings, words]) =>
-		new RegExp(
-			decodeRegexes(strings) + "|\\b(?:" + decodeRegexes(words) + ")\\b",
-			"gi"
-		)
+		new RegExp(decodeRegexes(strings) + "|\\b(?:" + decodeRegexes(words) + ")\\b", "gi"),
 );
 
 /** @param {string} text */
@@ -179,10 +176,7 @@ export function censor(text) {
 	return words.flat().length
 		? {
 				censored,
-				strikes: words.reduce(
-					(acc, curr, index) => curr.length * index + acc,
-					0
-				),
+				strikes: words.reduce((acc, curr, index) => curr.length * index + acc, 0),
 				words,
 		  }
 		: false;
@@ -217,23 +211,17 @@ async function checkString(toCensor, message) {
 
 	if (
 		!badWordsAllowed(message.channel) &&
-		CONSTANTS.channels.info?.id !==
-			getBaseChannel(message.channel)?.parent.id &&
+		CONSTANTS.channels.info?.id !== getBaseChannel(message.channel)?.parent.id &&
 		!message.author?.bot
 	) {
-		const botLinks = toCensor.match(
-			/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi
-		);
+		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
 		if (botLinks) {
 			bad.words.bots.push(...botLinks);
 			bad.bots = botLinks.length;
 		}
 
 		/** A global regular expression variant of {@link Invite.InvitesPattern}. */
-		const GlobalInvitesPattern = new RegExp(
-			Invite.InvitesPattern.source,
-			"g"
-		);
+		const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern.source, "g");
 
 		const inviteCodes = toCensor.match(GlobalInvitesPattern);
 
@@ -241,15 +229,9 @@ async function checkString(toCensor, message) {
 			const invitesToDelete = (
 				await Promise.all(
 					inviteCodes.map(async (code) => {
-						const invite = await client
-							?.fetchInvite(code)
-							.catch(() => {});
-						return (
-							invite?.guild &&
-							invite.guild.id !== message.guild?.id &&
-							code
-						);
-					})
+						const invite = await client?.fetchInvite(code).catch(() => {});
+						return invite?.guild && invite.guild.id !== message.guild?.id && code;
+					}),
 				)
 			).filter(/** @returns {toWarn is string} */ (toWarn) => !!toWarn);
 
@@ -283,15 +265,9 @@ export async function automodMessage(message) {
 						? +bad.invites + censored.invites
 						: bad.invites,
 
-				bots:
-					typeof censored.bots === "number"
-						? +bad.bots + censored.bots
-						: bad.bots,
+				bots: typeof censored.bots === "number" ? +bad.bots + censored.bots : bad.bots,
 				words: {
-					language: [
-						...censored.words.language,
-						...bad.words.language,
-					],
+					language: [...censored.words.language, ...bad.words.language],
 					invites: [...censored.words.invites, ...bad.words.invites],
 					bots: [...censored.words.bots, ...bad.words.bots],
 				},
@@ -302,11 +278,11 @@ export async function automodMessage(message) {
 			invites: false,
 			bots: false,
 			words: { language: [], invites: [], bots: [] },
-		}
+		},
 	);
 
 	const toStrike = [bad.language, bad.invites, bad.bots].filter(
-		/** @returns {strikes is number} */ (strikes) => strikes !== false
+		/** @returns {strikes is number} */ (strikes) => strikes !== false,
 	);
 
 	const embedStrikes = badWordsAllowed(message.channel)
@@ -317,9 +293,7 @@ export async function automodMessage(message) {
 					embed.title,
 					embed.footer?.text,
 					embed.author?.name,
-					...embed.fields
-						.map((field) => [field.name, field.value])
-						.flat(),
+					...embed.fields.map((field) => [field.name, field.value]).flat(),
 				])
 				.flat()
 				.reduce((strikes, current) => {
@@ -336,8 +310,7 @@ export async function automodMessage(message) {
 
 	const promises = [];
 	if (toStrike.length) promises.push(message.delete());
-	else if (typeof embedStrikes === "number")
-		promises.push(message.suppressEmbeds());
+	else if (typeof embedStrikes === "number") promises.push(message.suppressEmbeds());
 
 	if (typeof bad.language === "number") {
 		promises.push(
@@ -345,14 +318,12 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				"Watch your language!",
 				bad.language,
-				"Sent message with words:\n" + bad.words.language.join("\n")
+				"Sent message with words:\n" + bad.words.language.join("\n"),
 			),
 			message.channel.send(
 				CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, language!`
-			)
+					` ${(message.interaction?.user || message.author).toString()}, language!`,
+			),
 		);
 	}
 	if (typeof bad.invites === "number") {
@@ -361,14 +332,14 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				"Please don’t send server invites in that channel!",
 				bad.invites,
-				bad.words.invites.join("\n")
+				bad.words.invites.join("\n"),
 			),
 			message.channel.send(
 				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, only post invite links in ${CONSTANTS.channels.advertise?.toString()}!`
-			)
+					).toString()}, only post invite links in ${CONSTANTS.channels.advertise?.toString()}!`,
+			),
 		);
 	}
 	if (typeof bad.bots === "number") {
@@ -377,28 +348,24 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				"Please don’t post bot invite links!",
 				bad.bots,
-				bad.words.bots.join("\n")
+				bad.words.bots.join("\n"),
 			),
 			message.channel.send(
 				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`
-			)
+					).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`,
+			),
 		);
 	}
 
 	/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
-	const GlobalAnimatedEmoji = new RegExp(
-		FormattingPatterns.AnimatedEmoji.source,
-		"g"
-	);
+	const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji.source, "g");
 
 	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
 
 	const badAnimatedEmojis =
-		animatedEmojis.length > 9 &&
-		Math.round((animatedEmojis.length - 10) / 10);
+		animatedEmojis.length > 9 && Math.round((animatedEmojis.length - 10) / 10);
 
 	if (
 		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
@@ -409,15 +376,15 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				`Please don’t post that many animated emojis!`,
 				badAnimatedEmojis,
-				animatedEmojis.join("\n")
+				animatedEmojis.join("\n"),
 			),
 			message.channel.send(
 				CONSTANTS.emojis.statuses.no +
 					` ${(
 						message.interaction?.user || message.author
-					).toString()}, lay off on the animated emojis please!`
+					).toString()}, lay off on the animated emojis please!`,
 			),
-			message.delete()
+			message.delete(),
 		);
 	}
 
@@ -430,9 +397,7 @@ export function badWordsAllowed(channel) {
 	const baseChannel = getBaseChannel(channel);
 	return (
 		baseChannel?.type === ChannelType.DM ||
-		!baseChannel
-			?.permissionsFor(baseChannel.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
+		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
 }
 
@@ -445,16 +410,11 @@ export async function changeNickname(member, strike = true) {
 	if (censored) {
 		await Promise.all([
 			strike
-				? warn(
-						member,
-						"Watch your language!",
-						censored.strikes,
-						member.displayName
-				  )
+				? warn(member, "Watch your language!", censored.strikes, member.displayName)
 				: member
 						.send(
 							CONSTANTS.emojis.statuses.no +
-								" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned."
+								" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
 						)
 						.catch(() => {}),
 			setNickname(member, pingablify(censored.censored)),
@@ -468,7 +428,7 @@ export async function changeNickname(member, strike = true) {
 			setNickname(member, pingablified),
 			member
 				.send(
-					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`
+					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`,
 				)
 				.catch(() => {}),
 		]);
@@ -486,7 +446,7 @@ export async function changeNickname(member, strike = true) {
 	const promises = [];
 	if (members.size > 1) {
 		const [safe, unsafe] = members.partition(
-			(found) => found.user.username === member.displayName
+			(found) => found.user.username === member.displayName,
 		);
 
 		if (safe.size) {
@@ -497,20 +457,18 @@ export async function changeNickname(member, strike = true) {
 
 						found
 							.send(
-								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`
+								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 							)
 							.catch(() => false),
 					])
-					.flat()
+					.flat(),
 			);
 			if (safe.size > 1) {
 				promises.push(
 					CONSTANTS.channels.modlogs?.send({
 						allowedMentions: { users: [] },
-						content: `⚠ Conflicting nicknames: ${joinWithAnd(
-							safe.toJSON()
-						)}.`,
-					})
+						content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
+					}),
 				);
 			}
 		} else if (
@@ -525,10 +483,8 @@ export async function changeNickname(member, strike = true) {
 			promises.push(
 				CONSTANTS.channels.modlogs?.send({
 					allowedMentions: { users: [] },
-					content: `⚠ Conflicting nicknames: ${joinWithAnd(
-						unsafe.toJSON()
-					)}.`,
-				})
+					content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
+				}),
 			);
 	}
 	await Promise.all(promises);
@@ -541,13 +497,9 @@ export async function changeNickname(member, strike = true) {
 async function setNickname(member, newNickname) {
 	if (member.nickname === newNickname) return member;
 	if (member.moderatable) {
-		if (censor(newNickname) || pingablify(newNickname) !== newNickname)
-			return false;
+		if (censor(newNickname) || pingablify(newNickname) !== newNickname) return false;
 
-		return await member.setNickname(
-			newNickname,
-			`To comply with rule ${NICKNAME_RULE}`
-		);
+		return await member.setNickname(newNickname, `To comply with rule ${NICKNAME_RULE}`);
 	}
 	await CONSTANTS.channels.modlogs?.send({
 		allowedMentions: { users: [] },

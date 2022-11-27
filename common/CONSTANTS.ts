@@ -46,7 +46,7 @@ export default {
 			bob: "<:bob:1001977844894810243>",
 			boost: "<:nitro:1044650827882696805>",
 			wasteof: "<:wasteofmoney:1044651861682176080>",
-			mater:"<:mater:1046512720792522892>"
+			mater: "<:mater:1046512720792522892>",
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",

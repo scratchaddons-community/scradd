@@ -179,7 +179,12 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						}> - ${gain.xp.toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
-			`\n\n*This week, ${weekly.length} people chatted, and ${activeCount} people were active. Alltogether, people gained ${weekly.reduce((a,b) => a + b, 0)} XP this week.*`,
+			`\n\n*This week, ${
+				weekly.length
+			} people chatted, and ${activeCount} people were active. Alltogether, people gained ${weekly.reduce(
+				(a, b) => a + b,
+				0,
+			)} XP this week.*`,
 	});
 
 	const role = CONSTANTS.roles.weekly_winner;

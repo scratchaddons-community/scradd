@@ -108,8 +108,9 @@ const command = defineCommand({
 			async ({ answer, author, count, title, ...id }) => {
 				return `**${count}** ${
 					"url" in id
-						?"👍":(suggestions?.defaultReactionEmoji?.name ||
-					`<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`)
+						? "👍"
+						: suggestions?.defaultReactionEmoji?.name ||
+						  `<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`
 				} ${hyperlink(
 					escapeLinks(title),
 					"url" in id

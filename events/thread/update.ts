@@ -7,7 +7,7 @@ import {
 } from "../../common/modmail.js";
 import warn from "../../common/warns.js";
 import { badWordsAllowed, censor } from "../../common/automod.js";
-import log, { LOG_GROUPS,shouldLog} from "../../common/logging.js";
+import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";

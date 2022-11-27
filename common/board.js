@@ -11,7 +11,16 @@ import giveXp from "./xp.js";
 export const BOARD_EMOJI = "🥔";
 /** @param {import("discord.js").TextBasedChannel} [channel] */
 export function boardReactionCount(channel) {
-	const COUNTS = { scradd: 2, devs: 6, modsPlus: 5, mods: 4, exec: 3, admins: 2, default: 8, info: 10 };
+	const COUNTS = {
+		scradd: 2,
+		devs: 6,
+		modsPlus: 5,
+		mods: 4,
+		exec: 3,
+		admins: 2,
+		default: 8,
+		info: 10,
+	};
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 	if (!channel) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
