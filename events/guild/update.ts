@@ -255,14 +255,14 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	if (oldGuild.verified !== newGuild.verified) {
 		logs.push(`Server ${newGuild.verified ? "" : "un"}verified`);
 	}
-	if (newGuild.widgetEnabled && oldGuild.widgetChannel?.id !== newGuild.widgetChannel?.id) {
+	if ((oldGuild.widgetChannel??newGuild.rulesChannel)?.id !== newGuild.widgetChannel?.id) {
 		logs.push(
 			`Server widget invite channel ${
 				newGuild.widgetChannel ? "set to " + newGuild.widgetChannel.toString() : "unset"
 			}`,
 		);
 	}
-	if (!!oldGuild.widgetEnabled !== !!newGuild.widgetEnabled) {
+	if ((oldGuild.widgetEnabled??true) !== (newGuild.widgetEnabled??true)) {
 		logs.push(`Server widget ${newGuild.widgetEnabled ? "en" : "dis"}abled`);
 	}
 	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
