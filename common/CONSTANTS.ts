@@ -46,6 +46,7 @@ export default {
 			bob: "<:bob:1001977844894810243>",
 			boost: "<:nitro:1044650827882696805>",
 			wasteof: "<:wasteofmoney:1044651861682176080>",
+			mater:"<:mater:1046512720792522892>"
 		},
 		discord: {
 			reply: "<:reply:953046345214750720>",
@@ -91,18 +92,20 @@ export default {
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	channels: {
-		info: getChannel("📜", ChannelType.GuildCategory, "start"),
+		info: getChannel("Info", ChannelType.GuildCategory, "start"),
 		announcements: guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
 		board: getChannel("board", [ChannelType.GuildText, ChannelType.GuildAnnouncement], "end"),
 		welcome: getChannel("welcome", ChannelType.GuildText),
 
 		mod: getChannel("mod-talk", ChannelType.GuildText),
 		modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
-		admin: getChannel("admin", ChannelType.GuildText, "partial"),
+		exec: getChannel("exec", ChannelType.GuildText, "start"),
+		admin: getChannel("admin", ChannelType.GuildText, "start"),
 		modmail: getChannel("modmail", ChannelType.GuildText),
 
-		chat: getChannel("💬", ChannelType.GuildCategory, "start"),
 		general: getChannel("general", ChannelType.GuildText),
+
+		SA: getChannel("Scratch Addons", ChannelType.GuildCategory, "start"),
 		suggestions: getChannel("suggestions", ChannelType.GuildForum),
 
 		bots: getChannel("bots", ChannelType.GuildText, "end"),

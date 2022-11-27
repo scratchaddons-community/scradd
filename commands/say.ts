@@ -19,7 +19,7 @@ const command = defineCommand({
 			message: {
 				type: ApplicationCommandOptionType.String,
 				description: "What to mimic",
-				max_length: 2000,
+				maxLength: 2000,
 			},
 		},
 		restricted: true,

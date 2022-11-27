@@ -120,21 +120,21 @@ setInterval(async () => {
 		)
 	).count;
 	await CONSTANTS.channels.info?.setName(
-		`📜 Info - ${count.toLocaleString([], {
-			maximumFractionDigits: 1,
-			minimumFractionDigits: count > 999 ? 1 : 0,
-			notation: "compact",
-			compactDisplay: "short",
-		})} SA users!`,
-		"Automated update to sync count",
-	);
-	await CONSTANTS.channels.chat?.setName(
-		`💬 Chat - ${CONSTANTS.guild.memberCount.toLocaleString([], {
+		`Info - ${CONSTANTS.guild.memberCount.toLocaleString([], {
 			maximumFractionDigits: 2,
 			minimumFractionDigits: CONSTANTS.guild.memberCount > 999 ? 2 : 0,
 			notation: "compact",
 			compactDisplay: "short",
-		})} members!`,
+		})} members`,
+		"Automated update to sync count",
+	);
+	await CONSTANTS.channels.SA?.setName(
+		`Scratch Addons - ${count.toLocaleString([], {
+			maximumFractionDigits: 1,
+			minimumFractionDigits: count > 999 ? 1 : 0,
+			notation: "compact",
+			compactDisplay: "short",
+		})} users`,
 		"Automated update to sync count",
 	);
 }, 300_000);

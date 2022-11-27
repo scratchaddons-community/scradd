@@ -76,7 +76,7 @@ const command = defineCommand({
 			"minimum-reactions": {
 				type: ApplicationCommandOptionType.Integer,
 				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
-				min_value: 1,
+				min: 1,
 			},
 			"user": {
 				type: ApplicationCommandOptionType.User,

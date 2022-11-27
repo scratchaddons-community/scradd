@@ -107,8 +107,9 @@ const command = defineCommand({
 				.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 			async ({ answer, author, count, title, ...id }) => {
 				return `**${count}** ${
-					suggestions?.defaultReactionEmoji?.name ||
-					`<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`
+					"url" in id
+						?"👍":(suggestions?.defaultReactionEmoji?.name ||
+					`<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`)
 				} ${hyperlink(
 					escapeLinks(title),
 					"url" in id

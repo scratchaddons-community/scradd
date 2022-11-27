@@ -12,7 +12,7 @@ const event: Event<"inviteCreate"> = async function event(invite) {
 			invite.inviter ? ` by ${invite.inviter.toString()}` : ""
 		}${
 			invite.expiresAt || invite.maxUses
-				? ` expiring ${invite.expiresAt ? time(invite.expiresAt) : ""}${
+				? ` expiring ${invite.expiresAt ? time(invite.expiresAt, "R") : ""}${
 						invite.expiresAt && invite.maxUses ? " or " : ""
 				  }${invite.maxUses ? "after " + invite.maxUses + " uses" : ""}`
 				: ""

@@ -7,7 +7,7 @@ import {
 } from "../../common/modmail.js";
 import warn from "../../common/warns.js";
 import { badWordsAllowed, censor } from "../../common/automod.js";
-import log, { LOG_GROUPS } from "../../common/logging.js";
+import log, { LOG_GROUPS,shouldLog} from "../../common/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
@@ -15,6 +15,7 @@ import type Event from "../../common/types/event";
 
 const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
 	if (newThread.guild.id !== CONSTANTS.guild.id) return;
+	if (!shouldLog(newMessage.channel)) return;
 
 	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
 		suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>

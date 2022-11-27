@@ -313,7 +313,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		return;
 	}
 
-	const content = stripMarkdown(normalize(message.content).replace(/<.+?>/, ""));
+	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
 
 	/**
 	 * Determines whether the message contains a word.
@@ -353,6 +353,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (includes("doost") || includes("dooster")) react(CONSTANTS.emojis.autoreact.boost);
 	if (content.includes("quack") || includes("duck")) react("🦆");
 	if (content === "radio") react("📻");
+	if (content === "agreed") react(CONSTANTS.emojis.autoreact.mater);
 	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);
 	if (includes("snake") || includes("snek")) {
