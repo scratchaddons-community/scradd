@@ -202,4 +202,7 @@ export type Databases = {
 		title: string;
 	};
 	roles: { [role: Snowflake]: true } & { user: Snowflake };
+	potatoboard_speedrun: {
+		time: number;
+	};
 };

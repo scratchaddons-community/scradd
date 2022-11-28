@@ -50,6 +50,7 @@ export function boardReactionCount(channel) {
 if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
 export const boardDatabase = new Database("board");
+export const speedrunDatabase = new Database("potatoboard_speedrun")
 await boardDatabase.init();
 
 /**
@@ -187,6 +188,13 @@ export async function updateBoard(message) {
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },
 		});
+
+		if (potatoboard_speedrun.length === 0 || ((new Date()).getTime() - (new Date(message.createdTimestamp)).getTime()) < speedrunDatabase[0].time) {
+			potatoboard_speedrun = [{ time:  ((new Date()).getTime() - (new Date(message.createdTimestamp)).getTime()) }]
+			await CONSTANTS.channels.announcements.send({
+				content: `<@${message.author.id}>'s message just hit the potatoboard faster than any message before! Only ${((new Date()).getTime() - (new Date(message.createdTimestamp)).getTime())/1000}s!`
+			})
+		}
 
 		if (CONSTANTS.channels.board.type === ChannelType.GuildAnnouncement)
 			promises.push(boardMessage.crosspost());
