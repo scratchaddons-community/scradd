@@ -119,7 +119,7 @@ function decodeRegexes(regexes) {
 	return regexes
 		.map(({ source }) =>
 			caesar(source).replaceAll(
-				/./gi,
+				/[a-z ]/gi,
 				(letter) =>
 					`[${
 						{
