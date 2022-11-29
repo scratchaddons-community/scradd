@@ -21,10 +21,10 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@discordjs/opus": "0.9.0",
-		"@discordjs/voice": "0.11.0",
+		"@discordjs/voice": "0.14.0",
 		"async-exit-hook": "2.0.1",
 		"difflib": "0.2.4",
-		"discord.js": "14.6.0",
+		"discord.js": "14.7.0",
 		"dotenv": "16.0.3",
 		"ffmpeg-static": "5.1.0",
 		"fuse.js": "6.6.2",
@@ -48,8 +48,5 @@
 	"engines": {
 		"node": "18.12.1",
 		"npm": "8.13.2"
-	},
-	"overrides": {
-		"discord-api-types": "0.37.14"
 	}
 }
