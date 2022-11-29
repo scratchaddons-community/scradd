@@ -1,5 +1,10 @@
 name: Lint
-on: [push, pull_request_target, workflow_dispatch]
+on: 
+    push:
+    workflow_dispatch:
+    schedule:
+        - cron: "0 * * * *"
+    
 
 jobs:
     bump:
