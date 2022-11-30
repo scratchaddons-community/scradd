@@ -3,7 +3,7 @@ on:
     push:
     workflow_dispatch:
     schedule:
-        - cron: "0 * * * *"
+        - cron: "30 12 * * *" # 30 minutes before Dependabot
     
 
 jobs:
