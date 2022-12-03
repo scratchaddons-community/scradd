@@ -5,7 +5,8 @@
  * @template X
  *
  * @param {T[]} array - Array to filter.
- * @param {(value: T, index: number, array: T[]) => Promise<X | false>} predicate - A function to asynchronously test each element for a condition.
+ * @param {(value: T, index: number, array: T[]) => Promise<X | false>} predicate - A function to asynchronously test each element for a
+ *   condition.
  *
  * @returns {AsyncGenerator<Awaited<X>, void, unknown>}
  */
