@@ -152,7 +152,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 				?.edit({
 					embeds: [
 						{
-							...starter.embeds[0],
+							...starter.embeds[0]?.data,
 							title: "Modmail ticket opened!",
 							color: MODMAIL_COLORS.opened,
 						},
