@@ -1,6 +1,6 @@
 import { Invite, FormattingPatterns, ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
-import warn from "./warns.js";
+import warn, { PARTIAL_STRIKE_COUNT } from "./warn.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
 import client from "../client.js";
@@ -13,8 +13,6 @@ import { getBaseChannel } from "../util/discord.js";
  * All words are ROT13-encoded.
  *
  * @type {[RegExp[], RegExp[]][]}
- *
- * @todo Make index 0 give 0.25 strikes.
  */
 const badWords = [
 	[
@@ -22,26 +20,25 @@ const badWords = [
 			/cbea/,
 			/grfgvpyr/,
 			/fpuzhpx/,
-			/ohgg(?: ?cvengr)/,
-			/qvyqb/,
 			/erpghz/,
 			/ihyin/,
 			/🖕/,
 			/卐/,
+			/fjnfgvxn/,
 			/卍/,
 			/lvss/,
-			/wvmm/,
+			/ahg ?fnpx/,
+			/fcu(?:r|v)apgre/,
 		],
 		[
 			/intva(?:n|r|y|f|l)+/,
-			/cravf(?:rf)?/,
+			/(?:urzv ?)?cravf(?:rf)?/,
 			/nahf(?:rf)?/,
 			/frzra/,
 			/(?:c(?:er|bfg) ?)?phz/,
 			/pyvg/,
 			/gvg(?:(?:gvr)?f)?/,
 			/chff(?:l|vrf)/,
-			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/fpebghz/,
 			/ynovn/,
 			/preivk/,
@@ -53,61 +50,54 @@ const badWords = [
 	[
 		[
 			/fuv+r*g(?!nx(?:v|r))/,
-			/puvat ?(punat ?)?puba/,
 			/rwnphyngr/,
 			/fcyb+tr/,
-			/fcurapgre/,
-			/fjnfgvxn/,
-			/fpunssre/,
 			/oybj ?wbo/,
 			/shpx/,
+			/wvmm/,
 			/wvfz/,
-			/xvxr/,
-			/xhxfhtre/,
 			/znfg(?:h|r)eong/,
-			/ahg ?fnpx/,
-			/cnxl/,
-			/cbynpx/,
+			/ohgg(?: ?cvengr)/,
+			/qvyqb/,
+			/xhxfhtre/,
 			/dhrrs/,
+			/ineg/,
 			/wnpx ?bss/,
 			/wrex ?bss/,
 			/ovg?pu/,
+			/ubeal/,
 		],
 		[
+			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/xlf/,
 			/(?:8|o)=+Q/,
-			/nefryvpx(?:vat|ref?)?/,
 			/fzhg+(?:vr|e|fg?|l)?/,
-			/vawhaf?/,
 			/pbpx(?: ?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
-			/fcvpf?/,
-			/yrfobf?/,
-			/tbbx(?:f|l)?/,
-			/urzv ?cravf/,
 			/onfgneq(?:vfz|(y|e)?l|evrf|f)?/,
-			/cnp?x(?:vr|l)?vf?/,
 			/phagf?/,
-			/fuk/,
+			/shx/,
 			/ovg?fu/,
+			/jnax(?:v?ref?|v(?:rfg|at)|yr|f|l)?/,
 		],
 	],
 	[
 		[
+			/puvat ?(punat ?)?puba/,
+			/xvxr/,
 			/pnecrg ?zhapure/,
 			/fyhg/,
 			/fur ?znyr/,
-			/yrmmvn/,
-			/qbzvangevk/,
 			/shqtr ?cnpxr/,
-			/jrg ?onp/,
 			/ergneq/,
 		],
 		[
+			/tbbx(?:f|l)?/,
+			/yrfobf?/,
+			/fcvpf?/,
 			/j?uber/,
 			/av+t{2,}(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
 			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
 			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat)?/,
-			/jnax(?:v?ref?|v(?:rfg|at)|yr|f|l)?/,
 		],
 	],
 ];
@@ -123,30 +113,30 @@ function decodeRegexes(regexes) {
 				(letter) =>
 					`[${
 						{
-							"q": "ϙϱ۹qℚoｑⓠ⒬",
+							"q": "oϙϱp۹qℚoｑⓠ⒬",
 							"w": "wｗሠⓦ⒲",
 							"e": "e❸③３₃³⑶ꮛɛჳ⓷еₑ*ｅⓔℨ3⒠",
 							"r": "rℝｒዪ尺ⓡ⒭",
 							"t": "tｔፕⓣℑₜ⒯",
-							"y": "yγሃｙⓨ⒴",
-							"u": "ሁυu*ሀｕⓤ⒰",
-							"i": "iⁱ*ᴉjｉіⓘℹ❶①１₁¹⑴⇂⥜⓵ⅰ❗❕!¡l|ℹ1❗❕ℑ⒤",
-							"o": "ዐοoₒዕ*ｏⓞ⓪⓿０₀⁰θ○⭕⭕0⒪",
-							"p": "የₚℙpｐⓟ⒫",
-							"a": "aɒₐ*ａαⓐ@⒜",
-							"s": "sᔆₛｓⓢ$⒮",
-							"d": "ɒdｄⓓ⒟",
+							"y": "vyγሃｙⓨ⒴",
+							"u": "vሁυu*ሀｕⓤ⒰",
+							"i": "iⁱ*ᴉjｉіⓘℹ❶①１₁¹⑴⇂⥜⓵ⅰ❗❕!¡l|1ℑ⒤",
+							"o": "ዐqοoₒዕ*ｏⓞ⓪⓿０₀⁰θ○⭕0⒪",
+							"p": "የₚqℙpｐⓟ⒫",
+							"a": "aɒₐ*eａαⓐ@⒜",
+							"s": "sᔆₛｓaⓢz$⒮",
+							"d": "ɒdｄⓓ⒟b",
 							"f": "⸁fᶠｆⓕ⒡",
 							"g": "gｇⓖ⒢",
 							"h": "ʜhₕｈክዪዘℜℍⓗℌ#⒣",
 							"j": "jⱼյｊiⓙℑ⒥",
 							"k": "kₖｋⓚ⒦",
-							"l": "ₗｌⓛl|⒧",
-							"z": "zᙆᶻｚℤ乙ⓩ⒵",
+							"l": "ₗｌⓛli|⒧",
+							"z": "zᙆᶻｚℤs乙ⓩ⒵",
 							"x": "xᕽₓｘⓧﾒ⒳",
 							"c": "cᑦᶜℂｃℭⓒ⒞",
-							"v": "vⱽｖ√✅☑✔ⓥ⒱",
-							"b": "ｂⓑb⒝",
+							"v": "vⱽｖ√✅u☑✔ⓥ⒱",
+							"b": "ｂⓑb⒝d",
 							"n": "ⁿₙnሸℕｎⓝ⒩",
 							"m": "ₘｍʍﾶጠⓜⓂ️m⒨",
 							" ": "-",
@@ -176,7 +166,10 @@ export function censor(text) {
 	return words.flat().length
 		? {
 				censored,
-				strikes: words.reduce((acc, curr, index) => curr.length * index + acc, 0),
+				strikes: words.reduce(
+					(acc, curr, index) => curr.length * Math.max(index, PARTIAL_STRIKE_COUNT) + acc,
+					0,
+				),
 				words,
 		  }
 		: false;
@@ -216,6 +209,7 @@ async function checkString(toCensor, message) {
 	if (
 		!badWordsAllowed(message.channel) &&
 		CONSTANTS.channels.info?.id !== parentChannel?.id &&
+		CONSTANTS.channels.advertise?.id !== baseChannel?.id &&
 		!message.author?.bot
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
@@ -285,7 +279,7 @@ export async function automodMessage(message) {
 		},
 	);
 
-	const toStrike = [bad.language, bad.invites, bad.bots].filter(
+	const toWarn = [bad.language, bad.invites, bad.bots].filter(
 		/** @returns {strikes is number} */ (strikes) => strikes !== false,
 	);
 
@@ -313,7 +307,7 @@ export async function automodMessage(message) {
 	}
 
 	const promises = [];
-	if (toStrike.length) promises.push(message.delete());
+	if (toWarn.length) promises.push(message.delete());
 	else if (typeof embedStrikes === "number") promises.push(message.suppressEmbeds());
 
 	if (typeof bad.language === "number") {
@@ -394,7 +388,7 @@ export async function automodMessage(message) {
 
 	await Promise.all(promises);
 
-	return toStrike.length > 0;
+	return toWarn.length > 0;
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
@@ -408,12 +402,12 @@ export function badWordsAllowed(channel) {
 const NICKNAME_RULE = 8;
 
 /** @param {import("discord.js").GuildMember} member */
-export async function changeNickname(member, strike = true) {
+export async function changeNickname(member, shouldWarn = true) {
 	const censored = censor(member.displayName);
 
 	if (censored) {
 		await Promise.all([
-			strike
+			shouldWarn
 				? warn(member, "Watch your language!", censored.strikes, member.displayName)
 				: member
 						.send(
@@ -463,7 +457,7 @@ export async function changeNickname(member, strike = true) {
 							.send(
 								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 							)
-							.catch(() => false),
+							.catch(() => {}),
 					])
 					.flat(),
 			);

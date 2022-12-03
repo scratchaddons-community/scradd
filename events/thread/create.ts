@@ -1,4 +1,4 @@
-import warn from "../../common/warns.js";
+import warn from "../../common/warn.js";
 import { badWordsAllowed, censor } from "../../common/automod.js";
 import { suggestionAnswers, suggestionsDatabase } from "../../commands/get-top-suggestions.js";
 import client from "../../client.js";

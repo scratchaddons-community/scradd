@@ -5,6 +5,8 @@ import {
 	EmojiIdentifierResolvable,
 	MessageReaction,
 	Snowflake,
+	ComponentType,
+	ButtonStyle,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { automodMessage } from "../../common/automod.js";
@@ -22,7 +24,7 @@ import {
 
 import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
-import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import giveXp, { DEFAULT_XP } from "../../common/xp.js";
 import { normalize, truncateText } from "../../util/text.js";
 import client from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
@@ -65,6 +67,25 @@ const event: Event<"messageCreate"> = async function event(message) {
 						...(await generateModmailMessage(message)),
 					})
 					.then(...generateReactionFunctions(message)),
+			);
+		} else if (message.content.startsWith("/")) {
+			promises.push(
+				message.reply({
+					content: "Sorry, but commands are not supported in DMs.",
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "Go to #bots",
+									style: ButtonStyle.Link,
+									url: "https://discord.com/channels/806602307750985799/806648546773434390",
+								},
+							],
+						},
+					],
+				}),
 			);
 		} else if (
 			[MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(
@@ -204,11 +225,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				.then((messages) => messages.toJSON());
 
 			const res: Message<true>[] = [];
-			for (
-				let index = 0;
-				index < fetched.length && res.length < NORMAL_XP_PER_MESSAGE;
-				index++
-			) {
+			for (let index = 0; index < fetched.length && res.length < DEFAULT_XP; index++) {
 				const item = fetched[index];
 				item && (!item.author.bot || item.interaction) && res.push(item);
 			}
@@ -236,7 +253,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				}).next()
 			).value ?? -1;
 
-		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
+		const newChannel = lastInChannel.length < DEFAULT_XP;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
 		const bot =
@@ -256,8 +273,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 					: Math.max(
 							1,
 							Math.round(
-								(NORMAL_XP_PER_MESSAGE -
-									(newChannel ? lastInChannel.length - 1 : spam)) /
+								(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
 									bot /
 									(1 +
 										+![
@@ -390,7 +406,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		includes(/gives? ?you ?up/i, false) ||
 		content.includes("rickroll") ||
 		includes("astley") ||
-		content.includes("dqw4w9wgxcq")
+		message.content.includes("dQw4w9WgXcQ")
 	)
 		react(CONSTANTS.emojis.autoreact.rick);
 

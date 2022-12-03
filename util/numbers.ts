@@ -1,9 +1,5 @@
-export function convertBase(
-	value: string,
-	sourceBase: number,
-	outBase: number,
-	chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-=[];'/,.",
-) {
+const baseChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-=[];'/,.";
+export function convertBase(value: string, sourceBase: number, outBase: number, chars = baseChars) {
 	var range = chars.split("");
 
 	var decValue = value
@@ -23,6 +19,8 @@ export function convertBase(
 	}
 	return output || "0";
 }
+
+convertBase.MAX_BASE = baseChars.length;
 
 /** @author [Changaco/unicode-progress-bars](https://github.com/Changaco/unicode-progress-bars/blob/f8df5e8/generator.html#L60L82) */
 export function makeProgressBar(progress: number) {

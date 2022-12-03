@@ -5,7 +5,7 @@ import {
 	sendClosedMessage,
 	sendOpenedMessage,
 } from "../../common/modmail.js";
-import warn from "../../common/warns.js";
+import warn from "../../common/warn.js";
 import { badWordsAllowed, censor } from "../../common/automod.js";
 import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";
@@ -152,7 +152,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 				?.edit({
 					embeds: [
 						{
-							...starter.embeds[0],
+							...starter.embeds[0]?.data,
 							title: "Modmail ticket opened!",
 							color: MODMAIL_COLORS.opened,
 						},

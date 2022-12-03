@@ -10,10 +10,10 @@ const weeklyXpDatabase = new Database("recent_xp");
 await xpDatabase.init();
 await weeklyXpDatabase.init();
 
-export const NORMAL_XP_PER_MESSAGE = 5;
+export const DEFAULT_XP = 5;
 
 /** @param {User | GuildMember} to */
-export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
+export default async function giveXp(to, amount = DEFAULT_XP) {
 	// give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
@@ -61,7 +61,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					fields: [
 						{
 							name: "✨ Current XP",
-							value: newXp.toLocaleString() + " XP",
+							value: Math.floor(newXp).toLocaleString() + " XP",
 							inline: true,
 						},
 						{
@@ -111,10 +111,11 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000));
+	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra = "1669507200000")) + 604_800_000;
+	// TODO: change to `||=` next release!!
 
 	//send weekly winners
-	if (+date - nextWeeklyDate < 604_800_000) return;
+	if (+date < nextWeeklyDate) return;
 
 	// More than a week since last weekly
 	weeklyXpDatabase.extra = nextWeeklyDate + "";
@@ -128,7 +129,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					return member.roles.remove(active, "Inactive");
 			}),
 			...sorted.map(({ user, xp }) => {
-				if (xp > 350) {
+				if (xp >= 350) {
 					activeCount++;
 					return CONSTANTS.guild.members
 						.fetch(user)
@@ -141,7 +142,9 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	weeklyXpDatabase.data = [];
 
-	sorted.splice(5);
+	sorted.splice(
+		sorted.findIndex((gain, index) => index > 3 && gain.xp !== sorted[index + 1]?.xp) + 1,
+	);
 
 	const ids = sorted.map((gain) => (typeof gain === "string" ? gain : gain.user));
 
@@ -174,16 +177,15 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			(sorted
 				.map(
 					(gain, index) =>
-						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${
-							gain.user
-						}> - ${gain.xp.toLocaleString()} XP`,
+						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
+							gain.xp,
+						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
 			`\n\n*This week, ${
 				weekly.length
-			} people chatted, and ${activeCount} people were active. Alltogether, people gained ${weekly.reduce(
-				(a, b) => a + b.xp,
-				0,
+			} people chatted, and ${activeCount} people were active. Alltogether, people gained ${Math.floor(
+				weekly.reduce((a, b) => a + b.xp, 0),
 			)} XP this week.*`,
 	});
 

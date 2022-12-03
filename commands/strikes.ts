@@ -8,21 +8,25 @@ import {
 	User,
 	ComponentType,
 	ApplicationCommandOptionType,
+	TimestampStyles,
 } from "discord.js";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getLoggingThread } from "../common/logging.js";
-import { removeExpiredWarns, muteLog, warnLog, WARN_INFO_BASE } from "../common/warns.js";
+import { strikeDatabase } from "../common/warn.js";
 import { convertBase } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
+
+// TODO: rewrite
+// TODO: handle unwarning
 
 const command = defineCommand({
 	data: {
 		description: "Commands to view strike information",
 		subcommands: {
 			user: {
-				description: "View your or (Mods only) someone else’s active strikes",
+				description: "View your or (Mods only) someone else’s strikes",
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
@@ -55,16 +59,16 @@ const command = defineCommand({
 					user.id === interaction.member.id ||
 						(CONSTANTS.roles.mod &&
 							interaction.member.roles.resolve(CONSTANTS.roles.mod.id))
-						? { ...(await getWarnsForMember(user)), ephemeral: true }
+						? { ...(await getStrikesForMember(user)), ephemeral: true }
 						: {
 								ephemeral: true,
-								content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's warns!`,
+								content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
 						  },
 				);
 			}
 			case "id": {
 				await interaction.reply(
-					await getWarnById(
+					await getStrikeById(
 						interaction.member,
 						interaction.options.getString("id", true),
 					),
@@ -75,30 +79,25 @@ const command = defineCommand({
 });
 export default command;
 
-export async function getWarnsForMember(user: User | GuildMember): Promise<BaseMessageOptions> {
-	const warns = (await removeExpiredWarns(warnLog)).filter((warn) => warn.user === user.id);
-	const mutes = (await removeExpiredWarns(muteLog)).filter((mute) => mute.user === user.id);
+export async function getStrikesForMember(user: User | GuildMember): Promise<BaseMessageOptions> {
+	const strikes = strikeDatabase.data
+		.filter((strike) => strike.user === user.id)
+		.sort((one, two) => two.expiresAt - one.expiresAt);
 
 	const member =
 		user instanceof GuildMember
 			? user
 			: await CONSTANTS.guild?.members.fetch(user.id).catch(() => {});
 
-	const strikes = await Promise.all(
-		warns
-			.filter((warn, index) => warns.findIndex((w) => w.info == warn.info) == index)
-			.sort((one, two) => two.expiresAt - one.expiresAt),
-	);
-
 	return {
 		components: strikes.length
 			? [
 					{
 						type: ComponentType.ActionRow,
-						components: strikes.map((warn) => ({
-							label: convertBase(warn.info || "", 10, WARN_INFO_BASE),
+						components: strikes.map((strike) => ({
+							label: strike.info || "",
 							style: ButtonStyle.Secondary,
-							custom_id: `${warn.info}_strike`,
+							custom_id: `${strike.info}_strike`,
 							type: ComponentType.Button,
 						})),
 					},
@@ -109,42 +108,29 @@ export async function getWarnsForMember(user: User | GuildMember): Promise<BaseM
 				title: `${
 					member?.displayName ||
 					(user instanceof GuildMember ? user.user.username : user.username)
-				} has ${warns.length} active strike${warns.length === 1 ? "" : "s"}`,
+				} has ${strikes.length} strike${strikes.length === 1 ? "" : "s"}`,
 				author: {
 					icon_url: (member || user).displayAvatarURL(),
 					name: user instanceof GuildMember ? user.user.username : user.username,
 				},
 				color: member?.displayColor,
 				description:
-					(
-						await Promise.all(
-							strikes.map(async (warn) => {
-								const strikes = warns.filter(
-									({ info }) => info === warn.info,
-								).length;
-
-								return `\`${convertBase(warn.info || "", 10, WARN_INFO_BASE)}\`${
-									strikes === 1 ? "" : ` (*${strikes})`
-								}: expiring ${time(new Date(warn.expiresAt), "R")}`;
-							}),
-						)
-					).join("\n") || `${user.toString()} has no recent strikes!`,
-				footer: mutes.length
-					? {
-							text:
-								`${
-									user instanceof GuildMember ? user.user.username : user.username
-								} has been muted ` +
-								mutes.length +
-								` time${mutes.length === 1 ? "" : "s"} recently.`,
-					  }
-					: undefined,
+					strikes
+						.map((strike) => {
+							return `\`${strike.info}\`${
+								strike.count === 1 ? "" : ` (*${strike.count})`
+							}: expiring ${time(
+								new Date(strike.expiresAt),
+								TimestampStyles.RelativeTime,
+							)}`;
+						})
+						.join("\n") || `${user.toString()} has no strikes!`,
 			},
 		],
 	};
 }
 
-export async function getWarnById(
+export async function getStrikeById(
 	interactor: GuildMember,
 	filter: string,
 ): Promise<InteractionReplyOptions> {
@@ -153,7 +139,7 @@ export async function getWarnById(
 			?.useMentions ?? false;
 
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	const id = convertBase(filter, WARN_INFO_BASE, 10);
+	const id = convertBase(filter, convertBase.MAX_BASE, 10);
 	const channel = await getLoggingThread("members");
 
 	const idMessage =
@@ -176,13 +162,13 @@ export async function getWarnById(
 	if (userId !== interactor.id && !isMod)
 		return {
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's warns!`,
+			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
 		};
 
 	const member = await CONSTANTS.guild?.members.fetch(userId).catch(() => {});
 	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
-	const caseId = idMessage ? filter : convertBase(filter, 10, WARN_INFO_BASE);
+	const caseId = idMessage ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
 	const { url } = message.attachments.first() || {};
 	const mod =
 		isMod &&
@@ -190,8 +176,7 @@ export async function getWarnById(
 			.fetch(GlobalUsersPattern.exec(message.content)?.[1] || "")
 			.catch(() => {}));
 
-	const allWarns = await removeExpiredWarns(warnLog);
-	const { expiresAt } = allWarns.find((warn) => warn.info === message.id) || {};
+	const { expiresAt } = strikeDatabase.data.find((strike) => strike.info === message.id) || {};
 
 	return {
 		ephemeral: true,
@@ -201,15 +186,19 @@ export async function getWarnById(
 				author: nick
 					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
-				title: `Case \`${caseId}\``,
+				title: `Strike \`${caseId}\``,
 				description: url
 					? await fetch(url).then((response) => response.text())
 					: message.content,
 				timestamp: message.createdAt.toISOString(),
 				fields: [
 					{
-						name: "⚠ Strikes",
-						value: / \d+ /.exec(message.content)?.[0]?.trim() ?? "0",
+						name: "⚠ Count",
+						value:
+							"" +
+							(strikeDatabase.data.find(({ info }) => info === caseId)?.count ??
+								/ \d+ /.exec(message.content)?.[0]?.trim() ??
+								"0"),
 						inline: true,
 					},
 					...(mod
@@ -234,7 +223,7 @@ export async function getWarnById(
 						? [
 								{
 									name: "⏲ Expirery",
-									value: time(new Date(expiresAt), "R"),
+									value: time(new Date(expiresAt), TimestampStyles.RelativeTime),
 									inline: true,
 								},
 						  ]

@@ -45,7 +45,7 @@ const command = defineCommand({
 
 				const member = await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 
-				const xp = allXp.find((entry) => entry.user === user.id)?.xp || 0;
+				const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp || 0);
 				const level = getLevelForXp(xp);
 				const xpForNextLevel = getXpForLevel(level + 1);
 				const xpForPreviousLevel = getXpForLevel(level);
@@ -136,7 +136,7 @@ const command = defineCommand({
 											.fetch(xp.user)
 											.catch(() => ({ username: `<@${xp.user}>` }))
 								  ).username
-						} (${xp.xp.toLocaleString()} XP)`;
+						} (${Math.floor(xp.xp).toLocaleString()} XP)`;
 					},
 					"No users found.",
 					`Leaderboard for ${CONSTANTS.guild.name}`,

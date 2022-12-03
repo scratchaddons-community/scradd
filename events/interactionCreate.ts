@@ -1,7 +1,7 @@
 import { CommandInteractionOption, GuildMember } from "discord.js";
-import warn from "../common/warns.js";
+import warn from "../common/warn.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
-import { getWarnById } from "../commands/view-warns.js";
+import { getStrikeById } from "../commands/strikes.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
 
@@ -39,7 +39,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					if (!(interaction.member instanceof GuildMember))
 						throw new TypeError("interaction.member is not a GuildMember");
 
-					await interaction.reply(await getWarnById(interaction.member, id ?? ""));
+					await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
 					return;
 				}
 

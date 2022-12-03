@@ -14,7 +14,7 @@ export function boardReactionCount(channel) {
 	const COUNTS = {
 		scradd: 2,
 		devs: 6,
-		modsPlus: 5,
+		misc: 5,
 		mods: 4,
 		exec: 3,
 		admins: 2,
@@ -25,6 +25,8 @@ export function boardReactionCount(channel) {
 	if (!channel) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.mods;
+	if (baseChannel.isVoiceBased()) return COUNTS.misc;
+	if (baseChannel.parent?.id === CONSTANTS.channels.info?.id) return COUNTS.info;
 
 	return (
 		{
@@ -33,15 +35,13 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
 			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
-			"853256939089559583": COUNTS.modsPlus, // #da-boosters
+			"853256939089559583": COUNTS.misc, // #da-boosters
 			"869662117651955802": COUNTS.devs, // #devs-only
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
 		COUNTS[
 			baseChannel.parent?.id === "866028754962612294" // 💀 The Cache!
-				? "modsPlus"
-				: baseChannel.parent?.id === CONSTANTS.channels.info?.id
-				? "info"
+				? "misc"
 				: "default"
 		]
 	);

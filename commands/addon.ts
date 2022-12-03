@@ -15,7 +15,13 @@ const fuse = new Fuse(addons, {
 	keys: [
 		{ name: "id", weight: 1 },
 		{ name: "name", weight: 1 },
-		{ name: "description", weight: 0.5 },
+		{ name: "description", weight: 0.7 },
+		{ name: "latestUpdate.temporaryNotice", weight: 0.5 },
+		{ name: "info.text", weight: 0.4 },
+		{ name: "presets.name", weight: 0.3 },
+		{ name: "settings.name", weight: 0.3 },
+		{ name: "credits.note", weight: 0.2 },
+		{ name: "credits.name", weight: 0.1 },
 	],
 });
 
