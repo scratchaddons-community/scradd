@@ -25,9 +25,6 @@ const command = defineCommand({
 			ephemeral: true,
 			content: words
 				? `⚠ **${words.length} bad word${words.length ? "s" : ""} detected**!\n` +
-				  `Posting that text would give you **${result.strikes} strike${
-						result.strikes === 1 ? "" : "s"
-				  }**, ${result.strikes ? "so don’t" : "but please don’t still"}.\n\n` +
 				  "**I detected the following words as bad**: " +
 				  joinWithAnd(words, (word) => "*" + escapeMarkdown(word) + "*")
 				: CONSTANTS.emojis.statuses.yes + " No bad words found.",
