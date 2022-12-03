@@ -272,16 +272,28 @@ export async function messageToText(message, replies = true) {
 		//     # the author will be a Member
 		//     return f'{self.author.name} is live! Now streaming {self.author.activity.name}'  # type: ignore
 		case MessageType.GuildDiscoveryDisqualified: {
-			return "This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.";
+			return (
+				CONSTANTS.emojis.discord.no +
+				" This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
+			);
 		}
 		case MessageType.GuildDiscoveryRequalified: {
-			return "This server is eligible for Server Discovery again and has been automatically relisted!";
+			return (
+				CONSTANTS.emojis.discord.yes +
+				" This server is eligible for Server Discovery again and has been automatically relisted!"
+			);
 		}
 		case MessageType.GuildDiscoveryGracePeriodInitialWarning: {
-			return "This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.";
+			return (
+				CONSTANTS.emojis.discord.warning +
+				" This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery."
+			);
 		}
 		case MessageType.GuildDiscoveryGracePeriodFinalWarning: {
-			return "This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.";
+			return (
+				CONSTANTS.emojis.discord.warning +
+				" This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery."
+			);
 		}
 		case MessageType.ThreadCreated: {
 			return (
@@ -318,6 +330,7 @@ export async function messageToText(message, replies = true) {
 				: `${CONSTANTS.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
 		}
 		case MessageType.GuildInviteReminder: {
+			// TODO: this probably needs an emoji
 			return (
 				"Wondering who to invite?\n" +
 				"Start by inviting anyone who can help you build the server!"
@@ -340,6 +353,7 @@ export async function messageToText(message, replies = true) {
 		}
 		default: {
 			// Fallback for unknown message types
+			// TODO: automoderationaction
 			throw new TypeError("Unknown message type: " + message.type);
 		}
 	}
@@ -429,7 +443,7 @@ export async function paginate(array, toString, failMessage, title, reply, user,
 					title: title,
 					description: content,
 					footer: {
-						text: `Page ${Math.floor(offset / PAGE_OFFSET) + 1}/${numberOfPages}${
+						text: `Page ${offset / PAGE_OFFSET + 1}/${numberOfPages}${
 							useMentions === undefined
 								? "\nUse /settings to restore the old behavior of showing mentions instead of usernames"
 								: ""
