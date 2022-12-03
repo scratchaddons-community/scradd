@@ -1,4 +1,4 @@
-import { time, Snowflake, Role } from "discord.js";
+import { time, Snowflake, Role, TimestampStyles } from "discord.js";
 
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
@@ -56,7 +56,10 @@ const command = defineCommand({
 								{ name: "Version", value: `v${pkg.version}`, inline: true },
 								{
 									name: "Last restarted",
-									value: time(client.readyAt ?? new Date(), "R"),
+									value: time(
+										client.readyAt ?? new Date(),
+										TimestampStyles.RelativeTime,
+									),
 									inline: true,
 								},
 								{
