@@ -16,7 +16,7 @@ jobs:
               with:
                   ref: ${{ github.head_ref }}
 
-            - name: Bump dependnencies
+            - name: Bump dependencies
               uses: RedGuy12/sync-types@v1.0.3
 
             - name: Commit
