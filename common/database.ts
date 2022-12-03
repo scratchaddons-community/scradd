@@ -4,6 +4,7 @@ import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./logging.js";
 import client from "../client.js";
 import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
+import logError from "../util/logError.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -118,9 +119,8 @@ export default class Database<Name extends keyof Databases> {
 
 			const promise = this.message
 				.edit({ content: messageContent.join("\n").trim(), files })
-				.catch(async () => {
-					databases[this.name] = undefined;
-					await this.init();
+				.catch(async (error) => {
+					await logError(error, `Database<${this.name}>#queueWrite()`);
 					return callback();
 				});
 
@@ -186,7 +186,7 @@ export type Databases = {
 		weeklyPings: boolean;
 		/** Whether to automatically react to their messages with random emojis. */
 		autoreactions: boolean;
-		useMentions?: boolean;
+		useMentions: boolean;
 	};
 	recent_xp: {
 		/** The ID of the user. */
