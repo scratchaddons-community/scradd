@@ -93,8 +93,7 @@ export async function getThreadFromMember(user) {
  * Let a user know that their ticket has been closed.
  *
  * @param {import("discord.js").ThreadChannel} thread - Ticket thread.
- * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} meta - The reason for closing the
- *   ticket.
+ * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} meta - The reason for closing the ticket.
  *
  * @returns {Promise<Message<false> | undefined>} - Message sent to user.
  */
