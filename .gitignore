@@ -1,9 +1,5 @@
-!**
-**/.DS_Store
-.git/
-.eslintcache
-.env
-.env.*
+.*
+!.github/
 dist/
 node_modules/
-.vscode/
+!.gitignore
