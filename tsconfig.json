@@ -8,7 +8,7 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importsNotUsedAsValues": "error",
-		"lib": ["dom", "ES2022"],
+		"lib": ["ESNext", "DOM"],
 		"maxNodeModuleJsDepth": 0,
 		"module": "ESNext",
 		"moduleResolution": "Node",
