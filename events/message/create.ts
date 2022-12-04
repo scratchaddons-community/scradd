@@ -5,6 +5,8 @@ import {
 	EmojiIdentifierResolvable,
 	MessageReaction,
 	Snowflake,
+	ComponentType,
+	ButtonStyle,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { automodMessage } from "../../common/automod.js";
@@ -65,6 +67,25 @@ const event: Event<"messageCreate"> = async function event(message) {
 						...(await generateModmailMessage(message)),
 					})
 					.then(...generateReactionFunctions(message)),
+			);
+		} else if (message.content.startsWith("/")) {
+			promises.push(
+				message.reply({
+					content: "⚠ Sorry, but commands are not supported in DMs.",
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "Go to #bots",
+									style: ButtonStyle.Link,
+									url: "https://discord.com/channels/806602307750985799/806648546773434390",
+								},
+							],
+						},
+					],
+				}),
 			);
 		} else if (
 			[MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(
