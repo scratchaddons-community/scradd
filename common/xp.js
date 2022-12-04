@@ -111,10 +111,11 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000));
+	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra = "1670112000000")) + 604_800_000;
+	// TODO: change to `||=` next release!!
 
 	//send weekly winners
-	if (+date - nextWeeklyDate < 604_800_000) return;
+	if (+date < nextWeeklyDate) return;
 
 	// More than a week since last weekly
 	weeklyXpDatabase.extra = nextWeeklyDate + "";
@@ -128,7 +129,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 					return member.roles.remove(active, "Inactive");
 			}),
 			...sorted.map(({ user, xp }) => {
-				if (xp > 350) {
+				if (xp >= 350) {
 					activeCount++;
 					return CONSTANTS.guild.members
 						.fetch(user)
@@ -141,7 +142,9 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 
 	weeklyXpDatabase.data = [];
 
-	sorted.splice(5);
+	sorted.splice(
+		sorted.findIndex((gain, index) => index > 3 && gain.xp !== sorted[index + 1]?.xp) + 1,
+	);
 
 	const ids = sorted.map((gain) => (typeof gain === "string" ? gain : gain.user));
 
@@ -174,17 +177,14 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			(sorted
 				.map(
 					(gain, index) =>
-						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${
-							gain.user
-						}> - ${gain.xp.toLocaleString()} XP`,
+						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
+							gain.xp,
+						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
-			`\n\n*This week, ${
-				weekly.length
-			} people chatted, and ${activeCount} people were active. Alltogether, people gained ${weekly.reduce(
-				(a, b) => a + b.xp,
-				0,
-			)} XP this week.*`,
+			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Alltogether, people gained ${Math.floor(
+				weekly.reduce((a, b) => a + b.xp, 0),
+			).toLocaleString()} XP this week.*`,
 	});
 
 	const role = CONSTANTS.roles.weekly_winner;
