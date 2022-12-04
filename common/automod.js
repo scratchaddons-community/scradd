@@ -216,6 +216,7 @@ async function checkString(toCensor, message) {
 	if (
 		!badWordsAllowed(message.channel) &&
 		CONSTANTS.channels.info?.id !== parentChannel?.id &&
+		CONSTANTS.channels.advertise?.id !== baseChannel?.id &&
 		!message.author?.bot
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);

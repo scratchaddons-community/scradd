@@ -111,10 +111,10 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra || 1_662_854_400_000));
+	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra ||= "1670112000000")) + 604_800_000;
 
 	//send weekly winners
-	if (+date - nextWeeklyDate < 604_800_000) return;
+	if (+date < nextWeeklyDate) return;
 
 	// More than a week since last weekly
 	weeklyXpDatabase.extra = nextWeeklyDate + "";
