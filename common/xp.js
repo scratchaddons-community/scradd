@@ -111,7 +111,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra = "1669507200000")) + 604_800_000;
+	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra = "1670112000000")) + 604_800_000;
 	// TODO: change to `||=` next release!!
 
 	//send weekly winners
@@ -182,11 +182,9 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
-			`\n\n*This week, ${
-				weekly.length
-			} people chatted, and ${activeCount} people were active. Alltogether, people gained ${Math.floor(
+			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Alltogether, people gained ${Math.floor(
 				weekly.reduce((a, b) => a + b.xp, 0),
-			)} XP this week.*`,
+			).toLocaleString()} XP this week.*`,
 	});
 
 	const role = CONSTANTS.roles.weekly_winner;

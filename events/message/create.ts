@@ -71,7 +71,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		} else if (message.content.startsWith("/")) {
 			promises.push(
 				message.reply({
-					content: "Sorry, but commands are not supported in DMs.",
+					content: "⚠ Sorry, but commands are not supported in DMs.",
 					components: [
 						{
 							type: ComponentType.ActionRow,
