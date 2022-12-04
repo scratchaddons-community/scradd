@@ -1,8 +1,8 @@
 const baseChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-=[];'/,.";
 export function convertBase(value: string, sourceBase: number, outBase: number, chars = baseChars) {
-	var range = chars.split("");
+	const range = chars.split("");
 
-	var decValue = value
+	let decValue = value
 		.toString()
 		.split("")
 		.reverse()
@@ -12,7 +12,7 @@ export function convertBase(value: string, sourceBase: number, outBase: number, 
 			BigInt(0),
 		);
 
-	var output = "";
+	let output = "";
 	while (decValue > 0) {
 		output = range[+(decValue % BigInt(outBase)).toString()] + output;
 		decValue = (decValue - (decValue % BigInt(outBase))) / BigInt(outBase);
