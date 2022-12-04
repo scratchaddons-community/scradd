@@ -411,7 +411,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		includes(/gives? ?you ?up/i, false) ||
 		content.includes("rickroll") ||
 		includes("astley") ||
-		content.includes("dqw4w9wgxcq")
+		message.content.includes("dQw4w9WgXcQ")
 	)
 		react(CONSTANTS.emojis.autoreact.rick);
 
