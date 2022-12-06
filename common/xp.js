@@ -182,7 +182,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
-			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Alltogether, people gained ${Math.floor(
+			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Altogether, people gained ${Math.floor(
 				weekly.reduce((a, b) => a + b.xp, 0),
 			).toLocaleString()} XP this week.*`,
 	});
