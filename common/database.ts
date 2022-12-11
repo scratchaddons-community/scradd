@@ -160,8 +160,7 @@ export type Databases = {
 		user: Snowflake;
 		/** The time when this strike expires. */
 		expiresAt: number;
-		/** The ID of the message in #mod-log with more information. */
-		info: Snowflake;
+		info: string;
 		count: number;
 	};
 	xp: {
