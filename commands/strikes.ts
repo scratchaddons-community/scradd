@@ -118,7 +118,11 @@ export async function getStrikesForMember(user: User | GuildMember): Promise<Bas
 					strikes
 						.map((strike) => {
 							return `\`${strike.info}\`${
-								strike.count === 1 ? "" : ` (*${strike.count})`
+								strike.count === 1
+									? ""
+									: ` (${
+											strike.count === 0.25 ? "verbal" : `\\*${strike.count}`
+									  })`
 							}: expiring ${time(
 								new Date(strike.expiresAt),
 								TimestampStyles.RelativeTime,
@@ -140,16 +144,17 @@ export async function getStrikeById(
 
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
 	const id = convertBase(filter, convertBase.MAX_BASE, 10);
+	console.log(id);
 	const channel = await getLoggingThread("members");
 
 	const idMessage =
-		(await channel?.messages.fetch(id).catch(() => {})) ||
+		(await channel.messages.fetch(id).catch(() => {})) ||
 		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
 
 	const message =
 		idMessage ||
-		(await channel?.messages.fetch(filter).catch(() => {})) ||
-		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
+		(await channel.messages.fetch(filter).catch(() => {})) ||
+		(await CONSTANTS.channels.modlogs?.messages.fetch(filter).catch(() => {}));
 
 	if (!message) {
 		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid filter!` };

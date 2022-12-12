@@ -9,7 +9,7 @@ import giveXp, { DEFAULT_XP } from "./xp.js";
 export const EXPIRY_LENGTH = 21,
 	STRIKES_PER_MUTE = 3,
 	MUTE_LENGTHS = [6, 12, 24],
-	PARTIAL_STRIKE_COUNT = 1 / STRIKES_PER_MUTE,
+	PARTIAL_STRIKE_COUNT = 1 / (STRIKES_PER_MUTE + 1),
 	DEFAULT_STRIKES = 1;
 
 export const strikeDatabase = new Database("strikes");
@@ -133,19 +133,22 @@ export default async function warn(
 	);
 	const addedMuteLength = newMuteLength - oldMuteLength;
 
-	if (member?.moderatable)
-		await member.disableCommunicationUntil(
-			addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
-				Date.now(),
-			"Too many strikes",
-		);
-	else
-		await CONSTANTS.channels.modlogs?.send({
-			allowedMentions: { users: [] },
-			content: `⚠ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
-				process.env.NODE_ENV === "production" ? "hour" : "minute"
-			}${addedMuteLength === 1 ? "" : "s"}.`,
-		});
+	if (addedMuteLength) {
+		if (member?.moderatable) {
+			await member.disableCommunicationUntil(
+				addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+					Date.now(),
+				"Too many strikes",
+			);
+		} else {
+			await CONSTANTS.channels.modlogs?.send({
+				allowedMentions: { users: [] },
+				content: `⚠ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+					process.env.NODE_ENV === "production" ? "hour" : "minute"
+				}${addedMuteLength === 1 ? "" : "s"}.`,
+			});
+		}
+	}
 
 	if (Math.trunc(newStrikeCount) >= MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(

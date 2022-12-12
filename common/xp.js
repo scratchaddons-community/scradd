@@ -37,7 +37,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 	const oldLevel = getLevelForXp(oldXp);
 	const newLevel = getLevelForXp(newXp);
 	const date = new Date();
-	if (oldLevel !== newLevel) {
+	if (oldLevel < newLevel) {
 		const nextLevelXp = getXpForLevel(newLevel + 1);
 		const pings =
 			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ??
@@ -182,7 +182,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*") +
-			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Alltogether, people gained ${Math.floor(
+			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Altogether, people gained ${Math.floor(
 				weekly.reduce((a, b) => a + b.xp, 0),
 			).toLocaleString()} XP this week.*`,
 	});
