@@ -5,6 +5,8 @@ on:
     schedule:
         - cron: "30 12 * * *" # 30 minutes before Dependabot
 
+permissions: write-all
+
 jobs:
     bump:
         name: Bump dependencies
