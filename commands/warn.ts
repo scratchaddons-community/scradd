@@ -36,7 +36,7 @@ const command = defineCommand({
 		await interaction.reply({
 			allowedMentions: { users: [] },
 			content: `${CONSTANTS.emojis.statuses.yes} ${
-				strikes === 1
+				strikes === 0
 					? "Verbally warned"
 					: `Warned ${Math.abs(strikes)} time${Math.abs(strikes) === 1 ? "" : "s"}`
 			} ${user.toString()}.${reason ? " " + reason : ""}`,
