@@ -1,26 +1,43 @@
-const baseChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-=[];'/,.";
+const baseChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
 export function convertBase(value: string, sourceBase: number, outBase: number, chars = baseChars) {
 	const range = chars.split("");
+	if (sourceBase < 2 || sourceBase > range.length)
+		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
+	if (outBase < 2 || outBase > range.length)
+		throw new RangeError(`outBase must be between 2 and ${range.length}`);
+
+	const outBaseBig = BigInt(outBase);
 
 	let decValue = value
-		.toString()
 		.split("")
 		.reverse()
-		.reduce(
-			(carry, digit, index) =>
-				carry + BigInt(range.indexOf(digit) * Math.pow(sourceBase, index)),
-			BigInt(0),
-		);
+		.reduce((carry, digit, loopIndex) => {
+			const biggestBaseIndex = range.indexOf(digit);
+			if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
+				throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
+			return (
+				carry +
+				BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
+			);
+		}, 0n);
 
 	let output = "";
 	while (decValue > 0) {
-		output = range[+(decValue % BigInt(outBase)).toString()] + output;
-		decValue = (decValue - (decValue % BigInt(outBase))) / BigInt(outBase);
+		output = range[Number(decValue % outBaseBig)] + output;
+		decValue = (decValue - (decValue % outBaseBig)) / outBaseBig;
 	}
 	return output || "0";
 }
 
 convertBase.MAX_BASE = baseChars.length;
+
+/** `x**y` */
+export function bigIntPower(x: bigint, y: bigint) {
+	if (y === 0n) return 1n;
+	let p2: bigint = bigIntPower(x, y / 2n);
+	if (y % 2n === 0n) return p2 * p2;
+	return x * p2 * p2;
+}
 
 /** @author [Changaco/unicode-progress-bars](https://github.com/Changaco/unicode-progress-bars/blob/f8df5e8/generator.html#L60L82) */
 export function makeProgressBar(progress: number) {
