@@ -43,6 +43,7 @@ const badWords = [
 			/chff(?:l|vrf)/,
 			/fpebghz/,
 			/ynovn/,
+			/xlf/,
 			/preivk/,
 			/ubeal/,
 			/obaref?/,
@@ -71,7 +72,6 @@ const badWords = [
 		],
 		[
 			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
-			/xlf/,
 			/(?:8|o)=+Q/,
 			/fzhg+(?:vr|e|fg?|l)?/,
 			/pbpx(?: ?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
@@ -99,7 +99,7 @@ const badWords = [
 			/j?uber/,
 			/av+t{2,}(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
 			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
-			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat)?/,
+			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat|cn)?/,
 		],
 	],
 ];
@@ -373,7 +373,7 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				`Please don’t post that many animated emojis!`,
 				badAnimatedEmojis,
-				animatedEmojis.join("\n"),
+				animatedEmojis.map((emoji) => emoji[0]).join("\n"),
 			),
 			message.channel.send(
 				CONSTANTS.emojis.statuses.no +
