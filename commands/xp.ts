@@ -138,8 +138,7 @@ const command = defineCommand({
 								  ).username
 						} (${Math.floor(xp.xp).toLocaleString()} XP)`;
 					},
-					(data) =>
-						interaction[interaction.replied ? "editReply" : "reply"](data),
+					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 					{
 						singular: "user",
 						title: `Leaderboard for ${CONSTANTS.guild.name}`,

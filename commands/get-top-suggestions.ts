@@ -132,8 +132,7 @@ const command = defineCommand({
 						  }`
 				}`;
 			},
-			(data) =>
-				interaction[interaction.replied ? "editReply" : "reply"](data),
+			(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 			{
 				title: `Top suggestions${nick ? ` by ${nick}` : ""}${
 					answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
