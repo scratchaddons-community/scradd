@@ -17,7 +17,6 @@ import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
 import { paginate } from "../util/discord.js";
 
-// TODO: rewrite
 // TODO: handle unwarning
 
 const command = defineCommand({
@@ -53,6 +52,17 @@ const command = defineCommand({
 		switch (interaction.options.getSubcommand(true)) {
 			case "user": {
 				const selected = interaction.options.getUser("user") ?? interaction.member;
+				if (
+					selected.id !== interaction.member.id &&
+					CONSTANTS.roles.mod &&
+					!interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+				) {
+					return await interaction.reply({
+						ephemeral: true,
+						content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
+					});
+				}
+
 				const user = selected instanceof GuildMember ? selected.user : selected;
 				const member =
 					selected instanceof GuildMember
@@ -71,7 +81,7 @@ const command = defineCommand({
 				}
 				const strikes = strikeDatabase.data
 					.filter((strike) => strike.user === selected.id)
-					.sort((one, two) => two.expiresAt - one.expiresAt);
+					.sort((one, two) => two.date - one.date);
 
 				await paginate(
 					strikes,
@@ -80,10 +90,7 @@ const command = defineCommand({
 							strike.count === 1
 								? ""
 								: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
-						}: expiring ${time(
-							new Date(strike.expiresAt),
-							TimestampStyles.RelativeTime,
-						)}`,
+						} ${time(new Date(strike.date), TimestampStyles.RelativeTime)}`,
 					(data) => {
 						if (
 							data.embeds?.[0] &&
@@ -188,7 +195,7 @@ export async function getStrikeById(
 			.fetch(GlobalUsersPattern.exec(message.content)?.[1] || "")
 			.catch(() => {}));
 
-	const { expiresAt } = strikeDatabase.data.find((strike) => strike.info === message.id) || {};
+	const { date } = strikeDatabase.data.find((strike) => strike.info === message.id) || {};
 
 	return {
 		ephemeral: true,
@@ -231,11 +238,11 @@ export async function getStrikeById(
 								},
 						  ]
 						: []),
-					...(expiresAt
+					...(date
 						? [
 								{
-									name: "⏲ Expirery",
-									value: time(new Date(expiresAt), TimestampStyles.RelativeTime),
+									name: "⏲ Date",
+									value: time(new Date(date), TimestampStyles.RelativeTime),
 									inline: true,
 								},
 						  ]

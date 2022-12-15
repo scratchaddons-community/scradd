@@ -158,8 +158,8 @@ export type Databases = {
 	strikes: {
 		/** The ID of the user who was warned. */
 		user: Snowflake;
-		/** The time when this strike expires. */
-		expiresAt: number;
+		/** The time when this strike was issued. */
+		date: number;
 		info: string;
 		count: number;
 	};

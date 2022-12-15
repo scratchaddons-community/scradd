@@ -22,7 +22,7 @@ export default async function warn(
 	contextOrMod: import("discord.js").User | string = client.user,
 ): Promise<void> {
 	const allUserStrikes = strikeDatabase.data.filter(
-		(strike) => strike.user === user.id && strike.expiresAt < +new Date(),
+		(strike) => strike.user === user.id && strike.date + EXPIRY_LENGTH < +new Date(),
 	);
 
 	const oldStrikeCount = allUserStrikes.reduce((acc, { count }) => count + acc, 0);
@@ -91,16 +91,12 @@ export default async function warn(
 		})
 		.catch(() => {});
 
-	const expiresAt = new Date()[process.env.NODE_ENV === "production" ? "setDate" : "setMinutes"](
-		new Date()[process.env.NODE_ENV === "production" ? "getDate" : "getMinutes"]() +
-			EXPIRY_LENGTH,
-	);
 	strikeDatabase.data = [
 		...strikeDatabase.data,
 		{
 			user: user.id,
 			info: convertBase(logMessage.id, 10, convertBase.MAX_BASE),
-			expiresAt,
+			date: +new Date(),
 			count: strikes,
 		},
 	];
@@ -151,7 +147,7 @@ export default async function warn(
 	if (Math.trunc(newStrikeCount) >= MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
-				Math.round((allUserStrikes[0]?.expiresAt || expiresAt) / 1000),
+				Math.round((+(allUserStrikes[0]?.date || new Date()) + EXPIRY_LENGTH) / 1000),
 				TimestampStyles.LongDate,
 			)}, you will be banned.**__`,
 		);
