@@ -51,7 +51,7 @@ export default async function warn(
 		{
 			files: [
 				{
-					attachment: Buffer.from(reason + (context ? `\n>>> ${context}` : ""), "utf-8"),
+					attachment: Buffer.from(reason + (context && `\n>>> ${context}`), "utf-8"),
 					name: "strike.txt",
 				},
 			],
@@ -67,14 +67,12 @@ export default async function warn(
 		.send({
 			embeds: [
 				{
-					title: `You were ${displayStrikes ? "" : "verbally "}warned in ${escapeMarkdown(
-						CONSTANTS.guild.name,
-					)}!`,
-					description: displayStrikes
-						? `You gained ${displayStrikes} strike${
-								displayStrikes === 1 ? "" : "s"
-						  }.\n\n>>> ${reason}${context ? `\n\n${context}` : ""}`
-						: reason + (context ? `\n>>> ${context}` : ""),
+					title: `You were ${
+						strikes
+							? `warned${strikes > 1 ? ` ${strikes} times` : ""}`
+							: "verbally warned"
+					} in ${escapeMarkdown(CONSTANTS.guild.name)}!`,
+					description: reason + (context && `\n>>> ${context}`),
 					color: member?.displayColor,
 					footer: {
 						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
@@ -153,7 +151,7 @@ export default async function warn(
 	if (Math.trunc(newStrikeCount) >= MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
-				(allUserStrikes[0]?.expiresAt || expiresAt) / 1000,
+				Math.round((allUserStrikes[0]?.expiresAt || expiresAt) / 1000),
 				TimestampStyles.LongDate,
 			)}, you will be banned.**__`,
 		);

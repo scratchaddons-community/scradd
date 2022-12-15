@@ -15,7 +15,7 @@ import { disableComponents, extractMessageExtremities, messageToText } from "../
 
 import CONSTANTS from "./CONSTANTS.js";
 import client from "../client.js";
-import { getStrikesForMember } from "../commands/strikes.js";
+// import { getStrikesForMember } from "../commands/strikes.js";
 
 export const MODMAIL_COLORS = {
 	opened: Colors.Gold,
@@ -197,12 +197,12 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 						type: ComponentType.Button,
 						label: "Confirm",
 						style: ButtonStyle.Success,
-						custom_id: confirmId,
+						customId: confirmId,
 					},
 					{
 						type: ComponentType.Button,
 						label: "Cancel",
-						custom_id: cancelId,
+						customId: cancelId,
 						style: ButtonStyle.Secondary,
 					},
 				],
@@ -288,6 +288,6 @@ export async function openModmail(openedEmbed, user, ping = false) {
 		reason: "Modmail opened",
 	});
 	await thread.setLocked(true, "Modmail opened");
-	await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
+	// TODO: await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
 	return thread;
 }

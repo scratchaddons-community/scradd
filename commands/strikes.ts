@@ -2,13 +2,11 @@ import {
 	GuildMember,
 	MessageMentions,
 	time,
-	ButtonStyle,
-	BaseMessageOptions,
 	InteractionReplyOptions,
-	User,
-	ComponentType,
 	ApplicationCommandOptionType,
 	TimestampStyles,
+	ButtonStyle,
+	ComponentType,
 } from "discord.js";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -17,6 +15,7 @@ import { strikeDatabase } from "../common/warn.js";
 import { convertBase } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
+import { paginate } from "../util/discord.js";
 
 // TODO: rewrite
 // TODO: handle unwarning
@@ -53,18 +52,82 @@ const command = defineCommand({
 			throw new TypeError("interaction.member is not a GuildMember");
 		switch (interaction.options.getSubcommand(true)) {
 			case "user": {
-				const user = interaction.options.getUser("user") ?? interaction.member;
+				const selected = interaction.options.getUser("user") ?? interaction.member;
+				const user = selected instanceof GuildMember ? selected.user : selected;
+				const member =
+					selected instanceof GuildMember
+						? selected
+						: await CONSTANTS.guild?.members.fetch(selected.id).catch(() => {});
 
-				return await interaction.reply(
-					user.id === interaction.member.id ||
-						(CONSTANTS.roles.mod &&
-							interaction.member.roles.resolve(CONSTANTS.roles.mod.id))
-						? { ...(await getStrikesForMember(user)), ephemeral: true }
-						: {
-								ephemeral: true,
-								content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
-						  },
+				if (
+					selected.id !== interaction.member.id &&
+					CONSTANTS.roles.mod &&
+					!interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+				) {
+					return await interaction.reply({
+						ephemeral: true,
+						content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
+					});
+				}
+				const strikes = strikeDatabase.data
+					.filter((strike) => strike.user === selected.id)
+					.sort((one, two) => two.expiresAt - one.expiresAt);
+
+				await paginate(
+					strikes,
+					(strike) =>
+						`\`${strike.info}\`${
+							strike.count === 1
+								? ""
+								: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
+						}: expiring ${time(
+							new Date(strike.expiresAt),
+							TimestampStyles.RelativeTime,
+						)}`,
+					(data) => {
+						if (
+							data.embeds?.[0] &&
+							"footer" in data.embeds[0] &&
+							data.embeds[0].footer?.text
+						) {
+							data.embeds[0].footer.text = data.embeds[0].footer?.text.replace(
+								/\d+(?= \w+$)/,
+								`${Math.trunc(strikes.reduce((acc, { count }) => count + acc, 0))}`,
+							);
+						}
+						return interaction[interaction.replied ? "editReply" : "reply"](data);
+					},
+					{
+						title: `${member?.displayName || user.username}'s strikes`,
+						user: member || user,
+						singular: "strike",
+						failMessage: `${selected.toString()} has never been warned!`,
+						formatFromUser: true,
+						ephemeral: true,
+						count: false,
+						generateComponents(filtered) {
+							if (filtered.length > 5)
+								return [
+									{
+										type: ComponentType.StringSelect,
+										customId: "selectStrike",
+										placeholder: "View more information on a strike",
+										options: filtered.map((strike) => ({
+											label: strike.info,
+											value: strike.info,
+										})),
+									},
+								];
+							return filtered.map((strike) => ({
+								label: strike.info || "",
+								style: ButtonStyle.Secondary,
+								customId: `${strike.info}_strike`,
+								type: ComponentType.Button,
+							}));
+						},
+					},
 				);
+				break;
 			}
 			case "id": {
 				await interaction.reply(
@@ -79,61 +142,6 @@ const command = defineCommand({
 });
 export default command;
 
-export async function getStrikesForMember(user: User | GuildMember): Promise<BaseMessageOptions> {
-	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === user.id)
-		.sort((one, two) => two.expiresAt - one.expiresAt);
-
-	const member =
-		user instanceof GuildMember
-			? user
-			: await CONSTANTS.guild?.members.fetch(user.id).catch(() => {});
-
-	return {
-		components: strikes.length
-			? [
-					{
-						type: ComponentType.ActionRow,
-						components: strikes.map((strike) => ({
-							label: strike.info || "",
-							style: ButtonStyle.Secondary,
-							custom_id: `${strike.info}_strike`,
-							type: ComponentType.Button,
-						})),
-					},
-			  ]
-			: [],
-		embeds: [
-			{
-				title: `${
-					member?.displayName ||
-					(user instanceof GuildMember ? user.user.username : user.username)
-				} has ${strikes.length} strike${strikes.length === 1 ? "" : "s"}`,
-				author: {
-					icon_url: (member || user).displayAvatarURL(),
-					name: user instanceof GuildMember ? user.user.username : user.username,
-				},
-				color: member?.displayColor,
-				description:
-					strikes
-						.map((strike) => {
-							return `\`${strike.info}\`${
-								strike.count === 1
-									? ""
-									: ` (${
-											strike.count === 0.25 ? "verbal" : `\\*${strike.count}`
-									  })`
-							}: expiring ${time(
-								new Date(strike.expiresAt),
-								TimestampStyles.RelativeTime,
-							)}`;
-						})
-						.join("\n") || `${user.toString()} has no strikes!`,
-			},
-		],
-	};
-}
-
 export async function getStrikeById(
 	interactor: GuildMember,
 	filter: string,
@@ -144,7 +152,6 @@ export async function getStrikeById(
 
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
 	const id = convertBase(filter, convertBase.MAX_BASE, 10);
-	console.log(id);
 	const channel = await getLoggingThread("members");
 
 	const idMessage =

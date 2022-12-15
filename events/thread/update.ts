@@ -27,8 +27,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 								(
 									tag,
 								): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
-									// @ts-expect-error -- We want to see if the types match.
-									suggestionAnswers.includes(tag.name) &&
+									(suggestionAnswers as readonly string[]).includes(tag.name) &&
 									newThread.appliedTags.includes(tag.id),
 							)?.name || suggestionAnswers[0],
 						title: newThread.name,

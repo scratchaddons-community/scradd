@@ -8,19 +8,34 @@ import {
 	ChannelType,
 	Attachment,
 	User,
+	APIActionRowComponent,
+	APIEmbed,
+	APIMessageActionRowComponent,
+	Awaitable,
+	BaseMessageOptions,
+	DMChannel,
+	EmojiIdentifierResolvable,
+	GuildTextBasedChannel,
+	InteractionReplyOptions,
+	MessageActionRowComponent,
+	MessageEditOptions,
+	NonThreadGuildBasedChannel,
+	PartialDMChannel,
+	Snowflake,
+	TextBasedChannel,
+	MessageActionRowComponentData,
+	ActionRowData,
+	GuildMember,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { censor } from "../common/automod.js";
-import { userSettingsDatabase } from "../commands/settings.js";
 
-/**
- * @param {import("discord.js").Message} message
- *
- * @returns {Promise<{ embeds: import("discord.js").APIEmbed[]; files: Attachment[] }>}
- */
-export async function extractMessageExtremities(message, allowLanguage = true) {
+export async function extractMessageExtremities(
+	message: Message,
+	allowLanguage = true,
+): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
 	const embeds = [
 		...message.stickers
 			.filter((sticker) => {
@@ -92,12 +107,7 @@ export async function extractMessageExtremities(message, allowLanguage = true) {
 	return { embeds, files: message.attachments.toJSON() };
 }
 
-/**
- * @param {Message} message
- *
- * @returns {import("discord.js").MessageEditOptions}
- */
-export function getMessageJSON(message) {
+export function getMessageJSON(message: Message): MessageEditOptions {
 	return {
 		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
@@ -111,20 +121,18 @@ export function getMessageJSON(message) {
  *
  * @deprecated Too laggy.
  *
- * @template {import("discord.js").Message<C extends import("discord.js").GuildTextBasedChannel ? true : false>} T
- * @template {import("discord.js").TextBasedChannel} C
+ * @param channel The channel to fetch messages from.
  *
- * @param {C} channel - The channel to fetch messages from.
- *
- * @returns {Promise<T[]>} - The messages.
+ * @returns The messages.
  */
-export async function getAllMessages(channel) {
-	/** @type {T[]} */
-	const messages = [];
+export async function getAllMessages<
+	T extends Message<C extends GuildTextBasedChannel ? true : false>,
+	C extends TextBasedChannel,
+>(channel: C): Promise<T[]> {
+	const messages: T[] = [];
 
-	/** @type {import("discord.js").Snowflake | undefined} */
 	// eslint-disable-next-line fp/no-let -- This needs to be changable
-	let lastId;
+	let lastId: Snowflake | undefined;
 
 	do {
 		// eslint-disable-next-line no-await-in-loop -- We can’t use `Promise.all` here
@@ -142,13 +150,15 @@ export async function getAllMessages(channel) {
  * A property that returns the content that is rendered regardless of the message type. In some cases, this just returns the regular message
  * content. Otherwise this returns an English message denoting the contents of the system message.
  *
- * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1825-L1944).
+ * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1825-L1944)
  *
- * @param {import("discord.js").Message} message - Message to convert.
+ * @param message - Message to convert.
  *
- * @returns {Promise<string>} Text representation of the message.
+ * @returns Text representation of the message.
+ *
+ * @todo Better `replies`
  */
-export async function messageToText(message, replies = true) {
+export async function messageToText(message: Message, replies = true): Promise<string> {
 	const linklessContent = message.webhookId ? message.content : escapeLinks(message.content);
 
 	const actualContent = message.flags.has("Loading")
@@ -359,135 +369,181 @@ export async function messageToText(message, replies = true) {
 	}
 }
 
-/**
- * @param {import("discord.js").Message} message
- * @param {Readonly<import("discord.js").EmojiIdentifierResolvable[]>} reactions
- */
-export async function reactAll(message, reactions) {
+export async function reactAll(message: Message, reactions: Readonly<EmojiIdentifierResolvable[]>) {
 	for (const reaction of reactions) {
 		await message.react(reaction);
 	}
 }
 
-/**
- * @template T
- *
- * @param {T[]} array
- * @param {(value: T, index: number, array: T[]) => import("discord.js").Awaitable<string>} toString
- * @param {string} failMessage
- * @param {string} title
- * @param {User} user
- * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message | import("discord.js").InteractionResponse | void>} reply
- */
-
-export async function paginate(array, toString, failMessage, title, reply, user, rawOffset = 0) {
-	const PAGE_OFFSET = 15;
+export async function paginate<Item, FormatFromUser extends boolean>(
+	array: Item[],
+	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	reply: (options: BaseMessageOptions & { fetchReply: true }) => Promise<Message>,
+	{
+		title,
+		user,
+		singular,
+		plural = `${singular}s`,
+		failMessage = `No ${plural} found!`,
+		formatFromUser, // Implicit default of false
+		ephemeral = false,
+		rawOffset = 0,
+		itemsPerPage = 15,
+		count = true,
+		generateComponents,
+		disableCustomComponents = false,
+	}: {
+		title: string;
+		user: FormatFromUser extends true ? GuildMember | User : User;
+		singular: string;
+		plural?: string;
+		failMessage?: string;
+		formatFromUser?: FormatFromUser;
+		ephemeral?: boolean;
+		rawOffset?: number;
+		itemsPerPage?: number;
+		count?: boolean;
+		generateComponents?: (filtered: Item[]) => MessageActionRowComponentData[];
+		disableCustomComponents?: boolean;
+	},
+) {
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
-	const useMentions = userSettingsDatabase.data.find(
-		(settings) => user.id === settings.user,
-	)?.useMentions;
+	const numberOfPages = Math.ceil(array.length / itemsPerPage);
 
 	// eslint-disable-next-line fp/no-let -- This must be changable.
-	let offset = Math.floor(rawOffset / PAGE_OFFSET) * PAGE_OFFSET;
+	let offset = Math.floor(rawOffset / itemsPerPage) * itemsPerPage;
 
 	/**
 	 * Generate an embed that has the next page.
 	 *
-	 * @returns {Promise<import("discord.js").InteractionReplyOptions>} EmbedBuilder with the next page.
+	 * @returns The next page.
 	 */
-	async function generateMessage() {
+	async function generateMessage(): Promise<InteractionReplyOptions & { fetchReply: true }> {
+		const filtered = array.filter(
+			(_, index) => index >= offset && index < offset + itemsPerPage,
+		);
+
 		const content = (
 			await Promise.all(
-				array
-					.filter((_, index) => index >= offset && index < offset + PAGE_OFFSET)
-					.map(
-						async (current, index, all) =>
-							`${index + offset + 1}) ${await toString(current, index, all)}`,
-					),
+				filtered.map(
+					async (current, index, all) =>
+						`${count ? `${index + offset + 1}) ` : ""}${await toString(
+							current,
+							index,
+							all,
+						)}`,
+				),
 			)
 		)
 			.join("\n")
 			.trim();
 
 		if (!content) {
-			return { content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`, ephemeral: true };
+			return {
+				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
+				ephemeral: true,
+				fetchReply: true,
+			} as const;
+		}
+
+		const components: ActionRowData<MessageActionRowComponentData>[] =
+			numberOfPages > 1
+				? [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "<< Previous",
+									style: ButtonStyle.Primary,
+									disabled: offset === 0,
+									customId: previousId,
+								},
+								{
+									type: ComponentType.Button,
+									label: "Next >>",
+									style: ButtonStyle.Primary,
+									disabled: offset + itemsPerPage >= array.length,
+									customId: nextId,
+								},
+							],
+						},
+				  ]
+				: [];
+
+		if (generateComponents) {
+			components.push({
+				type: ComponentType.ActionRow,
+				components: generateComponents(filtered),
+			});
 		}
 
 		return {
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.Button,
-							label: "<< Previous",
-							style: ButtonStyle.Primary,
-							disabled: offset === 0,
-							customId: previousId,
-						},
-						{
-							type: ComponentType.Button,
-							label: "Next >>",
-							style: ButtonStyle.Primary,
-							disabled: offset + PAGE_OFFSET >= array.length - 1,
-							customId: nextId,
-						},
-					],
-				},
-			],
+			components,
 
 			embeds: [
 				{
 					title: title,
 					description: content,
 					footer: {
-						text: `Page ${offset / PAGE_OFFSET + 1}/${numberOfPages}${
-							useMentions === undefined
-								? "\nUse /settings to restore the old behavior of showing mentions instead of usernames"
-								: ""
-						}`,
+						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
+							CONSTANTS.footerSeperator
+						}${array.length} ${array.length === 1 ? singular : plural}`,
 					},
-					color: CONSTANTS.themeColor,
+					author: formatFromUser
+						? {
+								icon_url: user.displayAvatarURL(),
+								name:
+									user instanceof GuildMember ? user.displayName : user.username,
+						  }
+						: undefined,
+					color: formatFromUser
+						? user instanceof GuildMember
+							? user.displayColor
+							: undefined
+						: CONSTANTS.themeColor,
 				},
 			],
+			ephemeral,
 			fetchReply: true,
 		};
 	}
 
 	let message = await reply(await generateMessage());
 
-	const collector = message?.createMessageComponentCollector({
+	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
-			buttonInteraction.user.id === message?.interaction?.user.id,
+			buttonInteraction.user.id === user.id,
 
 		time: CONSTANTS.collectorTime,
 	});
 
 	collector
 		?.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += PAGE_OFFSET;
-			else offset -= PAGE_OFFSET;
+			if (buttonInteraction.customId === nextId) offset += itemsPerPage;
+			else offset -= itemsPerPage;
 
 			await buttonInteraction.deferUpdate();
 			message = await reply(await generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {
+			const [pagination, ...rest] = message.components;
 			await reply({
-				components: message instanceof Message ? disableComponents(message.components) : [],
+				components:
+					disableCustomComponents || !pagination
+						? disableComponents(message.components)
+						: [...disableComponents([pagination]), ...rest],
+				fetchReply: true,
 			});
 		});
 }
 
-/**
- * @param {ActionRow<import("discord.js").MessageActionRowComponent>[]} rows
- *
- * @returns {import("discord.js").APIActionRowComponent<import("discord.js").APIMessageActionRowComponent>[]}
- */
-export function disableComponents(rows) {
+export function disableComponents(
+	rows: ActionRow<MessageActionRowComponent>[],
+): APIActionRowComponent<APIMessageActionRowComponent>[] {
 	return rows.map(({ components }) => ({
 		type: ComponentType.ActionRow,
 		components: components.map((component) => {
@@ -502,15 +558,9 @@ export function disableComponents(rows) {
 	}));
 }
 
-/**
- * @param {null | undefined | import("discord.js").TextBasedChannel} channel
- *
- * @returns {| import("discord.js").DMChannel
- * 	| import("discord.js").PartialDMChannel
- * 	| import("discord.js").NonThreadGuildBasedChannel
- * 	| undefined}
- */
-export function getBaseChannel(channel) {
+export function getBaseChannel(
+	channel?: null | TextBasedChannel,
+): DMChannel | PartialDMChannel | NonThreadGuildBasedChannel | undefined {
 	const nonThread = channel?.isThread() ? channel.parent : channel;
 	return nonThread && !nonThread.isThread() ? nonThread : undefined;
 }

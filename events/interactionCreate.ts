@@ -72,8 +72,6 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			}
 			return;
 		}
-		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
-
 		if (interaction.isModalSubmit()) {
 			if (interaction.customId.startsWith("guessModal."))
 				return await guessAddon(interaction);
@@ -83,7 +81,18 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 			if (interaction.customId.startsWith("edit.")) return await edit(interaction);
 		}
+		if (interaction.isStringSelectMenu()) {
+			if (interaction.customId === "selectStrike") {
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member is not a GuildMember");
+
+				const id = interaction.values[0];
+				if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
+			}
+		}
+
 		if (!interaction.isCommand()) return;
+		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
 		const command = (await commands).get(interaction.command?.name || "");
 

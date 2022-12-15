@@ -32,16 +32,16 @@ const command = defineCommand({
 
 		await interaction.showModal({
 			title: `/${interaction.command?.name}`,
-			custom_id: "say",
+			customId: "say",
 			components: [
 				{
 					type: ComponentType.ActionRow,
 					components: [
 						{
 							type: ComponentType.TextInput,
-							custom_id: "message",
+							customId: "message",
 							label: "Message",
-							max_length: 2000,
+							maxLength: 2000,
 							required: true,
 							style: TextInputStyle.Paragraph,
 						},
