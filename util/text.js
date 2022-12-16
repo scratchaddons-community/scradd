@@ -68,17 +68,17 @@ export function caesar(text, rot = 13) {
 
 /** @param {string} text */
 export function pingablify(text) {
-	const getRegex = () => /[^\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]/gi;
+	const regex = /[^\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]/gi;
 	const segments = [...new Intl.Segmenter().segment(text)];
 	const pingable =
 		segments.reduce((count, { segment }) => {
-			return count + +!!getRegex().exec(segment);
+			return count + +!!regex.test(segment);
 		}, 0) <
 		segments.length / 2;
 
 	return pingable && /[\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]{4,}/.test(text)
 		? text
-		: text.replaceAll(getRegex(), "") || "[pingable name] " + truncateText(text, 10);
+		: text.replaceAll(regex, "") || "[pingable name] " + truncateText(text, 10);
 }
 
 /** @param {string} text */
@@ -100,5 +100,5 @@ export function normalize(text) {
  * @returns {string} - The patchless version.
  */
 export function trimPatchVersion(full) {
-	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main || "";
+	return full.match(/^(?<main>\d+\.\d+)\.\d+/)?.groups?.main || "";
 }

@@ -47,7 +47,7 @@ const old = CONSTANTS.channels.old_suggestions
 					author:
 						(message.author.id === CONSTANTS.robotop
 							? message.embeds[0]?.footer?.text.split(": ")[1]
-							: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
+							: message.embeds[0]?.author?.iconURL?.match(/\/(?<userId>\d+)\//)
 									?.groups?.userId) || message.author,
 
 					count:
