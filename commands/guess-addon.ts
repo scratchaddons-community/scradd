@@ -9,7 +9,7 @@ import {
 	ModalSubmitInteraction,
 	Snowflake,
 	APIActionRowComponent,
-	APISelectMenuComponent,
+	APIStringSelectComponent,
 	Collection,
 	TextInputStyle,
 	ButtonStyle,
@@ -1642,7 +1642,7 @@ const command = defineCommand({
 							return;
 						}
 
-						if (!componentInteraction.isSelectMenu())
+						if (!componentInteraction.isStringSelectMenu())
 							throw new TypeError("Unknown button pressed");
 
 						const selected = componentInteraction.values[0] || "";
@@ -1686,12 +1686,12 @@ const command = defineCommand({
 				function selectGroupButton(
 					doneGroups: Set<GroupName> = new Set(),
 					defaultValue?: GroupName,
-				): APIActionRowComponent<APISelectMenuComponent> {
+				): APIActionRowComponent<APIStringSelectComponent> {
 					return {
 						type: ComponentType.ActionRow,
 						components: [
 							{
-								type: ComponentType.SelectMenu,
+								type: ComponentType.StringSelect,
 								placeholder: "Select a group",
 								custom_id: generateHash("group"),
 								options: GROUP_NAMES.filter((group) => !doneGroups.has(group))
@@ -1739,7 +1739,7 @@ const command = defineCommand({
 									type: ComponentType.ActionRow,
 									components: [
 										{
-											type: ComponentType.SelectMenu,
+											type: ComponentType.StringSelect,
 											placeholder: `Select a question (${
 												accumulator[0] ? "continued" : "irreversible"
 											})`,
@@ -1751,7 +1751,7 @@ const command = defineCommand({
 
 							return accumulator;
 						},
-						[] as APIActionRowComponent<APISelectMenuComponent>[],
+						[] as APIActionRowComponent<APIStringSelectComponent>[],
 					);
 
 					const reply = await interaction.fetchReply();
