@@ -1,10 +1,10 @@
-import { Invite, FormattingPatterns, ChannelType, PermissionFlagsBits } from "discord.js";
+import { ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import warn from "./warns.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
 import client from "../client.js";
-import { getBaseChannel } from "../util/discord.js";
+import { getBaseChannel, GlobalAnimatedEmoji, GlobalInvitesPattern } from "../util/discord.js";
 /**
  * The index of each array determines how many strikes the word gives.
  *
@@ -215,9 +215,6 @@ async function checkString(toCensor, message) {
 			bad.bots = botLinks.length;
 		}
 
-		/** A global regular expression variant of {@link Invite.InvitesPattern}. */
-		const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern.source, "g");
-
 		const inviteCodes = toCensor.match(GlobalInvitesPattern);
 
 		if (inviteCodes) {
@@ -353,9 +350,6 @@ export async function automodMessage(message) {
 			),
 		);
 	}
-
-	/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
-	const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji.source, "g");
 
 	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
 

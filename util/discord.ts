@@ -26,6 +26,9 @@ import {
 	MessageActionRowComponentData,
 	ActionRowData,
 	GuildMember,
+	FormattingPatterns,
+	Invite,
+	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
@@ -569,3 +572,12 @@ export function getBaseChannel(
 	const nonThread = channel?.isThread() ? channel.parent : channel;
 	return nonThread && !nonThread.isThread() ? nonThread : undefined;
 }
+
+/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
+export const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern, "g");
+
+/** A global regular expression variant of {@link Invite.InvitesPattern}. */
+export const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern, "g");
+
+/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
+export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");
