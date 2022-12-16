@@ -125,7 +125,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					: `/${interaction.command?.name}`
 				: `${interaction.constructor.name}: ${interaction.customId}`,
 		);
-		if (interaction.deferred && +interaction.createdAt - +new Date() < 900_000) {
+		if (interaction.deferred && +interaction.createdAt - Date.now() < 900_000) {
 			return await interaction.editReply({
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
@@ -134,7 +134,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			});
 		}
 
-		if (!interaction.replied && +interaction.createdAt - +new Date() > 3_000) return;
+		if (!interaction.replied && +interaction.createdAt - Date.now() > 3_000) return;
 
 		await interaction[interaction.replied ? "followUp" : "reply"]({
 			ephemeral: true,

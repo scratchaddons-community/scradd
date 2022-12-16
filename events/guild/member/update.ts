@@ -22,12 +22,12 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
 		if (
 			newMember.communicationDisabledUntil &&
-			newMember.communicationDisabledUntil > new Date()
+			+newMember.communicationDisabledUntil > Date.now()
 		)
 			logs.push(" timed out until " + time(newMember.communicationDisabledUntil));
 		else if (
 			oldMember.communicationDisabledUntil &&
-			oldMember.communicationDisabledUntil > new Date()
+			+oldMember.communicationDisabledUntil > Date.now()
 		)
 			logs.push("’s timeout was removed");
 	}
