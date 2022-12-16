@@ -1,6 +1,5 @@
 import {
 	GuildMember,
-	MessageMentions,
 	time,
 	InteractionReplyOptions,
 	ApplicationCommandOptionType,
@@ -10,14 +9,10 @@ import {
 } from "discord.js";
 import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { getLoggingThread } from "../common/logging.js";
-import { strikeDatabase } from "../common/warn.js";
-import { convertBase } from "../util/numbers.js";
+import { filterToStrike, strikeDatabase } from "../common/warn.js";
 import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
-import { paginate } from "../util/discord.js";
-
-// TODO: handle unwarning
+import { GlobalUsersPattern, paginate } from "../util/discord.js";
 
 const command = defineCommand({
 	data: {
@@ -83,14 +78,20 @@ const command = defineCommand({
 					.filter((strike) => strike.user === selected.id)
 					.sort((one, two) => two.date - one.date);
 
+				const totalStrikeCount = Math.trunc(
+					strikes.reduce((acc, { count, removed }) => count * +!removed + acc, 0),
+				);
+
 				await paginate(
 					strikes,
 					(strike) =>
-						`\`${strike.info}\`${
+						`${strike.removed ? "~~" : ""}\`${strike.id}\`${
 							strike.count === 1
 								? ""
 								: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
-						} ${time(new Date(strike.date), TimestampStyles.RelativeTime)}`,
+						} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
+							strike.removed ? "~~" : ""
+						}`,
 					(data) => {
 						if (
 							data.embeds?.[0] &&
@@ -98,8 +99,8 @@ const command = defineCommand({
 							data.embeds[0].footer?.text
 						) {
 							data.embeds[0].footer.text = data.embeds[0].footer?.text.replace(
-								/\d+(?= \w+$)/,
-								`${Math.trunc(strikes.reduce((acc, { count }) => count + acc, 0))}`,
+								/\d+ $/,
+								`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
 							);
 						}
 						return interaction[interaction.replied ? "editReply" : "reply"](data);
@@ -107,7 +108,8 @@ const command = defineCommand({
 					{
 						title: `${member?.displayName || user.username}'s strikes`,
 						user: member || user,
-						singular: "strike",
+						singular: "",
+						plural: "",
 						failMessage: `${selected.toString()} has never been warned!`,
 						formatFromUser: true,
 						ephemeral: true,
@@ -120,15 +122,15 @@ const command = defineCommand({
 										customId: "selectStrike",
 										placeholder: "View more information on a strike",
 										options: filtered.map((strike) => ({
-											label: strike.info,
-											value: strike.info,
+											label: strike.id,
+											value: strike.id,
 										})),
 									},
 								];
 							return filtered.map((strike) => ({
-								label: strike.info || "",
+								label: strike.id || "",
 								style: ButtonStyle.Secondary,
-								customId: `${strike.info}_strike`,
+								customId: `${strike.id}_strike`,
 								type: ComponentType.Button,
 							}));
 						},
@@ -153,31 +155,15 @@ export async function getStrikeById(
 	interactor: GuildMember,
 	filter: string,
 ): Promise<InteractionReplyOptions> {
-	const useMentions =
-		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
-			?.useMentions ?? false;
+	const { strike, message } = (await filterToStrike(filter)) ?? {};
+	if (!strike || !message)
+		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
+
+	const [[, userId = ""] = [], [, modId] = []] = [
+		...message.content.matchAll(GlobalUsersPattern),
+	];
 
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	const id = convertBase(filter, convertBase.MAX_BASE, 10);
-	const channel = await getLoggingThread("members");
-
-	const idMessage =
-		(await channel.messages.fetch(id).catch(() => {})) ||
-		(await CONSTANTS.channels.modlogs?.messages.fetch(id).catch(() => {}));
-
-	const message =
-		idMessage ||
-		(await channel.messages.fetch(filter).catch(() => {})) ||
-		(await CONSTANTS.channels.modlogs?.messages.fetch(filter).catch(() => {}));
-
-	if (!message) {
-		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid filter!` };
-	}
-
-	/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
-	const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern.source, "g");
-
-	const userId = GlobalUsersPattern.exec(message.content)?.[1] || "";
 	if (userId !== interactor.id && !isMod)
 		return {
 			ephemeral: true,
@@ -186,18 +172,30 @@ export async function getStrikeById(
 
 	const member = await CONSTANTS.guild?.members.fetch(userId).catch(() => {});
 	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
+
+	const mod = isMod && modId && (await client.users.fetch(modId).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
-	const caseId = idMessage ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
 	const { url } = message.attachments.first() || {};
-	const mod =
-		isMod &&
-		(await client.users
-			.fetch(GlobalUsersPattern.exec(message.content)?.[1] || "")
-			.catch(() => {}));
-
-	const { date } = strikeDatabase.data.find((strike) => strike.info === message.id) || {};
-
+	const useMentions =
+		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
+			?.useMentions ?? false;
 	return {
+		components:
+			isMod && !strike.removed
+				? [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									customId: strike.id + "_remove_strike",
+									label: "Remove",
+									style: ButtonStyle.Danger,
+								},
+							],
+						},
+				  ]
+				: [],
 		ephemeral: true,
 		embeds: [
 			{
@@ -205,7 +203,9 @@ export async function getStrikeById(
 				author: nick
 					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
-				title: `Strike \`${caseId}\``,
+				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
+					strike.removed ? "~~" : ""
+				}`,
 				description: url
 					? await fetch(url).then((response) => response.text())
 					: message.content,
@@ -213,11 +213,7 @@ export async function getStrikeById(
 				fields: [
 					{
 						name: "⚠ Count",
-						value:
-							"" +
-							(strikeDatabase.data.find(({ info }) => info === caseId)?.count ??
-								/ \d+ /.exec(message.content)?.[0]?.trim() ??
-								"0"),
+						value: "" + strike.count,
 						inline: true,
 					},
 					...(mod
@@ -238,15 +234,11 @@ export async function getStrikeById(
 								},
 						  ]
 						: []),
-					...(date
-						? [
-								{
-									name: "⏲ Date",
-									value: time(new Date(date), TimestampStyles.RelativeTime),
-									inline: true,
-								},
-						  ]
-						: []),
+					{
+						name: "⏲ Date",
+						value: time(new Date(strike.date), TimestampStyles.RelativeTime),
+						inline: true,
+					},
 				],
 			},
 		],

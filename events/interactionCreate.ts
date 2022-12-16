@@ -1,5 +1,5 @@
 import { CommandInteractionOption, GuildMember } from "discord.js";
-import warn from "../common/warn.js";
+import warn, { strikeDatabase } from "../common/warn.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
 import { getStrikeById } from "../commands/strikes.js";
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -13,6 +13,8 @@ import { say } from "../commands/say.js";
 import { edit } from "../commands/Edit Message.js";
 import type Event from "../common/types/event";
 import type Command from "../common/types/command.js";
+import log from "../common/logging.js";
+import client from "../client.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -30,7 +32,6 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 		return await command.autocomplete?.(interaction);
 	}
-	if (!interaction.isRepliable()) return;
 	try {
 		if (interaction.isButton()) {
 			const [id, type] = interaction.customId.split(/(?<=^[^_]*)_/);
@@ -69,8 +70,50 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					}
 					return;
 				}
+
+				case "remove_strike": {
+					const strike = strikeDatabase.data.find((strike) => strike.id === id);
+					if (!strike)
+						return interaction.reply({
+							ephemeral: true,
+							content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
+						});
+
+					if (strike.removed)
+						return interaction.reply({
+							ephemeral: true,
+							content: `${CONSTANTS.emojis.statuses.no} That strike was already removed!`,
+						});
+
+					strikeDatabase.data = strikeDatabase.data.map((strike) =>
+						id === strike.id ? { ...strike, removed: true } : strike,
+					);
+					const user =
+						(await client.users.fetch(strike.user).catch(() => {})) ||
+						`<@${strike.user}>`;
+					await interaction.reply(
+						`${
+							CONSTANTS.emojis.statuses.yes
+						} Removed strike \`${id}\` from ${user.toString()}!`,
+					);
+					if (
+						interaction.member instanceof GuildMember &&
+						interaction.member.communicationDisabledUntil &&
+						+interaction.member.communicationDisabledUntil > Date.now()
+					)
+						interaction.member.disableCommunicationUntil(Date.now());
+					await log(
+						`${CONSTANTS.emojis.statuses.yes} ${
+							interaction.member
+						} removed strike \`${id}\` from ${user.toString()}!`,
+						"members",
+					);
+					if (typeof user === "object")
+						await user.send(
+							`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
+						);
+				}
 			}
-			return;
 		}
 		if (interaction.isModalSubmit()) {
 			if (interaction.customId.startsWith("guessModal."))
@@ -137,7 +180,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					: `/${interaction.command?.name}`
 				: `${interaction.constructor.name}: ${interaction.customId}`,
 		);
-		if (interaction.deferred && +interaction.createdAt - +new Date() < 900_000) {
+		if (interaction.deferred && +interaction.createdAt - Date.now() < 900_000) {
 			return await interaction.editReply({
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
@@ -146,7 +189,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			});
 		}
 
-		if (!interaction.replied && +interaction.createdAt - +new Date() > 3_000) return;
+		if (!interaction.replied && +interaction.createdAt - Date.now() > 3_000) return;
 
 		await interaction[interaction.replied ? "followUp" : "reply"]({
 			ephemeral: true,

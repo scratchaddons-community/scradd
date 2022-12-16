@@ -49,7 +49,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	];
 
 	await Promise.all(promises);
-	const allRoles = rolesDatabase.data;
+	const allRoles = [...rolesDatabase.data];
 	const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
 
 	const memberRoles = Object.fromEntries(

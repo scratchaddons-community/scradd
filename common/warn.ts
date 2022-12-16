@@ -3,7 +3,7 @@ import client from "../client.js";
 import { convertBase } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
-import log from "./logging.js";
+import log, { getLoggingThread } from "./logging.js";
 import giveXp, { DEFAULT_XP } from "./xp.js";
 
 export const EXPIRY_LENGTH = 21,
@@ -22,7 +22,8 @@ export default async function warn(
 	contextOrMod: import("discord.js").User | string = client.user,
 ): Promise<void> {
 	const allUserStrikes = strikeDatabase.data.filter(
-		(strike) => strike.user === user.id && strike.date + EXPIRY_LENGTH < +new Date(),
+		(strike) =>
+			strike.user === user.id && strike.date + EXPIRY_LENGTH < Date.now() && !strike.removed,
 	);
 
 	const oldStrikeCount = allUserStrikes.reduce((acc, { count }) => count + acc, 0);
@@ -95,9 +96,10 @@ export default async function warn(
 		...strikeDatabase.data,
 		{
 			user: user.id,
-			info: convertBase(logMessage.id, 10, convertBase.MAX_BASE),
-			date: +new Date(),
+			id: convertBase(logMessage.id, 10, convertBase.MAX_BASE),
+			date: Date.now(),
 			count: strikes,
+			removed: false,
 		},
 	];
 
@@ -147,9 +149,28 @@ export default async function warn(
 	if (Math.trunc(newStrikeCount) >= MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
-				Math.round((+(allUserStrikes[0]?.date || new Date()) + EXPIRY_LENGTH) / 1000),
+				Math.round((+(allUserStrikes[0]?.date || Date.now()) + EXPIRY_LENGTH) / 1000),
 				TimestampStyles.LongDate,
 			)}, you will be banned.**__`,
 		);
 	}
+}
+
+export async function filterToStrike(filter: string) {
+	const channel = await getLoggingThread("members");
+	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
+
+	const messageFromId =
+		(await channel.messages.fetch(messageId).catch(() => {})) || // todo do we still need this with the new warns system
+		(await CONSTANTS.channels.modlogs?.messages.fetch(messageId).catch(() => {}));
+	const resolvedMessage =
+		messageFromId ||
+		(await channel.messages.fetch(filter).catch(() => {})) ||
+		(await CONSTANTS.channels.modlogs?.messages.fetch(filter).catch(() => {}));
+	if (!resolvedMessage) return;
+
+	const strikeId = messageFromId ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
+	const strike = strikeDatabase.data.find((strike) => strike.id === strikeId);
+	if (!strike) return;
+	return { strike, message: resolvedMessage };
 }

@@ -7,7 +7,7 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import log from "../common/logging.js";
+import log, { getLoggingThread } from "../common/logging.js";
 import { defineCommand } from "../common/types/command.js";
 import { getBaseChannel, getMessageJSON } from "../util/discord.js";
 import { generateError } from "../util/logError.js";
@@ -28,7 +28,8 @@ const command = defineCommand({
 				CONSTANTS.channels.modmail?.id,
 				CONSTANTS.channels.old_suggestions?.id,
 			].includes(interaction.channel?.id) ||
-			CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id
+			(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
+				(await getLoggingThread("databases")).id !== interaction.channel?.id)
 		)
 			return await interaction.reply({
 				ephemeral: true,

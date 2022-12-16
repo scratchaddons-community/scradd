@@ -21,7 +21,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 			? user
 			: await CONSTANTS.guild.members.fetch(user).catch(() => {});
 
-	const xp = xpDatabase.data;
+	const xp = [...xpDatabase.data];
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 	const newXp = oldXp + amount;
@@ -101,7 +101,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 	}
 
 	// Update recent DB
-	const weekly = weeklyXpDatabase.data;
+	const weekly = [...weeklyXpDatabase.data];
 	const weeklyIndex = weekly.findIndex((entry) => entry.user === user.id);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 
@@ -111,7 +111,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra ?? 0)) + 604_800_000;
+	const nextWeeklyDate = +(weeklyXpDatabase.extra ?? 0) + 604_800_000;
 
 	//send weekly winners
 	if (+date < nextWeeklyDate) return;

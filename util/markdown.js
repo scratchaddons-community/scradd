@@ -17,6 +17,7 @@ export function escapeMessage(text) {
  * @param {string} text - The text to escape.
  *
  * @returns {string} The escaped text.
+ * @todo djs has this
  */
 export function escapeLinks(text) {
 	while (text.split("[").length > text.split("]").length) text = text.replace("[", "");

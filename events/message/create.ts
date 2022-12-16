@@ -370,7 +370,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (content.includes("quack") || includes("duck")) react("🦆");
 	if (content === "radio") react("📻");
 	if (content === "agreed") react(CONSTANTS.emojis.autoreact.mater);
-	if (includes(/te(?:r|w)+a/) || /👉\s*👈/.test(message.content))
+	if (includes(/te(?:r|w)+a+/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);
 	if (includes("snake") || includes("snek")) {
 		if (reactions < REACTION_CAP) {

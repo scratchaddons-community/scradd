@@ -26,6 +26,9 @@ import {
 	MessageActionRowComponentData,
 	ActionRowData,
 	GuildMember,
+	FormattingPatterns,
+	Invite,
+	MessageMentions,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
@@ -375,18 +378,22 @@ export async function reactAll(message: Message, reactions: Readonly<EmojiIdenti
 	}
 }
 
-export async function paginate<Item, FormatFromUser extends boolean>(
+export async function paginate<Item, FormatFromUser extends boolean, Interaction extends boolean>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: BaseMessageOptions & { fetchReply: true }) => Promise<Message>,
+	reply: (
+		options: (Interaction extends true ? InteractionReplyOptions : BaseMessageOptions) & {
+			fetchReply: true;
+		},
+	) => Promise<Message>,
 	{
 		title,
 		user,
 		singular,
 		plural = `${singular}s`,
 		failMessage = `No ${plural} found!`,
-		formatFromUser, // Implicit default of false
-		ephemeral = false,
+		formatFromUser, // Implicitly defaults to false
+		ephemeral, // Implicitly defaults to false
 		rawOffset = 0,
 		itemsPerPage = 15,
 		count = true,
@@ -399,7 +406,7 @@ export async function paginate<Item, FormatFromUser extends boolean>(
 		plural?: string;
 		failMessage?: string;
 		formatFromUser?: FormatFromUser;
-		ephemeral?: boolean;
+		ephemeral?: Interaction extends true ? boolean : undefined;
 		rawOffset?: number;
 		itemsPerPage?: number;
 		count?: boolean;
@@ -505,12 +512,13 @@ export async function paginate<Item, FormatFromUser extends boolean>(
 						: CONSTANTS.themeColor,
 				},
 			],
-			ephemeral,
+			ephemeral: !!ephemeral,
 			fetchReply: true,
 		};
 	}
 
 	let message = await reply(await generateMessage());
+	if (numberOfPages === 1) return;
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
@@ -564,3 +572,12 @@ export function getBaseChannel(
 	const nonThread = channel?.isThread() ? channel.parent : channel;
 	return nonThread && !nonThread.isThread() ? nonThread : undefined;
 }
+
+/** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
+export const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern, "g");
+
+/** A global regular expression variant of {@link Invite.InvitesPattern}. */
+export const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern, "g");
+
+/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
+export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");
