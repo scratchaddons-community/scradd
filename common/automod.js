@@ -448,7 +448,7 @@ export async function changeNickname(member, strike = true) {
 							.send(
 								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
 							)
-							.catch(() => false),
+							.catch(() => {}),
 					])
 					.flat(),
 			);

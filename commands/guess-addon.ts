@@ -1344,7 +1344,7 @@ const command = defineCommand({
 							{
 								...oldMessage.embeds[0]?.toJSON(),
 								description: `${
-									oldMessage.embeds[0]?.description || ""
+									oldMessage.embeds[0]?.description
 										? `${
 												oldMessage.embeds[0]?.description || ""
 										  } **${justAnswered}**\n`
@@ -1647,6 +1647,7 @@ const command = defineCommand({
 
 						const selected = componentInteraction.values[0] || "";
 						const split = selected.split(".") as
+							| []
 							| [GroupName]
 							| [GroupName, string, string];
 						const [groupName, selectIndex, questionIndex] = split;

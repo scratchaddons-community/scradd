@@ -30,7 +30,6 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 		return await command.autocomplete?.(interaction);
 	}
-	if (!interaction.isRepliable()) return;
 	try {
 		if (interaction.isButton()) {
 			const [id, type] = interaction.customId.split(/(?<=^[^_]*)_/);
@@ -70,10 +69,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					return;
 				}
 			}
-			return;
 		}
-		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
-
 		if (interaction.isModalSubmit()) {
 			if (interaction.customId.startsWith("guessModal."))
 				return await guessAddon(interaction);
@@ -84,6 +80,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			if (interaction.customId.startsWith("edit.")) return await edit(interaction);
 		}
 		if (!interaction.isCommand()) return;
+		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
 		const command = (await commands).get(interaction.command?.name || "");
 
