@@ -44,33 +44,6 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					return;
 				}
 
-				case "reaction_role": {
-					if (!(interaction.member instanceof GuildMember))
-						throw new TypeError("interaction.member is not a GuildMember");
-
-					if (!id)
-						throw new SyntaxError(
-							"Button customId ends in _reaction_role but no role ID was given",
-						);
-					const role = interaction.member.roles.resolve(id);
-					if (role) {
-						await interaction.member.roles.remove(role, "Self role");
-						await interaction.reply({
-							ephemeral: true,
-							content: `${
-								CONSTANTS.emojis.statuses.yes
-							} Removed ${role.toString()} from you!`,
-						});
-					} else {
-						await interaction.member.roles.add(id, "Self role");
-						await interaction.reply({
-							ephemeral: true,
-							content: `${CONSTANTS.emojis.statuses.yes} Gave you <@&${id}>!`,
-						});
-					}
-					return;
-				}
-
 				case "remove_strike": {
 					const strike = strikeDatabase.data.find((strike) => strike.id === id);
 					if (!strike)
