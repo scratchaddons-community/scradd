@@ -52,10 +52,11 @@ export function joinWithAnd(array, callback = (item) => item.toString()) {
  */
 export function truncateText(text, maxLength) {
 	const firstLine = text.replaceAll(/\s+/g, " ");
+	const segments = [...new Intl.Segmenter().segment(firstLine)].map(({ segment }) => segment);
 
-	return firstLine.length > maxLength || text.includes("\n")
-		? `${firstLine.slice(0, Math.max(0, maxLength - 1))}…`
-		: firstLine;
+	return segments.length > maxLength || text.includes("\n")
+		? `${segments.slice(0, Math.max(0, maxLength - 1)).join("")}…`
+		: segments.join("");
 }
 
 /** @param {string} text */
