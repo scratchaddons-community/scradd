@@ -1,10 +1,11 @@
-import type { Message, Snowflake } from "discord.js";
+import { Message, RESTJSONErrorCodes, Snowflake } from "discord.js";
 import papaparse from "papaparse";
 import exitHook from "async-exit-hook";
 import { getLoggingThread } from "./logging.js";
 import client from "../client.js";
 import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
 import logError from "../util/logError.js";
+import type { ImmutableArray } from "./types/util.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -28,7 +29,7 @@ const contructed: (keyof Databases)[] = [];
 
 export default class Database<Name extends keyof Databases> {
 	message: Message<true> | undefined;
-	#data: Databases[Name][] | undefined;
+	#data: ImmutableArray<Databases[Name]> | undefined;
 	#extra: string | undefined;
 	constructor(public name: Name) {
 		if (contructed.includes(name))
@@ -99,13 +100,10 @@ export default class Database<Name extends keyof Databases> {
 					"Must call `.init()` before reading or setting `.data` or `.extra`",
 				);
 
-			const files = this.#data?.length
-				? [
-						{
-							attachment: Buffer.from(papaparse.unparse(this.#data), "utf-8"),
-							name: this.name + ".scradddb",
-						},
-				  ]
+			const data = !!this.#data?.length && papaparse.unparse([...this.#data]).trim();
+
+			const files = data
+				? [{ attachment: Buffer.from(data, "utf-8"), name: this.name + ".scradddb" }]
 				: [];
 			const messageContent = this.message.content.split("\n");
 			messageContent[3] = "";
@@ -121,7 +119,25 @@ export default class Database<Name extends keyof Databases> {
 				.edit({ content: messageContent.join("\n").trim(), files })
 				.catch(async (error) => {
 					await logError(error, `Database<${this.name}>#queueWrite()`);
+					if (error.code === RESTJSONErrorCodes.UnknownMessage) {
+						databases[this.name] = undefined;
+						await this.init();
+					}
 					return callback();
+				})
+				.then(async (edited) => {
+					const attachment = edited.attachments.first()?.url;
+
+					const written = attachment
+						? (await fetch(attachment).then((res) => res.text())).trim()
+						: false;
+
+					if (written !== data)
+						throw new Error("Data changed through write!", {
+							cause: { written, data },
+						});
+
+					return edited;
 				});
 
 			timeouts[this.message.id] = undefined;

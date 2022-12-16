@@ -21,7 +21,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 			? user
 			: await CONSTANTS.guild.members.fetch(user).catch(() => {});
 
-	const xp = xpDatabase.data;
+	const xp = [...xpDatabase.data];
 	const index = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[index]?.xp || 0;
 	const newXp = oldXp + amount;
@@ -101,7 +101,7 @@ export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
 	}
 
 	// Update recent DB
-	const weekly = weeklyXpDatabase.data;
+	const weekly = [...weeklyXpDatabase.data];
 	const weeklyIndex = weekly.findIndex((entry) => entry.user === user.id);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 
