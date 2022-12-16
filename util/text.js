@@ -4,13 +4,13 @@
  * 	| import("discord.js").APISelectMenuComponent
  * 	| import("discord.js").APITextInputComponent
  * 	| import("discord.js").APIModalInteractionResponseCallbackData
- * )["custom_id"]} custom_id
+ * )["custom_id"]} customId
  */
 
 /**
  * Generate a short, random string based off the date. Note that the length is not fixed.
  *
- * Intended for use on {@link custom_id}s.
+ * Intended for use on {@link customId}s.
  *
  * @param {string} [prefix] - An optional prefix to the hash.
  *

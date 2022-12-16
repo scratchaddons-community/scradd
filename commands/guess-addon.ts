@@ -1098,31 +1098,31 @@ const command = defineCommand({
 										type: ComponentType.Button,
 										label: "Yes",
 										style: ButtonStyle.Success,
-										custom_id: generateHash("yes"),
+										customId: generateHash("yes"),
 									},
 									{
 										type: ComponentType.Button,
 										label: "I think so",
 										style: ButtonStyle.Success,
-										custom_id: generateHash("probably"),
+										customId: generateHash("probably"),
 									},
 									{
 										type: ComponentType.Button,
 										label: "I don’t know",
 										style: ButtonStyle.Primary,
-										custom_id: generateHash("dontKnow"),
+										customId: generateHash("dontKnow"),
 									},
 									{
 										type: ComponentType.Button,
 										label: "I don’t think so",
 										style: ButtonStyle.Danger,
-										custom_id: generateHash("not"),
+										customId: generateHash("not"),
 									},
 									{
 										type: ComponentType.Button,
 										label: "No",
 										style: ButtonStyle.Danger,
-										custom_id: generateHash("no"),
+										customId: generateHash("no"),
 									},
 								],
 							},
@@ -1135,13 +1135,13 @@ const command = defineCommand({
 													type: ComponentType.Button,
 													label: "Back",
 													style: ButtonStyle.Secondary,
-													custom_id: generateHash("back"),
+													customId: generateHash("back"),
 												},
 												{
 													type: ComponentType.Button,
 													label: "End",
 													style: ButtonStyle.Secondary,
-													custom_id: generateHash("end"),
+													customId: generateHash("end"),
 												},
 										  ]
 										: [
@@ -1149,7 +1149,7 @@ const command = defineCommand({
 													type: ComponentType.Button,
 													label: "End",
 													style: ButtonStyle.Secondary,
-													custom_id: generateHash("end"),
+													customId: generateHash("end"),
 												},
 										  ],
 							},
@@ -1365,13 +1365,13 @@ const command = defineCommand({
 													type: ComponentType.Button,
 													label: "Back",
 													style: ButtonStyle.Secondary,
-													custom_id: generateHash("back"),
+													customId: generateHash("back"),
 												},
 												{
 													type: ComponentType.Button,
 													label: "No it’s not, continue!",
 													style: ButtonStyle.Primary,
-													custom_id: generateHash("continue"),
+													customId: generateHash("continue"),
 												},
 										  ]
 										: [
@@ -1379,7 +1379,7 @@ const command = defineCommand({
 													type: ComponentType.Button,
 													label: "No it’s not, continue!",
 													style: ButtonStyle.Primary,
-													custom_id: generateHash("continue"),
+													customId: generateHash("continue"),
 												},
 										  ],
 							},
@@ -1530,19 +1530,19 @@ const command = defineCommand({
 									type: ComponentType.Button,
 									label: "Give up",
 									style: ButtonStyle.Danger,
-									custom_id: generateHash("end"),
+									customId: generateHash("end"),
 								},
 								{
 									type: ComponentType.Button,
 									label: "Hint",
 									style: ButtonStyle.Secondary,
-									custom_id: generateHash("hint"),
+									customId: generateHash("hint"),
 								},
 								{
 									type: ComponentType.Button,
 									label: "Guess",
 									style: ButtonStyle.Success,
-									custom_id: generateHash("guess"),
+									customId: generateHash("guess"),
 								},
 							],
 						},
@@ -1622,14 +1622,14 @@ const command = defineCommand({
 						if (componentInteraction.customId.startsWith("guess.")) {
 							await componentInteraction.showModal({
 								title: "Guess the addon!",
-								custom_id: generateHash("guessModal"),
+								customId: generateHash("guessModal"),
 								components: [
 									{
 										type: ComponentType.ActionRow,
 										components: [
 											{
 												type: ComponentType.TextInput,
-												custom_id: "addon",
+												customId: "addon",
 												label: "Which addon do you think it is?",
 												required: true,
 												style: TextInputStyle.Short,
