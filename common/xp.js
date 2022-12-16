@@ -111,8 +111,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 		weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
 	}
 	weeklyXpDatabase.data = weekly;
-	const nextWeeklyDate = +new Date(+(weeklyXpDatabase.extra = "1670112000000")) + 604_800_000;
-	// TODO: change to `||=` next release!!
+	const nextWeeklyDate = +(weeklyXpDatabase.extra ?? 0) + 604_800_000;
 
 	//send weekly winners
 	if (+date < nextWeeklyDate) return;
