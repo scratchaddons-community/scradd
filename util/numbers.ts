@@ -1,4 +1,5 @@
 const baseChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
+/** @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187) */
 export function convertBase(value: string, sourceBase: number, outBase: number, chars = baseChars) {
 	const range = chars.split("");
 	if (sourceBase < 2 || sourceBase > range.length)
@@ -31,7 +32,11 @@ export function convertBase(value: string, sourceBase: number, outBase: number, 
 
 convertBase.MAX_BASE = baseChars.length;
 
-/** `x**y` */
+/**
+ * `x**y`
+ *
+ * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ */
 export function bigIntPower(x: bigint, y: bigint) {
 	if (y === 0n) return 1n;
 	let p2: bigint = bigIntPower(x, y / 2n);
