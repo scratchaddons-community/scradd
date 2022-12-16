@@ -24,7 +24,7 @@ import {
 
 import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
-import giveXp, { NORMAL_XP_PER_MESSAGE } from "../../common/xp.js";
+import giveXp, { DEFAULT_XP } from "../../common/xp.js";
 import { normalize, truncateText } from "../../util/text.js";
 import client from "../../client.js";
 import { asyncFilter } from "../../util/promises.js";
@@ -225,11 +225,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				.then((messages) => messages.toJSON());
 
 			const res: Message<true>[] = [];
-			for (
-				let index = 0;
-				index < fetched.length && res.length < NORMAL_XP_PER_MESSAGE;
-				index++
-			) {
+			for (let index = 0; index < fetched.length && res.length < DEFAULT_XP; index++) {
 				const item = fetched[index];
 				item && (!item.author.bot || item.interaction) && res.push(item);
 			}
@@ -257,7 +253,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				}).next()
 			).value ?? -1;
 
-		const newChannel = lastInChannel.length < NORMAL_XP_PER_MESSAGE;
+		const newChannel = lastInChannel.length < DEFAULT_XP;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
 		const bot =
@@ -277,8 +273,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 					: Math.max(
 							1,
 							Math.round(
-								(NORMAL_XP_PER_MESSAGE -
-									(newChannel ? lastInChannel.length - 1 : spam)) /
+								(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
 									bot /
 									(1 +
 										+![

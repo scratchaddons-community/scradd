@@ -10,10 +10,10 @@ const weeklyXpDatabase = new Database("recent_xp");
 await xpDatabase.init();
 await weeklyXpDatabase.init();
 
-export const NORMAL_XP_PER_MESSAGE = 5;
+export const DEFAULT_XP = 5;
 
 /** @param {User | GuildMember} to */
-export default async function giveXp(to, amount = NORMAL_XP_PER_MESSAGE) {
+export default async function giveXp(to, amount = DEFAULT_XP) {
 	// give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
