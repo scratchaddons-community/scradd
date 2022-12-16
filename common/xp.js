@@ -37,7 +37,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 	const oldLevel = getLevelForXp(oldXp);
 	const newLevel = getLevelForXp(newXp);
 	const date = new Date();
-	if (oldLevel !== newLevel) {
+	if (oldLevel < newLevel) {
 		const nextLevelXp = getXpForLevel(newLevel + 1);
 		const pings =
 			userSettingsDatabase.data.find(({ user }) => user === to.id)?.levelUpPings ??
@@ -61,7 +61,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 					fields: [
 						{
 							name: "✨ Current XP",
-							value: newXp.toLocaleString() + " XP",
+							value: Math.floor(newXp).toLocaleString() + " XP",
 							inline: true,
 						},
 						{

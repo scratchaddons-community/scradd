@@ -1,6 +1,6 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
-import warn from "./warns.js";
+import warn, { PARTIAL_STRIKE_COUNT } from "./warn.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
 import client from "../client.js";
@@ -13,8 +13,6 @@ import { getBaseChannel, GlobalAnimatedEmoji, GlobalInvitesPattern } from "../ut
  * All words are ROT13-encoded.
  *
  * @type {[RegExp[], RegExp[]][]}
- *
- * @todo Make index 0 give 0.25 strikes.
  */
 const badWords = [
 	[
@@ -166,7 +164,10 @@ export function censor(text) {
 	return words.flat().length
 		? {
 				censored,
-				strikes: words.reduce((acc, curr, index) => curr.length * index + acc, 0),
+				strikes: words.reduce(
+					(acc, curr, index) => curr.length * Math.max(index, PARTIAL_STRIKE_COUNT) + acc,
+					0,
+				),
 				words,
 		  }
 		: false;
@@ -273,7 +274,7 @@ export async function automodMessage(message) {
 		},
 	);
 
-	const toStrike = [bad.language, bad.invites, bad.bots].filter(
+	const toWarn = [bad.language, bad.invites, bad.bots].filter(
 		/** @returns {strikes is number} */ (strikes) => strikes !== false,
 	);
 
@@ -301,7 +302,7 @@ export async function automodMessage(message) {
 	}
 
 	const promises = [];
-	if (toStrike.length) promises.push(message.delete());
+	if (toWarn.length) promises.push(message.delete());
 	else if (typeof embedStrikes === "number") promises.push(message.suppressEmbeds());
 
 	if (typeof bad.language === "number") {
@@ -379,7 +380,7 @@ export async function automodMessage(message) {
 
 	await Promise.all(promises);
 
-	return toStrike.length > 0;
+	return toWarn.length > 0;
 }
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
@@ -393,12 +394,12 @@ export function badWordsAllowed(channel) {
 const NICKNAME_RULE = 8;
 
 /** @param {import("discord.js").GuildMember} member */
-export async function changeNickname(member, strike = true) {
+export async function changeNickname(member, shouldWarn = true) {
 	const censored = censor(member.displayName);
 
 	if (censored) {
 		await Promise.all([
-			strike
+			shouldWarn
 				? warn(member, "Watch your language!", censored.strikes, member.displayName)
 				: member
 						.send(

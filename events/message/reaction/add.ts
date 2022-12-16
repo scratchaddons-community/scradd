@@ -1,5 +1,5 @@
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
-import warn from "../../../common/warns.js";
+import warn from "../../../common/warn.js";
 import { censor, badWordsAllowed } from "../../../common/automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";

@@ -1,7 +1,7 @@
 import { CommandInteractionOption, GuildMember } from "discord.js";
-import warn from "../common/warns.js";
+import warn, { strikeDatabase } from "../common/warn.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
-import { getWarnById } from "../commands/view-warns.js";
+import { getStrikeById } from "../commands/strikes.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
 
@@ -13,6 +13,8 @@ import { say } from "../commands/say.js";
 import { edit } from "../commands/Edit Message.js";
 import type Event from "../common/types/event";
 import type Command from "../common/types/command.js";
+import log from "../common/logging.js";
+import client from "../client.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -38,7 +40,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					if (!(interaction.member instanceof GuildMember))
 						throw new TypeError("interaction.member is not a GuildMember");
 
-					await interaction.reply(await getWarnById(interaction.member, id ?? ""));
+					await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
 					return;
 				}
 
@@ -68,6 +70,49 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					}
 					return;
 				}
+
+				case "remove_strike": {
+					const strike = strikeDatabase.data.find((strike) => strike.id === id);
+					if (!strike)
+						return interaction.reply({
+							ephemeral: true,
+							content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
+						});
+
+					if (strike.removed)
+						return interaction.reply({
+							ephemeral: true,
+							content: `${CONSTANTS.emojis.statuses.no} That strike was already removed!`,
+						});
+
+					strikeDatabase.data = strikeDatabase.data.map((strike) =>
+						id === strike.id ? { ...strike, removed: true } : strike,
+					);
+					const user =
+						(await client.users.fetch(strike.user).catch(() => {})) ||
+						`<@${strike.user}>`;
+					await interaction.reply(
+						`${
+							CONSTANTS.emojis.statuses.yes
+						} Removed strike \`${id}\` from ${user.toString()}!`,
+					);
+					if (
+						interaction.member instanceof GuildMember &&
+						interaction.member.communicationDisabledUntil &&
+						+interaction.member.communicationDisabledUntil > Date.now()
+					)
+						interaction.member.disableCommunicationUntil(Date.now());
+					await log(
+						`${CONSTANTS.emojis.statuses.yes} ${
+							interaction.member
+						} removed strike \`${id}\` from ${user.toString()}!`,
+						"members",
+					);
+					if (typeof user === "object")
+						await user.send(
+							`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
+						);
+				}
 			}
 		}
 		if (interaction.isModalSubmit()) {
@@ -79,6 +124,16 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 			if (interaction.customId.startsWith("edit.")) return await edit(interaction);
 		}
+		if (interaction.isStringSelectMenu()) {
+			if (interaction.customId === "selectStrike") {
+				if (!(interaction.member instanceof GuildMember))
+					throw new TypeError("interaction.member is not a GuildMember");
+
+				const id = interaction.values[0];
+				if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
+			}
+		}
+
 		if (!interaction.isCommand()) return;
 		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 

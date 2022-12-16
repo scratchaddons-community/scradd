@@ -171,19 +171,14 @@ export type Databases = {
 		/** The ID of the original message. */
 		source: Snowflake;
 	};
-	warn: {
+	strikes: {
 		/** The ID of the user who was warned. */
 		user: Snowflake;
-		/** The time when this warn expires. */
-		expiresAt: number;
-		/** The ID of the message in #mod-log with more information. */
-		info: Snowflake;
-	};
-	mute: {
-		/** The ID of the user who was muted. */
-		user: Snowflake;
-		/** The time when this mute is no longer taken into account when calculating future mute times. */
-		expiresAt: number;
+		/** The time when this strike was issued. */
+		date: number;
+		id: string;
+		count: number;
+		removed: boolean;
 	};
 	xp: {
 		/** The ID of the user. */

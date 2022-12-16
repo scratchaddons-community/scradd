@@ -15,7 +15,7 @@ import { disableComponents, extractMessageExtremities, messageToText } from "../
 
 import CONSTANTS from "./CONSTANTS.js";
 import client from "../client.js";
-import { getWarnsForMember } from "../commands/view-warns.js";
+// import { getStrikesForMember } from "../commands/strikes.js";
 
 export const MODMAIL_COLORS = {
 	opened: Colors.Gold,
@@ -288,6 +288,6 @@ export async function openModmail(openedEmbed, user, ping = false) {
 		reason: "Modmail opened",
 	});
 	await thread.setLocked(true, "Modmail opened");
-	await thread.send({ ...(await getWarnsForMember(user)), content: "=" });
+	// TODO: await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
 	return thread;
 }
