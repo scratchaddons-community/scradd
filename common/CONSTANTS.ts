@@ -128,8 +128,7 @@ function getChannel<T extends ChannelType>(
 ): (import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined {
 	const types = [type].flat();
 	return channels.find((channel): channel is typeof channel & { type: T } => {
-		// @ts-expect-error -- We want to see if the types match.
-		if (!channel || !types.includes(channel.type)) return false;
+		if (!channel || !(types as ChannelType[]).includes(channel.type)) return false;
 
 		switch (matchType) {
 			case "full":
