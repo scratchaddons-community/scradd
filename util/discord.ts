@@ -17,7 +17,6 @@ import {
 	EmojiIdentifierResolvable,
 	GuildTextBasedChannel,
 	InteractionReplyOptions,
-	InteractionResponse,
 	MessageActionRowComponent,
 	MessageEditOptions,
 	NonThreadGuildBasedChannel,
@@ -26,12 +25,12 @@ import {
 	TextBasedChannel,
 	MessageActionRowComponentData,
 	ActionRowData,
+	GuildMember,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { censor } from "../common/automod.js";
-import { userSettingsDatabase } from "../commands/settings.js";
 
 export async function extractMessageExtremities(
 	message: Message,
@@ -376,93 +375,149 @@ export async function reactAll(message: Message, reactions: Readonly<EmojiIdenti
 	}
 }
 
-export async function paginate<T>(
-	array: T[],
-	toString: (value: T, index: number, array: T[]) => Awaitable<string>,
-	failMessage: string,
-	title: string,
-	reply: (options: BaseMessageOptions) => Promise<Message | InteractionResponse | void>,
-	user: User,
-	rawOffset = 0,
+export async function paginate<Item, FormatFromUser extends boolean, Interaction extends boolean>(
+	array: Item[],
+	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	reply: (
+		options: (Interaction extends true ? InteractionReplyOptions : BaseMessageOptions) & {
+			fetchReply: true;
+		},
+	) => Promise<Message>,
+	{
+		title,
+		user,
+		singular,
+		plural = `${singular}s`,
+		failMessage = `No ${plural} found!`,
+		formatFromUser, // Implicitly defaults to false
+		ephemeral, // Implicitly defaults to false
+		rawOffset = 0,
+		itemsPerPage = 15,
+		count = true,
+		generateComponents,
+		disableCustomComponents = false,
+	}: {
+		title: string;
+		user: FormatFromUser extends true ? GuildMember | User : User;
+		singular: string;
+		plural?: string;
+		failMessage?: string;
+		formatFromUser?: FormatFromUser;
+		ephemeral?: Interaction extends true ? boolean : undefined;
+		rawOffset?: number;
+		itemsPerPage?: number;
+		count?: boolean;
+		generateComponents?: (filtered: Item[]) => MessageActionRowComponentData[];
+		disableCustomComponents?: boolean;
+	},
 ) {
-	const PAGE_OFFSET = 15;
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / PAGE_OFFSET);
-	const useMentions = userSettingsDatabase.data.find(
-		(settings) => user.id === settings.user,
-	)?.useMentions;
+	const numberOfPages = Math.ceil(array.length / itemsPerPage);
 
 	// eslint-disable-next-line fp/no-let -- This must be changable.
-	let offset = Math.floor(rawOffset / PAGE_OFFSET) * PAGE_OFFSET;
+	let offset = Math.floor(rawOffset / itemsPerPage) * itemsPerPage;
 
 	/**
 	 * Generate an embed that has the next page.
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage(): Promise<InteractionReplyOptions> {
+	async function generateMessage(): Promise<InteractionReplyOptions & { fetchReply: true }> {
+		const filtered = array.filter(
+			(_, index) => index >= offset && index < offset + itemsPerPage,
+		);
+
 		const content = (
 			await Promise.all(
-				array
-					.filter((_, index) => index >= offset && index < offset + PAGE_OFFSET)
-					.map(
-						async (current, index, all) =>
-							`${index + offset + 1}) ${await toString(current, index, all)}`,
-					),
+				filtered.map(
+					async (current, index, all) =>
+						`${count ? `${index + offset + 1}) ` : ""}${await toString(
+							current,
+							index,
+							all,
+						)}`,
+				),
 			)
 		)
 			.join("\n")
 			.trim();
 
 		if (!content) {
-			return { content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`, ephemeral: true };
+			return {
+				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
+				ephemeral: true,
+				fetchReply: true,
+			} as const;
+		}
+
+		const components: ActionRowData<MessageActionRowComponentData>[] =
+			numberOfPages > 1
+				? [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "<< Previous",
+									style: ButtonStyle.Primary,
+									disabled: offset === 0,
+									customId: previousId,
+								},
+								{
+									type: ComponentType.Button,
+									label: "Next >>",
+									style: ButtonStyle.Primary,
+									disabled: offset + itemsPerPage >= array.length,
+									customId: nextId,
+								},
+							],
+						},
+				  ]
+				: [];
+
+		if (generateComponents) {
+			components.push({
+				type: ComponentType.ActionRow,
+				components: generateComponents(filtered),
+			});
 		}
 
 		return {
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.Button,
-							label: "<< Previous",
-							style: ButtonStyle.Primary,
-							disabled: offset === 0,
-							customId: previousId,
-						},
-						{
-							type: ComponentType.Button,
-							label: "Next >>",
-							style: ButtonStyle.Primary,
-							disabled: offset + PAGE_OFFSET >= array.length - 1,
-							customId: nextId,
-						},
-					],
-				},
-			],
+			components,
 
 			embeds: [
 				{
 					title: title,
 					description: content,
 					footer: {
-						text: `Page ${offset / PAGE_OFFSET + 1}/${numberOfPages}${
-							useMentions === undefined
-								? "\nUse /settings to restore the old behavior of showing mentions instead of usernames"
-								: ""
-						}`,
+						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
+							CONSTANTS.footerSeperator
+						}${array.length} ${array.length === 1 ? singular : plural}`,
 					},
-					color: CONSTANTS.themeColor,
+					author: formatFromUser
+						? {
+								icon_url: user.displayAvatarURL(),
+								name:
+									user instanceof GuildMember ? user.displayName : user.username,
+						  }
+						: undefined,
+					color: formatFromUser
+						? user instanceof GuildMember
+							? user.displayColor
+							: undefined
+						: CONSTANTS.themeColor,
 				},
 			],
+			ephemeral: !!ephemeral,
 			fetchReply: true,
 		};
 	}
 
 	let message = await reply(await generateMessage());
+	if (numberOfPages === 1) return;
 
-	const collector = message?.createMessageComponentCollector({
+	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === user.id,
@@ -472,16 +527,21 @@ export async function paginate<T>(
 
 	collector
 		?.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += PAGE_OFFSET;
-			else offset -= PAGE_OFFSET;
+			if (buttonInteraction.customId === nextId) offset += itemsPerPage;
+			else offset -= itemsPerPage;
 
 			await buttonInteraction.deferUpdate();
 			message = await reply(await generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {
+			const [pagination, ...rest] = message.components;
 			await reply({
-				components: message instanceof Message ? disableComponents(message.components) : [],
+				components:
+					disableCustomComponents || !pagination
+						? disableComponents(message.components)
+						: [...disableComponents([pagination]), ...rest],
+				fetchReply: true,
 			});
 		});
 }

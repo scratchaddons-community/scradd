@@ -132,12 +132,19 @@ const command = defineCommand({
 						  }`
 				}`;
 			},
-			"No suggestions found. Try changing any filters you may have used.",
-			`Top suggestions${nick ? ` by ${nick}` : ""}${
-				answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
-			}`,
 			(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
-			interaction.user,
+			{
+				title: `Top suggestions${nick ? ` by ${nick}` : ""}${
+					answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
+				}`,
+				user:
+					interaction.member instanceof GuildMember
+						? interaction.member
+						: interaction.user,
+				singular: "suggestion",
+				failMessage: "No suggestions found! Try changing any filters you may have used.",
+				formatFromUser: !!nick,
+			},
 		);
 	},
 });

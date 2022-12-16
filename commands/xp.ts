@@ -138,11 +138,13 @@ const command = defineCommand({
 								  ).username
 						} (${xp.xp.toLocaleString()} XP)`;
 					},
-					"No users found.",
-					`Leaderboard for ${CONSTANTS.guild.name}`,
 					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
-					interaction.user,
-					index,
+					{
+						singular: "user",
+						title: `Leaderboard for ${CONSTANTS.guild.name}`,
+						user: interaction.user,
+						rawOffset: index,
+					},
 				);
 			}
 		}
