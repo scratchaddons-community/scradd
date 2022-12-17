@@ -408,7 +408,7 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 		rawOffset?: number;
 		itemsPerPage?: number;
 		count?: boolean;
-		generateComponents?: (filtered: Item[]) => MessageActionRowComponentData[];
+		generateComponents?: (items: Item[]) => MessageActionRowComponentData[];
 		disableCustomComponents?: boolean;
 	},
 ) {

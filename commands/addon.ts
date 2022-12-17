@@ -110,7 +110,7 @@ const command = defineCommand({
 								? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 								: ""
 						}`,
-					footer: { text: addon.id },
+					footer: { text: addon.id + "\nClick the addon name to enable it!" },
 					thumbnail: {
 						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
 					},
