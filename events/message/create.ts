@@ -207,9 +207,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 		return;
 	}
 
+	const baseChannel = getBaseChannel(message.channel);
+
 	// XP
 	const webhook =
-		CONSTANTS.channels.modmail?.id == getBaseChannel(message.channel)?.id &&
+		CONSTANTS.channels.modmail?.id === baseChannel?.id &&
 		message.webhookId &&
 		message.webhookId === client.application.id;
 
@@ -317,9 +319,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 	// Don’t react to users who disabled the setting.
 	if (
 		message.interaction ||
-		[CONSTANTS.channels.board?.id, CONSTANTS.channels.modlogs?.id].includes(
-			getBaseChannel(message.channel)?.id,
-		) ||
+		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
+		CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
 		!(
 			userSettingsDatabase.data.find(({ user }) => user === message.author.id)
 				?.autoreactions ?? true
@@ -354,8 +355,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 		content.includes("æ")
 	)
 		react(CONSTANTS.emojis.autoreact.e);
-	if (includes("dango")) react("🍡");
-	if (includes(/av[ao]cado/)) react("🥑");
+	if (includes("dango") && !content.includes("🍡")) react("🍡");
+	if (includes(/av[ao]cado/) && !content.includes("🥑")) react("🥑");
 	if (includes("sat on addon")) {
 		if (reactions < REACTION_CAP) {
 			reactions = reactions + 3;
@@ -367,7 +368,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
 	if (content.includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
 	if (includes("doost") || includes("dooster")) react(CONSTANTS.emojis.autoreact.boost);
-	if (content.includes("quack") || includes("duck")) react("🦆");
+	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆")) react("🦆");
 	if (content === "radio") react("📻");
 	if (content === "agreed") react(CONSTANTS.emojis.autoreact.mater);
 	if (includes(/te(?:r|w)+a+/) || /👉\s*👈/.test(message.content))
@@ -380,7 +381,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 	}
 
 	// Discord jokes
-	if (includes("mee6") || includes("dyno")) react("🤮");
+	if (
+		(includes("mee6") || includes("dyno")) &&
+		!(content.includes("🤮") || content.includes("🤢"))
+	)
+		react("🤮");
 	if (
 		message.mentions.has(client.user?.id ?? "", {
 			ignoreEveryone: true,
@@ -395,7 +400,10 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (includes(/j[eo]f+[oa]l+o/) || includes(/buf+[oa]l+o/))
 		react(CONSTANTS.emojis.autoreact.jeffalo);
 	if (includes(/wasteof\.(?!money)/, false)) react(CONSTANTS.emojis.autoreact.wasteof);
-	if (content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/))
+	if (
+		(content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/)) &&
+		!content.includes("turbo")
+	)
 		react(CONSTANTS.emojis.autoreact.tw);
 	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
 	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
