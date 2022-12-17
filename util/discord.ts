@@ -33,12 +33,12 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
-import { censor } from "../common/automod.js";
 
 export async function extractMessageExtremities(
 	message: Message,
 	allowLanguage = true,
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
+	const { censor } = await import("../common/automod.js");
 	const embeds = [
 		...message.stickers
 			.filter((sticker) => {
