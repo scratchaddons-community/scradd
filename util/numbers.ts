@@ -44,21 +44,6 @@ export function bigIntPower(x: bigint, y: bigint) {
 	return x * p2 * p2;
 }
 
-/** @author [Changaco/unicode-progress-bars](https://github.com/Changaco/unicode-progress-bars/blob/f8df5e8/generator.html#L60L82) */
-export function makeProgressBar(progress: number) {
-	const BAR_STYLE = "░▒▓█",
-		LENGTH = 29;
-	const full = progress * LENGTH;
-	const rounded = Math.floor(full);
-	return (
-		(BAR_STYLE.at(-1) || "").repeat(rounded) +
-		(rounded === LENGTH
-			? ""
-			: (BAR_STYLE[Math.floor((full - rounded) * (BAR_STYLE.length - 1))] || "") +
-			  (BAR_STYLE[0] || "")?.repeat(LENGTH - rounded - 1))
-	);
-}
-
 export function nth(number: number, { bold = true, jokes = true } = {}) {
 	const formatted =
 		number.toLocaleString() +

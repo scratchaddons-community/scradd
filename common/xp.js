@@ -6,7 +6,7 @@ import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
 export const xpDatabase = new Database("xp");
-const weeklyXpDatabase = new Database("recent_xp");
+export const weeklyXpDatabase = new Database("recent_xp");
 await xpDatabase.init();
 await weeklyXpDatabase.init();
 

@@ -1,12 +1,18 @@
 import { ApplicationCommandOptionType } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
-import { getLevelForXp, getXpForLevel, xpDatabase as database } from "../common/xp.js";
+import {
+	getLevelForXp,
+	getXpForLevel,
+	weeklyXpDatabase,
+	xpDatabase as database,
+} from "../common/xp.js";
 import { paginate } from "../util/discord.js";
-import { makeProgressBar } from "../util/numbers.js";
+import { convertBase, nth } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
 import client from "../client.js";
+import { createCanvas } from "canvas";
 
 const command = defineCommand({
 	data: {
@@ -53,6 +59,40 @@ const command = defineCommand({
 				const xpGained = xp - xpForPreviousLevel;
 				const progress = xpGained / increment;
 				const rank = top.findIndex((info) => info.user === user.id) + 1;
+				const weeklyRank =
+					weeklyXpDatabase.data
+						.sort((one, two) => two.xp - one.xp)
+						.findIndex((entry) => entry.user === user.id) + 1;
+				const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
+
+				const canvas = createCanvas(1_000, 50);
+				const context = canvas.getContext("2d");
+				context.fillStyle = "#" + convertBase(CONSTANTS.themeColor + "", 10, 16);
+				const rectangleSize = canvas.width * progress;
+				const paddingPixels = 0.18 * canvas.height;
+				context.fillRect(0, 0, rectangleSize, canvas.height);
+				context.font = canvas.height * 0.9 + "px sans-serif";
+				context.fillStyle = "#00000096";
+				if (progress < 0.145) {
+					context.textAlign = "end";
+					context.fillText(
+						progress.toLocaleString([], {
+							maximumFractionDigits: 1,
+							style: "percent",
+						}),
+						canvas.width - paddingPixels,
+						canvas.height - paddingPixels,
+					);
+				} else {
+					context.fillText(
+						progress.toLocaleString([], {
+							maximumFractionDigits: 1,
+							style: "percent",
+						}),
+						paddingPixels,
+						canvas.height - paddingPixels,
+					);
+				}
 				interaction.reply({
 					embeds: [
 						{
@@ -66,32 +106,20 @@ const command = defineCommand({
 								{ name: "📊 Level", value: level.toLocaleString(), inline: true },
 								{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 								{
-									name: CONSTANTS.zeroWidthSpace,
-									value: CONSTANTS.zeroWidthSpace,
-									inline: true,
-								},
-								{
-									name: "⬆ Next Level XP",
-									value: xpForNextLevel.toLocaleString(),
-									inline: true,
-								},
-								{
-									name: `${CONSTANTS.emojis.misc.percent} Progress`,
-									value:
-										progress.toLocaleString([], {
-											maximumFractionDigits: 2,
-											style: "percent",
-										}) + ` (${xpGained}/${increment})`,
+									name: "⏲ Weekly rank",
+									value: weeklyRank
+										? approximateWeeklyRank === 10
+											? "Top 10"
+											: `About ${nth(approximateWeeklyRank - 5, {
+													bold: false,
+													jokes: false,
+											  })}`
+										: "Inactive",
 									inline: true,
 								},
 								{
 									name: CONSTANTS.zeroWidthSpace,
-									value: CONSTANTS.zeroWidthSpace,
-									inline: true,
-								},
-								{
-									value: CONSTANTS.zeroWidthSpace,
-									name: makeProgressBar(progress),
+									value: `**⬆ Next level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 								},
 							],
 
@@ -105,8 +133,10 @@ const command = defineCommand({
 										  }${CONSTANTS.footerSeperator}`
 										: "") + `View the leaderboard with /xp top`,
 							},
+							image: { url: "attachment://progress.png" },
 						},
 					],
+					files: [{ attachment: canvas.toBuffer(), name: "progress.png" }],
 				});
 				return;
 			}
