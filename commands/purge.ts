@@ -61,15 +61,13 @@ async function deleteMessages(
 	count: number,
 	user?: User,
 ) {
-	const twoWeeksAgo = Date.now() - 1_209_600_000;
 	const filtered = unfiltered
 		.toJSON()
 		.filter(
 			(message, index) =>
 				index < count &&
 				(user ? message.author.id === user.id : true) &&
-				+message.createdAt > twoWeeksAgo &&
-				message.deletable,
+				message.bulkDeletable,
 		);
 	if (filtered.length) {
 		// TODO: channel.createMessageComponentCollector({})
