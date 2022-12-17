@@ -1,4 +1,4 @@
-import { time, Snowflake, Role, TimestampStyles } from "discord.js";
+import { time, Snowflake, Role, TimestampStyles, ChannelType } from "discord.js";
 
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
@@ -106,7 +106,11 @@ const command = defineCommand({
 														(name[0] || "").toUpperCase() +
 														name.slice(1),
 												)
-												.join(" ") + " channel",
+												.join(" ") +
+											" " +
+											(channel[1]?.type === ChannelType.GuildCategory
+												? "category"
+												: "channel"),
 										value: channel[1]?.toString() || "*None*",
 										inline: true,
 									};
