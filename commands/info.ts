@@ -26,9 +26,9 @@ const command = defineCommand({
 	data: {
 		description: "Learn about me",
 		subcommands: {
-			credits: { description: "Show bot status" },
+			status: { description: "Show bot status" },
+			credits: { description: "Show credit information" },
 			config: { description: "Show configuration settings" },
-			status: { description: "Show credit information" },
 		},
 	},
 
