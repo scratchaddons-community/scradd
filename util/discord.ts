@@ -110,13 +110,13 @@ export async function extractMessageExtremities(
 	return { embeds, files: message.attachments.toJSON() };
 }
 
-export function getMessageJSON(message: Message): MessageEditOptions {
+export function getMessageJSON(message: Message) {
 	return {
 		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
 		embeds: message.embeds.map((embed) => embed.toJSON()),
 		files: message.attachments.map((attachment) => attachment.url),
-	};
+	} satisfies MessageEditOptions;
 }
 
 /**

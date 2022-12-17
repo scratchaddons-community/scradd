@@ -81,10 +81,20 @@ const promises = [
 			commands
 				.filter((command): command is NonNullable<Command> => !!command)
 				.map(({ data }, name): ApplicationCommandData => {
+					const type = data.type ?? ApplicationCommandType.ChatInput;
 					return {
-						name,
+						name:
+							type === ApplicationCommandType.ChatInput
+								? name
+								: name
+										.split("-")
+										.map(
+											(word) =>
+												(word[0] ?? "").toUpperCase() + word.substring(1),
+										)
+										.join(" "),
 						description: data.description ?? "",
-						type: data.type || ApplicationCommandType.ChatInput,
+						type,
 						defaultMemberPermissions: data.restricted
 							? new PermissionsBitField()
 							: null,

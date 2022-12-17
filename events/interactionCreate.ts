@@ -1,4 +1,4 @@
-import { CommandInteractionOption, GuildMember } from "discord.js";
+import { ApplicationCommandType, CommandInteractionOption, GuildMember } from "discord.js";
 import warn, { strikeDatabase } from "../common/warn.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
 import { getStrikeById } from "../commands/strikes.js";
@@ -10,7 +10,7 @@ import path from "path";
 import url from "url";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
-import { edit } from "../commands/Edit Message.js";
+import { edit } from "../commands/edit-message.js";
 import type Event from "../common/types/event";
 import type Command from "../common/types/command.js";
 import log from "../common/logging.js";
@@ -110,7 +110,14 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 		if (!interaction.isCommand()) return;
 		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
 
-		const command = (await commands).get(interaction.command?.name || "");
+		const command = (await commands).get(
+			(!interaction.command || interaction.command.type === ApplicationCommandType.ChatInput
+				? interaction.command?.name
+				: interaction.command.name
+						.split(" ")
+						.map((word) => word.toLowerCase())
+						.join("-")) ?? "",
+		);
 
 		if (!command)
 			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);

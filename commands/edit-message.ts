@@ -25,6 +25,7 @@ const command = defineCommand({
 	async interaction(interaction) {
 		if (
 			interaction.targetMessage.type !== MessageType.Default ||
+			!interaction.targetMessage.editable ||
 			[
 				CONSTANTS.channels.board?.id,
 				CONSTANTS.channels.modmail?.id,
@@ -105,6 +106,8 @@ export async function edit(interaction: ModalSubmitInteraction) {
 	const message = await interaction.channel?.messages.fetch(
 		interaction.customId.split(".")[1] || "",
 	);
+	if (!message) throw new TypeError("Used command in DM!");
+	const oldJSON = getMessageJSON(message);
 	const edited = await message?.edit(json).catch((error) => {
 		interaction.reply({
 			ephemeral: true,
@@ -122,7 +125,7 @@ export async function edit(interaction: ModalSubmitInteraction) {
 		});
 	});
 
-	if (!message || !edited) return;
+	if (!edited) return;
 
 	await interaction.reply({
 		content: `${CONSTANTS.emojis.statuses.yes} Successfully edited message!`,
@@ -130,14 +133,12 @@ export async function edit(interaction: ModalSubmitInteraction) {
 	});
 
 	const files = [];
-	const contentDiff =
-		message?.content !== null &&
-		diffLib
-			.unifiedDiff((message?.content ?? "").split("\n"), edited.content.split("\n"))
-			.join("\n");
+	const contentDiff = diffLib
+		.unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n"))
+		.join("\n");
 
 	const extraDiff = jsonDiff.diffString(
-		{ ...getMessageJSON(message), content: undefined },
+		{ ...oldJSON, content: undefined },
 		{ ...getMessageJSON(edited), content: undefined },
 		{ color: false },
 	);
