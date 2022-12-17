@@ -7,10 +7,14 @@
  * )["custom_id"]} customId
  */
 
+/** @typedef {import("discord.js").BaseInteraction["id"]} interactionId */
+
 /**
  * Generate a short, random string based off the date. Note that the length is not fixed.
  *
  * Intended for use on {@link customId}s.
+ *
+ * @deprecated Use {@link interactionId Interaction#id} instead.
  *
  * @param {string} [prefix] - An optional prefix to the hash.
  *
