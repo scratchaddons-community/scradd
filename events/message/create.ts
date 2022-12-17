@@ -270,6 +270,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 					message.interaction?.user ||
 					message.member ||
 					message.author,
+				message.url,
 				spam === -1 && !newChannel
 					? 1
 					: Math.max(

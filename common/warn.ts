@@ -36,7 +36,6 @@ export default async function warn(
 	strikes = Math.max(Math.round(strikes * 4) / 4, PARTIAL_STRIKE_COUNT);
 	const totalVerbalStrikes = Math.floor((oldStrikeCount % 1) + (strikes % 1));
 	const displayStrikes = Math.trunc(strikes) + totalVerbalStrikes;
-	giveXp(user, DEFAULT_XP * strikes * -1);
 	const mod = contextOrMod instanceof User ? contextOrMod : client.user;
 	const context =
 		(contextOrMod instanceof User ? "" : contextOrMod + (totalVerbalStrikes ? "\n\n" : "")) +
@@ -58,6 +57,7 @@ export default async function warn(
 			],
 		},
 	);
+	giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
 	const member =
 		user instanceof GuildMember

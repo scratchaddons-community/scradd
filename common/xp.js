@@ -12,8 +12,11 @@ await weeklyXpDatabase.init();
 
 export const DEFAULT_XP = 5;
 
-/** @param {User | GuildMember} to */
-export default async function giveXp(to, amount = DEFAULT_XP) {
+/**
+ * @param {User | GuildMember} to
+ * @param {string} [url]
+ */
+export default async function giveXp(to, url, amount = DEFAULT_XP) {
 	// give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
@@ -57,6 +60,7 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 							? "'v" // april fools
 							: "’r"
 					}e at level ${newLevel}!`,
+					url,
 
 					fields: [
 						{
