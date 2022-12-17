@@ -13,14 +13,11 @@ import {
 	APIMessageActionRowComponent,
 	Awaitable,
 	BaseMessageOptions,
-	DMChannel,
 	EmojiIdentifierResolvable,
 	GuildTextBasedChannel,
 	InteractionReplyOptions,
 	MessageActionRowComponent,
 	MessageEditOptions,
-	NonThreadGuildBasedChannel,
-	PartialDMChannel,
 	Snowflake,
 	TextBasedChannel,
 	MessageActionRowComponentData,
@@ -29,6 +26,7 @@ import {
 	FormattingPatterns,
 	Invite,
 	MessageMentions,
+	AnyThreadChannel,
 } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
@@ -566,11 +564,15 @@ export function disableComponents(
 	}));
 }
 
-export function getBaseChannel(
-	channel?: null | TextBasedChannel,
-): DMChannel | PartialDMChannel | NonThreadGuildBasedChannel | undefined {
-	const nonThread = channel?.isThread() ? channel.parent : channel;
-	return nonThread && !nonThread.isThread() ? nonThread : undefined;
+export function getBaseChannel<T extends null | undefined | TextBasedChannel>(
+	channel: T,
+): T extends undefined | null
+	? undefined
+	: T extends AnyThreadChannel
+	? Exclude<GuildTextBasedChannel, AnyThreadChannel> | undefined
+	: T {
+	// @ts-expect-error -- This is the right type.
+	return channel ? (channel.isThread() ? channel.parent || undefined : channel) : undefined;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
