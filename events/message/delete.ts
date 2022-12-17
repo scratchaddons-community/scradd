@@ -4,7 +4,7 @@ import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import type Event from "../../common/types/event";
 import { DATABASE_THREAD } from "../../common/database.js";
-const databaseThread = (await getLoggingThread(DATABASE_THREAD))
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 const event: Event<"messageDelete"> = async function event(message) {
 	if (!shouldLog(message.channel)) return;
