@@ -13,6 +13,8 @@ import { getBaseChannel, getMessageJSON } from "../util/discord.js";
 import { generateError } from "../util/logError.js";
 import jsonDiff from "json-diff";
 import diffLib from "difflib";
+import { DATABASE_THREAD } from "../common/database.js";
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 const command = defineCommand({
 	data: {
@@ -29,7 +31,7 @@ const command = defineCommand({
 				CONSTANTS.channels.old_suggestions?.id,
 			].includes(interaction.channel?.id) ||
 			(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
-				(await getLoggingThread("databases")).id !== interaction.channel?.id)
+				databaseThread.id !== interaction.channel?.id)
 		)
 			return await interaction.reply({
 				ephemeral: true,

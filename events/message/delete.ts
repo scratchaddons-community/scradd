@@ -3,6 +3,8 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import type Event from "../../common/types/event";
+import { DATABASE_THREAD } from "../../common/database.js";
+const databaseThread = (await getLoggingThread(DATABASE_THREAD))
 
 const event: Event<"messageDelete"> = async function event(message) {
 	if (!shouldLog(message.channel)) return;
@@ -10,7 +12,7 @@ const event: Event<"messageDelete"> = async function event(message) {
 	const shush =
 		message.partial ||
 		(CONSTANTS.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
-			(await getLoggingThread("databases")).id !== message.channel?.id);
+			databaseThread.id !== message.channel?.id);
 
 	const content = !shush && (await messageToText(message));
 	const { embeds, files } = shush

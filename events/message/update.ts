@@ -6,9 +6,9 @@ import { ButtonStyle, ComponentType } from "discord.js";
 import diffLib from "difflib";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import client from "../../client.js";
-
-const loggingThread = await getLoggingThread("databases");
 import type Event from "../../common/types/event";
+import { DATABASE_THREAD } from "../../common/database.js";
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 const event: Event<"messageUpdate"> = async function event(oldMessage, newMessage) {
 	if (newMessage.partial) newMessage = await newMessage.fetch();
@@ -60,7 +60,7 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 	}
 	if (
 		!oldMessage.partial &&
-		loggingThread.id !== newMessage.channel.id &&
+		databaseThread.id !== newMessage.channel.id &&
 		!newMessage.author.bot
 	) {
 		const files = [];
