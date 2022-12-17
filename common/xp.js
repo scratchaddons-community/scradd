@@ -1,4 +1,4 @@
-import { GuildMember, User } from "discord.js";
+import { GuildMember, time, TimestampStyles, User } from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
@@ -183,7 +183,10 @@ export default async function giveXp(to, amount = DEFAULT_XP) {
 				.join("\n") || "*Nobody got any XP this week!*") +
 			`\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeCount.toLocaleString()} people were active. Altogether, people gained ${Math.floor(
 				weekly.reduce((a, b) => a + b.xp, 0),
-			).toLocaleString()} XP this week.*`,
+			).toLocaleString()} XP this week.*\n__Next week's weekly winners will be posted ${time(
+				Math.round((nextWeeklyDate + 604_800_000) / 1000),
+				TimestampStyles.RelativeTime,
+			)}.__`,
 	});
 
 	const role = CONSTANTS.roles.weekly_winner;
