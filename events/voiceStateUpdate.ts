@@ -8,7 +8,7 @@ const event: Event<"voiceStateUpdate"> = async function event(oldState, newState
 
 	const logs = [];
 	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
-		if (oldState.channel) {
+		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {
 			logs.push(`left voice channel ${oldState.channel.toString()}`);
 		}
 		if (newState.channel && newState.channel.type !== ChannelType.GuildStageVoice) {
