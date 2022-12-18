@@ -1,9 +1,8 @@
-import { ApplicationCommandType, CommandInteractionOption, GuildMember } from "discord.js";
+import { ApplicationCommandType, CommandInteractionOption, GuildMember, User } from "discord.js";
 import warn, { getStrikeById, strikeDatabase } from "../common/punishments.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
-
 import { importScripts } from "../util/files.js";
 import path from "path";
 import url from "url";
@@ -14,6 +13,7 @@ import type Event from "../common/types/event";
 import type Command from "../common/types/command.js";
 import log from "../common/logging.js";
 import client from "../client.js";
+import giveXp, { DEFAULT_XP } from "../common/xp.js";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -68,18 +68,19 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 							CONSTANTS.emojis.statuses.yes
 						} Removed strike \`${id}\` from ${user.toString()}!`,
 					);
+					const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 					if (
-						interaction.member instanceof GuildMember &&
-						interaction.member.communicationDisabledUntil &&
-						+interaction.member.communicationDisabledUntil > Date.now()
+						member?.communicationDisabledUntil &&
+						+member.communicationDisabledUntil > Date.now()
 					)
-						interaction.member.disableCommunicationUntil(Date.now());
-					await log(
+						member.disableCommunicationUntil(Date.now());
+					const { url } = await log(
 						`${CONSTANTS.emojis.statuses.yes} ${
 							interaction.member
 						} removed strike \`${id}\` from ${user.toString()}!`,
 						"members",
 					);
+					if (user instanceof User) giveXp(user, url, strike.count * DEFAULT_XP);
 					if (typeof user === "object")
 						await user.send(
 							`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
