@@ -176,7 +176,7 @@ export type Databases = {
 		user: Snowflake;
 		/** The time when this strike was issued. */
 		date: number;
-		id: string;
+		id: string | number;
 		count: number;
 		removed: boolean;
 	};

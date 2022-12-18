@@ -119,13 +119,13 @@ const command = defineCommand({
 										customId: "selectStrike",
 										placeholder: "View more information on a strike",
 										options: filtered.map((strike) => ({
-											label: strike.id,
-											value: strike.id,
+											label: strike.id + "",
+											value: strike.id + "",
 										})),
 									},
 								];
 							return filtered.map((strike) => ({
-								label: strike.id || "",
+								label: strike.id + "",
 								style: ButtonStyle.Secondary,
 								customId: `${strike.id}_strike`,
 								type: ComponentType.Button,

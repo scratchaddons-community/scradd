@@ -7,6 +7,7 @@ import {
 	ComponentType,
 	ButtonStyle,
 	InteractionReplyOptions,
+	Snowflake,
 } from "discord.js";
 import client from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
@@ -166,51 +167,60 @@ export default async function warn(
 		);
 	}
 }
+const databases = await (await getLoggingThread("databases")).messages.fetch({ limit: 100 });
+const { url } =
+	databases
+		.find((message) => message.attachments.first()?.name === "robotop_warns.json")
+		?.attachments.first() ?? {};
+export const robotopStrikes: { id: number; mod: Snowflake; reason: string }[] = url
+	? await fetch(url).then((response) => response.json())
+	: [];
 
 export async function filterToStrike(filter: string) {
+	if (filter.match(/^\d{1,4}$/)) {
+		const strike = strikeDatabase.data.find((strike) => strike.id + "" === filter);
+		const info = robotopStrikes.find((strike) => strike.id + "" === filter);
+		if (strike && info) return { ...info, ...strike, id: info.id + "" };
+	}
 	const channel = await getLoggingThread("members");
 	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
 
-	const messageFromId =
-		(await channel.messages.fetch(messageId).catch(() => {})) || // todo do we still need this with the new warns system
-		(await CONSTANTS.channels.modlogs?.messages.fetch(messageId).catch(() => {}));
-	const resolvedMessage =
-		messageFromId ||
-		(await channel.messages.fetch(filter).catch(() => {})) ||
-		(await CONSTANTS.channels.modlogs?.messages.fetch(filter).catch(() => {}));
-	if (!resolvedMessage) return;
+	const messageFromId = await channel.messages.fetch(messageId).catch(() => {});
+	const message = messageFromId || (await channel.messages.fetch(filter).catch(() => {}));
+	if (!message) return;
 
 	const strikeId = messageFromId ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
-	const strike = strikeDatabase.data.find((strike) => strike.id === strikeId);
+	const strike = strikeDatabase.data.find((strike) => strike.id + "" === strikeId);
 	if (!strike) return;
-	return { strike, message: resolvedMessage };
+
+	const { url } = message.attachments.first() || {};
+	return {
+		...strike,
+		mod: [...message.content.matchAll(GlobalUsersPattern)][1]?.[1],
+		reason: url ? await fetch(url).then((response) => response.text()) : message.content,
+	};
 }
 
 export async function getStrikeById(
 	interactor: GuildMember,
 	filter: string,
 ): Promise<InteractionReplyOptions> {
-	const { strike, message } = (await filterToStrike(filter)) ?? {};
-	if (!strike || !message)
+	const strike = await filterToStrike(filter);
+	if (!strike)
 		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
 
-	const [[, userId = ""] = [], [, modId] = []] = [
-		...message.content.matchAll(GlobalUsersPattern),
-	];
-
 	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	if (userId !== interactor.id && !isMod)
+	if (strike.user !== interactor.id && !isMod)
 		return {
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
 		};
 
-	const member = await CONSTANTS.guild?.members.fetch(userId).catch(() => {});
-	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
+	const member = await CONSTANTS.guild?.members.fetch(strike.user).catch(() => {});
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
-	const mod = isMod && modId && (await client.users.fetch(modId).catch(() => {}));
+	const mod = isMod && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
-	const { url } = message.attachments.first() || {};
 	const useMentions =
 		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
 			?.useMentions ?? false;
@@ -241,10 +251,8 @@ export async function getStrikeById(
 				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
 					strike.removed ? "~~" : ""
 				}`,
-				description: url
-					? await fetch(url).then((response) => response.text())
-					: message.content,
-				timestamp: message.createdAt.toISOString(),
+				description: strike.reason,
+				timestamp: new Date(strike.date).toISOString(),
 				fields: [
 					{
 						name: "⚠ Count",

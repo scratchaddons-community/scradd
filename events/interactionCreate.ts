@@ -1,5 +1,5 @@
 import { ApplicationCommandType, CommandInteractionOption, GuildMember, User } from "discord.js";
-import warn, { getStrikeById, strikeDatabase } from "../common/punishments.js";
+import warn, { filterToStrike, getStrikeById, strikeDatabase } from "../common/punishments.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
@@ -44,7 +44,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 				}
 
 				case "remove_strike": {
-					const strike = strikeDatabase.data.find((strike) => strike.id === id);
+					const strike = id && (await filterToStrike(id));
 					if (!strike)
 						return interaction.reply({
 							ephemeral: true,
