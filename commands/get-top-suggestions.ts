@@ -143,7 +143,6 @@ const command = defineCommand({
 						: interaction.user,
 				singular: "suggestion",
 				failMessage: "No suggestions found! Try changing any filters you may have used.",
-				formatFromUser: !!nick,
 			},
 		);
 	},
