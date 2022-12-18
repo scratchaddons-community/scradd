@@ -1,18 +1,15 @@
 import {
 	GuildMember,
 	time,
-	InteractionReplyOptions,
 	ApplicationCommandOptionType,
 	TimestampStyles,
 	ButtonStyle,
 	ComponentType,
 } from "discord.js";
-import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { filterToStrike, strikeDatabase } from "../common/warn.js";
+import { getStrikeById, strikeDatabase } from "../common/punishments.js";
 import { defineCommand } from "../common/types/command.js";
-import { userSettingsDatabase } from "./settings.js";
-import { GlobalUsersPattern, paginate } from "../util/discord.js";
+import { paginate } from "../util/discord.js";
 
 const command = defineCommand({
 	data: {
@@ -150,97 +147,3 @@ const command = defineCommand({
 	},
 });
 export default command;
-
-export async function getStrikeById(
-	interactor: GuildMember,
-	filter: string,
-): Promise<InteractionReplyOptions> {
-	const { strike, message } = (await filterToStrike(filter)) ?? {};
-	if (!strike || !message)
-		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
-
-	const [[, userId = ""] = [], [, modId] = []] = [
-		...message.content.matchAll(GlobalUsersPattern),
-	];
-
-	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	if (userId !== interactor.id && !isMod)
-		return {
-			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
-		};
-
-	const member = await CONSTANTS.guild?.members.fetch(userId).catch(() => {});
-	const user = member?.user || (await client.users.fetch(userId).catch(() => {}));
-
-	const mod = isMod && modId && (await client.users.fetch(modId).catch(() => {}));
-	const nick = member?.displayName ?? user?.username;
-	const { url } = message.attachments.first() || {};
-	const useMentions =
-		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
-			?.useMentions ?? false;
-	return {
-		components:
-			isMod && !strike.removed
-				? [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									type: ComponentType.Button,
-									customId: strike.id + "_remove_strike",
-									label: "Remove",
-									style: ButtonStyle.Danger,
-								},
-							],
-						},
-				  ]
-				: [],
-		ephemeral: true,
-		embeds: [
-			{
-				color: member?.displayColor,
-				author: nick
-					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
-					: undefined,
-				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
-					strike.removed ? "~~" : ""
-				}`,
-				description: url
-					? await fetch(url).then((response) => response.text())
-					: message.content,
-				timestamp: message.createdAt.toISOString(),
-				fields: [
-					{
-						name: "⚠ Count",
-						value: "" + strike.count,
-						inline: true,
-					},
-					...(mod
-						? [
-								{
-									name: "🛡 Moderator",
-									value: useMentions ? mod.toString() : mod.username,
-									inline: true,
-								},
-						  ]
-						: []),
-					...(user
-						? [
-								{
-									name: "👤 Target user",
-									value: useMentions ? user.toString() : user.username,
-									inline: true,
-								},
-						  ]
-						: []),
-					{
-						name: "⏲ Date",
-						value: time(new Date(strike.date), TimestampStyles.RelativeTime),
-						inline: true,
-					},
-				],
-			},
-		],
-	};
-}

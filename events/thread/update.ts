@@ -5,7 +5,7 @@ import {
 	sendClosedMessage,
 	sendOpenedMessage,
 } from "../../common/modmail.js";
-import warn from "../../common/warn.js";
+import warn from "../../common/punishments.js";
 import { badWordsAllowed, censor } from "../../common/automod.js";
 import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
 import { DATABASE_THREAD } from "../../common/database.js";

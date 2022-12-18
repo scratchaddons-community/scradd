@@ -1,7 +1,6 @@
 import { ApplicationCommandType, CommandInteractionOption, GuildMember } from "discord.js";
-import warn, { strikeDatabase } from "../common/warn.js";
+import warn, { getStrikeById, strikeDatabase } from "../common/punishments.js";
 import { censor, badWordsAllowed } from "../common/automod.js";
-import { getStrikeById } from "../commands/strikes.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import logError from "../util/logError.js";
 

@@ -1,6 +1,6 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
 import CONSTANTS from "./CONSTANTS.js";
-import warn, { PARTIAL_STRIKE_COUNT } from "./warn.js";
+import warn, { PARTIAL_STRIKE_COUNT } from "./punishments.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
 import client from "../client.js";

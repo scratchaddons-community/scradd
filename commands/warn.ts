@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import warn, { MUTE_LENGTHS, STRIKES_PER_MUTE, DEFAULT_STRIKES } from "../common/warn.js";
+import warn, { MUTE_LENGTHS, STRIKES_PER_MUTE, DEFAULT_STRIKES } from "../common/punishments.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { defineCommand } from "../common/types/command.js";
 
