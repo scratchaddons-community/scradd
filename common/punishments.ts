@@ -8,6 +8,7 @@ import {
 	ButtonStyle,
 	InteractionReplyOptions,
 	Snowflake,
+	MessageType,
 } from "discord.js";
 import client from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
@@ -182,16 +183,33 @@ export async function filterToStrike(filter: string) {
 		const info = robotopStrikes.find((strike) => strike.id + "" === filter);
 		if (strike && info) return { ...info, ...strike, id: info.id + "" };
 	}
-	const channel = await getLoggingThread("members");
+	const channel = filter.startsWith("0")
+		? CONSTANTS.channels.modlogs
+		: await getLoggingThread("members");
 	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
 
-	const messageFromId = await channel.messages.fetch(messageId).catch(() => {});
-	const message = messageFromId || (await channel.messages.fetch(filter).catch(() => {}));
+	const messageFromId = await channel?.messages.fetch(messageId).catch(() => {});
+	const message = messageFromId || (await channel?.messages.fetch(filter).catch(() => {}));
 	if (!message) return;
 
 	const strikeId = messageFromId ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
 	const strike = strikeDatabase.data.find((strike) => strike.id + "" === strikeId);
 	if (!strike) return;
+
+	if (
+		strikeId.startsWith("0") &&
+		message.type === MessageType.AutoModerationAction &&
+		message.embeds[0]
+	) {
+		return {
+			...strike,
+			mod: "643945264868098049",
+			reason:
+				message.embeds[0].fields.find((field) => field.name === "rule_name")?.value +
+				"\n>>> " +
+				message.embeds[0].description,
+		};
+	}
 
 	const { url } = message.attachments.first() || {};
 	return {

@@ -1,6 +1,10 @@
-const baseChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
 /** @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187) */
-export function convertBase(value: string, sourceBase: number, outBase: number, chars = baseChars) {
+export function convertBase(
+	value: string,
+	sourceBase: number,
+	outBase: number,
+	chars = convertBase.defaultChars,
+) {
 	const range = chars.split("");
 	if (sourceBase < 2 || sourceBase > range.length)
 		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
@@ -30,7 +34,9 @@ export function convertBase(value: string, sourceBase: number, outBase: number, 
 	return output || "0";
 }
 
-convertBase.MAX_BASE = baseChars.length;
+convertBase.defaultChars =
+	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
+convertBase.MAX_BASE = convertBase.defaultChars.length;
 
 /**
  * `x**y`
