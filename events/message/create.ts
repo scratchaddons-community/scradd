@@ -177,7 +177,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		const member = await getUserFromModmail(message.channel);
 
 		const useMentions =
-			userSettingsDatabase.data.find((settings) => member.id === settings.user)
+			userSettingsDatabase.data.find((settings) => member?.id === settings.user)
 				?.useMentions ?? false;
 
 		const messageToSend = await generateModmailMessage(message);
@@ -188,7 +188,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 		reactions++;
 
-		promises.push(member.send(messageToSend).then(...generateReactionFunctions(message)));
+		promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
 	}
 
 	// #upcoming-updates

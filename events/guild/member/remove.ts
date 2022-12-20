@@ -68,7 +68,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	);
 
 	if (databaseIndex === -1) allRoles.push({ user: member.id, ...memberRoles });
-	else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles };
+	else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles, user: member.id };
 
 	rolesDatabase.data = allRoles;
 };

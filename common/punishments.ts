@@ -98,7 +98,7 @@ export default async function warn(
 					} in ${escapeMarkdown(CONSTANTS.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
-					color: member.displayColor,
+					color: member?.displayColor,
 
 					footer: {
 						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
@@ -133,7 +133,7 @@ export default async function warn(
 
 	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		// Ban
-		await (member.bannable &&
+		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
@@ -152,7 +152,7 @@ export default async function warn(
 	const addedMuteLength = newMuteLength - oldMuteLength;
 
 	if (addedMuteLength) {
-		await (member.moderatable
+		await (member?.moderatable
 			? member.disableCommunicationUntil(
 					addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
 						Date.now(),
@@ -251,11 +251,11 @@ export async function getStrikeById(
 	}
 
 	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
-	const user = member.user || (await client.users.fetch(strike.user).catch(() => {}));
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
 	const mod =
 		isMod && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
-	const nick = member.displayName ?? user?.username;
+	const nick = member?.displayName ?? user?.username;
 	const useMentions =
 		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
 			?.useMentions ?? false;
@@ -282,10 +282,10 @@ export async function getStrikeById(
 
 		embeds: [
 			{
-				color: member.displayColor,
+				color: member?.displayColor,
 
 				author: nick
-					? { icon_url: (member || user).displayAvatarURL(), name: nick }
+					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
 				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${

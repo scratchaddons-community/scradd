@@ -77,35 +77,42 @@ const promises = [
 	}),
 	importScripts<Command>(path.resolve(dirname, "./commands")).then((commands) => {
 		client.application.commands.set(
-			commands.filter(Boolean).map(({ data }, name): ApplicationCommandData => {
-				const type = data.type ?? ApplicationCommandType.ChatInput;
-				return {
-					name:
-						type === ApplicationCommandType.ChatInput
-							? name
-							: name
-									.split("-")
-									.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1))
-									.join(" "),
+			commands
+				.filter((command): command is NonNullable<typeof command> => Boolean(command))
+				.map(({ data }, name): ApplicationCommandData => {
+					const type = data.type ?? ApplicationCommandType.ChatInput;
+					return {
+						name:
+							type === ApplicationCommandType.ChatInput
+								? name
+								: name
+										.split("-")
+										.map(
+											(word) => (word[0] ?? "").toUpperCase() + word.slice(1),
+										)
+										.join(" "),
 
-					description: data.description ?? "",
-					type,
+						description: data.description ?? "",
+						type,
 
-					defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
+						defaultMemberPermissions: data.restricted
+							? new PermissionsBitField()
+							: null,
 
-					options: data.options
-						? transformOptions(data.options)
-						: data.subcommands &&
-						  Object.entries(data.subcommands).map(([name, subcommand]) => ({
-								name,
-								description: subcommand.description,
+						options: data.options
+							? transformOptions(data.options)
+							: data.subcommands &&
+							  Object.entries(data.subcommands).map(([name, subcommand]) => ({
+									name,
+									description: subcommand.description,
 
-								options: subcommand.options && transformOptions(subcommand.options),
+									options:
+										subcommand.options && transformOptions(subcommand.options),
 
-								type: ApplicationCommandOptionType.Subcommand,
-						  })),
-				};
-			}),
+									type: ApplicationCommandOptionType.Subcommand,
+							  })),
+					};
+				}),
 			CONSTANTS.guild.id,
 		);
 	}),

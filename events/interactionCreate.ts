@@ -81,7 +81,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					);
 					const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 					if (
-						member.communicationDisabledUntil &&
+						member?.communicationDisabledUntil &&
 						Number(member.communicationDisabledUntil) > Date.now()
 					)
 						member.disableCommunicationUntil(Date.now());

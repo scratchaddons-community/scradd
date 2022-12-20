@@ -211,7 +211,8 @@ async function checkString(toCensor, message) {
 	}
 
 	const baseChannel = getBaseChannel(message.channel);
-	const parentChannel = baseChannel?.isDMBased() ? baseChannel : baseChannel?.parent;
+	const parentChannel =
+		baseChannel && baseChannel.isDMBased() ? baseChannel : baseChannel?.parent;
 
 	if (
 		!badWordsAllowed(message.channel) &&
@@ -455,15 +456,17 @@ export async function changeNickname(member, shouldWarn = true) {
 
 		if (safe.size > 0) {
 			promises.push(
-				...unsafe.flatMap((found) => [
-					setNickname(found, found.user.username),
+				...unsafe
+					.map((found) => [
+						setNickname(found, found.user.username),
 
-					found
-						.send(
-							`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
-						)
-						.catch(() => {}),
-				]),
+						found
+							.send(
+								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
+							)
+							.catch(() => {}),
+					])
+					.flat(),
 			);
 
 			if (safe.size > 1) {

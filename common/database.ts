@@ -106,7 +106,7 @@ export default class Database<Name extends keyof Databases> {
 			}
 
 			const data =
-				Boolean(this.#data?.length) && papaparse.unparse(Array.from(this.#data)).trim();
+				Boolean(this.#data?.length) && papaparse.unparse(Array.from(this.#data||[])).trim();
 
 			const files = data
 				? [{ attachment: Buffer.from(data, "utf-8"), name: `${this.name}.scradddb` }]
@@ -123,7 +123,7 @@ export default class Database<Name extends keyof Databases> {
 
 			const promise = this.message
 				.edit({ content: messageContent.join("\n").trim(), files })
-				.catch(async (error: unknown) => {
+				.catch(async (error) => {
 					await logError(error, `Database<${this.name}>#queueWrite()`);
 					if (error.code === RESTJSONErrorCodes.UnknownMessage) {
 						databases[this.name] = undefined;

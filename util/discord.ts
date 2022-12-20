@@ -203,8 +203,8 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			return `${
 				CONSTANTS.emojis.discord.pin
 			} ${message.author.toString()} pinned [a message](${
-				pinned.url || ""
-			}) to this channel. See all [pinned messages](${pinned.channel.url}).`;
+				pinned?.url || ""
+			}) to this channel. See all [pinned messages](${pinned?.channel.url}).`;
 		}
 		case MessageType.UserJoin: {
 			const formats = [
