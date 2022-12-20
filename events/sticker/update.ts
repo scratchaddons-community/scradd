@@ -1,6 +1,8 @@
 import difflib from "difflib";
+
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticker) {
@@ -22,22 +24,20 @@ const event: Event<"stickerUpdate"> = async function event(oldSticker, newSticke
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
+
 					name: "description.diff",
 				},
 			],
 		});
 	}
-	if (oldSticker.name !== newSticker.name) {
-		logs.push(` renamed to ${newSticker.name}`);
-	}
+	if (oldSticker.name !== newSticker.name) logs.push(` renamed to ${newSticker.name}`);
+
 	if (oldSticker.tags !== newSticker.tags) {
-		logs.push(
-			`’s related emoji ` + (newSticker.tags ? `set to ${newSticker.tags}` : "removed"),
-		);
+		logs.push(`’s related emoji ${newSticker.tags ? `set to ${newSticker.tags}` : "removed"}`);
 	}
 
 	await Promise.all(
-		logs.map((edit) => log(`✏ Sticker ${oldSticker.name}` + edit + `!`, "server")),
+		logs.map(async (edit) => await log(`✏ Sticker ${oldSticker.name}${edit}!`, "server")),
 	);
 };
 export default event;

@@ -1,37 +1,42 @@
 import {
-	ActionRow,
+	type ActionRow,
 	ButtonStyle,
 	Colors,
 	ComponentType,
-	Message,
+	type Message,
 	MessageType,
 	ChannelType,
-	Attachment,
-	User,
-	APIActionRowComponent,
-	APIEmbed,
-	APIMessageActionRowComponent,
-	Awaitable,
-	BaseMessageOptions,
-	EmojiIdentifierResolvable,
-	GuildTextBasedChannel,
-	InteractionReplyOptions,
-	MessageActionRowComponent,
-	MessageEditOptions,
-	Snowflake,
-	TextBasedChannel,
-	MessageActionRowComponentData,
-	ActionRowData,
+	type Attachment,
+	type User,
+	type APIActionRowComponent,
+	type APIEmbed,
+	type APIMessageActionRowComponent,
+	type Awaitable,
+	type BaseMessageOptions,
+	type EmojiIdentifierResolvable,
+	type GuildTextBasedChannel,
+	type InteractionReplyOptions,
+	type MessageActionRowComponent,
+	type MessageEditOptions,
+	type Snowflake,
+	type TextBasedChannel,
+	type MessageActionRowComponentData,
+	type ActionRowData,
 	GuildMember,
 	FormattingPatterns,
 	Invite,
 	MessageMentions,
-	AnyThreadChannel,
+	type AnyThreadChannel,
 } from "discord.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 
+/**
+ * @param message
+ * @param allowLanguage
+ */
 export async function extractMessageExtremities(
 	message: Message,
 	allowLanguage = true,
@@ -39,9 +44,7 @@ export async function extractMessageExtremities(
 	const { censor } = await import("../common/automod.js");
 	const embeds = [
 		...message.stickers
-			.filter((sticker) => {
-				return allowLanguage || !censor(sticker.name);
-			})
+			.filter((sticker) => allowLanguage || !censor(sticker.name))
 			.map((sticker) => ({ image: { url: sticker.url }, color: Colors.Blurple })),
 		...message.embeds
 			.filter((embed) => !embed.video)
@@ -72,21 +75,16 @@ export async function extractMessageExtremities(
 				if (newEmbed.footer?.text) {
 					const censored = censor(newEmbed.footer.text);
 
-					if (censored) {
-						newEmbed.footer.text = censored.censored;
-					}
+					if (censored) newEmbed.footer.text = censored.censored;
 				}
 
 				if (newEmbed.author) {
 					const censoredName = censor(newEmbed.author.name);
 					const censoredUrl = newEmbed.author.url && censor(newEmbed.author.url);
 
-					if (censoredName) {
-						newEmbed.author.name = censoredName.censored;
-					}
-					if (censoredUrl) {
-						newEmbed.author.url = "";
-					}
+					if (censoredName) newEmbed.author.name = censoredName.censored;
+
+					if (censoredUrl) newEmbed.author.url = "";
 				}
 
 				newEmbed.fields = (newEmbed.fields || []).map((field) => {
@@ -108,6 +106,7 @@ export async function extractMessageExtremities(
 	return { embeds, files: message.attachments.toJSON() };
 }
 
+/** @param message */
 export function getMessageJSON(message: Message) {
 	return {
 		components: message.components.map((component) => component.toJSON()),
@@ -122,7 +121,7 @@ export function getMessageJSON(message: Message) {
  *
  * @deprecated Too laggy.
  *
- * @param channel The channel to fetch messages from.
+ * @param channel - The channel to fetch messages from.
  *
  * @returns The messages.
  */
@@ -153,6 +152,7 @@ export async function getAllMessages<
  *
  * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1825-L1944)
  *
+ * @param replies
  * @param message - Message to convert.
  *
  * @returns Text representation of the message.
@@ -163,12 +163,11 @@ export async function messageToText(message: Message, replies = true): Promise<s
 	const linklessContent = message.webhookId ? message.content : escapeLinks(message.content);
 
 	const actualContent = message.flags.has("Loading")
-		? (Date.now() - +message.createdAt) / 1_000 / 60 > 15
-			? CONSTANTS.emojis.discord.error + " The application did not respond"
-			: CONSTANTS.emojis.discord.typing +
-			  " " +
-			  escapeMessage(message.author.username) +
-			  " is thinking..."
+		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
+			? `${CONSTANTS.emojis.discord.error} The application did not respond`
+			: `${CONSTANTS.emojis.discord.typing} ${escapeMessage(
+					message.author.username,
+			  )} is thinking...`
 		: message.content;
 
 	switch (message.type) {
@@ -176,47 +175,36 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			return linklessContent;
 		}
 		case MessageType.RecipientAdd: {
-			return (
-				CONSTANTS.emojis.discord.add +
-				` ${message.author.toString()} added ${
-					message.mentions.users.first()?.toString() ?? ""
-				} to the ${message.guild ? "thread" : "group"}.`
-			);
+			return `${CONSTANTS.emojis.discord.add} ${message.author.toString()} added ${
+				message.mentions.users.first()?.toString() ?? ""
+			} to the ${message.guild ? "thread" : "group"}.`;
 		}
 		case MessageType.RecipientRemove: {
-			return (
-				CONSTANTS.emojis.discord.remove +
-				` ${message.author.toString()} removed ${
-					message.mentions.users.first()?.toString() ?? ""
-				} from the ${message.guild ? "thread" : "group"}.`
-			);
+			return `${CONSTANTS.emojis.discord.remove} ${message.author.toString()} removed ${
+				message.mentions.users.first()?.toString() ?? ""
+			} from the ${message.guild ? "thread" : "group"}.`;
 		}
 		case MessageType.ChannelNameChange: {
-			return (
-				CONSTANTS.emojis.discord.edit +
-				` ${message.author.toString()} changed the ${
-					message.channel.isThread() &&
-					message.channel.parent?.type === ChannelType.GuildForum
-						? "post title"
-						: "channel name"
-				}: **${escapeMessage(message.content)}**`
-			);
+			return `${CONSTANTS.emojis.discord.edit} ${message.author.toString()} changed the ${
+				message.channel.isThread() &&
+				message.channel.parent?.type === ChannelType.GuildForum
+					? "post title"
+					: "channel name"
+			}: **${escapeMessage(message.content)}**`;
 		}
 		case MessageType.ChannelIconChange: {
-			return (
-				CONSTANTS.emojis.discord.edit +
-				` ${message.author.toString()} changed the channel icon.`
-			);
+			return `${
+				CONSTANTS.emojis.discord.edit
+			} ${message.author.toString()} changed the channel icon.`;
 		}
 		case MessageType.ChannelPinnedMessage: {
 			const pinned = await message.fetchReference().catch(() => {});
 
-			return (
-				CONSTANTS.emojis.discord.pin +
-				` ${message.author.toString()} pinned [a message](${
-					pinned?.url || ""
-				}) to this channel. See all [pinned messages](${pinned?.channel.url}).`
-			);
+			return `${
+				CONSTANTS.emojis.discord.pin
+			} ${message.author.toString()} pinned [a message](${
+				pinned.url || ""
+			}) to this channel. See all [pinned messages](${pinned.channel.url}).`;
 		}
 		case MessageType.UserJoin: {
 			const formats = [
@@ -235,107 +223,85 @@ export async function messageToText(message: Message, replies = true): Promise<s
 				`Yay you made it, ${message.author.toString()}!`,
 			];
 
-			return (
-				CONSTANTS.emojis.discord.add + ` ${formats[+message.createdAt % formats.length]}`
-			);
+			return `${CONSTANTS.emojis.discord.add} ${
+				formats[Number(message.createdAt) % formats.length]
+			}`;
 		}
 		case MessageType.GuildBoost: {
-			return (
-				CONSTANTS.emojis.discord.boost +
-				` ${message.author.toString()} just boosted the server${
-					message.content ? ` **${escapeMessage(message.content)}** times` : ""
-				}!`
-			);
+			return `${
+				CONSTANTS.emojis.discord.boost
+			} ${message.author.toString()} just boosted the server${
+				message.content ? ` **${escapeMessage(message.content)}** times` : ""
+			}!`;
 		}
 		case MessageType.GuildBoostTier1: {
-			return (
-				CONSTANTS.emojis.discord.boost +
-				` ${message.author.toString()} just boosted the server${
-					message.content ? ` **${escapeMessage(message.content)}** times` : ""
-				}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 1**!`
-			);
+			return `${
+				CONSTANTS.emojis.discord.boost
+			} ${message.author.toString()} just boosted the server${
+				message.content ? ` **${escapeMessage(message.content)}** times` : ""
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 1**!`;
 		}
 		case MessageType.GuildBoostTier2: {
-			return (
-				CONSTANTS.emojis.discord.boost +
-				` ${message.author.toString()} just boosted the server${
-					message.content ? ` **${escapeMessage(message.content)}** times` : ""
-				}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 2**!`
-			);
+			return `${
+				CONSTANTS.emojis.discord.boost
+			} ${message.author.toString()} just boosted the server${
+				message.content ? ` **${escapeMessage(message.content)}** times` : ""
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 2**!`;
 		}
 		case MessageType.GuildBoostTier3: {
-			return (
-				CONSTANTS.emojis.discord.boost +
-				` ${message.author.toString()} just boosted the server${
-					message.content ? ` **${escapeMessage(message.content)}** times` : ""
-				}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 3**!`
-			);
+			return `${
+				CONSTANTS.emojis.discord.boost
+			} ${message.author.toString()} just boosted the server${
+				message.content ? ` **${escapeMessage(message.content)}** times` : ""
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 3**!`;
 		}
 		case MessageType.ChannelFollowAdd: {
-			return (
-				CONSTANTS.emojis.discord.add +
-				` ${message.author.toString()} has added **${escapeMessage(
-					message.content,
-				)}** to this channel. Its most important updates will show up here.`
-			);
+			return `${
+				CONSTANTS.emojis.discord.add
+			} ${message.author.toString()} has added **${escapeMessage(
+				message.content,
+			)}** to this channel. Its most important updates will show up here.`;
 		}
 		// if self.type is MessageType.guild_stream:
 		//     # the author will be a Member
 		//     return f'{self.author.name} is live! Now streaming {self.author.activity.name}'  # type: ignore
 		case MessageType.GuildDiscoveryDisqualified: {
-			return (
-				CONSTANTS.emojis.discord.no +
-				" This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
-			);
+			return `${CONSTANTS.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
 		}
 		case MessageType.GuildDiscoveryRequalified: {
-			return (
-				CONSTANTS.emojis.discord.yes +
-				" This server is eligible for Server Discovery again and has been automatically relisted!"
-			);
+			return `${CONSTANTS.emojis.discord.yes} This server is eligible for Server Discovery again and has been automatically relisted!`;
 		}
 		case MessageType.GuildDiscoveryGracePeriodInitialWarning: {
-			return (
-				CONSTANTS.emojis.discord.warning +
-				" This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery."
-			);
+			return `${CONSTANTS.emojis.discord.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
 		}
 		case MessageType.GuildDiscoveryGracePeriodFinalWarning: {
-			return (
-				CONSTANTS.emojis.discord.warning +
-				" This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery."
-			);
+			return `${CONSTANTS.emojis.discord.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
 		}
 		case MessageType.ThreadCreated: {
-			return (
-				CONSTANTS.emojis.discord.thread +
-				` ${message.author.toString()} started a thread: **${escapeMessage(
-					message.content,
-				)}** See all **threads**.`
-			);
+			return `${
+				CONSTANTS.emojis.discord.thread
+			} ${message.author.toString()} started a thread: **${escapeMessage(
+				message.content,
+			)}** See all **threads**.`;
 		}
 		case MessageType.Reply: {
 			if (!replies) return linklessContent;
 			const repliedMessage = await message.fetchReference().catch(() => {});
 
-			if (!repliedMessage)
-				return (
-					`*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n` +
-					linklessContent
-				);
+			if (!repliedMessage) {
+				return `*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n${linklessContent}`;
+			}
 
 			const cleanContent = await messageToText(repliedMessage, false);
 
-			return (
-				`*[Replying to](${repliedMessage.url}) ${repliedMessage.author.toString()}${
-					cleanContent ? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "*"
-				}\n\n` + linklessContent
-			);
+			return `*[Replying to](${repliedMessage.url}) ${repliedMessage.author.toString()}${
+				cleanContent ? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "*"
+			}\n\n${linklessContent}`;
 		}
 		case MessageType.ThreadStarterMessage: {
 			const reference = await message.fetchReference().catch(() => {});
 
-			// the resolved message for the reference will be a Message
+			// The resolved message for the reference will be a Message
 			return reference
 				? (await messageToText(reference, replies)) || actualContent
 				: `${CONSTANTS.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
@@ -360,22 +326,42 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			)}**:*\n${actualContent}`;
 		}
 		case MessageType.Call: {
-			return CONSTANTS.emojis.discord.call + `${message.author.toString()} started a call.`;
+			return `${CONSTANTS.emojis.discord.call}${message.author.toString()} started a call.`;
 		}
 		default: {
 			// Fallback for unknown message types
 			// TODO: automoderationaction
-			throw new TypeError("Unknown message type: " + message.type);
+			throw new TypeError(`Unknown message type: ${message.type}`);
 		}
 	}
 }
 
+/**
+ * @param message
+ * @param reactions
+ */
 export async function reactAll(message: Message, reactions: Readonly<EmojiIdentifierResolvable[]>) {
-	for (const reaction of reactions) {
-		await message.react(reaction);
-	}
+	for (const reaction of reactions) await message.react(reaction);
 }
 
+/**
+ * @param array
+ * @param toString
+ * @param reply
+ * @param options
+ * @param options.title
+ * @param options.user
+ * @param options.singular
+ * @param options.plural
+ * @param options.failMessage
+ * @param options.formatFromUser
+ * @param options.ephemeral
+ * @param options.rawOffset
+ * @param options.itemsPerPage
+ * @param options.count
+ * @param options.generateComponents
+ * @param options.disableCustomComponents
+ */
 export async function paginate<Item, FormatFromUser extends boolean, Interaction extends boolean>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
@@ -457,6 +443,7 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 				? [
 						{
 							type: ComponentType.ActionRow,
+
 							components: [
 								{
 									type: ComponentType.Button,
@@ -489,20 +476,24 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 
 			embeds: [
 				{
-					title: title,
+					title,
 					description: content,
+
 					footer: {
 						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
 							CONSTANTS.footerSeperator
 						}${array.length} ${array.length === 1 ? singular : plural}`,
 					},
+
 					author: formatFromUser
 						? {
 								icon_url: user.displayAvatarURL(),
+
 								name:
 									user instanceof GuildMember ? user.displayName : user.username,
 						  }
 						: undefined,
+
 					color: formatFromUser
 						? user instanceof GuildMember
 							? user.displayColor
@@ -510,7 +501,8 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 						: CONSTANTS.themeColor,
 				},
 			],
-			ephemeral: !!ephemeral,
+
+			ephemeral: Boolean(ephemeral),
 			fetchReply: true,
 		};
 	}
@@ -527,7 +519,7 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 	});
 
 	collector
-		?.on("collect", async (buttonInteraction) => {
+		.on("collect", async (buttonInteraction) => {
 			if (buttonInteraction.customId === nextId) offset += itemsPerPage;
 			else offset -= itemsPerPage;
 
@@ -542,31 +534,34 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 					disableCustomComponents || !pagination
 						? disableComponents(message.components)
 						: [...disableComponents([pagination]), ...rest],
+
 				fetchReply: true,
 			});
 		});
 }
 
+/** @param rows */
 export function disableComponents(
 	rows: ActionRow<MessageActionRowComponent>[],
 ): APIActionRowComponent<APIMessageActionRowComponent>[] {
 	return rows.map(({ components }) => ({
 		type: ComponentType.ActionRow,
-		components: components.map((component) => {
-			return {
-				...component.data,
-				disabled:
-					component.type === ComponentType.Button
-						? component.style !== ButtonStyle.Link
-						: true,
-			};
-		}),
+
+		components: components.map((component) => ({
+			...component.data,
+
+			disabled:
+				component.type === ComponentType.Button
+					? component.style !== ButtonStyle.Link
+					: true,
+		})),
 	}));
 }
 
-export function getBaseChannel<T extends null | undefined | TextBasedChannel>(
+/** @param channel */
+export function getBaseChannel<T extends TextBasedChannel | null | undefined>(
 	channel: T,
-): T extends undefined | null
+): T extends null | undefined
 	? undefined
 	: T extends AnyThreadChannel
 	? Exclude<GuildTextBasedChannel, AnyThreadChannel> | undefined

@@ -1,14 +1,15 @@
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 	if (newRole.guild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
-	if (oldRole.hexColor !== newRole.hexColor) {
+	if (oldRole.hexColor !== newRole.hexColor)
 		logs.push(`’s role color set to ${newRole.hexColor}`);
-	}
+
 	if (oldRole.hoist !== newRole.hoist) {
 		logs.push(
 			` set to display role members ${
@@ -16,27 +17,25 @@ const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 			} online members`,
 		);
 	}
-	if (oldRole.managed !== newRole.managed) {
+	if (oldRole.managed !== newRole.managed)
 		logs.push(` made ${newRole.managed ? "" : "un"}assignable`);
-	}
-	if (oldRole.mentionable !== newRole.mentionable) {
+
+	if (oldRole.mentionable !== newRole.mentionable)
 		logs.push(` set to ${newRole.mentionable ? "" : "dis"}allow anyone to @mention this role`);
-	}
-	if (oldRole.name !== newRole.name) {
-		logs.push(` renamed to ${newRole.name}`);
-	}
-	if (oldRole.position !== newRole.position) {
-		logs.push(` moved to position ${newRole.position}`);
-	}
+
+	if (oldRole.name !== newRole.name) logs.push(` renamed to ${newRole.name}`);
+
+	if (oldRole.position !== newRole.position) logs.push(` moved to position ${newRole.position}`);
+
 	if (oldRole.iconURL() !== newRole.iconURL() || oldRole.unicodeEmoji !== newRole.unicodeEmoji) {
 		const iconURL = newRole.iconURL({ size: 128, forceStatic: false });
 		const response = iconURL && (await fetch(iconURL));
 		await log(
 			`✏ Role ${newRole.toString()}’s icon was ${
 				response
-					? `changed`
+					? "changed"
 					: newRole.unicodeEmoji
-					? "set to " + newRole.unicodeEmoji
+					? `set to ${newRole.unicodeEmoji}`
 					: "removed"
 			}!`,
 			"server",
@@ -45,7 +44,7 @@ const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 	}
 
 	await Promise.all(
-		logs.map((edit) => log(`✏ Role ${newRole.toString()}` + edit + `!`, "server")),
+		logs.map(async (edit) => await log(`✏ Role ${newRole.toString()}${edit}!`, "server")),
 	);
 };
 export default event;

@@ -1,4 +1,5 @@
 import logError from "../util/logError.js";
+
 import type Event from "../common/types/event";
 
 const event: Event<"invalidated"> = async function event() {

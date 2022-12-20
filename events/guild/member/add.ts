@@ -1,10 +1,12 @@
-import { Collection, Snowflake } from "discord.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import { Collection, type Snowflake } from "discord.js";
+
 import { changeNickname } from "../../../common/automod.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/logging.js";
 import { nth } from "../../../util/numbers.js";
-import type Event from "../../../common/types/event";
 import { rolesDatabase } from "./remove.js";
+
+import type Event from "../../../common/types/event";
 
 const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
@@ -30,20 +32,21 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	];
 
 	await CONSTANTS.channels.welcome?.send(
-		CONSTANTS.emojis.misc.join +
-			" " +
-			(greetings[Math.floor(Math.random() * greetings.length)] || "") +
-			(`${CONSTANTS.guild.memberCount}`.includes("87")
+		`${CONSTANTS.emojis.misc.join} ${
+			greetings[Math.floor(Math.random() * greetings.length)] || ""
+		}${
+			String(CONSTANTS.guild.memberCount).includes("87")
 				? " (WAS THAT THE BITE OF 87?!?!?)"
-				: ""),
+				: ""
+		}`,
 	);
 
 	await changeNickname(member, false);
 
-	const inviters = (await CONSTANTS.guild.invites.fetch()).reduce((acc, invite) => {
+	const inviters = (await CONSTANTS.guild.invites.fetch()).reduce((accumulator, invite) => {
 		const inviter = invite.inviter?.id || "";
-		acc.set(inviter, (acc.get(inviter) || 0) + (invite.uses || 0));
-		return acc;
+		accumulator.set(inviter, (accumulator.get(inviter) || 0) + (invite.uses || 0));
+		return accumulator;
 	}, new Collection<Snowflake, number>());
 	inviters.map(async (count, user) => {
 		if (count < 20) return;

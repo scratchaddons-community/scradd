@@ -1,5 +1,6 @@
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"emojiUpdate"> = async function event(oldEmoji, newEmoji) {

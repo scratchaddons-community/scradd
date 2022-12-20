@@ -1,8 +1,9 @@
 import CONSTANTS from "../../../common/CONSTANTS.js";
+import Database from "../../../common/database.js";
 import log from "../../../common/logging.js";
 import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
+
 import type Event from "../../../common/types/event";
-import Database from "../../../common/database.js";
 
 export const rolesDatabase = new Database("roles");
 await rolesDatabase.init();
@@ -39,9 +40,9 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 
 	const promises = [
 		CONSTANTS.channels.welcome?.send(
-			CONSTANTS.emojis.misc[banned ? "ban" : "leave"] +
-				" " +
-				byes[Math.floor(Math.random() * byes.length)],
+			`${CONSTANTS.emojis.misc[banned ? "ban" : "leave"]} ${
+				byes[Math.floor(Math.random() * byes.length)]
+			}`,
 		),
 		getThreadFromMember(member).then(async (thread) => {
 			if (thread) closeModmail(thread, member.user, "Member left");
@@ -49,7 +50,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	];
 
 	await Promise.all(promises);
-	const allRoles = [...rolesDatabase.data];
+	const allRoles = Array.from(rolesDatabase.data);
 	const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
 
 	const memberRoles = Object.fromEntries(
@@ -66,8 +67,8 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			.map((role) => [role.id, true] as const),
 	);
 
-	if (databaseIndex === -1) allRoles.push(Object.assign({ user: member.id }, memberRoles));
-	else allRoles[databaseIndex] = Object.assign({}, allRoles[databaseIndex], memberRoles);
+	if (databaseIndex === -1) allRoles.push({ user: member.id, ...memberRoles });
+	else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles };
 
 	rolesDatabase.data = allRoles;
 };

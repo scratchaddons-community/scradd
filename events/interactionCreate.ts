@@ -1,19 +1,27 @@
-import { ApplicationCommandType, CommandInteractionOption, GuildMember, User } from "discord.js";
-import warn, { filterToStrike, getStrikeById, strikeDatabase } from "../common/punishments.js";
-import { censor, badWordsAllowed } from "../common/automod.js";
-import CONSTANTS from "../common/CONSTANTS.js";
-import logError from "../util/logError.js";
-import { importScripts } from "../util/files.js";
 import path from "path";
 import url from "url";
+
+import {
+	ApplicationCommandType,
+	type CommandInteractionOption,
+	GuildMember,
+	User,
+} from "discord.js";
+
+import client from "../client.js";
+import { edit } from "../commands/edit-message.js";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
-import { edit } from "../commands/edit-message.js";
-import type Event from "../common/types/event";
-import type Command from "../common/types/command.js";
+import { censor, badWordsAllowed } from "../common/automod.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
-import client from "../client.js";
+import warn, { filterToStrike, getStrikeById, strikeDatabase } from "../common/punishments.js";
 import giveXp, { DEFAULT_XP } from "../common/xp.js";
+import { importScripts } from "../util/files.js";
+import logError from "../util/logError.js";
+
+import type Command from "../common/types/command.js";
+import type Event from "../common/types/event";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -21,13 +29,14 @@ const commands = importScripts<Command>(path.resolve(dirname, "../commands"));
 
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (interaction.isAutocomplete()) {
-		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
+		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
 		const command = (await commands).get(interaction.command?.name || "");
 
-		if (!command || !("autocomplete" in command))
+		if (!command || !("autocomplete" in command)) {
 			throw new ReferenceError(
 				`Command \`${interaction.command?.name}\` autocomplete handler not found`,
 			);
+		}
 
 		return await command.autocomplete?.(interaction);
 	}
@@ -45,17 +54,19 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 
 				case "remove_strike": {
 					const strike = id && (await filterToStrike(id));
-					if (!strike)
-						return interaction.reply({
+					if (!strike) {
+						return await interaction.reply({
 							ephemeral: true,
 							content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
 						});
+					}
 
-					if (strike.removed)
-						return interaction.reply({
+					if (strike.removed) {
+						return await interaction.reply({
 							ephemeral: true,
 							content: `${CONSTANTS.emojis.statuses.no} That strike was already removed!`,
 						});
+					}
 
 					strikeDatabase.data = strikeDatabase.data.map((strike) =>
 						id === strike.id ? { ...strike, removed: true } : strike,
@@ -70,8 +81,8 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					);
 					const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 					if (
-						member?.communicationDisabledUntil &&
-						+member.communicationDisabledUntil > Date.now()
+						member.communicationDisabledUntil &&
+						Number(member.communicationDisabledUntil) > Date.now()
 					)
 						member.disableCommunicationUntil(Date.now());
 					const { url } = await log(
@@ -81,34 +92,40 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						"members",
 					);
 					if (user instanceof User) giveXp(user, url, strike.count * DEFAULT_XP);
-					if (typeof user === "object")
+					if (typeof user === "object") {
 						await user.send(
 							`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
 						);
+					}
 				}
 			}
 		}
 		if (interaction.isModalSubmit()) {
-			if (interaction.customId.startsWith("guessModal."))
-				return await guessAddon(interaction);
-
-			if (interaction.customId === "say")
-				return await say(interaction, interaction.fields.getTextInputValue("message"));
-
-			if (interaction.customId.startsWith("edit.")) return await edit(interaction);
-		}
-		if (interaction.isStringSelectMenu()) {
-			if (interaction.customId === "selectStrike") {
-				if (!(interaction.member instanceof GuildMember))
-					throw new TypeError("interaction.member is not a GuildMember");
-
-				const id = interaction.values[0];
-				if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
+			if (interaction.customId.startsWith("guessModal.")) {
+				await guessAddon(interaction);
+				return;
 			}
+
+			if (interaction.customId === "say") {
+				await say(interaction, interaction.fields.getTextInputValue("message"));
+				return;
+			}
+
+			if (interaction.customId.startsWith("edit.")) {
+				await edit(interaction);
+				return;
+			}
+		}
+		if (interaction.isStringSelectMenu() && interaction.customId === "selectStrike") {
+			if (!(interaction.member instanceof GuildMember))
+				throw new TypeError("interaction.member is not a GuildMember");
+
+			const id = interaction.values[0];
+			if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
 		}
 
 		if (!interaction.isCommand()) return;
-		if (!interaction.inGuild()) throw new TypeError(`Used command in DM`);
+		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
 
 		const command = (await commands).get(
 			(!interaction.command || interaction.command.type === ApplicationCommandType.ChatInput
@@ -140,7 +157,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						interaction.member instanceof GuildMember
 							? interaction.member
 							: interaction.user,
-						`Watch your language!`,
+						"Watch your language!",
 						censored.strikes,
 						`Used command:\n${interaction.toString()}`,
 					),
@@ -160,7 +177,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					: `/${interaction.command?.name}`
 				: `${interaction.constructor.name}: ${interaction.customId}`,
 		);
-		if (interaction.deferred && +interaction.createdAt - Date.now() < 900_000) {
+		if (interaction.deferred && Number(interaction.createdAt) - Date.now() < 900_000) {
 			return await interaction.editReply({
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 				embeds: [],
@@ -169,7 +186,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			});
 		}
 
-		if (!interaction.replied && +interaction.createdAt - Date.now() > 3_000) return;
+		if (!interaction.replied && Number(interaction.createdAt) - Date.now() > 3000) return;
 
 		await interaction[interaction.replied ? "followUp" : "reply"]({
 			ephemeral: true,
@@ -178,11 +195,12 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 	}
 };
 
+/** @param options */
 function censorOptions(options: readonly CommandInteractionOption[]) {
 	let strikes = 0,
 		isBad = false,
 		words: string[] = [];
-	options.forEach((option) => {
+	for (const option of options) {
 		if (typeof option.value === "string") {
 			const censored = censor(option.value);
 			if (censored) {
@@ -199,7 +217,7 @@ function censorOptions(options: readonly CommandInteractionOption[]) {
 				words.push(...censored.words);
 			}
 		}
-	});
+	}
 
 	return { isBad, strikes, words };
 }

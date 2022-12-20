@@ -1,5 +1,6 @@
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"roleCreate"> = async function event(role) {

@@ -35,6 +35,16 @@ export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Mes
 
 export type Option = { description: string; required?: boolean } & (
 	| {
+			type: ApplicationCommandOptionType.Channel;
+			channelTypes?: ChannelType[];
+			choices?: never;
+			min?: never;
+			max?: never;
+			minLength?: never;
+			maxLength?: never;
+			autocomplete?: never;
+	  }
+	| {
 			type: typeof ApplicationCommandOptionType[
 				| "Attachment"
 				| "Boolean"
@@ -43,16 +53,6 @@ export type Option = { description: string; required?: boolean } & (
 				| "User"];
 			choices?: never;
 			channelTypes?: never;
-			min?: never;
-			max?: never;
-			minLength?: never;
-			maxLength?: never;
-			autocomplete?: never;
-	  }
-	| {
-			type: ApplicationCommandOptionType.Channel;
-			channelTypes?: ChannelType[];
-			choices?: never;
 			min?: never;
 			max?: never;
 			minLength?: never;
@@ -75,19 +75,19 @@ export type Option = { description: string; required?: boolean } & (
 			min?: never;
 			max?: never;
 	  } & (
-			| { minLength?: number; maxLength?: number; autocomplete?: true; choices?: never }
 			| {
-					choices?: Record<string, string>;
+					choices?: { [key: string]: string };
 					minLength?: never;
 					maxLength?: never;
 					autocomplete?: never;
 			  }
+			| { minLength?: number; maxLength?: number; autocomplete?: true; choices?: never }
 	  ))
 );
 
 type OptionToType<O extends Option> = {
 	[ApplicationCommandOptionType.Attachment]: Attachment;
-	[ApplicationCommandOptionType.Mentionable]: User | GuildMember | Role;
+	[ApplicationCommandOptionType.Mentionable]: GuildMember | Role | User;
 	[ApplicationCommandOptionType.Role]: Role;
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: User;
@@ -98,13 +98,13 @@ type OptionToType<O extends Option> = {
 		? string
 		: Extract<keyof O["choices"], string>;
 }[O["type"]];
-type OptionsToType<O extends Record<string, Option>> = {
+type OptionsToType<O extends { [key: string]: Option }> = {
 	[Key in keyof O]: O[Key]["required"] extends true
 		? OptionToType<O[Key]>
 		: OptionToType<O[Key]> | undefined;
 };
 
-export interface ChatInputCommand<O extends Record<string, Option> = {}> {
+export interface ChatInputCommand<O extends { [key: string]: Option } = {}> {
 	data: {
 		type?: never;
 		/**
@@ -113,7 +113,7 @@ export interface ChatInputCommand<O extends Record<string, Option> = {}> {
 		 *
 		 * @default true
 		 */
-		censored?: false | "channel";
+		censored?: "channel" | false;
 		description: string;
 		restricted?: true;
 		options?: O;
@@ -122,13 +122,13 @@ export interface ChatInputCommand<O extends Record<string, Option> = {}> {
 
 	/** A function that processes interactions to this command. */
 	interaction: (
-		interaction: ChatInputCommandInteraction<"raw" | "cached">,
+		interaction: ChatInputCommandInteraction<"cached" | "raw">,
 		// options: OptionsToType<O>,
 	) => any;
-	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
+	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }
 
-export interface ChatInputSubcommands<O extends Record<string, Record<string, Option>>> {
+export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]: Option } }> {
 	data: {
 		type?: never;
 		/**
@@ -137,7 +137,7 @@ export interface ChatInputSubcommands<O extends Record<string, Record<string, Op
 		 *
 		 * @default true
 		 */
-		censored?: false | "channel";
+		censored?: "channel" | false;
 		description: string;
 		restricted?: true;
 
@@ -153,7 +153,7 @@ export interface ChatInputSubcommands<O extends Record<string, Record<string, Op
 
 	/** A function that processes interactions to this command. */
 	interaction: (
-		interaction: ChatInputCommandInteraction<"raw" | "cached">,
+		interaction: ChatInputCommandInteraction<"cached" | "raw">,
 		// options: {
 		// 	[S in keyof O]: {
 		// 		subcommand: S;
@@ -161,11 +161,11 @@ export interface ChatInputSubcommands<O extends Record<string, Record<string, Op
 		// 	};
 		// }[keyof O],
 	) => any;
-	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
+	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }
 
 export interface ChatInputSubcommandGroups<
-	O extends Record<string, Record<string, Record<string, Option>>>,
+	O extends { [key: string]: { [key: string]: { [key: string]: Option } } },
 	Subcommand extends keyof O,
 	SubcommandGroup extends keyof O[Subcommand],
 > {
@@ -177,7 +177,7 @@ export interface ChatInputSubcommandGroups<
 		 *
 		 * @default true
 		 */
-		censored?: false | "channel";
+		censored?: "channel" | false;
 		description: string;
 		restricted?: true;
 		options?: never;
@@ -198,7 +198,7 @@ export interface ChatInputSubcommandGroups<
 
 	/** A function that processes interactions to this command. */
 	interaction: (
-		interaction: ChatInputCommandInteraction<"raw" | "cached">,
+		interaction: ChatInputCommandInteraction<"cached" | "raw">,
 		options: {
 			[SG in SubcommandGroup]: {
 				[S in Subcommand]: {
@@ -209,32 +209,33 @@ export interface ChatInputSubcommandGroups<
 			}[Subcommand];
 		}[SubcommandGroup],
 	) => any;
-	autocomplete?: (interaction: AutocompleteInteraction<"raw" | "cached">) => any;
+	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }
 
 type Command =
+	| ChatInputCommand<{ [key: string]: Option }>
+	| ChatInputSubcommands<{ [key: string]: { [key: string]: Option } }>
 	| ContextMenuCommand<typeof ApplicationCommandType["Message" | "User"]>
-	| ChatInputCommand<Record<string, Option>>
-	| ChatInputSubcommands<Record<string, Record<string, Option>>>
 	| undefined;
 export default Command;
 
-export function defineCommand<O extends Record<string, Option> = {}>(
+export function defineCommand<O extends { [key: string]: Option } = {}>(
 	command: ChatInputCommand<O>,
 ): ChatInputCommand<O>;
 export function defineCommand<T extends typeof ApplicationCommandType["Message" | "User"]>(
 	command: ContextMenuCommand<T>,
 ): ContextMenuCommand<T>;
-export function defineCommand<O extends Record<string, Record<string, Option>>>(
+export function defineCommand<O extends { [key: string]: { [key: string]: Option } }>(
 	command: ChatInputSubcommands<O>,
 ): ChatInputSubcommands<O>;
 export function defineCommand<
-	O extends Record<string, Record<string, Record<string, Option>>> = {},
+	O extends { [key: string]: { [key: string]: { [key: string]: Option } } } = {},
 	Subcommand extends keyof O = never,
 	SubcommandGroup extends keyof O[Subcommand] = never,
 >(
 	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
 ): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>;
+/** @param command */
 export function defineCommand<T extends any>(command: T): T {
 	return command;
 }

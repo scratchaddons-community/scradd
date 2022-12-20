@@ -1,7 +1,9 @@
 import { AssertionError } from "assert";
+
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
-import { sanitizePath } from "./util/files.js";
+
 import pkg from "./package.json" assert { type: "json" };
+import { sanitizePath } from "./util/files.js";
 
 const Handler = new Client({
 	allowedMentions: { parse: ["users"], repliedUser: true },
@@ -35,12 +37,11 @@ const Handler = new Client({
 		Partials.GuildScheduledEvent,
 		Partials.ThreadMember,
 	],
+
 	ws: { large_threshold: 0 },
 });
 
-const readyPromise: Promise<Client<true>> = new Promise((resolve) =>
-	Handler.once("ready", resolve),
-);
+const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
 
 Handler.on("debug", (message) => {
 	if (
@@ -53,11 +54,11 @@ Handler.on("debug", (message) => {
 		throw error;
 	})
 	.on("warn", process.emitWarning)
-	.rest.on("invalidRequestWarning", (data) =>
+	.rest.on("invalidRequestWarning", (data) => {
 		process.emitWarning(
 			`invalidRequestWarning: ${data.count} requests; ${data.remainingTime}ms left`,
-		),
-	)
+		);
+	})
 	.on("restDebug", (message) => {
 		if (
 			process.env.NODE_ENV !== "production" ||
@@ -70,11 +71,13 @@ await Handler.login(process.env.BOT_TOKEN);
 
 const client = await readyPromise;
 
-console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
+console.log(
+	`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`,
+);
 
 if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production")) {
 	throw new AssertionError({
-		actual: process.argv.map((arg) => sanitizePath(arg)),
+		actual: process.argv.map((argument) => sanitizePath(argument)),
 		expected: "--production",
 		operator: ".includes",
 		message: "Refusing to run on prod without --production flag",

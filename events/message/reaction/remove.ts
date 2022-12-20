@@ -1,6 +1,7 @@
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
+
 import type Event from "../../../common/types/event";
 
 const event: Event<"messageReactionRemove"> = async function event(reaction, user) {

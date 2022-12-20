@@ -1,3 +1,4 @@
+import difflib from "difflib";
 import {
 	ChannelType,
 	escapeMarkdown,
@@ -5,10 +6,11 @@ import {
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
 } from "discord.js";
-import log from "../../common/logging.js";
-import difflib from "difflib";
-import type Event from "../../common/types/event";
+
 import CONSTANTS from "../../common/CONSTANTS.js";
+import log from "../../common/logging.js";
+
+import type Event from "../../common/types/event";
 
 const event: Event<"channelUpdate"> = async function event(oldChannel, newChannel) {
 	if (
@@ -19,10 +21,10 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 		return;
 	const edits = [];
 	if (oldChannel.name !== newChannel.name)
-		edits.push(" was renamed to " + escapeMarkdown(newChannel.name));
-	if (oldChannel.type !== newChannel.type)
+		edits.push(` was renamed to ${escapeMarkdown(newChannel.name)}`);
+	if (oldChannel.type !== newChannel.type) {
 		edits.push(
-			" was made into a" +
+			` was made into a${
 				{
 					[ChannelType.GuildText]: " text",
 					[ChannelType.GuildVoice]: " voice",
@@ -30,40 +32,40 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 					[ChannelType.GuildAnnouncement]: "n announcement",
 					[ChannelType.GuildStageVoice]: " stage",
 					[ChannelType.GuildForum]: " forum",
-				}[newChannel.type] +
-				" channel",
+				}[newChannel.type]
+			} channel`,
 		);
+	}
 
 	if (oldChannel.rawPosition !== newChannel.rawPosition)
-		edits.push(" was moved to position " + newChannel.rawPosition);
+		edits.push(` was moved to position ${newChannel.rawPosition}`);
 
 	if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
 		oldChannel.bitrate !== newChannel.bitrate &&
-			edits.push("’s bitrate was set to " + newChannel.bitrate + "kbps");
+			edits.push(`’s bitrate was set to ${newChannel.bitrate}kbps`);
 
 		oldChannel.userLimit !== newChannel.userLimit &&
 			edits.push(
-				"’s user limit was " + newChannel.userLimit
-					? "set to " + newChannel.userLimit + " users"
+				`’s user limit was ${newChannel.userLimit}`
+					? `set to ${newChannel.userLimit} users`
 					: "removed",
 			);
 
 		oldChannel.rtcRegion !== newChannel.rtcRegion &&
-			edits.push("’s region override was set to " + newChannel.rtcRegion || "Automatic");
+			edits.push(`’s region override was set to ${newChannel.rtcRegion}` || "Automatic");
 	}
 
 	if (
 		(oldChannel.type === ChannelType.GuildText || oldChannel.type === ChannelType.GuildForum) &&
 		(newChannel.type === ChannelType.GuildText || newChannel.type === ChannelType.GuildForum)
-	)
+	) {
 		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
 			edits.push(
 				`’s ${
 					newChannel.type === ChannelType.GuildForum ? "post " : ""
-				}slowmode was set to ` +
-					newChannel.rateLimitPerUser +
-					" seconds",
+				}slowmode was set to ${newChannel.rateLimitPerUser} seconds`,
 			);
+	}
 
 	if (
 		(oldChannel.type === ChannelType.GuildText ||
@@ -90,6 +92,7 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 								.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 							"utf-8",
 						),
+
 						name: "topic.diff",
 					},
 				],
@@ -98,14 +101,14 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 
 		oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration &&
 			edits.push(
-				"’s hide after inactivity time was set to " +
+				`’s hide after inactivity time was set to ${
 					{
 						[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-					}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
-					newChannel.defaultAutoArchiveDuration,
+					}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay]
+				}` || newChannel.defaultAutoArchiveDuration,
 			);
 	}
 
@@ -117,32 +120,32 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 			oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name
 		) {
 			edits.push(
-				"’s default reaction" +
-					(newChannel.defaultReactionEmoji
-						? " was set to " +
-						  (newChannel.defaultReactionEmoji.name ||
-								`<:${newChannel.defaultReactionEmoji.name}:${newChannel.defaultReactionEmoji.id}>`)
-						: " removed"),
+				`’s default reaction${
+					newChannel.defaultReactionEmoji
+						? ` was set to ${
+								newChannel.defaultReactionEmoji.name ||
+								`<:${newChannel.defaultReactionEmoji.name}:${newChannel.defaultReactionEmoji.id}>`
+						  }`
+						: " removed"
+				}`,
 			);
 		}
 
 		oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser &&
-			edits.push(
-				`’s message slowmode was set to ` + newChannel.rateLimitPerUser + " seconds",
-			);
+			edits.push(`’s message slowmode was set to ${newChannel.rateLimitPerUser} seconds`);
 
 		oldChannel.defaultSortOrder !== newChannel.defaultSortOrder &&
 			edits.push(
-				`’s sort order was set to ` +
+				`’s sort order was set to ${
 					{
 						[SortOrderType.CreationDate]: "Creation Time",
 						[SortOrderType.LatestActivity]: "Recent Activity",
-					}[newChannel.defaultSortOrder || 0] +
-					" seconds",
+					}[newChannel.defaultSortOrder || 0]
+				} seconds`,
 			);
 	}
 
-	if (oldChannel.type === ChannelType.GuildVoice && newChannel.type === ChannelType.GuildVoice)
+	if (oldChannel.type === ChannelType.GuildVoice && newChannel.type === ChannelType.GuildVoice) {
 		oldChannel.videoQualityMode !== newChannel.videoQualityMode &&
 			edits.push(
 				`’s video quality set to ${
@@ -151,9 +154,12 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 					]
 				}`,
 			);
+	}
 
 	await Promise.all(
-		edits.map((edit) => log(`✏ Channel ${newChannel.toString()}${edit}!`, "channels")),
+		edits.map(
+			async (edit) => await log(`✏ Channel ${newChannel.toString()}${edit}!`, "channels"),
+		),
 	);
 };
 export default event;

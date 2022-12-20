@@ -4,6 +4,7 @@ import url from "url";
 
 import { Collection } from "discord.js";
 
+/** @param directory */
 export async function getFileNames(directory: string): Promise<string[]> {
 	return (
 		await Promise.all(
@@ -19,10 +20,11 @@ export async function getFileNames(directory: string): Promise<string[]> {
 	).flat();
 }
 
+/** @param directory */
 export async function importScripts<T, K extends string = string>(
 	directory: string,
 ): Promise<Collection<K, T>> {
-	const collection: Collection<K, T> = new Collection();
+	const collection = new Collection<K, T>();
 
 	const siblings = (await getFileNames(directory)).filter((file) => path.extname(file) === ".js");
 
@@ -48,6 +50,10 @@ export async function importScripts<T, K extends string = string>(
 	return collection;
 }
 
+/**
+ * @param unclean
+ * @param noDoxx
+ */
 export function sanitizePath(unclean: string, noDoxx = true): string {
 	const sanitized = decodeURIComponent(unclean).replaceAll("\\", "/").replaceAll("file:///", "");
 	return noDoxx ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;

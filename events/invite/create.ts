@@ -1,6 +1,8 @@
 import { Guild, time, TimestampStyles } from "discord.js";
+
 import CONSTANTS from "../../common/CONSTANTS.js";
 import log from "../../common/logging.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"inviteCreate"> = async function event(invite) {
@@ -15,7 +17,7 @@ const event: Event<"inviteCreate"> = async function event(invite) {
 				? ` expiring ${
 						invite.expiresAt ? time(invite.expiresAt, TimestampStyles.LongDate) : ""
 				  }${invite.expiresAt && invite.maxUses ? " or " : ""}${
-						invite.maxUses ? "after " + invite.maxUses + " uses" : ""
+						invite.maxUses ? `after ${invite.maxUses} uses` : ""
 				  }`
 				: ""
 		}!`,

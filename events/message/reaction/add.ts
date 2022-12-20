@@ -1,9 +1,10 @@
-import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
-import warn from "../../../common/punishments.js";
-import { censor, badWordsAllowed } from "../../../common/automod.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
 import client from "../../../client.js";
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
+import { censor, badWordsAllowed } from "../../../common/automod.js";
+import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
+import CONSTANTS from "../../../common/CONSTANTS.js";
+import warn from "../../../common/punishments.js";
+
 import type Event from "../../../common/types/event";
 
 const event: Event<"messageReactionAdd"> = async function event(reaction, user) {
@@ -23,9 +24,9 @@ const event: Event<"messageReactionAdd"> = async function event(reaction, user) 
 		if (censored) {
 			await warn(
 				user,
-				`Watch your language!`,
+				"Watch your language!",
 				censored.strikes,
-				"Reacted with:\n:" + emoji.name + ":",
+				`Reacted with:\n:${emoji.name}:`,
 			);
 			await reaction.remove();
 			return;
@@ -44,7 +45,9 @@ const event: Event<"messageReactionAdd"> = async function event(reaction, user) 
 					? { ...suggestion, count: reaction.count || 0 }
 					: suggestion,
 			);
-		} else await message.reactions.resolve(reaction)?.users.remove(user);
+		} else {
+			await message.reactions.resolve(reaction).users.remove(user);
+		}
 	}
 
 	// Ignore when it’s the wrong emoji
@@ -54,7 +57,7 @@ const event: Event<"messageReactionAdd"> = async function event(reaction, user) 
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			// Or if they reacted to a message on the board
 			(message.channel.id === CONSTANTS.channels.board?.id &&
-				message.author.id === client.user?.id) ||
+				message.author.id === client.user.id) ||
 			// Or they reacted to an /explore-potatoes message
 			["explore-potatoes", "explorepotatoes"].includes(message.interaction?.commandName || "")
 		) {

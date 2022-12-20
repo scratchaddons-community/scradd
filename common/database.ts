@@ -1,18 +1,20 @@
-import { Message, RESTJSONErrorCodes, Snowflake } from "discord.js";
-import papaparse from "papaparse";
 import exitHook from "async-exit-hook";
-import { getLoggingThread } from "./logging.js";
+import { type Message, RESTJSONErrorCodes, type Snowflake } from "discord.js";
+import papaparse from "papaparse";
+
 import client from "../client.js";
-import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
-import logError from "../util/logError.js";
 import { extractMessageExtremities } from "../util/discord.js";
+import logError from "../util/logError.js";
+import { getLoggingThread } from "./logging.js";
+
+import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
 import type { ImmutableArray } from "./types/util.js";
 
 export const DATABASE_THREAD = "databases";
 
 const thread = await getLoggingThread(DATABASE_THREAD);
 
-const databases: Record<string, undefined | Message<true>> = {};
+const databases: { [key: string]: Message<true> | undefined } = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
@@ -27,22 +29,27 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	}
 }
 
-let timeouts: Record<
-	Snowflake,
-	{ callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
-> = {};
+let timeouts: {
+	[key: Snowflake]:
+		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
+		| undefined;
+} = {};
 
 const contructed: (keyof Databases)[] = [];
 
 export default class Database<Name extends keyof Databases> {
 	message: Message<true> | undefined;
+
 	#data: ImmutableArray<Databases[Name]> | undefined;
+
 	#extra: string | undefined;
+
 	constructor(public name: Name) {
-		if (contructed.includes(name))
+		if (contructed.includes(name)) {
 			throw new RangeError(
 				`Cannot create a 2nd database for ${name}, they will have conflicting data`,
 			);
+		}
 		contructed.push(name);
 	}
 
@@ -54,11 +61,11 @@ export default class Database<Name extends keyof Databases> {
 			)} information may be reset.*`,
 		);
 
-		const attachment = this.message?.attachments.first()?.url;
+		const attachment = this.message.attachments.first()?.url;
 
 		this.#data = attachment
 			? await fetch(attachment)
-					.then((res) => res.text())
+					.then(async (res) => await res.text())
 					.then(
 						(csv) =>
 							papaparse.parse<Databases[Name]>(csv.trim(), {
@@ -77,40 +84,32 @@ export default class Database<Name extends keyof Databases> {
 		return this.#data;
 	}
 
-	set data(content) {
-		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
-		this.#data = content;
-		this.#queueWrite();
-	}
-
 	get extra() {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.extra`");
 		return this.#extra;
 	}
-	set extra(content) {
-		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
-		this.#extra = content;
-		this.#queueWrite();
-	}
 
 	#queueWrite() {
-		if (!this.message)
+		if (!this.message) {
 			throw new ReferenceError(
 				"Must call `.init()` before reading or setting `.data` or `.extra`",
 			);
+		}
 
 		const timeoutId = timeouts[this.message.id];
 
-		const callback = (): Promise<Message<true>> => {
-			if (!this.message)
+		const callback = async (): Promise<Message<true>> => {
+			if (!this.message) {
 				throw new ReferenceError(
 					"Must call `.init()` before reading or setting `.data` or `.extra`",
 				);
+			}
 
-			const data = !!this.#data?.length && papaparse.unparse([...this.#data]).trim();
+			const data =
+				Boolean(this.#data?.length) && papaparse.unparse(Array.from(this.#data)).trim();
 
 			const files = data
-				? [{ attachment: Buffer.from(data, "utf-8"), name: this.name + ".scradddb" }]
+				? [{ attachment: Buffer.from(data, "utf-8"), name: `${this.name}.scradddb` }]
 				: [];
 			const messageContent = this.message.content.split("\n");
 			messageContent[3] = "";
@@ -124,35 +123,48 @@ export default class Database<Name extends keyof Databases> {
 
 			const promise = this.message
 				.edit({ content: messageContent.join("\n").trim(), files })
-				.catch(async (error) => {
+				.catch(async (error: unknown) => {
 					await logError(error, `Database<${this.name}>#queueWrite()`);
 					if (error.code === RESTJSONErrorCodes.UnknownMessage) {
 						databases[this.name] = undefined;
 						await this.init();
 					}
-					return callback();
+					return await callback();
 				})
 				.then(async (edited) => {
 					const attachment = edited.attachments.first()?.url;
 
 					const written = attachment
-						? (await fetch(attachment).then((res) => res.text())).trim()
+						? (await fetch(attachment).then(async (res) => await res.text())).trim()
 						: false;
 
-					if (written !== data)
+					if (written !== data) {
 						throw new Error("Data changed through write!", {
 							cause: { written, data },
 						});
+					}
 
 					return edited;
 				});
 
 			timeouts[this.message.id] = undefined;
-			return promise;
+			return await promise;
 		};
 
 		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
+	}
+
+	set data(content) {
+		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
+		this.#data = content;
+		this.#queueWrite();
+	}
+
+	set extra(content) {
+		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
+		this.#extra = content;
+		this.#queueWrite();
 	}
 }
 
@@ -163,7 +175,9 @@ export async function cleanDatabaseListeners() {
 	console.log("Listeners cleaned");
 }
 
-exitHook((callback) => cleanDatabaseListeners().then(callback));
+exitHook(async (callback) => {
+	await cleanDatabaseListeners().then(callback);
+});
 
 export type Databases = {
 	board: {
@@ -174,7 +188,7 @@ export type Databases = {
 		/** The ID of the channel this message is in. */
 		channel: Snowflake;
 		/** The ID of the message on the board. */
-		onBoard: 0 | Snowflake;
+		onBoard: Snowflake | 0;
 		/** The ID of the original message. */
 		source: Snowflake;
 	};
@@ -183,7 +197,7 @@ export type Databases = {
 		user: Snowflake;
 		/** The time when this strike was issued. */
 		date: number;
-		id: string | number;
+		id: number | string;
 		count: number;
 		removed: boolean;
 	};

@@ -1,11 +1,10 @@
 import { ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
 
+import { userSettingsDatabase } from "../commands/settings.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
+import { censor } from "./automod.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
-
-import { censor } from "./automod.js";
-import { userSettingsDatabase } from "../commands/settings.js";
 import giveXp from "./xp.js";
 
 export const BOARD_EMOJI = "🥔";
@@ -21,11 +20,17 @@ export function boardReactionCount(channel) {
 		default: 8,
 		info: 10,
 	};
+
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
+
 	if (!channel) return COUNTS.default;
+
 	const baseChannel = getBaseChannel(channel);
+
 	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.mods;
+
 	if (baseChannel.isVoiceBased()) return COUNTS.misc;
+
 	if (baseChannel.parent?.id === CONSTANTS.channels.info?.id) return COUNTS.info;
 
 	return (
@@ -50,6 +55,7 @@ export function boardReactionCount(channel) {
 if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
 export const boardDatabase = new Database("board");
+
 await boardDatabase.init();
 
 /**
@@ -79,9 +85,11 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 
 		return {
 			allowedMentions: { users: [] },
+
 			components: [
 				{
 					type: ComponentType.ActionRow,
+
 					components: [
 						...(extraButtons.pre || []),
 
@@ -101,29 +109,37 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 					? `${message.channel.toString()} (${message.channel.parent.toString()})`
 					: message.channel.toString()
 			} | ${message.author.toString()}`,
+
 			embeds: [
 				{
 					color: message.member?.displayColor,
 					description: censored ? censored.censored : description,
+
 					author: {
 						icon_url: (message.member ?? message.author).displayAvatarURL(),
+
 						name:
 							message.member?.displayName ??
 							(censoredName ? censoredName.censored : message.author.username),
 					},
+
 					timestamp: message.createdAt.toISOString(),
 				},
 				...embeds,
 			],
+
 			files,
 		};
 	}
 
-	if (info instanceof Message) return messageToBoardData(info);
+	if (info instanceof Message) return await messageToBoardData(info);
+
 	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+
 	const onBoard =
 		info.onBoard &&
 		(await CONSTANTS.channels.board.messages.fetch(info.onBoard).catch(() => {}));
+
 	if (onBoard) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
 		const buttons =
@@ -134,20 +150,24 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 		return {
 			allowedMentions: { users: [] },
 
-			components: buttons.length
-				? [{ type: ComponentType.ActionRow, components: buttons }]
-				: [],
+			components:
+				buttons.length > 0 ? [{ type: ComponentType.ActionRow, components: buttons }] : [],
 
 			content: onBoard.content,
 			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),
 			files: onBoard.attachments.map((attachment) => attachment),
 		};
 	}
+
 	const channel = await CONSTANTS.guild.channels.fetch(info.channel).catch(() => {});
+
 	if (!channel?.isTextBased()) return;
+
 	const message = await channel.messages.fetch(info.source).catch(() => {});
+
 	if (!message) return;
-	return messageToBoardData(message);
+
+	return await messageToBoardData(message);
 }
 
 /**
@@ -163,6 +183,7 @@ export async function updateBoard(message) {
 	const info = boardDatabase.data.find(({ source }) => source === message.id);
 
 	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+
 	const boardMessage =
 		info?.onBoard &&
 		(await CONSTANTS.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
@@ -172,17 +193,17 @@ export async function updateBoard(message) {
 		process.env.NODE_ENV === "production";
 
 	if (boardMessage) {
-		if (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)) {
-			await boardMessage.delete();
-		} else {
-			await boardMessage.edit({
-				allowedMentions: pings ? undefined : { users: [] },
-				content: boardMessage.content.replace(/\d+/, `${count}`),
-			});
-		}
+		await (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)
+			? boardMessage.delete()
+			: boardMessage.edit({
+					allowedMentions: pings ? undefined : { users: [] },
+					content: boardMessage.content.replace(/\d+/, String(count)),
+			  }));
 	} else if (count >= minReactions) {
 		if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+
 		!message.author.bot && promises.push(giveXp(message.author, message.url));
+
 		const boardMessage = await CONSTANTS.channels.board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },
@@ -228,7 +249,8 @@ export async function updateBoard(message) {
 			: boardDatabase.data.filter((item) => item.source !== message.id);
 	}
 
-	const top = [...boardDatabase.data.sort((a, b) => b.reactions - a.reactions)];
+	const top = Array.from(boardDatabase.data.sort((a, b) => b.reactions - a.reactions));
+
 	top.splice(5);
 	promises.push(
 		Promise.all(
@@ -236,22 +258,25 @@ export async function updateBoard(message) {
 				const toPin =
 					onBoard &&
 					(await CONSTANTS.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+
 				toPin && (await toPin.pin("Is a top-potatoed message"));
+
 				return onBoard;
 			}),
 		).then((top) => {
-			CONSTANTS.channels.board?.messages.fetchPinned().then(async (pins) => {
-				return (
-					pins.size > 5 &&
-					(await Promise.all(
-						pins.map(
-							async (pin) =>
-								!top.includes(pin.id) &&
-								(await pin.unpin("No longer a top-potatoed message")),
-						),
-					))
+			CONSTANTS.channels.board?.messages
+				.fetchPinned()
+				.then(
+					async (pins) =>
+						pins.size > 5 &&
+						(await Promise.all(
+							pins.map(
+								async (pin) =>
+									!top.includes(pin.id) &&
+									(await pin.unpin("No longer a top-potatoed message")),
+							),
+						)),
 				);
-			});
 		}),
 	);
 

@@ -1,7 +1,9 @@
 import { time } from "discord.js";
+
 import client from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/logging.js";
+
 import type Event from "../../../common/types/event";
 
 const event: Event<"guildScheduledEventCreate"> = async function event(event) {
@@ -14,12 +16,12 @@ const event: Event<"guildScheduledEventCreate"> = async function event(event) {
 	await log(
 		`🗓 Event ${event.name} scheduled${
 			start || end
-				? ` for ${time(start || end || new Date())}${end && start ? "-" + time(end) : ""}`
+				? ` for ${time(start || end || new Date())}${end && start ? `-${time(end)}` : ""}`
 				: ""
 		} in ${
 			event.channel?.toString() || event.entityMetadata?.location || "an external location"
-		}${event.creator ? " by " + event.creator.toString() : ""}${
-			event.description ? ":\n" + event.description : "!"
+		}${event.creator ? ` by ${event.creator.toString()}` : ""}${
+			event.description ? `:\n${event.description}` : "!"
 		}`,
 		"voice",
 	);

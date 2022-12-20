@@ -1,16 +1,18 @@
 import { ActivityType } from "discord.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+
 import { censor } from "../common/automod.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+
 import type Event from "../common/types/event";
 
 const event: Event<"presenceUpdate"> = async function event(_, newPresence) {
 	if (newPresence.guild?.id !== CONSTANTS.guild.id) return;
 
 	const activity = newPresence.activities[0];
-	const member = newPresence.member;
+	const { member } = newPresence;
 
 	const censored = censor(
-		(activity?.type === ActivityType.Custom ? activity?.state : activity?.name) || "",
+		(activity?.type === ActivityType.Custom ? activity.state : activity?.name) || "",
 	);
 	if (
 		censored &&

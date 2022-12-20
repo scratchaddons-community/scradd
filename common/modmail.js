@@ -7,14 +7,13 @@ import {
 	ComponentType,
 	ButtonStyle,
 } from "discord.js";
-import { generateHash } from "../util/text.js";
 
+import client from "../client.js";
+import { disableComponents, extractMessageExtremities, messageToText } from "../util/discord.js";
 import { escapeMessage } from "../util/markdown.js";
 import { asyncFilter } from "../util/promises.js";
-import { disableComponents, extractMessageExtremities, messageToText } from "../util/discord.js";
-
+import { generateHash } from "../util/text.js";
 import CONSTANTS from "./CONSTANTS.js";
-import client from "../client.js";
 // import { getStrikesForMember } from "../commands/strikes.js";
 
 export const MODMAIL_COLORS = {
@@ -61,7 +60,9 @@ export async function generateModmailMessage(message) {
 export async function getUserFromModmail(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
 	const embed = starter?.embeds[0];
+
 	if (!embed?.description) return;
+
 	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
 
 	return (
@@ -79,6 +80,7 @@ export async function getUserFromModmail(thread) {
  */
 export async function getThreadFromMember(user) {
 	if (!CONSTANTS.channels.modmail) return;
+
 	const { threads } = await CONSTANTS.channels.modmail.threads.fetchActive();
 
 	return (
@@ -126,15 +128,21 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 					{
 						title: "Modmail ticket closed!",
 						timestamp: thread.createdAt?.toISOString(),
+
 						footer: {
 							icon_url: CONSTANTS.guild.iconURL() ?? undefined,
 							text: "Any future messages will start a new ticket.",
 						},
+
 						color: MODMAIL_COLORS.closed,
 						description: reason,
+
 						author: mod && {
 							icon_url: mod.displayAvatarURL(),
-							name: mod instanceof GuildMember ? mod.displayName : mod.username,
+							name:
+								mod instanceof GuildMember
+									? mod.displayName
+									: mod.username,
 						},
 					},
 				],
@@ -151,7 +159,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
  */
 export async function closeModmail(thread, user, reason) {
 	await sendClosedMessage(thread, { reason, user });
-	await thread.setArchived(true, `Modmail closed`);
+	await thread.setArchived(true, "Modmail closed");
 }
 
 /**
@@ -167,9 +175,11 @@ export async function sendOpenedMessage(user) {
 			embeds: [
 				{
 					title: "Modmail ticket opened!",
+
 					description: `The moderation team of **${escapeMessage(
 						CONSTANTS.guild.name,
 					)}** would like to talk to you. I will DM you their messages. You may send them messages by sending me DMs.`,
+
 					footer: { text: MODMAIL_UNSUPPORTED },
 					color: MODMAIL_COLORS.opened,
 				},
@@ -192,6 +202,7 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 		components: [
 			{
 				type: ComponentType.ActionRow,
+
 				components: [
 					{
 						type: ComponentType.Button,
@@ -208,6 +219,7 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 				],
 			},
 		],
+
 		embeds: [confirmEmbed],
 	});
 
@@ -216,9 +228,11 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 
 		time: CONSTANTS.collectorTime,
 	});
+
 	collector
 		.on("collect", async (buttonInteraction) => {
 			collector.stop();
+
 			switch (buttonInteraction.customId) {
 				case confirmId: {
 					await onConfirm(buttonInteraction);
@@ -239,6 +253,7 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 			if (!message.interaction)
 				await message.edit({ components: disableComponents(message.components) });
 		});
+
 	return collector;
 }
 
@@ -251,16 +266,19 @@ export function generateReactionFunctions(message) {
 	return /** @type {const} */ ([
 		async () => {
 			const reaction = await message.react(CONSTANTS.emojis.statuses.yes);
+
 			message.channel
-				.createMessageCollector({ maxProcessed: 1, time: 5_000 })
+				.createMessageCollector({ maxProcessed: 1, time: 5000 })
 				.on("end", async () => {
 					await reaction.users.remove(client.user || "");
 				});
+
 			return reaction;
 		},
 		/** @param {unknown} error */
 		async (error) => {
 			console.error(error);
+
 			return await message.react(CONSTANTS.emojis.statuses.no);
 		},
 	]);
@@ -269,9 +287,11 @@ export function generateReactionFunctions(message) {
 /**
  * @param {import("discord.js").APIEmbed} openedEmbed
  * @param {GuildMember | User} user
+ * @param ping
  */
 export async function openModmail(openedEmbed, user, ping = false) {
 	if (!CONSTANTS.channels.modmail) throw new ReferenceError("Cannot find modmail channel");
+
 	const starterMessage = await CONSTANTS.channels.modmail.send({
 		allowedMentions: { parse: ["everyone"] },
 		content: ping && process.env.NODE_ENV === "production" ? "@here" : undefined,
@@ -285,9 +305,12 @@ export async function openModmail(openedEmbed, user, ping = false) {
 			[],
 			{ minimumIntegerDigits: 2 },
 		)}-${date.getUTCDate().toLocaleString([], { minimumIntegerDigits: 2 })})`,
+
 		reason: "Modmail opened",
 	});
+
 	await thread.setLocked(true, "Modmail opened");
+
 	// TODO: await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
 	return thread;
 }

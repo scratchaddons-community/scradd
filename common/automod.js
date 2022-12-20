@@ -1,10 +1,12 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
-import CONSTANTS from "./CONSTANTS.js";
-import warn, { PARTIAL_STRIKE_COUNT } from "./punishments.js";
-import { stripMarkdown } from "../util/markdown.js";
-import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
+
 import client from "../client.js";
 import { getBaseChannel, GlobalAnimatedEmoji, GlobalInvitesPattern } from "../util/discord.js";
+import { stripMarkdown } from "../util/markdown.js";
+import { caesar, joinWithAnd, pingablify, normalize } from "../util/text.js";
+import CONSTANTS from "./CONSTANTS.js";
+import warn, { PARTIAL_STRIKE_COUNT } from "./punishments.js";
+
 /**
  * The index of each array determines how many strikes the word gives.
  *
@@ -34,7 +36,7 @@ const badWords = [
 			/(?:urzv ?)?cravf(?:rf)?/,
 			/nahf(?:rf)?/,
 			/frzra/,
-			/(?:c(?:er|bfg) ?)?phz/,
+			/(?:c(?:bfg|er) ?)?phz/,
 			/pyvg/,
 			/gvg(?:(?:gvr)?f)?/,
 			/chff(?:l|vrf)/,
@@ -57,7 +59,7 @@ const badWords = [
 			/wvmm/,
 			/wvfz/,
 			/znfg(?:h|r)eong/,
-			/ohgg(?: ?cvengr)/,
+			/ohgg ?cvengr/,
 			/qvyqb/,
 			/xhxfhtre/,
 			/dhrrs/,
@@ -69,13 +71,13 @@ const badWords = [
 		[
 			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vrfg?|vat|f|jnqf?|loveqf?))?/,
 			/(?:8|o)=+Q/,
-			/fzhg+(?:vr|e|fg?|l)?/,
-			/pbpx(?: ?svtug|fhpx|(?:svtug|fhpx)(?:re|vat)|znafuvc|hc)?f?/,
-			/onfgneq(?:vfz|(y|e)?l|evrf|f)?/,
+			/fzhg+(?:e|fg?|l|vr)?/,
+			/pbpx(?: ?svtug|fhpx|(?:fhpx|svtug)(?:re|vat)|znafuvc|hc)?f?/,
+			/onfgneq(?:vfz|(e|y)?l|evrf|f)?/,
 			/phagf?/,
 			/shx/,
 			/ovg?fu/,
-			/jnax(?:v?ref?|v(?:rfg|at)|yr|f|l)?/,
+			/jnax(?:v?ref?|v(?:at|rfg)|yr|f|l)?/,
 		],
 	],
 	[
@@ -93,7 +95,7 @@ const badWords = [
 			/yrfobf?/,
 			/fcvpf?/,
 			/j?uber/,
-			/av+t{2,}(?:(r|h)?e|n)(?: ?rq|qbz|urnq|vat|vf(u|z)|yvat|l)?f?/,
+			/av+t{2,}(?:(h|r)?e|n)(?: ?rq|l|qbz|urnq|vat|vf(u|z)|yvat)?f?/,
 			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
 			/wnc(?:rq?|revrf|re?f|rel?|r?f|vatf?|crq|cvat|cn)?/,
 		],
@@ -107,7 +109,7 @@ function decodeRegexes(regexes) {
 	return regexes
 		.map(({ source }) =>
 			caesar(source).replaceAll(
-				/[a-z ]/gi,
+				/[ a-z]/gi,
 				(letter) =>
 					`[${
 						{
@@ -144,9 +146,10 @@ function decodeRegexes(regexes) {
 		)
 		.join("|");
 }
+
 const badWordRegexps = badWords.map(
 	([strings, words]) =>
-		new RegExp(decodeRegexes(strings) + "|\\b(?:" + decodeRegexes(words) + ")\\b", "gi"),
+		new RegExp(`${decodeRegexes(strings)}|\\b(?:${decodeRegexes(words)})\\b`, "gi"),
 );
 
 /** @param {string} text */
@@ -155,19 +158,24 @@ export function censor(text) {
 	const words = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
+
 		return string.replaceAll(regexp, (censored) => {
 			words[index]?.push(censored);
+
 			return censored[0] + "#".repeat(censored.length - 1);
 		});
 	}, normalize(text));
 
-	return words.flat().length
+	return words.flat().length > 0
 		? {
 				censored,
+
 				strikes: words.reduce(
-					(acc, curr, index) => curr.length * Math.max(index, PARTIAL_STRIKE_COUNT) + acc,
+					(accumulator, current, index) =>
+						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
 					0,
 				),
+
 				words,
 		  }
 		: false;
@@ -192,8 +200,10 @@ async function checkString(toCensor, message) {
 		bots: false,
 		words: { language: [], invites: [], bots: [] },
 	};
+
 	if (!badWordsAllowed(message.channel)) {
 		const censored = censor(toCensor);
+
 		if (censored) {
 			bad.words.language.push(...censored.words.flat());
 			bad.language = censored.strikes;
@@ -201,8 +211,7 @@ async function checkString(toCensor, message) {
 	}
 
 	const baseChannel = getBaseChannel(message.channel);
-	const parentChannel =
-		baseChannel && baseChannel.isDMBased() ? baseChannel : baseChannel?.parent;
+	const parentChannel = baseChannel?.isDMBased() ? baseChannel : baseChannel?.parent;
 
 	if (
 		!badWordsAllowed(message.channel) &&
@@ -211,6 +220,7 @@ async function checkString(toCensor, message) {
 		!message.author?.bot
 	) {
 		const botLinks = toCensor.match(/discord(?:app)?\.com\/(api\/)?oauth2\/authorize/gi);
+
 		if (botLinks) {
 			bad.words.bots.push(...botLinks);
 			bad.bots = botLinks.length;
@@ -223,12 +233,13 @@ async function checkString(toCensor, message) {
 				await Promise.all(
 					inviteCodes.map(async (code) => {
 						const invite = await client?.fetchInvite(code).catch(() => {});
+
 						return invite?.guild && invite.guild.id !== message.guild?.id && code;
 					}),
 				)
 			).filter(/** @returns {toWarn is string} */ (toWarn) => !!toWarn);
 
-			if (invitesToDelete.length) {
+			if (invitesToDelete.length > 0) {
 				bad.words.invites.push(...invitesToDelete);
 				bad.invites = invitesToDelete.length;
 			}
@@ -243,29 +254,28 @@ export async function automodMessage(message) {
 	const bad = (
 		await Promise.all([
 			checkString(stripMarkdown(message.content), message),
-			...message.stickers.map(({ name }) => checkString(name, message)),
+			...message.stickers.map(async ({ name }) => await checkString(name, message)),
 		])
 	).reduce(
-		(bad, censored) => {
-			return {
-				language:
-					typeof censored.language === "number"
-						? +bad.language + censored.language
-						: bad.language,
+		(bad, censored) => ({
+			language:
+				typeof censored.language === "number"
+					? Number(bad.language) + censored.language
+					: bad.language,
 
-				invites:
-					typeof censored.invites === "number"
-						? +bad.invites + censored.invites
-						: bad.invites,
+			invites:
+				typeof censored.invites === "number"
+					? Number(bad.invites) + censored.invites
+					: bad.invites,
 
-				bots: typeof censored.bots === "number" ? +bad.bots + censored.bots : bad.bots,
-				words: {
-					language: [...censored.words.language, ...bad.words.language],
-					invites: [...censored.words.invites, ...bad.words.invites],
-					bots: [...censored.words.bots, ...bad.words.bots],
-				},
-			};
-		},
+			bots: typeof censored.bots === "number" ? Number(bad.bots) + censored.bots : bad.bots,
+
+			words: {
+				language: [...censored.words.language, ...bad.words.language],
+				invites: [...censored.words.invites, ...bad.words.invites],
+				bots: [...censored.words.bots, ...bad.words.bots],
+			},
+		}),
 		{
 			language: false,
 			invites: false,
@@ -281,28 +291,27 @@ export async function automodMessage(message) {
 	const embedStrikes = badWordsAllowed(message.channel)
 		? false
 		: message.embeds
-				.map((embed) => [
+				.flatMap((embed) => [
 					embed.description && embed.description,
 					embed.title,
 					embed.footer?.text,
 					embed.author?.name,
-					...embed.fields.map((field) => [field.name, field.value]).flat(),
+					...embed.fields.flatMap((field) => [field.name, field.value]),
 				])
-				.flat()
 				.reduce((strikes, current) => {
 					const censored = current && censor(current);
-					if (censored) {
-						bad.words.language.push(...censored.words.flat());
-					}
-					return censored ? +strikes + censored.strikes : strikes;
+
+					if (censored) bad.words.language.push(...censored.words.flat());
+
+					return censored ? Number(strikes) + censored.strikes : strikes;
 				}, /** @type {number | false} */ (false));
 
-	if (typeof embedStrikes === "number") {
+	if (typeof embedStrikes === "number")
 		bad.language = (bad.language || 0) + Math.max(embedStrikes - 1, 0);
-	}
 
 	const promises = [];
-	if (toWarn.length) promises.push(message.delete());
+
+	if (toWarn.length > 0) promises.push(message.delete());
 	else if (typeof embedStrikes === "number") promises.push(message.suppressEmbeds());
 
 	if (typeof bad.language === "number") {
@@ -311,14 +320,16 @@ export async function automodMessage(message) {
 				message.interaction?.user || message.author,
 				"Watch your language!",
 				bad.language,
-				"Sent message with words:\n" + bad.words.language.join("\n"),
+				`Sent message with words:\n${bad.words.language.join("\n")}`,
 			),
 			message.channel.send(
-				CONSTANTS.emojis.statuses.no +
-					` ${(message.interaction?.user || message.author).toString()}, language!`,
+				`${CONSTANTS.emojis.statuses.no} ${(
+					message.interaction?.user || message.author
+				).toString()}, language!`,
 			),
 		);
 	}
+
 	if (typeof bad.invites === "number") {
 		promises.push(
 			warn(
@@ -328,13 +339,13 @@ export async function automodMessage(message) {
 				bad.words.invites.join("\n"),
 			),
 			message.channel.send(
-				CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, only post invite links in ${CONSTANTS.channels.advertise?.toString()}!`,
+				`${CONSTANTS.emojis.statuses.no} ${(
+					message.interaction?.user || message.author
+				).toString()}, only post invite links in ${CONSTANTS.channels.advertise?.toString()}!`,
 			),
 		);
 	}
+
 	if (typeof bad.bots === "number") {
 		promises.push(
 			warn(
@@ -344,15 +355,14 @@ export async function automodMessage(message) {
 				bad.words.bots.join("\n"),
 			),
 			message.channel.send(
-				CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`,
+				`${CONSTANTS.emojis.statuses.no} ${(
+					message.interaction?.user || message.author
+				).toString()}, bot invites go to ${CONSTANTS.channels.advertise?.toString()}!`,
 			),
 		);
 	}
 
-	const animatedEmojis = [...message.content.matchAll(GlobalAnimatedEmoji)];
+	const animatedEmojis = Array.from(message.content.matchAll(GlobalAnimatedEmoji));
 
 	const badAnimatedEmojis =
 		animatedEmojis.length > 9 && Math.round((animatedEmojis.length - 10) / 10);
@@ -364,15 +374,14 @@ export async function automodMessage(message) {
 		promises.push(
 			warn(
 				message.interaction?.user || message.author,
-				`Please don’t post that many animated emojis!`,
+				"Please don’t post that many animated emojis!",
 				badAnimatedEmojis,
 				animatedEmojis.map((emoji) => emoji[0]).join("\n"),
 			),
 			message.channel.send(
-				CONSTANTS.emojis.statuses.no +
-					` ${(
-						message.interaction?.user || message.author
-					).toString()}, lay off on the animated emojis please!`,
+				`${CONSTANTS.emojis.statuses.no} ${(
+					message.interaction?.user || message.author
+				).toString()}, lay off on the animated emojis please!`,
 			),
 			message.delete(),
 		);
@@ -385,6 +394,7 @@ export async function automodMessage(message) {
 /** @param {import("discord.js").TextBasedChannel | null} channel */
 export function badWordsAllowed(channel) {
 	const baseChannel = getBaseChannel(channel);
+
 	return (
 		baseChannel?.type === ChannelType.DM ||
 		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
@@ -393,7 +403,10 @@ export function badWordsAllowed(channel) {
 
 const NICKNAME_RULE = 8;
 
-/** @param {import("discord.js").GuildMember} member */
+/**
+ * @param {import("discord.js").GuildMember} member
+ * @param shouldWarn
+ */
 export async function changeNickname(member, shouldWarn = true) {
 	const censored = censor(member.displayName);
 
@@ -403,8 +416,7 @@ export async function changeNickname(member, shouldWarn = true) {
 				? warn(member, "Watch your language!", censored.strikes, member.displayName)
 				: member
 						.send(
-							CONSTANTS.emojis.statuses.no +
-								" I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.",
+							`${CONSTANTS.emojis.statuses.no} I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.`,
 						)
 						.catch(() => {}),
 			setNickname(member, pingablify(censored.censored)),
@@ -422,6 +434,7 @@ export async function changeNickname(member, shouldWarn = true) {
 				)
 				.catch(() => {}),
 		]);
+
 		return;
 	}
 
@@ -434,25 +447,25 @@ export async function changeNickname(member, shouldWarn = true) {
 
 	/** @type {any[]} */
 	const promises = [];
+
 	if (members.size > 1) {
 		const [safe, unsafe] = members.partition(
 			(found) => found.user.username === member.displayName,
 		);
 
-		if (safe.size) {
+		if (safe.size > 0) {
 			promises.push(
-				...unsafe
-					.map((found) => [
-						setNickname(found, found.user.username),
+				...unsafe.flatMap((found) => [
+					setNickname(found, found.user.username),
 
-						found
-							.send(
-								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
-							)
-							.catch(() => {}),
-					])
-					.flat(),
+					found
+						.send(
+							`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
+						)
+						.catch(() => {}),
+				]),
 			);
+
 			if (safe.size > 1) {
 				promises.push(
 					CONSTANTS.channels.modlogs?.send({
@@ -469,14 +482,16 @@ export async function changeNickname(member, shouldWarn = true) {
 			unsafe.delete(member.id);
 		}
 
-		if (unsafe.size > 1)
+		if (unsafe.size > 1) {
 			promises.push(
 				CONSTANTS.channels.modlogs?.send({
 					allowedMentions: { users: [] },
 					content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
 				}),
 			);
+		}
 	}
+
 	await Promise.all(promises);
 }
 
@@ -486,14 +501,17 @@ export async function changeNickname(member, shouldWarn = true) {
  */
 async function setNickname(member, newNickname) {
 	if (member.nickname === newNickname) return member;
+
 	if (member.moderatable) {
 		if (censor(newNickname) || pingablify(newNickname) !== newNickname) return false;
 
 		return await member.setNickname(newNickname, `To comply with rule ${NICKNAME_RULE}`);
 	}
+
 	await CONSTANTS.channels.modlogs?.send({
 		allowedMentions: { users: [] },
 		content: `⚠ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\`.`,
 	});
+
 	return false;
 }

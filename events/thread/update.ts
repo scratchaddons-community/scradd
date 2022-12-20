@@ -1,4 +1,10 @@
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
+
+import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
+import { badWordsAllowed, censor } from "../../common/automod.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
+import { DATABASE_THREAD } from "../../common/database.js";
+import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
 import {
 	MODMAIL_COLORS,
 	getUserFromModmail,
@@ -6,11 +12,7 @@ import {
 	sendOpenedMessage,
 } from "../../common/modmail.js";
 import warn from "../../common/punishments.js";
-import { badWordsAllowed, censor } from "../../common/automod.js";
-import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
-import { DATABASE_THREAD } from "../../common/database.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
+
 import type Event from "../../common/types/event";
 
 const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
@@ -22,6 +24,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			suggestion.id === newThread.id
 				? {
 						...suggestion,
+
 						answer:
 							CONSTANTS.channels.suggestions?.availableTags.find(
 								(
@@ -30,6 +33,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 									(suggestionAnswers as readonly string[]).includes(tag.name) &&
 									newThread.appliedTags.includes(tag.id),
 							)?.name || suggestionAnswers[0],
+
 						title: newThread.name,
 				  }
 				: suggestion,
@@ -37,12 +41,12 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	}
 
 	const logs = [];
-	if (oldThread.archived !== newThread.archived) {
+	if (oldThread.archived !== newThread.archived)
 		logs.push(` ${newThread.archived ? "closed" : "opened"}`);
-	}
-	if (oldThread.locked !== newThread.locked) {
+
+	if (oldThread.locked !== newThread.locked)
 		logs.push(` ${newThread.locked ? "locked" : "unlocked"}`);
-	}
+
 	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 		logs.push(
 			`’s hide after inactivity set to ${
@@ -58,9 +62,9 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	}
 	if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
 		logs.push(
-			"’s slowmode was set to " +
-				newThread.rateLimitPerUser +
-				` second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
+			`’s slowmode was set to ${newThread.rateLimitPerUser} second${
+				newThread.rateLimitPerUser === 1 ? "" : "s"
+			}`,
 		);
 	}
 	newThread.appliedTags; // TODO
@@ -74,6 +78,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 				components: [
 					{
 						type: ComponentType.ActionRow,
+
 						components: [
 							{
 								type: ComponentType.Button,
@@ -93,40 +98,42 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			(LOG_GROUPS as readonly string[]).includes(newThread.name)) &&
 			newThread.parent?.id === CONSTANTS.channels.modlogs?.id) ||
 			newThread.id === "1029234332977602660")
-	) {
+	)
 		await newThread.setArchived(false, "Modlog threads must stay open");
-	}
 
 	await Promise.all(
-		logs.map((edit) =>
-			log(`📃 Thread #${newThread.name}` + edit + `!`, "channels", {
-				components: [
-					{
-						type: ComponentType.ActionRow,
-						components: [
-							{
-								type: ComponentType.Button,
-								label: "View Thread",
-								style: ButtonStyle.Link,
-								url: newThread.url,
-							},
-						],
-					},
-				],
-			}),
+		logs.map(
+			async (edit) =>
+				await log(`📃 Thread #${newThread.name}${edit}!`, "channels", {
+					components: [
+						{
+							type: ComponentType.ActionRow,
+
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "View Thread",
+									style: ButtonStyle.Link,
+									url: newThread.url,
+								},
+							],
+						},
+					],
+				}),
 		),
 	);
 	const censored = censor(newThread.name);
 	if (censored && !badWordsAllowed(newThread)) {
 		await newThread.setName(oldThread.name, "Censored bad word");
 		const owner = await newThread.fetchOwner();
-		if (owner?.guildMember)
+		if (owner?.guildMember) {
 			await warn(
 				owner.guildMember,
-				`Watch your language!`,
+				"Watch your language!",
 				censored.strikes,
-				"Renamed thread to:\n" + newThread.name,
+				`Renamed thread to:\n${newThread.name}`,
 			);
+		}
 	}
 
 	const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
@@ -135,7 +142,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 		oldThread.archived === newThread.archived ||
 		(newThread.archived &&
 			latestMessage?.interaction?.commandName === "modmail close" &&
-			Date.now() - +latestMessage.createdAt < 60_000)
+			Date.now() - Number(latestMessage.createdAt) < 60_000)
 	)
 		return;
 

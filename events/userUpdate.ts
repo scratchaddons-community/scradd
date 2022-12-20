@@ -1,6 +1,7 @@
-import CONSTANTS from "../common/CONSTANTS.js";
 import { changeNickname } from "../common/automod.js";
+import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
+
 import type Event from "../common/types/event";
 
 const event: Event<"userUpdate"> = async function event(oldUser, newUser) {

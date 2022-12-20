@@ -1,8 +1,10 @@
-import client from "../../client.js";
-import log from "../../common/logging.js";
 import difflib from "difflib";
-import type Event from "../../common/types/event";
+
+import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import log from "../../common/logging.js";
+
+import type Event from "../../common/types/event";
 
 const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, newInstance) {
 	const guild = newInstance.guild || (await client.guilds.fetch(newInstance.guildId));
@@ -22,6 +24,7 @@ const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, ne
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf-8",
 					),
+
 					name: "topic.diff",
 				},
 			],

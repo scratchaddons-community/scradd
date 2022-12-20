@@ -13,9 +13,9 @@
 export async function* asyncFilter(array, predicate) {
 	for (const [index, value] of array.entries()) {
 		const newValue = await predicate(value, index, array);
+
 		if (newValue !== false) yield newValue;
 	}
-	return;
 }
 
 /**
@@ -30,8 +30,8 @@ export async function* asyncFilter(array, predicate) {
  */
 export async function firstTrueyPromise(promises) {
 	const newPromises = promises.map(
-		(promise) =>
-			new Promise((resolve, reject) => {
+		async (promise) =>
+			await new Promise((resolve, reject) => {
 				promise
 					.then((resolved) => {
 						if (resolved) resolve(true);

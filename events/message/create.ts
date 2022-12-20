@@ -1,16 +1,19 @@
 import {
 	MessageType,
 	ChannelType,
-	Message,
-	EmojiIdentifierResolvable,
-	MessageReaction,
-	Snowflake,
+	type Message,
+	type EmojiIdentifierResolvable,
+	type MessageReaction,
+	type Snowflake,
 	ComponentType,
 	ButtonStyle,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { automodMessage } from "../../common/automod.js";
 
+import client from "../../client.js";
+import { userSettingsDatabase } from "../../commands/settings.js";
+import { automodMessage } from "../../common/automod.js";
+import { BOARD_EMOJI } from "../../common/board.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
 import {
 	MODMAIL_COLORS,
 	generateModmailConfirm,
@@ -21,18 +24,15 @@ import {
 	openModmail,
 	MODMAIL_UNSUPPORTED,
 } from "../../common/modmail.js";
-
-import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
-import { getBaseChannel, reactAll } from "../../util/discord.js";
 import giveXp, { DEFAULT_XP } from "../../common/xp.js";
-import { normalize, truncateText } from "../../util/text.js";
-import client from "../../client.js";
+import { getBaseChannel, reactAll } from "../../util/discord.js";
+import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
 import { asyncFilter } from "../../util/promises.js";
-import { userSettingsDatabase } from "../../commands/settings.js";
-import type Event from "../../common/types/event";
-import { BOARD_EMOJI } from "../../common/board.js";
+import { normalize, truncateText } from "../../util/text.js";
 
-const latestMessages: Record<Snowflake, Message[]> = {};
+import type Event from "../../common/types/event";
+
+const latestMessages: { [key: Snowflake]: Message[] } = {};
 
 const event: Event<"messageCreate"> = async function event(message) {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
@@ -72,9 +72,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 			promises.push(
 				message.reply({
 					content: "⚠ Sorry, but commands are not supported in DMs.",
+
 					components: [
 						{
 							type: ComponentType.ActionRow,
+
 							components: [
 								{
 									type: ComponentType.Button,
@@ -95,10 +97,13 @@ const event: Event<"messageCreate"> = async function event(message) {
 			const collector = await generateModmailConfirm(
 				{
 					title: "Confirmation",
+
 					description: `Are you sure you want to send client message to **the ${escapeMessage(
 						CONSTANTS.guild.name,
 					)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
+
 					color: MODMAIL_COLORS.confirm,
+
 					author: {
 						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
 						name: CONSTANTS.guild.name,
@@ -109,11 +114,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 						{
 							title: "Modmail ticket opened!",
 							description: `Ticket by ${message.author.toString()}`,
+
 							footer: {
-								text:
-									MODMAIL_UNSUPPORTED +
-									"\nMessages starting with an equals sign (=) are ignored.",
+								text: `${MODMAIL_UNSUPPORTED}\nMessages starting with an equals sign (=) are ignored.`,
 							},
+
 							color: MODMAIL_COLORS.opened,
 						},
 						message.member ?? message.author,
@@ -124,9 +129,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 					await Promise.all([
 						buttonInteraction.reply({
-							content:
-								`${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ` +
-								MODMAIL_UNSUPPORTED,
+							content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ${MODMAIL_UNSUPPORTED}`,
 
 							ephemeral: true,
 						}),
@@ -144,7 +147,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 			message.channel
 				.createMessageCollector({ time: CONSTANTS.collectorTime })
 				.on("collect", async () => {
-					collector?.stop();
+					collector.stop();
 				});
 		}
 	}
@@ -166,7 +169,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		message.channel.type === ChannelType.PublicThread &&
 		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
 		!message.content.startsWith("=") &&
-		(message.webhookId && message.author.id !== client.user?.id
+		(message.webhookId && message.author.id !== client.user.id
 			? message.applicationId !== client.application.id
 			: true) &&
 		message.interaction?.commandName !== "modmail close"
@@ -174,19 +177,18 @@ const event: Event<"messageCreate"> = async function event(message) {
 		const member = await getUserFromModmail(message.channel);
 
 		const useMentions =
-			userSettingsDatabase.data.find((settings) => member?.id === settings.user)
+			userSettingsDatabase.data.find((settings) => member.id === settings.user)
 				?.useMentions ?? false;
 
 		const messageToSend = await generateModmailMessage(message);
 
-		messageToSend.content =
-			(useMentions ? message.author.toString() : message.author.username) +
-			":" +
-			(messageToSend.content ? " " + messageToSend.content : "");
+		messageToSend.content = `${
+			useMentions ? message.author.toString() : message.author.username
+		}:${messageToSend.content ? ` ${messageToSend.content}` : ""}`;
 
 		reactions++;
 
-		promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
+		promises.push(member.send(messageToSend).then(...generateReactionFunctions(message)));
 	}
 
 	// #upcoming-updates
@@ -197,6 +199,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 					message.cleanContent || message.embeds[0]?.title || "[image]",
 					50,
 				),
+
 				reason: "New upcoming update",
 			}),
 		);
@@ -260,7 +263,10 @@ const event: Event<"messageCreate"> = async function event(message) {
 		lastInChannel.unshift(message);
 		const bot =
 			1 +
-			+(!!message.interaction || /^(r!|<@323630372531470346>)\s*\w+/i.test(message.content));
+			Number(
+				Boolean(message.interaction) ||
+					/^(r!|<@323630372531470346>)\s*\w+/i.test(message.content),
+			);
 
 		promises.push(
 			giveXp(
@@ -279,16 +285,18 @@ const event: Event<"messageCreate"> = async function event(message) {
 								(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
 									bot /
 									(1 +
-										+![
-											MessageType.Default,
-											MessageType.GuildBoost,
-											MessageType.GuildBoostTier1,
-											MessageType.GuildBoostTier2,
-											MessageType.GuildBoostTier3,
-											MessageType.Reply,
-											MessageType.ChatInputCommand,
-											MessageType.ContextMenuCommand,
-										].includes(message.type)),
+										Number(
+											![
+												MessageType.Default,
+												MessageType.GuildBoost,
+												MessageType.GuildBoostTier1,
+												MessageType.GuildBoostTier2,
+												MessageType.GuildBoostTier3,
+												MessageType.Reply,
+												MessageType.ChatInputCommand,
+												MessageType.ContextMenuCommand,
+											].includes(message.type),
+										)),
 							),
 					  ),
 			),
@@ -299,7 +307,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	const REACTION_CAP = 2;
 
-	function react(emoji: EmojiIdentifierResolvable): Promise<void | MessageReaction> | void {
+	/** @param emoji */
+	function react(emoji: EmojiIdentifierResolvable): Promise<MessageReaction | void> | void {
 		if (reactions > REACTION_CAP) return;
 		reactions++;
 		const promise = message.react(emoji).catch(console.error);
@@ -337,15 +346,15 @@ const event: Event<"messageCreate"> = async function event(message) {
 	 * Determines whether the message contains a word.
 	 *
 	 * @param text - The word to check for.
+	 * @param plural
 	 *
 	 * @returns Whether the message contains the word.
 	 */
-	function includes(text: string | RegExp, plural = true): boolean {
+	function includes(text: RegExp | string, plural = true): boolean {
 		return new RegExp(
-			"\\b" +
-				(typeof text === "string" ? text : "(?:" + text.source + ")") +
-				(plural ? "(?:e?s)?" : "") +
-				"\\b",
+			`\\b${typeof text === "string" ? text : `(?:${text.source})`}${
+				plural ? "(?:e?s)?" : ""
+			}\\b`,
 			"i",
 		).test(content);
 	}
@@ -358,11 +367,9 @@ const event: Event<"messageCreate"> = async function event(message) {
 		react(CONSTANTS.emojis.autoreact.e);
 	if (includes("dango") && !content.includes("🍡")) react("🍡");
 	if (includes(/av[ao]cado/) && !content.includes("🥑")) react("🥑");
-	if (includes("sat on addon")) {
-		if (reactions < REACTION_CAP) {
-			reactions = reactions + 3;
-			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
-		}
+	if (includes("sat on addon") && reactions < REACTION_CAP) {
+		reactions += 3;
+		promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
 	}
 
 	// Server jokes
@@ -372,13 +379,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆")) react("🦆");
 	if (content === "radio") react("📻");
 	if (content === "agreed") react(CONSTANTS.emojis.autoreact.mater);
-	if (includes(/te(?:r|w)+a+/) || /👉\s*👈/.test(message.content))
+	if (includes(/te[rw]+a+/) || /👉\s*👈/.test(message.content))
 		react(CONSTANTS.emojis.autoreact.tera);
-	if (includes("snake") || includes("snek")) {
-		if (reactions < REACTION_CAP) {
-			reactions = reactions + 3;
-			promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
-		}
+	if ((includes("snake") || includes("snek")) && reactions < REACTION_CAP) {
+		reactions += 3;
+		promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
 	}
 
 	// Discord jokes
@@ -388,17 +393,17 @@ const event: Event<"messageCreate"> = async function event(message) {
 	)
 		react("🤮");
 	if (
-		message.mentions.has(client.user?.id ?? "", {
+		message.mentions.has(client.user.id ?? "", {
 			ignoreEveryone: true,
 			ignoreRoles: true,
 			ignoreRepliedUser: true,
 		}) &&
-		message.author.id !== client.user?.id
+		message.author.id !== client.user.id
 	)
 		react("👋");
 
 	// Scratch jokes
-	if (includes(/j[eo]f+[oa]l+o/) || includes(/buf+[oa]l+o/))
+	if (includes(/j[eo]f+[ao]l+o/) || includes(/buf+[ao]l+o/))
 		react(CONSTANTS.emojis.autoreact.jeffalo);
 	if (includes(/wasteof\.(?!money)/, false)) react(CONSTANTS.emojis.autoreact.wasteof);
 	if (

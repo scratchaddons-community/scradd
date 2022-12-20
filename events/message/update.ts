@@ -1,13 +1,16 @@
+import diffLib from "difflib";
+import { ButtonStyle, ComponentType } from "discord.js";
+import jsonDiff from "json-diff";
+
+import client from "../../client.js";
 import { automodMessage } from "../../common/automod.js";
+import CONSTANTS from "../../common/CONSTANTS.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
 import { getMessageJSON } from "../../util/discord.js";
-import jsonDiff from "json-diff";
-import { ButtonStyle, ComponentType } from "discord.js";
-import diffLib from "difflib";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import client from "../../client.js";
+
 import type Event from "../../common/types/event";
-import { DATABASE_THREAD } from "../../common/database.js";
+
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 const event: Event<"messageUpdate"> = async function event(oldMessage, newMessage) {
@@ -30,9 +33,11 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 			"messages",
 			{
 				embeds: oldMessage.embeds,
+
 				components: [
 					{
 						type: ComponentType.ActionRow,
+
 						components: [
 							{
 								type: ComponentType.Button,
@@ -76,19 +81,21 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 			{ color: false },
 		);
 
-		if (contentDiff)
+		if (contentDiff) {
 			files.push({
 				attachment: Buffer.from(
 					contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 					"utf-8",
 				),
+
 				name: "content.diff",
 			});
+		}
 
 		if (extraDiff)
 			files.push({ attachment: Buffer.from(extraDiff, "utf-8"), name: "extra.diff" });
 
-		if (files.length)
+		if (files.length > 0) {
 			log(
 				`✏ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
 					newMessage.id
@@ -96,9 +103,11 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				"messages",
 				{
 					files,
+
 					components: [
 						{
 							type: ComponentType.ActionRow,
+
 							components: [
 								{
 									type: ComponentType.Button,
@@ -111,25 +120,28 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 					],
 				},
 			);
+		}
 	}
 
 	await Promise.all(
-		logs.map((edit) =>
-			log(edit + "!", "messages", {
-				components: [
-					{
-						type: ComponentType.ActionRow,
-						components: [
-							{
-								type: ComponentType.Button,
-								label: "View Message",
-								style: ButtonStyle.Link,
-								url: newMessage.url,
-							},
-						],
-					},
-				],
-			}),
+		logs.map(
+			async (edit) =>
+				await log(`${edit}!`, "messages", {
+					components: [
+						{
+							type: ComponentType.ActionRow,
+
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "View Message",
+									style: ButtonStyle.Link,
+									url: newMessage.url,
+								},
+							],
+						},
+					],
+				}),
 		),
 	);
 	if (await automodMessage(newMessage)) return;

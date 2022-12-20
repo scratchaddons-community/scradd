@@ -77,13 +77,13 @@ export function caesar(text, rot = 13) {
 
 /** @param {string} text */
 export function pingablify(text) {
-	const regex = /[^\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]/giu;
+	const regex = /[^\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]/giu;
 	const segments = Array.from(new Intl.Segmenter().segment(text));
 	const pingable =
 		segments.reduce((count, { segment }) => count + Number(regex.test(segment)), 0) <
 		segments.length / 2;
 
-	return pingable && /[\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]{4,}/u.test(text)
+	return pingable && /[\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]{4,}/u.test(text)
 		? text
 		: text.replaceAll(regex, "") || `[pingable name] ${truncateText(text, 10)}`;
 }

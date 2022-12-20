@@ -6,7 +6,7 @@ import {
 	MessageType,
 	type ModalSubmitInteraction,
 	TextInputStyle,
-	MessageEditOptions,
+	type MessageEditOptions,
 } from "discord.js";
 import jsonDiff from "json-diff";
 
