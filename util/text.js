@@ -35,13 +35,13 @@ export function generateHash(prefix = "") {
 export function joinWithAnd(array, callback = (item) => item.toString()) {
 	const last = array.pop();
 
-	if (typeof last === "undefined") return "";
+	if (last === undefined) return "";
 
 	if (array.length === 0) return callback(last);
 
 	return `${
 		array.length === 1
-			? (array[0] ? callback(array[0]) : "") + " "
+			? `${array[0] ? callback(array[0]) : ""} `
 			: array.map((item) => `${callback(item)}, `).join("")
 	}and ${callback(last)}`;
 }
@@ -56,34 +56,36 @@ export function joinWithAnd(array, callback = (item) => item.toString()) {
  */
 export function truncateText(text, maxLength) {
 	const firstLine = text.replaceAll(/\s+/g, " ");
-	const segments = [...new Intl.Segmenter().segment(firstLine)].map(({ segment }) => segment);
+	const segments = Array.from(new Intl.Segmenter().segment(firstLine), ({ segment }) => segment);
 
 	return segments.length > maxLength || text.includes("\n")
 		? `${segments.slice(0, Math.max(0, maxLength - 1)).join("")}…`
 		: segments.join("");
 }
 
-/** @param {string} text */
+/**
+ * @param {string} text
+ * @param rot
+ */
 export function caesar(text, rot = 13) {
-	return text.replace(/[a-zA-Z]/g, function (chr) {
-		var start = chr <= "Z" ? 65 : 97;
+	return text.replace(/[a-z]/gi, (chr) => {
+		const start = chr <= "Z" ? 65 : 97;
+
 		return String.fromCharCode(start + ((chr.charCodeAt(0) - start + rot) % 26));
 	});
 }
 
 /** @param {string} text */
 export function pingablify(text) {
-	const regex = /[^\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]/gi;
-	const segments = [...new Intl.Segmenter().segment(text)];
+	const regex = /[^\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]/giu;
+	const segments = Array.from(new Intl.Segmenter().segment(text));
 	const pingable =
-		segments.reduce((count, { segment }) => {
-			return count + +!!regex.test(segment);
-		}, 0) <
+		segments.reduce((count, { segment }) => count + Number(regex.test(segment)), 0) <
 		segments.length / 2;
 
-	return pingable && /[\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]{4,}/.test(text)
+	return pingable && /[\p{Diacritic}\w`~!@#$%^&*()=+[\]\\{}|;':",\./<>? -]{4,}/u.test(text)
 		? text
-		: text.replaceAll(regex, "") || "[pingable name] " + truncateText(text, 10);
+		: text.replaceAll(regex, "") || `[pingable name] ${truncateText(text, 10)}`;
 }
 
 /** @param {string} text */

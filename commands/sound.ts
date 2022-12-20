@@ -1,4 +1,6 @@
-import { ApplicationCommandOptionType, ChannelType, GuildMember, VoiceChannel } from "discord.js";
+import url from "node:url";
+import path from "path";
+
 import {
 	joinVoiceChannel,
 	VoiceConnectionStatus,
@@ -8,23 +10,26 @@ import {
 	createAudioResource,
 	AudioPlayerStatus,
 } from "@discordjs/voice";
-import { defineCommand } from "../common/types/command.js";
-import url from "node:url";
-import path from "path";
+import { ApplicationCommandOptionType, ChannelType, GuildMember, VoiceChannel } from "discord.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
+import { defineCommand } from "../common/types/command.js";
 
 const command = defineCommand({
 	data: {
 		description: "Commands to play sounds in voice channels",
+
 		subcommands: {
 			meme: {
 				description: "Play a meme sound",
+
 				options: {
 					sound: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
 						description: "The sound to play",
+
 						choices: {
 							"amongus.mp3": "AMONGUS",
 							"youreWelcome.mp3": "And thank you!",
@@ -52,20 +57,24 @@ const command = defineCommand({
 							"yeet.mp3": "YEEEET!",
 						},
 					},
+
 					channel: {
-						type: ApplicationCommandOptionType.Channel,
-						description: "The channel to play the sound in",
 						channelTypes: [ChannelType.GuildVoice],
+						description: "The channel to play the sound in",
+						type: ApplicationCommandOptionType.Channel,
 					},
 				},
 			},
+
 			quote: {
 				description: "Play a quote sound",
+
 				options: {
 					sound: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
 						description: "The sound to play",
+
 						choices: {
 							"colaberVoiceReveal.wav": "And then, Colaber, voice revealed",
 							"squidward.mp3": "Co-Lay-Burrrr",
@@ -83,6 +92,7 @@ const command = defineCommand({
 							"welcomeBack.mp3": "Welcome back to the Scratch Addons YouTube channel",
 						},
 					},
+
 					channel: {
 						type: ApplicationCommandOptionType.Channel,
 						description: "The channel to play the sound in",
@@ -105,22 +115,24 @@ const command = defineCommand({
 			interaction.member.voice.channel,
 		].find((channel): channel is VoiceChannel => channel instanceof VoiceChannel);
 
-		if (!channel)
-			return interaction.reply({
-				ephemeral: true,
+		if (!channel) {
+			return await interaction.reply({
 				content: `${CONSTANTS.emojis.statuses.no} Please select or join a voice channel!`,
-			});
-
-		if (CONSTANTS.guild.members.me?.voice.channel)
-			return interaction.reply({
 				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} I'm already playing something!`,
 			});
+		}
+
+		if (CONSTANTS.guild.members.me?.voice.channel) {
+			return await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.no} I'm already playing something!`,
+				ephemeral: true,
+			});
+		}
 
 		const connection = joinVoiceChannel({
+			adapterCreator: channel.guild.voiceAdapterCreator,
 			channelId: channel.id,
 			guildId: channel.guild.id,
-			adapterCreator: channel.guild.voiceAdapterCreator,
 			selfDeaf: false,
 		});
 

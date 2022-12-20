@@ -6,6 +6,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 } from "discord.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getStrikeById, strikeDatabase } from "../common/punishments.js";
 import { defineCommand } from "../common/types/command.js";
@@ -14,18 +15,11 @@ import { paginate } from "../util/discord.js";
 const command = defineCommand({
 	data: {
 		description: "Commands to view strike information",
+
 		subcommands: {
-			user: {
-				description: "View your or (Mods only) someone else’s strikes",
-				options: {
-					user: {
-						type: ApplicationCommandOptionType.User,
-						description: "(Mods only) The user to see strikes for",
-					},
-				},
-			},
 			id: {
 				description: "View a strike by ID",
+
 				options: {
 					id: {
 						required: true,
@@ -34,7 +28,19 @@ const command = defineCommand({
 					},
 				},
 			},
+
+			user: {
+				description: "View your or (Mods only) someone else’s strikes",
+
+				options: {
+					user: {
+						type: ApplicationCommandOptionType.User,
+						description: "(Mods only) The user to see strikes for",
+					},
+				},
+			},
 		},
+
 		censored: false,
 	},
 
@@ -59,7 +65,7 @@ const command = defineCommand({
 				const member =
 					selected instanceof GuildMember
 						? selected
-						: await CONSTANTS.guild?.members.fetch(selected.id).catch(() => {});
+						: await CONSTANTS.guild.members.fetch(selected.id).catch(() => {});
 
 				if (
 					selected.id !== interaction.member.id &&
@@ -76,7 +82,10 @@ const command = defineCommand({
 					.sort((one, two) => two.date - one.date);
 
 				const totalStrikeCount = Math.trunc(
-					strikes.reduce((acc, { count, removed }) => count * +!removed + acc, 0),
+					strikes.reduce(
+						(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
+						0,
+					),
 				);
 
 				await paginate(
@@ -89,18 +98,18 @@ const command = defineCommand({
 						} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 							strike.removed ? "~~" : ""
 						}`,
-					(data) => {
+					async (data) => {
 						if (
 							data.embeds?.[0] &&
 							"footer" in data.embeds[0] &&
 							data.embeds[0].footer?.text
 						) {
-							data.embeds[0].footer.text = data.embeds[0].footer?.text.replace(
+							data.embeds[0].footer.text = data.embeds[0].footer.text.replace(
 								/\d+ $/,
 								`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
 							);
 						}
-						return interaction[interaction.replied ? "editReply" : "reply"](data);
+						return await interaction[interaction.replied ? "editReply" : "reply"](data);
 					},
 					{
 						title: `${member?.displayName || user.username}'s strikes`,
@@ -111,21 +120,24 @@ const command = defineCommand({
 						formatFromUser: true,
 						ephemeral: true,
 						count: false,
+
 						generateComponents(filtered) {
-							if (filtered.length > 5)
+							if (filtered.length > 5) {
 								return [
 									{
 										type: ComponentType.StringSelect,
 										customId: "selectStrike",
 										placeholder: "View more information on a strike",
+
 										options: filtered.map((strike) => ({
-											label: strike.id + "",
-											value: strike.id + "",
+											label: String(strike.id),
+											value: String(strike.id),
 										})),
 									},
 								];
+							}
 							return filtered.map((strike) => ({
-								label: strike.id + "",
+								label: String(strike.id),
 								style: ButtonStyle.Secondary,
 								customId: `${strike.id}_strike`,
 								type: ComponentType.Button,

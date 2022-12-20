@@ -1,24 +1,28 @@
 import { ApplicationCommandOptionType } from "discord.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import warn, { MUTE_LENGTHS, STRIKES_PER_MUTE, DEFAULT_STRIKES } from "../common/punishments.js";
-import { stripMarkdown } from "../util/markdown.js";
 import { defineCommand } from "../common/types/command.js";
+import { stripMarkdown } from "../util/markdown.js";
 
 const command = defineCommand({
 	data: {
 		description: "(Mod only) Warns a user",
 		restricted: true,
+
 		options: {
 			user: {
 				type: ApplicationCommandOptionType.User,
 				description: "The user to warn",
 				required: true,
 			},
+
 			reason: {
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the warning",
 				required: process.env.NODE_ENV === "production",
 			},
+
 			strikes: {
 				type: ApplicationCommandOptionType.Integer,
 				description: `How many strikes to add (defaults to ${DEFAULT_STRIKES})`,
@@ -27,6 +31,7 @@ const command = defineCommand({
 			},
 		},
 	},
+
 	async interaction(interaction) {
 		const user = interaction.options.getUser("user", true);
 		const reason = stripMarkdown(interaction.options.getString("reason") || "No reason given.");
@@ -35,9 +40,10 @@ const command = defineCommand({
 
 		await interaction.reply({
 			allowedMentions: { users: [] },
+
 			content: `${CONSTANTS.emojis.statuses.yes} ${
-				strikes ? `Warned` : "Verbally warned"
-			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
+				strikes ? "W" : "Verbally w"
+			}arned ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
 		});
 	},
 });

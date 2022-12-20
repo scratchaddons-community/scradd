@@ -1,11 +1,11 @@
 import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
-
+import { defineCommand } from "../common/types/command.js";
 import { escapeMessage, escapeLinks, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import { defineCommand } from "../common/types/command.js";
 
 const fuse = new Fuse(addons, {
 	findAllMatches: true,
@@ -26,20 +26,30 @@ const fuse = new Fuse(addons, {
 });
 
 const command = defineCommand({
+	async autocomplete(interaction) {
+		await interaction.respond(
+			fuse
+				.search(interaction.options.getString("addon", true))
+				.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
+				.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
+		);
+	},
+
 	data: {
+		censored: "channel",
+
 		description: `Replies with information about a specific addon available in v${
-			manifest.version_name || manifest.version
+			manifest.version_name ?? manifest.version
 		}`,
+
 		options: {
 			addon: {
+				autocomplete: true,
 				description: "The name of the addon",
 				required: true,
-				autocomplete: true,
 				type: ApplicationCommandOptionType.String,
 			},
 		},
-
-		censored: "channel",
 	},
 
 	async interaction(interaction) {
@@ -63,22 +73,24 @@ const command = defineCommand({
 			: addon.tags.includes("theme")
 			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
 			: addon.tags.includes("community")
-			? "Scratch Website Features -> " +
-			  (addon.tags.includes("profiles")
-					? "Profiles"
-					: addon.tags.includes("projectPage")
-					? "Project Pages"
-					: addon.tags.includes("forums")
-					? "Forums"
-					: "Others")
-			: "Scratch Editor Features -> " +
-			  (addon.tags.includes("codeEditor")
-					? "Code Editor"
-					: addon.tags.includes("costumeEditor")
-					? "Costume Editor"
-					: addon.tags.includes("projectPlayer")
-					? "Project Player"
-					: "Others");
+			? `Scratch Website Features -> ${
+					addon.tags.includes("profiles")
+						? "Profiles"
+						: addon.tags.includes("projectPage")
+						? "Project Pages"
+						: addon.tags.includes("forums")
+						? "Forums"
+						: "Others"
+			  }`
+			: `Scratch Editor Features -> ${
+					addon.tags.includes("codeEditor")
+						? "Code Editor"
+						: addon.tags.includes("costumeEditor")
+						? "Costume Editor"
+						: addon.tags.includes("projectPlayer")
+						? "Project Player"
+						: "Others"
+			  }`;
 
 		const credits = joinWithAnd(
 			addon.credits?.map((credit) => {
@@ -97,36 +109,27 @@ const command = defineCommand({
 		await interaction.reply({
 			embeds: [
 				{
-					title: addon.name,
 					color: CONSTANTS.themeColor,
+
 					description:
 						`${escapeMessage(addon.description)}\n` +
 						`[See source code](https://github.com/${CONSTANTS.urls.saRepo}/tree/${
 							manifest.version_name?.endsWith("-prerelease")
-								? `main`
+								? "main"
 								: `v${encodeURI(manifest.version)}`
 						}/addons/${encodeURIComponent(addon.id)}/)${
 							addon.permissions?.length
 								? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 								: ""
 						}`,
-					footer: { text: addon.id + "\nClick the addon name to enable it!" },
-					thumbnail: {
-						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
-					},
-					url:
-						group === "Easter Eggs"
-							? undefined
-							: `https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
-									addon.id,
-							  )}`,
+
 					fields: [
 						...(credits
 							? [
 									{
+										inline: true,
 										name: "🫂 Contributors",
 										value: escapeMarkdown(credits),
-										inline: true,
 									},
 							  ]
 							: []),
@@ -134,10 +137,10 @@ const command = defineCommand({
 						{
 							inline: true,
 							name: "📝 Version added",
+
 							value: escapeMarkdown(
-								"v" +
-									addon.versionAdded +
-									(addon.latestUpdate && lastUpdatedIn
+								`v${addon.versionAdded}${
+									addon.latestUpdate && lastUpdatedIn
 										? ` (${
 												interaction.channel
 													? generateTooltip(
@@ -147,22 +150,29 @@ const command = defineCommand({
 													  )
 													: lastUpdatedIn
 										  })`
-										: ""),
+										: ""
+								}`,
 							),
 						},
 					],
+
+					footer: { text: `${addon.id}\nClick the addon name to enable it!` },
+
+					thumbnail: {
+						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
+					},
+
+					title: addon.name,
+
+					url:
+						group === "Easter Eggs"
+							? undefined
+							: `https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
+									addon.id,
+							  )}`,
 				},
 			],
 		});
-	},
-
-	async autocomplete(interaction) {
-		await interaction.respond(
-			fuse
-				.search(interaction.options.getString("addon", true))
-				.filter(({ score }, i) => i < 25 && (score || 0) < 0.1)
-				.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
-		);
 	},
 });
 

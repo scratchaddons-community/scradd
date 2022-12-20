@@ -1,28 +1,30 @@
 import {
-	Message,
+	type Message,
 	escapeMarkdown,
 	ComponentType,
 	GuildMember,
-	InteractionCollector,
-	MappedInteractionTypes,
-	MessageComponentType,
-	ModalSubmitInteraction,
-	Snowflake,
-	APIActionRowComponent,
-	APIStringSelectComponent,
+	type InteractionCollector,
+	type MappedInteractionTypes,
+	type MessageComponentType,
+	type ModalSubmitInteraction,
+	type Snowflake,
+	type APIActionRowComponent,
+	type APIStringSelectComponent,
 	Collection,
 	TextInputStyle,
 	ButtonStyle,
 	chatInputApplicationCommandMention,
 } from "discord.js";
 import Fuse from "fuse.js";
+
 import CONSTANTS from "../common/CONSTANTS.js";
-import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { manifest, addons } from "../common/extension.js";
-import { generateHash, trimPatchVersion } from "../util/text.js";
-import { disableComponents } from "../util/discord.js";
-import type AddonManifest from "../common/types/addonManifest";
+import { CURRENTLY_PLAYING, checkIfUserPlaying } from "../common/games.js";
 import { defineCommand } from "../common/types/command.js";
+import { disableComponents } from "../util/discord.js";
+import { generateHash, trimPatchVersion } from "../util/text.js";
+
+import type AddonManifest from "../common/types/addonManifest";
 
 const COLLECTOR_TIME = CONSTANTS.collectorTime * 4;
 
@@ -39,7 +41,7 @@ const fuse = new Fuse(addons, {
 });
 const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 	"addon",
-	(await CONSTANTS.guild.commands.fetch())?.find((command) => command.name === "addon")?.id || "",
+	(await CONSTANTS.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
 )} command for more information about this addon!*`;
 
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
@@ -65,7 +67,7 @@ type AddonQuestions = AddonQuestion[];
 const addonStartings = Object.fromEntries(
 	addons.map(({ name }) => [
 		`Does your addon’s name **start** with **${escapeMarkdown(
-			name[0]?.toUpperCase() || "",
+			name[0]?.toUpperCase() ?? "",
 		)}**?`,
 		false,
 	]),
@@ -73,7 +75,7 @@ const addonStartings = Object.fromEntries(
 const addonEndings = Object.fromEntries(
 	addons.map(({ name }) => [
 		`Does your addon’s name **end** with **${escapeMarkdown(
-			name.at(-1)?.toUpperCase() || "",
+			name.at(-1)?.toUpperCase() ?? "",
 		)}**?`,
 		false,
 	]),
@@ -82,7 +84,7 @@ const versionMarkdown = `**[${escapeMarkdown(
 	manifest.version_name || manifest.version,
 )}](https://github.com/${CONSTANTS.urls.saRepo}${
 	manifest.version_name?.endsWith("-prerelease")
-		? ``
+		? ""
 		: `/releases/tag/v${encodeURI(manifest.version)}`
 })**`;
 const QUESTIONS = {
@@ -92,77 +94,99 @@ const QUESTIONS = {
 			statement: "This addon is an easter egg addon!",
 			markdownless: "Is this addon an easter egg addon?",
 		},
+
 		editor: {
 			code: {
 				question:
 					"Is your addon listed under **Scratch Editor Features** -> **Code Editor**?",
+
 				statement:
 					"This addon is listed under **Scratch Editor Features** -> **Code Editor**!",
+
 				markdownless: "Is this addon listed under Scratch Editor Features -> Code Editor?",
 			},
+
 			costumes: {
 				question:
 					"Is your addon listed under **Scratch Editor Features** -> **Costume Editor**?",
+
 				statement:
 					"This addon is listed under **Scratch Editor Features** -> **Costume Editor**!",
+
 				markdownless:
 					"Is this addon listed under Scratch Editor Features -> Costume Editor?",
 			},
+
 			other: {
 				question: "Is your addon listed under **Scratch Editor Features** -> **Others**?",
 				statement: "This addon is listed under **Scratch Editor Features** -> **Others**!",
 				markdownless: "Is this addon listed under Scratch Editor Features -> Others?",
 			},
+
 			player: {
 				question:
 					"Is your addon listed under **Scratch Editor Features** -> **Project Player**?",
+
 				statement:
 					"This addon is listed under **Scratch Editor Features** -> **Project Player**!",
+
 				markdownless:
 					"Is this addon listed under Scratch Editor Features -> Project Player?",
 			},
+
 			root: {
 				question: "Is your addon listed under **Scratch Editor Features**?",
 				statement: "This addon is listed under **Scratch Editor Features**!",
 				markdownless: "Is this addon listed under Scratch Editor Features?",
 			},
 		},
+
 		popup: {
 			question: "Is your addon listed under **Extension Popup Features**?",
 			statement: "This addon is listed under **Extension Popup Features**!",
 			markdownless: "Is this addon listed under Extension Popup Features?",
 		},
+
 		themes: {
 			question: "Is your addon listed under **Themes**?",
 			statement: "This addon is listed under **Themes**!",
 			markdownless: "Is this addon is listed under Themes?",
 		},
+
 		website: {
 			forums: {
 				question: "Is your addon listed under **Scratch Website Features** -> **Forums**?",
 				statement: "This addon is listed under **Scratch Website Features** -> **Forums**!",
 				markdownless: "Is this addon listed under Scratch Website Features -> Forums?",
 			},
+
 			other: {
 				question: "Is your addon listed under **Scratch Website Features** -> **Others**?",
 				statement: "This addon is listed under **Scratch Website Features** -> **Others**!",
 				markdownless: "Is this addon listed under Scratch Website Features -> Others?",
 			},
+
 			profiles: {
 				question:
 					"Is your addon listed under **Scratch Website Features** -> **Profiles**?",
+
 				statement:
 					"This addon is listed under **Scratch Website Features** -> **Profiles**!",
+
 				markdownless: "Is this addon listed under Scratch Website Features -> Profiles?",
 			},
+
 			projects: {
 				question:
 					"Is your addon listed under **Scratch Website Features** -> **Project Pages**?",
+
 				statement:
 					"This addon is listed under **Scratch Website Features** -> **Project Pages**!",
+
 				markdownless:
 					"Is this addon listed under Scratch Website Features -> Project Pages?",
 			},
+
 			root: {
 				question: "Is your addon listed under **Scratch Website Features**?",
 				statement: "This addon is listed under **Scratch Website Features**!",
@@ -170,88 +194,104 @@ const QUESTIONS = {
 			},
 		},
 	},
+
 	groups: {
 		beta: {
 			question: "Is your addon found under **Beta** when disabled?",
 			statement: "This addon is found under **Beta** when disabled!",
 			markdownless: "Is this addon found under Beta when disabled?",
 		},
+
 		featured: {
 			question: "Is your addon found under **Featured** when disabled?",
 			statement: "This addon is found under **Featured** when disabled!",
 			markdownless: "Is this addon found under Featured when disabled?",
 		},
+
 		forums: {
 			question: "Is your addon found under **Forums** when disabled?",
 			statement: "This addon is found under **Forums** when disabled",
 			markdownless: "Is this addon found under Forums when disabled?",
 		},
+
 		others: {
 			question: "Is your addon found under **Others** when disabled?",
 			statement: "This addon is found under **Others** when disabled",
 			markdownless: "Is this addon found under Others when disabled?",
 		},
 	},
+
 	history: {
 		new: {
 			question: `Was your addon added in the latest version (${versionMarkdown})?`,
 			statement: "This addon was added in the latest version!",
 			markdownless: "Was this addon added in the latest version?",
 		},
+
 		updated: {
 			question: `Was your addon updated (not including completely new addons) in the latest version (${versionMarkdown})?`,
 			statement: "This addon was updated in the latest version!",
 			markdownless: "Was this addon updated in the latest version?",
 		},
 	},
+
 	settings: {
 		credits: {
 			question: "Does your addon have credits listed on the settings page?",
 			statement: "This addon has credits listed on the settings page!",
 			markdownless: "Does this addon have credits listed on the settings page?",
 		},
+
 		enabledDefault: {
 			question: "Is your addon enabled by default?",
 			statement: "This addon is enabled by default!",
 			markdownless: "Is this addon enabled by default?",
 		},
+
 		info: {
 			question: "Does your addon have any notices on the settings page?",
 			statement: "This addon has notice(s) on the settings page!",
 			markdownless: "Does this addon have any notices on the settings page?",
 		},
+
 		presets: {
 			question: "Does your addon have any presets for its settings?",
 			statement: "This addon has presets for its settings!",
 			markdownless: "Does this addon have any presets for its settings?",
 		},
+
 		preview: {
 			question: "Does your addon have an interactive preview for its settings?",
 			statement: "This addon has an interactive preview for its settings!",
 			markdownless: "Does this addon have an interactive preview for its settings?",
 		},
+
 		settings: {
 			question: "Does your addon have any settings?",
 			statement: "This addon has settings!",
 			markdownless: "Does this addon have any settings?",
 		},
 	},
+
 	tags: {
 		beta: {
 			question: "Does your addon have the **Beta** tag?",
 			statement: "This addon has the **Beta** tag!",
 			markdownless: "Does this addon have the Beta tag?",
 		},
+
 		dangerous: {
 			question: "Does your addon have the **Dangerous** tag?",
 			statement: "This addon has the **Dangerous** tag!",
 			markdownless: "Does this addon have the Dangerous tag?",
 		},
+
 		forums: {
 			question: "Does your addon have the **Forums** tag?",
 			statement: "This addon has the **Forums** tag!",
 			markdownless: "Does this addon have the Forums tag?",
 		},
+
 		recommended: {
 			question: "Does your addon have the **Recommended** tag?",
 			statement: "This addon has the **Recommended** tag!",
@@ -269,18 +309,23 @@ const questionsByAddon = Object.fromEntries(
 			{
 				dependencies: {
 					...addonStartings,
+
 					[`Does your addon’s name **start** with **${escapeMarkdown(
 						addon.name[0]?.toUpperCase() || "",
 					)}**?`]: undefined,
 				},
+
 				group: "Addon name",
 				order: 1,
+
 				question: `Does your addon’s name **start** with **${escapeMarkdown(
 					addon.name[0]?.toUpperCase() || "",
 				)}**?`,
+
 				statement: `This addon’s name starts with **${escapeMarkdown(
 					addon.name[0]?.toUpperCase() || "",
 				)}**!`,
+
 				markdownless: `Does this addon’s name start with ${
 					addon.name[0]?.toUpperCase() || ""
 				}?`,
@@ -288,18 +333,23 @@ const questionsByAddon = Object.fromEntries(
 			{
 				dependencies: {
 					...addonEndings,
+
 					[`Does your addon’s name **end** with **${escapeMarkdown(
 						addon.name.at(-1)?.toUpperCase() || "",
 					)}**?`]: undefined,
 				},
+
 				group: "Addon name",
 				order: 2,
+
 				question: `Does your addon’s name **end** with **${escapeMarkdown(
 					addon.name.at(-1)?.toUpperCase() || "",
 				)}**?`,
+
 				statement: `This addon’s name ends with **${escapeMarkdown(
 					addon.name.at(-1)?.toUpperCase() || "",
 				)}**!`,
+
 				markdownless: `Does this addon’s name end with ${
 					addon.name.at(-1)?.toUpperCase() || ""
 				}?`,
@@ -323,6 +373,7 @@ const questionsByAddon = Object.fromEntries(
 						[QUESTIONS.categories.themes.question]: false,
 						[QUESTIONS.categories.website.root.question]: false,
 						[QUESTIONS.categories.popup.question]: false,
+
 						[QUESTIONS.categories.easterEgg.question]:
 							forcedEasterEgg === addon.id ? undefined : false,
 					},
@@ -342,6 +393,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.editor.costumes.question]: false,
 							[QUESTIONS.categories.editor.player.question]: false,
 						},
+
 						group: "Categorization",
 						order: 11,
 						question: QUESTIONS.categories.editor.code.question,
@@ -356,6 +408,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.editor.other.question]: false,
 							[QUESTIONS.categories.editor.player.question]: false,
 						},
+
 						group: "Categorization",
 						order: 12,
 						question: QUESTIONS.categories.editor.costumes.question,
@@ -370,6 +423,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.editor.costumes.question]: false,
 							[QUESTIONS.categories.editor.other.question]: false,
 						},
+
 						group: "Categorization",
 						order: 13,
 						question: QUESTIONS.categories.editor.player.question,
@@ -384,6 +438,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.editor.costumes.question]: false,
 							[QUESTIONS.categories.editor.player.question]: false,
 						},
+
 						group: "Categorization",
 						order: 14,
 						question: QUESTIONS.categories.editor.other.question,
@@ -403,6 +458,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.website.projects.question]: false,
 							[QUESTIONS.categories.website.forums.question]: false,
 						},
+
 						group: "Categorization",
 						order: 17,
 						question: QUESTIONS.categories.website.profiles.question,
@@ -417,6 +473,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.website.other.question]: false,
 							[QUESTIONS.categories.website.forums.question]: false,
 						},
+
 						group: "Categorization",
 						order: 16,
 						question: QUESTIONS.categories.website.projects.question,
@@ -431,6 +488,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.website.projects.question]: false,
 							[QUESTIONS.categories.website.other.question]: false,
 						},
+
 						group: "Categorization",
 						order: 18,
 						question: QUESTIONS.categories.website.forums.question,
@@ -445,6 +503,7 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.website.projects.question]: false,
 							[QUESTIONS.categories.website.forums.question]: false,
 						},
+
 						group: "Categorization",
 						order: 19,
 						question: QUESTIONS.categories.website.other.question,
@@ -459,6 +518,7 @@ const questionsByAddon = Object.fromEntries(
 						[QUESTIONS.categories.editor.root.question]: false,
 						[QUESTIONS.categories.popup.question]: false,
 					},
+
 					group: "Categorization",
 					order: 15,
 					question: QUESTIONS.categories.website.root.question,
@@ -475,9 +535,11 @@ const questionsByAddon = Object.fromEntries(
 							[QUESTIONS.categories.editor.root.question]: false,
 							[QUESTIONS.categories.website.root.question]: false,
 							[QUESTIONS.categories.popup.question]: false,
+
 							[QUESTIONS.categories.easterEgg.question]:
 								forcedEasterEgg === addon.id ? undefined : false,
 						},
+
 						group: "Categorization",
 						order: 20,
 						question: QUESTIONS.categories.themes.question,
@@ -487,18 +549,23 @@ const questionsByAddon = Object.fromEntries(
 					{
 						dependencies: {
 							[QUESTIONS.categories.themes.question]: true,
+
 							[`Is your addon listed under **Themes** -> **${
 								addon.tags.includes("editor") ? "Website" : "Editor"
 							} Themes**?`]: false,
 						},
+
 						group: "Categorization",
 						order: 21,
+
 						question: `Is your addon listed under **Themes** -> **${
 							addon.tags.includes("editor") ? "Editor" : "Website"
 						} Themes**?`,
+
 						statement: `This addon is listed under **Themes** -> **${
 							addon.tags.includes("editor") ? "Editor" : "Website"
 						} Themes**!`,
+
 						markdownless: `Is this addon listed under Themes -> ${
 							addon.tags.includes("editor") ? "Editor" : "Website"
 						} Themes?`,
@@ -514,6 +581,7 @@ const questionsByAddon = Object.fromEntries(
 						[QUESTIONS.categories.editor.root.question]: false,
 						[QUESTIONS.categories.website.root.question]: false,
 					},
+
 					group: "Categorization",
 					order: 22,
 					question: QUESTIONS.categories.popup.question,
@@ -531,6 +599,7 @@ const questionsByAddon = Object.fromEntries(
 						[QUESTIONS.categories.editor.root.question]: false,
 						[QUESTIONS.categories.website.root.question]: false,
 					},
+
 					group: "Categorization",
 					order: 23,
 					question: QUESTIONS.categories.easterEgg.question,
@@ -558,6 +627,7 @@ const questionsByAddon = Object.fromEntries(
 					[QUESTIONS.groups.beta.question]: false,
 					[QUESTIONS.groups.others.question]: false,
 				},
+
 				group: "Categorization",
 				question: QUESTIONS.tags.recommended.question,
 				statement: QUESTIONS.tags.recommended.statement,
@@ -572,6 +642,7 @@ const questionsByAddon = Object.fromEntries(
 					[QUESTIONS.groups.others.question]: false,
 					[QUESTIONS.tags.recommended.question]: false,
 				},
+
 				group: "Categorization",
 				order: 5,
 				question: QUESTIONS.groups.featured.question,
@@ -585,6 +656,7 @@ const questionsByAddon = Object.fromEntries(
 					[QUESTIONS.groups.forums.question]: false,
 					[QUESTIONS.groups.others.question]: false,
 				},
+
 				group: "Categorization",
 				order: 7,
 				question: QUESTIONS.groups.beta.question,
@@ -599,6 +671,7 @@ const questionsByAddon = Object.fromEntries(
 					[QUESTIONS.tags.forums.question]: true,
 					[QUESTIONS.groups.others.question]: false,
 				},
+
 				group: "Categorization",
 				order: 6,
 				question: QUESTIONS.groups.forums.question,
@@ -613,6 +686,7 @@ const questionsByAddon = Object.fromEntries(
 					[QUESTIONS.groups.forums.question]: false,
 					[QUESTIONS.tags.forums.question]: false,
 				},
+
 				group: "Categorization",
 				order: 8,
 				question: QUESTIONS.groups.others.question,
@@ -664,31 +738,36 @@ const questionsByAddon = Object.fromEntries(
 			result.push({
 				dependencies: {
 					[QUESTIONS.history.new.question]: true,
+
 					[`Is your addon found under **${
 						addon.tags.includes("recommended") || addon.tags.includes("featured")
 							? "Other"
 							: "Featured"
 					} new addons and updates** as of version ${versionMarkdown}?`]: false,
 				},
+
 				group: "Categorization",
 				order: 9,
+
 				question: `Is your addon found under **${
 					addon.tags.includes("recommended") || addon.tags.includes("featured")
 						? "Featured"
 						: "Other"
 				} new addons and updates** as of version ${versionMarkdown}?`,
+
 				markdownless: `Is this addon currently found under ${
 					addon.tags.includes("recommended") || addon.tags.includes("featured")
 						? "Featured"
 						: "Other"
 				} new addons and updates?`,
+
 				statement: `This addon is currently found under **${
 					addon.tags.includes("recommended") || addon.tags.includes("featured")
 						? "Featured"
 						: "Other"
 				} new addons and updates**!`,
 			});
-			if (brandNew)
+			if (brandNew) {
 				result.push({
 					group: "Misc",
 					order: 6,
@@ -696,6 +775,7 @@ const questionsByAddon = Object.fromEntries(
 					statement: QUESTIONS.history.new.statement,
 					markdownless: QUESTIONS.history.new.markdownless,
 				});
+			}
 
 			if (addon.latestUpdate && updated) {
 				result.push(
@@ -708,19 +788,24 @@ const questionsByAddon = Object.fromEntries(
 					{
 						dependencies: {
 							[QUESTIONS.history.updated.question]: true,
+
 							[`Does your addon have the **${
 								addon.latestUpdate.newSettings?.length
 									? "New features"
 									: "New settings"
 							}** tag?`]: false,
 						},
+
 						group: "Misc",
+
 						question: `Does your addon have the **${
 							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
 						}** tag?`,
+
 						statement: `This addon has the **${
 							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
 						}** tag!`,
+
 						markdownless: `Does this addon have the ${
 							addon.latestUpdate.newSettings?.length ? "New settings" : "New features"
 						} tag?`,
@@ -820,12 +905,13 @@ const questions = Object.values(questionsByAddon)
 	)
 	.reduce(
 		(accumulator, { group, markdownless }) => {
-			function addToGroup(index: number = 0) {
+			/** @param index */
+			function addToGroup(index = 0) {
 				const accumulated = accumulator[group];
 
-				if ((accumulated[+index]?.length || 0) < 25) {
-					accumulated[+index] ??= [];
-					accumulated[+index]?.push(markdownless);
+				if ((accumulated[Number(index)]?.length ?? 0) < 25) {
+					accumulated[Number(index)] ??= [];
+					accumulated[Number(index)]?.push(markdownless);
 					accumulator[group] = accumulated;
 				} else {
 					addToGroup(index + 1);
@@ -848,18 +934,20 @@ const games = new Collection<
 	Snowflake,
 	{
 		collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
-		addon: { id: string } & AddonManifest;
+		addon: AddonManifest & { id: string };
 	}
 >();
 
 const command = defineCommand({
 	data: {
 		description: "Play games where you or I guess addons",
+
 		subcommands: {
 			bot: { description: "You think of an addon and I guess" },
 			player: { description: "I think of an addon and you guess" },
 		},
 	},
+
 	async interaction(interaction) {
 		if (await checkIfUserPlaying(interaction)) return;
 		const command = interaction.options.getSubcommand(true);
@@ -905,15 +993,15 @@ const command = defineCommand({
 						.flat(2);
 
 					for (const question of questions) {
-						frequencies[`${question.question}`] ??= 0;
-						frequencies[`${question.question}`]++;
+						frequencies[String(question.question)] ??= 0;
+						frequencies[String(question.question)]++;
 					}
 
 					const frequenciesArray = Object.entries(frequencies);
 
 					return frequenciesArray
 						.sort(() => Math.random() - 0.5)
-						.reduce((previous, current, _, { length }) => {
+						.reduce<typeof frequenciesArray>((previous, current, _, { length }) => {
 							const currentDistance = Math.abs(current[1] / length - 0.5);
 							const previousDistance = Math.abs(
 								(previous[0]?.[1] || 0) / length - 0.5,
@@ -926,7 +1014,7 @@ const command = defineCommand({
 								: currentDistance > previousDistance
 								? previous
 								: [...previous, current];
-						}, [] as typeof frequenciesArray)
+						}, [])
 						.map(([question]) => question);
 				}
 				/**
@@ -950,7 +1038,7 @@ const command = defineCommand({
 					const dependencies: Dependencies = {};
 					const initialUpdated = probabilitiesBefore.map(
 						([addonId, probability]): [string, number] => {
-							const addon = questionsByAddon[`${addonId}`] || [];
+							const addon = questionsByAddon[String(addonId)] || [];
 							const questionInfo = addon.find(
 								({ question }) => question === justAsked,
 							);
@@ -958,25 +1046,25 @@ const command = defineCommand({
 							if (probabilityShift > 0 && questionInfo?.dependencies)
 								Object.assign(dependencies, questionInfo.dependencies);
 
-							const allDependencies = addon.reduce(
+							const allDependencies = addon.reduce<Dependencies>(
 								(accumulated, { dependencies: addonDependencies = {} }) => ({
 									...accumulated,
 									...addonDependencies,
 								}),
-								{} as Dependencies,
+								{},
 							);
 
 							if (
-								allDependencies[`${justAsked}`] !== undefined &&
-								((probabilityShift > 0 && !allDependencies[`${justAsked}`]) ||
+								allDependencies[String(justAsked)] !== undefined &&
+								((probabilityShift > 0 && !allDependencies[String(justAsked)]) ||
 									(probabilityShift < 0 &&
-										allDependencies[`${justAsked}`] !== false))
+										allDependencies[String(justAsked)] !== false))
 							) {
 								if (addon) {
 									justAskedQuestions.push(
 										...addon
 											.filter(({ dependencies: addonDependencies = {} }) =>
-												Object.keys(addonDependencies)?.includes(justAsked),
+												Object.keys(addonDependencies).includes(justAsked),
 											)
 											.map(({ question }) => question),
 									);
@@ -1020,6 +1108,7 @@ const command = defineCommand({
 				 * @param addonProbabilities - Current probabilities of each addon being correct. MUST be sorted.
 				 * @param askedCount - Count of messages that have already been asked.
 				 * @param backInfo - Information about the previous question.
+				 * @param justAnswered
 				 *
 				 * @returns Sent message.
 				 */
@@ -1028,10 +1117,10 @@ const command = defineCommand({
 					addonProbabilities: [string, number][] = addons
 						.map((addon) => [addon.id, 0] as [string, 0])
 						.sort(() => Math.random() - 0.5),
-					askedCount: number = 0,
+					askedCount = 0,
 					backInfo:
-						| false
 						| string
+						| false
 						| {
 								probabilities: [string, number][];
 								askedQuestions: string[];
@@ -1058,7 +1147,7 @@ const command = defineCommand({
 						return;
 					}
 
-					if (!questions?.[0]) {
+					if (!questions[0]) {
 						if ((addonProbabilities[1]?.[1] || 0) < (addonProbabilities[0]?.[1] || 0)) {
 							await answerWithAddon(
 								addonProbabilities,
@@ -1093,6 +1182,7 @@ const command = defineCommand({
 						components: [
 							{
 								type: ComponentType.ActionRow,
+
 								components: [
 									{
 										type: ComponentType.Button,
@@ -1128,6 +1218,7 @@ const command = defineCommand({
 							},
 							{
 								type: ComponentType.ActionRow,
+
 								components:
 									typeof backInfo === "object"
 										? [
@@ -1158,6 +1249,7 @@ const command = defineCommand({
 						embeds: [
 							{
 								color: CONSTANTS.themeColor,
+
 								author: {
 									icon_url: (interaction.member instanceof GuildMember
 										? interaction.member
@@ -1169,14 +1261,15 @@ const command = defineCommand({
 											? interaction.member.displayName
 											: interaction.user.username,
 								},
+
 								title: "🤔 Think of an addon…",
-								description:
+
+								description: `${
 									(oldMessage && oldMessage.embeds[0]?.description
 										? `${oldMessage.embeds[0].description} **${justAnswered}**\n`
-										: "") +
-									BULLET_POINT +
-									" " +
-									questions[0],
+										: "") + BULLET_POINT
+								} ${questions[0]}`,
+
 								footer: {
 									text:
 										(oldMessage &&
@@ -1184,7 +1277,7 @@ const command = defineCommand({
 												/\d+ questions?/,
 												(previousCount) =>
 													`${
-														1 + +(previousCount.split(" ")[0] || 0)
+														1 + Number(previousCount.split(" ")[0] || 0)
 													} question${
 														previousCount === "0 questions" ? "" : "s"
 													}`,
@@ -1213,7 +1306,7 @@ const command = defineCommand({
 							if (buttonInteraction.customId.startsWith("end.")) {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
 								await Promise.all([
-									buttonInteraction.reply(`🛑 Ended the game`),
+									buttonInteraction.reply("🛑 Ended the game"),
 									interaction.editReply({
 										components: disableComponents(message.components),
 									}),
@@ -1227,9 +1320,8 @@ const command = defineCommand({
 							await buttonInteraction.deferUpdate();
 
 							if (buttonInteraction.customId.startsWith("back.")) {
-								if (typeof backInfo !== "object") {
+								if (typeof backInfo !== "object")
 									throw new TypeError("backInfo must be an object to go back");
-								}
 
 								const nextMessage = await reply(
 									backInfo.askedQuestions,
@@ -1243,7 +1335,8 @@ const command = defineCommand({
 									CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
 								else CURRENTLY_PLAYING.delete(interaction.user.id);
 
-								return collector.stop();
+								collector.stop();
+								return;
 							}
 
 							const probabilityShift = buttonInteraction.customId.startsWith("yes.")
@@ -1283,7 +1376,7 @@ const command = defineCommand({
 							collector.stop();
 						})
 						.on("end", async (collected) => {
-							if (collected.size) return;
+							if (collected.size > 0) return;
 
 							CURRENTLY_PLAYING.delete(interaction.user.id);
 							await Promise.all([
@@ -1306,14 +1399,15 @@ const command = defineCommand({
 				 * @param askedCount - How many questions have been asked already.
 				 * @param askedQuestions - Questions that should not be asked.
 				 * @param backInfo - Information about the previous question.
+				 * @param justAnswered
 				 */
 				async function answerWithAddon(
 					addonProbabilities: [string, number][],
 					askedCount: number,
 					askedQuestions: string[],
 					backInfo:
-						| false
 						| string
+						| false
 						| {
 								probabilities: [string, number][];
 								askedQuestions: string[];
@@ -1343,6 +1437,7 @@ const command = defineCommand({
 						embeds: [
 							{
 								...oldMessage.embeds[0]?.toJSON(),
+
 								description: `${
 									oldMessage.embeds[0]?.description
 										? `${
@@ -1358,6 +1453,7 @@ const command = defineCommand({
 						components: [
 							{
 								type: ComponentType.ActionRow,
+
 								components:
 									typeof backInfo === "object"
 										? [
@@ -1392,12 +1488,14 @@ const command = defineCommand({
 						embeds: [
 							{
 								title: foundAddon.name,
+
 								description: `${
 									Object.entries(questionsByAddon)
 										.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
 										?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 										.join("\n") || ""
 								}${commandMarkdown}`,
+
 								author: {
 									icon_url: (interaction.member instanceof GuildMember
 										? interaction.member
@@ -1409,15 +1507,19 @@ const command = defineCommand({
 											? interaction.member.displayName
 											: interaction.user.username,
 								},
+
 								color: CONSTANTS.themeColor,
+
 								thumbnail: {
 									url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(
 										foundAddon.id,
 									)}.png`,
 								},
+
 								url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
 									foundAddon.id,
 								)}`,
+
 								footer: {
 									text: `Guessed after ${askedCount} questions.${
 										process.env.NODE_ENV === "production"
@@ -1459,6 +1561,7 @@ const command = defineCommand({
 								components: [
 									{
 										type: ComponentType.ActionRow,
+
 										components: [
 											{
 												type: ComponentType.Button,
@@ -1502,6 +1605,7 @@ const command = defineCommand({
 								embeds: [
 									{
 										...oldMessage.embeds[0]?.toJSON(),
+
 										description: `${
 											oldMessage.embeds[0]?.description || ""
 										} **Yes**`,
@@ -1525,6 +1629,7 @@ const command = defineCommand({
 						selectGroupButton(),
 						{
 							type: ComponentType.ActionRow,
+
 							components: [
 								{
 									type: ComponentType.Button,
@@ -1551,6 +1656,7 @@ const command = defineCommand({
 					embeds: [
 						{
 							color: CONSTANTS.themeColor,
+
 							author: {
 								icon_url: (interaction.member instanceof GuildMember
 									? interaction.member
@@ -1562,7 +1668,9 @@ const command = defineCommand({
 										? interaction.member.displayName
 										: interaction.user.username,
 							},
+
 							title: "Guess the addon!",
+
 							footer: {
 								text: `Pick a question for me to answer from a dropdown below${CONSTANTS.footerSeperator}0 questions asked`,
 							},
@@ -1577,6 +1685,7 @@ const command = defineCommand({
 				const collector = message.createMessageComponentCollector({
 					filter: (componentInteraction) =>
 						componentInteraction.user.id === interaction.user.id,
+
 					time: COLLECTOR_TIME,
 				});
 				games.set(interaction.user.id, { addon, collector });
@@ -1593,17 +1702,18 @@ const command = defineCommand({
 								ephemeral: !hint,
 							});
 
-							if (hint) await answerQuestion(hint.group, hint.markdownless);
-							else {
-								await interaction.editReply({
-									components: message.components?.map((row) => ({
-										type: ComponentType.ActionRow,
-										components: row.components?.filter(
-											(component) => !component.customId?.startsWith("hint."),
-										),
-									})),
-								});
-							}
+							await (hint
+								? answerQuestion(hint.group, hint.markdownless)
+								: interaction.editReply({
+										components: message.components.map((row) => ({
+											type: ComponentType.ActionRow,
+
+											components: row.components.filter(
+												(component) =>
+													!component.customId?.startsWith("hint."),
+											),
+										})),
+								  }));
 							collector.resetTimer();
 
 							return;
@@ -1623,9 +1733,11 @@ const command = defineCommand({
 							await componentInteraction.showModal({
 								title: "Guess the addon!",
 								customId: generateHash("guessModal"),
+
 								components: [
 									{
 										type: ComponentType.ActionRow,
+
 										components: [
 											{
 												type: ComponentType.TextInput,
@@ -1646,14 +1758,13 @@ const command = defineCommand({
 							throw new TypeError("Unknown button pressed");
 
 						const selected = componentInteraction.values[0] || "";
-						const split = selected.split(".") as
+						const [groupName, selectIndex, questionIndex] = selected.split(".") as
 							| []
-							| [GroupName]
-							| [GroupName, string, string];
-						const [groupName, selectIndex, questionIndex] = split;
+							| [GroupName, string, string]
+							| [GroupName];
 
 						if (!groupName || !GROUP_NAMES.includes(groupName))
-							throw new ReferenceError("Unknown group: " + groupName);
+							throw new ReferenceError(`Unknown group: ${groupName}`);
 
 						await componentInteraction.deferUpdate();
 						collector.resetTimer();
@@ -1662,8 +1773,8 @@ const command = defineCommand({
 							groupName,
 							(selectIndex &&
 								questionIndex &&
-								questions[groupName as GroupName][+selectIndex]?.[
-									+questionIndex
+								questions[groupName][Number(selectIndex)]?.[
+									Number(questionIndex)
 								]) ||
 								undefined,
 						);
@@ -1684,17 +1795,23 @@ const command = defineCommand({
 						]);
 					});
 
+				/**
+				 * @param doneGroups
+				 * @param defaultValue
+				 */
 				function selectGroupButton(
 					doneGroups: Set<GroupName> = new Set(),
 					defaultValue?: GroupName,
 				): APIActionRowComponent<APIStringSelectComponent> {
 					return {
 						type: ComponentType.ActionRow,
+
 						components: [
 							{
 								type: ComponentType.StringSelect,
 								placeholder: "Select a group",
 								custom_id: generateHash("group"),
+
 								options: GROUP_NAMES.filter((group) => !doneGroups.has(group))
 									.map((group) => ({
 										default: group === defaultValue,
@@ -1709,6 +1826,10 @@ const command = defineCommand({
 					};
 				}
 
+				/**
+				 * @param groupName
+				 * @param question
+				 */
 				async function answerQuestion(groupName: GroupName, question?: string) {
 					if (question) doneQuestions.add(question);
 
@@ -1726,39 +1847,42 @@ const command = defineCommand({
 						new Set<GroupName>(),
 					);
 
-					const groupSelects = questions[groupName].reduce(
-						(accumulator, group, selectIndex) => {
-							const options = group
-								.map((label, index) => ({
-									label,
-									value: `${groupName}.${selectIndex}.${index}`,
-								}))
-								.filter(({ label }) => !doneQuestions.has(label));
+					const groupSelects = questions[groupName].reduce<
+						APIActionRowComponent<APIStringSelectComponent>[]
+					>((accumulator, group, selectIndex) => {
+						const options = group
+							.map((label, index) => ({
+								label,
+								value: `${groupName}.${selectIndex}.${index}`,
+							}))
+							.filter(({ label }) => !doneQuestions.has(label));
 
-							if (options.length)
-								accumulator.push({
-									type: ComponentType.ActionRow,
-									components: [
-										{
-											type: ComponentType.StringSelect,
-											placeholder: `Select a question (${
-												accumulator[0] ? "continued" : "irreversible"
-											})`,
-											custom_id: generateHash(groupName),
-											options,
-										},
-									],
-								});
+						if (options.length > 0) {
+							accumulator.push({
+								type: ComponentType.ActionRow,
 
-							return accumulator;
-						},
-						[] as APIActionRowComponent<APIStringSelectComponent>[],
-					);
+								components: [
+									{
+										type: ComponentType.StringSelect,
+
+										placeholder: `Select a question (${
+											accumulator[0] ? "continued" : "irreversible"
+										})`,
+
+										custom_id: generateHash(groupName),
+										options,
+									},
+								],
+							});
+						}
+
+						return accumulator;
+					}, []);
 
 					const reply = await interaction.fetchReply();
 					const buttons = reply.components.at(-1);
 
-					const foundInAddon = questionsByAddon[addon?.id || ""]?.find?.(
+					const foundInAddon = questionsByAddon[addon?.id || ""]?.find(
 						({ markdownless }) => markdownless === question,
 					);
 
@@ -1773,6 +1897,7 @@ const command = defineCommand({
 							? [
 									{
 										...reply.embeds[0]?.toJSON(),
+
 										description: `${
 											reply.embeds[0]?.description || ""
 										}\n${BULLET_POINT} ${
@@ -1780,19 +1905,21 @@ const command = defineCommand({
 												foundInAddon ||
 												Object.values(questionsByAddon)
 													.flat()
-													.find?.(
+													.find(
 														({ markdownless }) =>
 															markdownless === question,
 													)
 											)?.question || question
 										} **${foundInAddon ? "Yes" : "No"}**`.trim(),
+
 										footer: {
 											text:
 												reply.embeds[0]?.footer?.text.replace(
 													/\d+ questions?/,
 													(previousCount) =>
 														`${
-															1 + +(previousCount.split(" ")[0] || 0)
+															1 +
+															Number(previousCount.split(" ")[0] || 0)
 														} question${
 															previousCount === "0 questions"
 																? ""
@@ -1812,6 +1939,7 @@ const command = defineCommand({
 });
 export default command;
 
+/** @param interaction */
 export async function guessAddon(interaction: ModalSubmitInteraction) {
 	const game = games.get(interaction.user.id);
 	if (!game) return;
@@ -1832,17 +1960,19 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 		embeds: [
 			{
 				...interaction.message.embeds[0]?.toJSON(),
+
 				description: `${
 					interaction.message.embeds[0]?.description || ""
 				}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
 					item.id === game.addon.id ? "Yes" : "No"
 				}**`.trim(),
+
 				footer: {
 					text:
 						interaction.message.embeds[0]?.footer?.text.replace(
 							/\d+ questions?/,
 							(previousCount) =>
-								`${1 + +(previousCount.split(" ")[0] || 0)} question${
+								`${1 + Number(previousCount.split(" ")[0] || 0)} question${
 									previousCount === "0 questions" ? "" : "s"
 								}`,
 						) || "",
@@ -1871,12 +2001,14 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 			embeds: [
 				{
 					title: game.addon.name,
+
 					description: `${
 						Object.entries(questionsByAddon)
 							.find(([id]) => id === game.addon.id)?.[1]
 							?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
 							.join("\n") || ""
 					}${commandMarkdown}`,
+
 					author: {
 						icon_url: (interaction.member instanceof GuildMember
 							? interaction.member
@@ -1888,10 +2020,13 @@ export async function guessAddon(interaction: ModalSubmitInteraction) {
 								? interaction.member.displayName
 								: interaction.user.username,
 					},
+
 					color: CONSTANTS.themeColor,
+
 					thumbnail: {
 						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
 					},
+
 					url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
 						game.addon.id,
 					)}`,

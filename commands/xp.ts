@@ -1,6 +1,9 @@
+import { createCanvas } from "@napi-rs/canvas";
 import { ApplicationCommandOptionType } from "discord.js";
 
+import client from "../client.js";
 import CONSTANTS from "../common/CONSTANTS.js";
+import { defineCommand } from "../common/types/command.js";
 import {
 	getLevelForXp,
 	getXpForLevel,
@@ -9,17 +12,16 @@ import {
 } from "../common/xp.js";
 import { paginate } from "../util/discord.js";
 import { convertBase, nth } from "../util/numbers.js";
-import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
-import client from "../client.js";
-import { createCanvas } from "@napi-rs/canvas";
 
 const command = defineCommand({
 	data: {
 		description: "Commands to view users’ XP amounts",
+
 		subcommands: {
 			rank: {
 				description: "View a users’ XP rank",
+
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
@@ -27,8 +29,10 @@ const command = defineCommand({
 					},
 				},
 			},
+
 			top: {
 				description: "View all users sorted by how much XP they have",
+
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
@@ -65,13 +69,13 @@ const command = defineCommand({
 						.findIndex((entry) => entry.user === user.id) + 1;
 				const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
-				const canvas = createCanvas(1_000, 50);
+				const canvas = createCanvas(1000, 50);
 				const context = canvas.getContext("2d");
-				context.fillStyle = "#" + convertBase(CONSTANTS.themeColor + "", 10, 16);
+				context.fillStyle = `#${convertBase(String(CONSTANTS.themeColor), 10, 16)}`;
 				const rectangleSize = canvas.width * progress;
 				const paddingPixels = 0.18 * canvas.height;
 				context.fillRect(0, 0, rectangleSize, canvas.height);
-				context.font = canvas.height * 0.9 + "px sans-serif";
+				context.font = `${canvas.height * 0.9}px sans-serif`;
 				context.fillStyle = "#00000096";
 				if (progress < 0.145) {
 					context.textAlign = "end";
@@ -97,16 +101,20 @@ const command = defineCommand({
 					embeds: [
 						{
 							color: member?.displayColor,
+
 							author: {
 								icon_url: (member || user).displayAvatarURL(),
 								name: member?.displayName ?? user.username,
 							},
+
 							title: "XP Rank",
+
 							fields: [
 								{ name: "📊 Level", value: level.toLocaleString(), inline: true },
 								{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 								{
 									name: "⏲ Weekly rank",
+
 									value: weeklyRank
 										? approximateWeeklyRank === 10
 											? "Top 10"
@@ -115,6 +123,7 @@ const command = defineCommand({
 													jokes: false,
 											  })}`
 										: "Inactive",
+
 									inline: true,
 								},
 								{
@@ -124,18 +133,19 @@ const command = defineCommand({
 							],
 
 							footer: {
-								text:
-									(rank
-										? `Ranked ${
-												rank.toLocaleString() +
-												"/" +
-												top.length.toLocaleString()
-										  }${CONSTANTS.footerSeperator}`
-										: "") + `View the leaderboard with /xp top`,
+								text: `${
+									rank
+										? `Ranked ${`${rank.toLocaleString()}/${top.length.toLocaleString()}`}${
+												CONSTANTS.footerSeperator
+										  }`
+										: ""
+								}View the leaderboard with /xp top`,
 							},
+
 							image: { url: "attachment://progress.png" },
 						},
 					],
+
 					files: [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }],
 				});
 				return;
@@ -147,18 +157,20 @@ const command = defineCommand({
 						(settings) => interaction.user.id === settings.user,
 					)?.useMentions ?? false;
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : 0;
-				if (index === -1)
+				if (index === -1) {
 					return await interaction.reply({
 						content: `${
 							CONSTANTS.emojis.statuses.no
 						} ${user?.toString()} could not be found! Do they have any XP?`,
+
 						ephemeral: true,
 					});
+				}
 
 				await paginate(
 					top,
-					async (xp) => {
-						return `**Level ${getLevelForXp(xp.xp)}** - ${
+					async (xp) =>
+						`**Level ${getLevelForXp(xp.xp)}** - ${
 							useMentions
 								? `<@${xp.user}>`
 								: (
@@ -166,9 +178,9 @@ const command = defineCommand({
 											.fetch(xp.user)
 											.catch(() => ({ username: `<@${xp.user}>` }))
 								  ).username
-						} (${Math.floor(xp.xp).toLocaleString()} XP)`;
-					},
-					(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
+						} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+					async (data) =>
+						await interaction[interaction.replied ? "editReply" : "reply"](data),
 					{
 						singular: "user",
 						title: `Leaderboard for ${CONSTANTS.guild.name}`,
