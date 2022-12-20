@@ -12,7 +12,7 @@ import { convertBase, nth } from "../util/numbers.js";
 import { defineCommand } from "../common/types/command.js";
 import { userSettingsDatabase } from "./settings.js";
 import client from "../client.js";
-import { createCanvas } from "canvas";
+import { createCanvas } from "@napi-rs/canvas";
 
 const command = defineCommand({
 	data: {
@@ -136,7 +136,7 @@ const command = defineCommand({
 							image: { url: "attachment://progress.png" },
 						},
 					],
-					files: [{ attachment: canvas.toBuffer(), name: "progress.png" }],
+					files: [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }],
 				});
 				return;
 			}
