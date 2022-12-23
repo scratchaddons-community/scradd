@@ -90,7 +90,7 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 								)
 								.join("\n")
 								.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-							"utf-8",
+							"utf8",
 						),
 
 						name: "topic.diff",

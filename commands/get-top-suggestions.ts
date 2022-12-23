@@ -142,10 +142,8 @@ const command = defineCommand({
 					answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
 				}`,
 
-				user:
-					interaction.member instanceof GuildMember
-						? interaction.member
-						: interaction.user,
+				user: interaction.user,
+				format: (author instanceof GuildMember && author) || undefined,
 
 				singular: "suggestion",
 				failMessage: "No suggestions found! Try changing any filters you may have used.",

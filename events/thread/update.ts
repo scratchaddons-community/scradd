@@ -30,9 +30,9 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 								(
 									tag,
 								): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
-									(suggestionAnswers as readonly string[]).includes(tag.name) &&
+									suggestionAnswers.includes(tag.name) &&
 									newThread.appliedTags.includes(tag.id),
-							)?.name || suggestionAnswers[0],
+							)?.name ?? suggestionAnswers[0],
 
 						title: newThread.name,
 				  }
@@ -55,7 +55,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 					[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-				}[newThread.autoArchiveDuration || ThreadAutoArchiveDuration.OneDay] ||
+				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay] ??
 				newThread.autoArchiveDuration
 			}`,
 		);
@@ -67,7 +67,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			}`,
 		);
 	}
-	newThread.appliedTags; // TODO
+	// TODO // newThread.appliedTags;
 	if (oldThread.flags.has("Pinned") !== newThread.flags.has("Pinned")) {
 		await log(
 			`📌 Post ${
@@ -77,16 +77,15 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			{
 				components: [
 					{
-						type: ComponentType.ActionRow,
-
 						components: [
 							{
-								type: ComponentType.Button,
 								label: "View Post",
+								type: ComponentType.Button,
 								style: ButtonStyle.Link,
 								url: newThread.url,
 							},
 						],
+						type: ComponentType.ActionRow,
 					},
 				],
 			},
@@ -94,8 +93,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	}
 	if (
 		newThread.archived &&
-		(((newThread.name === DATABASE_THREAD ||
-			(LOG_GROUPS as readonly string[]).includes(newThread.name)) &&
+		(((newThread.name === DATABASE_THREAD || LOG_GROUPS.includes(newThread.name)) &&
 			newThread.parent?.id === CONSTANTS.channels.modlogs?.id) ||
 			newThread.id === "1029234332977602660")
 	)
@@ -107,16 +105,15 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 				await log(`📃 Thread #${newThread.name}${edit}!`, "channels", {
 					components: [
 						{
-							type: ComponentType.ActionRow,
-
 							components: [
 								{
-									type: ComponentType.Button,
 									label: "View Thread",
+									type: ComponentType.Button,
 									style: ButtonStyle.Link,
 									url: newThread.url,
 								},
 							],
+							type: ComponentType.ActionRow,
 						},
 					],
 				}),
@@ -159,8 +156,8 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 					embeds: [
 						{
 							...starter.embeds[0]?.data,
-							title: "Modmail ticket opened!",
 							color: MODMAIL_COLORS.opened,
+							title: "Modmail ticket opened!",
 						},
 					],
 				})

@@ -34,7 +34,7 @@ export async function firstTrueyPromise(promises) {
 			await new Promise((resolve, reject) => {
 				promise
 					.then((resolved) => {
-						if (resolved) resolve(true);
+						if (resolved) resolve(resolved);
 					})
 					.catch(reject);
 			}),

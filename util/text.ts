@@ -1,38 +1,34 @@
 /**
- * @typedef {(
- * 	| import("discord.js").APIButtonComponentWithCustomId
- * 	| import("discord.js").APISelectMenuComponent
- * 	| import("discord.js").APITextInputComponent
- * 	| import("discord.js").APIModalInteractionResponseCallbackData
- * )["custom_id"]} customId
- */
-
-/** @typedef {import("discord.js").BaseInteraction["id"]} interactionId */
-
-/**
  * Generate a short, random string based off the date. Note that the length is not fixed.
  *
- * Intended for use on {@link customId}s.
+ * Intended for use on `APIBaseComponent#customId`s.
  *
- * @deprecated Use {@link interactionId Interaction#id} instead.
+ * @deprecated Use `Interaction#id` instead.
  *
- * @param {string} [prefix] - An optional prefix to the hash.
+ * @param prefix - An optional prefix to the hash.
  *
- * @returns {string} Hash.
+ * @returns Hash.
  */
-export function generateHash(prefix = "") {
+export function generateHash(prefix = ""): string {
 	return `${prefix}.${Math.round(
 		Math.random() * 100_000_000 + Date.now() - 1_643_000_000_000,
 	).toString(36)}`;
 }
 
 /**
- * @template {{ toString(): string }} T
+ * Joins an array using (Oxford) comma rules and the word "and".
  *
- * @param {T[]} array
- * @param {(item: T) => string} [callback]
+ * @param array - The array to join.
+ * @param callback - A function to convert each item to a string.
+ *
+ * @returns - The joined string.
  */
-export function joinWithAnd(array, callback = (item) => item.toString()) {
+export function joinWithAnd<Item extends { toString: () => string }>(
+	array: Item[],
+	callback?: ((item: Item) => string) | undefined,
+): string;
+export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
+export function joinWithAnd(array: any[], callback = (item: any) => item.toString()): string {
 	const last = array.pop();
 
 	if (last === undefined) return "";
@@ -54,7 +50,7 @@ export function joinWithAnd(array, callback = (item) => item.toString()) {
  *
  * @returns {string} - The truncated string.
  */
-export function truncateText(text, maxLength) {
+export function truncateText(text: string, maxLength: number): string {
 	const firstLine = text.replaceAll(/\s+/g, " ");
 	const segments = Array.from(new Intl.Segmenter().segment(firstLine), ({ segment }) => segment);
 
@@ -64,19 +60,19 @@ export function truncateText(text, maxLength) {
 }
 
 /**
- * @param {string} text
+ * @param text
  * @param rot
  */
-export function caesar(text, rot = 13) {
+export function caesar(text: string, rot = 13) {
 	return text.replace(/[a-z]/gi, (chr) => {
 		const start = chr <= "Z" ? 65 : 97;
 
-		return String.fromCharCode(start + ((chr.charCodeAt(0) - start + rot) % 26));
+		return String.fromCodePoint(start + (((chr.codePointAt(0) || 0) - start + rot) % 26));
 	});
 }
 
-/** @param {string} text */
-export function pingablify(text) {
+/** @param text */
+export function pingablify(text: string) {
 	const regex = /[^\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]/giu;
 	const segments = Array.from(new Intl.Segmenter().segment(text));
 	const pingable =
@@ -88,8 +84,8 @@ export function pingablify(text) {
 		: text.replaceAll(regex, "") || `[pingable name] ${truncateText(text, 10)}`;
 }
 
-/** @param {string} text */
-export function normalize(text) {
+/** @param text */
+export function normalize(text: string) {
 	return text
 		.toLowerCase()
 		.normalize("NFD")
@@ -102,10 +98,10 @@ export function normalize(text) {
 /**
  * Trims the patch version off of a Semver.
  *
- * @param {string} full - The full version.
+ * @param full - The full version.
  *
- * @returns {string} - The patchless version.
+ * @returns - The patchless version.
  */
-export function trimPatchVersion(full) {
-	return full.match(/^(?<main>\d+\.\d+)\.\d+/)?.groups?.main || "";
+export function trimPatchVersion(full: string): string {
+	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main || "";
 }

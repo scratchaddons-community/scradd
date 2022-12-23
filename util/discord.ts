@@ -27,6 +27,7 @@ import {
 	Invite,
 	MessageMentions,
 	type AnyThreadChannel,
+	MessageReaction,
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -34,24 +35,31 @@ import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 
 /**
- * @param message
- * @param allowLanguage
+ * Extract extremities (embeds, stickers, and attachments) from a message.
+ *
+ * @param message - The message to extract extremeties from.
+ * @param censor - Function to censor bad words. Omit to not censor.
  */
 export async function extractMessageExtremities(
 	message: Message,
-	allowLanguage = true,
+	censor?: (text: string) =>
+		| {
+				censored: string;
+				strikes: number;
+				words: string[][];
+		  }
+		| false,
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
-	const { censor } = await import("../common/automod.js");
 	const embeds = [
 		...message.stickers
-			.filter((sticker) => allowLanguage || !censor(sticker.name))
-			.map((sticker) => ({ image: { url: sticker.url }, color: Colors.Blurple })),
+			.filter((sticker) => !censor?.(sticker.name))
+			.map((sticker): APIEmbed => ({ color: Colors.Blurple, image: { url: sticker.url } })),
 		...message.embeds
 			.filter((embed) => !embed.video)
-			.map(({ data }) => {
-				if (allowLanguage) return data;
-
+			.map(({ data }): APIEmbed => {
 				const newEmbed = { ...data };
+
+				if (!censor) return newEmbed;
 
 				if (newEmbed.description) {
 					const censored = censor(newEmbed.description);
@@ -87,13 +95,13 @@ export async function extractMessageExtremities(
 					if (censoredUrl) newEmbed.author.url = "";
 				}
 
-				newEmbed.fields = (newEmbed.fields || []).map((field) => {
+				newEmbed.fields = (newEmbed.fields ?? []).map((field) => {
 					const censoredName = censor(field.name);
 					const censoredValue = censor(field.value);
 					return {
+						inline: field.inline,
 						name: censoredName ? censoredName.censored : field.name,
 						value: censoredValue ? censoredValue.censored : field.value,
-						inline: field.inline,
 					};
 				});
 
@@ -106,8 +114,19 @@ export async function extractMessageExtremities(
 	return { embeds, files: message.attachments.toJSON() };
 }
 
-/** @param message */
-export function getMessageJSON(message: Message) {
+/**
+ * Converts a message to a JSON object describing it.
+ *
+ * @param message The message to convert.
+ *
+ * @returns The JSON.
+ */
+export function getMessageJSON(message: Message): {
+	components: APIActionRowComponent<APIMessageActionRowComponent>[];
+	content: string;
+	embeds: APIEmbed[];
+	files: string[];
+} {
 	return {
 		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
@@ -125,11 +144,10 @@ export function getMessageJSON(message: Message) {
  *
  * @returns The messages.
  */
-export async function getAllMessages<
-	T extends Message<C extends GuildTextBasedChannel ? true : false>,
-	C extends TextBasedChannel,
->(channel: C): Promise<T[]> {
-	const messages: T[] = [];
+export async function getAllMessages<Channel extends TextBasedChannel>(
+	channel: Channel,
+): Promise<Message<Channel extends GuildTextBasedChannel ? true : false>[]> {
+	const messages = [];
 
 	// eslint-disable-next-line fp/no-let -- This needs to be changable
 	let lastId: Snowflake | undefined;
@@ -138,11 +156,11 @@ export async function getAllMessages<
 		// eslint-disable-next-line no-await-in-loop -- We can’t use `Promise.all` here
 		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
 
-		// @ts-expect-error -- This is the right type.
 		messages.push(...fetchedMessages.toJSON());
 		lastId = fetchedMessages.lastKey();
 	} while (lastId);
 
+	// @ts-expect-error TS2322 -- This is the right type.
 	return messages;
 }
 
@@ -152,12 +170,12 @@ export async function getAllMessages<
  *
  * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1825-L1944)
  *
- * @param replies
  * @param message - Message to convert.
+ * @param replies - Whether to quote replies.
  *
  * @returns Text representation of the message.
  *
- * @todo Better `replies`
+ * @todo Better `replies` for modlog.
  */
 export async function messageToText(message: Message, replies = true): Promise<string> {
 	const linklessContent = message.webhookId ? message.content : escapeLinks(message.content);
@@ -198,13 +216,13 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			} ${message.author.toString()} changed the channel icon.`;
 		}
 		case MessageType.ChannelPinnedMessage: {
-			const pinned = await message.fetchReference().catch(() => {});
+			const pinned = await message.fetchReference().catch(() => message);
 
 			return `${
 				CONSTANTS.emojis.discord.pin
 			} ${message.author.toString()} pinned [a message](${
-				pinned?.url || ""
-			}) to this channel. See all [pinned messages](${pinned?.channel.url}).`;
+				pinned.url
+			}) to this channel. See all [pinned messages](${pinned.channel.url}).`;
 		}
 		case MessageType.UserJoin: {
 			const formats = [
@@ -218,7 +236,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 				`Welcome ${message.author.toString()}. Say hi!`,
 				`${message.author.toString()} hopped into the server.`,
 				`Everyone welcome ${message.author.toString()}!`,
-				"Glad you're here, ${message.author.toString()}.",
+				`Glad you're here, ${message.author.toString()}.`,
 				`Good to see you, ${message.author.toString()}.`,
 				`Yay you made it, ${message.author.toString()}!`,
 			];
@@ -262,9 +280,11 @@ export async function messageToText(message: Message, replies = true): Promise<s
 				message.content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}
+
 		// if self.type is MessageType.guild_stream:
 		//     # the author will be a Member
 		//     return f'{self.author.name} is live! Now streaming {self.author.activity.name}'  # type: ignore
+
 		case MessageType.GuildDiscoveryDisqualified: {
 			return `${CONSTANTS.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
 		}
@@ -288,9 +308,8 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			if (!replies) return linklessContent;
 			const repliedMessage = await message.fetchReference().catch(() => {});
 
-			if (!repliedMessage) {
+			if (!repliedMessage)
 				return `*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n${linklessContent}`;
-			}
 
 			const cleanContent = await messageToText(repliedMessage, false);
 
@@ -337,32 +356,67 @@ export async function messageToText(message: Message, replies = true): Promise<s
 }
 
 /**
- * @param message
- * @param reactions
+ * React with multiple emojis to a message, one at a time & in order.
+ *
+ * @param message - The message to react to.
+ * @param reactions - The reactions to add.
+ *
+ * @returns The added reactions.
  */
-export async function reactAll(message: Message, reactions: Readonly<EmojiIdentifierResolvable[]>) {
-	for (const reaction of reactions) await message.react(reaction);
+export async function reactAll(
+	message: Message,
+	reactions: Readonly<EmojiIdentifierResolvable[]>,
+): Promise<MessageReaction[]> {
+	const messageReactions = [];
+	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
+	for (const reaction of reactions) messageReactions.push(await message.react(reaction));
+	return messageReactions;
 }
 
 /**
- * @param array
- * @param toString
- * @param reply
- * @param options
- * @param options.title
- * @param options.user
- * @param options.singular
- * @param options.plural
- * @param options.failMessage
- * @param options.formatFromUser
- * @param options.ephemeral
- * @param options.rawOffset
- * @param options.itemsPerPage
- * @param options.count
- * @param options.generateComponents
- * @param options.disableCustomComponents
+ * Disables components on passed action rows. Ignores buttons with a link.
+ *
+ * @param rows - The action rows to disable components on.
+ *
+ * @returns The action rows with disabled components.
  */
-export async function paginate<Item, FormatFromUser extends boolean, Interaction extends boolean>(
+export function disableComponents(
+	rows: ActionRow<MessageActionRowComponent>[],
+): APIActionRowComponent<APIMessageActionRowComponent>[] {
+	return rows.map(({ components }) => ({
+		components: components.map((component) => ({
+			...component.data,
+
+			disabled:
+				component.type === ComponentType.Button
+					? component.style !== ButtonStyle.Link
+					: true,
+		})),
+		type: ComponentType.ActionRow,
+	}));
+}
+
+/**
+ * Creates a paginated embed from an array.
+ *
+ * @param array - The array to be paginated.
+ * @param toString - A function to convert each element of the array to a string.
+ * @param reply - A function to send pages.
+ * @param options - Additional options.
+ * @param options.title - The title of the embed.
+ * @param options.user - The user who ran the command. Only they will be able to switch pages.
+ * @param options.singular - A noun that describes a item of the array.
+ * @param options.plural - `singular` pluralized. Defaults to just adding an `s` to the end.
+ * @param options.failMessage - A message to show when `array` is empty.
+ * @param options.format - A user to format the embed against.
+ * @param options.ephemeral - Whether the message is ephemeral.
+ * @param options.rawOffset - The offset to start pagination from. Will be rounded to the nearest `itemsPerPage`.
+ * @param options.itemsPerPage - The number of items to display at a time. Defaults to 15.
+ * @param options.showIndexes - Whether to show the index of each item.
+ * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
+ * @param options.disableCustomComponents - Whether to disable the custom components when the pagination buttons go inactive.
+ */
+export async function paginate<Item, Interaction extends boolean>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (
@@ -376,28 +430,28 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 		singular,
 		plural = `${singular}s`,
 		failMessage = `No ${plural} found!`,
-		formatFromUser, // Implicitly defaults to false
+		format,
 		ephemeral, // Implicitly defaults to false
 		rawOffset = 0,
 		itemsPerPage = 15,
-		count = true,
+		showIndexes = true,
 		generateComponents,
 		disableCustomComponents = false,
 	}: {
 		title: string;
-		user: FormatFromUser extends true ? GuildMember | User : User;
+		user: User;
 		singular: string;
 		plural?: string;
 		failMessage?: string;
-		formatFromUser?: FormatFromUser;
+		format?: GuildMember | User;
 		ephemeral?: Interaction extends true ? boolean : undefined;
 		rawOffset?: number;
 		itemsPerPage?: number;
-		count?: boolean;
+		showIndexes?: boolean;
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[];
 		disableCustomComponents?: boolean;
 	},
-) {
+): Promise<void> {
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / itemsPerPage);
@@ -415,11 +469,19 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 			(_, index) => index >= offset && index < offset + itemsPerPage,
 		);
 
+		if (!filtered.length) {
+			return {
+				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
+				ephemeral: true,
+				fetchReply: true,
+			};
+		}
+
 		const content = (
 			await Promise.all(
 				filtered.map(
 					async (current, index, all) =>
-						`${count ? `${index + offset + 1}) ` : ""}${await toString(
+						`${showIndexes ? `${index + offset + 1}) ` : ""}${await toString(
 							current,
 							index,
 							all,
@@ -429,14 +491,6 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 		)
 			.join("\n")
 			.trim();
-
-		if (!content) {
-			return {
-				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
-				ephemeral: true,
-				fetchReply: true,
-			} as const;
-		}
 
 		const components: ActionRowData<MessageActionRowComponentData>[] =
 			numberOfPages > 1
@@ -485,18 +539,21 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 						}${array.length} ${array.length === 1 ? singular : plural}`,
 					},
 
-					author: formatFromUser
+					author: format
 						? {
-								icon_url: user.displayAvatarURL(),
+								// eslint-disable-next-line id-match -- We didn't name this.
+								icon_url: format.displayAvatarURL(),
 
 								name:
-									user instanceof GuildMember ? user.displayName : user.username,
+									format instanceof GuildMember
+										? format.displayName
+										: format.username,
 						  }
 						: undefined,
 
-					color: formatFromUser
-						? user instanceof GuildMember
-							? user.displayColor
+					color: format
+						? format instanceof GuildMember
+							? format.displayColor
 							: undefined
 						: CONSTANTS.themeColor,
 				},
@@ -507,6 +564,7 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 		};
 	}
 
+	// eslint-disable-next-line no-let -- This needs to be changable.
 	let message = await reply(await generateMessage());
 	if (numberOfPages === 1) return;
 
@@ -540,34 +598,22 @@ export async function paginate<Item, FormatFromUser extends boolean, Interaction
 		});
 }
 
-/** @param rows */
-export function disableComponents(
-	rows: ActionRow<MessageActionRowComponent>[],
-): APIActionRowComponent<APIMessageActionRowComponent>[] {
-	return rows.map(({ components }) => ({
-		type: ComponentType.ActionRow,
-
-		components: components.map((component) => ({
-			...component.data,
-
-			disabled:
-				component.type === ComponentType.Button
-					? component.style !== ButtonStyle.Link
-					: true,
-		})),
-	}));
-}
-
-/** @param channel */
-export function getBaseChannel<T extends TextBasedChannel | null | undefined>(
-	channel: T,
-): T extends null | undefined
+/**
+ * Get a non-thread text channel from any other text channel.
+ *
+ * @param channel - The channel to convert.
+ *
+ * @returns The non-thread text channel.
+ */
+export function getBaseChannel<Channel extends TextBasedChannel | null | undefined>(
+	channel: Channel,
+): Channel extends null | undefined
 	? undefined
-	: T extends AnyThreadChannel
+	: Channel extends AnyThreadChannel
 	? Exclude<GuildTextBasedChannel, AnyThreadChannel> | undefined
-	: T {
-	// @ts-expect-error -- This is the right type.
-	return channel ? (channel.isThread() ? channel.parent || undefined : channel) : undefined;
+	: Channel {
+	// @ts-expect-error TS2322 -- This is the right type.
+	return channel ? (channel.isThread() ? channel.parent ?? undefined : channel) : undefined;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */

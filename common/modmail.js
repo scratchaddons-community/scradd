@@ -139,10 +139,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 
 						author: mod && {
 							icon_url: mod.displayAvatarURL(),
-							name:
-								mod instanceof GuildMember
-									? mod.displayName
-									: mod.username,
+							name: mod instanceof GuildMember ? mod.displayName : mod.username,
 						},
 					},
 				],

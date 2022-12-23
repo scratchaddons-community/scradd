@@ -129,12 +129,12 @@ export async function edit(interaction: ModalSubmitInteraction) {
 				{
 					attachment: Buffer.from(
 						JSON.stringify({ ...generateError(error, true) }, null, "  "),
-						"utf-8",
+						"utf8",
 					),
 
 					name: "error.json",
 				},
-				{ attachment: Buffer.from(text, "utf-8"), name: "json.json" },
+				{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
 			],
 		});
 	});

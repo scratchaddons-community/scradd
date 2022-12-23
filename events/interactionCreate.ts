@@ -6,6 +6,7 @@ import {
 	type CommandInteractionOption,
 	GuildMember,
 	User,
+	Collection,
 } from "discord.js";
 
 import client from "../client.js";
@@ -25,7 +26,9 @@ import type Event from "../common/types/event";
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-const commands = importScripts<Command>(path.resolve(dirname, "../commands"));
+const commands: Promise<Collection<string, Command>> = importScripts(
+	path.resolve(dirname, "../commands"),
+);
 
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (interaction.isAutocomplete()) {

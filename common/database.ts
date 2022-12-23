@@ -106,10 +106,11 @@ export default class Database<Name extends keyof Databases> {
 			}
 
 			const data =
-				Boolean(this.#data?.length) && papaparse.unparse(Array.from(this.#data||[])).trim();
+				Boolean(this.#data?.length) &&
+				papaparse.unparse(Array.from(this.#data || [])).trim();
 
 			const files = data
-				? [{ attachment: Buffer.from(data, "utf-8"), name: `${this.name}.scradddb` }]
+				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
 				: [];
 			const messageContent = this.message.content.split("\n");
 			messageContent[3] = "";

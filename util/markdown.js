@@ -1,17 +1,6 @@
 import { escapeMarkdown, hyperlink } from "discord.js";
 
 /**
- * Escape text.
- *
- * @param {string} text - The text to escape.
- *
- * @returns {string} The escaped text.
- */
-export function escapeMessage(text) {
-	return escapeLinks(escapeMarkdown(text));
-}
-
-/**
  * Escape text for use in a link’s display or in a message sent by a webhook.
  *
  * @param {string} text - The text to escape.
@@ -24,6 +13,17 @@ export function escapeLinks(text) {
 	while (text.split("[").length > text.split("]").length) text = text.replace("[", "");
 
 	return text.replaceAll(/\[/g, "\\[");
+}
+
+/**
+ * Escape text.
+ *
+ * @param {string} text - The text to escape.
+ *
+ * @returns {string} The escaped text.
+ */
+export function escapeMessage(text) {
+	return escapeLinks(escapeMarkdown(text));
 }
 
 /**

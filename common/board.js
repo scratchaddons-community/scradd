@@ -74,7 +74,7 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 	 * @returns {Promise<import("discord.js").BaseMessageOptions>}
 	 */
 	async function messageToBoardData(message) {
-		const { files, embeds } = await extractMessageExtremities(message, false);
+		const { files, embeds } = await extractMessageExtremities(message, censor);
 
 		const description = await messageToText(message);
 

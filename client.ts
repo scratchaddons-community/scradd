@@ -71,9 +71,7 @@ await Handler.login(process.env.BOT_TOKEN);
 
 const client = await readyPromise;
 
-console.log(
-	`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`,
-);
+console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
 
 if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production")) {
 	throw new AssertionError({

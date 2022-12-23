@@ -33,7 +33,7 @@ const event: Event<"messageDelete"> = async function event(message) {
 			embeds,
 
 			files: content
-				? [{ attachment: Buffer.from(content, "utf-8"), name: "message.txt" }, ...files]
+				? [{ attachment: Buffer.from(content, "utf8"), name: "message.txt" }, ...files]
 				: files,
 
 			components: [

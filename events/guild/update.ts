@@ -53,7 +53,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 							)
 							.join("\n")
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-						"utf-8",
+						"utf8",
 					),
 
 					name: "description.diff",

@@ -1,6 +1,6 @@
 import diffLib from "difflib";
 import { ButtonStyle, ComponentType } from "discord.js";
-import jsonDiff from "json-diff";
+import { diffString } from "json-diff";
 
 import client from "../../client.js";
 import { automodMessage } from "../../common/automod.js";
@@ -13,8 +13,8 @@ import type Event from "../../common/types/event";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
-const event: Event<"messageUpdate"> = async function event(oldMessage, newMessage) {
-	if (newMessage.partial) newMessage = await newMessage.fetch();
+const event: Event<"messageUpdate"> = async function event(oldMessage, partialMessage) {
+	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (!shouldLog(newMessage.channel)) return;
 	const logs = [];
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
@@ -25,29 +25,28 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 		);
 	}
 	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
-		log(
+		await log(
 			`🗄 Embeds ${
 				newMessage.flags.has("SuppressEmbeds") ? "removed" : "shown"
 			} on message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}` +
 				"!",
 			"messages",
 			{
-				embeds: oldMessage.embeds,
-
 				components: [
 					{
-						type: ComponentType.ActionRow,
-
 						components: [
 							{
-								type: ComponentType.Button,
 								label: "View Message",
+								type: ComponentType.Button,
 								style: ButtonStyle.Link,
 								url: newMessage.url,
 							},
 						],
+						type: ComponentType.ActionRow,
 					},
 				],
+
+				embeds: oldMessage.embeds,
 			},
 		);
 	}
@@ -69,13 +68,11 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 		!newMessage.author.bot
 	) {
 		const files = [];
-		const contentDiff =
-			oldMessage.content !== null &&
-			diffLib
-				.unifiedDiff((oldMessage.content ?? "").split("\n"), newMessage.content.split("\n"))
-				.join("\n");
+		const contentDiff = diffLib
+			.unifiedDiff(oldMessage.content.split("\n"), newMessage.content.split("\n"))
+			.join("\n");
 
-		const extraDiff = jsonDiff.diffString(
+		const extraDiff = diffString(
 			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },
 			{ ...getMessageJSON(newMessage), content: undefined, embeds: undefined },
 			{ color: false },
@@ -85,7 +82,7 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 			files.push({
 				attachment: Buffer.from(
 					contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-					"utf-8",
+					"utf8",
 				),
 
 				name: "content.diff",
@@ -93,31 +90,29 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 		}
 
 		if (extraDiff)
-			files.push({ attachment: Buffer.from(extraDiff, "utf-8"), name: "extra.diff" });
+			files.push({ attachment: Buffer.from(extraDiff, "utf8"), name: "extra.diff" });
 
 		if (files.length > 0) {
-			log(
+			await log(
 				`✏ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
 					newMessage.id
 				})!`,
 				"messages",
 				{
-					files,
-
 					components: [
 						{
-							type: ComponentType.ActionRow,
-
 							components: [
 								{
-									type: ComponentType.Button,
 									label: "View Message",
+									type: ComponentType.Button,
 									style: ButtonStyle.Link,
 									url: newMessage.url,
 								},
 							],
+							type: ComponentType.ActionRow,
 						},
 					],
+					files,
 				},
 			);
 		}
@@ -144,7 +139,8 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, newMessag
 				}),
 		),
 	);
-	if (await automodMessage(newMessage)) return;
+
+	await automodMessage(newMessage);
 };
 
 export default event;

@@ -113,13 +113,13 @@ const command = defineCommand({
 					},
 					{
 						title: `${member?.displayName || user.username}'s strikes`,
-						user: member || user,
 						singular: "",
 						plural: "",
 						failMessage: `${selected.toString()} has never been warned!`,
-						formatFromUser: true,
+						format: member || user,
 						ephemeral: true,
-						count: false,
+						showIndexes: false,
+						user: interaction.user,
 
 						generateComponents(filtered) {
 							if (filtered.length > 5) {

@@ -7,11 +7,11 @@ import log from "../../common/logging.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, newInstance) {
-	const guild = newInstance.guild || (await client.guilds.fetch(newInstance.guildId));
+	const guild = newInstance.guild ?? (await client.guilds.fetch(newInstance.guildId));
 	if (!oldInstance || guild.id !== CONSTANTS.guild.id) return;
 
 	if (oldInstance.topic !== newInstance.topic) {
-		log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "voice", {
+		await log(`✏ Stage ${newInstance.channel?.toString()}’s topic was changed!`, "voice", {
 			files: [
 				{
 					attachment: Buffer.from(
@@ -22,7 +22,7 @@ const event: Event<"stageInstanceUpdate"> = async function event(oldInstance, ne
 							)
 							.join("\n")
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-						"utf-8",
+						"utf8",
 					),
 
 					name: "topic.diff",

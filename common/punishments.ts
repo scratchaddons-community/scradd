@@ -74,7 +74,7 @@ export default async function warn(
 		{
 			files: [
 				{
-					attachment: Buffer.from(reason + (context && `\n>>> ${context}`), "utf-8"),
+					attachment: Buffer.from(reason + (context && `\n>>> ${context}`), "utf8"),
 					name: "strike.txt",
 				},
 			],
@@ -253,8 +253,7 @@ export async function getStrikeById(
 	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
-	const mod =
-		isMod && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+	const mod = isMod && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
 	const useMentions =
 		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)

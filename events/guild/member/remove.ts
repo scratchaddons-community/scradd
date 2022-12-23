@@ -50,26 +50,26 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	];
 
 	await Promise.all(promises);
-	const allRoles = Array.from(rolesDatabase.data);
-	const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
+	// const allRoles = [...(rolesDatabase.data)];
+	// const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
 
-	const memberRoles = Object.fromEntries(
-		member.roles
-			.valueOf()
-			.filter(
-				(role) =>
-					role.editable &&
-					role.id !== CONSTANTS.guild.id &&
-					![CONSTANTS.roles.active?.id, CONSTANTS.roles.weekly_winner?.id].includes(
-						role.id,
-					),
-			)
-			.map((role) => [role.id, true] as const),
-	);
+	// const memberRoles = Object.fromEntries(
+	// 	member.roles
+	// 		.valueOf()
+	// 		.filter(
+	// 			(role) =>
+	// 				role.editable &&
+	// 				role.id !== CONSTANTS.guild.id &&
+	// 				![CONSTANTS.roles.active?.id, CONSTANTS.roles.weekly_winner?.id].includes(
+	// 					role.id,
+	// 				),
+	// 		)
+	// 		.map((role) => [role.id, true] as const),
+	// );
 
-	if (databaseIndex === -1) allRoles.push({ user: member.id, ...memberRoles });
-	else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles, user: member.id };
+	// if (databaseIndex === -1) allRoles.push({ user: member.id, ...memberRoles });
+	// else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles, user: member.id };
 
-	rolesDatabase.data = allRoles;
+	// rolesDatabase.data = allRoles;
 };
 export default event;

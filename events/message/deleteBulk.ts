@@ -24,7 +24,7 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 	).join("\n\n---\n\n");
 
 	log(`💥 ${messages.size} messages in ${channel.toString()} bulk deleted!`, "messages", {
-		files: [{ attachment: Buffer.from(messagesInfo, "utf-8"), name: "messages.txt" }],
+		files: [{ attachment: Buffer.from(messagesInfo, "utf8"), name: "messages.txt" }],
 
 		components: [
 			{

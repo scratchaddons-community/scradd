@@ -38,7 +38,7 @@ const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent,
 							)
 							.join("\n")
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-						"utf-8",
+						"utf8",
 					),
 
 					name: "description.diff",

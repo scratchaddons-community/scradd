@@ -14,7 +14,7 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 			...suggestionsDatabase.data,
 			{
 				answer: suggestionAnswers[0],
-				author: thread.ownerId || client.user.id,
+				author: thread.ownerId ?? client.user.id,
 				count: 0,
 				id: thread.id,
 				title: thread.name,

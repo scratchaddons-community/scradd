@@ -418,7 +418,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (includes("sus", false)) react(CONSTANTS.emojis.autoreact.sus);
 	if (
 		includes(/gives? ?you ?up/i, false) ||
-		content.includes("rickroll") ||
+		includes(/rick[ -]?rol+/) ||
 		includes("astley") ||
 		message.content.includes("dQw4w9WgXcQ")
 	)

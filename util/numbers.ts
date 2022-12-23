@@ -1,4 +1,19 @@
 /**
+ * `x**y`
+ *
+ * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ *
+ * @param one
+ * @param two
+ */
+export function bigIntPower(one: bigint, two: bigint) {
+	if (two === 0n) return 1n;
+	const powerTwo: bigint = bigIntPower(one, two / 2n);
+	if (two % 2n === 0n) return powerTwo * powerTwo;
+	return one * powerTwo * powerTwo;
+}
+
+/**
  * @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
  *
  * @param value
@@ -31,7 +46,7 @@ export function convertBase(
 
 	let output = "";
 	while (decValue > 0) {
-		output = range[Number(decValue % outBaseBig)] + output;
+		output = `${range[Number(decValue % outBaseBig)]}${output}`;
 		decValue = (decValue - (decValue % outBaseBig)) / outBaseBig;
 	}
 	return output || "0";
@@ -42,21 +57,6 @@ convertBase.defaultChars =
 convertBase.MAX_BASE = convertBase.defaultChars.length;
 
 /**
- * `x**y`
- *
- * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
- *
- * @param x
- * @param y
- */
-export function bigIntPower(x: bigint, y: bigint) {
-	if (y === 0n) return 1n;
-	const p2: bigint = bigIntPower(x, y / 2n);
-	if (y % 2n === 0n) return p2 * p2;
-	return x * p2 * p2;
-}
-
-/**
  * @param number
  * @param options
  * @param options.bold
@@ -65,7 +65,7 @@ export function bigIntPower(x: bigint, y: bigint) {
 export function nth(number: number, { bold = true, jokes = true } = {}) {
 	const formatted =
 		number.toLocaleString() +
-		([, "st", "nd", "rd"][(number / 10) % 10 ^ 1 && number % 10] || "th");
+		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th");
 	return (
 		(bold ? `**${formatted}**` : formatted) +
 		(jokes

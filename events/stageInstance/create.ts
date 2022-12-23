@@ -5,7 +5,7 @@ import log from "../../common/logging.js";
 import type Event from "../../common/types/event";
 
 const event: Event<"stageInstanceCreate"> = async function event(instance) {
-	const guild = instance.guild || (await client.guilds.fetch(instance.guildId));
+	const guild = instance.guild ?? (await client.guilds.fetch(instance.guildId));
 
 	if (guild.id !== CONSTANTS.guild.id) return;
 	await log(
