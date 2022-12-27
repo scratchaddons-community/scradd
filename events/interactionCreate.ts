@@ -13,7 +13,7 @@ import client from "../client.js";
 import { edit } from "../commands/edit-message.js";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
-import { censor, badWordsAllowed } from "../common/automod.js";
+import censor, { badWordsAllowed } from "../common/language.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
 import warn, { filterToStrike, getStrikeById, strikeDatabase } from "../common/punishments.js";

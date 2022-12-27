@@ -1,6 +1,6 @@
 import { Collection, type Snowflake } from "discord.js";
 
-import { changeNickname } from "../../../common/automod.js";
+import changeNickname from "../../../common/nicknames.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/logging.js";
 import { nth } from "../../../util/numbers.js";

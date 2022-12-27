@@ -1,6 +1,6 @@
 import { ActivityType } from "discord.js";
 
-import { censor } from "../common/automod.js";
+import censor from "../common/language.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 
 import type Event from "../common/types/event";

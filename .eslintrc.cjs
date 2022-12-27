@@ -24,7 +24,7 @@ const config = {
 			rules: { "etc/no-internal": 0 },
 		},
 		{
-			files: "common/automod.js",
+			files: "common/language.js",
 
 			rules: {
 				"@redguy12/no-character-class": 2,

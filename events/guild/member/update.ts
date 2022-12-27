@@ -1,6 +1,6 @@
 import { time } from "discord.js";
 
-import { changeNickname } from "../../../common/automod.js";
+import changeNickname from "../../../common/nicknames.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../../../common/logging.js";
 

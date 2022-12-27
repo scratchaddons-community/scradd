@@ -3,7 +3,7 @@ import { ButtonStyle, ComponentType } from "discord.js";
 import { diffString } from "json-diff";
 
 import client from "../../client.js";
-import { automodMessage } from "../../common/automod.js";
+import automodMessage from "../../common/automod.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import log, { getLoggingThread, shouldLog } from "../../common/logging.js";

@@ -1,7 +1,7 @@
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 
 import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
-import { badWordsAllowed, censor } from "../../common/automod.js";
+import censor, { badWordsAllowed } from "../../common/language.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";

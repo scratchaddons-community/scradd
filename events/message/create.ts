@@ -11,7 +11,7 @@ import {
 
 import client from "../../client.js";
 import { userSettingsDatabase } from "../../commands/settings.js";
-import { automodMessage } from "../../common/automod.js";
+import automodMessage from "../../common/automod.js";
 import { BOARD_EMOJI } from "../../common/board.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import {

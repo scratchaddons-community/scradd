@@ -1,6 +1,6 @@
 import client from "../../../client.js";
 import { suggestionsDatabase } from "../../../commands/get-top-suggestions.js";
-import { censor, badWordsAllowed } from "../../../common/automod.js";
+import censor, { badWordsAllowed } from "../../../common/language.js";
 import { BOARD_EMOJI, updateBoard } from "../../../common/board.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import warn from "../../../common/punishments.js";

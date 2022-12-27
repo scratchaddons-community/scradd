@@ -2,7 +2,7 @@ import { ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
-import { censor } from "./automod.js";
+import censor from "./language.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 import giveXp from "./xp.js";

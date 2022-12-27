@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, escapeMarkdown, GuildMember } from "discord.js";
 
-import { censor } from "../common/automod.js";
+import censor from "../common/language.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { defineCommand } from "../common/types/command.js";
 import { joinWithAnd } from "../util/text.js";
