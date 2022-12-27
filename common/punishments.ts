@@ -33,13 +33,13 @@ await strikeDatabase.init();
  * @param user
  * @param reason
  * @param strikes
- * @param contextOrMod
+ * @param contextOrModerator
  */
 export default async function warn(
 	user: import("discord.js").GuildMember | import("discord.js").User,
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
-	contextOrMod: string | import("discord.js").User = client.user,
+	contextOrModerator: string | import("discord.js").User = client.user,
 ): Promise<void> {
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -59,9 +59,11 @@ export default async function warn(
 	strikes = Math.max(Math.round(strikes * 4) / 4, PARTIAL_STRIKE_COUNT);
 	const totalVerbalStrikes = Math.floor((oldStrikeCount % 1) + (strikes % 1));
 	const displayStrikes = Math.trunc(strikes) + totalVerbalStrikes;
-	const mod = contextOrMod instanceof User ? contextOrMod : client.user;
+	const moderator = contextOrModerator instanceof User ? contextOrModerator : client.user;
 	const context =
-		(contextOrMod instanceof User ? "" : contextOrMod + (totalVerbalStrikes ? "\n\n" : "")) +
+		(contextOrModerator instanceof User
+			? ""
+			: contextOrModerator + (totalVerbalStrikes ? "\n\n" : "")) +
 		(totalVerbalStrikes ? "Too many verbal strikes" : "");
 
 	const logMessage = await log(
@@ -69,7 +71,7 @@ export default async function warn(
 			displayStrikes
 				? `gained ${displayStrikes} strike${displayStrikes === 1 ? "" : "s"} from`
 				: "verbally warned by"
-		} ${mod.toString()}!`,
+		} ${moderator.toString()}!`,
 		"members",
 		{
 			files: [
@@ -224,6 +226,7 @@ export async function filterToStrike(filter: string) {
 	return {
 		...strike,
 		mod: Array.from(message.content.matchAll(GlobalUsersPattern))[1]?.[1],
+
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
 			: message.content,
@@ -242,8 +245,8 @@ export async function getStrikeById(
 	if (!strike)
 		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
 
-	const isMod = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
-	if (strike.user !== interactor.id && !isMod) {
+	const isModerator = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
+	if (strike.user !== interactor.id && !isModerator) {
 		return {
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
@@ -253,14 +256,15 @@ export async function getStrikeById(
 	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
-	const mod = isMod && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+	const moderator =
+		isModerator && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
 	const useMentions =
 		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
 			?.useMentions ?? false;
 	return {
 		components:
-			isMod && !strike.removed
+			isModerator && !strike.removed
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -300,11 +304,11 @@ export async function getStrikeById(
 						value: String(strike.count),
 						inline: true,
 					},
-					...(mod
+					...(moderator
 						? [
 								{
 									name: "🛡 Moderator",
-									value: useMentions ? mod.toString() : mod.username,
+									value: useMentions ? moderator.toString() : moderator.username,
 									inline: true,
 								},
 						  ]

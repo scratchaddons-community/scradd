@@ -1,12 +1,4 @@
-import {
-	GuildMember,
-	Message,
-	Colors,
-	MessageMentions,
-	User,
-	ComponentType,
-	ButtonStyle,
-} from "discord.js";
+import { GuildMember, Colors, MessageMentions, User, ComponentType, ButtonStyle } from "discord.js";
 
 import client from "../client.js";
 import { disableComponents, extractMessageExtremities, messageToText } from "../util/discord.js";
@@ -55,7 +47,7 @@ export async function generateModmailMessage(message) {
  *
  * @param {import("discord.js").ThreadChannel} thread - Modmail ticket thread.
  *
- * @returns User who messages are being sent to.
+ * @returns {Promise<void | GuildMember>} - User who messages are being sent to.
  */
 export async function getUserFromModmail(thread) {
 	const starter = await thread.fetchStarterMessage().catch(() => {});
@@ -63,12 +55,9 @@ export async function getUserFromModmail(thread) {
 
 	if (!embed?.description) return;
 
-	const userId = embed.description.match(MessageMentions.UsersPattern)?.[1] ?? embed.description;
+	const userId = MessageMentions.UsersPattern.exec(embed.description)?.[1] ?? embed.description;
 
-	return (
-		(await CONSTANTS.guild.members.fetch(userId).catch(() => {})) ||
-		(await client.users.fetch(userId).catch(() => {}))
-	);
+	return await CONSTANTS.guild.members.fetch(userId).catch(() => {});
 }
 
 /**
@@ -98,12 +87,12 @@ export async function getThreadFromMember(user) {
  * @param {{ reason?: string; user?: import("discord.js").User | import("discord.js").GuildMember }} meta - The reason for closing the
  *   ticket.
  *
- * @returns {Promise<Message<false> | undefined>} - Message sent to user.
+ * @returns {Promise<import("discord.js").Message<false> | undefined>} - Message sent to user.
  */
 export async function sendClosedMessage(thread, { reason, user } = {}) {
 	const member = await getUserFromModmail(thread);
 
-	const mod =
+	const moderator =
 		(user instanceof User && (await CONSTANTS.guild.members.fetch(user.id).catch(() => {}))) ||
 		user;
 
@@ -112,7 +101,7 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 			thread
 				.fetchStarterMessage()
 				.catch(() => {})
-				.then((starter) => {
+				.then((starter) =>
 					starter?.edit({
 						embeds: [
 							{
@@ -121,8 +110,8 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 								color: MODMAIL_COLORS.closed,
 							},
 						],
-					});
-				}),
+					}),
+				),
 			member?.send({
 				embeds: [
 					{
@@ -137,9 +126,13 @@ export async function sendClosedMessage(thread, { reason, user } = {}) {
 						color: MODMAIL_COLORS.closed,
 						description: reason,
 
-						author: mod && {
-							icon_url: mod.displayAvatarURL(),
-							name: mod instanceof GuildMember ? mod.displayName : mod.username,
+						author: moderator && {
+							icon_url: moderator.displayAvatarURL(),
+
+							name:
+								moderator instanceof GuildMember
+									? moderator.displayName
+									: moderator.username,
 						},
 					},
 				],
@@ -186,9 +179,13 @@ export async function sendOpenedMessage(user) {
 }
 
 /**
- * @param {import("discord.js").APIEmbed} confirmEmbed
- * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm
- * @param {(options: import("discord.js").BaseMessageOptions) => Promise<Message>} reply
+ * Generate a confirmation message for starting a modmail.
+ *
+ * @param {import("discord.js").APIEmbed} confirmEmbed - The embed explaining how modmail works.
+ * @param {(buttonInteraction: import("discord.js").MessageComponentInteraction) => Promise<void>} onConfirm - A calback for when the
+ *   modmail is started.
+ * @param {(options: import("discord.js").BaseMessageOptions) => Promise<import("discord.js").Message>} reply - A callback to send the
+ *   initial message.
  */
 export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 	const confirmId = generateHash("confirm");
@@ -255,9 +252,15 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 }
 
 /**
- * @param {import("discord.js").Message} message
+ * Generates functions to add temporary reactions to a modmail message.
  *
- * @returns
+ * @param {import("discord.js").Message} message - The message to react to.
+ *
+ * @returns {readonly [
+ * 	() => Promise<import("discord.js").MessageReaction>,
+ * 	(error: unknown) => Promise<import("discord.js").MessageReaction>,
+ * ]}
+ *   - The functions.
  */
 export function generateReactionFunctions(message) {
 	return /** @type {const} */ ([
@@ -272,7 +275,6 @@ export function generateReactionFunctions(message) {
 
 			return reaction;
 		},
-		/** @param {unknown} error */
 		async (error) => {
 			console.error(error);
 
@@ -282,9 +284,11 @@ export function generateReactionFunctions(message) {
 }
 
 /**
- * @param {import("discord.js").APIEmbed} openedEmbed
- * @param {GuildMember | User} user
- * @param ping
+ * Open a modmail.
+ *
+ * @param {import("discord.js").APIEmbed} openedEmbed - The success embed to send.
+ * @param {GuildMember | User} user - The user who to send modmail messages to.
+ * @param {boolean} ping - Whether to ping `@here` in #modmail.
  */
 export async function openModmail(openedEmbed, user, ping = false) {
 	if (!CONSTANTS.channels.modmail) throw new ReferenceError("Cannot find modmail channel");
@@ -308,6 +312,6 @@ export async function openModmail(openedEmbed, user, ping = false) {
 
 	await thread.setLocked(true, "Modmail opened");
 
-	// TODO: await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
+	// await thread.send({ ...(await getStrikesForMember(user)), content: "=" });
 	return thread;
 }

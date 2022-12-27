@@ -42,6 +42,7 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 								url: newMessage.url,
 							},
 						],
+
 						type: ComponentType.ActionRow,
 					},
 				],
@@ -109,9 +110,11 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 									url: newMessage.url,
 								},
 							],
+
 							type: ComponentType.ActionRow,
 						},
 					],
+
 					files,
 				},
 			);

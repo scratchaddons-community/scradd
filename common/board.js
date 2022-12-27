@@ -8,7 +8,13 @@ import Database from "./database.js";
 import giveXp from "./xp.js";
 
 export const BOARD_EMOJI = "🥔";
-/** @param {import("discord.js").TextBasedChannel} [channel] */
+/**
+ * Determines the board reaction count for a channel.
+ *
+ * @param {import("discord.js").TextBasedChannel} [channel] - The channel to determine reaction count for.
+ *
+ * @returns {number} - The reaction count.
+ */
 export function boardReactionCount(channel) {
 	const COUNTS = {
 		scradd: 2,
@@ -45,7 +51,7 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
 		COUNTS[
-			baseChannel.parent?.id === "866028754962612294" // 💀 The Cache!
+			baseChannel.parent?.id === "866028754962612294" // The Cache
 				? "misc"
 				: "default"
 		]
@@ -54,24 +60,31 @@ export function boardReactionCount(channel) {
 
 if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
 
+const { board } = CONSTANTS.channels;
+
 export const boardDatabase = new Database("board");
 
 await boardDatabase.init();
 
 /**
- * @param {import("./database").Databases["board"] | import("discord.js").Message} info
- * @param {{ pre?: import("discord.js").APIButtonComponent[]; post?: import("discord.js").APIButtonComponent[] }} [extraButtons]
+ * Generate an embed and button to represent a board message with.
  *
- * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>}
+ * @param {import("./database").Databases["board"] | import("discord.js").Message} info - Info to generate a message from.
+ * @param {{ pre?: import("discord.js").APIButtonComponent[]; post?: import("discord.js").APIButtonComponent[] }} [extraButtons] - Extra
+ *   custom buttons to show.
+ *
+ * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>} - The representation of the message.
  */
 export async function generateBoardMessage(info, extraButtons = {}) {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
 	/**
-	 * @param {import("discord.js").Message} message
+	 * Convert a message to an embed and button representation.
 	 *
-	 * @returns {Promise<import("discord.js").BaseMessageOptions>}
+	 * @param {import("discord.js").Message} message - The message to convert.
+	 *
+	 * @returns {Promise<import("discord.js").BaseMessageOptions>} - The converted message.
 	 */
 	async function messageToBoardData(message) {
 		const { files, embeds } = await extractMessageExtremities(message, censor);
@@ -134,11 +147,7 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 
 	if (info instanceof Message) return await messageToBoardData(info);
 
-	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
-
-	const onBoard =
-		info.onBoard &&
-		(await CONSTANTS.channels.board.messages.fetch(info.onBoard).catch(() => {}));
+	const onBoard = info.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
 
 	if (onBoard) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
@@ -173,7 +182,7 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 /**
  * Update the count on a message on #potatoboard.
  *
- * @param {import("discord.js").Message} message
+ * @param {import("discord.js").Message} message - The board message to update.
  */
 export async function updateBoard(message) {
 	/** @type {Promise<any>[]} */
@@ -182,40 +191,34 @@ export async function updateBoard(message) {
 	const minReactions = boardReactionCount(message.channel);
 	const info = boardDatabase.data.find(({ source }) => source === message.id);
 
-	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
-
-	const boardMessage =
-		info?.onBoard &&
-		(await CONSTANTS.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
+	const foundMessage =
+		info?.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
 
 	const pings =
 		userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.boardPings ??
 		process.env.NODE_ENV === "production";
 
-	if (boardMessage) {
+	if (foundMessage) {
 		await (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)
-			? boardMessage.delete()
-			: boardMessage.edit({
+			? foundMessage.delete()
+			: foundMessage.edit({
 					allowedMentions: pings ? undefined : { users: [] },
-					content: boardMessage.content.replace(/\d+/, String(count)),
+					content: foundMessage.content.replace(/\d+/, String(count)),
 			  }));
 	} else if (count >= minReactions) {
-		if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+		if (!message.author.bot) promises.push(giveXp(message.author, message.url));
 
-		!message.author.bot && promises.push(giveXp(message.author, message.url));
-
-		const boardMessage = await CONSTANTS.channels.board.send({
+		const sentMessage = await board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },
 		});
 
-		if (CONSTANTS.channels.board.type === ChannelType.GuildAnnouncement)
-			promises.push(boardMessage.crosspost());
+		if (board.type === ChannelType.GuildAnnouncement) promises.push(sentMessage.crosspost());
 
 		boardDatabase.data = info
 			? boardDatabase.data.map((item) =>
 					item.source === message.id
-						? { ...item, onBoard: boardMessage.id, reactions: count }
+						? { ...item, onBoard: sentMessage.id, reactions: count }
 						: item,
 			  )
 			: [
@@ -225,14 +228,14 @@ export async function updateBoard(message) {
 						user: message.author.id,
 						channel: message.channel.id,
 						source: message.id,
-						onBoard: boardMessage.id,
+						onBoard: sentMessage.id,
 					},
 			  ];
 	}
 
-	if (boardMessage || count < minReactions) {
+	if (foundMessage || count < minReactions) {
 		boardDatabase.data = count
-			? boardMessage
+			? foundMessage
 				? boardDatabase.data.map((item) =>
 						item.source === message.id ? { ...item, reactions: count } : item,
 				  )
@@ -249,35 +252,34 @@ export async function updateBoard(message) {
 			: boardDatabase.data.filter((item) => item.source !== message.id);
 	}
 
-	const top = Array.from(boardDatabase.data.sort((a, b) => b.reactions - a.reactions));
+	const top = Array.from(boardDatabase.data.sort((one, two) => two.reactions - one.reactions));
 
 	top.splice(5);
 	promises.push(
 		Promise.all(
 			top.map(async ({ onBoard }) => {
-				const toPin =
-					onBoard &&
-					(await CONSTANTS.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+				const toPin = onBoard && (await board.messages.fetch(onBoard)?.catch(() => {}));
 
-				toPin && (await toPin.pin("Is a top-potatoed message"));
+				if (toPin) await toPin.pin("Is a top-potatoed message");
 
 				return onBoard;
 			}),
-		).then((top) => {
-			CONSTANTS.channels.board?.messages
-				.fetchPinned()
-				.then(
-					async (pins) =>
-						pins.size > 5 &&
-						(await Promise.all(
-							pins.map(
-								async (pin) =>
-									!top.includes(pin.id) &&
-									(await pin.unpin("No longer a top-potatoed message")),
-							),
-						)),
-				);
-		}),
+		).then(
+			async (topIds) =>
+				await board?.messages
+					.fetchPinned()
+					.then(
+						async (pins) =>
+							pins.size > 5 &&
+							(await Promise.all(
+								pins.map(
+									async (pin) =>
+										!topIds.includes(pin.id) &&
+										(await pin.unpin("No longer a top-potatoed message")),
+								),
+							)),
+					),
+		),
 	);
 
 	await Promise.all(promises);

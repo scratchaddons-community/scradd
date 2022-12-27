@@ -123,7 +123,7 @@ export interface ChatInputCommand<O extends { [key: string]: Option } = {}> {
 	/** A function that processes interactions to this command. */
 	interaction: (
 		interaction: ChatInputCommandInteraction<"cached" | "raw">,
-		// options: OptionsToType<O>,
+		// 	options: OptionsToType<O>,
 	) => any;
 	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }
@@ -154,12 +154,12 @@ export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]
 	/** A function that processes interactions to this command. */
 	interaction: (
 		interaction: ChatInputCommandInteraction<"cached" | "raw">,
-		// options: {
-		// 	[S in keyof O]: {
-		// 		subcommand: S;
-		// 		options: OptionsToType<O[S]>;
-		// 	};
-		// }[keyof O],
+		// 	options: {
+		// 		[S in keyof O]: {
+		// 			subcommand: S;
+		// 			options: OptionsToType<O[S]>;
+		// 		};
+		// 	}[keyof O],
 	) => any;
 	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }

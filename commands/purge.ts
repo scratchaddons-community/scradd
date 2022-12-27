@@ -19,8 +19,10 @@ const command = defineCommand({
 		options: {
 			count: {
 				type: ApplicationCommandOptionType.String,
+
 				description:
 					"The number of messages to delete or a message ID to delete to (inclusive)",
+
 				required: true,
 			},
 

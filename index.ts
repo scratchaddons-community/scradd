@@ -14,7 +14,7 @@ import {
 	type ApplicationCommandNonOptionsData,
 	type ApplicationCommandNumericOptionData,
 	type ApplicationCommandStringOptionData,
-	Collection,
+	type Collection,
 } from "discord.js";
 import dotenv from "dotenv";
 
@@ -213,5 +213,5 @@ if (process.env.NODE_ENV === "production") {
 }
 
 process
-	.on("uncaughtException", (error, origin) => logError(error, origin))
-	.on("warning", (error) => logError(error, "warning"));
+	.on("uncaughtException", async (error, origin) => await logError(error, origin))
+	.on("warning", async (error) => await logError(error, "warning"));

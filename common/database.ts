@@ -53,32 +53,6 @@ export default class Database<Name extends keyof Databases> {
 		contructed.push(name);
 	}
 
-	async init() {
-		this.message = databases[this.name] ||= await thread.send(
-			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
-				"_",
-				" ",
-			)} information may be reset.*`,
-		);
-
-		const attachment = this.message.attachments.first()?.url;
-
-		this.#data = attachment
-			? await fetch(attachment)
-					.then(async (res) => await res.text())
-					.then(
-						(csv) =>
-							papaparse.parse<Databases[Name]>(csv.trim(), {
-								dynamicTyping: true,
-								header: true,
-								delimiter: ",",
-							}).data,
-					)
-			: [];
-
-		this.#extra = this.message.content.split("\n")[5];
-	}
-
 	get data() {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
 		return this.#data;
@@ -154,6 +128,32 @@ export default class Database<Name extends keyof Databases> {
 
 		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
+	}
+
+	async init() {
+		this.message = databases[this.name] ||= await thread.send(
+			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+				"_",
+				" ",
+			)} information may be reset.*`,
+		);
+
+		const attachment = this.message.attachments.first()?.url;
+
+		this.#data = attachment
+			? await fetch(attachment)
+					.then(async (res) => await res.text())
+					.then(
+						(csv) =>
+							papaparse.parse<Databases[Name]>(csv.trim(), {
+								dynamicTyping: true,
+								header: true,
+								delimiter: ",",
+							}).data,
+					)
+			: [];
+
+		this.#extra = this.message.content.split("\n")[5];
 	}
 
 	set data(content) {

@@ -20,8 +20,7 @@ export function generateError(error: any, returnObject = false): string | { [key
 		delete serialized.stack;
 		delete serialized.errors;
 
-		/** @type {unknown[]} */
-		const subErrors: unknown[] =
+		const subErrors: unknown[] | undefined =
 			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
 
 		const object = {

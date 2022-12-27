@@ -13,8 +13,24 @@ const config = {
 			files: "*.js",
 		},
 		{
-			files: "events/**.js",
+			files: "events/**.ts",
 			rules: { "func-style": 0 },
+		},
+		{
+			files: ["*.md/**", "*.json"],
+
+			// Type information can't be obtained: see https://github.com/eslint/eslint-plugin-markdown/pull/155#issuecomment-671620312
+			// So these rules must unfortunately be disabled.
+			rules: { "etc/no-internal": 0 },
+		},
+		{
+			files: "common/automod.js",
+
+			rules: {
+				"@redguy12/no-character-class": 2,
+				"regexp/prefer-character-class": 0,
+				"unicorn/better-regex": 0,
+			},
 		},
 	],
 
@@ -27,6 +43,7 @@ const config = {
 		"jsdoc/require-file-overview": 0,
 		"unicorn/no-null": 1,
 		"etc/no-internal": [2, { ignored: { [/^Collection$/.source]: "name" } }],
+		"@redguy12/no-js": 1,
 	},
 };
 

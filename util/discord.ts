@@ -27,7 +27,7 @@ import {
 	Invite,
 	MessageMentions,
 	type AnyThreadChannel,
-	MessageReaction,
+	type MessageReaction,
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -43,12 +43,12 @@ import { generateHash, truncateText } from "./text.js";
 export async function extractMessageExtremities(
 	message: Message,
 	censor?: (text: string) =>
+		| false
 		| {
 				censored: string;
 				strikes: number;
 				words: string[][];
-		  }
-		| false,
+		  },
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
 	const embeds = [
 		...message.stickers
@@ -117,7 +117,7 @@ export async function extractMessageExtremities(
 /**
  * Converts a message to a JSON object describing it.
  *
- * @param message The message to convert.
+ * @param message - The message to convert.
  *
  * @returns The JSON.
  */
@@ -392,6 +392,7 @@ export function disableComponents(
 					? component.style !== ButtonStyle.Link
 					: true,
 		})),
+
 		type: ComponentType.ActionRow,
 	}));
 }
@@ -469,7 +470,7 @@ export async function paginate<Item, Interaction extends boolean>(
 			(_, index) => index >= offset && index < offset + itemsPerPage,
 		);
 
-		if (!filtered.length) {
+		if (filtered.length === 0) {
 			return {
 				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
 				ephemeral: true,
@@ -624,3 +625,8 @@ export const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern, "g");
 
 /** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
 export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");
+
+export const BotInvitesPattern = /discord(?:app)?\.com\/(?:api\/)?oauth2\/authorize/i;
+
+/** A global regular expression variant of {@link BotInvitesPattern}. */
+export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, "g");

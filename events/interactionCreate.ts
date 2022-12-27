@@ -6,7 +6,7 @@ import {
 	type CommandInteractionOption,
 	GuildMember,
 	User,
-	Collection,
+	type Collection,
 } from "discord.js";
 
 import client from "../client.js";

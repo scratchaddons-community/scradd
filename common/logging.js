@@ -10,18 +10,12 @@ export const LOG_GROUPS = /** @type {const} */ ([
 	"members",
 	"voice",
 ]);
+
 /**
- * @param {string} content
- * @param {typeof LOG_GROUPS[number]} group
- * @param {Pick<import("discord.js").BaseMessageOptions, "embeds" | "files" | "components">} [extra]
+ * Fetch a thread used for logging in #mod-logs.
+ *
+ * @param {typeof LOG_GROUPS[number] | typeof import("./database").DATABASE_THREAD} group - The thread to find.
  */
-export default async function log(content, group, extra = {}) {
-	const thread = await getLoggingThread(group);
-
-	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
-}
-
-/** @param {typeof LOG_GROUPS[number] | typeof import("./database").DATABASE_THREAD} group */
 export async function getLoggingThread(group) {
 	if (!CONSTANTS.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 
@@ -36,15 +30,34 @@ export async function getLoggingThread(group) {
 	);
 }
 
-/** @param {import("discord.js").TextBasedChannel | null} channel */
+/**
+ * Log a message in #mod-logs.
+ *
+ * @param {string} content - The message to log.
+ * @param {typeof LOG_GROUPS[number]} group - The thread to log it in.
+ * @param {Pick<import("discord.js").BaseMessageOptions, "embeds" | "files" | "components">} [extra] - Extra extremities to log.
+ */
+export default async function log(content, group, extra = {}) {
+	const thread = await getLoggingThread(group);
+
+	return await thread.send({ ...extra, content, allowedMentions: { users: [] } });
+}
+
+/**
+ * Whether actions related to this channel should be logged in #mod-logs.
+ *
+ * @param {import("discord.js").TextBasedChannel | null} channel - The channel to check.
+ *
+ * @returns {boolean} - Whether they should be logged.
+ */
 export function shouldLog(channel) {
 	const baseChannel = getBaseChannel(channel);
 
-	return (
+	return Boolean(
 		baseChannel?.type !== ChannelType.DM &&
-		baseChannel?.guild.id === CONSTANTS.guild.id &&
-		baseChannel
-			?.permissionsFor(CONSTANTS.roles.mod || baseChannel.guild.id)
-			?.has(PermissionFlagsBits.ViewChannel)
+			baseChannel?.guild.id === CONSTANTS.guild.id &&
+			baseChannel
+				?.permissionsFor(CONSTANTS.roles.mod || baseChannel.guild.id)
+				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }

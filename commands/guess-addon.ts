@@ -903,7 +903,7 @@ const questions = Object.values(questionsByAddon)
 			(one.order || Number.POSITIVE_INFINITY) - (two.order || Number.POSITIVE_INFINITY) ||
 			(one.markdownless.toLowerCase() < two.markdownless.toLowerCase() ? -1 : 1),
 	)
-	.reduce(
+	.reduce<{ [key in GroupName]: string[][] }>(
 		(accumulator, { group, markdownless }) => {
 			/** @param index */
 			function addToGroup(index = 0) {
@@ -922,10 +922,7 @@ const questions = Object.values(questionsByAddon)
 
 			return accumulator;
 		},
-		{ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] } as Record<
-			GroupName,
-			string[][]
-		>,
+		{ "Addon name": [], "Categorization": [], "Credits": [], "Misc": [] },
 	);
 
 const BULLET_POINT = CONSTANTS.footerSeperator.trim();
@@ -968,7 +965,7 @@ const command = defineCommand({
 					addonProbabilities: [string, number][],
 					askedQuestions: string[] = [],
 				): string[] {
-					const frequencies: Record<string, number> = {};
+					const frequencies: { [key: string]: number } = {};
 
 					const questions = Object.entries(questionsByAddon)
 						.map(([addon, questions]) =>

@@ -28,6 +28,10 @@ export function joinWithAnd<Item extends { toString: () => string }>(
 	callback?: ((item: Item) => string) | undefined,
 ): string;
 export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
+/**
+ * @param array
+ * @param callback
+ */
 export function joinWithAnd(array: any[], callback = (item: any) => item.toString()): string {
 	const last = array.pop();
 
