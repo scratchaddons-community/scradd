@@ -32,7 +32,7 @@ await suggestionsDatabase.init();
 const old = CONSTANTS.channels.old_suggestions
 	? getAllMessages(CONSTANTS.channels.old_suggestions).then((suggestions) =>
 			suggestions.map((message) => {
-				const embed = message.embeds[0];
+				const [embed] = message.embeds;
 
 				const segments = message.thread?.name.split(" | ");
 
@@ -49,7 +49,7 @@ const old = CONSTANTS.channels.old_suggestions
 						(message.author.id === CONSTANTS.robotop
 							? message.embeds[0]?.footer?.text.split(": ")[1]
 							: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
-									?.groups?.userId) || message.author,
+									?.groups?.userId) ?? message.author,
 
 					count:
 						(message.reactions.valueOf().first()?.count ?? 0) -
@@ -89,24 +89,24 @@ const command = defineCommand({
 	},
 
 	async interaction(interaction) {
-		const author = interaction.options.getMember("user");
-		const answer = interaction.options.getString("answer");
+		const authorFilter = interaction.options.getMember("user");
+		const answerFilter = interaction.options.getString("answer");
 		const { suggestions } = CONSTANTS.channels;
 		const useMentions =
 			userSettingsDatabase.data.find((settings) => interaction.user.id === settings.user)
 				?.useMentions ?? false;
 
-		const nick = author instanceof GuildMember && author.displayName;
+		const nick =
+			authorFilter instanceof GuildMember ? authorFilter.displayName : authorFilter?.nick;
 
 		await paginate(
 			[...(await old), ...suggestionsDatabase.data]
 				.filter(
-					(item) =>
+					({ answer, author }) =>
 						!(
-							(answer && item.answer !== answer) ||
-							(author instanceof GuildMember &&
-								(item.author instanceof User ? item.author.id : item.author) !==
-									author.id)
+							(answerFilter && answer !== answerFilter) ||
+							(authorFilter instanceof GuildMember &&
+								(author instanceof User ? author.id : author) !== authorFilter.id)
 						),
 				)
 				.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
@@ -139,11 +139,11 @@ const command = defineCommand({
 			async (data) => await interaction[interaction.replied ? "editReply" : "reply"](data),
 			{
 				title: `Top suggestions${nick ? ` by ${nick}` : ""}${
-					answer ? `${nick ? " &" : ""} answered with ${answer}` : ""
+					answerFilter ? `${nick ? " &" : ""} answered with ${answerFilter}` : ""
 				}`,
 
 				user: interaction.user,
-				format: author instanceof GuildMember ? author : undefined,
+				format: authorFilter instanceof GuildMember ? authorFilter : undefined,
 
 				singular: "suggestion",
 				failMessage: "No suggestions found! Try changing any filters you may have used.",

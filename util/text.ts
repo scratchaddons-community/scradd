@@ -28,10 +28,6 @@ export function joinWithAnd<Item extends { toString: () => string }>(
 	callback?: ((item: Item) => string) | undefined,
 ): string;
 export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
-/**
- * @param array
- * @param callback
- */
 export function joinWithAnd(array: any[], callback = (item: any) => item.toString()): string {
 	const last = array.pop();
 
@@ -64,18 +60,28 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
- * @param text
- * @param rot
+ * Encodes text using the Caeser Chiper.
+ *
+ * @param text - The text to encode.
+ * @param rot - The rotate shift.
+ *
+ * @returns The encoded text.
  */
 export function caesar(text: string, rot = 13) {
 	return text.replace(/[a-z]/gi, (chr) => {
 		const start = chr <= "Z" ? 65 : 97;
 
-		return String.fromCodePoint(start + (((chr.codePointAt(0) || 0) - start + rot) % 26));
+		return String.fromCodePoint(start + (((chr.codePointAt(0) ?? 0) - start + rot) % 26));
 	});
 }
 
-/** @param text */
+/**
+ * Removes unpingable characters from a string.
+ *
+ * @param text - The text to sanitize.
+ *
+ * @returns A pingable version of {@link text}.
+ */
 export function pingablify(text: string) {
 	const regex = /[^\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]/giu;
 	const segments = Array.from(new Intl.Segmenter().segment(text));
@@ -88,7 +94,13 @@ export function pingablify(text: string) {
 		: text.replaceAll(regex, "") || `[pingable name] ${truncateText(text, 10)}`;
 }
 
-/** @param text */
+/**
+ * Normalize a string.
+ *
+ * @param text - The string to normalize.
+ *
+ * @returns The normalized string.
+ */
 export function normalize(text: string) {
 	return text
 		.toLowerCase()
@@ -107,5 +119,5 @@ export function normalize(text: string) {
  * @returns - The patchless version.
  */
 export function trimPatchVersion(full: string): string {
-	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main || "";
+	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main ?? full;
 }

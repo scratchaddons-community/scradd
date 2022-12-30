@@ -1,4 +1,4 @@
-import diffLib from "difflib";
+import { unifiedDiff } from "difflib";
 import {
 	ApplicationCommandType,
 	ButtonStyle,
@@ -8,7 +8,7 @@ import {
 	TextInputStyle,
 	type MessageEditOptions,
 } from "discord.js";
-import jsonDiff from "json-diff";
+import { diffString } from "json-diff";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../common/database.js";
@@ -20,10 +20,7 @@ import { generateError } from "../util/logError.js";
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 const command = defineCommand({
-	data: {
-		restricted: true,
-		type: ApplicationCommandType.Message,
-	},
+	data: { restricted: true, type: ApplicationCommandType.Message },
 
 	async interaction(interaction) {
 		if (
@@ -44,9 +41,9 @@ const command = defineCommand({
 		}
 
 		const pre =
-			JSON.stringify(getMessageJSON(interaction.targetMessage), null, "  ").match(
+			JSON.stringify(getMessageJSON(interaction.targetMessage), undefined, "  ").match(
 				/.{1,4000}/gsy,
-			) || [];
+			) ?? [];
 		await interaction.showModal({
 			components: [
 				{
@@ -85,15 +82,19 @@ const command = defineCommand({
 });
 export default command;
 
-/** @param interaction */
-export async function edit(interaction: ModalSubmitInteraction) {
+/**
+ * Edit a message.
+ *
+ * @param interaction - The interaction with information about the edit.
+ */
+export async function edit(interaction: ModalSubmitInteraction): Promise<void> {
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
 	const json = await new Promise<MessageEditOptions>((resolve) => {
 		resolve(JSON.parse(text));
-	}).catch((error: unknown) => {
-		interaction.reply({
+	}).catch(async (error: unknown) => {
+		await interaction.reply({
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred while parsing the JSON.`,
 			ephemeral: true,
 
@@ -102,7 +103,7 @@ export async function edit(interaction: ModalSubmitInteraction) {
 					attachment: Buffer.from(
 						JSON.stringify(
 							{ ...generateError(error, true), stack: undefined },
-							null,
+							undefined,
 							"  ",
 						),
 						"utf8",
@@ -116,19 +117,19 @@ export async function edit(interaction: ModalSubmitInteraction) {
 	});
 	if (!json) return;
 	const message = await interaction.channel?.messages.fetch(
-		interaction.customId.split(".")[1] || "",
+		interaction.customId.split(".")[1] ?? "",
 	);
 	if (!message) throw new TypeError("Used command in DM!");
 	const oldJSON = getMessageJSON(message);
-	const edited = await message.edit(json).catch((error: unknown) => {
-		interaction.reply({
+	const edited = await message.edit(json).catch(async (error: unknown) => {
+		await interaction.reply({
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.no} An error occurred while editing the message.`,
 
 			files: [
 				{
 					attachment: Buffer.from(
-						JSON.stringify({ ...generateError(error, true) }, null, "  "),
+						JSON.stringify({ ...generateError(error, true) }, undefined, "  "),
 						"utf8",
 					),
 
@@ -147,11 +148,11 @@ export async function edit(interaction: ModalSubmitInteraction) {
 	});
 
 	const files = [];
-	const contentDiff = diffLib
-		.unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n"))
-		.join("\n");
+	const contentDiff = unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n")).join(
+		"\n",
+	);
 
-	const extraDiff = jsonDiff.diffString(
+	const extraDiff = diffString(
 		{ ...oldJSON, content: undefined },
 		{ ...getMessageJSON(edited), content: undefined },
 		{ color: false },

@@ -3,8 +3,10 @@
  *
  * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
  *
- * @param one
- * @param two
+ * @param one `x`.
+ * @param two `y`.
+ *
+ * @returns Return value.
  */
 export function bigIntPower(one: bigint, two: bigint) {
 	if (two === 0n) return 1n;
@@ -14,12 +16,14 @@ export function bigIntPower(one: bigint, two: bigint) {
 }
 
 /**
+ * Convert a number between bases.
+ *
  * @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
  *
- * @param value
- * @param sourceBase
- * @param outBase
- * @param chars
+ * @param value - The number to convert.
+ * @param sourceBase - The base of the input number.
+ * @param outBase - The base of the output number.
+ * @param chars - The character set to use.
  */
 export function convertBase(
 	value: string,
@@ -57,10 +61,12 @@ convertBase.defaultChars =
 convertBase.MAX_BASE = convertBase.defaultChars.length;
 
 /**
- * @param number
- * @param options
- * @param options.bold
- * @param options.jokes
+ * Adds a numerical suffix to a number.
+ *
+ * @param number - The number to suffix.
+ * @param options - Options.
+ * @param options.bold - Whether to bold the output using Markdown.
+ * @param options.jokes - Toggle jokes after the number.
  */
 export function nth(number: number, { bold = true, jokes = true } = {}) {
 	const formatted =

@@ -18,7 +18,7 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	const logs = [];
 	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {
 		logs.push(
-			`Inactive channel set to ${newGuild.afkChannel?.toString() || "No inactive channel"}`,
+			`Inactive channel set to ${newGuild.afkChannel?.toString() ?? "No inactive channel"}`,
 		);
 	}
 	if (oldGuild.afkTimeout !== newGuild.afkTimeout)
@@ -42,14 +42,14 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 		);
 	}
 	if (oldGuild.description !== newGuild.description) {
-		log("✏ Server description was changed!", "server", {
+		await log("✏ Server description was changed!", "server", {
 			files: [
 				{
 					attachment: Buffer.from(
 						difflib
 							.unifiedDiff(
-								(oldGuild.description || "").split("\n"),
-								(newGuild.description || "").split("\n"),
+								(oldGuild.description ?? "").split("\n"),
+								(newGuild.description ?? "").split("\n"),
 							)
 							.join("\n")
 							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),

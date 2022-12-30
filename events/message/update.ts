@@ -1,4 +1,4 @@
-import diffLib from "difflib";
+import { unifiedDiff } from "difflib";
 import { ButtonStyle, ComponentType } from "discord.js";
 import { diffString } from "json-diff";
 
@@ -69,9 +69,10 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 		!newMessage.author.bot
 	) {
 		const files = [];
-		const contentDiff = diffLib
-			.unifiedDiff(oldMessage.content.split("\n"), newMessage.content.split("\n"))
-			.join("\n");
+		const contentDiff = unifiedDiff(
+			oldMessage.content.split("\n"),
+			newMessage.content.split("\n"),
+		).join("\n");
 
 		const extraDiff = diffString(
 			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },

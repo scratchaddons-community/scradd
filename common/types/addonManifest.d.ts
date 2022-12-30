@@ -316,7 +316,7 @@ type AddonManifest = {
 		/** The link relevant to the credit. */
 		link?: `http${string}`;
 	} & (
-		| {}
+		| Record<string, never>
 		| {
 				/** The ID for the credit. Required if note is in use. */
 				id: string;

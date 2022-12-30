@@ -12,7 +12,7 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 			messages.reverse().map(async (message) => {
 				const content = !message.partial && (await messageToText(message));
 
-				return `${message.author?.tag || "[unknown]"}${
+				return `${message.author?.tag ?? "[unknown]"}${
 					message.embeds.length > 0 || message.attachments.size > 0 ? " (" : ""
 				}${message.embeds.length > 0 ? `${message.embeds.length} embeds` : ""}${
 					message.embeds.length > 0 && message.attachments.size > 0 ? ", " : ""
@@ -23,7 +23,7 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 		)
 	).join("\n\n---\n\n");
 
-	log(`💥 ${messages.size} messages in ${channel.toString()} bulk deleted!`, "messages", {
+	await log(`💥 ${messages.size} messages in ${channel.toString()} bulk deleted!`, "messages", {
 		files: [{ attachment: Buffer.from(messagesInfo, "utf8"), name: "messages.txt" }],
 
 		components: [

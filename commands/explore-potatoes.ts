@@ -123,8 +123,14 @@ const command = defineCommand({
 		const previousId = generateHash("prev");
 
 		const messages: InteractionReplyOptions[] = [];
+		// eslint-disable-next-line fp/no-let -- This needs to change.
 		let index = 0;
 
+		/**
+		 * Get the next message to reply with.
+		 *
+		 * @returns The reply information.
+		 */
 		async function getNextMessage(): Promise<InteractionReplyOptions> {
 			const info = (await fetchedMessages.next()).value;
 

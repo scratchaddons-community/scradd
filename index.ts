@@ -46,9 +46,11 @@ const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
- * @param options
+ * Convert our custom options format to something the Discord API will accept.
  *
- * @returns
+ * @param options - The options to convert.
+ *
+ * @returns The converted options.
  */
 function transformOptions(options: { [key: string]: Option }) {
 	return Object.entries(options)
@@ -118,7 +120,7 @@ const promises = [
 
 							defaultMemberPermissions: data.restricted
 								? new PermissionsBitField()
-								: null,
+								: undefined,
 
 							type,
 
@@ -162,28 +164,32 @@ const promises = [
 	),
 ];
 
-setInterval(async () => {
-	const { count }: { count: number; _chromeCountDate: string } = await fetch(
-		`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`,
-	).then(async (response) => await response.json());
-	await CONSTANTS.channels.info?.setName(
-		`Info - ${CONSTANTS.guild.memberCount.toLocaleString([], {
-			compactDisplay: "short",
-			maximumFractionDigits: 2,
-			minimumFractionDigits: CONSTANTS.guild.memberCount > 999 ? 2 : 0,
-			notation: "compact",
-		})} members`,
-		"Automated update to sync count",
-	);
-	await CONSTANTS.channels.SA?.setName(
-		`Scratch Addons - ${count.toLocaleString([], {
-			compactDisplay: "short",
-			maximumFractionDigits: 1,
-			minimumFractionDigits: count > 999 ? 1 : 0,
-			notation: "compact",
-		})} users`,
-		"Automated update to sync count",
-	);
+setInterval(() => {
+	fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`)
+		.then(async (response) => await response.json())
+		.then(({ count }: { count: number; _chromeCountDate: string }) => {
+			CONSTANTS.channels.SA?.setName(
+				`Scratch Addons - ${count.toLocaleString([], {
+					compactDisplay: "short",
+					maximumFractionDigits: 1,
+					minimumFractionDigits: count > 999 ? 1 : 0,
+					notation: "compact",
+				})} users`,
+				"Automated update to sync count",
+			).catch((error) => logError(error, "setInterval(SA)"));
+		});
+
+	CONSTANTS.channels.info
+		?.setName(
+			`Info - ${CONSTANTS.guild.memberCount.toLocaleString([], {
+				compactDisplay: "short",
+				maximumFractionDigits: 2,
+				minimumFractionDigits: CONSTANTS.guild.memberCount > 999 ? 2 : 0,
+				notation: "compact",
+			})} members`,
+			"Automated update to sync count",
+		)
+		.catch((error) => logError(error, "setInterval(info)"));
 }, 300_000);
 
 if (process.env.NODE_ENV === "production") {
@@ -213,5 +219,9 @@ if (process.env.NODE_ENV === "production") {
 }
 
 process
-	.on("uncaughtException", async (error, origin) => await logError(error, origin))
-	.on("warning", async (error) => await logError(error, "warning"));
+	.on("uncaughtException", (error, origin) => {
+		logError(error, origin).catch(console.error);
+	})
+	.on("warning", (error) => {
+		logError(error, "warning").catch(console.error);
+	});

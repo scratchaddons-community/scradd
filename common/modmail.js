@@ -25,7 +25,7 @@ export const MODMAIL_UNSUPPORTED =
  * @returns {Promise<import("discord.js").WebhookCreateMessageOptions>} - Webhook message.
  */
 export async function generateModmailMessage(message) {
-	const { files, embeds } = await extractMessageExtremities(message);
+	const { files, embeds } = extractMessageExtremities(message);
 
 	const member =
 		(message.interaction &&

@@ -1,9 +1,9 @@
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 
 import { suggestionsDatabase, suggestionAnswers } from "../../commands/get-top-suggestions.js";
-import censor, { badWordsAllowed } from "../../common/language.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../../common/database.js";
+import censor, { badWordsAllowed } from "../../common/language.js";
 import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
 import {
 	MODMAIL_COLORS,
@@ -55,8 +55,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 					[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay] ??
-				newThread.autoArchiveDuration
+				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay] // TODO: Is this the correct default?
 			}`,
 		);
 	}

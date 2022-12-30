@@ -3,7 +3,6 @@ import {
 	ChannelType,
 	type Message,
 	type EmojiIdentifierResolvable,
-	type MessageReaction,
 	type Snowflake,
 	ComponentType,
 	ButtonStyle,
@@ -55,7 +54,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				reason: "New modmail webhook",
 			}));
 		const existingThread = await getThreadFromMember(
-			message.interaction?.user || message.author,
+			message.interaction?.user ?? message.author,
 		);
 
 		if (existingThread) {
@@ -125,12 +124,9 @@ const event: Event<"messageCreate"> = async function event(message) {
 						true,
 					);
 
-					if (!webhook) throw new ReferenceError("Could not find webhook");
-
 					await Promise.all([
 						buttonInteraction.reply({
 							content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ${MODMAIL_UNSUPPORTED}`,
-
 							ephemeral: true,
 						}),
 						webhook
@@ -146,7 +142,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 			message.channel
 				.createMessageCollector({ time: CONSTANTS.collectorTime })
-				.on("collect", async () => {
+				.on("collect", () => {
 					collector.stop();
 				});
 		}
@@ -195,10 +191,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if (message.channel.id === "806605006072709130") {
 		promises.push(
 			message.startThread({
-				name: truncateText(
-					message.cleanContent || message.embeds[0]?.title || "[image]",
-					50,
-				),
+				name: truncateText(message.cleanContent || "New update!", 50),
 
 				reason: "New upcoming update",
 			}),
@@ -229,14 +222,18 @@ const event: Event<"messageCreate"> = async function event(message) {
 				.fetch({ limit: 100, before: message.id })
 				.then((messages) => messages.toJSON());
 
-			const res: Message<true>[] = [];
-			for (let index = 0; index < fetched.length && res.length < DEFAULT_XP; index++) {
+			const accumulator: Message<true>[] = [];
+			for (
+				let index = 0;
+				index < fetched.length && accumulator.length < DEFAULT_XP;
+				index++
+			) {
 				const item = fetched[index];
-				item && (!item.author.bot || item.interaction) && res.push(item);
+				if (item && (!item.author.bot || item.interaction)) accumulator.push(item);
 			}
-			latestMessages[message.channel.id] = res;
+			latestMessages[message.channel.id] = accumulator;
 		}
-		const lastInChannel = latestMessages[message.channel.id] || [];
+		const lastInChannel = latestMessages[message.channel.id] ?? [];
 		const spam =
 			(
 				await asyncFilter(lastInChannel, async (foundMessage, index) => {
@@ -265,7 +262,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 			1 +
 			Number(
 				Boolean(message.interaction) ||
-					/^(r!|<@323630372531470346>)\s*\w+/i.test(message.content),
+					/^(?:r!|<@323630372531470346>)\s*\w+/i.test(message.content),
 			);
 
 		promises.push(
@@ -274,7 +271,6 @@ const event: Event<"messageCreate"> = async function event(message) {
 					message.channel.isThread() &&
 					(await getUserFromModmail(message.channel))) ||
 					message.interaction?.user ||
-					message.member ||
 					message.author,
 				message.url,
 				spam === -1 && !newChannel
@@ -307,13 +303,16 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	const REACTION_CAP = 2;
 
-	/** @param emoji */
-	function react(emoji: EmojiIdentifierResolvable): Promise<MessageReaction | void> | void {
+	/**
+	 * Attempt to react with an emoji.
+	 *
+	 * @param emoji - The emoji to react with.
+	 */
+	function react(emoji: EmojiIdentifierResolvable): void {
 		if (reactions > REACTION_CAP) return;
 		reactions++;
 		const promise = message.react(emoji).catch(console.error);
 		promises.push(promise);
-		return promise;
 	}
 
 	if (
@@ -393,7 +392,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	)
 		react("🤮");
 	if (
-		message.mentions.has(client.user.id ?? "", {
+		message.mentions.has(client.user.id, {
 			ignoreEveryone: true,
 			ignoreRoles: true,
 			ignoreRepliedUser: true,

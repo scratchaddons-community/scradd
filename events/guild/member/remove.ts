@@ -45,7 +45,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			}`,
 		),
 		getThreadFromMember(member).then(async (thread) => {
-			if (thread) closeModmail(thread, member.user, "Member left");
+			if (thread) await closeModmail(thread, member.user, "Member left");
 		}),
 	];
 

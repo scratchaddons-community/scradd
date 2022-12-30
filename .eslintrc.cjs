@@ -8,14 +8,8 @@ const config = {
 	extends: ["@redguy12", "@redguy12/eslint-config/node"],
 
 	overrides: [
-		{
-			extends: "@redguy12/eslint-config/esm",
-			files: "*.js",
-		},
-		{
-			files: "events/**.ts",
-			rules: { "func-style": 0 },
-		},
+		{ extends: "@redguy12/eslint-config/esm", files: "*.js" },
+		{ files: "events/**.ts", rules: { "func-style": 0 } },
 		{
 			files: ["*.md/**", "*.json"],
 

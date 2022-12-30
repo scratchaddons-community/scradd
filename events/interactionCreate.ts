@@ -13,8 +13,8 @@ import client from "../client.js";
 import { edit } from "../commands/edit-message.js";
 import { guessAddon } from "../commands/guess-addon.js";
 import { say } from "../commands/say.js";
-import censor, { badWordsAllowed } from "../common/language.js";
 import CONSTANTS from "../common/CONSTANTS.js";
+import censor, { badWordsAllowed } from "../common/language.js";
 import log from "../common/logging.js";
 import warn, { filterToStrike, getStrikeById, strikeDatabase } from "../common/punishments.js";
 import giveXp, { DEFAULT_XP } from "../common/xp.js";
@@ -23,6 +23,40 @@ import logError from "../util/logError.js";
 
 import type Command from "../common/types/command.js";
 import type Event from "../common/types/event";
+
+/**
+ * Detect bad words in command options.
+ *
+ * @param options The options to scan.
+ *
+ * @returns The scan results.
+ */
+function censorOptions(options: readonly CommandInteractionOption[]) {
+	let strikes = 0;
+	let isBad = false;
+	const words: string[] = [];
+
+	for (const option of options) {
+		if (typeof option.value === "string") {
+			const censored = censor(option.value);
+			if (censored) {
+				isBad = true;
+				strikes += censored.strikes;
+				words.push(option.value);
+			}
+		}
+		if (option.options) {
+			const censored = censorOptions(option.options);
+			if (censored.isBad) {
+				isBad = true;
+				strikes += censored.strikes;
+				words.push(...censored.words);
+			}
+		}
+	}
+
+	return { isBad, strikes, words };
+}
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -33,7 +67,7 @@ const commands: Promise<Collection<string, Command>> = importScripts(
 const event: Event<"interactionCreate"> = async function event(interaction) {
 	if (interaction.isAutocomplete()) {
 		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
-		const command = (await commands).get(interaction.command?.name || "");
+		const command = (await commands).get(interaction.command?.name ?? "");
 
 		if (!command || !("autocomplete" in command)) {
 			throw new ReferenceError(
@@ -41,7 +75,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			);
 		}
 
-		return await command.autocomplete?.(interaction);
+		return command.autocomplete?.(interaction);
 	}
 	try {
 		if (interaction.isButton()) {
@@ -71,8 +105,8 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						});
 					}
 
-					strikeDatabase.data = strikeDatabase.data.map((strike) =>
-						id === strike.id ? { ...strike, removed: true } : strike,
+					strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
+						id === toRemove.id ? { ...toRemove, removed: true } : toRemove,
 					);
 					const user =
 						(await client.users.fetch(strike.user).catch(() => {})) ||
@@ -87,14 +121,14 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						member?.communicationDisabledUntil &&
 						Number(member.communicationDisabledUntil) > Date.now()
 					)
-						member.disableCommunicationUntil(Date.now());
-					const { url } = await log(
+						await member.disableCommunicationUntil(Date.now());
+					const { url: logUrl } = await log(
 						`${CONSTANTS.emojis.statuses.yes} ${
 							interaction.member
 						} removed strike \`${id}\` from ${user.toString()}!`,
 						"members",
 					);
-					if (user instanceof User) giveXp(user, url, strike.count * DEFAULT_XP);
+					if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
 					if (typeof user === "object") {
 						await user.send(
 							`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
@@ -123,7 +157,7 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			if (!(interaction.member instanceof GuildMember))
 				throw new TypeError("interaction.member is not a GuildMember");
 
-			const id = interaction.values[0];
+			const [id] = interaction.values;
 			if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
 		}
 
@@ -169,10 +203,10 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			}
 		}
 
-		// @ts-expect-error -- No concrete fix to this
+		// @ts-expect-error TS2345 -- No concrete fix to this
 		await command.interaction(interaction);
 	} catch (error) {
-		logError(
+		await logError(
 			error,
 			interaction.isCommand()
 				? interaction.isChatInputCommand()
@@ -198,30 +232,4 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 	}
 };
 
-/** @param options */
-function censorOptions(options: readonly CommandInteractionOption[]) {
-	let strikes = 0,
-		isBad = false,
-		words: string[] = [];
-	for (const option of options) {
-		if (typeof option.value === "string") {
-			const censored = censor(option.value);
-			if (censored) {
-				isBad = true;
-				strikes += censored.strikes;
-				words.push(option.value);
-			}
-		}
-		if (option.options) {
-			const censored = censorOptions(option.options);
-			if (censored.isBad) {
-				isBad = true;
-				strikes += censored.strikes;
-				words.push(...censored.words);
-			}
-		}
-	}
-
-	return { isBad, strikes, words };
-}
 export default event;

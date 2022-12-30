@@ -1,15 +1,20 @@
+import type { Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
 import { sanitizePath } from "./files.js";
 
+/**
+ * Standardize an error.
+ *
+ * @param error The error to standardize.
+ * @param returnObject Whether to return an object.
+ *
+ * @returns The standardized error.
+ */
 export function generateError(error: any, returnObject: true): { [key: string]: any };
 export function generateError(error: any, returnObject?: false): string;
-/**
- * @param error
- * @param returnObject
- */
 export function generateError(error: any, returnObject = false): string | { [key: string]: any } {
 	if (typeof error === "object" || error.toString !== "function") {
 		const serialized = serializeError(error);
@@ -26,7 +31,7 @@ export function generateError(error: any, returnObject = false): string | { [key
 		const object = {
 			name: returnObject ? error.name : undefined,
 			message: error.message,
-			stack: sanitizePath(error.stack || new Error().stack).split("\n"),
+			stack: sanitizePath(error.stack || new Error("dummy message").stack).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
@@ -36,10 +41,17 @@ export function generateError(error: any, returnObject = false): string | { [key
 }
 
 /**
- * @param error
- * @param event
+ * Log an error in #mod-logs.
+ *
+ * @param error - The error to log.
+ * @param event - The event this error occurred in.
+ *
+ * @returns The logged message.
  */
-export default async function logError(error: any, event: string) {
+export default async function logError(
+	error: any,
+	event: string,
+): Promise<Message<true> | undefined> {
 	try {
 		console.error(error);
 		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;

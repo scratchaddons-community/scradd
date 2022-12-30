@@ -40,7 +40,7 @@ import { generateHash, truncateText } from "./text.js";
  * @param message - The message to extract extremeties from.
  * @param censor - Function to censor bad words. Omit to not censor.
  */
-export async function extractMessageExtremities(
+export function extractMessageExtremities(
 	message: Message,
 	censor?: (text: string) =>
 		| false
@@ -49,7 +49,7 @@ export async function extractMessageExtremities(
 				strikes: number;
 				words: string[][];
 		  },
-): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
+): { embeds: APIEmbed[]; files: Attachment[] } {
 	const embeds = [
 		...message.stickers
 			.filter((sticker) => !censor?.(sticker.name))
@@ -457,7 +457,7 @@ export async function paginate<Item, Interaction extends boolean>(
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / itemsPerPage);
 
-	// eslint-disable-next-line fp/no-let -- This must be changable.
+	// eslint-disable-next-line no-let -- This must be changable.
 	let offset = Math.floor(rawOffset / itemsPerPage) * itemsPerPage;
 
 	/**

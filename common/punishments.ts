@@ -234,8 +234,10 @@ export async function filterToStrike(filter: string) {
 }
 
 /**
- * @param interactor
- * @param filter
+ * Reply to a interaction with strike information.
+ *
+ * @param interactor - The user who initiated the interaction.
+ * @param filter - The strike to get.
  */
 export async function getStrikeById(
 	interactor: GuildMember,

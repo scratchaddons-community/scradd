@@ -34,7 +34,7 @@ export async function getFileNames(directory: string): Promise<string[]> {
  * @returns A collection of the scripts.
  */
 export async function importScripts(directory: string): Promise<Collection<any, any>> {
-	const collection = new Collection<any, any>();
+	const collection = new Collection();
 
 	const siblings = (await getFileNames(directory)).filter((file) => path.extname(file) === ".js");
 

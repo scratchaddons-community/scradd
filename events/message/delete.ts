@@ -20,7 +20,7 @@ const event: Event<"messageDelete"> = async function event(message) {
 	const content = !shush && (await messageToText(message));
 	const { embeds, files } = shush
 		? { embeds: [], files: [] }
-		: await extractMessageExtremities(message);
+		: extractMessageExtremities(message);
 
 	while (files.length > 9 + Number(!content)) files.pop();
 

@@ -3,8 +3,8 @@ import log from "../../../common/logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"guildBanAdd"> = async function event(ban) {
-	if (ban.partial) ban = await ban.fetch();
+const event: Event<"guildBanAdd"> = async function event(partialBan) {
+	const ban = partialBan.partial ? await partialBan.fetch() : partialBan;
 	if (ban.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`🔨 User ${ban.user.toString()} banned${ban.reason ? ` - ${ban.reason}` : "!"}`,
