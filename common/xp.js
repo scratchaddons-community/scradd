@@ -1,9 +1,11 @@
-import { GuildMember, time, TimestampStyles, User } from "discord.js";
+import { Collection, GuildMember, time, TimestampStyles, User } from "discord.js";
+import { setTimeout as sleep } from "timers/promises";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
-import Database from "./database.js";
+import Database, { DATABASE_THREAD } from "./database.js";
+import { getLoggingThread } from "./logging.js";
 
 export const xpDatabase = new Database("xp");
 export const weeklyXpDatabase = new Database("recent_xp");
@@ -122,7 +124,7 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 
 	// More than a week since last weekly
 	weeklyXpDatabase.extra = nextWeeklyDate + "";
-	const sorted = weekly.sort((a, b) => b.xp - a.xp);
+	const sorted = [...weekly.sort((a, b) => b.xp - a.xp)];
 	const active = CONSTANTS.roles.active;
 	let activeCount = 0;
 	if (active) {
@@ -212,6 +214,94 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 					),
 			),
 		]);
+	}
+
+	if (date.getUTCDate() === 25 && process.env.NODE_ENV === "production") {
+		// Remove before July lmao
+		const channel = await CONSTANTS.guild.channels.fetch("806605043817644074");
+		if (!channel?.isTextBased()) return;
+		await channel.sendTyping();
+		const message = await channel.messages.fetch("1056560467444781077");
+
+		// Find all reactions with the emoji you want
+		const reaction = message.reactions.valueOf().find((r) => r.emoji.name === "🎉");
+		if (!reaction) return;
+		let users = new Collection();
+		while (users.size % 100 === 0)
+			users = users.concat(
+				await reaction.users.fetch({ limit: 100, after: users.lastKey() }),
+			);
+
+		const members = await Promise.all(
+			users.map((user) => CONSTANTS.guild.members.fetch(user.id).catch(() => {})),
+		);
+
+		const pool = members
+			.map((user, index) => {
+				if (!user) return [];
+				const topIndex = weekly.findIndex((found) => user.id === found.user);
+
+				return Array(
+					topIndex === -1
+						? 1
+						: Math.ceil(
+								((members.length - index) / 90 +
+									Math.min((weekly[topIndex]?.xp ?? 0) / 90, 10)) /
+									(user instanceof GuildMember &&
+									user.roles.resolve("806623480937447455")
+										? 5
+										: 1),
+						  ),
+				).fill(user.id);
+			})
+			.flat();
+
+		await channel.send("👀");
+		await channel.sendTyping();
+
+		await (
+			await getLoggingThread(DATABASE_THREAD)
+		).send({
+			files: [
+				{
+					attachment: Buffer.from(JSON.stringify(weekly), "utf8"),
+					name: "weekly.json",
+				},
+				{
+					attachment: Buffer.from(JSON.stringify(pool), "utf8"),
+					name: "pool.json",
+				},
+			],
+		});
+
+		await sleep(Math.random() * 1000);
+		await channel.send(CONSTANTS.emojis.discord.typing);
+		const index = Math.round(Math.random() * pool.length);
+		await channel.sendTyping();
+		await sleep(Math.random() * 4000 + 1000);
+		await channel.sendTyping();
+		await sleep(Math.random() * 4000 + 1000);
+		await channel.send(
+			`Congrats <@${pool[index]}>! You won **a month of Nitro**! DM <@771422735486156811> to claim your prize.`,
+		);
+
+		// IF ANYONE IS READING THIS, PLEASE DON'T TELL ANYONE THAT THIS IS HERE, IN ANY WAY, SHAPE, OR FORM. IT'S A SURPRISE. TY!
+		await channel.sendTyping();
+		await sleep(Math.random() * 1000 + 2000);
+		await channel.send("And...");
+		await channel.sendTyping();
+		pool.splice(index, 1);
+		await sleep(Math.random() * 5000 + 5000);
+		await channel.sendTyping();
+		await sleep(Math.random() * 5000 + 5000);
+		await channel.sendTyping();
+		await sleep(Math.random() * 5000 + 5000);
+		await channel.sendTyping();
+		await channel.send(
+			`Surprise! Congrats to <@${
+				pool[Math.round(Math.random() * pool.length)]
+			}> as well! You won **a month of Nitro *Basic***! DM <@771422735486156811> to claim your prize.`,
+		);
 	}
 }
 
