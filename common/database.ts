@@ -5,6 +5,7 @@ import { getLoggingThread } from "./logging.js";
 import client from "../client.js";
 import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
 import logError from "../util/logError.js";
+import { extractMessageExtremities } from "../util/discord.js";
 import type { ImmutableArray } from "./types/util.js";
 
 export const DATABASE_THREAD = "databases";
@@ -15,8 +16,14 @@ const databases: Record<string, undefined | Message<true>> = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
-	if (name && message.author.id === client.user?.id) {
-		databases[name] = message;
+	if (name) {
+		databases[name] =
+			message.author.id === client.user?.id
+				? message
+				: await thread.send({
+						...(await extractMessageExtremities(message)),
+						content: message.content,
+				  });
 	}
 }
 
