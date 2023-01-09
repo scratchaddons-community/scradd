@@ -26,7 +26,9 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 							CONSTANTS.channels.suggestions?.availableTags.find(
 								(
 									tag,
-								): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
+								): tag is typeof tag & {
+									name: (typeof suggestionAnswers)[number];
+								} =>
 									(suggestionAnswers as readonly string[]).includes(tag.name) &&
 									newThread.appliedTags.includes(tag.id),
 							)?.name || suggestionAnswers[0],

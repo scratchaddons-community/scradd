@@ -44,7 +44,7 @@ const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 
-type GroupName = typeof GROUP_NAMES[number];
+type GroupName = (typeof GROUP_NAMES)[number];
 type Dependencies = Record<string, undefined | boolean>;
 type AddonQuestion = {
 	/** Questions that, if this question is `true`, must have this answer. */

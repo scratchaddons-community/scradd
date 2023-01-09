@@ -213,7 +213,7 @@ export type Databases = {
 		xp: number;
 	};
 	suggestions: {
-		answer: typeof suggestionAnswers[number];
+		answer: (typeof suggestionAnswers)[number];
 		author: string;
 		count: number;
 		id: Snowflake;

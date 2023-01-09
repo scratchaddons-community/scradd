@@ -13,7 +13,7 @@ import type {
 	UserContextMenuCommandInteraction,
 } from "discord.js";
 
-export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Message" | "User"]> {
+export interface ContextMenuCommand<T extends (typeof ApplicationCommandType)["Message" | "User"]> {
 	data: {
 		type: T;
 		censored?: never;
@@ -35,7 +35,7 @@ export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Mes
 
 export type Option = { description: string; required?: boolean } & (
 	| {
-			type: typeof ApplicationCommandOptionType[
+			type: (typeof ApplicationCommandOptionType)[
 				| "Attachment"
 				| "Boolean"
 				| "Mentionable"
@@ -60,7 +60,7 @@ export type Option = { description: string; required?: boolean } & (
 			autocomplete?: never;
 	  }
 	| {
-			type: typeof ApplicationCommandOptionType["Integer" | "Number"];
+			type: (typeof ApplicationCommandOptionType)["Integer" | "Number"];
 			min?: number;
 			max?: number;
 			choices?: never;
@@ -213,7 +213,7 @@ export interface ChatInputSubcommandGroups<
 }
 
 type Command =
-	| ContextMenuCommand<typeof ApplicationCommandType["Message" | "User"]>
+	| ContextMenuCommand<(typeof ApplicationCommandType)["Message" | "User"]>
 	| ChatInputCommand<Record<string, Option>>
 	| ChatInputSubcommands<Record<string, Record<string, Option>>>
 	| undefined;
@@ -222,7 +222,7 @@ export default Command;
 export function defineCommand<O extends Record<string, Option> = {}>(
 	command: ChatInputCommand<O>,
 ): ChatInputCommand<O>;
-export function defineCommand<T extends typeof ApplicationCommandType["Message" | "User"]>(
+export function defineCommand<T extends (typeof ApplicationCommandType)["Message" | "User"]>(
 	command: ContextMenuCommand<T>,
 ): ContextMenuCommand<T>;
 export function defineCommand<O extends Record<string, Record<string, Option>>>(
