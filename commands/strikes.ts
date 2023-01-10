@@ -99,20 +99,23 @@ const command = defineCommand({
 							strike.removed ? "~~" : ""
 						}`,
 					async (data) => {
+						const newData = { ...data };
 						if (
-							data.embeds?.[0] &&
-							"footer" in data.embeds[0] &&
-							data.embeds[0].footer?.text
+							newData.embeds?.[0] &&
+							"footer" in newData.embeds[0] &&
+							newData.embeds[0].footer?.text
 						) {
-							data.embeds[0].footer.text = data.embeds[0].footer.text.replace(
+							newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
 								/\d+ $/,
 								`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
 							);
 						}
-						return await interaction[interaction.replied ? "editReply" : "reply"](data);
+						return await interaction[interaction.replied ? "editReply" : "reply"](
+							newData,
+						);
 					},
 					{
-						title: `${member?.displayName || user.username}'s strikes`,
+						title: `${member?.displayName ?? user.username}'s strikes`,
 						singular: "",
 						plural: "",
 						failMessage: `${selected.toString()} has never been warned!`,

@@ -38,6 +38,19 @@ const config = {
 		"unicorn/no-null": 1,
 		"etc/no-internal": [2, { ignored: { [/^Collection$/.source]: "name" } }],
 		"@redguy12/no-js": 1,
+
+		"id-match": [
+			2,
+			/^(?:[#_]?(?:(?:[A-Z]{2,}_){0,9}[A-Z]{2,}|(?:[A-Z](?:[a-z]|[A-Z])+|[a-z]{2,}){0,5})|icon_url)$/
+				.source,
+			{
+				ignoreDestructuring: false,
+				onlyDeclarations: false,
+				properties: true,
+			},
+		],
+
+		"sort-keys": 0,
 	},
 };
 

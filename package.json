@@ -2,13 +2,6 @@
 	"name": "scradd",
 	"version": "2.4.0",
 	"private": true,
-	"description": "Custom Discord bot for the Scratch Addons server.",
-	"homepage": "https://discord.gg/FPv957V6SD",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/scratchaddons-community/scradd"
-	},
-	"license": "MIT",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {

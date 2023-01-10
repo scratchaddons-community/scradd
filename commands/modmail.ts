@@ -68,7 +68,7 @@ const command = defineCommand({
 					return;
 				}
 
-				const reason = interaction.options.getString("reason") ?? null;
+				const reason = interaction.options.getString("reason") ?? undefined;
 
 				await interaction.reply({
 					embeds: [
@@ -76,7 +76,7 @@ const command = defineCommand({
 							color: MODMAIL_COLORS.closed,
 							title: "Modmail ticket closed!",
 							timestamp: interaction.channel.createdAt?.toISOString() ?? undefined,
-							description: reason ?? undefined,
+							description: reason,
 
 							footer: {
 								text: "While any future messages will reopen this ticket, it’s recommended to create a new one instead by using /modmail start.",

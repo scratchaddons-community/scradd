@@ -14,6 +14,7 @@ const command = defineCommand({
 		await cleanDatabaseListeners();
 		await interaction.reply("Killing bot…");
 		process.emitWarning(`${interaction.user.tag} is killing the bot`);
+		// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
 		process.exit(1);
 	},
 });

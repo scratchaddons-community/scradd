@@ -195,11 +195,11 @@ setInterval(() => {
 if (process.env.NODE_ENV === "production") {
 	const { cleanDatabaseListeners } = await import("./common/database.js");
 	http.createServer(async (request, response) => {
-		const RequestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
+		const requestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
 
 		if (
-			RequestUrl.pathname === "/cleanDatabaseListeners" &&
-			RequestUrl.searchParams.get("auth") === process.env.CDBL_AUTH
+			requestUrl.pathname === "/cleanDatabaseListeners" &&
+			requestUrl.searchParams.get("auth") === process.env.CDBL_AUTH
 		) {
 			process.emitWarning("cleanDatabaseListeners called");
 			cleanDatabaseListeners().then(() => {

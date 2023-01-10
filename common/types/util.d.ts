@@ -9,6 +9,9 @@ declare global {
 		 * @param searchElement The element to search for.
 		 * @param fromIndex The position in this array at which to begin searching for searchElement.
 		 */
-		includes<U>(x: T & U extends never ? never : U): boolean;
+		includes<U>(
+			searchElement: T|(T & U extends never ? never : U),
+			fromIndex?: 0,
+		): searchElement is T;
 	}
 }

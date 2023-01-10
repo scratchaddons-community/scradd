@@ -12,7 +12,7 @@ import { userSettingsDatabase } from "./settings.js";
  * Get all users with a role.
  *
  * @param roleId - Role to fetch.
- * @param useMentions
+ * @param useMentions - Whether to use mentions or usernames.
  *
  * @returns Users with the role.
  */
@@ -45,7 +45,7 @@ const command = defineCommand({
 					embeds: [
 						{
 							title: "Status",
-							description: `I'm open-source! The source code is available [on GitHub](${pkg.repository.url}).`,
+							description: `I'm open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).`,
 
 							fields: [
 								{
@@ -62,10 +62,7 @@ const command = defineCommand({
 								{
 									name: "Last restarted",
 
-									value: time(
-										client.readyAt ?? new Date(),
-										TimestampStyles.RelativeTime,
-									),
+									value: time(client.readyAt, TimestampStyles.RelativeTime),
 
 									inline: true,
 								},
@@ -110,7 +107,7 @@ const command = defineCommand({
 									name: `${channel[0]
 										.split("_")
 										.map(
-											(name) => (name[0] || "").toUpperCase() + name.slice(1),
+											(name) => (name[0] ?? "").toUpperCase() + name.slice(1),
 										)
 										.join(" ")} ${
 										channel[1]?.type === ChannelType.GuildCategory
@@ -118,7 +115,7 @@ const command = defineCommand({
 											: "channel"
 									}`,
 
-									value: channel[1]?.toString() || "*None*",
+									value: channel[1]?.toString() ?? "*None*",
 									inline: true,
 								})),
 								{
@@ -136,11 +133,11 @@ const command = defineCommand({
 											.split("_")
 											.map(
 												(name) =>
-													(name[0] || "").toUpperCase() + name.slice(1),
+													(name[0] ?? "").toUpperCase() + name.slice(1),
 											)
 											.join(" ")} role`,
 
-										value: role[1]?.toString() || "*None*",
+										value: role[1]?.toString() ?? "*None*",
 										inline: true,
 									})),
 							],

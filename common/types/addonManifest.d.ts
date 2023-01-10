@@ -107,7 +107,7 @@ type cssManipulator =
 type matches =
 	| "*"
 	| `^${string}`
-	| (
+	| readonly (
 			| `^${string}`
 			| (
 					| "projects"
@@ -125,7 +125,7 @@ type matches =
 			| `https://${string}`
 	  )[];
 
-type _if = { settings: Record<string, unknown>; addonEnabled: string | string[] };
+type _if = { settings: Record<string, unknown>; addonEnabled: string | readonly string[] };
 type serializedTableNestableSetting = boolean | number | string;
 type serializedTableNestableSettings = Record<string, serializedTableNestableSetting>;
 type tableNestableSettings = {
@@ -143,7 +143,7 @@ type tableNestableSettings = {
 			 *
 			 * A potential value for the select setting.
 			 */
-			potentialValues: (
+			potentialValues: readonly (
 				| string
 				| {
 						/** The name of the potential value. */
@@ -224,7 +224,7 @@ type AddonManifest = {
 	 *
 	 * A tag.
 	 */
-	tags: (
+	tags: readonly (
 		| "community"
 		| "editor"
 		| "popup"
@@ -249,7 +249,7 @@ type AddonManifest = {
 	 *
 	 * A permission.
 	 */
-	permissions?: ("notifications" | "clipboardWrite")[];
+	permissions?: readonly ("notifications" | "clipboardWrite")[];
 	/**
 	 * You can add userscripts by providing a "userscripts" array.
 	 *
@@ -257,7 +257,7 @@ type AddonManifest = {
 	 *
 	 * Each object must specify the url to the userscript through the "url" property, and provide an array of URL matches.
 	 */
-	userscripts?: {
+	userscripts?: readonly {
 		/** The path to the userscript. */
 		url: `${string}.js`;
 		matches: matches;
@@ -270,7 +270,7 @@ type AddonManifest = {
 	 *
 	 * Each object must specify the url to the stylesheet through the "url" property, and provide an array of URL matches.
 	 */
-	userstyles?: {
+	userstyles?: readonly {
 		/** The path to the userstyle. */
 		url: `${string}.css`;
 		matches: matches;
@@ -284,7 +284,7 @@ type AddonManifest = {
 	 *
 	 * A table setting.
 	 */
-	settings?: (
+	settings?: readonly (
 		| tableNestableSettings
 		| {
 				/** The name of the setting. */
@@ -293,16 +293,16 @@ type AddonManifest = {
 				id: string;
 				type: "table";
 				/** The array that contains default table items. */
-				default?: serializedTableNestableSettings[];
+				default?: readonly serializedTableNestableSettings[];
 				if?: _if;
 				/** The rows of the table. The ordering is used in default and presets. */
-				row: tableNestableSettings[];
+				row: readonly tableNestableSettings[];
 				/**
 				 * The table presets.
 				 *
 				 * The table preset.
 				 */
-				presets?: { name: string; value: serializedTableNestableSettings }[];
+				presets?: readonly { name: string; value: serializedTableNestableSettings }[];
 		  }
 	)[];
 	/**
@@ -310,7 +310,7 @@ type AddonManifest = {
 	 *
 	 * A credited author/contributor.
 	 */
-	credits?: ({
+	credits?: readonly ({
 		/** The name of the credited person. */
 		name: string;
 		/** The link relevant to the credit. */
@@ -331,7 +331,7 @@ type AddonManifest = {
 	 */
 	enabledByDefault?: boolean;
 	/** An array containing presets for settings. */
-	presets?: {
+	presets?: readonly {
 		/** The name of the preset. */
 		name: string;
 		/** The identifier of the preset. */
@@ -343,20 +343,23 @@ type AddonManifest = {
 		 *
 		 * The preset value of the setting.
 		 */
-		values: Record<string, serializedTableNestableSetting | serializedTableNestableSettings[]>;
+		values: Record<
+			string,
+			serializedTableNestableSetting | readonly serializedTableNestableSettings[]
+		>;
 	}[];
 	/**
 	 * An array of libraries that the addon uses.
 	 *
 	 * A library identifier.
 	 */
-	libraries?: string[];
+	libraries?: readonly string[];
 	/**
 	 * An array of additional information (e.g. warnings, notices) about the addon.
 	 *
 	 * Information about the addon.
 	 */
-	info?: {
+	info?: readonly {
 		/** Type of the information. */
 		type?: "warning" | "notice" | "info";
 		/** ID of the information. */
@@ -389,7 +392,7 @@ type AddonManifest = {
 	 *
 	 * A CSS variable.
 	 */
-	customCssVariables?: {
+	customCssVariables?: readonly {
 		/** The name of the CSS variable. */
 		name: string;
 		value: cssManipulator;
@@ -407,7 +410,7 @@ type AddonManifest = {
 	presetPreview?: {
 		/** The type of the preview. */
 		type: "palette";
-		colors?: string[];
+		colors?: readonly string[];
 	};
 	/** The information about the latest update. */
 	latestUpdate?: {
@@ -418,7 +421,7 @@ type AddonManifest = {
 		/** The notice describing the update. */
 		temporaryNotice?: string;
 		/** The array of new setting IDs. */
-		newSettings?: string[];
+		newSettings?: readonly string[];
 	};
 };
 

@@ -42,7 +42,8 @@ async function checkString(toCensor, message) {
 	}
 
 	const baseChannel = getBaseChannel(message.channel);
-	const parentChannel = baseChannel?.isDMBased() ? baseChannel : baseChannel?.parent;
+	const parentChannel =
+		baseChannel && baseChannel.isDMBased() ? baseChannel : baseChannel?.parent;
 
 	if (
 		!badWordsAllowed(message.channel) &&

@@ -51,11 +51,11 @@ const command = defineCommand({
 
 		switch (command) {
 			case "rank": {
-				const user = interaction.options.getUser("user") || interaction.user;
+				const user = interaction.options.getUser("user") ?? interaction.user;
 
 				const member = await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 
-				const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp || 0);
+				const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
 				const level = getLevelForXp(xp);
 				const xpForNextLevel = getXpForLevel(level + 1);
 				const xpForPreviousLevel = getXpForLevel(level);
@@ -97,7 +97,8 @@ const command = defineCommand({
 						canvas.height - paddingPixels,
 					);
 				}
-				interaction.reply({
+
+				await interaction.reply({
 					embeds: [
 						{
 							color: member?.displayColor,
@@ -135,7 +136,7 @@ const command = defineCommand({
 							footer: {
 								text: `${
 									rank
-										? `Ranked ${`${rank.toLocaleString()}/${top.length.toLocaleString()}`}${
+										? `Ranked ${rank.toLocaleString()}/${top.length.toLocaleString()}${
 												CONSTANTS.footerSeperator
 										  }`
 										: ""

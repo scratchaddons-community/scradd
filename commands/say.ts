@@ -12,6 +12,49 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../common/logging.js";
 import { defineCommand } from "../common/types/command.js";
 
+/**
+ * Mimic something.
+ *
+ * @param interaction - The interaction that triggered this mimic.
+ * @param content - What to mimic.
+ */
+export async function say(
+	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
+	content: string,
+): Promise<void> {
+	const message = await interaction.channel?.send(content);
+
+	if (message) {
+		await Promise.all([
+			interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
+			log(
+				`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
+					"say",
+					(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")
+						?.id ?? "",
+				)} in ${message.channel.toString()}!`,
+				"messages",
+				{
+					components: [
+						{
+							type: ComponentType.ActionRow,
+
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "View Message",
+									style: ButtonStyle.Link,
+									url: message.url,
+								},
+							],
+						},
+					],
+				},
+			),
+		]);
+	}
+}
+
 const command = defineCommand({
 	data: {
 		description: "(Mods only) Mimic what you tell me to",
@@ -60,45 +103,3 @@ const command = defineCommand({
 	},
 });
 export default command;
-
-/**
- * @param interaction
- * @param content
- */
-export async function say(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
-	content: string,
-) {
-	const message = await interaction.channel?.send(content);
-
-	if (message) {
-		await Promise.all([
-			interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
-			log(
-				`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
-					"say",
-					(
-						await CONSTANTS.guild.commands.fetch()
-					).find((command) => command.name === "say")?.id ?? "",
-				)} in ${message.channel.toString()}!`,
-				"messages",
-				{
-					components: [
-						{
-							type: ComponentType.ActionRow,
-
-							components: [
-								{
-									type: ComponentType.Button,
-									label: "View Message",
-									style: ButtonStyle.Link,
-									url: message.url,
-								},
-							],
-						},
-					],
-				},
-			),
-		]);
-	}
-}
