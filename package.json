@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@discordjs/opus": "0.9.0",
 		"@discordjs/voice": "0.14.0",
-		"@napi-rs/canvas": "0.1.30",
+		"@napi-rs/canvas": "0.1.33",
 		"async-exit-hook": "2.0.1",
 		"difflib": "0.2.4",
 		"discord.js": "14.7.1",
