@@ -34,7 +34,7 @@
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "latest",
-		"@types/eslint": "8.4.10",
+		"@types/eslint": "<=8.30.0",
 		"@types/json-diff": "<=0.9.1",
 		"@types/node": "<=18.12.1",
 		"@types/papaparse": "<=5.3.2",
