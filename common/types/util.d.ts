@@ -10,7 +10,7 @@ declare global {
 		 * @param fromIndex The position in this array at which to begin searching for searchElement.
 		 */
 		includes<U>(
-			searchElement: T|(T & U extends never ? never : U),
+			searchElement: T | (T & U extends never ? never : U),
 			fromIndex?: 0,
 		): searchElement is T;
 	}
