@@ -6,7 +6,7 @@ import warn from "./punishments.js";
 const NICKNAME_RULE = 8;
 
 /**
- * Set a users nickname, unless they aren't moderatable, in which case send a warning in #mod-logs.
+ * Set a users nickname, unless they aren’t moderatable, in which case send a warning in #mod-logs.
  *
  * @param {import("discord.js").GuildMember} member - The member to rename.
  * @param {string} newNickname - Their new nickname.
@@ -30,7 +30,7 @@ async function setNickname(member, newNickname, reason = `To comply with rule ${
 }
 
 /**
- * Checks a user's nickname for rule 7 and changes it if it is rulebreaking.
+ * Checks a user’s nickname for rule 7 and changes it if it is rulebreaking.
  *
  * @param {import("discord.js").GuildMember} member - The member to change nickname of.
  * @param {boolean} shouldWarn - Whether to warn them if it has bad words.

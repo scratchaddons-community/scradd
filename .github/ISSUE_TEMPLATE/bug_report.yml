@@ -70,4 +70,4 @@ body:
                     Guidelines](https://github.com/scratchaddons-community/scradd/blob/main/.github/CONTRIBUTING.md).
                 required: true
 
-              - label: I'm willing to submit a PR to fix this (optional).
+              - label: I’m willing to submit a PR to fix this (optional).

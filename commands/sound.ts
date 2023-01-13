@@ -41,10 +41,10 @@ const command = defineCommand({
 							"emotionalDamage.mp3": "E-mo-tion-al dam-age",
 							"fbi.mp3": "FBI OPEN UP",
 							"rickroll.mp3": "Innocent song",
-							"weGotEm.mp3": "Ladies and Gentlemen, we got 'em!",
+							"weGotEm.mp3": "Ladies and Gentlemen, we got ’em!",
 							"megalovania.mp3": "Megalovania",
 							"nani.mp3": "NANI?!",
-							"nowThatsALottaDamage.m4a": "Now that's a lotta damage!",
+							"nowThatsALottaDamage.m4a": "Now that’s a lotta damage!",
 							"oof.mp3": "oof",
 							"discord.mp3": "Ping!1!!1!!!",
 							"allStar.mp3": "Somebody once told me",
@@ -84,11 +84,11 @@ const command = defineCommand({
 							"notTodayGriffpatch.mp3": "Not Today, Griffpatch",
 							"potato.mp3": "poe-tah-toe",
 							"ping.mp3": "Scratch Notifier",
-							"worldsSmallestViolin.wav": "The World's Smallest Violin",
+							"worldsSmallestViolin.wav": "The World’s Smallest Violin",
 							"thisIs.mp3": "This Is Scratch Addons.",
 							"weGottaGetRedGuyBack.mp3": "We gotta get Red Guy back!",
 							"tedTalk.wav": "TED Talk",
-							"balls.wav": "We've got some REALLY good content today, though.",
+							"balls.wav": "We’ve got some REALLY good content today, though.",
 							"welcomeBack.mp3": "Welcome back to the Scratch Addons YouTube channel",
 						},
 					},
@@ -124,7 +124,7 @@ const command = defineCommand({
 
 		if (CONSTANTS.guild.members.me?.voice.channel) {
 			return await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} I'm already playing something!`,
+				content: `${CONSTANTS.emojis.statuses.no} I’m already playing something!`,
 				ephemeral: true,
 			});
 		}
@@ -161,7 +161,7 @@ const command = defineCommand({
 					entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
 					entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
 				]).catch(() => {
-					// Seems to be a real disconnect which SHOULDN'T be recovered from
+					// Seems to be a real disconnect which SHOULDN’T be recovered from
 					connection.destroy();
 				});
 

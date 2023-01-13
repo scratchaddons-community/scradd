@@ -6,6 +6,6 @@ import type Event from "../common/types/event";
 const event: Event<"applicationCommandPermissionsUpdate"> = async function event(permissions) {
 	if (permissions.guildId !== CONSTANTS.guild.id) return;
 
-	await log(`✏ Permissions for <@${permissions.applicationId}>'s commands edited!`, "server");
+	await log(`✏ Permissions for <@${permissions.applicationId}>’s commands edited!`, "server");
 };
 export default event;

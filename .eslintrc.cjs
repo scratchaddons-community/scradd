@@ -13,7 +13,7 @@ const config = {
 		{
 			files: ["*.md/**", "*.json"],
 
-			// Type information can't be obtained: see https://github.com/eslint/eslint-plugin-markdown/pull/155#issuecomment-671620312
+			// Type information can’t be obtained: see https://github.com/eslint/eslint-plugin-markdown/pull/155#issuecomment-671620312
 			// So these rules must unfortunately be disabled.
 			rules: { "etc/no-internal": 0 },
 		},

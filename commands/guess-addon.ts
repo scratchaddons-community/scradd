@@ -44,7 +44,7 @@ const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 	(await CONSTANTS.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
 )} command for more information about this addon!*`;
 
-// eslint-disable-next-line -- sonarjs/no-duplicate-string -- This already has types wherever it's duplicated to prevent inconsistencies, we don't need a rule too.
+// eslint-disable-next-line -- sonarjs/no-duplicate-string -- This already has types wherever it’s duplicated to prevent inconsistencies, we don’t need a rule too.
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 
 type GroupName = typeof GROUP_NAMES[number];
@@ -902,7 +902,7 @@ const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 			);
 			accumulated[index] ??= [];
 			accumulated[index]?.push(markdownless);
-			// eslint-disable-next-line no-param-reassign -- This isn't problematic.
+			// eslint-disable-next-line no-param-reassign -- This isn’t problematic.
 			accumulator[group] = accumulated;
 
 			return accumulator;
@@ -1858,7 +1858,7 @@ const command = defineCommand({
 
 						if (componentInteraction.customId.startsWith("end.")) {
 							await componentInteraction.reply(
-								`😦 Why did you quit? That's no fun! (PS, the addon I was thinking of was **${addon.name}**.)`,
+								`😦 Why did you quit? That’s no fun! (PS, the addon I was thinking of was **${addon.name}**.)`,
 							);
 
 							collector.stop();

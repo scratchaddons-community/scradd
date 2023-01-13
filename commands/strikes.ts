@@ -24,7 +24,7 @@ const command = defineCommand({
 					id: {
 						required: true,
 						type: ApplicationCommandOptionType.String,
-						description: "The strike's ID",
+						description: "The strike’s ID",
 					},
 				},
 			},
@@ -57,7 +57,7 @@ const command = defineCommand({
 				) {
 					return await interaction.reply({
 						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
+						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 					});
 				}
 
@@ -74,7 +74,7 @@ const command = defineCommand({
 				) {
 					return await interaction.reply({
 						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
+						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 					});
 				}
 				const strikes = strikeDatabase.data
@@ -115,7 +115,7 @@ const command = defineCommand({
 						);
 					},
 					{
-						title: `${member?.displayName ?? user.username}'s strikes`,
+						title: `${member?.displayName ?? user.username}’s strikes`,
 						singular: "",
 						plural: "",
 						failMessage: `${selected.toString()} has never been warned!`,

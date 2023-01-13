@@ -179,9 +179,9 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 		member && // Be in the server
 		!member.roles.resolve(CONSTANTS.roles.epic.id) // Not have the role
 	) {
-		await member.roles.add(CONSTANTS.roles.epic, "Top 1% of the XP leaderboard");
+		await member.roles.add(CONSTANTS.roles.epic, "Top 1% of the server’s XP");
 		await CONSTANTS.channels.bots?.send(
-			`🎊 ${member.toString()} Congratulations on being in the top 1% of the leaderboard! You have earned ${CONSTANTS.roles.epic.toString()}.`,
+			`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${CONSTANTS.roles.epic.toString()}.`,
 		);
 	}
 
@@ -268,7 +268,7 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 				.join("\n") || "*Nobody got any XP this week!*"
 		}\n\n*This week, ${weekly.length.toLocaleString()} people chatted, and ${activeMembers.length.toLocaleString()} people were active. Altogether, people gained ${Math.floor(
 			weekly.reduce((one, two) => one + two.xp, 0),
-		).toLocaleString()} XP this week.*\n__Next week's weekly winners will be posted ${time(
+		).toLocaleString()} XP this week.*\n__Next week’s weekly winners will be posted ${time(
 			Math.round((nextWeeklyDate + 604_800_000) / 1000),
 			TimestampStyles.RelativeTime,
 		)}.__`,

@@ -251,7 +251,7 @@ export async function getStrikeById(
 	if (strike.user !== interactor.id && !isModerator) {
 		return {
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don't have permission to view this member's strikes!`,
+			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		};
 	}
 

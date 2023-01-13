@@ -101,7 +101,7 @@ const badWords = [
 if (process.env.NODE_ENV !== "production") badWords[1]?.[0].push(/nhgbzbqzhgr/);
 
 /**
- * Decodes RegExes to not be rot13'd & to add unicode letter fonts.
+ * Decodes RegExes to not be rot13’d & to add unicode letter fonts.
  *
  * @param {RegExp[]} regexes - RegExes to decode.
  *
@@ -111,7 +111,7 @@ function decodeRegexes(regexes) {
 	return regexes
 		.map(({ source }) =>
 			caesar(source).replaceAll(
-				// eslint-disable-next-line @redguy12/no-character-class -- It's OK to use a character class here.
+				// eslint-disable-next-line @redguy12/no-character-class -- It’s OK to use a character class here.
 				/[ a-z]/gi,
 				(letter) =>
 					`[${

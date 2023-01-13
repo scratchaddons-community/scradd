@@ -19,7 +19,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 1. Visit [the Discord Developer Portal](https://discord.com/developers/applications) and create a new application.
 2. Note the "Application ID" for future use.
 3. Go to the "Bot" tab and add a bot to the app.
-4. Highly recommended: Disable the "Public Bot" switch so random people don't add it to their servers.
+4. Highly recommended: Disable the "Public Bot" switch so random people don’t add it to their servers.
 5. Make sure to toggle all three of the Privileged Gateway Intents (the Presence, Server Members, and Message Content Intents) on.
 6. Click "Reset Token" and note it for future use.
 
@@ -33,7 +33,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 
 #### Set up the repository locally
 
-1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) if you haven't already.
+1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) if you haven’t already.
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
 4. Set up the .env file as described in [`index.ts`](https://github.com/scratchaddons-community/scradd/blob/main/index.ts#L15L25).
@@ -41,7 +41,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 
 ### File structure
 
-`index.js` is this bots' entry point. It calls `client.js`, which initializes and exports the Discord.js `Client` object, then preforms set-up tasks. `client.js` also exports the main servers' `Guild` object for use elsewhere.
+`index.js` is this bots’ entry point. It calls `client.js`, which initializes and exports the Discord.js `Client` object, then preforms set-up tasks. `client.js` also exports the main servers’ `Guild` object for use elsewhere.
 
 #### `events`
 

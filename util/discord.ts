@@ -542,7 +542,7 @@ export async function paginate<Item, Interaction extends boolean>(
 
 					author: format
 						? {
-								// eslint-disable-next-line id-match -- We didn't name this.
+								// eslint-disable-next-line id-match -- We didn’t name this.
 								icon_url: format.displayAvatarURL(),
 
 								name:

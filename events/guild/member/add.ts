@@ -61,7 +61,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			return;
 		await inviter.roles.add(CONSTANTS.roles.epic, "Invited 20+ people");
 		await CONSTANTS.channels.general?.send(
-			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here's ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
+			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
 		);
 	});
 
