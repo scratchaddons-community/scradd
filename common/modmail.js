@@ -208,7 +208,7 @@ export async function generateModmailConfirm(confirmEmbed, onConfirm, reply) {
 						type: ComponentType.Button,
 						label: "Cancel",
 						customId: cancelId,
-						style: ButtonStyle.Secondary,
+						style: ButtonStyle.Danger,
 					},
 				],
 			},

@@ -41,6 +41,16 @@ declare global {
 dotenv.config();
 
 const { default: client } = await import("./client.js");
+const { default: logError } = await import("./util/logError.js");
+
+process
+	.on("uncaughtException", (error, origin) => {
+		logError(error, origin).catch(console.error);
+	})
+	.on("warning", (error) => {
+		logError(error, "warning").catch(console.error);
+	});
+
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -54,35 +64,36 @@ const dirname = path.dirname(url.fileURLToPath(import.meta.url));
  */
 function transformOptions(options: { [key: string]: Option }) {
 	return Object.entries(options)
-		.map(
-			([name, option]) =>
-				({
-					autocomplete: option.autocomplete,
-					channelTypes: option.channelTypes,
+		.map(([name, option]) => {
+			const transformed = {
+				name,
+				description: option.description,
+				type: option.type,
+				required: option.required ?? false,
+			} as any;
 
-					choices:
-						option.choices &&
-						Object.entries(option.choices).map(([value, choice]) => ({
-							name: choice,
-							value,
-						})),
+			if (option.autocomplete) transformed.autocomplete = option.autocomplete;
+			if (option.choices)
+				transformed.choices = Object.entries(option.choices).map(([value, choice]) => ({
+					name: choice,
+					value,
+				}));
 
-					description: option.description,
-					maxLength: option.maxLength,
-					minLength: option.minLength,
-					maxValue: option.max,
-					minValue: option.min,
-					name,
-					type: option.type,
-					required: option.required ?? false,
-				} as
-					| ApplicationCommandAutocompleteNumericOptionData
-					| ApplicationCommandAutocompleteStringOptionData
-					| ApplicationCommandChannelOptionData
-					| ApplicationCommandNonOptionsData
-					| ApplicationCommandNumericOptionData
-					| ApplicationCommandStringOptionData),
-		)
+			if (option.channelTypes) transformed.channelTypes = option.channelTypes;
+			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
+			if (option.minLength !== undefined) transformed.minLength = option.minLength;
+
+			if (option.maxValue !== undefined) transformed.max = option.maxValue;
+			if (option.minValue !== undefined) transformed.min = option.minValue;
+
+			return transformed as
+				| ApplicationCommandAutocompleteNumericOptionData
+				| ApplicationCommandAutocompleteStringOptionData
+				| ApplicationCommandChannelOptionData
+				| ApplicationCommandNonOptionsData
+				| ApplicationCommandNumericOptionData
+				| ApplicationCommandStringOptionData;
+		})
 		.sort((one, two) =>
 			one.required === two.required
 				? two.name.localeCompare(one.name)
@@ -91,8 +102,6 @@ function transformOptions(options: { [key: string]: Option }) {
 				: 1,
 		);
 }
-
-const { default: logError } = await import("./util/logError.js");
 
 const promises = [
 	importScripts(path.resolve(dirname, "./events")).then(
@@ -112,18 +121,12 @@ const promises = [
 		async (commands: Collection<string, Command>) => {
 			await client.application.commands.set(
 				commands
-					.filter((command): command is NonNullable<typeof command> => Boolean(command))
+					.filter(
+						(command): command is NonNullable<typeof command> => command !== undefined,
+					)
 					.map(({ data }, name): ApplicationCommandData => {
 						const type = data.type ?? ApplicationCommandType.ChatInput;
 						return {
-							description: data.description ?? "",
-
-							defaultMemberPermissions: data.restricted
-								? new PermissionsBitField()
-								: undefined,
-
-							type,
-
 							name:
 								type === ApplicationCommandType.ChatInput
 									? name
@@ -134,6 +137,9 @@ const promises = [
 													(word[0] ?? "").toUpperCase() + word.slice(1),
 											)
 											.join(" "),
+
+							description: data.description as string,
+							type,
 
 							options: data.options
 								? transformOptions(data.options)
@@ -147,6 +153,10 @@ const promises = [
 
 										type: ApplicationCommandOptionType.Subcommand,
 								  })),
+
+							defaultMemberPermissions: data.restricted
+								? new PermissionsBitField()
+								: undefined,
 						};
 					}),
 				CONSTANTS.guild.id,
@@ -217,11 +227,3 @@ if (process.env.NODE_ENV === "production") {
 	const { default: log } = await import("./common/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 }
-
-process
-	.on("uncaughtException", (error, origin) => {
-		logError(error, origin).catch(console.error);
-	})
-	.on("warning", (error) => {
-		logError(error, "warning").catch(console.error);
-	});

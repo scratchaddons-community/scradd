@@ -26,8 +26,8 @@ const command = defineCommand({
 			strikes: {
 				type: ApplicationCommandOptionType.Integer,
 				description: `How many strikes to add (defaults to ${DEFAULT_STRIKES})`,
-				max: STRIKES_PER_MUTE * MUTE_LENGTHS.length + 1,
-				min: 0,
+				maxValue: STRIKES_PER_MUTE * MUTE_LENGTHS.length + 1,
+				minValue: 0,
 			},
 		},
 	},

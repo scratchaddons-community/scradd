@@ -38,8 +38,8 @@ export type Option = { description: string; required?: boolean } & (
 			type: ApplicationCommandOptionType.Channel;
 			channelTypes?: ChannelType[];
 			choices?: never;
-			min?: never;
-			max?: never;
+			minValue?: never;
+			maxValue?: never;
 			minLength?: never;
 			maxLength?: never;
 			autocomplete?: never;
@@ -53,16 +53,16 @@ export type Option = { description: string; required?: boolean } & (
 				| "User"];
 			choices?: never;
 			channelTypes?: never;
-			min?: never;
-			max?: never;
+			minValue?: never;
+			maxValue?: never;
 			minLength?: never;
 			maxLength?: never;
 			autocomplete?: never;
 	  }
 	| {
 			type: typeof ApplicationCommandOptionType["Integer" | "Number"];
-			min?: number;
-			max?: number;
+			minValue?: number;
+			maxValue?: number;
 			choices?: never;
 			channelTypes?: never;
 			minLength?: never;
@@ -72,8 +72,8 @@ export type Option = { description: string; required?: boolean } & (
 	| ({
 			type: ApplicationCommandOptionType.String;
 			channelTypes?: never;
-			min?: never;
-			max?: never;
+			minValue?: never;
+			maxValue?: never;
 	  } & (
 			| {
 					choices?: { [key: string]: string };
