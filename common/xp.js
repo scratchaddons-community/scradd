@@ -175,7 +175,7 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 	if (
 		CONSTANTS.roles.epic && // The role must exist
 		// in addition, they must:
-		rank / xp.length < 0.01 && // Be in the top 1%
+		rank / CONSTANTS.guild.memberCount < 0.01 && // Be in the top 1%
 		member && // Be in the server
 		!member.roles.resolve(CONSTANTS.roles.epic.id) // Not have the role
 	) {
