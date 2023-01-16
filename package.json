@@ -29,7 +29,7 @@
 		"serialize-error": "11.0.0"
 	},
 	"devDependencies": {
-		"@railway/cli": "2.0.13",
+		"@railway/cli": "2.1.0",
 		"@redguy12/eslint-config": "file:../../configs/eslint-config",
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
