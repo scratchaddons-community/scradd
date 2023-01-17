@@ -2,7 +2,7 @@
 
 ## About
 
-Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](https://discord.gg/FPv957V6SD). It has many features, such as Modmail, potatoboard, auto moderation, XP, and much more. It also has many features specific to Scratch Addons, including addon search, suggestions, a fun game, tons of inside jokes, and more.
+Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](https://discord.gg/FPv957V6SD). It has many features, such as punishments, auto moderation, "potatoboard", XP, and much more. It also has many features specific to Scratch Addons, including addon search, suggestions, a fun game, tons of inside jokes, and more.
 
 Feel free to fork Scradd to use some features in your servers.
 
@@ -26,7 +26,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 #### Set up the testing server
 
 1. Create a new server using the [Scradd Testing server template](https://discord.new/htbTxKBq6EVp).
-2. Enable Community in Server Settings. Use `#rules` for the Rules or Guidelines channel and `#mod-logs` for the Community Updates Channel.
+2. Enable Community in Server Settings. Use `#roles` for the Rules or Guidelines channel and `#mod-logs` for the Community Updates Channel.
 3. Enable Developer Mode in your User Settings -> Advanced.
 4. Right-click on your new testing server, copy its id, and note it for future use.
 5. Invite your bot at https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[GUILD_ID_HERE]&permissions=8&scope=applications.commands%20bot

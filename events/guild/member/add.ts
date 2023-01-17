@@ -73,5 +73,15 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 				.map(([id]) => id),
 		);
 	}
+
+	await CONSTANTS.channels.info?.setName(
+		`Info - ${(CONSTANTS.guild.memberCount - 1).toLocaleString([], {
+			compactDisplay: "short",
+			maximumFractionDigits: 2,
+			minimumFractionDigits: CONSTANTS.guild.memberCount > 1_000 ? 2 : 0,
+			notation: "compact",
+		})} members`,
+		"Automated update to sync count",
+	);
 };
 export default event;

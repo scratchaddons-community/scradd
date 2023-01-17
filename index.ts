@@ -188,18 +188,6 @@ setInterval(() => {
 				"Automated update to sync count",
 			).catch((error) => logError(error, "setInterval(SA)"));
 		});
-
-	CONSTANTS.channels.info
-		?.setName(
-			`Info - ${CONSTANTS.guild.memberCount.toLocaleString([], {
-				compactDisplay: "short",
-				maximumFractionDigits: 2,
-				minimumFractionDigits: CONSTANTS.guild.memberCount > 999 ? 2 : 0,
-				notation: "compact",
-			})} members`,
-			"Automated update to sync count",
-		)
-		.catch((error) => logError(error, "setInterval(info)"));
 }, 300_000);
 
 if (process.env.NODE_ENV === "production") {
@@ -207,18 +195,16 @@ if (process.env.NODE_ENV === "production") {
 	http.createServer(async (request, response) => {
 		const requestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
 
-		if (
-			requestUrl.pathname === "/cleanDatabaseListeners" &&
-			requestUrl.searchParams.get("auth") === process.env.CDBL_AUTH
-		) {
-			process.emitWarning("cleanDatabaseListeners called");
-			cleanDatabaseListeners().then(() => {
-				process.emitWarning("cleanDatabaseListeners ran");
-				response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
-			});
-		} else {
-			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
-		}
+		if (requestUrl.pathname !== "/cleanDatabaseListeners")
+			return response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+		if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
+			return response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
+
+		process.emitWarning("cleanDatabaseListeners called");
+		cleanDatabaseListeners().then(() => {
+			process.emitWarning("cleanDatabaseListeners ran");
+			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
+		});
 	}).listen(process.env.PORT ?? 443);
 }
 

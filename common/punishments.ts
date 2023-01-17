@@ -324,11 +324,6 @@ export async function getStrikeById(
 								},
 						  ]
 						: []),
-					{
-						name: "⏲ Date",
-						value: time(new Date(strike.date), TimestampStyles.RelativeTime),
-						inline: true,
-					},
 				],
 			},
 		],

@@ -2,9 +2,9 @@ import { ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
-import censor from "./language.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
+import censor from "./language.js";
 import giveXp from "./xp.js";
 
 export const BOARD_EMOJI = "🥔";
@@ -42,10 +42,10 @@ export function boardReactionCount(channel) {
 	return (
 		{
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.mods + 1,
+			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.misc,
 			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
-			[CONSTANTS.channels.modmail?.id || ""]: COUNTS.mods,
+			"1064409498757910528": COUNTS.misc, // #contact-mods
 			"853256939089559583": COUNTS.misc, // #da-boosters
 			"869662117651955802": COUNTS.devs, // #devs-only
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,

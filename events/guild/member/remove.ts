@@ -1,7 +1,7 @@
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import Database from "../../../common/database.js";
 import log from "../../../common/logging.js";
-import { closeModmail, getThreadFromMember } from "../../../common/modmail.js";
+import { getThreadFromMember } from "../../../common/contactMods.js";
 
 import type Event from "../../../common/types/event";
 
@@ -45,7 +45,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			}`,
 		),
 		getThreadFromMember(member).then(async (thread) => {
-			if (thread) await closeModmail(thread, member.user, "Member left");
+			await thread?.setArchived(true, "Member left");
 		}),
 	];
 

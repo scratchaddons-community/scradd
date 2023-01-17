@@ -110,6 +110,7 @@ export default {
 	channels: {
 		info: getChannel("Info", ChannelType.GuildCategory, "start"),
 		announcements: guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+		contact: getChannel("contact", ChannelType.GuildText, "start"),
 		board: getChannel("board", [ChannelType.GuildText, ChannelType.GuildAnnouncement], "end"),
 		welcome: getChannel("welcome", ChannelType.GuildText),
 
@@ -117,7 +118,6 @@ export default {
 		modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
 		exec: getChannel("exec", ChannelType.GuildText, "start"),
 		admin: getChannel("admin", ChannelType.GuildText, "start"),
-		modmail: getChannel("modmail", ChannelType.GuildText),
 
 		general: getChannel("general", ChannelType.GuildText),
 

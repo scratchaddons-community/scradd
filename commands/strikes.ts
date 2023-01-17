@@ -67,16 +67,6 @@ const command = defineCommand({
 						? selected
 						: await CONSTANTS.guild.members.fetch(selected.id).catch(() => {});
 
-				if (
-					selected.id !== interaction.member.id &&
-					CONSTANTS.roles.mod &&
-					!interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-				) {
-					return await interaction.reply({
-						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
-					});
-				}
 				const strikes = strikeDatabase.data
 					.filter((strike) => strike.user === selected.id)
 					.sort((one, two) => two.date - one.date);

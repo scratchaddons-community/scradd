@@ -405,7 +405,7 @@ export function disableComponents(
  * @param reply - A function to send pages.
  * @param options - Additional options.
  * @param options.title - The title of the embed.
- * @param options.user - The user who ran the command. Only they will be able to switch pages.
+ * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
  * @param options.singular - A noun that describes a item of the array.
  * @param options.plural - `singular` pluralized. Defaults to just adding an `s` to the end.
  * @param options.failMessage - A message to show when `array` is empty.
@@ -417,13 +417,11 @@ export function disableComponents(
  * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
  * @param options.disableCustomComponents - Whether to disable the custom components when the pagination buttons go inactive.
  */
-export async function paginate<Item, Interaction extends boolean>(
+export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (
-		options: (Interaction extends true ? InteractionReplyOptions : BaseMessageOptions) & {
-			fetchReply: true;
-		},
+		options: BaseMessageOptions & { fetchReply: true; ephemeral?: boolean },
 	) => Promise<Message>,
 	{
 		title,
@@ -432,7 +430,7 @@ export async function paginate<Item, Interaction extends boolean>(
 		plural = `${singular}s`,
 		failMessage = `No ${plural} found!`,
 		format,
-		ephemeral, // Implicitly defaults to false
+		ephemeral = false,
 		rawOffset = 0,
 		itemsPerPage = 15,
 		showIndexes = true,
@@ -440,12 +438,12 @@ export async function paginate<Item, Interaction extends boolean>(
 		disableCustomComponents = false,
 	}: {
 		title: string;
-		user: User;
+		user: User | false;
 		singular: string;
 		plural?: string;
 		failMessage?: string;
 		format?: GuildMember | User;
-		ephemeral?: Interaction extends true ? boolean : undefined;
+		ephemeral?: boolean;
 		rawOffset?: number;
 		itemsPerPage?: number;
 		showIndexes?: boolean;
@@ -490,11 +488,10 @@ export async function paginate<Item, Interaction extends boolean>(
 				),
 			)
 		)
-			.join("\n")
-			.trim();
+			.join("\n");
 
 		const components: ActionRowData<MessageActionRowComponentData>[] =
-			numberOfPages > 1
+			numberOfPages > 1 && user
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -567,7 +564,7 @@ export async function paginate<Item, Interaction extends boolean>(
 
 	// eslint-disable-next-line no-let -- This needs to be changable.
 	let message = await reply(await generateMessage());
-	if (numberOfPages === 1) return;
+	if (numberOfPages === 1 || !user) return;
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>

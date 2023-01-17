@@ -23,6 +23,7 @@ import logError from "../util/logError.js";
 
 import type Command from "../common/types/command.js";
 import type Event from "../common/types/event";
+import startTicket, { gatherTicketInfo, ticketCategoryMessage } from "../common/contactMods.js";
 
 /**
  * Detect bad words in command options.
@@ -135,30 +136,56 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 						);
 					}
 				}
+
+				case "contact_mods": {
+					await interaction.reply(ticketCategoryMessage);
+				}
 			}
 		}
 		if (interaction.isModalSubmit()) {
-			if (interaction.customId.startsWith("guessModal.")) {
-				await guessAddon(interaction);
-				return;
-			}
+			const [id, ...options] = interaction.customId.split(".");
 
-			if (interaction.customId === "say") {
-				await say(interaction, interaction.fields.getTextInputValue("message"));
-				return;
-			}
-
-			if (interaction.customId.startsWith("edit.")) {
-				await edit(interaction);
-				return;
+			switch (id) {
+				case "guessModal": {
+					await guessAddon(interaction);
+					break;
+				}
+				case "say": {
+					await say(interaction, interaction.fields.getTextInputValue("message"));
+					break;
+				}
+				case "edit": {
+					await edit(interaction);
+					break;
+				}
+				case "contactMods": {
+					const thread = await startTicket(interaction, options);
+					if (thread)
+						await interaction.reply({
+							content: `${
+								CONSTANTS.emojis.statuses.yes
+							} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
+							ephemeral: true,
+						});
+					return;
+				}
 			}
 		}
-		if (interaction.isStringSelectMenu() && interaction.customId === "selectStrike") {
-			if (!(interaction.member instanceof GuildMember))
-				throw new TypeError("interaction.member is not a GuildMember");
+		if (interaction.isStringSelectMenu()) {
+			switch (interaction.customId) {
+				case "selectStrike": {
+					if (!(interaction.member instanceof GuildMember))
+						throw new TypeError("interaction.member is not a GuildMember");
 
-			const [id] = interaction.values;
-			if (id) return await interaction.reply(await getStrikeById(interaction.member, id));
+					const [id] = interaction.values;
+					if (id)
+						return await interaction.reply(await getStrikeById(interaction.member, id));
+					break;
+				}
+				case "contactMods": {
+					return await gatherTicketInfo(interaction);
+				}
+			}
 		}
 
 		if (!interaction.isCommand()) return;

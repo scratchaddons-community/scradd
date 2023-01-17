@@ -28,7 +28,6 @@ const command = defineCommand({
 			!interaction.targetMessage.editable ||
 			[
 				CONSTANTS.channels.board?.id,
-				CONSTANTS.channels.modmail?.id,
 				CONSTANTS.channels.old_suggestions?.id,
 			].includes(interaction.channel?.id) ||
 			(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&

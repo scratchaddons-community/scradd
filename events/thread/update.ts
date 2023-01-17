@@ -5,12 +5,6 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import censor, { badWordsAllowed } from "../../common/language.js";
 import log, { LOG_GROUPS, shouldLog } from "../../common/logging.js";
-import {
-	MODMAIL_COLORS,
-	getUserFromModmail,
-	sendClosedMessage,
-	sendOpenedMessage,
-} from "../../common/modmail.js";
 import warn from "../../common/punishments.js";
 
 import type Event from "../../common/types/event";
@@ -133,38 +127,5 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			);
 		}
 	}
-
-	const latestMessage = (await oldThread.messages.fetch({ limit: 1 })).first();
-	if (
-		newThread.parent?.id !== CONSTANTS.channels.modmail?.id ||
-		oldThread.archived === newThread.archived ||
-		(newThread.archived &&
-			latestMessage?.interaction?.commandName === "modmail close" &&
-			Date.now() - Number(latestMessage.createdAt) < 60_000)
-	)
-		return;
-
-	if (newThread.archived) {
-		await sendClosedMessage(newThread);
-		return;
-	}
-	const member = await getUserFromModmail(newThread);
-
-	await Promise.all([
-		newThread.fetchStarterMessage().then((starter) => {
-			starter
-				?.edit({
-					embeds: [
-						{
-							...starter.embeds[0]?.data,
-							color: MODMAIL_COLORS.opened,
-							title: "Modmail ticket opened!",
-						},
-					],
-				})
-				.catch(console.error);
-		}),
-		member && sendOpenedMessage(member),
-	]);
 };
 export default event;

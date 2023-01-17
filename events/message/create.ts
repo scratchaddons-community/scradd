@@ -1,11 +1,8 @@
 import {
 	MessageType,
-	ChannelType,
 	type Message,
 	type EmojiIdentifierResolvable,
 	type Snowflake,
-	ComponentType,
-	ButtonStyle,
 } from "discord.js";
 
 import client from "../../client.js";
@@ -13,20 +10,9 @@ import { userSettingsDatabase } from "../../commands/settings.js";
 import automodMessage from "../../common/automod.js";
 import { BOARD_EMOJI } from "../../common/board.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import {
-	MODMAIL_COLORS,
-	generateModmailConfirm,
-	generateModmailMessage,
-	generateReactionFunctions,
-	getUserFromModmail,
-	getThreadFromMember,
-	openModmail,
-	MODMAIL_UNSUPPORTED,
-} from "../../common/modmail.js";
 import giveXp, { DEFAULT_XP } from "../../common/xp.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
-import { escapeMessage, stripMarkdown } from "../../util/markdown.js";
-import { asyncFilter } from "../../util/promises.js";
+import { stripMarkdown } from "../../util/markdown.js";
 import { normalize, truncateText } from "../../util/text.js";
 
 import type Event from "../../common/types/event";
@@ -34,158 +20,26 @@ import type Event from "../../common/types/event";
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
 const event: Event<"messageCreate"> = async function event(message) {
-	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
-	const promises = [];
-
-	let reactions = 0;
-
 	if (
-		message.channel.isDMBased() &&
-		(message.author.id !== client.user.id || message.interaction) &&
-		CONSTANTS.channels.modmail
-	) {
-		const webhooks = await CONSTANTS.channels.modmail.fetchWebhooks();
-		const webhook =
-			webhooks.find(
-				(possibleWebhook) => possibleWebhook.applicationId === client.application.id,
-			) ??
-			(await CONSTANTS.channels.modmail.createWebhook({
-				name: CONSTANTS.webhookName,
-				reason: "New modmail webhook",
-			}));
-		const existingThread = await getThreadFromMember(
-			message.interaction?.user ?? message.author,
-		);
-
-		if (existingThread) {
-			reactions++;
-			promises.push(
-				webhook
-					.send({
-						threadId: existingThread.id,
-						...(await generateModmailMessage(message)),
-					})
-					.then(...generateReactionFunctions(message)),
-			);
-		} else if (message.content.startsWith("/")) {
-			promises.push(
-				message.reply({
-					content: "⚠ Sorry, but commands are not supported in DMs.",
-
-					components: [
-						{
-							type: ComponentType.ActionRow,
-
-							components: [
-								{
-									type: ComponentType.Button,
-									label: "Go to #bots",
-									style: ButtonStyle.Link,
-									url: "https://discord.com/channels/806602307750985799/806648546773434390",
-								},
-							],
-						},
-					],
-				}),
-			);
-		} else if (
-			[MessageType.Default, MessageType.Reply, MessageType.ThreadStarterMessage].includes(
-				message.type,
-			)
-		) {
-			const collector = await generateModmailConfirm(
-				{
-					title: "Confirmation",
-
-					description: `Are you sure you want to send client message to **the ${escapeMessage(
-						CONSTANTS.guild.name,
-					)} server’s mod team**? This will ping all online mods, so please don’t abuse this if you don’t have a genuine reason for contacting us.`,
-
-					color: MODMAIL_COLORS.confirm,
-
-					author: {
-						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
-						name: CONSTANTS.guild.name,
-					},
-				},
-				async (buttonInteraction) => {
-					const newThread = await openModmail(
-						{
-							title: "Modmail ticket opened!",
-							description: `Ticket by ${message.author.toString()}`,
-
-							footer: {
-								text: `${MODMAIL_UNSUPPORTED}\nMessages starting with an equals sign (=) are ignored.`,
-							},
-
-							color: MODMAIL_COLORS.opened,
-						},
-						message.member ?? message.author,
-						true,
-					);
-
-					await Promise.all([
-						buttonInteraction.reply({
-							content: `${CONSTANTS.emojis.statuses.yes} **Modmail ticket opened!** You may send the mod team messages by sending me DMs. I will DM you their messages. ${MODMAIL_UNSUPPORTED}`,
-							ephemeral: true,
-						}),
-						webhook
-							.send({
-								threadId: newThread.id,
-								...(await generateModmailMessage(message)),
-							})
-							.then(...generateReactionFunctions(message)),
-					]);
-				},
-				async (options) => await message.reply(options),
-			);
-
-			message.channel
-				.createMessageCollector({ time: CONSTANTS.collectorTime })
-				.on("collect", () => {
-					collector.stop();
-				});
-		}
-	}
-
-	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) {
-		await Promise.all(promises);
+		message.flags.has("Ephemeral") ||
+		message.type === MessageType.ThreadStarterMessage ||
+		message.channel.isDMBased() ||
+		message.guild?.id !== CONSTANTS.guild.id
+	)
 		return;
-	}
 
 	if (
 		message.channel.id === CONSTANTS.channels.board?.id &&
 		message.type === MessageType.ChannelPinnedMessage
 	) {
-		await Promise.all([...promises, message.delete()]);
+		await message.delete();
 		return;
 	}
 
-	if (
-		message.channel.type === ChannelType.PublicThread &&
-		message.channel.parent?.id === CONSTANTS.channels.modmail?.id &&
-		!message.content.startsWith("=") &&
-		(message.webhookId && message.author.id !== client.user.id
-			? message.applicationId !== client.application.id
-			: true) &&
-		message.interaction?.commandName !== "modmail close"
-	) {
-		const member = await getUserFromModmail(message.channel);
+	if (await automodMessage(message)) return;
 
-		const useMentions =
-			userSettingsDatabase.data.find((settings) => member?.id === settings.user)
-				?.useMentions ?? false;
-
-		const messageToSend = await generateModmailMessage(message);
-
-		messageToSend.content = `${
-			useMentions ? message.author.toString() : message.author.username
-		}:${messageToSend.content ? ` ${messageToSend.content}` : ""}`;
-
-		reactions++;
-
-		promises.push(member?.send(messageToSend).then(...generateReactionFunctions(message)));
-	}
+	const promises = [];
+	let reactions = 0;
 
 	// #upcoming-updates
 	if (message.channel.id === "806605006072709130") {
@@ -198,25 +52,10 @@ const event: Event<"messageCreate"> = async function event(message) {
 		);
 	}
 
-	if (await automodMessage(message)) {
-		await Promise.all(promises);
-		return;
-	}
-
 	const baseChannel = getBaseChannel(message.channel);
 
 	// XP
-	const webhook =
-		CONSTANTS.channels.modmail?.id === baseChannel?.id &&
-		message.webhookId &&
-		message.webhookId === client.application.id;
-
-	if (
-		process.env.NODE_ENV !== "production" ||
-		!message.author.bot ||
-		message.interaction ||
-		webhook
-	) {
+	if (process.env.NODE_ENV !== "production" || !message.author.bot || message.interaction) {
 		if (!latestMessages[message.channel.id]) {
 			const fetched = await message.channel.messages
 				.fetch({ limit: 100, before: message.id })
@@ -234,26 +73,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 			latestMessages[message.channel.id] = accumulator;
 		}
 		const lastInChannel = latestMessages[message.channel.id] ?? [];
-		const spam =
-			(
-				await asyncFilter(lastInChannel, async (foundMessage, index) => {
-					if (webhook) {
-						return (
-							!(
-								foundMessage.webhookId &&
-								foundMessage.applicationId === client.application.id
-							) && index
-						);
-					}
-					return (
-						![message.author.id, message.interaction?.user.id || ""].some((user) =>
-							[foundMessage.author.id, foundMessage.interaction?.user.id].includes(
-								user,
-							),
-						) && index
-					);
-				}).next()
-			).value ?? -1;
+		const spam = lastInChannel.findIndex((foundMessage) => {
+			return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
+				[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
+			);
+		});
 
 		const newChannel = lastInChannel.length < DEFAULT_XP;
 		if (!newChannel) lastInChannel.pop();
@@ -267,11 +91,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 		promises.push(
 			giveXp(
-				(webhook &&
-					message.channel.isThread() &&
-					(await getUserFromModmail(message.channel))) ||
-					message.interaction?.user ||
-					message.author,
+				message.interaction?.user || message.author,
 				message.url,
 				spam === -1 && !newChannel
 					? 1
