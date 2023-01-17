@@ -14,4 +14,22 @@ declare global {
 			fromIndex?: 0,
 		): searchElement is T;
 	}
+	interface ObjectConstructor {
+		/**
+		 * Returns an array of key/values of the enumerable properties of an object.
+		 *
+		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
+		 *   Model (DOM) object.
+		 */
+		entries<T, U extends string>(o: Record<U, T> | ArrayLike<T>): [U, T][];
+		/**
+		 * Returns an object created by key-value entries for properties and methods.
+		 *
+		 * @param entries An iterable object that contains key-value entries for properties and methods.
+		 */
+		fromEntries<T, U extends PropertyKey>(entries: Iterable<readonly [U, T]>): Record<U, T>;
+	}
+	interface Body {
+		json<T = unknown>(): Promise<T>;
+	}
 }

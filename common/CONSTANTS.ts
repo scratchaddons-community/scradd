@@ -12,7 +12,7 @@ const latestRelease: string =
 	process.env.NODE_ENV == "production"
 		? (
 				await fetch(`https://api.github.com/repos/${saRepo}/releases/latest`).then(
-					async (res) => await res.json(),
+					async (res) => await res.json<any>(),
 				)
 		  ).tag_name
 		: "master";
@@ -146,9 +146,9 @@ function getChannel<T extends ChannelType>(
 	type: T | T[] = [],
 	matchType: "end" | "full" | "partial" | "start" = "full",
 ): (import("discord.js").NonThreadGuildBasedChannel & { type: T }) | undefined {
-	const types = [type].flat();
+	const types = [type].flat() as ChannelType[];
 	return channels.find((channel): channel is typeof channel & { type: T } => {
-		if (!channel || !(types as ChannelType[]).includes(channel.type)) return false;
+		if (!channel || !types.includes(channel.type)) return false;
 
 		switch (matchType) {
 			case "full":

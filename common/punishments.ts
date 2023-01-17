@@ -183,8 +183,11 @@ const { url } =
 	databases
 		.find((message) => message.attachments.first()?.name === "robotop_warns.json")
 		?.attachments.first() ?? {};
-export const robotopStrikes: { id: number; mod: Snowflake; reason: string }[] = url
-	? await fetch(url).then(async (response) => await response.json())
+export const robotopStrikes = url
+	? await fetch(url).then(
+			async (response) =>
+				await response.json<{ id: number; mod: Snowflake; reason: string }[]>(),
+	  )
 	: [];
 
 /** @param filter */

@@ -125,7 +125,7 @@ const command = defineCommand({
 								},
 								...Object.entries(CONSTANTS.roles)
 									.filter(
-										(role): role is [string, Role | undefined] =>
+										(role): role is [typeof role[0], Role | undefined] =>
 											typeof role[1] !== "string",
 									)
 									.map((role) => ({

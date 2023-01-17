@@ -145,23 +145,25 @@ export const ticketCategoryMessage = {
 					type: ComponentType.StringSelect,
 					customId: "contactMods",
 					options: [
-						{ label: "Appeal a warn", value: "appeal" },
-						{ label: "Report a user", value: "report" },
-						{ label: "Request a role", value: "role" },
-						{ label: "Report a Scradd bug", value: "bug" },
-						{
-							label: "Suggest a server change",
-							value: "update",
-						},
-						{
-							label: "Get clarification on a rule",
-							value: "rules",
-						},
-						{
-							label: "Get help with Scratch Addons",
-							value: "sa",
-						},
-						{ label: "Other", value: "other" },
+						...([
+							{ label: "Appeal a warn", value: "appeal" },
+							{ label: "Report a user", value: "report" },
+							{ label: "Request a role", value: "role" },
+							{ label: "Report a Scradd bug", value: "bug" },
+							{
+								label: "Suggest a server change",
+								value: "update",
+							},
+							{
+								label: "Get clarification on a rule",
+								value: "rules",
+							},
+							{
+								label: "Get help with Scratch Addons",
+								value: "sa",
+							},
+							{ label: "Other", value: "other" },
+						] as const),
 					],
 					placeholder: "What do you need help with?",
 				},
@@ -173,9 +175,9 @@ export const ticketCategoryMessage = {
 
 const categoryToDescription = Object.fromEntries(
 	ticketCategoryMessage.components[0]?.components[0]?.options.map(
-		({ label, value }) => [value, label] as const,
+		({ label, value }) => [value, label]
 	) || [],
-) as Record<typeof CATEGORIES[number], string>;
+);
 
 /**
  * Given a modmail ticket thread, return the user who messages are being sent to.

@@ -138,7 +138,7 @@ const promises = [
 											)
 											.join(" "),
 
-							description: data.description as string,
+							description: data.description ?? "",
 							type,
 
 							options: data.options
@@ -176,8 +176,10 @@ const promises = [
 
 setInterval(() => {
 	fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`)
-		.then(async (response) => await response.json())
-		.then(({ count }: { count: number; _chromeCountDate: string }) => {
+		.then(
+			async (response) => await response.json<{ count: number; _chromeCountDate: string }>(),
+		)
+		.then(({ count }) => {
 			CONSTANTS.channels.SA?.setName(
 				`Scratch Addons - ${count.toLocaleString([], {
 					compactDisplay: "short",

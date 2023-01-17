@@ -7,11 +7,11 @@ import type AddonManifest from "./types/addonManifest.js";
 dns.setDefaultResultOrder("ipv4first"); // TODO: move elsewhere
 
 export const manifest = await fetch(`${CONSTANTS.urls.saSource}/manifest.json`).then(
-	async (response) => await (response.json() as Promise<chrome.runtime.Manifest>),
+	async (response) => await response.json<chrome.runtime.Manifest>(),
 );
 
 const addonIds = await fetch(`${CONSTANTS.urls.saSource}/addons/addons.json`).then(
-	async (response) => await (response.json() as Promise<string[]>),
+	async (response) => await response.json<string[]>(),
 );
 
 export const addons = await Promise.all(
@@ -22,7 +22,7 @@ export const addons = await Promise.all(
 				await fetch(
 					`${CONSTANTS.urls.saSource}/addons/${encodeURI(addonId)}/addon.json`,
 				).then(async (response) => ({
-					...(await (response.json() as Promise<AddonManifest>)),
+					...(await response.json<AddonManifest>()),
 
 					id: addonId,
 				})),

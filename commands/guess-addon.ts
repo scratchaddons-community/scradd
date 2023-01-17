@@ -1668,7 +1668,7 @@ const command = defineCommand({
 								)
 							)
 								// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- This is the only way.
-								accumulator.push(group as GroupName);
+								accumulator.push(group);
 
 							return accumulator;
 						},
