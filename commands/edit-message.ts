@@ -26,10 +26,9 @@ const command = defineCommand({
 		if (
 			interaction.targetMessage.type !== MessageType.Default ||
 			!interaction.targetMessage.editable ||
-			[
-				CONSTANTS.channels.board?.id,
-				CONSTANTS.channels.old_suggestions?.id,
-			].includes(interaction.channel?.id) ||
+			[CONSTANTS.channels.board?.id, CONSTANTS.channels.old_suggestions?.id].includes(
+				interaction.channel?.id,
+			) ||
 			(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
 				databaseThread.id !== interaction.channel?.id)
 		) {

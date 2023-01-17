@@ -487,8 +487,7 @@ export async function paginate<Item>(
 						)}`,
 				),
 			)
-		)
-			.join("\n");
+		).join("\n");
 
 		const components: ActionRowData<MessageActionRowComponentData>[] =
 			numberOfPages > 1 && user
