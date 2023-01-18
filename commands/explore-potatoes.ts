@@ -134,7 +134,7 @@ const command = defineCommand({
 		async function getNextMessage(): Promise<InteractionReplyOptions> {
 			const info = (await fetchedMessages.next()).value;
 
-			const reply: InteractionReplyOptions | undefined = info
+			const reply = info
 				? await generateBoardMessage(info, {
 						pre:
 							index > 0
@@ -157,7 +157,7 @@ const command = defineCommand({
 							},
 						],
 				  })
-				: {
+				: ({
 						allowedMentions: { users: [] },
 
 						components:
@@ -183,7 +183,7 @@ const command = defineCommand({
 						embeds: [],
 						ephemeral: true,
 						files: [],
-				  };
+				  } satisfies InteractionReplyOptions);
 
 			if (!reply) {
 				boardDatabase.data = data.filter(({ source }) => source !== info?.source);

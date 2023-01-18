@@ -174,9 +174,10 @@ export const ticketCategoryMessage = {
 } satisfies InteractionReplyOptions;
 
 const categoryToDescription = Object.fromEntries(
-	ticketCategoryMessage.components[0]?.components[0]?.options.map(
-		({ label, value }) => [value, label]
-	) || [],
+	ticketCategoryMessage.components[0]?.components[0]?.options.map(({ label, value }) => [
+		value,
+		label,
+	]) || [],
 );
 
 /**

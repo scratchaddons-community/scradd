@@ -75,7 +75,6 @@ export default async function changeNickname(member, shouldWarn = true) {
 		})
 	).filter((found) => found.displayName === member.displayName);
 
-	/** @type {any[]} */
 	const promises = [];
 
 	if (members.size > 1) {

@@ -8,9 +8,9 @@
  *
  * @returns Return value.
  */
-export function bigIntPower(one: bigint, two: bigint) {
+export function bigIntPower(one: bigint, two: bigint):bigint {
 	if (two === 0n) return 1n;
-	const powerTwo: bigint = bigIntPower(one, two / 2n);
+	const powerTwo = bigIntPower(one, two / 2n);
 	if (two % 2n === 0n) return powerTwo * powerTwo;
 	return one * powerTwo * powerTwo;
 }
