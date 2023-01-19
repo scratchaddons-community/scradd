@@ -162,15 +162,17 @@ const promises = [
 
 setInterval(() => {
 	fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`)
+		.catch(() => {})
 		.then(
-			async (response) => await response.json<{ count: number; _chromeCountDate: string }>(),
+			async (response) => await response?.json<{ count: number; _chromeCountDate: string }>(),
 		)
-		.then(({ count }) => {
+		.then((count) => {
+			if (!count) return;
 			CONSTANTS.channels.SA?.setName(
-				`Scratch Addons - ${count.toLocaleString([], {
+				`Scratch Addons - ${count.count.toLocaleString([], {
 					compactDisplay: "short",
 					maximumFractionDigits: 1,
-					minimumFractionDigits: count > 999 ? 1 : 0,
+					minimumFractionDigits: count.count > 999 ? 1 : 0,
 					notation: "compact",
 				})} users`,
 				"Automated update to sync count",
