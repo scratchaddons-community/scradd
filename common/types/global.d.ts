@@ -1,3 +1,5 @@
+import type { Snowflake } from "discord.js";
+
 export type ImmutableArray<T> = Omit<Array<T>, "pop" | "push" | "shift" | "unshift" | "splice">;
 declare global {
 	interface ReadonlyArray<T> {
@@ -31,5 +33,15 @@ declare global {
 	}
 	interface Body {
 		json<T = unknown>(): Promise<T>;
+	}
+	namespace NodeJS {
+		interface ProcessEnv {
+			GUILD_ID: Snowflake;
+			BOT_TOKEN: string;
+			// BOT_SECRET: string;
+			NODE_ENV: "development" | "production";
+			PORT?: `${number}`;
+			CDBL_AUTH?: string;
+		}
 	}
 }

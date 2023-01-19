@@ -3,7 +3,6 @@ import path from "path";
 import url from "url";
 
 import {
-	type Snowflake,
 	PermissionsBitField,
 	ApplicationCommandType,
 	type ApplicationCommandData,
@@ -25,18 +24,6 @@ import type Command from "./common/types/command.js";
 import type { Option } from "./common/types/command.js";
 import type Event from "./common/types/event.js";
 import type { ClientEvent } from "./common/types/event.js";
-
-declare global {
-	namespace NodeJS {
-		interface ProcessEnv {
-			GUILD_ID: Snowflake;
-			BOT_TOKEN: string;
-			NODE_ENV: "development" | "production";
-			PORT?: `${number}`;
-			CDBL_AUTH?: string;
-		}
-	}
-}
 
 dotenv.config();
 

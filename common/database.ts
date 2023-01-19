@@ -8,7 +8,7 @@ import logError from "../util/logError.js";
 import { getLoggingThread } from "./logging.js";
 
 import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
-import type { ImmutableArray } from "./types/util.js";
+import type { ImmutableArray } from "./types/global.js";
 
 export const DATABASE_THREAD = "databases";
 
