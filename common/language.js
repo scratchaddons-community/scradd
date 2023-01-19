@@ -15,22 +15,10 @@ import { PARTIAL_STRIKE_COUNT } from "./punishments.js";
  */
 const badWords = [
 	[
-		[
-			/cbea/,
-			/grfgvpyr/,
-			/fpuzhpx/,
-			/erpghz/,
-			/ihyin/,
-			/🖕/,
-			/卐/,
-			/fjnfgvxn/,
-			/卍/,
-			/lvss/,
-			/ahg ?fnpx/,
-		],
+		[/cbea/, /grfgvpyr/, /fpuzhpx/, /erpghz/, /ihyin/, /🖕/, /卐/, /卍/, /lvss/, /ahg ?fnpx/],
 		[
 			/intva(?:f|l|n|r|y)+/,
-			/(?:urzv ?)?cravf(?:rf)?/,
+			/(?:urzv ?)?crav(?:f?rf|yr)?/,
 			/nahf(?:rf)?/,
 			/frzra/,
 			/(?:c(?:bfg|er) ?)?phz/,
@@ -135,14 +123,14 @@ function decodeRegexes(regexes) {
 							"p": "pᴘ𝙋የₚℙｐⓟᵖ⒫",
 							"q": "qϙфϱ۹ℚoｑⓠ⒬ᑫ",
 							"r": "r𝙍𝚛ℝｒዪ尺ʳⓡ⒭ᵣՀʀɾ卂几乃Ꮧ",
-							"s": "§ˢs𝙎ᔆₛｓazⓢ$⒮₴5ѕꙅ҉ֆςS̲ŜŞßꜱʂᎦᏕᔕ丂",
+							"s": "§ˢs𝙎ᔆₛｓⓢ$⒮₴5ѕꙅ҉ֆςS̲ŜŞßꜱʂᎦᏕᔕ丂",
 							"t": "тʅᴛ𝙏千ŦtｔƬፕᵗⓣℑₜ⒯ｷ",
 							"u": "uᵤ𝚞ᴜɥɯvሁυᵘ*ሀｕⓤ⒰",
 							"v": "√vⱽｖ℣✅u☑✔ⓥ⒱۷ѵ҉νΛVᵛᵥᴠʋʌᏉᐯᐺ",
 							"w": "𝓌🆆🅆Wʷᴡʍwｗሠⓦ⒲",
 							"x": "⌧᙭×xᕽₓｘⓧﾒ⒳҉χXЖˣӼӾҳא乂",
 							"y": "५vyγሃｙⓨ⒴ʸʏᵧ",
-							"z": "z𝑧҉չｚZえᶻᴢƵȥʐʑⱫƹ乙Ƨᙆℤsⓩ⒵",
+							"z": "z𝑧҉չｚZえᶻᴢƵȥʐʑⱫƹ乙Ƨᙆℤⓩ⒵",
 							"'": "‘’",
 							"7": "ᖭ",
 							"-": "ー",
@@ -180,10 +168,10 @@ export default function censor(text) {
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
 
-		return string.replaceAll(regexp, (censored) => {
-			words[index]?.push(censored);
+		return string.replaceAll(regexp, (word) => {
+			words[index]?.push(word);
 
-			return censored[0] + "#".repeat(censored.length - 1);
+			return word.length === 1 ? "#" : word[0] + "#".repeat(word.length - 1);
 		});
 	}, normalize(text));
 

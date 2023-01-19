@@ -94,8 +94,8 @@ export default async function warn(
 			embeds: [
 				{
 					title: `You were ${
-						strikes
-							? `warned${strikes > 1 ? ` ${strikes} times` : ""}`
+						displayStrikes
+							? `warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 							: "verbally warned"
 					} in ${escapeMarkdown(CONSTANTS.guild.name)}!`,
 
@@ -133,6 +133,7 @@ export default async function warn(
 
 	const newStrikeCount = oldStrikeCount + strikes;
 
+	console.log(newStrikeCount);
 	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		// Ban
 		await (member?.bannable &&
@@ -169,7 +170,7 @@ export default async function warn(
 			  }));
 	}
 
-	if (Math.trunc(newStrikeCount) >= MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
+	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
 				Math.round((Number(allUserStrikes[0]?.date || Date.now()) + EXPIRY_LENGTH) / 1000),
