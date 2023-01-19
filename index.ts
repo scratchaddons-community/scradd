@@ -1,4 +1,3 @@
-import http from "node:http";
 import path from "path";
 import url from "url";
 
@@ -179,23 +178,7 @@ setInterval(() => {
 		});
 }, 300_000);
 
-if (process.env.NODE_ENV === "production") {
-	const { cleanDatabaseListeners } = await import("./common/database.js");
-	http.createServer(async (request, response) => {
-		const requestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
-
-		if (requestUrl.pathname !== "/cleanDatabaseListeners")
-			return response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
-		if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
-			return response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
-
-		process.emitWarning("cleanDatabaseListeners called");
-		cleanDatabaseListeners().then(() => {
-			process.emitWarning("cleanDatabaseListeners ran");
-			response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
-		});
-	}).listen(process.env.PORT ?? 443);
-}
+if (process.env.NODE_ENV === "production") await import("./web/server.js");
 
 await Promise.all(promises);
 if (process.env.NODE_ENV === "production") {
