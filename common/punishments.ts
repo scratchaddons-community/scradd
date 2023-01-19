@@ -20,7 +20,7 @@ import Database from "./database.js";
 import log, { getLoggingThread } from "./logging.js";
 import giveXp, { DEFAULT_XP } from "./xp.js";
 
-export const EXPIRY_LENGTH = 21,
+export const EXPIRY_LENGTH = 1814400000,
 	STRIKES_PER_MUTE = 3,
 	MUTE_LENGTHS = [6, 12, 24],
 	PARTIAL_STRIKE_COUNT = 1 / (STRIKES_PER_MUTE + 1),
@@ -43,7 +43,7 @@ export default async function warn(
 ): Promise<void> {
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
-			strike.user === user.id && strike.date + EXPIRY_LENGTH < Date.now() && !strike.removed,
+			strike.user === user.id && strike.date + EXPIRY_LENGTH > Date.now() && !strike.removed,
 	);
 
 	const oldStrikeCount = allUserStrikes.reduce(
