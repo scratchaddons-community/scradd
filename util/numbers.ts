@@ -8,7 +8,7 @@
  *
  * @returns Return value.
  */
-export function bigIntPower(one: bigint, two: bigint):bigint {
+export function bigIntPower(one: bigint, two: bigint): bigint {
 	if (two === 0n) return 1n;
 	const powerTwo = bigIntPower(one, two / 2n);
 	if (two % 2n === 0n) return powerTwo * powerTwo;
@@ -39,14 +39,18 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = value.split("").reduceRight((carry, digit, loopIndex) => {
-		const biggestBaseIndex = range.indexOf(digit);
-		if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
-			throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
-		return (
-			carry + BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
-		);
-	}, 0n);
+	let decValue = value
+		.split("")
+		.reverse() // Stop changing this to `.reduceRight()`! It's not the same!
+		.reduce((carry, digit, loopIndex) => {
+			const biggestBaseIndex = range.indexOf(digit);
+			if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
+				throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
+			return (
+				carry +
+				BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
+			);
+		}, 0n);
 
 	let output = "";
 	while (decValue > 0) {
