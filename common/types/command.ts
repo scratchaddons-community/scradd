@@ -143,7 +143,8 @@ export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Mes
 	autocomplete?: never;
 }
 
-export interface ChatInputCommand<O extends { [key: string]: Option } = {}> extends BaseChatInputCommand {
+export interface ChatInputCommand<O extends { [key: string]: Option } = {}>
+	extends BaseChatInputCommand {
 	data: { options?: O; subcommands?: never } & BaseChatInputCommandData;
 
 	/** A function that processes interactions to this command. */

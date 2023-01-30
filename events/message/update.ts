@@ -49,7 +49,7 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 			},
 		);
 	}
-	
+
 	if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
 		logs.push(
 			`📌 Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${

@@ -48,7 +48,7 @@ const command = defineCommand({
 		},
 	},
 
-	async interaction(interaction,) {
+	async interaction(interaction) {
 		await interaction.reply(
 			updateOptions(interaction.user, {
 				autoreactions: interaction.options.getBoolean("autoreactions") ?? undefined,
