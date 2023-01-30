@@ -119,7 +119,7 @@ const command = defineCommand({
 								return [
 									{
 										type: ComponentType.StringSelect,
-										customId: "selectStrike",
+										customId: "_selectStrike",
 										placeholder: "View more information on a strike",
 
 										options: filtered.map((strike) => ({
@@ -149,6 +149,26 @@ const command = defineCommand({
 				);
 			}
 		}
+	},
+
+	buttons: {
+		async strike(interaction, id) {
+			if (!(interaction.member instanceof GuildMember))
+				throw new TypeError("interaction.member is not a GuildMember");
+
+			await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
+			return;
+		},
+	},
+
+	stringSelects: {
+		async selectStrike(interaction) {
+			if (!(interaction.member instanceof GuildMember))
+				throw new TypeError("interaction.member is not a GuildMember");
+
+			const [id] = interaction.values;
+			if (id) await interaction.reply(await getStrikeById(interaction.member, id));
+		},
 	},
 });
 export default command;

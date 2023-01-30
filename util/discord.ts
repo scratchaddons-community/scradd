@@ -345,7 +345,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			)}**:*\n${actualContent}`;
 		}
 		case MessageType.Call: {
-			return `${CONSTANTS.emojis.discord.call}${message.author.toString()} started a call.`;
+			return `${CONSTANTS.emojis.discord.call} ${message.author.toString()} started a call.`;
 		}
 		default: {
 			// Fallback for unknown message types

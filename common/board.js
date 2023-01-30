@@ -45,9 +45,9 @@ export function boardReactionCount(channel) {
 			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.misc,
 			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
-			"1064409498757910528": COUNTS.misc, // #contact-mods
-			"853256939089559583": COUNTS.misc, // #da-boosters
-			"869662117651955802": COUNTS.devs, // #devs-only
+			[CONSTANTS.channels.contact?.id || ""]: COUNTS.misc,
+			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.misc,
+			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
 		COUNTS[

@@ -133,7 +133,6 @@ export default async function warn(
 
 	const newStrikeCount = oldStrikeCount + strikes;
 
-	console.log(newStrikeCount);
 	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		// Ban
 		await (member?.bannable &&
@@ -278,7 +277,7 @@ export async function getStrikeById(
 							components: [
 								{
 									type: ComponentType.Button,
-									customId: `${strike.id}_remove_strike`,
+									customId: `${strike.id}_removeStrike`,
 									label: "Remove",
 									style: ButtonStyle.Danger,
 								},

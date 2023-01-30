@@ -17,6 +17,8 @@ const latestRelease: string =
 		  ).tag_name
 		: "master";
 
+const SA = getChannel("Scratch Addons", ChannelType.GuildCategory, "start");
+
 export default {
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200b",
@@ -120,9 +122,13 @@ export default {
 		admin: getChannel("admin", ChannelType.GuildText, "start"),
 
 		general: getChannel("general", ChannelType.GuildText),
+		boosters: getChannel("boosters", ChannelType.GuildText, "end"),
 
-		SA: getChannel("Scratch Addons", ChannelType.GuildCategory, "start"),
+		SA,
+		support: SA?.children.valueOf().first(),
 		suggestions: getChannel("suggestions", ChannelType.GuildForum),
+		bugs: getChannel("bug", ChannelType.GuildForum, "start"),
+		devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 		bots: getChannel("bots", ChannelType.GuildText, "end"),
 

@@ -180,6 +180,7 @@ exitHook(async (callback) => {
 	await cleanDatabaseListeners().then(callback);
 });
 
+/** @todo Abstract this out. */
 export type Databases = {
 	board: {
 		/** The number of reactions this message has. */

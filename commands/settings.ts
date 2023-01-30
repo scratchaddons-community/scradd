@@ -1,8 +1,15 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ButtonStyle,
+	ComponentType,
+	InteractionReplyOptions,
+	User,
+} from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
+import { xpDatabase } from "../common/xp.js";
 
 export const userSettingsDatabase = new Database("user_settings");
 await userSettingsDatabase.init();
@@ -41,66 +48,136 @@ const command = defineCommand({
 		},
 	},
 
-	async interaction(interaction) {
-		const settingsForUser = userSettingsDatabase.data.find(
-			({ user }) => user === interaction.user.id,
+	async interaction(interaction,) {
+		await interaction.reply(
+			updateOptions(interaction.user, {
+				autoreactions: interaction.options.getBoolean("autoreactions") ?? undefined,
+				boardPings: interaction.options.getBoolean("board-pings") ?? undefined,
+				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
+				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
+				weeklyPings: interaction.options.getBoolean("weekly-pings") ?? undefined,
+			}),
 		);
-		const autoreactions =
-				interaction.options.getBoolean("autoreactions") ??
-				settingsForUser?.autoreactions ??
-				true,
-			boardPings =
-				interaction.options.getBoolean("board-pings") ??
-				settingsForUser?.boardPings ??
-				process.env.NODE_ENV === "production",
-			levelUpPings =
-				interaction.options.getBoolean("level-up-pings") ??
-				settingsForUser?.levelUpPings ??
-				process.env.NODE_ENV === "production",
-			useMentions =
-				interaction.options.getBoolean("use-mentions") ??
-				settingsForUser?.useMentions ??
-				false,
-			weeklyPings =
-				interaction.options.getBoolean("weekly-pings") ??
-				settingsForUser?.weeklyPings ??
-				process.env.NODE_ENV === "production";
-
-		userSettingsDatabase.data = settingsForUser
-			? userSettingsDatabase.data.map((data) =>
-					data.user === interaction.user.id
-						? {
-								user: data.user,
-								boardPings,
-								levelUpPings,
-								weeklyPings,
-								autoreactions,
-								useMentions,
-						  }
-						: data,
-			  )
-			: [
-					...userSettingsDatabase.data,
-					{
-						user: interaction.user.id,
-						boardPings,
-						levelUpPings,
-						weeklyPings,
-						autoreactions,
-						useMentions,
-					},
-			  ];
-		await interaction.reply({
-			ephemeral: true,
-
-			content:
-				`${CONSTANTS.emojis.statuses.yes} Updated your settings!\n\n` +
-				`Board Pings: ${CONSTANTS.emojis.statuses[boardPings ? "yes" : "no"]}\n` +
-				`Level Up Pings: ${CONSTANTS.emojis.statuses[levelUpPings ? "yes" : "no"]}\n` +
-				`Weekly Winner Pings: ${CONSTANTS.emojis.statuses[weeklyPings ? "yes" : "no"]}\n` +
-				`Autoreactions: ${CONSTANTS.emojis.statuses[autoreactions ? "yes" : "no"]}\n` +
-				`Use Mentions: ${CONSTANTS.emojis.statuses[useMentions ? "yes" : "no"]}`,
-		});
+	},
+	buttons: {
+		async toggleOption(interaction, option) {
+			if (!option) throw new ReferenceError("Can not toggle no option");
+			await interaction.reply(updateOptions(interaction.user, { [option]: "toggle" }));
+		},
 	},
 });
 export default command;
+
+export function updateOptions(
+	user: User,
+	options: {
+		autoreactions?: boolean | "toggle";
+		boardPings?: boolean | "toggle";
+		levelUpPings?: boolean | "toggle";
+		useMentions?: boolean | "toggle";
+		weeklyPings?: boolean | "toggle";
+	},
+) {
+	const settingsForUser = userSettingsDatabase.data.find((settings) => settings.user === user.id);
+
+	const old = {
+		autoreactions: settingsForUser?.autoreactions ?? true,
+		boardPings: settingsForUser?.boardPings ?? process.env.NODE_ENV === "production",
+		levelUpPings: settingsForUser?.levelUpPings ?? process.env.NODE_ENV === "production",
+		useMentions:
+			settingsForUser?.useMentions ??
+			(xpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 ||
+				xpDatabase.data.length) < 100,
+		weeklyPings: settingsForUser?.weeklyPings ?? process.env.NODE_ENV === "production",
+	};
+	const autoreactions =
+			options.autoreactions === "toggle"
+				? !old.autoreactions
+				: options.autoreactions ?? old.autoreactions,
+		boardPings =
+			options.boardPings === "toggle"
+				? !old.boardPings
+				: options.boardPings ?? old.boardPings,
+		levelUpPings =
+			options.levelUpPings === "toggle"
+				? !old.levelUpPings
+				: options.levelUpPings ?? old.levelUpPings,
+		useMentions =
+			options.useMentions === "toggle"
+				? !old.useMentions
+				: options.useMentions ?? old.useMentions,
+		weeklyPings =
+			options.weeklyPings === "toggle"
+				? !old.weeklyPings
+				: options.weeklyPings ?? old.weeklyPings;
+
+	userSettingsDatabase.data = settingsForUser
+		? userSettingsDatabase.data.map((data) =>
+				data.user === user.id
+					? {
+							user: data.user,
+							boardPings,
+							levelUpPings,
+							weeklyPings,
+							autoreactions,
+							useMentions,
+					  }
+					: data,
+		  )
+		: [
+				...userSettingsDatabase.data,
+				{
+					user: user.id,
+					boardPings,
+					levelUpPings,
+					weeklyPings,
+					autoreactions,
+					useMentions,
+				},
+		  ];
+
+	return {
+		ephemeral: true,
+		fetchReply: true,
+
+		content: `${CONSTANTS.emojis.statuses.yes} Updated your settings!`,
+
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: "boardPings_toggleOption",
+						type: ComponentType.Button,
+						label: "Board Pings",
+						style: ButtonStyle[boardPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "levelUpPings_toggleOption",
+						type: ComponentType.Button,
+						label: "Level Up Pings",
+						style: ButtonStyle[levelUpPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "weeklyPings_toggleOption",
+						type: ComponentType.Button,
+						label: "Weekly Winner Pings",
+						style: ButtonStyle[weeklyPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "autoreactions_toggleOption",
+						type: ComponentType.Button,
+						label: "Autoreactions",
+						style: ButtonStyle[autoreactions ? "Success" : "Danger"],
+					},
+					{
+						customId: "useMentions_toggleOption",
+						type: ComponentType.Button,
+						label: "Use Mentions",
+						style: ButtonStyle[useMentions ? "Success" : "Danger"],
+					},
+				],
+			},
+		],
+	} satisfies InteractionReplyOptions;
+}

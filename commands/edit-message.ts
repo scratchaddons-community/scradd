@@ -4,7 +4,6 @@ import {
 	ButtonStyle,
 	ComponentType,
 	MessageType,
-	type ModalSubmitInteraction,
 	TextInputStyle,
 	type MessageEditOptions,
 } from "discord.js";
@@ -26,9 +25,7 @@ const command = defineCommand({
 		if (
 			interaction.targetMessage.type !== MessageType.Default ||
 			!interaction.targetMessage.editable ||
-			[CONSTANTS.channels.board?.id, CONSTANTS.channels.old_suggestions?.id].includes(
-				interaction.channel?.id,
-			) ||
+			CONSTANTS.channels.board?.id === interaction.channel?.id ||
 			(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
 				databaseThread.id !== interaction.channel?.id)
 		) {
@@ -73,129 +70,125 @@ const command = defineCommand({
 				},
 			],
 
-			customId: `edit.${interaction.targetMessage.id}`,
+			customId: `${interaction.targetMessage.id}_edit`,
 			title: "Edit Message",
 		});
 	},
-});
-export default command;
 
-/**
- * Edit a message.
- *
- * @param interaction - The interaction with information about the edit.
- */
-export async function edit(interaction: ModalSubmitInteraction): Promise<void> {
-	const text =
-		interaction.fields.getTextInputValue("json1") +
-		interaction.fields.getTextInputValue("json2");
-	const json = await new Promise<MessageEditOptions>((resolve) => {
-		resolve(JSON.parse(text));
-	}).catch(async (error: unknown) => {
-		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} An error occurred while parsing the JSON.`,
-			ephemeral: true,
+	modals: {
+		async edit(interaction, id) {
+			const text =
+				interaction.fields.getTextInputValue("json1") +
+				interaction.fields.getTextInputValue("json2");
+			const json = await new Promise<MessageEditOptions>((resolve) => {
+				resolve(JSON.parse(text));
+			}).catch(async (error: unknown) => {
+				await interaction.reply({
+					content: `${CONSTANTS.emojis.statuses.no} An error occurred while parsing the JSON.`,
+					ephemeral: true,
 
-			files: [
-				{
+					files: [
+						{
+							attachment: Buffer.from(
+								JSON.stringify(
+									{ ...generateError(error, true), stack: undefined },
+									undefined,
+									"  ",
+								),
+								"utf8",
+							),
+
+							name: "error.json",
+						},
+						{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
+					],
+				});
+			});
+			if (!json) return;
+			const message = await interaction.channel?.messages.fetch(id ?? "");
+			if (!message) throw new TypeError("Used command in DM!");
+			const oldJSON = getMessageJSON(message);
+			const edited = await message.edit(json).catch(async (error: unknown) => {
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} An error occurred while editing the message.`,
+
+					files: [
+						{
+							attachment: Buffer.from(
+								JSON.stringify({ ...generateError(error, true) }, undefined, "  "),
+								"utf8",
+							),
+
+							name: "error.json",
+						},
+						{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
+					],
+				});
+			});
+
+			if (!edited) return;
+
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.yes} Successfully edited message!`,
+				ephemeral: true,
+			});
+
+			const files = [];
+			const contentDiff = unifiedDiff(
+				oldJSON.content.split("\n"),
+				edited.content.split("\n"),
+			).join("\n");
+
+			const extraDiff = diffString(
+				{ ...oldJSON, content: undefined },
+				{ ...getMessageJSON(edited), content: undefined },
+				{ color: false },
+			);
+
+			if (contentDiff) {
+				files.push({
 					attachment: Buffer.from(
-						JSON.stringify(
-							{ ...generateError(error, true), stack: undefined },
-							undefined,
-							"  ",
-						),
+						contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
 						"utf8",
 					),
 
-					name: "error.json",
-				},
-				{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
-			],
-		});
-	});
-	if (!json) return;
-	const message = await interaction.channel?.messages.fetch(
-		interaction.customId.split(".")[1] ?? "",
-	);
-	if (!message) throw new TypeError("Used command in DM!");
-	const oldJSON = getMessageJSON(message);
-	const edited = await message.edit(json).catch(async (error: unknown) => {
-		await interaction.reply({
-			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} An error occurred while editing the message.`,
+					name: "content.diff",
+				});
+			}
 
-			files: [
-				{
-					attachment: Buffer.from(
-						JSON.stringify({ ...generateError(error, true) }, undefined, "  "),
-						"utf8",
-					),
+			if (extraDiff) {
+				files.push({
+					attachment: Buffer.from(extraDiff, "utf8"),
+					name: "extra.diff",
+				});
+			}
 
-					name: "error.json",
-				},
-				{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
-			],
-		});
-	});
-
-	if (!edited) return;
-
-	await interaction.reply({
-		content: `${CONSTANTS.emojis.statuses.yes} Successfully edited message!`,
-		ephemeral: true,
-	});
-
-	const files = [];
-	const contentDiff = unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n")).join(
-		"\n",
-	);
-
-	const extraDiff = diffString(
-		{ ...oldJSON, content: undefined },
-		{ ...getMessageJSON(edited), content: undefined },
-		{ color: false },
-	);
-
-	if (contentDiff) {
-		files.push({
-			attachment: Buffer.from(
-				contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-				"utf8",
-			),
-
-			name: "content.diff",
-		});
-	}
-
-	if (extraDiff) {
-		files.push({
-			attachment: Buffer.from(extraDiff, "utf8"),
-			name: "extra.diff",
-		});
-	}
-
-	if (files.length > 0) {
-		await log(
-			`✏ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}!`,
-			"messages",
-			{
-				components: [
+			if (files.length > 0) {
+				await log(
+					`✏ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}!`,
+					"messages",
 					{
 						components: [
 							{
-								label: "View Message",
-								style: ButtonStyle.Link,
-								type: ComponentType.Button,
-								url: edited.url,
+								components: [
+									{
+										label: "View Message",
+										style: ButtonStyle.Link,
+										type: ComponentType.Button,
+										url: edited.url,
+									},
+								],
+
+								type: ComponentType.ActionRow,
 							},
 						],
 
-						type: ComponentType.ActionRow,
+						files,
 					},
-				],
-
-				files,
-			},
-		);
-	}
-}
+				);
+			}
+		},
+	},
+});
+export default command;

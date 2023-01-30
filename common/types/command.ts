@@ -11,27 +11,14 @@ import type {
 	User,
 	MessageContextMenuCommandInteraction,
 	UserContextMenuCommandInteraction,
+	ButtonInteraction,
+	ModalSubmitInteraction,
+	StringSelectMenuInteraction,
+	UserSelectMenuInteraction,
+	RoleSelectMenuInteraction,
+	MentionableSelectMenuInteraction,
+	ChannelSelectMenuInteraction,
 } from "discord.js";
-
-export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Message" | "User"]> {
-	data: {
-		type: T;
-		censored?: never;
-		description?: never;
-		restricted?: true;
-		options?: never;
-		subcommands?: never;
-	};
-
-	/** A function that processes interactions to this command. */
-	interaction: (
-		interaction: {
-			[ApplicationCommandType.Message]: MessageContextMenuCommandInteraction;
-			[ApplicationCommandType.User]: UserContextMenuCommandInteraction;
-		}[T],
-	) => any;
-	autocomplete?: never;
-}
 
 export type Option = { description: string; required?: boolean } & (
 	| {
@@ -104,43 +91,71 @@ type OptionsToType<O extends { [key: string]: Option }> = {
 		: OptionToType<O[Key]> | undefined;
 };
 
-export interface ChatInputCommand<O extends { [key: string]: Option } = {}> {
+export interface BaseCommand {
+	buttons?: Record<string, (interaction: ButtonInteraction, id?: string) => any>;
+	modals?: Record<string, (interaction: ModalSubmitInteraction, id?: string) => any>;
+	stringSelects?: Record<string, (interaction: StringSelectMenuInteraction, id?: string) => any>;
+	userSelects?: Record<string, (interaction: UserSelectMenuInteraction, id?: string) => any>;
+	roleSelects?: Record<string, (interaction: RoleSelectMenuInteraction, id?: string) => any>;
+	mentionableSelects?: Record<
+		string,
+		(interaction: MentionableSelectMenuInteraction, id?: string) => any
+	>;
+	channelSelects?: Record<
+		string,
+		(interaction: ChannelSelectMenuInteraction, id?: string) => any
+	>;
+}
+interface BaseChatInputCommand extends BaseCommand {
+	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
+}
+interface BaseChatInputCommandData {
+	type?: never;
+	/**
+	 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
+	 * words.
+	 *
+	 * @default true
+	 */
+	censored?: "channel" | false;
+	description: string;
+	restricted?: true;
+}
+
+export interface ContextMenuCommand<T extends typeof ApplicationCommandType["Message" | "User"]>
+	extends BaseCommand {
 	data: {
-		type?: never;
-		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
-		 * words.
-		 *
-		 * @default true
-		 */
-		censored?: "channel" | false;
-		description: string;
+		type: T;
+		censored?: never;
+		description?: never;
 		restricted?: true;
-		options?: O;
+		options?: never;
 		subcommands?: never;
 	};
 
 	/** A function that processes interactions to this command. */
 	interaction: (
-		interaction: ChatInputCommandInteraction<"cached" | "raw">,
-		// 	options: OptionsToType<O>,
+		interaction: {
+			[ApplicationCommandType.Message]: MessageContextMenuCommandInteraction;
+			[ApplicationCommandType.User]: UserContextMenuCommandInteraction;
+		}[T],
 	) => any;
-	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
+	autocomplete?: never;
 }
 
-export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]: Option } }> {
-	data: {
-		type?: never;
-		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
-		 * words.
-		 *
-		 * @default true
-		 */
-		censored?: "channel" | false;
-		description: string;
-		restricted?: true;
+export interface ChatInputCommand<O extends { [key: string]: Option } = {}> extends BaseChatInputCommand {
+	data: { options?: O; subcommands?: never } & BaseChatInputCommandData;
 
+	/** A function that processes interactions to this command. */
+	interaction: (
+		interaction: ChatInputCommandInteraction<"cached" | "raw">,
+		//	 options: OptionsToType<O>,
+	) => any;
+}
+
+export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]: Option } }>
+	extends BaseChatInputCommand {
+	data: {
 		options?: never;
 		subcommands: {
 			[key in keyof O]: {
@@ -149,7 +164,7 @@ export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]
 				options?: O[key]; // TODO: the `?` breaks it
 			};
 		};
-	};
+	} & BaseChatInputCommandData;
 
 	/** A function that processes interactions to this command. */
 	interaction: (
@@ -161,9 +176,13 @@ export interface ChatInputSubcommands<O extends { [key: string]: { [key: string]
 		// 		};
 		// 	}[keyof O],
 	) => any;
-	autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
 }
 
+/**
+ * @private
+ *
+ * @todo Make it work lmao.
+ */
 export interface ChatInputSubcommandGroups<
 	O extends { [key: string]: { [key: string]: { [key: string]: Option } } },
 	Subcommand extends keyof O,
@@ -228,13 +247,13 @@ export function defineCommand<T extends typeof ApplicationCommandType["Message" 
 export function defineCommand<O extends { [key: string]: { [key: string]: Option } }>(
 	command: ChatInputSubcommands<O>,
 ): ChatInputSubcommands<O>;
-export function defineCommand<
-	O extends { [key: string]: { [key: string]: { [key: string]: Option } } } = {},
-	Subcommand extends keyof O = never,
-	SubcommandGroup extends keyof O[Subcommand] = never,
->(
-	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
-): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>;
+// export function defineCommand<
+// 	O extends { [key: string]: { [key: string]: { [key: string]: Option } } } = {},
+// 	Subcommand extends keyof O = never,
+// 	SubcommandGroup extends keyof O[Subcommand] = never,
+// >(
+// 	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
+// ): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>;
 /** @param command */
 export function defineCommand<T extends any>(command: T): T {
 	return command;

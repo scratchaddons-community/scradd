@@ -6,7 +6,6 @@ import {
 	type InteractionCollector,
 	type MappedInteractionTypes,
 	type MessageComponentType,
-	type ModalSubmitInteraction,
 	type Snowflake,
 	type APIActionRowComponent,
 	type APIStringSelectComponent,
@@ -896,11 +895,8 @@ const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 		(accumulator, { group, markdownless }) => {
 			const accumulated = accumulator[group];
 
-			const index = Math.max(
-				accumulated.findIndex((row) => row.length < 25),
-				accumulated.length,
-			);
-			accumulated[index] ??= [];
+			const index =
+				(accumulated.findIndex((row) => row.length < 25) + 1 || accumulated.push([])) - 1;
 			accumulated[index]?.push(markdownless);
 			// eslint-disable-next-line no-param-reassign -- This isn’t problematic.
 			accumulator[group] = accumulated;
@@ -1518,7 +1514,7 @@ const command = defineCommand({
 							if (buttonInteraction.customId.startsWith("end.")) {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
 								await Promise.all([
-									buttonInteraction.reply("🛑 Ended the game"),
+									buttonInteraction.reply("🛑 Ended the game."),
 									interaction.editReply({
 										components: disableComponents(message.components),
 									}),
@@ -1667,7 +1663,6 @@ const command = defineCommand({
 									),
 								)
 							)
-								// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- This is the only way.
 								accumulator.push(group);
 
 							return accumulator;
@@ -1869,7 +1864,7 @@ const command = defineCommand({
 						if (componentInteraction.customId.startsWith("guess.")) {
 							await componentInteraction.showModal({
 								title: "Guess the addon!",
-								customId: generateHash("guessModal"),
+								customId: "_guessModal",
 
 								components: [
 									{
@@ -1931,108 +1926,107 @@ const command = defineCommand({
 			}
 		}
 	},
+
+	modals: {
+		async guessModal(interaction) {
+			const game = games.get(interaction.user.id);
+			if (!game) return;
+
+			const query = interaction.fields.getTextInputValue("addon");
+			const { item, score = 1 } = fuse.search(query)[0] ?? {};
+
+			game.collector.resetTimer();
+
+			if (!item || score > 0.3) {
+				await interaction.reply({
+					content: `${CONSTANTS.emojis.statuses.no} Could not find the **${query}** addon!`,
+					ephemeral: true,
+				});
+				return;
+			}
+			const editPromise = interaction.message?.edit({
+				embeds: [
+					{
+						...interaction.message.embeds[0]?.toJSON(),
+
+						description: `${
+							interaction.message.embeds[0]?.description ?? ""
+						}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
+							item.id === game.addon.id ? "Yes" : "No"
+						}**`.trim(),
+
+						footer: {
+							text:
+								interaction.message.embeds[0]?.footer?.text.replace(
+									/\d+ questions?/,
+									(previousCount) =>
+										`${1 + Number(previousCount.split(" ")[0] ?? 0)} question${
+											previousCount === "0 questions" ? "" : "s"
+										}`,
+								) ?? "",
+						},
+					},
+				],
+			});
+
+			if (item.id !== game.addon.id) {
+				await Promise.all([
+					editPromise,
+					interaction.reply(
+						`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
+					),
+				]);
+				return;
+			}
+
+			await Promise.all([
+				editPromise,
+				interaction.reply({
+					content: `${CONSTANTS.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
+						game.addon.name,
+					)}**! You got it right!`,
+
+					embeds: [
+						{
+							title: game.addon.name,
+
+							description: `${
+								Object.entries(QUESTIONS_BY_ADDON)
+									.find(([id]) => id === game.addon.id)?.[1]
+									?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+									.join("\n") ?? ""
+							}${commandMarkdown}`,
+
+							author: {
+								icon_url: (interaction.member instanceof GuildMember
+									? interaction.member
+									: interaction.user
+								).displayAvatarURL(),
+
+								name:
+									interaction.member instanceof GuildMember
+										? interaction.member.displayName
+										: interaction.user.username,
+							},
+
+							color: CONSTANTS.themeColor,
+
+							thumbnail: {
+								url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(
+									game.addon.id,
+								)}.png`,
+							},
+
+							url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+								game.addon.id,
+							)}`,
+						},
+					],
+				}),
+			]);
+
+			game.collector.stop();
+		},
+	},
 });
 export default command;
-
-/**
- * Tell the user if their addon guess was correct or not.
- *
- * @param interaction - The modal interaction.
- */
-export async function guessAddon(interaction: ModalSubmitInteraction): Promise<void> {
-	const game = games.get(interaction.user.id);
-	if (!game) return;
-
-	const query = interaction.fields.getTextInputValue("addon");
-	const { item, score = 1 } = fuse.search(query)[0] ?? {};
-
-	game.collector.resetTimer();
-
-	if (!item || score > 0.3) {
-		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} Could not find the **${query}** addon!`,
-			ephemeral: true,
-		});
-		return;
-	}
-	const editPromise = interaction.message?.edit({
-		embeds: [
-			{
-				...interaction.message.embeds[0]?.toJSON(),
-
-				description: `${
-					interaction.message.embeds[0]?.description ?? ""
-				}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
-					item.id === game.addon.id ? "Yes" : "No"
-				}**`.trim(),
-
-				footer: {
-					text:
-						interaction.message.embeds[0]?.footer?.text.replace(
-							/\d+ questions?/,
-							(previousCount) =>
-								`${1 + Number(previousCount.split(" ")[0] ?? 0)} question${
-									previousCount === "0 questions" ? "" : "s"
-								}`,
-						) ?? "",
-				},
-			},
-		],
-	});
-
-	if (item.id !== game.addon.id) {
-		await Promise.all([
-			editPromise,
-			interaction.reply(
-				`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
-			),
-		]);
-		return;
-	}
-
-	await Promise.all([
-		editPromise,
-		interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
-				game.addon.name,
-			)}**! You got it right!`,
-
-			embeds: [
-				{
-					title: game.addon.name,
-
-					description: `${
-						Object.entries(QUESTIONS_BY_ADDON)
-							.find(([id]) => id === game.addon.id)?.[1]
-							?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
-							.join("\n") ?? ""
-					}${commandMarkdown}`,
-
-					author: {
-						icon_url: (interaction.member instanceof GuildMember
-							? interaction.member
-							: interaction.user
-						).displayAvatarURL(),
-
-						name:
-							interaction.member instanceof GuildMember
-								? interaction.member.displayName
-								: interaction.user.username,
-					},
-
-					color: CONSTANTS.themeColor,
-
-					thumbnail: {
-						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
-					},
-
-					url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
-						game.addon.id,
-					)}`,
-				},
-			],
-		}),
-	]);
-
-	game.collector.stop();
-}

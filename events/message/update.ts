@@ -2,9 +2,7 @@ import { unifiedDiff } from "difflib";
 import { ButtonStyle, ComponentType } from "discord.js";
 import { diffString } from "json-diff";
 
-import client from "../../client.js";
 import automodMessage from "../../common/automod.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import log, { getLoggingThread, shouldLog } from "../../common/logging.js";
 import { getMessageJSON } from "../../util/discord.js";
@@ -51,12 +49,8 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 			},
 		);
 	}
-	if (
-		oldMessage.pinned !== null &&
-		(newMessage.author.id === client.user.id) !==
-			(newMessage.channel.id === CONSTANTS.channels.board?.id) &&
-		oldMessage.pinned !== newMessage.pinned
-	) {
+	
+	if (oldMessage.pinned !== null && oldMessage.pinned !== newMessage.pinned) {
 		logs.push(
 			`📌 Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
 				newMessage.pinned ? "" : "un"

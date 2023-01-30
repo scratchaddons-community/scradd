@@ -143,7 +143,7 @@ export const ticketCategoryMessage = {
 			components: [
 				{
 					type: ComponentType.StringSelect,
-					customId: "contactMods",
+					customId: "_contactMods",
 					options: [
 						...([
 							{ label: "Appeal a warn", value: "appeal" },
@@ -220,7 +220,7 @@ export async function gatherTicketInfo(interaction: StringSelectMenuInteraction)
 		return await interaction.reply({
 			content: `${
 				CONSTANTS.emojis.statuses.no
-			} Please don't contact mods for SA help. Put your suggestions in ${CONSTANTS.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
+			} Please don't contact mods for SA help. Instead, put your suggestions in ${CONSTANTS.channels.suggestions?.toString()}, bug reports in ${CONSTANTS.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${CONSTANTS.channels.support?.toString()}.`,
 
 			ephemeral: true,
 		});
@@ -245,7 +245,7 @@ export async function gatherTicketInfo(interaction: StringSelectMenuInteraction)
 	await interaction.showModal({
 		title: `Contact Mods - ${categoryToDescription[option]}`,
 
-		customId: `contactMods.${option}`,
+		customId: `${option}_contactMods`,
 
 		components: fields.map((field) => ({
 			type: ComponentType.ActionRow,
@@ -256,9 +256,9 @@ export async function gatherTicketInfo(interaction: StringSelectMenuInteraction)
 
 export default async function startTicket(
 	interaction: ModalSubmitInteraction | ChatInputCommandInteraction<"cached" | "raw">,
-	options: string[] | GuildMember,
+	options: string | GuildMember,
 ) {
-	const [option] = options instanceof GuildMember ? ["mod"] : options;
+	const option = options instanceof GuildMember ? "mod" : options;
 	if (!CATEGORIES.includes(option) && option !== "mod")
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
@@ -333,7 +333,7 @@ export default async function startTicket(
 								? [
 										{
 											type: ComponentType.StringSelect,
-											customId: "selectStrike",
+											customId: "_selectStrike",
 											placeholder: "View more information on a strike",
 
 											options: filtered.map((strike: { id: any }) => ({

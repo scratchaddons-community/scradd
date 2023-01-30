@@ -1,7 +1,11 @@
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType, GuildMember } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
-import startTicket, { getThreadFromMember } from "../common/contactMods.js";
+import startTicket, {
+	gatherTicketInfo,
+	getThreadFromMember,
+	ticketCategoryMessage,
+} from "../common/contactMods.js";
 import { defineCommand } from "../common/types/command.js";
 import { disableComponents } from "../util/discord.js";
 
@@ -95,6 +99,32 @@ const command = defineCommand({
 			.on("end", async () => {
 				await message.edit({ components: disableComponents(message.components) });
 			});
+	},
+
+	buttons: {
+		async contactMods(interaction) {
+			await interaction.reply(ticketCategoryMessage);
+		},
+	},
+
+	stringSelects: {
+		async contactMods(interaction) {
+			return await gatherTicketInfo(interaction);
+		},
+	},
+
+	modals: {
+		async contactMods(interaction, id) {
+			const thread = id && (await startTicket(interaction, id));
+			if (thread)
+				await interaction.reply({
+					content: `${
+						CONSTANTS.emojis.statuses.yes
+					} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
+					ephemeral: true,
+				});
+			return;
+		},
 	},
 });
 export default command;

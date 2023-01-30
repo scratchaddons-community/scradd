@@ -80,7 +80,7 @@ const command = defineCommand({
 
 		await interaction.showModal({
 			title: `/${interaction.command?.name}`,
-			customId: "say",
+			customId: "_say",
 
 			components: [
 				{
@@ -100,6 +100,12 @@ const command = defineCommand({
 			],
 		});
 		return await interaction.channel?.sendTyping();
+	},
+
+	modals: {
+		async say(interaction) {
+			await say(interaction, interaction.fields.getTextInputValue("message"));
+		},
 	},
 });
 export default command;
