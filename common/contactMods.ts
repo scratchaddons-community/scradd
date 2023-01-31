@@ -287,12 +287,10 @@ export default async function startTicket(
 					value: interaction.fields.getTextInputValue(key),
 					inline: true,
 			  }));
-	if (option !== "role" && interaction.type !== InteractionType.ApplicationCommand)
-		fields.push({
-			name: CONSTANTS.zeroWidthSpace,
-			value: interaction.fields.getTextInputValue("BODY"),
-			inline: false,
-		});
+	const body =
+		option !== "role" &&
+		interaction.type !== InteractionType.ApplicationCommand &&
+		interaction.fields.getTextInputValue("BODY");
 
 	const date = new Date();
 	const thread = await CONSTANTS.channels.contact?.threads.create({
@@ -377,7 +375,16 @@ export default async function startTicket(
 					icon_url: member.displayAvatarURL(),
 					name: member.displayName,
 				},
-				fields,
+				...(body
+					? fields.length === 0
+						? { description: body }
+						: {
+								fields: [
+									...fields,
+									{ name: CONSTANTS.zeroWidthSpace, value: body, inline: false },
+								],
+						  }
+					: { fields }),
 			},
 			{
 				title: `${member.displayName}’s strikes`,
