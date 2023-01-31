@@ -36,10 +36,9 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 
 	const logs = [];
 	if (oldThread.archived !== newThread.archived)
-		logs.push(` ${newThread.archived ? "closed" : "opened"}`);
-
-	if (oldThread.locked !== newThread.locked)
-		logs.push(` ${newThread.locked ? "locked" : "unlocked"}`);
+		logs.push(
+			` ${newThread.archived ? `closed${newThread.locked ? " and locked" : ""}` : "opened"}`,
+		);
 
 	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 		logs.push(
@@ -96,22 +95,28 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 	await Promise.all(
 		logs.map(
 			async (edit) =>
-				await log(`📃 Thread #${newThread.name}${edit}!`, "channels", {
-					components: [
-						{
-							components: [
-								{
-									label: "View Thread",
-									type: ComponentType.Button,
-									style: ButtonStyle.Link,
-									url: newThread.url,
-								},
-							],
+				await log(
+					`📃 Thread ${
+						edit.startsWith(" closed") ? `#${newThread.name}` : newThread.toString()
+					}${edit}!`,
+					"channels",
+					{
+						components: [
+							{
+								components: [
+									{
+										label: "View Thread",
+										type: ComponentType.Button,
+										style: ButtonStyle.Link,
+										url: newThread.url,
+									},
+								],
 
-							type: ComponentType.ActionRow,
-						},
-					],
-				}),
+								type: ComponentType.ActionRow,
+							},
+						],
+					},
+				),
 		),
 	);
 	const censored = censor(newThread.name);
