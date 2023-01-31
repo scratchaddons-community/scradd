@@ -11,14 +11,14 @@ import { disableComponents } from "../util/discord.js";
 
 const command = defineCommand({
 	data: {
-		description: "(Mods only) Start a ticket with a user",
+		description: "(Mods only) Start a private ticket with a user",
 		restricted: true,
 
 		options: {
 			user: {
 				required: true,
 				type: ApplicationCommandOptionType.User,
-				description: "The user to start a ticket with",
+				description: "The user to contact",
 			},
 		},
 	},

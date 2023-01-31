@@ -5,7 +5,7 @@ const command = defineCommand({
 	data: {
 		description: `(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
 			process.env.NODE_ENV === "production" ? "Restarts" : "Kills"
-		} the bot.`,
+		} the bot`,
 
 		restricted: true,
 	},
