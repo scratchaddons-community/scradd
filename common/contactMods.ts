@@ -262,7 +262,10 @@ export default async function startTicket(
 	if (!CATEGORIES.includes(option) && option !== "mod")
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
-	const member = options instanceof GuildMember ? options : interaction.member;
+	const member =
+		options instanceof GuildMember
+			? options
+			: interaction.member || (await CONSTANTS.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	const fields =

@@ -3,6 +3,8 @@ import {
 	type Message,
 	type EmojiIdentifierResolvable,
 	type Snowflake,
+	ComponentType,
+	ButtonStyle,
 } from "discord.js";
 
 import client from "../../client.js";
@@ -20,13 +22,25 @@ import type Event from "../../common/types/event";
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
 const event: Event<"messageCreate"> = async function event(message) {
-	if (
-		message.flags.has("Ephemeral") ||
-		message.type === MessageType.ThreadStarterMessage ||
-		message.channel.isDMBased() ||
-		message.guild?.id !== CONSTANTS.guild.id
-	)
-		return;
+	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
+	if (message.channel.isDMBased() && message.author.id !== client.user.id)
+		return await message.channel.send({
+			content: `Are you trying to contact mods? We now use ${CONSTANTS.channels.contact?.toString()} instead of DMs!`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							style: ButtonStyle.Primary,
+							label: "Contact Mods",
+							custom_id: "_contactMods",
+						},
+					],
+				},
+			],
+		});
+	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
 
 	if (
 		message.channel.id === CONSTANTS.channels.board?.id &&
