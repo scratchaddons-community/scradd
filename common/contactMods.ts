@@ -181,9 +181,9 @@ const categoryToDescription = Object.fromEntries(
 );
 
 /**
- * Given a modmail ticket thread, return the user who messages are being sent to.
+ * Get the non-mod involved in a ticket.
  *
- * @param thread - Ticket ticket thread.
+ * @param thread - Ticket thread.
  *
  * @returns User who messages are being sent to.
  */
@@ -193,7 +193,7 @@ export async function getUserFromTicket(thread: ThreadChannel): Promise<void | U
 }
 
 /**
- * Given a user, find a ticket thread that sends messages to them.
+ * Find a ticket for a user.
  *
  * @param user - The user to search for.
  *
