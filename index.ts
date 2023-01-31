@@ -142,7 +142,7 @@ const promises = [
 
 							defaultMemberPermissions: data.restricted
 								? new PermissionsBitField()
-								: undefined,
+								: null,
 						};
 					}),
 				CONSTANTS.guild.id,
