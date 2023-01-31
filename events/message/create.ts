@@ -240,7 +240,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		react(CONSTANTS.emojis.autoreact.jeffalo);
 	if (includes(/wasteof\.(?!money)/, false)) react(CONSTANTS.emojis.autoreact.wasteof);
 	if (
-		(content.includes("garbo") || includes(/garbag(?:(?:e )?muffin|man)?/)) &&
+		(content.includes("garbo") || includes(/garbage? ?(?:muffin|man)/)) &&
 		!content.includes("turbo")
 	)
 		react(CONSTANTS.emojis.autoreact.tw);
