@@ -222,7 +222,7 @@ const command = defineCommand({
 							content: `${CONSTANTS.emojis.statuses.yes} Purged ${
 								sliced.length
 							} message${sliced.length === 1 ? "" : "s"}!`,
-							ephemeral: true,
+							ephemeral: false,
 						});
 						collector.stop();
 						return;
