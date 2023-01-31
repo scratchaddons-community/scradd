@@ -76,29 +76,66 @@ const command = defineCommand({
 			);
 			const user =
 				(await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
-			await interaction.reply(
-				`${
+			const { url: logUrl } = await interaction.reply({
+				fetchReply: true,
+				content: `${
 					CONSTANTS.emojis.statuses.yes
-				} Removed strike \`${id}\` from ${user.toString()}!`,
-			);
+				} Removed ${user.toString()}’s strike \`${id}\`!`,
+			});
 			const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
 			if (
 				member?.communicationDisabledUntil &&
 				Number(member.communicationDisabledUntil) > Date.now()
 			)
 				await member.disableCommunicationUntil(Date.now());
-			const { url: logUrl } = await log(
+			await log(
 				`${CONSTANTS.emojis.statuses.yes} ${
 					interaction.member
-				} removed strike \`${id}\` from ${user.toString()}!`,
+				} removed ${user.toString()}’s strike \`${id}\`!`,
 				"members",
 			);
 			if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
-			if (typeof user === "object") {
-				await user.send(
-					`${CONSTANTS.emojis.statuses.yes} Your strike \`${id}\` was removed!`,
-				);
+		},
+		async addStrikeBack(interaction, id) {
+			const strike = id && (await filterToStrike(id));
+			if (!strike) {
+				return await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
+				});
 			}
+
+			if (!strike.removed) {
+				return await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} That strike was not removed!`,
+				});
+			}
+
+			strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
+				id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
+			);
+			const user =
+				(await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
+			const { url: logUrl } = await interaction.reply({
+				fetchReply: true,
+				content: `${
+					CONSTANTS.emojis.statuses.yes
+				} Added ${user.toString()}’s strike \`${id}\` back!`,
+			});
+			const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
+			if (
+				member?.communicationDisabledUntil &&
+				Number(member.communicationDisabledUntil) > Date.now()
+			)
+				await member.disableCommunicationUntil(Date.now());
+			await log(
+				`${CONSTANTS.emojis.statuses.yes} ${
+					interaction.member
+				} added ${user.toString()}’s strike \`${id}\` back!`,
+				"members",
+			);
+			if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
 		},
 	},
 });

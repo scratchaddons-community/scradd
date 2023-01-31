@@ -268,23 +268,29 @@ export async function getStrikeById(
 		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
 			?.useMentions ?? false;
 	return {
-		components:
-			isModerator && !strike.removed
-				? [
-						{
-							type: ComponentType.ActionRow,
+		components: isModerator
+			? [
+					{
+						type: ComponentType.ActionRow,
 
-							components: [
-								{
-									type: ComponentType.Button,
-									customId: `${strike.id}_removeStrike`,
-									label: "Remove",
-									style: ButtonStyle.Danger,
-								},
-							],
-						},
-				  ]
-				: [],
+						components: [
+							strike.removed
+								? {
+										type: ComponentType.Button,
+										customId: `${strike.id}_addStrikeBack`,
+										label: "Add back",
+										style: ButtonStyle.Primary,
+								  }
+								: {
+										type: ComponentType.Button,
+										customId: `${strike.id}_removeStrike`,
+										label: "Remove",
+										style: ButtonStyle.Danger,
+								  },
+						],
+					},
+			  ]
+			: [],
 
 		ephemeral: true,
 
