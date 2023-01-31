@@ -200,7 +200,9 @@ export default function censor(text) {
 		return string.replaceAll(regexp, (word) => {
 			words[index]?.push(word);
 
-			return word.length === 1 ? "#" : word[0] + "#".repeat(word.length - 1);
+			return word.length < 3
+				? "#".repeat(word.length)
+				: word[0] + "#".repeat(word.length - 1);
 		});
 	}, normalize(text));
 
