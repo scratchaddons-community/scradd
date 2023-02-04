@@ -11,7 +11,7 @@ import { diffString } from "json-diff";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import { DATABASE_THREAD } from "../common/database.js";
-import log, { getLoggingThread } from "../common/logging.js";
+import log, { getLoggingThread, shouldLog } from "../common/logging.js";
 import { defineCommand } from "../common/types/command.js";
 import { getBaseChannel, getMessageJSON } from "../util/discord.js";
 import { generateError } from "../util/logError.js";
@@ -184,7 +184,7 @@ const command = defineCommand({
 							},
 						],
 
-						files,
+						files: shouldLog(edited.channel) ? files : [],
 					},
 				);
 			}
