@@ -136,7 +136,7 @@ const allFields = {
 } satisfies Record<string, TextInputComponentData[]>;
 
 export const ticketCategoryMessage = {
-	content: `👋 Thanks for reaching out!`,
+	content: `👍 Thanks for reaching out!`,
 	components: [
 		{
 			type: ComponentType.ActionRow,
@@ -425,6 +425,7 @@ export default async function startTicket(
 				color: member.displayColor,
 			},
 		],
+		content: CONSTANTS.roles.mod?.toString(),
 	});
 
 	await thread?.members.add(member);

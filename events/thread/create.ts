@@ -42,11 +42,9 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 			],
 		});
 
-	const toPing = [
-		CONSTANTS.channels.contact?.id,
-		CONSTANTS.channels.mod?.id,
-		CONSTANTS.channels.modlogs?.id,
-	].includes(thread.parent?.id)
+	const toPing = [CONSTANTS.channels.mod?.id, CONSTANTS.channels.modlogs?.id].includes(
+		thread.parent?.id,
+	)
 		? CONSTANTS.roles.mod?.toString()
 		: thread.parent?.id === CONSTANTS.channels.exec?.id
 		? "<@&1046043735680630784>"
