@@ -123,7 +123,7 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 
 		await CONSTANTS.channels.bots?.send({
 			allowedMentions: pings ? undefined : { users: [] },
-			content: `🎉${to.toString()}`,
+			content: `🎉 ${to.toString()}`,
 
 			embeds: [
 				{
