@@ -426,6 +426,7 @@ export default async function startTicket(
 			},
 		],
 		content: CONSTANTS.roles.mod?.toString(),
+		allowedMentions: { parse: ["roles"] },
 	});
 
 	await thread?.members.add(member);
