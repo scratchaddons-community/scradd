@@ -15,7 +15,21 @@ import { PARTIAL_STRIKE_COUNT } from "./punishments.js";
  */
 const badWords = [
 	[
-		[/cbea/, /grfgvpyr/, /fpuzhpx/, /erpghz/, /ihyin/, /🖕/, /卐/, /卍/, /lvss/, /ahg ?fnpx/],
+		[
+			/cbea/,
+			/grfgvpyr/,
+			/fpuzhpx/,
+			/erpghz/,
+			/ihyin/,
+			/🖕/,
+			/卐/,
+			/卍/,
+			/lvss/,
+			/ahg ?fnpx/,
+			/rwnphyngr/,
+			/znfg(?:h|r)eong/,
+			/ohgg ?cvengr/,
+		],
 		[
 			/intva(?:f|l|n|r|y)+/,
 			/(?:urzv ?)?crav(?:f?rf|yr)?/,
@@ -27,7 +41,6 @@ const badWords = [
 			/chff(?:l|vrf)/,
 			/fpebghz/,
 			/ynovn/,
-			/xlf/,
 			/preivk/,
 			/ubeal/,
 			/obaref?/,
@@ -37,12 +50,9 @@ const badWords = [
 	[
 		[
 			/fuv+r*g(?!nx(?:r|v))/,
-			/rwnphyngr/,
 			/fcyb+tr/,
 			/oybj ?wbo/,
 			/shpx/,
-			/znfg(?:h|r)eong/,
-			/ohgg ?cvengr/,
 			/qvyqb/,
 			/xhxfhtre/,
 			/dhrrs/,
