@@ -21,7 +21,7 @@ export function generateHash(prefix = ""): string {
  * @param array - The array to join.
  * @param callback - A function to convert each item to a string.
  *
- * @returns - The joined string.
+ * @returns The joined string.
  */
 export function joinWithAnd<Item extends { toString: () => string }>(
 	array: Item[],
@@ -45,10 +45,10 @@ export function joinWithAnd(array: any[], callback = (item: any) => item.toStrin
 /**
  * Slice a string so that it fits into a given length.
  *
- * @param {string} text - The string to truncate.
- * @param {number} maxLength - The maximum length of the string.
+ * @param text - The string to truncate.
+ * @param maxLength - The maximum length of the string.
  *
- * @returns {string} - The truncated string.
+ * @returns The truncated string.
  */
 export function truncateText(text: string, maxLength: number): string {
 	const firstLine = text.replaceAll(/\s+/g, " ");
@@ -116,8 +116,8 @@ export function normalize(text: string) {
  *
  * @param full - The full version.
  *
- * @returns - The patchless version.
+ * @returns The patchless version.
  */
 export function trimPatchVersion(full: string): string {
-	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main ?? full;
+	return full.match(/^(?<main>\d+\.\d+)\.\d+/)?.groups?.main ?? full;
 }

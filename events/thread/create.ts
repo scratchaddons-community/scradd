@@ -49,7 +49,7 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 		: thread.parent?.id === CONSTANTS.channels.exec?.id
 		? "<@&1046043735680630784>"
 		: thread.parent?.id === CONSTANTS.channels.admin?.id
-		? "<@&806603332944134164>"
+		? CONSTANTS.roles.admin?.toString()
 		: undefined;
 	if (toPing) await thread.send({ content: toPing, allowedMentions: { parse: ["roles"] } });
 

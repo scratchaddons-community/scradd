@@ -3,6 +3,7 @@ import {
 	cleanContent,
 	GuildMember,
 	hyperlink,
+	Snowflake,
 	User,
 } from "discord.js";
 
@@ -26,7 +27,13 @@ export const suggestionAnswers = [
 	"Impossible",
 ] as const;
 
-export const suggestionsDatabase = new Database("suggestions");
+export const suggestionsDatabase = new Database<{
+	answer: typeof suggestionAnswers[number];
+	author: string;
+	count: number;
+	id: Snowflake;
+	title: string;
+}>("suggestions");
 await suggestionsDatabase.init();
 
 const old = CONSTANTS.channels.old_suggestions
@@ -48,7 +55,7 @@ const old = CONSTANTS.channels.old_suggestions
 					author:
 						(message.author.id === CONSTANTS.robotop
 							? message.embeds[0]?.footer?.text.split(": ")[1]
-							: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
+							: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
 									?.groups?.userId) ?? message.author,
 
 					count:

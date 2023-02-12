@@ -243,6 +243,7 @@ export function badWordsAllowed(channel) {
 
 	return (
 		baseChannel?.type === ChannelType.DM ||
+		channel?.type === ChannelType.PrivateThread ||
 		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
 }

@@ -6,8 +6,6 @@ import client from "../client.js";
 import { extractMessageExtremities } from "../util/discord.js";
 import logError from "../util/logError.js";
 import { getLoggingThread } from "./logging.js";
-
-import type { suggestionAnswers } from "../commands/get-top-suggestions.js";
 import type { ImmutableArray } from "./types/global.js";
 
 export const DATABASE_THREAD = "databases";
@@ -35,16 +33,16 @@ let timeouts: {
 		| undefined;
 } = {};
 
-const contructed: (keyof Databases)[] = [];
+const contructed: string[] = [];
 
-export default class Database<Name extends keyof Databases> {
+export default class Database<Data extends { [key: string]: string | number | boolean | null }> {
 	message: Message<true> | undefined;
 
-	#data: ImmutableArray<Databases[Name]> | undefined;
+	#data: ImmutableArray<Data> | undefined;
 
 	#extra: string | undefined;
 
-	constructor(public name: Name) {
+	constructor(public name: string) {
 		if (contructed.includes(name)) {
 			throw new RangeError(
 				`Cannot create a 2nd database for ${name}, they will have conflicting data`,
@@ -145,7 +143,7 @@ export default class Database<Name extends keyof Databases> {
 					.then(async (res) => await res.text())
 					.then(
 						(csv) =>
-							papaparse.parse<Databases[Name]>(csv.trim(), {
+							papaparse.parse<Data>(csv.trim(), {
 								dynamicTyping: true,
 								header: true,
 								delimiter: ",",
@@ -179,61 +177,3 @@ export async function cleanDatabaseListeners() {
 exitHook(async (callback) => {
 	await cleanDatabaseListeners().then(callback);
 });
-
-/** @todo Abstract this out. */
-export type Databases = {
-	board: {
-		/** The number of reactions this message has. */
-		reactions: number;
-		/** The ID of the user who posted this. */
-		user: Snowflake;
-		/** The ID of the channel this message is in. */
-		channel: Snowflake;
-		/** The ID of the message on the board. */
-		onBoard: Snowflake | 0;
-		/** The ID of the original message. */
-		source: Snowflake;
-	};
-	strikes: {
-		/** The ID of the user who was warned. */
-		user: Snowflake;
-		/** The time when this strike was issued. */
-		date: number;
-		id: number | string;
-		count: number;
-		removed: boolean;
-	};
-	xp: {
-		/** The ID of the user. */
-		user: Snowflake;
-		/** How much XP they have. */
-		xp: number;
-	};
-	user_settings: {
-		/** The ID of the user. */
-		user: Snowflake;
-		/** Whether to ping the user when their message gets on the board. */
-		boardPings: boolean;
-		/** Whether to ping the user when they level up. */
-		levelUpPings: boolean;
-		/** Whether to ping the user when they are a top poster of the week. */
-		weeklyPings: boolean;
-		/** Whether to automatically react to their messages with random emojis. */
-		autoreactions: boolean;
-		useMentions: boolean;
-	};
-	recent_xp: {
-		/** The ID of the user. */
-		user: Snowflake;
-		/** How much XP they gained. */
-		xp: number;
-	};
-	suggestions: {
-		answer: typeof suggestionAnswers[number];
-		author: string;
-		count: number;
-		id: Snowflake;
-		title: string;
-	};
-	roles: { [role: Snowflake]: true } & { user: Snowflake };
-};

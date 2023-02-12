@@ -1,11 +1,13 @@
 import {
 	APIEmbedField,
+	ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
 	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
 	InteractionReplyOptions,
+	InteractionResponse,
 	InteractionType,
 	ModalSubmitInteraction,
 	StringSelectMenuInteraction,
@@ -21,7 +23,16 @@ import { asyncFilter } from "../util/promises.js";
 import CONSTANTS from "./CONSTANTS.js";
 import { strikeDatabase } from "./punishments.js";
 
-const CATEGORIES = ["appeal", "report", "role", "bug", "update", "rules", "other"] as const;
+export const TICKET_CATEGORIES = [
+	"appeal",
+	"report",
+	"role",
+	"bug",
+	"update",
+	"rules",
+	"other",
+] as const;
+type Category = typeof TICKET_CATEGORIES[number];
 const allFields = {
 	appeal: [
 		{
@@ -133,7 +144,7 @@ const allFields = {
 			label: "Why are you contacting us?",
 		},
 	],
-} satisfies Record<string, TextInputComponentData[]>;
+} satisfies Record<Category, TextInputComponentData[]>;
 
 export const ticketCategoryMessage = {
 	content: `👍 Thanks for reaching out!`,
@@ -146,7 +157,7 @@ export const ticketCategoryMessage = {
 					customId: "_contactMods",
 					options: [
 						...([
-							{ label: "Appeal a warn", value: "appeal" },
+							{ label: "Appeal a strike", value: "appeal" },
 							{ label: "Report a user", value: "report" },
 							{ label: "Request a role", value: "role" },
 							{ label: "Report a Scradd bug", value: "bug" },
@@ -212,9 +223,19 @@ export async function getThreadFromMember(user: GuildMember | User): Promise<Thr
 	).value;
 }
 
-/** @param interaction */
-export async function gatherTicketInfo(interaction: StringSelectMenuInteraction) {
-	const [option] = interaction.values;
+export async function gatherTicketInfo(
+	interaction: StringSelectMenuInteraction,
+): Promise<InteractionResponse<boolean> | undefined>;
+export async function gatherTicketInfo(
+	interaction: ButtonInteraction,
+	category: Category,
+): Promise<InteractionResponse<boolean> | undefined>;
+export async function gatherTicketInfo(
+	interaction: StringSelectMenuInteraction | ButtonInteraction,
+	category?: Category,
+) {
+	const option =
+		interaction.componentType === ComponentType.StringSelect ? interaction.values[0] : category;
 
 	if (option === "sa") {
 		return await interaction.reply({
@@ -236,7 +257,8 @@ export async function gatherTicketInfo(interaction: StringSelectMenuInteraction)
 			ephemeral: true,
 		});
 
-	if (!CATEGORIES.includes(option)) throw new TypeError(`Unknown ticket category: ${option}`);
+	if (!TICKET_CATEGORIES.includes(option))
+		throw new TypeError(`Unknown ticket category: ${option}`);
 
 	const fields = allFields[option];
 
@@ -256,11 +278,9 @@ export async function gatherTicketInfo(interaction: StringSelectMenuInteraction)
 
 export default async function startTicket(
 	interaction: ModalSubmitInteraction | ChatInputCommandInteraction<"cached" | "raw">,
-	options: string | GuildMember,
+	options: Category | GuildMember,
 ) {
 	const option = options instanceof GuildMember ? "mod" : options;
-	if (!CATEGORIES.includes(option) && option !== "mod")
-		throw new TypeError(`Unknown ticket category: ${option}`);
 
 	const member =
 		options instanceof GuildMember
@@ -308,20 +328,19 @@ export default async function startTicket(
 	await thread?.setLocked(true, "Ticket opened");
 
 	const strikes = strikeDatabase.data
-		.filter((strike: { user: string }) => strike.user === member.id)
-		.sort((one: { date: number }, two: { date: number }) => two.date - one.date);
+		.filter((strike) => strike.user === member.id)
+		.sort((one, two) => two.date - one.date);
 
 	const totalStrikeCount = Math.trunc(
 		strikes.reduce(
-			(accumulator: number, { count, removed }: any) =>
-				count * Number(!removed) + accumulator,
+			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
 			0,
 		),
 	);
 
 	const numberOfPages = Math.ceil(strikes.length / 15);
 
-	const filtered = strikes.filter((_: any, index: number) => index < 15);
+	const filtered = strikes.filter((_, index) => index < 15);
 
 	await thread?.send({
 		components: filtered.length
@@ -337,13 +356,13 @@ export default async function startTicket(
 											customId: "_selectStrike",
 											placeholder: "View more information on a strike",
 
-											options: filtered.map((strike: { id: any }) => ({
+											options: filtered.map((strike) => ({
 												label: String(strike.id),
 												value: String(strike.id),
 											})),
 										},
 								  ]
-								: filtered.map((strike: { id: any }) => ({
+								: filtered.map((strike) => ({
 										type: ComponentType.Button,
 										customId: `${strike.id}_strike`,
 										label: String(strike.id),
@@ -360,7 +379,7 @@ export default async function startTicket(
 						? "Contact User"
 						: "Contact Mods - " +
 						  {
-								appeal: "Appeal a warn",
+								appeal: "Appeal a strike",
 								report: "Report a user",
 								role: "Request a role",
 								bug: "Report a Scradd bug",
@@ -391,12 +410,7 @@ export default async function startTicket(
 				description: filtered.length
 					? filtered
 							.map(
-								(strike: {
-									removed: any;
-									id: any;
-									count: number;
-									date: string | number | Date;
-								}) =>
+								(strike) =>
 									`${strike.removed ? "~~" : ""}\`${strike.id}\`${
 										strike.count === 1
 											? ""

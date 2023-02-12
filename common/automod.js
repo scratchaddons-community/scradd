@@ -51,14 +51,14 @@ async function checkString(toCensor, message) {
 		CONSTANTS.channels.advertise?.id !== baseChannel?.id &&
 		!message.author?.bot
 	) {
-		const botLinks = GlobalBotInvitesPattern.exec(toCensor);
+		const botLinks = toCensor.match(GlobalBotInvitesPattern);
 
 		if (botLinks) {
 			bad.words.bots.push(...botLinks);
 			bad.bots = botLinks.length;
 		}
 
-		const inviteCodes = GlobalInvitesPattern.exec(toCensor);
+		const inviteCodes = toCensor.match(GlobalInvitesPattern);
 
 		if (inviteCodes) {
 			const invitesToDelete = (
@@ -198,10 +198,12 @@ export default async function automodMessage(message) {
 		}
 	}
 
-	const animatedEmojis = Array.from(message.content.matchAll(GlobalAnimatedEmoji));
+	const animatedEmojis = message.content.match(GlobalAnimatedEmoji);
 
 	const badAnimatedEmojis =
-		animatedEmojis.length > 9 && Math.round((animatedEmojis.length - 10) / 10);
+		animatedEmojis &&
+		animatedEmojis.length > 15 &&
+		Math.floor((animatedEmojis.length - 16) / 10) * 0.25;
 
 	if (
 		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
@@ -212,12 +214,12 @@ export default async function automodMessage(message) {
 				user,
 				"Please don’t post that many animated emojis!",
 				badAnimatedEmojis,
-				animatedEmojis.map((emoji) => emoji[0]).join("\n"),
+				animatedEmojis?.map((emoji) => emoji[0]).join(""),
 			),
 			message.channel.send(
 				`${
 					CONSTANTS.emojis.statuses.no
-				} ${user.toString()}, lay off on the animated emojis please!`,
+				} ${user.toString()}, a few less animated emojis please!`,
 			),
 			message.delete(),
 		);

@@ -5,6 +5,7 @@ import startTicket, {
 	gatherTicketInfo,
 	getThreadFromMember,
 	ticketCategoryMessage,
+	TICKET_CATEGORIES,
 } from "../common/contactMods.js";
 import { defineCommand } from "../common/types/command.js";
 import { disableComponents } from "../util/discord.js";
@@ -105,6 +106,9 @@ const command = defineCommand({
 		async contactMods(interaction) {
 			await interaction.reply(ticketCategoryMessage);
 		},
+		async appealStrike(interaction) {
+			return await gatherTicketInfo(interaction, "appeal");
+		},
 	},
 
 	stringSelects: {
@@ -115,6 +119,8 @@ const command = defineCommand({
 
 	modals: {
 		async contactMods(interaction, id) {
+			if (!TICKET_CATEGORIES.includes(id))
+				throw new TypeError(`Unknown ticket category: ${id}`);
 			const thread = id && (await startTicket(interaction, id));
 			if (thread)
 				await interaction.reply({

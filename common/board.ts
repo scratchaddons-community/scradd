@@ -1,4 +1,13 @@
-import { ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
+import {
+	APIButtonComponent,
+	BaseMessageOptions,
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	Message,
+	Snowflake,
+	TextBasedChannel,
+} from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
@@ -11,11 +20,11 @@ export const BOARD_EMOJI = "🥔";
 /**
  * Determines the board reaction count for a channel.
  *
- * @param {import("discord.js").TextBasedChannel} [channel] - The channel to determine reaction count for.
+ * @param channel - The channel to determine reaction count for.
  *
- * @returns {number} - The reaction count.
+ * @returns The reaction count.
  */
-export function boardReactionCount(channel) {
+export function boardReactionCount(channel?: TextBasedChannel): number {
 	const COUNTS = {
 		scradd: 2,
 		devs: 6,
@@ -62,31 +71,47 @@ if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board ch
 
 const { board } = CONSTANTS.channels;
 
-export const boardDatabase = new Database("board");
+export const boardDatabase = new Database<{
+	/** The number of reactions this message has. */
+	reactions: number;
+	/** The ID of the user who posted this. */
+	user: Snowflake;
+	/** The ID of the channel this message is in. */
+	channel: Snowflake;
+	/** The ID of the message on the board. */
+	onBoard: Snowflake | 0;
+	/** The ID of the original message. */
+	source: Snowflake;
+}>("board");
 
 await boardDatabase.init();
 
 /**
  * Generate an embed and button to represent a board message with.
  *
- * @param {import("./database").Databases["board"] | import("discord.js").Message} info - Info to generate a message from.
- * @param {{ pre?: import("discord.js").APIButtonComponent[]; post?: import("discord.js").APIButtonComponent[] }} [extraButtons] - Extra
- *   custom buttons to show.
+ * @param info - Info to generate a message from.
+ * @param extraButtons - Extra custom buttons to show.
  *
- * @returns {Promise<import("discord.js").BaseMessageOptions | undefined>} - The representation of the message.
+ * @returns The representation of the message.
  */
-export async function generateBoardMessage(info, extraButtons = {}) {
+export async function generateBoardMessage(
+	info: typeof boardDatabase.data[number] | Message,
+	extraButtons: {
+		pre?: APIButtonComponent[];
+		post?: APIButtonComponent[];
+	} = {},
+): Promise<BaseMessageOptions | undefined> {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
 	/**
 	 * Convert a message to an embed and button representation.
 	 *
-	 * @param {import("discord.js").Message} message - The message to convert.
+	 * @param message - The message to convert.
 	 *
-	 * @returns {Promise<import("discord.js").BaseMessageOptions>} - The converted message.
+	 * @returns The converted message.
 	 */
-	async function messageToBoardData(message) {
+	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
 		const { files, embeds } = extractMessageExtremities(message, censor);
 
 		const description = await messageToText(message);
@@ -182,11 +207,10 @@ export async function generateBoardMessage(info, extraButtons = {}) {
 /**
  * Update the count on a message on #potatoboard.
  *
- * @param {import("discord.js").Message} message - The board message to update.
+ * @param message - The board message to update.
  */
-export async function updateBoard(message) {
-	/** @type {Promise<any>[]} */
-	const promises = [];
+export async function updateBoard(message: Message) {
+	const promises: Promise<any>[] = [];
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
 	const minReactions = boardReactionCount(message.channel);
 	const info = boardDatabase.data.find(({ source }) => source === message.id);

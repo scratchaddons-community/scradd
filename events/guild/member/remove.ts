@@ -4,8 +4,11 @@ import log from "../../../common/logging.js";
 import { getThreadFromMember } from "../../../common/contactMods.js";
 
 import type Event from "../../../common/types/event";
+import type { Snowflake } from "discord.js";
 
-export const rolesDatabase = new Database("roles");
+export const rolesDatabase = new Database<{ [role: Snowflake]: true } & { user: Snowflake }>(
+	"roles",
+);
 await rolesDatabase.init();
 
 const event: Event<"guildMemberAdd"> = async function event(member) {

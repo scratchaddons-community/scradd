@@ -411,7 +411,7 @@ export function disableComponents(
  * @param options.failMessage - A message to show when `array` is empty.
  * @param options.format - A user to format the embed against.
  * @param options.ephemeral - Whether the message is ephemeral.
- * @param options.rawOffset - The offset to start pagination from. Will be rounded to the nearest `itemsPerPage`.
+ * @param options.rawOffset - The index of an item to jump to.
  * @param options.itemsPerPage - The number of items to display at a time. Defaults to 15.
  * @param options.showIndexes - Whether to show the index of each item.
  * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
@@ -431,7 +431,7 @@ export async function paginate<Item>(
 		failMessage = `No ${plural} found!`,
 		format,
 		ephemeral = false,
-		rawOffset = 0,
+		rawOffset,
 		itemsPerPage = 15,
 		showIndexes = true,
 		generateComponents,
@@ -456,7 +456,7 @@ export async function paginate<Item>(
 	const numberOfPages = Math.ceil(array.length / itemsPerPage);
 
 	// eslint-disable-next-line no-let -- This must be changable.
-	let offset = Math.floor(rawOffset / itemsPerPage) * itemsPerPage;
+	let offset = Math.floor((rawOffset ?? 0) / itemsPerPage) * itemsPerPage;
 
 	/**
 	 * Generate an embed that has the next page.
@@ -478,14 +478,14 @@ export async function paginate<Item>(
 
 		const content = (
 			await Promise.all(
-				filtered.map(
-					async (current, index, all) =>
-						`${showIndexes ? `${index + offset + 1}) ` : ""}${await toString(
-							current,
-							index,
-							all,
-						)}`,
-				),
+				filtered.map(async (current, index, all) => {
+					const line = `${showIndexes ? `${index + offset + 1}) ` : ""}${await toString(
+						current,
+						index,
+						all,
+					)}`;
+					return rawOffset === index + offset ? `__${line}__` : line;
+				}),
 			)
 		).join("\n");
 

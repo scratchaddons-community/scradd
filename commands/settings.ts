@@ -3,6 +3,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	InteractionReplyOptions,
+	Snowflake,
 	User,
 } from "discord.js";
 
@@ -11,7 +12,19 @@ import Database from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
 import { xpDatabase } from "../common/xp.js";
 
-export const userSettingsDatabase = new Database("user_settings");
+export const userSettingsDatabase = new Database<{
+	/** The ID of the user. */
+	user: Snowflake;
+	/** Whether to ping the user when their message gets on the board. */
+	boardPings: boolean;
+	/** Whether to ping the user when they level up. */
+	levelUpPings: boolean;
+	/** Whether to ping the user when they are a top poster of the week. */
+	weeklyPings: boolean;
+	/** Whether to automatically react to their messages with random emojis. */
+	autoreactions: boolean;
+	useMentions: boolean;
+}>("user_settings");
 await userSettingsDatabase.init();
 
 const command = defineCommand({

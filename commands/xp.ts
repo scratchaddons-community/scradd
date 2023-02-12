@@ -157,7 +157,7 @@ const command = defineCommand({
 					userSettingsDatabase.data.find(
 						(settings) => interaction.user.id === settings.user,
 					)?.useMentions ?? false;
-				const index = user ? top.findIndex(({ user: id }) => id === user.id) : 0;
+				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
 				if (index === -1) {
 					return await interaction.reply({
 						content: `${

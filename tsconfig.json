@@ -32,6 +32,5 @@
 		"useUnknownInCatchVariables": false
 	},
 	"exclude": ["node_modules", ".git", "dist"],
-	"include": ["./*", "./.*", "./**/*", "./.**/*"], // TODO: idt we need this
 	"typeAcquisition": { "enable": true }
 }

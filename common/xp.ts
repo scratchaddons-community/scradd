@@ -1,12 +1,22 @@
-import { GuildMember, time, TimestampStyles, User } from "discord.js";
+import { GuildMember, Snowflake, time, TimestampStyles, User } from "discord.js";
 
 import { userSettingsDatabase } from "../commands/settings.js";
 import { nth } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
 
-export const xpDatabase = new Database("xp");
-export const weeklyXpDatabase = new Database("recent_xp");
+export const xpDatabase = new Database<{
+	/** The ID of the user. */
+	user: Snowflake;
+	/** How much XP they have. */
+	xp: number;
+}>("xp");
+export const weeklyXpDatabase = new Database<{
+	/** The ID of the user. */
+	user: Snowflake;
+	/** How much XP they gained. */
+	xp: number;
+}>("recent_xp");
 
 await xpDatabase.init();
 await weeklyXpDatabase.init();
@@ -29,11 +39,11 @@ const INCREMENT_FREQUENCY = 10;
 /**
  * Get the difference between the XP required for a level and its predecessor.
  *
- * @param {number} level - The level to get the increment for.
+ * @param level - The level to get the increment for.
  *
- * @returns {number} - The increment.
+ * @returns The increment.
  */
-function getIncrementForLevel(level) {
+function getIncrementForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 
@@ -53,11 +63,11 @@ function getIncrementForLevel(level) {
 /**
  * Get the needed amount of XP to reach the given level.
  *
- * @param {number} level - The level.
+ * @param level - The level.
  *
- * @returns {number} - The needed XP.
+ * @returns The needed XP.
  */
-export function getXpForLevel(level) {
+export function getXpForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
 
 	if (xpForLevel !== undefined) return xpForLevel;
@@ -68,11 +78,11 @@ export function getXpForLevel(level) {
 /**
  * Get the corresponding level of an XP value.
  *
- * @param {number} xp - The XP value.
+ * @param xp - The XP value.
  *
- * @returns {number} The corresponding level.
+ * @returns The corresponding level.
  */
-export function getLevelForXp(xp) {
+export function getLevelForXp(xp: number): number {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
 
 	if (foundLevel !== -2) return foundLevel;
@@ -88,11 +98,15 @@ export function getLevelForXp(xp) {
 /**
  * Give XP to a user.
  *
- * @param {User | GuildMember} to - Who to give the XP to.
- * @param {string} [url] - A link to a message or other that gave them this XP.
- * @param {number} amount - How much XP to give.
+ * @param to - Who to give the XP to.
+ * @param url - A link to a message or other that gave them this XP.
+ * @param amount - How much XP to give.
  */
-export default async function giveXp(to, url, amount = DEFAULT_XP) {
+export default async function giveXp(
+	to: User | GuildMember,
+	url: string,
+	amount: number = DEFAULT_XP,
+) {
 	// Give the xp
 	const user = to instanceof User ? to : to.user;
 	const member =
@@ -242,7 +256,7 @@ export default async function giveXp(to, url, amount = DEFAULT_XP) {
 			),
 		},
 
-		content: `__**Weekly Winners week of ${
+		content: `__**🏆 Weekly Winners week of ${
 			[
 				"January",
 				"February",

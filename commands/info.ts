@@ -1,7 +1,16 @@
-import { time, type Snowflake, type Role, TimestampStyles, ChannelType } from "discord.js";
+import {
+	time,
+	type Snowflake,
+	type Role,
+	TimestampStyles,
+	ChannelType,
+	ComponentType,
+	ButtonStyle,
+	GuildMember,
+} from "discord.js";
 
 import client from "../client.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+import CONSTANTS, { syncConstants } from "../common/CONSTANTS.js";
 import { defineCommand } from "../common/types/command.js";
 import pkg from "../package.json" assert { type: "json" };
 import { escapeMessage } from "../util/markdown.js";
@@ -92,59 +101,25 @@ const command = defineCommand({
 			}
 			case "config": {
 				await interaction.reply({
-					embeds: [
-						{
-							title: "Configuration",
+					embeds: getConfig(),
 
-							fields: [
-								{
-									name: CONSTANTS.zeroWidthSpace,
-									value: "**CHANNELS**",
-									inline: false,
-								},
-
-								...Object.entries(CONSTANTS.channels).map((channel) => ({
-									name: `${channel[0]
-										.split("_")
-										.map(
-											(name) => (name[0] ?? "").toUpperCase() + name.slice(1),
-										)
-										.join(" ")} ${
-										channel[1]?.type === ChannelType.GuildCategory
-											? "category"
-											: "channel"
-									}`,
-
-									value: channel[1]?.toString() ?? "*None*",
-									inline: true,
-								})),
-								{
-									name: CONSTANTS.zeroWidthSpace,
-									value: "**ROLES**",
-									inline: false,
-								},
-								...Object.entries(CONSTANTS.roles)
-									.filter(
-										(role): role is [typeof role[0], Role | undefined] =>
-											typeof role[1] !== "string",
-									)
-									.map((role) => ({
-										name: `${role[0]
-											.split("_")
-											.map(
-												(name) =>
-													(name[0] ?? "").toUpperCase() + name.slice(1),
-											)
-											.join(" ")} role`,
-
-										value: role[1]?.toString() ?? "*None*",
-										inline: true,
-									})),
-							],
-
-							color: CONSTANTS.themeColor,
-						},
-					],
+					components:
+						interaction.member instanceof GuildMember &&
+						interaction.member.roles.resolve(CONSTANTS.roles.admin?.id ?? "")
+							? [
+									{
+										type: ComponentType.ActionRow,
+										components: [
+											{
+												style: ButtonStyle.Primary,
+												type: ComponentType.Button,
+												label: "Sync",
+												customId: "_syncConstants",
+											},
+										],
+									},
+							  ]
+							: [],
 				});
 				break;
 			}
@@ -199,5 +174,74 @@ const command = defineCommand({
 			}
 		}
 	},
+
+	buttons: {
+		async syncConstants(interaction) {
+			if (
+				interaction.member instanceof GuildMember &&
+				interaction.member.roles.resolve(CONSTANTS.roles.admin?.id ?? "")
+			) {
+				await syncConstants();
+				await interaction.message.edit({ embeds: getConfig() });
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.yes} Synced configuration!`,
+				});
+			} else
+				interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to sync my configuration!`,
+				});
+		},
+	},
 });
 export default command;
+
+function getConfig() {
+	return [
+		{
+			title: "Configuration",
+
+			fields: [
+				{
+					name: CONSTANTS.zeroWidthSpace,
+					value: "**CHANNELS**",
+					inline: false,
+				},
+
+				...Object.entries(CONSTANTS.channels).map((channel) => ({
+					name: `${channel[0]
+						.split("_")
+						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+						.join(" ")} ${
+						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
+					}`,
+
+					value: channel[1]?.toString() ?? "*None*",
+					inline: true,
+				})),
+				{
+					name: CONSTANTS.zeroWidthSpace,
+					value: "**ROLES**",
+					inline: false,
+				},
+				...Object.entries(CONSTANTS.roles)
+					.filter(
+						(role): role is [typeof role[0], Role | undefined] =>
+							typeof role[1] !== "string",
+					)
+					.map((role) => ({
+						name: `${role[0]
+							.split("_")
+							.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+							.join(" ")} role`,
+
+						value: role[1]?.toString() ?? "*None*",
+						inline: true,
+					})),
+			],
+
+			color: CONSTANTS.themeColor,
+		},
+	];
+}

@@ -9,11 +9,11 @@ import {
 	type InteractionReplyOptions,
 	type Snowflake,
 	MessageType,
+	MessageMentions,
 } from "discord.js";
 
 import client from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
-import { GlobalUsersPattern } from "../util/discord.js";
 import { convertBase } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
@@ -26,7 +26,15 @@ export const EXPIRY_LENGTH = 1814400000,
 	PARTIAL_STRIKE_COUNT = 1 / (STRIKES_PER_MUTE + 1),
 	DEFAULT_STRIKES = 1;
 
-export const strikeDatabase = new Database("strikes");
+export const strikeDatabase = new Database<{
+	/** The ID of the user who was warned. */
+	user: Snowflake;
+	/** The time when this strike was issued. */
+	date: number;
+	id: number | string;
+	count: number;
+	removed: boolean;
+}>("strikes");
 await strikeDatabase.init();
 
 /**
@@ -89,6 +97,8 @@ export default async function warn(
 			? user
 			: await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 
+	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
+
 	await user
 		.send({
 			embeds: [
@@ -105,16 +115,27 @@ export default async function warn(
 					footer: {
 						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
 
-						text: `${
+						text: `Strike ${id}${
 							displayStrikes
-								? `${
-										displayStrikes === 1 ? "This strike" : "These strikes"
-								  } will expire in 21 ${
+								? `${CONSTANTS.footerSeperator}Expiring in 21 ${
 										process.env.NODE_ENV === "production" ? "day" : "minute"
-								  }s.\n`
+								  }s`
 								: ""
-						}You may DM me to discuss this strike with the mods if you want.`,
+						}`,
 					},
+				},
+			],
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							style: ButtonStyle.Primary,
+							label: "Appeal Strike",
+							custom_id: `${id}_appealStrike`,
+						},
+					],
 				},
 			],
 		})
@@ -124,7 +145,7 @@ export default async function warn(
 		...strikeDatabase.data,
 		{
 			user: user.id,
-			id: convertBase(logMessage.id, 10, convertBase.MAX_BASE),
+			id,
 			date: Date.now(),
 			count: strikes,
 			removed: false,
@@ -228,7 +249,7 @@ export async function filterToStrike(filter: string) {
 	const { url } = message.attachments.first() || {};
 	return {
 		...strike,
-		mod: Array.from(message.content.matchAll(GlobalUsersPattern))[1]?.[1],
+		mod: message.content.match(MessageMentions.UsersPattern)?.[1],
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
