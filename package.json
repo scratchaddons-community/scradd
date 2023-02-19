@@ -47,13 +47,8 @@
 	"engines": {
 		"node": "18.12.1",
 		"npm": "8.13.2"
+	},
+	"overrides": {
+		"discord-api-types": "0.37.20"
 	}
-
-,
-
-  "overrides": {
-
-    "discord-api-types": "0.37.20"
-
- 
-}}
+}
