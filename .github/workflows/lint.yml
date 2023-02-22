@@ -1,6 +1,8 @@
 name: Lint
 on:
     push:
+        branches-ignore:
+           - 'dependabot/**'
     workflow_dispatch:
     schedule:
         - cron: "30 12 * * *" # 30 minutes before Dependabot
