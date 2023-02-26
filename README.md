@@ -8,7 +8,7 @@ Feel free to fork Scradd to use some features in your servers.
 
 ## Contributing
 
-The majority of Scradd is made by @RedGuy12 (`RedGuy13#5922`). Thanks to everyone with the `@Scradd Developer` role in the SA server for help as well!
+The majority of Scradd is made by @RedGuy12 (`RedGuy13#5922`). Thanks to everyone with the `@Scradd Contributor` role in the SA server for help as well!
 
 Pull requests are welcome if you would like to help contribute. However, before coding new features, please discuss it with @RedGuy12 in an issue here, or the Scradd private/SA server on Discord. The issues section contains [some issues marked as "Help Wanted"](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) that you may take up without asking. [See the Roadmap also.](https://github.com/orgs/scratchaddons-community/projects/1/views/1?sortedBy%5Bdirection%5D=asc&sortedBy%5BcolumnId%5D=11568385)
 
