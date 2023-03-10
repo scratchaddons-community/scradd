@@ -15,13 +15,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
 	await log(`💨 Member ${member.toString()} left!`, "members");
 
-	const banned = await CONSTANTS.guild.bans
-		.fetch(member)
-		.then((partialBan) => {
-			if (partialBan.partial) return partialBan.fetch();
-			return partialBan;
-		})
-		.catch(() => {});
+	const banned = await CONSTANTS.guild.bans.fetch(member).catch(() => {});
 
 	const byes = banned
 		? [
