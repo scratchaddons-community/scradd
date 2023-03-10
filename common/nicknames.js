@@ -34,8 +34,6 @@ async function setNickname(member, newNickname, reason = `To comply with rule ${
  *
  * @param {import("discord.js").GuildMember} member - The member to change nickname of.
  * @param {boolean} shouldWarn - Whether to warn them if it has bad words.
- *
- * @todo Invite links? (Xan 👀)
  */
 export default async function changeNickname(member, shouldWarn = true) {
 	const censored = censor(member.displayName);
