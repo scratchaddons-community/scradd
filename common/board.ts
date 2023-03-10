@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	ComponentType,
 	Message,
+	MessageType,
 	Snowflake,
 	TextBasedChannel,
 } from "discord.js";
@@ -216,102 +217,91 @@ export async function generateBoardMessage(
  *
  * @param message - The board message to update.
  */
-export async function updateBoard(message: Message) {
-	const promises: Promise<any>[] = [];
-	const count = message.reactions.resolve(BOARD_EMOJI)?.count || 0;
+export default async function updateBoard(message: Message) {
+	const count = message.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
 	const minReactions = boardReactionCount(message.channel);
-	const info = boardDatabase.data.find(({ source }) => source === message.id);
 
-	const foundMessage =
-		info?.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
+	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
-	const pings =
-		userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.boardPings ??
-		process.env.NODE_ENV === "production";
+	const boardMessage = boardMessageId
+		? await board.messages.fetch(boardMessageId).catch(() => {})
+		: undefined;
 
-	if (foundMessage) {
-		await (count < Math.max(Math.floor(minReactions - minReactions / 6), 0)
-			? foundMessage.delete()
-			: foundMessage.edit({
-					allowedMentions: pings ? undefined : { users: [] },
-					content: foundMessage.content.replace(/\d+/, String(count)),
-			  }));
+	if (boardMessage) {
+		if (count < Math.floor(minReactions * 0.8)) {
+			await boardMessage.delete();
+		} else {
+			const content = boardMessage.content.replace(/\d+/, String(count));
+			await boardMessage.edit(content);
+		}
 	} else if (count >= minReactions) {
-		if (!message.author.bot) promises.push(giveXp(message.author, message.url));
+		if (!message.author.bot) await giveXp(message.author, message.url);
 
+		const userSettings = userSettingsDatabase.data.find(
+			({ user }) => user === message.author.id,
+		);
+		const pings = userSettings?.boardPings ?? process.env.NODE_ENV === "production";
 		const sentMessage = await board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions: pings ? undefined : { users: [] },
 		});
 
-		if (board.type === ChannelType.GuildAnnouncement) promises.push(sentMessage.crosspost());
+		if (board.type === ChannelType.GuildAnnouncement) await sentMessage.crosspost();
 
-		boardDatabase.data = info
-			? boardDatabase.data.map((item) =>
-					item.source === message.id
-						? { ...item, onBoard: sentMessage.id, reactions: count }
-						: item,
-			  )
-			: [
-					...boardDatabase.data,
-					{
-						reactions: count,
-						user: message.author.id,
-						channel: message.channel.id,
-						source: message.id,
-						onBoard: sentMessage.id,
-					},
-			  ];
-	}
-
-	if (foundMessage || count < minReactions) {
-		boardDatabase.data = count
-			? foundMessage
-				? boardDatabase.data.map((item) =>
-						item.source === message.id ? { ...item, reactions: count } : item,
-				  )
-				: [
-						...boardDatabase.data,
+		boardDatabase.data = [
+			...boardDatabase.data.filter((item) => item.source !== message.id),
+			...(count
+				? ([
 						{
 							channel: message.channel.id,
-							onBoard: 0,
+							onBoard: sentMessage.id,
 							reactions: count,
 							source: message.id,
 							user: message.author.id,
 						},
-				  ]
-			: boardDatabase.data.filter((item) => item.source !== message.id);
+				  ] as const)
+				: []),
+		];
 	}
 
-	const top = Array.from(boardDatabase.data.sort((one, two) => two.reactions - one.reactions));
+	if (boardMessage || count < minReactions) {
+		boardDatabase.data = [
+			...boardDatabase.data.filter((item) => item.source !== message.id),
+			...(count
+				? ([
+						{
+							channel: message.channel.id,
+							onBoard: boardMessage?.id ?? 0,
+							reactions: count,
+							source: message.id,
+							user: message.author.id,
+						},
+				  ] as const)
+				: []),
+		];
+	}
 
-	top.splice(5);
-	promises.push(
-		Promise.all(
-			top.map(async ({ onBoard }) => {
-				const toPin = onBoard && (await board.messages.fetch(onBoard)?.catch(() => {}));
-
-				if (toPin) await toPin.pin("Is a top-potatoed message");
-
-				return onBoard;
-			}),
-		).then(
-			async (topIds) =>
-				await board?.messages
-					.fetchPinned()
-					.then(
-						async (pins) =>
-							pins.size > 5 &&
-							(await Promise.all(
-								pins.map(
-									async (pin) =>
-										!topIds.includes(pin.id) &&
-										(await pin.unpin("No longer a top-potatoed message")),
-								),
-							)),
-					),
-		),
+	const top = Array.from(boardDatabase.data).sort((one, two) => two.reactions - one.reactions);
+	top.splice(
+		top.findIndex(
+			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,
+		) + 1,
 	);
+	const topIds = await Promise.all(
+		top.map(async ({ onBoard }) => {
+			const toPin = onBoard && (await board.messages.fetch(onBoard)?.catch(() => {}));
 
-	await Promise.all(promises);
+			if (toPin) await toPin.pin("Is a top-potatoed message");
+
+			return onBoard;
+		}),
+	);
+	const pins = await board?.messages.fetchPinned();
+	if (pins.size > 5) {
+		await Promise.all(
+			pins
+				.filter((pin) => !topIds.includes(pin.id))
+				.map(async (pin) => await pin.unpin("No longer a top-potatoed message")),
+		);
+	}
 }
