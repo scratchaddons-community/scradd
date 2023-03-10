@@ -9,11 +9,11 @@ import {
 	type InteractionReplyOptions,
 	type Snowflake,
 	MessageType,
-	MessageMentions,
 } from "discord.js";
 
 import client from "../client.js";
 import { userSettingsDatabase } from "../commands/settings.js";
+import { GlobalUsersPattern } from "../util/discord.js";
 import { convertBase } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
@@ -194,7 +194,7 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
-				Math.round((Number(allUserStrikes[0]?.date || Date.now()) + EXPIRY_LENGTH) / 1000),
+				new Date((allUserStrikes[0]?.date ?? Date.now()) + EXPIRY_LENGTH),
 				TimestampStyles.LongDate,
 			)}, you will be banned.**__`,
 		);
@@ -250,7 +250,7 @@ export async function filterToStrike(filter: string) {
 	const { url } = message.attachments.first() || {};
 	return {
 		...strike,
-		mod: message.content.match(MessageMentions.UsersPattern)?.[1],
+		mod: [...message.content.matchAll(GlobalUsersPattern)]?.[1]?.groups?.id,
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
