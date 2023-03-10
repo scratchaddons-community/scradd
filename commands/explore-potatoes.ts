@@ -8,6 +8,9 @@ import {
 	ComponentType,
 	type InteractionReplyOptions,
 	ApplicationCommandOptionType,
+	ButtonInteraction,
+	CacheType,
+	ChatInputCommandInteraction,
 } from "discord.js";
 
 import {
@@ -104,124 +107,150 @@ const command = defineCommand({
 	},
 
 	async interaction(interaction) {
-		await interaction.deferReply();
-		const minReactions =
-			interaction.options.getInteger("minimum-reactions") ?? defaultMinReactions;
+		const minReactions = interaction.options.getInteger("minimum-reactions") ?? undefined;
 		const user = interaction.options.getUser("user")?.id;
-		const channelWanted = interaction.options.getChannel("channel");
-		const { data } = boardDatabase;
-		const fetchedMessages = asyncFilter(
-			data.sort(() => Math.random() - 0.5),
-			async (message) =>
-				message.reactions >= minReactions &&
-				(user ? message.user === user : true) &&
-				(channelWanted ? await textChannelMatches(channelWanted, message.channel) : true) &&
-				message,
-		);
-
-		const nextId = generateHash("next");
-		const previousId = generateHash("prev");
-
-		const messages: InteractionReplyOptions[] = [];
-		// eslint-disable-next-line fp/no-let -- This needs to change.
-		let index = 0;
-
-		/**
-		 * Get the next message to reply with.
-		 *
-		 * @returns The reply information.
-		 */
-		async function getNextMessage(): Promise<InteractionReplyOptions> {
-			const info = (await fetchedMessages.next()).value;
-
-			const reply = info
-				? await generateBoardMessage(info, {
-						pre:
-							index > 0
-								? [
-										{
-											custom_id: previousId,
-											label: "<< Previous",
-											style: ButtonStyle.Primary,
-											type: ComponentType.Button,
-										},
-								  ]
-								: [],
-
-						post: [
-							{
-								custom_id: nextId,
-								label: "Next >>",
-								style: ButtonStyle.Primary,
-								type: ComponentType.Button,
-							},
-						],
-				  })
-				: ({
-						allowedMentions: { users: [] },
-
-						components:
-							index > 0
-								? [
-										{
-											components: [
-												{
-													customId: previousId,
-													label: "<< Previous",
-													style: ButtonStyle.Primary,
-													type: ComponentType.Button,
-												},
-											],
-
-											type: ComponentType.ActionRow,
-										},
-								  ]
-								: [],
-
-						content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
-
-						embeds: [],
-						ephemeral: true,
-						files: [],
-				  } satisfies InteractionReplyOptions);
-
-			if (!reply) {
-				boardDatabase.data = data.filter(({ source }) => source !== info?.source);
-
-				return await getNextMessage();
-			}
-			messages.push(reply);
-			return reply;
-		}
-
-		const reply = await interaction.editReply(await getNextMessage());
-
-		const collector = reply.createMessageComponentCollector({
-			filter: (buttonInteraction) =>
-				[previousId, nextId].includes(buttonInteraction.customId) &&
-				buttonInteraction.user.id === interaction.user.id,
-
-			time: CONSTANTS.collectorTime,
+		const channel = interaction.options.getChannel("channel") ?? undefined;
+		await makeSlideshow(interaction, {
+			minReactions,
+			user,
+			channel,
 		});
+	},
 
-		collector
-			.on("collect", async (buttonInteraction) => {
-				await buttonInteraction.deferUpdate();
-				if (buttonInteraction.customId === previousId) index--;
-				else index++;
-				await interaction.editReply(messages[Number(index)] ?? (await getNextMessage()));
-
-				collector.resetTimer();
-			})
-			.on("end", async () => {
-				const source = await interaction.fetchReply();
-
-				await interaction.editReply({
-					allowedMentions: { users: [] },
-
-					components: disableComponents(source.components),
-				});
+	buttons: {
+		async explorePotatoes(interaction, userId) {
+			await makeSlideshow(interaction, {
+				user: userId,
 			});
+		},
 	},
 });
 export default command;
+
+async function makeSlideshow(
+	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction<CacheType>,
+	{
+		minReactions = defaultMinReactions,
+		user,
+		channel: channelWanted,
+	}: {
+		minReactions?: number;
+		user?: string;
+		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
+	},
+) {
+	await interaction.deferReply();
+	const { data } = boardDatabase;
+	const fetchedMessages = asyncFilter(
+		data.sort(() => Math.random() - 0.5),
+		async (message) =>
+			message.reactions >= minReactions &&
+			(user ? message.user === user : true) &&
+			(channelWanted ? await textChannelMatches(channelWanted, message.channel) : true) &&
+			message,
+	);
+
+	const nextId = generateHash("next");
+	const previousId = generateHash("prev");
+
+	const messages: InteractionReplyOptions[] = [];
+	// eslint-disable-next-line fp/no-let -- This needs to change.
+	let index = 0;
+
+	/**
+	 * Get the next message to reply with.
+	 *
+	 * @returns The reply information.
+	 */
+	async function getNextMessage(): Promise<InteractionReplyOptions> {
+		const info = (await fetchedMessages.next()).value;
+
+		const reply = info
+			? await generateBoardMessage(info, {
+					pre:
+						index > 0
+							? [
+									{
+										custom_id: previousId,
+										label: "<< Previous",
+										style: ButtonStyle.Primary,
+										type: ComponentType.Button,
+									},
+							  ]
+							: [],
+
+					post: [
+						{
+							custom_id: nextId,
+							label: "Next >>",
+							style: ButtonStyle.Primary,
+							type: ComponentType.Button,
+						},
+					],
+			  })
+			: ({
+					allowedMentions: { users: [] },
+
+					components:
+						index > 0
+							? [
+									{
+										components: [
+											{
+												customId: previousId,
+												label: "<< Previous",
+												style: ButtonStyle.Primary,
+												type: ComponentType.Button,
+											},
+										],
+
+										type: ComponentType.ActionRow,
+									},
+							  ]
+							: [],
+
+					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
+
+					embeds: [],
+					ephemeral: true,
+					files: [],
+			  } satisfies InteractionReplyOptions);
+
+		if (!reply) {
+			boardDatabase.data = data.filter(({ source }) => source !== info?.source);
+
+			return await getNextMessage();
+		}
+		messages.push(reply);
+		return reply;
+	}
+
+	const reply = await interaction.editReply(await getNextMessage());
+
+	const collector = reply.createMessageComponentCollector({
+		filter: (buttonInteraction: { customId: string; user: { id: any } }) =>
+			[previousId, nextId].includes(buttonInteraction.customId) &&
+			buttonInteraction.user.id === interaction.user.id,
+
+		time: CONSTANTS.collectorTime,
+	});
+
+	collector
+		.on("collect", async (buttonInteraction: { deferUpdate: () => any; customId: string }) => {
+			await buttonInteraction.deferUpdate();
+			if (buttonInteraction.customId === previousId) index--;
+			else index++;
+			await interaction.editReply(messages[Number(index)] ?? (await getNextMessage()));
+
+			collector.resetTimer();
+		})
+		.on("end", async () => {
+			const source = await interaction.fetchReply();
+
+			await interaction.editReply({
+				allowedMentions: { users: [] },
+
+				components: disableComponents(source.components),
+			});
+		});
+}
