@@ -49,6 +49,6 @@
 		"npm": "8.13.2"
 	},
 	"overrides": {
-		"discord-api-types": "0.37.20"
+		"discord-api-types": "0.37.34"
 	}
 }
