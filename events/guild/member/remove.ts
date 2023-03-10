@@ -41,18 +41,15 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 				`Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
 		  ];
 
-	const promises = [
-		CONSTANTS.channels.welcome?.send(
-			`${CONSTANTS.emojis.misc[banned ? "ban" : "leave"]} ${
-				byes[Math.floor(Math.random() * byes.length)]
-			}`,
-		),
-		getThreadFromMember(member).then(async (thread) => {
-			await thread?.setArchived(true, "Member left");
-		}),
-	];
+	await CONSTANTS.channels.welcome?.send(
+		`${CONSTANTS.emojis.misc[banned ? "ban" : "leave"]} ${
+			byes[Math.floor(Math.random() * byes.length)]
+		}`,
+	);
+	await getThreadFromMember(member).then(async (thread) => {
+		await thread?.setArchived(true, "Member left");
+	});
 
-	await Promise.all(promises);
 	// const allRoles = [...(rolesDatabase.data)];
 	// const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
 

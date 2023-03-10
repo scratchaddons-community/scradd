@@ -25,33 +25,31 @@ export async function say(
 	const message = await interaction.channel?.send(content);
 
 	if (message) {
-		await Promise.all([
-			interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true }),
-			log(
-				`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
-					"say",
-					(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")
-						?.id ?? "",
-				)} in ${message.channel.toString()}!`,
-				"messages",
-				{
-					components: [
-						{
-							type: ComponentType.ActionRow,
+		await log(
+			`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
+				"say",
+				(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")?.id ??
+					"",
+			)} in ${message.channel.toString()}!`,
+			"messages",
+			{
+				components: [
+					{
+						type: ComponentType.ActionRow,
 
-							components: [
-								{
-									type: ComponentType.Button,
-									label: "View Message",
-									style: ButtonStyle.Link,
-									url: message.url,
-								},
-							],
-						},
-					],
-				},
-			),
-		]);
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "View Message",
+								style: ButtonStyle.Link,
+								url: message.url,
+							},
+						],
+					},
+				],
+			},
+		);
+		await interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true });
 	}
 }
 

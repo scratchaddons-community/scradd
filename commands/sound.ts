@@ -172,13 +172,11 @@ const command = defineCommand({
 				throw error;
 			});
 
-		await Promise.all([
-			interaction.reply(CONSTANTS.emojis.statuses.yes),
-			log(
-				`🎤 ${interaction.user.toString()} played \`${sound}\` in ${channel.toString()}!`,
-				"voice",
-			),
-		]);
+		await log(
+			`🎤 ${interaction.user.toString()} played \`${sound}\` in ${channel.toString()}!`,
+			"voice",
+		);
+		await interaction.reply(CONSTANTS.emojis.statuses.yes);
 	},
 });
 

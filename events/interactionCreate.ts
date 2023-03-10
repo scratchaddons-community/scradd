@@ -123,20 +123,19 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			const censored = censorOptions(interaction.options.data);
 
 			if (censored.isBad) {
-				await Promise.all([
-					interaction.reply({
+
+				await	interaction.reply({
 						ephemeral: true,
 						content: `${CONSTANTS.emojis.statuses.no} Language!`,
-					}),
-					warn(
+					})
+				await	warn(
 						interaction.member instanceof GuildMember
 							? interaction.member
 							: interaction.user,
 						"Watch your language!",
 						censored.strikes,
 						`Used command:\n${interaction.toString()}`,
-					),
-				]);
+					)
 				return;
 			}
 		}

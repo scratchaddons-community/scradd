@@ -41,29 +41,27 @@ export default async function changeNickname(member, shouldWarn = true) {
 	const censored = censor(member.displayName);
 
 	if (censored) {
-		await Promise.all([
-			shouldWarn
-				? warn(member, "Watch your language!", censored.strikes, member.displayName)
-				: member
-						.send(
-							`${CONSTANTS.emojis.statuses.no} I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.`,
-						)
-						.catch(() => {}),
-			setNickname(member, pingablify(censored.censored)),
-		]);
+		await setNickname(member, pingablify(censored.censored));
+		if (shouldWarn) {
+			await warn(member, "Watch your language!", censored.strikes, member.displayName);
+		} else {
+			await member
+				.send(
+					`${CONSTANTS.emojis.statuses.no} I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.`,
+				)
+				.catch(() => {});
+		}
 	}
 
 	const pingablified = pingablify(member.displayName);
 
 	if (pingablified !== member.displayName) {
-		await Promise.all([
-			setNickname(member, pingablified),
-			member
-				.send(
-					`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`,
-				)
-				.catch(() => {}),
-		]);
+		await setNickname(member, pingablified);
+		await member
+			.send(
+				`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`,
+			)
+			.catch(() => {});
 
 		return;
 	}
@@ -75,16 +73,14 @@ export default async function changeNickname(member, shouldWarn = true) {
 		})
 	).filter((found) => found.displayName === member.displayName);
 
-	const promises = [];
-
 	if (members.size > 1) {
 		const [safe, unsafe] = members.partition(
 			(found) => found.user.username === member.displayName,
 		);
 
 		if (safe.size > 0) {
-			promises.push(
-				...unsafe
+			await Promise.all(
+				unsafe
 					.map((found) => [
 						setNickname(found, found.user.username),
 
@@ -98,12 +94,10 @@ export default async function changeNickname(member, shouldWarn = true) {
 			);
 
 			if (safe.size > 1) {
-				promises.push(
-					CONSTANTS.channels.modlogs?.send({
-						allowedMentions: { users: [] },
-						content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
-					}),
-				);
+				await CONSTANTS.channels.modlogs?.send({
+					allowedMentions: { users: [] },
+					content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
+				});
 			}
 		} else if (
 			unsafe.size > 1 &&
@@ -114,14 +108,10 @@ export default async function changeNickname(member, shouldWarn = true) {
 		}
 
 		if (unsafe.size > 1) {
-			promises.push(
-				CONSTANTS.channels.modlogs?.send({
-					allowedMentions: { users: [] },
-					content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
-				}),
-			);
+			await CONSTANTS.channels.modlogs?.send({
+				allowedMentions: { users: [] },
+				content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
+			});
 		}
 	}
-
-	await Promise.all(promises);
 }

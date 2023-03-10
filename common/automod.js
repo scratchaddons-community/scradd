@@ -145,55 +145,47 @@ export default async function automodMessage(message) {
 	if (typeof embedStrikes === "number")
 		bad.language = (bad.language || 0) + Math.max(embedStrikes - 1, 0);
 
-	const promises = [];
-
-	if (toWarn.length > 0) promises.push(message.delete());
-	else if (typeof embedStrikes === "number") promises.push(message.suppressEmbeds());
+	if (toWarn.length > 0) await message.delete();
+	else if (typeof embedStrikes === "number") await message.suppressEmbeds();
 
 	const user = message.interaction?.user || message.author;
 
 	if (typeof bad.language === "number") {
-		promises.push(
-			warn(
-				user,
-				"Watch your language!",
-				bad.language,
-				`Sent message with words:\n${bad.words.language.join("\n")}`,
-			),
-			message.channel.send(`${CONSTANTS.emojis.statuses.no} ${user.toString()}, language!`),
+		await warn(
+			user,
+			"Watch your language!",
+			bad.language,
+			`Sent message with words:\n${bad.words.language.join("\n")}`,
 		);
+		await message.channel.send(`${CONSTANTS.emojis.statuses.no} ${user.toString()}, language!`);
 	}
 
 	if (CONSTANTS.channels.advertise) {
 		if (typeof bad.invites === "number") {
-			promises.push(
-				warn(
-					user,
-					"Please don’t send server invites in that channel!",
-					bad.invites,
-					bad.words.invites.join("\n"),
-				),
-				message.channel.send(
-					`${
-						CONSTANTS.emojis.statuses.no
-					} ${user.toString()}, only post invite links in ${CONSTANTS.channels.advertise.toString()}!`,
-				),
+			await warn(
+				user,
+				"Please don’t send server invites in that channel!",
+				bad.invites,
+				bad.words.invites.join("\n"),
+			);
+			await message.channel.send(
+				`${
+					CONSTANTS.emojis.statuses.no
+				} ${user.toString()}, only post invite links in ${CONSTANTS.channels.advertise.toString()}!`,
 			);
 		}
 
 		if (typeof bad.bots === "number") {
-			promises.push(
-				warn(
-					user,
-					"Please don’t post bot invite links!",
-					bad.bots,
-					bad.words.bots.join("\n"),
-				),
-				message.channel.send(
-					`${
-						CONSTANTS.emojis.statuses.no
-					} ${user.toString()}, bot invites go to ${CONSTANTS.channels.advertise.toString()}!`,
-				),
+			await warn(
+				user,
+				"Please don’t post bot invite links!",
+				bad.bots,
+				bad.words.bots.join("\n"),
+			);
+			await message.channel.send(
+				`${
+					CONSTANTS.emojis.statuses.no
+				} ${user.toString()}, bot invites go to ${CONSTANTS.channels.advertise.toString()}!`,
 			);
 		}
 	}
@@ -209,23 +201,19 @@ export default async function automodMessage(message) {
 		getBaseChannel(message.channel)?.id !== CONSTANTS.channels.bots?.id &&
 		typeof badAnimatedEmojis === "number"
 	) {
-		promises.push(
-			warn(
-				user,
-				"Please don’t post that many animated emojis!",
-				badAnimatedEmojis,
-				animatedEmojis?.map((emoji) => emoji[0]).join(""),
-			),
-			message.channel.send(
-				`${
-					CONSTANTS.emojis.statuses.no
-				} ${user.toString()}, a few less animated emojis please!`,
-			),
-			message.delete(),
+		await message.delete();
+		await warn(
+			user,
+			"Please don’t post that many animated emojis!",
+			badAnimatedEmojis,
+			animatedEmojis?.map((emoji) => emoji[0]).join(""),
+		);
+		await message.channel.send(
+			`${
+				CONSTANTS.emojis.statuses.no
+			} ${user.toString()}, a few less animated emojis please!`,
 		);
 	}
-
-	await Promise.all(promises);
 
 	return toWarn.length > 0;
 }

@@ -1513,12 +1513,10 @@ const command = defineCommand({
 						.on("collect", async (buttonInteraction) => {
 							if (buttonInteraction.customId.startsWith("end.")) {
 								CURRENTLY_PLAYING.delete(interaction.user.id);
-								await Promise.all([
-									buttonInteraction.reply("🛑 Ended the game."),
-									interaction.editReply({
-										components: disableComponents(message.components),
-									}),
-								]);
+								await interaction.editReply({
+									components: disableComponents(message.components),
+								});
+								await buttonInteraction.reply("🛑 Ended the game.");
 
 								collector.stop();
 
@@ -1587,14 +1585,13 @@ const command = defineCommand({
 							if (collected.size > 0) return;
 
 							CURRENTLY_PLAYING.delete(interaction.user.id);
-							await Promise.all([
-								interaction.followUp(
-									`🛑 ${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
-								),
-								interaction.editReply({
-									components: disableComponents(message.components),
-								}),
-							]);
+
+							await interaction.editReply({
+								components: disableComponents(message.components),
+							});
+							await interaction.followUp(
+								`🛑 ${interaction.user.toString()},you didn’t answer my question! I’m going to end the game.`,
+							);
 						});
 
 					return message;
@@ -1912,15 +1909,13 @@ const command = defineCommand({
 						games.delete(interaction.user.id);
 
 						const reply = await interaction.fetchReply();
-						await Promise.all([
-							reason === "time" &&
-								interaction.followUp(
-									`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
-								),
-							interaction.editReply({
-								components: disableComponents(reply.components),
-							}),
-						]);
+
+						interaction.editReply({ components: disableComponents(reply.components) });
+						if (reason === "time") {
+							await interaction.followUp(
+								`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
+							);
+						}
 					});
 				break;
 			}
@@ -1944,7 +1939,7 @@ const command = defineCommand({
 				});
 				return;
 			}
-			const editPromise = interaction.message?.edit({
+			await interaction.message?.edit({
 				embeds: [
 					{
 						...interaction.message.embeds[0]?.toJSON(),
@@ -1970,60 +1965,52 @@ const command = defineCommand({
 			});
 
 			if (item.id !== game.addon.id) {
-				await Promise.all([
-					editPromise,
-					interaction.reply(
-						`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
-					),
-				]);
+				await interaction.reply(
+					`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
+				);
 				return;
 			}
 
-			await Promise.all([
-				editPromise,
-				interaction.reply({
-					content: `${CONSTANTS.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
-						game.addon.name,
-					)}**! You got it right!`,
+			await interaction.reply({
+				content: `${CONSTANTS.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
+					game.addon.name,
+				)}**! You got it right!`,
 
-					embeds: [
-						{
-							title: game.addon.name,
+				embeds: [
+					{
+						title: game.addon.name,
 
-							description: `${
-								Object.entries(QUESTIONS_BY_ADDON)
-									.find(([id]) => id === game.addon.id)?.[1]
-									?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
-									.join("\n") ?? ""
-							}${commandMarkdown}`,
+						description: `${
+							Object.entries(QUESTIONS_BY_ADDON)
+								.find(([id]) => id === game.addon.id)?.[1]
+								?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+								.join("\n") ?? ""
+						}${commandMarkdown}`,
 
-							author: {
-								icon_url: (interaction.member instanceof GuildMember
-									? interaction.member
-									: interaction.user
-								).displayAvatarURL(),
+						author: {
+							icon_url: (interaction.member instanceof GuildMember
+								? interaction.member
+								: interaction.user
+							).displayAvatarURL(),
 
-								name:
-									interaction.member instanceof GuildMember
-										? interaction.member.displayName
-										: interaction.user.username,
-							},
-
-							color: CONSTANTS.themeColor,
-
-							thumbnail: {
-								url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(
-									game.addon.id,
-								)}.png`,
-							},
-
-							url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
-								game.addon.id,
-							)}`,
+							name:
+								interaction.member instanceof GuildMember
+									? interaction.member.displayName
+									: interaction.user.username,
 						},
-					],
-				}),
-			]);
+
+						color: CONSTANTS.themeColor,
+
+						thumbnail: {
+							url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
+						},
+
+						url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+							game.addon.id,
+						)}`,
+					},
+				],
+			});
 
 			game.collector.stop();
 		},
