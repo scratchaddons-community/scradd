@@ -91,100 +91,73 @@ function transformOptions(options: { [key: string]: Option }) {
 		);
 }
 
-const promises = [
-	importScripts(path.resolve(dirname, "./events")).then(
-		(events: Collection<ClientEvent, Event>) => {
-			for (const [event, execute] of events.entries()) {
-				client.on(event, async (...args) => {
-					try {
-						await execute(...args);
-					} catch (error) {
-						await logError(error, event);
-					}
-				});
-			}
-		},
-	),
-	importScripts(path.resolve(dirname, "./commands")).then(
-		async (commands: Collection<string, Command>) => {
-			await client.application.commands.set(
-				commands
-					.filter(
-						(command): command is NonNullable<typeof command> => command !== undefined,
-					)
-					.map(({ data }, name): ApplicationCommandData => {
-						const type = data.type ?? ApplicationCommandType.ChatInput;
-						return {
-							name:
-								type === ApplicationCommandType.ChatInput
-									? name
-									: name
-											.split("-")
-											.map(
-												(word) =>
-													(word[0] ?? "").toUpperCase() + word.slice(1),
-											)
-											.join(" "),
+await importScripts(path.resolve(dirname, "./events")).then(
+	(events: Collection<ClientEvent, Event>) => {
+		for (const [event, execute] of events.entries()) {
+			client.on(event, async (...args) => {
+				try {
+					await execute(...args);
+				} catch (error) {
+					await logError(error, event);
+				}
+			});
+		}
+	},
+);
+await importScripts(path.resolve(dirname, "./commands")).then(
+	async (commands: Collection<string, Command>) => {
+		await client.application.commands.set(
+			commands
+				.filter((command): command is NonNullable<typeof command> => command !== undefined)
+				.map(({ data }, name): ApplicationCommandData => {
+					const type = data.type ?? ApplicationCommandType.ChatInput;
+					return {
+						name:
+							type === ApplicationCommandType.ChatInput
+								? name
+								: name
+										.split("-")
+										.map(
+											(word) => (word[0] ?? "").toUpperCase() + word.slice(1),
+										)
+										.join(" "),
 
-							description: data.description ?? "",
-							type,
+						description: data.description ?? "",
+						type,
 
-							options: data.options
-								? transformOptions(data.options)
-								: data.subcommands &&
-								  Object.entries(data.subcommands).map(([subcommand, command]) => ({
-										description: command.description,
-										name: subcommand,
+						options: data.options
+							? transformOptions(data.options)
+							: data.subcommands &&
+							  Object.entries(data.subcommands).map(([subcommand, command]) => ({
+									description: command.description,
+									name: subcommand,
 
-										options:
-											command.options && transformOptions(command.options),
+									options: command.options && transformOptions(command.options),
 
-										type: ApplicationCommandOptionType.Subcommand,
-								  })),
+									type: ApplicationCommandOptionType.Subcommand,
+							  })),
 
-							defaultMemberPermissions: data.restricted
-								? new PermissionsBitField()
-								: null,
-						};
-					}),
-				CONSTANTS.guild.id,
-			);
-		},
-	),
-	client.guilds.fetch().then(
-		async (guilds) =>
-			await Promise.all(
-				guilds.map(async (otherGuild) => {
-					if (otherGuild.id !== CONSTANTS.guild.id)
-						await client.application.commands.set([], otherGuild.id).catch(() => {});
+						defaultMemberPermissions: data.restricted
+							? new PermissionsBitField()
+							: null,
+					};
 				}),
-			),
-	),
-];
-
-setInterval(() => {
-	fetch(`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`)
-		.catch(() => {})
-		.then(
-			async (response) => await response?.json<{ count: number; _chromeCountDate: string }>(),
-		)
-		.then((count) => {
-			if (!count) return;
-			CONSTANTS.channels.SA?.setName(
-				`Scratch Addons - ${count.count.toLocaleString([], {
-					compactDisplay: "short",
-					maximumFractionDigits: 1,
-					minimumFractionDigits: count.count > 999 ? 1 : 0,
-					notation: "compact",
-				})} users`,
-				"Automated update to sync count",
-			).catch((error) => logError(error, "setInterval(SA)"));
-		});
-}, 300_000);
+			CONSTANTS.guild.id,
+		);
+	},
+);
+await client.guilds.fetch().then(
+	async (guilds) =>
+		await Promise.all(
+			guilds.map(async (otherGuild) => {
+				if (otherGuild.id !== CONSTANTS.guild.id)
+					await client.application.commands.set([], otherGuild.id).catch(() => {});
+			}),
+		),
+);
 
 if (process.env.NODE_ENV === "production") await import("./web/server.js");
 
-await Promise.all(promises);
 if (process.env.NODE_ENV === "production") {
 	const { default: log } = await import("./common/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
