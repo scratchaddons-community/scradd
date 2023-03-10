@@ -94,11 +94,7 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 
 	await Promise.all(
 		logs.map(
-			async (edit) =>
-				await log(
-					`📃 Thread ${newThread.toString()}${edit}!`,
-					"channels",
-				),
+			async (edit) => await log(`📃 Thread ${newThread.toString()}${edit}!`, "channels"),
 		),
 	);
 	const censored = censor(newThread.name);
