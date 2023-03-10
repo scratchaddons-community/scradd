@@ -326,6 +326,7 @@ export default async function startTicket(
 		invitable: false,
 	});
 	await thread?.setLocked(true, "Ticket opened");
+	await CONSTANTS.channels.modlogs?.send(`🔴 Ticket ${thread?.toString()} opened`);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === member.id)
