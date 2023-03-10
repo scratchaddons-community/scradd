@@ -75,7 +75,7 @@ const client = await readyPromise;
 
 console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
 
-if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production")) {
+if (client.user.id === "929928324959055932" && !process.argv.includes("--production")) {
 	throw new AssertionError({
 		actual: process.argv.map((argument) => sanitizePath(argument)),
 		expected: "--production",
