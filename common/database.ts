@@ -78,8 +78,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 			}
 
 			const data =
-				Boolean(this.#data?.length) &&
-				papaparse.unparse(Array.from(this.#data || [])).trim();
+				this.#data?.length && papaparse.unparse(Array.from(this.#data || [])).trim();
 
 			const files = data
 				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
@@ -111,9 +110,9 @@ export default class Database<Data extends { [key: string]: string | number | bo
 						? (await fetch(attachment).then(async (res) => await res.text())).trim()
 						: false;
 
-					if (written !== data) {
+					if (attachment && written !== data) {
 						throw new Error("Data changed through write!", {
-							cause: { written, data },
+							cause: { written, data, database: this.name },
 						});
 					}
 
