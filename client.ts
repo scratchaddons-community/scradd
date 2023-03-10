@@ -1,4 +1,4 @@
-import { AssertionError } from "assert";
+import { AssertionError } from "node:assert";
 
 import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
 

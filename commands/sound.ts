@@ -1,5 +1,5 @@
 import url from "node:url";
-import path from "path";
+import path from "node:path";
 
 import {
 	joinVoiceChannel,
