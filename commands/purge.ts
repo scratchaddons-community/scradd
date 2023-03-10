@@ -71,7 +71,7 @@ const command = defineCommand({
 
 		async function generateMessage() {
 			const sliced = filtered.slice(start, deleteTo);
-			if (!sliced[0] || deleteTo > filtered.length || start >= deleteTo) {
+			if (!sliced[0] || start >= deleteTo) {
 				return {
 					content: `${
 						CONSTANTS.emojis.statuses.no
