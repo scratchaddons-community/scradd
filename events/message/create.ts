@@ -96,40 +96,33 @@ const event: Event<"messageCreate"> = async function event(message) {
 		const newChannel = lastInChannel.length < DEFAULT_XP;
 		if (!newChannel) lastInChannel.pop();
 		lastInChannel.unshift(message);
-		const bot =
-			1 +
-			Number(
-				Boolean(message.interaction) ||
-					/^(?:r!|<@323630372531470346>)\s*\w+/i.test(message.content),
-			);
+		const bot = 1 + Number(Boolean(message.interaction));
 
-		promises.push(
-			giveXp(
-				message.interaction?.user || message.author,
-				message.url,
-				spam === -1 && !newChannel
-					? 1
-					: Math.max(
-							1,
-							Math.round(
-								(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
-									bot /
-									(1 +
-										Number(
-											![
-												MessageType.Default,
-												MessageType.GuildBoost,
-												MessageType.GuildBoostTier1,
-												MessageType.GuildBoostTier2,
-												MessageType.GuildBoostTier3,
-												MessageType.Reply,
-												MessageType.ChatInputCommand,
-												MessageType.ContextMenuCommand,
-											].includes(message.type),
-										)),
-							),
-					  ),
-			),
+		await giveXp(
+			message.interaction?.user || message.author,
+			message.url,
+			spam === -1 && !newChannel
+				? 1
+				: Math.max(
+						1,
+						Math.round(
+							(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
+								bot /
+								(1 +
+									Number(
+										![
+											MessageType.Default,
+											MessageType.GuildBoost,
+											MessageType.GuildBoostTier1,
+											MessageType.GuildBoostTier2,
+											MessageType.GuildBoostTier3,
+											MessageType.Reply,
+											MessageType.ChatInputCommand,
+											MessageType.ContextMenuCommand,
+										].includes(message.type),
+									)),
+						),
+				  ),
 		);
 	}
 
