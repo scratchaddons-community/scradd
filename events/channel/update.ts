@@ -154,7 +154,7 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 			edits.push(
 				`’s video quality set to ${
 					{ [VideoQualityMode.Auto]: "Auto", [VideoQualityMode.Full]: "720p" }[
-						newChannel.videoQualityMode ?? VideoQualityMode.Auto // TODO: is the correct default?
+						newChannel.videoQualityMode ?? VideoQualityMode.Auto
 					]
 				}`,
 			);
