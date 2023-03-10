@@ -29,9 +29,10 @@ const command = defineCommand({
 
 			content: words
 				? `⚠ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
-						interaction.member instanceof GuildMember &&
 						CONSTANTS.roles.mod &&
-						interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+						(interaction.member instanceof GuildMember
+							? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+							: interaction.member.roles.includes(CONSTANTS.roles.mod.id))
 							? `That text gives **${Math.trunc(result.strikes)} strike${
 									result.strikes === 1 ? "" : "s"
 							  }**.\n\n`

@@ -104,8 +104,10 @@ const command = defineCommand({
 					embeds: getConfig(),
 
 					components:
-						interaction.member instanceof GuildMember &&
-						interaction.member.roles.resolve(CONSTANTS.roles.admin?.id ?? "")
+						CONSTANTS.roles.admin &&
+						(interaction.member instanceof GuildMember
+							? interaction.member.roles.resolve(CONSTANTS.roles.admin.id)
+							: interaction.member.roles.includes(CONSTANTS.roles.admin.id))
 							? [
 									{
 										type: ComponentType.ActionRow,
@@ -178,8 +180,10 @@ const command = defineCommand({
 	buttons: {
 		async syncConstants(interaction) {
 			if (
-				interaction.member instanceof GuildMember &&
-				interaction.member.roles.resolve(CONSTANTS.roles.admin?.id ?? "")
+				CONSTANTS.roles.admin &&
+				(interaction.member instanceof GuildMember
+					? interaction.member.roles.resolve(CONSTANTS.roles.admin.id)
+					: interaction.member?.roles.includes(CONSTANTS.roles.admin.id))
 			) {
 				await syncConstants();
 				await interaction.message.edit({ embeds: getConfig() });
