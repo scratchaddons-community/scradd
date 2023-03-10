@@ -96,26 +96,8 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 		logs.map(
 			async (edit) =>
 				await log(
-					`📃 Thread ${
-						edit.startsWith(" closed") ? `#${newThread.name}` : newThread.toString()
-					}${edit}!`,
+					`📃 Thread ${newThread.toString()}${edit}!`,
 					"channels",
-					{
-						components: [
-							{
-								components: [
-									{
-										label: "View Thread",
-										type: ComponentType.Button,
-										style: ButtonStyle.Link,
-										url: newThread.url,
-									},
-								],
-
-								type: ComponentType.ActionRow,
-							},
-						],
-					},
 				),
 		),
 	);
