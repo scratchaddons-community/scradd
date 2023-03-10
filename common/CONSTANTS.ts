@@ -30,6 +30,7 @@ async function getConstants() {
 			autoreact: {
 				jeffalo: "<:jeffalo:1019771285850554419>",
 				tw: "<:tw:1019771807450026084>",
+				taco: "<a:taco:1083423116547596359>",
 				e: "<:e_:939986562937151518>",
 				griffpatch: "<:griffpatch:938441399936909362>",
 				sus: "<:sus:938548233385414686>",
@@ -54,8 +55,9 @@ async function getConstants() {
 
 				bob: "<:bob:1001977844894810243>",
 				boost: "<:nitro:1044650827882696805>",
-				wasteof: "<:wasteofmoney:1044651861682176080>",
+				wasteof: "<:wasteof:1044651861682176080>",
 				mater: "<:mater:1073805840584282224>",
+				rip: "<:rip:1082693496739201205>",
 			},
 
 			discord: {

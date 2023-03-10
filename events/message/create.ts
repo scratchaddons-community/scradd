@@ -129,17 +129,17 @@ const event: Event<"messageCreate"> = async function event(message) {
 	// Autoreactions start here.
 
 	const REACTION_CAP = 2;
+	let reactions = 0;
 
 	/**
 	 * Attempt to react with an emoji.
 	 *
 	 * @param emoji - The emoji to react with.
 	 */
-	function react(emoji: EmojiIdentifierResolvable): void {
+	function react(emoji: EmojiIdentifierResolvable) {
 		if (reactions > REACTION_CAP) return;
 		reactions++;
-		const promise = message.react(emoji).catch(console.error);
-		promises.push(promise);
+		return message.react(emoji);
 	}
 
 	if (
@@ -150,7 +150,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 			MessageType.GuildBoostTier3,
 		].includes(message.type)
 	)
-		react(BOARD_EMOJI);
+		await react(BOARD_EMOJI);
 
 	// Don’t react to users who disabled the setting.
 	if (
@@ -161,10 +161,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 			userSettingsDatabase.data.find(({ user }) => user === message.author.id)
 				?.autoreactions ?? true
 		)
-	) {
-		await Promise.all(promises);
+	)
 		return;
-	}
 
 	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
 
@@ -190,34 +188,38 @@ const event: Event<"messageCreate"> = async function event(message) {
 		["e", "ae", "iei", "a", "."].includes(stripMarkdown(normalize(content))) ||
 		content.includes("æ")
 	)
-		react(CONSTANTS.emojis.autoreact.e);
-	if (includes("dango") && !content.includes("🍡")) react("🍡");
-	if (includes(/av[ao]cado/) && !content.includes("🥑")) react("🥑");
+		await react(CONSTANTS.emojis.autoreact.e);
+	if (includes("dango") && !content.includes("🍡")) await react("🍡");
+	if (includes(/av[ao]cado/) && !content.includes("🥑")) await react("🥑");
 	if (includes("sat on addon") && reactions < REACTION_CAP) {
 		reactions += 3;
-		promises.push(reactAll(message, CONSTANTS.emojis.autoreact.soa));
+		await reactAll(message, CONSTANTS.emojis.autoreact.soa);
 	}
 
 	// Server jokes
-	if (includes("bob", false)) react(CONSTANTS.emojis.autoreact.bob);
-	if (content.includes("( ∘)つ")) react(CONSTANTS.emojis.autoreact.sxd);
-	if (includes("doost") || includes("dooster")) react(CONSTANTS.emojis.autoreact.boost);
-	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆")) react("🦆");
-	if (content === "radio") react("📻");
-	if (content === "agreed") react(CONSTANTS.emojis.autoreact.mater);
+	if (includes(/taco(?:d(?:ude|iva))?/, false)) await react(CONSTANTS.emojis.autoreact.bob);
+	if (includes("bob", false)) await react(CONSTANTS.emojis.autoreact.bob);
+	if (content.includes("( ∘)つ")) await react(CONSTANTS.emojis.autoreact.sxd);
+	if (includes("doost", false) || includes("dooster"))
+		await react(CONSTANTS.emojis.autoreact.boost);
+	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆"))
+		await react("🦆");
+	if (content === "radio") await react("📻");
+	if (content === "agreed") await react(CONSTANTS.emojis.autoreact.mater);
 	if (includes(/te[rw]+a+/) || /👉\s*👈/.test(message.content))
-		react(CONSTANTS.emojis.autoreact.tera);
+		await react(CONSTANTS.emojis.autoreact.tera);
 	if ((includes("snake") || includes("snek")) && reactions < REACTION_CAP) {
 		reactions += 3;
-		promises.push(reactAll(message, CONSTANTS.emojis.autoreact.snakes));
+		await reactAll(message, CONSTANTS.emojis.autoreact.snakes);
 	}
 
 	// Discord jokes
+	if (includes("robotop", false)) await react(CONSTANTS.emojis.autoreact.rip);
 	if (
-		(includes("mee6") || includes("dyno")) &&
+		(includes("mee6", false) || includes("dyno", false) || includes(/carl[ -]?bot/)) &&
 		!(content.includes("🤮") || content.includes("🤢"))
 	)
-		react("🤮");
+		await react("🤮");
 	if (
 		message.mentions.has(client.user.id, {
 			ignoreEveryone: true,
@@ -226,30 +228,28 @@ const event: Event<"messageCreate"> = async function event(message) {
 		}) &&
 		message.author.id !== client.user.id
 	)
-		react("👋");
+		await react("👋");
 
 	// Scratch jokes
-	if (includes(/j[eo]f+[ao]l+o/) || includes(/buf+[ao]l+o/))
-		react(CONSTANTS.emojis.autoreact.jeffalo);
-	if (includes(/wasteof\.(?!money)/, false)) react(CONSTANTS.emojis.autoreact.wasteof);
+	if (includes(/j[eo]f+[ao]l+o/, false) || includes(/buf+[ao]l+o/, false))
+		await react(CONSTANTS.emojis.autoreact.jeffalo);
+	if (includes(/wasteof\.(?!money)/, false)) await react(CONSTANTS.emojis.autoreact.wasteof);
 	if (
-		(content.includes("garbo") || includes(/garbage? ?(?:muffin|man)/)) &&
+		(content.includes("garbo") || includes(/garbage? ?(?:muffin|man)/, false)) &&
 		!content.includes("turbo")
 	)
-		react(CONSTANTS.emojis.autoreact.tw);
-	if (includes(/griff(?:patch)?y?/)) react(CONSTANTS.emojis.autoreact.griffpatch);
-	if (includes("appel")) react(CONSTANTS.emojis.autoreact.appel);
+		await react(CONSTANTS.emojis.autoreact.tw);
+	if (includes(/griff(?:patch)?y?/, false)) await react(CONSTANTS.emojis.autoreact.griffpatch);
+	if (includes("appel")) await react(CONSTANTS.emojis.autoreact.appel);
 
 	// Internet jokes
-	if (includes("sus", false)) react(CONSTANTS.emojis.autoreact.sus);
+	if (includes("sus", false)) await react(CONSTANTS.emojis.autoreact.sus);
 	if (
 		includes(/gives? ?you ?up/i, false) ||
 		includes(/rick[ -]?rol+/) ||
-		includes("astley") ||
+		includes("astley", false) ||
 		message.content.includes("dQw4w9WgXcQ")
 	)
-		react(CONSTANTS.emojis.autoreact.rick);
-
-	await Promise.all(promises);
+		await react(CONSTANTS.emojis.autoreact.rick);
 };
 export default event;
