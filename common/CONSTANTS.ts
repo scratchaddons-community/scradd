@@ -72,6 +72,13 @@ async function getConstants() {
 				yes: "<:yes:1048464639056420885>",
 				no: "<:no:1048464674892558396>",
 				warning: "<:warning:1048466347039928370>",
+				muted: "<:muted:1082818151303106621>",
+				deafened: "<:deafened:1082818124463743027>",
+				streaming: "<:streaming:1082818172555645028>",
+				stage: "<:stage:1083046440714129481>",
+				speaker: "<:speaker:1083046535320829952>",
+				stageLive: "<:stage_live:1083046549656977423>",
+				raisedHand: "<:raised_hand:1083046563049381898>",
 			},
 
 			misc: {

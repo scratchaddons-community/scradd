@@ -150,15 +150,23 @@ export async function generateBoardMessage(
 
 			embeds: [
 				{
-					color: message.member?.displayColor,
+					color:
+						message.type === MessageType.AutoModerationAction
+							? 0x99a1f2
+							: message.member?.displayColor,
 					description: censored ? censored.censored : description,
 
 					author: {
-						icon_url: (message.member ?? message.author).displayAvatarURL(),
+						icon_url:
+							message.type === MessageType.AutoModerationAction
+								? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+								: (message.member ?? message.author).displayAvatarURL(),
 
 						name:
-							message.member?.displayName ??
-							(censoredName ? censoredName.censored : message.author.username),
+							message.type === MessageType.AutoModerationAction
+								? "AutoMod"
+								: message.member?.displayName ??
+								  (censoredName ? censoredName.censored : message.author.username),
 					},
 
 					timestamp: message.createdAt.toISOString(),
