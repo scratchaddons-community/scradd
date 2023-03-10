@@ -18,6 +18,7 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { normalize, truncateText } from "../../util/text.js";
 
 import type Event from "../../common/types/event";
+import { remindersDatabase, SpecialReminders } from "../../commands/remind.js";
 
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
@@ -42,28 +43,30 @@ const event: Event<"messageCreate"> = async function event(message) {
 		});
 	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
 
-	if (
-		message.channel.id === CONSTANTS.channels.board?.id &&
-		message.type === MessageType.ChannelPinnedMessage
-	) {
-		await message.delete();
-		return;
-	}
-
 	if (await automodMessage(message)) return;
 
-	const promises = [];
-	let reactions = 0;
+	if (
+		message.interaction?.commandName === "bump" &&
+		message.interaction.user.id === "302050872383242240"
+	) {
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: "881619501018394725",
+				date: Date.now() + 7230,
+				reminder: SpecialReminders.Bump,
+				setAt: Date.now(),
+				user: client.user.id,
+			},
+		];
+	}
 
-	// #upcoming-updates
-	if (message.channel.id === "806605006072709130") {
-		promises.push(
-			message.startThread({
-				name: truncateText(message.cleanContent || "New update!", 50),
+	if (message.channel.id === CONSTANTS.channels.updates?.id) {
+		await message.startThread({
+			name: truncateText(message.cleanContent || "New update!", 50),
 
-				reason: "New upcoming update",
-			}),
-		);
+			reason: "New upcoming update",
+		});
 	}
 
 	const baseChannel = getBaseChannel(message.channel);
