@@ -152,9 +152,9 @@ export default async function warn(
 		},
 	];
 
-	const newStrikeCount = oldStrikeCount + strikes;
+	const totalStrikeCount = oldStrikeCount + strikes;
 
-	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
+	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		// Ban
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
@@ -167,12 +167,13 @@ export default async function warn(
 		return;
 	}
 
-	const newMuteCount = Math.trunc(newStrikeCount / STRIKES_PER_MUTE);
-	const newMuteLength = MUTE_LENGTHS.reduce(
-		(accumulator, length, index) => (index > newMuteCount ? accumulator : accumulator + length),
+	const totalMuteCount = Math.trunc(totalStrikeCount / STRIKES_PER_MUTE);
+	const totalMuteLength = MUTE_LENGTHS.reduce(
+		(accumulator, length, index) =>
+			index < totalMuteCount ? accumulator + length : accumulator,
 		0,
 	);
-	const addedMuteLength = newMuteLength - oldMuteLength;
+	const addedMuteLength = totalMuteLength - oldMuteLength;
 
 	if (addedMuteLength) {
 		await (member?.moderatable
@@ -190,7 +191,7 @@ export default async function warn(
 			  }));
 	}
 
-	if (Math.trunc(newStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
+	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user.send(
 			`__**This is your last chance. If you get another strike before ${time(
 				Math.round((Number(allUserStrikes[0]?.date || Date.now()) + EXPIRY_LENGTH) / 1000),
