@@ -27,43 +27,42 @@ export const BOARD_EMOJI = "🥔";
 export function boardReactionCount(channel?: TextBasedChannel): number {
 	const COUNTS = {
 		scradd: 2,
-		devs: 6,
-		misc: 5,
-		mods: 4,
-		exec: 3,
 		admins: 2,
-		default: 8,
+		exec: 3,
+		mods: 4,
+		misc: 5,
+		default: 6,
+		memes: 8,
 		info: 10,
 	};
 
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
-	if (!channel) return COUNTS.default;
-
+	if (channel?.id === CONSTANTS.channels.updates?.id) return COUNTS.info;
 	const baseChannel = getBaseChannel(channel);
-
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.mods;
-
+	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
 	if (baseChannel.isVoiceBased()) return COUNTS.misc;
-
-	if (baseChannel.parent?.id === CONSTANTS.channels.info?.id) return COUNTS.info;
 
 	return (
 		{
+			[CONSTANTS.channels.contact?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.misc,
+			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,
 			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
-			[CONSTANTS.channels.contact?.id || ""]: COUNTS.misc,
 			[CONSTANTS.channels.boosters?.id || ""]: COUNTS.misc,
-			[CONSTANTS.channels.devs?.id || ""]: COUNTS.devs,
+			[CONSTANTS.channels.devs?.id || ""]: COUNTS.misc,
+			"811065897057255424": COUNTS.memes,
+			"806609527281549312": COUNTS.memes,
+			"806656240129671188": COUNTS.memes,
+			[CONSTANTS.channels.advertise?.id || ""]: COUNTS.memes,
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
-		COUNTS[
-			baseChannel.parent?.id === "866028754962612294" // The Cache
-				? "misc"
-				: "default"
-		]
+		{
+			[CONSTANTS.channels.info?.id || ""]: COUNTS.misc,
+			"866028754962612294": COUNTS.misc, // The Cache
+		}[baseChannel.parent?.id || ""] ||
+		COUNTS.default
 	);
 }
 
