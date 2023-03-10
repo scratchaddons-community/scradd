@@ -60,7 +60,7 @@ export default async function warn(
 	);
 	const oldMuteCount = Math.trunc(oldStrikeCount / STRIKES_PER_MUTE);
 	const oldMuteLength = MUTE_LENGTHS.reduce(
-		(accumulator, length, index) => (index > oldMuteCount ? accumulator : accumulator + length),
+		(accumulator, length, index) => (index < oldMuteCount ? accumulator + length : accumulator),
 		0,
 	);
 
