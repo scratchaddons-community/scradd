@@ -5,7 +5,11 @@ import {
 	TimestampStyles,
 	ButtonStyle,
 	ComponentType,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	User,
 } from "discord.js";
+import client from "../client.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import { getStrikeById, strikeDatabase } from "../common/punishments.js";
@@ -50,94 +54,7 @@ const command = defineCommand({
 		switch (interaction.options.getSubcommand(true)) {
 			case "user": {
 				const selected = interaction.options.getUser("user") ?? interaction.member;
-				if (
-					selected.id !== interaction.member.id &&
-					CONSTANTS.roles.mod &&
-					!interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-				) {
-					return await interaction.reply({
-						ephemeral: true,
-						content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
-					});
-				}
-
-				const user = selected instanceof GuildMember ? selected.user : selected;
-				const member =
-					selected instanceof GuildMember
-						? selected
-						: await CONSTANTS.guild.members.fetch(selected.id).catch(() => {});
-
-				const strikes = strikeDatabase.data
-					.filter((strike) => strike.user === selected.id)
-					.sort((one, two) => two.date - one.date);
-
-				const totalStrikeCount = Math.trunc(
-					strikes.reduce(
-						(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
-						0,
-					),
-				);
-
-				await paginate(
-					strikes,
-					(strike) =>
-						`${strike.removed ? "~~" : ""}\`${strike.id}\`${
-							strike.count === 1
-								? ""
-								: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
-						} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-							strike.removed ? "~~" : ""
-						}`,
-					async (data) => {
-						const newData = { ...data };
-						if (
-							newData.embeds?.[0] &&
-							"footer" in newData.embeds[0] &&
-							newData.embeds[0].footer?.text
-						) {
-							newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
-								/\d+ $/,
-								`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-							);
-						}
-						return await interaction[interaction.replied ? "editReply" : "reply"](
-							newData,
-						);
-					},
-					{
-						title: `${member?.displayName ?? user.username}’s strikes`,
-						singular: "",
-						plural: "",
-						failMessage: `${selected.toString()} has never been warned!`,
-						format: member || user,
-						ephemeral: true,
-						showIndexes: false,
-						user: interaction.user,
-
-						generateComponents(filtered) {
-							if (filtered.length > 5) {
-								return [
-									{
-										type: ComponentType.StringSelect,
-										customId: "_selectStrike",
-										placeholder: "View more information on a strike",
-
-										options: filtered.map((strike) => ({
-											label: String(strike.id),
-											value: String(strike.id),
-										})),
-									},
-								];
-							}
-							return filtered.map((strike) => ({
-								label: String(strike.id),
-								style: ButtonStyle.Secondary,
-								customId: `${strike.id}_strike`,
-								type: ComponentType.Button,
-							}));
-						},
-					},
-				);
+				await getStrikes(selected, interaction);
 				break;
 			}
 			case "id": {
@@ -159,6 +76,9 @@ const command = defineCommand({
 			await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
 			return;
 		},
+		async viewStrikes(interaction, userId = "") {
+			await getStrikes(await client.users.fetch(userId), interaction);
+		},
 	},
 
 	stringSelects: {
@@ -172,3 +92,101 @@ const command = defineCommand({
 	},
 });
 export default command;
+
+async function getStrikes(
+	selected: GuildMember | User,
+	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+) {
+	if (
+		selected.id !== interaction.user.id &&
+		!(
+			CONSTANTS.roles.mod &&
+			(interaction.member instanceof GuildMember
+				? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+				: interaction.member?.roles.includes(CONSTANTS.roles.mod.id))
+		)
+	) {
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+		});
+	}
+
+	const user = selected instanceof GuildMember ? selected.user : selected;
+	const member =
+		selected instanceof GuildMember
+			? selected
+			: await CONSTANTS.guild.members.fetch(selected.id).catch(() => {});
+
+	const strikes = strikeDatabase.data
+		.filter((strike) => strike.user === selected.id)
+		.sort((one, two) => two.date - one.date);
+
+	const totalStrikeCount = Math.trunc(
+		strikes.reduce(
+			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
+			0,
+		),
+	);
+
+	await paginate(
+		strikes,
+		(strike) =>
+			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
+				strike.count === 1
+					? ""
+					: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
+			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
+				strike.removed ? "~~" : ""
+			}`,
+		async (data) => {
+			const newData = { ...data };
+			if (
+				newData.embeds?.[0] &&
+				"footer" in newData.embeds[0] &&
+				newData.embeds[0].footer?.text
+			) {
+				newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
+					/\d+ $/,
+					`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
+				);
+			}
+			return await (interaction.replied
+				? interaction.editReply(newData)
+				: interaction.reply(newData));
+		},
+		{
+			title: `${member?.displayName ?? user.username}’s strikes`,
+			singular: "",
+			plural: "",
+			failMessage: `${selected.toString()} has never been warned!`,
+			format: member || user,
+			ephemeral: true,
+			showIndexes: false,
+			user: interaction.user,
+
+			generateComponents(filtered) {
+				if (filtered.length > 5) {
+					return [
+						{
+							type: ComponentType.StringSelect,
+							customId: "_selectStrike",
+							placeholder: "View more information on a strike",
+
+							options: filtered.map((strike) => ({
+								label: String(strike.id),
+								value: String(strike.id),
+							})),
+						},
+					];
+				}
+				return filtered.map((strike) => ({
+					label: String(strike.id),
+					style: ButtonStyle.Secondary,
+					customId: `${strike.id}_strike`,
+					type: ComponentType.Button,
+				}));
+			},
+		},
+	);
+}

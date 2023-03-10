@@ -49,6 +49,22 @@ const command = defineCommand({
 		async contactMods(interaction) {
 			await interaction.reply(ticketCategoryMessage);
 		},
+		async contactUser(interaction, userId = "") {
+			if (
+				!CONSTANTS.roles.mod ||
+				!(interaction.member instanceof GuildMember
+					? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
+					: interaction.member?.roles.includes(CONSTANTS.roles.mod.id))
+			) {
+				return await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to open a ticket for someone else!`,
+				});
+			}
+
+			const member = await CONSTANTS.guild.members.fetch(userId);
+			await contactUser(member, interaction);
+		},
 		async appealStrike(interaction) {
 			return await gatherTicketInfo(interaction, "appeal");
 		},
@@ -118,6 +134,7 @@ async function contactUser(
 			},
 		],
 		fetchReply: true,
+		allowedMentions: { users: [] },
 	});
 
 	const collector = message.createMessageComponentCollector({

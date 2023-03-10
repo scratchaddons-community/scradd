@@ -277,7 +277,10 @@ export async function gatherTicketInfo(
 }
 
 export default async function startTicket(
-	interaction: ModalSubmitInteraction | ChatInputCommandInteraction<"cached" | "raw">,
+	interaction:
+		| ModalSubmitInteraction
+		| ChatInputCommandInteraction<"cached" | "raw">
+		| ButtonInteraction,
 	options: Category | GuildMember,
 ) {
 	const option = options instanceof GuildMember ? "mod" : options;
@@ -289,9 +292,8 @@ export default async function startTicket(
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	const fields =
-		interaction.type === InteractionType.ApplicationCommand
-			? []
-			: Object.entries(
+		interaction.type === InteractionType.ModalSubmit
+			? Object.entries(
 					{
 						appeal: { "Strike ID": "strike" },
 						report: { "Reported User": "user" },
@@ -306,10 +308,11 @@ export default async function startTicket(
 					name,
 					value: interaction.fields.getTextInputValue(key),
 					inline: true,
-			  }));
+			  }))
+			: [];
 	const body =
 		option !== "role" &&
-		interaction.type !== InteractionType.ApplicationCommand &&
+		interaction.type === InteractionType.ModalSubmit &&
 		interaction.fields.getTextInputValue("BODY");
 
 	const date = new Date();
