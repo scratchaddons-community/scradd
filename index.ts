@@ -14,6 +14,7 @@ import {
 	type ApplicationCommandNumericOptionData,
 	type ApplicationCommandStringOptionData,
 	type Collection,
+	ActivityType,
 } from "discord.js";
 import dotenv from "dotenv";
 
@@ -162,3 +163,14 @@ if (process.env.NODE_ENV === "production") {
 	const { default: log } = await import("./common/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 }
+
+client.user.setPresence({
+	activities: [
+		{
+			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
+			type: ActivityType.Watching,
+			url: "https://discord.gg/FPv957V6SD",
+		},
+	],
+	status: "online",
+});

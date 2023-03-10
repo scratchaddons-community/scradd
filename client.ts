@@ -1,6 +1,6 @@
 import { AssertionError } from "node:assert";
 
-import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 
 import pkg from "./package.json" assert { type: "json" };
 import { sanitizePath } from "./util/files.js";
@@ -39,6 +39,8 @@ const Handler = new Client({
 	],
 
 	ws: { large_threshold: 0 },
+
+	presence: { status: "dnd" },
 });
 
 const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
@@ -83,13 +85,3 @@ if (client.user.tag === "Scradd#5905" && !process.argv.includes("--production"))
 }
 
 export default client;
-
-client.user.setPresence({
-	activities: [
-		{
-			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
-			type: ActivityType.Watching,
-			url: "https://discord.gg/FPv957V6SD",
-		},
-	],
-});
