@@ -1860,7 +1860,7 @@ const command = defineCommand({
 
 						if (componentInteraction.customId.startsWith("guess.")) {
 							await componentInteraction.showModal({
-								title: "Guess the addon!",
+								title: "Guess Addon",
 								customId: "_guessModal",
 
 								components: [

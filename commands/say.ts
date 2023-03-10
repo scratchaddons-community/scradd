@@ -55,12 +55,12 @@ export async function say(
 
 const command = defineCommand({
 	data: {
-		description: "(Mods only) Mimic what you tell me to",
+		description: "(Mods only) Say what you tell me to say",
 
 		options: {
 			message: {
 				type: ApplicationCommandOptionType.String,
-				description: "What to mimic",
+				description: "What to say",
 				maxLength: 2000,
 			},
 		},
@@ -77,7 +77,7 @@ const command = defineCommand({
 		}
 
 		await interaction.showModal({
-			title: `/${interaction.command?.name}`,
+			title: `Say Message`,
 			customId: "_say",
 
 			components: [

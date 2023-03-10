@@ -15,7 +15,7 @@ import giveXp, { DEFAULT_XP } from "../common/xp.js";
 
 const command = defineCommand({
 	data: {
-		description: "(Mod only) Warns a user",
+		description: "(Mods only) Warns a user",
 		restricted: true,
 
 		options: {
