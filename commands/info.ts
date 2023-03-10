@@ -201,14 +201,9 @@ function getConfig() {
 	return [
 		{
 			title: "Configuration",
+			description: "**CHANNELS**",
 
 			fields: [
-				{
-					name: CONSTANTS.zeroWidthSpace,
-					value: "**CHANNELS**",
-					inline: false,
-				},
-
 				...Object.entries(CONSTANTS.channels).map((channel) => ({
 					name: `${channel[0]
 						.split("_")
@@ -220,11 +215,13 @@ function getConfig() {
 					value: channel[1]?.toString() ?? "*None*",
 					inline: true,
 				})),
-				{
-					name: CONSTANTS.zeroWidthSpace,
-					value: "**ROLES**",
-					inline: false,
-				},
+			],
+
+			color: CONSTANTS.themeColor,
+		},
+		{
+			description: "**ROLES**",
+			fields: [
 				...Object.entries(CONSTANTS.roles)
 					.filter(
 						(role): role is [typeof role[0], Role | undefined] =>
