@@ -90,7 +90,6 @@ async function getConstants() {
 			},
 		},
 
-		robotop: "323630372531470346",
 		testingServer: await client.guilds.fetch("938438560925761619").catch(() => {}),
 
 		roles: {

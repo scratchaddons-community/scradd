@@ -53,7 +53,7 @@ const old = CONSTANTS.channels.old_suggestions
 						) ?? suggestionAnswers[0],
 
 					author:
-						(message.author.id === CONSTANTS.robotop
+						(message.author.id === "323630372531470346"
 							? message.embeds[0]?.footer?.text.split(": ")[1]
 							: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
 									?.groups?.userId) ?? message.author,
