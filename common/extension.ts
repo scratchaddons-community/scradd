@@ -1,10 +1,6 @@
-import dns from "dns";
-
 import CONSTANTS from "./CONSTANTS.js";
 
 import type AddonManifest from "./types/addonManifest.js";
-
-dns.setDefaultResultOrder("ipv4first"); // TODO: move elsewhere
 
 export const manifest = await fetch(`${CONSTANTS.urls.saSource}/manifest.json`).then(
 	async (response) => await response.json<chrome.runtime.Manifest>(),

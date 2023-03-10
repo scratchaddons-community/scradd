@@ -26,6 +26,7 @@ import type Event from "./common/types/event.js";
 import type { ClientEvent } from "./common/types/event.js";
 
 dotenv.config();
+dns.setDefaultResultOrder("ipv4first");
 
 const { default: client } = await import("./client.js");
 const { default: logError } = await import("./util/logError.js");
