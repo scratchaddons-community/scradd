@@ -83,6 +83,8 @@ export function caesar(text: string, rot = 13) {
  * @returns A pingable version of {@link text}.
  */
 export function pingablify(text: string) {
+	text = text.normalize("NFD");
+	if (/^[\p{Diacritic}]+$/gu.test(text)) return `{pingable name} ${truncateText(text, 10)}`;
 	const regex = /[^\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]/gu;
 	const segments = Array.from(new Intl.Segmenter().segment(text));
 	const pingable =
@@ -91,7 +93,7 @@ export function pingablify(text: string) {
 
 	return pingable && /[\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>?-]{4,}/u.test(text)
 		? text
-		: text.replaceAll(regex, "") || `[pingable name] ${truncateText(text, 10)}`;
+		: text.replaceAll(regex, "") || `{pingable name} ${truncateText(text, 10)}`;
 }
 
 /**
@@ -105,10 +107,7 @@ export function normalize(text: string) {
 	return text
 		.toLowerCase()
 		.normalize("NFD")
-		.replace(
-			/[\p{Diacritic}\u00AD\u034F\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F]/gu,
-			"",
-		);
+		.replace(/[\p{Diacritic}]/gu, "");
 }
 
 /**
