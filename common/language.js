@@ -32,9 +32,8 @@ const badWords = [
 		],
 		[
 			/intva(?:f|l|n|r|y)+/,
-			/(?:urzv ?)?crav(?:f?rf|yr)?/,
+			/(?:urzv ?)?crav(?:(?:[yf]r)?f)?/,
 			/nahf(?:rf)?/,
-			/frzra/,
 			/(?:c(?:bfg|er) ?)?phz/,
 			/pyvg/,
 			/gvg(?:(?:gvr)?f)?/,
@@ -82,7 +81,7 @@ const badWords = [
 			/fyhg/,
 			/fur ?znyr/,
 			/shqtr ?cnpxr/,
-			/ergneq/,
+			/ergneq(?!ant)/,
 		],
 		[
 			/tbbx(?:f|l)?/,
@@ -112,7 +111,7 @@ function decodeRegexes(regexes) {
 				// eslint-disable-next-line @redguy12/no-character-class -- It’s OK to use a character class here.
 				/[ a-z]/gi,
 				(letter) =>
-					`[${
+					`[${letter}${
 						{
 							" ": "^w",
 							"a": "⒜@*⍺₳4aａⓐAＡᵃₐᴬåǟÃąẚᴀɐɑɒαΑΔΛаАคภᎪᗅᗩꓮ",
@@ -175,7 +174,7 @@ function decodeRegexes(regexes) {
 							// "}": "}｝❵",
 							// "~": "⁓~∼",
 						}[letter] || ""
-					}${letter}]`,
+					}]`,
 			),
 		)
 		.join("|");
