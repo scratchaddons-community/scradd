@@ -36,9 +36,9 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 
 	const logs = [];
 	if (oldThread.archived !== newThread.archived)
-		logs.push(
-			` ${newThread.archived ? `closed${newThread.locked ? " and locked" : ""}` : "opened"}`,
-		);
+		logs.push(` ${newThread.archived ? "closed" : "opened"}`);
+	if (oldThread.locked !== newThread.locked)
+		logs.push(` ${newThread.locked ? "locked" : "unlocked"}`);
 
 	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
 		logs.push(
