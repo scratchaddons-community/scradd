@@ -50,6 +50,27 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 		}
 	}
 
+	if (
+		message.interaction?.commandName === "poll" &&
+		message.embeds[0]?.footer?.text &&
+		user.id !== client.user.id
+	) {
+		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
+		const isPollEmoji = emojis?.includes(emoji.name ?? "");
+		if (isPollEmoji) {
+			message.reactions
+				.valueOf()
+				.find(
+					(otherReaction) =>
+						otherReaction.emoji.name &&
+						otherReaction.emoji.name !== emoji.name &&
+						emojis?.includes(otherReaction.emoji.name) &&
+						otherReaction.users.resolve(user.id),
+				)
+				?.users.remove(user);
+		}
+	}
+
 	// Ignore when it’s the wrong emoji
 	if (emoji.name === BOARD_EMOJI) {
 		if (
