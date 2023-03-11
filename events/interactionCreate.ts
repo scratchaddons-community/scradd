@@ -150,21 +150,18 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 					: `/${interaction.command?.name}`
 				: `${interaction.constructor.name}: ${interaction.customId}`,
 		);
-		if (interaction.deferred && Number(interaction.createdAt) - Date.now() < 900_000) {
-			return await interaction.editReply({
+
+		if (interaction.deferred || interaction.replied) {
+			await interaction.followUp({
+				ephemeral: true,
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
-				embeds: [],
-				components: [],
-				files: [],
+			});
+		} else if (Number(interaction.createdAt) - Date.now() < 3000) {
+			await interaction.reply({
+				ephemeral: true,
+				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 			});
 		}
-
-		if (!interaction.replied && Number(interaction.createdAt) - Date.now() > 3000) return;
-
-		await interaction[interaction.replied ? "followUp" : "reply"]({
-			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
-		});
 	}
 };
 
