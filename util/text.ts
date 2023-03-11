@@ -51,7 +51,7 @@ export function joinWithAnd(array: any[], callback = (item: any) => item.toStrin
  * @returns The truncated string.
  */
 export function truncateText(text: string, maxLength: number): string {
-	const firstLine = text.replaceAll(/\s+/g, " ");
+	const firstLine = (text.split("\n")[0] ?? text).replaceAll(/\s+/g, " ");
 	const segments = Array.from(new Intl.Segmenter().segment(firstLine), ({ segment }) => segment);
 
 	return segments.length > maxLength || text.includes("\n")
