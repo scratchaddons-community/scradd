@@ -208,6 +208,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆"))
 		await react("🦆");
 	if (content === "radio") await react("📻");
+	if (content.match(/^fr+\b/)) await react("🇫🇷");
 	if (content === "agreed") await react(CONSTANTS.emojis.autoreact.mater);
 	if (includes(/te[rw]+a+/) || /👉\s*👈/.test(message.content))
 		await react(CONSTANTS.emojis.autoreact.tera);
