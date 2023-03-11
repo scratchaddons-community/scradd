@@ -30,7 +30,7 @@
 		"serialize-error": "11.0.0"
 	},
 	"devDependencies": {
-		"@railway/cli": "2.1.0",
+		"@railway/cli": "3.0.12",
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "latest",
