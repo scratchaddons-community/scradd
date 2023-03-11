@@ -24,6 +24,9 @@ jobs:
             - name: Install
               run: npm ci --force
 
+            - name: Link
+              run: npx railway link b8b10332-30c2-4b72-8999-78c69ddcd63a
+
             - name: Deploy
               run: npx railway up --detach
               env:
