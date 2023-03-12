@@ -25,7 +25,7 @@ jobs:
               run: npm ci --force
 
             - name: Link
-              run: npx railway link --enviroment production b8b10332-30c2-4b72-8999-78c69ddcd63a
+              run: npx railway link --environment production b8b10332-30c2-4b72-8999-78c69ddcd63a
               env:
                   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
