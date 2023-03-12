@@ -230,7 +230,7 @@ setInterval(async () => {
 		toPostpone: Reminder[];
 	}>(
 		(acc, reminder) => {
-			acc[reminder.date - Date.now() < 30_000 ? "toSend" : "toPostpone"].push(reminder);
+			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
 			return acc;
 		},
 		{ toSend: [], toPostpone: [] },
@@ -299,7 +299,7 @@ setInterval(async () => {
 				.catch(() => {});
 		}),
 	);
-}, 60_000);
+}, 120_000);
 
 export enum SpecialReminders {
 	Weekly,
