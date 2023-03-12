@@ -197,7 +197,8 @@ function parseTime(time: string): Date {
 	const number = Number(time);
 
 	if (!isNaN(number)) {
-		if (number > Date.now()) return new Date(number);
+		if (number > 1_000_000_000_000) return new Date(number);
+		else if (number > 1_000_000_000) return new Date(number * 1_000);
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 
