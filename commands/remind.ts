@@ -34,7 +34,7 @@ const command = defineCommand({
 		options: {
 			dms: {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Whether to send the reminder in DMs instead of the current channel",
+				description: "Whether to send the reminder in DMs instead of the current channel (defaults to true)",
 			},
 			time: {
 				type: ApplicationCommandOptionType.String,
@@ -52,7 +52,7 @@ const command = defineCommand({
 	},
 
 	async interaction(interaction) {
-		const dms = interaction.options.getBoolean("dms") ?? false;
+		const dms = interaction.options.getBoolean("dms") ?? true;
 		const reminder = interaction.options.getString("reminder", true);
 
 		if (!dms && !badWordsAllowed(interaction.channel)) {
