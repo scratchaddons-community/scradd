@@ -47,7 +47,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	if (
 		message.interaction?.commandName === "bump" &&
-		message.interaction.user.id === "302050872383242240"
+		message.author.id === "302050872383242240"
 	) {
 		remindersDatabase.data = [
 			...remindersDatabase.data,
