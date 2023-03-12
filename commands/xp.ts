@@ -149,8 +149,8 @@ async function getUserRank(
 	const paddingPixels = 0.18 * canvas.height;
 	context.fillRect(0, 0, rectangleSize, canvas.height);
 	context.font = `${canvas.height * 0.9}px Sora`;
-	context.fillStyle = "#000c";
 	if (progress < 0.145) {
+		context.fillStyle = "#666";
 		context.textAlign = "end";
 		context.fillText(
 			progress.toLocaleString([], {
@@ -161,6 +161,7 @@ async function getUserRank(
 			canvas.height - paddingPixels,
 		);
 	} else {
+		context.fillStyle = "#0009";
 		context.fillText(
 			progress.toLocaleString([], {
 				maximumFractionDigits: 1,
