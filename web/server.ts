@@ -103,6 +103,6 @@ http.createServer((request, response) => {
 	} catch (error) {
 		response.writeHead(500).end(error.name + ": " + error.message);
 	}
-}).listen(3000, () => {
+}).listen(process.env.PORT, () => {
 	console.log("Server up!");
 });
