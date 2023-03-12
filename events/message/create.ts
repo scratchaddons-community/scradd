@@ -200,7 +200,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 	}
 
 	// Server jokes
-	if (includes(/taco(?:d(?:ude|iva))?/, false)) await react(CONSTANTS.emojis.autoreact.bob);
+	if (includes(/taco(?:d(?:ude|iva))?/, false)) await react(CONSTANTS.emojis.autoreact.taco);
 	if (includes("bob", false)) await react(CONSTANTS.emojis.autoreact.bob);
 	if (content.includes("( ∘)つ")) await react(CONSTANTS.emojis.autoreact.sxd);
 	if (includes("doost", false) || includes("dooster"))
