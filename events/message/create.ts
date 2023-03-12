@@ -45,10 +45,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	if (await automodMessage(message)) return;
 
-	if (
-		message.interaction?.commandName === "bump" &&
-		message.author.id === "302050872383242240"
-	) {
+	if (message.interaction?.commandName === "bump" && message.author.id === "302050872383242240") {
 		remindersDatabase.data = [
 			...remindersDatabase.data,
 			{
