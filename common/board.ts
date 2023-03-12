@@ -60,7 +60,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
 		{
-			[CONSTANTS.channels.info?.id || ""]: COUNTS.misc,
+			[CONSTANTS.channels.info?.id || ""]: COUNTS.info,
 			"866028754962612294": COUNTS.misc, // The Cache
 		}[baseChannel.parent?.id || ""] ||
 		COUNTS.default
