@@ -614,7 +614,9 @@ export async function paginate<Item>(
 					footer: {
 						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
 							CONSTANTS.footerSeperator
-						}${array.length} ${array.length === 1 ? singular : plural}`,
+						}${array.length.toLocaleString()} ${
+							array.length === 1 ? singular : plural
+						}`,
 					},
 
 					author: format
