@@ -1,4 +1,4 @@
-import { escapeMarkdown, hyperlink } from "discord.js";
+import { escapeMarkdown, escapeMaskedLink, hyperlink } from "discord.js";
 
 /**
  * Escape text for use in a link’s display or in a message sent by a webhook.
@@ -50,39 +50,9 @@ export function stripMarkdown(text) {
  * @param {string | undefined} tooltipText - The tooltip text.
  *
  * @returns {string} - The link.
- *
- * @todo Just use escapeMaskedLink (waiting on https://github.com/discordjs/discord.js/pull/8944)
  */
 export function generateTooltip(channel, display, tooltipText) {
 	return tooltipText
-		? hyperlink(
-				escapeMarkdown(display, {
-					codeBlock: false,
-					inlineCode: false,
-					bold: false,
-					italic: false,
-					underline: false,
-					strikethrough: false,
-					spoiler: false,
-					codeBlockContent: false,
-					inlineCodeContent: false,
-					escape: false,
-					maskedLink: true,
-				}),
-				channel?.url || "",
-				tooltipText,
-		  )
-		: escapeMarkdown(display, {
-				codeBlock: false,
-				inlineCode: false,
-				bold: false,
-				italic: false,
-				underline: false,
-				strikethrough: false,
-				spoiler: false,
-				codeBlockContent: false,
-				inlineCodeContent: false,
-				escape: false,
-				maskedLink: true,
-		  });
+		? hyperlink(escapeMaskedLink(display), channel?.url || "", tooltipText)
+		: escapeMaskedLink(display);
 }
