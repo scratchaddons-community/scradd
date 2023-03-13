@@ -366,14 +366,14 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
 		}
 
-		// case MessageType.RoleSubscriptionPurchase: {
-		// 	// TODO: figure out how the message looks like for is_renewal: true
-		// 	const totalMonths = message.roleSubscriptionData?.totalMonthsSubscribed;
-		// 	const months = `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
-		// 	return `${message.author.toString()} joined ${
-		// 		message.member?.roleSubscriptionData.tierName
-		// 	} and has been a subscriber of ${message.guild} for ${months}!`;
-		// }
+		case MessageType.RoleSubscriptionPurchase: {
+			// TODO: figure out how the message looks like for is_renewal: true
+			const totalMonths = message.roleSubscriptionData?.totalMonthsSubscribed;
+			const months = `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
+			return `${message.author.toString()} joined ${
+				message.roleSubscriptionData?.tierName
+			} and has been a subscriber of ${message.guild} for ${months}!`;
+		}
 
 		case MessageType.StageStart: {
 			return `${CONSTANTS.emojis.discord.stageLive} ${message.author.toString()} started **${
