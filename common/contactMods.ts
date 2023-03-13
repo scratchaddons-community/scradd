@@ -328,7 +328,6 @@ export default async function startTicket(
 		type: ChannelType.PrivateThread,
 		invitable: false,
 	});
-	await thread?.setLocked(true, "Ticket opened");
 	await CONSTANTS.channels.modlogs?.send(`🔴 Ticket ${thread?.toString()} opened`);
 
 	const strikes = strikeDatabase.data
