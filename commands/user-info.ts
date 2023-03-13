@@ -23,8 +23,10 @@ const command = defineCommand({
 	},
 
 	async interaction(interaction) {
-		const rawMember = interaction.options.getMember("user") ?? interaction.member;
 		const user = await (interaction.options.getUser("user") ?? interaction.user).fetch();
+		const rawMember =
+			interaction.options.getMember("user") ??
+			(user.id === interaction.user.id ? interaction.member : undefined);
 		const member = rawMember instanceof GuildMember ? rawMember : undefined;
 		const isMod =
 			CONSTANTS.roles.mod &&
