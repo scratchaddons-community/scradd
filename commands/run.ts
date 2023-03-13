@@ -46,9 +46,10 @@ const command = defineCommand({
 
 	modals: {
 		async run(interaction) {
+			await interaction.deferReply()
 			const code = interaction.fields.getTextInputValue("code");
 			try {
-				await interaction.reply({
+				await interaction.editReply({
 					files: [
 						{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 						{
@@ -61,7 +62,7 @@ const command = defineCommand({
 					],
 				});
 			} catch (error) {
-				await interaction.reply({
+				await interaction.editReply({
 					files: [
 						{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 						{
