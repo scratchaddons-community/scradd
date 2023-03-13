@@ -36,10 +36,10 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 	if (
 		message.channel.parent?.id === CONSTANTS.channels.suggestions?.id &&
 		message.channel.isThread() &&
-		(await message.channel.fetchStarterMessage())?.id === message.id
+		message.channel.id === message.id
 	) {
 		const defaultEmoji = CONSTANTS.channels.suggestions?.defaultReactionEmoji;
-		if (defaultEmoji?.id === emoji.id || defaultEmoji?.name === emoji.name) {
+		if ([defaultEmoji?.id, defaultEmoji?.name].includes(reaction.emoji.valueOf())) {
 			suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>
 				suggestion.id === message.id
 					? { ...suggestion, count: reaction.count }
@@ -56,15 +56,14 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 		user.id !== client.user.id
 	) {
 		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
-		const isPollEmoji = emojis?.includes(emoji.name ?? "");
+		const isPollEmoji = emojis?.includes(emoji.valueOf());
 		if (isPollEmoji) {
 			message.reactions
 				.valueOf()
 				.find(
 					(otherReaction) =>
-						otherReaction.emoji.name &&
-						otherReaction.emoji.name !== emoji.name &&
-						emojis?.includes(otherReaction.emoji.name) &&
+						otherReaction.emoji.valueOf() !== emoji.valueOf() &&
+						emojis?.includes(otherReaction.emoji.valueOf()) &&
 						otherReaction.users.resolve(user.id),
 				)
 				?.users.remove(user);

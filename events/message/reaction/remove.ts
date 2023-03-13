@@ -15,9 +15,9 @@ const event: Event<"messageReactionRemove"> = async function event(partialReacti
 	const defaultEmoji = CONSTANTS.channels.suggestions?.defaultReactionEmoji;
 	if (
 		message.channel.parent?.id === CONSTANTS.channels.suggestions?.id &&
-		(defaultEmoji?.id === reaction.emoji.id || defaultEmoji?.name === reaction.emoji.name) &&
+		[defaultEmoji?.id, defaultEmoji?.name].includes(reaction.emoji.valueOf()) &&
 		message.channel.isThread() &&
-		(await message.channel.fetchStarterMessage())?.id === message.id
+		message.channel.id === message.id
 	) {
 		suggestionsDatabase.data = suggestionsDatabase.data.map((suggestion) =>
 			suggestion.id === message.id ? { ...suggestion, count: reaction.count } : suggestion,

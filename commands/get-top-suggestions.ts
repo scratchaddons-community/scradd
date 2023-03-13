@@ -117,17 +117,17 @@ const command = defineCommand({
 						),
 				)
 				.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
-			async ({ answer, author, count, title, ...id }) =>
+			async ({ answer, author, count, title, ...ref }) =>
 				`**${count}** ${
-					"url" in id
+					"url" in ref
 						? "👍"
 						: suggestions?.defaultReactionEmoji?.name ??
-						  `<:${suggestions?.defaultReactionEmoji?.name}:${suggestions?.defaultReactionEmoji?.id}>`
+						  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 				} ${hyperlink(
 					escapeLinks(title),
-					"url" in id
-						? id.url
-						: `https://discord.com/channels/${CONSTANTS.guild.id}/${id.id}/${id.id}`,
+					"url" in ref
+						? ref.url
+						: `https://discord.com/channels/${CONSTANTS.guild.id}/${ref.id}/${ref.id}`,
 					answer,
 				)}${
 					nick
