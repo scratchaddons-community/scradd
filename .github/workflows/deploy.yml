@@ -36,5 +36,5 @@ jobs:
 
             - name: Clean DB listeners
               run:
-                  curl https://sa-discord.up.railway.app/cleanDatabaseListeners?auth=${{
+                  curl https://sa-discord.up.railway.app/clean-database-listeners?auth=${{
                   secrets.CDBL_AUTH }}

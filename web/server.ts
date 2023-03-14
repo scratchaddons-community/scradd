@@ -36,7 +36,7 @@ http.createServer((request, response) => {
 		}
 
 		switch (requestUrl.pathname) {
-			case "/cleanDatabaseListeners": {
+			case "/clean-database-listeners": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
 				else {
