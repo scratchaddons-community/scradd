@@ -64,7 +64,6 @@ async function textChannelMatches(
 		}
 
 		default: {
-			// It’s a DM, stage, directory, non-matching thread, non-matching VC, or an unimplemented channel type.
 			return false;
 		}
 	}
@@ -78,17 +77,6 @@ const command = defineCommand({
 
 		options: {
 			"channel": {
-				channelTypes: [
-					ChannelType.GuildText,
-					ChannelType.GuildVoice,
-					ChannelType.GuildCategory,
-					ChannelType.GuildAnnouncement,
-					ChannelType.AnnouncementThread,
-					ChannelType.PublicThread,
-					ChannelType.PrivateThread,
-					ChannelType.GuildForum,
-				],
-
 				description: "Filter messages to only get those in a certain channel",
 				type: ApplicationCommandOptionType.Channel,
 			},
@@ -110,18 +98,12 @@ const command = defineCommand({
 		const minReactions = interaction.options.getInteger("minimum-reactions") ?? undefined;
 		const user = interaction.options.getUser("user")?.id;
 		const channel = interaction.options.getChannel("channel") ?? undefined;
-		await makeSlideshow(interaction, {
-			minReactions,
-			user,
-			channel,
-		});
+		await makeSlideshow(interaction, { minReactions, user, channel });
 	},
 
 	buttons: {
 		async explorePotatoes(interaction, userId) {
-			await makeSlideshow(interaction, {
-				user: userId,
-			});
+			await makeSlideshow(interaction, { user: userId });
 		},
 	},
 });
