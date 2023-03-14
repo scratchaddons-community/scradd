@@ -65,10 +65,7 @@ export default async function changeNickname(member, shouldWarn = true) {
 	}
 
 	const members = (
-		await CONSTANTS.guild.members.fetch({
-			query: member.displayName,
-			limit: 100,
-		})
+		await CONSTANTS.guild.members.fetch({ query: member.displayName, limit: 100 })
 	).filter((found) => found.displayName === member.displayName);
 
 	if (members.size > 1) {

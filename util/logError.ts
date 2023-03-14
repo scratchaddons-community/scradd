@@ -61,10 +61,7 @@ export default async function logError(
 			"server",
 			{
 				files: [
-					{
-						attachment: Buffer.from(generateError(error), "utf8"),
-						name: "error.json",
-					},
+					{ attachment: Buffer.from(generateError(error), "utf8"), name: "error.json" },
 				],
 			},
 		);

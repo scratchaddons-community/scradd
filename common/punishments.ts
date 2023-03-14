@@ -143,13 +143,7 @@ export default async function warn(
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
-		{
-			user: user.id,
-			id,
-			date: Date.now(),
-			count: strikes,
-			removed: false,
-		},
+		{ user: user.id, id, date: Date.now(), count: strikes, removed: false },
 	];
 
 	const totalStrikeCount = oldStrikeCount + strikes;
@@ -332,11 +326,7 @@ export async function getStrikeById(
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{
-						name: "⚠ Count",
-						value: String(strike.count),
-						inline: true,
-					},
+					{ name: "⚠ Count", value: String(strike.count), inline: true },
 					...(moderator
 						? [
 								{

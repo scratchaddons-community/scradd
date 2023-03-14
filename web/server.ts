@@ -30,9 +30,7 @@ http.createServer((request, response) => {
 				}
 
 				response
-					.writeHead(200, {
-						"Content-Type": mime.lookup(resolved) || "text/plain",
-					})
+					.writeHead(200, { "Content-Type": mime.lookup(resolved) || "text/plain" })
 					.end(file);
 			});
 		}

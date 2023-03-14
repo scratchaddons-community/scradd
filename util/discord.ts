@@ -42,13 +42,7 @@ import { generateHash, truncateText } from "./text.js";
  */
 export function extractMessageExtremities(
 	message: Message,
-	censor?: (text: string) =>
-		| false
-		| {
-				censored: string;
-				strikes: number;
-				words: string[][];
-		  },
+	censor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
 ): { embeds: APIEmbed[]; files: Attachment[] } {
 	const embeds = [
 		...message.stickers

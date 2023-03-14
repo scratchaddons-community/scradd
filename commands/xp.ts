@@ -153,20 +153,14 @@ async function getUserRank(
 		context.fillStyle = "#666";
 		context.textAlign = "end";
 		context.fillText(
-			progress.toLocaleString([], {
-				maximumFractionDigits: 1,
-				style: "percent",
-			}),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			canvas.width - paddingPixels,
 			canvas.height - paddingPixels,
 		);
 	} else {
 		context.fillStyle = "#0009";
 		context.fillText(
-			progress.toLocaleString([], {
-				maximumFractionDigits: 1,
-				style: "percent",
-			}),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			paddingPixels,
 			canvas.height - paddingPixels,
 		);

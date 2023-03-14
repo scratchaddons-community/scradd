@@ -218,9 +218,10 @@ const command = defineCommand({
 					case "confirm": {
 						const sliced = filtered.slice(start, deleteTo);
 						await channel?.bulkDelete(sliced);
-						await buttonInteraction.reply( `${CONSTANTS.emojis.statuses.yes} Purged ${
-								sliced.length
-							} message${sliced.length === 1 ? "" : "s"}!`
+						await buttonInteraction.reply(
+							`${CONSTANTS.emojis.statuses.yes} Purged ${sliced.length} message${
+								sliced.length === 1 ? "" : "s"
+							}!`,
 						);
 						collector.stop();
 						return;

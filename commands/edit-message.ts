@@ -157,10 +157,7 @@ const command = defineCommand({
 			}
 
 			if (extraDiff) {
-				files.push({
-					attachment: Buffer.from(extraDiff, "utf8"),
-					name: "extra.diff",
-				});
+				files.push({ attachment: Buffer.from(extraDiff, "utf8"), name: "extra.diff" });
 			}
 
 			if (files.length > 0) {

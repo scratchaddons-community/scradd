@@ -96,10 +96,7 @@ await boardDatabase.init();
  */
 export async function generateBoardMessage(
 	info: typeof boardDatabase.data[number] | Message,
-	extraButtons: {
-		pre?: APIButtonComponent[];
-		post?: APIButtonComponent[];
-	} = {},
+	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
 ): Promise<BaseMessageOptions | undefined> {
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;

@@ -161,18 +161,9 @@ export const ticketCategoryMessage = {
 							{ label: "Report a user", value: "report" },
 							{ label: "Request a role", value: "role" },
 							{ label: "Report a Scradd bug", value: "bug" },
-							{
-								label: "Suggest a server change",
-								value: "update",
-							},
-							{
-								label: "Get clarification on a rule",
-								value: "rules",
-							},
-							{
-								label: "Get help with Scratch Addons",
-								value: "sa",
-							},
+							{ label: "Suggest a server change", value: "update" },
+							{ label: "Get clarification on a rule", value: "rules" },
+							{ label: "Get help with Scratch Addons", value: "sa" },
 							{ label: "Other", value: "other" },
 						] as const),
 					],
@@ -266,13 +257,8 @@ export async function gatherTicketInfo(
 
 	await interaction.showModal({
 		title: `Contact Mods - ${categoryToDescription[option]}`,
-
 		customId: `${option}_contactMods`,
-
-		components: fields.map((field) => ({
-			type: ComponentType.ActionRow,
-			components: [field],
-		})),
+		components: fields.map((field) => ({ type: ComponentType.ActionRow, components: [field] })),
 	});
 }
 
@@ -393,19 +379,11 @@ export default async function startTicket(
 
 				color: member.displayColor,
 
-				author: {
-					icon_url: member.displayAvatarURL(),
-					name: member.displayName,
-				},
+				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 				...(body
 					? fields.length === 0
 						? { description: body }
-						: {
-								fields: [
-									...fields,
-									{ name: CONSTANTS.zeroWidthSpace, value: body },
-								],
-						  }
+						: { fields: [...fields, { name: CONSTANTS.zeroWidthSpace, value: body }] }
 					: { fields }),
 			},
 			{

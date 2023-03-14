@@ -103,13 +103,7 @@ const command = defineCommand({
 
 		remindersDatabase.data = [
 			...remindersDatabase.data,
-			{
-				channel,
-				date: +date,
-				reminder,
-				user: interaction.user.id,
-				setAt: Date.now(),
-			},
+			{ channel, date: +date, reminder, user: interaction.user.id, setAt: Date.now() },
 		];
 
 		await interaction.reply({
@@ -260,10 +254,7 @@ setInterval(async () => {
 							`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`,
 						).then(
 							async (response) =>
-								await response?.json<{
-									count: number;
-									_chromeCountDate: string;
-								}>(),
+								await response?.json<{ count: number; _chromeCountDate: string }>(),
 						);
 
 						return await channel?.setName(
