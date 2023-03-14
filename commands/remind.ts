@@ -283,9 +283,7 @@ setInterval(async () => {
 			}
 			if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
 			const silent = reminder.reminder.startsWith("@silent");
-			const content = silent
-				? reminder.reminder.replace("@silent", "")
-				: reminder.reminder;
+			const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
 			await channel
 				.send({
 					content: `🔔 ${
