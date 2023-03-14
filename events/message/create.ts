@@ -129,9 +129,9 @@ const event: Event<"messageCreate"> = async function event(message) {
 	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
 
 	if (
-		((userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.dad ?? false) &&
-			content.match(/^i['"`‘’“”]?m\b/) &&
-			CONSTANTS.channels.modlogs?.id !== baseChannel?.id) ||
+		(userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.dad ?? false) &&
+		content.match(/^i['"`‘’“”]?m\b/) &&
+		CONSTANTS.channels.modlogs?.id !== baseChannel?.id &&
 		CONSTANTS.channels.info?.id !== baseChannel?.parent?.id
 	) {
 		const name =
