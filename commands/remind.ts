@@ -4,6 +4,7 @@ import {
 	ChannelType,
 	ComponentType,
 	GuildMember,
+	MessageFlags,
 	Snowflake,
 	time,
 	TimestampStyles,
@@ -280,13 +281,21 @@ setInterval(async () => {
 					}
 				}
 			}
-			if (!channel?.isTextBased()) return;
+			if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
+			const silent = reminder.reminder.startsWith("@silent");
+			const content = silent
+				? reminder.reminder.replace("@silent", "")
+				: reminder.reminder;
 			await channel
 				.send({
-					content: `🔔 ${channel.isDMBased() ? "" : `<@${reminder.user}> `}${
-						reminder.reminder
-					} (from ${time(new Date(reminder.setAt), TimestampStyles.RelativeTime)})`,
+					content: `🔔 ${
+						channel.isDMBased() ? "" : `<@${reminder.user}> `
+					}${content.trim()} (from ${time(
+						new Date(reminder.setAt),
+						TimestampStyles.RelativeTime,
+					)})`,
 					allowedMentions: { users: [reminder.user] },
+					flags: MessageFlags.SuppressNotifications,
 				})
 				.catch(() => {});
 		}),
