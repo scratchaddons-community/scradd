@@ -297,7 +297,7 @@ export default async function updateBoard(message: Message) {
 		}),
 	);
 	const pins = await board?.messages.fetchPinned();
-	if (pins.size > 5) {
+	if (pins.size > top.length) {
 		await Promise.all(
 			pins
 				.filter((pin) => !topIds.includes(pin.id))
