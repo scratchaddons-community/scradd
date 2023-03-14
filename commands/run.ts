@@ -46,7 +46,7 @@ const command = defineCommand({
 
 	modals: {
 		async run(interaction) {
-			await interaction.deferReply()
+			await interaction.deferReply();
 			const code = interaction.fields.getTextInputValue("code");
 			try {
 				await interaction.editReply({

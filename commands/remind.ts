@@ -34,7 +34,8 @@ const command = defineCommand({
 		options: {
 			dms: {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Whether to send the reminder in DMs instead of the current channel (defaults to true)",
+				description:
+					"Whether to send the reminder in DMs instead of the current channel (defaults to true)",
 			},
 			time: {
 				type: ApplicationCommandOptionType.String,
