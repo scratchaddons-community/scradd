@@ -1059,30 +1059,21 @@ const command = defineCommand({
 							{
 								type: ComponentType.ActionRow,
 
-								components:
-									typeof backInfo === "object"
-										? [
-												{
-													type: ComponentType.Button,
-													label: "Back",
-													style: ButtonStyle.Secondary,
-													customId: generateHash("back"),
-												},
-												{
-													type: ComponentType.Button,
-													label: "No it’s not, continue!",
-													style: ButtonStyle.Primary,
-													customId: generateHash("continue"),
-												},
-										  ]
-										: [
-												{
-													type: ComponentType.Button,
-													label: "No it’s not, continue!",
-													style: ButtonStyle.Primary,
-													customId: generateHash("continue"),
-												},
-										  ],
+								components: [
+									{
+										type: ComponentType.Button,
+										label: "Back",
+										style: ButtonStyle.Secondary,
+										customId: generateHash("back"),
+										disabled: typeof backInfo !== "object",
+									},
+									{
+										type: ComponentType.Button,
+										label: "No it’s not, continue!",
+										style: ButtonStyle.Primary,
+										customId: generateHash("continue"),
+									},
+								],
 							},
 						],
 
@@ -1428,30 +1419,21 @@ const command = defineCommand({
 							{
 								type: ComponentType.ActionRow,
 
-								components:
-									typeof backInfo === "object"
-										? [
-												{
-													type: ComponentType.Button,
-													label: "Back",
-													style: ButtonStyle.Secondary,
-													customId: generateHash("back"),
-												},
-												{
-													type: ComponentType.Button,
-													label: "End",
-													style: ButtonStyle.Secondary,
-													customId: generateHash("end"),
-												},
-										  ]
-										: [
-												{
-													type: ComponentType.Button,
-													label: "End",
-													style: ButtonStyle.Secondary,
-													customId: generateHash("end"),
-												},
-										  ],
+								components: [
+									{
+										type: ComponentType.Button,
+										label: "Back",
+										style: ButtonStyle.Secondary,
+										customId: generateHash("back"),
+										disabled: typeof backInfo !== "object",
+									},
+									{
+										type: ComponentType.Button,
+										label: "End",
+										style: ButtonStyle.Secondary,
+										customId: generateHash("end"),
+									},
+								],
 							},
 						],
 

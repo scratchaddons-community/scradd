@@ -149,18 +149,15 @@ async function makeSlideshow(
 
 		const reply = info
 			? await generateBoardMessage(info, {
-					pre:
-						index > 0
-							? [
-									{
-										custom_id: previousId,
-										label: "<< Previous",
-										style: ButtonStyle.Primary,
-										type: ComponentType.Button,
-									},
-							  ]
-							: [],
-
+					pre: [
+						{
+							custom_id: previousId,
+							label: "<< Previous",
+							style: ButtonStyle.Primary,
+							type: ComponentType.Button,
+							disabled: index <= 0,
+						},
+					],
 					post: [
 						{
 							custom_id: nextId,
@@ -173,23 +170,21 @@ async function makeSlideshow(
 			: ({
 					allowedMentions: { users: [] },
 
-					components:
-						index > 0
-							? [
-									{
-										components: [
-											{
-												customId: previousId,
-												label: "<< Previous",
-												style: ButtonStyle.Primary,
-												type: ComponentType.Button,
-											},
-										],
+					components: [
+						{
+							components: [
+								{
+									customId: previousId,
+									label: "<< Previous",
+									style: ButtonStyle.Primary,
+									type: ComponentType.Button,
+									disabled: index <= 0,
+								},
+							],
 
-										type: ComponentType.ActionRow,
-									},
-							  ]
-							: [],
+							type: ComponentType.ActionRow,
+						},
+					],
 
 					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
 
