@@ -63,12 +63,13 @@ const command = defineCommand({
 		if (member)
 			fields.push({
 				name: "Roles",
-				value: member?.roles
-					.valueOf()
-					.sorted((one, two) => two.comparePositionTo(one))
-					.filter((role) => role.id !== CONSTANTS.guild.id)
-					.toJSON()
-					.join(" "),
+				value:
+					member?.roles
+						.valueOf()
+						.sorted((one, two) => two.comparePositionTo(one))
+						.filter((role) => role.id !== CONSTANTS.guild.id)
+						.toJSON()
+						.join(" ") || "*No roles*",
 				inline: false,
 			});
 
