@@ -6,6 +6,7 @@ import {
 	TextInputStyle,
 	ButtonStyle,
 	chatInputApplicationCommandMention,
+	MessageFlags,
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -22,7 +23,13 @@ export async function say(
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
 	content: string,
 ): Promise<void> {
-	const message = await interaction.channel?.send(content);
+	const silent = content.startsWith("@silent");
+	content = silent ? content.replace("@silent", "").trim() : content;
+
+	const message = await interaction.channel?.send({
+		content,
+		flags: MessageFlags.SuppressNotifications,
+	});
 
 	if (message) {
 		await log(
