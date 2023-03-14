@@ -126,6 +126,43 @@ const event: Event<"messageCreate"> = async function event(message) {
 		);
 	}
 
+	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
+
+	if (
+		(userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.dad ?? false) &&
+		content.match(/^i['"`‘’“”]?m\b/)&&
+		CONSTANTS.channels.modlogs?.id !== baseChannel?.id ||
+		CONSTANTS.channels.info?.id !== baseChannel?.parent?.id 
+	) {
+		const name =
+			content.split(
+				/[៚๛๚܌܊፨៕។။၊॥।·｡。᙮᠉᠃።܂܁۔﹒．.‽᥅፧܉؟⁇⁈﹖？?᥄⁉‼﹗！!᛭᛬᛫៖᠅᠄፦፥፤፣፡܈܇܆܅܄܃։﹕：:؛﹔；;;､﹑、᠈᠂،﹐，,\s]+/gm,
+			)[1] ?? "";
+		const capitalized = (name[0] ?? "").toUpperCase() + name.slice(1);
+		const greetings = [
+			"Hey",
+			"Hi",
+			"Hello",
+			"Yo",
+			"Ayy,",
+			"Howdy",
+			"Greetings",
+			"Salutations",
+			"Hiya",
+			"Aloha",
+			"Hola",
+			"Bonjour",
+			"Whattup",
+			"👋",
+		];
+		if (capitalized)
+			await message.reply({
+				content: `${
+					greetings[Math.floor(Math.random() * greetings.length)]
+				} ${capitalized}${Math.random() > 0.5 ? "!" : ","} I’m Scradd!`,
+			});
+	}
+
 	// Autoreactions start here.
 
 	const REACTION_CAP = 2;
@@ -163,8 +200,6 @@ const event: Event<"messageCreate"> = async function event(message) {
 		)
 	)
 		return;
-
-	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
 
 	/**
 	 * Determines whether the message contains a word.

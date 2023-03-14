@@ -10,7 +10,7 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
-import { xpDatabase } from "../common/xp.js";
+import { weeklyXpDatabase } from "../common/xp.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -23,7 +23,8 @@ export const userSettingsDatabase = new Database<{
 	weeklyPings: boolean;
 	/** Whether to automatically react to their messages with random emojis. */
 	autoreactions: boolean;
-	useMentions: boolean;
+	useMentions?: boolean;
+	dad?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -58,6 +59,11 @@ const command = defineCommand({
 				description:
 					"Enable using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
 			},
+			"dad": {
+				type: ApplicationCommandOptionType.Boolean,
+
+				description: "You know what this is.",
+			},
 		},
 	},
 
@@ -69,13 +75,13 @@ const command = defineCommand({
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
 				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
 				weeklyPings: interaction.options.getBoolean("weekly-pings") ?? undefined,
+				dad: interaction.options.getBoolean("dad") ?? undefined,
 			}),
 		);
 	},
 	buttons: {
-		async toggleOption(interaction, option) {
-			if (!option) throw new ReferenceError("Can not toggle no option");
-			await interaction.reply(updateOptions(interaction.user, { [option]: "toggle" }));
+		async toggleOption(interaction, option = "") {
+			await interaction.message.edit(updateOptions(interaction.user, { [option]: "toggle" }));
 		},
 	},
 });
@@ -89,6 +95,7 @@ export function updateOptions(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		weeklyPings?: boolean | "toggle";
+		dad?: boolean | "toggle";
 	},
 ) {
 	const settingsForUser = userSettingsDatabase.data.find((settings) => settings.user === user.id);
@@ -99,9 +106,10 @@ export function updateOptions(
 		levelUpPings: settingsForUser?.levelUpPings ?? process.env.NODE_ENV === "production",
 		useMentions:
 			settingsForUser?.useMentions ??
-			(xpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 ||
-				xpDatabase.data.length) < 100,
+			(weeklyXpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 ||
+				weeklyXpDatabase.data.length) < 30,
 		weeklyPings: settingsForUser?.weeklyPings ?? process.env.NODE_ENV === "production",
+		dad: settingsForUser?.weeklyPings ?? false,
 	};
 	const autoreactions =
 			options.autoreactions === "toggle"
@@ -122,7 +130,8 @@ export function updateOptions(
 		weeklyPings =
 			options.weeklyPings === "toggle"
 				? !old.weeklyPings
-				: options.weeklyPings ?? old.weeklyPings;
+				: options.weeklyPings ?? old.weeklyPings,
+		dad = options.dad === "toggle" ? !old.dad : options.dad ?? old.dad;
 
 	userSettingsDatabase.data = settingsForUser
 		? userSettingsDatabase.data.map((data) =>
@@ -134,6 +143,7 @@ export function updateOptions(
 							weeklyPings,
 							autoreactions,
 							useMentions,
+							dad,
 					  }
 					: data,
 		  )
@@ -146,6 +156,7 @@ export function updateOptions(
 					weeklyPings,
 					autoreactions,
 					useMentions,
+					dad,
 				},
 		  ];
 
@@ -175,6 +186,11 @@ export function updateOptions(
 						label: "Weekly Winner Pings",
 						style: ButtonStyle[weeklyPings ? "Success" : "Danger"],
 					},
+				],
+			},
+			{
+				type: ComponentType.ActionRow,
+				components: [
 					{
 						customId: "autoreactions_toggleOption",
 						type: ComponentType.Button,
@@ -186,6 +202,12 @@ export function updateOptions(
 						type: ComponentType.Button,
 						label: "Use Mentions",
 						style: ButtonStyle[useMentions ? "Success" : "Danger"],
+					},
+					{
+						customId: "dad_toggleOption",
+						type: ComponentType.Button,
+						label: "Dad",
+						style: ButtonStyle[dad ? "Success" : "Danger"],
 					},
 				],
 			},
