@@ -403,7 +403,7 @@ export default async function startTicket(
 						: {
 								fields: [
 									...fields,
-									{ name: CONSTANTS.zeroWidthSpace, value: body, inline: false },
+									{ name: CONSTANTS.zeroWidthSpace, value: body },
 								],
 						  }
 					: { fields }),

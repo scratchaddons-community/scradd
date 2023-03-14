@@ -21,7 +21,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 			message.author.id === client.user?.id
 				? message
 				: await thread.send({
-						...(await extractMessageExtremities(message)),
+						...extractMessageExtremities(message),
 						content: message.content,
 				  });
 	}

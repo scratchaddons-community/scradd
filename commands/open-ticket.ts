@@ -151,11 +151,11 @@ async function contactUser(
 			if (buttonInteraction.customId.startsWith("confirm-")) {
 				const thread = await startTicket(interaction, member);
 				if (thread)
-					await buttonInteraction.reply({
-						content: `${
+					await buttonInteraction.reply(
+						`${
 							CONSTANTS.emojis.statuses.yes
 						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-					});
+					);
 			} else {
 				await buttonInteraction.deferUpdate();
 			}

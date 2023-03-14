@@ -59,7 +59,6 @@ const command = defineCommand({
 						{
 							customId: "json2",
 							label: "JSON #2 (concatenated with the above)",
-							required: false,
 							style: TextInputStyle.Paragraph,
 							type: ComponentType.TextInput,
 							value: pre[1],

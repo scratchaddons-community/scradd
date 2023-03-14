@@ -151,8 +151,6 @@ export function updateOptions(
 
 	return {
 		ephemeral: true,
-		fetchReply: true,
-
 		content: `${CONSTANTS.emojis.statuses.yes} Updated your settings!`,
 
 		components: [

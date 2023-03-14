@@ -46,7 +46,7 @@ const command = defineCommand({
 	async interaction(interaction) {
 		switch (interaction.options.getSubcommand(true)) {
 			case "status": {
-				const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
+				const message = await interaction.reply("Pinging…");
 
 				await interaction.editReply({
 					content: "",
