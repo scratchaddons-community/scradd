@@ -2,6 +2,7 @@ import difflib from "difflib";
 import {
 	ChannelType,
 	escapeMarkdown,
+	ForumLayoutType,
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
@@ -107,8 +108,8 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 						[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 						[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 						[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-					}[newChannel.defaultAutoArchiveDuration || ThreadAutoArchiveDuration.OneDay]
-				}` || newChannel.defaultAutoArchiveDuration,
+					}[newChannel.defaultAutoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay]
+				}`,
 			);
 	}
 
@@ -136,16 +137,22 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 
 		if (oldChannel.defaultSortOrder !== newChannel.defaultSortOrder)
 			edits.push(
-				`’s sort order was ${
-					newChannel.defaultSortOrder
-						? `set to ${
-								{
-									[SortOrderType.CreationDate]: "Creation Time",
-									[SortOrderType.LatestActivity]: "Recent Activity",
-								}[newChannel.defaultSortOrder]
-						  }`
-						: "unset"
+				`’s sort order was set to ${
+					{
+						[SortOrderType.CreationDate]: "Creation Time",
+						[SortOrderType.LatestActivity]: "Recent Activity",
+					}[newChannel.defaultSortOrder ?? SortOrderType.LatestActivity]
 				}`,
+			);
+
+		if (oldChannel.defaultForumLayout !== newChannel.defaultForumLayout)
+			edits.push(
+				`’s default layout was set to ${
+					{
+						[ForumLayoutType.ListView]: "List",
+						[ForumLayoutType.GalleryView]: "Gallery",
+					}[newChannel.defaultForumLayout || ForumLayoutType.ListView]
+				} View`,
 			);
 	}
 
