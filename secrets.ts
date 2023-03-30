@@ -1,5 +1,5 @@
 export function dad(name: string, _: string) {
-	return `Hi ${name}!I’m Scradd!`;
+	return `Hi ${name}! I’m Scradd!`;
 }
 
 /**
@@ -16,3 +16,5 @@ export const autoreactions: [
 ][] = [];
 
 export const isAprilFools = false;
+
+export const warnAF = "";
