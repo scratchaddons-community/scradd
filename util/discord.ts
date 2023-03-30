@@ -441,10 +441,17 @@ export async function messageToText(message: Message, replies = true): Promise<s
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
-): Promise<MessageReaction[]> {
+): Promise<MessageReaction[] | void> {
 	const messageReactions = [];
 	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
-	for (const reaction of reactions) messageReactions.push(await message.react(reaction));
+	for (const reaction of reactions) {
+		try {
+			const messageReaction = await message.react(reaction);
+			messageReactions.push(messageReaction);
+		} catch {
+			return;
+		}
+	}
 	return messageReactions;
 }
 
@@ -522,7 +529,7 @@ export async function paginate<Item>(
 		rawOffset?: number;
 		itemsPerPage?: number;
 		showIndexes?: boolean;
-		generateComponents?: (items: Item[]) => MessageActionRowComponentData[];
+		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
 		disableCustomComponents?: boolean;
 	},
 ): Promise<void> {
@@ -591,10 +598,12 @@ export async function paginate<Item>(
 				: [];
 
 		if (generateComponents) {
-			components.push({
-				type: ComponentType.ActionRow,
-				components: generateComponents(filtered),
-			});
+			const extraComponents = generateComponents(filtered);
+			if (extraComponents?.length)
+				components.push({
+					type: ComponentType.ActionRow,
+					components: extraComponents,
+				});
 		}
 
 		return {

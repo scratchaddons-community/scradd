@@ -62,6 +62,7 @@ const command = defineCommand({
 							style: TextInputStyle.Paragraph,
 							type: ComponentType.TextInput,
 							value: pre[1],
+							required: false,
 						},
 					],
 
@@ -162,7 +163,7 @@ const command = defineCommand({
 
 			if (files.length > 0) {
 				await log(
-					`✏ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}!`,
+					`✏️ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}!`,
 					"messages",
 					{
 						components: [

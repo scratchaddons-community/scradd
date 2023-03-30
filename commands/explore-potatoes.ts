@@ -124,7 +124,7 @@ async function makeSlideshow(
 	await interaction.deferReply();
 	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
-		data.sort(() => Math.random() - 0.5),
+		[...data].sort(() => Math.random() - 0.5),
 		async (message) =>
 			message.reactions >= minReactions &&
 			(user ? message.user === user : true) &&

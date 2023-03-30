@@ -34,31 +34,19 @@ const command = defineCommand({
 				? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
 				: interaction.member.roles.includes(CONSTANTS.roles.mod.id));
 
-		const emptyColumn = {
-			name: CONSTANTS.zeroWidthSpace,
-			value: CONSTANTS.zeroWidthSpace,
-			inline: true,
-		};
-
 		const fields = [{ name: "ID", value: user.id, inline: true }];
 		if (member?.nickname)
 			fields.push({ name: "Nickname", value: member.nickname, inline: true });
-		fields.push(
-			member?.voice.channel
-				? {
-						name: "Voice Channel",
-						value:
-							member.voice.channel?.toString() +
-							`${member.voice.mute ? CONSTANTS.emojis.discord.muted + " " : ""}${
-								member.voice.deaf ? CONSTANTS.emojis.discord.deafened + " " : ""
-							}${
-								member.voice.streaming ? CONSTANTS.emojis.discord.streaming : ""
-							}`.trim(),
-						inline: true,
-				  }
-				: emptyColumn,
-		);
-		if (!member?.nickname) fields.push(emptyColumn);
+		if (member?.voice.channel)
+			fields.push({
+				name: "Voice Channel",
+				value:
+					member.voice.channel?.toString() +
+					`${member.voice.mute ? CONSTANTS.emojis.discord.muted + " " : ""}${
+						member.voice.deaf ? CONSTANTS.emojis.discord.deafened + " " : ""
+					}${member.voice.streaming ? CONSTANTS.emojis.discord.streaming : ""}`.trim(),
+				inline: true,
+			});
 
 		if (member)
 			fields.push({
@@ -90,28 +78,24 @@ const command = defineCommand({
 					  }
 					: { name: "Banned", value: "Yes", inline: true },
 			);
-		fields.push(
-			member?.joinedAt
-				? {
-						name: "Joined Server",
-						value: time(member.joinedAt, TimestampStyles.RelativeTime),
-						inline: true,
-				  }
-				: emptyColumn,
-			member?.premiumSince
-				? {
-						name: "Boosted Server",
-						value: time(member.premiumSince, TimestampStyles.RelativeTime),
-						inline: true,
-				  }
-				: emptyColumn,
-		);
+		if (member?.joinedAt)
+			fields.push({
+				name: "Joined Server",
+				value: time(member.joinedAt, TimestampStyles.RelativeTime),
+				inline: true,
+			});
+		if (member?.premiumSince)
+			fields.push({
+				name: "Boosted Server",
+				value: time(member.premiumSince, TimestampStyles.RelativeTime),
+				inline: true,
+			});
 
 		await interaction.reply({
 			embeds: [
 				{
 					color: member?.displayColor,
-					// image: user.bannerURL() ?? user.accentColor,
+					// TODO // image: user.bannerURL() ?? user.accentColor,
 					thumbnail: { url: (member ?? user).displayAvatarURL() },
 					fields,
 					author: {
@@ -132,16 +116,18 @@ const command = defineCommand({
 				{
 					type: ComponentType.ActionRow,
 					components: [
-						...(isMod
-							? [
-									{
-										customId: `${user.id}_contactUser`,
-										style: ButtonStyle.Secondary,
-										type: ComponentType.Button,
-										label: "Open Ticket",
-									} as const,
-							  ]
-							: []),
+						{
+							customId: `${user.id}_xp`,
+							style: ButtonStyle.Secondary,
+							type: ComponentType.Button,
+							label: "View XP",
+						},
+						{
+							customId: `${user.id}_explorePotatoes`,
+							style: ButtonStyle.Secondary,
+							type: ComponentType.Button,
+							label: "Explore Potatoes",
+						},
 						...(user.id == interaction.user.id || isMod
 							? [
 									{
@@ -152,18 +138,18 @@ const command = defineCommand({
 									} as const,
 							  ]
 							: []),
-						{
-							customId: `${user.id}_explorePotatoes`,
-							style: ButtonStyle.Secondary,
-							type: ComponentType.Button,
-							label: "Explore Potatoes",
-						},
-						{
-							customId: `${user.id}_xp`,
-							style: ButtonStyle.Secondary,
-							type: ComponentType.Button,
-							label: "View XP",
-						},
+						...(member &&
+						isMod &&
+						CONSTANTS.channels.contact?.permissionsFor(member)?.has("ViewChannel")
+							? [
+									{
+										customId: `${user.id}_contactUser`,
+										style: ButtonStyle.Secondary,
+										type: ComponentType.Button,
+										label: "Open Ticket",
+									} as const,
+							  ]
+							: []),
 					],
 				},
 			],

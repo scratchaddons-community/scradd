@@ -72,8 +72,8 @@ function transformOptions(options: { [key: string]: Option }) {
 			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
 			if (option.minLength !== undefined) transformed.minLength = option.minLength;
 
-			if (option.maxValue !== undefined) transformed.max = option.maxValue;
-			if (option.minValue !== undefined) transformed.min = option.minValue;
+			if (option.maxValue !== undefined) transformed.maxValue = option.maxValue;
+			if (option.minValue !== undefined) transformed.minValue = option.minValue;
 
 			return transformed as
 				| ApplicationCommandAutocompleteNumericOptionData

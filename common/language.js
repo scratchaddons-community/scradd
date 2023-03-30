@@ -1,101 +1,9 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
+import badWords from "../badWords.js";
 
 import { getBaseChannel } from "../util/discord.js";
 import { caesar, normalize } from "../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "./punishments.js";
-
-/**
- * The index of each array determines how many strikes the word gives.
- *
- * The second sub-array is for words that must be surrounded by a word boundary.
- *
- * All words are ROT13-encoded.
- *
- * @type {[RegExp[], RegExp[]][]}
- */
-const badWords = [
-	[
-		[
-			/cbea/,
-			/grfgvpyr/,
-			/fpuzhpx/,
-			/erpghz/,
-			/ihyin/,
-			/🖕/,
-			/卐/,
-			/卍/,
-			/lvss/,
-			/ahg ?fnpx/,
-			/rwnphyngr/,
-			/znfg(?:h|r)eong/,
-			/ohgg ?cvengr/,
-		],
-		[
-			/intva(?:f|l|n|r|y)+/,
-			/(?:urzv ?)?crav(?:(?:[yf]r)?f)?/,
-			/nahf(?:rf)?/,
-			/(?:c(?:bfg|er) ?)?phz/,
-			/pyvg/,
-			/gvg(?:(?:gvr)?f)?/,
-			/chff(?:l|vrf)/,
-			/fpebghz/,
-			/ynovn/,
-			/preivk/,
-			/ubeal/,
-			/obaref?/,
-			/fcrez/,
-		],
-	],
-	[
-		[
-			/fuv+r*g(?!nx(?:r|v))/,
-			/fcyb+tr/,
-			/oybj ?wbo/,
-			/shpx/,
-			/qvyqb/,
-			/xhxfhtre/,
-			/dhrrs/,
-			/wnpx ?bss/,
-			/wrex ?bss/,
-			/ovg?pu/,
-			/ubeal/,
-		],
-		[
-			/wvm+z?/,
-			/(?:ovt ?)?qvp?xr?(?: ?(?:q|l|evat|ef?|urnqf?|vre?|vat|f|jnqf?))?/,
-			/(?:8|o)=+Q/,
-			/fzhg+(?:e|fg?|l|vr)?/,
-			/pbpx(?: ?svtug|fhpx|(?:fhpx|svtug)(?:re|vat)|znafuvc|hc)?f?/,
-			/onfgneq(?:vfz|(?:e|y)?l|evrf|f)?/,
-			/phagf?/,
-			/shx/,
-			/ovg?fu/,
-			/jnax(?:v?ref?|v(?:at|rfg)|yr|f|l)?/,
-		],
-	],
-	[
-		[
-			/puvat ?(?:punat ?)?puba/,
-			/xvxr/,
-			/pnecrg ?zhapure/,
-			/fyhg/,
-			/fur ?znyr/,
-			/shqtr ?cnpxr/,
-			/ergneq(?!ant)/,
-		],
-		[
-			/tbbx(?:f|l)?/,
-			/yrfobf?/,
-			/fcvpf?/,
-			/j?uber/,
-			/av+t{2,}(?:(?:h|r)?e|n)(?: ?rq|l|qbz|urnq|vat|vf(?:u|z)|yvat)?f?/,
-			/snv?t+(?:rq|vr(?:e|fg)|va|vg|bgf?|bge?l|l)?f?/,
-			/wnc(?:rq?|r?f|vatf?|crq|cvat|cn)?/,
-		],
-	],
-];
-
-if (process.env.NODE_ENV !== "production") badWords[1]?.[0].push(/nhgbzbqzhgr/);
 
 /**
  * Decodes RegExes to not be rot13’d & to add unicode letter fonts.
@@ -108,7 +16,6 @@ function decodeRegexes(regexes) {
 	return regexes
 		.map(({ source }) =>
 			caesar(source).replaceAll(
-				// eslint-disable-next-line @redguy12/no-character-class -- It’s OK to use a character class here.
 				/[ a-z]/gi,
 				(letter) =>
 					`[${letter}${
@@ -200,7 +107,7 @@ const badWordRegexps = badWords.map(
  *
  * @returns {false | CensoredText} - False if there was nothing to censor, a CensoredText object if there was.
  */
-export default function censor(text) {
+export default function censor(text, remove = 0) {
 	/** @type {string[][]} */
 	const words = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
@@ -221,7 +128,8 @@ export default function censor(text) {
 
 				strikes: words.reduce(
 					(accumulator, current, index) =>
-						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
+						current.length * Math.max(index - remove, PARTIAL_STRIKE_COUNT) +
+						accumulator,
 					0,
 				),
 

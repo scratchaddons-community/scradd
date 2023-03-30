@@ -2,7 +2,9 @@ import { createCanvas, GlobalFonts } from "@napi-rs/canvas";
 import {
 	ApplicationCommandOptionType,
 	ButtonInteraction,
+	ButtonStyle,
 	ChatInputCommandInteraction,
+	ComponentType,
 	User,
 } from "discord.js";
 import path from "node:path";
@@ -16,10 +18,12 @@ import {
 	getXpForLevel,
 	weeklyXpDatabase,
 	xpDatabase as database,
+	xpDatabase,
 } from "../common/xp.js";
+import { isAprilFools } from "../secrets.js";
 import { paginate } from "../util/discord.js";
 import { convertBase, nth } from "../util/numbers.js";
-import { userSettingsDatabase } from "./settings.js";
+import { getSettings } from "./settings.js";
 
 GlobalFonts.registerFromPath(
 	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../../common/sora/font.ttf`),
@@ -52,6 +56,21 @@ const command = defineCommand({
 					},
 				},
 			},
+
+			...(isAprilFools
+				? {
+						tank: {
+							description: "Tank a users’ XP",
+
+							options: {
+								user: {
+									type: ApplicationCommandOptionType.User,
+									description: "User to tank (defaults to you)",
+								},
+							},
+						},
+				  }
+				: {}),
 		},
 	},
 
@@ -59,20 +78,22 @@ const command = defineCommand({
 		const command = interaction.options.getSubcommand(true);
 
 		switch (command) {
+			case "tank": {
+				const user = interaction.options.getUser("user") ?? interaction.user;
+				xpDatabase.data = xpDatabase.data.map((xp) =>
+					xp.user === user.id ? { user: xp.user, xp: xp.xp * -1 } : xp,
+				);
+			}
 			case "rank": {
 				const user = interaction.options.getUser("user") ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
 			}
 			case "top": {
-				const allXp = database.data;
+				const allXp = [...database.data];
 				const top = allXp.sort((one, two) => two.xp - one.xp);
 
 				const user = interaction.options.getUser("user");
-				const useMentions =
-					userSettingsDatabase.data.find(
-						(settings) => interaction.user.id === settings.user,
-					)?.useMentions ?? false;
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
 				if (index === -1) {
 					return await interaction.reply({
@@ -87,8 +108,8 @@ const command = defineCommand({
 				await paginate(
 					top,
 					async (xp) =>
-						`**Level ${getLevelForXp(xp.xp)}** - ${
-							useMentions
+						`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${
+							getSettings(interaction.user).useMentions
 								? `<@${xp.user}>`
 								: (
 										await client.users
@@ -103,6 +124,18 @@ const command = defineCommand({
 						title: `Leaderboard for ${CONSTANTS.guild.name}`,
 						user: interaction.user,
 						rawOffset: index,
+						generateComponents() {
+							return getSettings(interaction.user, false)?.useMentions === undefined
+								? [
+										{
+											customId: "levelUpPings_toggleOption",
+											type: ComponentType.Button,
+											label: "Toggle Mentions",
+											style: ButtonStyle.Success,
+										},
+								  ]
+								: undefined;
+						},
 					},
 				);
 			}
@@ -122,21 +155,21 @@ async function getUserRank(
 	user: User,
 ) {
 	const allXp = database.data;
-	const top = allXp.sort((one, two) => two.xp - one.xp);
+	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
 	const member = await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
-	const level = getLevelForXp(xp);
-	const xpForNextLevel = getXpForLevel(level + 1);
-	const xpForPreviousLevel = getXpForLevel(level);
+	const level = getLevelForXp(Math.abs(xp));
+	const xpForNextLevel = getXpForLevel(level + 1) * (Math.sign(xp) || 1);
+	const xpForPreviousLevel = getXpForLevel(level) * (Math.sign(xp) || 1);
 	const increment = xpForNextLevel - xpForPreviousLevel;
 	const xpGained = xp - xpForPreviousLevel;
 	const progress = xpGained / increment;
 	const rank = top.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank =
-		weeklyXpDatabase.data
-			.sort((one, two) => two.xp - one.xp)
+		[...weeklyXpDatabase.data]
+			.sort(isAprilFools ? (one, two) => one.xp - two.xp : (one, two) => two.xp - one.xp)
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
@@ -179,25 +212,32 @@ async function getUserRank(
 				title: "XP Rank",
 
 				fields: [
-					{ name: "📊 Level", value: level.toLocaleString(), inline: true },
+					{
+						name: "📊 Level",
+						value: (level * Math.sign(xp)).toLocaleString(),
+						inline: true,
+					},
 					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 					{
-						name: "⏲ Weekly rank",
+						name: "⏳ Weekly rank",
 
-						value: weeklyRank
-							? approximateWeeklyRank === 10
-								? "Top 10"
-								: `About ${nth(approximateWeeklyRank - 5, {
-										bold: false,
-										jokes: false,
-								  })}`
-							: "Inactive",
+						value:
+							weeklyRank || isAprilFools
+								? approximateWeeklyRank === 10 && !isAprilFools
+									? "Top 10"
+									: `About ${nth(Math.max(0, approximateWeeklyRank - 5), {
+											bold: false,
+											jokes: false,
+									  })}`
+								: "Inactive",
 
 						inline: true,
 					},
 					{
 						name: CONSTANTS.zeroWidthSpace,
-						value: `**⬆ Next level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
+						value: `**${
+							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
+						} level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 					},
 				],
 

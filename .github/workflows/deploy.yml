@@ -21,6 +21,12 @@ jobs:
                   node-version: "18.12.1"
                   cache: "npm"
 
+            - name: Download bad words
+              run: curl ${{ secrets.BAD_WORDS }} --output badWords.ts
+
+            - name: Download secrets
+              run: curl ${{ secrets.SECRETS }} --output secrets.ts
+
             - name: Install
               run: npm ci --force
 

@@ -255,7 +255,6 @@ export function defineCommand<O extends { [key: string]: { [key: string]: Option
 // >(
 // 	command: ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>,
 // ): ChatInputSubcommandGroups<O, Subcommand, SubcommandGroup>;
-/** @param command */
 export function defineCommand<T extends any>(command: T): T {
 	return command;
 }

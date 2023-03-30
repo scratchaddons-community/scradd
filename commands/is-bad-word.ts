@@ -28,7 +28,7 @@ const command = defineCommand({
 			ephemeral: true,
 
 			content: words
-				? `⚠ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
+				? `⚠️ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
 						CONSTANTS.roles.mod &&
 						(interaction.member instanceof GuildMember
 							? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)

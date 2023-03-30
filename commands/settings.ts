@@ -11,20 +11,21 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
 import { weeklyXpDatabase } from "../common/xp.js";
+import { isAprilFools } from "../secrets.js";
 
-export const userSettingsDatabase = new Database<{
+const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
 	user: Snowflake;
 	/** Whether to ping the user when their message gets on the board. */
-	boardPings: boolean;
+	boardPings?: boolean;
 	/** Whether to ping the user when they level up. */
-	levelUpPings: boolean;
+	levelUpPings?: boolean;
 	/** Whether to ping the user when they are a top poster of the week. */
-	weeklyPings: boolean;
+	weeklyPings?: boolean;
 	/** Whether to automatically react to their messages with random emojis. */
-	autoreactions: boolean;
+	autoreactions?: boolean;
 	useMentions?: boolean;
-	dad?: boolean;
+	dmReminders?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -59,10 +60,9 @@ const command = defineCommand({
 				description:
 					"Enable using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
 			},
-			"dad": {
+			"dm-reminders": {
 				type: ApplicationCommandOptionType.Boolean,
-
-				description: "You know what this is.",
+				description: "Send reminders in your DMs by default",
 			},
 		},
 	},
@@ -75,13 +75,13 @@ const command = defineCommand({
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
 				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
 				weeklyPings: interaction.options.getBoolean("weekly-pings") ?? undefined,
-				dad: interaction.options.getBoolean("dad") ?? undefined,
+				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
 			}),
 		);
 	},
 	buttons: {
 		async toggleOption(interaction, option = "") {
-			await interaction.message.edit(updateOptions(interaction.user, { [option]: "toggle" }));
+			await interaction.reply(updateOptions(interaction.user, { [option]: "toggle" }));
 		},
 	},
 });
@@ -95,70 +95,53 @@ export function updateOptions(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		weeklyPings?: boolean | "toggle";
-		dad?: boolean | "toggle";
+		dmReminders?: boolean | "toggle";
 	},
 ) {
-	const settingsForUser = userSettingsDatabase.data.find((settings) => settings.user === user.id);
+	const settingsForUser = getSettings(user, false);
+	const defaultSettings = getDefaultSettings(user);
 
 	const old = {
-		autoreactions: settingsForUser?.autoreactions ?? true,
-		boardPings: settingsForUser?.boardPings ?? process.env.NODE_ENV === "production",
-		levelUpPings: settingsForUser?.levelUpPings ?? process.env.NODE_ENV === "production",
-		useMentions:
-			settingsForUser?.useMentions ??
-			(weeklyXpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 ||
-				weeklyXpDatabase.data.length) < 30,
-		weeklyPings: settingsForUser?.weeklyPings ?? process.env.NODE_ENV === "production",
-		dad: settingsForUser?.weeklyPings ?? false,
+		autoreactions: settingsForUser?.autoreactions ?? defaultSettings.autoreactions,
+		boardPings: settingsForUser?.boardPings ?? defaultSettings.boardPings,
+		levelUpPings: settingsForUser?.levelUpPings ?? defaultSettings.levelUpPings,
+		useMentions: settingsForUser?.useMentions ?? defaultSettings.useMentions,
+		weeklyPings: settingsForUser?.weeklyPings ?? defaultSettings.weeklyPings,
+		dmReminders: settingsForUser?.dmReminders ?? defaultSettings.dmReminders,
 	};
-	const autoreactions =
-			options.autoreactions === "toggle"
-				? !old.autoreactions
-				: options.autoreactions ?? old.autoreactions,
-		boardPings =
+
+	const updated = {
+		user: user.id,
+		boardPings:
 			options.boardPings === "toggle"
 				? !old.boardPings
-				: options.boardPings ?? old.boardPings,
-		levelUpPings =
+				: options.boardPings ?? settingsForUser?.boardPings,
+		levelUpPings:
 			options.levelUpPings === "toggle"
 				? !old.levelUpPings
-				: options.levelUpPings ?? old.levelUpPings,
-		useMentions =
-			options.useMentions === "toggle"
-				? !old.useMentions
-				: options.useMentions ?? old.useMentions,
-		weeklyPings =
+				: options.levelUpPings ?? settingsForUser?.levelUpPings,
+		weeklyPings:
 			options.weeklyPings === "toggle"
 				? !old.weeklyPings
-				: options.weeklyPings ?? old.weeklyPings,
-		dad = options.dad === "toggle" ? !old.dad : options.dad ?? old.dad;
+				: options.weeklyPings ?? settingsForUser?.weeklyPings,
+		autoreactions:
+			options.autoreactions === "toggle"
+				? !old.autoreactions
+				: options.autoreactions ?? settingsForUser?.autoreactions,
+		useMentions:
+			options.useMentions === "toggle"
+				? !old.useMentions
+				: options.useMentions ?? settingsForUser?.useMentions,
+
+		dmReminders:
+			options.dmReminders === "toggle"
+				? !old.dmReminders
+				: options.dmReminders ?? settingsForUser?.dmReminders,
+	};
 
 	userSettingsDatabase.data = settingsForUser
-		? userSettingsDatabase.data.map((data) =>
-				data.user === user.id
-					? {
-							user: data.user,
-							boardPings,
-							levelUpPings,
-							weeklyPings,
-							autoreactions,
-							useMentions,
-							dad,
-					  }
-					: data,
-		  )
-		: [
-				...userSettingsDatabase.data,
-				{
-					user: user.id,
-					boardPings,
-					levelUpPings,
-					weeklyPings,
-					autoreactions,
-					useMentions,
-					dad,
-				},
-		  ];
+		? userSettingsDatabase.data.map((data) => (data.user === user.id ? updated : data))
+		: [...userSettingsDatabase.data, updated];
 
 	return {
 		ephemeral: true,
@@ -172,19 +155,19 @@ export function updateOptions(
 						customId: "boardPings_toggleOption",
 						type: ComponentType.Button,
 						label: "Board Pings",
-						style: ButtonStyle[boardPings ? "Success" : "Danger"],
+						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
 					},
 					{
 						customId: "levelUpPings_toggleOption",
 						type: ComponentType.Button,
 						label: "Level Up Pings",
-						style: ButtonStyle[levelUpPings ? "Success" : "Danger"],
+						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 					},
 					{
 						customId: "weeklyPings_toggleOption",
 						type: ComponentType.Button,
-						label: "Weekly Winner Pings",
-						style: ButtonStyle[weeklyPings ? "Success" : "Danger"],
+						label: `Weekly ${isAprilFools ? "Loser" : "Winner"}s Pings`,
+						style: ButtonStyle[updated.weeklyPings ? "Success" : "Danger"],
 					},
 				],
 			},
@@ -195,22 +178,75 @@ export function updateOptions(
 						customId: "autoreactions_toggleOption",
 						type: ComponentType.Button,
 						label: "Autoreactions",
-						style: ButtonStyle[autoreactions ? "Success" : "Danger"],
+						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
 					},
 					{
 						customId: "useMentions_toggleOption",
 						type: ComponentType.Button,
 						label: "Use Mentions",
-						style: ButtonStyle[useMentions ? "Success" : "Danger"],
+						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 					{
-						customId: "dad_toggleOption",
+						customId: "dmReminders_toggleOption",
 						type: ComponentType.Button,
-						label: "Dad",
-						style: ButtonStyle[dad ? "Success" : "Danger"],
+						label: "DM Reminders",
+						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
 					},
 				],
 			},
 		],
 	} satisfies InteractionReplyOptions;
+}
+
+export function getSettings(
+	user: { id: Snowflake },
+	defaults?: true,
+): {
+	boardPings: boolean;
+	levelUpPings: boolean;
+	weeklyPings: boolean;
+	autoreactions: boolean;
+	useMentions: boolean;
+	dmReminders: boolean;
+};
+export function getSettings(
+	user: { id: Snowflake },
+	defaults: false,
+): {
+	boardPings?: boolean;
+	levelUpPings?: boolean;
+	weeklyPings?: boolean;
+	autoreactions?: boolean;
+	useMentions?: boolean;
+	dmReminders?: boolean;
+};
+export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
+	const settings: {
+		boardPings?: boolean;
+		levelUpPings?: boolean;
+		weeklyPings?: boolean;
+		autoreactions?: boolean;
+		useMentions?: boolean;
+		dmReminders?: boolean;
+	} = userSettingsDatabase.data.find((settings) => settings.user === user.id) ?? {};
+	if (defaults) {
+		const defaultSettings = getDefaultSettings(user);
+		for (const setting of Object.keys(defaultSettings)) {
+			if (!Object.prototype.hasOwnProperty.call(defaultSettings, setting)) return;
+			if (settings[setting] === undefined) settings[setting] = defaultSettings[setting];
+		}
+	}
+	return settings;
+}
+
+export function getDefaultSettings(user: { id: Snowflake }) {
+	return {
+		autoreactions: true,
+		dmReminders: true,
+		boardPings: process.env.NODE_ENV === "production",
+		levelUpPings: process.env.NODE_ENV === "production",
+		useMentions:
+			(weeklyXpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 || 30) < 30,
+		weeklyPings: process.env.NODE_ENV === "production",
+	};
 }

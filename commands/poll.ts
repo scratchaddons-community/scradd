@@ -10,9 +10,8 @@ import { defineCommand } from "../common/types/command.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
 
-const DEFAULT_THUMBS = ["👍", "👎"];
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
-const DEFAULT_VALUES = ["Yes", "No"];
+const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
 
 const command = defineCommand({
 	data: {
@@ -50,7 +49,7 @@ const command = defineCommand({
 						label: `Option #${i + 1}`,
 						required: true,
 						style: TextInputStyle.Short,
-						value: optionCount < DEFAULT_VALUES.length ? DEFAULT_VALUES[i] : undefined,
+						value: optionCount <= DEFAULT_VALUES.length ? DEFAULT_VALUES[i] : undefined,
 					},
 				],
 			} satisfies ActionRowData<ModalActionRowComponentData>);
@@ -90,11 +89,7 @@ const command = defineCommand({
 				{ customReactions: [], options: [] },
 			);
 			const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
-			const reactions =
-				(options.length < 3 &&
-					customReactions.some((emoji): emoji is undefined => !emoji) &&
-					DEFAULT_THUMBS.slice(0, options.length + 1)) ||
-				customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
+			const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
 
 			const message = await interaction.reply({
 				embeds: [

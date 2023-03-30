@@ -15,7 +15,7 @@ import { defineCommand } from "../common/types/command.js";
 import pkg from "../package.json" assert { type: "json" };
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import { userSettingsDatabase } from "./settings.js";
+import { getSettings } from "./settings.js";
 
 /**
  * Get all users with a role.
@@ -46,7 +46,7 @@ const command = defineCommand({
 	async interaction(interaction) {
 		switch (interaction.options.getSubcommand(true)) {
 			case "status": {
-				const message = await interaction.reply("Pinging…");
+				const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
 				await interaction.editReply({
 					content: "",
@@ -126,9 +126,7 @@ const command = defineCommand({
 				break;
 			}
 			case "credits": {
-				const useMentions = userSettingsDatabase.data.find(
-					(settings) => interaction.user.id === settings.user,
-				)?.useMentions;
+				const useMentions = getSettings(interaction.user).useMentions;
 
 				await interaction.reply({
 					embeds: [

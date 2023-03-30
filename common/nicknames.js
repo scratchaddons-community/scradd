@@ -1,6 +1,7 @@
 import { joinWithAnd, pingablify } from "../util/text.js";
 import CONSTANTS from "./CONSTANTS.js";
 import censor from "./language.js";
+import log from "./logging.js";
 import warn from "./punishments.js";
 
 const NICKNAME_RULE = 8;
@@ -21,10 +22,9 @@ async function setNickname(member, newNickname, reason = `To comply with rule ${
 		return await member.setNickname(newNickname, reason);
 	}
 
-	await CONSTANTS.channels.modlogs?.send({
-		allowedMentions: { users: [] },
-		content: `⚠ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason}).`,
-	});
+	await log(
+		`⚠️ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason}).`,
+	);
 
 	return false;
 }
@@ -40,27 +40,14 @@ export default async function changeNickname(member, shouldWarn = true) {
 
 	if (censored) {
 		await setNickname(member, pingablify(censored.censored));
-		if (shouldWarn) {
+		if (shouldWarn)
 			await warn(member, "Watch your language!", censored.strikes, member.displayName);
-		} else {
-			await member
-				.send(
-					`${CONSTANTS.emojis.statuses.no} I censored some bad words in your username. If you change your nickname to include bad words, you may be warned.`,
-				)
-				.catch(() => {});
-		}
 	}
 
 	const pingablified = pingablify(member.displayName);
 
 	if (pingablified !== member.displayName) {
 		await setNickname(member, pingablified);
-		await member
-			.send(
-				`⚠ For your information, I automatically removed non-easily-pingable characters from your nickname to comply with rule ${NICKNAME_RULE}. You may change it to something else that’s easily typable on American English keyboards if you dislike what I chose.`,
-			)
-			.catch(() => {});
-
 		return;
 	}
 
@@ -74,25 +61,10 @@ export default async function changeNickname(member, shouldWarn = true) {
 		);
 
 		if (safe.size > 0) {
-			await Promise.all(
-				unsafe
-					.map((found) => [
-						setNickname(found, found.user.username),
-
-						found
-							.send(
-								`⚠ Your nickname conflicted with someone else’s nickname, so I unfortunately had to change it to comply with rule ${NICKNAME_RULE}.`,
-							)
-							.catch(() => {}),
-					])
-					.flat(),
-			);
+			await Promise.all(unsafe.map((found) => setNickname(found, found.user.username)));
 
 			if (safe.size > 1) {
-				await CONSTANTS.channels.modlogs?.send({
-					allowedMentions: { users: [] },
-					content: `⚠ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`,
-				});
+				await log(`⚠️ Conflicting nicknames: ${joinWithAnd(safe.toJSON())}.`);
 			}
 		} else if (
 			unsafe.size > 1 &&
@@ -103,10 +75,7 @@ export default async function changeNickname(member, shouldWarn = true) {
 		}
 
 		if (unsafe.size > 1) {
-			await CONSTANTS.channels.modlogs?.send({
-				allowedMentions: { users: [] },
-				content: `⚠ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`,
-			});
+			await log(`⚠️ Conflicting nicknames: ${joinWithAnd(unsafe.toJSON())}.`);
 		}
 	}
 }

@@ -135,15 +135,14 @@ export default async function automodMessage(message) {
 				...embed.fields.flatMap((field) => [field.name, field.value]),
 			])
 			.reduce((strikes, current) => {
-				const censored = current && censor(current);
+				const censored = current && censor(current, 1);
 
 				if (censored) bad.words.language.push(...censored.words.flat());
 
 				return censored ? Number(strikes) + censored.strikes : strikes;
 			}, /** @type {number | false} */ (false));
 
-	if (typeof embedStrikes === "number")
-		bad.language = (bad.language || 0) + Math.max(embedStrikes - 1, 0);
+	if (typeof embedStrikes === "number") bad.language = (bad.language || 0) + embedStrikes;
 
 	if (toWarn.length > 0) await message.delete();
 	else if (typeof embedStrikes === "number") await message.suppressEmbeds();

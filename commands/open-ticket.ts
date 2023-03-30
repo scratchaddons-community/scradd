@@ -65,8 +65,8 @@ const command = defineCommand({
 			const member = await CONSTANTS.guild.members.fetch(userId);
 			await contactUser(member, interaction);
 		},
-		async appealStrike(interaction) {
-			return await gatherTicketInfo(interaction, "appeal");
+		async appealStrike(interaction, id = "") {
+			return await gatherTicketInfo(interaction, "appeal", id);
 		},
 	},
 

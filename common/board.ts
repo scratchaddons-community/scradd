@@ -9,8 +9,8 @@ import {
 	Snowflake,
 	TextBasedChannel,
 } from "discord.js";
+import { getSettings } from "../commands/settings.js";
 
-import { userSettingsDatabase } from "../commands/settings.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../util/discord.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
@@ -34,7 +34,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 		misc: 5,
 		default: 6,
 		memes: 8,
-		info: 10,
+		info: 12,
 	};
 
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
@@ -59,10 +59,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 			[CONSTANTS.channels.advertise?.id || ""]: COUNTS.memes,
 			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
-		{
-			[CONSTANTS.channels.info?.id || ""]: COUNTS.info,
-			"866028754962612294": COUNTS.misc, // The Cache
-		}[baseChannel.parent?.id || ""] ||
+		{ [CONSTANTS.channels.info?.id || ""]: COUNTS.info }[baseChannel.parent?.id || ""] ||
 		COUNTS.default
 	);
 }
@@ -233,13 +230,9 @@ export default async function updateBoard(message: Message) {
 	} else if (count >= minReactions) {
 		if (!message.author.bot) await giveXp(message.author, message.url);
 
-		const userSettings = userSettingsDatabase.data.find(
-			({ user }) => user === message.author.id,
-		);
-		const pings = userSettings?.boardPings ?? process.env.NODE_ENV === "production";
 		const sentMessage = await board.send({
 			...(await generateBoardMessage(message)),
-			allowedMentions: pings ? undefined : { users: [] },
+			allowedMentions: getSettings(message.author).boardPings ? undefined : { users: [] },
 		});
 
 		if (board.type === ChannelType.GuildAnnouncement) await sentMessage.crosspost();

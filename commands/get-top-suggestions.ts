@@ -14,7 +14,7 @@ import { defineCommand } from "../common/types/command.js";
 import { getAllMessages, paginate } from "../util/discord.js";
 import { escapeLinks } from "../util/markdown.js";
 import { truncateText } from "../util/text.js";
-import { userSettingsDatabase } from "./settings.js";
+import { getSettings } from "./settings.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
@@ -99,9 +99,7 @@ const command = defineCommand({
 		const authorFilter = interaction.options.getMember("user");
 		const answerFilter = interaction.options.getString("answer");
 		const { suggestions } = CONSTANTS.channels;
-		const useMentions =
-			userSettingsDatabase.data.find((settings) => interaction.user.id === settings.user)
-				?.useMentions ?? false;
+		const useMentions = getSettings(interaction.user).useMentions;
 
 		const nick =
 			authorFilter instanceof GuildMember ? authorFilter.displayName : authorFilter?.nick;

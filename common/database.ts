@@ -6,7 +6,6 @@ import client from "../client.js";
 import { extractMessageExtremities } from "../util/discord.js";
 import logError from "../util/logError.js";
 import { getLoggingThread } from "./logging.js";
-import type { ImmutableArray } from "./types/global.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -38,7 +37,7 @@ const contructed: string[] = [];
 export default class Database<Data extends { [key: string]: string | number | boolean | null }> {
 	message: Message<true> | undefined;
 
-	#data: ImmutableArray<Data> | undefined;
+	#data: ReadonlyArray<Data> | undefined;
 
 	#extra: string | undefined;
 
@@ -77,8 +76,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 				);
 			}
 
-			const data =
-				this.#data?.length && papaparse.unparse(Array.from(this.#data || [])).trim();
+			const data = this.#data?.length && papaparse.unparse(Array.from(this.#data)).trim();
 
 			const files = data
 				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]

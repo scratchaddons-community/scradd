@@ -90,7 +90,7 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 
 		if (files.length > 0) {
 			await log(
-				`✏ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
+				`✏️ Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
 					newMessage.id
 				})!`,
 				"messages",

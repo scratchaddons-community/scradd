@@ -94,7 +94,29 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 
 	await Promise.all(
 		logs.map(
-			async (edit) => await log(`📃 Thread ${newThread.toString()}${edit}!`, "channels"),
+			async (edit) =>
+				await log(
+					`📃 Thread ${
+						edit.startsWith(" closed") ? `#${newThread.name}` : newThread.toString()
+					}${edit}!`,
+					"channels",
+					{
+						components: [
+							{
+								components: [
+									{
+										label: "View Thread",
+										type: ComponentType.Button,
+										style: ButtonStyle.Link,
+										url: newThread.url,
+									},
+								],
+
+								type: ComponentType.ActionRow,
+							},
+						],
+					},
+				),
 		),
 	);
 	const censored = censor(newThread.name);

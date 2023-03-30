@@ -75,7 +75,9 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	}
 
 	await CONSTANTS.channels.info?.setName(
-		`Info - ${(CONSTANTS.guild.memberCount - 1).toLocaleString([], {
+		`Info - ${(
+			CONSTANTS.guild.memberCount - (CONSTANTS.guild.memberCount > 1_005 ? 5 : 0)
+		).toLocaleString([], {
 			compactDisplay: "short",
 			maximumFractionDigits: 2,
 			minimumFractionDigits: CONSTANTS.guild.memberCount > 1_000 ? 2 : 0,

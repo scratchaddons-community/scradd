@@ -27,39 +27,6 @@ async function getConstants() {
 		emojis: {
 			statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
 
-			autoreact: {
-				jeffalo: "<:jeffalo:1019771285850554419>",
-				tw: "<:tw:1019771807450026084>",
-				taco: "<a:taco:1083423116547596359>",
-				e: "<:e_:939986562937151518>",
-				griffpatch: "<:griffpatch:938441399936909362>",
-				sus: "<:sus:938548233385414686>",
-				appel: "<:appel:938818517535440896>",
-				cubot: "<:cubot:939336981601722428>",
-				tera: "<:tewwa:938486033274785832>",
-				rick: "<a:rick:962421165295554601>",
-				sxd: "<:sxd:962798819572056164>",
-				nope: "<a:nope:947888617953574912>",
-
-				soa: [
-					"<:soa1:939336189880713287>",
-					"<:soa2:939336229449789510>",
-					"<:soa3:939336281454936095>",
-				],
-
-				snakes: [
-					"<:snakes1:962795689660788819>",
-					"<:snakes2:962795778638762004>",
-					"<:snakes3:962800682061140019>",
-				],
-
-				bob: "<:bob:1001977844894810243>",
-				boost: "<:nitro:1044650827882696805>",
-				wasteof: "<:wasteof:1044651861682176080>",
-				mater: "<:mater:1073805840584282224>",
-				rip: "<:rip:1082693496739201205>",
-			},
-
 			discord: {
 				reply: "<:reply:953046345214750720>",
 				error: "<:error:949439327413358602>",
@@ -160,11 +127,6 @@ async function getConstants() {
 		guild,
 	};
 
-	/**
-	 * @param name
-	 * @param type
-	 * @param matchType
-	 */
 	function getChannel<T extends ChannelType>(
 		name: string,
 		type: T | T[] = [],

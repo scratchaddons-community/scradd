@@ -1,6 +1,5 @@
 import type { Snowflake } from "discord.js";
 
-export type ImmutableArray<T> = Omit<Array<T>, "pop" | "push" | "shift" | "unshift" | "splice">;
 declare global {
 	interface ReadonlyArray<T> {
 		/**
@@ -23,13 +22,22 @@ declare global {
 		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
 		 *   Model (DOM) object.
 		 */
-		entries<T, U extends string>(o: Record<U, T> | ArrayLike<T>): [U, T][];
+		entries<T, U extends PropertyKey>(
+			o: Record<U, T> | ArrayLike<T>,
+		): [U extends number ? `${U}` : U, T][];
 		/**
 		 * Returns an object created by key-value entries for properties and methods.
 		 *
 		 * @param entries An iterable object that contains key-value entries for properties and methods.
 		 */
 		fromEntries<T, U extends PropertyKey>(entries: Iterable<readonly [U, T]>): Record<U, T>;
+		/**
+		 * Returns the names of the enumerable string properties and methods of an object.
+		 *
+		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
+		 *   Model (DOM) object.
+		 */
+		keys<U extends PropertyKey>(entries: Record<U, any>): (U extends number ? `${U}` : U)[];
 	}
 	interface Body {
 		json<T = unknown>(): Promise<T>;

@@ -44,6 +44,7 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 		await thread?.setArchived(true, "Member left");
 	});
 
+	// todo
 	// const allRoles = [...(rolesDatabase.data)];
 	// const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
 

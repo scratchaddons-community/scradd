@@ -12,7 +12,8 @@ import {
 } from "discord.js";
 
 import client from "../client.js";
-import { userSettingsDatabase } from "../commands/settings.js";
+import { getSettings } from "../commands/settings.js";
+import { isAprilFools, warnAF } from "../secrets.js";
 import { GlobalUsersPattern } from "../util/discord.js";
 import { convertBase } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
@@ -37,12 +38,6 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-/**
- * @param user
- * @param reason
- * @param strikes
- * @param contextOrModerator
- */
 export default async function warn(
 	user: import("discord.js").GuildMember | import("discord.js").User,
 	reason: string,
@@ -75,7 +70,7 @@ export default async function warn(
 		(totalVerbalStrikes ? "Too many verbal strikes" : "");
 
 	const logMessage = await log(
-		`⚠ ${user.toString()} ${
+		`⚠️ ${user.toString()} ${
 			displayStrikes
 				? `gained ${displayStrikes} strike${displayStrikes === 1 ? "" : "s"} from`
 				: "verbally warned by"
@@ -99,6 +94,7 @@ export default async function warn(
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
+	if (isAprilFools) await user.send(warnAF).catch(() => {});
 	await user
 		.send({
 			embeds: [
@@ -125,19 +121,21 @@ export default async function warn(
 					},
 				},
 			],
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
+			components: CONSTANTS.channels.contact?.permissionsFor(user)?.has("ViewChannel")
+				? [
 						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Primary,
-							label: "Appeal Strike",
-							custom_id: `${id}_appealStrike`,
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									style: ButtonStyle.Primary,
+									label: "Appeal Strike",
+									custom_id: `${id}_appealStrike`,
+								},
+							],
 						},
-					],
-				},
-			],
+				  ]
+				: [],
 		})
 		.catch(() => {});
 
@@ -149,15 +147,11 @@ export default async function warn(
 	const totalStrikeCount = oldStrikeCount + strikes;
 
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
-		// Ban
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: CONSTANTS.channels.modlogs?.send({
-					allowedMentions: { users: [] },
-					content: `⚠ Missing permissions to ban ${user.toString()}.`,
-			  }));
+			: log(`⚠️ Missing permissions to ban ${user.toString()}.`));
 		return;
 	}
 
@@ -176,13 +170,11 @@ export default async function warn(
 						Date.now(),
 					"Too many strikes",
 			  )
-			: CONSTANTS.channels.modlogs?.send({
-					allowedMentions: { users: [] },
-
-					content: `⚠ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+			: log(
+					`⚠️ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}.`,
-			  }));
+			  ));
 	}
 
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
@@ -206,16 +198,13 @@ export const robotopStrikes = url
 	  )
 	: [];
 
-/** @param filter */
 export async function filterToStrike(filter: string) {
 	if (/^\d{1,4}$/.test(filter)) {
 		const strike = strikeDatabase.data.find((strike) => String(strike.id) === filter);
 		const info = robotopStrikes.find((strike) => String(strike.id) === filter);
 		if (strike && info) return { ...info, ...strike, id: String(info.id) };
 	}
-	const channel = filter.startsWith("0")
-		? CONSTANTS.channels.modlogs
-		: await getLoggingThread("members");
+	const channel = await getLoggingThread(filter.startsWith("0") ? "members" : undefined);
 	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
 
 	const messageFromId = await channel?.messages.fetch(messageId).catch(() => {});
@@ -280,9 +269,7 @@ export async function getStrikeById(
 	const moderator =
 		isModerator && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
-	const useMentions =
-		userSettingsDatabase.data.find((settings) => interactor.id === settings.user)
-			?.useMentions ?? false;
+	const { useMentions } = getSettings(interactor.user);
 	return {
 		components: isModerator
 			? [
@@ -326,7 +313,7 @@ export async function getStrikeById(
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠ Count", value: String(strike.count), inline: true },
+					{ name: "⚠️ Count", value: String(strike.count), inline: true },
 					...(moderator
 						? [
 								{

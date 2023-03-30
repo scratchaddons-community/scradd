@@ -9,7 +9,6 @@ const event: Event<"messageReactionRemove"> = async function event(partialReacti
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	// Ignore other servers
 	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
 
 	const defaultEmoji = CONSTANTS.channels.suggestions?.defaultReactionEmoji;
@@ -24,7 +23,6 @@ const event: Event<"messageReactionRemove"> = async function event(partialReacti
 		);
 	}
 
-	// Ignore when it’s the wrong emoji
 	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
 };
 export default event;

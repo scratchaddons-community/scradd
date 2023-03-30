@@ -12,7 +12,6 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	// Ignore other servers
 	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
@@ -56,32 +55,27 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 		user.id !== client.user.id
 	) {
 		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
-		const isPollEmoji = emojis?.includes(emoji.valueOf());
+		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
 			message.reactions
 				.valueOf()
 				.find(
 					(otherReaction) =>
-						otherReaction.emoji.valueOf() !== emoji.valueOf() &&
-						emojis?.includes(otherReaction.emoji.valueOf()) &&
+						otherReaction.emoji.name !== emoji.name &&
+						emojis?.includes(otherReaction.emoji.name || "") &&
 						otherReaction.users.resolve(user.id),
 				)
 				?.users.remove(user);
 		}
 	}
 
-	// Ignore when it’s the wrong emoji
 	if (emoji.name === BOARD_EMOJI) {
 		if (
-			// If they self-reacted
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
-			// Or if they reacted to a message on the board
 			(message.channel.id === CONSTANTS.channels.board?.id &&
 				message.author.id === client.user.id) ||
-			// Or they reacted to an /explore-potatoes message
 			["explore-potatoes", "explorepotatoes"].includes(message.interaction?.commandName || "")
 		) {
-			// Remove the reaction
 			await reaction.users.remove(user);
 
 			return;

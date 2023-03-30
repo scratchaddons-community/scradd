@@ -28,7 +28,7 @@ export async function say(
 
 	const message = await interaction.channel?.send({
 		content,
-		flags: MessageFlags.SuppressNotifications,
+		flags: silent ? MessageFlags.SuppressNotifications : undefined,
 	});
 
 	if (message) {

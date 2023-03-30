@@ -1,14 +1,7 @@
-import {
-	MessageType,
-	type Message,
-	type EmojiIdentifierResolvable,
-	type Snowflake,
-	ComponentType,
-	ButtonStyle,
-} from "discord.js";
+import { MessageType, type Message, type Snowflake, ComponentType, ButtonStyle } from "discord.js";
 
 import client from "../../client.js";
-import { userSettingsDatabase } from "../../commands/settings.js";
+import { getSettings } from "../../commands/settings.js";
 import automodMessage from "../../common/automod.js";
 import { BOARD_EMOJI } from "../../common/board.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
@@ -18,13 +11,18 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { normalize, truncateText } from "../../util/text.js";
 
 import type Event from "../../common/types/event";
-import { remindersDatabase, SpecialReminders } from "../../commands/remind.js";
+import { remindersDatabase, SpecialReminders } from "../../commands/reminders.js";
+import { autoreactions, dad, isAprilFools } from "../../secrets.js";
 
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
 const event: Event<"messageCreate"> = async function event(message) {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
-	if (message.channel.isDMBased() && message.author.id !== client.user.id)
+	if (
+		message.channel.isDMBased() &&
+		message.author.id !== client.user.id &&
+		CONSTANTS.channels.contact?.permissionsFor(message.author)?.has("ViewChannel")
+	) {
 		return await message.channel.send({
 			content: `Are you trying to contact mods? We now use ${CONSTANTS.channels.contact?.toString()} instead of DMs!`,
 			components: [
@@ -41,6 +39,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 				},
 			],
 		});
+	}
 	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
 
 	if (await automodMessage(message)) return;
@@ -51,7 +50,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 			{
 				channel: "881619501018394725",
 				date: Date.now() + 7260000,
-				reminder: SpecialReminders.Bump,
+				reminder: "",
+				id: SpecialReminders.Bump,
 				setAt: Date.now(),
 				user: client.user.id,
 			},
@@ -68,7 +68,6 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	const baseChannel = getBaseChannel(message.channel);
 
-	// XP
 	if (process.env.NODE_ENV !== "production" || !message.author.bot || message.interaction) {
 		if (!latestMessages[message.channel.id]) {
 			const fetched = await message.channel.messages
@@ -126,58 +125,10 @@ const event: Event<"messageCreate"> = async function event(message) {
 		);
 	}
 
-	const content = stripMarkdown(normalize(message.content).replaceAll(/<.+?>/g, ""));
+	const content = stripMarkdown(normalize(message.content));
 
-	if (
-		(userSettingsDatabase.data.find(({ user }) => user === message.author.id)?.dad ?? false) &&
-		content.match(/^i['"`‘’“”]?m\b/) &&
-		CONSTANTS.channels.modlogs?.id !== baseChannel?.id &&
-		CONSTANTS.channels.info?.id !== baseChannel?.parent?.id
-	) {
-		const name =
-			content.split(
-				/[៚๛๚܌܊፨៕។။၊॥।·｡。᙮᠉᠃።܂܁۔﹒．.‽᥅፧܉؟⁇⁈﹖？?᥄⁉‼﹗！!᛭᛬᛫៖᠅᠄፦፥፤፣፡܈܇܆܅܄܃։﹕：:؛﹔；;;､﹑、᠈᠂،﹐，,\s]+/gm,
-			)[1] ?? "";
-		const capitalized = (name[0] ?? "").toUpperCase() + name.slice(1);
-		const greetings = [
-			"Hey",
-			"Hi",
-			"Hello",
-			"Yo",
-			"Ayy,",
-			"Howdy",
-			"Greetings",
-			"Salutations",
-			"Hiya",
-			"Aloha",
-			"Hola",
-			"Bonjour",
-			"Whattup",
-			"👋",
-		];
-		if (capitalized)
-			await message.reply({
-				content: `${
-					greetings[Math.floor(Math.random() * greetings.length)]
-				} ${capitalized}${Math.random() > 0.5 ? "!" : ","} I’m Scradd!`,
-			});
-	}
-
-	// Autoreactions start here.
-
-	const REACTION_CAP = 2;
+	const REACTION_CAP = 3;
 	let reactions = 0;
-
-	/**
-	 * Attempt to react with an emoji.
-	 *
-	 * @param emoji - The emoji to react with.
-	 */
-	function react(emoji: EmojiIdentifierResolvable) {
-		if (reactions > REACTION_CAP) return;
-		reactions++;
-		return message.react(emoji);
-	}
 
 	if (
 		[
@@ -186,106 +137,74 @@ const event: Event<"messageCreate"> = async function event(message) {
 			MessageType.GuildBoostTier2,
 			MessageType.GuildBoostTier3,
 		].includes(message.type)
-	)
-		await react(BOARD_EMOJI);
+	) {
+		try {
+			await message.react(BOARD_EMOJI);
+			reactions++;
+		} catch {
+			return;
+		}
+	}
 
-	// Don’t react to users who disabled the setting.
 	if (
 		message.interaction ||
 		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
 		CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
-		!(
-			userSettingsDatabase.data.find(({ user }) => user === message.author.id)
-				?.autoreactions ?? true
-		)
+		!getSettings(message.author).autoreactions
 	)
 		return;
 
-	/**
-	 * Determines whether the message contains a word.
-	 *
-	 * @param text - The word to check for.
-	 * @param plural
-	 *
-	 * @returns Whether the message contains the word.
-	 */
-	function includes(text: RegExp | string, plural = true): boolean {
-		return new RegExp(
-			`\\b${typeof text === "string" ? text : `(?:${text.source})`}${
-				plural ? "(?:e?s)?" : ""
-			}\\b`,
-			"i",
-		).test(content);
+	if (content.match(/^i['"`‘’“”]?m\b/)) {
+		const name = content
+			.split(
+				/[៚๛๚܌܊፨៕។။၊॥।·｡。᙮᠉᠃።܂܁۔﹒．.‽᥅፧܉؟⁇⁈﹖？?᥄⁉‼﹗！!᛭᛬᛫៖᠅᠄፦፥፤፣፡܈܇܆܅܄܃։﹕：:؛﹔；;;､﹑、᠈᠂،﹐，,\n]+/gm,
+			)[0]
+			?.split(/\s/g)
+			.slice(1)
+			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
+			.join(" ");
+
+		if (name) {
+			if (CONSTANTS.channels.bots?.id === baseChannel?.id || isAprilFools) {
+				return await message.reply({
+					content: dad(name, message.author.username),
+					allowedMentions: { users: [] },
+				});
+			}
+			reactions++;
+			return await message.react("👋").catch(() => {});
+		}
 	}
 
-	// SA jokes
-	if (
-		["e", "ae", "iei", "a", "."].includes(stripMarkdown(normalize(content))) ||
-		content.includes("æ")
-	)
-		await react(CONSTANTS.emojis.autoreact.e);
-	if (includes("dango") && !content.includes("🍡")) await react("🍡");
-	if (includes(/av[ao]cado/) && !content.includes("🥑")) await react("🥑");
-	if (includes("sat on addon") && reactions < REACTION_CAP) {
-		reactions += 3;
-		await reactAll(message, CONSTANTS.emojis.autoreact.soa);
+	for (const [emoji, ...requirements] of autoreactions) {
+		if (typeof emoji == "string" && content.includes(emoji)) continue;
+
+		const results = requirements.map((requirement) => {
+			const type = Array.isArray(requirement) ? requirement[1] : "word";
+			if (!(["partial", "full", "raw", "plural", "negative", "word"] as const).includes(type))
+				throw new TypeError("Unknown type: " + type);
+
+			const pre = type === "partial" || type === "raw" ? "" : type === "full" ? "^" : "\\b";
+
+			const rawMatch = Array.isArray(requirement) ? requirement[0] : requirement;
+			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
+
+			const appendage = type === "plural" ? "(?:e?s)?" : "";
+
+			const post = type === "partial" || type === "raw" ? "" : type === "full" ? "$" : "\\b";
+
+			const result = new RegExp(`${pre}${match}${appendage}${post}`, "i").test(
+				type === "raw" ? message.content : content,
+			);
+
+			return type === "negative" ? result && 0 : result;
+		});
+		if (results.includes(true) && !results.includes(0)) {
+			const emojis = [emoji].flat();
+			reactions += emojis.length;
+			const messageReactions = await reactAll(message, emojis);
+			if (reactions > REACTION_CAP || !messageReactions) return;
+		}
 	}
-
-	// Server jokes
-	if (includes(/taco(?:d(?:ude|iva))?/, false)) await react(CONSTANTS.emojis.autoreact.taco);
-	if (includes("bob", false)) await react(CONSTANTS.emojis.autoreact.bob);
-	if (content.includes("( ∘)つ")) await react(CONSTANTS.emojis.autoreact.sxd);
-	if (includes("doost", false) || includes("dooster"))
-		await react(CONSTANTS.emojis.autoreact.boost);
-	if ((content.includes("quack") || includes("duck")) && !content.includes("🦆"))
-		await react("🦆");
-	if (content === "radio") await react("📻");
-	if (content.match(/^fr+\b/)) await react("🇫🇷");
-	if (content === "agreed") await react(CONSTANTS.emojis.autoreact.mater);
-	if (includes(/te[rw]+a+/) || /👉\s*👈/.test(message.content))
-		await react(CONSTANTS.emojis.autoreact.tera);
-	if ((includes("snake") || includes("snek")) && reactions < REACTION_CAP) {
-		reactions += 3;
-		await reactAll(message, CONSTANTS.emojis.autoreact.snakes);
-	}
-
-	// Discord jokes
-	if (includes("robotop", false)) await react(CONSTANTS.emojis.autoreact.rip);
-	if (
-		(includes("mee6", false) || includes("dyno", false) || includes(/carl[ -]?bot/)) &&
-		!(content.includes("🤮") || content.includes("🤢"))
-	)
-		await react("🤮");
-	if (
-		message.mentions.has(client.user.id, {
-			ignoreEveryone: true,
-			ignoreRoles: true,
-			ignoreRepliedUser: true,
-		}) &&
-		message.author.id !== client.user.id
-	)
-		await react("👋");
-
-	// Scratch jokes
-	if (includes(/j[eo]f+[ao]l+o/, false) || includes(/buf+[ao]l+o/, false))
-		await react(CONSTANTS.emojis.autoreact.jeffalo);
-	if (includes(/wasteof\.(?!money)/, false)) await react(CONSTANTS.emojis.autoreact.wasteof);
-	if (
-		(content.includes("garbo") || includes(/garbage? ?(?:muffin|man)/, false)) &&
-		!content.includes("turbo")
-	)
-		await react(CONSTANTS.emojis.autoreact.tw);
-	if (includes(/griff(?:patch)?y?/, false)) await react(CONSTANTS.emojis.autoreact.griffpatch);
-	if (includes("appel")) await react(CONSTANTS.emojis.autoreact.appel);
-
-	// Internet jokes
-	if (includes("sus", false)) await react(CONSTANTS.emojis.autoreact.sus);
-	if (
-		includes(/gives? ?you ?up/i, false) ||
-		includes(/rick[ -]?rol+/) ||
-		includes("astley", false) ||
-		message.content.includes("dQw4w9WgXcQ")
-	)
-		await react(CONSTANTS.emojis.autoreact.rick);
 };
 export default event;

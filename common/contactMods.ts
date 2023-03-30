@@ -21,6 +21,7 @@ import {
 
 import { asyncFilter } from "../util/promises.js";
 import CONSTANTS from "./CONSTANTS.js";
+import log from "./logging.js";
 import { strikeDatabase } from "./punishments.js";
 
 export const TICKET_CATEGORIES = [
@@ -219,11 +220,17 @@ export async function gatherTicketInfo(
 ): Promise<InteractionResponse<boolean> | undefined>;
 export async function gatherTicketInfo(
 	interaction: ButtonInteraction,
-	category: Category,
+	category: Exclude<Category, "appeal">,
+): Promise<InteractionResponse<boolean> | undefined>;
+export async function gatherTicketInfo(
+	interaction: ButtonInteraction,
+	category: "appeal",
+	strikeId: string,
 ): Promise<InteractionResponse<boolean> | undefined>;
 export async function gatherTicketInfo(
 	interaction: StringSelectMenuInteraction | ButtonInteraction,
 	category?: Category,
+	strikeId?: string,
 ) {
 	const option =
 		interaction.componentType === ComponentType.StringSelect ? interaction.values[0] : category;
@@ -258,7 +265,10 @@ export async function gatherTicketInfo(
 	await interaction.showModal({
 		title: `Contact Mods - ${categoryToDescription[option]}`,
 		customId: `${option}_contactMods`,
-		components: fields.map((field) => ({ type: ComponentType.ActionRow, components: [field] })),
+		components: fields.map((field) => ({
+			type: ComponentType.ActionRow,
+			components: [field.customId === "strike" ? { ...field, value: strikeId } : field],
+		})),
 	});
 }
 
@@ -314,7 +324,7 @@ export default async function startTicket(
 		type: ChannelType.PrivateThread,
 		invitable: false,
 	});
-	await CONSTANTS.channels.modlogs?.send(`🔴 Ticket ${thread?.toString()} opened`);
+	await log(`🔴 Ticket ${thread?.toString()} opened`);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === member.id)
@@ -420,7 +430,7 @@ export default async function startTicket(
 				color: member.displayColor,
 			},
 		],
-		content: CONSTANTS.roles.mod?.toString(),
+		content: option === "mod" ? "" : CONSTANTS.roles.mod?.toString(),
 		allowedMentions: { parse: ["roles"] },
 	});
 
