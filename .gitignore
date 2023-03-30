@@ -2,5 +2,6 @@
 !.github/
 dist/
 node_modules/
-!.eslintrc.cjs
 !.gitignore
+secrets.ts
+badWords.ts
