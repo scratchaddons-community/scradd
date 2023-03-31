@@ -313,7 +313,10 @@ export async function getWeekly(nextWeeklyDate: Date) {
 				.map(
 					(gain, index) =>
 						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
-							gain.xp,
+							gain.xp *
+								Math.sign(
+									xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
+								),
 						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*"

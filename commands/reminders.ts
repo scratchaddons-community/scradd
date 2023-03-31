@@ -100,7 +100,7 @@ const command = defineCommand({
 						description: reminders
 							.map(
 								(reminder) =>
-									`\`${reminder.id})\` ${time(
+									`\`${reminder.id}\`) ${time(
 										new Date(reminder.date),
 										TimestampStyles.RelativeTime,
 									)}: <#${reminder.channel}> ${reminder.reminder}`,
