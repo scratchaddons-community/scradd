@@ -92,7 +92,11 @@ const command = defineCommand({
 									? interaction.member.displayName
 									: interaction.user.username,
 						},
-						footer: { text: `${reminders.length} reminders` },
+						footer: {
+							text: `${reminders.length} reminder${
+								reminders.length === 1 ? "" : "s"
+							}`,
+						},
 						description: reminders
 							.map(
 								(reminder) =>
