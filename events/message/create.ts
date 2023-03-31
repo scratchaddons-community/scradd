@@ -50,9 +50,8 @@ const event: Event<"messageCreate"> = async function event(message) {
 			{
 				channel: "881619501018394725",
 				date: Date.now() + 7260000,
-				reminder: "",
+				reminder: undefined,
 				id: SpecialReminders.Bump,
-				setAt: Date.now(),
 				user: client.user.id,
 			},
 		];

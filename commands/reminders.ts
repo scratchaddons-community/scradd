@@ -24,9 +24,8 @@ import { getSettings } from "./settings.js";
 type Reminder = {
 	channel: Snowflake;
 	date: number;
-	reminder: string;
+	reminder?: string;
 	user: Snowflake;
-	setAt: number;
 	id: string | SpecialReminders;
 };
 export const remindersDatabase = new Database<Reminder>("reminders");
@@ -64,10 +63,10 @@ const command = defineCommand({
 	},
 
 	async interaction(interaction) {
+		const reminders = remindersDatabase.data
+			.filter((reminder) => reminder.user === interaction.user.id)
+			.sort((one, two) => one.date - two.date);
 		if (interaction.options.getSubcommand(true) === "list") {
-			const reminders = remindersDatabase.data
-				.filter((reminder) => reminder.user === interaction.user.id)
-				.sort((one, two) => one.date - two.date);
 			if (!reminders.length)
 				return await interaction.reply({
 					ephemeral: true,
@@ -115,7 +114,7 @@ const command = defineCommand({
 								placeholder: "Cancel Reminder",
 								options: reminders.map((reminder) => ({
 									value: reminder.id + "",
-									description: reminder.reminder.slice(0, 100),
+									description: reminder.reminder?.slice(0, 100),
 									label: reminder.id + "",
 								})),
 							},
@@ -146,10 +145,7 @@ const command = defineCommand({
 			}
 		}
 
-		if (
-			remindersDatabase.data.filter((reminder) => reminder.user === interaction.user.id)
-				.length > 19
-		) {
+		if (reminders.length > 19) {
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${CONSTANTS.emojis.statuses.no} You already have 20 reminders set! You are currently not allowed to set any more.`,
@@ -176,7 +172,7 @@ const command = defineCommand({
 		const id = convertBase(Date.now() + "", 10, convertBase.MAX_BASE);
 		remindersDatabase.data = [
 			...remindersDatabase.data,
-			{ channel, date: +date, reminder, user: interaction.user.id, setAt: Date.now(), id },
+			{ channel, date: +date, reminder, user: interaction.user.id, id },
 		];
 
 		await interaction.reply({
@@ -341,9 +337,8 @@ setInterval(async () => {
 							{
 								channel: CONSTANTS.channels.info?.id || "",
 								date: Number(Date.now() + 3_600_000),
-								reminder: "",
+								reminder: undefined,
 								id: SpecialReminders.UpdateSACategory,
-								setAt: Date.now(),
 								user: client.user.id,
 							},
 						];
@@ -370,7 +365,7 @@ setInterval(async () => {
 							throw new TypeError("Could not find bumping channel");
 						return await channel.send({
 							content: `🔔 @here </bump:947088344167366698> the server! (from ${time(
-								new Date(reminder.setAt),
+								new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
 								TimestampStyles.RelativeTime,
 							)})`,
 							allowedMentions: { parse: ["everyone"] },
@@ -392,7 +387,7 @@ setInterval(async () => {
 					content: `🔔 ${
 						channel.isDMBased() ? "" : `<@${reminder.user}> `
 					}${content.trim()} (from ${time(
-						new Date(reminder.setAt),
+						new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
 						TimestampStyles.RelativeTime,
 					)})`,
 					allowedMentions: { users: [reminder.user] },

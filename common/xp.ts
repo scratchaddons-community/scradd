@@ -216,9 +216,8 @@ export async function getWeekly(nextWeeklyDate: Date) {
 		{
 			channel: CONSTANTS.channels.announcements?.id || "",
 			date: Number(nextWeeklyDate),
-			reminder: "",
+			reminder: undefined,
 			id: SpecialReminders.Weekly,
-			setAt: Date.now(),
 			user: client.user.id,
 		},
 	];
