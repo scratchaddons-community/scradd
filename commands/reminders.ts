@@ -24,7 +24,7 @@ import { getSettings } from "./settings.js";
 type Reminder = {
 	channel: Snowflake;
 	date: number;
-	reminder?: string|number;
+	reminder?: string | number;
 	user: Snowflake;
 	id: string | SpecialReminders;
 };

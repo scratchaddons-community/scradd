@@ -32,7 +32,7 @@ export const suggestionsDatabase = new Database<{
 	author: Snowflake;
 	count: number;
 	id: Snowflake;
-	title: string|number;
+	title: string | number;
 }>("suggestions");
 await suggestionsDatabase.init();
 
