@@ -146,10 +146,11 @@ const event: Event<"messageCreate"> = async function event(message) {
 	}
 
 	if (
-		message.interaction ||
-		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
-		CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
-		!getSettings(message.author).autoreactions
+		(message.interaction ||
+			CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
+			CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
+			!getSettings(message.author).autoreactions) &&
+		!isAprilFools
 	)
 		return;
 

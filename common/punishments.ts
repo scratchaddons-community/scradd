@@ -204,7 +204,7 @@ export async function filterToStrike(filter: string) {
 		const info = robotopStrikes.find((strike) => String(strike.id) === filter);
 		if (strike && info) return { ...info, ...strike, id: String(info.id) };
 	}
-	const channel = await getLoggingThread(filter.startsWith("0") ? "members" : undefined);
+	const channel = await getLoggingThread(filter.startsWith("0") ?undefined: "members");
 	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
 
 	const messageFromId = await channel?.messages.fetch(messageId).catch(() => {});
