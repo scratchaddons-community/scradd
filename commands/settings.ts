@@ -13,7 +13,7 @@ import { defineCommand } from "../common/types/command.js";
 import { weeklyXpDatabase } from "../common/xp.js";
 import { isAprilFools } from "../secrets.js";
 
-const userSettingsDatabase = new Database<{
+export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
 	user: Snowflake;
 	/** Whether to ping the user when their message gets on the board. */
