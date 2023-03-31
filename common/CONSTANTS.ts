@@ -52,7 +52,6 @@ async function getConstants() {
 
 			misc: {
 				addon: "<:addon:1008842100764332142>",
-				percent: "<:percent:1009144273331040296>",
 				join: "<:join:1041863919708418068>",
 				leave: "<:leave:1041863867757756477>",
 				ban: "<:ban:1041864907194388480>",

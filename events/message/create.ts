@@ -167,7 +167,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		if (name) {
 			if (CONSTANTS.channels.bots?.id === baseChannel?.id || isAprilFools) {
 				return await message.reply({
-					content: dad(name, message.author.username),
+					content: dad(name, message.author),
 					allowedMentions: { users: [] },
 				});
 			}
