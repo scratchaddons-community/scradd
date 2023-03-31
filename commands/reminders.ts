@@ -24,7 +24,7 @@ import { getSettings } from "./settings.js";
 type Reminder = {
 	channel: Snowflake;
 	date: number;
-	reminder?: string;
+	reminder?: string|number;
 	user: Snowflake;
 	id: string | SpecialReminders;
 };
@@ -118,7 +118,7 @@ const command = defineCommand({
 								placeholder: "Cancel Reminder",
 								options: reminders.map((reminder) => ({
 									value: reminder.id + "",
-									description: reminder.reminder?.slice(0, 100),
+									description: `${reminder.reminder}`.slice(0, 100),
 									label: reminder.id + "",
 								})),
 							},

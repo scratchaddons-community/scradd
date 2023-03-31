@@ -29,10 +29,10 @@ export const suggestionAnswers = [
 
 export const suggestionsDatabase = new Database<{
 	answer: typeof suggestionAnswers[number];
-	author: string;
+	author: Snowflake;
 	count: number;
 	id: Snowflake;
-	title: string;
+	title: string|number;
 }>("suggestions");
 await suggestionsDatabase.init();
 
@@ -122,7 +122,7 @@ const command = defineCommand({
 						: suggestions?.defaultReactionEmoji?.name ??
 						  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 				} ${hyperlink(
-					escapeLinks(title),
+					escapeLinks(`${title}`),
 					"url" in ref
 						? ref.url
 						: `https://discord.com/channels/${CONSTANTS.guild.id}/${ref.id}/${ref.id}`,
