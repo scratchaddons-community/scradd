@@ -1640,8 +1640,8 @@ const command = defineCommand({
 						[],
 					);
 
-					const length = QUESTIONS_BY_CATEGORY[groupName].length
-					const maxLength = Math.ceil(length/25)*25;
+					const length = QUESTIONS_BY_CATEGORY[groupName].length;
+					const maxLength = Math.ceil(length / 25) * 25;
 					const groupSelects = QUESTIONS_BY_CATEGORY[groupName]
 						.filter((question) => !doneQuestions.has(question))
 						.reduce<APIActionRowComponent<APIStringSelectComponent>[]>(

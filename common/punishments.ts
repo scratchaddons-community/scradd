@@ -13,7 +13,6 @@ import {
 
 import client from "../client.js";
 import { getSettings } from "../commands/settings.js";
-import { isAprilFools, warnAF } from "../secrets.js";
 import { GlobalUsersPattern } from "../util/discord.js";
 import { convertBase } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
@@ -94,7 +93,6 @@ export default async function warn(
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
-	if (isAprilFools) await user.send(warnAF).catch(() => {});
 	await user
 		.send({
 			embeds: [

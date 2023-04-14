@@ -12,7 +12,7 @@ import { normalize, truncateText } from "../../util/text.js";
 
 import type Event from "../../common/types/event";
 import { remindersDatabase, SpecialReminders } from "../../commands/reminders.js";
-import { autoreactions, dad, isAprilFools } from "../../secrets.js";
+import { autoreactions, dad } from "../../secrets.js";
 
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
@@ -146,11 +146,10 @@ const event: Event<"messageCreate"> = async function event(message) {
 	}
 
 	if (
-		(message.interaction ||
-			CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
-			CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
-			!getSettings(message.author).autoreactions) &&
-		!isAprilFools
+		message.interaction ||
+		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
+		CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
+		!getSettings(message.author).autoreactions
 	)
 		return;
 
@@ -165,7 +164,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 			.join(" ");
 
 		if (name) {
-			if (CONSTANTS.channels.bots?.id === baseChannel?.id || isAprilFools) {
+			if (CONSTANTS.channels.bots?.id === baseChannel?.id) {
 				return await message.reply({
 					content: dad(name, message.author),
 					allowedMentions: { users: [] },

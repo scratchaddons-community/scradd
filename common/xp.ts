@@ -12,7 +12,6 @@ import client from "../client.js";
 import { remindersDatabase, SpecialReminders } from "../commands/reminders.js";
 
 import { getSettings } from "../commands/settings.js";
-import { isAprilFools } from "../secrets.js";
 import { nth } from "../util/numbers.js";
 import CONSTANTS from "./CONSTANTS.js";
 import Database from "./database.js";
@@ -169,9 +168,7 @@ export default async function giveXp(
 						name: member?.displayName ?? user.username,
 					},
 
-					title: `You${isAprilFools ? "'v" : "’r"}e at level ${
-						newLevel * Math.sign(newXp)
-					}!`,
+					title: `You’re at level ${newLevel * Math.sign(newXp)}!`,
 
 					url,
 
@@ -200,6 +197,20 @@ export default async function giveXp(
 				},
 			],
 		});
+	}
+
+	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
+
+	if (
+		CONSTANTS.roles.epic &&
+		rank / CONSTANTS.guild.memberCount < 0.01 &&
+		member &&
+		!member.roles.resolve(CONSTANTS.roles.epic.id)
+	) {
+		await member.roles.add(CONSTANTS.roles.epic, "Top 1% of the server’s XP");
+		await CONSTANTS.channels.general?.send(
+			`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${CONSTANTS.roles.epic.toString()}.`,
+		);
 	}
 
 	const weekly = Array.from(weeklyXpDatabase.data);
@@ -259,10 +270,7 @@ export async function getWeekly(nextWeeklyDate: Date) {
 		await Promise.all([
 			...role.members.map(async (weeklyMember) => {
 				if (!ids.includes(weeklyMember.id))
-					return await weeklyMember.roles.remove(
-						role,
-						`No longer weekly ${isAprilFools ? "loser" : "winner"}`,
-					);
+					return await weeklyMember.roles.remove(role, `No longer weekly winner`);
 			}),
 			...weeklyWinners.map(
 				async ({ user: userId }, index) =>
@@ -274,7 +282,7 @@ export async function getWeekly(nextWeeklyDate: Date) {
 								index || !CONSTANTS.roles.epic
 									? role
 									: [role, CONSTANTS.roles.epic],
-								`Weekly ${isAprilFools ? "loser" : "winner"}`,
+								`Weekly winner`,
 							),
 						),
 			),
@@ -284,9 +292,7 @@ export async function getWeekly(nextWeeklyDate: Date) {
 	return {
 		allowedMentions: { users: ids.filter((id) => getSettings({ id }).weeklyPings) },
 
-		content: `__**${isAprilFools ? "🇱" : "🏆"} Weekly ${
-			isAprilFools ? "Loser" : "Winner"
-		}s week of ${
+		content: `__**🏆 Weekly Winners week of ${
 			[
 				"January",
 				"February",
@@ -304,11 +310,7 @@ export async function getWeekly(nextWeeklyDate: Date) {
 		} ${nth(date.getUTCDate(), {
 			bold: false,
 			jokes: false,
-		})}**__${
-			isAprilFools
-				? "\n*These people seriously need to go touch some grass. 👎👎 Feel free to ridicule them for being such 🤓s!*"
-				: ""
-		}\n${
+		})}**__\n${
 			weeklyWinners
 				.map(
 					(gain, index) =>
@@ -320,14 +322,9 @@ export async function getWeekly(nextWeeklyDate: Date) {
 						).toLocaleString()} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*"
-		}\n\n*This week, ${chatters.toLocaleString()} ${
-			isAprilFools ? "🤓s" : "people"
-		} chatted, and ${activeMembers.length.toLocaleString()} ${
-			isAprilFools ? "🤓s" : "people"
-		} were active. Altogether, ${
-			isAprilFools ? "🤓s" : "people"
-		} gained ${allXp.toLocaleString()} XP this week.*\n__Next week’s weekly ${
-			isAprilFools ? "loser" : "winner"
-		}a will be posted ${time(nextWeeklyDate, TimestampStyles.RelativeTime)}.__`,
+		}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${activeMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n__Next week’s weekly winners will be posted ${time(
+			nextWeeklyDate,
+			TimestampStyles.RelativeTime,
+		)}.__`,
 	} satisfies MessageCreateOptions;
 }

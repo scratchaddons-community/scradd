@@ -11,7 +11,6 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import { defineCommand } from "../common/types/command.js";
 import { weeklyXpDatabase } from "../common/xp.js";
-import { isAprilFools } from "../secrets.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -166,7 +165,7 @@ export function updateOptions(
 					{
 						customId: "weeklyPings_toggleOption",
 						type: ComponentType.Button,
-						label: `Weekly ${isAprilFools ? "Loser" : "Winner"}s Pings`,
+						label: `Weekly Winners Pings`,
 						style: ButtonStyle[updated.weeklyPings ? "Success" : "Danger"],
 					},
 				],

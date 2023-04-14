@@ -20,7 +20,6 @@ import {
 	xpDatabase as database,
 	xpDatabase,
 } from "../common/xp.js";
-import { isAprilFools } from "../secrets.js";
 import { paginate } from "../util/discord.js";
 import { convertBase, nth } from "../util/numbers.js";
 import { getSettings } from "./settings.js";
@@ -56,21 +55,6 @@ const command = defineCommand({
 					},
 				},
 			},
-
-			...(isAprilFools
-				? {
-						tank: {
-							description: "Tank a users’ XP",
-
-							options: {
-								user: {
-									type: ApplicationCommandOptionType.User,
-									description: "User to tank (defaults to you)",
-								},
-							},
-						},
-				  }
-				: {}),
 		},
 	},
 
@@ -78,12 +62,6 @@ const command = defineCommand({
 		const command = interaction.options.getSubcommand(true);
 
 		switch (command) {
-			case "tank": {
-				const user = interaction.options.getUser("user") ?? interaction.user;
-				xpDatabase.data = xpDatabase.data.map((xp) =>
-					xp.user === user.id ? { user: xp.user, xp: xp.xp * -1 } : xp,
-				);
-			}
 			case "rank": {
 				const user = interaction.options.getUser("user") ?? interaction.user;
 				await getUserRank(interaction, user);
@@ -169,7 +147,7 @@ async function getUserRank(
 	const rank = top.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank =
 		[...weeklyXpDatabase.data]
-			.sort(isAprilFools ? (one, two) => one.xp - two.xp : (one, two) => two.xp - one.xp)
+			.sort((one, two) => two.xp - one.xp)
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
@@ -221,15 +199,14 @@ async function getUserRank(
 					{
 						name: "⏳ Weekly rank",
 
-						value:
-							weeklyRank || isAprilFools
-								? approximateWeeklyRank === 10 && !isAprilFools
-									? "Top 10"
-									: `About ${nth(Math.max(0, approximateWeeklyRank - 5), {
-											bold: false,
-											jokes: false,
-									  })}`
-								: "Inactive",
+						value: weeklyRank
+							? approximateWeeklyRank === 10
+								? "Top 10"
+								: `About ${nth(Math.max(0, approximateWeeklyRank - 5), {
+										bold: false,
+										jokes: false,
+								  })}`
+							: "Inactive",
 
 						inline: true,
 					},
