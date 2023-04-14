@@ -1,7 +1,7 @@
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import Database from "../../../common/database.js";
 import log from "../../../common/logging.js";
-import { getThreadFromMember } from "../../../common/contactMods.js";
+import { getThreadFromMember } from "../../../common/tickets.js";
 
 import type Event from "../../../common/types/event";
 import type { Snowflake } from "discord.js";

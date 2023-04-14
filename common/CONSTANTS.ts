@@ -18,8 +18,6 @@ async function getConstants() {
 			  ).tag_name
 			: "master";
 
-	const SA = getChannel("Scratch Addons", ChannelType.GuildCategory, "start");
-
 	return {
 		collectorTime: 45_000,
 		zeroWidthSpace: "\u200b",
@@ -64,14 +62,14 @@ async function getConstants() {
 			designers: "966174686142672917",
 			developers: "938439909742616616",
 			testers: "938440159102386276",
-			mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
 			admin: roles.find((role) => role.name.toLowerCase().includes("admin")),
-			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
+			mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
-			active: roles.find((role) => role.name.toLowerCase().includes("active")),
+			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
 				(role) => role.editable && role.name.toLowerCase().includes("booster"),
 			),
+			active: roles.find((role) => role.name.toLowerCase().includes("active")),
 		},
 
 		urls: {
@@ -105,14 +103,10 @@ async function getConstants() {
 			admin: getChannel("admin", ChannelType.GuildText, "start"),
 
 			general: getChannel("general", ChannelType.GuildText),
-			boosters: getChannel("boosters", ChannelType.GuildText, "end"),
 
-			SA,
-			support: SA?.children.valueOf().first(),
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 

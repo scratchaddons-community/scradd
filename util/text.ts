@@ -108,7 +108,6 @@ export function pingablify(text: string) {
  */
 export function normalize(text: string) {
 	return text
-		.toLowerCase()
 		.normalize("NFD")
 		.replace(
 			/[\p{Diacritic}\u00AD\u0300-\u036f\u0489\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F]/gu,

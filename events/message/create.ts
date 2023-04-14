@@ -124,7 +124,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		);
 	}
 
-	const content = stripMarkdown(normalize(message.content));
+	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 
 	const REACTION_CAP = 3;
 	let reactions = 0;

@@ -24,6 +24,6 @@ const event: Event<"userUpdate"> = async function event(oldUser, partialUser) {
 
 	const member = await CONSTANTS.guild.members.fetch(newUser.id).catch(() => {});
 	if (!member) return;
-	await changeNickname(member);
+	await changeNickname(member, false);
 };
 export default event;

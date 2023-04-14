@@ -368,10 +368,7 @@ setInterval(async () => {
 						if (!channel?.isTextBased())
 							throw new TypeError("Could not find bumping channel");
 						return await channel.send({
-							content: `🔔 @here </bump:947088344167366698> the server! (from ${time(
-								new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
-								TimestampStyles.RelativeTime,
-							)})`,
+							content: "🔔 @here </bump:947088344167366698> the server!",
 							allowedMentions: { parse: ["everyone"] },
 						});
 					}

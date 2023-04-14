@@ -891,13 +891,10 @@ const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 			(one.order ?? Number.POSITIVE_INFINITY) - (two.order ?? Number.POSITIVE_INFINITY) ||
 			(one.markdownless.toLowerCase() < two.markdownless.toLowerCase() ? -1 : 1),
 	)
-	.reduce<{ [name in GroupName]: string[][] }>(
+	.reduce<{ [name in GroupName]: string[] }>(
 		(accumulator, { group, markdownless }) => {
 			const accumulated = accumulator[group];
-
-			const index =
-				(accumulated.findIndex((row) => row.length < 25) + 1 || accumulated.push([])) - 1;
-			accumulated[index]?.push(markdownless);
+			accumulated?.push(markdownless);
 			// eslint-disable-next-line no-param-reassign -- This isn’t problematic.
 			accumulator[group] = accumulated;
 
@@ -1635,13 +1632,7 @@ const command = defineCommand({
 
 					const doneGroups = Object.entries(QUESTIONS_BY_CATEGORY).reduce<GroupName[]>(
 						(accumulator, [group, questions]) => {
-							if (
-								questions.every((subQuestions) =>
-									subQuestions.every((subQuestion) =>
-										doneQuestions.has(subQuestion),
-									),
-								)
-							)
+							if (questions.every((subQuestion) => doneQuestions.has(subQuestion)))
 								accumulator.push(group);
 
 							return accumulator;
@@ -1649,37 +1640,51 @@ const command = defineCommand({
 						[],
 					);
 
-					const groupSelects = QUESTIONS_BY_CATEGORY[groupName].reduce<
-						APIActionRowComponent<APIStringSelectComponent>[]
-					>((accumulator, group, selectIndex) => {
-						const options = group
-							.map((label, index) => ({
-								label,
-								value: `${groupName}.${selectIndex}.${index}`,
-							}))
-							.filter(({ label }) => !doneQuestions.has(label));
+					const length = QUESTIONS_BY_CATEGORY[groupName].length
+					const maxLength = Math.ceil(length/25)*25;
+					const groupSelects = QUESTIONS_BY_CATEGORY[groupName]
+						.filter((question) => !doneQuestions.has(question))
+						.reduce<APIActionRowComponent<APIStringSelectComponent>[]>(
+							(accumulator, question, index) => {
+								const options = accumulator.at(-1)?.components?.[0]?.options || [];
 
-						if (options.length > 0) {
-							accumulator.push({
-								type: ComponentType.ActionRow,
+								options.push({
+									label: question,
+									value: `${groupName}.${index}`,
+								});
 
-								components: [
-									{
-										type: ComponentType.StringSelect,
+								if (options.length === maxLength && index !== length - 1) {
+									accumulator.push({
+										type: ComponentType.ActionRow,
 
-										placeholder: `Select a question (${
-											accumulator[0] ? "continued" : "irreversible"
-										})`,
+										components: [
+											{
+												type: ComponentType.StringSelect,
+												placeholder: `Select a question (irreversible)`,
+												custom_id: generateHash(groupName),
+												options,
+											},
+										],
+									});
+								}
 
-										custom_id: generateHash(groupName),
-										options,
-									},
-								],
-							});
-						}
+								return accumulator;
+							},
+							[
+								{
+									type: ComponentType.ActionRow,
 
-						return accumulator;
-					}, []);
+									components: [
+										{
+											type: ComponentType.StringSelect,
+											placeholder: `Select a question (irreversible)`,
+											custom_id: generateHash(groupName),
+											options: [],
+										},
+									],
+								},
+							],
+						);
 
 					const reply = await interaction.fetchReply();
 					const buttons = reply.components.at(-1);
@@ -1869,7 +1874,7 @@ const command = defineCommand({
 							throw new TypeError("Unknown button pressed");
 
 						const selected = componentInteraction.values[0] ?? "";
-						const [groupName, selectIndex, questionIndex] = selected.split(".");
+						const [groupName, questionIndex] = selected.split(".");
 
 						if (!groupName || !GROUP_NAMES.includes(groupName))
 							throw new ReferenceError(`Unknown group: ${groupName}`);
@@ -1879,11 +1884,8 @@ const command = defineCommand({
 
 						await answerQuestion(
 							groupName,
-							selectIndex &&
-								questionIndex &&
-								QUESTIONS_BY_CATEGORY[groupName][Number(selectIndex)]?.[
-									Number(questionIndex)
-								],
+							questionIndex &&
+								QUESTIONS_BY_CATEGORY[groupName]?.[Number(questionIndex)],
 						);
 					})
 					.on("end", async (_, reason) => {

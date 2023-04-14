@@ -37,6 +37,7 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 		logs.push(
 			newMember.nickname ? ` was nicknamed ${newMember.nickname}` : "’s nickname was removed",
 		);
+		await changeNickname(newMember);
 	}
 	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster)
 		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
@@ -44,7 +45,5 @@ const event: Event<"guildMemberUpdate"> = async function event(oldMember, newMem
 	await Promise.all(
 		logs.map(async (edit) => await log(`🫂 Member ${newMember.toString()}${edit}!`, "members")),
 	);
-
-	await changeNickname(newMember);
 };
 export default event;

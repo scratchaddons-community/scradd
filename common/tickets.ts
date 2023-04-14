@@ -31,6 +31,7 @@ export const TICKET_CATEGORIES = [
 	"bug",
 	"update",
 	"rules",
+	"server",
 	"other",
 ] as const;
 type Category = typeof TICKET_CATEGORIES[number];
@@ -90,7 +91,7 @@ const allFields = {
 			required: true,
 			maxLength: 500,
 			style: TextInputStyle.Paragraph,
-			label: "What are your GitHub and Transifex usernames?",
+			label: "What are your GitHub/Transifex usernames?",
 		},
 	],
 
@@ -135,6 +136,17 @@ const allFields = {
 		},
 	],
 
+	server: [
+		{
+			type: ComponentType.TextInput,
+			customId: "BODY",
+			required: true,
+			maxLength: 75,
+			style: TextInputStyle.Paragraph,
+			label: "Server invite",
+		},
+	],
+
 	other: [
 		{
 			type: ComponentType.TextInput,
@@ -160,11 +172,12 @@ export const ticketCategoryMessage = {
 						...([
 							{ label: "Appeal a strike", value: "appeal" },
 							{ label: "Report a user", value: "report" },
-							{ label: "Request a role", value: "role" },
+							{ label: "Request a contributor role", value: "role" },
 							{ label: "Report a Scradd bug", value: "bug" },
 							{ label: "Suggest a server change", value: "update" },
 							{ label: "Get clarification on a rule", value: "rules" },
 							{ label: "Get help with Scratch Addons", value: "sa" },
+							{ label: "Add your server to Other Scratch Servers", value: "server" },
 							{ label: "Other", value: "other" },
 						] as const),
 					],
@@ -239,7 +252,7 @@ export async function gatherTicketInfo(
 		return await interaction.reply({
 			content: `${
 				CONSTANTS.emojis.statuses.no
-			} Please don't contact mods for SA help. Instead, put your suggestions in ${CONSTANTS.channels.suggestions?.toString()}, bug reports in ${CONSTANTS.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${CONSTANTS.channels.support?.toString()}.`,
+			} Please don't contact mods for SA help. Instead, put your suggestions in ${CONSTANTS.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
 
 			ephemeral: true,
 		});
@@ -287,6 +300,8 @@ export default async function startTicket(
 			: interaction.member || (await CONSTANTS.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
+	const oldThread = await getThreadFromMember(member);
+	if (oldThread) return oldThread;
 	const fields =
 		interaction.type === InteractionType.ModalSubmit
 			? Object.entries(
@@ -297,6 +312,7 @@ export default async function startTicket(
 						bug: {},
 						update: {},
 						rules: { Rule: "rule" },
+						server: {},
 						other: {},
 						mod: {},
 					}[option],
@@ -324,7 +340,7 @@ export default async function startTicket(
 		type: ChannelType.PrivateThread,
 		invitable: false,
 	});
-	await log(`🔴 Ticket ${thread?.toString()} opened`);
+	await log(`🔴 Ticket ${thread?.toString()} opened by ${interaction.user.toString()}`);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === member.id)
@@ -384,6 +400,7 @@ export default async function startTicket(
 								bug: "Report a Scradd bug",
 								update: "Suggest a server change",
 								rules: "Get clarification on a rule",
+								server: "Add a server to Other Scratch Servers",
 								other: "Other",
 						  }[option || ""],
 

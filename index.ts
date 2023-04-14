@@ -157,9 +157,9 @@ await client.guilds.fetch().then(
 		),
 );
 
-if (process.env.NODE_ENV === "production") await import("./web/server.js");
-
 if (process.env.NODE_ENV === "production") {
+	await import("./web/server.js");
+
 	const { default: log } = await import("./common/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 }

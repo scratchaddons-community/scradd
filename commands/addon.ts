@@ -167,7 +167,7 @@ const command = defineCommand({
 					url:
 						group === "Easter Eggs"
 							? undefined
-							: `https://scratch.mit.edu/scratch-addons-extension/settings#addon-${encodeURIComponent(
+							: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
 									addon.id,
 							  )}`,
 				},

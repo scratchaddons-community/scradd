@@ -13,7 +13,7 @@ import startTicket, {
 	getThreadFromMember,
 	ticketCategoryMessage,
 	TICKET_CATEGORIES,
-} from "../common/contactMods.js";
+} from "../common/tickets.js";
 import { defineCommand } from "../common/types/command.js";
 import { disableComponents } from "../util/discord.js";
 
@@ -135,6 +135,7 @@ async function contactUser(
 		],
 		fetchReply: true,
 		allowedMentions: { users: [] },
+		ephemeral: true,
 	});
 
 	const collector = message.createMessageComponentCollector({
@@ -151,11 +152,12 @@ async function contactUser(
 			if (buttonInteraction.customId.startsWith("confirm-")) {
 				const thread = await startTicket(interaction, member);
 				if (thread)
-					await buttonInteraction.reply(
-						`${
+					await buttonInteraction.reply({
+						content: `${
 							CONSTANTS.emojis.statuses.yes
 						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-					);
+						ephemeral: true,
+					});
 			} else {
 				await buttonInteraction.deferUpdate();
 			}
