@@ -142,7 +142,7 @@ const allFields = {
 			customId: "BODY",
 			required: true,
 			maxLength: 75,
-			style: TextInputStyle.Paragraph,
+			style: TextInputStyle.Short,
 			label: "Server invite",
 		},
 	],
@@ -189,12 +189,16 @@ export const ticketCategoryMessage = {
 	ephemeral: true,
 } satisfies InteractionReplyOptions;
 
-const categoryToDescription = Object.fromEntries(
-	ticketCategoryMessage.components[0]?.components[0]?.options.map(({ label, value }) => [
-		value,
-		label,
-	]) || [],
-);
+const categoryToDescription = {
+	appeal: "Strike Appeal",
+	report: "Report",
+	role: "Role Request",
+	bug: "Scradd Bug",
+	update: "Server Suggestion",
+	rules: "Rule Clarification",
+	server: "Add An Other Scratch Server",
+	other: "Other",
+};
 
 /**
  * Get the non-mod involved in a ticket.
@@ -390,19 +394,8 @@ export default async function startTicket(
 		embeds: [
 			{
 				title:
-					option === "mod"
-						? "Contact User"
-						: "Contact Mods - " +
-						  {
-								appeal: "Appeal a strike",
-								report: "Report a user",
-								role: "Request a role",
-								bug: "Report a Scradd bug",
-								update: "Suggest a server change",
-								rules: "Get clarification on a rule",
-								server: "Add a server to Other Scratch Servers",
-								other: "Other",
-						  }[option || ""],
+					"Constact " +
+					(option === "mod" ? "User" : `Mods - ${categoryToDescription[option]}`),
 
 				color: member.displayColor,
 
@@ -447,7 +440,10 @@ export default async function startTicket(
 				color: member.displayColor,
 			},
 		],
-		content: option === "mod" ? "" : CONSTANTS.roles.mod?.toString(),
+		content:
+			option === "mod" || process.env.NODE_ENV === "development"
+				? ""
+				: CONSTANTS.roles.mod?.toString(),
 		allowedMentions: { parse: ["roles"] },
 	});
 
