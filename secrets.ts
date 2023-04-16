@@ -1,6 +1,9 @@
-export function dad(name: string, _: string) {
-	return `Hi ${name}! I’m Scradd!`;
+import type { User } from "discord.js";
+
+export function dad(name: string, _: User) {
+	return `Hi ${name.split(/\b/)[0] ?? name}! I’m Scradd!`;
 }
+export const dadEasterEggCount = 0;
 
 /**
  * - `word`
@@ -14,7 +17,3 @@ export const autoreactions: [
 	string | string[],
 	...(string | RegExp | [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"])[],
 ][] = [];
-
-export const isAprilFools = false;
-
-export const warnAF = "";

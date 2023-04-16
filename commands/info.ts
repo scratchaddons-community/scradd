@@ -13,6 +13,7 @@ import client from "../client.js";
 import CONSTANTS, { syncConstants } from "../common/CONSTANTS.js";
 import { defineCommand } from "../common/types/command.js";
 import pkg from "../package.json" assert { type: "json" };
+import { autoreactions, dadEasterEggCount } from "../secrets.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 import { getSettings } from "./settings.js";
@@ -203,6 +204,10 @@ function getConfig() {
 	return [
 		{
 			title: "Configuration",
+			description: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
+			color: CONSTANTS.themeColor,
+		},
+		{
 			description: "**CHANNELS**",
 
 			fields: [

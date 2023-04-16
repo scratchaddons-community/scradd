@@ -18,7 +18,6 @@ import {
 	getXpForLevel,
 	weeklyXpDatabase,
 	xpDatabase as database,
-	xpDatabase,
 } from "../common/xp.js";
 import { paginate } from "../util/discord.js";
 import { convertBase, nth } from "../util/numbers.js";
