@@ -59,7 +59,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 
 	if (message.channel.id === CONSTANTS.channels.updates?.id) {
 		await message.startThread({
-			name: truncateText(message.cleanContent?.split("\n")[0] || "New update!", 50),
+			name: truncateText(stripMarkdown(message.cleanContent)?.split("\n")[0] || "New update!", 50),
 
 			reason: "New upcoming update",
 		});
