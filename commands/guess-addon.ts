@@ -43,7 +43,6 @@ const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 	(await CONSTANTS.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
 )} command for more information about this addon!*`;
 
-// eslint-disable-next-line -- sonarjs/no-duplicate-string -- This already has types wherever it’s duplicated to prevent inconsistencies, we don’t need a rule too.
 const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 
 type GroupName = typeof GROUP_NAMES[number];
@@ -1640,51 +1639,53 @@ const command = defineCommand({
 						[],
 					);
 
-					const length = QUESTIONS_BY_CATEGORY[groupName].length;
-					const maxLength = Math.ceil(length / 25) * 25;
-					const groupSelects = QUESTIONS_BY_CATEGORY[groupName]
-						.filter((question) => !doneQuestions.has(question))
-						.reduce<APIActionRowComponent<APIStringSelectComponent>[]>(
-							(accumulator, question, index) => {
-								const options = accumulator.at(-1)?.components?.[0]?.options || [];
+					const questions = QUESTIONS_BY_CATEGORY[groupName].filter(
+						(question) => !doneQuestions.has(question),
+					);
+					const maxLength = Math.ceil(
+						questions.length / Math.ceil(questions.length / 25),
+					);
+					const groupSelects = questions.reduce<
+						APIActionRowComponent<APIStringSelectComponent>[]
+					>(
+						(result, question, index) => {
+							const arrayIndex = Math.floor(index / maxLength);
+							result[arrayIndex] ??= {
+								type: ComponentType.ActionRow,
 
-								options.push({
-									label: question,
-									value: `${groupName}.${index}`,
-								});
+								components: [
+									{
+										type: ComponentType.StringSelect,
+										placeholder: `Select a question (continued)`,
+										custom_id: generateHash(groupName),
+										options: [],
+									},
+								],
+							};
 
-								if (options.length === maxLength && index !== length - 1) {
-									accumulator.push({
-										type: ComponentType.ActionRow,
+							result[arrayIndex]?.components[0]?.options.push({
+								label: question,
+								value: `${groupName}.${QUESTIONS_BY_CATEGORY[groupName].indexOf(
+									question,
+								)}`,
+							});
+							return result;
+						},
+						[
+							{
+								type: ComponentType.ActionRow,
 
-										components: [
-											{
-												type: ComponentType.StringSelect,
-												placeholder: `Select a question (irreversible)`,
-												custom_id: generateHash(groupName),
-												options,
-											},
-										],
-									});
-								}
-
-								return accumulator;
+								components: [
+									{
+										type: ComponentType.StringSelect,
+										placeholder: `Select a question (irreversible)`,
+										custom_id: generateHash(groupName),
+										options: [],
+									},
+								],
 							},
-							[
-								{
-									type: ComponentType.ActionRow,
-
-									components: [
-										{
-											type: ComponentType.StringSelect,
-											placeholder: `Select a question (irreversible)`,
-											custom_id: generateHash(groupName),
-											options: [],
-										},
-									],
-								},
-							],
-						);
+						],
+					);
 
 					const reply = await interaction.fetchReply();
 					const buttons = reply.components.at(-1);
