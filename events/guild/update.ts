@@ -211,6 +211,8 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	if (oldGuild.preferredLocale !== newGuild.preferredLocale)
 		logs.push(`Server primary language switched to ${newGuild.preferredLocale}`);
 
+	// todo: maxStageVideoChannelUsers
+
 	if (oldGuild.premiumProgressBarEnabled !== newGuild.premiumProgressBarEnabled)
 		logs.push(`Boost progress bar ${newGuild.premiumProgressBarEnabled ? "shown" : "hidden"}`);
 
