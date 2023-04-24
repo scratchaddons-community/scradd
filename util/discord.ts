@@ -518,6 +518,7 @@ export async function paginate<Item>(
 		showIndexes = true,
 		generateComponents,
 		disableCustomComponents = false,
+		customComponentLocation = "below",
 	}: {
 		title: string;
 		user: User | false;
@@ -531,6 +532,7 @@ export async function paginate<Item>(
 		showIndexes?: boolean;
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
 		disableCustomComponents?: boolean;
+		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
 	const previousId = generateHash("previous");
@@ -600,7 +602,7 @@ export async function paginate<Item>(
 		if (generateComponents) {
 			const extraComponents = generateComponents(filtered);
 			if (extraComponents?.length)
-				components.push({
+				components[customComponentLocation === "above" ? "unshift" : "push"]({
 					type: ComponentType.ActionRow,
 					components: extraComponents,
 				});
