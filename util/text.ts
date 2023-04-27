@@ -79,27 +79,6 @@ export function caesar(text: string, rot = 13) {
 }
 
 /**
- * Removes unpingable characters from a string.
- *
- * @param text - The text to sanitize.
- *
- * @returns A pingable version of {@link text}.
- */
-export function pingablify(text: string) {
-	text = text.normalize("NFD");
-	if (/^[\p{Diacritic}]+$/gu.test(text)) return `{pingable name} ${truncateText(text, 10)}`;
-	const regex = /[^\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>? -]/gu;
-	const segments = Array.from(new Intl.Segmenter().segment(text));
-	const pingable =
-		segments.reduce((count, { segment }) => count + Number(regex.test(segment)), 0) <
-		segments.length / 2;
-
-	return pingable && /[\p{Diacritic}\w~!@#$%&*()=+[\]\\{}|;':",./<>?-]{4,}/u.test(text)
-		? text
-		: text.replaceAll(regex, "") || `{pingable name} ${truncateText(text, 10)}`;
-}
-
-/**
  * Normalize a string.
  *
  * @param text - The string to normalize.

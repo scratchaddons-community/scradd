@@ -9,14 +9,13 @@ import {
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
-import censor, { badWordsAllowed } from "../common/language.js";
-import warn from "../common/punishments.js";
+import censor, { badWordsAllowed } from "../modules/automod/language.js";
+import warn from "../modules/punishments/punishments.js";
 import { importScripts } from "../util/files.js";
 import logError from "../util/logError.js";
 
-import type Command from "../common/types/command.js";
 import type Event from "../common/types/event";
-import type { BaseCommand } from "../common/types/command.js";
+import type { BaseCommand } from "../commands.js";
 
 /**
  * Detect bad words in command options.

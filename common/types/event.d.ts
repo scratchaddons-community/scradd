@@ -1,7 +1,7 @@
 import type { ClientEvents } from "discord.js";
 
 /** A function to process events. */
-type Event<K extends ClientEvent = ClientEvent> = (...args: ClientEvents[K]) => unknown;
+type Event<K extends ClientEvent = ClientEvent> = (...args: ClientEvents[K]) => never;
 export default Event;
 
 export type ReservedClientEvent = "ready" | "warn" | "debug" | "error";

@@ -1,30 +1,14 @@
 import path from "node:path";
 import url from "node:url";
 import dns from "node:dns";
+import fileSystem from "node:fs/promises";
 
-import {
-	PermissionsBitField,
-	ApplicationCommandType,
-	type ApplicationCommandData,
-	ApplicationCommandOptionType,
-	type ApplicationCommandAutocompleteNumericOptionData,
-	type ApplicationCommandAutocompleteStringOptionData,
-	type ApplicationCommandChannelOptionData,
-	type ApplicationCommandNonOptionsData,
-	type ApplicationCommandNumericOptionData,
-	type ApplicationCommandStringOptionData,
-	type Collection,
-	ActivityType,
-} from "discord.js";
+import { ActivityType } from "discord.js";
 import dotenv from "dotenv";
 
 import pkg from "./package.json" assert { type: "json" };
-import { importScripts } from "./util/files.js";
-
-import type Command from "./common/types/command.js";
-import type { Option } from "./common/types/command.js";
-import type Event from "./common/types/event.js";
 import type { ClientEvent } from "./common/types/event.js";
+import type Event from "./common/types/event.js";
 
 dotenv.config();
 dns.setDefaultResultOrder("ipv4first");
@@ -42,111 +26,34 @@ process
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
-const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+const directory = path.resolve(url.fileURLToPath(import.meta.url), "./modules");
+const modules = await fileSystem.readdir(directory);
 
-/**
- * Convert our custom options format to something the Discord API will accept.
- *
- * @param options - The options to convert.
- *
- * @returns The converted options.
- */
-function transformOptions(options: { [key: string]: Option }) {
-	return Object.entries(options)
-		.map(([name, option]) => {
-			const transformed = {
-				name,
-				description: option.description,
-				type: option.type,
-				required: option.required ?? false,
-			} as any;
+const promises = modules.map(async (module) => {
+	const fullPath = path.join(directory, module);
+	const resolved = (await fileSystem.lstat(fullPath)).isDirectory()
+		? path.join(fullPath, "./index.js")
+		: fullPath;
+	if (path.extname(resolved) !== ".js") return;
 
-			if (option.autocomplete) transformed.autocomplete = option.autocomplete;
-			if (option.choices)
-				transformed.choices = Object.entries(option.choices).map(([value, choice]) => ({
-					name: choice,
-					value,
-				}));
+	await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
+});
+await Promise.all(promises);
 
-			if (option.channelTypes) transformed.channelTypes = option.channelTypes;
-			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
-			if (option.minLength !== undefined) transformed.minLength = option.minLength;
-
-			if (option.maxValue !== undefined) transformed.maxValue = option.maxValue;
-			if (option.minValue !== undefined) transformed.minValue = option.minValue;
-
-			return transformed as
-				| ApplicationCommandAutocompleteNumericOptionData
-				| ApplicationCommandAutocompleteStringOptionData
-				| ApplicationCommandChannelOptionData
-				| ApplicationCommandNonOptionsData
-				| ApplicationCommandNumericOptionData
-				| ApplicationCommandStringOptionData;
-		})
-		.sort((one, two) =>
-			one.required === two.required
-				? two.name.localeCompare(one.name)
-				: one.required
-				? -1
-				: 1,
-		);
+const { events } = await import("./events.js");
+for (const [event, execute] of Object.entries(events) as [ClientEvent, Event][]) {
+	client.on(event, async (...args) => {
+		try {
+			await (execute as Event<typeof event>)(...args);
+		} catch (error) {
+			await logError(error, event);
+		}
+	});
 }
 
-await importScripts(path.resolve(dirname, "./events")).then(
-	(events: Collection<ClientEvent, Event>) => {
-		for (const [event, execute] of events.entries()) {
-			client.on(event, async (...args) => {
-				try {
-					await execute(...args);
-				} catch (error) {
-					await logError(error, event);
-				}
-			});
-		}
-	},
-);
-await importScripts(path.resolve(dirname, "./commands")).then(
-	async (commands: Collection<string, Command>) => {
-		await client.application.commands.set(
-			commands
-				.filter((command): command is NonNullable<typeof command> => command !== undefined)
-				.map(({ data }, name): ApplicationCommandData => {
-					const type = data.type ?? ApplicationCommandType.ChatInput;
-					return {
-						name:
-							type === ApplicationCommandType.ChatInput
-								? name
-								: name
-										.split("-")
-										.map(
-											(word) => (word[0] ?? "").toUpperCase() + word.slice(1),
-										)
-										.join(" "),
+const { commandData } = await import("./commands.js");
+await client.application.commands.set(commandData, CONSTANTS.guild.id);
 
-						description: data.description ?? "",
-						type,
-
-						options: data.options
-							? transformOptions(data.options)
-							: data.subcommands &&
-							  Object.entries(data.subcommands).map(([subcommand, command]) => ({
-									description: command.description,
-									name: subcommand,
-
-									options: command.options && transformOptions(command.options),
-
-									type: ApplicationCommandOptionType.Subcommand,
-							  })),
-
-						defaultMemberPermissions: data.restricted
-							? new PermissionsBitField()
-							: null,
-					};
-				}),
-			CONSTANTS.guild.id,
-		);
-	},
-);
 await client.guilds.fetch().then(
 	async (guilds) =>
 		await Promise.all(
@@ -160,7 +67,7 @@ await client.guilds.fetch().then(
 if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
-	const { default: log } = await import("./common/logging.js");
+	const { default: log } = await import("./modules/modlogs/logging.js");
 	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
 }
 
