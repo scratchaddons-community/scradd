@@ -1,7 +1,9 @@
 import type { ClientEvents } from "discord.js";
-import type { ClientEvent } from "./common/types/event.js";
 
-export const events: { [E in ClientEvent]?: (...args: ClientEvents[E]) => unknown } = {};
+type ReservedClientEvent = "ready" | "warn" | "debug" | "error" | "interactionCreate";
+export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
+export type Event<E extends ClientEvent> =(...args: ClientEvents[E]) => unknown
+export const events: { [E in ClientEvent]?: Event<E> } = {};
 
 export default function defineEvent<EventName extends ClientEvent>(
 	eventName: EventName,

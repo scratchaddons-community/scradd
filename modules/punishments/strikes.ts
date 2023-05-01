@@ -1,97 +1,21 @@
 import {
-	GuildMember,
-	time,
-	ApplicationCommandOptionType,
-	TimestampStyles,
-	ButtonStyle,
-	ComponentType,
 	ButtonInteraction,
+	ButtonStyle,
 	ChatInputCommandInteraction,
+	ComponentType,
+	GuildMember,
+	InteractionReplyOptions,
+	time,
+	TimestampStyles,
 	User,
 } from "discord.js";
 import client from "../../client.js";
-
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { getStrikeById, strikeDatabase } from "./punishments.js";
-import defineCommand from "../../commands.js";
 import { paginate } from "../../util/discord.js";
+import { getSettings } from "../settings.js";
+import filterToStrike, { strikeDatabase } from "./misc.js";
 
-defineCommand({
-		description: "Commands to view strike information",
-
-		subcommands: {
-			id: {
-				description: "View a strike by ID",
-
-				options: {
-					id: {
-						required: true,
-						type: ApplicationCommandOptionType.String,
-						description: "The strike’s ID",
-					},
-				},
-			},
-
-			user: {
-				description: "View your or (Mods only) someone else’s strikes",
-
-				options: {
-					user: {
-						type: ApplicationCommandOptionType.User,
-						description: "(Mods only) The user to see strikes for",
-					},
-				},
-			},
-		},
-
-		censored: false,
-	},
-
-	async (interaction) => {
-		if (!(interaction.member instanceof GuildMember))
-			throw new TypeError("interaction.member is not a GuildMember");
-		switch (interaction.options.getSubcommand(true)) {
-			case "user": {
-				const selected = interaction.options.getUser("user") ?? interaction.member;
-				await getStrikes(selected, interaction);
-				break;
-			}
-			case "id": {
-				await interaction.reply(
-					await getStrikeById(
-						interaction.member,
-						interaction.options.getString("id", true),
-					),
-				);
-			}
-		}
-	},
-
-	buttons: {
-		async strike(interaction, id) {
-			if (!(interaction.member instanceof GuildMember))
-				throw new TypeError("interaction.member is not a GuildMember");
-
-			await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
-			return;
-		},
-		async viewStrikes(interaction, userId = "") {
-			await getStrikes(await client.users.fetch(userId), interaction);
-		},
-	},
-
-	stringSelects: {
-		async selectStrike(interaction) {
-			if (!(interaction.member instanceof GuildMember))
-				throw new TypeError("interaction.member is not a GuildMember");
-
-			const [id] = interaction.values;
-			if (id) await interaction.reply(await getStrikeById(interaction.member, id));
-		},
-	},
-});
-
-async function getStrikes(
+export async function getStrikes(
 	selected: GuildMember | User,
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
 ) {
@@ -187,4 +111,101 @@ async function getStrikes(
 			},
 		},
 	);
+}
+
+/**
+ * Reply to a interaction with strike information.
+ *
+ * @param interactor - The user who initiated the interaction.
+ * @param filter - The strike to get.
+ */
+export async function getStrikeById(
+	interactor: GuildMember,
+	filter: string,
+): Promise<InteractionReplyOptions> {
+	const strike = await filterToStrike(filter);
+	if (!strike)
+		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
+
+	const isModerator = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
+	if (strike.user !== interactor.id && !isModerator) {
+		return {
+			ephemeral: true,
+			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+		};
+	}
+
+	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
+
+	const moderator =
+		isModerator && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+	const nick = member?.displayName ?? user?.username;
+	const { useMentions } = getSettings(interactor.user);
+	return {
+		components: isModerator
+			? [
+					{
+						type: ComponentType.ActionRow,
+
+						components: [
+							strike.removed
+								? {
+										type: ComponentType.Button,
+										customId: `${strike.id}_addStrikeBack`,
+										label: "Add back",
+										style: ButtonStyle.Primary,
+								  }
+								: {
+										type: ComponentType.Button,
+										customId: `${strike.id}_removeStrike`,
+										label: "Remove",
+										style: ButtonStyle.Danger,
+								  },
+						],
+					},
+			  ]
+			: [],
+
+		ephemeral: true,
+
+		embeds: [
+			{
+				color: member?.displayColor,
+
+				author: nick
+					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
+					: undefined,
+
+				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
+					strike.removed ? "~~" : ""
+				}`,
+
+				description: strike.reason,
+				timestamp: new Date(strike.date).toISOString(),
+
+				fields: [
+					{ name: "⚠️ Count", value: String(strike.count), inline: true },
+					...(moderator
+						? [
+								{
+									name: "🛡 Moderator",
+									value: useMentions ? moderator.toString() : moderator.username,
+									inline: true,
+								},
+						  ]
+						: []),
+					...(user
+						? [
+								{
+									name: "👤 Target user",
+									value: useMentions ? user.toString() : user.username,
+									inline: true,
+								},
+						  ]
+						: []),
+				],
+			},
+		],
+	};
 }

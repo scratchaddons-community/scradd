@@ -7,8 +7,8 @@ import { ActivityType } from "discord.js";
 import dotenv from "dotenv";
 
 import pkg from "./package.json" assert { type: "json" };
-import type { ClientEvent } from "./common/types/event.js";
-import type Event from "./common/types/event.js";
+import type { ClientEvent, Event } from "./events.js";
+import { GlobalFonts } from "@napi-rs/canvas";
 
 dotenv.config();
 dns.setDefaultResultOrder("ipv4first");
@@ -23,6 +23,11 @@ process
 	.on("warning", (error) => {
 		logError(error, "warning").catch(console.error);
 	});
+
+GlobalFonts.registerFromPath(
+	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `./common/sora/font.ttf`),
+	"Sora",
+);
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
@@ -41,10 +46,10 @@ const promises = modules.map(async (module) => {
 await Promise.all(promises);
 
 const { events } = await import("./events.js");
-for (const [event, execute] of Object.entries(events) as [ClientEvent, Event][]) {
+for (const [event, execute] of Object.entries(events) as [ClientEvent, Event<ClientEvent>][]) {
 	client.on(event, async (...args) => {
 		try {
-			await (execute as Event<typeof event>)(...args);
+			await execute(...args);
 		} catch (error) {
 			await logError(error, event);
 		}

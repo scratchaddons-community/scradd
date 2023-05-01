@@ -5,7 +5,7 @@ import { messageToText } from "../../../util/discord.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"messageDeleteBulk"> = async function event(messages, channel) {
+defineEvent("messageDeleteBulk", async (messages, channel) => {
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
@@ -41,5 +41,4 @@ const event: Event<"messageDeleteBulk"> = async function event(messages, channel
 			},
 		],
 	});
-};
-export default event;
+});

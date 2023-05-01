@@ -1,7 +1,6 @@
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 
-import type Event from "../common/types/event";
 import type { Snowflake } from "discord.js";
 
 export const rolesDatabase = new Database<{ [role: Snowflake]: true } & { user: Snowflake }>(
@@ -9,7 +8,7 @@ export const rolesDatabase = new Database<{ [role: Snowflake]: true } & { user: 
 );
 await rolesDatabase.init();
 
-const event: Event<"guildMemberAdd"> = async function event(member) {
+defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
 
 	// todo
@@ -34,6 +33,5 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 	// else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles, user: member.id };
 
 	// rolesDatabase.data = allRoles;
-};
-export default event;
+});
 // todo save roles in the db

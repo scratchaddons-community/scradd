@@ -3,7 +3,7 @@ import log, { shouldLog } from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"threadDelete"> = async function event(thread) {
+defineEvent("threadDelete", async (thread) => {
 	if (thread.guild.id !== CONSTANTS.guild.id) return;
 	if (!shouldLog(thread)) return;
 
@@ -13,5 +13,4 @@ const event: Event<"threadDelete"> = async function event(thread) {
 		}deleted! (ID: ${thread.id})`,
 		"channels",
 	);
-};
-export default event;
+});

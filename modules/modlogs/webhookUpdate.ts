@@ -3,9 +3,8 @@ import log from "./logging.js";
 
 import type Event from "../../common/types/event";
 
-const event: Event<"webhookUpdate"> = async function event(channel) {
+defineEvent("webhookUpdate", async (channel) => {
 	if (channel.guild.id !== CONSTANTS.guild.id) return;
 
 	await log(`🌐 Webhooks updated in ${channel.toString()}!`, "channels");
-};
-export default event;
+});

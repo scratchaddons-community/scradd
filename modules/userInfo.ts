@@ -9,6 +9,7 @@ import {
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import defineCommand from "../commands.js";
+import { REACTIONS_NAME } from "./board/misc.js";
 
 defineCommand(
 	{
@@ -124,10 +125,10 @@ defineCommand(
 							label: "View XP",
 						},
 						{
-							customId: `${user.id}_explorePotatoes`,
+							customId: `${user.id}_exploreBoard`,
 							style: ButtonStyle.Secondary,
 							type: ComponentType.Button,
-							label: "Explore Potatoes",
+							label: `Explore ${REACTIONS_NAME}`,
 						},
 						...(user.id == interaction.user.id || isMod
 							? [
@@ -147,7 +148,7 @@ defineCommand(
 										customId: `${user.id}_contactUser`,
 										style: ButtonStyle.Secondary,
 										type: ComponentType.Button,
-										label: "Open Ticket",
+										label: "Contact User",
 									} as const,
 							  ]
 							: []),

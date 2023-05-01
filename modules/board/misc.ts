@@ -2,22 +2,36 @@ import {
 	APIButtonComponent,
 	BaseMessageOptions,
 	ButtonStyle,
-	ChannelType,
 	ComponentType,
 	Message,
 	MessageType,
 	Snowflake,
 	TextBasedChannel,
 } from "discord.js";
-import { getSettings } from "../settings.js";
-
-import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import Database from "../../common/database.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";
-import giveXp from "../xp/xp2.js";
 
-export const BOARD_EMOJI = "🥔";
+if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+const { board } = CONSTANTS.channels;
+export const BOARD_EMOJI = "🥔",
+	REACTIONS_NAME = "Potatoes";
+
+export const boardDatabase = new Database<{
+	/** The number of reactions this message has. */
+	reactions: number;
+	/** The ID of the user who posted this. */
+	user: Snowflake;
+	/** The ID of the channel this message is in. */
+	channel: Snowflake;
+	/** The ID of the message on the board. */
+	onBoard: Snowflake | 0;
+	/** The ID of the original message. */
+	source: Snowflake;
+}>("board");
+await boardDatabase.init();
+
 /**
  * Determines the board reaction count for a channel.
  *
@@ -63,25 +77,6 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 		COUNTS.default
 	);
 }
-
-if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
-
-const { board } = CONSTANTS.channels;
-
-export const boardDatabase = new Database<{
-	/** The number of reactions this message has. */
-	reactions: number;
-	/** The ID of the user who posted this. */
-	user: Snowflake;
-	/** The ID of the channel this message is in. */
-	channel: Snowflake;
-	/** The ID of the message on the board. */
-	onBoard: Snowflake | 0;
-	/** The ID of the original message. */
-	source: Snowflake;
-}>("board");
-
-await boardDatabase.init();
 
 /**
  * Generate an embed and button to represent a board message with.
@@ -204,95 +199,3 @@ export async function generateBoardMessage(
 
 	return await messageToBoardData(message);
 }
-
-/**
- * Update the count on a message on #potatoboard.
- *
- * @param message - The board message to update.
- */
-export default async function updateBoard(message: Message) {
-	const count = message.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
-	const minReactions = boardReactionCount(message.channel);
-
-	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
-
-	const boardMessage = boardMessageId
-		? await board.messages.fetch(boardMessageId).catch(() => {})
-		: undefined;
-
-	if (boardMessage) {
-		if (count < Math.floor(minReactions * 0.8)) {
-			await boardMessage.delete();
-		} else {
-			const content = boardMessage.content.replace(/\d+/, String(count));
-			await boardMessage.edit(content);
-		}
-	} else if (count >= minReactions) {
-		if (!message.author.bot) await giveXp(message.author, message.url);
-
-		const sentMessage = await board.send({
-			...(await generateBoardMessage(message)),
-			allowedMentions: getSettings(message.author).boardPings ? undefined : { users: [] },
-		});
-
-		if (board.type === ChannelType.GuildAnnouncement) await sentMessage.crosspost();
-
-		boardDatabase.data = [
-			...boardDatabase.data.filter((item) => item.source !== message.id),
-			...(count
-				? ([
-						{
-							channel: message.channel.id,
-							onBoard: sentMessage.id,
-							reactions: count,
-							source: message.id,
-							user: message.author.id,
-						},
-				  ] as const)
-				: []),
-		];
-	}
-
-	if (boardMessage || count < minReactions) {
-		boardDatabase.data = [
-			...boardDatabase.data.filter((item) => item.source !== message.id),
-			...(count
-				? ([
-						{
-							channel: message.channel.id,
-							onBoard: boardMessage?.id ?? 0,
-							reactions: count,
-							source: message.id,
-							user: message.author.id,
-						},
-				  ] as const)
-				: []),
-		];
-	}
-
-	const top = Array.from(boardDatabase.data).sort((one, two) => two.reactions - one.reactions);
-	top.splice(
-		top.findIndex(
-			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,
-		) + 1,
-	);
-	const topIds = await Promise.all(
-		top.map(async ({ onBoard }) => {
-			const toPin = onBoard && (await board.messages.fetch(onBoard)?.catch(() => {}));
-
-			if (toPin) await toPin.pin("Is a top-potatoed message");
-
-			return onBoard;
-		}),
-	);
-	const pins = await board?.messages.fetchPinned();
-	if (pins.size > top.length) {
-		await Promise.all(
-			pins
-				.filter((pin) => !topIds.includes(pin.id))
-				.map(async (pin) => await pin.unpin("No longer a top-potatoed message")),
-		);
-	}
-}
-
-TODO;

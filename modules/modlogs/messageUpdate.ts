@@ -10,7 +10,7 @@ import type Event from "../../common/types/event";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
-const event: Event<"messageUpdate"> = async function event(oldMessage, partialMessage) {
+defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (!shouldLog(newMessage.channel)) return;
 	const logs = [];
@@ -136,6 +136,4 @@ const event: Event<"messageUpdate"> = async function event(oldMessage, partialMe
 				}),
 		),
 	);
-};
-
-export default event;
+});

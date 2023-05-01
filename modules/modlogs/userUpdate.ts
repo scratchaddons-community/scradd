@@ -2,7 +2,7 @@ import log from "./logging.js";
 
 import type Event from "../../common/types/event";
 
-const event: Event<"userUpdate"> = async function event(oldUser, partialUser) {
+defineEvent("userUpdate", async (oldUser, partialUser) => {
 	const newUser = partialUser.partial ? await partialUser.fetch() : partialUser;
 
 	if (oldUser.tag !== newUser.tag) {
@@ -19,5 +19,4 @@ const event: Event<"userUpdate"> = async function event(oldUser, partialUser) {
 			files: [Buffer.from(await response.arrayBuffer())],
 		});
 	}
-};
-export default event;
+});

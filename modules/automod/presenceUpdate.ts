@@ -5,7 +5,7 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 
 import type Event from "../../common/types/event";
 
-const event: Event<"presenceUpdate"> = async function event(_, newPresence) {
+defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== CONSTANTS.guild.id) return;
 
 	const [activity] = newPresence.activities;
@@ -19,5 +19,4 @@ const event: Event<"presenceUpdate"> = async function event(_, newPresence) {
 			"⚠️ As a mod, you should set an example for the server, so please refrain from swears in your status. Thanks!",
 		);
 	}
-};
-export default event;
+});

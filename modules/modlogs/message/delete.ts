@@ -9,7 +9,7 @@ import type Event from "../../common/types/event";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
-const event: Event<"messageDelete"> = async function event(message) {
+defineEvent("messageDelete", async (message) => {
 	if (!shouldLog(message.channel)) return;
 
 	const shush =
@@ -52,5 +52,4 @@ const event: Event<"messageDelete"> = async function event(message) {
 			],
 		},
 	);
-};
-export default event;
+});

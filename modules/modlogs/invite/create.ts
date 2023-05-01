@@ -5,7 +5,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"inviteCreate"> = async function event(invite) {
+defineEvent("inviteCreate", async (invite) => {
 	if (!(invite.guild instanceof Guild) || invite.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`➕ ${invite.temporary ? "Temporary invite" : "Invite"} ${
@@ -23,5 +23,4 @@ const event: Event<"inviteCreate"> = async function event(invite) {
 		}!`,
 		"members",
 	);
-};
-export default event;
+});

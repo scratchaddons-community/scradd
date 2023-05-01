@@ -4,7 +4,7 @@ import CONSTANTS from "../../../common/CONSTANTS.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"threadCreate"> = async function event(thread, newlyCreated) {
+defineEvent("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
 
 	if (thread.parent?.id === CONSTANTS.channels.suggestions?.id) {
@@ -19,5 +19,4 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 			},
 		];
 	}
-};
-export default event;
+});

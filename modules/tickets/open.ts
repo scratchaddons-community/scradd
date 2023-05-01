@@ -7,34 +7,21 @@ import {
 	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	InteractionReplyOptions,
 	InteractionResponse,
 	InteractionType,
 	ModalSubmitInteraction,
 	TextInputComponentData,
 	TextInputStyle,
-	ThreadChannel,
 	time,
 	TimestampStyles,
-	User,
 } from "discord.js";
 
-import { asyncFilter } from "../../util/promises.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
+import { disableComponents } from "../../util/discord.js";
 import log from "../modlogs/logging.js";
-import { strikeDatabase } from "../punishments/punishments.js";
+import { strikeDatabase } from "../punishments/misc.js";
+import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 
-export const TICKET_CATEGORIES = [
-	"appeal",
-	"report",
-	"role",
-	"bug",
-	"update",
-	"rules",
-	"server",
-	"other",
-] as const;
-type Category = typeof TICKET_CATEGORIES[number];
 const allFields = {
 	appeal: [
 		{
@@ -159,36 +146,6 @@ const allFields = {
 	],
 } satisfies Record<Category, TextInputComponentData[]>;
 
-export const ticketCategoryMessage = {
-	content: `👍 Thanks for reaching out!`,
-	components: [
-		{
-			type: ComponentType.ActionRow,
-			components: [
-				{
-					type: ComponentType.StringSelect,
-					customId: "_contactMods",
-					options: [
-						...([
-							{ label: "Appeal a strike", value: "appeal" },
-							{ label: "Report a user", value: "report" },
-							{ label: "Request a contributor role", value: "role" },
-							{ label: "Report a Scradd bug", value: "bug" },
-							{ label: "Suggest a server change", value: "update" },
-							{ label: "Get clarification on a rule", value: "rules" },
-							{ label: "Get help with Scratch Addons", value: "sa" },
-							{ label: "Add your server to Other Scratch Servers", value: "server" },
-							{ label: "Other", value: "other" },
-						] as const),
-					],
-					placeholder: "What do you need help with?",
-				},
-			],
-		},
-	],
-	ephemeral: true,
-} satisfies InteractionReplyOptions;
-
 const categoryToDescription = {
 	appeal: "Strike Appeal",
 	report: "Report",
@@ -198,39 +155,7 @@ const categoryToDescription = {
 	rules: "Rule Clarification",
 	server: "Add An Other Scratch Server",
 	other: "Other",
-};
-
-/**
- * Get the non-mod involved in a ticket.
- *
- * @param thread - Ticket thread.
- *
- * @returns User who messages are being sent to.
- */
-export async function getUserFromTicket(thread: ThreadChannel): Promise<void | User> {
-	const messages = await thread.messages.fetch({ after: thread.id, limit: 2 });
-	return messages.first()?.mentions.users.first();
-}
-
-/**
- * Find a ticket for a user.
- *
- * @param user - The user to search for.
- *
- * @returns Ticket thread.
- */
-export async function getThreadFromMember(user: GuildMember | User): Promise<ThreadChannel | void> {
-	if (!CONSTANTS.channels.contact) return;
-
-	const { threads } = await CONSTANTS.channels.contact.threads.fetchActive();
-
-	return (
-		await asyncFilter(
-			threads.toJSON(),
-			async (thread) => (await getUserFromTicket(thread))?.id === user.id && thread,
-		).next()
-	).value;
-}
+} satisfies Record<Category, string>;
 
 export async function gatherTicketInfo(
 	interaction: AnySelectMenuInteraction,
@@ -251,7 +176,7 @@ export async function gatherTicketInfo(
 ) {
 	const option = interaction.isAnySelectMenu() ? interaction.values[0] : category;
 
-	if (option === "sa") {
+	if (option === SA_CATEGORY) {
 		return await interaction.reply({
 			content: `${
 				CONSTANTS.emojis.statuses.no
@@ -287,7 +212,6 @@ export async function gatherTicketInfo(
 		})),
 	});
 }
-
 export default async function startTicket(
 	interaction:
 		| ModalSubmitInteraction
@@ -393,7 +317,7 @@ export default async function startTicket(
 		embeds: [
 			{
 				title:
-					"Constact " +
+					"Contact " +
 					(option === "mod" ? "User" : `Mods - ${categoryToDescription[option]}`),
 
 				color: member.displayColor,
@@ -451,4 +375,76 @@ export default async function startTicket(
 	return thread;
 }
 
-TODO;
+export async function contactUser(
+	member: GuildMember,
+	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+) {
+	const existingThread = await getThreadFromMember(member);
+
+	if (existingThread) {
+		await interaction.reply({
+			content: `${
+				CONSTANTS.emojis.statuses.no
+			} ${member.toString()} already has a ticket open! Talk to them in ${existingThread.toString()}.`,
+
+			ephemeral: true,
+		});
+
+		return;
+	}
+
+	const message = await interaction.reply({
+		content: `Are you sure you want to start a ticket with **${member.toString()}**?`,
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						type: ComponentType.Button,
+						label: "Confirm",
+						style: ButtonStyle.Success,
+						customId: `confirm-${interaction.id}`,
+					},
+					{
+						type: ComponentType.Button,
+						label: "Cancel",
+						customId: `cancel-${interaction.id}`,
+						style: ButtonStyle.Danger,
+					},
+				],
+			},
+		],
+		fetchReply: true,
+		allowedMentions: { users: [] },
+		ephemeral: true,
+	});
+
+	const collector = message.createMessageComponentCollector({
+		filter: (buttonInteraction) =>
+			buttonInteraction.customId.endsWith(`-${interaction.id}`) &&
+			buttonInteraction.user.id === interaction.user.id,
+
+		time: CONSTANTS.collectorTime,
+		max: 1,
+	});
+
+	collector
+		.on("collect", async (buttonInteraction) => {
+			if (buttonInteraction.customId.startsWith("confirm-")) {
+				const thread = await startTicket(interaction, member);
+				if (thread)
+					await buttonInteraction.reply({
+						content: `${
+							CONSTANTS.emojis.statuses.yes
+						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
+						ephemeral: true,
+					});
+			} else {
+				await buttonInteraction.deferUpdate();
+			}
+		})
+		.on("end", async () => {
+			await message.edit({ components: disableComponents(message.components) });
+		});
+}
+

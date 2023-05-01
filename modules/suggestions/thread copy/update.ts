@@ -4,7 +4,7 @@ import { shouldLog } from "../../modlogs/logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"threadUpdate"> = async function event(_, newThread) {
+defineEvent("threadUpdate", async (_, newThread) => {
 	if (newThread.guild.id !== CONSTANTS.guild.id) return;
 	if (!shouldLog(newThread)) return;
 
@@ -28,5 +28,4 @@ const event: Event<"threadUpdate"> = async function event(_, newThread) {
 				: suggestion,
 		);
 	}
-};
-export default event;
+});

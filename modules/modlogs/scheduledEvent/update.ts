@@ -7,7 +7,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent, newEvent) {
+defineEvent("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
 	const guild = newEvent.guild ?? (await client.guilds.fetch(newEvent.guildId));
 	if (guild.id !== CONSTANTS.guild.id || !oldEvent) return;
 	const logs = [];
@@ -77,5 +77,4 @@ const event: Event<"guildScheduledEventUpdate"> = async function event(oldEvent,
 	await Promise.all(
 		logs.map(async (edit) => await log(`📆 Event ${oldEvent.name}${edit}!`, "voice")),
 	);
-};
-export default event;
+});

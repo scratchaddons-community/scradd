@@ -3,8 +3,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"emojiDelete"> = async function event(emoji) {
+defineEvent("emojiDelete", async (emoji) => {
 	if (emoji.guild.id !== CONSTANTS.guild.id) return;
 	await log(`🙁 Emoji ${emoji.toString()} deleted!`, "server");
-};
-export default event;
+});

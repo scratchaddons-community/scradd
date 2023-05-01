@@ -321,8 +321,8 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 			.flat(2);
 
 		for (const question of questions) {
-			frequencies[String(question.question)] ??= 0;
-			frequencies[String(question.question)]++;
+			frequencies[question.question] ??= 0;
+			frequencies[question.question]++;
 		}
 
 		const frequenciesArray = Object.entries(frequencies);
@@ -569,7 +569,7 @@ function answerQuestion(
 
 	const dependencies: Dependencies = {};
 	const initialUpdated = probabilitiesBefore.map(([addonId, probability]): Probability => {
-		const addon = QUESTIONS_BY_ADDON[String(addonId)] ?? [];
+		const addon = QUESTIONS_BY_ADDON[addonId] ?? [];
 		const questionInfo = addon.find(({ question }) => question === justAsked);
 
 		if (probabilityShift > 0 && questionInfo?.dependencies)
@@ -585,9 +585,9 @@ function answerQuestion(
 		);
 
 		if (
-			allDependencies[String(justAsked)] !== undefined &&
-			((probabilityShift > 0 && !allDependencies[String(justAsked)]) ||
-				(probabilityShift < 0 && allDependencies[String(justAsked)] !== false))
+			allDependencies[justAsked] !== undefined &&
+			((probabilityShift > 0 && !allDependencies[justAsked]) ||
+				(probabilityShift < 0 && allDependencies[justAsked] !== false))
 		) {
 			justAskedQuestions.push(
 				...addon

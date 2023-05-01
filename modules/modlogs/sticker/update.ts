@@ -5,7 +5,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"stickerUpdate"> = async function event(oldSticker, partialSticker) {
+defineEvent("stickerUpdate", async (oldSticker, partialSticker) => {
 	const newSticker = partialSticker.partial ? await partialSticker.fetch() : partialSticker;
 
 	if (!newSticker.guild || newSticker.guild.id !== CONSTANTS.guild.id) return;
@@ -39,5 +39,4 @@ const event: Event<"stickerUpdate"> = async function event(oldSticker, partialSt
 	await Promise.all(
 		logs.map(async (edit) => await log(`✏️ Sticker ${oldSticker.name}${edit}!`, "server")),
 	);
-};
-export default event;
+});

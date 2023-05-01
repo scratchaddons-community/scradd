@@ -6,7 +6,7 @@ import log from "../../../modules/modlogs/logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"guildScheduledEventCreate"> = async function event(event) {
+defineEvent("guildScheduledEventCreate", async (event) => {
 	const guild = event.guild ?? (await client.guilds.fetch(event.guildId));
 	if (guild.id !== CONSTANTS.guild.id) return;
 
@@ -25,5 +25,4 @@ const event: Event<"guildScheduledEventCreate"> = async function event(event) {
 		}`,
 		"voice",
 	);
-};
-export default event;
+});

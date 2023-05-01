@@ -5,7 +5,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"inviteDelete"> = async function event(invite) {
+defineEvent("inviteDelete", async (invite) => {
 	if (!(invite.guild instanceof Guild) || invite.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`⛔ Invite ${invite.code} deleted${
@@ -13,5 +13,4 @@ const event: Event<"inviteDelete"> = async function event(invite) {
 		}!`,
 		"members",
 	);
-};
-export default event;
+});

@@ -13,7 +13,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"channelUpdate"> = async function event(oldChannel, newChannel) {
+defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 	if (
 		newChannel.isDMBased() ||
 		oldChannel.isDMBased() ||
@@ -172,5 +172,4 @@ const event: Event<"channelUpdate"> = async function event(oldChannel, newChanne
 			async (edit) => await log(`✏️ Channel ${newChannel.toString()}${edit}!`, "channels"),
 		),
 	);
-};
-export default event;
+});

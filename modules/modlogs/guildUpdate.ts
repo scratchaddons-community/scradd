@@ -12,7 +12,7 @@ import log from "./logging.js";
 
 import type Event from "../../common/types/event";
 
-const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
+defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	if (newGuild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
@@ -330,5 +330,4 @@ const event: Event<"guildUpdate"> = async function event(oldGuild, newGuild) {
 	}
 
 	await Promise.all(logs.map(async (edit) => await log(`✏️ ${edit}!`, "server")));
-};
-export default event;
+});

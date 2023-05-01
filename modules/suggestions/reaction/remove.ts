@@ -3,7 +3,7 @@ import CONSTANTS from "../../../common/CONSTANTS.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"messageReactionRemove"> = async function event(partialReaction) {
+defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -21,5 +21,4 @@ const event: Event<"messageReactionRemove"> = async function event(partialReacti
 			suggestion.id === message.id ? { ...suggestion, count: reaction.count } : suggestion,
 		);
 	}
-};
-export default event;
+});

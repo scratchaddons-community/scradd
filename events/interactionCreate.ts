@@ -14,7 +14,6 @@ import warn from "../modules/punishments/punishments.js";
 import { importScripts } from "../util/files.js";
 import logError from "../util/logError.js";
 
-import type Event from "../common/types/event";
 import type { BaseCommand } from "../commands.js";
 
 /**
@@ -57,7 +56,7 @@ const unloadedCommands: Promise<Collection<string, Command>> = importScripts(
 	path.resolve(dirname, "../commands"),
 );
 
-const event: Event<"interactionCreate"> = async function event(interaction) {
+defineEvent("interactionCreate", async (interaction) => {
 	const commands = await unloadedCommands;
 	if (interaction.isAutocomplete()) {
 		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
@@ -162,6 +161,4 @@ const event: Event<"interactionCreate"> = async function event(interaction) {
 			});
 		}
 	}
-};
-
-export default event;
+});

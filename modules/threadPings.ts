@@ -1,8 +1,7 @@
 import CONSTANTS from "../common/CONSTANTS.js";
+import defineEvent from "../events.js";
 
-import type Event from "../common/types/event";
-
-const event: Event<"threadCreate"> = async function event(thread, newlyCreated) {
+defineEvent("threadCreate", async (thread, newlyCreated) =>{
 	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
 
 	const toPing = [CONSTANTS.channels.mod?.id, CONSTANTS.channels.modlogs?.id].includes(
@@ -15,5 +14,4 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 		? CONSTANTS.roles.admin?.toString()
 		: undefined;
 	if (toPing) await thread.send({ content: toPing, allowedMentions: { parse: ["roles"] } });
-};
-export default event;
+})

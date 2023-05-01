@@ -5,7 +5,7 @@ import warn from "../../punishments/punishments.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"threadUpdate"> = async function event(oldThread, newThread) {
+defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (newThread.guild.id !== CONSTANTS.guild.id) return;
 	if (!shouldLog(newThread)) return;
 
@@ -22,5 +22,4 @@ const event: Event<"threadUpdate"> = async function event(oldThread, newThread) 
 			);
 		}
 	}
-};
-export default event;
+});

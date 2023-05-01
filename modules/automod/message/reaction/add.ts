@@ -4,7 +4,7 @@ import warn from "../../../punishments/punishments.js";
 
 import type Event from "../../../../common/types/event";
 
-const event: Event<"messageReactionAdd"> = async function event(partialReaction, partialUser) {
+defineEvent("messageReactionAdd",async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -28,5 +28,4 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 			return;
 		}
 	}
-};
-export default event;
+});

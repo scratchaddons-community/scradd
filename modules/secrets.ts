@@ -1,22 +1,28 @@
 import { MessageType } from "discord.js";
 
 import { getSettings } from "./settings.js";
-import { BOARD_EMOJI } from "./potatoboard/board.js";
+import { BOARD_EMOJI } from "./board/misc.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import { reactAll } from "../util/discord.js";
+import { getBaseChannel, reactAll } from "../util/discord.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { normalize } from "../util/text.js";
 
-import type Event from "../common/types/event";
 import { autoreactions, dad } from "../secrets.js";
+import defineEvent from "../events.js";
 
-const event: Event<"messageCreate"> = async function event(message) {
-	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
-	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
+const REACTION_CAP = 3;
+
+defineEvent("messageCreate", async (message) => {
+	if (
+		message.flags.has("Ephemeral") ||
+		message.type === MessageType.ThreadStarterMessage ||
+		message.channel.isDMBased() ||
+		message.guild?.id !== CONSTANTS.guild.id
+	)
+		return;
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 
-	const REACTION_CAP = 3;
 	let reactions = 0;
 
 	if (
@@ -35,6 +41,7 @@ const event: Event<"messageCreate"> = async function event(message) {
 		}
 	}
 
+	const baseChannel = getBaseChannel(message.channel);
 	if (
 		message.interaction ||
 		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
@@ -95,5 +102,4 @@ const event: Event<"messageCreate"> = async function event(message) {
 			if (reactions > REACTION_CAP || !messageReactions) return;
 		}
 	}
-};
-export default event;
+});

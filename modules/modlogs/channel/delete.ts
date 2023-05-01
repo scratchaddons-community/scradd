@@ -5,7 +5,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"channelDelete"> = async function event(channel) {
+defineEvent("channelDelete", async (channel) => {
 	if (channel.isDMBased() || channel.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`🗑 ${
@@ -20,5 +20,4 @@ const event: Event<"channelDelete"> = async function event(channel) {
 		} channel #${channel.name} deleted! (ID: ${channel.id})`,
 		"channels",
 	);
-};
-export default event;
+});

@@ -4,7 +4,7 @@ import log, { shouldLog } from "./logging.js";
 
 import type Event from "../../common/types/event";
 
-const event: Event<"messageReactionRemoveAll"> = async function event(partialMessage, reactions) {
+defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
 	if (!shouldLog(message.channel)) return;
@@ -39,6 +39,4 @@ const event: Event<"messageReactionRemoveAll"> = async function event(partialMes
 			],
 		},
 	);
-};
-
-export default event;
+});

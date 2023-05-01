@@ -3,9 +3,7 @@ import { ChannelType } from "discord.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import log from "../modules/modlogs/logging.js";
 
-import type Event from "../common/types/event";
-
-const event: Event<"voiceStateUpdate"> = async function event(oldState, newState) {
+defineEvent("voiceStateUpdate", async (oldState, newState) => {
 	if (!newState.member || newState.guild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
@@ -53,5 +51,4 @@ const event: Event<"voiceStateUpdate"> = async function event(oldState, newState
 				newState.member && log(`🔊 Member ${newState.member.toString()} ${edit}!`, "voice"),
 		),
 	);
-};
-export default event;
+});

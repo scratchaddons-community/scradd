@@ -3,7 +3,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
+defineEvent("roleUpdate", async (oldRole, newRole) => {
 	if (newRole.guild.id !== CONSTANTS.guild.id) return;
 
 	const logs = [];
@@ -46,5 +46,4 @@ const event: Event<"roleUpdate"> = async function event(oldRole, newRole) {
 	await Promise.all(
 		logs.map(async (edit) => await log(`✏️ Role ${newRole.toString()}${edit}!`, "server")),
 	);
-};
-export default event;
+});

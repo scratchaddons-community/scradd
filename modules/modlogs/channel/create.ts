@@ -5,7 +5,7 @@ import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"channelCreate"> = async function event(channel) {
+defineEvent("channelCreate", async (channel) => {
 	if (channel.guild.id !== CONSTANTS.guild.id) return;
 	await log(
 		`📃 ${
@@ -22,5 +22,4 @@ const event: Event<"channelCreate"> = async function event(channel) {
 		}!`,
 		"channels",
 	);
-};
-export default event;
+});

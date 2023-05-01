@@ -10,17 +10,25 @@ import {
 	time,
 	TimestampStyles,
 } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import Database, { cleanDatabaseListeners } from "../../common/database.js";
-import censor, { badWordsAllowed } from "../automod/language.js";
-import warn from "../punishments/punishments.js";
-import defineCommand from "../../commands.js";
-import { getWeekly } from "../xp/xp2.js";
-import { disableComponents } from "../../util/discord.js";
-import { convertBase } from "../../util/numbers.js";
-import { getSettings } from "../settings.js";
+import client from "../client.js";
+import CONSTANTS from "../common/CONSTANTS.js";
+import Database, { cleanDatabaseListeners } from "../common/database.js";
+import censor, { badWordsAllowed } from "./automod/language.js";
+import defineCommand from "../commands.js";
+import { disableComponents } from "../util/discord.js";
+import { convertBase } from "../util/numbers.js";
+import { getSettings } from "./settings.js";
+import { defineButton, defineSelect } from "../components.js";
+import defineEvent from "../events.js";
+import getWeekly from "./xp/weekly.js";
+import warn from "./punishments/warn.js";
 
+export enum SpecialReminders {
+	Weekly,
+	UpdateSACategory,
+	Bump,
+	RebootBot,
+}
 type Reminder = {
 	channel: Snowflake;
 	date: number;
@@ -31,7 +39,103 @@ type Reminder = {
 export const remindersDatabase = new Database<Reminder>("reminders");
 await remindersDatabase.init();
 
-defineCommand({
+setInterval(async () => {
+	const { toSend, toPostpone } = remindersDatabase.data.reduce<{
+		toSend: Reminder[];
+		toPostpone: Reminder[];
+	}>(
+		(acc, reminder) => {
+			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
+			return acc;
+		},
+		{ toSend: [], toPostpone: [] },
+	);
+	remindersDatabase.data = toPostpone;
+
+	await Promise.all(
+		toSend.map(async (reminder) => {
+			const channel = await client.channels.fetch(reminder.channel).catch(() => {});
+			if (reminder.user === client.user.id) {
+				switch (Number(reminder.id)) {
+					case SpecialReminders.Weekly: {
+						if (!channel?.isTextBased())
+							throw new TypeError("Could not find weekly channel");
+
+						const nextWeeklyDate = new Date(reminder.date);
+						nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
+
+						return await channel.send(await getWeekly(nextWeeklyDate));
+					}
+					case SpecialReminders.UpdateSACategory: {
+						if (channel?.type !== ChannelType.GuildCategory)
+							throw new TypeError("Could not find SA channel");
+
+						remindersDatabase.data = [
+							...remindersDatabase.data,
+							{
+								channel: CONSTANTS.channels.info?.id || "",
+								date: Number(Date.now() + 3_600_000),
+								reminder: undefined,
+								id: SpecialReminders.UpdateSACategory,
+								user: client.user.id,
+							},
+						];
+
+						const count = await fetch(
+							`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`,
+						).then(
+							async (response) =>
+								await response?.json<{ count: number; _chromeCountDate: string }>(),
+						);
+
+						return await channel?.setName(
+							`Scratch Addons - ${count.count.toLocaleString([], {
+								compactDisplay: "short",
+								maximumFractionDigits: 1,
+								minimumFractionDigits: count.count > 999 ? 1 : 0,
+								notation: "compact",
+							})} users`,
+							"Automated update to sync count",
+						);
+					}
+					case SpecialReminders.Bump: {
+						if (!channel?.isTextBased())
+							throw new TypeError("Could not find bumping channel");
+						return await channel.send({
+							content: "🔔 @here </bump:947088344167366698> the server!",
+							allowedMentions: { parse: ["everyone"] },
+						});
+					}
+					case SpecialReminders.RebootBot: {
+						await cleanDatabaseListeners();
+						process.emitWarning(`${client.user.tag} is killing the bot`);
+						// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
+						process.exit(1);
+					}
+				}
+			}
+			if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
+			const silent = reminder.reminder.startsWith("@silent");
+			const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
+			await channel
+				.send({
+					content: `🔔 ${
+						channel.isDMBased() ? "" : `<@${reminder.user}> `
+					}${content.trim()} (from ${time(
+						new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
+						TimestampStyles.RelativeTime,
+					)})`,
+					allowedMentions: { users: [reminder.user] },
+					flags: silent ? MessageFlags.SuppressNotifications : undefined,
+				})
+				.catch(() => {});
+		}),
+	);
+}, 120_000);
+
+defineCommand(
+	{
+		name: "reminders",
 		description: "Commands to manage reminders",
 		censored: false,
 		subcommands: {
@@ -60,7 +164,6 @@ defineCommand({
 			list: { description: "View your reminders" },
 		},
 	},
-
 	async (interaction) => {
 		const reminders = remindersDatabase.data
 			.filter((reminder) => reminder.user === interaction.user.id)
@@ -199,46 +302,7 @@ defineCommand({
 			],
 		});
 	},
-
-	stringSelects: {
-		async cancelReminder(interaction) {
-			const [id = ""] = interaction.values;
-			const success = await cancelReminder(interaction, id);
-			if (!success) return;
-
-			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.yes} Reminder \`${id}\` canceled!`,
-				ephemeral: true,
-			});
-		},
-	},
-	buttons: {
-		async cancelReminder(interaction, id = "") {
-			const success = await cancelReminder(interaction, id);
-			if (!success) return;
-
-			if (interaction.message.flags.has("Ephemeral")) {
-				await interaction.reply({
-					content: `${CONSTANTS.emojis.statuses.yes} Reminder canceled!`,
-					ephemeral: true,
-				});
-			} else {
-				await interaction.message.edit({
-					content: `~~${interaction.message.content}~~\n${
-						CONSTANTS.emojis.statuses.no
-					} Reminder canceled${
-						interaction.user.id === interaction.message.interaction?.user.id
-							? ""
-							: " by a mod"
-					}.`,
-					components: disableComponents(interaction.message.components),
-				});
-				await interaction.deferUpdate();
-			}
-		},
-	},
-});
-
+);
 function parseTime(time: string): Date {
 	const number = Number(time);
 
@@ -255,10 +319,10 @@ function parseTime(time: string): Date {
 		minutes = 0,
 	} = time.match(
 		new RegExp(
-			/^(?:(?<weeks>\d+(?:.\d+)?)w(?:(?:ee)?ks?)?\s*)?/.source +
-				/(?:(?<days>\d+(?:.\d+)?)d(?:ays?)?\s*)?/.source +
-				/(?:(?<hours>\d+(?:.\d+)?)h(?:(?:ou)?rs?)?\s*)?/.source +
-				/(?:(?<minutes>\d+(?:.\d+)?)m(?:in(?:ute)?s?)?)?$/.source,
+			/^(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
+				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
+				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
+				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
 		),
 	)?.groups ?? {};
 
@@ -270,6 +334,37 @@ function parseTime(time: string): Date {
 	return new Date(totalMilliseconds);
 }
 
+defineSelect("cancelReminder", async (interaction) => {
+	const [id = ""] = interaction.values;
+	const success = await cancelReminder(interaction, id);
+	if (!success) return;
+
+	await interaction.reply({
+		content: `${CONSTANTS.emojis.statuses.yes} Reminder \`${id}\` canceled!`,
+		ephemeral: true,
+	});
+});
+defineButton("cancelReminder", async (interaction, id = "") => {
+	const success = await cancelReminder(interaction, id);
+	if (!success) return;
+
+	if (interaction.message.flags.has("Ephemeral")) {
+		await interaction.reply({
+			content: `${CONSTANTS.emojis.statuses.yes} Reminder canceled!`,
+			ephemeral: true,
+		});
+	} else {
+		await interaction.message.edit({
+			content: `~~${interaction.message.content}~~\n${
+				CONSTANTS.emojis.statuses.no
+			} Reminder canceled${
+				interaction.user.id === interaction.message.interaction?.user.id ? "" : " by a mod"
+			}.`,
+			components: disableComponents(interaction.message.components),
+		});
+		await interaction.deferUpdate();
+	}
+});
 async function cancelReminder(interaction: MessageComponentInteraction, id: string) {
 	if (
 		interaction.user.id !== interaction.message.interaction?.user.id &&
@@ -303,103 +398,24 @@ async function cancelReminder(interaction: MessageComponentInteraction, id: stri
 	return true;
 }
 
-setInterval(async () => {
-	const { toSend, toPostpone } = remindersDatabase.data.reduce<{
-		toSend: Reminder[];
-		toPostpone: Reminder[];
-	}>(
-		(acc, reminder) => {
-			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
-			return acc;
-		},
-		{ toSend: [], toPostpone: [] },
-	);
-	remindersDatabase.data = toPostpone;
-
-	await Promise.all(
-		toSend.map(async (reminder) => {
-			const channel = await client.channels.fetch(reminder.channel).catch(() => {});
-			if (reminder.user === client.user.id) {
-				switch (Number(reminder.id)) {
-					case SpecialReminders.Weekly: {
-						if (!channel?.isTextBased())
-							throw new TypeError("Could not find weekly channel");
-
-						const nextWeeklyDate = new Date(reminder.date);
-						nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
-
-						return await channel.send(await getWeekly(nextWeeklyDate));
-					}
-					case SpecialReminders.UpdateSACategory: {
-						if (channel?.type !== ChannelType.GuildCategory)
-							throw new TypeError("Could not find SA channel");
-
-						remindersDatabase.data = [
-							...remindersDatabase.data,
-							{
-								channel: CONSTANTS.channels.info?.id || "",
-								date: Number(Date.now() + 3_600_000),
-								reminder: undefined,
-								id: SpecialReminders.UpdateSACategory,
-								user: client.user.id,
-							},
-						];
-
-						const count = await fetch(
-							`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`,
-						).then(
-							async (response) =>
-								await response?.json<{ count: number; _chromeCountDate: string }>(),
-						);
-
-						return await channel?.setName(
-							`Scratch Addons - ${count.count.toLocaleString([], {
-								compactDisplay: "short",
-								maximumFractionDigits: 1,
-								minimumFractionDigits: count.count > 999 ? 1 : 0,
-								notation: "compact",
-							})} users`,
-							"Automated update to sync count",
-						);
-					}
-					case SpecialReminders.Bump: {
-						if (!channel?.isTextBased())
-							throw new TypeError("Could not find bumping channel");
-						return await channel.send({
-							content: "🔔 @here </bump:947088344167366698> the server!",
-							allowedMentions: { parse: ["everyone"] },
-						});
-					}
-					case SpecialReminders.RebootBot: {
-						await cleanDatabaseListeners();
-						process.emitWarning(`${client.user.tag} is killing the bot`);
-						// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
-						process.exit(1);
-					}
-				}
-			}
-			if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
-			const silent = reminder.reminder.startsWith("@silent");
-			const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
-			await channel
-				.send({
-					content: `🔔 ${
-						channel.isDMBased() ? "" : `<@${reminder.user}> `
-					}${content.trim()} (from ${time(
-						new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
-						TimestampStyles.RelativeTime,
-					)})`,
-					allowedMentions: { users: [reminder.user] },
-					flags: silent ? MessageFlags.SuppressNotifications : undefined,
-				})
-				.catch(() => {});
-		}),
-	);
-}, 120_000);
-
-export enum SpecialReminders {
-	Weekly,
-	UpdateSACategory,
-	Bump,
-	RebootBot,
-}
+defineEvent("messageCreate", async (message) => {
+	if (
+		message.guild?.id === CONSTANTS.guild.id &&
+		message.interaction?.commandName == "bump" &&
+		message.author.id === "302050872383242240" &&
+		!remindersDatabase.data.find(
+			(reminder) => reminder.id === SpecialReminders.Bump && reminder.user === client.user.id,
+		)
+	) {
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: "881619501018394725",
+				date: Date.now() + 7260000,
+				reminder: undefined,
+				id: SpecialReminders.Bump,
+				user: client.user.id,
+			},
+		];
+	}
+});

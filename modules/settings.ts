@@ -10,7 +10,7 @@ import {
 import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 import defineCommand from "../commands.js";
-import { weeklyXpDatabase } from "./xp/xp2.js";
+import { weeklyXpDatabase } from "./xp/misc.js";
 import { defineButton } from "../components.js";
 
 export const userSettingsDatabase = new Database<{
@@ -26,6 +26,7 @@ export const userSettingsDatabase = new Database<{
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
+	resourcesDmed?: true;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -70,7 +71,7 @@ defineCommand(
 
 	async (interaction) => {
 		await interaction.reply(
-			updateOptions(interaction.user, {
+			updateSettings(interaction.user, {
 				autoreactions: interaction.options.getBoolean("autoreactions") ?? undefined,
 				boardPings: interaction.options.getBoolean("board-pings") ?? undefined,
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
@@ -82,19 +83,20 @@ defineCommand(
 	},
 );
 
-defineButton("toggleOption", async (interaction, option = "") => {
-	await interaction.reply(updateOptions(interaction.user, { [option]: "toggle" }));
+defineButton("toggleSetting", async (interaction, setting = "") => {
+	await interaction.reply(updateSettings(interaction.user, { [setting]: "toggle" }));
 });
 
-export function updateOptions(
+export function updateSettings(
 	user: User,
-	options: {
+	settings: {
 		autoreactions?: boolean | "toggle";
 		boardPings?: boolean | "toggle";
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		weeklyPings?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
+		resourcesDmed?: true;
 	},
 ) {
 	const settingsForUser = getSettings(user, false);
@@ -107,35 +109,38 @@ export function updateOptions(
 		useMentions: settingsForUser?.useMentions ?? defaultSettings.useMentions,
 		weeklyPings: settingsForUser?.weeklyPings ?? defaultSettings.weeklyPings,
 		dmReminders: settingsForUser?.dmReminders ?? defaultSettings.dmReminders,
+		resourcesDmed: defaultSettings.resourcesDmed,
 	};
 
 	const updated = {
 		user: user.id,
 		boardPings:
-			options.boardPings === "toggle"
+			settings.boardPings === "toggle"
 				? !old.boardPings
-				: options.boardPings ?? settingsForUser?.boardPings,
+				: settings.boardPings ?? settingsForUser?.boardPings,
 		levelUpPings:
-			options.levelUpPings === "toggle"
+			settings.levelUpPings === "toggle"
 				? !old.levelUpPings
-				: options.levelUpPings ?? settingsForUser?.levelUpPings,
+				: settings.levelUpPings ?? settingsForUser?.levelUpPings,
 		weeklyPings:
-			options.weeklyPings === "toggle"
+			settings.weeklyPings === "toggle"
 				? !old.weeklyPings
-				: options.weeklyPings ?? settingsForUser?.weeklyPings,
+				: settings.weeklyPings ?? settingsForUser?.weeklyPings,
 		autoreactions:
-			options.autoreactions === "toggle"
+			settings.autoreactions === "toggle"
 				? !old.autoreactions
-				: options.autoreactions ?? settingsForUser?.autoreactions,
+				: settings.autoreactions ?? settingsForUser?.autoreactions,
 		useMentions:
-			options.useMentions === "toggle"
+			settings.useMentions === "toggle"
 				? !old.useMentions
-				: options.useMentions ?? settingsForUser?.useMentions,
+				: settings.useMentions ?? settingsForUser?.useMentions,
 
 		dmReminders:
-			options.dmReminders === "toggle"
+			settings.dmReminders === "toggle"
 				? !old.dmReminders
-				: options.dmReminders ?? settingsForUser?.dmReminders,
+				: settings.dmReminders ?? settingsForUser?.dmReminders,
+
+		resourcesDmed: settings.resourcesDmed,
 	};
 
 	userSettingsDatabase.data = settingsForUser
@@ -151,19 +156,19 @@ export function updateOptions(
 				type: ComponentType.ActionRow,
 				components: [
 					{
-						customId: "boardPings_toggleOption",
+						customId: "boardPings_toggleSetting",
 						type: ComponentType.Button,
 						label: "Board Pings",
 						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
 					},
 					{
-						customId: "levelUpPings_toggleOption",
+						customId: "levelUpPings_toggleSetting",
 						type: ComponentType.Button,
 						label: "Level Up Pings",
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 					},
 					{
-						customId: "weeklyPings_toggleOption",
+						customId: "weeklyPings_toggleSetting",
 						type: ComponentType.Button,
 						label: `Weekly Winners Pings`,
 						style: ButtonStyle[updated.weeklyPings ? "Success" : "Danger"],
@@ -174,19 +179,19 @@ export function updateOptions(
 				type: ComponentType.ActionRow,
 				components: [
 					{
-						customId: "autoreactions_toggleOption",
+						customId: "autoreactions_toggleSetting",
 						type: ComponentType.Button,
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
 					},
 					{
-						customId: "useMentions_toggleOption",
+						customId: "useMentions_toggleSetting",
 						type: ComponentType.Button,
 						label: "Use Mentions",
 						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 					{
-						customId: "dmReminders_toggleOption",
+						customId: "dmReminders_toggleSetting",
 						type: ComponentType.Button,
 						label: "DM Reminders",
 						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
@@ -207,6 +212,7 @@ export function getSettings(
 	autoreactions: boolean;
 	useMentions: boolean;
 	dmReminders: boolean;
+	resourcesDmed: boolean;
 };
 export function getSettings(
 	user: { id: Snowflake },
@@ -218,6 +224,7 @@ export function getSettings(
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
+	resourcesDmed?: true;
 };
 export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	const settings: {
@@ -227,6 +234,7 @@ export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 		autoreactions?: boolean;
 		useMentions?: boolean;
 		dmReminders?: boolean;
+		resourcesDmed?: boolean;
 	} = userSettingsDatabase.data.find((settings) => settings.user === user.id) ?? {};
 	if (defaults) {
 		const defaultSettings = getDefaultSettings(user);
@@ -247,5 +255,6 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		useMentions:
 			(weeklyXpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 || 30) < 30,
 		weeklyPings: process.env.NODE_ENV === "production",
+		resourcesDmed: false,
 	};
 }

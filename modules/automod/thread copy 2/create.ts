@@ -4,7 +4,7 @@ import warn from "../../punishments/punishments.js";
 
 import type Event from "../../../common/types/event";
 
-const event: Event<"threadCreate"> = async function event(thread, newlyCreated) {
+defineEvent("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
 
 	if (badWordsAllowed(thread)) return;
@@ -25,5 +25,4 @@ const event: Event<"threadCreate"> = async function event(thread, newlyCreated) 
 			}
 		}
 	}
-};
-export default event;
+});

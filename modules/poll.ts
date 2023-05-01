@@ -10,6 +10,8 @@ import defineCommand from "../commands.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
 import { defineModal } from "../components.js";
+import defineEvent from "../events.js";
+import client from "../client.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
@@ -110,7 +112,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 	await reactAll(message, reactions);
 });
 
-const event: Event<"messageReactionAdd"> = async function event(partialReaction, partialUser) {
+defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -140,5 +142,4 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 				?.users.remove(user);
 		}
 	}
-};
-export default event;
+});

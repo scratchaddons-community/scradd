@@ -12,7 +12,7 @@ import {
 	ChatInputCommandInteraction,
 } from "discord.js";
 
-import { boardDatabase, generateBoardMessage, boardReactionCount } from "./board.js";
+import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { disableComponents } from "../../util/discord.js";
 import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
