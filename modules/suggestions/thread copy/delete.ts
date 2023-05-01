@@ -1,6 +1,6 @@
 import { suggestionsDatabase } from "../getTop.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
-import  { shouldLog } from "../../modlogs/logging.js";
+import { shouldLog } from "../../modlogs/logging.js";
 
 import type Event from "../../../common/types/event";
 

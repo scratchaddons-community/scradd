@@ -65,4 +65,4 @@ export function shouldLog(channel: import("discord.js").TextBasedChannel | null)
 	);
 }
 
-TODO
+TODO;

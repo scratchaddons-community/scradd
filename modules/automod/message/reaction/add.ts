@@ -1,4 +1,3 @@
-
 import censor, { badWordsAllowed } from "../../language.js";
 import CONSTANTS from "../../../../common/CONSTANTS.js";
 import warn from "../../../punishments/punishments.js";

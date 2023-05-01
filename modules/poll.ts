@@ -110,7 +110,6 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 	await reactAll(message, reactions);
 });
 
-
 const event: Event<"messageReactionAdd"> = async function event(partialReaction, partialUser) {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 

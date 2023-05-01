@@ -1,4 +1,8 @@
-import type { AnySelectMenuInteraction, ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+import type {
+	AnySelectMenuInteraction,
+	ButtonInteraction,
+	ModalSubmitInteraction,
+} from "discord.js";
 
 export const buttons: Record<string, (interaction: ButtonInteraction, id: string) => any> = {};
 export function defineButton(
@@ -16,7 +20,8 @@ export function defineModal(
 	modals[modalName] = modal;
 }
 
-export const selects: Record<string, (interaction: AnySelectMenuInteraction, id: string) => any> = {};
+export const selects: Record<string, (interaction: AnySelectMenuInteraction, id: string) => any> =
+	{};
 export function defineSelect(
 	selectName: string,
 	select: (interaction: AnySelectMenuInteraction, id: string) => any,

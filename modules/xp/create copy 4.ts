@@ -1,4 +1,4 @@
-import { MessageType, type Message, type Snowflake,   } from "discord.js";
+import { MessageType, type Message, type Snowflake } from "discord.js";
 
 import CONSTANTS from "../../common/CONSTANTS.js";
 import giveXp, { DEFAULT_XP } from "./xp2.js";

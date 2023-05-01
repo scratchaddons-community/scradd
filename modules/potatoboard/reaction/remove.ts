@@ -1,4 +1,3 @@
-
 import updateBoard, { BOARD_EMOJI } from "../board.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
 

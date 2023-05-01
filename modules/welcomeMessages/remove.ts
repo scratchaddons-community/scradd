@@ -29,6 +29,5 @@ const event: Event<"guildMemberAdd"> = async function event(member) {
 			byes[Math.floor(Math.random() * byes.length)]
 		}`,
 	);
-
 };
 export default event;

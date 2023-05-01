@@ -13,7 +13,8 @@ import { disableComponents, messageToText } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
-defineCommand({
+defineCommand(
+	{
 		name: "purge",
 		description: "(Mods only) Bulk deletes a specified amount of messages",
 

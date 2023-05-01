@@ -1,7 +1,6 @@
-
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import censor, { badWordsAllowed } from "../language.js";
-import  {  shouldLog } from "../../modlogs/logging.js";
+import { shouldLog } from "../../modlogs/logging.js";
 import warn from "../../punishments/punishments.js";
 
 import type Event from "../../../common/types/event";

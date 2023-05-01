@@ -12,7 +12,6 @@ const event: Event<"messageReactionAdd"> = async function event(partialReaction,
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
-
 	if (
 		message.channel.parent?.id === CONSTANTS.channels.suggestions?.id &&
 		message.channel.isThread() &&

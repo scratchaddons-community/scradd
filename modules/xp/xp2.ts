@@ -329,4 +329,4 @@ export async function getWeekly(nextWeeklyDate: Date) {
 	} satisfies MessageCreateOptions;
 }
 
-TODO
+TODO;

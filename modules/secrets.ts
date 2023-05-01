@@ -1,20 +1,18 @@
-import { MessageType,   } from "discord.js";
+import { MessageType } from "discord.js";
 
 import { getSettings } from "./settings.js";
 import { BOARD_EMOJI } from "./potatoboard/board.js";
 import CONSTANTS from "../common/CONSTANTS.js";
-import {  reactAll } from "../util/discord.js";
+import { reactAll } from "../util/discord.js";
 import { stripMarkdown } from "../util/markdown.js";
-import { normalize,  } from "../util/text.js";
+import { normalize } from "../util/text.js";
 
 import type Event from "../common/types/event";
 import { autoreactions, dad } from "../secrets.js";
 
-
 const event: Event<"messageCreate"> = async function event(message) {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
 	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
-
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 

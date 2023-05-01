@@ -1,4 +1,4 @@
-import { MessageType, } from "discord.js";
+import { MessageType } from "discord.js";
 
 import automodMessage from "../automod.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
