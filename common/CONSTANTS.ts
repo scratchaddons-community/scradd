@@ -69,7 +69,9 @@ async function getConstants() {
 			booster: roles.find(
 				(role) => role.editable && role.name.toLowerCase().includes("booster"),
 			),
-			active: roles.find((role) => role.name.toLowerCase().includes("active")),
+			active: roles.find(
+				(role) => role.editable && role.name.toLowerCase().includes("active"),
+			),
 		},
 
 		urls: {

@@ -150,6 +150,20 @@ export default class Database<Data extends { [key: string]: string | number | bo
 
 		this.#extra = this.message.content.split("\n")[5];
 	}
+	updateById<Keys extends keyof Data>(
+		newData: Data["id"] extends string ? Pick<Data, Keys> & { id: string } : never,
+		oldData?: Omit<Data, Keys | "id">,
+	) {
+		const data = [...this.data];
+		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
+		const suggestion = data[index];
+		if (suggestion) {
+			data[index] = { ...suggestion, ...newData };
+		} else if (oldData) {
+			data.push({ ...oldData, ...newData } as unknown as Data);
+		}
+		this.data = data;
+	}
 
 	set data(content) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");

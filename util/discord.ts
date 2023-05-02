@@ -28,6 +28,8 @@ import {
 	MessageMentions,
 	type AnyThreadChannel,
 	type MessageReaction,
+	escapeMarkdown,
+	chatInputApplicationCommandMention,
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
@@ -178,10 +180,10 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
 }
 
 /**
- * A property that returns the content that is rendered regardless of the message type. In some cases, this just returns the regular message
- * content. Otherwise this returns an English message denoting the contents of the system message.
+ * A property that returns the content that is rendered regardless of the {@link Message.type}. In some cases, this just returns the regular
+ * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
- * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1896-L2036)
+ * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1994-L2134)
  *
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
@@ -268,7 +270,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			return `${
 				CONSTANTS.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${escapeMessage(message.content)}** times` : ""
+				message.content ? ` **${message.content}** times` : ""
 			}!`;
 		}
 
@@ -276,37 +278,40 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			return `${
 				CONSTANTS.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${escapeMessage(message.content)}** times` : ""
-			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 1**!`;
+				message.content ? ` **${message.content}** times` : ""
+			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 1**!`;
 		}
 
 		case MessageType.GuildBoostTier2: {
 			return `${
 				CONSTANTS.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${escapeMessage(message.content)}** times` : ""
-			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 2**!`;
+				message.content ? ` **${message.content}** times` : ""
+			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 2**!`;
 		}
 
 		case MessageType.GuildBoostTier3: {
 			return `${
 				CONSTANTS.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${escapeMessage(message.content)}** times` : ""
-			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 3**!`;
+				message.content ? ` **${message.content}** times` : ""
+			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 3**!`;
 		}
 
 		case MessageType.ChannelFollowAdd: {
 			return `${
 				CONSTANTS.emojis.discord.add
-			} ${message.author.toString()} has added **${escapeMessage(
+			} ${message.author.toString()} has added **${escapeMarkdown(
 				message.content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}
 
-		// case MessageType.guild_stream:
-		//     # the author will be a Member
-		//     return f'{message.author.toString()} is live! Now streaming {message.author.activity.name}'  # type: ignore
+		// case MessageType.GuildStream: {
+		// 	// the author will be a Member
+		// 	return `${message.author.toString()} is live! Now streaming ${
+		// 		message.groupActivityApplication?.name
+		// 	}`;
+		// }
 
 		case MessageType.GuildDiscoveryDisqualified: {
 			return `${CONSTANTS.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
@@ -366,7 +371,9 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			const months = `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
 			return `${message.author.toString()} joined ${
 				message.roleSubscriptionData?.tierName
-			} and has been a subscriber of ${message.guild} for ${months}!`;
+			} and has been a subscriber of **${escapeMessage(
+				message.guild?.name ?? "",
+			)}** for ${months}!`;
 		}
 
 		case MessageType.StageStart: {
@@ -408,9 +415,14 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
-			return `*${message.interaction?.user.toString() ?? ""} used **/${escapeMessage(
+			return `*${
+				message.interaction?.user.toString() ?? ""
+			} used ${chatInputApplicationCommandMention(
 				message.interaction?.commandName ?? "",
-			)}**:*\n${actualContent}`;
+				(await CONSTANTS.guild.commands.fetch()).find(
+					({ name }) => name === message.interaction?.commandName,
+				)?.id ?? "",
+			)}:*\n${actualContent}`;
 		}
 
 		case MessageType.Call: {

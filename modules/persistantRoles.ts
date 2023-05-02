@@ -2,36 +2,58 @@ import CONSTANTS from "../common/CONSTANTS.js";
 import Database from "../common/database.js";
 
 import type { Snowflake } from "discord.js";
+import defineEvent from "../events.js";
 
-export const rolesDatabase = new Database<{ [role: Snowflake]: true } & { user: Snowflake }>(
-	"roles",
-);
+export const rolesDatabase = new Database<{
+	user: Snowflake;
+	designer: boolean;
+	scradd: boolean;
+	formerAdmin: boolean;
+	formerMod: boolean;
+	dev: boolean;
+	translator: boolean;
+	contributor: boolean;
+	epic: boolean;
+	booster: boolean;
+}>("roles");
 await rolesDatabase.init();
+
+const roles = {
+	designer: "916020774509375528",
+	scradd: "1008190416396484700",
+	formerAdmin: "1069776422467555328",
+	formerMod: "881623848137682954",
+	dev: "806608777835053098",
+	translator: "841696608592330794",
+	contributor: "991413187427700786",
+	epic: CONSTANTS.roles.epic?.id || "",
+	booster: CONSTANTS.roles.booster?.id || "",
+};
+
+defineEvent("guildMemberRemove", async (member) => {
+	if (member.guild.id !== CONSTANTS.guild.id) return;
+
+	const databaseIndex = rolesDatabase.data.findIndex((entry) => entry.user === member.id);
+
+	const memberRoles = {
+		user: member.id,
+		...Object.fromEntries(
+			Object.entries(roles).map(([key, value]) => [key, !!member.roles.resolve(value)]),
+		),
+	};
+
+	if (databaseIndex === -1) rolesDatabase.data = [...rolesDatabase.data, memberRoles];
+	else {
+		const allRoles = [...rolesDatabase.data];
+		allRoles[databaseIndex] = memberRoles;
+		rolesDatabase.data = allRoles;
+	}
+});
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
 
-	// todo
-	// const allRoles = [...(rolesDatabase.data)];
-	// const databaseIndex = allRoles.findIndex((entry) => entry.user === member.id);
-
-	// const memberRoles = Object.fromEntries(
-	// 	member.roles
-	// 		.valueOf()
-	// 		.filter(
-	// 			(role) =>
-	// 				role.editable &&
-	// 				role.id !== CONSTANTS.guild.id &&
-	// 				![CONSTANTS.roles.active?.id, CONSTANTS.roles.weekly_winner?.id].includes(
-	// 					role.id,
-	// 				),
-	// 		)
-	// 		.map((role) => [role.id, true] as const),
-	// );
-
-	// if (databaseIndex === -1) allRoles.push({ user: member.id, ...memberRoles });
-	// else allRoles[databaseIndex] = { ...allRoles[databaseIndex], ...memberRoles, user: member.id };
-
-	// rolesDatabase.data = allRoles;
+	const memberRoles = rolesDatabase.data.find((entry) => entry.user === member.id);
+	for (const roleName of Object.keys(roles))
+		if (memberRoles?.[roleName]) member.roles.add(roles[roleName]);
 });
-// todo save roles in the db
