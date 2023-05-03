@@ -19,7 +19,7 @@ import {
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { disableComponents } from "../../util/discord.js";
 import log from "../modlogs/logging.js";
-import { strikeDatabase } from "../punishments/misc.js";
+import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 
 const allFields = {
@@ -339,7 +339,7 @@ export default async function startTicket(
 										strike.count === 1
 											? ""
 											: ` (${
-													strike.count === 0.25
+													strike.count === PARTIAL_STRIKE_COUNT
 														? "verbal"
 														: `\\*${strike.count}`
 											  })`

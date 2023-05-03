@@ -13,7 +13,7 @@ import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import filterToStrike, { strikeDatabase } from "./misc.js";
+import filterToStrike, { PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
@@ -57,7 +57,7 @@ export async function getStrikes(
 			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
 				strike.count === 1
 					? ""
-					: ` (${strike.count === 0.25 ? "verbal" : `\\*${strike.count}`})`
+					: ` (${strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : ""
 			}`,

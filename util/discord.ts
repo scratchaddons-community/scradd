@@ -232,7 +232,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.ChannelIconChange: {
 			return `${
 				CONSTANTS.emojis.discord.edit
-			} ${message.author.toString()} changed the channel icon.`;
+			} ${message.author.toString()} changed the channel icon.`; // todo wait channel??
 		}
 
 		case MessageType.ChannelPinnedMessage: {

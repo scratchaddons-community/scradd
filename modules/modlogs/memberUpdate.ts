@@ -38,6 +38,13 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			newMember.nickname ? ` was nicknamed ${newMember.nickname}` : "’s nickname was removed",
 		);
 		await changeNickname(newMember);
+
+			await warn(
+				member,
+				"Watch your language!",
+				censored.strikes,
+				"Changed nickname to:\n " + member.displayName,
+			);
 	}
 	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster)
 		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
