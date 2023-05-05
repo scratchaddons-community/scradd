@@ -4,6 +4,7 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import { paginate } from "../../util/discord.js";
 import { escapeLinks } from "../../util/markdown.js";
 import { getSettings } from "../settings.js";
+import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function getTop(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const authorFilter = interaction.options.getMember("user");

@@ -65,6 +65,13 @@ Handler.on("debug", (message) => {
 			!message.includes("Received bucket hash update")
 		)
 			console.debug(message);
+	})
+	.on("invalidated", async () => {
+		console.error(new ReferenceError("Session is invalid"));
+		process.exit(1);
+	})
+	.on("guildUnavailable", async (guild) => {
+		throw new ReferenceError(`Guild ${guild.name} (${guild.id}) unavailable`);
 	});
 
 await Handler.login(process.env.BOT_TOKEN);

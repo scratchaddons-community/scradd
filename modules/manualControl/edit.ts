@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { diffString } from "json-diff";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log, { getLoggingThread, shouldLog } from "../modlogs/logging.js";
+import log, { getLoggingThread, shouldLog } from "../modlogs/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../../util/logError.js";
 

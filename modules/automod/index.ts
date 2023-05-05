@@ -73,11 +73,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
 });
-defineEvent("userUpdate", async (_, partialUser) => {
-	const newUser = partialUser.partial ? await partialUser.fetch() : partialUser;
-
-	const member = await CONSTANTS.guild.members.fetch(newUser.id).catch(() => {});
-	if (!member) return;
+defineEvent("guildMemberUpdate", async (_, member) => {
 	await changeNickname(member);
 });
 defineEvent("presenceUpdate", async (_, newPresence) => {

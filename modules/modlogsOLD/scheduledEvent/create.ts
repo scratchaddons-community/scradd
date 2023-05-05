@@ -2,7 +2,7 @@ import { time } from "discord.js";
 
 import client from "../../../client.js";
 import CONSTANTS from "../../../common/CONSTANTS.js";
-import log from "../../../modules/modlogs/logging.js";
+import log from "../../modlogs/misc.js";
 
 import type Event from "../../../common/types/event";
 

@@ -2,7 +2,7 @@ import { MessageType, Snowflake } from "discord.js";
 import Database from "../../common/database.js";
 import { GlobalUsersPattern } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
-import { getLoggingThread } from "../modlogs/logging.js";
+import { getLoggingThread } from "../modlogs/misc.js";
 
 export const EXPIRY_LENGTH = 1814400000,
 	STRIKES_PER_MUTE = 3,

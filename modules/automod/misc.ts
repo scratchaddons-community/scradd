@@ -1,7 +1,7 @@
 import type { GuildMember } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { joinWithAnd } from "../../util/text.js";
-import log from "../modlogs/logging.js";
+import log from "../modlogs/misc.js";
 import censor from "./language.js";
 
 export async function changeNickname(member: GuildMember) {

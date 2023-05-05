@@ -72,8 +72,7 @@ export default function censor(text: string) {
 
 				strikes: words.reduce(
 					(accumulator, current, index) =>
-						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) +
-						accumulator,
+						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
 					0,
 				),
 
@@ -82,7 +81,7 @@ export default function censor(text: string) {
 		: false;
 }
 
-export function badWordsAllowed(channel: TextBasedChannel) {
+export function badWordsAllowed(channel?: TextBasedChannel | null) {
 	const baseChannel = getBaseChannel(channel);
 
 	return (

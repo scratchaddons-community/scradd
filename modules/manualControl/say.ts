@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log from "../modlogs/logging.js";
+import log from "../modlogs/misc.js";
 
 /**
  * Mimic something.

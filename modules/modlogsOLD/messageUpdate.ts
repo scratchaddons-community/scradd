@@ -7,6 +7,7 @@ import log, { getLoggingThread, shouldLog } from "./logging.js";
 import { getMessageJSON } from "../../util/discord.js";
 
 import type Event from "../../common/types/event";
+import defineEvent from "../../events.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 

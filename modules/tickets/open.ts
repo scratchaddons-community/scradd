@@ -18,7 +18,7 @@ import {
 
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { disableComponents } from "../../util/discord.js";
-import log from "../modlogs/logging.js";
+import log from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 
@@ -447,4 +447,3 @@ export async function contactUser(
 			await message.edit({ components: disableComponents(message.components) });
 		});
 }
-

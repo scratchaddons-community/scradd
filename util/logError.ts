@@ -2,7 +2,7 @@ import type { Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
 import CONSTANTS from "../common/CONSTANTS.js";
-import log from "../modules/modlogs/logging.js";
+import log from "../modules/modlogs/misc.js";
 import { sanitizePath } from "./files.js";
 
 /**

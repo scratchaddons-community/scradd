@@ -7,7 +7,7 @@ import {
 	GlobalBotInvitesPattern,
 	GlobalInvitesPattern,
 } from "../../util/discord.js";
-import log from "../modlogs/logging.js";
+import log from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import censor, { badWordsAllowed } from "./language.js";

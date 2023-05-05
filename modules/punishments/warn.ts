@@ -12,7 +12,7 @@ import {
 import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { convertBase } from "../../util/numbers.js";
-import log from "../modlogs/logging.js";
+import log from "../modlogs/misc.js";
 import giveXp from "../xp/giveXp.js";
 import { DEFAULT_XP } from "../xp/misc.js";
 import filterToStrike, {
