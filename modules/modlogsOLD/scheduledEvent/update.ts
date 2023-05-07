@@ -1,4 +1,4 @@
-import difflib from "difflib";
+import { unifiedDiff } from "difflib";
 import { time } from "discord.js";
 
 import client from "../../../client.js";
@@ -31,8 +31,7 @@ defineEvent("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
 			files: [
 				{
 					attachment: Buffer.from(
-						difflib
-							.unifiedDiff(
+						.unifiedDiff(
 								(oldEvent.description ?? "").split("\n"),
 								(newEvent.description ?? "").split("\n"),
 							)

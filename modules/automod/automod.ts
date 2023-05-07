@@ -31,7 +31,7 @@ export default async function automodMessage(message: Message) {
 			message.author,
 			"Please don’t post that many animated emojis!",
 			badAnimatedEmojis,
-			animatedEmojis?.map((emoji) => emoji[0]).join(""),
+			animatedEmojis?.map((emoji) => emoji).join(""),
 		);
 		await message.channel.send(
 			`${

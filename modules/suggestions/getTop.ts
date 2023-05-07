@@ -55,7 +55,7 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 		async (data) => await interaction[interaction.replied ? "editReply" : "reply"](data),
 		{
 			title: `Top suggestions${nick ? ` by ${nick}` : ""}${
-				answerFilter ? `${nick ? " &" : ""} answered with ${answerFilter}` : ""
+				answerFilter ? `${nick ? " and" : ""} answered with ${answerFilter}` : ""
 			}`,
 
 			user: interaction.user,

@@ -46,7 +46,11 @@ defineCommand(
 					member.voice.channel?.toString() +
 					`${member.voice.mute ? CONSTANTS.emojis.discord.muted + " " : ""}${
 						member.voice.deaf ? CONSTANTS.emojis.discord.deafened + " " : ""
-					}${member.voice.streaming ? CONSTANTS.emojis.discord.streaming : ""}`.trim(),
+					}${
+						member.voice.streaming || member.voice.selfVideo
+							? CONSTANTS.emojis.discord.streaming
+							: ""
+					}`.trim(),
 				inline: true,
 			});
 

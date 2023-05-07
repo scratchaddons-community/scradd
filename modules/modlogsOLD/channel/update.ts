@@ -1,4 +1,4 @@
-import difflib from "difflib";
+import { unifiedDiff } from "difflib";
 import {
 	ChannelType,
 	escapeMarkdown,
@@ -84,7 +84,6 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 				files: [
 					{
 						attachment: Buffer.from(
-							difflib
 								.unifiedDiff(
 									(oldChannel.topic ?? "").split("\n"),
 									(newChannel.topic ?? "").split("\n"),

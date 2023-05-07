@@ -1,4 +1,4 @@
-import difflib from "difflib";
+import { unifiedDiff } from "difflib";
 
 import CONSTANTS from "../../../common/CONSTANTS.js";
 import log from "../logging.js";
@@ -16,8 +16,7 @@ defineEvent("stickerUpdate", async (oldSticker, partialSticker) => {
 			files: [
 				{
 					attachment: Buffer.from(
-						difflib
-							.unifiedDiff(
+						.unifiedDiff(
 								(oldSticker.description ?? "").split("\n"),
 								(newSticker.description ?? "").split("\n"),
 							)

@@ -7,11 +7,22 @@ import {
 	Locale,
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
+	ChannelType,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import defineEvent from "../../events.js";
-import log, { LoggingEmojis, shouldLog } from "./misc.js";
-import difflib from "difflib";
+import log, { getLoggingThread, LoggingEmojis, shouldLog } from "./misc.js";
+import { DATABASE_THREAD } from "../../common/database.js";
+import {
+	extractMessageExtremities,
+	getBaseChannel,
+	getMessageJSON,
+	messageToText,
+} from "../../util/discord.js";
+import { unifiedDiff } from "difflib";
+import { diffString } from "json-diff";
+
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
@@ -26,13 +37,13 @@ defineEvent("guildMemberRemove", async (member) => {
 defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	if (newMember.guild.id !== CONSTANTS.guild.id) return;
 	if (oldMember.avatar !== newMember.avatar) {
-		const avatarURL = newMember.avatarURL({ size: 128 });
+		const url = newMember.avatarURL({ size: 128 });
 		await log(
 			`${LoggingEmojis.UserUpdate} Member ${newMember.toString()} ${
-				avatarURL ? "changed" : "removed"
+				url ? "changed" : "removed"
 			} their server avatar`,
 			"members",
-			{ files: avatarURL ? [{ url: avatarURL }] : undefined },
+			{ files: url ? [url] : undefined },
 		);
 	}
 
@@ -92,12 +103,14 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			"members",
 		);
 
+	// todo: log role changes
+
 	if (oldMember.user.avatar !== newMember.user.avatar) {
 		await log(
 			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} changed their avatar`,
 			"members",
 			{
-				files: [{ url: newMember.user.displayAvatarURL({ size: 128 }) }],
+				files: [newMember.user.displayAvatarURL({ size: 128 })],
 			},
 		);
 	}
@@ -162,7 +175,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 				url ? "changed" : "removed"
 			}`,
 			"server",
-			{ files: url ? [{ url }] : [] },
+			{ files: url ? [url] : [] },
 		);
 	}
 	if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications) {
@@ -180,12 +193,10 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		await log(`${LoggingEmojis.SettingsChange} Server description was changed`, "server", {
 			files: [
 				{
-					content: difflib
-						.unifiedDiff(
-							oldGuild.description?.split("\n") ?? "",
-							newGuild.description?.split("\n") ?? "",
-						)
-						.join("\n"),
+					content: unifiedDiff(
+						oldGuild.description?.split("\n") ?? "",
+						newGuild.description?.split("\n") ?? "",
+					).join("\n"),
 					extension: "diff",
 				},
 			],
@@ -198,7 +209,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 				url ? "changed" : "removed"
 			}`,
 			"server",
-			{ files: url ? [{ url }] : [] },
+			{ files: url ? [url] : [] },
 		);
 	}
 	if (oldGuild.explicitContentFilter !== newGuild.explicitContentFilter) {
@@ -312,7 +323,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		await log(
 			`${LoggingEmojis.SettingsChange} Server icon ${url ? "changed" : "removed"}`,
 			"server",
-			{ files: url ? [{ url }] : [] },
+			{ files: url ? [url] : [] },
 		);
 	}
 	if (oldGuild.maximumMembers !== newGuild.maximumMembers) {
@@ -412,7 +423,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 				url ? "changed" : "removed"
 			}`,
 			"server",
-			{ files: url ? [{ url }] : [] },
+			{ files: url ? [url] : [] },
 		);
 	}
 	if (oldGuild.systemChannel?.id !== newGuild.systemChannel?.id) {
@@ -544,7 +555,68 @@ defineEvent("inviteDelete", async (invite) => {
 		`${LoggingEmojis.Invites} Invite ${invite.code} deleted${
 			invite.uses === null ? "" : ` with ${invite.uses} uses`
 		}!`,
-		"members",
+		"server",
+	);
+});
+
+defineEvent("messageDelete", async (message) => {
+	if (!shouldLog(message.channel)) return;
+
+	const shush =
+		message.partial ||
+		(CONSTANTS.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
+			databaseThread.id !== message.channel.id);
+
+	const content = !shush && (await messageToText(message));
+	const { embeds, files } = shush
+		? { embeds: [], files: [] }
+		: extractMessageExtremities(message);
+
+	while (files.length > 9 + Number(!content)) files.pop();
+
+	await log(
+		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
+			message.author ? ` by ${message.author.toString()}` : ""
+		} in ${message.channel.toString()} deleted (ID: ${message.id})`,
+		"messages",
+		{
+			embeds,
+			button: { label: "View Context", url: message.url },
+
+			files: content
+				? [{ content, extension: "md" }, ...files.map((file) => file.url)]
+				: files.map((file) => file.url),
+		},
+	);
+});
+
+defineEvent("messageDeleteBulk", async (messages, channel) => {
+	if (!shouldLog(channel)) return;
+	const messagesInfo = (
+		await Promise.all(
+			messages.reverse().map(async (message) => {
+				const content = !message.partial && (await messageToText(message));
+
+				return `${message.author?.tag ?? "[unknown]"}${
+					message.embeds.length > 0 || message.attachments.size > 0 ? " (" : ""
+				}${message.embeds.length > 0 ? `${message.embeds.length} embeds` : ""}${
+					message.embeds.length > 0 && message.attachments.size > 0 ? ", " : ""
+				}${message.attachments.size > 0 ? `${message.attachments.size} attachments` : ""}${
+					message.embeds.length > 0 || message.attachments.size > 0 ? ")" : ""
+				}${content ? `:\n${content}` : ""}`;
+			}),
+		)
+	).join("\n\n---\n\n");
+
+	await log(
+		`${LoggingEmojis.MessageDelete} ${
+			messages.size
+		} messages in ${channel.toString()} bulk deleted!`,
+		"messages",
+		{
+			files: [{ content: messagesInfo, extension: "txt" }],
+			button: { label: "View Context", url: messages.first()?.url ?? "" },
+		},
 	);
 });
 
@@ -555,7 +627,7 @@ defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 
 	await log(
 		`${
-			LoggingEmojis.Reactions
+			LoggingEmojis.MessageDelete
 		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
 			message.id
 		})`,
@@ -579,6 +651,80 @@ defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 	);
 });
 
+defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
+	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
+	if (!shouldLog(newMessage.channel)) return;
+
+	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
+		await log(
+			`${
+				LoggingEmojis.MessageUpdate
+			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				newMessage.flags.has("Crossposted") ? "" : "un"
+			}published`,
+			"messages",
+			{ button: { label: "View Message", url: newMessage.url } },
+		);
+	}
+	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
+		await log(
+			`${LoggingEmojis.MessageUpdate} Embeds ${
+				newMessage.flags.has("SuppressEmbeds") ? "removed from" : "shown on"
+			} message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
+			"messages",
+			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
+		);
+	}
+
+	if (!oldMessage.partial && oldMessage.pinned !== newMessage.pinned) {
+		await log(
+			`${
+				LoggingEmojis.MessageUpdate
+			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				newMessage.pinned ? "" : "un"
+			}pinned`,
+			"messages",
+			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
+		);
+	}
+
+	if (!oldMessage.partial && !newMessage.author.bot) {
+		const files = [];
+		const contentDiff = unifiedDiff(
+			oldMessage.content.split("\n"),
+			newMessage.content.split("\n"),
+		).join("\n");
+		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
+
+		const extraDiff = diffString(
+			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },
+			{ ...getMessageJSON(newMessage), content: undefined, embeds: undefined },
+			{ color: false },
+		);
+		if (extraDiff) {
+			const updatedFiles = newMessage.attachments.map((attachment) => attachment.url);
+			files.push(
+				{ content: extraDiff, extension: "diff" },
+				...oldMessage.attachments
+					.map((attachment) => attachment.url)
+					.filter((attachment) => !updatedFiles.includes(attachment)),
+			);
+		}
+
+		if (files.length > 0) {
+			await log(
+				`${
+					LoggingEmojis.MessageEdit
+				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
+					newMessage.id
+				})!`,
+				"messages",
+				{ button: { label: "View Message", url: newMessage.url }, files },
+			);
+		}
+	}
+});
+
 defineEvent("roleCreate", async (role) => {
 	if (role.guild.id !== CONSTANTS.guild.id) return;
 	await log(`${LoggingEmojis.Roles} Role ${role.toString()} created!`, "server");
@@ -587,4 +733,99 @@ defineEvent("roleCreate", async (role) => {
 defineEvent("roleDelete", async (role) => {
 	if (role.guild.id !== CONSTANTS.guild.id) return;
 	await log(`${LoggingEmojis.Roles} Role @${role.name} deleted! (ID: ${role.id})`, "server");
+});
+
+defineEvent("voiceStateUpdate", async (oldState, newState) => {
+	if (!newState.member || newState.guild.id !== CONSTANTS.guild.id) return;
+
+	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
+		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {
+			await log(
+				`${
+					LoggingEmojis.Voice
+				} ${newState.member.toString()} left voice channel ${oldState.channel.toString()}`,
+				"voice",
+			);
+		}
+
+		if (newState.channel && newState.channel.type !== ChannelType.GuildStageVoice) {
+			await log(
+				`${
+					LoggingEmojis.Voice
+				} ${newState.member.toString()} joined voice channel ${newState.channel.toString()}, ${
+					newState.mute ? "" : "un"
+				}muted and ${newState.deaf ? "" : "un"}deafened`,
+				"voice",
+			);
+		}
+
+		return;
+	}
+
+	if (!newState.channel) return;
+
+	if (Boolean(oldState.suppress) !== Boolean(newState.suppress)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
+				newState.suppress ? "moved to the audience" : "became a speaker"
+			} in ${newState.channel.toString()}`,
+			"voice",
+		);
+	}
+
+	if (newState.suppress && newState.channel?.type === ChannelType.GuildStageVoice) return;
+
+	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
+				newState.selfDeaf ? "" : "un"
+			}deafened in ${newState.channel.toString()}`,
+			"voice",
+		);
+	}
+
+	if (Boolean(oldState.selfMute) !== Boolean(newState.selfMute)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
+				newState.selfMute ? "" : "un"
+			}muted in ${newState.channel.toString()}`,
+			"voice",
+		);
+	}
+
+	if (Boolean(oldState.selfVideo) !== Boolean(newState.selfVideo)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} turned camera ${
+				newState.selfVideo ? "on" : "off"
+			} in ${newState.channel.toString()}`,
+			"voice",
+		);
+	}
+
+	if (Boolean(oldState.serverDeaf) !== Boolean(newState.serverDeaf)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
+				newState.serverDeaf ? "" : "un-"
+			}server deafened`,
+			"voice",
+		);
+	}
+
+	if (Boolean(oldState.serverMute) !== Boolean(newState.serverMute)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} was${
+				newState.serverMute ? "" : "un-"
+			}server muted`,
+			"voice",
+		);
+	}
+
+	if (Boolean(oldState.streaming) !== Boolean(newState.streaming)) {
+		await log(
+			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
+				newState.streaming ? "started" : "stopped"
+			} screen sharing in ${newState.channel.toString()}`,
+			"voice",
+		);
+	}
 });

@@ -31,19 +31,16 @@ export default async function log(
 	group: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
-		files?: (
-			| { extension?: string; url: string; content?: never }
-			| { extension?: string; content: string; url?: never }
-		)[];
+		files?: (string | { extension?: string; content: string; url?: never })[];
 		button?: { label: string; url: string };
 	} = {},
 ) {
 	const thread = await getLoggingThread(group);
 
 	const externalFileIndex = extra.files?.findIndex((file) => {
-		if (file.url || file.content?.includes("```")) return true;
+		if (typeof file === "string" || file.content.includes("```")) return true;
 
-		const lines = file.content?.split("\n") ?? [];
+		const lines = file.content.split("\n");
 		if (lines.length > 6 || lines.find((line) => line.length > 50)) return true;
 
 		return false;
@@ -59,7 +56,11 @@ export default async function log(
 			(embeddedFiles?.length
 				? "\n" +
 				  embeddedFiles
-						.map((file) => `\`\`\`${file.extension}\n${file.content}\n\`\`\``)
+						.map((file) =>
+							typeof file === "string"
+								? file
+								: `\`\`\`${file.extension}\n${file.content}\n\`\`\``,
+						)
 						.join("\n")
 				: ""),
 		allowedMentions: { users: [] },
@@ -79,17 +80,17 @@ export default async function log(
 		],
 		files: await Promise.all(
 			extra.files?.map(async (file) => {
-				if (file.url === undefined) {
+				if (typeof file === "string") {
+					const response = await fetch(file);
 					return {
-						attachment: Buffer.from(file.content, "utf8"),
-						name: `file.${file.extension || "txt"}`,
+						attachment: Buffer.from(await response.arrayBuffer()),
+						name: new URL(file).pathname.split("/").at(-1),
 					};
 				}
 
-				const response = await fetch(file.url);
 				return {
-					attachment: Buffer.from(await response.arrayBuffer()),
-					name: `file.${file.extension || "gif"}`,
+					attachment: Buffer.from(file.content, "utf8"),
+					name: `file.${file.extension || "txt"}`,
 				};
 			}) ?? [],
 		),
@@ -126,6 +127,9 @@ export enum LoggingEmojis {
 	SettingsChange = "📋",
 	ServerUpdate = "✨",
 	Invites = "👋",
-	Reactions = "😳", // TODO
 	Roles = "🏷",
+	MessageDelete = "🗑",
+	MessageUpdate = "🌐",
+	MessageEdit = "📝",
+	Voice = "🔊",
 }
