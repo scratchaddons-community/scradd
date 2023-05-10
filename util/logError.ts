@@ -57,7 +57,7 @@ export default async function logError(
 		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
 
 		return await log(
-			`${CONSTANTS.emojis.statuses.no} **${error.name}** occurred in \`${event}\`!`,
+			`${CONSTANTS.emojis.statuses.no} **${error.name}** occurred in \`${event}\``,
 			"server",
 			{
 				files: [

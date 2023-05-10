@@ -60,7 +60,7 @@ export default async function warn(
 			displayStrikes
 				? `gained ${displayStrikes} strike${displayStrikes === 1 ? "" : "s"} from`
 				: "verbally warned by"
-		} ${moderator.toString()}!`,
+		} ${moderator.toString()}`,
 		"members",
 		{
 			files: [
@@ -136,7 +136,7 @@ export default async function warn(
 		!member.roles.premiumSubscriberRole &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(`⚠️ Missing permissions to ban ${user.toString()}.`));
+			: log(`⚠️ Missing permissions to ban ${user.toString()}`));
 		return;
 	}
 
@@ -158,7 +158,7 @@ export default async function warn(
 			: log(
 					`⚠️ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
-					}${addedMuteLength === 1 ? "" : "s"}.`,
+					}${addedMuteLength === 1 ? "" : "s"}`,
 			  ));
 	}
 
@@ -202,9 +202,9 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${CONSTANTS.emojis.statuses.yes} ${
+		`${CONSTANTS.emojis.statuses.yes} ${user.toString()}’s strike \`${id}\` was removed by ${
 			interaction.member
-		} removed ${user.toString()}’s strike \`${id}\`!`,
+		}`,
 		"members",
 	);
 	if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
@@ -242,9 +242,9 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${CONSTANTS.emojis.statuses.yes} ${
+		`${CONSTANTS.emojis.statuses.yes} ${user.toString()}’s strike \`${id}\` was added back by ${
 			interaction.member
-		} added ${user.toString()}’s strike \`${id}\` back!`,
+		}`,
 		"members",
 	);
 	if (user instanceof User) await giveXp(user, logUrl, -1 * strike.count * DEFAULT_XP);

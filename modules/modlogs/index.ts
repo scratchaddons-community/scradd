@@ -8,6 +8,14 @@ import {
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
 	ChannelType,
+	AuditLogEvent,
+	GuildAuditLogsEntry,
+	Base,
+	TimestampStyles,
+	AuditLogChange,
+	APIAuditLogChangeKey$Add,
+	APIRole,
+	userMention,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import defineEvent from "../../events.js";
@@ -21,17 +29,268 @@ import {
 } from "../../util/discord.js";
 import { unifiedDiff } from "difflib";
 import { diffString } from "json-diff";
+import { joinWithAnd } from "../../util/text.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 
+function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
+	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
+		entry.reason ? ` (${entry.reason})` : ""
+	}`;
+}
+
+const events: Partial<{
+	[event in AuditLogEvent]: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
+}> = {
+	async [AuditLogEvent.ChannelCreate](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Channel} ${
+				{
+					[ChannelType.GuildText]: "Text",
+					[ChannelType.GuildVoice]: "Voice",
+					[ChannelType.GuildCategory]: "Category",
+					[ChannelType.GuildAnnouncement]: "Announcement",
+					[ChannelType.GuildStageVoice]: "Stage",
+					[ChannelType.GuildForum]: "Forum",
+				}[entry.target.type]
+			} channel ${entry.target.toString()} (${entry.target.name}) created${
+				entry.target.parent ? ` under ${entry.target.parent}` : ""
+			}${extraAuditLogsInfo(entry)}`,
+			"channels",
+		);
+	},
+	async [AuditLogEvent.ChannelUpdate](entry) {},
+	async [AuditLogEvent.ChannelDelete](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Channel} ${
+				{
+					[ChannelType.GuildText]: "Text",
+					[ChannelType.GuildVoice]: "Voice",
+					[ChannelType.GuildCategory]: "Category",
+					[ChannelType.GuildAnnouncement]: "Announcement",
+					[ChannelType.GuildStageVoice]: "Stage",
+					[ChannelType.GuildForum]: "Forum",
+				}[entry.target.type]
+			} channel #${entry.target.name} deleted${extraAuditLogsInfo(entry)} (ID: ${
+				entry.target.id
+			})`,
+			"channels",
+		);
+	},
+	async [AuditLogEvent.ChannelOverwriteCreate](entry) {
+		// EXTRA
+	},
+	async [AuditLogEvent.ChannelOverwriteUpdate](entry) {
+		// EXTRA
+	},
+	async [AuditLogEvent.ChannelOverwriteDelete](entry) {
+		// EXTRA
+	},
+	async [AuditLogEvent.MemberKick](entry) {
+		if (!entry.target) return;
+		await log(
+			`${LoggingEmojis.Ban} ${entry.target.toString()} kicked${extraAuditLogsInfo(entry)}`,
+			"members",
+		);
+	},
+	async [AuditLogEvent.MemberPrune](entry) {
+		await log(
+			`${LoggingEmojis.Ban} ${entry.executor ? `${entry.executor.toString()} p` : "P"}runed ${
+				entry.extra.removed
+			} members who haven’t talked in ${entry.extra.days}${
+				entry.reason ? ` (${entry.reason})` : ""
+			}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.MemberBanAdd](entry) {
+		if (!entry.target) return;
+		await log(
+			`${LoggingEmojis.Ban} ${entry.target.toString()} banned${extraAuditLogsInfo(entry)}`,
+			"members",
+		);
+	},
+	async [AuditLogEvent.MemberBanRemove](entry) {
+		if (!entry.target) return;
+		await log(
+			`${LoggingEmojis.Ban} ${entry.target.toString()} unbanned${extraAuditLogsInfo(entry)}`,
+			"members",
+		);
+	},
+	async [AuditLogEvent.MemberRoleUpdate](entry) {
+		if (!entry.target) return;
+
+		const addedRoles = entry.changes
+			.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
+			.map((change) => change.new)
+			.flat();
+
+		const removedRoles = entry.changes
+			.filter(
+				(change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove",
+			)
+			.map((change) => change.new)
+			.flat();
+
+		if (addedRoles.length)
+			await log(
+				`${LoggingEmojis.Roles} ${entry.target.toString()} gained ${joinWithAnd(
+					addedRoles,
+					({ id }) => userMention(id),
+				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
+					entry.reason ? ` (${entry.reason})` : ""
+				}`,
+				"members",
+			);
+
+		if (removedRoles.length)
+			await log(
+				`${LoggingEmojis.Roles} ${entry.target.toString()} gained ${joinWithAnd(
+					removedRoles,
+					({ id }) => userMention(id),
+				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
+					entry.reason ? ` (${entry.reason})` : ""
+				}`,
+				"members",
+			);
+	},
+	async [AuditLogEvent.BotAdd](entry) {
+		if (!entry.target) return;
+		await log(
+			`${LoggingEmojis.Members} ${entry.target.toString()} added${extraAuditLogsInfo(entry)}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.RoleUpdate](entry) {},
+	async [AuditLogEvent.InviteCreate](entry) {
+		await log(
+			`${LoggingEmojis.Invites} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
+				entry.target.code
+			} for ${entry.target.channel?.toString()} created${
+				entry.executor ? ` by ${entry.executor.toString()}` : ""
+			}${
+				entry.target.expiresAt || entry.target.maxUses
+					? `, expiring ${
+							entry.target.expiresAt
+								? time(entry.target.expiresAt, TimestampStyles.LongDate)
+								: ""
+					  }${entry.target.expiresAt && entry.target.maxUses ? " or " : ""}${
+							entry.target.maxUses ? `after ${entry.target.maxUses} uses` : ""
+					  }`
+					: ""
+			}${entry.reason ? ` (${entry.reason})` : ""}`,
+			"members",
+		);
+	},
+	async [AuditLogEvent.InviteUpdate](entry) {},
+	async [AuditLogEvent.WebhookCreate](entry) {},
+	async [AuditLogEvent.WebhookUpdate](entry) {},
+	async [AuditLogEvent.WebhookDelete](entry) {},
+	async [AuditLogEvent.EmojiCreate](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Emojis} ${entry.target.toString()} created${extraAuditLogsInfo(
+				entry,
+			)}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.EmojiUpdate](entry) {},
+	async [AuditLogEvent.EmojiDelete](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Emojis} ${entry.target.toString()} deleted${extraAuditLogsInfo(
+				entry,
+			)}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.IntegrationCreate](entry) {},
+	async [AuditLogEvent.IntegrationUpdate](entry) {},
+	async [AuditLogEvent.IntegrationDelete](entry) {},
+	async [AuditLogEvent.StickerCreate](entry) {
+		await log(
+			`${LoggingEmojis.Emojis} Sticker ${entry.target.name} created${extraAuditLogsInfo(
+				entry,
+			)}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.StickerUpdate](entry) {},
+	async [AuditLogEvent.StickerDelete](entry) {
+		await log(
+			`${LoggingEmojis.Emojis} Sticker ${entry.target.name} deleted${extraAuditLogsInfo(
+				entry,
+			)}`,
+			"server",
+		);
+	},
+	async [AuditLogEvent.GuildScheduledEventCreate](entry) {
+		const start = entry.target.scheduledStartAt;
+		const end = entry.target.scheduledEndAt;
+
+		await log(
+			`${LoggingEmojis.Events} Event ${entry.target.name} scheduled${
+				start ?? end
+					? ` for ${time(start ?? end ?? new Date())}${
+							end && start ? `-${time(end)}` : ""
+					  }`
+					: ""
+			} in ${
+				entry.target.channel?.toString() ??
+				entry.target.entityMetadata?.location ??
+				"an external location"
+			}${extraAuditLogsInfo(entry)}${
+				entry.target.description ? `:\n${entry.target.description}` : ""
+			}`,
+			"voice",
+		);
+	},
+	async [AuditLogEvent.GuildScheduledEventUpdate](entry) {},
+	async [AuditLogEvent.ThreadCreate](entry) {
+		if (entry.target.type !== ChannelType.PrivateThread) return;
+		await log(
+			`${
+				LoggingEmojis.Threads
+			} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+			"channels",
+			{ button: { label: "View Thread", url: entry.target.url } },
+		);
+	},
+	async [AuditLogEvent.ThreadUpdate](entry) {},
+	async [AuditLogEvent.ThreadDelete](entry) {
+		await log(
+			`${LoggingEmojis.Threads} Thread #${entry.target.name} ${
+				entry.target.parent ? `in ${entry.target.parent.toString()} ` : ""
+			}deleted${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			"channels",
+		);
+	},
+	async [AuditLogEvent.ApplicationCommandPermissionUpdate](entry) {
+		// EXTRA
+	},
+	async [AuditLogEvent.AutoModerationRuleCreate](entry) {},
+	async [AuditLogEvent.AutoModerationRuleUpdate](entry) {},
+	async [AuditLogEvent.AutoModerationRuleDelete](entry) {},
+};
+
+defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
+	// @ts-expect-error -- Can't fix this
+	if (guild.id === CONSTANTS.guild.id) events[entry.action]?.(entry);
+
+	entry.target;
+});
+
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
-	await log(`${LoggingEmojis.Members} Member ${member.toString()} joined`, "members");
+	await log(`${LoggingEmojis.Members} ${member.toString()} joined`, "members");
 });
 
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== CONSTANTS.guild.id) return;
-	await log(`${LoggingEmojis.Members} Member ${member.toString()} left`, "members");
+	await log(`${LoggingEmojis.Members} ${member.toString()} left`, "members");
 });
 
 defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
@@ -39,7 +298,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	if (oldMember.avatar !== newMember.avatar) {
 		const url = newMember.avatarURL({ size: 128 });
 		await log(
-			`${LoggingEmojis.UserUpdate} Member ${newMember.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
 				url ? "changed" : "removed"
 			} their server avatar`,
 			"members",
@@ -53,7 +312,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			Number(newMember.communicationDisabledUntil) > Date.now()
 		)
 			await log(
-				`${LoggingEmojis.UserUpdate} Member ${newMember.toString()} timed out until ${time(
+				`${LoggingEmojis.UserUpdate} ${newMember.toString()} timed out until ${time(
 					newMember.communicationDisabledUntil,
 				)}`,
 				"members",
@@ -63,7 +322,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			Number(oldMember.communicationDisabledUntil) > Date.now()
 		)
 			await log(
-				`${LoggingEmojis.UserUpdate} Member ${newMember.toString()}’s timeout was removed`,
+				`${LoggingEmojis.UserUpdate} ${newMember.toString()}’s timeout was removed`,
 				"members",
 			);
 	}
@@ -76,7 +335,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			oldMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
 	) {
 		await log(
-			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} ${
 				automodQuarantine ? "" : "un"
 			}quarantined based on AutoMod rules`,
 			"members",
@@ -86,7 +345,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	const verified = !!newMember.flags?.has("BypassesVerification");
 	if (!!oldMember.flags?.has("BypassesVerification") !== verified) {
 		await log(
-			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} ${
 				verified ? "" : "un"
 			}verified`,
 			"members",
@@ -95,7 +354,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.nickname !== newMember.nickname)
 		await log(
-			`${LoggingEmojis.UserUpdate} Member ${newMember.toString()}${
+			`${LoggingEmojis.UserUpdate} ${newMember.toString()}${
 				newMember.nickname
 					? ` was nicknamed ${newMember.nickname}`
 					: "’s nickname was removed"
@@ -103,11 +362,9 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 			"members",
 		);
 
-	// todo: log role changes
-
 	if (oldMember.user.avatar !== newMember.user.avatar) {
 		await log(
-			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} changed their avatar`,
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} changed their avatar`,
 			"members",
 			{
 				files: [newMember.user.displayAvatarURL({ size: 128 })],
@@ -118,7 +375,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	const quarantined = !!newMember.user.flags?.has("Quarantined");
 	if (!!oldMember.user.flags?.has("Quarantined") !== quarantined) {
 		await log(
-			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
 			"members",
@@ -128,7 +385,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	const spammer = !!newMember.user.flags?.has("Spammer");
 	if (!!oldMember.user.flags?.has("Spammer") !== spammer) {
 		await log(
-			`${LoggingEmojis.UserUpdate} User ${newMember.user.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} ${
 				spammer ? "" : "un"
 			}marked as likely spammer`,
 			"members",
@@ -137,9 +394,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.user.tag !== newMember.user.tag) {
 		await log(
-			`${
-				LoggingEmojis.UserUpdate
-			} User ${newMember.user.toString()} changed their username from ${
+			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} changed their username from ${
 				oldMember.user.tag
 			} to ${newMember.user.tag}`,
 			"members",
@@ -149,6 +404,12 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	// TODO: this doesn't go here
 	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster)
 		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
+});
+
+defineEvent("guildScheduledEventDelete", async (event) => {
+	if (event.guildId !== CONSTANTS.guild.id) return;
+
+	await log(`${LoggingEmojis.Events} Event ${event.name} removed`, "voice");
 });
 
 defineEvent("guildUpdate", async (oldGuild, newGuild) => {
@@ -554,7 +815,7 @@ defineEvent("inviteDelete", async (invite) => {
 	await log(
 		`${LoggingEmojis.Invites} Invite ${invite.code} deleted${
 			invite.uses === null ? "" : ` with ${invite.uses} uses`
-		}!`,
+		}`,
 		"server",
 	);
 });
@@ -611,7 +872,7 @@ defineEvent("messageDeleteBulk", async (messages, channel) => {
 	await log(
 		`${LoggingEmojis.MessageDelete} ${
 			messages.size
-		} messages in ${channel.toString()} bulk deleted!`,
+		} messages in ${channel.toString()} bulk deleted`,
 		"messages",
 		{
 			files: [{ content: messagesInfo, extension: "txt" }],
@@ -627,7 +888,7 @@ defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 
 	await log(
 		`${
-			LoggingEmojis.MessageDelete
+			LoggingEmojis.Emojis
 		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
 			message.id
 		})`,
@@ -717,7 +978,7 @@ defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 					LoggingEmojis.MessageEdit
 				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
 					newMessage.id
-				})!`,
+				})`,
 				"messages",
 				{ button: { label: "View Message", url: newMessage.url }, files },
 			);
@@ -727,12 +988,12 @@ defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 
 defineEvent("roleCreate", async (role) => {
 	if (role.guild.id !== CONSTANTS.guild.id) return;
-	await log(`${LoggingEmojis.Roles} Role ${role.toString()} created!`, "server");
+	await log(`${LoggingEmojis.Roles} ${role.toString()} created`, "server");
 });
 
 defineEvent("roleDelete", async (role) => {
 	if (role.guild.id !== CONSTANTS.guild.id) return;
-	await log(`${LoggingEmojis.Roles} Role @${role.name} deleted! (ID: ${role.id})`, "server");
+	await log(`${LoggingEmojis.Roles} @${role.name} deleted (ID: ${role.id})`, "server");
 });
 
 defineEvent("voiceStateUpdate", async (oldState, newState) => {

@@ -4,13 +4,12 @@ import dns from "node:dns";
 import fileSystem from "node:fs/promises";
 
 import { ActivityType } from "discord.js";
-import dotenv from "dotenv";
+import "dotenv/config";
 
 import pkg from "./package.json" assert { type: "json" };
 import type { ClientEvent, Event } from "./events.js";
 import { GlobalFonts } from "@napi-rs/canvas";
 
-dotenv.config();
 dns.setDefaultResultOrder("ipv4first");
 
 const { default: client } = await import("./client.js");
@@ -73,7 +72,7 @@ if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
 	const { default: log } = await import("./modules/modlogs/misc.js");
-	await log(`🤖 Bot restarted on version **v${pkg.version}**!`, "server");
+	await log(`🤖 Bot restarted on version **v${pkg.version}**`, "server");
 }
 
 client.user.setPresence({

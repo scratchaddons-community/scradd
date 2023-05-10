@@ -80,7 +80,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 			edits.push(` was made ${newChannel.nsfw ? "" : "non-"}age-restricted`);
 
 		if ((oldChannel.topic ?? "") !== (newChannel.topic ?? "")) {
-			await log(`✏️ Channel ${newChannel.toString()}’s topic was changed!`, "channels", {
+			await log(`✏️ ${newChannel.toString()}’s topic was changed!`, "channels", {
 				files: [
 					{
 						attachment: Buffer.from(
@@ -168,7 +168,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 	await Promise.all(
 		edits.map(
-			async (edit) => await log(`✏️ Channel ${newChannel.toString()}${edit}!`, "channels"),
+			async (edit) => await log(`✏️ ${newChannel.toString()}${edit}!`, "channels"),
 		),
 	);
 });

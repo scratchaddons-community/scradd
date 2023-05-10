@@ -71,7 +71,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		logs.map(
 			async (edit) =>
 				await log(
-					`📃 Thread ${
+					`📃 ${
 						edit.startsWith(" closed") ? `#${newThread.name}` : newThread.toString()
 					}${edit}!`,
 					"channels",

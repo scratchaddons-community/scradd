@@ -31,7 +31,7 @@ defineEvent("roleUpdate", async (oldRole, newRole) => {
 		const iconURL = newRole.iconURL({ size: 128 });
 		const response = iconURL && (await fetch(iconURL));
 		await log(
-			`✏️ Role ${newRole.toString()}’s icon was ${
+			`✏️ ${newRole.toString()}’s icon was ${
 				response
 					? "changed"
 					: newRole.unicodeEmoji
@@ -44,6 +44,6 @@ defineEvent("roleUpdate", async (oldRole, newRole) => {
 	}
 
 	await Promise.all(
-		logs.map(async (edit) => await log(`✏️ Role ${newRole.toString()}${edit}!`, "server")),
+		logs.map(async (edit) => await log(`✏️ ${newRole.toString()}${edit}!`, "server")),
 	);
 });

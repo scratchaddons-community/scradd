@@ -155,7 +155,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 
 	if (files.length > 0) {
 		await log(
-			`✏️ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}!`,
+			`✏️ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
 			"messages",
 			{
 				components: [

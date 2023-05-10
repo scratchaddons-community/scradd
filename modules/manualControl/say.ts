@@ -35,7 +35,7 @@ export async function say(
 				"say",
 				(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")?.id ??
 					"",
-			)} in ${message.channel.toString()}!`,
+			)} in ${message.channel.toString()}`,
 			"messages",
 			{
 				components: [

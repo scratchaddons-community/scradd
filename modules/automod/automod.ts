@@ -161,7 +161,7 @@ export default async function automodMessage(message: Message) {
 	function deleteMessage() {
 		if (deleteMessage.deleted) return;
 
-		if (!message.deletable) return log(`⚠️ Missing permissions to delete ${message.url}.`);
+		if (!message.deletable) return log(`⚠️ Missing permissions to delete ${message.url}`);
 
 		deleteMessage.deleted = true;
 		return message.delete();

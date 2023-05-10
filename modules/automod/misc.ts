@@ -40,7 +40,7 @@ export async function changeNickname(member: GuildMember) {
 		}
 
 		if (unchanged.size > 1)
-			await log(`⚠️ Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}.`);
+			await log(`⚠️ Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}`);
 	}
 }
 
@@ -49,6 +49,6 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		await member.setNickname(member.user.username === newNickname ? null : newNickname, reason);
 	else
 		await log(
-			`⚠️ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason}).`,
+			`⚠️ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		);
 }

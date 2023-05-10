@@ -132,4 +132,7 @@ export enum LoggingEmojis {
 	MessageUpdate = "🌐",
 	MessageEdit = "📝",
 	Voice = "🔊",
+	Channel = "🗄",
+	Ban = "🔨",
+	Events = "🗓",
 }
