@@ -2,14 +2,13 @@ import {
 	type ModalSubmitInteraction,
 	type ChatInputCommandInteraction,
 	ComponentType,
-	ButtonStyle,
 	chatInputApplicationCommandMention,
 	MessageFlags,
 	TextInputStyle,
 } from "discord.js";
 
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../modlogs/misc.js";
 
 /**
  * Mimic something.
@@ -31,28 +30,15 @@ export async function say(
 
 	if (message) {
 		await log(
-			`💬 ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
+			`${
+				LoggingEmojis.Bot
+			} ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
 				"say",
 				(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")?.id ??
 					"",
 			)} in ${message.channel.toString()}`,
 			"messages",
-			{
-				components: [
-					{
-						type: ComponentType.ActionRow,
-
-						components: [
-							{
-								type: ComponentType.Button,
-								label: "View Message",
-								style: ButtonStyle.Link,
-								url: message.url,
-							},
-						],
-					},
-				],
-			},
+			{ button: { label: "View Message", url: message.url } },
 		);
 		await interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true });
 	}

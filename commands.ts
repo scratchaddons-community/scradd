@@ -16,7 +16,7 @@ import {
 	AutocompleteInteraction,
 } from "discord.js";
 export const commandData: ApplicationCommandData[] = [];
-export const commands = new Map<string, Command>();
+export const commands = new Map<string, CommandData & { command: Command }>();
 
 type Option = { description: string; required?: boolean } & (
 	| {
@@ -198,7 +198,7 @@ export default function defineCommand(data: CommandData, command: Command) {
 			  })),
 	});
 
-	commands.set(data.name, command);
+	commands.set(data.name, { ...data, command });
 }
 
 /**

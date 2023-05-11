@@ -1,20 +1,97 @@
-import path from "node:path";
-import url from "node:url";
-
-import {
-	ApplicationCommandType,
-	type CommandInteractionOption,
-	GuildMember,
-	type Collection,
-} from "discord.js";
+import { type CommandInteractionOption, GuildMember } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
 import censor, { badWordsAllowed } from "../modules/automod/language.js";
-import warn from "../modules/punishments/punishments.js";
-import { importScripts } from "../util/files.js";
 import logError from "../util/logError.js";
+import defineEvent from "../events.js";
+import warn from "../modules/punishments/warn.js";
+import { commands } from "../commands.js";
+import { buttons, modals, selects } from "../components.js";
+defineEvent("interactionCreate", async (interaction) => {
+	if (interaction.isAutocomplete()) {
+		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
+		const command = commands.get(interaction.command?.name ?? "");
 
-import type { BaseCommand } from "../commands.js";
+		const { autocomplete } =
+			command?.options?.[interaction.options.getFocused(true).name] ?? {};
+
+		if (!autocomplete) {
+			throw new ReferenceError(
+				`Command \`${interaction.command?.name}\` autocomplete handler not found`,
+			);
+		}
+
+		return autocomplete(interaction);
+	}
+
+	try {
+		if (!interaction.isCommand()) {
+			const [id, name] = interaction.customId.split(/(?<=^[^_]*)_/);
+			if (!name) return;
+
+			if (interaction.isButton()) await buttons[name]?.(interaction, id ?? "");
+			else if (interaction.isModalSubmit()) await modals[name]?.(interaction, id ?? "");
+			else if (interaction.isAnySelectMenu()) await selects[name]?.(interaction, id ?? "");
+
+			return;
+		}
+		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
+
+		const command = commands.get(interaction.command?.name ?? "");
+
+		if (!command)
+			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+
+		if (
+			interaction.isChatInputCommand() &&
+			(command.censored === "channel"
+				? !badWordsAllowed(interaction.channel)
+				: command.censored ?? true)
+		) {
+			const censored = censorOptions(interaction.options.data);
+
+			if (censored.isBad) {
+				await interaction.reply({
+					ephemeral: true,
+					content: `${CONSTANTS.emojis.statuses.no} Language!`,
+				});
+				await warn(
+					interaction.member instanceof GuildMember
+						? interaction.member
+						: interaction.user,
+					"Watch your language!",
+					censored.strikes,
+					`Used command:\n${interaction.toString()}`,
+				);
+				return;
+			}
+		}
+
+		// @ts-expect-error TS2345 -- No concrete fix to this
+		await command.command(interaction);
+	} catch (error) {
+		await logError(
+			error,
+			interaction.isCommand()
+				? interaction.isChatInputCommand()
+					? interaction.toString()
+					: `/${interaction.command?.name}`
+				: `${interaction.constructor.name}: ${interaction.customId}`,
+		);
+
+		if (interaction.deferred || interaction.replied) {
+			await interaction.followUp({
+				ephemeral: true,
+				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
+			});
+		} else if (Number(interaction.createdAt) - Date.now() < 3000) {
+			await interaction.reply({
+				ephemeral: true,
+				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
+			});
+		}
+	}
+});
 
 /**
  * Detect bad words in command options.
@@ -49,116 +126,3 @@ function censorOptions(options: readonly CommandInteractionOption[]) {
 
 	return { isBad, strikes, words };
 }
-
-const dirname = path.dirname(url.fileURLToPath(import.meta.url));
-
-const unloadedCommands: Promise<Collection<string, Command>> = importScripts(
-	path.resolve(dirname, "../commands"),
-);
-
-defineEvent("interactionCreate", async (interaction) => {
-	const commands = await unloadedCommands;
-	if (interaction.isAutocomplete()) {
-		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
-		const command = commands.get(interaction.command?.name ?? "");
-
-		if (!command || !("autocomplete" in command)) {
-			throw new ReferenceError(
-				`Command \`${interaction.command?.name}\` autocomplete handler not found`,
-			);
-		}
-
-		return command.autocomplete?.(interaction);
-	}
-	try {
-		if (!interaction.isCommand()) {
-			const [id, name] = interaction.customId.split(/(?<=^[^_]*)_/);
-			if (!name) return;
-
-			if (interaction.isButton()) await get("buttons")?.(interaction, id);
-			else if (interaction.isModalSubmit()) await get("modals")?.(interaction, id);
-			else if (interaction.isStringSelectMenu())
-				await get("stringSelects")?.(interaction, id);
-			else if (interaction.isUserSelectMenu()) await get("userSelects")?.(interaction, id);
-			else if (interaction.isRoleSelectMenu()) await get("roleSelects")?.(interaction, id);
-			else if (interaction.isMentionableSelectMenu())
-				await get("mentionableSelects")?.(interaction, id);
-			else if (interaction.isChannelSelectMenu())
-				await get("channelSelects")?.(interaction, id);
-
-			function get<T extends keyof BaseCommand>(
-				type: T,
-			): NonNullable<NonNullable<Command>[T]>[string] | undefined;
-
-			function get(type: keyof BaseCommand) {
-				return commands.find((command) => !!command?.[type]?.[name ?? ""])?.[type]?.[
-					name ?? ""
-				];
-			}
-
-			return;
-		}
-		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
-
-		const command = commands.get(
-			(!interaction.command || interaction.command.type === ApplicationCommandType.ChatInput
-				? interaction.command?.name
-				: interaction.command.name
-						.split(" ")
-						.map((word) => word.toLowerCase())
-						.join("-")) ?? "",
-		);
-
-		if (!command)
-			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
-
-		if (
-			interaction.isChatInputCommand() &&
-			(command.data.censored === "channel"
-				? !badWordsAllowed(interaction.channel)
-				: command.data.censored ?? true)
-		) {
-			const censored = censorOptions(interaction.options.data);
-
-			if (censored.isBad) {
-				await interaction.reply({
-					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} Language!`,
-				});
-				await warn(
-					interaction.member instanceof GuildMember
-						? interaction.member
-						: interaction.user,
-					"Watch your language!",
-					censored.strikes,
-					`Used command:\n${interaction.toString()}`,
-				);
-				return;
-			}
-		}
-
-		// @ts-expect-error TS2345 -- No concrete fix to this
-		await command.interaction(interaction);
-	} catch (error) {
-		await logError(
-			error,
-			interaction.isCommand()
-				? interaction.isChatInputCommand()
-					? interaction.toString()
-					: `/${interaction.command?.name}`
-				: `${interaction.constructor.name}: ${interaction.customId}`,
-		);
-
-		if (interaction.deferred || interaction.replied) {
-			await interaction.followUp({
-				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
-			});
-		} else if (Number(interaction.createdAt) - Date.now() < 3000) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
-			});
-		}
-	}
-});

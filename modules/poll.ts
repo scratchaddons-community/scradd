@@ -15,6 +15,7 @@ import client from "../client.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
+const bannedReactions = ["🥔"];
 
 defineCommand(
 	{
@@ -86,7 +87,9 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 				],
 				customReactions: [
 					...customReactions,
-					customReactions.includes(emoji) ? undefined : emoji,
+					!emoji || customReactions.includes(emoji) || bannedReactions.includes(emoji)
+						? undefined
+						: emoji,
 				],
 			};
 		},

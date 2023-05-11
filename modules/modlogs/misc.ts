@@ -28,7 +28,7 @@ export function shouldLog(channel: import("discord.js").TextBasedChannel | null)
 
 export default async function log(
 	content: `${LoggingEmojis} ${string}`,
-	group: typeof LOG_GROUPS[number],
+	group?: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string; url?: never })[];
@@ -122,17 +122,21 @@ export async function getLoggingThread(
 }
 
 export enum LoggingEmojis {
-	Members = "👥",
+	Member = "👥",
 	UserUpdate = "👤",
-	SettingsChange = "📋",
+	SettingChange = "📋",
 	ServerUpdate = "✨",
-	Invites = "👋",
-	Roles = "🏷",
+	Invite = "👋",
+	Role = "🏷",
 	MessageDelete = "🗑",
 	MessageUpdate = "🌐",
 	MessageEdit = "📝",
 	Voice = "🔊",
 	Channel = "🗄",
-	Ban = "🔨",
-	Events = "🗓",
+	Punishment = "🔨",
+	Event = "🗓",
+	Error = "⚠", // TODO ts 5.0: CONSTANTS.emojis.statuses.no,
+	Bot = "🤖",
+	Emoji = "😳",
+	Thread = "📂",
 }

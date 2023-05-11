@@ -11,25 +11,26 @@ import defineCommand from "../../commands.js";
 import { joinWithAnd } from "../../util/text.js";
 import defineEvent from "../../events.js";
 import warn from "../punishments/warn.js";
-import {  changeNickname } from "./misc.js";
+import { changeNickname } from "./misc.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
 
-defineEvent("messageCreate", async (message) => {
+defineEvent.pre("messageCreate", async (message) => {
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
 		message.guild?.id === CONSTANTS.guild.id
 	)
-		await automodMessage(message);
+		return await automodMessage(message);
+	return true;
 });
 defineEvent("messageUpdate", async (_, message) => {
 	await automodMessage(message.partial ? await message.fetch() : message);
 });
-defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
+defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== CONSTANTS.guild.id) return;
+	if (message.guild?.id !== CONSTANTS.guild.id) return true;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
 		const censored = censor(reaction.emoji.name);
@@ -41,8 +42,10 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 				`Reacted with:\n:${reaction.emoji.name}:`,
 			);
 			await reaction.remove();
+			return false;
 		}
 	}
+	return true;
 });
 defineEvent("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;

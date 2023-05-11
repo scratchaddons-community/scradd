@@ -1,8 +1,7 @@
 import type { Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
-import CONSTANTS from "../common/CONSTANTS.js";
-import log from "../modules/modlogs/misc.js";
+import log, { LoggingEmojis } from "../modules/modlogs/misc.js";
 import { sanitizePath } from "./files.js";
 
 /**
@@ -57,13 +56,9 @@ export default async function logError(
 		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
 
 		return await log(
-			`${CONSTANTS.emojis.statuses.no} **${error.name}** occurred in \`${event}\``,
+			`${LoggingEmojis.Error} **${error.name}** occurred in \`${event}\``, // todo chat input cmd errors
 			"server",
-			{
-				files: [
-					{ attachment: Buffer.from(generateError(error), "utf8"), name: "error.json" },
-				],
-			},
+			{ files: [{ content: generateError(error), extension: "json" }] },
 		);
 	} catch (errorError) {
 		console.error(errorError);

@@ -30,7 +30,7 @@ GlobalFonts.registerFromPath(
 
 const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
 
-const directory = path.resolve(url.fileURLToPath(import.meta.url), "./modules");
+const directory = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules");
 const modules = await fileSystem.readdir(directory);
 
 const promises = modules.map(async (module) => {
@@ -44,8 +44,8 @@ const promises = modules.map(async (module) => {
 });
 await Promise.all(promises);
 
-const { events } = await import("./events.js");
-for (const [event, execute] of Object.entries(events) as [ClientEvent, Event<ClientEvent>][]) {
+const { getEvents } = await import("./events.js");
+for (const [event, execute] of Object.entries(getEvents()) as [ClientEvent, Event][]) {
 	client.on(event, async (...args) => {
 		try {
 			await execute(...args);
@@ -71,8 +71,8 @@ await client.guilds.fetch().then(
 if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
-	const { default: log } = await import("./modules/modlogs/misc.js");
-	await log(`🤖 Bot restarted on version **v${pkg.version}**`, "server");
+	const { default: log, LoggingEmojis } = await import("./modules/modlogs/misc.js");
+	await log(`${LoggingEmojis.Bot} Bot restarted on version **v${pkg.version}**`, "server");
 }
 
 client.user.setPresence({

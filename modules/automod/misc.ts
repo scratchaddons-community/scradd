@@ -1,7 +1,7 @@
 import type { GuildMember } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { joinWithAnd } from "../../util/text.js";
-import log from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../modlogs/misc.js";
 import censor from "./language.js";
 
 export async function changeNickname(member: GuildMember) {
@@ -40,7 +40,7 @@ export async function changeNickname(member: GuildMember) {
 		}
 
 		if (unchanged.size > 1)
-			await log(`⚠️ Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}`);
+			await log(`${LoggingEmojis.Error} Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}`);
 	}
 }
 
@@ -49,6 +49,6 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		await member.setNickname(member.user.username === newNickname ? null : newNickname, reason);
 	else
 		await log(
-			`⚠️ Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+			`${LoggingEmojis.Error} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		);
 }

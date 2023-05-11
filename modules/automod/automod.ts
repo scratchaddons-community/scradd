@@ -7,7 +7,7 @@ import {
 	GlobalBotInvitesPattern,
 	GlobalInvitesPattern,
 } from "../../util/discord.js";
-import log from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import censor, { badWordsAllowed } from "./language.js";
@@ -161,10 +161,12 @@ export default async function automodMessage(message: Message) {
 	function deleteMessage() {
 		if (deleteMessage.deleted) return;
 
-		if (!message.deletable) return log(`⚠️ Missing permissions to delete ${message.url}`);
+		if (!message.deletable) return log(`${LoggingEmojis.Error} Missing permissions to delete ${message.url}`);
 
 		deleteMessage.deleted = true;
 		return message.delete();
 	}
 	deleteMessage.deleted = false;
+
+	return !deleteMessage.deleted;
 }

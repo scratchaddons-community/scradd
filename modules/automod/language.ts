@@ -5,7 +5,7 @@ import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 
--function decodeRegexes(regexes: RegExp[]) {
+function decodeRegexes(regexes: RegExp[]) {
 	return regexes
 		.map(({ source }) =>
 			caesar(source).replaceAll(

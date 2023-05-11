@@ -1,4 +1,4 @@
-import type { ClientEvents } from "discord.js";
+import type { Awaitable, ClientEvents } from "discord.js";
 
 type ReservedClientEvent =
 	| "ready"
@@ -8,23 +8,47 @@ type ReservedClientEvent =
 	| "restDebug"
 	| "invalidated"
 	| "guildUnavailable"
-	| "interactionCreate"
 	| "userUpdate";
 export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
-export type Event<E extends ClientEvent> = (...args: ClientEvents[E]) => unknown;
-export const events: { [E in ClientEvent]?: Event<E> } = {};
+export type Event = (...args: ClientEvents[ClientEvent]) => unknown;
+const events: Record<string, Event> = {};
+const preEvents: Record<string, Event> = {};
 
 export default function defineEvent<EventName extends ClientEvent>(
 	eventName: EventName,
-	event: NonNullable<typeof events[EventName]>,
+	event: (...args: ClientEvents[EventName]) => unknown,
 ) {
 	const old = events[eventName];
 	if (old) {
-		events[eventName] = async function (...args) {
+		events[eventName] = async function (...args: ClientEvents[EventName]) {
 			old(...args);
 			event(...args);
-		} as typeof event;
+		} as Event;
 	} else {
-		events[eventName] = event;
+		events[eventName] = event as Event;
 	}
+}
+defineEvent.pre = function pre<EventName extends ClientEvent>(
+	eventName: EventName,
+	event: (...args: ClientEvents[EventName]) => Awaitable<boolean>,
+) {
+	if (preEvents[eventName])
+		throw new ReferenceError("Pre event already exists for event " + eventName);
+	preEvents[eventName] = event as Event;
+};
+
+export function getEvents(): { [E in ClientEvent]?: Event } {
+	for (const eventName in preEvents) {
+		const event = preEvents[eventName];
+		if (!event) continue;
+		const old = events[eventName];
+		if (old) {
+			events[eventName] = async function (...args) {
+				if (await event(...args)) old(...args);
+			};
+		} else {
+			events[eventName] = event;
+		}
+	}
+	return events;
 }

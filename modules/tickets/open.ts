@@ -18,7 +18,7 @@ import {
 
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { disableComponents } from "../../util/discord.js";
-import log from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 
@@ -267,7 +267,11 @@ export default async function startTicket(
 		type: ChannelType.PrivateThread,
 		invitable: false,
 	});
-	await log(`🔴 Ticket ${thread?.toString()} opened by ${interaction.user.toString()}`);
+	await log(
+		`${
+			LoggingEmojis.Thread
+		} Ticket ${thread?.toString()} opened by ${interaction.user.toString()}`,
+	);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === member.id)

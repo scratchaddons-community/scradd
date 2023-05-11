@@ -1,6 +1,5 @@
 import { unifiedDiff } from "difflib";
 import {
-	ButtonStyle,
 	ComponentType,
 	MessageContextMenuCommandInteraction,
 	MessageEditOptions,
@@ -10,7 +9,7 @@ import {
 } from "discord.js";
 import { diffString } from "json-diff";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import log, { getLoggingThread, shouldLog } from "../modlogs/misc.js";
+import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../modlogs/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../../util/logError.js";
 
@@ -138,41 +137,17 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		{ color: false },
 	);
 
-	if (contentDiff) {
-		files.push({
-			attachment: Buffer.from(
-				contentDiff.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
-				"utf8",
-			),
-
-			name: "content.diff",
-		});
-	}
-
-	if (extraDiff) {
-		files.push({ attachment: Buffer.from(extraDiff, "utf8"), name: "extra.diff" });
-	}
+	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
+	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });
 
 	if (files.length > 0) {
 		await log(
-			`✏️ Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+			`${
+				LoggingEmojis.MessageEdit
+			} Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
 			"messages",
 			{
-				components: [
-					{
-						components: [
-							{
-								label: "View Message",
-								style: ButtonStyle.Link,
-								type: ComponentType.Button,
-								url: edited.url,
-							},
-						],
-
-						type: ComponentType.ActionRow,
-					},
-				],
-
+				button: { label: "View Message", url: edited.url },
 				files: shouldLog(edited.channel) ? files : [],
 			},
 		);

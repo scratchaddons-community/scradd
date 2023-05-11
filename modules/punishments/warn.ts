@@ -12,7 +12,7 @@ import {
 import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { convertBase } from "../../util/numbers.js";
-import log from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../modlogs/misc.js";
 import giveXp from "../xp/giveXp.js";
 import { DEFAULT_XP } from "../xp/misc.js";
 import filterToStrike, {
@@ -56,19 +56,14 @@ export default async function warn(
 		(totalVerbalStrikes ? "Too many verbal strikes" : "");
 
 	const logMessage = await log(
-		`⚠️ ${user.toString()} ${
+		`${LoggingEmojis.Punishment} ${user.toString()} ${
 			displayStrikes
 				? `gained ${displayStrikes} strike${displayStrikes === 1 ? "" : "s"} from`
 				: "verbally warned by"
 		} ${moderator.toString()}`,
 		"members",
 		{
-			files: [
-				{
-					attachment: Buffer.from(reason + (context && `\n>>> ${context}`), "utf8"),
-					name: "strike.txt",
-				},
-			],
+			files: [{ content: reason + (context && `\n>>> ${context}`), extension: "txt" }],
 		},
 	);
 	giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
@@ -136,7 +131,7 @@ export default async function warn(
 		!member.roles.premiumSubscriberRole &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(`⚠️ Missing permissions to ban ${user.toString()}`));
+			: log(`${LoggingEmojis.Error} Missing permissions to ban ${user.toString()}`));
 		return;
 	}
 
@@ -156,7 +151,9 @@ export default async function warn(
 					"Too many strikes",
 			  )
 			: log(
-					`⚠️ Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+					`${
+						LoggingEmojis.Error
+					} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,
 			  ));
@@ -202,7 +199,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${CONSTANTS.emojis.statuses.yes} ${user.toString()}’s strike \`${id}\` was removed by ${
+		`${LoggingEmojis.Punishment} ${user.toString()}’s strike \`${id}\` was removed by ${
 			interaction.member
 		}`,
 		"members",
@@ -242,7 +239,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${CONSTANTS.emojis.statuses.yes} ${user.toString()}’s strike \`${id}\` was added back by ${
+		`${LoggingEmojis.Punishment} ${user.toString()}’s strike \`${id}\` was added back by ${
 			interaction.member
 		}`,
 		"members",
