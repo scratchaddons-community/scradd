@@ -147,10 +147,10 @@ export default async function automodMessage(message: Message) {
 							current.length * (index - 1 || PARTIAL_STRIKE_COUNT) + accumulator,
 						0,
 					),
-				`Sent message with words:\n${[
-					...(badWords?.words ?? []),
-					embedStrikes?.words ?? [],
-				].join("\n")}`,
+				`Sent message with words: ${[
+					...(badWords?.words.flat() ?? []),
+					...(embedStrikes?.words.flat() ?? []),
+				].join(", ")}`,
 			);
 			await message.channel.send(
 				`${CONSTANTS.emojis.statuses.no} ${message.author.toString()}, language!`,

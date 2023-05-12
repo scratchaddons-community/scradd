@@ -32,24 +32,24 @@ defineEvent("messageCreate", async (message) => {
 							label: "Server Rules",
 							url: CONSTANTS.guild.rulesChannel?.url || "",
 						},
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Link,
-							label: "FAQ",
-							url: "TODO",
-						},
+						// {
+						// 	type: ComponentType.Button,
+						// 	style: ButtonStyle.Link,
+						// 	label: "FAQ",
+						// 	url: "TODO",
+						// },
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Secondary,
 							label: "Contact Mods",
 							custom_id: "_contactMods",
 						},
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Link,
-							label: "SA Support",
-							url: "TODO",
-						},
+						// {
+						// 	type: ComponentType.Button,
+						// 	style: ButtonStyle.Link,
+						// 	label: "SA Support",
+						// 	url: "TODO",
+						// },
 					],
 				},
 			],
@@ -99,15 +99,15 @@ defineButton("appealStrike", async (interaction, id = "") => {
 });
 defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
+
+	await interaction.deferReply({ ephemeral: true });
 	const thread = id && (await startTicket(interaction, id));
 	if (thread)
-		await interaction.reply({
-			content: `${
+		await interaction.editReply(
+			`${
 				CONSTANTS.emojis.statuses.yes
 			} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
-			ephemeral: true,
-		});
-	return;
+		);
 });
 
 defineCommand(

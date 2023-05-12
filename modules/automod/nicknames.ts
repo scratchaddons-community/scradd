@@ -4,9 +4,9 @@ import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import censor from "./language.js";
 
-export async function changeNickname(member: GuildMember) {
+export default async function changeNickname(member: GuildMember) {
 	const censored = censor(member.displayName);
-	if (censored) await setNickname(member, censored.censored, "Had bad words");
+	if (censored) await setNickname(member, censored.censored, "Has bad words");
 
 	const newNick = censored ? censored.censored : member.displayName;
 
@@ -40,7 +40,13 @@ export async function changeNickname(member: GuildMember) {
 		}
 
 		if (unchanged.size > 1)
-			await log(`${LoggingEmojis.Error} Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}`);
+			await log(
+				`${LoggingEmojis.Error} Conflicting nicknames: ${joinWithAnd(
+					unchanged
+						.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0))
+						.toJSON(),
+				)}`,
+			);
 	}
 }
 
@@ -49,6 +55,8 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		await member.setNickname(member.user.username === newNickname ? null : newNickname, reason);
 	else
 		await log(
-			`${LoggingEmojis.Error} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+			`${
+				LoggingEmojis.Error
+			} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		);
 }

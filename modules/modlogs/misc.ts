@@ -31,7 +31,7 @@ export default async function log(
 	group?: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
-		files?: (string | { extension?: string; content: string; url?: never })[];
+		files?: (string | { extension?: string; content: string })[];
 		button?: { label: string; url: string };
 	} = {},
 ) {
@@ -41,14 +41,12 @@ export default async function log(
 		if (typeof file === "string" || file.content.includes("```")) return true;
 
 		const lines = file.content.split("\n");
-		if (lines.length > 6 || lines.find((line) => line.length > 50)) return true;
-
-		return false;
+		return lines.length > 10 || lines.find((line) => line.length > 50);
 	});
-	const embeddedFiles = extra.files?.splice(
-		0,
-		externalFileIndex === -1 ? undefined : externalFileIndex,
-	);
+	const embeddedFiles =
+		externalFileIndex === -1
+			? extra.files?.splice(0)
+			: extra.files?.splice(0, externalFileIndex);
 
 	return await thread.send({
 		content:
@@ -79,7 +77,7 @@ export default async function log(
 			},
 		],
 		files: await Promise.all(
-			extra.files?.map(async (file) => {
+			extra.files?.slice(0, 10).map(async (file) => {
 				if (typeof file === "string") {
 					const response = await fetch(file);
 					return {

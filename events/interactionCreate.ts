@@ -89,7 +89,7 @@ defineEvent("interactionCreate", async (interaction) => {
 				ephemeral: true,
 				content: `${CONSTANTS.emojis.statuses.no} An error occurred.`,
 			});
-		}
+		}// TODO: bugs
 	}
 });
 

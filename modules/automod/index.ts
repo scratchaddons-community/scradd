@@ -11,7 +11,7 @@ import defineCommand from "../../commands.js";
 import { joinWithAnd } from "../../util/text.js";
 import defineEvent from "../../events.js";
 import warn from "../punishments/warn.js";
-import { changeNickname } from "./misc.js";
+import  changeNickname  from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
 
@@ -47,26 +47,15 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	}
 	return true;
 });
-defineEvent("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
+defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
+	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return true;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {
-		await thread.setName(censored.censored.replaceAll(/#+/g, "x"), "Censored bad word");
-
-		const owner = await thread.fetchOwner();
-		if (owner) {
-			await thread.send(`${owner.toString()}, language!`);
-			if (owner.guildMember) {
-				await warn(
-					owner.guildMember,
-					"Watch your language!",
-					censored.strikes,
-					`Made thread titled:\n${thread.name}`,
-				);
-			}
-		}
+		await thread.delete("Bad words");
+		return false;
 	}
+	return true;
 });
 defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (newThread.guild.id !== CONSTANTS.guild.id) return;

@@ -51,9 +51,9 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 	await interaction.deferReply();
 	const code = interaction.fields.getTextInputValue("code");
-	const output = await eval(code);
-	const type = typeof output;
 	try {
+		const output = await eval(`(async () => {${code}})()`);
+		const type = typeof output;
 		await interaction.editReply({
 			files: [
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
@@ -68,9 +68,7 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 							: output.toString(),
 						"utf8",
 					),
-					name: `output.${
-						["bigint", "symbol", "function", "object"].includes(type) ? "json" : "txt"
-					}`,
+					name: `output.${"string" === type ? "txt" : "json"}`,
 				},
 			],
 		});

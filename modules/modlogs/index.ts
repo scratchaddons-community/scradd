@@ -13,7 +13,7 @@ import {
 	Base,
 	TimestampStyles,
 	APIRole,
-	userMention,
+	roleMention,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import defineEvent from "../../events.js";
@@ -52,7 +52,7 @@ const events: {
 					[ChannelType.GuildStageVoice]: "Stage",
 					[ChannelType.GuildForum]: "Forum",
 				}[entry.target.type]
-			} channel ${entry.target.toString()} (${entry.target.name}) created${
+			} channel ${entry.target.toString()} (#${entry.target.name}) created${
 				entry.target.parent ? ` under ${entry.target.parent}` : ""
 			}${extraAuditLogsInfo(entry)}`,
 			"channels",
@@ -60,20 +60,10 @@ const events: {
 	},
 	async [AuditLogEvent.ChannelUpdate](entry) {},
 	async [AuditLogEvent.ChannelDelete](entry) {
-		if (!(entry.target instanceof Base)) return;
 		await log(
-			`${LoggingEmojis.Channel} ${
-				{
-					[ChannelType.GuildText]: "Text",
-					[ChannelType.GuildVoice]: "Voice",
-					[ChannelType.GuildCategory]: "Category",
-					[ChannelType.GuildAnnouncement]: "Announcement",
-					[ChannelType.GuildStageVoice]: "Stage",
-					[ChannelType.GuildForum]: "Forum",
-				}[entry.target.type]
-			} channel #${entry.target.name} deleted${extraAuditLogsInfo(entry)} (ID: ${
-				entry.target.id
-			})`,
+			`${LoggingEmojis.Channel} Channel #${entry.target.name} deleted${extraAuditLogsInfo(
+				entry,
+			)} (ID: ${entry.target.id})`,
 			"channels",
 		);
 	},
@@ -97,11 +87,9 @@ const events: {
 	},
 	async [AuditLogEvent.MemberPrune](entry) {
 		await log(
-			`${LoggingEmojis.Punishment} ${
-				entry.executor ? `${entry.executor.toString()} pruned` : "Pruned"
-			} ${entry.extra.removed} members who haven’t talked in ${entry.extra.days}${
-				entry.reason ? ` (${entry.reason})` : ""
-			}`,
+			`${LoggingEmojis.Punishment} ${entry.extra.removed} members who haven’t talked in ${
+				entry.extra.days
+			} days pruned${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
@@ -142,7 +130,7 @@ const events: {
 			await log(
 				`${LoggingEmojis.Role} ${entry.target.toString()} gained ${joinWithAnd(
 					addedRoles,
-					({ id }) => userMention(id),
+					({ id }) => roleMention(id),
 				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
 					entry.reason ? ` (${entry.reason})` : ""
 				}`,
@@ -151,9 +139,9 @@ const events: {
 
 		if (removedRoles.length)
 			await log(
-				`${LoggingEmojis.Role} ${entry.target.toString()} gained ${joinWithAnd(
+				`${LoggingEmojis.Role} ${entry.target.toString()} lost ${joinWithAnd(
 					removedRoles,
-					({ id }) => userMention(id),
+					({ id }) => roleMention(id),
 				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
 					entry.reason ? ` (${entry.reason})` : ""
 				}`,
@@ -163,7 +151,7 @@ const events: {
 	async [AuditLogEvent.BotAdd](entry) {
 		if (!entry.target) return;
 		await log(
-			`${LoggingEmojis.Member} ${entry.target.toString()} added${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Bot} ${entry.target.toString()} added${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
@@ -185,7 +173,7 @@ const events: {
 					  }`
 					: ""
 			}${entry.reason ? ` (${entry.reason})` : ""}`,
-			"members",
+			"server",
 		);
 	},
 	async [AuditLogEvent.InviteUpdate](entry) {},
@@ -201,9 +189,13 @@ const events: {
 	},
 	async [AuditLogEvent.EmojiUpdate](entry) {},
 	async [AuditLogEvent.EmojiDelete](entry) {
-		if (!(entry.target instanceof Base)) return;
+		if (!entry.target) return;
 		await log(
-			`${LoggingEmojis.Emoji} ${entry.target.toString()} deleted${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Emoji} :${
+				"name" in entry.target
+					? entry.target.name
+					: entry.changes.find((change) => change.key === "name")?.old
+			}: deleted${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
 			"server",
 		);
 	},
@@ -214,8 +206,9 @@ const events: {
 		await log(
 			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} created${extraAuditLogsInfo(
 				entry,
-			)}`,
+			)} (ID: ${entry.target.id})`,
 			"server",
+			{ files: [entry.target.url] },
 		);
 	},
 	async [AuditLogEvent.StickerUpdate](entry) {},
@@ -223,8 +216,9 @@ const events: {
 		await log(
 			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} deleted${extraAuditLogsInfo(
 				entry,
-			)}`,
+			)} (ID: ${entry.target.id})`,
 			"server",
+			{ files: [entry.target.url] },
 		);
 	},
 	async [AuditLogEvent.GuildScheduledEventCreate](entry) {
@@ -281,8 +275,6 @@ const events: {
 defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 	// @ts-expect-error T2345 -- No concrete fix to this
 	if (guild.id === CONSTANTS.guild.id) events[entry.action]?.(entry);
-
-	entry.target;
 });
 
 defineEvent("guildMemberAdd", async (member) => {
@@ -349,7 +341,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 		await log(
 			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} ${
 				verified ? "" : "un"
-			}verified`,
+			}verified by a moderator`,
 			"members",
 		);
 	}
@@ -366,6 +358,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.user.avatar !== newMember.user.avatar) {
 		await log(
+			// todo no workies
 			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} changed their avatar`,
 			"members",
 			{
@@ -396,6 +389,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.user.tag !== newMember.user.tag) {
 		await log(
+			// todo no workies
 			`${LoggingEmojis.UserUpdate} ${newMember.user.toString()} changed their username from ${
 				oldMember.user.tag
 			} to ${newMember.user.tag}`,
@@ -403,7 +397,7 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 		);
 	}
 
-	// TODO: this doesn't go here
+	// TODO: this doesn’t go here
 	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster)
 		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
 });
@@ -432,6 +426,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		);
 
 	if (oldGuild.banner !== newGuild.banner) {
+		//todo test
 		const url = newGuild.bannerURL({ size: 128 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server banner background was ${
@@ -540,10 +535,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		);
 	const invitesDisabled = newGuild.features.includes("INVITES_DISABLED");
 	if (oldGuild.features.includes("INVITES_DISABLED") !== invitesDisabled)
-		await log(
-			`${LoggingEmojis.Invite} Invites ${invitesDisabled ? "" : "un"}paused`,
-			"members",
-		);
+		await log(`${LoggingEmojis.Invite} Invites ${invitesDisabled ? "" : "un"}paused`, "server");
 	const hub = newGuild.features.includes("LINKED_TO_HUB");
 	if (oldGuild.features.includes("LINKED_TO_HUB") !== hub)
 		await log(
@@ -645,10 +637,40 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 
 	if (oldGuild.preferredLocale !== newGuild.preferredLocale)
 		await log(
-			`${LoggingEmojis.SettingChange} Server primary language switched to ${
-				Object.entries(Locale).find(
-					([, locale]) => locale === newGuild.preferredLocale,
-				)?.[0] ?? newGuild.preferredLocale
+			`${LoggingEmojis.SettingChange} Server primary language set to ${
+				{
+					[Locale.Indonesian]: "Indonesian",
+					[Locale.EnglishUS]: "English",
+					[Locale.EnglishGB]: "English",
+					[Locale.Bulgarian]: "български",
+					[Locale.ChineseCN]: "中文",
+					[Locale.ChineseTW]: "繁體中文",
+					[Locale.Croatian]: "Hrvatski",
+					[Locale.Czech]: "Čeština",
+					[Locale.Danish]: "Dansk",
+					[Locale.Dutch]: "Nederlands",
+					[Locale.Finnish]: "Suomi",
+					[Locale.French]: "Français",
+					[Locale.German]: "Deutsch",
+					[Locale.Greek]: "Ελληνικά",
+					[Locale.Hindi]: "हिंदी",
+					[Locale.Hungarian]: "Magyar",
+					[Locale.Italian]: "Italiano",
+					[Locale.Japanese]: "日本語",
+					[Locale.Korean]: "한국어",
+					[Locale.Lithuanian]: "Lietuviškai",
+					[Locale.Norwegian]: "Norsk",
+					[Locale.Polish]: "Polski",
+					[Locale.PortugueseBR]: "Português do Brasil",
+					[Locale.Romanian]: "Română",
+					[Locale.Russian]: "Русский",
+					[Locale.SpanishES]: "Español",
+					[Locale.Swedish]: "Svenska",
+					[Locale.Thai]: "ไทย",
+					[Locale.Turkish]: "Türkçe",
+					[Locale.Ukrainian]: "Українська",
+					[Locale.Vietnamese]: "Tiếng Việt",
+				}[newGuild.preferredLocale]
 			}`,
 			"server",
 		);
@@ -697,91 +719,92 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			"server",
 		);
 	}
-	const serverSetup = newGuild.systemChannelFlags.has(
+	const noSetup = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressGuildReminderNotifications,
 	);
 	if (
 		oldGuild.systemChannelFlags.has(
 			GuildSystemChannelFlags.SuppressGuildReminderNotifications,
-		) !== serverSetup
+		) !== noSetup
 	)
 		await log(
 			`${LoggingEmojis.SettingChange} “Send helpful tips for server setup” ${
-				serverSetup ? "en" : "dis"
+				noSetup ? "dis" : "en"
 			}abled`,
 			"server",
 		);
-	const joinReplies = newGuild.systemChannelFlags.has(
+	const noJoinReplies = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressJoinNotificationReplies,
 	);
 	if (
 		oldGuild.systemChannelFlags.has(GuildSystemChannelFlags.SuppressJoinNotificationReplies) !==
-		joinReplies
+		noJoinReplies
 	)
 		await log(
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to welcome messages with a sticker.” ${
-				joinReplies ? "en" : "dis"
+				noJoinReplies ? "dis" : "en"
 			}abled`,
 			"server",
 		);
-	const joins = newGuild.systemChannelFlags.has(
+	const noJoins = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressJoinNotifications,
 	);
 	if (
-		oldGuild.systemChannelFlags.has(GuildSystemChannelFlags.SuppressJoinNotifications) !== joins
+		oldGuild.systemChannelFlags.has(GuildSystemChannelFlags.SuppressJoinNotifications) !==
+		noJoins
 	)
 		await log(
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a random welcome message when someone joins this server.” ${
-				joins ? "en" : "dis"
+				noJoins ? "dis" : "en"
 			}abled`,
 			"server",
 		);
-	const boosts = newGuild.systemChannelFlags.has(
+	const noBoosts = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressPremiumSubscriptions,
 	);
 	if (
 		oldGuild.systemChannelFlags.has(GuildSystemChannelFlags.SuppressPremiumSubscriptions) !==
-		boosts
+		noBoosts
 	)
 		await log(
 			`${LoggingEmojis.SettingChange} “Send a message when someone boosts this server.” ${
-				boosts ? "en" : "dis"
+				noBoosts ? "dis" : "en"
 			}abled`,
 			"server",
 		);
-	const subscriptionReplies = newGuild.systemChannelFlags.has(
+	const noSubscriptionReplies = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotificationReplies,
 	);
 	if (
 		oldGuild.systemChannelFlags.has(
 			GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotificationReplies,
-		) !== subscriptionReplies
+		) !== noSubscriptionReplies
 	)
 		await log(
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to Server Subscription congratulation messages with a sticker” ${
-				subscriptionReplies ? "en" : "dis"
+				noSubscriptionReplies ? "dis" : "en"
 			}abled`,
 			"server",
 		);
-	const subscriptionNotifs = newGuild.systemChannelFlags.has(
+	const noSubscriptions = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotifications,
 	);
 	if (
 		oldGuild.systemChannelFlags.has(
 			GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotifications,
-		) !== subscriptionNotifs
+		) !== noSubscriptions
 	)
 		await log(
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a message when someone purchases or renews a Server Subscripton” ${
-				subscriptionNotifs ? "en" : "dis"
+				noSubscriptions ? "dis" : "en"
 			}abled`,
 			"server",
 		);
@@ -834,8 +857,6 @@ defineEvent("messageDelete", async (message) => {
 	const { embeds, files } = shush
 		? { embeds: [], files: [] }
 		: extractMessageExtremities(message);
-
-	while (files.length > 9 + Number(!content)) files.pop();
 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
@@ -1076,7 +1097,7 @@ defineEvent("voiceStateUpdate", async (oldState, newState) => {
 
 	if (Boolean(oldState.serverMute) !== Boolean(newState.serverMute)) {
 		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} was${
+			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
 				newState.serverMute ? "" : "un-"
 			}server muted`,
 			"voice",

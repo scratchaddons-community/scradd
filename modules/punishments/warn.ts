@@ -58,9 +58,9 @@ export default async function warn(
 	const logMessage = await log(
 		`${LoggingEmojis.Punishment} ${user.toString()} ${
 			displayStrikes
-				? `gained ${displayStrikes} strike${displayStrikes === 1 ? "" : "s"} from`
-				: "verbally warned by"
-		} ${moderator.toString()}`,
+				? `warned ${displayStrikes} time${displayStrikes === 1 ? "" : "s"}`
+				: "verbally warned"
+		} by ${moderator.toString()}`,
 		"members",
 		{
 			files: [{ content: reason + (context && `\n>>> ${context}`), extension: "txt" }],
@@ -199,7 +199,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${LoggingEmojis.Punishment} ${user.toString()}’s strike \`${id}\` was removed by ${
+		`${LoggingEmojis.Punishment} Strike \`${id}\` removed from ${user.toString()} by ${
 			interaction.member
 		}`,
 		"members",
@@ -239,7 +239,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	)
 		await member.disableCommunicationUntil(Date.now());
 	await log(
-		`${LoggingEmojis.Punishment} ${user.toString()}’s strike \`${id}\` was added back by ${
+		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
 			interaction.member
 		}`,
 		"members",

@@ -9,6 +9,7 @@ import {
 	GuildMember,
 	InteractionResponse,
 	InteractionType,
+	Message,
 	ModalSubmitInteraction,
 	TextInputComponentData,
 	TextInputStyle,
@@ -435,14 +436,14 @@ export async function contactUser(
 	collector
 		.on("collect", async (buttonInteraction) => {
 			if (buttonInteraction.customId.startsWith("confirm-")) {
+				await interaction.deferReply({ ephemeral: true });
 				const thread = await startTicket(interaction, member);
 				if (thread)
-					await buttonInteraction.reply({
-						content: `${
+					await buttonInteraction.editReply(
+						`${
 							CONSTANTS.emojis.statuses.yes
 						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-						ephemeral: true,
-					});
+					);
 			} else {
 				await buttonInteraction.deferUpdate();
 			}

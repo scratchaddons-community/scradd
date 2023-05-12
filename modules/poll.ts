@@ -36,7 +36,7 @@ defineCommand(
 			},
 			"vote-mode": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Restrict people to one reaction on this poll",
+				description: "Restrict people to one reaction on this poll (defaults to true)",
 			},
 		},
 	},
@@ -63,7 +63,7 @@ defineCommand(
 			title: "Set Up Poll",
 			components,
 			customId:
-				Number(interaction.options.getBoolean("vote-mode")) +
+				Number(interaction.options.getBoolean("vote-mode")??true) +
 				interaction.options.getString("question", true) +
 				"_poll",
 		});

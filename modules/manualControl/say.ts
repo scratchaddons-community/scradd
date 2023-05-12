@@ -30,13 +30,11 @@ export async function say(
 
 	if (message) {
 		await log(
-			`${
-				LoggingEmojis.Bot
-			} ${interaction.user.toString()} used ${chatInputApplicationCommandMention(
+			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
 				(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")?.id ??
 					"",
-			)} in ${message.channel.toString()}`,
+			)} used by ${interaction.user.toString()} in ${message.channel.toString()}`,
 			"messages",
 			{ button: { label: "View Message", url: message.url } },
 		);

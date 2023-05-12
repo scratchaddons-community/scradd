@@ -49,7 +49,13 @@ export function extractMessageExtremities(
 	const embeds = [
 		...message.stickers
 			.filter((sticker) => !censor?.(sticker.name))
-			.map((sticker): APIEmbed => ({ color: Colors.Blurple, image: { url: sticker.url } })),
+			.map(
+				(sticker): APIEmbed => ({
+					color: Colors.Blurple,
+					image: { url: sticker.url },
+					footer: { text: sticker.name },
+				}),
+			),
 		...message.embeds
 			.filter((embed) => !embed.video)
 			.map(({ data }): APIEmbed => {

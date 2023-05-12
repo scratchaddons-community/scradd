@@ -9,7 +9,7 @@ import warn, { addStrikeBack, removeStrike } from "./warn.js";
 
 defineCommand(
 	{
-		name: "strike",
+		name: "strikes",
 		description: "Commands to view strike information",
 
 		subcommands: {

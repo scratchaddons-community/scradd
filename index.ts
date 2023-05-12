@@ -43,6 +43,7 @@ const promises = modules.map(async (module) => {
 	await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
 });
 await Promise.all(promises);
+await import("./events/interactionCreate.js");
 
 const { getEvents } = await import("./events.js");
 for (const [event, execute] of Object.entries(getEvents()) as [ClientEvent, Event][]) {
@@ -72,7 +73,7 @@ if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
 	const { default: log, LoggingEmojis } = await import("./modules/modlogs/misc.js");
-	await log(`${LoggingEmojis.Bot} Bot restarted on version **v${pkg.version}**`, "server");
+	await log(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`, "server");
 }
 
 client.user.setPresence({

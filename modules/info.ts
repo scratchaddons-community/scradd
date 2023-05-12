@@ -7,6 +7,8 @@ import {
 	ComponentType,
 	ButtonStyle,
 	GuildMember,
+	User,
+	userMention,
 } from "discord.js";
 
 import client from "../client.js";
@@ -29,9 +31,14 @@ import { defineButton } from "../components.js";
  */
 async function getRole(roleId: Snowflake, useMentions = false): Promise<string> {
 	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
-	const members = role?.members.toJSON() ?? [];
+	const members: { user: User }[] = role?.members.toJSON() ?? [];
+	if (roleId === CONSTANTS.roles.designers)
+		members.push({ user: await client.users.fetch("765910070222913556") });
 
-	return joinWithAnd(members, useMentions ? undefined : (member) => member.user.username);
+	return joinWithAnd(
+		members.sort((one, two) => one.user.username.localeCompare(two.user.username)),
+		(member) => (useMentions ? userMention(member.user.id) : member.user.username),
+	);
 }
 
 defineCommand(
@@ -165,10 +172,6 @@ defineCommand(
 									inline: true,
 								},
 							],
-
-							footer: {
-								text: "None of the above users are in any particular order.",
-							},
 
 							color: CONSTANTS.themeColor,
 						},

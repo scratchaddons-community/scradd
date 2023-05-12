@@ -354,7 +354,9 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 			interaction.editReply({ components: disableComponents(reply.components) });
 			if (reason === "time") {
 				await interaction.followUp(
-					`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game.`,
+					`🛑 ${interaction.user.toString()}, you didn’t ask me any questions! I’m going to end the game. (PS, the addon I was thinking of was **${
+						addon.name
+					}**.)`,
 				);
 			}
 		});
