@@ -61,7 +61,7 @@ jobs:
     build:
         name: Build
         needs: [bump]
-        if: startsWith(github.ref_name, 'dependabot/') != true && always()
+        if: startsWith(github.ref_name, 'dependabot/') == true || always()
         runs-on: ubuntu-20.04
 
         steps:
