@@ -30,8 +30,7 @@ jobs:
 
     format:
         name: Format
-        needs: [bump]
-        if: startsWith(github.ref_name, "dependabot/") != true && always()
+        if: startsWith(github.ref_name, 'dependabot/') != true && always()
         runs-on: ubuntu-20.04
 
         steps:
@@ -58,10 +57,29 @@ jobs:
                   commit_message: Format
                   branch: ${{ github.head_ref }}
 
+    analyze:
+        name: Analyze
+        if: always()
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3.5.2
+              with:
+                  ref: ${{ github.head_ref }}
+
+            - name: Setup CodeQL
+              uses: github/codeql-action/init@v2.3.3
+              with:
+                  languages: javascript
+                  queries: security-and-quality
+
+            - name: Analyze
+              uses: github/codeql-action/analyze@v2
+
     build:
         name: Build
-        needs: [bump]
-        if: startsWith(github.ref_name, "dependabot/") == true || always()
+        if: always()
         runs-on: ubuntu-20.04
 
         steps:
