@@ -20,6 +20,7 @@ import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 import { getSettings } from "./settings.js";
 import { defineButton } from "../components.js";
+import log, { LoggingEmojis } from "./modlogs/misc.js";
 
 /**
  * Get all users with a role.
@@ -195,6 +196,7 @@ defineButton("syncConstants", async (interaction) => {
 			ephemeral: true,
 			content: `${CONSTANTS.emojis.statuses.yes} Synced configuration!`,
 		});
+		await log(`${LoggingEmojis.ServerUpdate} Configuration synced by ${interaction.member?.toString()}`)
 	} else
 		interaction.reply({
 			ephemeral: true,

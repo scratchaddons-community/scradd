@@ -493,6 +493,26 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			`${LoggingEmojis.SettingChange} Community ${community ? "en" : "dis"}abled`,
 			"server",
 		);
+	else {
+		if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id) {
+			await log(
+				`${LoggingEmojis.SettingChange} Community updates channel ${
+					newGuild.publicUpdatesChannel
+						? `set to ${newGuild.publicUpdatesChannel.toString()}`
+						: "unset"
+				}`,
+				"server",
+			);
+		}
+		if (oldGuild.rulesChannel?.id !== newGuild.rulesChannel?.id) {
+			await log(
+				`${LoggingEmojis.SettingChange} Rules or guidelines channel ${
+					newGuild.rulesChannel ? `set to ${newGuild.rulesChannel.toString()}` : "unset"
+				}`,
+				"server",
+			);
+		}
+	}
 	const monetized = newGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL");
 	if (oldGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL") !== monetized)
 		await log(
@@ -687,24 +707,6 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			"server",
 		);
 
-	if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id) {
-		await log(
-			`${LoggingEmojis.SettingChange} Community updates channel ${
-				newGuild.publicUpdatesChannel
-					? `set to ${newGuild.publicUpdatesChannel.toString()}`
-					: "unset"
-			}`,
-			"server",
-		);
-	}
-	if (oldGuild.rulesChannel?.id !== newGuild.rulesChannel?.id) {
-		await log(
-			`${LoggingEmojis.SettingChange} Rules or guidelines channel ${
-				newGuild.rulesChannel ? `set to ${newGuild.rulesChannel.toString()}` : "unset"
-			}`,
-			"server",
-		);
-	}
 	if (oldGuild.splash !== newGuild.splash) {
 		const url = newGuild.splashURL({ size: 128 });
 		await log(
@@ -973,7 +975,7 @@ defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 				newMessage.pinned ? "" : "un"
 			}pinned`,
 			"messages",
-			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
+			{ button: { label: "View Message", url: newMessage.url } },
 		);
 	}
 

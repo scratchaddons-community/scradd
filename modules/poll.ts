@@ -25,7 +25,7 @@ defineCommand(
 			"question": {
 				type: ApplicationCommandOptionType.String,
 				required: true,
-				description: "The question to ask",
+				description: "The question to ask (specify questions on the next screen)",
 				maxLength: 94,
 			},
 			"options": {
