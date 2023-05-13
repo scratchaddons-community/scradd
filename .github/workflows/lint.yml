@@ -10,11 +10,11 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
+        if: startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
 
         steps:
             - name: Checkout
-              if: startsWith(github.ref_name, 'dependabot/') != true
               uses: actions/checkout@v3.3.0
               with:
                   ref: ${{ github.head_ref }}
