@@ -12,7 +12,7 @@ import { defineButton, defineModal, defineSelect } from "../../components.js";
 import defineEvent from "../../events.js";
 import { getSettings, updateSettings } from "../settings.js";
 import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
-import startTicket, { contactUser, gatherTicketInfo } from "./open.js";
+import contactMods, { contactUser, gatherTicketInfo } from "./contact.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (
@@ -101,7 +101,7 @@ defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
 
 	await interaction.deferReply({ ephemeral: true });
-	const thread = id && (await startTicket(interaction, id));
+	const thread = id && (await contactMods(interaction, id));
 	if (thread)
 		await interaction.editReply(
 			`${
@@ -112,7 +112,7 @@ defineModal("contactMods", async (interaction, id) => {
 
 defineCommand(
 	{
-		name: "open-ticket",
+		name: "contact-user",
 		description: "(Mods only) Start a private ticket with a user",
 		restricted: true,
 
@@ -149,7 +149,7 @@ defineButton("contactUser", async (interaction, userId = "") => {
 	) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to open a ticket for someone else!`,
+			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to contact users!`,
 		});
 	}
 

@@ -91,7 +91,7 @@ async function getConstants() {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
 				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
-			contact: getChannel("contact", ChannelType.GuildText, "start"),
+			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],

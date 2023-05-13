@@ -14,6 +14,7 @@ import {
 	TimestampStyles,
 	APIRole,
 	roleMention,
+	Colors,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import defineEvent from "../../events.js";
@@ -924,6 +925,7 @@ defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 						value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
 						inline: true,
 					})),
+					color: Colors.Blurple
 				},
 			],
 

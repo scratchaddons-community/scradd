@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import client from "../../client.js";
 import defineCommand from "../../commands.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import defineEvent from "../../events.js";
@@ -25,17 +26,25 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 });
 defineEvent("threadUpdate", async (_, newThread) => {
 	if (newThread.parent?.id === CONSTANTS.channels.suggestions?.id) {
-		suggestionsDatabase.updateById({
-			id: newThread.id,
-			title: newThread.name,
+		if (newThread.locked)
+			suggestionsDatabase.data = suggestionsDatabase.data.filter(
+				({ id }) => id !== newThread.id,
+			);
+		else
+			suggestionsDatabase.updateById(
+				{
+					id: newThread.id,
+					title: newThread.name,
 
-			answer:
-				CONSTANTS.channels.suggestions?.availableTags.find(
-					(tag): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
-						suggestionAnswers.includes(tag.name) &&
-						newThread.appliedTags.includes(tag.id),
-				)?.name ?? suggestionAnswers[0],
-		});
+					answer:
+						CONSTANTS.channels.suggestions?.availableTags.find(
+							(tag) =>
+								suggestionAnswers.includes(tag.name) &&
+								newThread.appliedTags.includes(tag.id),
+						)?.name ?? suggestionAnswers[0],
+				},
+				{ author: newThread.ownerId ?? client.user.id, count: 0 },
+			);
 	}
 });
 defineEvent("threadDelete", async (thread) => {

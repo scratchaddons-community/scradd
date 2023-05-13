@@ -146,7 +146,7 @@ defineCommand(
 							: []),
 						...(member &&
 						isMod &&
-						CONSTANTS.channels.contact?.permissionsFor(member)?.has("ViewChannel")
+						CONSTANTS.channels.tickets?.permissionsFor(member)?.has("ViewChannel")
 							? [
 									{
 										customId: `${user.id}_contactUser`,

@@ -147,6 +147,7 @@ const allFields = {
 	],
 } satisfies Record<Category, TextInputComponentData[]>;
 
+const modCategory = "mod";
 const categoryToDescription = {
 	appeal: "Strike Appeal",
 	report: "Report",
@@ -156,7 +157,8 @@ const categoryToDescription = {
 	rules: "Rule Clarification",
 	server: "Add An Other Scratch Server",
 	other: "Other",
-} satisfies Record<Category, string>;
+	[modCategory]: "Contact User",
+} satisfies Record<Category | typeof modCategory, string>;
 
 export async function gatherTicketInfo(
 	interaction: AnySelectMenuInteraction,
@@ -205,7 +207,7 @@ export async function gatherTicketInfo(
 	if (!fields) throw new ReferenceError(`Unknown ticket category: ${option}`);
 
 	await interaction.showModal({
-		title: `Contact Mods - ${categoryToDescription[option]}`,
+		title: `Ticket: ${categoryToDescription[option]}`,
 		customId: `${option}_contactMods`,
 		components: fields.map((field) => ({
 			type: ComponentType.ActionRow,
@@ -213,14 +215,14 @@ export async function gatherTicketInfo(
 		})),
 	});
 }
-export default async function startTicket(
+export default async function contactMods(
 	interaction:
 		| ModalSubmitInteraction
 		| ChatInputCommandInteraction<"cached" | "raw">
 		| ButtonInteraction,
 	options: Category | GuildMember,
 ) {
-	const option = options instanceof GuildMember ? "mod" : options;
+	const option = options instanceof GuildMember ? modCategory : options;
 
 	const member =
 		options instanceof GuildMember
@@ -242,7 +244,7 @@ export default async function startTicket(
 						rules: { Rule: "rule" },
 						server: {},
 						other: {},
-						mod: {},
+						[modCategory]: {},
 					}[option],
 			  ).map<APIEmbedField>(([name, key]) => ({
 					name,
@@ -256,7 +258,7 @@ export default async function startTicket(
 		interaction.fields.getTextInputValue("BODY");
 
 	const date = new Date();
-	const thread = await CONSTANTS.channels.contact?.threads.create({
+	const thread = await CONSTANTS.channels.tickets?.threads.create({
 		name: `${member.user.username} (${date
 			.getUTCFullYear()
 			.toLocaleString([], { useGrouping: false })}-${(date.getUTCMonth() + 1).toLocaleString(
@@ -269,9 +271,9 @@ export default async function startTicket(
 		invitable: false,
 	});
 	await log(
-		`${
-			LoggingEmojis.Thread
-		} Ticket ${thread?.toString()} opened by ${interaction.user.toString()}`,
+		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
+			option === modCategory ? member.toString() : "mods"
+		}: ${thread?.toString()}`,
 	);
 
 	const strikes = strikeDatabase.data
@@ -321,9 +323,7 @@ export default async function startTicket(
 
 		embeds: [
 			{
-				title:
-					"Contact " +
-					(option === "mod" ? "User" : `Mods - ${categoryToDescription[option]}`),
+				title: "Ticket: " + categoryToDescription[option],
 
 				color: member.displayColor,
 
@@ -369,13 +369,13 @@ export default async function startTicket(
 			},
 		],
 		content:
-			option === "mod" || process.env.NODE_ENV === "development"
+			option === modCategory || process.env.NODE_ENV === "development"
 				? ""
 				: CONSTANTS.roles.mod?.toString(),
 		allowedMentions: { parse: ["roles"] },
 	});
 
-	await thread?.members.add(member);
+	await thread?.members.add(member, "Thread created");
 
 	return thread;
 }
@@ -399,7 +399,7 @@ export async function contactUser(
 	}
 
 	const message = await interaction.reply({
-		content: `Are you sure you want to start a ticket with **${member.toString()}**?`,
+		content: `Are you sure you want to contact **${member.toString()}**?`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -437,7 +437,7 @@ export async function contactUser(
 		.on("collect", async (buttonInteraction) => {
 			if (buttonInteraction.customId.startsWith("confirm-")) {
 				await interaction.deferReply({ ephemeral: true });
-				const thread = await startTicket(interaction, member);
+				const thread = await contactMods(interaction, member);
 				if (thread)
 					await buttonInteraction.editReply(
 						`${

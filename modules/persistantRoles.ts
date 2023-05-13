@@ -55,5 +55,5 @@ defineEvent("guildMemberAdd", async (member) => {
 
 	const memberRoles = rolesDatabase.data.find((entry) => entry.user === member.id);
 	for (const roleName of Object.keys(roles))
-		if (memberRoles?.[roleName]) member.roles.add(roles[roleName]);
+		if (memberRoles?.[roleName]) member.roles.add(roles[roleName], "Persisting roles");
 });

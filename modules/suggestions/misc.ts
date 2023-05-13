@@ -6,13 +6,9 @@ import { truncateText } from "../../util/text.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
-	"Good Idea",
-	"Implemented",
-	"In Development",
-	"Incompatible",
-	"Impractical",
-	"Rejected",
-	"Impossible",
+	...(CONSTANTS.channels.suggestions?.availableTags
+		.filter((tag) => tag.moderated)
+		.map((tag) => tag.name) ?? []),
 ] as const;
 
 export const suggestionsDatabase = new Database<{

@@ -60,7 +60,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 
 	return (
 		{
-			[CONSTANTS.channels.contact?.id || ""]: COUNTS.mods,
+			[CONSTANTS.channels.tickets?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.mods,
 			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,

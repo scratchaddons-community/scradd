@@ -38,7 +38,7 @@ export async function say(
 			"messages",
 			{ button: { label: "View Message", url: message.url } },
 		);
-		await interaction.reply({ content: CONSTANTS.emojis.statuses.yes, ephemeral: true });
+		await interaction.reply({ content: `${CONSTANTS.emojis.statuses.yes} Message sent!`, ephemeral: true });
 	}
 }
 
@@ -52,7 +52,7 @@ export default async function sayCommand(
 	}
 
 	await interaction.showModal({
-		title: `Say Message`,
+		title: `Send Message`,
 		customId: "_say",
 
 		components: [
@@ -63,7 +63,7 @@ export default async function sayCommand(
 					{
 						type: ComponentType.TextInput,
 						customId: "message",
-						label: "Message",
+						label: "Message Content",
 						maxLength: 2000,
 						required: true,
 						style: TextInputStyle.Paragraph,

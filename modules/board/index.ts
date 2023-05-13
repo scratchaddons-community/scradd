@@ -8,6 +8,8 @@ import CONSTANTS from "../../common/CONSTANTS.js";
 import client from "../../client.js";
 import updateBoard from "./update.js";
 
+const reactionsName = REACTIONS_NAME.toLowerCase();
+
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 
@@ -24,10 +26,9 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			(message.channel.id === CONSTANTS.channels.board?.id &&
 				message.author.id === client.user.id) ||
-			[
-				`explore-${REACTIONS_NAME.toLowerCase()}`,
-				`explore${REACTIONS_NAME.toLowerCase()}`,
-			].includes(message.interaction?.commandName || "")
+			[`explore-${reactionsName}`, `explore${reactionsName}`].includes(
+				message.interaction?.commandName || "",
+			)
 		) {
 			await reaction.users.remove(user);
 
@@ -49,7 +50,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 
 defineCommand(
 	{
-		name: `explore-${REACTIONS_NAME.toLowerCase()}`,
+		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
 
 		options: {
@@ -86,5 +87,9 @@ defineCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
 	async (interaction) => {
 		await updateBoard(interaction.targetMessage);
+		await interaction.reply({
+			content: `${CONSTANTS.emojis.statuses.yes} Synced ${reactionsName}!`,
+			ephemeral: true,
+		});
 	},
 );

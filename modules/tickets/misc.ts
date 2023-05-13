@@ -10,9 +10,9 @@ import { asyncFilter } from "../../util/promises.js";
  * @returns Ticket thread.
  */
 export async function getThreadFromMember(user: GuildMember | User): Promise<ThreadChannel | void> {
-	if (!CONSTANTS.channels.contact) return;
+	if (!CONSTANTS.channels.tickets) return;
 
-	const { threads } = await CONSTANTS.channels.contact.threads.fetchActive();
+	const { threads } = await CONSTANTS.channels.tickets.threads.fetchActive();
 
 	return (
 		await asyncFilter(

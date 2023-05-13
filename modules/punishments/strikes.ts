@@ -57,7 +57,9 @@ export async function getStrikes(
 			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
 				strike.count === 1
 					? ""
-					: ` (${strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`})`
+					: ` (${
+							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
+					  })`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : ""
 			}`,
@@ -109,6 +111,7 @@ export async function getStrikes(
 					type: ComponentType.Button,
 				}));
 			},
+			customComponentLocation: "above",
 		},
 	);
 }

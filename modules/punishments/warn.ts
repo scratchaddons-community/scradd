@@ -101,7 +101,7 @@ export default async function warn(
 					},
 				},
 			],
-			components: CONSTANTS.channels.contact?.permissionsFor(user)?.has("ViewChannel")
+			components: CONSTANTS.channels.tickets?.permissionsFor(user)?.has("ViewChannel")
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -197,7 +197,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
 	)
-		await member.disableCommunicationUntil(Date.now());
+		await member.disableCommunicationUntil(Date.now(), "Strike removed");
 	await log(
 		`${LoggingEmojis.Punishment} Strike \`${id}\` removed from ${user.toString()} by ${
 			interaction.member
@@ -237,7 +237,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
 	)
-		await member.disableCommunicationUntil(Date.now());
+		await member.disableCommunicationUntil(Date.now(), "Too many strikes");
 	await log(
 		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
 			interaction.member

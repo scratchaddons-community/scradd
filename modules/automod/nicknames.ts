@@ -2,6 +2,7 @@ import type { GuildMember } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
+import warn from "../punishments/warn.js";
 import censor from "./language.js";
 
 export default async function changeNickname(member: GuildMember) {
@@ -10,6 +11,13 @@ export default async function changeNickname(member: GuildMember) {
 
 	const newNick = censored ? censored.censored : member.displayName;
 
+	if (censored && member.nickname)
+		warn(
+			member,
+			"Watch your language!",
+			censored.strikes,
+			"Set nickname to " + member.displayName,
+		);
 	const members = (await CONSTANTS.guild.members.fetch({ query: newNick, limit: 100 })).filter(
 		(found) => found.displayName === newNick,
 	);

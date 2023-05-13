@@ -57,12 +57,12 @@ defineCommand(
 defineCommand(
 	{
 		name: "say",
-		description: "(Mods only) Say what you tell me to say",
+		description: "(Mods only) Send a message",
 
 		options: {
 			message: {
 				type: ApplicationCommandOptionType.String,
-				description: "What to say",
+				description: "Message content",
 				maxLength: 2000,
 			},
 		},

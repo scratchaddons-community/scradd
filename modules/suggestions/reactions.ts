@@ -16,7 +16,10 @@ export default async function updateReactions(reaction: MessageReaction) {
 			[defaultEmoji?.id, defaultEmoji?.name].includes(reaction.emoji.valueOf()) &&
 			!message.channel.locked
 		) {
-			suggestionsDatabase.updateById({id:message.id,count:reaction.count},{...getSuggestionData(message.channel)})
+			suggestionsDatabase.updateById(
+				{ id: message.id, count: reaction.count },
+				{ ...getSuggestionData(message.channel) },
+			);
 			return true;
 		} else {
 			return false;
@@ -37,7 +40,7 @@ export function getSuggestionData(
 	return {
 		answer:
 			CONSTANTS.channels.suggestions?.availableTags.find(
-				(tag): tag is typeof tag & { name: typeof suggestionAnswers[number] } =>
+				(tag) =>
 					suggestionAnswers.includes(tag.name) && thread.appliedTags.includes(tag.id),
 			)?.name ?? suggestionAnswers[0],
 		author: thread.ownerId ?? client.user.id,

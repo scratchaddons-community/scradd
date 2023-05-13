@@ -8,7 +8,7 @@ import {
 	type Snowflake,
 } from "discord.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
-import { getSettings } from "../settings.js";
+import { getDefaultSettings, getSettings } from "../settings.js";
 import { DEFAULT_XP, getLevelForXp, getXpForLevel, weeklyXpDatabase, xpDatabase } from "./misc.js";
 
 const latestMessages: { [key: Snowflake]: Message[] } = {};
@@ -135,7 +135,11 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url: strin
 								{
 									customId: "levelUpPings_toggleSetting",
 									type: ComponentType.Button,
-									label: "Disable Pings",
+									label: `${
+										getDefaultSettings(member).levelUpPings
+											? "Disable"
+											: "Enable"
+									} Pings`,
 									style: ButtonStyle.Success,
 								},
 							],
