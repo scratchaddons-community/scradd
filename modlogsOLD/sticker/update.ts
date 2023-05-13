@@ -16,12 +16,13 @@ defineEvent("stickerUpdate", async (oldSticker, partialSticker) => {
 			files: [
 				{
 					attachment: Buffer.from(
-						.unifiedDiff(
-								(oldSticker.description ?? "").split("\n"),
-								(newSticker.description ?? "").split("\n"),
-							)
+						unifiedDiff(
+							(oldSticker.description ?? "").split("\n"),
+							(newSticker.description ?? "").split("\n"),
+							{ lineterm: "" },
+						)
 							.join("\n")
-							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+							.replace(/^--- \n\+\+\+ \n/, ""),
 						"utf8",
 					),
 

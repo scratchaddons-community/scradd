@@ -31,12 +31,13 @@ defineEvent("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
 			files: [
 				{
 					attachment: Buffer.from(
-						.unifiedDiff(
-								(oldEvent.description ?? "").split("\n"),
-								(newEvent.description ?? "").split("\n"),
-							)
+						unifiedDiff(
+							(oldEvent.description ?? "").split("\n"),
+							(newEvent.description ?? "").split("\n"),
+							{ lineterm: "" },
+						)
 							.join("\n")
-							.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+							.replace(/^--- \n\+\+\+ \n/, ""),
 						"utf8",
 					),
 

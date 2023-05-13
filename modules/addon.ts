@@ -4,7 +4,7 @@ import Fuse from "fuse.js";
 import CONSTANTS from "../common/CONSTANTS.js";
 import { manifest, addons } from "../common/extension.js";
 import defineCommand from "../commands.js";
-import { escapeMessage, escapeLinks, generateTooltip } from "../util/markdown.js";
+import { escapeMessage, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
 const fuse = new Fuse(addons, {
@@ -94,7 +94,7 @@ defineCommand(
 			addon.credits?.map((credit) => {
 				const note = ("note" in credit && credit.note) || "";
 				return credit.link
-					? hyperlink(escapeLinks(credit.name), credit.link, note)
+					? hyperlink(credit.name, credit.link, note)
 					: interaction.channel
 					? generateTooltip(interaction.channel, credit.name, note)
 					: credit.name;

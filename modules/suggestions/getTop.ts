@@ -2,7 +2,6 @@ import { ChatInputCommandInteraction, GuildMember, hyperlink, User } from "disco
 import client from "../../client.js";
 import CONSTANTS from "../../common/CONSTANTS.js";
 import { paginate } from "../../util/discord.js";
-import { escapeLinks } from "../../util/markdown.js";
 import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
@@ -33,7 +32,7 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 					: suggestions?.defaultReactionEmoji?.name ??
 					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 			} ${hyperlink(
-				escapeLinks(`${title}`),
+				`${title}`,
 				"url" in ref
 					? ref.url
 					: `https://discord.com/channels/${CONSTANTS.guild.id}/${ref.id}/${ref.id}`,

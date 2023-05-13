@@ -33,7 +33,7 @@ import {
 } from "discord.js";
 
 import CONSTANTS from "../common/CONSTANTS.js";
-import { escapeMessage, escapeLinks, stripMarkdown } from "./markdown.js";
+import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 
 /**
@@ -199,8 +199,6 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
  * @todo Better `replies` for modlog.
  */
 export async function messageToText(message: Message, replies = true): Promise<string> {
-	const linklessContent = message.webhookId ? message.content : escapeLinks(message.content);
-
 	const actualContent = message.flags.has("Loading")
 		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
 			? `${CONSTANTS.emojis.discord.error} The application did not respond`
@@ -211,7 +209,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 	switch (message.type) {
 		case MessageType.Default: {
-			return linklessContent;
+			return message.content;
 		}
 
 		case MessageType.RecipientAdd: {
@@ -344,17 +342,17 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.Reply: {
-			if (!replies) return linklessContent;
+			if (!replies) return message.content;
 			const repliedMessage = await message.fetchReference().catch(() => {});
 
 			if (!repliedMessage)
-				return `*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n${linklessContent}`;
+				return `*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n${message.content}`;
 
 			const cleanContent = await messageToText(repliedMessage, false);
 
 			return `*[Replying to](${repliedMessage.url}) ${repliedMessage.author.toString()}${
 				cleanContent ? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "*"
-			}\n\n${linklessContent}`;
+			}\n\n${message.content}`;
 		}
 
 		case MessageType.ThreadStarterMessage: {

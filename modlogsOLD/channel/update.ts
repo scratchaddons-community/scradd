@@ -84,12 +84,13 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 				files: [
 					{
 						attachment: Buffer.from(
-								.unifiedDiff(
-									(oldChannel.topic ?? "").split("\n"),
-									(newChannel.topic ?? "").split("\n"),
-								)
+							unifiedDiff(
+								(oldChannel.topic ?? "").split("\n"),
+								(newChannel.topic ?? "").split("\n"),
+								{ lineterm: "" },
+							)
 								.join("\n")
-								.replace(/^--- \n{2}\+\+\+ \n{2}@@ .+ @@\n{2}/, ""),
+								.replace(/^--- \n\+\+\+ \n/, ""),
 							"utf8",
 						),
 
@@ -167,8 +168,6 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 	}
 
 	await Promise.all(
-		edits.map(
-			async (edit) => await log(`✏️ ${newChannel.toString()}${edit}!`, "channels"),
-		),
+		edits.map(async (edit) => await log(`✏️ ${newChannel.toString()}${edit}!`, "channels")),
 	);
 });

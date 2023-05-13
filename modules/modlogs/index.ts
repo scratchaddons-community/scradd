@@ -455,7 +455,10 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 					content: unifiedDiff(
 						oldGuild.description?.split("\n") ?? "",
 						newGuild.description?.split("\n") ?? "",
-					).join("\n"),
+						{ lineterm: "" },
+					)
+						.join("\n")
+						.replace(/^--- \n\+\+\+ \n/, ""),
 					extension: "diff",
 				},
 			],
@@ -925,7 +928,7 @@ defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
 						value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
 						inline: true,
 					})),
-					color: Colors.Blurple
+					color: Colors.Blurple,
 				},
 			],
 
@@ -979,7 +982,10 @@ defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 		const contentDiff = unifiedDiff(
 			oldMessage.content.split("\n"),
 			newMessage.content.split("\n"),
-		).join("\n");
+			{ lineterm: "" },
+		)
+			.join("\n")
+			.replace(/^--- \n\+\+\+ \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
 		const extraDiff = diffString(
