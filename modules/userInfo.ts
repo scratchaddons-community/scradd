@@ -7,8 +7,9 @@ import {
 	TimestampStyles,
 } from "discord.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineCommand from "../commands.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineCommand from "../lib/commands.js";
 import { REACTIONS_NAME } from "./board/misc.js";
 
 defineCommand(
@@ -31,10 +32,10 @@ defineCommand(
 			(user.id === interaction.user.id ? interaction.member : undefined);
 		const member = rawMember instanceof GuildMember ? rawMember : undefined;
 		const isMod =
-			CONSTANTS.roles.mod &&
+			config.roles.mod &&
 			(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-				: interaction.member.roles.includes(CONSTANTS.roles.mod.id));
+				? interaction.member.roles.resolve(config.roles.mod.id)
+				: interaction.member.roles.includes(config.roles.mod.id));
 
 		const fields = [{ name: "ID", value: user.id, inline: true }];
 		if (member?.nickname)
@@ -44,11 +45,11 @@ defineCommand(
 				name: "Voice Channel",
 				value:
 					member.voice.channel?.toString() +
-					`${member.voice.mute ? CONSTANTS.emojis.discord.muted + " " : ""}${
-						member.voice.deaf ? CONSTANTS.emojis.discord.deafened + " " : ""
+					`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
+						member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
 					}${
 						member.voice.streaming || member.voice.selfVideo
-							? CONSTANTS.emojis.discord.streaming
+							? constants.emojis.discord.streaming
 							: ""
 					}`.trim(),
 				inline: true,
@@ -61,7 +62,7 @@ defineCommand(
 					member?.roles
 						.valueOf()
 						.sorted((one, two) => two.comparePositionTo(one))
-						.filter((role) => role.id !== CONSTANTS.guild.id)
+						.filter((role) => role.id !== config.guild.id)
 						.toJSON()
 						.join(" ") || "*No roles*",
 				inline: false,
@@ -73,7 +74,7 @@ defineCommand(
 			inline: true,
 		});
 
-		const banned = await CONSTANTS.guild.bans.fetch(user.id).catch(() => {});
+		const banned = await config.guild.bans.fetch(user.id).catch(() => {});
 		if (banned)
 			fields.push(
 				isMod
@@ -146,7 +147,7 @@ defineCommand(
 							: []),
 						...(member &&
 						isMod &&
-						CONSTANTS.channels.tickets?.permissionsFor(member)?.has("ViewChannel")
+						config.channels.tickets?.permissionsFor(member)?.has("ViewChannel")
 							? [
 									{
 										customId: `${user.id}_contactUser`,

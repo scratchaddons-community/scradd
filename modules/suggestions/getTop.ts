@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, GuildMember, hyperlink, User } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
@@ -8,7 +9,7 @@ import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 export default async function getTop(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const authorFilter = interaction.options.getMember("user");
 	const answerFilter = interaction.options.getString("answer");
-	const { suggestions } = CONSTANTS.channels;
+	const { suggestions } = config.channels;
 	const useMentions = getSettings(interaction.user).useMentions;
 
 	const nick =
@@ -35,7 +36,7 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 				`${title}`,
 				"url" in ref
 					? ref.url
-					: `https://discord.com/channels/${CONSTANTS.guild.id}/${ref.id}/${ref.id}`,
+					: `https://discord.com/channels/${config.guild.id}/${ref.id}/${ref.id}`,
 				answer,
 			)}${
 				nick

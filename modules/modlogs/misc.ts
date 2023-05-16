@@ -5,23 +5,26 @@ import {
 	ComponentType,
 	Embed,
 	PermissionFlagsBits,
+	TextBasedChannel,
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
 
 import { getBaseChannel } from "../../util/discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import type { DATABASE_THREAD } from "../../common/database.js";
 
 export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
 
-export function shouldLog(channel: import("discord.js").TextBasedChannel | null): boolean {
+export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
 
 	return Boolean(
 		baseChannel?.type !== ChannelType.DM &&
-			baseChannel?.guild.id === CONSTANTS.guild.id &&
+			baseChannel?.guild.id === config.guild.id &&
 			baseChannel
-				?.permissionsFor(CONSTANTS.roles.mod || baseChannel.guild.id)
+				?.permissionsFor(config.roles.mod || baseChannel.guild.id)
 				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }
@@ -96,23 +99,20 @@ export default async function log(
 }
 
 export async function getLoggingThread(
-	group?: typeof LOG_GROUPS[number] | typeof import("../../common/database").DATABASE_THREAD,
+	group?: typeof LOG_GROUPS[number] | typeof DATABASE_THREAD,
 ): Promise<ThreadChannel>;
 export async function getLoggingThread(group?: undefined): Promise<TextChannel>;
 export async function getLoggingThread(
-	group?:
-		| typeof LOG_GROUPS[number]
-		| typeof import("../../common/database").DATABASE_THREAD
-		| undefined,
+	group?: typeof LOG_GROUPS[number] | typeof DATABASE_THREAD | undefined,
 ) {
-	if (!CONSTANTS.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
-	if (!group) return CONSTANTS.channels.modlogs;
+	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
+	if (!group) return config.channels.modlogs;
 
-	const threads = await CONSTANTS.channels.modlogs.threads.fetchActive();
+	const threads = await config.channels.modlogs.threads.fetchActive();
 
 	return (
 		threads.threads.find((thread) => thread.name === group) ||
-		(await CONSTANTS.channels.modlogs.threads.create({
+		(await config.channels.modlogs.threads.create({
 			name: group,
 			reason: "New logging thread",
 		}))
@@ -133,7 +133,7 @@ export enum LoggingEmojis {
 	Channel = "🗄",
 	Punishment = "🔨",
 	Event = "🗓",
-	Error = "⚠", // TODO ts 5.0: CONSTANTS.emojis.statuses.no,
+	Error = "⚠", // TODO ts 5.0: constants.emojis.statuses.no,
 	Bot = "🤖",
 	Emoji = "😳",
 	Thread = "📂",

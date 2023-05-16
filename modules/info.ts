@@ -11,16 +11,20 @@ import {
 	userMention,
 } from "discord.js";
 
-import client from "../client.js";
-import CONSTANTS, { syncConstants } from "../common/CONSTANTS.js";
-import defineCommand from "../commands.js";
+import { client } from "../lib/client.js";
+import config, { syncConfig } from "../common/config.js";
+import defineCommand from "../lib/commands.js";
 import pkg from "../package.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../secrets.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 import { getSettings } from "./settings.js";
-import { defineButton } from "../components.js";
+import { defineButton } from "../lib/components.js";
 import log, { LoggingEmojis } from "./modlogs/misc.js";
+import constants from "../common/constants.js";
+
+const testingServer = await client.guilds.fetch("938438560925761619").catch(() => {});
+const designers = "966174686142672917";
 
 /**
  * Get all users with a role.
@@ -31,9 +35,9 @@ import log, { LoggingEmojis } from "./modlogs/misc.js";
  * @returns Users with the role.
  */
 async function getRole(roleId: Snowflake, useMentions = false): Promise<string> {
-	const role = await CONSTANTS.testingServer?.roles.fetch(roleId);
+	const role = await testingServer?.roles.fetch(roleId);
 	const members: { user: User }[] = role?.members.toJSON() ?? [];
-	if (roleId === CONSTANTS.roles.designers)
+	if (roleId === designers)
 		members.push({ user: await client.users.fetch("765910070222913556") });
 
 	return joinWithAnd(
@@ -104,7 +108,7 @@ defineCommand(
 							],
 
 							thumbnail: { url: client.user.displayAvatarURL() },
-							color: CONSTANTS.themeColor,
+							color: constants.themeColor,
 						},
 					],
 				});
@@ -115,10 +119,10 @@ defineCommand(
 					embeds: getConfig(),
 
 					components:
-						CONSTANTS.roles.admin &&
+						config.roles.admin &&
 						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(CONSTANTS.roles.admin.id)
-							: interaction.member.roles.includes(CONSTANTS.roles.admin.id))
+							? interaction.member.roles.resolve(config.roles.admin.id)
+							: interaction.member.roles.includes(config.roles.admin.id))
 							? [
 									{
 										type: ComponentType.ActionRow,
@@ -148,17 +152,17 @@ defineCommand(
 							fields: [
 								{
 									name: "Developers",
-									value: await getRole(CONSTANTS.roles.developers, useMentions),
+									value: await getRole("938439909742616616", useMentions),
 									inline: true,
 								},
 								{
 									name: "Designers",
-									value: await getRole(CONSTANTS.roles.designers, useMentions),
+									value: await getRole(designers, useMentions),
 									inline: true,
 								},
 								{
 									name: "Additional beta testers",
-									value: await getRole(CONSTANTS.roles.testers, useMentions),
+									value: await getRole("938440159102386276", useMentions),
 									inline: true,
 								},
 								{
@@ -174,7 +178,7 @@ defineCommand(
 								},
 							],
 
-							color: CONSTANTS.themeColor,
+							color: constants.themeColor,
 						},
 					],
 				});
@@ -183,24 +187,28 @@ defineCommand(
 	},
 );
 
-defineButton("syncConstants", async (interaction) => {
+defineButton("syncConfig", async (interaction) => {
 	if (
-		CONSTANTS.roles.admin &&
+		config.roles.admin &&
 		(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(CONSTANTS.roles.admin.id)
-			: interaction.member?.roles.includes(CONSTANTS.roles.admin.id))
+			? interaction.member.roles.resolve(config.roles.admin.id)
+			: interaction.member?.roles.includes(config.roles.admin.id))
 	) {
-		await syncConstants();
+		await syncConfig();
 		await interaction.message.edit({ embeds: getConfig() });
 		await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.yes} Synced configuration!`,
+			content: `${constants.emojis.statuses.yes} Synced configuration!`,
 		});
-		await log(`${LoggingEmojis.ServerUpdate} Configuration synced by ${interaction.member?.toString()}`)
+		await log(
+			`${
+				LoggingEmojis.ServerUpdate
+			} Configuration synced by ${interaction.member?.toString()}`,
+		);
 	} else
 		interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to sync my configuration!`,
+			content: `${constants.emojis.statuses.no} You don’t have permission to sync my configuration!`,
 		});
 });
 
@@ -209,13 +217,13 @@ function getConfig() {
 		{
 			title: "Configuration",
 			description: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
-			color: CONSTANTS.themeColor,
+			color: constants.themeColor,
 		},
 		{
 			description: "**CHANNELS**",
 
 			fields: [
-				...Object.entries(CONSTANTS.channels).map((channel) => ({
+				...Object.entries(config.channels).map((channel) => ({
 					name: `${channel[0]
 						.split("_")
 						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
@@ -228,12 +236,12 @@ function getConfig() {
 				})),
 			],
 
-			color: CONSTANTS.themeColor,
+			color: constants.themeColor,
 		},
 		{
 			description: "**ROLES**",
 			fields: [
-				...Object.entries(CONSTANTS.roles)
+				...Object.entries(config.roles)
 					.filter(
 						(role): role is [typeof role[0], Role | undefined] =>
 							typeof role[1] !== "string",
@@ -249,7 +257,7 @@ function getConfig() {
 					})),
 			],
 
-			color: CONSTANTS.themeColor,
+			color: constants.themeColor,
 		},
 	];
 }

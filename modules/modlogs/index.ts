@@ -16,8 +16,9 @@ import {
 	roleMention,
 	Colors,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import defineEvent from "../../events.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import defineEvent from "../../lib/events.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "./misc.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import {
@@ -275,21 +276,21 @@ const events: {
 
 defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 	// @ts-expect-error T2345 -- No concrete fix to this
-	if (guild.id === CONSTANTS.guild.id) events[entry.action]?.(entry);
+	if (guild.id === config.guild.id) events[entry.action]?.(entry);
 });
 
 defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
 });
 
 defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} left`, "members");
 });
 
 defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
-	if (newMember.guild.id !== CONSTANTS.guild.id) return;
+	if (newMember.guild.id !== config.guild.id) return;
 	if (oldMember.avatar !== newMember.avatar) {
 		const url = newMember.avatarURL({ size: 128 });
 		await log(
@@ -399,18 +400,18 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 	}
 
 	// TODO: this doesn’t go here
-	if (newMember.roles.premiumSubscriberRole && CONSTANTS.roles.booster)
-		await newMember.roles.add(CONSTANTS.roles.booster, "Boosted the server");
+	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
+		await newMember.roles.add(config.roles.booster, "Boosted the server");
 });
 
 defineEvent("guildScheduledEventDelete", async (event) => {
-	if (event.guildId !== CONSTANTS.guild.id) return;
+	if (event.guildId !== config.guild.id) return;
 
 	await log(`${LoggingEmojis.Event} Event ${event.name} removed`, "voice");
 });
 
 defineEvent("guildUpdate", async (oldGuild, newGuild) => {
-	if (newGuild.id !== CONSTANTS.guild.id) return;
+	if (newGuild.id !== config.guild.id) return;
 
 	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {
 		await log(
@@ -842,7 +843,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 });
 
 defineEvent("inviteDelete", async (invite) => {
-	if (invite.guild?.id !== CONSTANTS.guild.id) return;
+	if (invite.guild?.id !== config.guild.id) return;
 	await log(
 		`${LoggingEmojis.Invite} Invite ${invite.code} deleted${
 			invite.uses === null ? "" : ` with ${invite.uses} uses`
@@ -856,7 +857,7 @@ defineEvent("messageDelete", async (message) => {
 
 	const shush =
 		message.partial ||
-		(CONSTANTS.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
+		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
 			databaseThread.id !== message.channel.id);
 
 	const content = !shush && (await messageToText(message));
@@ -1020,17 +1021,17 @@ defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
 });
 
 defineEvent("roleCreate", async (role) => {
-	if (role.guild.id !== CONSTANTS.guild.id) return;
+	if (role.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Role} ${role.toString()} created`, "server");
 });
 
 defineEvent("roleDelete", async (role) => {
-	if (role.guild.id !== CONSTANTS.guild.id) return;
+	if (role.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Role} @${role.name} deleted (ID: ${role.id})`, "server");
 });
 
 defineEvent("voiceStateUpdate", async (oldState, newState) => {
-	if (!newState.member || newState.guild.id !== CONSTANTS.guild.id) return;
+	if (!newState.member || newState.guild.id !== config.guild.id) return;
 
 	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
 		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {

@@ -7,7 +7,8 @@ import {
 	TextInputStyle,
 } from "discord.js";
 
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 
 /**
@@ -32,13 +33,15 @@ export async function say(
 		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
-				(await CONSTANTS.guild.commands.fetch()).find(({ name }) => name === "say")?.id ??
-					"",
+				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()}`,
 			"messages",
 			{ button: { label: "View Message", url: message.url } },
 		);
-		await interaction.reply({ content: `${CONSTANTS.emojis.statuses.yes} Message sent!`, ephemeral: true });
+		await interaction.reply({
+			content: `${constants.emojis.statuses.yes} Message sent!`,
+			ephemeral: true,
+		});
 	}
 }
 

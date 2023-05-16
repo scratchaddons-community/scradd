@@ -1,73 +1,46 @@
 import path from "node:path";
 import url from "node:url";
 import dns from "node:dns";
-import fileSystem from "node:fs/promises";
-
-import { ActivityType } from "discord.js";
+import { ActivityType, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
 
 import pkg from "./package.json" assert { type: "json" };
-import type { ClientEvent, Event } from "./events.js";
 import { GlobalFonts } from "@napi-rs/canvas";
+import login, { client } from "./lib/client.js";
+import constants from "./common/constants.js";
 
 dns.setDefaultResultOrder("ipv4first");
-
-const { default: client } = await import("./client.js");
-const { default: logError } = await import("./util/logError.js");
-
-process
-	.on("uncaughtException", (error, origin) => {
-		logError(error, origin).catch(console.error);
-	})
-	.on("warning", (error) => {
-		logError(error, "warning").catch(console.error);
-	});
-
 GlobalFonts.registerFromPath(
 	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `./common/sora/font.ttf`),
 	"Sora",
 );
 
-const { default: CONSTANTS } = await import("./common/CONSTANTS.js");
-
-const directory = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules");
-const modules = await fileSystem.readdir(directory);
-
-const promises = modules.map(async (module) => {
-	const fullPath = path.join(directory, module);
-	const resolved = (await fileSystem.lstat(fullPath)).isDirectory()
-		? path.join(fullPath, "./index.js")
-		: fullPath;
-	if (path.extname(resolved) !== ".js") return;
-
-	await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
+await login({
+	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
+	commandsGuildId: process.env.GUILD_ID,
+	async handleError(error, event) {
+		await logError(error, event);
+	},
+	productionId: "929928324959055932",
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildModeration,
+		GatewayIntentBits.GuildEmojisAndStickers,
+		GatewayIntentBits.GuildWebhooks,
+		GatewayIntentBits.GuildInvites,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMessageReactions,
+		GatewayIntentBits.DirectMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildScheduledEvents,
+	],
+	commandErrorMessage: `${constants.emojis.statuses.no} An error occurred.`,
 });
-await Promise.all(promises);
-await import("./events/interactionCreate.js");
 
-const { getEvents } = await import("./events.js");
-for (const [event, execute] of Object.entries(getEvents()) as [ClientEvent, Event][]) {
-	client.on(event, async (...args) => {
-		try {
-			await execute(...args);
-		} catch (error) {
-			await logError(error, event);
-		}
-	});
-}
-
-const { commandData } = await import("./commands.js");
-await client.application.commands.set(commandData, CONSTANTS.guild.id);
-
-await client.guilds.fetch().then(
-	async (guilds) =>
-		await Promise.all(
-			guilds.map(async (otherGuild) => {
-				if (otherGuild.id !== CONSTANTS.guild.id)
-					await client.application.commands.set([], otherGuild.id).catch(() => {});
-			}),
-		),
-);
+const { default: logError } = await import("./common/logError.js");
 
 if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");

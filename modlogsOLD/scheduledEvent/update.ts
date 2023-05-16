@@ -1,15 +1,16 @@
 import { unifiedDiff } from "difflib";
 import { time } from "discord.js";
 
-import client from "../../../client.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import { client } from "../../../lib/client.js";
+import config from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
 defineEvent("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
 	const guild = newEvent.guild ?? (await client.guilds.fetch(newEvent.guildId));
-	if (guild.id !== CONSTANTS.guild.id || !oldEvent) return;
+	if (guild.id !== config.guild.id || !oldEvent) return;
 	const logs = [];
 	if (oldEvent.name !== newEvent.name) logs.push(`’s topic changed to \`${newEvent.name}\``);
 

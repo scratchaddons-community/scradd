@@ -5,10 +5,11 @@ import {
 	ComponentType,
 	InteractionReplyOptions,
 } from "discord.js";
-import client from "../client.js";
+import { client } from "../lib/client.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineCommand from "../commands.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineCommand from "../lib/commands.js";
 import { disableComponents, messageToText } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
@@ -56,7 +57,7 @@ defineCommand(
 		const channel = channelId ? await client.channels.fetch(channelId) : interaction.channel;
 		if (!channel?.isTextBased() || channel.isDMBased())
 			return await interaction.reply(
-				`${CONSTANTS.emojis.statuses.no} Could not find that channel!`,
+				`${constants.emojis.statuses.no} Could not find that channel!`,
 			);
 		const messages = await channel.messages.fetch({ limit: MAX_FETCH_COUNT, before: message });
 
@@ -75,7 +76,7 @@ defineCommand(
 			if (!sliced[0] || start >= deleteTo) {
 				return {
 					content: `${
-						CONSTANTS.emojis.statuses.no
+						constants.emojis.statuses.no
 					} No messages matched those filters! Note: I cannot purge messages that are older than 2 weeks or more than ${MAX_FETCH_COUNT} messages ${
 						message ? `before [this message](${channel?.url}/${message})` : "ago"
 					}.`,
@@ -207,7 +208,7 @@ defineCommand(
 				return buttonInteraction.customId.endsWith(`-${interaction.id}`);
 			},
 
-			time: CONSTANTS.collectorTime,
+			time: constants.collectorTime,
 		});
 
 		collector
@@ -220,7 +221,7 @@ defineCommand(
 						const sliced = filtered.slice(start, deleteTo);
 						await channel?.bulkDelete(sliced);
 						await buttonInteraction.reply(
-							`${CONSTANTS.emojis.statuses.yes} Purged ${sliced.length} message${
+							`${constants.emojis.statuses.yes} Purged ${sliced.length} message${
 								sliced.length === 1 ? "" : "s"
 							}!`,
 						);
@@ -229,7 +230,7 @@ defineCommand(
 					}
 					case "cancel": {
 						await buttonInteraction.reply({
-							content: `${CONSTANTS.emojis.statuses.no} Purge canceled!`,
+							content: `${constants.emojis.statuses.no} Purge canceled!`,
 							ephemeral: true,
 						});
 						collector.stop();

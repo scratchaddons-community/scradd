@@ -1,8 +1,8 @@
 import { ApplicationCommandType, ApplicationCommandOptionType, User } from "discord.js";
-import client from "../../client.js";
-import defineCommand from "../../commands.js";
+import { client } from "../../lib/client.js";
+import defineCommand from "../../lib/commands.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { defineModal } from "../../components.js";
+import { defineModal } from "../../lib/components.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";

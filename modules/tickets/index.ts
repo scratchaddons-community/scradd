@@ -5,11 +5,12 @@ import {
 	ComponentType,
 	GuildMember,
 } from "discord.js";
-import client from "../../client.js";
-import defineCommand from "../../commands.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { defineButton, defineModal, defineSelect } from "../../components.js";
-import defineEvent from "../../events.js";
+import { client } from "../../lib/client.js";
+import defineCommand from "../../lib/commands.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { defineButton, defineModal, defineSelect } from "../../lib/components.js";
+import defineEvent from "../../lib/events.js";
 import { getSettings, updateSettings } from "../settings.js";
 import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 import contactMods, { contactUser, gatherTicketInfo } from "./contact.js";
@@ -18,7 +19,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		// TODO CONSTANTS.channels.contact?.permissionsFor(message.author)?.has("ViewChannel") &&
+		// TODO config.channels.contact?.permissionsFor(message.author)?.has("ViewChannel") &&
 		!getSettings(message.author).resourcesDmed
 	) {
 		await message.channel.send({
@@ -30,7 +31,7 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "Server Rules",
-							url: CONSTANTS.guild.rulesChannel?.url || "",
+							url: config.guild.rulesChannel?.url || "",
 						},
 						// {
 						// 	type: ComponentType.Button,
@@ -105,7 +106,7 @@ defineModal("contactMods", async (interaction, id) => {
 	if (thread)
 		await interaction.editReply(
 			`${
-				CONSTANTS.emojis.statuses.yes
+				constants.emojis.statuses.yes
 			} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
 		);
 });
@@ -129,7 +130,7 @@ defineCommand(
 		const member = interaction.options.getMember("user");
 		if (!(member instanceof GuildMember)) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Could not find user.`,
+				content: `${constants.emojis.statuses.no} Could not find user.`,
 				ephemeral: true,
 			});
 
@@ -142,23 +143,23 @@ defineCommand(
 
 defineButton("contactUser", async (interaction, userId = "") => {
 	if (
-		!CONSTANTS.roles.mod ||
+		!config.roles.mod ||
 		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-			: interaction.member?.roles.includes(CONSTANTS.roles.mod.id))
+			? interaction.member.roles.resolve(config.roles.mod.id)
+			: interaction.member?.roles.includes(config.roles.mod.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to contact users!`,
+			content: `${constants.emojis.statuses.no} You don’t have permission to contact users!`,
 		});
 	}
 
-	const member = await CONSTANTS.guild.members.fetch(userId);
+	const member = await config.guild.members.fetch(userId);
 	await contactUser(member, interaction);
 });
 
 defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 	await getThreadFromMember(member.partial ? await member.fetch() : member).then(
 		async (thread) => {
 			await thread?.setArchived(true, "Member left");

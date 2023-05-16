@@ -1,8 +1,9 @@
-import CONSTANTS from "../common/CONSTANTS.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import Database from "../common/database.js";
 
 import type { Snowflake } from "discord.js";
-import defineEvent from "../events.js";
+import defineEvent from "../lib/events.js";
 
 export const rolesDatabase = new Database<{
 	user: Snowflake;
@@ -26,12 +27,12 @@ const roles = {
 	dev: "806608777835053098",
 	translator: "841696608592330794",
 	contributor: "991413187427700786",
-	epic: CONSTANTS.roles.epic?.id || "",
-	booster: CONSTANTS.roles.booster?.id || "",
+	epic: config.roles.epic?.id || "",
+	booster: config.roles.booster?.id || "",
 };
 
 defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 
 	const databaseIndex = rolesDatabase.data.findIndex((entry) => entry.user === member.id);
 
@@ -51,7 +52,7 @@ defineEvent("guildMemberRemove", async (member) => {
 });
 
 defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 
 	const memberRoles = rolesDatabase.data.find((entry) => entry.user === member.id);
 	for (const roleName of Object.keys(roles))

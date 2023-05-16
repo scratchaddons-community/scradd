@@ -1,12 +1,13 @@
 import { cleanContent, Snowflake } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
-	...(CONSTANTS.channels.suggestions?.availableTags
+	...(config.channels.suggestions?.availableTags
 		.filter((tag) => tag.moderated)
 		.map((tag) => tag.name) ?? []),
 ] as const;
@@ -20,8 +21,8 @@ export const suggestionsDatabase = new Database<{
 }>("suggestions");
 await suggestionsDatabase.init();
 
-export const oldSuggestions = CONSTANTS.channels.old_suggestions
-	? getAllMessages(CONSTANTS.channels.old_suggestions).then((suggestions) =>
+export const oldSuggestions = config.channels.old_suggestions
+	? getAllMessages(config.channels.old_suggestions).then((suggestions) =>
 			suggestions.map((message) => {
 				const [embed] = message.embeds;
 

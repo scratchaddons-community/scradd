@@ -1,6 +1,7 @@
 import type { AnyThreadChannel, MessageReaction } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 
 export default async function updateReactions(reaction: MessageReaction) {
@@ -8,10 +9,10 @@ export default async function updateReactions(reaction: MessageReaction) {
 
 	if (
 		message.channel.isThread() &&
-		message.channel.parent?.id === CONSTANTS.channels.suggestions?.id &&
+		message.channel.parent?.id === config.channels.suggestions?.id &&
 		message.channel.id === message.id
 	) {
-		const defaultEmoji = CONSTANTS.channels.suggestions?.defaultReactionEmoji;
+		const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
 		if (
 			[defaultEmoji?.id, defaultEmoji?.name].includes(reaction.emoji.valueOf()) &&
 			!message.channel.locked
@@ -39,7 +40,7 @@ export function getSuggestionData(
 ): Omit<typeof suggestionsDatabase.data[number], "count"> {
 	return {
 		answer:
-			CONSTANTS.channels.suggestions?.availableTags.find(
+			config.channels.suggestions?.availableTags.find(
 				(tag) =>
 					suggestionAnswers.includes(tag.name) && thread.appliedTags.includes(tag.id),
 			)?.name ?? suggestionAnswers[0],

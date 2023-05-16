@@ -14,13 +14,14 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import Fuse from "fuse.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { addons } from "../../common/extension.js";
 import type AddonManifest from "../../common/types/addonManifest.js";
-import { defineModal } from "../../components.js";
+import { defineModal } from "../../lib/components.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
-import { BULLET_POINT, COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
+import { COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { GroupName, GROUP_NAMES } from "./questions.js";
 
 const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
@@ -173,7 +174,7 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 						{
 							...reply.embeds[0]?.toJSON(),
 
-							description: `${reply.embeds[0]?.description ?? ""}\n${BULLET_POINT} ${
+							description: `${reply.embeds[0]?.description ?? ""}\n- ${
 								(
 									foundInAddon ??
 									Object.values(QUESTIONS_BY_ADDON)
@@ -231,7 +232,7 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 
 		embeds: [
 			{
-				color: CONSTANTS.themeColor,
+				color: constants.themeColor,
 
 				author: {
 					icon_url: (interaction.member instanceof GuildMember
@@ -248,7 +249,7 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 				title: "Guess the addon!",
 
 				footer: {
-					text: `Pick a question for me to answer from a dropdown below${CONSTANTS.footerSeperator}0 questions asked`,
+					text: `Pick a question for me to answer from a dropdown below${constants.footerSeperator}0 questions asked`,
 				},
 			},
 		],
@@ -384,7 +385,7 @@ defineModal("guessModal", async (interaction) => {
 
 	if (!item || score > 0.3) {
 		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} Could not find the **${query}** addon!`,
+			content: `${constants.emojis.statuses.no} Could not find the **${query}** addon!`,
 			ephemeral: true,
 		});
 		return;
@@ -394,11 +395,9 @@ defineModal("guessModal", async (interaction) => {
 			{
 				...interaction.message.embeds[0]?.toJSON(),
 
-				description: `${
-					interaction.message.embeds[0]?.description ?? ""
-				}\n${BULLET_POINT} Is it the **${item.name}** addon? **${
-					item.id === game.addon.id ? "Yes" : "No"
-				}**`.trim(),
+				description: `${interaction.message.embeds[0]?.description ?? ""}\n- Is it the **${
+					item.name
+				}** addon? **${item.id === game.addon.id ? "Yes" : "No"}**`.trim(),
 
 				footer: {
 					text:
@@ -416,13 +415,13 @@ defineModal("guessModal", async (interaction) => {
 
 	if (item.id !== game.addon.id) {
 		await interaction.reply(
-			`${CONSTANTS.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
+			`${constants.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
 		);
 		return;
 	}
 
 	await interaction.reply({
-		content: `${CONSTANTS.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
+		content: `${constants.emojis.statuses.yes} The addon *is* **${escapeMarkdown(
 			game.addon.name,
 		)}**! You got it right!`,
 
@@ -433,7 +432,7 @@ defineModal("guessModal", async (interaction) => {
 				description: `${
 					Object.entries(QUESTIONS_BY_ADDON)
 						.find(([id]) => id === game.addon.id)?.[1]
-						?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+						?.map(({ statement }) => `- ${statement}`)
 						.join("\n") ?? ""
 				}${commandMarkdown}`,
 
@@ -449,13 +448,13 @@ defineModal("guessModal", async (interaction) => {
 							: interaction.user.username,
 				},
 
-				color: CONSTANTS.themeColor,
+				color: constants.themeColor,
 
 				thumbnail: {
-					url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
+					url: `${constants.urls.addonImageRoot}/${encodeURI(game.addon.id)}.png`,
 				},
 
-				url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(game.addon.id)}`,
+				url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(game.addon.id)}`,
 			},
 		],
 	});

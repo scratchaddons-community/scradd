@@ -1,6 +1,7 @@
 import { escapeMarkdown } from "discord.js";
 
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { manifest, addons } from "../../common/extension.js";
 import { trimPatchVersion } from "../../util/text.js";
 
@@ -41,7 +42,7 @@ const addonEndings = Object.fromEntries(
 );
 const versionMarkdown = `**[${escapeMarkdown(
 	manifest.version_name ?? manifest.version,
-)}](https://github.com/${CONSTANTS.urls.saRepo}${
+)}](https://github.com/${constants.urls.saRepo}${
 	manifest.version_name?.endsWith("-prerelease")
 		? ""
 		: `/releases/tag/v${encodeURI(manifest.version)}`

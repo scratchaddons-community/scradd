@@ -1,20 +1,21 @@
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType, MessageType } from "discord.js";
 
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import defineCommand from "../../commands.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import defineCommand from "../../lib/commands.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { defineButton } from "../../components.js";
+import { defineButton } from "../../lib/components.js";
 import getUserRank from "./rank.js";
-import defineEvent from "../../events.js";
+import defineEvent from "../../lib/events.js";
 import { giveXpForMessage } from "./giveXp.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
 
-	if (message.channel.isDMBased() || message.guild?.id !== CONSTANTS.guild.id) return;
+	if (message.channel.isDMBased() || message.guild?.id !== config.guild.id) return;
 
 	if (process.env.NODE_ENV !== "production" || !message.author.bot || message.interaction) {
 		giveXpForMessage(message);
@@ -69,7 +70,7 @@ defineCommand(
 				if (index === -1) {
 					return await interaction.reply({
 						content: `${
-							CONSTANTS.emojis.statuses.no
+							constants.emojis.statuses.no
 						} ${user?.toString()} could not be found! Do they have any XP?`,
 
 						ephemeral: true,
@@ -92,7 +93,7 @@ defineCommand(
 						await interaction[interaction.replied ? "editReply" : "reply"](data),
 					{
 						singular: "user",
-						title: `Leaderboard for ${CONSTANTS.guild.name}`,
+						title: `Leaderboard for ${config.guild.name}`,
 						user: interaction.user,
 						rawOffset: index,
 						generateComponents() {

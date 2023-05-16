@@ -32,7 +32,8 @@ import {
 	chatInputApplicationCommandMention,
 } from "discord.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 
@@ -72,7 +73,7 @@ export function extractMessageExtremities(
 					newEmbed.footer = {
 						text: `Keyword: ${
 							newEmbed.fields?.find(({ name }) => name === "keyword")?.value
-						}${CONSTANTS.footerSeperator}Rule: ${
+						}${constants.footerSeperator}Rule: ${
 							newEmbed.fields?.find(({ name }) => name === "rule_name")?.value
 						}`,
 					};
@@ -201,8 +202,8 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
 export async function messageToText(message: Message, replies = true): Promise<string> {
 	const actualContent = message.flags.has("Loading")
 		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
-			? `${CONSTANTS.emojis.discord.error} The application did not respond`
-			: `${CONSTANTS.emojis.discord.typing} ${escapeMessage(
+			? `${constants.emojis.discord.error} The application did not respond`
+			: `${constants.emojis.discord.typing} ${escapeMessage(
 					message.author.username,
 			  )} is thinking...`
 		: message.content;
@@ -213,19 +214,19 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.RecipientAdd: {
-			return `${CONSTANTS.emojis.discord.add} ${message.author.toString()} added ${
+			return `${constants.emojis.discord.add} ${message.author.toString()} added ${
 				message.mentions.users.first()?.toString() ?? ""
 			} to the ${message.guild ? "thread" : "group"}.`;
 		}
 
 		case MessageType.RecipientRemove: {
-			return `${CONSTANTS.emojis.discord.remove} ${message.author.toString()} removed ${
+			return `${constants.emojis.discord.remove} ${message.author.toString()} removed ${
 				message.mentions.users.first()?.toString() ?? ""
 			} from the ${message.guild ? "thread" : "group"}.`;
 		}
 
 		case MessageType.ChannelNameChange: {
-			return `${CONSTANTS.emojis.discord.edit} ${message.author.toString()} changed the ${
+			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() &&
 				message.channel.parent?.type === ChannelType.GuildForum
 					? "post title"
@@ -235,7 +236,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.ChannelIconChange: {
 			return `${
-				CONSTANTS.emojis.discord.edit
+				constants.emojis.discord.edit
 			} ${message.author.toString()} changed the channel icon.`; // todo wait channel??
 		}
 
@@ -243,7 +244,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			const pinned = await message.fetchReference().catch(() => message);
 
 			return `${
-				CONSTANTS.emojis.discord.pin
+				constants.emojis.discord.pin
 			} ${message.author.toString()} pinned [a message](${
 				pinned.url
 			}) to this channel. See all [pinned messages](${pinned.channel.url}).`;
@@ -267,12 +268,12 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			];
 
 			const createdAtMs = Number(message.createdAt);
-			return `${CONSTANTS.emojis.discord.add} ${formats[createdAtMs % formats.length]}`;
+			return `${constants.emojis.discord.add} ${formats[createdAtMs % formats.length]}`;
 		}
 
 		case MessageType.GuildBoost: {
 			return `${
-				CONSTANTS.emojis.discord.boost
+				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
 				message.content ? ` **${message.content}** times` : ""
 			}!`;
@@ -280,7 +281,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.GuildBoostTier1: {
 			return `${
-				CONSTANTS.emojis.discord.boost
+				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
 				message.content ? ` **${message.content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 1**!`;
@@ -288,7 +289,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.GuildBoostTier2: {
 			return `${
-				CONSTANTS.emojis.discord.boost
+				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
 				message.content ? ` **${message.content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 2**!`;
@@ -296,7 +297,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.GuildBoostTier3: {
 			return `${
-				CONSTANTS.emojis.discord.boost
+				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
 				message.content ? ` **${message.content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 3**!`;
@@ -304,7 +305,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.ChannelFollowAdd: {
 			return `${
-				CONSTANTS.emojis.discord.add
+				constants.emojis.discord.add
 			} ${message.author.toString()} has added **${escapeMarkdown(
 				message.content,
 			)}** to this channel. Its most important updates will show up here.`;
@@ -318,24 +319,24 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		// }
 
 		case MessageType.GuildDiscoveryDisqualified: {
-			return `${CONSTANTS.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
+			return `${constants.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
 		}
 
 		case MessageType.GuildDiscoveryRequalified: {
-			return `${CONSTANTS.emojis.discord.yes} This server is eligible for Server Discovery again and has been automatically relisted!`;
+			return `${constants.emojis.discord.yes} This server is eligible for Server Discovery again and has been automatically relisted!`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodInitialWarning: {
-			return `${CONSTANTS.emojis.discord.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
+			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodFinalWarning: {
-			return `${CONSTANTS.emojis.discord.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
+			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
 		}
 
 		case MessageType.ThreadCreated: {
 			return `${
-				CONSTANTS.emojis.discord.thread
+				constants.emojis.discord.thread
 			} ${message.author.toString()} started a thread: **${escapeMessage(
 				message.content,
 			)}** See all **threads**.`;
@@ -346,7 +347,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			const repliedMessage = await message.fetchReference().catch(() => {});
 
 			if (!repliedMessage)
-				return `*${CONSTANTS.emojis.discord.reply} Original message was deleted.*\n\n${message.content}`;
+				return `*${constants.emojis.discord.reply} Original message was deleted.*\n\n${message.content}`;
 
 			const cleanContent = await messageToText(repliedMessage, false);
 
@@ -361,7 +362,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			// The resolved message for the reference will be a Message
 			return reference
 				? (await messageToText(reference, replies)) || actualContent
-				: `${CONSTANTS.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
+				: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
 		}
 
 		case MessageType.GuildInviteReminder: {
@@ -381,32 +382,32 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.StageStart: {
-			return `${CONSTANTS.emojis.discord.stageLive} ${message.author.toString()} started **${
+			return `${constants.emojis.discord.stageLive} ${message.author.toString()} started **${
 				message.content
 			}**.`;
 		}
 
 		case MessageType.StageEnd: {
-			return `${CONSTANTS.emojis.discord.stage} ${message.author.toString()} ended **${
+			return `${constants.emojis.discord.stage} ${message.author.toString()} ended **${
 				message.content
 			}**.`;
 		}
 
 		case MessageType.StageSpeaker: {
 			return `${
-				CONSTANTS.emojis.discord.speaker
+				constants.emojis.discord.speaker
 			} ${message.author.toString()} is now a speaker.`;
 		}
 
 		case MessageType.StageRaiseHand: {
 			return `${
-				CONSTANTS.emojis.discord.raisedHand
+				constants.emojis.discord.raisedHand
 			} ${message.author.toString()} requested to speak.`;
 		}
 
 		case MessageType.StageTopic: {
 			return `${
-				CONSTANTS.emojis.discord.stage
+				constants.emojis.discord.stage
 			} ${message.author.toString()} changed Stage topic: **${message.content}**.`;
 		}
 
@@ -423,14 +424,14 @@ export async function messageToText(message: Message, replies = true): Promise<s
 				message.interaction?.user.toString() ?? ""
 			} used ${chatInputApplicationCommandMention(
 				message.interaction?.commandName ?? "",
-				(await CONSTANTS.guild.commands.fetch()).find(
+				(await config.guild.commands.fetch()).find(
 					({ name }) => name === message.interaction?.commandName,
 				)?.id ?? "",
 			)}:*\n${actualContent}`;
 		}
 
 		case MessageType.Call: {
-			return `${CONSTANTS.emojis.discord.call} ${message.author.toString()} started a call.`;
+			return `${constants.emojis.discord.call} ${message.author.toString()} started a call.`;
 		}
 
 		case MessageType.AutoModerationAction: {
@@ -570,7 +571,7 @@ export async function paginate<Item>(
 
 		if (filtered.length === 0) {
 			return {
-				content: `${CONSTANTS.emojis.statuses.no} ${failMessage}`,
+				content: `${constants.emojis.statuses.no} ${failMessage}`,
 				ephemeral: true,
 				fetchReply: true,
 			};
@@ -634,7 +635,7 @@ export async function paginate<Item>(
 
 					footer: {
 						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
-							CONSTANTS.footerSeperator
+							constants.footerSeperator
 						}${array.length.toLocaleString()} ${
 							array.length === 1 ? singular : plural
 						}`,
@@ -656,7 +657,7 @@ export async function paginate<Item>(
 						? format instanceof GuildMember
 							? format.displayColor
 							: undefined
-						: CONSTANTS.themeColor,
+						: constants.themeColor,
 				},
 			],
 
@@ -674,7 +675,7 @@ export async function paginate<Item>(
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === user.id,
 
-		time: CONSTANTS.collectorTime,
+		time: constants.collectorTime,
 	});
 
 	collector

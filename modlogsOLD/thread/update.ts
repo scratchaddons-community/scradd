@@ -1,12 +1,13 @@
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import config from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import { DATABASE_THREAD } from "../../../common/database.js";
 import log, { LOG_GROUPS, shouldLog } from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
 defineEvent("threadUpdate", async (oldThread, newThread) => {
-	if (newThread.guild.id !== CONSTANTS.guild.id) return;
+	if (newThread.guild.id !== config.guild.id) return;
 	if (!shouldLog(newThread)) return;
 
 	const logs = [];
@@ -62,7 +63,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (
 		newThread.archived &&
 		(((newThread.name === DATABASE_THREAD || LOG_GROUPS.includes(newThread.name)) &&
-			newThread.parent?.id === CONSTANTS.channels.modlogs?.id) ||
+			newThread.parent?.id === config.channels.modlogs?.id) ||
 			newThread.id === "1029234332977602660")
 	)
 		await newThread.setArchived(false, "Modlog threads must stay open");

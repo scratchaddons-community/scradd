@@ -6,17 +6,12 @@ import {
 	GuildMember,
 	Message,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { addons, manifest } from "../../common/extension.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
-import {
-	BULLET_POINT,
-	checkIfUserPlaying,
-	COLLECTOR_TIME,
-	commandMarkdown,
-	CURRENTLY_PLAYING,
-} from "./misc.js";
+import { checkIfUserPlaying, COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { AddonQuestion, Dependencies } from "./questions.js";
 
 type Probability = readonly [string, number];
@@ -155,7 +150,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 
 			embeds: [
 				{
-					color: CONSTANTS.themeColor,
+					color: constants.themeColor,
 
 					author: {
 						icon_url: (interaction.member instanceof GuildMember
@@ -172,10 +167,10 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 					title: "🤔 Think of an addon…",
 
 					description: `${
-						(oldMessage?.embeds[0]?.description
+						oldMessage?.embeds[0]?.description
 							? `${oldMessage.embeds[0].description} **${justAnswered}**\n`
-							: "") + BULLET_POINT
-					} ${questions[0]}`,
+							: ""
+					}- ${questions[0]}`,
 
 					footer: {
 						text:
@@ -186,7 +181,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 										previousCount === "0 questions" ? "" : "s"
 									}`,
 							) ??
-							`Answer my questions using the buttons below${CONSTANTS.footerSeperator}0 questions asked`,
+							`Answer my questions using the buttons below${constants.footerSeperator}0 questions asked`,
 					},
 				},
 			],
@@ -391,7 +386,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 						oldMessage.embeds[0]?.description
 							? `${oldMessage.embeds[0]?.description ?? ""} **${justAnswered}**\n`
 							: ""
-					}${BULLET_POINT} Is it the **${foundAddon.name}** addon?`,
+					}- Is it the **${foundAddon.name}** addon?`,
 				},
 			],
 		});
@@ -419,7 +414,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 				},
 			],
 
-			content: `${CONSTANTS.emojis.misc.addon} Your addon is **${escapeMarkdown(
+			content: `${constants.emojis.misc.addon} Your addon is **${escapeMarkdown(
 				foundAddon.name,
 			)}**!`,
 
@@ -430,7 +425,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 					description: `${
 						Object.entries(QUESTIONS_BY_ADDON)
 							.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
-							?.map(({ statement }) => `${BULLET_POINT} ${statement}`)
+							?.map(({ statement }) => `- ${statement}`)
 							.join("\n") ?? ""
 					}${commandMarkdown}`,
 
@@ -446,13 +441,13 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 								: interaction.user.username,
 					},
 
-					color: CONSTANTS.themeColor,
+					color: constants.themeColor,
 
 					thumbnail: {
-						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURI(foundAddon.id)}.png`,
+						url: `${constants.urls.addonImageRoot}/${encodeURI(foundAddon.id)}.png`,
 					},
 
-					url: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+					url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
 						foundAddon.id,
 					)}`,
 
@@ -460,10 +455,10 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 						text: `Guessed after ${askedCount} questions.${
 							process.env.NODE_ENV === "production"
 								? ""
-								: `${CONSTANTS.footerSeperator}Probability: ${addonProbabilities[0]?.[1]}`
+								: `${constants.footerSeperator}Probability: ${addonProbabilities[0]?.[1]}`
 						}${
 							nextChoice
-								? `${CONSTANTS.footerSeperator}Next choice: ${nextChoice}${
+								? `${constants.footerSeperator}Next choice: ${nextChoice}${
 										process.env.NODE_ENV === "production"
 											? ""
 											: ` (probability ${addonProbabilities[1]?.[1]})`
@@ -483,7 +478,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 			filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id,
 
 			max: 1,
-			time: CONSTANTS.collectorTime,
+			time: constants.collectorTime,
 		});
 
 		collector

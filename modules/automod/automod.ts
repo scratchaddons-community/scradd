@@ -1,6 +1,7 @@
 import type { Message } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import {
 	getBaseChannel,
 	GlobalAnimatedEmoji,
@@ -25,7 +26,7 @@ export default async function automodMessage(message: Message) {
 		animatedEmojis.length > 15 &&
 		Math.floor((animatedEmojis.length - 16) / 10) * PARTIAL_STRIKE_COUNT;
 
-	if (baseChannel?.id !== CONSTANTS.channels.bots?.id && typeof badAnimatedEmojis === "number") {
+	if (baseChannel?.id !== config.channels.bots?.id && typeof badAnimatedEmojis === "number") {
 		await deleteMessage();
 		await warn(
 			message.author,
@@ -35,16 +36,16 @@ export default async function automodMessage(message: Message) {
 		);
 		await message.channel.send(
 			`${
-				CONSTANTS.emojis.statuses.no
+				constants.emojis.statuses.no
 			} ${message.author.toString()}, less animated emojis please!`,
 		);
 	}
 
 	if (
 		!allowBadWords &&
-		CONSTANTS.channels.info?.id !== parentChannel?.id &&
-		CONSTANTS.channels.advertise &&
-		CONSTANTS.channels.advertise.id !== baseChannel?.id &&
+		config.channels.info?.id !== parentChannel?.id &&
+		config.channels.advertise &&
+		config.channels.advertise.id !== baseChannel?.id &&
 		!message.author?.bot
 	) {
 		const invites = (
@@ -66,8 +67,8 @@ export default async function automodMessage(message: Message) {
 			);
 			await message.channel.send(
 				`${
-					CONSTANTS.emojis.statuses.no
-				} ${message.author.toString()}, only post invite links in ${CONSTANTS.channels.advertise.toString()}!`,
+					constants.emojis.statuses.no
+				} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
 			);
 		}
 
@@ -82,8 +83,8 @@ export default async function automodMessage(message: Message) {
 			);
 			await message.channel.send(
 				`${
-					CONSTANTS.emojis.statuses.no
-				} ${message.author.toString()}, bot invites go to ${CONSTANTS.channels.advertise.toString()}!`,
+					constants.emojis.statuses.no
+				} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
 			);
 		}
 	}
@@ -153,7 +154,7 @@ export default async function automodMessage(message: Message) {
 				].join(", ")}`,
 			);
 			await message.channel.send(
-				`${CONSTANTS.emojis.statuses.no} ${message.author.toString()}, language!`,
+				`${constants.emojis.statuses.no} ${message.author.toString()}, language!`,
 			);
 		}
 	}
@@ -161,7 +162,8 @@ export default async function automodMessage(message: Message) {
 	function deleteMessage() {
 		if (deleteMessage.deleted) return;
 
-		if (!message.deletable) return log(`${LoggingEmojis.Error} Missing permissions to delete ${message.url}`);
+		if (!message.deletable)
+			return log(`${LoggingEmojis.Error} Missing permissions to delete ${message.url}`);
 
 		deleteMessage.deleted = true;
 		return message.delete();

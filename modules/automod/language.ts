@@ -12,7 +12,8 @@ function decodeRegexes(regexes: RegExp[]) {
 				/[ a-z]/gi,
 				(letter) =>
 					`[${letter}${
-						{// TODO use confusables
+						{
+							// TODO use confusables
 							" ": "^w",
 							"a": "⒜@*⍺₳4aａⓐAＡᵃₐᴬåǟÃąẚᴀɐɑɒαΑΔΛаАคภᎪᗅᗩꓮ-",
 							"b": "⒝฿8bｂⓑℬʙɓꞵƅβвьҍⴆცꮟᏸᏼᑲᖯᗷꓐ",

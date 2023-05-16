@@ -1,17 +1,18 @@
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineEvent from "../events.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineEvent from "../lib/events.js";
 
-defineEvent("threadCreate", async (thread, newlyCreated) =>{
-	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return;
+defineEvent("threadCreate", async (thread, newlyCreated) => {
+	if (thread.guild.id !== config.guild.id || !newlyCreated) return;
 
-	const toPing = [CONSTANTS.channels.mod?.id, CONSTANTS.channels.modlogs?.id].includes(
+	const toPing = [config.channels.mod?.id, config.channels.modlogs?.id].includes(
 		thread.parent?.id,
 	)
-		? CONSTANTS.roles.mod?.toString()
-		: thread.parent?.id === CONSTANTS.channels.exec?.id
+		? config.roles.mod?.toString()
+		: thread.parent?.id === config.channels.exec?.id
 		? "<@&1046043735680630784>"
-		: thread.parent?.id === CONSTANTS.channels.admin?.id
-		? CONSTANTS.roles.admin?.toString()
+		: thread.parent?.id === config.channels.admin?.id
+		? config.roles.admin?.toString()
 		: undefined;
 	if (toPing) await thread.send({ content: toPing, allowedMentions: { parse: ["roles"] } });
-})
+});

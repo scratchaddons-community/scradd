@@ -7,7 +7,8 @@ import {
 	User,
 	type Snowflake,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import { DEFAULT_XP, getLevelForXp, getXpForLevel, weeklyXpDatabase, xpDatabase } from "./misc.js";
 
@@ -80,9 +81,7 @@ export default async function giveXp(
 ) {
 	const user = to instanceof User ? to : to.user;
 	const member =
-		user instanceof GuildMember
-			? user
-			: await CONSTANTS.guild.members.fetch(user).catch(() => {});
+		user instanceof GuildMember ? user : await config.guild.members.fetch(user).catch(() => {});
 
 	const xp = Array.from(xpDatabase.data);
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
@@ -101,14 +100,14 @@ export default async function giveXp(
 	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
 
 	if (
-		CONSTANTS.roles.epic &&
-		rank / CONSTANTS.guild.memberCount < 0.01 &&
+		config.roles.epic &&
+		rank / config.guild.memberCount < 0.01 &&
 		member &&
-		!member.roles.resolve(CONSTANTS.roles.epic.id)
+		!member.roles.resolve(config.roles.epic.id)
 	) {
-		await member.roles.add(CONSTANTS.roles.epic, "Top 1% of the server’s XP");
-		await CONSTANTS.channels.general?.send(
-			`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${CONSTANTS.roles.epic.toString()}.`,
+		await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
+		await config.channels.general?.send(
+			`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${config.roles.epic.toString()}.`,
 		);
 	}
 
@@ -124,7 +123,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url: strin
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
 
-	await CONSTANTS.channels.bots?.send({
+	await config.channels.bots?.send({
 		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
 		components:
@@ -167,8 +166,8 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url: strin
 						inline: true,
 					},
 					{
-						name: CONSTANTS.zeroWidthSpace,
-						value: CONSTANTS.zeroWidthSpace,
+						name: constants.zeroWidthSpace,
+						value: constants.zeroWidthSpace,
 						inline: true,
 					},
 					{
@@ -179,7 +178,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url: strin
 				],
 
 				footer: {
-					icon_url: CONSTANTS.guild.iconURL() ?? undefined,
+					icon_url: config.guild.iconURL() ?? undefined,
 					text: "View the leaderboard with /xp top\nView someone’s XP with /xp rank\nToggle pings with /settings",
 				},
 			},

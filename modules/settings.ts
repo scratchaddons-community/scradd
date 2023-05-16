@@ -7,11 +7,12 @@ import {
 	User,
 } from "discord.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import defineCommand from "../commands.js";
+import defineCommand from "../lib/commands.js";
 import { weeklyXpDatabase } from "./xp/misc.js";
-import { defineButton } from "../components.js";
+import { defineButton } from "../lib/components.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -38,7 +39,7 @@ defineCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Enable pings when your messages get on #${CONSTANTS.channels.board?.name}`,
+				description: `Enable pings when your messages get on #${config.channels.board?.name}`,
 			},
 
 			"level-up-pings": {
@@ -48,7 +49,7 @@ defineCommand(
 
 			"weekly-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Enable pings if you are one of the most active people each week (#${CONSTANTS.channels.announcements?.name})`,
+				description: `Enable pings if you are one of the most active people each week (#${config.channels.announcements?.name})`,
 			},
 
 			"autoreactions": {
@@ -149,7 +150,7 @@ export function updateSettings(
 
 	return {
 		ephemeral: true,
-		content: `${CONSTANTS.emojis.statuses.yes} Updated your settings!`,
+		content: `${constants.emojis.statuses.yes} Updated your settings!`,
 
 		components: [
 			{

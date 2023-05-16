@@ -13,7 +13,8 @@ import {
 } from "discord.js";
 
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
@@ -39,7 +40,7 @@ async function textChannelMatches(
 			const fetchedChannel =
 				channelWanted instanceof CategoryChannel
 					? channelWanted
-					: await CONSTANTS.guild.channels.fetch(channelWanted.id).catch(() => {});
+					: await config.guild.channels.fetch(channelWanted.id).catch(() => {});
 
 			if (fetchedChannel?.type !== ChannelType.GuildCategory)
 				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
@@ -54,7 +55,7 @@ async function textChannelMatches(
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			const thread = await CONSTANTS.guild.channels.fetch(channelFound).catch(() => {});
+			const thread = await config.guild.channels.fetch(channelFound).catch(() => {});
 			return thread?.parent?.id === channelWanted.id;
 		}
 
@@ -141,7 +142,7 @@ export default async function makeSlideshow(
 						},
 					],
 
-					content: `${CONSTANTS.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
+					content: `${constants.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
 
 					embeds: [],
 					ephemeral: true,
@@ -164,7 +165,7 @@ export default async function makeSlideshow(
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === interaction.user.id,
 
-		time: CONSTANTS.collectorTime,
+		time: constants.collectorTime,
 	});
 
 	collector

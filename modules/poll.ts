@@ -5,13 +5,14 @@ import {
 	ModalActionRowComponentData,
 	TextInputStyle,
 } from "discord.js";
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineCommand from "../commands.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineCommand from "../lib/commands.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
-import { defineModal } from "../components.js";
-import defineEvent from "../events.js";
-import client from "../client.js";
+import { defineModal } from "../lib/components.js";
+import defineEvent from "../lib/events.js";
+import { client } from "../lib/client.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
@@ -63,7 +64,7 @@ defineCommand(
 			title: "Set Up Poll",
 			components,
 			customId:
-				Number(interaction.options.getBoolean("vote-mode")??true) +
+				Number(interaction.options.getBoolean("vote-mode") ?? true) +
 				interaction.options.getString("question", true) +
 				"_poll",
 		});
@@ -101,7 +102,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 	const message = await interaction.reply({
 		embeds: [
 			{
-				color: CONSTANTS.themeColor,
+				color: constants.themeColor,
 				title: question,
 				description: options
 					.map((option, index) => `${reactions[index]} ${option}`)
@@ -120,7 +121,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
+	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 

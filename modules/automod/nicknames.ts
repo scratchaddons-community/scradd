@@ -1,5 +1,6 @@
 import type { GuildMember } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import warn from "../punishments/warn.js";
@@ -18,7 +19,7 @@ export default async function changeNickname(member: GuildMember) {
 			censored.strikes,
 			"Set nickname to " + member.displayName,
 		);
-	const members = (await CONSTANTS.guild.members.fetch({ query: newNick, limit: 100 })).filter(
+	const members = (await config.guild.members.fetch({ query: newNick, limit: 100 })).filter(
 		(found) => found.displayName === newNick,
 	);
 

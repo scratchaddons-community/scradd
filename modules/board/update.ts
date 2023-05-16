@@ -1,8 +1,6 @@
-import {
-	ChannelType,
-	Message,
-} from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { ChannelType, Message } from "discord.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
 import { boardDatabase, boardReactionCount, BOARD_EMOJI, generateBoardMessage } from "./misc.js";
@@ -13,14 +11,14 @@ import { boardDatabase, boardReactionCount, BOARD_EMOJI, generateBoardMessage } 
  * @param message - The board message to update.
  */
 export default async function updateBoard(message: Message) {
-	if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
+	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
 	const count = message.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
 	const minReactions = boardReactionCount(message.channel);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
 	const boardMessage = boardMessageId
-		? await CONSTANTS.channels.board.messages.fetch(boardMessageId).catch(() => {})
+		? await config.channels.board.messages.fetch(boardMessageId).catch(() => {})
 		: undefined;
 
 	if (boardMessage) {
@@ -33,12 +31,13 @@ export default async function updateBoard(message: Message) {
 	} else if (count >= minReactions) {
 		if (!message.author.bot) await giveXp(message.author, message.url);
 
-		const sentMessage = await CONSTANTS.channels.board.send({
+		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions: getSettings(message.author).boardPings ? undefined : { users: [] },
 		});
 
-		if (CONSTANTS.channels.board.type === ChannelType.GuildAnnouncement) await sentMessage.crosspost();
+		if (config.channels.board.type === ChannelType.GuildAnnouncement)
+			await sentMessage.crosspost();
 
 		boardDatabase.data = [
 			...boardDatabase.data.filter((item) => item.source !== message.id),
@@ -81,14 +80,15 @@ export default async function updateBoard(message: Message) {
 	);
 	const topIds = await Promise.all(
 		top.map(async ({ onBoard }) => {
-			const toPin = onBoard && (await CONSTANTS.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+			const toPin =
+				onBoard && (await config.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
 
 			if (toPin) await toPin.pin("Is a top-reacted message");
 
 			return onBoard;
 		}),
 	);
-	const pins = await CONSTANTS.channels.board.messages.fetchPinned();
+	const pins = await config.channels.board.messages.fetchPinned();
 	if (pins.size > top.length) {
 		await Promise.all(
 			pins

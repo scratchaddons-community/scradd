@@ -8,22 +8,23 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import { diffString } from "json-diff";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../modlogs/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { generateError } from "../../util/logError.js";
+import { generateError } from "../../common/logError.js";
 
 const databaseThread = await getLoggingThread("databases");
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
 		interaction.targetMessage.type !== MessageType.Default ||
 		!interaction.targetMessage.editable ||
-		CONSTANTS.channels.board?.id === interaction.channel?.id ||
-		(CONSTANTS.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
+		config.channels.board?.id === interaction.channel?.id ||
+		(config.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
 			databaseThread.id !== interaction.channel?.id)
 	) {
 		return await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} Can not edit this message!`,
+			content: `${constants.emojis.statuses.no} Can not edit this message!`,
 			ephemeral: true,
 		});
 	}
@@ -76,7 +77,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		resolve(JSON.parse(text));
 	}).catch(async (error: unknown) => {
 		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.no} An error occurred while parsing the JSON.`,
+			content: `${constants.emojis.statuses.no} An error occurred while parsing the JSON.`,
 			ephemeral: true,
 
 			files: [
@@ -103,7 +104,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	const edited = await message.edit(json).catch(async (error: unknown) => {
 		await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} An error occurred while editing the message.`,
+			content: `${constants.emojis.statuses.no} An error occurred while editing the message.`,
 
 			files: [
 				{
@@ -122,7 +123,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	if (!edited) return;
 
 	await interaction.reply({
-		content: `${CONSTANTS.emojis.statuses.yes} Successfully edited message!`,
+		content: `${constants.emojis.statuses.yes} Successfully edited message!`,
 		ephemeral: true,
 	});
 

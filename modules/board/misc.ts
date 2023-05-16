@@ -8,13 +8,14 @@ import {
 	Snowflake,
 	TextBasedChannel,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";
 
-if (!CONSTANTS.channels.board) throw new ReferenceError("Could not find board channel");
-const { board } = CONSTANTS.channels;
+if (!config.channels.board) throw new ReferenceError("Could not find board channel");
+const { board } = config.channels;
 export const BOARD_EMOJI = "🥔",
 	REACTIONS_NAME = "Potatoes";
 
@@ -53,27 +54,27 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
-	if (channel?.id === CONSTANTS.channels.updates?.id) return COUNTS.info;
+	if (channel?.id === config.channels.updates?.id) return COUNTS.info;
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
 	if (baseChannel.isVoiceBased()) return COUNTS.misc;
 
 	return (
 		{
-			[CONSTANTS.channels.tickets?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.mod?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.modlogs?.id || ""]: COUNTS.mods,
-			[CONSTANTS.channels.exec?.id || ""]: COUNTS.exec,
-			[CONSTANTS.channels.admin?.id || ""]: COUNTS.admins,
+			[config.channels.tickets?.id || ""]: COUNTS.mods,
+			[config.channels.mod?.id || ""]: COUNTS.mods,
+			[config.channels.modlogs?.id || ""]: COUNTS.mods,
+			[config.channels.exec?.id || ""]: COUNTS.exec,
+			[config.channels.admin?.id || ""]: COUNTS.admins,
 			"853256939089559583": COUNTS.misc,
 			"869662117651955802": COUNTS.misc,
 			"811065897057255424": COUNTS.memes,
 			"806609527281549312": COUNTS.memes,
 			"806656240129671188": COUNTS.memes,
-			[CONSTANTS.channels.advertise?.id || ""]: COUNTS.memes,
-			[CONSTANTS.channels.old_suggestions?.id || ""]: COUNTS.default,
+			[config.channels.advertise?.id || ""]: COUNTS.memes,
+			[config.channels.old_suggestions?.id || ""]: COUNTS.default,
 		}[baseChannel.id] ||
-		{ [CONSTANTS.channels.info?.id || ""]: COUNTS.info }[baseChannel.parent?.id || ""] ||
+		{ [config.channels.info?.id || ""]: COUNTS.info }[baseChannel.parent?.id || ""] ||
 		COUNTS.default
 	);
 }
@@ -189,7 +190,7 @@ export async function generateBoardMessage(
 		};
 	}
 
-	const channel = await CONSTANTS.guild.channels.fetch(info.channel).catch(() => {});
+	const channel = await config.guild.channels.fetch(info.channel).catch(() => {});
 
 	if (!channel?.isTextBased()) return;
 

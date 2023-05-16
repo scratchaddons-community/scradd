@@ -1,8 +1,9 @@
 import { ApplicationCommandOptionType, GuildMember } from "discord.js";
-import client from "../../client.js";
-import defineCommand from "../../commands.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { defineButton, defineSelect } from "../../components.js";
+import { client } from "../../lib/client.js";
+import defineCommand from "../../lib/commands.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { defineButton, defineSelect } from "../../lib/components.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
@@ -115,7 +116,7 @@ defineCommand(
 		await interaction.reply({
 			allowedMentions: { users: [] },
 
-			content: `${CONSTANTS.emojis.statuses.yes} ${
+			content: `${constants.emojis.statuses.yes} ${
 				strikes ? "W" : "Verbally w"
 			}arned ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
 		});

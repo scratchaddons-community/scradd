@@ -1,4 +1,4 @@
-import defineCommand from "../../commands.js";
+import defineCommand from "../../lib/commands.js";
 import bot from "./bot.js";
 import { checkIfUserPlaying } from "./misc.js";
 import player from "./player.js";

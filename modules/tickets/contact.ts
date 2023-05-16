@@ -17,7 +17,8 @@ import {
 	TimestampStyles,
 } from "discord.js";
 
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
@@ -182,8 +183,8 @@ export async function gatherTicketInfo(
 	if (option === SA_CATEGORY) {
 		return await interaction.reply({
 			content: `${
-				CONSTANTS.emojis.statuses.no
-			} Please don't contact mods for SA help. Instead, put your suggestions in ${CONSTANTS.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
+				constants.emojis.statuses.no
+			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
 
 			ephemeral: true,
 		});
@@ -193,7 +194,7 @@ export async function gatherTicketInfo(
 	if (existing)
 		return await interaction.reply({
 			content: `${
-				CONSTANTS.emojis.statuses.no
+				constants.emojis.statuses.no
 			} You already have an open ticket! Please send the mods messages in ${existing.toString()}.`,
 
 			ephemeral: true,
@@ -227,7 +228,7 @@ export default async function contactMods(
 	const member =
 		options instanceof GuildMember
 			? options
-			: interaction.member || (await CONSTANTS.guild.members.fetch(interaction.user.id));
+			: interaction.member || (await config.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	const oldThread = await getThreadFromMember(member);
@@ -258,7 +259,7 @@ export default async function contactMods(
 		interaction.fields.getTextInputValue("BODY");
 
 	const date = new Date();
-	const thread = await CONSTANTS.channels.tickets?.threads.create({
+	const thread = await config.channels.tickets?.threads.create({
 		name: `${member.user.username} (${date
 			.getUTCFullYear()
 			.toLocaleString([], { useGrouping: false })}-${(date.getUTCMonth() + 1).toLocaleString(
@@ -331,7 +332,7 @@ export default async function contactMods(
 				...(body
 					? fields.length === 0
 						? { description: body }
-						: { fields: [...fields, { name: CONSTANTS.zeroWidthSpace, value: body }] }
+						: { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
 					: { fields }),
 			},
 			{
@@ -354,12 +355,12 @@ export default async function contactMods(
 									)}${strike.removed ? "~~" : ""}`,
 							)
 							.join("\n")
-					: `${CONSTANTS.emojis.statuses.no} ${member.toString()} has never been warned!`,
+					: `${constants.emojis.statuses.no} ${member.toString()} has never been warned!`,
 
 				footer: filtered.length
 					? {
 							text: `Page 1/${numberOfPages}${
-								CONSTANTS.footerSeperator
+								constants.footerSeperator
 							} ${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
 					  }
 					: undefined,
@@ -371,7 +372,7 @@ export default async function contactMods(
 		content:
 			option === modCategory || process.env.NODE_ENV === "development"
 				? ""
-				: CONSTANTS.roles.mod?.toString(),
+				: config.roles.mod?.toString(),
 		allowedMentions: { parse: ["roles"] },
 	});
 
@@ -389,7 +390,7 @@ export async function contactUser(
 	if (existingThread) {
 		await interaction.reply({
 			content: `${
-				CONSTANTS.emojis.statuses.no
+				constants.emojis.statuses.no
 			} ${member.toString()} already has a ticket open! Talk to them in ${existingThread.toString()}.`,
 
 			ephemeral: true,
@@ -429,7 +430,7 @@ export async function contactUser(
 			buttonInteraction.customId.endsWith(`-${interaction.id}`) &&
 			buttonInteraction.user.id === interaction.user.id,
 
-		time: CONSTANTS.collectorTime,
+		time: constants.collectorTime,
 		max: 1,
 	});
 
@@ -441,7 +442,7 @@ export async function contactUser(
 				if (thread)
 					await buttonInteraction.editReply(
 						`${
-							CONSTANTS.emojis.statuses.yes
+							constants.emojis.statuses.yes
 						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
 					);
 			} else {

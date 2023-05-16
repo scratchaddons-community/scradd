@@ -2,13 +2,14 @@ import { MessageType } from "discord.js";
 
 import { getSettings } from "./settings.js";
 import { BOARD_EMOJI } from "./board/misc.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import { getBaseChannel, reactAll } from "../util/discord.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { normalize } from "../util/text.js";
 
 import { autoreactions, dad } from "../secrets.js";
-import defineEvent from "../events.js";
+import defineEvent from "../lib/events.js";
 
 const REACTION_CAP = 3;
 
@@ -17,7 +18,7 @@ defineEvent("messageCreate", async (message) => {
 		message.flags.has("Ephemeral") ||
 		message.type === MessageType.ThreadStarterMessage ||
 		message.channel.isDMBased() ||
-		message.guild?.id !== CONSTANTS.guild.id
+		message.guild?.id !== config.guild.id
 	)
 		return;
 
@@ -44,8 +45,9 @@ defineEvent("messageCreate", async (message) => {
 	const baseChannel = getBaseChannel(message.channel);
 	if (
 		message.interaction ||
-		CONSTANTS.channels.modlogs?.id === baseChannel?.id ||
-		CONSTANTS.channels.info?.id === baseChannel?.parent?.id ||
+		config.channels.modlogs?.id === baseChannel?.id ||
+		(process.env.NODE_ENV === "production" &&
+			config.channels.info?.id === baseChannel?.parent?.id) ||
 		!getSettings(message.author).autoreactions
 	)
 		return;
@@ -61,7 +63,10 @@ defineEvent("messageCreate", async (message) => {
 			.join(" ");
 
 		if (name) {
-			if (CONSTANTS.channels.bots?.id === baseChannel?.id) {
+			if (
+				process.env.NODE_ENV !== "production" ||
+				config.channels.bots?.id === baseChannel?.id
+			) {
 				return await message.reply({
 					content: dad(name, message.author),
 					allowedMentions: { users: [] },

@@ -1,45 +1,44 @@
 import { Collection, Snowflake } from "discord.js";
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineEvent from "../events.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineEvent from "../lib/events.js";
 import { nth } from "../util/numbers.js";
 
 defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 
 	const greetings = [
-		`Everybody please welcome ${member.toString()} to ${
-			CONSTANTS.guild.name
-		}; they’re our ${nth(CONSTANTS.guild.memberCount)} member!`,
+		`Everybody please welcome ${member.toString()} to ${config.guild.name}; they’re our ${nth(
+			config.guild.memberCount,
+		)} member!`,
 		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
-			CONSTANTS.guild.memberCount,
+			config.guild.memberCount,
 		)} member!`,
 		`Here we go again… ${member.toString()} is here, our ${nth(
-			CONSTANTS.guild.memberCount,
+			config.guild.memberCount,
 		)} member!`,
 		`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
-			CONSTANTS.guild.memberCount,
+			config.guild.memberCount,
 		)})!`,
 		`Is it a bird? Is it a plane? No, it’s ${member.toString()}, our ${nth(
-			CONSTANTS.guild.memberCount,
+			config.guild.memberCount,
 		)} member!`,
-		`Welcome:tm: ${member.toString()}! You’re our ${nth(CONSTANTS.guild.memberCount)} member!`,
+		`Welcome:tm: ${member.toString()}! You’re our ${nth(config.guild.memberCount)} member!`,
 	];
 
-	await CONSTANTS.channels.welcome?.send(
-		`${CONSTANTS.emojis.misc.join} ${
+	await config.channels.welcome?.send(
+		`${constants.emojis.misc.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}${
-			String(CONSTANTS.guild.memberCount).includes("87")
-				? " (WAS THAT THE BITE OF 87?!?!?)"
-				: ""
+			String(config.guild.memberCount).includes("87") ? " (WAS THAT THE BITE OF 87?!?!?)" : ""
 		}`,
 	);
 });
 
 defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== CONSTANTS.guild.id) return;
+	if (member.guild.id !== config.guild.id) return;
 
-	const banned = await CONSTANTS.guild.bans.fetch(member).catch(() => {});
+	const banned = await config.guild.bans.fetch(member).catch(() => {});
 
 	const byes = banned
 		? [
@@ -59,8 +58,8 @@ defineEvent("guildMemberRemove", async (member) => {
 				`Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
 		  ];
 
-	await CONSTANTS.channels.welcome?.send(
-		`${CONSTANTS.emojis.misc[banned ? "ban" : "leave"]} ${
+	await config.channels.welcome?.send(
+		`${constants.emojis.misc[banned ? "ban" : "leave"]} ${
 			byes[Math.floor(Math.random() * byes.length)]
 		}`,
 	);
@@ -68,36 +67,36 @@ defineEvent("guildMemberRemove", async (member) => {
 
 defineEvent("guildMemberAdd", async () => {
 	// TODO: when an invite is deleted, store its info in a db so it can be read in the future
-	const inviters = (await CONSTANTS.guild.invites.fetch()).reduce((accumulator, invite) => {
+	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
 		const inviter = invite.inviter?.id ?? "";
 		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));
 		return accumulator;
 	}, new Collection<Snowflake, number>());
 	inviters.map(async (count, user) => {
 		if (count < 20) return;
-		const inviter = await CONSTANTS.guild.members.fetch(user).catch(() => {});
+		const inviter = await config.guild.members.fetch(user).catch(() => {});
 		if (
 			!inviter ||
 			inviter.id === "279855717203050496" ||
 			inviter.user.bot ||
-			!CONSTANTS.roles.epic ||
-			inviter.roles.resolve(CONSTANTS.roles.epic.id)
+			!config.roles.epic ||
+			inviter.roles.resolve(config.roles.epic.id)
 		)
 			return;
-		await inviter.roles.add(CONSTANTS.roles.epic, "Invited 20+ people");
-		await CONSTANTS.channels.general?.send(
-			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${CONSTANTS.roles.epic.toString()} as a thank-you.`,
+		await inviter.roles.add(config.roles.epic, "Invited 20+ people");
+		await config.channels.general?.send(
+			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${config.roles.epic.toString()} as a thank-you.`,
 		);
 	});
 });
 defineEvent("guildMemberAdd", async () => {
-	await CONSTANTS.channels.info?.setName(
+	await config.channels.info?.setName(
 		`Info - ${(
-			CONSTANTS.guild.memberCount - (CONSTANTS.guild.memberCount > 1_005 ? 5 : 0)
+			config.guild.memberCount - (config.guild.memberCount > 1_005 ? 5 : 0)
 		).toLocaleString([], {
 			compactDisplay: "short",
 			maximumFractionDigits: 2,
-			minimumFractionDigits: CONSTANTS.guild.memberCount > 1_000 ? 2 : 0,
+			minimumFractionDigits: config.guild.memberCount > 1_000 ? 2 : 0,
 			notation: "compact",
 		})} members`,
 		"Member joined",

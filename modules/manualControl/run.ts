@@ -6,9 +6,10 @@ import {
 	TextInputStyle,
 	User,
 } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import { generateError } from "../../util/logError.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { generateError } from "../../common/logError.js";
 
 export default async function getCode(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const { owner } = await client.application.fetch();
@@ -19,7 +20,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 	if (process.env.NODE_ENV === "production" && !owners.includes(interaction.user.id))
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} This command is reserved for ${
+			content: `${constants.emojis.statuses.no} This command is reserved for ${
 				process.env.NODE_ENV === "production"
 					? owner instanceof User
 						? owner.username

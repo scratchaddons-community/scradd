@@ -3,9 +3,8 @@ import type { Awaitable, ClientEvents } from "discord.js";
 type ReservedClientEvent =
 	| "ready"
 	| "debug"
-	| "error"
 	| "warn"
-	| "restDebug"
+	| "error"
 	| "invalidated"
 	| "guildUnavailable"
 	| "userUpdate";

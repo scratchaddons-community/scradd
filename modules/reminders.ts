@@ -10,16 +10,17 @@ import {
 	time,
 	TimestampStyles,
 } from "discord.js";
-import client from "../client.js";
-import CONSTANTS from "../common/CONSTANTS.js";
+import { client } from "../lib/client.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import Database, { cleanDatabaseListeners } from "../common/database.js";
 import censor, { badWordsAllowed } from "./automod/language.js";
-import defineCommand from "../commands.js";
+import defineCommand from "../lib/commands.js";
 import { disableComponents } from "../util/discord.js";
 import { convertBase } from "../util/numbers.js";
 import { getSettings } from "./settings.js";
-import { defineButton, defineSelect } from "../components.js";
-import defineEvent from "../events.js";
+import { defineButton, defineSelect } from "../lib/components.js";
+import defineEvent from "../lib/events.js";
 import getWeekly from "./xp/weekly.js";
 import warn from "./punishments/warn.js";
 
@@ -73,7 +74,7 @@ setInterval(async () => {
 						remindersDatabase.data = [
 							...remindersDatabase.data,
 							{
-								channel: CONSTANTS.channels.info?.id || "",
+								channel: reminder.channel,
 								date: Number(Date.now() + 3_600_000),
 								reminder: undefined,
 								id: SpecialReminders.UpdateSACategory,
@@ -82,7 +83,7 @@ setInterval(async () => {
 						];
 
 						const count = await fetch(
-							`${CONSTANTS.urls.usercountJson}?date=${Date.now()}`,
+							`${constants.urls.usercountJson}?date=${Date.now()}`,
 						).then(
 							async (response) =>
 								await response?.json<{ count: number; _chromeCountDate: string }>(),
@@ -172,7 +173,7 @@ defineCommand(
 			if (!reminders.length)
 				return await interaction.reply({
 					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} You don’t have any reminders set!`,
+					content: `${constants.emojis.statuses.no} You don’t have any reminders set!`,
 				});
 
 			return await interaction.reply({
@@ -239,7 +240,7 @@ defineCommand(
 			if (censored) {
 				await interaction.reply({
 					ephemeral: true,
-					content: `${CONSTANTS.emojis.statuses.no} Language!`,
+					content: `${constants.emojis.statuses.no} Language!`,
 				});
 				await warn(
 					interaction.user,
@@ -254,7 +255,7 @@ defineCommand(
 		if (reminders.length > 19) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} You already have 20 reminders set! You are currently not allowed to set any more.`,
+				content: `${constants.emojis.statuses.no} You already have 20 reminders set! You are currently not allowed to set any more.`,
 			});
 		}
 
@@ -262,7 +263,7 @@ defineCommand(
 		if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t remind you sooner than 1 minute or later than 365 days.`,
+				content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t remind you sooner than 1 minute or later than 365 days.`,
 			});
 		}
 
@@ -272,7 +273,7 @@ defineCommand(
 		if (!channel)
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${CONSTANTS.emojis.statuses.no} Your DMs are closed, so I can’t remind you!`,
+				content: `${constants.emojis.statuses.no} Your DMs are closed, so I can’t remind you!`,
 			});
 
 		const id = convertBase(Date.now() + "", 10, convertBase.MAX_BASE);
@@ -283,7 +284,7 @@ defineCommand(
 
 		await interaction.reply({
 			ephemeral: dms,
-			content: `${CONSTANTS.emojis.statuses.yes} I’ll remind you ${time(
+			content: `${constants.emojis.statuses.yes} I’ll remind you ${time(
 				date,
 				TimestampStyles.RelativeTime,
 			)}!`,
@@ -340,7 +341,7 @@ defineSelect("cancelReminder", async (interaction) => {
 	if (!success) return;
 
 	await interaction.reply({
-		content: `${CONSTANTS.emojis.statuses.yes} Reminder \`${id}\` canceled!`,
+		content: `${constants.emojis.statuses.yes} Reminder \`${id}\` canceled!`,
 		ephemeral: true,
 	});
 });
@@ -350,13 +351,13 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 
 	if (interaction.message.flags.has("Ephemeral")) {
 		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.yes} Reminder canceled!`,
+			content: `${constants.emojis.statuses.yes} Reminder canceled!`,
 			ephemeral: true,
 		});
 	} else {
 		await interaction.message.edit({
 			content: `~~${interaction.message.content}~~\n${
-				CONSTANTS.emojis.statuses.no
+				constants.emojis.statuses.no
 			} Reminder canceled${
 				interaction.user.id === interaction.message.interaction?.user.id ? "" : " by a mod"
 			}.`,
@@ -368,14 +369,14 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 async function cancelReminder(interaction: MessageComponentInteraction, id: string) {
 	if (
 		interaction.user.id !== interaction.message.interaction?.user.id &&
-		(!CONSTANTS.roles.mod ||
+		(!config.roles.mod ||
 			!(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-				: interaction.member?.roles.includes(CONSTANTS.roles.mod.id)))
+				? interaction.member.roles.resolve(config.roles.mod.id)
+				: interaction.member?.roles.includes(config.roles.mod.id)))
 	) {
 		await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to cancel this reminder!`,
+			content: `${constants.emojis.statuses.no} You don’t have permission to cancel this reminder!`,
 		});
 		return false;
 	}
@@ -389,7 +390,7 @@ async function cancelReminder(interaction: MessageComponentInteraction, id: stri
 			});
 		await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} Could not cancel that reminder. Has it already passed?`,
+			content: `${constants.emojis.statuses.no} Could not cancel that reminder. Has it already passed?`,
 		});
 		return false;
 	}
@@ -400,7 +401,7 @@ async function cancelReminder(interaction: MessageComponentInteraction, id: stri
 
 defineEvent("messageCreate", async (message) => {
 	if (
-		message.guild?.id === CONSTANTS.guild.id &&
+		message.guild?.id === config.guild.id &&
 		message.interaction?.commandName == "bump" &&
 		message.author.id === "302050872383242240" &&
 		!remindersDatabase.data.find(

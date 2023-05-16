@@ -2,9 +2,9 @@ import exitHook from "async-exit-hook";
 import { type Message, RESTJSONErrorCodes, type Snowflake } from "discord.js";
 import papaparse from "papaparse";
 
-import client from "../client.js";
+import { client } from "../lib/client.js";
 import { extractMessageExtremities } from "../util/discord.js";
-import logError from "../util/logError.js";
+import logError from "./logError.js";
 import { getLoggingThread } from "../modules/modlogs/misc.js";
 
 export const DATABASE_THREAD = "databases";

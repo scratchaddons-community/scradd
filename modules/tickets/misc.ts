@@ -1,5 +1,6 @@
 import type { GuildMember, ThreadChannel, User } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { asyncFilter } from "../../util/promises.js";
 
 /**
@@ -10,9 +11,9 @@ import { asyncFilter } from "../../util/promises.js";
  * @returns Ticket thread.
  */
 export async function getThreadFromMember(user: GuildMember | User): Promise<ThreadChannel | void> {
-	if (!CONSTANTS.channels.tickets) return;
+	if (!config.channels.tickets) return;
 
-	const { threads } = await CONSTANTS.channels.tickets.threads.fetchActive();
+	const { threads } = await config.channels.tickets.threads.fetchActive();
 
 	return (
 		await asyncFilter(

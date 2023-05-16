@@ -1,11 +1,12 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import defineCommand from "../../commands.js";
+import defineCommand from "../../lib/commands.js";
 import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import { defineButton } from "../../components.js";
+import { defineButton } from "../../lib/components.js";
 import makeSlideshow, { defaultMinReactions } from "./explore.js";
-import defineEvent from "../../events.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
-import client from "../../client.js";
+import defineEvent from "../../lib/events.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { client } from "../../lib/client.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
@@ -15,7 +16,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
+	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
@@ -24,7 +25,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	if (emoji.name === BOARD_EMOJI) {
 		if (
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
-			(message.channel.id === CONSTANTS.channels.board?.id &&
+			(message.channel.id === config.channels.board?.id &&
 				message.author.id === client.user.id) ||
 			[`explore-${reactionsName}`, `explore${reactionsName}`].includes(
 				message.interaction?.commandName || "",
@@ -43,7 +44,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	if (!message.inGuild() || message.guild.id !== CONSTANTS.guild.id) return;
+	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
 
 	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
 });
@@ -88,7 +89,7 @@ defineCommand(
 	async (interaction) => {
 		await updateBoard(interaction.targetMessage);
 		await interaction.reply({
-			content: `${CONSTANTS.emojis.statuses.yes} Synced ${reactionsName}!`,
+			content: `${constants.emojis.statuses.yes} Synced ${reactionsName}!`,
 			ephemeral: true,
 		});
 	},

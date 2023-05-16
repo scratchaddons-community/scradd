@@ -2,7 +2,40 @@ import type { Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
 import log, { LoggingEmojis } from "../modules/modlogs/misc.js";
-import { sanitizePath } from "./files.js";
+import { sanitizePath } from "../util/files.js";
+import { cleanDatabaseListeners } from "./database.js";
+
+process
+	.on("uncaughtException", (error, origin) => logError(error, origin))
+	.on("warning", (error) => logError(error, "warning"));
+
+/**
+ * Log an error in #mod-logs.
+ *
+ * @param error - The error to log.
+ * @param event - The event this error occurred in.
+ *
+ * @returns The logged message.
+ */
+export default async function logError(
+	error: any,
+	event: string,
+): Promise<Message<true> | undefined> {
+	try {
+		console.error(error);
+		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
+
+		return await log(
+			`${LoggingEmojis.Error} **${error.name}** occurred in \`${event}\``, // todo chat input cmd errors
+			"server",
+			{ files: [{ content: generateError(error), extension: "json" }] },
+		);
+	} catch (errorError) {
+		console.error(errorError);
+		await cleanDatabaseListeners().catch(console.error);
+		process.exit(1);
+	}
+}
 
 /**
  * Standardize an error.
@@ -37,33 +70,4 @@ export function generateError(error: any, returnObject = false): string | { [key
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");
 	}
 	return error.toString();
-}
-
-/**
- * Log an error in #mod-logs.
- *
- * @param error - The error to log.
- * @param event - The event this error occurred in.
- *
- * @returns The logged message.
- */
-export default async function logError(
-	error: any,
-	event: string,
-): Promise<Message<true> | undefined> {
-	try {
-		console.error(error);
-		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
-
-		return await log(
-			`${LoggingEmojis.Error} **${error.name}** occurred in \`${event}\``, // todo chat input cmd errors
-			"server",
-			{ files: [{ content: generateError(error), extension: "json" }] },
-		);
-	} catch (errorError) {
-		console.error(errorError);
-		const { cleanDatabaseListeners } = await import("../common/database.js");
-		await cleanDatabaseListeners().catch(console.error);
-		process.exit(1);
-	}
 }

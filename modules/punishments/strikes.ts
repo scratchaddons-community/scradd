@@ -9,8 +9,9 @@ import {
 	TimestampStyles,
 	User,
 } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
 import filterToStrike, { PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
@@ -22,15 +23,15 @@ export async function getStrikes(
 	if (
 		selected.id !== interaction.user.id &&
 		!(
-			CONSTANTS.roles.mod &&
+			config.roles.mod &&
 			(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-				: interaction.member?.roles.includes(CONSTANTS.roles.mod.id))
+				? interaction.member.roles.resolve(config.roles.mod.id)
+				: interaction.member?.roles.includes(config.roles.mod.id))
 		)
 	) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+			content: `${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		});
 	}
 
@@ -38,7 +39,7 @@ export async function getStrikes(
 	const member =
 		selected instanceof GuildMember
 			? selected
-			: await CONSTANTS.guild.members.fetch(selected.id).catch(() => {});
+			: await config.guild.members.fetch(selected.id).catch(() => {});
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === selected.id)
@@ -128,17 +129,17 @@ export async function getStrikeById(
 ): Promise<InteractionReplyOptions> {
 	const strike = await filterToStrike(filter);
 	if (!strike)
-		return { ephemeral: true, content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!` };
+		return { ephemeral: true, content: `${constants.emojis.statuses.no} Invalid strike ID!` };
 
-	const isModerator = CONSTANTS.roles.mod && interactor.roles.resolve(CONSTANTS.roles.mod.id);
+	const isModerator = config.roles.mod && interactor.roles.resolve(config.roles.mod.id);
 	if (strike.user !== interactor.id && !isModerator) {
 		return {
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+			content: `${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		};
 	}
 
-	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => {});
 	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
 	const moderator =

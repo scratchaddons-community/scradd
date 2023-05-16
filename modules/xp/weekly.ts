@@ -1,6 +1,7 @@
 import { MessageCreateOptions, time, TimestampStyles } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getSettings } from "../settings.js";
@@ -10,7 +11,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
-			channel: CONSTANTS.channels.announcements?.id || "",
+			channel: config.channels.announcements?.id || "",
 			date: Number(nextWeeklyDate),
 			reminder: undefined,
 			id: SpecialReminders.Weekly,
@@ -20,7 +21,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	const weeklyWinners = [...weeklyXpDatabase.data].sort((one, two) => two.xp - one.xp);
 	weeklyXpDatabase.data = [];
 
-	const { active } = CONSTANTS.roles;
+	const { active } = config.roles;
 	const activeMembers = weeklyWinners.filter((item) => item.xp > 350);
 	if (active) {
 		await Promise.all([
@@ -30,7 +31,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			}),
 			...activeMembers.map(
 				async ({ user: memberId }) =>
-					await CONSTANTS.guild.members
+					await config.guild.members
 						.fetch(memberId)
 						.catch(() => {})
 						.then((activeMember) => activeMember?.roles.add(active, "Active")),
@@ -50,7 +51,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 	const ids = weeklyWinners.map((gain) => gain.user);
 
-	const role = CONSTANTS.roles.weekly_winner;
+	const role = config.roles.weekly_winner;
 	if (role) {
 		await Promise.all([
 			...role.members.map(async (weeklyMember) => {
@@ -59,14 +60,12 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			}),
 			...weeklyWinners.map(
 				async ({ user: userId }, index) =>
-					await CONSTANTS.guild.members
+					await config.guild.members
 						.fetch(userId)
 						.catch(() => {})
 						.then((member) =>
 							member?.roles.add(
-								index || !CONSTANTS.roles.epic
-									? role
-									: [role, CONSTANTS.roles.epic],
+								index || !config.roles.epic ? role : [role, config.roles.epic],
 								`Weekly winner`,
 							),
 						),

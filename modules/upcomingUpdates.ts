@@ -1,7 +1,8 @@
 import { MessageType } from "discord.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
-import defineEvent from "../events.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import defineEvent from "../lib/events.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { truncateText } from "../util/text.js";
 
@@ -9,7 +10,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
-		message.channel.id === CONSTANTS.channels.updates?.id
+		message.channel.id === config.channels.updates?.id
 	) {
 		await message.startThread({
 			name: truncateText(

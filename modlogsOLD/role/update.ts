@@ -1,10 +1,11 @@
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import config from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
 defineEvent("roleUpdate", async (oldRole, newRole) => {
-	if (newRole.guild.id !== CONSTANTS.guild.id) return;
+	if (newRole.guild.id !== config.guild.id) return;
 
 	const logs = [];
 	if (oldRole.hexColor !== newRole.hexColor)

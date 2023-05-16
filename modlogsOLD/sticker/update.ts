@@ -1,6 +1,7 @@
 import { unifiedDiff } from "difflib";
 
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import config from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
@@ -8,7 +9,7 @@ import type Event from "../../../common/types/event";
 defineEvent("stickerUpdate", async (oldSticker, partialSticker) => {
 	const newSticker = partialSticker.partial ? await partialSticker.fetch() : partialSticker;
 
-	if (!newSticker.guild || newSticker.guild.id !== CONSTANTS.guild.id) return;
+	if (!newSticker.guild || newSticker.guild.id !== config.guild.id) return;
 
 	const logs = [];
 	if (oldSticker.description !== newSticker.description) {

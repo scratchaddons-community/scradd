@@ -8,17 +8,14 @@ import {
 	VideoQualityMode,
 } from "discord.js";
 
-import CONSTANTS from "../../../common/CONSTANTS.js";
+import config from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import log from "../logging.js";
 
 import type Event from "../../../common/types/event";
 
 defineEvent("channelUpdate", async (oldChannel, newChannel) => {
-	if (
-		newChannel.isDMBased() ||
-		oldChannel.isDMBased() ||
-		newChannel.guild.id !== CONSTANTS.guild.id
-	)
+	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
 		return;
 	const edits = [];
 	if (oldChannel.name !== newChannel.name)

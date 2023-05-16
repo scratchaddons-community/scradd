@@ -4,22 +4,75 @@ import {
 	escapeMarkdown,
 	GuildMember,
 	MessageType,
+	type CommandInteractionOption,
 } from "discord.js";
-
-import CONSTANTS from "../../common/CONSTANTS.js";
-import defineCommand from "../../commands.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import defineCommand from "../../lib/commands.js";
 import { joinWithAnd } from "../../util/text.js";
-import defineEvent from "../../events.js";
+import defineEvent from "../../lib/events.js";
 import warn from "../punishments/warn.js";
-import  changeNickname  from "./nicknames.js";
+import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
+import { commands } from "../../lib/commands.js";
 
+defineEvent.pre("interactionCreate", async (interaction) => {
+	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
+
+	const command = commands.get(interaction.command?.name ?? "");
+	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+
+	if (
+		command.censored === "channel"
+			? !badWordsAllowed(interaction.channel)
+			: command.censored ?? true
+	) {
+		const censored = censorOptions(interaction.options.data);
+
+		if (censored.strikes) {
+			await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} Language!`,
+			});
+			await warn(
+				interaction.user,
+				"Watch your language!",
+				censored.strikes,
+				`Used command:\n${interaction.toString()}`,
+			);
+			return false;
+		}
+	}
+
+	return true;
+
+	function censorOptions(options: readonly CommandInteractionOption[]): {
+		strikes: number;
+		words: string[];
+	} {
+		let strikes = 0;
+		const words: string[] = [];
+
+		for (const option of options) {
+			const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
+			const censoredOptions = (option.options && censorOptions(option.options)) || undefined;
+
+			strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
+			words.push(
+				...(censoredValue?.words.flat() ?? []),
+				...(censoredOptions?.words.flat() ?? []),
+			);
+		}
+
+		return { strikes, words };
+	}
+});
 defineEvent.pre("messageCreate", async (message) => {
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
-		message.guild?.id === CONSTANTS.guild.id
+		message.guild?.id === config.guild.id
 	)
 		return await automodMessage(message);
 	return true;
@@ -30,7 +83,7 @@ defineEvent("messageUpdate", async (_, message) => {
 defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== CONSTANTS.guild.id) return true;
+	if (message.guild?.id !== config.guild.id) return true;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
 		const censored = censor(reaction.emoji.name);
@@ -48,7 +101,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	return true;
 });
 defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== CONSTANTS.guild.id || !newlyCreated) return true;
+	if (thread.guild.id !== config.guild.id || !newlyCreated) return true;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {
@@ -58,7 +111,7 @@ defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
 	return true;
 });
 defineEvent("threadUpdate", async (oldThread, newThread) => {
-	if (newThread.guild.id !== CONSTANTS.guild.id) return;
+	if (newThread.guild.id !== config.guild.id) return;
 
 	const censored = censor(newThread.name);
 	if (censored && !badWordsAllowed(newThread)) {
@@ -69,18 +122,14 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	await changeNickname(member);
 });
 defineEvent("presenceUpdate", async (_, newPresence) => {
-	if (newPresence.guild?.id !== CONSTANTS.guild.id) return;
+	if (newPresence.guild?.id !== config.guild.id) return;
 
 	const status =
 		newPresence.activities[0]?.type === ActivityType.Custom
 			? newPresence.activities[0].state
 			: newPresence.activities[0]?.name;
 	const censored = status && censor(status);
-	if (
-		censored &&
-		CONSTANTS.roles.mod &&
-		newPresence.member?.roles.resolve(CONSTANTS.roles.mod.id)
-	) {
+	if (censored && config.roles.mod && newPresence.member?.roles.resolve(config.roles.mod.id)) {
 		await warn(
 			newPresence.member,
 			"Watch your language!",
@@ -115,10 +164,10 @@ defineCommand(
 
 			content: words
 				? `⚠️ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
-						CONSTANTS.roles.mod &&
+						config.roles.mod &&
 						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(CONSTANTS.roles.mod.id)
-							: interaction.member.roles.includes(CONSTANTS.roles.mod.id))
+							? interaction.member.roles.resolve(config.roles.mod.id)
+							: interaction.member.roles.includes(config.roles.mod.id))
 							? `That text gives **${Math.trunc(result.strikes)} strike${
 									result.strikes === 1 ? "" : "s"
 							  }**.\n\n`
@@ -127,7 +176,7 @@ defineCommand(
 						words,
 						(word) => `*${escapeMarkdown(word)}*`,
 				  )}`
-				: `${CONSTANTS.emojis.statuses.yes} No bad words found.`,
+				: `${constants.emojis.statuses.yes} No bad words found.`,
 		});
 	},
 );

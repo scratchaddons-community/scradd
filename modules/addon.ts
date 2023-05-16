@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
 
-import CONSTANTS from "../common/CONSTANTS.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
 import { manifest, addons } from "../common/extension.js";
-import defineCommand from "../commands.js";
+import defineCommand from "../lib/commands.js";
 import { escapeMessage, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
@@ -56,7 +57,7 @@ defineCommand(
 
 		if (!addon) {
 			await interaction.reply({
-				content: `${CONSTANTS.emojis.statuses.no} Could not find a matching addon!`,
+				content: `${constants.emojis.statuses.no} Could not find a matching addon!`,
 
 				ephemeral: true,
 			});
@@ -107,11 +108,11 @@ defineCommand(
 		await interaction.reply({
 			embeds: [
 				{
-					color: CONSTANTS.themeColor,
+					color: constants.themeColor,
 
 					description:
 						`${escapeMessage(addon.description)}\n` +
-						`[See source code](https://github.com/${CONSTANTS.urls.saRepo}/tree/${
+						`[See source code](https://github.com/${constants.urls.saRepo}/tree/${
 							manifest.version_name?.endsWith("-prerelease")
 								? "main"
 								: `v${encodeURI(manifest.version)}`
@@ -157,7 +158,7 @@ defineCommand(
 					footer: { text: `${addon.id}\nClick the addon name to enable it!` },
 
 					thumbnail: {
-						url: `${CONSTANTS.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
+						url: `${constants.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
 					},
 
 					title: addon.name,
@@ -165,7 +166,7 @@ defineCommand(
 					url:
 						group === "Easter Eggs"
 							? undefined
-							: `${CONSTANTS.urls.settingsPage}#addon-${encodeURIComponent(
+							: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
 									addon.id,
 							  )}`,
 				},

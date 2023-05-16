@@ -8,14 +8,14 @@ import {
 	ModalSubmitInteraction,
 	Snowflake,
 } from "discord.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 
-export const BULLET_POINT = CONSTANTS.footerSeperator.trim();
-export const COLLECTOR_TIME = CONSTANTS.collectorTime * 4;
+export const COLLECTOR_TIME = constants.collectorTime * 4;
 
 export const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
 	"addon",
-	(await CONSTANTS.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
+	(await config.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
 )} command for more information about this addon!*`;
 
 export const CURRENTLY_PLAYING = new Collection<Snowflake, string>();
@@ -50,7 +50,7 @@ export async function checkIfUserPlaying(
 			},
 		],
 
-		content: `${CONSTANTS.emojis.statuses.no} You already have an ongoing game!`,
+		content: `${constants.emojis.statuses.no} You already have an ongoing game!`,
 		ephemeral: true,
 	});
 

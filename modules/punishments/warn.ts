@@ -9,8 +9,9 @@ import {
 	TimestampStyles,
 	User,
 } from "discord.js";
-import client from "../../client.js";
-import CONSTANTS from "../../common/CONSTANTS.js";
+import { client } from "../../lib/client.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import giveXp from "../xp/giveXp.js";
@@ -25,10 +26,10 @@ import filterToStrike, {
 } from "./misc.js";
 
 export default async function warn(
-	user: import("discord.js").GuildMember | import("discord.js").User,
+	user: GuildMember | User,
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
-	contextOrModerator: string | import("discord.js").User = client.user,
+	contextOrModerator: string | User = client.user,
 ) {
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -71,7 +72,7 @@ export default async function warn(
 	const member =
 		user instanceof GuildMember
 			? user
-			: await CONSTANTS.guild.members.fetch(user.id).catch(() => {});
+			: await config.guild.members.fetch(user.id).catch(() => {});
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
@@ -83,17 +84,17 @@ export default async function warn(
 						displayStrikes
 							? `warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 							: "verbally warned"
-					} in ${escapeMarkdown(CONSTANTS.guild.name)}!`,
+					} in ${escapeMarkdown(config.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
 					color: member?.displayColor,
 
 					footer: {
-						icon_url: CONSTANTS.guild.iconURL() ?? undefined,
+						icon_url: config.guild.iconURL() ?? undefined,
 
 						text: `Strike ${id}${
 							displayStrikes
-								? `${CONSTANTS.footerSeperator}Expiring in 21 ${
+								? `${constants.footerSeperator}Expiring in 21 ${
 										process.env.NODE_ENV === "production" ? "day" : "minute"
 								  }s`
 								: ""
@@ -101,7 +102,7 @@ export default async function warn(
 					},
 				},
 			],
-			components: CONSTANTS.channels.tickets?.permissionsFor(user)?.has("ViewChannel")
+			components: config.channels.tickets?.permissionsFor(user)?.has("ViewChannel")
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -173,14 +174,14 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	if (!strike) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
+			content: `${constants.emojis.statuses.no} Invalid strike ID!`,
 		});
 	}
 
 	if (strike.removed) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} That strike was already removed!`,
+			content: `${constants.emojis.statuses.no} That strike was already removed!`,
 		});
 	}
 
@@ -190,9 +191,9 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	const user = (await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
-		content: `${CONSTANTS.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
+		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
 	});
-	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => {});
 	if (
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
@@ -211,14 +212,14 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	if (!strike) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} Invalid strike ID!`,
+			content: `${constants.emojis.statuses.no} Invalid strike ID!`,
 		});
 	}
 
 	if (!strike.removed) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${CONSTANTS.emojis.statuses.no} That strike was not removed!`,
+			content: `${constants.emojis.statuses.no} That strike was not removed!`,
 		});
 	}
 
@@ -229,10 +230,10 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${
-			CONSTANTS.emojis.statuses.yes
+			constants.emojis.statuses.yes
 		} Added ${user.toString()}’s strike \`${id}\` back!`,
 	});
-	const member = await CONSTANTS.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => {});
 	if (
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
