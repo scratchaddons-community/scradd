@@ -195,13 +195,12 @@ defineCommand(
 						],
 					},
 				],
-				fetchReply: true,
 			} satisfies InteractionReplyOptions;
 		}
 
 		const generated = await generateMessage();
 		await interaction.reply(generated);
-		if (!generated.fetchReply) return;
+		if (!generated.embeds) return;
 
 		const collector = interaction.channel?.createMessageComponentCollector({
 			filter: (buttonInteraction) => {
@@ -252,7 +251,7 @@ defineCommand(
 				const generated = await generateMessage();
 				await interaction.editReply(generated);
 
-				if (!generated.fetchReply) collector.stop();
+				if (!generated.embeds) collector.stop();
 				else collector.resetTimer();
 			})
 			.on("end", async () => {

@@ -231,8 +231,16 @@ export default async function contactMods(
 			: interaction.member || (await config.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
+	if (!config.channels.tickets) throw new ReferenceError("Could not find tickets channel!");
+
 	const oldThread = await getThreadFromMember(member);
-	if (oldThread) return oldThread;
+	if (oldThread)
+		return await interaction.editReply(
+			`${
+				constants.emojis.statuses.no
+			} You already have an open ticket! Please use ${oldThread?.toString()}.`,
+		);
+
 	const fields =
 		interaction.type === InteractionType.ModalSubmit
 			? Object.entries(
@@ -259,7 +267,7 @@ export default async function contactMods(
 		interaction.fields.getTextInputValue("BODY");
 
 	const date = new Date();
-	const thread = await config.channels.tickets?.threads.create({
+	const thread = await config.channels.tickets.threads.create({
 		name: `${member.user.username} (${date
 			.getUTCFullYear()
 			.toLocaleString([], { useGrouping: false })}-${(date.getUTCMonth() + 1).toLocaleString(
@@ -385,21 +393,20 @@ export async function contactUser(
 	member: GuildMember,
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
 ) {
+	await interaction.deferReply({ ephemeral: true });
 	const existingThread = await getThreadFromMember(member);
 
 	if (existingThread) {
-		await interaction.reply({
-			content: `${
+		await interaction.editReply(
+			`${
 				constants.emojis.statuses.no
 			} ${member.toString()} already has a ticket open! Talk to them in ${existingThread.toString()}.`,
-
-			ephemeral: true,
-		});
+		);
 
 		return;
 	}
 
-	const message = await interaction.reply({
+	const message = await interaction.editReply({
 		content: `Are you sure you want to contact **${member.toString()}**?`,
 		components: [
 			{
@@ -411,18 +418,10 @@ export async function contactUser(
 						style: ButtonStyle.Success,
 						customId: `confirm-${interaction.id}`,
 					},
-					{
-						type: ComponentType.Button,
-						label: "Cancel",
-						customId: `cancel-${interaction.id}`,
-						style: ButtonStyle.Danger,
-					},
 				],
 			},
 		],
-		fetchReply: true,
 		allowedMentions: { users: [] },
-		ephemeral: true,
 	});
 
 	const collector = message.createMessageComponentCollector({
@@ -436,20 +435,16 @@ export async function contactUser(
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId.startsWith("confirm-")) {
-				await interaction.deferReply({ ephemeral: true });
-				const thread = await contactMods(interaction, member);
-				if (thread)
-					await buttonInteraction.editReply(
-						`${
-							constants.emojis.statuses.yes
-						} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-					);
-			} else {
-				await buttonInteraction.deferUpdate();
-			}
+			await buttonInteraction.deferReply({ ephemeral: true });
+			const thread = await contactMods(interaction, member);
+			if (thread)
+				await buttonInteraction.editReply(
+					`${
+						constants.emojis.statuses.yes
+					} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
+				);
 		})
 		.on("end", async () => {
-			await message.edit({ components: disableComponents(message.components) });
+			await interaction.editReply({ components: disableComponents(message.components) });
 		});
 }
