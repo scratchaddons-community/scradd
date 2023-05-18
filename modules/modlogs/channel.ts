@@ -100,7 +100,7 @@ export async function channelUpdate(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
 			} Active Channels`,
-			"members",
+			"channels",
 		);
 	}
 	const clyde = !!newChannel.flags?.has("ClydeAI");
@@ -109,7 +109,7 @@ export async function channelUpdate(
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
-			"members",
+			"channels",
 		);
 	}
 	const removedFeed = !!newChannel.flags?.has("GuildFeedRemoved");
@@ -118,7 +118,7 @@ export async function channelUpdate(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
 			} Server Feed`,
-			"members",
+			"channels",
 		);
 	}
 	const resource = !!newChannel.flags?.has("IsGuildResourceChannel");
@@ -127,14 +127,14 @@ export async function channelUpdate(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				resource ? "" : "un"
 			}made a Resource Page`,
-			"members",
+			"channels",
 		);
 	}
 	const spam = !!newChannel.flags?.has("IsSpam");
 	if (!!oldChannel.flags?.has("IsSpam") !== spam) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${spam ? "" : "un"}marked as spam`,
-			"members",
+			"channels",
 		);
 	}
 	const tags = !!newChannel.flags?.has("RequireTag");
@@ -143,7 +143,7 @@ export async function channelUpdate(
 			`${LoggingEmojis.Channel} "Require people to select tags when posting" ${
 				tags ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
-			"members",
+			"channels",
 		);
 	}
 	if (oldChannel.name !== newChannel.name)

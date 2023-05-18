@@ -15,7 +15,7 @@ import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
 import type { DATABASE_THREAD } from "../../common/database.js";
 
-export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
+type LogGroup = "server" | "messages" | "channels" | "members" | "voice";
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -31,7 +31,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 
 export default async function log(
 	content?: `${LoggingEmojis} ${string}`,
-	group?: typeof LOG_GROUPS[number],
+	group?: LogGroup,
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
@@ -99,12 +99,10 @@ export default async function log(
 }
 
 export async function getLoggingThread(
-	group?: typeof LOG_GROUPS[number] | typeof DATABASE_THREAD,
+	group?: LogGroup | typeof DATABASE_THREAD,
 ): Promise<ThreadChannel>;
 export async function getLoggingThread(group?: undefined): Promise<TextChannel>;
-export async function getLoggingThread(
-	group?: typeof LOG_GROUPS[number] | typeof DATABASE_THREAD | undefined,
-) {
+export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD | undefined) {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (!group) return config.channels.modlogs;
 

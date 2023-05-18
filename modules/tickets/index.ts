@@ -12,7 +12,13 @@ import constants from "../../common/constants.js";
 import { defineButton, defineModal, defineSelect } from "../../lib/components.js";
 import defineEvent from "../../lib/events.js";
 import { getSettings, updateSettings } from "../settings.js";
-import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
+import {
+	Category,
+	getThreadFromMember,
+	SA_CATEGORY,
+	SERVER_CATEGORY,
+	TICKET_CATEGORIES,
+} from "./misc.js";
 import contactMods, { contactUser, gatherTicketInfo } from "./contact.js";
 
 defineEvent("messageCreate", async (message) => {
@@ -73,12 +79,12 @@ defineButton("contactMods", async (interaction) => {
 							report: "Report a user",
 							role: "Request a contributor role",
 							bug: "Report a Scradd bug",
-							update: "Suggest a server change",
+							[SERVER_CATEGORY]: "Suggest a server change",
 							rules: "Get clarification on a rule",
 							[SA_CATEGORY]: "Get help with Scratch Addons",
 							server: "Add your server to Other Scratch Servers",
 							other: "Other",
-						} satisfies Record<Category | typeof SA_CATEGORY, string>).map(
+						} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>).map(
 							([value, label]) => ({
 								value,
 								label,

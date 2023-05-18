@@ -1,7 +1,7 @@
 import config from "../common/config.js";
 import Database from "../common/database.js";
 
-import type { Snowflake } from "discord.js";
+import { Collection, Snowflake } from "discord.js";
 import defineEvent from "../lib/events.js";
 
 export const rolesDatabase = new Database<{
@@ -30,6 +30,30 @@ const roles = {
 	booster: config.roles.booster?.id || "",
 };
 
+defineEvent("guildMemberAdd", async () => {
+	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
+		const inviter = invite.inviter?.id ?? "";
+		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));
+		return accumulator;
+	}, new Collection<Snowflake, number>());
+	inviters.map(async (count, user) => {
+		if (count < 20) return;
+		const inviter = await config.guild.members.fetch(user).catch(() => {});
+		if (
+			!inviter ||
+			inviter.id === "279855717203050496" ||
+			inviter.user.bot ||
+			!config.roles.epic ||
+			inviter.roles.resolve(config.roles.epic.id)
+		)
+			return;
+		await inviter.roles.add(config.roles.epic, "Invited 20+ people");
+		await config.channels.general?.send(
+			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${config.roles.epic.toString()} as a thank-you.`,
+		);
+	});
+});
+
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
@@ -56,4 +80,11 @@ defineEvent("guildMemberAdd", async (member) => {
 	const memberRoles = rolesDatabase.data.find((entry) => entry.user === member.id);
 	for (const roleName of Object.keys(roles))
 		if (memberRoles?.[roleName]) member.roles.add(roles[roleName], "Persisting roles");
+});
+
+defineEvent("guildMemberUpdate", async (_, newMember) => {
+	if (newMember.guild.id !== config.guild.id) return;
+
+	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
+		await newMember.roles.add(config.roles.booster, "Boosted the server");
 });

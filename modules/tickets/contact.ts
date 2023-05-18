@@ -22,7 +22,7 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
-import { Category, getThreadFromMember, SA_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
+import { Category, getThreadFromMember, SA_CATEGORY, SERVER_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
 
 const allFields = {
 	appeal: [
@@ -95,17 +95,6 @@ const allFields = {
 		},
 	],
 
-	update: [
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			required: true,
-			maxLength: 1024,
-			style: TextInputStyle.Paragraph,
-			label: "What is the suggested change?",
-		},
-	],
-
 	rules: [
 		{
 			type: ComponentType.TextInput,
@@ -154,7 +143,6 @@ const categoryToDescription = {
 	report: "Report",
 	role: "Role Request",
 	bug: "Scradd Bug",
-	update: "Server Suggestion",
 	rules: "Rule Clarification",
 	server: "Add An Other Scratch Server",
 	other: "Other",
@@ -185,6 +173,14 @@ export async function gatherTicketInfo(
 			content: `${
 				constants.emojis.statuses.no
 			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
+
+			ephemeral: true,
+		});
+	}
+
+	if (option === SERVER_CATEGORY) {
+		return await interaction.reply({
+			content: `${constants.emojis.statuses.no} Please don't contact mods for server suggestions. Instead, share them in <#988780044627345468>.`,
 
 			ephemeral: true,
 		});

@@ -188,7 +188,4 @@ export async function guildMemberUpdate(
 			"members",
 		);
 	}
-
-	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
-		await newMember.roles.add(config.roles.booster, "Boosted the server");
 }

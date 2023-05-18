@@ -62,7 +62,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		newThread.archived &&
 		(((newThread.name === DATABASE_THREAD || LOG_GROUPS.includes(newThread.name)) &&
 			newThread.parent?.id === config.channels.modlogs?.id) ||
-			newThread.id === "1029234332977602660")
+			newThread.id === "1029234332977602660") // 988780044627345468
 	)
 		await newThread.setArchived(false, "Modlog threads must stay open");
 

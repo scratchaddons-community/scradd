@@ -66,29 +66,6 @@ defineEvent("guildMemberRemove", async (member) => {
 });
 
 defineEvent("guildMemberAdd", async () => {
-	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
-		const inviter = invite.inviter?.id ?? "";
-		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));
-		return accumulator;
-	}, new Collection<Snowflake, number>());
-	inviters.map(async (count, user) => {
-		if (count < 20) return;
-		const inviter = await config.guild.members.fetch(user).catch(() => {});
-		if (
-			!inviter ||
-			inviter.id === "279855717203050496" ||
-			inviter.user.bot ||
-			!config.roles.epic ||
-			inviter.roles.resolve(config.roles.epic.id)
-		)
-			return;
-		await inviter.roles.add(config.roles.epic, "Invited 20+ people");
-		await config.channels.general?.send(
-			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${config.roles.epic.toString()} as a thank-you.`,
-		);
-	});
-});
-defineEvent("guildMemberAdd", async () => {
 	await config.channels.info?.setName(
 		`Info - ${(
 			config.guild.memberCount - (config.guild.memberCount > 1_005 ? 5 : 0)
