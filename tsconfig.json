@@ -29,7 +29,8 @@
 		"stripInternal": true,
 		"target": "ES2021",
 		"useDefineForClassFields": true,
-		"useUnknownInCatchVariables": false
+		"useUnknownInCatchVariables": false,
+		"watch": false
 	},
 	"exclude": ["node_modules", ".git", "dist", "modlogsOLD"],
 	"typeAcquisition": { "enable": true }

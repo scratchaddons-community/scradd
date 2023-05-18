@@ -1,4 +1,3 @@
-import { Collection, Snowflake } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import defineEvent from "../lib/events.js";

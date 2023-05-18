@@ -13,6 +13,15 @@ import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import censor, { badWordsAllowed } from "./language.js";
 
+const WHITELISTED_INVITE_GUILDS = [
+	config.guild.id,
+	"751206349614088204", // Scratch Addons development
+	"837024174865776680", // TurboWarp
+	"938438560925761619", // Scradd Testing
+	"461575285364752384", // 9th Tail Bot Hub
+	"898383289059016704", // Scratch Addons SMP Archive
+];
+
 export default async function automodMessage(message: Message) {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
@@ -52,7 +61,7 @@ export default async function automodMessage(message: Message) {
 			await Promise.all(
 				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
 					const invite = await client?.fetchInvite(code).catch(() => {});
-					return invite?.guild && invite.guild.id !== message.guild?.id && code;
+					return invite?.guild && !WHITELISTED_INVITE_GUILDS.includes(invite.guild.id) && code;
 				}),
 			)
 		).filter((toWarn): toWarn is string => Boolean(toWarn));

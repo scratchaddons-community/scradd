@@ -152,9 +152,12 @@ export async function generateBoardMessage(
 
 						name:
 							message.type === MessageType.AutoModerationAction
-								? "AutoMod"
-								: message.member?.displayName ??
-								  (censoredName ? censoredName.censored : message.author.username),
+								? "AutoMod 🤖"
+								: (message.member?.displayName ??
+										(censoredName
+											? censoredName.censored
+											: message.author.username)) +
+								  (message.author.bot ? " 🤖" : ""),
 					},
 
 					timestamp: message.createdAt.toISOString(),

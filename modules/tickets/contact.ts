@@ -9,7 +9,6 @@ import {
 	GuildMember,
 	InteractionResponse,
 	InteractionType,
-	Message,
 	ModalSubmitInteraction,
 	TextInputComponentData,
 	TextInputStyle,

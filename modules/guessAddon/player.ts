@@ -51,6 +51,7 @@ const games = new Collection<
 	{
 		collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
 		addon: AddonManifest & { id: string };
+		guessed: string[];
 	}
 >();
 
@@ -263,7 +264,7 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 
 		time: COLLECTOR_TIME,
 	});
-	games.set(interaction.user.id, { addon, collector });
+	games.set(interaction.user.id, { addon, collector, guessed: [] });
 
 	collector
 		.on("collect", async (componentInteraction) => {
@@ -389,6 +390,13 @@ defineModal("guessModal", async (interaction) => {
 		});
 		return;
 	}
+	if (game.guessed.includes(item.id)) {
+		await interaction.reply({
+			content: `${constants.emojis.statuses.no} You already guessed **${item.name}**!`,
+			ephemeral: true,
+		});
+		return;
+	}
 	await interaction.message?.edit({
 		embeds: [
 			{
@@ -416,6 +424,7 @@ defineModal("guessModal", async (interaction) => {
 		await interaction.reply(
 			`${constants.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
 		);
+		game.guessed.push(item.id);
 		return;
 	}
 

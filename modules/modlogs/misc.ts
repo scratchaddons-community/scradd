@@ -15,7 +15,8 @@ import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
 import type { DATABASE_THREAD } from "../../common/database.js";
 
-type LogGroup = "server" | "messages" | "channels" | "members" | "voice";
+export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
+export type LogGroup = typeof LOG_GROUPS[number];
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -24,7 +25,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
 			baseChannel
-				?.permissionsFor(config.roles.mod || baseChannel.guild.id)
+				?.permissionsFor(config.roles.mod || config.guild.id)
 				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }

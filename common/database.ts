@@ -15,7 +15,7 @@ const databases: { [key: string]: Message<true> | undefined } = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
-	if (name) {
+	if (name && message.attachments.size) {
 		databases[name] =
 			message.author.id === client.user?.id
 				? message

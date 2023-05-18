@@ -7,7 +7,6 @@ import {
 	Locale,
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
-	ChannelType,
 	AuditLogEvent,
 	GuildAuditLogsEntry,
 	Base,
@@ -16,12 +15,11 @@ import {
 	WebhookType,
 	formatEmoji,
 	APISticker,
-	APIGuildScheduledEvent,
 	AutoModerationRuleTriggerType,
 } from "discord.js";
 import config from "../../common/config.js";
 import defineEvent from "../../lib/events.js";
-import log, { extraAuditLogsInfo, LoggingEmojis } from "./misc.js";
+import log, { extraAuditLogsInfo, LoggingEmojis, LOG_GROUPS  } from "./misc.js";
 import { unifiedDiff } from "difflib";
 import {
 	channelCreate,
@@ -30,6 +28,9 @@ import {
 	channelOverwriteUpdate,
 	channelOverwriteDelete,
 	channelUpdate,
+	threadCreate,
+	threadDelete,
+	threadUpdate,
 } from "./channel.js";
 import {
 	memberKick,
@@ -40,6 +41,7 @@ import {
 	guildMemberRemove,
 	guildMemberAdd,
 	guildMemberUpdate,
+	userUpdate,
 } from "./member.js";
 import {
 	messageDelete,
@@ -47,6 +49,13 @@ import {
 	messageReactionRemoveAll,
 	messageUpdate,
 } from "./message.js";
+import {
+	guildScheduledEventCreate,
+	guildScheduledEventDelete,
+	guildScheduledEventUpdate,
+	voiceStateUpdate,
+} from "./voice.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
@@ -70,7 +79,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.RoleUpdate](entry) {},
+	// async [AuditLogEvent.RoleUpdate](entry) {}, // TODO
 	async [AuditLogEvent.InviteCreate](entry) {
 		await log(
 			`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
@@ -100,7 +109,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.WebhookUpdate](entry) {},
+	// async [AuditLogEvent.WebhookUpdate](entry) {}, // TODO
 	async [AuditLogEvent.WebhookDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} deleted${extraAuditLogsInfo(
@@ -148,7 +157,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.IntegrationUpdate](entry) {},
+	// async [AuditLogEvent.IntegrationUpdate](entry) {}, // TODO
 	async [AuditLogEvent.IntegrationDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.name} removed${extraAuditLogsInfo(entry)}`,
@@ -224,100 +233,10 @@ const events: {
 			{ files: [entry.target.url] },
 		);
 	},
-	async [AuditLogEvent.GuildScheduledEventCreate](entry) {
-		await log(
-			`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${
-				entry.target.url
-			}`,
-			"voice",
-		);
-	},
-	async [AuditLogEvent.GuildScheduledEventUpdate](entry) {
-		for (const change of entry.changes) {
-			const key = change.key as Extract<
-				typeof change.key,
-				keyof APIGuildScheduledEvent | "image_hash"
-			>;
-			switch (key) {
-				case "name": {
-					await log(
-						`${LoggingEmojis.Event} Event ${entry.target.name}’s topic changed to ${
-							change.new
-						} (${change.old})${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
-						"voice",
-					);
-					break;
-				}
-				case "description": {
-					await log(
-						`${LoggingEmojis.Event} Event ${
-							entry.target.name
-						}’s description changed${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
-						"voice",
-						{
-							files: [
-								{
-									content: unifiedDiff(
-										`${change.old ?? ""}`.split("\n"),
-										`${change.new ?? ""}`.split("\n"),
-										{ lineterm: "" },
-									)
-										.join("\n")
-										.replace(/^--- \n\+\+\+ \n/, ""),
-
-									extension: "diff",
-								},
-							],
-						},
-					);
-					break;
-				}
-				case "channel_id":
-				case "entity_type": {
-					await log(
-						`${LoggingEmojis.Event} Event ${entry.target.name} moved to ${
-							entry.target.channel?.toString() ??
-							entry.target.entityMetadata?.location ??
-							"an external location"
-						}${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
-						"voice",
-					);
-					break;
-				}
-				case "image_hash": {
-					const url = entry.target.coverImageURL({ size: 128 });
-					await log(
-						`${LoggingEmojis.Event} Event ${entry.target.name}’s cover image ${
-							url ? "changed" : "removed"
-						}${extraAuditLogsInfo(entry)}`,
-						"voice",
-						{ files: url ? [url] : [] },
-					);
-				}
-			}
-		}
-	},
-	async [AuditLogEvent.ThreadCreate](entry) {
-		if (entry.target.type !== ChannelType.PrivateThread) return;
-		await log(
-			`${
-				LoggingEmojis.Thread
-			} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
-			"channels",
-			typeof entry.target.url === "string"
-				? { button: { label: "View Thread", url: entry.target.url } }
-				: undefined,
-		);
-	},
-	async [AuditLogEvent.ThreadUpdate](entry) {},
-	async [AuditLogEvent.ThreadDelete](entry) {
-		await log(
-			`${LoggingEmojis.Thread} Thread #${entry.target.name} ${
-				entry.target.parent ? `in ${entry.target.parent.toString()} ` : ""
-			}deleted${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
-			"channels",
-		);
-	},
+	[AuditLogEvent.GuildScheduledEventCreate]: guildScheduledEventCreate,
+	[AuditLogEvent.GuildScheduledEventUpdate]: guildScheduledEventUpdate,
+	[AuditLogEvent.ThreadCreate]: threadCreate,
+	[AuditLogEvent.ThreadDelete]: threadDelete,
 	async [AuditLogEvent.ApplicationCommandPermissionUpdate](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Permissions for ${userMention(
@@ -341,7 +260,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.AutoModerationRuleUpdate](entry) {},
+	// async [AuditLogEvent.AutoModerationRuleUpdate](entry) {}, // TODO
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
 			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} created${extraAuditLogsInfo(
@@ -353,24 +272,14 @@ const events: {
 };
 
 defineEvent("channelUpdate", channelUpdate);
-
 defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 	// @ts-expect-error T2345 -- No concrete fix to this
 	if (guild.id === config.guild.id) events[entry.action]?.(entry);
 });
-
 defineEvent("guildMemberAdd", guildMemberAdd);
-
 defineEvent("guildMemberRemove", guildMemberRemove);
-
 defineEvent("guildMemberUpdate", guildMemberUpdate);
-
-defineEvent("guildScheduledEventDelete", async (event) => {
-	if (event.guildId !== config.guild.id) return;
-
-	await log(`${LoggingEmojis.Event} Event ${event.name} removed`, "voice");
-});
-
+defineEvent("guildScheduledEventDelete", guildScheduledEventDelete);
 defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	if (newGuild.id !== config.guild.id) return;
 
@@ -807,7 +716,6 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			"server",
 		);
 });
-
 defineEvent("inviteDelete", async (invite) => {
 	if (invite.guild?.id !== config.guild.id) return;
 	await log(
@@ -817,116 +725,27 @@ defineEvent("inviteDelete", async (invite) => {
 		"server",
 	);
 });
-
 defineEvent("messageDelete", messageDelete);
-
 defineEvent("messageDeleteBulk", messageDeleteBulk);
-
 defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
-
 defineEvent("messageUpdate", messageUpdate);
-
 defineEvent("roleCreate", async (role) => {
 	if (role.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Role} ${role.toString()} created`, "server");
 });
-
 defineEvent("roleDelete", async (role) => {
 	if (role.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Role} @${role.name} deleted (ID: ${role.id})`, "server");
 });
-
-defineEvent("voiceStateUpdate", async (oldState, newState) => {
-	if (!newState.member || newState.guild.id !== config.guild.id) return;
-
-	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
-		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {
-			await log(
-				`${
-					LoggingEmojis.Voice
-				} ${newState.member.toString()} left voice channel ${oldState.channel.toString()}`,
-				"voice",
-			);
-		}
-
-		if (newState.channel && newState.channel.type !== ChannelType.GuildStageVoice) {
-			await log(
-				`${
-					LoggingEmojis.Voice
-				} ${newState.member.toString()} joined voice channel ${newState.channel.toString()}, ${
-					newState.mute ? "" : "un"
-				}muted and ${newState.deaf ? "" : "un"}deafened`,
-				"voice",
-			);
-		}
-
-		return;
-	}
-
-	if (!newState.channel) return;
-
-	if (Boolean(oldState.suppress) !== Boolean(newState.suppress)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.suppress ? "moved to the audience" : "became a speaker"
-			} in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
-
-	if (newState.suppress && newState.channel?.type === ChannelType.GuildStageVoice) return;
-
-	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.selfDeaf ? "" : "un"
-			}deafened in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
-
-	if (Boolean(oldState.selfMute) !== Boolean(newState.selfMute)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.selfMute ? "" : "un"
-			}muted in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
-
-	if (Boolean(oldState.selfVideo) !== Boolean(newState.selfVideo)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} turned camera ${
-				newState.selfVideo ? "on" : "off"
-			} in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
-
-	if (Boolean(oldState.serverDeaf) !== Boolean(newState.serverDeaf)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
-				newState.serverDeaf ? "" : "un-"
-			}server deafened`,
-			"voice",
-		);
-	}
-
-	if (Boolean(oldState.serverMute) !== Boolean(newState.serverMute)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
-				newState.serverMute ? "" : "un-"
-			}server muted`,
-			"voice",
-		);
-	}
-
-	if (Boolean(oldState.streaming) !== Boolean(newState.streaming)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.streaming ? "started" : "stopped"
-			} screen sharing in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
+defineEvent("threadUpdate", threadUpdate);
+defineEvent("userUpdate", userUpdate);
+defineEvent("voiceStateUpdate", voiceStateUpdate);
+defineEvent("threadUpdate", async (_, newThread) => {
+	if (
+		newThread.archived &&
+		(((newThread.name === DATABASE_THREAD || LOG_GROUPS.includes(newThread.name)) &&
+			newThread.parent?.id === config.channels.modlogs?.id) ||
+			newThread.id === "1029234332977602660") // 988780044627345468
+	)
+		await newThread.setArchived(false, "Modlog threads must stay open");
 });

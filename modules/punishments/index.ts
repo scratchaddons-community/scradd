@@ -110,9 +110,10 @@ defineCommand(
 		const user = interaction.options.getUser("user", true);
 		const reason = interaction.options.getString("reason") || "No reason given.";
 		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
+		await interaction.deferReply();
 		await warn(user, reason, strikes, interaction.user);
 
-		await interaction.reply({
+		await interaction.editReply({
 			allowedMentions: { users: [] },
 
 			content: `${constants.emojis.statuses.yes} ${

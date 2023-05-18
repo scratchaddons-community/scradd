@@ -1,4 +1,14 @@
-import { APIRole, AuditLogEvent, GuildAuditLogsEntry, GuildMember, PartialGuildMember, roleMention, time } from "discord.js";
+import {
+	APIRole,
+	AuditLogEvent,
+	GuildAuditLogsEntry,
+	GuildMember,
+	PartialGuildMember,
+	PartialUser,
+	roleMention,
+	time,
+	User,
+} from "discord.js";
 import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
@@ -149,42 +159,46 @@ export async function guildMemberUpdate(
 			}`,
 			"members",
 		);
+}
 
-	if (oldMember.user.avatar !== newMember.user.avatar) {
+export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
+	if (oldUser.partial) return;
+	
+	if (oldUser.avatar !== newUser.avatar) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their avatar`,
+			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their avatar`,
 			"members",
 			{
-				files: [newMember.user.displayAvatarURL({ size: 128 })],
+				files: [newUser.displayAvatarURL({ size: 128 })],
 			},
 		);
 	}
 
-	const quarantined = !!newMember.user.flags?.has("Quarantined");
-	if (!!oldMember.user.flags?.has("Quarantined") !== quarantined) {
+	const quarantined = !!newUser.flags?.has("Quarantined");
+	if (!!oldUser.flags?.has("Quarantined") !== quarantined) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newUser.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
 			"members",
 		);
 	}
 
-	const spammer = !!newMember.user.flags?.has("Spammer");
-	if (!!oldMember.user.flags?.has("Spammer") !== spammer) {
+	const spammer = !!newUser.flags?.has("Spammer");
+	if (!!oldUser.flags?.has("Spammer") !== spammer) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
+			`${LoggingEmojis.UserUpdate} ${newUser.toString()} ${
 				spammer ? "" : "un"
 			}marked as likely spammer`,
 			"members",
 		);
 	}
 
-	if (oldMember.user.tag !== newMember.user.tag) {
+	if (oldUser.tag !== newUser.tag) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their username from ${
-				oldMember.user.tag
-			} to ${newMember.user.tag}`,
+			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their username from ${
+				oldUser.tag
+			} to ${newUser.tag}`,
 			"members",
 		);
 	}

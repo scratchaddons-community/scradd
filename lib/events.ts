@@ -6,8 +6,7 @@ type ReservedClientEvent =
 	| "warn"
 	| "error"
 	| "invalidated"
-	| "guildUnavailable"
-	| "userUpdate";
+	| "guildUnavailable";
 export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
 export type Event = (...args: ClientEvents[ClientEvent]) => unknown;
 const events: Record<string, Event> = {};

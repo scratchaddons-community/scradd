@@ -390,7 +390,7 @@ async function cancelReminder(interaction: MessageComponentInteraction, id: stri
 			});
 		await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not cancel that reminder. Has it already passed?`,
+			content: `${constants.emojis.statuses.no} Could not find the reminder to cancel!`,
 		});
 		return false;
 	}
