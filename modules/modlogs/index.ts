@@ -23,9 +23,13 @@ import {
 	ThreadAutoArchiveDuration,
 	SortOrderType,
 	ForumLayoutType,
+	formatEmoji,
+	APIEmoji,
+	APISticker,
+	APIGuildScheduledEvent,
+	AutoModerationRuleTriggerType,
 } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import defineEvent from "../../lib/events.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "./misc.js";
 import { DATABASE_THREAD } from "../../common/database.js";
@@ -44,8 +48,14 @@ const databaseThread = await getLoggingThread(DATABASE_THREAD);
 function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
 		entry.reason ? ` (${entry.reason})` : ""
-	}`;
+	} ✨` as const;
 }
+
+// for (const change of entry.changes) {
+// 	const key = change.key as Extract<typeof change.key, keyof ___>;
+// 	switch (key) {
+// 	}
+// }
 
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
@@ -233,11 +243,25 @@ const events: {
 	async [AuditLogEvent.EmojiCreate](entry) {
 		if (!(entry.target instanceof Base)) return;
 		await log(
-			`${LoggingEmojis.Emoji} ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Emoji} ${entry.target.toString()} created${extraAuditLogsInfo(
+				entry,
+			)} (ID: ${entry.target.id})`,
 			"server",
 		);
 	},
-	async [AuditLogEvent.EmojiUpdate](entry) {},
+	async [AuditLogEvent.EmojiUpdate](entry) {
+		for (const change of entry.changes) {
+			if (change.key !== "name") return;
+			await log(
+				`${LoggingEmojis.Emoji} ${formatEmoji(entry.target?.id ?? "")} (:${
+					change.old
+				}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${
+					entry.target?.id
+				})`,
+				"server",
+			);
+		}
+	},
 	async [AuditLogEvent.EmojiDelete](entry) {
 		if (!entry.target) return;
 		await log(
@@ -271,7 +295,53 @@ const events: {
 			{ files: [entry.target.url] },
 		);
 	},
-	async [AuditLogEvent.StickerUpdate](entry) {},
+	async [AuditLogEvent.StickerUpdate](entry) {
+		for (const change of entry.changes) {
+			const key = change.key as Extract<typeof change.key, keyof APISticker>;
+			switch (key) {
+				case "name": {
+					await log(
+						`${LoggingEmojis.Emoji} Sticker ${entry.target.name} (:${
+							change.old
+						}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						"server",
+					);
+					break;
+				}
+				case "description": {
+					await log(
+						`${LoggingEmojis.Emoji} Sticker ${
+							entry.target.name
+						}’s description changed${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						"server",
+						{
+							files: [
+								{
+									content: unifiedDiff(
+										`${change.old ?? ""}`.split("\n"),
+										`${change.new ?? ""}`.split("\n"),
+										{ lineterm: "" },
+									)
+										.join("\n")
+										.replace(/^--- \n\+\+\+ \n/, ""),
+
+									extension: "diff",
+								},
+							],
+						},
+					);
+				}
+				case "tags": {
+					await log(
+						`${LoggingEmojis.Emoji} Sticker ${entry.target.name}’s related emoji ${
+							change.new ? `set to ${change.new}` : "removed"
+						}${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						"server",
+					);
+				}
+			}
+		}
+	},
 	async [AuditLogEvent.StickerDelete](entry) {
 		await log(
 			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} deleted${extraAuditLogsInfo(
@@ -282,27 +352,78 @@ const events: {
 		);
 	},
 	async [AuditLogEvent.GuildScheduledEventCreate](entry) {
-		const start = entry.target.scheduledStartAt;
-		const end = entry.target.scheduledEndAt;
-
 		await log(
-			`${LoggingEmojis.Event} Event ${entry.target.name} scheduled${
-				start ?? end
-					? ` for ${time(start ?? end ?? new Date())}${
-							end && start ? `-${time(end)}` : ""
-					  }`
-					: ""
-			} in ${
-				entry.target.channel?.toString() ??
-				entry.target.entityMetadata?.location ??
-				"an external location"
-			}${extraAuditLogsInfo(entry)}${
-				entry.target.description ? `:\n${entry.target.description}` : ""
+			`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${
+				entry.target.url
 			}`,
 			"voice",
 		);
 	},
-	async [AuditLogEvent.GuildScheduledEventUpdate](entry) {},
+	async [AuditLogEvent.GuildScheduledEventUpdate](entry) {
+		for (const change of entry.changes) {
+			const key = change.key as Extract<
+				typeof change.key,
+				keyof APIGuildScheduledEvent | "image_hash"
+			>;
+			switch (key) {
+				case "name": {
+					await log(
+						`${LoggingEmojis.Event} Event ${entry.target.name}’s topic changed to ${
+							change.new
+						} (${change.old})${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+						"voice",
+					);
+					break;
+				}
+				case "description": {
+					await log(
+						`${LoggingEmojis.Event} Event ${
+							entry.target.name
+						}’s description changed${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+						"voice",
+						{
+							files: [
+								{
+									content: unifiedDiff(
+										`${change.old ?? ""}`.split("\n"),
+										`${change.new ?? ""}`.split("\n"),
+										{ lineterm: "" },
+									)
+										.join("\n")
+										.replace(/^--- \n\+\+\+ \n/, ""),
+
+									extension: "diff",
+								},
+							],
+						},
+					);
+					break;
+				}
+				case "channel_id":
+				case "entity_type": {
+					await log(
+						`${LoggingEmojis.Event} Event ${entry.target.name} moved to ${
+							entry.target.channel?.toString() ??
+							entry.target.entityMetadata?.location ??
+							"an external location"
+						}${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+						"voice",
+						);
+					break;
+				}
+				case "image_hash": {
+					const url = entry.target.coverImageURL({ size: 128 });
+					await log(
+						`${LoggingEmojis.Event} Event ${entry.target.name}’s cover image ${
+							url ? "changed" : "removed"
+						}${extraAuditLogsInfo(entry)}`,
+						"voice",
+						{ files: url ? [url] : [] },
+					);
+				}
+			}
+		}
+	},
 	async [AuditLogEvent.ThreadCreate](entry) {
 		if (entry.target.type !== ChannelType.PrivateThread) return;
 		await log(
@@ -332,9 +453,24 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.AutoModerationRuleCreate](entry) {},
+	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
+		await log(
+			`${
+				LoggingEmojis.Thread
+			} AutoMod "${{
+				[ AutoModerationRuleTriggerType.Keyword ]: "Block Custom Words",
+				[ AutoModerationRuleTriggerType.Spam ]: "Block Suspected Spam Content",
+				[ AutoModerationRuleTriggerType.KeywordPreset ]: "Block Commonly Flagged Words",
+				[ AutoModerationRuleTriggerType.MentionSpam ]: "Block Mention Spam",
+			}[ entry.target.triggerType ]}" Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			"server",
+		);},
 	async [AuditLogEvent.AutoModerationRuleUpdate](entry) {},
-	async [AuditLogEvent.AutoModerationRuleDelete](entry) {},
+	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
+		await log(
+			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			"server",
+		);},
 };
 
 defineEvent("channelUpdate", async (oldChannel, newChannel) => {
@@ -353,7 +489,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 	const clyde = !!newChannel.flags?.has("ClydeAI");
 	if (!!oldChannel.flags?.has("ClydeAI") !== clyde) {
 		await log(
-			`${LoggingEmojis.Channel} ClydeAI ${
+			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
 			"members",
@@ -395,21 +531,21 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 	}
 	if (oldChannel.name !== newChannel.name)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} (${
-				oldChannel.name
-			}) was renamed to ${newChannel.name}`,
+			`${LoggingEmojis.Channel} ${newChannel.toString()} (${oldChannel.name}) renamed to ${
+				newChannel.name
+			}`,
 			"channels",
 		);
 	if (oldChannel.rawPosition !== newChannel.rawPosition)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} was moved to position ${
+			`${LoggingEmojis.Channel} ${newChannel.toString()} moved to position ${
 				newChannel.rawPosition
 			}`,
 			"channels",
 		);
 	if (oldChannel.type !== newChannel.type) {
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} was made into a${
+			`${LoggingEmojis.Channel} ${newChannel.toString()} made into a${
 				{
 					[ChannelType.GuildText]: " Text",
 					[ChannelType.GuildVoice]: " Voice",
@@ -431,7 +567,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 	if (oldChannel.nsfw !== newChannel.nsfw)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} was made ${
+			`${LoggingEmojis.Channel} ${newChannel.toString()} made ${
 				newChannel.nsfw ? "" : "non-"
 			}age-restricted`,
 			"channels",
@@ -441,14 +577,14 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
 				newChannel.type === ChannelType.GuildForum ? "post " : ""
-			}slowmode was set to ${newChannel.rateLimitPerUser} seconds`,
+			}slowmode set to ${newChannel.rateLimitPerUser} seconds`,
 			"channels",
 		);
 
 	if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
 		if (oldChannel.bitrate !== newChannel.bitrate)
 			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s bitrate was set to ${
+				`${LoggingEmojis.Channel} ${newChannel.toString()}’s bitrate set to ${
 					newChannel.bitrate
 				}kbps`,
 				"channels",
@@ -456,7 +592,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 		if (oldChannel.rtcRegion !== newChannel.rtcRegion)
 			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s region override was set to ${
+				`${LoggingEmojis.Channel} ${newChannel.toString()}’s region override set to ${
 					newChannel.rtcRegion || "Automatic"
 				}`,
 				"channels",
@@ -464,7 +600,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 		if (oldChannel.userLimit !== newChannel.userLimit)
 			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s user limit was set to ${
+				`${LoggingEmojis.Channel} ${newChannel.toString()}’s user limit set to ${
 					newChannel.userLimit ?? "∞"
 				} users`,
 				"channels",
@@ -472,7 +608,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 		if (oldChannel.videoQualityMode !== newChannel.videoQualityMode)
 			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s video quality was set to ${
+				`${LoggingEmojis.Channel} ${newChannel.toString()}’s video quality set to ${
 					{ [VideoQualityMode.Auto]: "Auto", [VideoQualityMode.Full]: "720p" }[
 						newChannel.videoQualityMode ?? VideoQualityMode.Auto
 					]
@@ -487,7 +623,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 		await log(
 			`${
 				LoggingEmojis.Channel
-			} ${newChannel.toString()}’s hide after inactivity time was set to ${
+			} ${newChannel.toString()}’s hide after inactivity time set to ${
 				{
 					[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
 					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
@@ -499,25 +635,21 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 		);
 
 	if ((oldChannel.topic ?? "") !== (newChannel.topic ?? "")) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s topic was changed!`,
-			"channels",
-			{
-				files: [
-					{
-						content: unifiedDiff(
-							(oldChannel.topic ?? "").split("\n"),
-							(newChannel.topic ?? "").split("\n"),
-							{ lineterm: "" },
-						)
-							.join("\n")
-							.replace(/^--- \n\+\+\+ \n/, ""),
+		await log(`${LoggingEmojis.Channel} ${newChannel.toString()}’s topic changed`, "channels", {
+			files: [
+				{
+					content: unifiedDiff(
+						(oldChannel.topic ?? "").split("\n"),
+						(newChannel.topic ?? "").split("\n"),
+						{ lineterm: "" },
+					)
+						.join("\n")
+						.replace(/^--- \n\+\+\+ \n/, ""),
 
-						extension: "diff",
-					},
-				],
-			},
-		);
+					extension: "diff",
+				},
+			],
+		});
 	}
 
 	if (oldChannel.type !== ChannelType.GuildForum || newChannel.type !== ChannelType.GuildForum)
@@ -542,7 +674,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode was set to ${
+			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
 				newChannel.defaultThreadRateLimitPerUser
 			} seconds`,
 			"channels",
@@ -550,7 +682,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 	if (oldChannel.defaultSortOrder !== newChannel.defaultSortOrder)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s sort order was set to ${
+			`${LoggingEmojis.Channel} ${newChannel.toString()}’s sort order set to ${
 				{
 					[SortOrderType.CreationDate]: "Creation Time",
 					[SortOrderType.LatestActivity]: "Recent Activity",
@@ -561,7 +693,7 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 
 	if (oldChannel.defaultForumLayout !== newChannel.defaultForumLayout)
 		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default layout was set to ${
+			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default layout set to ${
 				{
 					[ForumLayoutType.ListView]: "List",
 					[ForumLayoutType.GalleryView]: "Gallery",
@@ -743,7 +875,7 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		);
 	}
 	if (oldGuild.description !== newGuild.description) {
-		await log(`${LoggingEmojis.SettingChange} Server description was changed`, "server", {
+		await log(`${LoggingEmojis.SettingChange} Server description changed`, "server", {
 			files: [
 				{
 					content: unifiedDiff(
@@ -924,7 +1056,9 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	if (oldGuild.mfaLevel !== newGuild.mfaLevel) {
 		await log(
 			`${LoggingEmojis.SettingChange} “Require 2FA for moderator actions” ${
-				{ [GuildMFALevel.None]: "disabled", [GuildMFALevel.Elevated]: "enabled" }[newGuild.mfaLevel]
+				{ [GuildMFALevel.None]: "disabled", [GuildMFALevel.Elevated]: "enabled" }[
+					newGuild.mfaLevel
+				]
 			}`,
 			"server",
 		);
@@ -1048,7 +1182,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to welcome messages with a sticker.” ${
-				noJoinReplies ? "enabled" : "disabled"}`,
+				noJoinReplies ? "enabled" : "disabled"
+			}`,
 			"server",
 		);
 	const noJoins = newGuild.systemChannelFlags.has(
@@ -1062,7 +1197,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a random welcome message when someone joins this server.” ${
-				noJoins ? "enabled" : "disabled"}`,
+				noJoins ? "enabled" : "disabled"
+			}`,
 			"server",
 		);
 	const noBoosts = newGuild.systemChannelFlags.has(
@@ -1074,7 +1210,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	)
 		await log(
 			`${LoggingEmojis.SettingChange} “Send a message when someone boosts this server.” ${
-				noBoosts ? "enabled" : "disabled"}`,
+				noBoosts ? "enabled" : "disabled"
+			}`,
 			"server",
 		);
 	const noSubscriptionReplies = newGuild.systemChannelFlags.has(
@@ -1089,7 +1226,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to Server Subscription congratulation messages with a sticker” ${
-				noSubscriptionReplies ? "enabled" : "disabled"}`,
+				noSubscriptionReplies ? "enabled" : "disabled"
+			}`,
 			"server",
 		);
 	const noSubscriptions = newGuild.systemChannelFlags.has(
@@ -1104,7 +1242,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a message when someone purchases or renews a Server Subscripton” ${
-				noSubscriptions ? "enabled" : "disabled"}`,
+				noSubscriptions ? "enabled" : "disabled"
+			}`,
 			"server",
 		);
 	if (oldGuild.vanityURLCode !== newGuild.vanityURLCode)

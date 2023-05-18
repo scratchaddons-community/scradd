@@ -30,7 +30,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 }
 
 export default async function log(
-	content: `${LoggingEmojis} ${string}`,
+	content: `${LoggingEmojis} ${string} ✨${string}`,
 	group?: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
