@@ -197,8 +197,6 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
  * @param replies - Whether to quote replies.
  *
  * @returns Text representation of the message.
- *
- * @todo Better `replies` for modlog.
  */
 export async function messageToText(message: Message, replies = true): Promise<string> {
 	const actualContent = message.flags.has("Loading")
@@ -367,7 +365,6 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.GuildInviteReminder: {
-			// TODO: this probably needs an emoji
 			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
 		}
 

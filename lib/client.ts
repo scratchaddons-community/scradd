@@ -173,7 +173,7 @@ export default async function login(options: {
 						ephemeral: true,
 						content: options.commandErrorMessage,
 					});
-				} // TODO: bugs
+				}
 			}
 		});
 	}

@@ -24,7 +24,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
 					[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
 					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay] // TODO: Is this the correct default?
+				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay]
 			}`,
 		);
 	}
@@ -35,7 +35,6 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 			}`,
 		);
 	}
-	// TODO // newThread.appliedTags;
 	if (oldThread.flags.has("Pinned") !== newThread.flags.has("Pinned")) {
 		await log(
 			`📌 Post ${

@@ -66,7 +66,6 @@ defineEvent("guildMemberRemove", async (member) => {
 });
 
 defineEvent("guildMemberAdd", async () => {
-	// TODO: when an invite is deleted, store its info in a db so it can be read in the future
 	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
 		const inviter = invite.inviter?.id ?? "";
 		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));

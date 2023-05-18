@@ -301,7 +301,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 				Array.from<AddonQuestion[]>({
 					length: Math.round(
 						(Array.from(addonProbabilities)
-							.reverse() // TODO: https://github.com/microsoft/TypeScript/pull/49636
+							.reverse() // findLastIndex
 							.findIndex(([id]) => id === addon) +
 							1) /
 							addonProbabilities.length +

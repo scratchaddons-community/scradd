@@ -523,8 +523,6 @@ defineEvent("channelUpdate", async (oldChannel, newChannel) => {
 	if (oldChannel.type !== ChannelType.GuildForum || newChannel.type !== ChannelType.GuildForum)
 		return;
 
-	// TODO // oldChannel.availableTags;
-
 	if (
 		oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
 		oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name
@@ -659,7 +657,6 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.user.avatar !== newMember.user.avatar) {
 		await log(
-			// todo no workies
 			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their avatar`,
 			"members",
 			{
@@ -690,7 +687,6 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 
 	if (oldMember.user.tag !== newMember.user.tag) {
 		await log(
-			// todo no workies
 			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their username from ${
 				oldMember.user.tag
 			} to ${newMember.user.tag}`,
@@ -698,7 +694,6 @@ defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
 		);
 	}
 
-	// TODO: this doesn’t go here
 	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
 		await newMember.roles.add(config.roles.booster, "Boosted the server");
 });
@@ -727,7 +722,6 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 		);
 
 	if (oldGuild.banner !== newGuild.banner) {
-		//todo test
 		const url = newGuild.bannerURL({ size: 128 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server banner background was ${

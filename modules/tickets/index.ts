@@ -19,7 +19,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		// TODO config.channels.contact?.permissionsFor(message.author)?.has("ViewChannel") &&
+		config.channels.tickets?.permissionsFor(message.author)?.has("ViewChannel") &&
 		!getSettings(message.author).resourcesDmed
 	) {
 		await message.channel.send({
@@ -37,7 +37,7 @@ defineEvent("messageCreate", async (message) => {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "FAQ",
-						// 	url: "TODO",
+						// 	url: "https://discord.com/channels/806602307750985799/1099457798452035646",
 						// },
 						{
 							type: ComponentType.Button,
@@ -49,7 +49,7 @@ defineEvent("messageCreate", async (message) => {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "SA Support",
-						// 	url: "TODO",
+						// 	url: "https://discord.com/channels/806602307750985799/826250884279173162",
 						// },
 					],
 				},

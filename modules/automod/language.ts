@@ -13,7 +13,6 @@ function decodeRegexes(regexes: RegExp[]) {
 				(letter) =>
 					`[${letter}${
 						{
-							// TODO use confusables
 							" ": "^w",
 							"a": "⒜@*⍺₳4aａⓐAＡᵃₐᴬåǟÃąẚᴀɐɑɒαΑΔΛаАคภᎪᗅᗩꓮ-",
 							"b": "⒝฿8bｂⓑℬʙɓꞵƅβвьҍⴆცꮟᏸᏼᑲᖯᗷꓐ",
@@ -89,5 +88,5 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 		baseChannel?.type === ChannelType.DM ||
 		channel?.type === ChannelType.PrivateThread ||
 		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
-	); // todo: hm
+	);
 }

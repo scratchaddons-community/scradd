@@ -42,7 +42,7 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 
 	return joinWithAnd(
 		members.sort((one, two) => one.user.username.localeCompare(two.user.username)),
-		(member) => (useMentions ? userMention(member.id) : member.user.username),
+		(member) => (useMentions ? userMention(member.user.id) : member.user.username),
 	);
 }
 

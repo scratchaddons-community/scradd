@@ -102,7 +102,7 @@ defineCommand(
 			embeds: [
 				{
 					color: member?.displayColor,
-					// TODO // image: user.bannerURL() ?? user.accentColor,
+					// image: user.bannerURL() ?? user.accentColor,
 					thumbnail: { url: (member ?? user).displayAvatarURL() },
 					fields,
 					author: {

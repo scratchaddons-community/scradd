@@ -1,4 +1,4 @@
-import type { Message } from "discord.js";
+import { inlineCode, Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
 import log, { LoggingEmojis } from "../modules/modlogs/misc.js";
@@ -26,7 +26,9 @@ export default async function logError(
 		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
 
 		return await log(
-			`${LoggingEmojis.Error} **${error.name}** occurred in \`${event}\``, // todo chat input cmd errors
+			`${LoggingEmojis.Error} **${error.name}** occurred in ${
+				event.startsWith("<") && event.endsWith(">") ? event : inlineCode(event)
+			}`,
 			"server",
 			{ files: [{ content: generateError(error), extension: "json" }] },
 		);

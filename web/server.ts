@@ -80,7 +80,7 @@ http.createServer((request, response) => {
 
 			// 	const ban = await config.guild.bans.fetch(user.id).catch(() => {});
 			// 	if (!ban) {
-			// 		return; // TODO: user is not banned
+			// 		return; // user is not banned
 			// 	}
 
 			// 	const userPublic = {
