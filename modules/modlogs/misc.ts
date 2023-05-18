@@ -31,7 +31,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 
 export default async function log(
 	content: `${LoggingEmojis} ${string}`,
-	group?: typeof LOG_GROUPS[number],
+	group: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
@@ -137,4 +137,5 @@ export enum LoggingEmojis {
 	Bot = "🤖",
 	Emoji = "😳",
 	Thread = "📂",
+	Integration="🖇"
 }

@@ -190,7 +190,8 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
  * A property that returns the content that is rendered regardless of the {@link Message.type}. In some cases, this just returns the regular
  * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
- * @author [Rapptz/discord.py](https://github.com/Rapptz/discord.py/blob/40986f9/discord/message.py#L1994-L2134)
+ * @author Based Off of [Rapptz/discord.py's
+ *   `system_content`](https://github.com/Rapptz/discord.py/blob/1767be0/discord/message.py#L1994-L2134)
  *
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
@@ -237,7 +238,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.ChannelIconChange: {
 			return `${
 				constants.emojis.discord.edit
-			} ${message.author.toString()} changed the channel icon.`; // todo wait channel??
+			} ${message.author.toString()} changed the group icon.`;
 		}
 
 		case MessageType.ChannelPinnedMessage: {
