@@ -1,7 +1,6 @@
 import { MessageCreateOptions, time, TimestampStyles } from "discord.js";
 import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getSettings } from "../settings.js";

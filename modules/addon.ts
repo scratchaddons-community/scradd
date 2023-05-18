@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
 import Fuse from "fuse.js";
 
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { manifest, addons } from "../common/extension.js";
 import defineCommand from "../lib/commands.js";

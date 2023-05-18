@@ -1,7 +1,6 @@
 import type { AnyThreadChannel, MessageReaction } from "discord.js";
 import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 
 export default async function updateReactions(reaction: MessageReaction) {

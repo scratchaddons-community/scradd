@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionType, GuildMember } from "discord.js";
 import { client } from "../../lib/client.js";
 import defineCommand from "../../lib/commands.js";
-import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { defineButton, defineSelect } from "../../lib/components.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";

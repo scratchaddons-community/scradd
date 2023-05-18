@@ -1,6 +1,5 @@
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 import config from "../../../common/config.js";
-import constants from "../../../common/constants.js";
 import { DATABASE_THREAD } from "../../../common/database.js";
 import log, { LOG_GROUPS, shouldLog } from "../logging.js";
 

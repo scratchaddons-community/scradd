@@ -1,5 +1,4 @@
 import config from "./config.js";
-import constants from "./constants.js";
 
 import type AddonManifest from "./types/addonManifest.js";
 

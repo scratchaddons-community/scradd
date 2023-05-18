@@ -1,5 +1,4 @@
 import config from "../common/config.js";
-import constants from "../common/constants.js";
 import defineEvent from "../lib/events.js";
 
 defineEvent("threadCreate", async (thread, newlyCreated) => {

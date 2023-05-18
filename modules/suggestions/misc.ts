@@ -1,6 +1,5 @@
 import { cleanContent, Snowflake } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";

@@ -9,7 +9,6 @@ import {
 	TextBasedChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";

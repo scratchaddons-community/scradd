@@ -1,7 +1,6 @@
 import { MessageType } from "discord.js";
 
 import config from "../common/config.js";
-import constants from "../common/constants.js";
 import defineEvent from "../lib/events.js";
 import { stripMarkdown } from "../util/markdown.js";
 import { truncateText } from "../util/text.js";

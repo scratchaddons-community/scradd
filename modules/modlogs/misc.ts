@@ -4,6 +4,7 @@ import {
 	ChannelType,
 	ComponentType,
 	Embed,
+	GuildAuditLogsEntry,
 	PermissionFlagsBits,
 	TextBasedChannel,
 	TextChannel,
@@ -12,7 +13,6 @@ import {
 
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import type { DATABASE_THREAD } from "../../common/database.js";
 
 export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
@@ -30,7 +30,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 }
 
 export default async function log(
-	content: `${LoggingEmojis} ${string} ✨${string}`,
+	content?: `${LoggingEmojis} ${string}`,
 	group?: typeof LOG_GROUPS[number],
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
@@ -137,5 +137,11 @@ export enum LoggingEmojis {
 	Bot = "🤖",
 	Emoji = "😳",
 	Thread = "📂",
-	Integration="🖇"
+	Integration = "🖇",
+}
+
+export function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
+	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
+		entry.reason ? ` (${entry.reason})` : ""
+	}`;
 }

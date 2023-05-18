@@ -6,7 +6,6 @@ import mime from "mime-types";
 import { createRequire } from "node:module";
 import { client } from "../lib/client.js";
 // import config from "../common/config.js";
-import constants from "../common/constants.js";
 // import {client} from "../lib/client.js";
 // import { REST, RESTGetAPIUserResult, RESTPostOAuth2AccessTokenResult, Routes } from "discord.js";
 

@@ -7,7 +7,6 @@ import {
 } from "discord.js";
 import { client } from "../lib/client.js";
 
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import defineCommand from "../lib/commands.js";
 import { disableComponents, messageToText } from "../util/discord.js";

@@ -1,6 +1,5 @@
 import type { GuildMember, ThreadChannel, User } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { asyncFilter } from "../../util/promises.js";
 
 /**

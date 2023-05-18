@@ -12,192 +12,61 @@ import {
 	GuildAuditLogsEntry,
 	Base,
 	TimestampStyles,
-	APIRole,
-	roleMention,
-	Colors,
-	channelMention,
 	userMention,
-	AuditLogOptionsType,
 	WebhookType,
-	VideoQualityMode,
-	ThreadAutoArchiveDuration,
-	SortOrderType,
-	ForumLayoutType,
 	formatEmoji,
-	APIEmoji,
 	APISticker,
 	APIGuildScheduledEvent,
 	AutoModerationRuleTriggerType,
 } from "discord.js";
 import config from "../../common/config.js";
 import defineEvent from "../../lib/events.js";
-import log, { getLoggingThread, LoggingEmojis, shouldLog } from "./misc.js";
-import { DATABASE_THREAD } from "../../common/database.js";
-import {
-	extractMessageExtremities,
-	getBaseChannel,
-	getMessageJSON,
-	messageToText,
-} from "../../util/discord.js";
+import log, { extraAuditLogsInfo, LoggingEmojis } from "./misc.js";
 import { unifiedDiff } from "difflib";
-import { diffString } from "json-diff";
-import { joinWithAnd } from "../../util/text.js";
-
-const databaseThread = await getLoggingThread(DATABASE_THREAD);
-
-function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
-	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		entry.reason ? ` (${entry.reason})` : ""
-	} ✨` as const;
-}
-
-// for (const change of entry.changes) {
-// 	const key = change.key as Extract<typeof change.key, keyof ___>;
-// 	switch (key) {
-// 	}
-// }
+import {
+	channelCreate,
+	channelDelete,
+	channelOverwriteCreate,
+	channelOverwriteUpdate,
+	channelOverwriteDelete,
+	channelUpdate,
+} from "./channel.js";
+import {
+	memberKick,
+	memberPrune,
+	memberBanAdd,
+	memberBanRemove,
+	memberRoleUpdate,
+	guildMemberRemove,
+	guildMemberAdd,
+	guildMemberUpdate,
+} from "./member.js";
+import {
+	messageDelete,
+	messageDeleteBulk,
+	messageReactionRemoveAll,
+	messageUpdate,
+} from "./message.js";
 
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
 } = {
-	async [AuditLogEvent.ChannelCreate](entry) {
-		if (!(entry.target instanceof Base)) return;
-		await log(
-			`${LoggingEmojis.Channel} ${
-				{
-					[ChannelType.GuildText]: "Text",
-					[ChannelType.GuildVoice]: "Voice",
-					[ChannelType.GuildCategory]: "Category",
-					[ChannelType.GuildAnnouncement]: "Announcement",
-					[ChannelType.GuildStageVoice]: "Stage",
-					[ChannelType.GuildForum]: "Forum",
-				}[entry.target.type]
-			} channel ${entry.target.toString()} (#${entry.target.name}) created${
-				entry.target.parent ? ` under ${entry.target.parent}` : ""
-			}${extraAuditLogsInfo(entry)}`,
-			"channels",
-		);
-	},
-	async [AuditLogEvent.ChannelDelete](entry) {
-		await log(
-			`${LoggingEmojis.Channel} #${entry.target.name} deleted${extraAuditLogsInfo(
-				entry,
-			)} (ID: ${entry.target.id})`,
-			"channels",
-		);
-	},
-	async [AuditLogEvent.ChannelOverwriteCreate](entry) {
-		await log(
-			`${LoggingEmojis.Channel} Permissions for ${
-				entry.extra instanceof Base
-					? entry.extra.toString()
-					: entry.extra.type === AuditLogOptionsType.Member
-					? userMention(entry.extra.id)
-					: roleMention(entry.extra.id)
-			} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
-			"channels",
-		);
-	},
-	async [AuditLogEvent.ChannelOverwriteUpdate](entry) {
-		await log(
-			`${LoggingEmojis.Channel} Permissions for ${
-				entry.extra instanceof Base
-					? entry.extra.toString()
-					: entry.extra.type === AuditLogOptionsType.Member
-					? userMention(entry.extra.id)
-					: roleMention(entry.extra.id)
-			} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
-			"channels",
-		);
-	},
-	async [AuditLogEvent.ChannelOverwriteDelete](entry) {
-		await log(
-			`${LoggingEmojis.Channel} Permissions for ${
-				entry.extra instanceof Base
-					? entry.extra.toString()
-					: entry.extra.type === AuditLogOptionsType.Member
-					? userMention(entry.extra.id)
-					: roleMention(entry.extra.id)
-			} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
-			"channels",
-		);
-	},
-	async [AuditLogEvent.MemberKick](entry) {
-		if (!entry.target) return;
-		await log(
-			`${LoggingEmojis.Punishment} ${entry.target.toString()} kicked${extraAuditLogsInfo(
-				entry,
-			)}`,
-			"members",
-		);
-	},
-	async [AuditLogEvent.MemberPrune](entry) {
-		await log(
-			`${LoggingEmojis.Punishment} ${entry.extra.removed} members who haven’t talked in ${
-				entry.extra.days
-			} days pruned${extraAuditLogsInfo(entry)}`,
-			"server",
-		);
-	},
-	async [AuditLogEvent.MemberBanAdd](entry) {
-		if (!entry.target) return;
-		await log(
-			`${LoggingEmojis.Punishment} ${entry.target.toString()} banned${extraAuditLogsInfo(
-				entry,
-			)}`,
-			"members",
-		);
-	},
-	async [AuditLogEvent.MemberBanRemove](entry) {
-		if (!entry.target) return;
-		await log(
-			`${LoggingEmojis.Punishment} ${entry.target.toString()} unbanned${extraAuditLogsInfo(
-				entry,
-			)}`,
-			"members",
-		);
-	},
-	async [AuditLogEvent.MemberRoleUpdate](entry) {
-		if (!entry.target) return;
-
-		const addedRoles = entry.changes
-			.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
-			.map((change) => change.new)
-			.flat();
-
-		const removedRoles = entry.changes
-			.filter(
-				(change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove",
-			)
-			.map((change) => change.new)
-			.flat();
-
-		if (addedRoles.length)
-			await log(
-				`${LoggingEmojis.Role} ${entry.target.toString()} gained ${joinWithAnd(
-					addedRoles,
-					({ id }) => roleMention(id),
-				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-					entry.reason ? ` (${entry.reason})` : ""
-				}`,
-				"members",
-			);
-
-		if (removedRoles.length)
-			await log(
-				`${LoggingEmojis.Role} ${entry.target.toString()} lost ${joinWithAnd(
-					removedRoles,
-					({ id }) => roleMention(id),
-				)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-					entry.reason ? ` (${entry.reason})` : ""
-				}`,
-				"members",
-			);
-	},
+	[AuditLogEvent.ChannelCreate]: channelCreate,
+	[AuditLogEvent.ChannelDelete]: channelDelete,
+	[AuditLogEvent.ChannelOverwriteCreate]: channelOverwriteCreate,
+	[AuditLogEvent.ChannelOverwriteUpdate]: channelOverwriteUpdate,
+	[AuditLogEvent.ChannelOverwriteDelete]: channelOverwriteDelete,
+	[AuditLogEvent.MemberKick]: memberKick,
+	[AuditLogEvent.MemberPrune]: memberPrune,
+	[AuditLogEvent.MemberBanAdd]: memberBanAdd,
+	[AuditLogEvent.MemberBanRemove]: memberBanRemove,
+	[AuditLogEvent.MemberRoleUpdate]: memberRoleUpdate,
 	async [AuditLogEvent.BotAdd](entry) {
 		if (!entry.target) return;
 		await log(
-			`${LoggingEmojis.Bot} ${entry.target.toString()} added${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Integration} ${entry.target.toString()} added${extraAuditLogsInfo(
+				entry,
+			)}`,
 			"server",
 		);
 	},
@@ -303,7 +172,9 @@ const events: {
 					await log(
 						`${LoggingEmojis.Emoji} Sticker ${entry.target.name} (:${
 							change.old
-						}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${
+							entry.target.id
+						})`,
 						"server",
 					);
 					break;
@@ -312,7 +183,9 @@ const events: {
 					await log(
 						`${LoggingEmojis.Emoji} Sticker ${
 							entry.target.name
-						}’s description changed${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						}’s description changed${extraAuditLogsInfo(entry)} (ID: ${
+							entry.target.id
+						})`,
 						"server",
 						{
 							files: [
@@ -408,7 +281,7 @@ const events: {
 							"an external location"
 						}${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
 						"voice",
-						);
+					);
 					break;
 				}
 				case "image_hash": {
@@ -455,380 +328,42 @@ const events: {
 	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
 		await log(
-			`${
-				LoggingEmojis.Thread
-			} AutoMod "${{
-				[ AutoModerationRuleTriggerType.Keyword ]: "Block Custom Words",
-				[ AutoModerationRuleTriggerType.Spam ]: "Block Suspected Spam Content",
-				[ AutoModerationRuleTriggerType.KeywordPreset ]: "Block Commonly Flagged Words",
-				[ AutoModerationRuleTriggerType.MentionSpam ]: "Block Mention Spam",
-			}[ entry.target.triggerType ]}" Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Thread} AutoMod "${
+				{
+					[AutoModerationRuleTriggerType.Keyword]: "Block Custom Words",
+					[AutoModerationRuleTriggerType.Spam]: "Block Suspected Spam Content",
+					[AutoModerationRuleTriggerType.KeywordPreset]: "Block Commonly Flagged Words",
+					[AutoModerationRuleTriggerType.MentionSpam]: "Block Mention Spam",
+				}[entry.target.triggerType]
+			}" Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${
+				entry.target.id
+			})`,
 			"server",
-		);},
+		);
+	},
 	async [AuditLogEvent.AutoModerationRuleUpdate](entry) {},
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
-			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} created${extraAuditLogsInfo(
+				entry,
+			)} (ID: ${entry.target.id})`,
 			"server",
-		);},
+		);
+	},
 };
 
-defineEvent("channelUpdate", async (oldChannel, newChannel) => {
-	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
-		return;
-
-	const removedActive = !!newChannel.flags?.has("ActiveChannelsRemoved");
-	if (!!oldChannel.flags?.has("ActiveChannelsRemoved") !== removedActive) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} Active Channels`,
-			"members",
-		);
-	}
-	const clyde = !!newChannel.flags?.has("ClydeAI");
-	if (!!oldChannel.flags?.has("ClydeAI") !== clyde) {
-		await log(
-			`${LoggingEmojis.Integration} ClydeAI ${
-				clyde ? "enabled" : "disabled"
-			} in ${newChannel.toString()}`,
-			"members",
-		);
-	}
-	const removedFeed = !!newChannel.flags?.has("GuildFeedRemoved");
-	if (!!oldChannel.flags?.has("GuildFeedRemoved") !== removedFeed) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} Server Feed`,
-			"members",
-		);
-	}
-	const resource = !!newChannel.flags?.has("IsGuildResourceChannel");
-	if (!!oldChannel.flags?.has("IsGuildResourceChannel") !== resource) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
-				resource ? "" : "un"
-			}made a Resource Page`,
-			"members",
-		);
-	}
-	const spam = !!newChannel.flags?.has("IsSpam");
-	if (!!oldChannel.flags?.has("IsSpam") !== spam) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} ${spam ? "" : "un"}marked as spam`,
-			"members",
-		);
-	}
-	const tags = !!newChannel.flags?.has("RequireTag");
-	if (!!oldChannel.flags?.has("RequireTag") !== tags) {
-		await log(
-			`${LoggingEmojis.Channel} "Require people to select tags when posting" ${
-				tags ? "enabled" : "disabled"
-			} in ${newChannel.toString()}`,
-			"members",
-		);
-	}
-	if (oldChannel.name !== newChannel.name)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} (${oldChannel.name}) renamed to ${
-				newChannel.name
-			}`,
-			"channels",
-		);
-	if (oldChannel.rawPosition !== newChannel.rawPosition)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} moved to position ${
-				newChannel.rawPosition
-			}`,
-			"channels",
-		);
-	if (oldChannel.type !== newChannel.type) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} made into a${
-				{
-					[ChannelType.GuildText]: " Text",
-					[ChannelType.GuildVoice]: " Voice",
-					[ChannelType.GuildCategory]: " Category",
-					[ChannelType.GuildAnnouncement]: "n Announcement",
-					[ChannelType.GuildStageVoice]: " Stage",
-					[ChannelType.GuildForum]: " Forum",
-				}[newChannel.type]
-			} Channel`,
-			"channels",
-		);
-	}
-
-	if (
-		oldChannel.type === ChannelType.GuildCategory ||
-		newChannel.type === ChannelType.GuildCategory
-	)
-		return;
-
-	if (oldChannel.nsfw !== newChannel.nsfw)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} made ${
-				newChannel.nsfw ? "" : "non-"
-			}age-restricted`,
-			"channels",
-		);
-
-	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
-				newChannel.type === ChannelType.GuildForum ? "post " : ""
-			}slowmode set to ${newChannel.rateLimitPerUser} seconds`,
-			"channels",
-		);
-
-	if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
-		if (oldChannel.bitrate !== newChannel.bitrate)
-			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s bitrate set to ${
-					newChannel.bitrate
-				}kbps`,
-				"channels",
-			);
-
-		if (oldChannel.rtcRegion !== newChannel.rtcRegion)
-			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s region override set to ${
-					newChannel.rtcRegion || "Automatic"
-				}`,
-				"channels",
-			);
-
-		if (oldChannel.userLimit !== newChannel.userLimit)
-			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s user limit set to ${
-					newChannel.userLimit ?? "∞"
-				} users`,
-				"channels",
-			);
-
-		if (oldChannel.videoQualityMode !== newChannel.videoQualityMode)
-			await log(
-				`${LoggingEmojis.Channel} ${newChannel.toString()}’s video quality set to ${
-					{ [VideoQualityMode.Auto]: "Auto", [VideoQualityMode.Full]: "720p" }[
-						newChannel.videoQualityMode ?? VideoQualityMode.Auto
-					]
-				}`,
-				"channels",
-			);
-	}
-
-	if (oldChannel.isVoiceBased() || newChannel.isVoiceBased()) return;
-
-	if (oldChannel.defaultAutoArchiveDuration !== newChannel.defaultAutoArchiveDuration)
-		await log(
-			`${
-				LoggingEmojis.Channel
-			} ${newChannel.toString()}’s hide after inactivity time set to ${
-				{
-					[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
-					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
-					[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
-					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-				}[newChannel.defaultAutoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay]
-			}`,
-			"channels",
-		);
-
-	if ((oldChannel.topic ?? "") !== (newChannel.topic ?? "")) {
-		await log(`${LoggingEmojis.Channel} ${newChannel.toString()}’s topic changed`, "channels", {
-			files: [
-				{
-					content: unifiedDiff(
-						(oldChannel.topic ?? "").split("\n"),
-						(newChannel.topic ?? "").split("\n"),
-						{ lineterm: "" },
-					)
-						.join("\n")
-						.replace(/^--- \n\+\+\+ \n/, ""),
-
-					extension: "diff",
-				},
-			],
-		});
-	}
-
-	if (oldChannel.type !== ChannelType.GuildForum || newChannel.type !== ChannelType.GuildForum)
-		return;
-
-	if (
-		oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
-		oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name
-	) {
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default reaction was ${
-				newChannel.defaultReactionEmoji
-					? `set to ${
-							newChannel.defaultReactionEmoji.name ||
-							`<:_:${newChannel.defaultReactionEmoji.id}>`
-					  }`
-					: "removed"
-			}`,
-			"channels",
-		);
-	}
-
-	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
-				newChannel.defaultThreadRateLimitPerUser
-			} seconds`,
-			"channels",
-		);
-
-	if (oldChannel.defaultSortOrder !== newChannel.defaultSortOrder)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s sort order set to ${
-				{
-					[SortOrderType.CreationDate]: "Creation Time",
-					[SortOrderType.LatestActivity]: "Recent Activity",
-				}[newChannel.defaultSortOrder ?? SortOrderType.LatestActivity]
-			}`,
-			"channels",
-		);
-
-	if (oldChannel.defaultForumLayout !== newChannel.defaultForumLayout)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default layout set to ${
-				{
-					[ForumLayoutType.ListView]: "List",
-					[ForumLayoutType.GalleryView]: "Gallery",
-				}[newChannel.defaultForumLayout || ForumLayoutType.ListView]
-			} View`,
-			"channels",
-		);
-});
+defineEvent("channelUpdate", channelUpdate);
 
 defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 	// @ts-expect-error T2345 -- No concrete fix to this
 	if (guild.id === config.guild.id) events[entry.action]?.(entry);
 });
 
-defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
-});
+defineEvent("guildMemberAdd", guildMemberAdd);
 
-defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} left`, "members");
-});
+defineEvent("guildMemberRemove", guildMemberRemove);
 
-defineEvent("guildMemberUpdate", async (oldMember, newMember) => {
-	if (newMember.guild.id !== config.guild.id) return;
-	if (oldMember.avatar !== newMember.avatar) {
-		const url = newMember.avatarURL({ size: 128 });
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
-				url ? "changed" : "removed"
-			} their server avatar`,
-			"members",
-			{ files: url ? [url] : undefined },
-		);
-	}
-
-	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
-		if (
-			newMember.communicationDisabledUntil &&
-			Number(newMember.communicationDisabledUntil) > Date.now()
-		)
-			await log(
-				`${LoggingEmojis.UserUpdate} ${newMember.toString()} timed out until ${time(
-					newMember.communicationDisabledUntil,
-				)}`,
-				"members",
-			);
-		else if (
-			oldMember.communicationDisabledUntil &&
-			Number(oldMember.communicationDisabledUntil) > Date.now()
-		)
-			await log(
-				`${LoggingEmojis.UserUpdate} ${newMember.toString()}’s timeout was removed`,
-				"members",
-			);
-	}
-
-	const automodQuarantine =
-		newMember.flags?.has("AutomodQuarantinedBio") ||
-		newMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname");
-	if (
-		(oldMember.flags?.has("AutomodQuarantinedBio") ||
-			oldMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
-	) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
-				automodQuarantine ? "" : "un"
-			}quarantined based on AutoMod rules`,
-			"members",
-		);
-	}
-
-	const verified = !!newMember.flags?.has("BypassesVerification");
-	if (!!oldMember.flags?.has("BypassesVerification") !== verified) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
-				verified ? "" : "un"
-			}verified by a moderator`,
-			"members",
-		);
-	}
-
-	if (oldMember.nickname !== newMember.nickname)
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()}${
-				newMember.nickname
-					? ` was nicknamed ${newMember.nickname}`
-					: "’s nickname was removed"
-			}`,
-			"members",
-		);
-
-	if (oldMember.user.avatar !== newMember.user.avatar) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their avatar`,
-			"members",
-			{
-				files: [newMember.user.displayAvatarURL({ size: 128 })],
-			},
-		);
-	}
-
-	const quarantined = !!newMember.user.flags?.has("Quarantined");
-	if (!!oldMember.user.flags?.has("Quarantined") !== quarantined) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
-				quarantined ? "" : "un"
-			}quarantined`,
-			"members",
-		);
-	}
-
-	const spammer = !!newMember.user.flags?.has("Spammer");
-	if (!!oldMember.user.flags?.has("Spammer") !== spammer) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
-				spammer ? "" : "un"
-			}marked as likely spammer`,
-			"members",
-		);
-	}
-
-	if (oldMember.user.tag !== newMember.user.tag) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} changed their username from ${
-				oldMember.user.tag
-			} to ${newMember.user.tag}`,
-			"members",
-		);
-	}
-
-	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
-		await newMember.roles.add(config.roles.booster, "Boosted the server");
-});
+defineEvent("guildMemberUpdate", guildMemberUpdate);
 
 defineEvent("guildScheduledEventDelete", async (event) => {
 	if (event.guildId !== config.guild.id) return;
@@ -1283,173 +818,13 @@ defineEvent("inviteDelete", async (invite) => {
 	);
 });
 
-defineEvent("messageDelete", async (message) => {
-	if (!shouldLog(message.channel)) return;
+defineEvent("messageDelete", messageDelete);
 
-	const shush =
-		message.partial ||
-		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
-			databaseThread.id !== message.channel.id);
+defineEvent("messageDeleteBulk", messageDeleteBulk);
 
-	const content = !shush && (await messageToText(message));
-	const { embeds, files } = shush
-		? { embeds: [], files: [] }
-		: extractMessageExtremities(message);
+defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
 
-	await log(
-		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
-			message.author ? ` by ${message.author.toString()}` : ""
-		} in ${message.channel.toString()} deleted (ID: ${message.id})`,
-		"messages",
-		{
-			embeds,
-			button: { label: "View Context", url: message.url },
-
-			files: content
-				? [{ content, extension: "md" }, ...files.map((file) => file.url)]
-				: files.map((file) => file.url),
-		},
-	);
-});
-
-defineEvent("messageDeleteBulk", async (messages, channel) => {
-	if (!shouldLog(channel)) return;
-	const messagesInfo = (
-		await Promise.all(
-			messages.reverse().map(async (message) => {
-				const content = !message.partial && (await messageToText(message));
-
-				return `${message.author?.tag ?? "[unknown]"}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? " (" : ""
-				}${message.embeds.length > 0 ? `${message.embeds.length} embeds` : ""}${
-					message.embeds.length > 0 && message.attachments.size > 0 ? ", " : ""
-				}${message.attachments.size > 0 ? `${message.attachments.size} attachments` : ""}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? ")" : ""
-				}${content ? `:\n${content}` : ""}`;
-			}),
-		)
-	).join("\n\n---\n\n");
-
-	await log(
-		`${LoggingEmojis.MessageDelete} ${
-			messages.size
-		} messages in ${channel.toString()} bulk deleted`,
-		"messages",
-		{
-			files: [{ content: messagesInfo, extension: "txt" }],
-			button: { label: "View Context", url: messages.first()?.url ?? "" },
-		},
-	);
-});
-
-defineEvent("messageReactionRemoveAll", async (partialMessage, reactions) => {
-	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
-
-	if (!shouldLog(message.channel)) return;
-
-	await log(
-		`${
-			LoggingEmojis.Emoji
-		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
-			message.id
-		})`,
-		"messages",
-		{
-			embeds: [
-				{
-					fields: reactions.map((reaction) => ({
-						name: reaction.emoji.toString(),
-						value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
-						inline: true,
-					})),
-					color: Colors.Blurple,
-				},
-			],
-
-			button: {
-				label: "View Context",
-				url: message.url,
-			},
-		},
-	);
-});
-
-defineEvent("messageUpdate", async (oldMessage, partialMessage) => {
-	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
-	if (!shouldLog(newMessage.channel)) return;
-
-	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
-		await log(
-			`${
-				LoggingEmojis.MessageUpdate
-			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-				newMessage.flags.has("Crossposted") ? "" : "un"
-			}published`,
-			"messages",
-			{ button: { label: "View Message", url: newMessage.url } },
-		);
-	}
-	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
-		await log(
-			`${LoggingEmojis.MessageUpdate} Embeds ${
-				newMessage.flags.has("SuppressEmbeds") ? "removed from" : "shown on"
-			} message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
-			"messages",
-			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
-		);
-	}
-
-	if (!oldMessage.partial && oldMessage.pinned !== newMessage.pinned) {
-		await log(
-			`${
-				LoggingEmojis.MessageUpdate
-			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-				newMessage.pinned ? "" : "un"
-			}pinned`,
-			"messages",
-			{ button: { label: "View Message", url: newMessage.url } },
-		);
-	}
-
-	if (!oldMessage.partial && !newMessage.author.bot) {
-		const files = [];
-		const contentDiff = unifiedDiff(
-			oldMessage.content.split("\n"),
-			newMessage.content.split("\n"),
-			{ lineterm: "" },
-		)
-			.join("\n")
-			.replace(/^--- \n\+\+\+ \n/, "");
-		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
-
-		const extraDiff = diffString(
-			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },
-			{ ...getMessageJSON(newMessage), content: undefined, embeds: undefined },
-			{ color: false },
-		);
-		if (extraDiff) {
-			const updatedFiles = newMessage.attachments.map((attachment) => attachment.url);
-			files.push(
-				{ content: extraDiff, extension: "diff" },
-				...oldMessage.attachments
-					.map((attachment) => attachment.url)
-					.filter((attachment) => !updatedFiles.includes(attachment)),
-			);
-		}
-
-		if (files.length > 0) {
-			await log(
-				`${
-					LoggingEmojis.MessageEdit
-				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
-					newMessage.id
-				})`,
-				"messages",
-				{ button: { label: "View Message", url: newMessage.url }, files },
-			);
-		}
-	}
-});
+defineEvent("messageUpdate", messageUpdate);
 
 defineEvent("roleCreate", async (role) => {
 	if (role.guild.id !== config.guild.id) return;

@@ -14,7 +14,6 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import Fuse from "fuse.js";
-import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { addons } from "../../common/extension.js";
 import type AddonManifest from "../../common/types/addonManifest.js";

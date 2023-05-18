@@ -1,5 +1,4 @@
 import config from "../common/config.js";
-import constants from "../common/constants.js";
 import Database from "../common/database.js";
 
 import type { Snowflake } from "discord.js";

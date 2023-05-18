@@ -1,6 +1,5 @@
 import { ChannelType, Message } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
 import { boardDatabase, boardReactionCount, BOARD_EMOJI, generateBoardMessage } from "./misc.js";
