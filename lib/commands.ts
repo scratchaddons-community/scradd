@@ -14,6 +14,8 @@ import {
 	MessageContextMenuCommandInteraction,
 	UserContextMenuCommandInteraction,
 	AutocompleteInteraction,
+	ApplicationCommandOptionChoiceData,
+	Awaitable,
 } from "discord.js";
 export const commandData: ApplicationCommandData[] = [];
 export const commands = new Map<string, CommandData & { command: Command }>();
@@ -69,7 +71,9 @@ type Option = { description: string; required?: boolean } & (
 			| {
 					minLength?: number;
 					maxLength?: number;
-					autocomplete?: (interaction: AutocompleteInteraction<"cached" | "raw">) => any;
+					autocomplete?: (
+						interaction: AutocompleteInteraction<"cached" | "raw">,
+					) => Awaitable<ApplicationCommandOptionChoiceData<string>[]>;
 					choices?: never;
 			  }
 	  ))

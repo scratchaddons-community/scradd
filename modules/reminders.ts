@@ -17,11 +17,11 @@ import Database, { cleanDatabaseListeners } from "../common/database.js";
 import censor, { badWordsAllowed } from "./automod/language.js";
 import defineCommand from "../lib/commands.js";
 import { disableComponents } from "../util/discord.js";
-import { convertBase } from "../util/numbers.js";
+import { convertBase, nth } from "../util/numbers.js";
 import { getSettings } from "./settings.js";
 import { defineButton, defineSelect } from "../lib/components.js";
 import defineEvent from "../lib/events.js";
-import getWeekly from "./xp/weekly.js";
+import getWeekly, { getChatters } from "./xp/weekly.js";
 import warn from "./punishments/warn.js";
 
 export enum SpecialReminders {
@@ -62,10 +62,36 @@ setInterval(async () => {
 						if (!channel?.isTextBased())
 							throw new TypeError("Could not find weekly channel");
 
+						const now = new Date(reminder.date);
 						const nextWeeklyDate = new Date(reminder.date);
 						nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
 
-						return await channel.send(await getWeekly(nextWeeklyDate));
+						const chatters = await getChatters()
+						const message = await channel.send(await getWeekly(nextWeeklyDate));
+						if(!chatters) return message
+						const thread= await message.startThread({
+							name: `🏆 Weekly Winners week of ${
+								[
+									"January",
+									"February",
+									"March",
+									"April",
+									"May",
+									"June",
+									"July",
+									"August",
+									"September",
+									"October",
+									"November",
+									"December",
+								][now.getUTCMonth()] || ""
+							} ${nth(now.getUTCDate(), {
+								bold: false,
+								jokes: false,
+							})}`,reason:"To send all chatters"
+						});
+						await thread.send(chatters)
+						return message
 					}
 					case SpecialReminders.UpdateSACategory: {
 						if (channel?.type !== ChannelType.GuildCategory)

@@ -35,13 +35,11 @@ defineCommand(
 
 		options: {
 			addon: {
-				async autocomplete(interaction) {
-					await interaction.respond(
-						fuse
-							.search(interaction.options.getString("addon", true))
-							.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
-							.map((addon) => ({ name: addon.item.name, value: addon.item.id })),
-					);
+				autocomplete(interaction) {
+					return fuse
+						.search(interaction.options.getString("addon", true))
+						.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
+						.map((addon) => ({ name: addon.item.name, value: addon.item.id }));
 				},
 				description: "The name of the addon",
 				required: true,

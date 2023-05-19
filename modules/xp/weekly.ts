@@ -6,6 +6,25 @@ import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getSettings } from "../settings.js";
 import { weeklyXpDatabase, xpDatabase } from "./misc.js";
 
+export async function getChatters() {
+	const weeklyWinners = [...weeklyXpDatabase.data].sort((one, two) => two.xp - one.xp);
+	weeklyWinners.splice(
+		0,
+		weeklyWinners.findIndex(
+			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
+		),
+	);
+	if (!weeklyWinners.length) return;
+
+	const promises = weeklyWinners.map(
+		async (user) =>
+			`${weeklyWinners.findIndex((found) => found.xp === user.xp)+6}) ${
+				(await client.users.fetch(user.user)).username
+			} - ${user.xp.toLocaleString("en-us")}`,
+	);
+	return "```\n" + (await Promise.all(promises)).join("\n").replaceAll("```", "'''") + "\n```";
+}
+
 export default async function getWeekly(nextWeeklyDate: Date) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,

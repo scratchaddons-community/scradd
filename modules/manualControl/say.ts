@@ -21,7 +21,7 @@ import log, { LoggingEmojis } from "../modlogs/misc.js";
 
 const fetchedChannels = new Set<Snowflake>();
 export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
-	if (!interaction.channel) return await interaction.respond([]);
+	if (!interaction.channel) return([]);
 	if (!fetchedChannels.has(interaction.channel.id)) {
 		interaction.channel.messages
 			.fetch({ limit: 100 })
@@ -41,7 +41,7 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 			})) ?? [],
 	);
 	const reply = interaction.options.getString("reply", true);
-	if (!reply) return await interaction.respond(messages.slice(0, 25).map(getMessageInfo));
+	if (!reply) return (messages.slice(0, 25).map(getMessageInfo));
 
 	const fuse = new Fuse(messages, {
 		findAllMatches: true,
@@ -65,11 +65,11 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 			{ name: "components.placeholder", weight: 0.1 },
 		],
 	});
-	await interaction.respond(
+	return(
 		fuse
 			.search(reply)
 			.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
-			.map((message) => getMessageInfo(message.item)),
+			.map((message) => getMessageInfo(message.item))
 	);
 	function getMessageInfo(message: typeof messages[number]) {
 		const component = message.components[0]?.components[0];
