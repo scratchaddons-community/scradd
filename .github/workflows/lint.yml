@@ -3,14 +3,14 @@ on:
     push:
     workflow_dispatch:
     schedule:
-        - cron: "30 12 * * *" # 30 minutes before Dependabot
+        - cron: 30 12 * * * # 30 minutes before Dependabot
 
 permissions: write-all
 
 jobs:
     bump:
         name: Bump dependencies
-        if: startsWith(github.ref_name, "dependabot/") != true
+        if: startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
 
         steps:
@@ -30,7 +30,7 @@ jobs:
 
     format:
         name: Format
-        if: startsWith(github.ref_name, "dependabot/") != true && always()
+        if: startsWith(github.ref_name, 'dependabot/') != true && always()
         runs-on: ubuntu-20.04
 
         steps:
@@ -43,7 +43,7 @@ jobs:
               uses: actions/setup-node@v3.6.0
               with:
                   node-version: "18.12.1"
-                  cache: "npm"
+                  cache: npm
 
             - name: Install
               run: npm ci
@@ -92,7 +92,7 @@ jobs:
               uses: actions/setup-node@v3.6.0
               with:
                   node-version: "18.12.1"
-                  cache: "npm"
+                  cache: npm
 
             - name: Install
               run: npm ci

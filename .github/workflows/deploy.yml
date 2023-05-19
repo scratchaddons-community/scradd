@@ -19,7 +19,7 @@ jobs:
               uses: actions/setup-node@v3.6.0
               with:
                   node-version: "18.12.1"
-                  cache: "npm"
+                  cache: npm
 
             - name: Download bad words
               run: curl ${{ secrets.BAD_WORDS }} --output badWords.ts
