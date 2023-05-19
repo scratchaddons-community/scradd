@@ -16,10 +16,12 @@ import {
 	formatEmoji,
 	APISticker,
 	AutoModerationRuleTriggerType,
+	APIRole,
+	roleMention,
 } from "discord.js";
 import config from "../../common/config.js";
 import defineEvent from "../../lib/events.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LOG_GROUPS  } from "./misc.js";
+import log, { extraAuditLogsInfo, LoggingEmojis, LOG_GROUPS } from "./misc.js";
 import { unifiedDiff } from "difflib";
 import {
 	channelCreate,
@@ -79,7 +81,85 @@ const events: {
 			"server",
 		);
 	},
-	// async [AuditLogEvent.RoleUpdate](entry) {}, // TODO
+	async [AuditLogEvent.RoleUpdate](entry) {
+		for (const change of entry.changes) {
+			const key = change.key as Extract<typeof change.key, keyof APIRole>;
+			switch (key) {
+				case "name": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} (@${
+							change.old
+						}) renamed to @${change.new}${extraAuditLogsInfo(entry)}`,
+						"server",
+					);
+					break;
+				}
+				case "color": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(
+							entry.target?.id ?? "",
+						)}’s role color ${
+							change.new
+								? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
+								: "reset"
+						}${extraAuditLogsInfo(entry)}`,
+						"server",
+					);
+					break;
+				}
+				case "hoist": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(
+							entry.target?.id ?? "",
+						)} set to display role members ${
+							change.new ? "separately from" : "combined with"
+						} online members${extraAuditLogsInfo(entry)}`,
+						"server",
+					);
+					break;
+				}
+				case "mentionable": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} set to ${
+							change.new ? "" : "dis"
+						}allow anyone to @mention this role${extraAuditLogsInfo(entry)}`,
+						"server",
+					);
+					break;
+				}
+				case "permissions": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(
+							entry.target?.id ?? "",
+						)}’s permissions changed${extraAuditLogsInfo(entry)}`,
+						"server",
+						{
+							button: {
+								label: "View Permission",
+								url:
+									"https://discordlookup.com/permissions-calculator/" +
+									change.new,
+							},
+						},
+					);
+					break;
+				}
+				case "position": {
+					await log(
+						`${LoggingEmojis.Role} ${roleMention(
+							entry.target?.id ?? "",
+						)}’s role color ${
+							change.new
+								? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
+								: "reset"
+						}${extraAuditLogsInfo(entry)}`,
+						"server",
+					);
+					break;
+				}
+			}
+		}
+	},
 	async [AuditLogEvent.InviteCreate](entry) {
 		await log(
 			`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
@@ -109,7 +189,7 @@ const events: {
 			"server",
 		);
 	},
-	// async [AuditLogEvent.WebhookUpdate](entry) {}, // TODO
+	// async [AuditLogEvent.WebhookUpdate](entry) {},
 	async [AuditLogEvent.WebhookDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} deleted${extraAuditLogsInfo(
@@ -212,6 +292,7 @@ const events: {
 							],
 						},
 					);
+					break;
 				}
 				case "tags": {
 					await log(
