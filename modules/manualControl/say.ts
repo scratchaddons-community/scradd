@@ -12,7 +12,7 @@ import {
 	type Snowflake,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
-import Fuse from "fuse.js";
+import { search } from "fast-fuzzy";
 import { truncateText } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import config from "../../common/config.js";
@@ -40,35 +40,40 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 				content: await messageToText(message, false),
 			})) ?? [],
 	);
-	const reply = interaction.options.getString("reply", true);
-	if (!reply) return messages.slice(0, 25).map(getMessageInfo);
+	const reply = interaction.options.getString("reply");
+	if (!reply?.trim()) return messages.slice(0, 25).map(getMessageInfo);
 
-	const fuse = new Fuse(messages, {
-		findAllMatches: true,
-		ignoreLocation: true,
-		includeScore: true,
+	return search(reply, messages, {
+		threshold: 0.1,
+		ignoreSymbols: false,
 
-		keys: [
-			{ name: "content", weight: 1 },
-			{ name: "embeds.title", weight: 0.8 },
-			{ name: "embeds.description", weight: 0.7 },
-			{ name: "embeds.fields.name", weight: 0.6 },
-			{ name: "embeds.fields.value", weight: 0.6 },
-			{ name: "id", weight: 0.5 },
-			{ name: "embeds.footer.text", weight: 0.4 },
-			{ name: "embeds.author.name", weight: 0.3 },
-			{ name: "interaction.commandName", weight: 0.3 },
-			{ name: "attachments.name", weight: 0.3 },
-			{ name: "sticker.name", weight: 0.3 },
-			{ name: "author.username", weight: 0.2 },
-			{ name: "components.label", weight: 0.2 },
-			{ name: "components.placeholder", weight: 0.1 },
-		],
-	});
-	return fuse
-		.search(reply)
-		.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
-		.map((message) => getMessageInfo(message.item));
+		keySelector(message) {
+			return [
+				message.content,
+				message.id,
+				message.embeds.map((embed) => [
+					embed.title ?? "",
+					embed.description ?? "",
+					embed.fields.map((field) => [field.name, field.value]),
+					embed.footer?.text ?? "",
+					embed.author?.name ?? "",
+				]),
+
+				message.interaction?.commandName ?? "",
+				message.attachments.map((attachment) => attachment.name),
+				message.stickers.map((sticker) => sticker.name),
+				message.author.username,
+				message.components.map((row) =>
+					row.components.map(
+						(component) =>
+							(component.type === ComponentType.Button
+								? component.label
+								: component.placeholder) ?? "",
+					),
+				),
+			].flat(4);
+		},
+	}).map(getMessageInfo);
 	function getMessageInfo(message: typeof messages[number]) {
 		const component = message.components[0]?.components[0];
 		return {
