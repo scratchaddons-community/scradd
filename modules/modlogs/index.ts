@@ -404,8 +404,8 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			files: [
 				{
 					content: unifiedDiff(
-						oldGuild.description?.split("\n") ?? "",
-						newGuild.description?.split("\n") ?? "",
+						oldGuild.description?.split("\n") ?? [],
+						newGuild.description?.split("\n") ?? [],
 						{ lineterm: "" },
 					)
 						.join("\n")
