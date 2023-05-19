@@ -7,7 +7,6 @@
 		"esModuleInterop": true,
 		"exactOptionalPropertyTypes": false,
 		"forceConsistentCasingInFileNames": true,
-		"importHelpers": true,
 		"verbatimModuleSyntax": true,
 		"lib": ["ESNext", "DOM"],
 		"maxNodeModuleJsDepth": 0,
