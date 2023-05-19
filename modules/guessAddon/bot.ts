@@ -299,9 +299,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 			.map(([addon, questions]) =>
 				Array.from<AddonQuestion[]>({
 					length: Math.round(
-						(Array.from(addonProbabilities)
-							.findLastIndex(([id]) => id === addon) +
-							1) /
+						(Array.from(addonProbabilities).findLastIndex(([id]) => id === addon) + 1) /
 							addonProbabilities.length +
 							((addonProbabilities.find(([id]) => id === addon)?.[1] ?? 0) + 1),
 					),

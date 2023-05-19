@@ -37,10 +37,12 @@ defineCommand(
 			addon: {
 				autocomplete(interaction) {
 					const query = interaction.options.getString("addon");
-					return (query?.trim() ? searcher.search(query) : addons.slice(25)).map((addon) => ({
-						name: addon.name,
-						value: addon.id,
-					}));
+					return (query?.trim() ? searcher.search(query) : addons.slice(25)).map(
+						(addon) => ({
+							name: addon.name,
+							value: addon.id,
+						}),
+					);
 				},
 				description: "The name of the addon",
 				required: true,

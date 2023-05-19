@@ -6,7 +6,7 @@ import {
 	ComponentType,
 	MessageComponentInteraction,
 	ModalSubmitInteraction,
-type 	Snowflake,
+	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";

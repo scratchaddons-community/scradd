@@ -119,7 +119,7 @@ export default async function login(options: {
 				);
 			}
 
-			return interaction.respond((await autocomplete(interaction)).slice(0,25));
+			return interaction.respond((await autocomplete(interaction)).slice(0, 25));
 		}
 
 		if (!interaction.isCommand()) {

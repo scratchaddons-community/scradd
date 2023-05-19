@@ -152,9 +152,7 @@ export default async function warn(
 					"Too many strikes",
 			  )
 			: log(
-					`${
-						LoggingErrorEmoji
-					} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+					`${LoggingErrorEmoji} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,
 			  ));

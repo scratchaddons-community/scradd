@@ -63,8 +63,6 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		await member.setNickname(member.user.username === newNickname ? null : newNickname, reason);
 	else
 		await log(
-			`${
-				LoggingErrorEmoji
-			} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+			`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		);
 }
