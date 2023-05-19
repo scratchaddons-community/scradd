@@ -15,7 +15,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	if (message.guild?.id !== config.guild.id) return;
 
-	if (!updateReactions(reaction))
+	if (!(await updateReactions(reaction)))
 		await message.reactions.resolve(reaction).users.remove(partialUser.id);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
