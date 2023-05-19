@@ -41,14 +41,14 @@ export default async function getUserRank(
 		context.fillStyle = "#666";
 		context.textAlign = "end";
 		context.fillText(
-			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 			canvas.width - paddingPixels,
 			canvas.height - paddingPixels,
 		);
 	} else {
 		context.fillStyle = "#0009";
 		context.fillText(
-			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 			paddingPixels,
 			canvas.height - paddingPixels,
 		);
@@ -69,10 +69,10 @@ export default async function getUserRank(
 				fields: [
 					{
 						name: "📊 Level",
-						value: (level * Math.sign(xp)).toLocaleString(),
+						value: (level * Math.sign(xp)).toLocaleString("en-us"),
 						inline: true,
 					},
-					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
+					{ name: "✨ XP", value: xp.toLocaleString("en-us"), inline: true },
 					{
 						name: "⏳ Weekly rank",
 
@@ -91,16 +91,16 @@ export default async function getUserRank(
 						name: constants.zeroWidthSpace,
 						value: `**${
 							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
-						} level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
+						} level progress** ${xpForNextLevel.toLocaleString("en-us")} XP needed`,
 					},
 				],
 
 				footer: {
 					text: `${
 						rank
-							? `Ranked ${rank.toLocaleString()}/${top.length.toLocaleString()}${
-									constants.footerSeperator
-							  }`
+							? `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
+									"en-us",
+							  )}${constants.footerSeperator}`
 							: ""
 					}View the leaderboard with /xp top`,
 				},

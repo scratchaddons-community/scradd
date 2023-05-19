@@ -192,7 +192,6 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
  *
  * @author Based Off of [Rapptz/discord.py's
  *   `system_content`](https://github.com/Rapptz/discord.py/blob/1767be0/discord/message.py#L1994-L2134)
- *
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
  *
@@ -634,7 +633,7 @@ export async function paginate<Item>(
 					footer: {
 						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
 							constants.footerSeperator
-						}${array.length.toLocaleString()} ${
+						}${array.length.toLocaleString("en-us")} ${
 							array.length === 1 ? singular : plural
 						}`,
 					},

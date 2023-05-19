@@ -88,7 +88,7 @@ defineCommand(
 											.fetch(xp.user)
 											.catch(() => ({ username: `<@${xp.user}>` }))
 								  ).username
-						} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 					async (data) =>
 						await interaction[interaction.replied ? "editReply" : "reply"](data),
 					{

@@ -102,10 +102,16 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 								Math.sign(
 									xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
 								),
-						).toLocaleString()} XP`,
+						).toLocaleString("en-us")} XP`,
 				)
 				.join("\n") || "*Nobody got any XP this week!*"
-		}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${activeMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n__Next week’s weekly winners will be posted ${time(
+		}\n\n*This week, ${chatters.toLocaleString(
+			"en-us",
+		)} people chatted, and ${activeMembers.length.toLocaleString(
+			"en-us",
+		)} people were active. Altogether, people gained ${allXp.toLocaleString(
+			"en-us",
+		)} XP this week.*\n__Next week’s weekly winners will be posted ${time(
 			nextWeeklyDate,
 			TimestampStyles.RelativeTime,
 		)}.__`,

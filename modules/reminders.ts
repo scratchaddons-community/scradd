@@ -90,7 +90,7 @@ setInterval(async () => {
 						);
 
 						return await channel?.setName(
-							`Scratch Addons - ${count.count.toLocaleString([], {
+							`Scratch Addons - ${count.count.toLocaleString("en-us", {
 								compactDisplay: "short",
 								maximumFractionDigits: 1,
 								minimumFractionDigits: count.count > 999 ? 1 : 0,

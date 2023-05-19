@@ -87,10 +87,8 @@ defineButton("exploreBoard", async (interaction, userId) => {
 defineCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
 	async (interaction) => {
+		await interaction.deferReply({ ephemeral: true });
 		await updateBoard(interaction.targetMessage);
-		await interaction.reply({
-			content: `${constants.emojis.statuses.yes} Synced ${reactionsName}!`,
-			ephemeral: true,
-		});
+		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
 	},
 );

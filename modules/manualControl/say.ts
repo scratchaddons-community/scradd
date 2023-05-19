@@ -20,14 +20,24 @@ import log, { LoggingEmojis } from "../modlogs/misc.js";
 export async function say(
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
 	content: string,
+	reply?: string,
 ) {
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;
 
-	const message = await interaction.channel?.send({
-		content,
-		flags: silent ? MessageFlags.SuppressNotifications : undefined,
-	});
+	const noPing = reply?.startsWith("-");
+	reply = noPing ? reply?.replace("-", "") : reply;
+	const oldMessage = reply && (await interaction.channel?.messages.fetch(reply));
+	const message = await (oldMessage
+		? oldMessage.reply({
+				content,
+				flags: silent ? MessageFlags.SuppressNotifications : undefined,
+				allowedMentions: { repliedUser: !noPing },
+		  })
+		: interaction.channel?.send({
+				content,
+				flags: silent ? MessageFlags.SuppressNotifications : undefined,
+		  }));
 
 	if (message) {
 		await log(
@@ -49,14 +59,15 @@ export default async function sayCommand(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ) {
 	const content = interaction.options.getString("message");
+	const reply = interaction.options.getString("reply");
 	if (content) {
-		await say(interaction, content);
+		await say(interaction, content, reply || undefined);
 		return;
 	}
 
 	await interaction.showModal({
 		title: `Send Message`,
-		customId: "_say",
+		customId: `${reply ?? ""}_say`,
 
 		components: [
 			{

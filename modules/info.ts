@@ -95,13 +95,13 @@ defineCommand(
 
 									value: `${Math.abs(
 										Number(message.createdAt) - Number(interaction.createdAt),
-									).toLocaleString()}ms`,
+									).toLocaleString("en-us")}ms`,
 
 									inline: true,
 								},
 								{
 									name: "WebSocket latency",
-									value: `${client.ws.ping.toLocaleString()}ms`,
+									value: `${client.ws.ping.toLocaleString("en-us")}ms`,
 									inline: true,
 								},
 								{ name: "Node version", value: process.version, inline: true },

@@ -68,7 +68,7 @@ defineEvent("guildMemberAdd", async () => {
 	await config.channels.info?.setName(
 		`Info - ${(
 			config.guild.memberCount - (config.guild.memberCount > 1_005 ? 5 : 0)
-		).toLocaleString([], {
+		).toLocaleString("en-us", {
 			compactDisplay: "short",
 			maximumFractionDigits: 2,
 			minimumFractionDigits: config.guild.memberCount > 1_000 ? 2 : 0,

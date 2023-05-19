@@ -21,7 +21,13 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
-import { Category, getThreadFromMember, SA_CATEGORY, SERVER_CATEGORY, TICKET_CATEGORIES } from "./misc.js";
+import {
+	Category,
+	getThreadFromMember,
+	SA_CATEGORY,
+	SERVER_CATEGORY,
+	TICKET_CATEGORIES,
+} from "./misc.js";
 
 const allFields = {
 	appeal: [
@@ -265,10 +271,11 @@ export default async function contactMods(
 	const thread = await config.channels.tickets.threads.create({
 		name: `${member.user.username} (${date
 			.getUTCFullYear()
-			.toLocaleString([], { useGrouping: false })}-${(date.getUTCMonth() + 1).toLocaleString(
-			[],
-			{ minimumIntegerDigits: 2 },
-		)}-${date.getUTCDate().toLocaleString([], { minimumIntegerDigits: 2 })})`,
+			.toLocaleString("en-us", { useGrouping: false })}-${(
+			date.getUTCMonth() + 1
+		).toLocaleString("en-us", { minimumIntegerDigits: 2 })}-${date
+			.getUTCDate()
+			.toLocaleString("en-us", { minimumIntegerDigits: 2 })})`,
 
 		reason: "Ticket opened",
 		type: ChannelType.PrivateThread,
