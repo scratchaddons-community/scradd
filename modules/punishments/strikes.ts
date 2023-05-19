@@ -4,7 +4,7 @@ import {
 	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	InteractionReplyOptions,
+	type InteractionReplyOptions,
 	time,
 	TimestampStyles,
 	User,

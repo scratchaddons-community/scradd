@@ -13,7 +13,7 @@ import { defineButton, defineModal, defineSelect } from "../../lib/components.js
 import defineEvent from "../../lib/events.js";
 import { getSettings, updateSettings } from "../settings.js";
 import {
-	Category,
+	type Category,
 	getThreadFromMember,
 	SA_CATEGORY,
 	SERVER_CATEGORY,

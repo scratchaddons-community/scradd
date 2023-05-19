@@ -8,14 +8,14 @@ import {
 	type ApplicationCommandNonOptionsData,
 	type ApplicationCommandNumericOptionData,
 	type ApplicationCommandStringOptionData,
-	ApplicationCommandData,
+	type ApplicationCommandData,
 	ChatInputCommandInteraction,
 	ChannelType,
 	MessageContextMenuCommandInteraction,
 	UserContextMenuCommandInteraction,
 	AutocompleteInteraction,
-	ApplicationCommandOptionChoiceData,
-	Awaitable,
+	type ApplicationCommandOptionChoiceData,
+	type Awaitable,
 } from "discord.js";
 export const commandData: ApplicationCommandData[] = [];
 export const commands = new Map<string, CommandData & { command: Command }>();

@@ -6,7 +6,7 @@ import {
 	GuildMember,
 	MessageComponentInteraction,
 	MessageFlags,
-	Snowflake,
+	type Snowflake,
 	time,
 	TimestampStyles,
 } from "discord.js";

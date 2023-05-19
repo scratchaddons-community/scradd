@@ -1,12 +1,12 @@
 import {
-	APIButtonComponent,
-	BaseMessageOptions,
+	type APIButtonComponent,
+	type BaseMessageOptions,
 	ButtonStyle,
 	ComponentType,
 	Message,
 	MessageType,
-	Snowflake,
-	TextBasedChannel,
+	type Snowflake,
+	type TextBasedChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";

@@ -2,7 +2,7 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	MessageEditOptions,
+	type MessageEditOptions,
 	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
-import Fuse from "fuse.js";
+import { Searcher } from "fast-fuzzy";
 
 import constants from "../common/constants.js";
 import { manifest, addons } from "../common/extension.js";
@@ -7,22 +7,22 @@ import defineCommand from "../lib/commands.js";
 import { escapeMessage, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
-const fuse = new Fuse(addons, {
-	findAllMatches: true,
-	ignoreLocation: true,
-	includeScore: true,
+const searcher = new Searcher(addons, {
+	threshold: 0.1,
+	ignoreSymbols: false,
 
-	keys: [
-		{ name: "id", weight: 1 },
-		{ name: "name", weight: 1 },
-		{ name: "description", weight: 0.7 },
-		{ name: "latestUpdate.temporaryNotice", weight: 0.5 },
-		{ name: "info.text", weight: 0.4 },
-		{ name: "presets.name", weight: 0.3 },
-		{ name: "settings.name", weight: 0.3 },
-		{ name: "credits.note", weight: 0.2 },
-		{ name: "credits.name", weight: 0.1 },
-	],
+	keySelector(addon) {
+		return [
+			addon.id,
+			addon.name,
+			addon.description,
+			addon.latestUpdate?.temporaryNotice ?? "",
+			addon.info?.map((info) => info.text) ?? "",
+			addon.presets?.map((preset) => preset.name) ?? "",
+			addon.settings?.map((setting) => setting.name) ?? "",
+			addon.credits?.map((credit) => [credit.note ?? "", credit.name]) ?? "",
+		].flat(2);
+	},
 });
 
 defineCommand(
@@ -36,10 +36,11 @@ defineCommand(
 		options: {
 			addon: {
 				autocomplete(interaction) {
-					return fuse
-						.search(interaction.options.getString("addon", true))
-						.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
-						.map((addon) => ({ name: addon.item.name, value: addon.item.id }));
+					const query = interaction.options.getString("addon");
+					return (query?.trim() ? searcher.search(query) : addons.slice(25)).map((addon) => ({
+						name: addon.name,
+						value: addon.id,
+					}));
 				},
 				description: "The name of the addon",
 				required: true,
@@ -50,7 +51,7 @@ defineCommand(
 
 	async (interaction) => {
 		const input = interaction.options.getString("addon", true);
-		const addon = fuse.search(input)[0]?.item;
+		const addon = searcher.search(input)[0];
 
 		if (!addon) {
 			await interaction.reply({

@@ -1,5 +1,5 @@
 import {
-	CacheType,
+	type CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
 	ModalSubmitInteraction,

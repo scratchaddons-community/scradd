@@ -1,4 +1,4 @@
-import { MessageCreateOptions, time, TimestampStyles } from "discord.js";
+import { type MessageCreateOptions, time, TimestampStyles } from "discord.js";
 import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";

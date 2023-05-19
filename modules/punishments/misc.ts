@@ -1,4 +1,4 @@
-import { MessageType, Snowflake } from "discord.js";
+import { MessageType, type Snowflake } from "discord.js";
 import Database from "../../common/database.js";
 import { GlobalUsersPattern } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";

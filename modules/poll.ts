@@ -1,8 +1,8 @@
 import {
-	ActionRowData,
+type 	ActionRowData,
 	ApplicationCommandOptionType,
 	ComponentType,
-	ModalActionRowComponentData,
+type 	ModalActionRowComponentData,
 	TextInputStyle,
 } from "discord.js";
 import config from "../common/config.js";

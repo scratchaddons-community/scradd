@@ -14,9 +14,9 @@ import {
 	userMention,
 	WebhookType,
 	formatEmoji,
-	APISticker,
+	type APISticker,
 	AutoModerationRuleTriggerType,
-	APIRole,
+	type APIRole,
 	roleMention,
 } from "discord.js";
 import config from "../../common/config.js";

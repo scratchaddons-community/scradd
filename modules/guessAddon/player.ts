@@ -1,6 +1,6 @@
 import {
-	APIActionRowComponent,
-	APIStringSelectComponent,
+	type APIActionRowComponent,
+	type APIStringSelectComponent,
 	ButtonStyle,
 	ChatInputCommandInteraction,
 	Collection,
@@ -8,12 +8,12 @@ import {
 	escapeMarkdown,
 	GuildMember,
 	InteractionCollector,
-	MappedInteractionTypes,
-	MessageComponentType,
-	Snowflake,
+	type MappedInteractionTypes,
+	type MessageComponentType,
+	type Snowflake,
 	TextInputStyle,
 } from "discord.js";
-import Fuse from "fuse.js";
+import { Searcher } from "fast-fuzzy";
 import constants from "../../common/constants.js";
 import { addons } from "../../common/extension.js";
 import type AddonManifest from "../../common/types/addonManifest.js";
@@ -21,7 +21,7 @@ import { defineModal } from "../../lib/components.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { GroupName, GROUP_NAMES } from "./questions.js";
+import QUESTIONS_BY_ADDON, { type GroupName, GROUP_NAMES } from "./questions.js";
 
 const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 	.flat()
@@ -363,36 +363,33 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 		});
 }
 
-const fuse = new Fuse(addons, {
-	findAllMatches: true,
-	ignoreLocation: true,
-	includeScore: true,
+const searcher = new Searcher(addons, {
+	threshold: 0.3,
+	ignoreSymbols: false,
 
-	keys: [
-		{ name: "id", weight: 1 },
-		{ name: "name", weight: 1 },
-		{ name: "description", weight: 2 },
-	],
+	keySelector(addon) {
+		return [addon.id, addon.name, addon.description];
+	},
 });
 defineModal("guessModal", async (interaction) => {
 	const game = games.get(interaction.user.id);
 	if (!game) return;
 
 	const query = interaction.fields.getTextInputValue("addon");
-	const { item, score = 1 } = fuse.search(query)[0] ?? {};
+	const addon = searcher.search(query)[0];
 
 	game.collector.resetTimer();
 
-	if (!item || score > 0.3) {
+	if (!addon) {
 		await interaction.reply({
 			content: `${constants.emojis.statuses.no} Could not find the **${query}** addon!`,
 			ephemeral: true,
 		});
 		return;
 	}
-	if (game.guessed.includes(item.id)) {
+	if (game.guessed.includes(addon.id)) {
 		await interaction.reply({
-			content: `${constants.emojis.statuses.no} You already guessed **${item.name}**!`,
+			content: `${constants.emojis.statuses.no} You already guessed **${addon.name}**!`,
 			ephemeral: true,
 		});
 		return;
@@ -403,8 +400,8 @@ defineModal("guessModal", async (interaction) => {
 				...interaction.message.embeds[0]?.toJSON(),
 
 				description: `${interaction.message.embeds[0]?.description ?? ""}\n- Is it the **${
-					item.name
-				}** addon? **${item.id === game.addon.id ? "Yes" : "No"}**`.trim(),
+					addon.name
+				}** addon? **${addon.id === game.addon.id ? "Yes" : "No"}**`.trim(),
 
 				footer: {
 					text:
@@ -420,11 +417,11 @@ defineModal("guessModal", async (interaction) => {
 		],
 	});
 
-	if (item.id !== game.addon.id) {
+	if (addon.id !== game.addon.id) {
 		await interaction.reply(
-			`${constants.emojis.statuses.no} Nope, the addon is not **${item.name}**…`,
+			`${constants.emojis.statuses.no} Nope, the addon is not **${addon.name}**…`,
 		);
-		game.guessed.push(item.id);
+		game.guessed.push(addon.id);
 		return;
 	}
 

@@ -1,4 +1,4 @@
-import { ChannelType, NonThreadGuildBasedChannel } from "discord.js";
+import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
 import constants from "./constants.js";
 import { client } from "../lib/client.js";
 

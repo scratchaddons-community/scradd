@@ -1,7 +1,7 @@
 import config from "../common/config.js";
 import Database from "../common/database.js";
 
-import { Collection, Snowflake } from "discord.js";
+import { Collection, type Snowflake } from "discord.js";
 import defineEvent from "../lib/events.js";
 
 export const rolesDatabase = new Database<{
