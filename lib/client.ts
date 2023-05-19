@@ -1,16 +1,16 @@
 import {
-	Awaitable,
+	type Awaitable,
 	Client,
 	GatewayIntentBits,
 	Partials,
-	Snowflake,
+	type Snowflake,
 	BaseInteraction,
 } from "discord.js";
 import pkg from "../package.json" assert { type: "json" };
 import path from "node:path";
 import url from "node:url";
 import fileSystem from "node:fs/promises";
-import defineEvent, { ClientEvent, Event, getEvents } from "./events.js";
+import defineEvent, { type ClientEvent, type Event, getEvents } from "./events.js";
 import { commandData, commands } from "./commands.js";
 import { buttons, modals, selects } from "./components.js";
 import { AssertionError } from "node:assert";

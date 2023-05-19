@@ -8,7 +8,7 @@ import {
 	ComponentType,
 	type InteractionReplyOptions,
 	ButtonInteraction,
-	CacheType,
+	type CacheType,
 	ChatInputCommandInteraction,
 } from "discord.js";
 

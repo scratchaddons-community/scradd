@@ -1,4 +1,4 @@
-import { cleanContent, Snowflake } from "discord.js";
+import { cleanContent, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";

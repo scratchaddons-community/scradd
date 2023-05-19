@@ -1,6 +1,6 @@
 import { unifiedDiff } from "difflib";
 import {
-	APIGuildScheduledEvent,
+	type APIGuildScheduledEvent,
 	AuditLogEvent,
 	ChannelType,
 	GuildAuditLogsEntry,

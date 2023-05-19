@@ -1,6 +1,6 @@
 import {
-	APIActionRowComponent,
-	APIStringSelectComponent,
+	type APIActionRowComponent,
+	type APIStringSelectComponent,
 	ButtonStyle,
 	ChatInputCommandInteraction,
 	Collection,
@@ -8,9 +8,9 @@ import {
 	escapeMarkdown,
 	GuildMember,
 	InteractionCollector,
-	MappedInteractionTypes,
-	MessageComponentType,
-	Snowflake,
+	type MappedInteractionTypes,
+	type MessageComponentType,
+	type Snowflake,
 	TextInputStyle,
 } from "discord.js";
 import Fuse from "fuse.js";
@@ -21,7 +21,7 @@ import { defineModal } from "../../lib/components.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { GroupName, GROUP_NAMES } from "./questions.js";
+import QUESTIONS_BY_ADDON, { type GroupName, GROUP_NAMES } from "./questions.js";
 
 const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 	.flat()

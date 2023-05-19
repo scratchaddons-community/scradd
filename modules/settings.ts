@@ -2,8 +2,8 @@ import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	InteractionReplyOptions,
-	Snowflake,
+	type InteractionReplyOptions,
+	type Snowflake,
 	User,
 } from "discord.js";
 

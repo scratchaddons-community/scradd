@@ -1,12 +1,12 @@
 import {
-	APIEmbed,
+	type APIEmbed,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	Embed,
 	GuildAuditLogsEntry,
 	PermissionFlagsBits,
-	TextBasedChannel,
+	type TextBasedChannel,
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
@@ -14,6 +14,7 @@ import {
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
 import type { DATABASE_THREAD } from "../../common/database.js";
+import constants from "../../common/constants.js";
 
 export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
 export type LogGroup = typeof LOG_GROUPS[number];
@@ -31,7 +32,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 }
 
 export default async function log(
-	content?: `${LoggingEmojis} ${string}`,
+	content?: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
 	group?: LogGroup,
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
@@ -132,12 +133,13 @@ export enum LoggingEmojis {
 	Channel = "🗄",
 	Punishment = "🔨",
 	Event = "🗓",
-	Error = "⚠", // constants.emojis.statuses.no,
 	Bot = "🤖",
 	Emoji = "😳",
 	Thread = "📂",
 	Integration = "🖇",
 }
+
+export const LoggingErrorEmoji = constants.emojis.statuses.no;
 
 export function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${

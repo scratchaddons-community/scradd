@@ -1,9 +1,9 @@
 import {
-	APIEmbed,
+type 	APIEmbed,
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	InteractionReplyOptions,
+type 	InteractionReplyOptions,
 } from "discord.js";
 import { client } from "../lib/client.js";
 

@@ -25,7 +25,6 @@
 		"serialize-error": "11.0.0"
 	},
 	"devDependencies": {
-		"@railway/cli": "3.0.12",
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "latest",
@@ -37,6 +36,9 @@
 		"nodemon": "2.0.22",
 		"prettier": "2.8.0",
 		"typescript": "5.0.4"
+	},
+	"optionalDependencies": {
+		"@railway/cli": "3.0.12"
 	},
 	"engines": {
 		"node": "18.12.1",

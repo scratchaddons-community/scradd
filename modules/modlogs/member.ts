@@ -1,10 +1,10 @@
 import {
-	APIRole,
+	type APIRole,
 	AuditLogEvent,
 	GuildAuditLogsEntry,
 	GuildMember,
-	PartialGuildMember,
-	PartialUser,
+	type PartialGuildMember,
+	type PartialUser,
 	roleMention,
 	time,
 	User,

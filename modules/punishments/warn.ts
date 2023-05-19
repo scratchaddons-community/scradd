@@ -1,7 +1,7 @@
 import {
 	ButtonInteraction,
 	ButtonStyle,
-	CacheType,
+	type CacheType,
 	ComponentType,
 	escapeMarkdown,
 	GuildMember,
@@ -13,7 +13,7 @@ import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
-import log, { LoggingEmojis } from "../modlogs/misc.js";
+import log, { LoggingEmojis, LoggingErrorEmoji } from "../modlogs/misc.js";
 import giveXp from "../xp/giveXp.js";
 import { DEFAULT_XP } from "../xp/misc.js";
 import filterToStrike, {
@@ -132,7 +132,7 @@ export default async function warn(
 		!member.roles.premiumSubscriberRole &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(`${LoggingEmojis.Error} Missing permissions to ban ${user.toString()}`));
+			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
 		return;
 	}
 
@@ -153,7 +153,7 @@ export default async function warn(
 			  )
 			: log(
 					`${
-						LoggingEmojis.Error
+						LoggingErrorEmoji
 					} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,

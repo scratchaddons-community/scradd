@@ -10,11 +10,11 @@ import {
 	channelMention,
 	DMChannel,
 	ForumLayoutType,
-	NonThreadGuildBasedChannel,
+	type NonThreadGuildBasedChannel,
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
-	AnyThreadChannel,
+	type AnyThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";

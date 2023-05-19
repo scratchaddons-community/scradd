@@ -1,6 +1,6 @@
 import {
-	AnySelectMenuInteraction,
-	APIEmbedField,
+	type AnySelectMenuInteraction,
+	type APIEmbedField,
 	ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
@@ -10,7 +10,7 @@ import {
 	InteractionResponse,
 	InteractionType,
 	ModalSubmitInteraction,
-	TextInputComponentData,
+	type TextInputComponentData,
 	TextInputStyle,
 	time,
 	TimestampStyles,
@@ -22,7 +22,7 @@ import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import {
-	Category,
+	type Category,
 	getThreadFromMember,
 	SA_CATEGORY,
 	SERVER_CATEGORY,

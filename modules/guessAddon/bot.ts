@@ -11,7 +11,7 @@ import { addons, manifest } from "../../common/extension.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { AddonQuestion, Dependencies } from "./questions.js";
+import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./questions.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -300,8 +300,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 				Array.from<AddonQuestion[]>({
 					length: Math.round(
 						(Array.from(addonProbabilities)
-							.reverse() // findLastIndex
-							.findIndex(([id]) => id === addon) +
+							.findLastIndex(([id]) => id === addon) +
 							1) /
 							addonProbabilities.length +
 							((addonProbabilities.find(([id]) => id === addon)?.[1] ?? 0) + 1),

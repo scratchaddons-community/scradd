@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits, TextBasedChannel } from "discord.js";
+import { ChannelType, PermissionFlagsBits, type TextBasedChannel } from "discord.js";
 import badWords from "../../badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 

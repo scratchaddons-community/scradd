@@ -9,7 +9,7 @@ import {
 	cleanContent,
 	Constants,
 	MessageType,
-	Snowflake,
+	type Snowflake,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
 import Fuse from "fuse.js";
