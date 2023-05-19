@@ -61,7 +61,11 @@ export default async function automodMessage(message: Message) {
 			await Promise.all(
 				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
 					const invite = await client?.fetchInvite(code).catch(() => {});
-					return invite?.guild && !WHITELISTED_INVITE_GUILDS.includes(invite.guild.id) && code;
+					return (
+						invite?.guild &&
+						!WHITELISTED_INVITE_GUILDS.includes(invite.guild.id) &&
+						code
+					);
 				}),
 			)
 		).filter((toWarn): toWarn is string => Boolean(toWarn));

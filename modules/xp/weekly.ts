@@ -18,7 +18,7 @@ export async function getChatters() {
 
 	const promises = weeklyWinners.map(
 		async (user) =>
-			`${weeklyWinners.findIndex((found) => found.xp === user.xp)+6}) ${
+			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
 				(await client.users.fetch(user.user)).username
 			} - ${user.xp.toLocaleString("en-us")}`,
 	);

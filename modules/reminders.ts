@@ -66,10 +66,10 @@ setInterval(async () => {
 						const nextWeeklyDate = new Date(reminder.date);
 						nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
 
-						const chatters = await getChatters()
+						const chatters = await getChatters();
 						const message = await channel.send(await getWeekly(nextWeeklyDate));
-						if(!chatters) return message
-						const thread= await message.startThread({
+						if (!chatters) return message;
+						const thread = await message.startThread({
 							name: `🏆 Weekly Winners week of ${
 								[
 									"January",
@@ -88,10 +88,11 @@ setInterval(async () => {
 							} ${nth(now.getUTCDate(), {
 								bold: false,
 								jokes: false,
-							})}`,reason:"To send all chatters"
+							})}`,
+							reason: "To send all chatters",
 						});
-						await thread.send(chatters)
-						return message
+						await thread.send(chatters);
+						return message;
 					}
 					case SpecialReminders.UpdateSACategory: {
 						if (channel?.type !== ChannelType.GuildCategory)

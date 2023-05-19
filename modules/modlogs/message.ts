@@ -1,9 +1,21 @@
 import { unifiedDiff } from "difflib";
-import { type Message, type PartialMessage, type Collection, type GuildTextBasedChannel, type MessageReaction, Colors } from "discord.js";
+import {
+	type Message,
+	type PartialMessage,
+	type Collection,
+	type GuildTextBasedChannel,
+	type MessageReaction,
+	Colors,
+} from "discord.js";
 import { diffString } from "json-diff";
 import config from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
-import { getBaseChannel, messageToText, extractMessageExtremities, getMessageJSON } from "../../util/discord.js";
+import {
+	getBaseChannel,
+	messageToText,
+	extractMessageExtremities,
+	getMessageJSON,
+} from "../../util/discord.js";
 import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);

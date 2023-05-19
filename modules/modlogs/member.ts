@@ -163,7 +163,7 @@ export async function guildMemberUpdate(
 
 export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 	if (oldUser.partial) return;
-	
+
 	if (oldUser.avatar !== newUser.avatar) {
 		await log(
 			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their avatar`,
