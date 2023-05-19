@@ -664,6 +664,14 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 			"server",
 		);
 
+	if (oldGuild.safetyAlertsChannel?.id !== newGuild.safetyAlertsChannel?.id) {
+		await log(
+			`${LoggingEmojis.SettingChange} Safety notifications channel ${
+				newGuild.safetyAlertsChannel ? `set to ${newGuild.safetyAlertsChannel.toString()}` : "unset"
+			}`,
+			"server",
+		);
+	}
 	if (oldGuild.splash !== newGuild.splash) {
 		const url = newGuild.splashURL({ size: 128 });
 		await log(
