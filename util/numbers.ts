@@ -74,7 +74,7 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  */
 export function nth(number: number, { bold = true, jokes = true } = {}) {
 	const formatted =
-		number.toLocaleString() +
+		number.toLocaleString("en-us") +
 		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th");
 	return (
 		(bold ? `**${formatted}**` : formatted) +

@@ -1,0 +1,173 @@
+import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
+import Fuse from "fuse.js";
+
+import constants from "../common/constants.js";
+import { manifest, addons } from "../common/extension.js";
+import defineCommand from "../lib/commands.js";
+import { escapeMessage, generateTooltip } from "../util/markdown.js";
+import { joinWithAnd } from "../util/text.js";
+
+const fuse = new Fuse(addons, {
+	findAllMatches: true,
+	ignoreLocation: true,
+	includeScore: true,
+
+	keys: [
+		{ name: "id", weight: 1 },
+		{ name: "name", weight: 1 },
+		{ name: "description", weight: 0.7 },
+		{ name: "latestUpdate.temporaryNotice", weight: 0.5 },
+		{ name: "info.text", weight: 0.4 },
+		{ name: "presets.name", weight: 0.3 },
+		{ name: "settings.name", weight: 0.3 },
+		{ name: "credits.note", weight: 0.2 },
+		{ name: "credits.name", weight: 0.1 },
+	],
+});
+
+defineCommand(
+	{
+		name: "addon",
+		censored: "channel",
+		description: `Replies with information about a specific addon available in v${
+			manifest.version_name ?? manifest.version
+		}`,
+
+		options: {
+			addon: {
+				autocomplete(interaction) {
+					return fuse
+						.search(interaction.options.getString("addon", true))
+						.filter(({ score }, index) => index < 25 && (score ?? 0) < 0.1)
+						.map((addon) => ({ name: addon.item.name, value: addon.item.id }));
+				},
+				description: "The name of the addon",
+				required: true,
+				type: ApplicationCommandOptionType.String,
+			},
+		},
+	},
+
+	async (interaction) => {
+		const input = interaction.options.getString("addon", true);
+		const addon = fuse.search(input)[0]?.item;
+
+		if (!addon) {
+			await interaction.reply({
+				content: `${constants.emojis.statuses.no} Could not find a matching addon!`,
+
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		const group = addon.tags.includes("popup")
+			? "Extension Popup Features"
+			: addon.tags.includes("easterEgg")
+			? "Easter Eggs"
+			: addon.tags.includes("theme")
+			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
+			: addon.tags.includes("community")
+			? `Scratch Website Features -> ${
+					addon.tags.includes("profiles")
+						? "Profiles"
+						: addon.tags.includes("projectPage")
+						? "Project Pages"
+						: addon.tags.includes("forums")
+						? "Forums"
+						: "Others"
+			  }`
+			: `Scratch Editor Features -> ${
+					addon.tags.includes("codeEditor")
+						? "Code Editor"
+						: addon.tags.includes("costumeEditor")
+						? "Costume Editor"
+						: addon.tags.includes("projectPlayer")
+						? "Project Player"
+						: "Others"
+			  }`;
+
+		const credits = joinWithAnd(
+			addon.credits?.map((credit) => {
+				const note = ("note" in credit && credit.note) || "";
+				return credit.link
+					? hyperlink(credit.name, credit.link, note)
+					: interaction.channel
+					? generateTooltip(interaction.channel, credit.name, note)
+					: credit.name;
+			}) ?? [],
+		);
+
+		const lastUpdatedIn =
+			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;
+
+		await interaction.reply({
+			embeds: [
+				{
+					color: constants.themeColor,
+
+					description:
+						`${escapeMessage(addon.description)}\n` +
+						`[See source code](https://github.com/${constants.urls.saRepo}/tree/${
+							manifest.version_name?.endsWith("-prerelease")
+								? "main"
+								: `v${encodeURI(manifest.version)}`
+						}/addons/${encodeURIComponent(addon.id)}/)${
+							addon.permissions?.length
+								? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
+								: ""
+						}`,
+
+					fields: [
+						...(credits
+							? [
+									{
+										inline: true,
+										name: "🫂 Contributors",
+										value: escapeMarkdown(credits),
+									},
+							  ]
+							: []),
+						{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
+						{
+							inline: true,
+							name: "📝 Version added",
+
+							value: escapeMarkdown(
+								`v${addon.versionAdded}${
+									addon.latestUpdate && lastUpdatedIn
+										? ` (${
+												interaction.channel
+													? generateTooltip(
+															interaction.channel,
+															lastUpdatedIn,
+															addon.latestUpdate.temporaryNotice,
+													  )
+													: lastUpdatedIn
+										  })`
+										: ""
+								}`,
+							),
+						},
+					],
+
+					footer: { text: `${addon.id}\nClick the addon name to enable it!` },
+
+					thumbnail: {
+						url: `${constants.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
+					},
+
+					title: addon.name,
+
+					url:
+						group === "Easter Eggs"
+							? undefined
+							: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
+									addon.id,
+							  )}`,
+				},
+			],
+		});
+	},
+);

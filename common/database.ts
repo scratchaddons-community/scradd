@@ -2,10 +2,10 @@ import exitHook from "async-exit-hook";
 import { type Message, RESTJSONErrorCodes, type Snowflake } from "discord.js";
 import papaparse from "papaparse";
 
-import client from "../client.js";
+import { client } from "../lib/client.js";
 import { extractMessageExtremities } from "../util/discord.js";
-import logError from "../util/logError.js";
-import { getLoggingThread } from "./logging.js";
+import logError from "./logError.js";
+import { getLoggingThread } from "../modules/modlogs/misc.js";
 
 export const DATABASE_THREAD = "databases";
 
@@ -15,7 +15,7 @@ const databases: { [key: string]: Message<true> | undefined } = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
-	if (name) {
+	if (name && message.attachments.size) {
 		databases[name] =
 			message.author.id === client.user?.id
 				? message
@@ -149,6 +149,20 @@ export default class Database<Data extends { [key: string]: string | number | bo
 			: [];
 
 		this.#extra = this.message.content.split("\n")[5];
+	}
+	updateById<Keys extends keyof Data>(
+		newData: Data["id"] extends string ? Pick<Data, Keys> & { id: string } : never,
+		oldData?: Omit<Data, Keys | "id">,
+	) {
+		const data = [...this.data];
+		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
+		const suggestion = data[index];
+		if (suggestion) {
+			data[index] = { ...suggestion, ...newData };
+		} else if (oldData) {
+			data.push({ ...oldData, ...newData } as unknown as Data);
+		}
+		this.data = data;
 	}
 
 	set data(content) {

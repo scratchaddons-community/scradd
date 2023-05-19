@@ -4,8 +4,9 @@ import path from "node:path";
 import fileSystem from "node:fs/promises";
 import mime from "mime-types";
 import { createRequire } from "node:module";
-// import CONSTANTS from "../common/CONSTANTS.js";
-// import client from "../client.js";
+import { client } from "../lib/client.js";
+// import config from "../common/config.js";
+// import {client} from "../lib/client.js";
 // import { REST, RESTGetAPIUserResult, RESTPostOAuth2AccessTokenResult, Routes } from "discord.js";
 
 const require = createRequire(import.meta.url);
@@ -41,6 +42,7 @@ http.createServer((request, response) => {
 					response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
 				else {
 					process.emitWarning("cleanDatabaseListeners called");
+					client.user.setPresence({ status: "dnd" });
 					cleanDatabaseListeners().then(() => {
 						process.emitWarning("cleanDatabaseListeners ran");
 						response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
@@ -75,9 +77,9 @@ http.createServer((request, response) => {
 
 			// 	const user = (await rest.get(Routes.user())) as RESTGetAPIUserResult;
 
-			// 	const ban = await CONSTANTS.guild.bans.fetch(user.id).catch(() => {});
+			// 	const ban = await config.guild.bans.fetch(user.id).catch(() => {});
 			// 	if (!ban) {
-			// 		return; // TODO: user is not banned
+			// 		return; // user is not banned
 			// 	}
 
 			// 	const userPublic = {
