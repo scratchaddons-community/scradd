@@ -667,7 +667,9 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	if (oldGuild.safetyAlertsChannel?.id !== newGuild.safetyAlertsChannel?.id) {
 		await log(
 			`${LoggingEmojis.SettingChange} Safety notifications channel ${
-				newGuild.safetyAlertsChannel ? `set to ${newGuild.safetyAlertsChannel.toString()}` : "unset"
+				newGuild.safetyAlertsChannel
+					? `set to ${newGuild.safetyAlertsChannel.toString()}`
+					: "unset"
 			}`,
 			"server",
 		);
