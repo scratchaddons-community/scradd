@@ -10,7 +10,7 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: startsWith(github.ref_name, 'dependabot/') != true
+        if: startsWith(github.ref_name, "dependabot/") != true
         runs-on: ubuntu-20.04
 
         steps:
@@ -30,7 +30,7 @@ jobs:
 
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') != true && always()
+        if: startsWith(github.ref_name, "dependabot/") != true && always()
         runs-on: ubuntu-20.04
 
         steps:
