@@ -215,5 +215,9 @@ defineModal("modInterestForm", async (interaction) => {
 			},
 		],
 	});
+	await interaction.reply({
+		ephemeral: true,
+		content: `${constants.emojis.statuses.yes} Thanks for filling it out!`,
+	});
 	await giveXp(interaction.user, url);
 });
