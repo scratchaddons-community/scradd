@@ -1,9 +1,13 @@
-import type { User } from "discord.js";
+import { User } from "discord.js";
 
 export function dad(name: string, _: User) {
-	return `Hi ${name.split(/\b/)[0] ?? name}! I’m Scradd!`;
+	return `Hi ${name.split(/\b/)[0] ?? name}, I’m Scradd!`;
 }
+
 export const dadEasterEggCount = 0;
+
+//todo
+// const ignoreTriggers = ["kill", "suicid", "depress", "pain", "sick", "abuse"];
 
 /**
  * - `word`
