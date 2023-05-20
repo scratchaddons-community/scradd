@@ -1,4 +1,4 @@
-import { User } from "discord.js";
+import type { User } from "discord.js";
 
 export function dad(name: string, _: User) {
 	return `Hi ${name.split(/\b/)[0] ?? name}, I’m Scradd!`;
