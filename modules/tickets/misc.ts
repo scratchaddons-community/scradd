@@ -17,7 +17,10 @@ export async function getThreadFromMember(user: GuildMember | User): Promise<Thr
 	return (
 		await asyncFilter(
 			threads.toJSON(),
-			async (thread) => (await getUserFromTicket(thread))?.id === user.id && thread,
+			async (thread) =>
+				thread.parent?.id === config.channels.tickets?.id &&
+				(await getUserFromTicket(thread))?.id === user.id &&
+				thread,
 		).next()
 	).value;
 }

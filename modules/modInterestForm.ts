@@ -10,7 +10,11 @@ import giveXp from "./xp/giveXp.js";
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
 const threads = await config.channels.admin.threads.fetchActive();
 const thread =
-	threads.threads.find((thread) => thread.name === "Moderator Interest Forms") ||
+	threads.threads.find(
+		(thread) =>
+			thread.parent?.id === config.channels.admin?.id &&
+			thread.name === "Moderator Interest Forms",
+	) ||
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
 		reason: "For mod interest forms",
@@ -133,7 +137,7 @@ defineModal("modInterestForm", async (interaction) => {
 		.reduce((accumulator, { count, removed }) => count * Number(!removed) + accumulator, 0);
 
 	const misc = interaction.fields.fields.get("misc")?.value;
-	const { url }=await thread.send({
+	const { url } = await thread.send({
 		embeds: [
 			{
 				color: interaction.member?.displayColor,
@@ -211,5 +215,5 @@ defineModal("modInterestForm", async (interaction) => {
 			},
 		],
 	});
-	await giveXp(interaction.user,url)
+	await giveXp(interaction.user, url);
 });

@@ -48,8 +48,14 @@ function decodeRegexes(regexes: RegExp[]) {
 }
 
 export const badWordRegexps = badWords.map(
-	([strings, words]) =>
-		new RegExp(`${decodeRegexes(strings)}|\\b(?:${decodeRegexes(words)})\\b`, "gi"),
+	([strings = [], words = [], prefixes = []]) =>
+		new RegExp(
+			(strings.length ? `${decodeRegexes(strings)}|` : "") +
+				`\\b(?:${words.length ? `(?:${decodeRegexes(words)})\\b` : ""}${
+					prefixes.length ? `|${decodeRegexes(prefixes)}` : ""
+				})`,
+			"gi",
+		),
 );
 
 export default function censor(text: string) {
