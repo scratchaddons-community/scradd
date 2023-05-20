@@ -7,15 +7,16 @@ export const xpDatabase = new Database<{
 	/** How much XP they have. */
 	xp: number;
 }>("xp");
-export const weeklyXpDatabase = new Database<{
+export const recentXpDatabase = new Database<{
 	/** The ID of the user. */
 	user: Snowflake;
 	/** How much XP they gained. */
 	xp: number;
+	time?: number;
 }>("recent_xp");
 
 await xpDatabase.init();
-await weeklyXpDatabase.init();
+await recentXpDatabase.init();
 
 export const DEFAULT_XP = 5;
 
@@ -89,4 +90,29 @@ export function getLevelForXp(xp: number): number {
 	while (getXpForLevel(level) < xp) level++;
 
 	return level;
+}
+
+export function getWeeklyXp(user: Snowflake) {
+	return recentXpDatabase.data.reduce((acc, gain) => {
+		if (
+			gain.user !== user ||
+			(gain.time ?? Number.POSITIVE_INFINITY) + 604_800_000 < Date.now()
+		)
+			return acc;
+		acc += gain.xp;
+		return acc;
+	}, 0);
+}
+
+export function getFullWeeklyData() {
+	return Object.entries(
+		[...recentXpDatabase.data].reduce<Record<Snowflake, number>>((acc, gain) => {
+			if ((gain.time ?? Number.POSITIVE_INFINITY) + 604_800_000 < Date.now()) return acc;
+
+			acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
+			return acc;
+		}, {}),
+	)
+		.map((entry) => ({ xp: entry[1], user: entry[0] }))
+		.sort((one, two) => two.xp - one.xp);
 }

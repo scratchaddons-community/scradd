@@ -11,7 +11,7 @@ import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import defineCommand from "../lib/commands.js";
-import { weeklyXpDatabase } from "./xp/misc.js";
+import { getWeeklyXp } from "./xp/misc.js";
 import { defineButton } from "../lib/components.js";
 
 export const userSettingsDatabase = new Database<{
@@ -264,8 +264,7 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
-		useMentions:
-			(weeklyXpDatabase.data.findIndex((gain) => user.id === gain.user) + 1 || 30) < 30,
+		useMentions: getWeeklyXp(user.id) > 100,
 		weeklyPings: process.env.NODE_ENV === "production",
 		resourcesDmed: false,
 	};

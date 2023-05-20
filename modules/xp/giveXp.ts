@@ -10,7 +10,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
-import { DEFAULT_XP, getLevelForXp, getXpForLevel, weeklyXpDatabase, xpDatabase } from "./misc.js";
+import { DEFAULT_XP, getLevelForXp, getXpForLevel, recentXpDatabase, xpDatabase } from "./misc.js";
 
 const latestMessages: { [key: Snowflake]: Message[] } = {};
 
@@ -111,12 +111,23 @@ export default async function giveXp(
 		);
 	}
 
-	const weekly = Array.from(weeklyXpDatabase.data);
-	const weeklyIndex = weekly.findIndex((entry) => entry.user === user.id);
+	const weekly = Array.from(recentXpDatabase.data);
+	const weeklyIndex = weekly.findIndex(
+		(entry) =>
+			entry.user === user.id &&
+			(entry.time ?? Number.POSITIVE_INFINITY) + 3_600_000 < Date.now(),
+	);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
-	if (weeklyIndex === -1) weekly.push({ user: user.id, xp: weeklyAmount });
-	else weekly[weeklyIndex] = { user: user.id, xp: weeklyAmount };
-	weeklyXpDatabase.data = weekly;
+	if (weeklyIndex === -1) {
+		weekly.push({ user: user.id, xp: weeklyAmount, time: Date.now() });
+	} else {
+		weekly[weeklyIndex] = {
+			user: user.id,
+			xp: weeklyAmount,
+			time: weekly[weeklyIndex]?.time ?? Date.now(),
+		};
+	}
+	recentXpDatabase.data = weekly;
 }
 
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url: string) {

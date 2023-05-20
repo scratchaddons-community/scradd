@@ -3,7 +3,7 @@ import type { ButtonInteraction, ChatInputCommandInteraction, User } from "disco
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase, nth } from "../../util/numbers.js";
-import { getLevelForXp, getXpForLevel, weeklyXpDatabase, xpDatabase } from "./misc.js";
+import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
 
 export default async function getUserRank(
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
@@ -22,10 +22,7 @@ export default async function getUserRank(
 	const xpGained = xp - xpForPreviousLevel;
 	const progress = xpGained / increment;
 	const rank = top.findIndex((info) => info.user === user.id) + 1;
-	const weeklyRank =
-		[...weeklyXpDatabase.data]
-			.sort((one, two) => two.xp - one.xp)
-			.findIndex((entry) => entry.user === user.id) + 1;
+	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
 	const canvas = createCanvas(1000, 50);

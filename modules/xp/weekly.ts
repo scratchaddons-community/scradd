@@ -4,10 +4,10 @@ import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getSettings } from "../settings.js";
-import { weeklyXpDatabase, xpDatabase } from "./misc.js";
+import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 
 export async function getChatters() {
-	const weeklyWinners = [...weeklyXpDatabase.data].sort((one, two) => two.xp - one.xp);
+	const weeklyWinners = getFullWeeklyData();
 	weeklyWinners.splice(
 		0,
 		weeklyWinners.findIndex(
@@ -36,8 +36,10 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			user: client.user.id,
 		},
 	];
-	const weeklyWinners = [...weeklyXpDatabase.data].sort((one, two) => two.xp - one.xp);
-	weeklyXpDatabase.data = [];
+	const weeklyWinners = getFullWeeklyData();
+	recentXpDatabase.data = recentXpDatabase.data.filter(
+		({ time }) => time && time + 604_800_000 < Date.now(),
+	);
 
 	const { active } = config.roles;
 	const activeMembers = weeklyWinners.filter((item) => item.xp > 350);
