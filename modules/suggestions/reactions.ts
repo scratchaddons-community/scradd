@@ -25,6 +25,7 @@ export default async function updateReactions(reaction: MessageReaction) {
 			return false;
 		}
 	}
+	return true;
 }
 
 export function addToDatabase(thread: AnyThreadChannel<boolean>) {
