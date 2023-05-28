@@ -344,7 +344,7 @@ const events: {
 	// async [AuditLogEvent.AutoModerationRuleUpdate](entry) {}, // TODO
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
-			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} created${extraAuditLogsInfo(
+			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} deleted${extraAuditLogsInfo(
 				entry,
 			)} (ID: ${entry.target.id})`,
 			"server",
@@ -563,12 +563,6 @@ defineEvent("guildUpdate", async (oldGuild, newGuild) => {
 	if (oldGuild.maximumMembers !== newGuild.maximumMembers) {
 		await log(
 			`${LoggingEmojis.ServerUpdate} Maximum members set to ${newGuild.maximumMembers}`,
-			"server",
-		);
-	}
-	if (oldGuild.maxStageVideoChannelUsers !== newGuild.maxStageVideoChannelUsers) {
-		await log(
-			`${LoggingEmojis.ServerUpdate} Maximum members in a stage video channel set to ${newGuild.maxStageVideoChannelUsers}`,
 			"server",
 		);
 	}

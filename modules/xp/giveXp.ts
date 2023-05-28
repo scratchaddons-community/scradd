@@ -115,7 +115,7 @@ export default async function giveXp(
 	const weeklyIndex = weekly.findIndex(
 		(entry) =>
 			entry.user === user.id &&
-			(entry.time ?? Number.POSITIVE_INFINITY) + 3_600_000 < Date.now(),
+			(entry.time ?? Number.POSITIVE_INFINITY) + 3_600_000 > Date.now(),
 	);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 	if (weeklyIndex === -1) {
@@ -133,30 +133,28 @@ export default async function giveXp(
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
+	const showButton = getSettings(member, false)?.levelUpPings === undefined;
 
 	await config.channels.bots?.send({
 		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
-		components:
-			getSettings(member, false)?.levelUpPings === undefined
-				? [
-						{
-							components: [
-								{
-									customId: "levelUpPings_toggleSetting",
-									type: ComponentType.Button,
-									label: `${
-										getDefaultSettings(member).levelUpPings
-											? "Disable"
-											: "Enable"
-									} Pings`,
-									style: ButtonStyle.Success,
-								},
-							],
-							type: ComponentType.ActionRow,
-						},
-				  ]
-				: [],
+		components: showButton
+			? [
+					{
+						components: [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: `${
+									getDefaultSettings(member).levelUpPings ? "Disable" : "Enable"
+								} Pings`,
+								style: ButtonStyle.Success,
+							},
+						],
+						type: ComponentType.ActionRow,
+					},
+			  ]
+			: [],
 
 		embeds: [
 			{
@@ -190,7 +188,9 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url: strin
 
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
-					text: "View the leaderboard with /xp top\nView someone’s XP with /xp rank\nToggle pings with /settings",
+					text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank${
+						!showButton ? `\nToggle pings with /settings` : ""
+					}`,
 				},
 			},
 		],

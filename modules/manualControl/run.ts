@@ -50,7 +50,11 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 	await interaction.deferReply();
 	const code = interaction.fields.getTextInputValue("code");
 	try {
-		const output = await eval(`(async () => {${code}})()`);
+		const output = await eval(
+			`(async () => {${
+				code.includes("\n") || code.includes("return") ? code : `return ${code}`
+			}})()`,
+		);
 		const type = typeof output;
 		await interaction.editReply({
 			files: [

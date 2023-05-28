@@ -12,6 +12,7 @@ import log, { LoggingErrorEmoji } from "../modlogs/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import censor, { badWordsAllowed } from "./language.js";
+import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = [
 	config.guild.id,
@@ -104,7 +105,7 @@ export default async function automodMessage(message: Message) {
 
 	if (!allowBadWords) {
 		const badWords = [
-			censor(message.content),
+			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
 		].reduce<undefined | { strikes: number; words: string[][] }>(
 			(bad, censored) =>

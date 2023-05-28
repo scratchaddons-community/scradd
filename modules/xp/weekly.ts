@@ -12,7 +12,7 @@ export async function getChatters() {
 		0,
 		weeklyWinners.findIndex(
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
-		),
+		) + 1,
 	);
 	if (!weeklyWinners.length) return;
 
@@ -20,7 +20,7 @@ export async function getChatters() {
 		async (user) =>
 			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
 				(await client.users.fetch(user.user)).username
-			} - ${user.xp.toLocaleString("en-us")}`,
+			} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
 	);
 	return "```\n" + (await Promise.all(promises)).join("\n").replaceAll("```", "'''") + "\n```";
 }
@@ -38,7 +38,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	];
 	const weeklyWinners = getFullWeeklyData();
 	recentXpDatabase.data = recentXpDatabase.data.filter(
-		({ time }) => time && time + 604_800_000 < Date.now(),
+		({ time }) => time + 604_800_000 > Date.now(),
 	);
 
 	const { active } = config.roles;

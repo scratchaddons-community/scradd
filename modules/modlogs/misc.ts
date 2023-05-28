@@ -46,7 +46,7 @@ export default async function log(
 		if (typeof file === "string" || file.content.includes("```")) return true;
 
 		const lines = file.content.split("\n");
-		return lines.length > 10 || lines.find((line) => line.length > 50);
+		return lines.length > 10 || lines.find((line) => line.length > 100);
 	});
 	const embeddedFiles =
 		externalFileIndex === -1

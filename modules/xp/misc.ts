@@ -12,7 +12,7 @@ export const recentXpDatabase = new Database<{
 	user: Snowflake;
 	/** How much XP they gained. */
 	xp: number;
-	time?: number;
+	time: number;
 }>("recent_xp");
 
 await xpDatabase.init();

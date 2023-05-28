@@ -62,8 +62,9 @@ defineCommand(
 		options: {
 			message: {
 				type: ApplicationCommandOptionType.String,
-				description: "Message content",
+				description: "Message content (send ‘-’ to open a multi-line input)",
 				maxLength: 2000,
+				required: true,
 			},
 			reply: {
 				type: ApplicationCommandOptionType.String,

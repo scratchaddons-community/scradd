@@ -121,7 +121,10 @@ export default class Database<Data extends { [key: string]: string | number | bo
 			return await promise;
 		};
 
-		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
+		timeouts[this.message.id] = {
+			timeout: setTimeout(async () => await callback(), 15_000),
+			callback,
+		};
 		timeoutId && clearTimeout(timeoutId.timeout);
 	}
 
