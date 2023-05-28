@@ -86,10 +86,11 @@ defineCommand(
 
 defineButton("toggleSetting", async (interaction, setting = "") => {
 	if (
-		(interaction.message.interaction &&
-			interaction.message.interaction.user.id === interaction.user.id) ||
-		(interaction.message.mentions.parsedUsers.size &&
-			interaction.message.mentions.users.has(interaction.user.id))
+		!interaction.message.flags.has("Ephemeral") &&
+		!(
+			interaction.message.mentions.parsedUsers.size &&
+			interaction.message.mentions.users.has(interaction.user.id)
+		)
 	) {
 		return await interaction.reply({
 			ephemeral: true,

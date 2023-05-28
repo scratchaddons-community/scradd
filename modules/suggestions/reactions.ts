@@ -13,8 +13,9 @@ export default async function updateReactions(reaction: MessageReaction) {
 	) {
 		const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
 		if (
-			defaultEmoji?.id === reaction.emoji.id &&
-			defaultEmoji?.name === reaction.emoji.name &&
+			(defaultEmoji?.id
+				? defaultEmoji?.id === reaction.emoji.id
+				: defaultEmoji?.name === reaction.emoji.name) &&
 			!message.channel.locked
 		) {
 			suggestionsDatabase.updateById(
