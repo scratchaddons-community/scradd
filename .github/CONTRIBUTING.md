@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](https://github.com/scratchaddons-community/scradd/blob/main/CODE_OF_CONDUCT.md).
+For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive the `@Scradd Contributor` role in the Scratch Addons Discord and access to the private Scradd Testing Discord.
 
 ## General Guidelines
 
@@ -28,6 +28,7 @@ Contributions are welcome! Be sure to file an issue first (see above). If you kn
 
 Please:
 
--   Fill out the template. Replace all comments (text flanked by `<!--` and `-->`).
+-   Enable actions on your fork by going to the Actions tab (on your fork) and pushing the button. That will add automatic linting and formatting to your code.
 -   Minimize lint errors.
+-   Open an issue before you start working on something.
 -   Write meaningful commit messages, AKA more than one word long.
