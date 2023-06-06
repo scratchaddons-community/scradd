@@ -30,7 +30,7 @@ jobs:
 
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') != true && always()
+        if: startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
 
         steps:
@@ -59,7 +59,6 @@ jobs:
 
     analyze:
         name: Analyze
-        if: always()
         runs-on: ubuntu-20.04
 
         steps:
@@ -79,7 +78,6 @@ jobs:
 
     build:
         name: Build
-        if: always()
         runs-on: ubuntu-20.04
 
         steps:
