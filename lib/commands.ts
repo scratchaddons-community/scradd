@@ -183,6 +183,9 @@ export default function defineCommand<T extends typeof ApplicationCommandType["M
 export default function defineCommand(data: CommandData, command: Command) {
 	const type = data.type ?? ApplicationCommandType.ChatInput;
 
+	if (commands.get(data.name))
+		throw new ReferenceError("Command " + data.name + " already exists");
+
 	commandData.push({
 		name: data.name,
 		description: data.description ?? "",
