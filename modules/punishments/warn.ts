@@ -159,12 +159,14 @@ export default async function warn(
 	}
 
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
-		await user.send(
-			`__**This is your last chance. If you get another strike before ${time(
-				new Date((allUserStrikes[0]?.date ?? Date.now()) + EXPIRY_LENGTH),
-				TimestampStyles.LongDate,
-			)}, you will be banned.**__`,
-		);
+		await user
+			.send(
+				`__**This is your last chance. If you get another strike before ${time(
+					new Date((allUserStrikes[0]?.date ?? Date.now()) + EXPIRY_LENGTH),
+					TimestampStyles.LongDate,
+				)}, you will be banned.**__`,
+			)
+			.catch(() => {});
 	}
 }
 export async function removeStrike(interaction: ButtonInteraction<CacheType>, id: string) {
