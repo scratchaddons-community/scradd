@@ -13,7 +13,7 @@ import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
-import log, { LoggingEmojis, LoggingErrorEmoji } from "../modlogs/misc.js";
+import log, { LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
 import giveXp from "../xp/giveXp.js";
 import { DEFAULT_XP } from "../xp/misc.js";
 import filterToStrike, {

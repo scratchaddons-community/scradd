@@ -1,7 +1,42 @@
+import { MessageType } from "discord.js";
+import defineEvent from "../lib/events.js";
+import { truncateText } from "../util/text.js";
+import { stripMarkdown } from "../util/markdown.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import defineEvent from "../lib/events.js";
 import { nth } from "../util/numbers.js";
+
+defineEvent("messageCreate", async (message) => {
+	if (
+		!message.flags.has("Ephemeral") &&
+		message.type !== MessageType.ThreadStarterMessage &&
+		message.channel.id === config.channels.updates?.id
+	) {
+		await message.startThread({
+			name: truncateText(
+				stripMarkdown(message.cleanContent)?.split("\n")[0] || "New update!",
+				50,
+			),
+
+			reason: "New upcoming update",
+		});
+	}
+});
+
+defineEvent("threadCreate", async (thread, newlyCreated) => {
+	if (thread.guild.id !== config.guild.id || !newlyCreated) return;
+
+	const toPing = [config.channels.mod?.id, config.channels.modlogs?.id].includes(
+		thread.parent?.id,
+	)
+		? config.roles.mod?.toString()
+		: thread.parent?.id === config.channels.exec?.id
+		? "<@&1046043735680630784>"
+		: thread.parent?.id === config.channels.admin?.id
+		? config.roles.admin?.toString()
+		: undefined;
+	if (toPing) await thread.send({ content: toPing, allowedMentions: { parse: ["roles"] } });
+});
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -33,7 +68,6 @@ defineEvent("guildMemberAdd", async (member) => {
 		}`,
 	);
 });
-
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 

@@ -45,7 +45,7 @@ const { default: logError } = await import("./common/logError.js");
 if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
-	const { default: log, LoggingEmojis } = await import("./modules/modlogs/misc.js");
+	const { default: log, LoggingEmojis } = await import("./modules/logging/misc.js");
 	await log(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`, "server");
 }
 

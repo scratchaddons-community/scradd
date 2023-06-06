@@ -2,10 +2,11 @@ import { ApplicationCommandType, ApplicationCommandOptionType, User } from "disc
 import { client } from "../../lib/client.js";
 import defineCommand from "../../lib/commands.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { defineModal } from "../../lib/components.js";
+import { defineButton, defineModal } from "../../lib/components.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say, sayAutocomplete } from "./say.js";
+import info, { syncConfigButton } from "./info.js";
 
 defineCommand(
 	{
@@ -83,3 +84,18 @@ defineCommand(
 defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
 });
+
+defineCommand(
+	{
+		name: "info",
+		description: "Learn about me",
+
+		subcommands: {
+			status: { description: "Show bot status" },
+			credits: { description: "Show credit information" },
+			config: { description: "Show configuration settings" },
+		},
+	},
+	info,
+);
+defineButton("syncConfig", syncConfigButton);

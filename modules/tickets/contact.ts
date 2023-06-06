@@ -19,7 +19,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import log, { LoggingEmojis } from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import {
 	type Category,

@@ -5,7 +5,7 @@ import papaparse from "papaparse";
 import { client } from "../lib/client.js";
 import { extractMessageExtremities } from "../util/discord.js";
 import logError from "./logError.js";
-import { getLoggingThread } from "../modules/modlogs/misc.js";
+import { getLoggingThread } from "../modules/logging/misc.js";
 
 export const DATABASE_THREAD = "databases";
 

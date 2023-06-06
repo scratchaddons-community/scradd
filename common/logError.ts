@@ -1,7 +1,7 @@
 import { inlineCode, Message } from "discord.js";
 import { serializeError } from "serialize-error";
 
-import log, { LoggingErrorEmoji } from "../modules/modlogs/misc.js";
+import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
 import { sanitizePath } from "../util/files.js";
 import { cleanDatabaseListeners } from "./database.js";
 

@@ -17,7 +17,7 @@ import { truncateText } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LoggingEmojis } from "../modlogs/misc.js";
+import log, { LoggingEmojis } from "../logging/misc.js";
 
 const fetchedChannels = new Set<Snowflake>();
 export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {

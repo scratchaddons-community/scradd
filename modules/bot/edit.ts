@@ -10,7 +10,7 @@ import {
 import { diffString } from "json-diff";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../modlogs/misc.js";
+import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../../common/logError.js";
 
