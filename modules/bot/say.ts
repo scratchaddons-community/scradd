@@ -77,27 +77,28 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 	function getMessageInfo(message: typeof messages[number]) {
 		const component = message.components[0]?.components[0];
 		return {
-			name: `@${message.author.username} - ${truncateText(
-				message.content
-					? stripMarkdown(
-							interaction.channel
-								? cleanContent(message.content, interaction.channel)
-								: message.content,
-					  )
-					: message.embeds[0]?.title ||
-							message.stickers.first()?.name ||
-							(component?.type === ComponentType.Button
+			name: `${truncateText(
+				`@${message.author.username} - ${
+					message.content
+						? stripMarkdown(
+								interaction.channel
+									? cleanContent(message.content, interaction.channel)
+									: message.content,
+						  )
+						: message.embeds[0]?.title ||
+						  message.stickers.first()?.name ||
+						  (component?.type === ComponentType.Button
 								? component.label
 								: component?.placeholder) ||
-							message.attachments.first()?.name ||
-							"",
-				40,
+						  message.attachments.first()?.name ||
+						  ""
+				}`,
+				79,
 			)} (${new Date(message.createdTimestamp).toLocaleDateString("en-us", {
 				month: "short",
 				day: "2-digit",
 				hour: "2-digit",
 				minute: "2-digit",
-				second: "2-digit",
 				hour12: true,
 			})})`,
 			value: message.id,
