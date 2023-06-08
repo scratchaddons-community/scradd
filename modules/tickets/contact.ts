@@ -42,6 +42,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			style: TextInputStyle.Paragraph,
 			maxLength: 1024,
@@ -62,6 +63,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			maxLength: 1024,
 			style: TextInputStyle.Paragraph,
@@ -93,6 +95,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			maxLength: 1024,
 			style: TextInputStyle.Paragraph,
@@ -112,6 +115,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			maxLength: 1024,
 			style: TextInputStyle.Paragraph,
@@ -123,6 +127,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			maxLength: 75,
 			style: TextInputStyle.Short,
@@ -134,6 +139,7 @@ const allFields = {
 		{
 			type: ComponentType.TextInput,
 			customId: "BODY",
+			minLength: 20,
 			required: true,
 			maxLength: 1024,
 			style: TextInputStyle.Paragraph,
