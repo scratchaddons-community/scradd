@@ -166,9 +166,7 @@ defineButton("contactUser", async (interaction, userId = "") => {
 
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
-	await getThreadFromMember(member).then(
-		async (thread) => {
-			await thread?.setArchived(true, "Member left");
-		},
-	);
+	await getThreadFromMember(member).then(async (thread) => {
+		await thread?.setArchived(true, "Member left");
+	});
 });

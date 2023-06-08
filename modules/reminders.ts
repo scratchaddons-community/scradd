@@ -140,7 +140,7 @@ setInterval(async () => {
 								user: client.user.id,
 							},
 						];
-						
+
 						return await channel.send({
 							content: "🔔 @here </bump:947088344167366698> the server!",
 							allowedMentions: { parse: ["everyone"] },
