@@ -11,7 +11,7 @@ import constants from "./common/constants.js";
 
 dns.setDefaultResultOrder("ipv4first");
 GlobalFonts.registerFromPath(
-	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `./common/sora/font.ttf`),
+	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
 	"Sora",
 );
 
