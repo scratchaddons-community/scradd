@@ -13,7 +13,7 @@
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@napi-rs/canvas": "0.1.40",
+		"@napi-rs/canvas": "0.1.41",
 		"async-exit-hook": "2.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "14.11.0",
