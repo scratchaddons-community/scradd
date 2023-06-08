@@ -5,9 +5,11 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getSettings } from "../settings.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
+import constants from "../../common/constants.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
+	const winner = weeklyWinners[0]?.user;
 	weeklyWinners.splice(
 		0,
 		weeklyWinners.findIndex(
@@ -16,13 +18,48 @@ export async function getChatters() {
 	);
 	if (!weeklyWinners.length) return;
 
-	const promises = weeklyWinners.map(
-		async (user) =>
-			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
-				(await client.users.fetch(user.user)).username
-			} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
+	const formatted = await Promise.all(
+		weeklyWinners.map(
+			async (user) =>
+				`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
+					(
+						await client.users.fetch(user.user)
+					).username
+				} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
+		),
 	);
-	return "```\n" + (await Promise.all(promises)).join("\n").replaceAll("```", "'''") + "\n```";
+
+	while (formatted.join("\n").length > 4096) formatted.pop();
+	const ending =
+		weeklyWinners[formatted.length] &&
+		` ${weeklyWinners[formatted.length]?.xp.toLocaleString("en-us")} XP`;
+	const filtered = ending ? formatted.filter((line) => !line.endsWith(ending)) : formatted;
+
+	return {
+		embeds: [
+			{
+				description: "```\n" + filtered.join("\n").replaceAll("```", "'''") + "\n```",
+				footer: ending
+					? {
+							icon_url: config.guild.iconURL() ?? undefined,
+							text: `${
+								weeklyWinners.length - filtered.length
+							} more users with <=${ending}`,
+					  }
+					: undefined,
+				color: constants.themeColor,
+				thumbnail: winner
+					? {
+							url: (
+								await config.guild.members
+									.fetch(winner)
+									.catch(() => client.users.fetch(winner))
+							).displayAvatarURL(),
+					  }
+					: undefined,
+			},
+		],
+	} satisfies MessageCreateOptions;
 }
 
 export default async function getWeekly(nextWeeklyDate: Date) {

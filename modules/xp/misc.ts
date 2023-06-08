@@ -114,5 +114,6 @@ export function getFullWeeklyData() {
 		}, {}),
 	)
 		.map((entry) => ({ xp: entry[1], user: entry[0] }))
+		.filter((entry) => entry.xp > 0)
 		.sort((one, two) => two.xp - one.xp);
 }
