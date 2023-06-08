@@ -129,6 +129,18 @@ setInterval(async () => {
 					case SpecialReminders.Bump: {
 						if (!channel?.isTextBased())
 							throw new TypeError("Could not find bumping channel");
+
+						remindersDatabase.data = [
+							...remindersDatabase.data,
+							{
+								channel: "881619501018394725",
+								date: Date.now() + 1800000,
+								reminder: undefined,
+								id: SpecialReminders.Bump,
+								user: client.user.id,
+							},
+						];
+						
 						return await channel.send({
 							content: "🔔 @here </bump:947088344167366698> the server!",
 							allowedMentions: { parse: ["everyone"] },
@@ -430,16 +442,16 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.guild?.id === config.guild.id &&
 		message.interaction?.commandName == "bump" &&
-		message.author.id === "302050872383242240" &&
-		!remindersDatabase.data.find(
-			(reminder) => reminder.id === SpecialReminders.Bump && reminder.user === client.user.id,
-		)
+		message.author.id === "302050872383242240"
 	) {
 		remindersDatabase.data = [
-			...remindersDatabase.data,
+			...remindersDatabase.data.filter(
+				(reminder) =>
+					!(reminder.id === SpecialReminders.Bump && reminder.user === client.user.id),
+			),
 			{
 				channel: "881619501018394725",
-				date: Date.now() + 7260000,
+				date: Date.now() + 7200000,
 				reminder: undefined,
 				id: SpecialReminders.Bump,
 				user: client.user.id,
