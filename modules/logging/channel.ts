@@ -94,9 +94,6 @@ export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Thre
 			LoggingEmojis.Thread
 		} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
 		"channels",
-		typeof entry.target.url === "string"
-			? { button: { label: "View Thread", url: entry.target.url } }
-			: undefined,
 	);
 }
 export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadDelete>) {
