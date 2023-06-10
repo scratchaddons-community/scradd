@@ -5,13 +5,20 @@ import {
 	escapeMarkdown,
 	GuildMember,
 	Message,
+	chatInputApplicationCommandMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { addons, manifest } from "../../common/extension.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
-import { checkIfUserPlaying, COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
+import { checkIfUserPlaying, COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./questions.js";
+import config from "../../common/config.js";
+
+export const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
+	"addon",
+	(await config.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
+)} command for more information about this addon!*`;
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -38,11 +45,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 		backInfo:
 			| string
 			| false
-			| {
-					probabilities: Probabilities;
-					askedQuestions: string[];
-					justAsked: string;
-			  } = false,
+			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string } = false,
 		justAnswered = "",
 	): Promise<Message | void> {
 		const questions =
@@ -74,9 +77,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 
 			if (!oldMessage) throw new ReferenceError("No questions exist on initialization");
 
-			await interaction.editReply({
-				components: disableComponents(oldMessage.components),
-			});
+			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
 				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
@@ -270,9 +271,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 
 				CURRENTLY_PLAYING.delete(interaction.user.id);
 
-				await interaction.editReply({
-					components: disableComponents(message.components),
-				});
+				await interaction.editReply({ components: disableComponents(message.components) });
 				await interaction.followUp(
 					`🛑 ${interaction.user.toString()},you didn’t answer my question! I’m going to end the game.`,
 				);
@@ -350,11 +349,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 		backInfo:
 			| string
 			| false
-			| {
-					probabilities: Probabilities;
-					askedQuestions: string[];
-					justAsked: string;
-			  },
+			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string },
 		justAnswered: string,
 	) {
 		const foundAddon = addons.find(({ id }) => id === addonProbabilities[0]?.[0]);
