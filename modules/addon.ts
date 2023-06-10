@@ -1,29 +1,17 @@
-import { ApplicationCommandOptionType, escapeMarkdown, hyperlink } from "discord.js";
-import { Searcher } from "fast-fuzzy";
+import {
+	ApplicationCommandOptionType,
+	ButtonStyle,
+	ComponentType,
+	escapeMarkdown,
+	hyperlink,
+} from "discord.js";
+import { matchSorter } from "match-sorter";
 
 import constants from "../common/constants.js";
-import { manifest, addons } from "../common/extension.js";
+import { manifest, addons, addonSearchOptions } from "../common/extension.js";
 import defineCommand from "../lib/commands.js";
 import { escapeMessage, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-
-const searcher = new Searcher(addons, {
-	threshold: 0.1,
-	ignoreSymbols: false,
-
-	keySelector(addon) {
-		return [
-			addon.id,
-			addon.name,
-			addon.description,
-			addon.latestUpdate?.temporaryNotice ?? "",
-			addon.info?.map((info) => info.text) ?? "",
-			addon.presets?.map((preset) => preset.name) ?? "",
-			addon.settings?.map((setting) => setting.name) ?? "",
-			addon.credits?.map((credit) => [credit.note ?? "", credit.name]) ?? "",
-		].flat(2);
-	},
-});
 
 defineCommand(
 	{
@@ -37,12 +25,10 @@ defineCommand(
 			addon: {
 				autocomplete(interaction) {
 					const query = interaction.options.getString("addon");
-					return (query?.trim() ? searcher.search(query) : addons.slice(25)).map(
-						(addon) => ({
-							name: addon.name,
-							value: addon.id,
-						}),
-					);
+					return matchSorter(addons, query ?? "", addonSearchOptions).map((addon) => ({
+						name: addon.name,
+						value: addon.id,
+					}));
 				},
 				description: "The name of the addon",
 				required: true,
@@ -53,7 +39,7 @@ defineCommand(
 
 	async (interaction) => {
 		const input = interaction.options.getString("addon", true);
-		const addon = searcher.search(input)[0];
+		const addon = matchSorter(addons, input, addonSearchOptions)[0];
 
 		if (!addon) {
 			await interaction.reply({
@@ -112,16 +98,9 @@ defineCommand(
 
 					description:
 						`${escapeMessage(addon.description)}\n` +
-						`[See source code](https://github.com/${constants.urls.saRepo}/tree/${
-							manifest.version_name?.endsWith("-prerelease")
-								? "main"
-								: `v${encodeURI(manifest.version)}`
-						}/addons/${encodeURIComponent(addon.id)}/)${
-							addon.permissions?.length
-								? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
-								: ""
-						}`,
-
+						(addon.permissions?.length
+							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
+							: ""),
 					fields: [
 						...(credits
 							? [
@@ -155,7 +134,7 @@ defineCommand(
 						},
 					],
 
-					footer: { text: `${addon.id}\nClick the addon name to enable it!` },
+					footer: { text: addon.id },
 
 					thumbnail: {
 						url: `${constants.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
@@ -163,12 +142,27 @@ defineCommand(
 
 					title: addon.name,
 
-					url:
-						group === "Easter Eggs"
-							? undefined
-							: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
-									addon.id,
-							  )}`,
+					url: `https://github.com/${constants.urls.saRepo}/tree/${
+						manifest.version_name?.endsWith("-prerelease")
+							? "master"
+							: `v${encodeURI(manifest.version)}`
+					}/addons/${encodeURIComponent(addon.id)}/`,
+				},
+			],
+
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							style: ButtonStyle.Link,
+							url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
+								addon.id,
+							)}`,
+							label: "Enable Addon",
+						},
+					],
 				},
 			],
 		});

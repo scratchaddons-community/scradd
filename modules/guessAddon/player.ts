@@ -13,15 +13,15 @@ import {
 	type Snowflake,
 	TextInputStyle,
 } from "discord.js";
-import { Searcher } from "fast-fuzzy";
 import constants from "../../common/constants.js";
-import { addons } from "../../common/extension.js";
+import { addonSearchOptions, addons } from "../../common/extension.js";
 import type AddonManifest from "../../common/types/addonManifest.js";
 import { defineModal } from "../../lib/components.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { COLLECTOR_TIME, commandMarkdown, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type GroupName, GROUP_NAMES } from "./questions.js";
+import { matchSorter } from "match-sorter";
 
 const QUESTIONS_BY_CATEGORY = Object.values(QUESTIONS_BY_ADDON)
 	.flat()
@@ -363,20 +363,12 @@ export default async function player(interaction: ChatInputCommandInteraction<"c
 		});
 }
 
-const searcher = new Searcher(addons, {
-	threshold: 0.3,
-	ignoreSymbols: false,
-
-	keySelector(addon) {
-		return [addon.id, addon.name, addon.description];
-	},
-});
 defineModal("guessModal", async (interaction) => {
 	const game = games.get(interaction.user.id);
 	if (!game) return;
 
 	const query = interaction.fields.getTextInputValue("addon");
-	const addon = searcher.search(query)[0];
+	const addon = matchSorter(addons, query, addonSearchOptions)[0];
 
 	game.collector.resetTimer();
 

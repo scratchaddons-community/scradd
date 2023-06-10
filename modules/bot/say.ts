@@ -12,12 +12,12 @@ import {
 	type Snowflake,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
-import { search } from "fast-fuzzy";
 import { truncateText } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
+import { matchSorter } from "match-sorter";
 
 const fetchedChannels = new Set<Snowflake>();
 export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
@@ -35,63 +35,56 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 					!message.flags.has("Ephemeral") &&
 					(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
 			)
-			.map(async (message) => ({
-				...message,
-				content: await messageToText(message, false),
-			})) ?? [],
+			.map(async (message) => {
+				const content = await messageToText(message, false);
+				return {
+					id: message.id,
+					embeds: message.embeds.map((embed) => embed.toJSON()),
+					interaction: message.interaction && "/" + message.interaction.commandName,
+					attachments: message.attachments.map((attachment) => attachment.name),
+					stickers: message.stickers.map((sticker) => sticker.name),
+					author: message.author.username,
+					components: message.components,
+					createdTimestamp: message.createdTimestamp,
+					content: stripMarkdown(
+						interaction.channel ? cleanContent(content, interaction.channel) : content,
+					),
+				};
+			}) ?? [],
 	);
 	const reply = interaction.options.getString("reply");
-	if (!reply?.trim()) return messages.slice(0, 25).map(getMessageInfo);
-
-	return search(reply, messages, {
-		threshold: 0.1,
-		ignoreSymbols: false,
-
-		keySelector(message) {
-			return [
-				message.content,
-				message.id,
-				message.embeds.map((embed) => [
-					embed.title ?? "",
-					embed.description ?? "",
-					embed.fields.map((field) => [field.name, field.value]),
-					embed.footer?.text ?? "",
-					embed.author?.name ?? "",
-				]),
-
-				message.interaction?.commandName ?? "",
-				message.attachments.map((attachment) => attachment.name),
-				message.stickers.map((sticker) => sticker.name),
-				message.author.username,
-				message.components.map((row) =>
-					row.components.map(
-						(component) =>
-							(component.type === ComponentType.Button
-								? component.label
-								: component.placeholder) ?? "",
-					),
-				),
-			].flat(4);
-		},
+	return matchSorter(messages, reply ?? "", {
+		keys: [
+			"content",
+			"id",
+			"embeds.*.title",
+			"embeds.*.description",
+			"embeds.*.fields.*.name",
+			"embeds.*.fields.*.value",
+			"embeds.*.footer.text",
+			"embeds.*.author.name",
+			"interaction",
+			"attachments.*",
+			"stickers.*",
+			"author",
+			"components.*.components.*.label",
+			"components.*.components.*.placeholder",
+		],
 	}).map(getMessageInfo);
 	function getMessageInfo(message: typeof messages[number]) {
 		const component = message.components[0]?.components[0];
 		return {
 			name: `${truncateText(
-				`@${message.author.username} - ${
-					message.content
-						? stripMarkdown(
-								interaction.channel
-									? cleanContent(message.content, interaction.channel)
-									: message.content,
-						  )
-						: message.embeds[0]?.title ||
-						  message.stickers.first()?.name ||
-						  (component?.type === ComponentType.Button
-								? component.label
-								: component?.placeholder) ||
-						  message.attachments.first()?.name ||
-						  ""
+				`@${message.author} - ${
+					message.content ||
+					message.embeds[0]?.title ||
+					message.stickers[0] ||
+					message.attachments[0] ||
+					message.interaction ||
+					(component?.type === ComponentType.Button
+						? component.label
+						: component?.placeholder) ||
+					""
 				}`,
 				79,
 			)} (${new Date(message.createdTimestamp).toLocaleDateString("en-us", {
