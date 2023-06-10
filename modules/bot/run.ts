@@ -48,7 +48,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 
 export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 	await interaction.deferReply();
-	const code = interaction.fields.getTextInputValue("code");
+	const code = interaction.fields.getTextInputValue("code").trim();
 	try {
 		const output = await eval(
 			`(async () => {${
