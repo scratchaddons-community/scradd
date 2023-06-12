@@ -107,8 +107,8 @@ defineCommand(
 								: (
 										await client.users
 											.fetch(xp.user)
-											.catch(() => ({ username: `<@${xp.user}>` }))
-								  ).username
+											.catch(() => ({ displayName: `<@${xp.user}>` }))
+								  ).displayName
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 					async (data) =>
 						await interaction[interaction.replied ? "editReply" : "reply"](data),

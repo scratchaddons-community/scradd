@@ -67,8 +67,7 @@ export function extractMessageExtremities(
 				if (message.type === MessageType.AutoModerationAction) {
 					newEmbed.author = {
 						icon_url: (message.member ?? message.author).displayAvatarURL(),
-
-						name: message.member ? message.member.displayName : message.author.username,
+						name: (message.member ?? message.author).displayName,
 					};
 					newEmbed.color = message.member?.displayColor;
 
@@ -205,7 +204,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
-					message.author.username,
+					message.author.displayName,
 			  )} is thinking...`
 		: message.content;
 
@@ -646,10 +645,7 @@ export async function paginate<Item>(
 								// eslint-disable-next-line id-match -- We didn’t name this.
 								icon_url: format.displayAvatarURL(),
 
-								name:
-									format instanceof GuildMember
-										? format.displayName
-										: format.username,
+								name: format.displayName,
 						  }
 						: undefined,
 

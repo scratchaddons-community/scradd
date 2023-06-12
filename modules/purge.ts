@@ -93,7 +93,7 @@ defineCommand(
 
 					author: {
 						icon_url: (last.member ?? last.author).displayAvatarURL(),
-						name: last.member?.displayName ?? last.author.username,
+						name: (last.member ?? last.author).displayName,
 					},
 
 					timestamp: last.createdAt.toISOString(),
@@ -113,7 +113,7 @@ defineCommand(
 
 				author: {
 					icon_url: (sliced[0].member ?? sliced[0].author).displayAvatarURL(),
-					name: sliced[0].member?.displayName ?? sliced[0].author.username,
+					name: (sliced[0].member ?? sliced[0].author).displayName,
 				},
 
 				timestamp: sliced[0].createdAt.toISOString(),

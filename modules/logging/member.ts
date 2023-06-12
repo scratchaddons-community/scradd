@@ -181,6 +181,15 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 		);
 	}
 
+	if (oldUser.displayName !== newUser.displayName) {
+		await log(
+			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their display name from ${
+				oldUser.displayName
+			} to ${newUser.displayName}`,
+			"members",
+		);
+	}
+
 	const quarantined = !!newUser.flags?.has("Quarantined");
 	if (!!oldUser.flags?.has("Quarantined") !== quarantined) {
 		await log(

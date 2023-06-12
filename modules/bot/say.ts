@@ -43,7 +43,7 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 					interaction: message.interaction && "/" + message.interaction.commandName,
 					attachments: message.attachments.map((attachment) => attachment.name),
 					stickers: message.stickers.map((sticker) => sticker.name),
-					author: message.author.username,
+					author: message.author.displayName,
 					components: message.components,
 					createdTimestamp: message.createdTimestamp,
 					content: stripMarkdown(

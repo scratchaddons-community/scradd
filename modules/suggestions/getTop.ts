@@ -42,13 +42,15 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 					? ""
 					: ` by ${
 							useMentions
-								? `<@${author instanceof User ? author.id : author}>`
+								? author instanceof User
+									? author.toString()
+									: `<@${author}>`
 								: (author instanceof User
 										? author
 										: await client.users
 												.fetch(author)
-												.catch(() => ({ username: `<@${author}>` }))
-								  ).username
+												.catch(() => ({ displayName: `<@${author}>` }))
+								  ).displayName
 					  }`
 			}`,
 		async (data) => await interaction[interaction.replied ? "editReply" : "reply"](data),
