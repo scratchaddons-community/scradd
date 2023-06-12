@@ -11,8 +11,8 @@ import constants from "../../common/constants.js";
 import { addons, manifest } from "../../common/extension.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
-import { checkIfUserPlaying, COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./questions.js";
+import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
+import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import config from "../../common/config.js";
 
 export const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
@@ -22,7 +22,10 @@ export const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMentio
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
-export default async function bot(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function guessAddon(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+) {
+	if (await checkIfUserPlaying(interaction)) return;
 	await reply();
 
 	/**
@@ -189,14 +192,14 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 			fetchReply: true,
 		});
 
-		CURRENTLY_PLAYING.set(interaction.user.id, message.url);
+		CURRENTLY_PLAYING.set(interaction.user.id, { url: message.url });
 
 		const collector = message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 
 			filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id,
 
-			time: COLLECTOR_TIME,
+			time: GAME_COLLECTOR_TIME,
 		});
 
 		collector
@@ -225,7 +228,8 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 						buttonInteraction.component.label ?? undefined,
 					);
 
-					if (nextMessage) CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
+					if (nextMessage)
+						CURRENTLY_PLAYING.set(interaction.user.id, { url: nextMessage.url });
 					else CURRENTLY_PLAYING.delete(interaction.user.id);
 
 					return collector.stop();
@@ -261,7 +265,8 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 					buttonInteraction.component.label ?? "",
 				);
 
-				if (nextMessage) CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
+				if (nextMessage)
+					CURRENTLY_PLAYING.set(interaction.user.id, { url: nextMessage.url });
 				else CURRENTLY_PLAYING.delete(interaction.user.id);
 
 				collector.stop();
@@ -517,7 +522,7 @@ export default async function bot(interaction: ChatInputCommandInteraction<"cach
 
 				if (nextMessage) {
 					if (nextMessage instanceof TypeError) throw nextMessage;
-					CURRENTLY_PLAYING.set(interaction.user.id, nextMessage.url);
+					CURRENTLY_PLAYING.set(interaction.user.id, { url: nextMessage.url });
 				}
 			})
 			.on("end", async () => {

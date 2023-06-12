@@ -9,9 +9,9 @@ import {
 } from "discord.js";
 import constants from "../../common/constants.js";
 
-export const COLLECTOR_TIME = constants.collectorTime * 4;
+export const GAME_COLLECTOR_TIME = constants.collectorTime * 4;
 
-export const CURRENTLY_PLAYING = new Collection<Snowflake, string>();
+export const CURRENTLY_PLAYING = new Collection<Snowflake, { url: string; end?: () => any }>();
 
 /**
  * Reply to the interaction if the interaction user is already playing a game.
@@ -37,8 +37,18 @@ export async function checkIfUserPlaying(
 						label: "Go to game",
 						style: ButtonStyle.Link,
 						type: ComponentType.Button,
-						url: current,
+						url: current.url,
 					},
+					...(current.end
+						? [
+								{
+									label: "End game",
+									style: ButtonStyle.Danger,
+									type: ComponentType.Button,
+									customId: `${interaction.user.id}_endGame`,
+								} as const,
+						  ]
+						: []),
 				],
 			},
 		],
