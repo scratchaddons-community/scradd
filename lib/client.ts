@@ -5,6 +5,8 @@ import {
 	Partials,
 	type Snowflake,
 	BaseInteraction,
+	DiscordAPIError,
+	RESTJSONErrorCodes,
 } from "discord.js";
 import pkg from "../package.json" assert { type: "json" };
 import path from "node:path";
@@ -168,7 +170,13 @@ export default async function login(options: {
 						ephemeral: true,
 						content: options.commandErrorMessage,
 					});
-				} else if (Number(interaction?.createdAt) - Date.now() < 3000) {
+				} else if (
+					Number(interaction?.createdAt) - Date.now() < 3000 &&
+					!(
+						error instanceof DiscordAPIError &&
+						error.code === RESTJSONErrorCodes.UnknownInteraction
+					)
+				) {
 					await interaction?.reply({
 						ephemeral: true,
 						content: options.commandErrorMessage,
