@@ -168,12 +168,10 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
+export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
 export async function getAllMessages(
-	channel: GuildTextBasedChannel,
-): Promise<Message<true>[]>;
-export async function getAllMessages(
-	channel: DMChannel|PartialDMChannel,
-): Promise<Message<false>[]>
+	channel: DMChannel | PartialDMChannel,
+): Promise<Message<false>[]>;
 export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
 	const messages = [];
 

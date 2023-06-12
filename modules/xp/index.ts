@@ -11,7 +11,7 @@ import { defineButton, defineSelect } from "../../lib/components.js";
 import getUserRank from "./rank.js";
 import defineEvent from "../../lib/events.js";
 import { giveXpForMessage } from "./giveXp.js";
-import  graph from "./graph.js";
+import graph from "./graph.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
