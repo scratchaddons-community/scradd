@@ -30,6 +30,8 @@ import {
 	type MessageReaction,
 	escapeMarkdown,
 	chatInputApplicationCommandMention,
+	DMChannel,
+	type PartialDMChannel,
 } from "discord.js";
 
 import config from "../common/config.js";
@@ -166,9 +168,13 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages<Channel extends TextBasedChannel>(
-	channel: Channel,
-): Promise<Message<Channel extends GuildTextBasedChannel ? true : false>[]> {
+export async function getAllMessages(
+	channel: GuildTextBasedChannel,
+): Promise<Message<true>[]>;
+export async function getAllMessages(
+	channel: DMChannel|PartialDMChannel,
+): Promise<Message<false>[]>
+export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
 	const messages = [];
 
 	// eslint-disable-next-line fp/no-let -- This needs to be changable
@@ -182,7 +188,6 @@ export async function getAllMessages<Channel extends TextBasedChannel>(
 		lastId = fetchedMessages.lastKey();
 	} while (lastId);
 
-	// @ts-expect-error TS2322 -- This is the right type.
 	return messages;
 }
 
