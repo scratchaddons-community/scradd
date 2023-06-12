@@ -65,7 +65,7 @@ export default async function warn(
 						(totalVerbalStrikes ? "Too many verbal strikes\n\n" : "") +
 						reason +
 						(context && `\n>>> ${context}`),
-					extension: "txt",
+					extension: "md",
 				},
 			],
 		},

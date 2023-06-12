@@ -74,7 +74,7 @@ export async function messageDeleteBulk(
 		} messages in ${channel.toString()} bulk deleted`,
 		"messages",
 		{
-			files: [{ content: messagesInfo, extension: "txt" }],
+			files: [{ content: messagesInfo, extension: "md" }],
 			button: { label: "View Context", url: messages.first()?.url ?? "" },
 		},
 	);
