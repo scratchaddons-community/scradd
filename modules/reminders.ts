@@ -234,10 +234,10 @@ defineCommand(
 								? interaction.member
 								: interaction.user
 							).displayAvatarURL(),
-							name:
-								interaction.member instanceof GuildMember
-									? interaction.member.displayName
-									: interaction.user.username,
+							name: (interaction.member instanceof GuildMember
+								? interaction.member
+								: interaction.user
+							).displayName,
 						},
 						footer: {
 							text: `${reminders.length} reminder${

@@ -110,7 +110,7 @@ export async function generateBoardMessage(
 		const description = await messageToText(message);
 
 		const censored = censor(description);
-		const censoredName = censor(message.author.username);
+		const censoredName = censor(message.author.displayName);
 
 		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
 
@@ -160,7 +160,7 @@ export async function generateBoardMessage(
 								: (message.member?.displayName ??
 										(censoredName
 											? censoredName.censored
-											: message.author.username)) +
+											: message.author.displayName)) +
 								  (message.author.bot ? " 🤖" : ""),
 					},
 

@@ -277,7 +277,7 @@ export default async function contactMods(
 
 	const date = new Date();
 	const thread = await config.channels.tickets.threads.create({
-		name: `${member.user.username} (${date
+		name: `${member.user.displayName} (${date
 			.getUTCFullYear()
 			.toLocaleString("en-us", { useGrouping: false })}-${(
 			date.getUTCMonth() + 1

@@ -75,20 +75,20 @@ defineEvent("guildMemberRemove", async (member) => {
 
 	const byes = banned
 		? [
-				`Oof… **${member.user.username}** got banned…`,
-				`There’s no turning back for **${member.user.username}**…`,
-				`I don’t think this was the best place for **${member.user.username}**…`,
-				`Oop, **${member.user.username}** angered the mods!`,
-				`**${member.user.username}** broke the rules and took an 🇱`,
-				`**${member.user.username}** talked about opacity slider too much.`,
+				`Oof… **${member.user.displayName}** got banned…`,
+				`There’s no turning back for **${member.user.displayName}**…`,
+				`I don’t think this was the best place for **${member.user.displayName}**…`,
+				`Oop, **${member.user.displayName}** angered the mods!`,
+				`**${member.user.displayName}** broke the rules and took an 🇱`,
+				`**${member.user.displayName}** talked about opacity slider too much.`,
 		  ]
 		: [
-				`Welp… **${member.user.username}** decided to leave… what a shame…`,
-				`Ahh… **${member.user.username}** left us… hope they’ll have safe travels!`,
-				`There goes another, bye **${member.user.username}**!`,
-				`Oop, **${member.user.username}** left… will they ever come back?`,
-				`Can we get an F in the chat for **${member.user.username}**? They left!`,
-				`Ope, **${member.user.username}** got eaten by an evil kumquat and left!`,
+				`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
+				`Ahh… **${member.user.displayName}** left us… hope they’ll have safe travels!`,
+				`There goes another, bye **${member.user.displayName}**!`,
+				`Oop, **${member.user.displayName}** left… will they ever come back?`,
+				`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
+				`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
 		  ];
 
 	await config.channels.welcome?.send(

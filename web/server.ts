@@ -85,8 +85,7 @@ http.createServer((request, response) => {
 			// 	const userPublic = {
 			// 		id: user.id,
 			// 		avatar: user.avatar,
-			// 		username: user.username,
-			// 		discriminator: user.discriminator,
+			// 		displayName: user.displayName,
 			// 		ban: ban.reason,
 			// 	};
 

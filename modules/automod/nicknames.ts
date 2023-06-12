@@ -23,12 +23,12 @@ export default async function changeNickname(member: GuildMember) {
 	);
 
 	if (members.size > 1) {
-		const [safe, unsafe] = members.partition((found) => found.user.username === newNick);
+		const [safe, unsafe] = members.partition((found) => found.user.displayName === newNick);
 
 		if (safe.size > 0) {
 			for (const [id, found] of unsafe) {
-				const censored = censor(found.user.username);
-				const nick = censored ? censored.censored : found.user.username;
+				const censored = censor(found.user.displayName);
+				const nick = censored ? censored.censored : found.user.displayName;
 
 				if (nick === found.displayName) continue;
 
@@ -38,8 +38,8 @@ export default async function changeNickname(member: GuildMember) {
 		}
 		const unchanged = safe.concat(unsafe);
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
-			const censored = censor(member.user.username);
-			const nick = censored ? censored.censored : member.user.username;
+			const censored = censor(member.user.displayName);
+			const nick = censored ? censored.censored : member.user.displayName;
 
 			if (nick !== member.displayName) {
 				setNickname(member, nick, "Conflicts");
@@ -60,7 +60,10 @@ export default async function changeNickname(member: GuildMember) {
 
 async function setNickname(member: GuildMember, newNickname: string, reason: string) {
 	if (member.moderatable)
-		await member.setNickname(member.user.username === newNickname ? null : newNickname, reason);
+		await member.setNickname(
+			member.user.displayName === newNickname ? null : newNickname,
+			reason,
+		);
 	else
 		await log(
 			`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,

@@ -67,7 +67,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 							];
 						}, []);
 					return {
-						label: user.username,
+						label: user.displayName,
 						data: [
 							...(data.length ? data : [{ y: 0, x: recentXp[0]?.time ?? 0 }]),
 							{ x: maxDate, y: data.at(-1)?.y ?? 0 },

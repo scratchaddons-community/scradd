@@ -20,7 +20,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 			content: `${constants.emojis.statuses.no} This command is reserved for ${
 				process.env.NODE_ENV === "production"
 					? owner instanceof User
-						? owner.username
+						? owner.displayName
 						: "the " + owner?.name + " team"
 					: "Scradd developers"
 			} only!`,

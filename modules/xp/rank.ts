@@ -57,8 +57,8 @@ export default async function getUserRank(
 				color: member?.displayColor,
 
 				author: {
-					icon_url: (member || user).displayAvatarURL(),
-					name: member?.displayName ?? user.username,
+					icon_url: (member ?? user).displayAvatarURL(),
+					name: (member ?? user).displayName,
 				},
 
 				title: "XP Rank",

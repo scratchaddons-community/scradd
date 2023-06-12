@@ -81,7 +81,7 @@ export async function getStrikes(
 				: interaction.reply(newData));
 		},
 		{
-			title: `${member?.displayName ?? user.username}’s strikes`,
+			title: `${(member ?? user).displayName}’s strikes`,
 			singular: "",
 			plural: "",
 			failMessage: `${selected.toString()} has never been warned!`,
@@ -146,7 +146,7 @@ export async function getStrikeById(
 		isModerator && strike.mod === "AutoMod"
 			? strike.mod
 			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
-	const nick = member?.displayName ?? user?.username;
+	const nick = (member ?? user)?.displayName;
 	const { useMentions } = getSettings(interactor.user);
 	return {
 		components: isModerator
@@ -201,7 +201,7 @@ export async function getStrikeById(
 											? moderator
 											: useMentions
 											? moderator.toString()
-											: moderator.username,
+											: moderator.displayName,
 									inline: true,
 								},
 						  ]
@@ -210,7 +210,7 @@ export async function getStrikeById(
 						? [
 								{
 									name: "👤 Target user",
-									value: useMentions ? user.toString() : user.username,
+									value: useMentions ? user.toString() : user.displayName,
 									inline: true,
 								},
 						  ]

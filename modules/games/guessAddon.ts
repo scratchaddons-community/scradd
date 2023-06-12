@@ -161,10 +161,10 @@ export default async function guessAddon(
 							: interaction.user
 						).displayAvatarURL(),
 
-						name:
-							interaction.member instanceof GuildMember
-								? interaction.member.displayName
-								: interaction.user.username,
+						name: (interaction.member instanceof GuildMember
+							? interaction.member
+							: interaction.user
+						).displayName,
 					},
 
 					title: "🤔 Think of an addon…",
@@ -431,10 +431,10 @@ export default async function guessAddon(
 							: interaction.user
 						).displayAvatarURL(),
 
-						name:
-							interaction.member instanceof GuildMember
-								? interaction.member.displayName
-								: interaction.user.username,
+						name: (interaction.member instanceof GuildMember
+							? interaction.member
+							: interaction.user
+						).displayName,
 					},
 
 					color: constants.themeColor,

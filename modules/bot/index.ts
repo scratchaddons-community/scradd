@@ -25,7 +25,7 @@ defineCommand(
 		description: `(${
 			process.env.NODE_ENV === "production"
 				? owner instanceof User
-					? owner.username
+					? owner.displayName
 					: owner?.name + " team"
 				: "Scradd dev"
 		} only) Run code on Scradd`,

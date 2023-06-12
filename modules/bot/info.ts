@@ -43,8 +43,8 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 		members.push({ user: await client.users.fetch(constants.users.retron) });
 
 	return joinWithAnd(
-		members.sort((one, two) => one.user.username.localeCompare(two.user.username)),
-		(member) => (useMentions ? userMention(member.user.id) : member.user.username),
+		members.sort((one, two) => one.user.displayName.localeCompare(two.user.displayName)),
+		(member) => (useMentions ? userMention(member.user.id) : member.user.displayName),
 	);
 }
 
