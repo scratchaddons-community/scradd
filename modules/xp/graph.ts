@@ -48,31 +48,33 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 		],
 		type: "line",
 		data: {
-			datasets: interaction.users.map((user) => {
-				const data = recentXp
-					.filter((gain) => gain.time < maxDate && gain.user === user.id)
-					.reduce<{ x: number; y: number }[]>((acc, xp) => {
-						const previous = acc.at(-1) ?? { y: 0, x: recentXp[0]?.time ?? 0 };
-						return [
-							...acc,
-							...Array.from(
-								{ length: Math.floor((xp.time - previous.x) / 3_600_000) },
-								(_, index) => ({
-									y: previous.y,
-									x: previous.x + 3_600_000 * index,
-								}),
-							),
-							{ x: xp.time, y: xp.xp + previous?.y },
-						];
-					}, []);
-				return {
-					label: user.username,
-					data: [
-						...(data.length ? data : [{ y: 0, x: recentXp[0]?.time ?? 0 }]),
-						{ x: maxDate, y: data.at(-1)?.y ?? 0 },
-					],
-				};
-			}),
+			datasets: interaction.users
+				.map((user) => {
+					const data = recentXp
+						.filter((gain) => gain.time < maxDate && gain.user === user.id)
+						.reduce<{ x: number; y: number }[]>((acc, xp) => {
+							const previous = acc.at(-1) ?? { y: 0, x: recentXp[0]?.time ?? 0 };
+							return [
+								...acc,
+								...Array.from(
+									{ length: Math.floor((xp.time - previous.x) / 3_600_000) },
+									(_, index) => ({
+										y: previous.y,
+										x: previous.x + 3_600_000 * index,
+									}),
+								),
+								{ x: xp.time, y: xp.xp + previous?.y },
+							];
+						}, []);
+					return {
+						label: user.username,
+						data: [
+							...(data.length ? data : [{ y: 0, x: recentXp[0]?.time ?? 0 }]),
+							{ x: maxDate, y: data.at(-1)?.y ?? 0 },
+						],
+					};
+				})
+				.sort((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0)),
 		},
 	});
 
