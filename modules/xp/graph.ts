@@ -8,6 +8,8 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
 		throw new TypeError("weeklyXpGraph SelectMenu not a UserSelectMenu!");
 
+	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
+
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 

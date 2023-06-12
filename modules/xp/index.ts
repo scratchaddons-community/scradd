@@ -75,7 +75,7 @@ defineCommand(
 									type: ComponentType.UserSelect,
 									placeholder: "Select users",
 									customId: "_weeklyXpGraph",
-									maxValues: 5,
+									maxValues: 10,
 								},
 							],
 						},
