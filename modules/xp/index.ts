@@ -29,7 +29,7 @@ defineCommand(
 
 		subcommands: {
 			rank: {
-				description: "View a users’ XP rank",
+				description: "View a user’s XP rank",
 
 				options: {
 					user: {
