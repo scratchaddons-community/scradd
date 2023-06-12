@@ -143,7 +143,9 @@ export async function getStrikeById(
 	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
 	const moderator =
-		isModerator && strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+		isModerator && strike.mod === "AutoMod"
+			? strike.mod
+			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = member?.displayName ?? user?.username;
 	const { useMentions } = getSettings(interactor.user);
 	return {
@@ -194,7 +196,12 @@ export async function getStrikeById(
 						? [
 								{
 									name: "🛡 Moderator",
-									value: useMentions ? moderator.toString() : moderator.username,
+									value:
+										typeof moderator === "string"
+											? moderator
+											: useMentions
+											? moderator.toString()
+											: moderator.username,
 									inline: true,
 								},
 						  ]
