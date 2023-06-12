@@ -23,6 +23,7 @@ import { defineButton, defineSelect } from "../lib/components.js";
 import defineEvent from "../lib/events.js";
 import getWeekly, { getChatters } from "./xp/weekly.js";
 import warn from "./punishments/warn.js";
+import { getLevelForXp, xpDatabase } from "./xp/misc.js";
 
 export enum SpecialReminders {
 	Weekly,
@@ -295,10 +296,17 @@ defineCommand(
 			}
 		}
 
-		if (reminders.length > 19) {
+		if (
+			reminders.length >
+			getLevelForXp(
+				Math.abs(xpDatabase.data.find(({ user }) => user === interaction.user.id)?.xp ?? 0),
+			) *
+				0.3 +
+				5
+		) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You already have 20 reminders set! You are currently not allowed to set any more.`,
+				content: `${constants.emojis.statuses.no} You already have ${reminders.length} reminders set! Please cancel some or level up before setting any more.`,
 			});
 		}
 
