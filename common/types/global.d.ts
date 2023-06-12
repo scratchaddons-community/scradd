@@ -47,7 +47,7 @@ declare global {
 			GUILD_ID: Snowflake;
 			BOT_TOKEN: string;
 			// BOT_SECRET: string;
-			/** @default "development" */ */
+			/** Defaults to `"development"` */
 			NODE_ENV?: "development" | "production";
 			PORT?: `${number}`;
 			CDBL_AUTH?: string;
