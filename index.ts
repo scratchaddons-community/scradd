@@ -21,7 +21,7 @@ await login({
 	async handleError(error, event) {
 		await logError(error, event);
 	},
-	productionId: "929928324959055932",
+	productionId: constants.users.scradd,
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,

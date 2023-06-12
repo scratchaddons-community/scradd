@@ -3,6 +3,7 @@ import Database from "../common/database.js";
 
 import { Collection, type Snowflake } from "discord.js";
 import defineEvent from "../lib/events.js";
+import constants from "../common/constants.js";
 
 export const rolesDatabase = new Database<{
 	user: Snowflake;
@@ -41,7 +42,7 @@ defineEvent("guildMemberAdd", async () => {
 		const inviter = await config.guild.members.fetch(user).catch(() => {});
 		if (
 			!inviter ||
-			inviter.id === "279855717203050496" ||
+			inviter.id === constants.users.hans ||
 			inviter.user.bot ||
 			!config.roles.epic ||
 			inviter.roles.resolve(config.roles.epic.id)

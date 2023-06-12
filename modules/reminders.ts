@@ -37,6 +37,10 @@ type Reminder = {
 	user: Snowflake;
 	id: string | SpecialReminders;
 };
+
+const BUMPING_THREAD = "881619501018394725",
+	COMMAND_ID = "947088344167366698";
+
 export const remindersDatabase = new Database<Reminder>("reminders");
 await remindersDatabase.init();
 
@@ -133,7 +137,7 @@ setInterval(async () => {
 						remindersDatabase.data = [
 							...remindersDatabase.data,
 							{
-								channel: "881619501018394725",
+								channel: BUMPING_THREAD,
 								date: Date.now() + 1800000,
 								reminder: undefined,
 								id: SpecialReminders.Bump,
@@ -142,7 +146,7 @@ setInterval(async () => {
 						];
 
 						return await channel.send({
-							content: "🔔 @here </bump:947088344167366698> the server!",
+							content: `🔔 @here </bump:${COMMAND_ID}> the server!`,
 							allowedMentions: { parse: ["everyone"] },
 						});
 					}
@@ -442,7 +446,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.guild?.id === config.guild.id &&
 		message.interaction?.commandName == "bump" &&
-		message.author.id === "302050872383242240"
+		message.author.id === constants.users.disboard
 	) {
 		remindersDatabase.data = [
 			...remindersDatabase.data.filter(
@@ -450,7 +454,7 @@ defineEvent("messageCreate", async (message) => {
 					!(reminder.id === SpecialReminders.Bump && reminder.user === client.user.id),
 			),
 			{
-				channel: "881619501018394725",
+				channel: BUMPING_THREAD,
 				date: Date.now() + 7200000,
 				reminder: undefined,
 				id: SpecialReminders.Bump,

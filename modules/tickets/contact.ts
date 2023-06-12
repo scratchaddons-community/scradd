@@ -183,7 +183,9 @@ export async function gatherTicketInfo(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in <#1019734503465439326>, and other questions, comments, concerns, or etcetera in <#826250884279173162>.`,
+			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
+				config.channels.support
+			}>.`,
 
 			ephemeral: true,
 		});
@@ -191,7 +193,7 @@ export async function gatherTicketInfo(
 
 	if (option === SERVER_CATEGORY) {
 		return await interaction.reply({
-			content: `${constants.emojis.statuses.no} Please don't contact mods for server suggestions. Instead, share them in <#988780044627345468>.`,
+			content: `${constants.emojis.statuses.no} Please don't contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
 
 			ephemeral: true,
 		});

@@ -3,6 +3,7 @@ import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
+import constants from "../../common/constants.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
@@ -37,7 +38,7 @@ export const oldSuggestions = config.channels.old_suggestions
 						) ?? suggestionAnswers[0],
 
 					author:
-						(message.author.id === "323630372531470346"
+						(message.author.id === constants.users.robotop
 							? message.embeds[0]?.footer?.text.split(": ")[1]
 							: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
 									?.groups?.userId) ?? message.author,

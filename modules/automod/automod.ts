@@ -18,7 +18,7 @@ const WHITELISTED_INVITE_GUILDS = [
 	config.guild.id,
 	"751206349614088204", // Scratch Addons development
 	"837024174865776680", // TurboWarp
-	"938438560925761619", // Scradd Testing
+	constants.testingServerId,
 	"461575285364752384", // 9th Tail Bot Hub
 	"898383289059016704", // Scratch Addons SMP Archive
 ];

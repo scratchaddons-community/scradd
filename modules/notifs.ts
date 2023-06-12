@@ -31,7 +31,7 @@ defineEvent("threadCreate", async (thread, newlyCreated) => {
 	)
 		? config.roles.mod?.toString()
 		: thread.parent?.id === config.channels.exec?.id
-		? "<@&1046043735680630784>"
+		? "<@&1046043735680630784>" // @Executive
 		: thread.parent?.id === config.channels.admin?.id
 		? config.roles.admin?.toString()
 		: undefined;

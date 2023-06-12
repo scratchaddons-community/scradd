@@ -23,8 +23,10 @@ import { getSettings } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch("938438560925761619").catch(() => {});
-const designers = "966174686142672917";
+const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => {});
+const designers = "966174686142672917",
+	developers = "938439909742616616",
+	testers = "938440159102386276";
 
 /**
  * Get all users with a role.
@@ -38,7 +40,7 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 	const role = await testingServer?.roles.fetch(roleId);
 	const members: { user: User }[] = role?.members.toJSON() ?? [];
 	if (roleId === designers)
-		members.push({ user: await client.users.fetch("765910070222913556") });
+		members.push({ user: await client.users.fetch(constants.users.retron) });
 
 	return joinWithAnd(
 		members.sort((one, two) => one.user.username.localeCompare(two.user.username)),
@@ -141,7 +143,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 						fields: [
 							{
 								name: "Developers",
-								value: await getRole("938439909742616616", useMentions),
+								value: await getRole(developers, useMentions),
 								inline: true,
 							},
 							{
@@ -151,7 +153,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 							},
 							{
 								name: "Additional beta testers",
-								value: await getRole("938440159102386276", useMentions),
+								value: await getRole(testers, useMentions),
 								inline: true,
 							},
 							{
@@ -211,17 +213,24 @@ function getConfig() {
 			description: "**CHANNELS**",
 
 			fields: [
-				...Object.entries(config.channels).map((channel) => ({
-					name: `${channel[0]
-						.split("_")
-						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-						.join(" ")} ${
-						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
-					}`,
+				...Object.entries(config.channels)
+					.filter(
+						(
+							channel,
+						): channel is [typeof channel[0], Exclude<typeof channel[1], string>] =>
+							typeof channel[1] !== "string",
+					)
+					.map((channel) => ({
+						name: `${channel[0]
+							.split("_")
+							.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+							.join(" ")} ${
+							channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
+						}`,
 
-					value: channel[1]?.toString() ?? "*None*",
-					inline: true,
-				})),
+						value: channel[1]?.toString() ?? "*None*",
+						inline: true,
+					})),
 			],
 
 			color: constants.themeColor,

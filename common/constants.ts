@@ -29,7 +29,7 @@ export default {
 		},
 
 		misc: {
-			addon: "<:addon:1008842100764332142>",
+			addon: "<:new_addon:817273401869205524>",
 			join: "<:join:1041863919708418068>",
 			leave: "<:leave:1041863867757756477>",
 			ban: "<:ban:1041864907194388480>",
@@ -46,4 +46,13 @@ export default {
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
+	testingServerId: "938438560925761619",
+
+	users: {
+		scradd: "929928324959055932",
+		hans: "279855717203050496",
+		retron: "765910070222913556",
+		robotop: "323630372531470346",
+		disboard: "302050872383242240",
+	},
 };

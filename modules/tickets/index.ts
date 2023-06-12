@@ -43,7 +43,7 @@ defineEvent("messageCreate", async (message) => {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "FAQ",
-						// 	url: "https://discord.com/channels/806602307750985799/1099457798452035646",
+						// 	url: `https://discord.com/channels/${config.guild.id}/1099457798452035646`,
 						// },
 						{
 							type: ComponentType.Button,
@@ -55,7 +55,7 @@ defineEvent("messageCreate", async (message) => {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "SA Support",
-						// 	url: "https://discord.com/channels/806602307750985799/826250884279173162",
+							// url: `https://discord.com/channels/${config.guild.id}/${config.channels.support}`,
 						// },
 					],
 				},

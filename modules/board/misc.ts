@@ -74,7 +74,10 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 			"939350305311715358": COUNTS.mods, // #modmail
 			"894314668317880321": COUNTS.mods, // #evil-secret-youtube-plans
 		}[baseChannel.id] ||
-		{ [config.channels.info?.id || ""]: COUNTS.info, "866028754962612294": COUNTS.misc }[
+		{
+			[ config.channels.info?.id || "" ]: COUNTS.info,
+			"866028754962612294": COUNTS.misc // #The Cache
+		}[
 			baseChannel.parent?.id || ""
 		] ||
 		COUNTS.default
