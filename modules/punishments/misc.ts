@@ -57,7 +57,7 @@ export default async function filterToStrike(filter: string) {
 	) {
 		return {
 			...strike,
-			mod:"AutoMod",
+			mod: "AutoMod",
 			reason: `${
 				message.embeds[0].fields.find((field) => field.name === "rule_name")?.value
 			}\n>>> ${message.embeds[0].description}`,

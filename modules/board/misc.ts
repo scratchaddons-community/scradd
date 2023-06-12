@@ -75,11 +75,9 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 			"894314668317880321": COUNTS.mods, // #evil-secret-youtube-plans
 		}[baseChannel.id] ||
 		{
-			[ config.channels.info?.id || "" ]: COUNTS.info,
-			"866028754962612294": COUNTS.misc // #The Cache
-		}[
-			baseChannel.parent?.id || ""
-		] ||
+			[config.channels.info?.id || ""]: COUNTS.info,
+			"866028754962612294": COUNTS.misc, // #The Cache
+		}[baseChannel.parent?.id || ""] ||
 		COUNTS.default
 	);
 }

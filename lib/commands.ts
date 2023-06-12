@@ -232,9 +232,7 @@ function transformOptions(options: { [key: string]: Option }) {
 						name: choice,
 						value,
 					}))
-					.sort((one, two) =>
-						one.name.localeCompare(two.name)
-					);
+					.sort((one, two) => one.name.localeCompare(two.name));
 
 			if (option.channelTypes) transformed.channelTypes = option.channelTypes;
 			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
