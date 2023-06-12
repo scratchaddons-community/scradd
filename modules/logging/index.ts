@@ -832,6 +832,7 @@ defineEvent("threadUpdate", async (_, newThread) => {
 			newThread.parent?.id === config.channels.modlogs?.id) ||
 			[
 				"1029234332977602660", // #YouTube planning
+				"988780044627345468", // #Server Suggestions
 			].includes(newThread.id))
 	)
 		await newThread.setArchived(false, "Modlog threads must stay open");
