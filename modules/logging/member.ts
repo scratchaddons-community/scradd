@@ -83,6 +83,13 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 export async function guildMemberAdd(member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
+
+	if (member.user.flags?.has("Spammer")) {
+		await log(
+			`${LoggingEmojis.UserUpdate} ${member.toString()} marked as likely spammer`,
+			"members",
+		);
+	}
 }
 export async function guildMemberRemove(member: GuildMember | PartialGuildMember) {
 	if (member.guild.id !== config.guild.id) return;
