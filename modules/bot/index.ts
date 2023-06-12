@@ -58,7 +58,7 @@ defineCommand(
 defineCommand(
 	{
 		name: "say",
-		description: "(Mods only) Send a message",
+		description: "(Mod only) Send a message",
 
 		options: {
 			message: {

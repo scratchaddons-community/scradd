@@ -16,7 +16,7 @@ const MAX_FETCH_COUNT = 100;
 defineCommand(
 	{
 		name: "purge",
-		description: "(Mods only) Bulk deletes a specified amount of messages",
+		description: "(Mod only) Bulk deletes a specified amount of messages",
 
 		options: {
 			count: {

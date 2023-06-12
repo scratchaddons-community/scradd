@@ -120,7 +120,7 @@ defineModal("contactMods", async (interaction, id) => {
 defineCommand(
 	{
 		name: "contact-user",
-		description: "(Mods only) Start a private ticket with a user",
+		description: "(Mod only) Start a private ticket with a user",
 		restricted: true,
 
 		options: {
