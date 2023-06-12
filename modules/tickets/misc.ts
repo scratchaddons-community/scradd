@@ -19,10 +19,7 @@ export async function getThreadFromMember(
 	return (
 		await asyncFilter(
 			threads.toJSON(),
-			async (thread) =>
-				thread.parent?.id === config.channels.tickets?.id &&
-				(await getUserFromTicket(thread))?.id === user.id &&
-				thread,
+			async (thread) => (await getUserFromTicket(thread))?.id === user.id && thread,
 		).next()
 	).value;
 }
