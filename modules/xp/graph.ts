@@ -74,7 +74,9 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 		},
 	});
 
-	interaction.message.edit({
+	await interaction.deferUpdate();
+
+	await interaction.message.edit({
 		files: [{ attachment: canvas.toBuffer("image/png"), name: "graph.png" }],
 	});
 }
