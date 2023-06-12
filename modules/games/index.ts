@@ -1,14 +1,34 @@
+import { ApplicationCommandOptionType } from "discord.js";
 import defineCommand from "../../lib/commands.js";
 import guessAddon from "./guessAddon.js";
+import memory, { messageDelete } from "./memory.js";
 import { defineButton } from "../../lib/components.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
+import defineEvent from "../../lib/events.js";
 import { disableComponents } from "../../util/discord.js";
 
 defineCommand(
 	{ name: "guess-addon", description: "Think of an addon and I will guess it!" },
 	guessAddon,
 );
+
+defineCommand(
+	{
+		name: "memory",
+		description: "memory",
+		options: {
+			user: { description: "user", type: ApplicationCommandOptionType.User, required: true },
+			mode: {
+				description: "difficulty",
+				type: ApplicationCommandOptionType.String,
+				choices: { Easy: "Easy", Traditional: "Traditional" },
+			},
+		},
+	},
+	memory,
+);
+defineEvent.pre("messageDelete", messageDelete);
 
 defineButton("endGame", async (interaction, users) => {
 	if (!users.split("-").includes(interaction.user.id))
