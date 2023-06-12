@@ -278,7 +278,7 @@ export default async function guessAddon(
 
 				await interaction.editReply({ components: disableComponents(message.components) });
 				await interaction.followUp(
-					`🛑 ${interaction.user.toString()},you didn’t answer my question! I’m going to end the game.`,
+					`🛑 ${interaction.user.toString()}, you didn’t answer my question! I’m going to end the game.`,
 				);
 			});
 
