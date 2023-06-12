@@ -7,10 +7,11 @@ import defineCommand from "../../lib/commands.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { defineButton } from "../../lib/components.js";
+import { defineButton, defineSelect } from "../../lib/components.js";
 import getUserRank from "./rank.js";
 import defineEvent from "../../lib/events.js";
 import { giveXpForMessage } from "./giveXp.js";
+import  graph from "./graph.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
@@ -49,6 +50,9 @@ defineCommand(
 					},
 				},
 			},
+			graph: {
+				description: "Graph users’ XP over the last week",
+			},
 		},
 	},
 
@@ -60,6 +64,23 @@ defineCommand(
 				const user = interaction.options.getUser("user") ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
+			}
+			case "graph": {
+				return await interaction.reply({
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.UserSelect,
+									placeholder: "Select users",
+									customId: "_weeklyXpGraph",
+									maxValues: 5,
+								},
+							],
+						},
+					],
+				});
 			}
 			case "top": {
 				const allXp = [...xpDatabase.data];
@@ -117,3 +138,5 @@ defineCommand(
 defineButton("xp", async (interaction, userId = "") => {
 	await getUserRank(interaction, await client.users.fetch(userId));
 });
+
+defineSelect("weeklyXpGraph", graph);
