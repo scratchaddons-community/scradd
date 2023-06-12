@@ -50,12 +50,7 @@ export default async function warn(
 	const totalVerbalStrikes = Math.floor((oldStrikeCount % 1) + (strikes % 1));
 	const displayStrikes = Math.trunc(strikes) + totalVerbalStrikes;
 	const moderator = contextOrModerator instanceof User ? contextOrModerator : client.user;
-	const context =
-		(contextOrModerator instanceof User
-			? ""
-			: contextOrModerator + (totalVerbalStrikes ? "\n\n" : "")) +
-		(totalVerbalStrikes ? "Too many verbal strikes" : "");
-
+	const context = contextOrModerator instanceof User ? "" : contextOrModerator;
 	const logMessage = await log(
 		`${LoggingEmojis.Punishment} ${user.toString()} ${
 			displayStrikes
@@ -64,7 +59,15 @@ export default async function warn(
 		} by ${moderator.toString()}`,
 		"members",
 		{
-			files: [{ content: reason + (context && `\n>>> ${context}`), extension: "txt" }],
+			files: [
+				{
+					content:
+						(totalVerbalStrikes ? "Too many verbal strikes\n\n" : "") +
+						reason +
+						(context && `\n>>> ${context}`),
+					extension: "txt",
+				},
+			],
 		},
 	);
 	giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
