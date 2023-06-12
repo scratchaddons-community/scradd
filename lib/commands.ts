@@ -227,10 +227,14 @@ function transformOptions(options: { [key: string]: Option }) {
 
 			if (option.autocomplete) transformed.autocomplete = true;
 			if (option.choices)
-				transformed.choices = Object.entries(option.choices).map(([value, choice]) => ({
-					name: choice,
-					value,
-				}));
+				transformed.choices = Object.entries(option.choices)
+					.map(([choice, value]) => ({
+						name: choice,
+						value,
+					}))
+					.sort((one, two) =>
+						one.name.localeCompare(two.name)
+					);
 
 			if (option.channelTypes) transformed.channelTypes = option.channelTypes;
 			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
@@ -249,7 +253,7 @@ function transformOptions(options: { [key: string]: Option }) {
 		})
 		.sort((one, two) =>
 			one.required === two.required
-				? two.name.localeCompare(one.name)
+				? one.name.localeCompare(two.name)
 				: one.required
 				? -1
 				: 1,
