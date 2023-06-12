@@ -16,13 +16,20 @@ defineCommand(
 defineCommand(
 	{
 		name: "memory",
-		description: "memory",
+		description: "Play a memory matching game against someone else",
 		options: {
-			user: { description: "user", type: ApplicationCommandOptionType.User, required: true },
+			user: {
+				description: "A user to challenge",
+				type: ApplicationCommandOptionType.User,
+				required: true,
+			},
 			mode: {
-				description: "difficulty",
+				description: "The difficulty",
 				type: ApplicationCommandOptionType.String,
-				choices: { Easy: "Easy", Traditional: "Traditional" },
+				choices: {
+					"Easy (2 matches per emoji)": "Easy",
+					"Traditional (1 match per emoji)": "Traditional",
+				},
 			},
 		},
 	},
