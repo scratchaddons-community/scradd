@@ -37,7 +37,37 @@ defineCommand(
 				? interaction.member.roles.resolve(config.roles.mod.id)
 				: interaction.member.roles.includes(config.roles.mod.id));
 
-		const fields = [{ name: "ID", value: user.id, inline: true }];
+		const fields = [
+			{ name: "ID", value: user.id, inline: true },
+			{
+				name: "Created Account",
+				value: time(user.createdAt, TimestampStyles.RelativeTime),
+				inline: true,
+			},
+			user.globalName
+				? { name: "Display Name", value: user.globalName, inline: true }
+				: { name: constants.zeroWidthSpace, value: constants.zeroWidthSpace, inline: true },
+		];
+
+		if (member)
+			fields.push({
+				name: "Roles",
+				value:
+					member?.roles
+						.valueOf()
+						.sorted((one, two) => two.comparePositionTo(one))
+						.filter((role) => role.id !== config.guild.id)
+						.toJSON()
+						.join(" ") || "*No roles*",
+				inline: false,
+			});
+
+		if (member?.joinedAt)
+			fields.push({
+				name: "Joined Server",
+				value: time(member.joinedAt, TimestampStyles.RelativeTime),
+				inline: true,
+			});
 		if (member?.nickname)
 			fields.push({ name: "Nickname", value: member.nickname, inline: true });
 		if (member?.voice.channel)
@@ -55,25 +85,6 @@ defineCommand(
 				inline: true,
 			});
 
-		if (member)
-			fields.push({
-				name: "Roles",
-				value:
-					member?.roles
-						.valueOf()
-						.sorted((one, two) => two.comparePositionTo(one))
-						.filter((role) => role.id !== config.guild.id)
-						.toJSON()
-						.join(" ") || "*No roles*",
-				inline: false,
-			});
-
-		fields.push({
-			name: "Created Account",
-			value: time(user.createdAt, TimestampStyles.RelativeTime),
-			inline: true,
-		});
-
 		const banned = await config.guild.bans.fetch(user.id).catch(() => {});
 		if (banned)
 			fields.push(
@@ -85,18 +96,6 @@ defineCommand(
 					  }
 					: { name: "Banned", value: "Yes", inline: true },
 			);
-		if (member?.joinedAt)
-			fields.push({
-				name: "Joined Server",
-				value: time(member.joinedAt, TimestampStyles.RelativeTime),
-				inline: true,
-			});
-		if (member?.premiumSince)
-			fields.push({
-				name: "Boosted Server",
-				value: time(member.premiumSince, TimestampStyles.RelativeTime),
-				inline: true,
-			});
 
 		await interaction.reply({
 			embeds: [
@@ -107,14 +106,14 @@ defineCommand(
 					fields,
 					author: {
 						name: user.tag + (user.bot ? " 🤖" : ""),
-						url: member
-							? `https://discordlookup.com/permissions-calculator/${
-									(interaction.channel
-										? member.permissionsIn(interaction.channel)
-										: member.permissions
-									).bitfield
-							  }`
-							: undefined,
+						url:
+							member &&
+							`https://discordlookup.com/permissions-calculator/${
+								(interaction.channel
+									? member.permissionsIn(interaction.channel)
+									: member.permissions
+								).bitfield
+							}`,
 						icon_url: member?.avatar ? user.displayAvatarURL() : undefined,
 					},
 				},
