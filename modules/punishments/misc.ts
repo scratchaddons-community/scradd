@@ -71,6 +71,6 @@ export default async function filterToStrike(filter: string) {
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
-			: message.content,
+			: message.content.match(/```.*\n([^]+)\n```$/)?.[1] ?? message.content,
 	};
 }
