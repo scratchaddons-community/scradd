@@ -7,6 +7,12 @@ import { extractMessageExtremities } from "../util/discord.js";
 import logError from "./logError.js";
 import { getLoggingThread } from "../modules/logging/misc.js";
 
+let timeouts: {
+	[key: Snowflake]:
+		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
+		| undefined;
+} = {};
+
 export const DATABASE_THREAD = "databases";
 
 const thread = await getLoggingThread(DATABASE_THREAD);
@@ -28,11 +34,6 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	}
 }
 
-let timeouts: {
-	[key: Snowflake]:
-		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
-		| undefined;
-} = {};
 
 const contructed: string[] = [];
 
