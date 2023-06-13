@@ -34,7 +34,6 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	}
 }
 
-
 const contructed: string[] = [];
 
 export default class Database<Data extends { [key: string]: string | number | boolean | null }> {
