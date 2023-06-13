@@ -10,17 +10,14 @@ import {
 	time,
 	TimestampStyles,
 } from "discord.js";
-import { client } from "../lib/client.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database, { cleanDatabaseListeners } from "../common/database.js";
 import censor, { badWordsAllowed } from "./automod/language.js";
-import defineCommand from "../lib/commands.js";
 import { disableComponents } from "../util/discord.js";
 import { convertBase, nth } from "../util/numbers.js";
 import { getSettings } from "./settings.js";
-import { defineButton, defineSelect } from "../lib/components.js";
-import defineEvent from "../lib/events.js";
+import { defineButton, defineSelect, client, defineCommand, defineEvent } from "strife.js";
 import getWeekly, { getChatters } from "./xp/weekly.js";
 import warn from "./punishments/warn.js";
 import { getLevelForXp, xpDatabase } from "./xp/misc.js";

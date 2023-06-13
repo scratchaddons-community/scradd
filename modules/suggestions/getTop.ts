@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, hyperlink, User } from "discord.js";
-import { client } from "../../lib/client.js";
+import { client } from "strife.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";

@@ -2,7 +2,7 @@ import config from "../common/config.js";
 import Database from "../common/database.js";
 
 import { Collection, type Snowflake } from "discord.js";
-import defineEvent from "../lib/events.js";
+import { defineEvent } from "strife.js";
 import constants from "../common/constants.js";
 
 export const rolesDatabase = new Database<{

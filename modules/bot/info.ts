@@ -13,7 +13,7 @@ import {
 	ButtonInteraction,
 } from "discord.js";
 
-import { client } from "../../lib/client.js";
+import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
 import pkg from "../../package.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../../secrets.js";

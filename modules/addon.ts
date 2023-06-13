@@ -9,7 +9,7 @@ import { matchSorter } from "match-sorter";
 
 import constants from "../common/constants.js";
 import { manifest, addons, addonSearchOptions } from "../common/extension.js";
-import defineCommand from "../lib/commands.js";
+import { defineCommand } from "strife.js";
 import { escapeMessage, generateTooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 

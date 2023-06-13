@@ -1,6 +1,6 @@
 import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
 import constants from "./constants.js";
-import { client } from "../lib/client.js";
+import { client } from "strife.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
 

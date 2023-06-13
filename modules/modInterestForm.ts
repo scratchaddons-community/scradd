@@ -1,6 +1,5 @@
 import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
-import defineCommand from "../lib/commands.js";
-import { defineButton, defineModal } from "../lib/components.js";
+import { defineCommand, defineButton, defineModal } from "strife.js";
 import config from "../common/config.js";
 import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
 import { EXPIRY_LENGTH, strikeDatabase } from "./punishments/misc.js";

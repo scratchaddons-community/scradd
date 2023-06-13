@@ -1,5 +1,5 @@
 import { MessageType } from "discord.js";
-import defineEvent from "../lib/events.js";
+import { defineEvent } from "strife.js";
 import { truncateText } from "../util/text.js";
 import { stripMarkdown } from "../util/markdown.js";
 import config from "../common/config.js";

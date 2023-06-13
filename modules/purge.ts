@@ -5,10 +5,9 @@ import {
 	ComponentType,
 	type InteractionReplyOptions,
 } from "discord.js";
-import { client } from "../lib/client.js";
+import { client, defineCommand } from "strife.js";
 
 import constants from "../common/constants.js";
-import defineCommand from "../lib/commands.js";
 import { disableComponents, messageToText } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;

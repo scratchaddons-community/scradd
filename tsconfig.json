@@ -29,6 +29,6 @@
 		"useDefineForClassFields": true,
 		"useUnknownInCatchVariables": false
 	},
-	"exclude": ["node_modules", ".git", "dist", "modlogsOLD"],
+	"exclude": ["node_modules", ".git", "dist"],
 	"typeAcquisition": { "enable": true }
 }

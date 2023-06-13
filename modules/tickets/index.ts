@@ -5,12 +5,16 @@ import {
 	ComponentType,
 	GuildMember,
 } from "discord.js";
-import { client } from "../../lib/client.js";
-import defineCommand from "../../lib/commands.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { defineButton, defineModal, defineSelect } from "../../lib/components.js";
-import defineEvent from "../../lib/events.js";
+import {
+	client,
+	defineCommand,
+	defineEvent,
+	defineButton,
+	defineModal,
+	defineSelect,
+} from "strife.js";
 import { getSettings, updateSettings } from "../settings.js";
 import {
 	type Category,

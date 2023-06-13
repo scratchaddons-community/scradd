@@ -20,7 +20,7 @@ import {
 	roleMention,
 } from "discord.js";
 import config from "../../common/config.js";
-import defineEvent from "../../lib/events.js";
+import { defineEvent } from "strife.js";
 import log, { extraAuditLogsInfo, LoggingEmojis, LOG_GROUPS } from "./misc.js";
 import { unifiedDiff } from "difflib";
 import {

@@ -10,9 +10,8 @@ import {
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import defineCommand from "../lib/commands.js";
 import { getWeeklyXp } from "./xp/misc.js";
-import { defineButton } from "../lib/components.js";
+import { defineButton, defineCommand } from "strife.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */

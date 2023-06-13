@@ -2,7 +2,7 @@ import exitHook from "async-exit-hook";
 import { type Message, RESTJSONErrorCodes, type Snowflake } from "discord.js";
 import papaparse from "papaparse";
 
-import { client } from "../lib/client.js";
+import { client } from "strife.js";
 import { extractMessageExtremities } from "../util/discord.js";
 import logError from "./logError.js";
 import { getLoggingThread } from "../modules/logging/misc.js";

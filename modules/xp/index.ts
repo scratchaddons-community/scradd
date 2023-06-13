@@ -1,15 +1,12 @@
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType, MessageType } from "discord.js";
 
-import { client } from "../../lib/client.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import defineCommand from "../../lib/commands.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { defineButton, defineSelect } from "../../lib/components.js";
+import { client, defineCommand, defineEvent, defineButton, defineSelect } from "strife.js";
 import getUserRank from "./rank.js";
-import defineEvent from "../../lib/events.js";
 import { giveXpForMessage } from "./giveXp.js";
 import graph from "./graph.js";
 

@@ -1,8 +1,6 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { client } from "../../lib/client.js";
-import defineCommand from "../../lib/commands.js";
+import { client, defineCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
-import defineEvent from "../../lib/events.js";
 import getTop from "./getTop.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";

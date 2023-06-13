@@ -1,11 +1,9 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import defineCommand from "../../lib/commands.js";
 import guessAddon from "./guessAddon.js";
 import memory, { messageDelete } from "./memory.js";
-import { defineButton } from "../../lib/components.js";
+import { defineButton, defineCommand, defineEvent } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
-import defineEvent from "../../lib/events.js";
 import { disableComponents } from "../../util/discord.js";
 
 defineCommand(

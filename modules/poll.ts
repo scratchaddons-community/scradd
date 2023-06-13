@@ -7,12 +7,9 @@ import {
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import defineCommand from "../lib/commands.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
-import { defineModal } from "../lib/components.js";
-import defineEvent from "../lib/events.js";
-import { client } from "../lib/client.js";
+import { defineCommand, defineEvent, client, defineModal } from "strife.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];

@@ -1,8 +1,6 @@
 import { ApplicationCommandOptionType, GuildMember } from "discord.js";
-import { client } from "../../lib/client.js";
-import defineCommand from "../../lib/commands.js";
 import constants from "../../common/constants.js";
-import { defineButton, defineSelect } from "../../lib/components.js";
+import { client, defineCommand, defineButton, defineSelect } from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";

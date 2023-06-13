@@ -8,7 +8,7 @@ import { stripMarkdown } from "../util/markdown.js";
 import { normalize } from "../util/text.js";
 
 import { autoreactions, dad } from "../secrets.js";
-import defineEvent from "../lib/events.js";
+import { defineEvent } from "strife.js";
 
 const REACTION_CAP = 3;
 

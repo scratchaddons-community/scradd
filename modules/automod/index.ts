@@ -8,14 +8,12 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import defineCommand from "../../lib/commands.js";
 import { joinWithAnd } from "../../util/text.js";
-import defineEvent from "../../lib/events.js";
 import warn from "../punishments/warn.js";
 import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
-import { commands } from "../../lib/commands.js";
+import { commands, defineCommand, defineEvent } from "strife.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;

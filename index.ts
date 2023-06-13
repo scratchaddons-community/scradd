@@ -6,7 +6,7 @@ import "dotenv/config";
 
 import pkg from "./package.json" assert { type: "json" };
 import { GlobalFonts } from "@napi-rs/canvas";
-import login, { client } from "./lib/client.js";
+import { login, client } from "strife.js";
 import constants from "./common/constants.js";
 
 dns.setDefaultResultOrder("ipv4first");
