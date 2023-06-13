@@ -108,10 +108,12 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (!group) return config.channels.modlogs;
 
-	const threads = await config.channels.modlogs.threads.fetchActive();
+	const threads = await config.guild.channels.fetchActiveThreads();
 
 	return (
-		threads.threads.find((thread) => thread.name === group) ||
+		threads.threads.find(
+			(thread) => thread.parent?.id === config.channels.modlogs?.id && thread.name === group,
+		) ||
 		(await config.channels.modlogs.threads.create({
 			name: group,
 			reason: "New logging thread",

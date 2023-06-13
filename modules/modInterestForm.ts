@@ -8,9 +8,13 @@ import constants from "../common/constants.js";
 import giveXp from "./xp/giveXp.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
-const threads = await config.channels.admin.threads.fetchActive();
+const threads = await config.guild.channels.fetchActiveThreads();
 const thread =
-	threads.threads.find((thread) => thread.name === "Moderator Interest Forms") ||
+	threads.threads.find(
+		(thread) =>
+			thread.parent?.id === config.channels.admin?.id &&
+			thread.name === "Moderator Interest Forms",
+	) ||
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
 		reason: "For mod interest forms",
