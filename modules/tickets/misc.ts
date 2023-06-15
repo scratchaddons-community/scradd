@@ -14,15 +14,12 @@ export async function getThreadFromMember(
 ): Promise<ThreadChannel | void> {
 	if (!config.channels.tickets) return;
 
-	const { threads } = await config.guild.channels.fetchActiveThreads();
+	const { threads } = await config.channels.tickets.threads.fetchActive();
 
 	return (
 		await asyncFilter(
 			threads.toJSON(),
-			async (thread) =>
-				thread.parent?.id === config.channels.tickets?.id &&
-				(await getUserFromTicket(thread))?.id === user.id &&
-				thread,
+			async (thread) => (await getUserFromTicket(thread))?.id === user.id && thread,
 		).next()
 	).value;
 }
