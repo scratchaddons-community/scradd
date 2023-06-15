@@ -1,4 +1,4 @@
-import { inlineCode, Message } from "discord.js";
+import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
 
 import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
@@ -19,7 +19,7 @@ process
  */
 export default async function logError(
 	error: any,
-	event: string,
+	event: string | RepliableInteraction,
 ): Promise<Message<true> | undefined> {
 	try {
 		console.error(error);
@@ -27,7 +27,13 @@ export default async function logError(
 
 		return await log(
 			`${LoggingErrorEmoji} **${error.name}** occurred in ${
-				event.startsWith("<") && event.endsWith(">") ? event : inlineCode(event)
+				typeof event == "string"
+					? inlineCode(event)
+					: event.isChatInputCommand()
+					? event.toString()
+					: event.isCommand()
+					? `/${event.command?.name}`
+					: `${event.constructor.name}: ${event.customId}`
 			}`,
 			"server",
 			{ files: [{ content: generateError(error), extension: "json" }] },

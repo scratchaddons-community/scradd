@@ -19,14 +19,14 @@
 		"chartjs-adapter-date-fns": "3.0.0",
 		"date-fns": "2.30.0",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
-		"discord.js": "14.11.1-dev.1686701422-db925fa.0",
+		"discord.js": "dev",
 		"dotenv": "16.1.4",
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"mime-types": "2.1.35",
 		"papaparse": "5.3.2",
 		"serialize-error": "11.0.0",
-		"strife.js": "1.0.4"
+		"strife.js": "1.0.6"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
@@ -47,5 +47,13 @@
 	"engines": {
 		"node": "18.12.1",
 		"npm": "8.13.2"
+	},
+	"overrides": {
+		"@discordjs/builders": "dev",
+		"@discordjs/collection": "dev",
+		"@discordjs/formatters": "dev",
+		"@discordjs/rest": "dev",
+		"@discordjs/util": "dev",
+		"@discordjs/ws": "dev"
 	}
 }

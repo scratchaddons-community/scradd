@@ -38,7 +38,7 @@ defineCommand(
 			},
 
 			top: {
-				description: "View all users sorted by how much XP they have",
+				description: "View the server XP leaderboard",
 
 				options: {
 					user: {
