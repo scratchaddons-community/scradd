@@ -32,6 +32,7 @@ import {
 	chatInputApplicationCommandMention,
 	DMChannel,
 	type PartialDMChannel,
+	bold,
 } from "discord.js";
 
 import config from "../common/config.js";
@@ -419,14 +420,20 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
-			return `*${
-				message.interaction?.user.toString() ?? ""
-			} used ${chatInputApplicationCommandMention(
-				message.interaction?.commandName ?? "",
-				(await config.guild.commands.fetch()).find(
-					({ name }) => name === message.interaction?.commandName,
-				)?.id ?? "",
-			)}:*\n${actualContent}`;
+
+			const commandName = message.interaction?.commandName.split(" ")[0];
+			const command = (await config.guild.commands.fetch()).find(
+				({ name }) => name === commandName,
+			);
+
+			return `*${message.interaction?.user.toString() ?? ""} used ${
+				command
+					? chatInputApplicationCommandMention(
+							message.interaction?.commandName ?? "",
+							command.id ?? "",
+					  )
+					: bold(`/${message.interaction?.commandName ?? ""}`)
+			}:*\n${actualContent}`;
 		}
 
 		case MessageType.Call: {
