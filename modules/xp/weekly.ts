@@ -23,7 +23,9 @@ export async function getChatters() {
 			async (user) =>
 				`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
 					(
-						await client.users.fetch(user.user)
+						await client.users
+							.fetch(user.user)
+							.catch(() => ({ displayName: user.user + "#" }))
 					).displayName
 				} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
 		),
