@@ -25,8 +25,8 @@ defineCommand(
 				description: "The difficulty",
 				type: ApplicationCommandOptionType.String,
 				choices: {
-					Easy: "Easy (2 matches per emoji)",
-					Traditional: "Traditional (1 match per emoji)",
+					"Easy (2 matches per emoji)": "Easy",
+					"Traditional (1 match per emoji)": "Traditional",
 				},
 			},
 		},
