@@ -22,7 +22,7 @@ defineCommand(
 				required: true,
 			},
 			mode: {
-				description: "The difficulty",
+				description: "The difficulty (defaults to Traditional)",
 				type: ApplicationCommandOptionType.String,
 				choices: {
 					"Easy (2 matches per emoji)": "Easy",
