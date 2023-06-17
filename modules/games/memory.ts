@@ -62,7 +62,9 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 		.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			filter: (buttonInteraction) =>
-				otherUser.id === buttonInteraction.user.id &&
+				(otherUser.id === buttonInteraction.user.id ||
+					(buttonInteraction.customId.startsWith("cancel-") &&
+						interaction.user.id === buttonInteraction.user.id)) &&
 				buttonInteraction.customId.endsWith(`-${interaction.id}`),
 			max: 1,
 			time: GAME_COLLECTOR_TIME,
@@ -288,6 +290,15 @@ async function setupGame(difficulty: 2 | 4) {
 			"🦆",
 			"🇫🇷",
 			"📻",
+			"😭",
+			"🗿",
+			"👀",
+			"🧐",
+			"🤔",
+			"🤨",
+			"🥶",
+			"💀",
+			"💩",
 			...(process.env.NODE_ENV === "production"
 				? [
 						{ name: "bowling_ball", id: "1104935019232899183" },
@@ -298,6 +309,7 @@ async function setupGame(difficulty: 2 | 4) {
 						{ name: "rip", id: "1082693496739201205" },
 						{ name: "sxd", id: "962798819572056164" },
 						{ name: "wasteof", id: "1044651861682176080" },
+						{ name: "callum", id: "1119305606323523624" },
 				  ]
 				: []),
 		].map((emoji): [string, APIMessageComponentEmoji] =>
