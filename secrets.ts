@@ -16,8 +16,14 @@ export const dadEasterEggCount = 0;
  * - `raw` (`messsge.content`)
  * - `full` (`content ===`)
  * - `negative` - overrides all (`&& !content.includes`)
+ * - `ping` - only direct pings (`message.mentions.has`)
  */
 export const autoreactions: [
 	string | string[],
-	...(string | RegExp | [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"])[],
-][] = [];
+	...(
+		| string
+		| RegExp
+		| [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"]
+		| [string, "ping"]
+	)[],
+][] = [[];
