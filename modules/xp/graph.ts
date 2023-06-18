@@ -30,7 +30,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				},
 				y: { min: 0 },
 			},
-			font: { family: "Sora" },
+			font: { family: "Sora", weight: "400", style: "normal" },
 			elements: { point: { radius: 0 } },
 		},
 		plugins: [
