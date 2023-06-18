@@ -86,7 +86,7 @@ export default async function giveXp(
 	const xp = Array.from(xpDatabase.data);
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[xpDatabaseIndex]?.xp || 0;
-	const newXp = oldXp + amount * (Math.sign(oldXp) || 1);
+	const newXp = oldXp === 0 && amount < 0 ? 0 : oldXp + amount * (Math.sign(oldXp) || 1);
 
 	if (xpDatabaseIndex === -1) xp.push({ user: user.id, xp: amount });
 	else xp[xpDatabaseIndex] = { user: user.id, xp: newXp };
