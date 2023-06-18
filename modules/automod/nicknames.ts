@@ -7,17 +7,19 @@ import censor from "./language.js";
 
 export default async function changeNickname(member: GuildMember) {
 	const censored = censor(member.displayName);
-	if (censored) await setNickname(member, censored.censored, "Has bad words");
-
 	const newNick = censored ? censored.censored : member.displayName;
 
-	if (censored && member.nickname)
-		warn(
-			member,
-			"Watch your language!",
-			censored.strikes,
-			"Set nickname to " + member.displayName,
-		);
+	if (censored) {
+		if (member.nickname)
+			await warn(
+				member,
+				"Watch your language!",
+				censored.strikes,
+				"Set nickname to " + member.displayName,
+			);
+		await setNickname(member, newNick, "Has bad words");
+	}
+
 	const members = (await config.guild.members.fetch({ query: newNick, limit: 100 })).filter(
 		(found) => found.displayName === newNick,
 	);
