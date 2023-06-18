@@ -80,8 +80,14 @@ defineEvent("messageCreate", async (message) => {
 
 		const results = requirements.map((requirement) => {
 			const type = Array.isArray(requirement) ? requirement[1] : "word";
-			if (!(["partial", "full", "raw", "plural", "negative", "word"] as const).includes(type))
-				throw new TypeError("Unknown type: " + type);
+
+			if (Array.isArray(requirement) && requirement[1] === "ping") {
+				return message.mentions.has(requirement[0], {
+					ignoreEveryone: true,
+					ignoreRepliedUser: true,
+					ignoreRoles: true,
+				});
+			}
 
 			const pre = type === "partial" || type === "raw" ? "" : type === "full" ? "^" : "\\b";
 
