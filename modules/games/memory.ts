@@ -177,8 +177,8 @@ async function memory(
 			: message.reply({
 					content,
 					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
-			}));
-		
+			  }));
+
 		const shown: string[] = [];
 
 		collector = message
