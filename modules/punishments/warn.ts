@@ -133,6 +133,7 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
+		(!config.roles.mod || !member.roles.resolve(config.roles.mod.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
 			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
@@ -189,7 +190,8 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	}
 
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
-		id === toRemove.id ? { ...toRemove, removed: true } : toRemove,
+		// Double equals because RoboTop warns are stored as numbers in the database
+		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
 	const user = (await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
