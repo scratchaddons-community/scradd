@@ -26,4 +26,4 @@ export const autoreactions: [
 		| [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"]
 		| [string, "ping"]
 	)[],
-][] = [[];
+][] = [];
