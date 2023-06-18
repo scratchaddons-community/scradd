@@ -10,16 +10,17 @@ import {
 	Message,
 	type PartialMessage,
 	User,
+	ThreadAutoArchiveDuration,
+	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
-import { generateHash } from "../../util/text.js";
 import { disableComponents } from "../../util/discord.js";
 
 const EMPTY_TILE = "⬛";
 
-const deletedPings: Record<string, Snowflake | undefined> = {};
+const deletedPings: Snowflake[] = [];
 
 export default async function (interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const otherUser = interaction.options.getUser("user", true);
@@ -37,7 +38,7 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 		fetchReply: true,
 		content: `${
 			constants.emojis.misc.challenge
-		} **${otherUser.toString()}, you are challenged to a game of Memory (${mode}) by ${interaction.user.toString()}!** Do you accept?`,
+		} **${otherUser.toString()}, you are challenged to a game of Memory Match (${mode}) by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -81,6 +82,7 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 					() => Math.random() - 0.5,
 				),
 				mode,
+				useThread: interaction.options.getBoolean("thread") ?? true,
 			});
 		})
 		.on("end", async (_, reason) => {
@@ -91,11 +93,19 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 
 async function memory(
 	interaction: ButtonInteraction,
-	{ users, mode }: { users: [User, User]; mode: string },
+	{ users, mode, useThread }: { users: [User, User]; mode: string; useThread: boolean },
 ) {
-	if (await checkIfUserPlaying(interaction)) return;
+	if (await checkIfUserPlaying(interaction)) {
+		await interaction.message.edit({
+			components: disableComponents(interaction.message.components),
+		});
+		return;
+	}
 	const otherUser = users.find((user) => user.id !== interaction.user.id) ?? interaction.user;
 	if (CURRENTLY_PLAYING.get(otherUser.id)) {
+		await interaction.message.edit({
+			components: disableComponents(interaction.message.components),
+		});
 		await interaction.reply({
 			content: `${constants.emojis.statuses.no} <@${otherUser}> is playing a different game now!`,
 			ephemeral: true,
@@ -104,7 +114,6 @@ async function memory(
 	}
 
 	await interaction.deferUpdate();
-	const deletedHash = generateHash();
 	const scores: [string[], string[]] = [[], ["22"]];
 	const chunks = await setupGame(mode === "Easy" ? 4 : 2);
 	let totalTurns = 0;
@@ -112,17 +121,26 @@ async function memory(
 	let timeout: NodeJS.Timeout | undefined;
 
 	const message = await interaction.message.edit(getBoard(totalTurns));
-
+	const thread =
+		useThread &&
+		(message.channel.type === ChannelType.GuildAnnouncement ||
+			message.channel.type === ChannelType.GuildText)
+			? await message.startThread({
+					name: `Memory Match: ${users[0].displayName} versus ${users[1].displayName}`,
+					reason: "To play the game",
+					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
+			  })
+			: undefined;
 	CURRENTLY_PLAYING.set(users[0].id, {
 		url: message.url,
-		end: () => {
+		end() {
 			collector?.stop("end");
 			return endGame(`🛑 ${users[0].toString()} ended the game`, users[0]);
 		},
 	});
 	CURRENTLY_PLAYING.set(users[1].id, {
 		url: message.url,
-		end: () => {
+		end() {
 			collector?.stop("end");
 			return endGame(`🛑 ${users[1].toString()} ended the game`, users[1]);
 		},
@@ -132,23 +150,35 @@ async function memory(
 
 	async function takeTurns(turn: number) {
 		const user = users[turn % 2] ?? users[0];
-		const ping = await message.reply({
-			content: `🎲 ${user.toString()}, your turn!`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
+		const content = `🎲 ${user.toString()}, your turn!`;
+		const gameLinkButton = {
+			label: "Go to game",
+			style: ButtonStyle.Link,
+			type: ComponentType.Button,
+			url: message.url,
+		} as const;
+		const endGameButton = {
+			label: "End game",
+			style: ButtonStyle.Danger,
+			type: ComponentType.Button,
+			customId: `${users.map((user) => user.id).join("-")}_endGame`,
+		} as const;
 
+		const ping = await (thread
+			? thread.send({
+					content,
 					components: [
 						{
-							label: "End game",
-							style: ButtonStyle.Danger,
-							type: ComponentType.Button,
-							customId: `${users.map((user) => user.id).join("-")}_endGame`,
-						} as const,
+							type: ComponentType.ActionRow,
+							components: [gameLinkButton, endGameButton],
+						},
 					],
-				},
-			],
-		});
+			  })
+			: message.reply({
+					content,
+					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
+			}));
+		
 		const shown: string[] = [];
 
 		collector = message
@@ -187,7 +217,7 @@ async function memory(
 					await interaction.message.edit(getBoard(turn));
 				}
 
-				deletedPings[deletedHash] = ping.id;
+				deletedPings.push(ping.id);
 				await ping.delete();
 				if (scores[0].length + scores[1].length === 25) return await endGame();
 
@@ -241,7 +271,6 @@ async function memory(
 	async function endGame(content?: string, user?: User) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
-		deletedPings[deletedHash] = undefined;
 
 		await message.edit({ components: disableComponents((await message.fetch()).components) });
 
@@ -256,6 +285,8 @@ async function memory(
 			}`;
 		const secondWon = firstScore < secondScore;
 		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
+
+		await thread?.setArchived(true);
 
 		await message.reply({
 			content,
@@ -342,5 +373,7 @@ async function setupGame(difficulty: 2 | 4) {
 }
 
 export async function messageDelete(message: Message | PartialMessage) {
-	return !Object.values(deletedPings).includes(message.id);
+	const index = deletedPings.indexOf(message.id);
+	if (index > -1) deletedPings.splice(index, 1);
+	return index > -1;
 }

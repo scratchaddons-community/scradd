@@ -29,6 +29,11 @@ defineCommand(
 					"Traditional (1 match per emoji)": "Traditional",
 				},
 			},
+			thread: {
+				description:
+					"Whether to create a thread for chatting alongside the game (defaults to true)",
+				type: ApplicationCommandOptionType.Boolean,
+			},
 		},
 	},
 	memory,
