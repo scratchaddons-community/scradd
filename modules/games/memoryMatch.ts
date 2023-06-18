@@ -22,7 +22,9 @@ const EMPTY_TILE = "⬛";
 
 const deletedPings: Snowflake[] = [];
 
-export default async function (interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function memoryMatch(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+) {
 	const otherUser = interaction.options.getUser("user", true);
 	if (
 		otherUser.bot ||
@@ -77,7 +79,7 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 				return;
 			}
 
-			return await memory(buttonInteraction, {
+			return await playGame(buttonInteraction, {
 				users: ([interaction.user, otherUser] satisfies [User, User]).sort(
 					() => Math.random() - 0.5,
 				),
@@ -91,7 +93,7 @@ export default async function (interaction: ChatInputCommandInteraction<"cached"
 		});
 }
 
-async function memory(
+async function playGame(
 	interaction: ButtonInteraction,
 	{ users, mode, useThread }: { users: [User, User]; mode: string; useThread: boolean },
 ) {
@@ -297,7 +299,7 @@ async function memory(
 							? `${constants.emojis.misc.blue} ${firstUser}`
 							: `${constants.emojis.misc.green} ${secondUser}`
 					}`,
-					title: "Memory Results",
+					title: "Memory Match Results",
 					color: winner.displayColor,
 					thumbnail: { url: winner.displayAvatarURL() },
 					footer: {
