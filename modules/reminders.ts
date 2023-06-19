@@ -15,7 +15,7 @@ import constants from "../common/constants.js";
 import Database, { cleanDatabaseListeners } from "../common/database.js";
 import censor, { badWordsAllowed } from "./automod/language.js";
 import { disableComponents } from "../util/discord.js";
-import { convertBase, nth } from "../util/numbers.js";
+import { convertBase, nth, parseTime } from "../util/numbers.js";
 import { getSettings } from "./settings.js";
 import { defineButton, defineSelect, client, defineCommand, defineEvent } from "strife.js";
 import getWeekly, { getChatters } from "./xp/weekly.js";
@@ -27,6 +27,8 @@ export enum SpecialReminders {
 	UpdateSACategory,
 	Bump,
 	RebootBot,
+	CloseThread,
+	LockThread,
 }
 type Reminder = {
 	channel: Snowflake;
@@ -55,124 +57,131 @@ setInterval(async () => {
 	);
 	remindersDatabase.data = toPostpone;
 
-	await Promise.all(
-		toSend.map(async (reminder) => {
-			const channel = await client.channels.fetch(reminder.channel).catch(() => {});
-			if (reminder.user === client.user.id) {
-				switch (Number(reminder.id)) {
-					case SpecialReminders.Weekly: {
-						if (!channel?.isTextBased())
-							throw new TypeError("Could not find weekly channel");
+	const promises = toSend.map(async (reminder) => {
+		const channel = await client.channels.fetch(reminder.channel).catch(() => {});
+		if (reminder.user === client.user.id) {
+			switch (reminder.id) {
+				case SpecialReminders.Weekly: {
+					if (!channel?.isTextBased())
+						throw new TypeError("Could not find weekly channel");
 
-						const now = new Date(reminder.date);
-						const nextWeeklyDate = new Date(reminder.date);
-						nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
+					const now = new Date(reminder.date);
+					const nextWeeklyDate = new Date(reminder.date);
+					nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
 
-						const chatters = await getChatters();
-						const message = await channel.send(await getWeekly(nextWeeklyDate));
-						if (!chatters) return message;
-						const thread = await message.startThread({
-							name: `🏆 Weekly Winners week of ${
-								[
-									"January",
-									"February",
-									"March",
-									"April",
-									"May",
-									"June",
-									"July",
-									"August",
-									"September",
-									"October",
-									"November",
-									"December",
-								][now.getUTCMonth()] || ""
-							} ${nth(now.getUTCDate(), {
-								bold: false,
-								jokes: false,
-							})}`,
-							reason: "To send all chatters",
-						});
-						await thread.send(chatters);
-						return message;
-					}
-					case SpecialReminders.UpdateSACategory: {
-						if (channel?.type !== ChannelType.GuildCategory)
-							throw new TypeError("Could not find SA channel");
+					const chatters = await getChatters();
+					const message = await channel.send(await getWeekly(nextWeeklyDate));
+					if (!chatters) return message;
+					const thread = await message.startThread({
+						name: `🏆 Weekly Winners week of ${
+							[
+								"January",
+								"February",
+								"March",
+								"April",
+								"May",
+								"June",
+								"July",
+								"August",
+								"September",
+								"October",
+								"November",
+								"December",
+							][now.getUTCMonth()] || ""
+						} ${nth(now.getUTCDate(), {
+							bold: false,
+							jokes: false,
+						})}`,
+						reason: "To send all chatters",
+					});
+					await thread.send(chatters);
+					return message;
+				}
+				case SpecialReminders.UpdateSACategory: {
+					if (channel?.type !== ChannelType.GuildCategory)
+						throw new TypeError("Could not find SA channel");
 
-						remindersDatabase.data = [
-							...remindersDatabase.data,
-							{
-								channel: reminder.channel,
-								date: Number(Date.now() + 3_600_000),
-								reminder: undefined,
-								id: SpecialReminders.UpdateSACategory,
-								user: client.user.id,
-							},
-						];
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: reminder.channel,
+							date: Number(Date.now() + 3_600_000),
+							reminder: undefined,
+							id: SpecialReminders.UpdateSACategory,
+							user: client.user.id,
+						},
+					];
 
-						const count = await fetch(
-							`${constants.urls.usercountJson}?date=${Date.now()}`,
-						).then(
-							async (response) =>
-								await response?.json<{ count: number; _chromeCountDate: string }>(),
-						);
+					const count = await fetch(
+						`${constants.urls.usercountJson}?date=${Date.now()}`,
+					).then(
+						async (response) =>
+							await response?.json<{ count: number; _chromeCountDate: string }>(),
+					);
 
-						return await channel?.setName(
-							`Scratch Addons - ${count.count.toLocaleString("en-us", {
-								compactDisplay: "short",
-								maximumFractionDigits: 1,
-								minimumFractionDigits: count.count > 999 ? 1 : 0,
-								notation: "compact",
-							})} users`,
-							"Automated update to sync count",
-						);
-					}
-					case SpecialReminders.Bump: {
-						if (!channel?.isTextBased())
-							throw new TypeError("Could not find bumping channel");
+					return await channel?.setName(
+						`Scratch Addons - ${count.count.toLocaleString("en-us", {
+							compactDisplay: "short",
+							maximumFractionDigits: 1,
+							minimumFractionDigits: count.count > 999 ? 1 : 0,
+							notation: "compact",
+						})} users`,
+						"Automated update to sync count",
+					);
+				}
+				case SpecialReminders.Bump: {
+					if (!channel?.isTextBased())
+						throw new TypeError("Could not find bumping channel");
 
-						remindersDatabase.data = [
-							...remindersDatabase.data,
-							{
-								channel: BUMPING_THREAD,
-								date: Date.now() + 1800000,
-								reminder: undefined,
-								id: SpecialReminders.Bump,
-								user: client.user.id,
-							},
-						];
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: BUMPING_THREAD,
+							date: Date.now() + 1800000,
+							reminder: undefined,
+							id: SpecialReminders.Bump,
+							user: client.user.id,
+						},
+					];
 
-						return await channel.send({
-							content: `🔔 @here </bump:${COMMAND_ID}> the server!`,
-							allowedMentions: { parse: ["everyone"] },
-						});
-					}
-					case SpecialReminders.RebootBot: {
-						await cleanDatabaseListeners();
-						process.emitWarning(`${client.user.tag} is killing the bot`);
-						// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
-						process.exit(1);
-					}
+					return await channel.send({
+						content: `🔔 @here </bump:${COMMAND_ID}> the server!`,
+						allowedMentions: { parse: ["everyone"] },
+					});
+				}
+				case SpecialReminders.RebootBot: {
+					await cleanDatabaseListeners();
+					process.emitWarning(`${client.user.tag} is killing the bot`);
+					// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
+					process.exit(1);
+				}
+				case SpecialReminders.CloseThread: {
+					if (channel?.isThread()) await channel.setArchived(true);
+					return;
+				}
+				case SpecialReminders.LockThread: {
+					if (channel?.isThread()) await channel.setLocked(true);
+					return;
 				}
 			}
-			if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
-			const silent = reminder.reminder.startsWith("@silent");
-			const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
-			await channel
-				.send({
-					content: `🔔 ${
-						channel.isDMBased() ? "" : `<@${reminder.user}> `
-					}${content.trim()} (from ${time(
-						new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
-						TimestampStyles.RelativeTime,
-					)})`,
-					allowedMentions: { users: [reminder.user] },
-					flags: silent ? MessageFlags.SuppressNotifications : undefined,
-				})
-				.catch(() => {});
-		}),
-	);
+		}
+		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
+		const silent = reminder.reminder.startsWith("@silent");
+		const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
+		await channel
+			.send({
+				content: `🔔 ${
+					channel.isDMBased() ? "" : `<@${reminder.user}> `
+				}${content.trim()} (from ${time(
+					new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
+					TimestampStyles.RelativeTime,
+				)})`,
+				allowedMentions: { users: [reminder.user] },
+				flags: silent ? MessageFlags.SuppressNotifications : undefined,
+			})
+			.catch(() => {});
+	});
+	await Promise.all(promises);
 }, 120_000);
 
 defineCommand(
@@ -193,7 +202,7 @@ defineCommand(
 						type: ApplicationCommandOptionType.String,
 						required: true,
 						description:
-							"How long until the reminder should be sent, or a UNIX timestamp to send it at (within one minute)",
+							"How long until sending the reminder or a UNIX timestamp to send it at (within one minute)",
 					},
 					reminder: {
 						type: ApplicationCommandOptionType.String,
@@ -310,7 +319,7 @@ defineCommand(
 			});
 		}
 
-		const date = parseTime(interaction.options.getString("time", true));
+		const date = parseTime(interaction.options.getString("time", true).toLowerCase().trim());
 		if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
 			return await interaction.reply({
 				ephemeral: true,
@@ -355,36 +364,6 @@ defineCommand(
 		});
 	},
 );
-function parseTime(time: string): Date {
-	const number = Number(time);
-
-	if (!isNaN(number)) {
-		if (number > 1_000_000_000_000) return new Date(number);
-		else if (number > 1_000_000_000) return new Date(number * 1_000);
-		else return new Date(Date.now() + number * 3_600_000);
-	}
-
-	const {
-		weeks = 0,
-		days = 0,
-		hours = 0,
-		minutes = 0,
-	} = time.match(
-		new RegExp(
-			/^(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
-				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
-				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
-				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
-		),
-	)?.groups ?? {};
-
-	const totalDays = Number(days) + 7 * Number(weeks);
-	const totalHours = Number(hours) + 24 * totalDays;
-	const totalMinutes = Number(minutes) + 60 * totalHours;
-	const totalSeconds = 60 * totalMinutes;
-	const totalMilliseconds = Date.now() + 1_000 * totalSeconds;
-	return new Date(totalMilliseconds);
-}
 
 defineSelect("cancelReminder", async (interaction) => {
 	const [id = ""] = interaction.values;

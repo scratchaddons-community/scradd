@@ -21,7 +21,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import { defineEvent } from "strife.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LOG_GROUPS } from "./misc.js";
+import log, { extraAuditLogsInfo, LoggingEmojis } from "./misc.js";
 import { unifiedDiff } from "difflib";
 import {
 	channelCreate,
@@ -57,7 +57,6 @@ import {
 	guildScheduledEventUpdate,
 	voiceStateUpdate,
 } from "./voice.js";
-import { DATABASE_THREAD } from "../../common/database.js";
 
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
@@ -825,15 +824,3 @@ defineEvent("roleDelete", async (role) => {
 defineEvent("threadUpdate", threadUpdate);
 defineEvent("userUpdate", userUpdate);
 defineEvent("voiceStateUpdate", voiceStateUpdate);
-defineEvent("threadUpdate", async (_, newThread) => {
-	if (
-		newThread.archived &&
-		(((newThread.name === DATABASE_THREAD || LOG_GROUPS.includes(newThread.name)) &&
-			newThread.parent?.id === config.channels.modlogs?.id) ||
-			[
-				"1029234332977602660", // #YouTube planning
-				"988780044627345468", // #Server Suggestions
-			].includes(newThread.id))
-	)
-		await newThread.setArchived(false, "Modlog threads must stay open");
-});

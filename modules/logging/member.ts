@@ -185,8 +185,10 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 		await log(
 			`${LoggingEmojis.UserUpdate} ${newUser.toString()}${
 				newUser.globalName
-					? ` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
-					: "’s nickname was removed"
+					? oldUser.globalName
+						? ` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
+						: ` set their display name to ${newUser.globalName}`
+					: "’s display name was removed"
 			}`,
 			"members",
 		);

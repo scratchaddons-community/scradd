@@ -377,5 +377,5 @@ async function setupGame(difficulty: 2 | 4) {
 export async function messageDelete(message: Message | PartialMessage) {
 	const index = deletedPings.indexOf(message.id);
 	if (index > -1) deletedPings.splice(index, 1);
-	return index > -1;
+	return index === -1;
 }

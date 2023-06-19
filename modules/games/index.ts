@@ -7,7 +7,7 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 
 defineCommand(
-	{ name: "guess-addon", description: "Think of an addon and I will guess it!" },
+	{ name: "guess-addon", description: "Think of an addon for me to guess it" },
 	guessAddon,
 );
 

@@ -23,21 +23,6 @@ defineEvent("messageCreate", async (message) => {
 	}
 });
 
-defineEvent("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== config.guild.id || !newlyCreated) return;
-
-	const toPing = [config.channels.mod?.id, config.channels.modlogs?.id].includes(
-		thread.parent?.id,
-	)
-		? config.roles.mod?.toString()
-		: thread.parent?.id === config.channels.exec?.id
-		? "<@&1046043735680630784>" // @Executive
-		: thread.parent?.id === config.channels.admin?.id
-		? config.roles.admin?.toString()
-		: undefined;
-	if (toPing) await thread.send({ content: toPing, allowedMentions: { parse: ["roles"] } });
-});
-
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 

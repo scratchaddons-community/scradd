@@ -81,7 +81,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 
 	const { active } = config.roles;
-	const activeMembers = weeklyWinners.filter((item) => item.xp > 350);
+	const activeMembers = weeklyWinners.filter((item) => item.xp > 300);
 	if (active) {
 		await Promise.all([
 			...active.members.map(async (roleMember) => {

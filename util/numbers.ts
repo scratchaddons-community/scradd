@@ -87,3 +87,34 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 			: "")
 	);
 }
+
+export function parseTime(time: string): Date {
+	const number = Number(time);
+
+	if (!isNaN(number)) {
+		if (number > 1_000_000_000_000) return new Date(number);
+		else if (number > 1_000_000_000) return new Date(number * 1_000);
+		else return new Date(Date.now() + number * 3_600_000);
+	}
+
+	const {
+		weeks = 0,
+		days = 0,
+		hours = 0,
+		minutes = 0,
+	} = time.match(
+		new RegExp(
+			/^(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
+				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
+				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
+				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
+		),
+	)?.groups ?? {};
+
+	const totalDays = Number(days) + 7 * Number(weeks);
+	const totalHours = Number(hours) + 24 * totalDays;
+	const totalMinutes = Number(minutes) + 60 * totalHours;
+	const totalSeconds = 60 * totalMinutes;
+	const totalMilliseconds = Date.now() + 1_000 * totalSeconds;
+	return new Date(totalMilliseconds);
+}
