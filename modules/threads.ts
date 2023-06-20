@@ -288,5 +288,7 @@ function getThreadConfig(thread: AnyThreadChannel) {
 }
 
 function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
-	return Promise.all(role.members.map((member) => thread.members.add(member, "Has qualifying role initially")));
+	return Promise.all(
+		role.members.map((member) => thread.members.add(member, "Has qualifying role initially")),
+	);
 }
