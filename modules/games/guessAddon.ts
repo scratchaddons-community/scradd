@@ -15,11 +15,6 @@ import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./mi
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import config from "../../common/config.js";
 
-export const commandMarkdown = `\n\n*Run the ${chatInputApplicationCommandMention(
-	"addon",
-	(await config.guild.commands.fetch()).find((command) => command.name === "addon")?.id ?? "",
-)} command for more information about this addon!*`;
-
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
 export default async function guessAddon(
@@ -423,7 +418,12 @@ export default async function guessAddon(
 							.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
 							?.map(({ statement }) => `- ${statement}`)
 							.join("\n") ?? ""
-					}${commandMarkdown}`,
+					}\n\n*Run the ${chatInputApplicationCommandMention(
+						"addon",
+						(
+							await config.guild.commands.fetch()
+						).find((command) => command.name === "addon")?.id ?? "",
+					)} command for more information about this addon!*`,
 
 					author: {
 						icon_url: (interaction.member instanceof GuildMember

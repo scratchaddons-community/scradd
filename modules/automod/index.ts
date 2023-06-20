@@ -37,7 +37,7 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 				interaction.user,
 				"Watch your language!",
 				censored.strikes,
-				`Used command:\n${interaction.toString()}`,
+				`Used command ${interaction.toString()}`,
 			);
 			return false;
 		}
@@ -90,7 +90,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 				partialUser.partial ? await partialUser.fetch() : partialUser,
 				"Watch your language!",
 				censored.strikes,
-				`Reacted with:\n:${reaction.emoji.name}:`,
+				`Reacted with :${reaction.emoji.name}:`,
 			);
 			await reaction.remove();
 			return false;
@@ -132,7 +132,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 			newPresence.member,
 			"Watch your language!",
 			censored.strikes,
-			"Set status to:\n" + status,
+			"Set status to " + status,
 		);
 	}
 });

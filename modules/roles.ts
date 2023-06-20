@@ -11,11 +11,17 @@ import {
 	type ColorResolvable,
 	ButtonStyle,
 	ApplicationCommandPermissionType,
+	ApplicationCommand,
 } from "discord.js";
-import { defineCommand, defineEvent, defineModal } from "strife.js";
+import { client, defineCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../common/constants.js";
 import { disableComponents } from "../util/discord.js";
 import { recentXpDatabase } from "./xp/misc.js";
+import censor from "./automod/language.js";
+import warn from "./punishments/warn.js";
+
+const PREFIX = "✨ ";
+let command: ApplicationCommand | undefined;
 
 export const rolesDatabase = new Database<{
 	user: Snowflake;
@@ -31,7 +37,7 @@ export const rolesDatabase = new Database<{
 }>("roles");
 await rolesDatabase.init();
 
-const roles = {
+const persistedRoles = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
 	formerAdmin: "1069776422467555328",
@@ -75,7 +81,10 @@ defineEvent("guildMemberRemove", async (member) => {
 	const memberRoles = {
 		user: member.id,
 		...Object.fromEntries(
-			Object.entries(roles).map(([key, value]) => [key, !!member.roles.resolve(value)]),
+			Object.entries(persistedRoles).map(([key, value]) => [
+				key,
+				!!member.roles.resolve(value),
+			]),
 		),
 	};
 
@@ -91,55 +100,33 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	const memberRoles = rolesDatabase.data.find((entry) => entry.user === member.id);
-	for (const roleName of Object.keys(roles))
-		if (memberRoles?.[roleName]) member.roles.add(roles[roleName], "Persisting roles");
+	for (const roleName of Object.keys(persistedRoles))
+		if (memberRoles?.[roleName]) member.roles.add(persistedRoles[roleName], "Persisting roles");
 });
 
-defineEvent("guildMemberUpdate", async (_, newMember) => {
-	if (newMember.guild.id !== config.guild.id) return;
+defineEvent("guildMemberUpdate", async (_, member) => {
+	if (member.guild.id !== config.guild.id) return;
 
-	if (newMember.roles.premiumSubscriberRole && config.roles.booster)
-		await newMember.roles.add(config.roles.booster, "Boosted the server");
+	if (member.roles.premiumSubscriberRole && config.roles.booster)
+		await member.roles.add(config.roles.booster, "Boosted the server");
 });
 
 defineCommand(
 	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
 	async (interaction) => {
+		command ??= interaction.command ?? undefined;
 		if (!(interaction.member instanceof GuildMember))
 			throw new TypeError("interaction.member is not a GuildMember!");
 
-		const permissions = interaction.command
-			? await config.guild.commands.permissions.fetch({ command: interaction.command })
-			: undefined;
-		const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
-		const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
-		const lastWeekly = Object.entries(
-			recentXp.reduce<Record<Snowflake, number>>((acc, gain) => {
-				if (gain.time > maxDate) return acc;
-
-				acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
-				return acc;
-			}, {}),
-		).sort((one, two) => two[1] - one[1]);
-
-		if (
-			!interaction.member.roles.premiumSubscriberRole &&
-			!permissions?.some(
-				(permission) =>
-					permission.type === ApplicationCommandPermissionType.User &&
-					permission.id === interaction.user.id &&
-					permission.permission,
-			) &&
-			lastWeekly[0]?.[0] !== interaction.user.id
-		)
+		if (!(await qualifiesForRole(interaction.member)))
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You can’t use this command!`,
+				content: `${constants.emojis.statuses.no} You don’t have permission to create a custom role!`,
 			});
 
 		const existingRole = interaction.member.roles
 			.valueOf()
-			.find((role) => role.name.startsWith("✨ "));
+			.find((role) => role.name.startsWith(PREFIX));
 
 		await interaction.showModal({
 			title: "Create Role",
@@ -155,7 +142,7 @@ defineCommand(
 							type: ComponentType.TextInput,
 							maxLength: 100,
 							required: !existingRole,
-							value: existingRole?.name.replace("✨ ", ""),
+							value: existingRole?.name.replace(PREFIX, ""),
 						},
 					],
 				},
@@ -187,7 +174,7 @@ defineModal("customRole", async (interaction) => {
 
 	const existingRole =
 		interaction.member instanceof GuildMember
-			? interaction.member.roles.valueOf().find((role) => role.name.startsWith("✨ "))
+			? interaction.member.roles.valueOf().find((role) => role.name.startsWith(PREFIX))
 			: undefined;
 
 	if (!name) {
@@ -236,7 +223,7 @@ defineModal("customRole", async (interaction) => {
 					return;
 				}
 
-				await existingRole.delete("Deleted by user");
+				await existingRole.delete(`Deleted by ${interaction.user.tag}`);
 				await buttonInteraction.reply(
 					`${constants.emojis.statuses.yes} Deleted your role ${existingRole.name} (${existingRole.hexColor})!`,
 				);
@@ -248,6 +235,29 @@ defineModal("customRole", async (interaction) => {
 		return;
 	}
 
+	const censored = censor(name);
+	if (censored) {
+		await warn(
+			interaction.user,
+			"Watch your language!",
+			censored.strikes,
+			`Attempted to make custom role @${name}`,
+		);
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} Language!`,
+		});
+	}
+
+	if (
+		name.match(/\b(?:mod(?:erator)?|admin(?:instrator)|owner|exec(?:utive)|manager|scradd)\b/i)
+	) {
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} Invalid role name!`,
+		});
+	}
+
 	if (color && !(color in Colors) && color !== "Random" && !/^#[a0-9a-f]{6}$/.test(color)) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -256,18 +266,83 @@ defineModal("customRole", async (interaction) => {
 	}
 
 	if (existingRole) {
-		await existingRole.setColor((color as ColorResolvable) || "#000000", "Edited by user");
-		await existingRole.setName("✨ " + name, "Edited by user");
+		await existingRole.setColor(
+			(color as ColorResolvable) || "#000000",
+			`Edited by ${interaction.user.tag}`,
+		);
+		await existingRole.setName(PREFIX + name, `Edited by ${interaction.user.tag}`);
 
 		return await interaction.reply(`${constants.emojis.statuses.yes} Updated your role!`);
 	}
 
 	const role = await config.guild.roles.create({
 		color: (color as ColorResolvable) || "#000000",
-		name: "✨ " + name,
-		reason: "Created by user",
+		name: PREFIX + name,
+		reason: `Created by ${interaction.user.tag}`,
 		position: (config.guild.roles.premiumSubscriberRole?.position ?? 0) + 1,
 	});
-	await interaction.member.roles.add(role);
+	await interaction.member.roles.add(role, "Custom role created");
 	return await interaction.reply(`${constants.emojis.statuses.yes} Created your custom role!`);
 });
+
+defineEvent("guildMemberRemove", async (member) => {
+	for (const [, role] of await config.guild.roles.fetch()) {
+		if (role.name.startsWith(PREFIX) && !role.members.size) {
+			await role.delete(`${member.user.tag} left the server`);
+		}
+	}
+});
+
+defineEvent("guildMemberUpdate", async (_, member) => {
+	if (member.guild.id !== config.guild.id) return;
+
+	if (!(await qualifiesForRole(member))) {
+		await member.roles
+			.valueOf()
+			.find((role) => role.name.startsWith(PREFIX))
+			?.delete("No longer qualifies");
+	}
+});
+
+defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
+	if (permissions.guildId !== config.guild.id || permissions.applicationId !== client.user.id)
+		return;
+
+	for (const [, role] of await config.guild.roles.fetch()) {
+		if (role.name.startsWith(PREFIX)) {
+			const member = role.members.first();
+			if (!member) {
+				await role.delete("Unused role");
+				continue;
+			}
+			if (!(await qualifiesForRole(member))) await role.delete("No longer qualifies");
+		}
+	}
+});
+
+async function qualifiesForRole(member: GuildMember) {
+	if (member.roles.premiumSubscriberRole) return true;
+
+	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
+	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
+	const lastWeekly = Object.entries(
+		recentXp.reduce<Record<Snowflake, number>>((acc, gain) => {
+			if (gain.time > maxDate) return acc;
+
+			acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
+			return acc;
+		}, {}),
+	).sort((one, two) => two[1] - one[1]);
+	if (lastWeekly[0]?.[0] !== member.user.id) return true;
+
+	command ??= (await config.guild.commands.fetch()).find(
+		(command) => command.name === "custom-role",
+	);
+	const permissions = command && (await config.guild.commands.permissions.fetch({ command }));
+	return permissions?.some(
+		(permission) =>
+			permission.type === ApplicationCommandPermissionType.User &&
+			permission.id === member.user.id &&
+			permission.permission,
+	);
+}

@@ -288,7 +288,7 @@ async function playGame(
 		const secondWon = firstScore < secondScore;
 		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
 
-		await thread?.setArchived(true);
+		await thread?.setArchived(true, "Game over");
 
 		await message.reply({
 			content,

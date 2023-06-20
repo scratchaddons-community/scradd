@@ -80,6 +80,13 @@ const events: {
 			"server",
 		);
 	},
+	async [AuditLogEvent.RoleCreate](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Role} ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+			"server",
+		);
+	},
 	async [AuditLogEvent.RoleUpdate](entry) {
 		for (const change of entry.changes) {
 			const key = change.key as Extract<typeof change.key, keyof APIRole>;
@@ -158,6 +165,15 @@ const events: {
 				}
 			}
 		}
+	},
+	async [AuditLogEvent.RoleDelete](entry) {
+		if (!(entry.target instanceof Base)) return;
+		await log(
+			`${LoggingEmojis.Role} @${entry.target.name} deleted${extraAuditLogsInfo(entry)} (ID: ${
+				entry.target.id
+			})`,
+			"server",
+		);
 	},
 	async [AuditLogEvent.InviteCreate](entry) {
 		await log(
@@ -813,14 +829,6 @@ defineEvent("messageDelete", messageDelete);
 defineEvent("messageDeleteBulk", messageDeleteBulk);
 defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
 defineEvent("messageUpdate", messageUpdate);
-defineEvent("roleCreate", async (role) => {
-	if (role.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Role} ${role.toString()} created`, "server");
-});
-defineEvent("roleDelete", async (role) => {
-	if (role.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Role} @${role.name} deleted (ID: ${role.id})`, "server");
-});
 defineEvent("threadUpdate", threadUpdate);
 defineEvent("userUpdate", userUpdate);
 defineEvent("voiceStateUpdate", voiceStateUpdate);

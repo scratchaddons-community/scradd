@@ -11,6 +11,7 @@ import {
 	ComponentType,
 	ButtonStyle,
 	Role,
+	GuildMember,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { parseTime } from "../util/numbers.js";
@@ -184,6 +185,18 @@ defineCommand(
 );
 
 defineButton("cancelThreadChange", async (interaction, type) => {
+	if (
+		!config.roles.mod ||
+		!(interaction.member instanceof GuildMember
+			? interaction.member.roles.resolve(config.roles.mod.id)
+			: interaction.member?.roles.includes(config.roles.mod.id))
+	) {
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You don’t have permission to cancel this!`,
+		});
+	}
+
 	await interaction.message.edit({
 		components: disableComponents(interaction.message.components),
 	});
@@ -215,10 +228,12 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
 			const roles = (options.roles ?? "").split("|");
+			if (!roles.length) return;
 			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
 			if (!thread?.isThread()) return;
-			if (roles.some((role) => member.roles.resolve(role))) await thread.members.add(member);
-			else await thread.members.remove(member.id);
+			if (roles.some((role) => member.roles.resolve(role)))
+				await thread.members.add(member, "Has qualifying role");
+			else await thread.members.remove(member.id, "Has no qualifying role");
 		}),
 	);
 });
@@ -273,5 +288,5 @@ function getThreadConfig(thread: AnyThreadChannel) {
 }
 
 function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
-	return Promise.all(role.members.map((member) => thread.members.add(member)));
+	return Promise.all(role.members.map((member) => thread.members.add(member, "Has qualifying role initially")));
 }

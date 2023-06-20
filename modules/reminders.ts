@@ -156,11 +156,11 @@ setInterval(async () => {
 					process.exit(1);
 				}
 				case SpecialReminders.CloseThread: {
-					if (channel?.isThread()) await channel.setArchived(true);
+					if (channel?.isThread()) await channel.setArchived(true, "Close requested");
 					return;
 				}
 				case SpecialReminders.LockThread: {
-					if (channel?.isThread()) await channel.setLocked(true);
+					if (channel?.isThread()) await channel.setLocked(true, "Lock requested");
 					return;
 				}
 			}
@@ -296,7 +296,7 @@ defineCommand(
 					interaction.user,
 					"Watch your language!",
 					censored.strikes,
-					`Used command:\n${interaction.toString()}`,
+					`Used command ${interaction.toString()}`,
 				);
 				return;
 			}
