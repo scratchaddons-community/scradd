@@ -30,7 +30,7 @@
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
-		"@types/async-exit-hook": "<=2.0.0",
+		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "latest",
 		"@types/difflib": "0.2.1",
 		"@types/json-diff": "<=1.0.6",
