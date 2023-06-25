@@ -21,7 +21,7 @@ jobs:
 
             - name: Bump
               id: sync_types
-              uses: RedGuy12/sync-types@v1.2.14
+              uses: RedGuy12/sync-types@v1.2.15
 
             - name: Commit
               id: commit
@@ -33,7 +33,7 @@ jobs:
             - name: Comment
               if: steps.commit.outputs.changes_detected == 'true'
               run: |
-                  body="$(cat ${{ steps.sync_types.outputs.outputDir }}/changes.md)$(cat ${{ steps.sync_types.outputs.outputDir }}/sync.md)"
+                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
                   echo "$body" | gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -X POST -F body=-
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
