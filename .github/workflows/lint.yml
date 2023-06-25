@@ -34,7 +34,7 @@ jobs:
               if: steps.commit.outputs.changes_detected == 'true'
               run: |
                   body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
-                  echo "$body" | gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -X POST -F body=-
+                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
