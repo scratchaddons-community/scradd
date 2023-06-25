@@ -21,7 +21,7 @@ jobs:
 
             - name: Bump
               id: sync_types
-              uses: RedGuy12/sync-types@v1.2.7
+              uses: RedGuy12/sync-types@v1.2.8
 
             - name: Commit
               id: commit
@@ -32,7 +32,7 @@ jobs:
 
             - name: Comment
               run: |
-                  body="<details><summary>Bumped dependencies</summary>${{ steps.sync_types.outputs.changes }}</details><details><summary>Requirement changes</summary>${{ steps.sync_types.outputs.sync }}</details>"
+                  body="${{ steps.sync_types.outputs.changes }}${{ steps.sync_types.outputs.sync }}"
                   echo "$body" | gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_sha }}/comments" -X POST -F body=-
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
