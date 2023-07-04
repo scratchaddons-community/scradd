@@ -77,6 +77,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 					"Must call `.init()` before reading or setting `.data` or `.extra`",
 				);
 			}
+			const message = this.message;
 
 			const data = this.#data?.length && papaparse.unparse(Array.from(this.#data)).trim();
 
@@ -93,15 +94,23 @@ export default class Database<Data extends { [key: string]: string | number | bo
 				messageContent[5] = "";
 			}
 
-			const promise = this.message
-				.edit({ content: messageContent.join("\n").trim(), files })
+			const content = messageContent.join("\n").trim();
+			const promise = message
+				.edit({ content, files })
 				.catch(async (error) => {
-					await logError(error, `Database<${this.name}>#queueWrite()`);
 					if (error.code === RESTJSONErrorCodes.UnknownMessage) {
 						databases[this.name] = undefined;
 						await this.init();
+						return await callback();
+					} else {
+						return message.edit({ content, files }).catch(async (error2) => {
+							await logError(error, `Database<${this.name}>#queueWrite()`);
+							await logError(error2, `Database<${this.name}>#queueWrite()`);
+							throw new Error("Failed to write to database!", {
+								cause: { data, database: this.name },
+							});
+						});
 					}
-					return await callback();
 				})
 				.then(async (edited) => {
 					const attachment = edited.attachments.first()?.url;
