@@ -9,7 +9,12 @@ import constants from "../../common/constants.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
-	const winner = weeklyWinners[0]?.user;
+	const winnerId = weeklyWinners[0]?.user;
+	const winner =
+		winnerId &&
+		(await config.guild.members
+			.fetch(winnerId)
+			.catch(() => client.users.fetch(winnerId).catch(() => {})));
 	weeklyWinners.splice(
 		0,
 		weeklyWinners.findIndex(
@@ -50,15 +55,7 @@ export async function getChatters() {
 					  }
 					: undefined,
 				color: constants.themeColor,
-				thumbnail: winner
-					? {
-							url: (
-								await config.guild.members
-									.fetch(winner)
-									.catch(() => client.users.fetch(winner))
-							).displayAvatarURL(),
-					  }
-					: undefined,
+				thumbnail: winner ? { url: winner?.displayAvatarURL() } : undefined,
 			},
 		],
 	} satisfies MessageCreateOptions;
