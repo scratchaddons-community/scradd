@@ -76,7 +76,7 @@ defineCommand(
 		const command = interaction.options.getSubcommand(true);
 		if (command === "sync-members") {
 			const role = interaction.options.getRole("role", true);
-			const roles = options.roles?.split("|") ?? [];
+			const roles = options.roles;
 			if (roles.includes(role.id)) {
 				threadsDatabase.updateById(
 					{
@@ -116,7 +116,7 @@ defineCommand(
 
 			threadsDatabase.updateById(
 				{ id: interaction.channel.id, keepOpen: !options.keepOpen },
-				options,
+				{ roles: options.roles.join("|") },
 			);
 
 			return await interaction.reply({
@@ -203,9 +203,10 @@ defineButton("cancelThreadChange", async (interaction, type) => {
 	if (!interaction.channel?.isThread())
 		throw new TypeError("cancelThreadChange clicked outside of thread");
 	if (type === "noclose") {
+		const oldConfig = getThreadConfig(interaction.channel);
 		threadsDatabase.updateById(
 			{ id: interaction.channel?.id || "", keepOpen: false },
-			getThreadConfig(interaction.channel),
+			{ roles: oldConfig.roles.join("|") },
 		);
 		await interaction.reply(
 			`${constants.emojis.statuses.yes} This thread will not be prevented from closing!`,
@@ -227,8 +228,8 @@ defineButton("cancelThreadChange", async (interaction, type) => {
 defineEvent("guildMemberUpdate", async (_, member) => {
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
-			const roles = (options.roles ?? "").split("|");
-			if (!roles.length) return;
+			const roles = options.roles?.split("|");
+			if (!roles?.length) return;
 			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
 			if (!thread?.isThread()) return;
 			if (roles.some((role) => member.roles.resolve(role)))
@@ -244,7 +245,10 @@ defineEvent("threadCreate", async (thread, newlyCreated) => {
 	const { roles } = getThreadConfig(thread);
 	if (roles)
 		await thread.send({
-			content: roles.split("|").map(roleMention).join(""),
+			content: roles
+				.filter((role): role is NonNullable<typeof role> => Boolean(role))
+				.map(roleMention)
+				.join(""),
 			allowedMentions: { parse: ["roles"] },
 		});
 });
@@ -254,7 +258,8 @@ defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
 	if (wasArchived && !thread.archived) {
 		await Promise.all(
-			options.roles?.split("|").map(async (roleId) => {
+			options.roles?.map(async (roleId) => {
+				if (!roleId) return;
 				const role = await config.guild.roles.fetch(roleId).catch(() => {});
 				if (!role) return;
 				return await addRoleToThread({ role, thread });
@@ -264,27 +269,28 @@ defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
 });
 
 function getThreadConfig(thread: AnyThreadChannel) {
-	return (
-		threadsDatabase.data.find((found) => found.id === thread.id) ??
-		{
-			[config.channels.mod?.id || ""]: {
-				roles: config.roles.mod?.id || null,
-				keepOpen: false,
-			},
-			[config.channels.modlogs?.id || ""]: {
-				roles: config.roles.mod?.id || null,
-				keepOpen: true,
-			},
-			[config.channels.exec?.id || ""]: {
-				roles: config.roles.exec?.id || null,
-				keepOpen: false,
-			},
-			[config.channels.admin?.id || ""]: {
-				roles: config.roles.admin?.id || null,
-				keepOpen: false,
-			},
-		}[thread.parent?.id || ""] ?? { roles: null, keepOpen: false }
-	);
+	const found = threadsDatabase.data.find((found) => found.id === thread.id);
+
+	return found
+		? { keepOpen: found.keepOpen, roles: found.roles?.split("|") ?? [] }
+		: {
+				[config.channels.mod?.id || ""]: {
+					roles: [config.roles.mod?.id],
+					keepOpen: false,
+				},
+				[config.channels.modlogs?.id || ""]: {
+					roles: [config.roles.mod?.id],
+					keepOpen: true,
+				},
+				[config.channels.exec?.id || ""]: {
+					roles: [config.roles.exec?.id],
+					keepOpen: false,
+				},
+				[config.channels.admin?.id || ""]: {
+					roles: [config.roles.admin?.id],
+					keepOpen: false,
+				},
+		  }[thread.parent?.id || ""] ?? { roles: [], keepOpen: false };
 }
 
 function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
