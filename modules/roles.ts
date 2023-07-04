@@ -333,7 +333,7 @@ async function qualifiesForRole(member: GuildMember) {
 			return acc;
 		}, {}),
 	).sort((one, two) => two[1] - one[1]);
-	if (lastWeekly[0]?.[0] !== member.user.id) return true;
+	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
 	command ??= (await config.guild.commands.fetch()).find(
 		(command) => command.name === "custom-role",
