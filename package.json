@@ -23,7 +23,6 @@
 		"dotenv": "16.3.1",
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
-		"mime-types": "2.1.35",
 		"papaparse": "5.4.1",
 		"serialize-error": "11.0.0",
 		"strife.js": "1.0.6"
@@ -34,7 +33,6 @@
 		"@types/chrome": "latest",
 		"@types/difflib": "0.2.1",
 		"@types/json-diff": "<=1.0.6",
-		"@types/mime-types": "<=2.1.35",
 		"@types/node": "<=18.12.1",
 		"@types/papaparse": "<=5.4.1",
 		"nodemon": "2.0.22",
