@@ -19,6 +19,7 @@ await login({
 	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
 	commandsGuildId: process.env.GUILD_ID,
 	async handleError(error, event) {
+		if (typeof logError === "undefined") throw error;
 		await logError(error, event);
 	},
 	productionId: constants.users.scradd,
