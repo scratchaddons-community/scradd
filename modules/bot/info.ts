@@ -12,7 +12,6 @@ import {
 	ChatInputCommandInteraction,
 	ButtonInteraction,
 } from "discord.js";
-
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
 import pkg from "../../package.json" assert { type: "json" };

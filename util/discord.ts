@@ -34,7 +34,6 @@ import {
 	type PartialDMChannel,
 	bold,
 } from "discord.js";
-
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";

@@ -1,5 +1,4 @@
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType, MessageType } from "discord.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";

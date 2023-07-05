@@ -1,6 +1,5 @@
 import config from "../common/config.js";
 import Database from "../common/database.js";
-
 import {
 	Collection,
 	ComponentType,

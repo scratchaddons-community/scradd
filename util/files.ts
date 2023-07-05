@@ -1,7 +1,6 @@
 import fileSystem from "fs/promises";
 import path from "node:path";
 import url from "node:url";
-
 import { Collection } from "discord.js";
 
 /**

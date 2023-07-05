@@ -11,7 +11,6 @@ import {
 	type CacheType,
 	ChatInputCommandInteraction,
 } from "discord.js";
-
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";

@@ -1,5 +1,4 @@
 import config from "./config.js";
-
 import type AddonManifest from "./types/addonManifest.js";
 
 export const manifest = await fetch(`${config.urls.saSource}/manifest.json`).then(

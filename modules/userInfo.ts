@@ -6,7 +6,6 @@ import {
 	time,
 	TimestampStyles,
 } from "discord.js";
-
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { defineCommand } from "strife.js";

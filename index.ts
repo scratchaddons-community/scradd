@@ -3,7 +3,6 @@ import url from "node:url";
 import dns from "node:dns";
 import { ActivityType, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
-
 import pkg from "./package.json" assert { type: "json" };
 import { GlobalFonts } from "@napi-rs/canvas";
 import { login, client } from "strife.js";

@@ -10,7 +10,6 @@ import {
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
-
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
 import type { DATABASE_THREAD } from "../../common/database.js";

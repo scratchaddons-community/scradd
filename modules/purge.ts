@@ -6,7 +6,6 @@ import {
 	type InteractionReplyOptions,
 } from "discord.js";
 import { client, defineCommand } from "strife.js";
-
 import constants from "../common/constants.js";
 import { disableComponents, messageToText } from "../util/discord.js";
 
