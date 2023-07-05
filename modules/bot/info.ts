@@ -94,7 +94,15 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 								value: `${client.ws.ping.toLocaleString("en-us")}ms`,
 								inline: true,
 							},
-							{ name: "Node version", value: process.version, inline: true },
+							{
+								name: "RAM usage",
+								value:
+									(process.memoryUsage.rss() / 1000000).toLocaleString("en-us", {
+										maximumFractionDigits: 2,
+										minimumFractionDigits: 2,
+									}) + " MB",
+								inline: true,
+							},
 						],
 
 						thumbnail: { url: client.user.displayAvatarURL() },
@@ -137,8 +145,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 				embeds: [
 					{
 						title: "Credits",
-						description:
-							"Scradd is hosted on [Railway](https://railway.app?referralCode=RedGuy14).",
+						description: `Scradd is hosted on [Railway](https://railway.app?referralCode=RedGuy14) using Node.JS v${process.version}.`,
 
 						fields: [
 							{
