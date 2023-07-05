@@ -7,6 +7,7 @@ import "dotenv/config";
 import pkg from "./package.json" assert { type: "json" };
 import { GlobalFonts } from "@napi-rs/canvas";
 import { login, client } from "strife.js";
+import { Chart } from "chart.js";
 import constants from "./common/constants.js";
 
 dns.setDefaultResultOrder("ipv4first");
@@ -14,6 +15,7 @@ GlobalFonts.registerFromPath(
 	path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
 	"Sora",
 );
+Chart.defaults.font.family = "Sora";
 
 await login({
 	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
