@@ -1,6 +1,5 @@
 import { cleanDatabaseListeners } from "../common/database.js";
 import http from "node:http";
-import { client } from "strife.js";
 
 http.createServer((request, response) => {
 	try {
@@ -11,7 +10,6 @@ http.createServer((request, response) => {
 				response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
 			else {
 				process.emitWarning("cleanDatabaseListeners called");
-				client.user.setPresence({ status: "dnd" });
 				cleanDatabaseListeners().then(() => {
 					process.emitWarning("cleanDatabaseListeners ran");
 					response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");

@@ -197,6 +197,7 @@ export async function cleanDatabaseListeners() {
 	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 	timeouts = {};
 	console.log("Listeners cleaned");
+	client.user.setPresence({ status: "dnd" });
 }
 
 exitHook(async (callback) => {
