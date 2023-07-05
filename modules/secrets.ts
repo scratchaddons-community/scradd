@@ -14,10 +14,11 @@ const REACTION_CAP = 3;
 
 defineEvent("messageCreate", async (message) => {
 	if (
-		message.flags.has("Ephemeral") ||
+		message.guild?.id !== config.guild.id ||
+		message.channel.id === message.id ||
 		message.type === MessageType.ThreadStarterMessage ||
 		message.channel.isDMBased() ||
-		message.guild?.id !== config.guild.id
+		message.flags.has("Ephemeral")
 	)
 		return;
 
