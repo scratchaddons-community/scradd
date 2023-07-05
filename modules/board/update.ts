@@ -28,7 +28,7 @@ export default async function updateBoard(message: Message) {
 			await boardMessage.edit(content);
 		}
 	} else if (count >= minReactions) {
-		if (!message.author.bot) await giveXp(message.author, message.url);
+		await giveXp(message.author, message.url);
 
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(message)),

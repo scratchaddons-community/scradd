@@ -76,10 +76,11 @@ export async function giveXpForMessage(message: Message) {
  */
 export default async function giveXp(
 	to: User | GuildMember,
-	url: string,
+	url?: string,
 	amount: number = DEFAULT_XP,
 ) {
 	const user = to instanceof User ? to : to.user;
+	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =
 		user instanceof GuildMember ? user : await config.guild.members.fetch(user).catch(() => {});
 
@@ -130,7 +131,7 @@ export default async function giveXp(
 	recentXpDatabase.data = weekly;
 }
 
-async function sendLevelUpMessage(member: GuildMember, newXp: number, url: string) {
+async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
 	const showButton = getSettings(member, false)?.levelUpPings === undefined;

@@ -15,9 +15,7 @@ defineEvent("messageCreate", async (message) => {
 
 	if (message.channel.isDMBased() || message.guild?.id !== config.guild.id) return;
 
-	if (process.env.NODE_ENV !== "production" || !message.author.bot || message.interaction) {
-		giveXpForMessage(message);
-	}
+	giveXpForMessage(message);
 });
 
 defineCommand(
