@@ -175,9 +175,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 		await log(
 			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their avatar`,
 			"members",
-			{
-				files: [newUser.displayAvatarURL({ size: 128 })],
-			},
+			{ files: [newUser.displayAvatarURL({ size: 128 })] },
 		);
 	}
 

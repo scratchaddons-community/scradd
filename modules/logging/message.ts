@@ -106,10 +106,7 @@ export async function messageReactionRemoveAll(
 				},
 			],
 
-			button: {
-				label: "View Context",
-				url: message.url,
-			},
+			button: { label: "View Context", url: message.url },
 		},
 	);
 }

@@ -89,10 +89,7 @@ defineButton("contactMods", async (interaction) => {
 							server: "Add your server to Other Scratch Servers",
 							other: "Other",
 						} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>).map(
-							([value, label]) => ({
-								value,
-								label,
-							}),
+							([value, label]) => ({ value, label }),
 						),
 						placeholder: "What do you need help with?",
 					},

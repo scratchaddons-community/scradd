@@ -78,10 +78,7 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 		await interaction.editReply({
 			files: [
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
-				{
-					attachment: Buffer.from(generateError(error), "utf8"),
-					name: "error.json",
-				},
+				{ attachment: Buffer.from(generateError(error), "utf8"), name: "error.json" },
 			],
 		});
 	}

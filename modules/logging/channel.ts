@@ -327,10 +327,9 @@ export async function channelUpdate(
 	if (oldChannel.defaultForumLayout !== newChannel.defaultForumLayout)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default layout set to ${
-				{
-					[ForumLayoutType.ListView]: "List",
-					[ForumLayoutType.GalleryView]: "Gallery",
-				}[newChannel.defaultForumLayout || ForumLayoutType.ListView]
+				{ [ForumLayoutType.ListView]: "List", [ForumLayoutType.GalleryView]: "Gallery" }[
+					newChannel.defaultForumLayout || ForumLayoutType.ListView
+				]
 			} View`,
 			"channels",
 		);

@@ -160,12 +160,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 		embeds: [
 			{
 				color: member?.displayColor,
-
-				author: {
-					icon_url: member.displayAvatarURL(),
-					name: member?.displayName,
-				},
-
+				author: { icon_url: member.displayAvatarURL(), name: member?.displayName },
 				title: `You’re at level ${newLevel * Math.sign(newXp)}!`,
 				url,
 

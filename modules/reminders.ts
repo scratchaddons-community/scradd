@@ -88,10 +88,7 @@ setInterval(async () => {
 								"November",
 								"December",
 							][now.getUTCMonth()] || ""
-						} ${nth(now.getUTCDate(), {
-							bold: false,
-							jokes: false,
-						})}`,
+						} ${nth(now.getUTCDate(), { bold: false, jokes: false })}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);

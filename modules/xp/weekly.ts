@@ -147,10 +147,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 				"November",
 				"December",
 			][date.getUTCMonth()] || ""
-		} ${nth(date.getUTCDate(), {
-			bold: false,
-			jokes: false,
-		})}**__\n${
+		} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n${
 			weeklyWinners
 				.map(
 					(gain, index) =>

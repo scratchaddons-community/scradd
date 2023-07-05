@@ -7,11 +7,7 @@ import sayCommand, { say, sayAutocomplete } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
 
 defineCommand(
-	{
-		name: "Edit Message",
-		restricted: true,
-		type: ApplicationCommandType.Message,
-	},
+	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message },
 	editMessage,
 );
 defineModal("edit", submitEdit);

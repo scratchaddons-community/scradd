@@ -274,10 +274,7 @@ function getThreadConfig(thread: AnyThreadChannel) {
 	return found
 		? { keepOpen: found.keepOpen, roles: found.roles?.split("|") ?? [] }
 		: {
-				[config.channels.mod?.id || ""]: {
-					roles: [config.roles.mod?.id],
-					keepOpen: false,
-				},
+				[config.channels.mod?.id || ""]: { roles: [config.roles.mod?.id], keepOpen: false },
 				[config.channels.modlogs?.id || ""]: {
 					roles: [config.roles.mod?.id],
 					keepOpen: true,
