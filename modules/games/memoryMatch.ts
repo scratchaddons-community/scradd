@@ -192,6 +192,7 @@ async function playGame(
 			})
 			.on("collect", async (buttonInteraction) => {
 				if (timeout) clearTimeout(timeout);
+				timeout = undefined;
 				shown.push(buttonInteraction.customId);
 				await buttonInteraction.deferUpdate();
 				await interaction.message.edit(getBoard(turn, shown));
@@ -223,10 +224,10 @@ async function playGame(
 				await ping.delete();
 				if (scores[0].length + scores[1].length === 25) return await endGame();
 
-				timeout = setTimeout(
-					() => interaction.message.edit(getBoard(turn + +!match)),
-					GAME_COLLECTOR_TIME / 60,
-				);
+				timeout = setTimeout(() => {
+					interaction.message.edit(getBoard(turn + +!match));
+					timeout = undefined;
+				}, GAME_COLLECTOR_TIME / 60);
 				await takeTurns(turn + +!match);
 			});
 	}
