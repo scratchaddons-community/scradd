@@ -3,7 +3,6 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
-import { getSettings } from "../settings.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
 
@@ -129,45 +128,41 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		]);
 	}
 
-	return {
-		allowedMentions: { users: ids.filter((id) => getSettings({ id }).weeklyPings) },
-
-		content: `__**🏆 Weekly Winners week of ${
-			[
-				"January",
-				"February",
-				"March",
-				"April",
-				"May",
-				"June",
-				"July",
-				"August",
-				"September",
-				"October",
-				"November",
-				"December",
-			][date.getUTCMonth()] || ""
-		} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n${
-			weeklyWinners
-				.map(
-					(gain, index) =>
-						`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
-							gain.xp *
-								Math.sign(
-									xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
-								),
-						).toLocaleString("en-us")} XP`,
-				)
-				.join("\n") || "*Nobody got any XP this week!*"
-		}\n\n*This week, ${chatters.toLocaleString(
-			"en-us",
-		)} people chatted, and ${activeMembers.length.toLocaleString(
-			"en-us",
-		)} people were active. Altogether, people gained ${allXp.toLocaleString(
-			"en-us",
-		)} XP this week.*\n__Next week’s weekly winners will be posted ${time(
-			nextWeeklyDate,
-			TimestampStyles.RelativeTime,
-		)}.__`,
-	} satisfies MessageCreateOptions;
+	return `__**🏆 Weekly Winners week of ${
+		[
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December",
+		][date.getUTCMonth()] || ""
+	} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n${
+		weeklyWinners
+			.map(
+				(gain, index) =>
+					`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
+						gain.xp *
+							Math.sign(
+								xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
+							),
+					).toLocaleString("en-us")} XP`,
+			)
+			.join("\n") || "*Nobody got any XP this week!*"
+	}\n\n*This week, ${chatters.toLocaleString(
+		"en-us",
+	)} people chatted, and ${activeMembers.length.toLocaleString(
+		"en-us",
+	)} people were active. Altogether, people gained ${allXp.toLocaleString(
+		"en-us",
+	)} XP this week.*\n__Next week’s weekly winners will be posted ${time(
+		nextWeeklyDate,
+		TimestampStyles.RelativeTime,
+	)}.__`;
 }

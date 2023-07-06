@@ -19,8 +19,6 @@ export const userSettingsDatabase = new Database<{
 	boardPings?: boolean;
 	/** Whether to ping the user when they level up. */
 	levelUpPings?: boolean;
-	/** Whether to ping the user when they are a top poster of the week. */
-	weeklyPings?: boolean;
 	/** Whether to automatically react to their messages with random emojis. */
 	autoreactions?: boolean;
 	useMentions?: boolean;
@@ -75,7 +73,6 @@ defineCommand(
 				boardPings: interaction.options.getBoolean("board-pings") ?? undefined,
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
 				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
-				weeklyPings: interaction.options.getBoolean("weekly-pings") ?? undefined,
 				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
 			}),
 		);
@@ -105,7 +102,6 @@ export function updateSettings(
 		boardPings?: boolean | "toggle";
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
-		weeklyPings?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
 		resourcesDmed?: true;
 	},
@@ -118,7 +114,6 @@ export function updateSettings(
 		boardPings: settingsForUser?.boardPings ?? defaultSettings.boardPings,
 		levelUpPings: settingsForUser?.levelUpPings ?? defaultSettings.levelUpPings,
 		useMentions: settingsForUser?.useMentions ?? defaultSettings.useMentions,
-		weeklyPings: settingsForUser?.weeklyPings ?? defaultSettings.weeklyPings,
 		dmReminders: settingsForUser?.dmReminders ?? defaultSettings.dmReminders,
 		resourcesDmed: defaultSettings.resourcesDmed,
 	};
@@ -133,10 +128,6 @@ export function updateSettings(
 			settings.levelUpPings === "toggle"
 				? !old.levelUpPings
 				: settings.levelUpPings ?? settingsForUser?.levelUpPings,
-		weeklyPings:
-			settings.weeklyPings === "toggle"
-				? !old.weeklyPings
-				: settings.weeklyPings ?? settingsForUser?.weeklyPings,
 		autoreactions:
 			settings.autoreactions === "toggle"
 				? !old.autoreactions
@@ -178,12 +169,6 @@ export function updateSettings(
 						label: "Level Up Pings",
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 					},
-					{
-						customId: "weeklyPings_toggleSetting",
-						type: ComponentType.Button,
-						label: `Weekly Winners Pings`,
-						style: ButtonStyle[updated.weeklyPings ? "Success" : "Danger"],
-					},
 				],
 			},
 			{
@@ -219,7 +204,6 @@ export function getSettings(
 ): {
 	boardPings: boolean;
 	levelUpPings: boolean;
-	weeklyPings: boolean;
 	autoreactions: boolean;
 	useMentions: boolean;
 	dmReminders: boolean;
@@ -231,7 +215,6 @@ export function getSettings(
 ): {
 	boardPings?: boolean;
 	levelUpPings?: boolean;
-	weeklyPings?: boolean;
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
@@ -241,7 +224,6 @@ export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	const settings: {
 		boardPings?: boolean;
 		levelUpPings?: boolean;
-		weeklyPings?: boolean;
 		autoreactions?: boolean;
 		useMentions?: boolean;
 		dmReminders?: boolean;
@@ -264,7 +246,6 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions: getWeeklyXp(user.id) > 100,
-		weeklyPings: process.env.NODE_ENV === "production",
 		resourcesDmed: false,
 	};
 }
