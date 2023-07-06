@@ -383,13 +383,13 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.StageStart: {
 			return `${constants.emojis.discord.stageLive} ${message.author.toString()} started **${
 				message.content
-			}**.`;
+			}**`;
 		}
 
 		case MessageType.StageEnd: {
 			return `${constants.emojis.discord.stage} ${message.author.toString()} ended **${
 				message.content
-			}**.`;
+			}**`;
 		}
 
 		case MessageType.StageSpeaker: {
@@ -407,7 +407,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.StageTopic: {
 			return `${
 				constants.emojis.discord.stage
-			} ${message.author.toString()} changed Stage topic: **${message.content}**.`;
+			} ${message.author.toString()} changed Stage topic: **${message.content}**`;
 		}
 
 		case MessageType.ContextMenuCommand: {
