@@ -347,7 +347,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			const repliedMessage = await message.fetchReference().catch(() => {});
 
 			if (!repliedMessage)
-				return `*${constants.emojis.discord.reply} Original message was deleted.*\n\n${message.content}`;
+				return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
 			const cleanContent = await messageToText(repliedMessage, false);
 
