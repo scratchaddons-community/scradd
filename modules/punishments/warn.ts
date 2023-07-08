@@ -47,13 +47,12 @@ export default async function warn(
 	);
 
 	strikes = Math.max(Math.round(strikes * 4) / 4, PARTIAL_STRIKE_COUNT);
-	const totalVerbalStrikes = Math.floor((oldStrikeCount % 1) + (strikes % 1));
-	const displayStrikes = Math.trunc(strikes) + totalVerbalStrikes;
+	const displayStrikes = Math.max(Math.trunc(strikes), 1);
 	const moderator = contextOrModerator instanceof User ? contextOrModerator : client.user;
 	const context = contextOrModerator instanceof User ? "" : contextOrModerator;
 	const logMessage = await log(
 		`${LoggingEmojis.Punishment} ${user.toString()} ${
-			displayStrikes
+			strikes > 0.5
 				? `warned ${displayStrikes} time${displayStrikes === 1 ? "" : "s"}`
 				: "verbally warned"
 		} by ${moderator.toString()}`,
@@ -61,10 +60,7 @@ export default async function warn(
 		{
 			files: [
 				{
-					content:
-						(totalVerbalStrikes ? "Too many verbal strikes\n\n" : "") +
-						reason +
-						(context && `\n>>> ${context}`),
+					content: reason + (context && `\n>>> ${context}`),
 					extension: "md",
 				},
 			],
@@ -84,7 +80,7 @@ export default async function warn(
 			embeds: [
 				{
 					title: `You were ${
-						displayStrikes
+						strikes > 0.5
 							? `warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 							: "verbally warned"
 					} in ${escapeMarkdown(config.guild.name)}!`,
