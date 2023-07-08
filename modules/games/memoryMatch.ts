@@ -6,7 +6,6 @@ import {
 	type APIMessageComponentEmoji,
 	type Snowflake,
 	ButtonInteraction,
-	InteractionCollector,
 	Message,
 	type PartialMessage,
 	User,
@@ -20,16 +19,13 @@ import { disableComponents } from "../../util/discord.js";
 
 const EMPTY_TILE = "⬛";
 
-const deletedPings: Snowflake[] = [];
+const deletedPings = new Set<Snowflake>();
 
 export default async function memoryMatch(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ) {
 	const otherUser = interaction.options.getUser("user", true);
-	if (
-		otherUser.bot ||
-		(interaction.user.id === otherUser.id && process.env.NODE_ENV === "production")
-	) {
+	if (otherUser.bot || interaction.user.id === otherUser.id) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
@@ -61,31 +57,33 @@ export default async function memoryMatch(
 			},
 		],
 	});
-	message
+
+	const collector = message
 		.createMessageComponentCollector({
 			componentType: ComponentType.Button,
-			filter: (buttonInteraction) =>
-				(otherUser.id === buttonInteraction.user.id ||
-					(buttonInteraction.customId.startsWith("cancel-") &&
-						interaction.user.id === buttonInteraction.user.id)) &&
-				buttonInteraction.customId.endsWith(`-${interaction.id}`),
-			max: 1,
 			time: GAME_COLLECTOR_TIME,
 		})
 		.on("collect", async (buttonInteraction) => {
+			const isUser = interaction.user.id === buttonInteraction.user.id;
+			const isOtherUser = otherUser.id === buttonInteraction.user.id;
+
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
-				await message.edit({ components: disableComponents(message.components) });
+				if (isUser || isOtherUser)
+					await message.edit({ components: disableComponents(message.components) });
 				return;
 			}
 
-			return await playGame(buttonInteraction, {
-				users: ([interaction.user, otherUser] satisfies [User, User]).sort(
-					() => Math.random() - 0.5,
-				),
-				mode,
-				useThread: interaction.options.getBoolean("thread") ?? true,
-			});
+			if (isOtherUser) {
+				collector.stop();
+				await playGame(buttonInteraction, {
+					users: ([interaction.user, otherUser] satisfies [User, User]).sort(
+						() => Math.random() - 0.5,
+					),
+					mode,
+					useThread: interaction.options.getBoolean("thread") ?? true,
+				});
+			} else await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, reason) => {
 			if (reason === "time")
@@ -118,11 +116,7 @@ async function playGame(
 	await interaction.deferUpdate();
 	const scores: [string[], string[]] = [[], ["22"]];
 	const chunks = await setupGame(mode === "Easy" ? 4 : 2);
-	let totalTurns = 0;
-	let collector: InteractionCollector<ButtonInteraction> | undefined;
-	let timeout: NodeJS.Timeout | undefined;
-
-	const message = await interaction.message.edit(getBoard(totalTurns));
+	const message = await interaction.message.edit(getBoard(0));
 	const thread =
 		useThread &&
 		(message.channel.type === ChannelType.GuildAnnouncement ||
@@ -133,6 +127,74 @@ async function playGame(
 					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
 			  })
 			: undefined;
+
+	let turn = 0;
+	let turnInfo = await setupTurn(turn);
+	let totalTurns = 0;
+	const shown = new Set<string>();
+
+	const collector = message
+		.createMessageComponentCollector({
+			componentType: ComponentType.Button,
+			idle: GAME_COLLECTOR_TIME,
+		})
+		.on("collect", async (buttonInteraction) => {
+			if (turnInfo.user.id !== buttonInteraction.user.id) {
+				await buttonInteraction.deferUpdate();
+				return;
+			}
+
+			if (turnInfo.timeout) clearTimeout(turnInfo.timeout);
+			turnInfo.timeout = undefined;
+			shown.add(buttonInteraction.customId);
+			await buttonInteraction.deferUpdate();
+			await interaction.message.edit(getBoard(turn, shown));
+
+			if (shown.size === 1) return;
+			totalTurns++;
+
+			const selected = [...shown].map(
+				([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
+			);
+
+			const match = selected.every(
+				(item) => item.name === selected[0]?.name && item.id === selected[0]?.id,
+			);
+			if (match) {
+				scores[turn % 2]?.push(...shown);
+				await interaction.message.edit(getBoard(turn));
+
+				if (scores[0].length + scores[1].length === 25) {
+					collector.stop();
+					return await endGame();
+				}
+			} else {
+				turn++;
+
+				deletedPings.add(turnInfo.ping.id);
+				await turnInfo.ping.delete();
+				turnInfo = await setupTurn(turn);
+			}
+			shown.clear()
+		})
+		.on("end", async (_, endReason) => {
+			if (endReason === "idle") {
+				await turnInfo.ping.edit({
+					components: disableComponents(turnInfo.ping.components),
+				});
+				return endGame(
+					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
+					turnInfo.user,
+				);
+			}
+			if (endReason === "end") {
+				await turnInfo.ping.edit({
+					components: disableComponents(turnInfo.ping.components),
+				});
+				return;
+			}
+		});
+
 	CURRENTLY_PLAYING.set(users[0].id, {
 		url: message.url,
 		end() {
@@ -148,9 +210,7 @@ async function playGame(
 		},
 	});
 
-	await takeTurns(totalTurns);
-
-	async function takeTurns(turn: number) {
+	async function setupTurn(turn: number) {
 		const user = users[turn % 2] ?? users[0];
 		const content = `🎲 ${user.toString()}, your turn!`;
 		const gameLinkButton = {
@@ -181,58 +241,14 @@ async function playGame(
 					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
 			  }));
 
-		const shown: string[] = [];
+		const timeout = turn
+			? setTimeout(() => interaction.message.edit(getBoard(turn)), GAME_COLLECTOR_TIME / 60)
+			: undefined;
 
-		collector = message
-			.createMessageComponentCollector({
-				componentType: ComponentType.Button,
-				filter: (interaction) => user.id === interaction.user.id,
-				max: 2,
-				idle: GAME_COLLECTOR_TIME,
-			})
-			.on("collect", async (buttonInteraction) => {
-				if (timeout) clearTimeout(timeout);
-				timeout = undefined;
-				shown.push(buttonInteraction.customId);
-				await buttonInteraction.deferUpdate();
-				await interaction.message.edit(getBoard(turn, shown));
-			})
-			.on("end", async (_, endReason) => {
-				if (endReason === "idle") {
-					await ping.edit({ components: disableComponents(ping.components) });
-					return endGame(`🛑 ${user.toString()}, you didn’t take your turn!`, user);
-				}
-				if (endReason === "end") {
-					await ping.edit({ components: disableComponents(ping.components) });
-					return;
-				}
-
-				totalTurns++;
-				const selected = shown.map(
-					([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
-				);
-
-				const match = selected.every(
-					(item) => item.name === selected[0]?.name && item.id === selected[0]?.id,
-				);
-				if (match) {
-					scores[turn % 2]?.push(...shown);
-					await interaction.message.edit(getBoard(turn));
-				}
-
-				deletedPings.push(ping.id);
-				await ping.delete();
-				if (scores[0].length + scores[1].length === 25) return await endGame();
-
-				timeout = setTimeout(() => {
-					interaction.message.edit(getBoard(turn + +!match));
-					timeout = undefined;
-				}, GAME_COLLECTOR_TIME / 60);
-				await takeTurns(turn + +!match);
-			});
+		return { user, ping, timeout };
 	}
 
-	function getBoard(turn: number, shown: string[] = []) {
+	function getBoard(turn: number, shown = new Set<string>()) {
 		const firstTurn = turn % 2 ? "" : "__",
 			secondTurn = turn % 2 ? "__" : "";
 
@@ -249,7 +265,7 @@ async function playGame(
 				type: ComponentType.ActionRow,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = shown.concat(...scores).includes(id);
+					const discovered = [...shown].concat(...scores).includes(id);
 
 					return {
 						type: ComponentType.Button,
@@ -333,6 +349,7 @@ async function setupGame(difficulty: 2 | 4) {
 			"🥶",
 			"💀",
 			"💩",
+			"🍢",
 			...(process.env.NODE_ENV === "production"
 				? [
 						{ name: "bowling_ball", id: "1104935019232899183" },
@@ -376,7 +393,5 @@ async function setupGame(difficulty: 2 | 4) {
 }
 
 export async function messageDelete(message: Message | PartialMessage) {
-	const index = deletedPings.indexOf(message.id);
-	if (index > -1) deletedPings.splice(index, 1);
-	return index === -1;
+	return !deletedPings.delete(message.id);
 }
