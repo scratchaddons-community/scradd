@@ -31,12 +31,14 @@ export default async function memoryMatch(
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
 		});
 	}
-	const mode = interaction.options.getString("mode") ?? "Traditional";
+	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
 	const message = await interaction.reply({
 		fetchReply: true,
 		content: `${
 			constants.emojis.misc.challenge
-		} **${otherUser.toString()}, you are challenged to a game of Memory Match (${mode}) by ${interaction.user.toString()}!** Do you accept?`,
+		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
+			easyMode ? " (easy mode)" : ""
+		} by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -80,7 +82,7 @@ export default async function memoryMatch(
 					users: ([interaction.user, otherUser] satisfies [User, User]).sort(
 						() => Math.random() - 0.5,
 					),
-					mode,
+					easyMode,
 					useThread: interaction.options.getBoolean("thread") ?? true,
 				});
 			} else await buttonInteraction.deferUpdate();
@@ -93,7 +95,7 @@ export default async function memoryMatch(
 
 async function playGame(
 	interaction: ButtonInteraction,
-	{ users, mode, useThread }: { users: [User, User]; mode: string; useThread: boolean },
+	{ users, easyMode, useThread }: { users: [User, User]; easyMode: boolean; useThread: boolean },
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -115,7 +117,7 @@ async function playGame(
 
 	await interaction.deferUpdate();
 	const scores: [string[], string[]] = [[], ["22"]];
-	const chunks = await setupGame(mode === "Easy" ? 4 : 2);
+	const chunks = await setupGame(easyMode ? 4 : 2);
 	const message = await interaction.message.edit(getBoard(0));
 	const thread =
 		useThread &&
@@ -175,7 +177,7 @@ async function playGame(
 				await turnInfo.ping.delete();
 				turnInfo = await setupTurn(turn);
 			}
-			shown.clear()
+			shown.clear();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {

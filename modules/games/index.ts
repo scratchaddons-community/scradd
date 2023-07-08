@@ -16,20 +16,16 @@ defineCommand(
 		name: "memory-match",
 		description: "Play a memory matching game against someone else",
 		options: {
-			user: {
+			"user": {
 				description: "A user to challenge",
 				type: ApplicationCommandOptionType.User,
 				required: true,
 			},
-			mode: {
-				description: "The difficulty (defaults to Traditional)",
-				type: ApplicationCommandOptionType.String,
-				choices: {
-					"Easy (2 matches per emoji)": "Easy",
-					"Traditional (1 match per emoji)": "Traditional",
-				},
+			"easy-mode": {
+				description: "Show 2 matches per emoji (defaults to false)",
+				type: ApplicationCommandOptionType.Boolean,
 			},
-			thread: {
+			"thread": {
 				description:
 					"Whether to create a thread for chatting alongside the game (defaults to true)",
 				type: ApplicationCommandOptionType.Boolean,
