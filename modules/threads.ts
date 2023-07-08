@@ -243,12 +243,9 @@ defineEvent("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== config.guild.id || !newlyCreated) return;
 
 	const { roles } = getThreadConfig(thread);
-	if (roles)
+	if (roles.length)
 		await thread.send({
-			content: roles
-				.filter((role): role is NonNullable<typeof role> => Boolean(role))
-				.map(roleMention)
-				.join(""),
+			content: roles.map(roleMention).join(""),
 			allowedMentions: { parse: ["roles"] },
 		});
 });
@@ -258,8 +255,7 @@ defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
 	if (wasArchived && !thread.archived) {
 		await Promise.all(
-			options.roles?.map(async (roleId) => {
-				if (!roleId) return;
+			options.roles.map(async (roleId) => {
 				const role = await config.guild.roles.fetch(roleId).catch(() => {});
 				if (!role) return;
 				return await addRoleToThread({ role, thread });
@@ -274,17 +270,20 @@ function getThreadConfig(thread: AnyThreadChannel) {
 	return found
 		? { keepOpen: found.keepOpen, roles: found.roles?.split("|") ?? [] }
 		: {
-				[config.channels.mod?.id || ""]: { roles: [config.roles.mod?.id], keepOpen: false },
+				[config.channels.mod?.id || ""]: {
+					roles: config.roles.mod ? [config.roles.mod?.id] : [],
+					keepOpen: false,
+				},
 				[config.channels.modlogs?.id || ""]: {
-					roles: [config.roles.mod?.id],
+					roles: config.roles.mod ? [config.roles.mod?.id] : [],
 					keepOpen: true,
 				},
 				[config.channels.exec?.id || ""]: {
-					roles: [config.roles.exec?.id],
+					roles: config.roles.exec ? [config.roles.exec?.id] : [],
 					keepOpen: false,
 				},
 				[config.channels.admin?.id || ""]: {
-					roles: [config.roles.admin?.id],
+					roles: config.roles.admin ? [config.roles.admin?.id] : [],
 					keepOpen: false,
 				},
 		  }[thread.parent?.id || ""] ?? { roles: [], keepOpen: false };
