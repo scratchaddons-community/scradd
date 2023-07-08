@@ -30,6 +30,10 @@ defineCommand(
 					"Whether to create a thread for chatting alongside the game (defaults to true)",
 				type: ApplicationCommandOptionType.Boolean,
 			},
+			"bonus-turns": {
+				description: "Give players another turn when they get a match (defaults to true)",
+				type: ApplicationCommandOptionType.Boolean,
+			},
 		},
 	},
 	memoryMatch,

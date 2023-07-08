@@ -32,12 +32,17 @@ export default async function memoryMatch(
 		});
 	}
 	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
+	const bonusTurns = interaction.options.getBoolean("bonus-turns") ?? true;
 	const message = await interaction.reply({
 		fetchReply: true,
 		content: `${
 			constants.emojis.misc.challenge
 		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
-			easyMode ? " (easy mode)" : ""
+			easyMode || !bonusTurns
+				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
+						!bonusTurns ? "no bonus turns" : ""
+				  })`
+				: ""
 		} by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
@@ -83,6 +88,7 @@ export default async function memoryMatch(
 						() => Math.random() - 0.5,
 					),
 					easyMode,
+					bonusTurns,
 					useThread: interaction.options.getBoolean("thread") ?? true,
 				});
 			} else await buttonInteraction.deferUpdate();
@@ -95,7 +101,12 @@ export default async function memoryMatch(
 
 async function playGame(
 	interaction: ButtonInteraction,
-	{ users, easyMode, useThread }: { users: [User, User]; easyMode: boolean; useThread: boolean },
+	{
+		users,
+		easyMode,
+		useThread,
+		bonusTurns,
+	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -170,7 +181,8 @@ async function playGame(
 					collector.stop();
 					return await endGame();
 				}
-			} else {
+			}
+			if (!match || !bonusTurns) {
 				turn++;
 
 				deletedPings.add(turnInfo.ping.id);
