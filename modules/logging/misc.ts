@@ -142,6 +142,10 @@ export const LoggingErrorEmoji = constants.emojis.statuses.no;
 
 export function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		entry.reason ? ` (${entry.reason})` : ""
+		entry.reason
+			? entry.reason.includes("\n")
+				? `:\n${entry.reason}`
+				: ` (${entry.reason})`
+			: ""
 	}`;
 }
