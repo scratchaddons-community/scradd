@@ -200,6 +200,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			`${
 				LoggingEmojis.ServerUpdate
 			} Configuration synced by ${interaction.member?.toString()}`,
+			"server",
 		);
 	} else
 		interaction.reply({
