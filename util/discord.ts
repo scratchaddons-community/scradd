@@ -33,6 +33,7 @@ import {
 	DMChannel,
 	type PartialDMChannel,
 	bold,
+	ChatInputCommandInteraction,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -733,3 +734,25 @@ export const BotInvitesPattern = /discord(?:app)?\.com\/(?:api\/)?oauth2\/author
 
 /** A global regular expression variant of {@link BotInvitesPattern}. */
 export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, "g");
+
+export function commandInteractionToString(interaction: ChatInputCommandInteraction) {
+	const subcommandGroup = interaction.options.getSubcommandGroup(false);
+	const subcommand = interaction.options.getSubcommand(false);
+
+	if (subcommandGroup && subcommand)
+		return chatInputApplicationCommandMention(
+			interaction.commandName,
+			subcommandGroup,
+			subcommand,
+			interaction.commandId,
+		);
+
+	if (subcommand)
+		return chatInputApplicationCommandMention(
+			interaction.commandName,
+			subcommand,
+			interaction.commandId,
+		);
+
+	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
+}

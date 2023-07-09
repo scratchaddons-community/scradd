@@ -1,8 +1,14 @@
-import { inlineCode, Message, type RepliableInteraction } from "discord.js";
+import {
+	inlineCode,
+	Message,
+	chatInputApplicationCommandMention,
+	type RepliableInteraction,
+} from "discord.js";
 import { serializeError } from "serialize-error";
 import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
 import { sanitizePath } from "../util/files.js";
 import { cleanDatabaseListeners } from "./database.js";
+import { commandInteractionToString } from "../util/discord.js";
 
 process
 	.on("uncaughtException", (error, origin) => logError(error, origin))
@@ -29,10 +35,12 @@ export default async function logError(
 				typeof event == "string"
 					? inlineCode(event)
 					: event.isChatInputCommand()
-					? event.toString()
-					: event.isCommand()
-					? `/${event.command?.name}`
-					: `${event.constructor.name}: ${event.customId}`
+					? commandInteractionToString(event)
+					: inlineCode(
+							event.isCommand()
+								? `/${event.command?.name}`
+								: `${event.constructor.name}: ${event.customId}`,
+					  )
 			}`,
 			"server",
 			{ files: [{ content: generateError(error), extension: "json" }] },
