@@ -35,7 +35,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
-		} in ${message.channel.toString()} deleted (ID: ${message.id})`,
+		} in ${message.channel.toString()} (ID: ${message.id}) deleted`,
 		"messages",
 		{
 			embeds,
@@ -121,9 +121,9 @@ export async function messageUpdate(
 		await log(
 			`${
 				LoggingEmojis.MessageUpdate
-			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-				newMessage.flags.has("Crossposted") ? "" : "un"
-			}published`,
+			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
+				newMessage.id
+			}) ${newMessage.flags.has("Crossposted") ? "" : "un"}published`,
 			"messages",
 			{ button: { label: "View Message", url: newMessage.url } },
 		);
@@ -132,7 +132,9 @@ export async function messageUpdate(
 		await log(
 			`${LoggingEmojis.MessageUpdate} Embeds ${
 				newMessage.flags.has("SuppressEmbeds") ? "removed from" : "shown on"
-			} message by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
+			} message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
+				newMessage.id
+			})`,
 			"messages",
 			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
 		);
@@ -142,9 +144,9 @@ export async function messageUpdate(
 		await log(
 			`${
 				LoggingEmojis.MessageUpdate
-			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
-				newMessage.pinned ? "" : "un"
-			}pinned`,
+			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
+				newMessage.id
+			}) ${newMessage.pinned ? "" : "un"}pinned`,
 			"messages",
 			{ button: { label: "View Message", url: newMessage.url } },
 		);
@@ -180,9 +182,9 @@ export async function messageUpdate(
 			await log(
 				`${
 					LoggingEmojis.MessageEdit
-				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited (ID: ${
+				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 					newMessage.id
-				})`,
+				}) edited`,
 				"messages",
 				{ button: { label: "View Message", url: newMessage.url }, files },
 			);

@@ -147,7 +147,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		await log(
 			`${
 				LoggingEmojis.MessageEdit
-			} Message by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+			} Message by ${edited.author.toString()} in ${edited.channel.toString()} (ID: ${
+				edited.id
+			}) edited by ${interaction.user.toString()}`,
 			"messages",
 			{
 				button: { label: "View Message", url: edited.url },

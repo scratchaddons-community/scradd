@@ -39,9 +39,9 @@ export async function channelCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Cha
 }
 export async function channelDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ChannelDelete>) {
 	await log(
-		`${LoggingEmojis.Channel} #${entry.target.name} deleted${extraAuditLogsInfo(entry)} (ID: ${
+		`${LoggingEmojis.Channel} #${entry.target.name} (ID: ${
 			entry.target.id
-		})`,
+		}) deleted${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }
@@ -100,7 +100,7 @@ export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.Thre
 	await log(
 		`${LoggingEmojis.Thread} Thread #${entry.target.name} ${
 			entry.target.parent ? `in ${entry.target.parent.toString()} ` : ""
-		}deleted${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+		}(ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }

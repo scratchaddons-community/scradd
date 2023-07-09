@@ -189,9 +189,9 @@ const events: {
 	async [AuditLogEvent.WebhookCreate](entry) {
 		if (entry.target.type !== WebhookType.Incoming) return;
 		await log(
-			`${LoggingEmojis.Integration} Webhook ${entry.target.name} created${extraAuditLogsInfo(
-				entry,
-			)}`,
+			`${LoggingEmojis.Integration} Webhook ${entry.target.name} (ID: ${
+				entry.target.id
+			}) created${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
@@ -207,9 +207,7 @@ const events: {
 	async [AuditLogEvent.EmojiCreate](entry) {
 		if (!(entry.target instanceof Base)) return;
 		await log(
-			`${LoggingEmojis.Emoji} ${entry.target.toString()} created${extraAuditLogsInfo(
-				entry,
-			)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Emoji} ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
@@ -219,9 +217,7 @@ const events: {
 			await log(
 				`${LoggingEmojis.Emoji} ${formatEmoji(entry.target?.id ?? "")} (:${
 					change.old
-				}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${
-					entry.target?.id
-				})`,
+				}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
 				"server",
 			);
 		}
@@ -233,28 +229,32 @@ const events: {
 				"name" in entry.target
 					? entry.target.name
 					: entry.changes.find((change) => change.key === "name")?.old
-			}: deleted${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+			}: (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
 	async [AuditLogEvent.IntegrationCreate](entry) {
 		await log(
-			`${LoggingEmojis.Integration} ${entry.target.name} added${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
+				entry.target.id
+			}) added${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
 	// async [AuditLogEvent.IntegrationUpdate](entry) {}, // TODO
 	async [AuditLogEvent.IntegrationDelete](entry) {
 		await log(
-			`${LoggingEmojis.Integration} ${entry.target.name} removed${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
+				entry.target.id
+			}) removed${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
 	async [AuditLogEvent.StickerCreate](entry) {
 		await log(
-			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} created${extraAuditLogsInfo(
-				entry,
-			)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} (ID: ${
+				entry.target.id
+			}) created${extraAuditLogsInfo(entry)}`,
 			"server",
 			{ files: [entry.target.url] },
 		);
@@ -265,22 +265,18 @@ const events: {
 			switch (key) {
 				case "name": {
 					await log(
-						`${LoggingEmojis.Emoji} Sticker ${entry.target.name} (:${
-							change.old
-						}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)} (ID: ${
+						`${LoggingEmojis.Emoji} Sticker ${change.old} (ID: ${
 							entry.target.id
-						})`,
+						}) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
 						"server",
 					);
 					break;
 				}
 				case "description": {
 					await log(
-						`${LoggingEmojis.Emoji} Sticker ${
-							entry.target.name
-						}’s description changed${extraAuditLogsInfo(entry)} (ID: ${
+						`${LoggingEmojis.Emoji} Sticker ${entry.target.name}’s description (ID: ${
 							entry.target.id
-						})`,
+						}) changed${extraAuditLogsInfo(entry)}`,
 						"server",
 						{
 							files: [
@@ -302,9 +298,11 @@ const events: {
 				}
 				case "tags": {
 					await log(
-						`${LoggingEmojis.Emoji} Sticker ${entry.target.name}’s related emoji ${
-							change.new ? `set to ${change.new}` : "removed"
-						}${extraAuditLogsInfo(entry)} (ID: ${entry.target.id})`,
+						`${LoggingEmojis.Emoji} Sticker ${entry.target.name}’s related emoji (ID: ${
+							entry.target.id
+						}) ${change.new ? `set to ${change.new}` : "removed"}${extraAuditLogsInfo(
+							entry,
+						)}`,
 						"server",
 					);
 				}
@@ -313,9 +311,9 @@ const events: {
 	},
 	async [AuditLogEvent.StickerDelete](entry) {
 		await log(
-			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} deleted${extraAuditLogsInfo(
-				entry,
-			)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Emoji} Sticker ${entry.target.name} (ID: ${
+				entry.target.id
+			}) deleted${extraAuditLogsInfo(entry)}`,
 			"server",
 			{ files: [entry.target.url] },
 		);
@@ -341,18 +339,18 @@ const events: {
 					[AutoModerationRuleTriggerType.KeywordPreset]: "Block Commonly Flagged Words",
 					[AutoModerationRuleTriggerType.MentionSpam]: "Block Mention Spam",
 				}[entry.target.triggerType]
-			}" Rule ${entry.target.name} created${extraAuditLogsInfo(entry)} (ID: ${
-				entry.target.id
-			})`,
+			}" Rule ${entry.target.name} (ID: ${entry.target.id}) created${extraAuditLogsInfo(
+				entry,
+			)}`,
 			"server",
 		);
 	},
 	// async [AuditLogEvent.AutoModerationRuleUpdate](entry) {}, // TODO
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
-			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} deleted${extraAuditLogsInfo(
-				entry,
-			)} (ID: ${entry.target.id})`,
+			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} (ID: ${
+				entry.target.id
+			}) deleted${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
@@ -822,7 +820,7 @@ defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
 defineEvent("messageUpdate", messageUpdate);
 defineEvent("roleDelete", async (role) => {
 	if (role.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Role} @${role.name} deleted (ID: ${role.id})`, "server");
+	await log(`${LoggingEmojis.Role} @${role.name} (ID: ${role.id}) deleted`, "server");
 });
 defineEvent("threadUpdate", threadUpdate);
 defineEvent("userUpdate", userUpdate);

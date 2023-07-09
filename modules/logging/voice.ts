@@ -14,7 +14,9 @@ export async function guildScheduledEventCreate(
 	entry: GuildAuditLogsEntry<AuditLogEvent.GuildScheduledEventCreate>,
 ) {
 	await log(
-		`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+		`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${
+			entry.reason?.includes("\n") ? "\n" : ""
+		}${entry.target.url}`,
 		"voice",
 	);
 }
@@ -31,7 +33,9 @@ export async function guildScheduledEventUpdate(
 				await log(
 					`${LoggingEmojis.Event} Event ${entry.target.name}’s topic changed to ${
 						change.new
-					} (${change.old})${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+					} (${change.old})${extraAuditLogsInfo(entry)}\n${
+						entry.reason?.includes("\n") ? "\n" : ""
+					}${entry.target.url}`,
 					"voice",
 				);
 				break;
@@ -40,7 +44,9 @@ export async function guildScheduledEventUpdate(
 				await log(
 					`${LoggingEmojis.Event} Event ${
 						entry.target.name
-					}’s description changed${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+					}’s description changed${extraAuditLogsInfo(entry)}\n${
+						entry.reason?.includes("\n") ? "\n" : ""
+					}${entry.target.url}`,
 					"voice",
 					{
 						files: [
@@ -67,7 +73,9 @@ export async function guildScheduledEventUpdate(
 						entry.target.channel?.toString() ??
 						entry.target.entityMetadata?.location ??
 						"an external location"
-					}${extraAuditLogsInfo(entry)}\n${entry.target.url}`,
+					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
+						entry.target.url
+					}`,
 					"voice",
 				);
 				break;
@@ -77,7 +85,9 @@ export async function guildScheduledEventUpdate(
 				await log(
 					`${LoggingEmojis.Event} Event ${entry.target.name}’s cover image ${
 						url ? "changed" : "removed"
-					}${extraAuditLogsInfo(entry)}`,
+					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
+						entry.target.url
+					}`,
 					"voice",
 					{ files: url ? [url] : [] },
 				);
@@ -183,5 +193,8 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 export async function guildScheduledEventDelete(event: GuildScheduledEvent) {
 	if (event.guildId !== config.guild.id) return;
 
-	await log(`${LoggingEmojis.Event} Event ${event.name} removed`, "voice");
+	await log(
+		`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`,
+		"voice",
+	);
 }

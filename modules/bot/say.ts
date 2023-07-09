@@ -171,7 +171,9 @@ export async function say(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
 				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "",
-			)} used by ${interaction.user.toString()} in ${message.channel.toString()}`,
+			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
+				message.id
+			})`,
 			"messages",
 			{ button: { label: "View Message", url: message.url } },
 		);
