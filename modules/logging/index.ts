@@ -166,15 +166,6 @@ const events: {
 			}
 		}
 	},
-	async [AuditLogEvent.RoleDelete](entry) {
-		if (!(entry.target instanceof Base)) return;
-		await log(
-			`${LoggingEmojis.Role} @${entry.target.name} deleted${extraAuditLogsInfo(entry)} (ID: ${
-				entry.target.id
-			})`,
-			"server",
-		);
-	},
 	async [AuditLogEvent.InviteCreate](entry) {
 		await log(
 			`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
@@ -829,6 +820,10 @@ defineEvent("messageDelete", messageDelete);
 defineEvent("messageDeleteBulk", messageDeleteBulk);
 defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
 defineEvent("messageUpdate", messageUpdate);
+defineEvent("roleDelete", async (role) => {
+	if (role.guild.id !== config.guild.id) return;
+	await log(`${LoggingEmojis.Role} @${role.name} deleted (ID: ${role.id})`, "server");
+});
 defineEvent("threadUpdate", threadUpdate);
 defineEvent("userUpdate", userUpdate);
 defineEvent("voiceStateUpdate", voiceStateUpdate);
