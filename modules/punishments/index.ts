@@ -38,42 +38,27 @@ defineCommand(
 		censored: false,
 	},
 	async (interaction) => {
-		if (!(interaction.member instanceof GuildMember))
-			throw new TypeError("interaction.member is not a GuildMember");
 		switch (interaction.options.getSubcommand(true)) {
 			case "user": {
-				const selected = interaction.options.getUser("user") ?? interaction.member;
+				const selected = interaction.options.getUser("user") ?? interaction.user;
 				await getStrikes(selected, interaction);
 				break;
 			}
 			case "id": {
-				await interaction.reply(
-					await getStrikeById(
-						interaction.member,
-						interaction.options.getString("id", true),
-					),
-				);
+				await getStrikeById(interaction, interaction.options.getString("id", true));
 			}
 		}
 	},
 );
 
-defineButton("strike", async (interaction, id) => {
-	if (!(interaction.member instanceof GuildMember))
-		throw new TypeError("interaction.member is not a GuildMember");
-
-	await interaction.reply(await getStrikeById(interaction.member, id ?? ""));
-});
+defineButton("strike", async (interaction, id) => await getStrikeById(interaction, id ?? ""));
 defineButton("viewStrikes", async (interaction, userId = "") => {
 	await getStrikes(await client.users.fetch(userId), interaction);
 });
 
 defineSelect("selectStrike", async (interaction) => {
-	if (!(interaction.member instanceof GuildMember))
-		throw new TypeError("interaction.member is not a GuildMember");
-
 	const [id] = interaction.values;
-	if (id) await interaction.reply(await getStrikeById(interaction.member, id));
+	if (id) await getStrikeById(interaction, id);
 });
 
 defineCommand(

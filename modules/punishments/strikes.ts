@@ -4,10 +4,10 @@ import {
 	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	type InteractionReplyOptions,
 	time,
 	TimestampStyles,
 	User,
+	type RepliableInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -117,26 +117,21 @@ export async function getStrikes(
 	);
 }
 
-/**
- * Reply to a interaction with strike information.
- *
- * @param interactor - The user who initiated the interaction.
- * @param filter - The strike to get.
- */
-export async function getStrikeById(
-	interactor: GuildMember,
-	filter: string,
-): Promise<InteractionReplyOptions> {
+export async function getStrikeById(interaction: RepliableInteraction, filter: string) {
+	if (!(interaction.member instanceof GuildMember))
+		throw new TypeError("interaction.member is not a GuildMember");
+
+	await interaction.deferReply({ ephemeral: true });
+
 	const strike = await filterToStrike(filter);
 	if (!strike)
-		return { ephemeral: true, content: `${constants.emojis.statuses.no} Invalid strike ID!` };
+		return await interaction.editReply(`${constants.emojis.statuses.no} Invalid strike ID!`);
 
-	const isModerator = config.roles.mod && interactor.roles.resolve(config.roles.mod.id);
-	if (strike.user !== interactor.id && !isModerator) {
-		return {
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
-		};
+	const isModerator = config.roles.mod && interaction.member.roles.resolve(config.roles.mod.id);
+	if (strike.user !== interaction.member.id && !isModerator) {
+		return await interaction.editReply(
+			`${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+		);
 	}
 
 	const member = await config.guild.members.fetch(strike.user).catch(() => {});
@@ -147,8 +142,8 @@ export async function getStrikeById(
 			? strike.mod
 			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
 	const nick = (member ?? user)?.displayName;
-	const { useMentions } = getSettings(interactor.user);
-	return {
+	const { useMentions } = getSettings(interaction.member.user);
+	return await interaction.editReply({
 		components: isModerator
 			? [
 					{
@@ -172,8 +167,6 @@ export async function getStrikeById(
 					},
 			  ]
 			: [],
-
-		ephemeral: true,
 
 		embeds: [
 			{
@@ -218,5 +211,5 @@ export async function getStrikeById(
 				],
 			},
 		],
-	};
+	});
 }
