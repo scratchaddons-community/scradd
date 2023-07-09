@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import guessAddon from "./guessAddon.js";
-import memoryMatch, { messageDelete } from "./memoryMatch.js";
+import memoryMatch, { messageDelete, showMemoryInstructions } from "./memoryMatch.js";
 import { defineButton, defineCommand, defineEvent } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
@@ -39,6 +39,7 @@ defineCommand(
 	memoryMatch,
 );
 defineEvent.pre("messageDelete", messageDelete);
+defineButton("showMemoryInstructions", showMemoryInstructions);
 
 defineButton("endGame", async (interaction, users) => {
 	if (!users.split("-").includes(interaction.user.id))

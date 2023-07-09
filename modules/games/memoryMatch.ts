@@ -11,6 +11,7 @@ import {
 	User,
 	ThreadAutoArchiveDuration,
 	ChannelType,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -29,6 +30,19 @@ export default async function memoryMatch(
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							label: "Instructions",
+							customId: `_showMemoryInstructions`,
+							style: ButtonStyle.Secondary,
+						},
+					],
+				},
+			],
 		});
 	}
 	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
@@ -59,6 +73,12 @@ export default async function memoryMatch(
 						label: "Not now…",
 						customId: `cancel-${interaction.id}`,
 						style: ButtonStyle.Danger,
+					},
+					{
+						type: ComponentType.Button,
+						label: "Instructions",
+						customId: `_showMemoryInstructions`,
+						style: ButtonStyle.Secondary,
 					},
 				],
 			},
@@ -408,4 +428,25 @@ async function setupGame(difficulty: 2 | 4) {
 
 export async function messageDelete(message: Message | PartialMessage) {
 	return !deletedPings.delete(message.id);
+}
+
+export function showMemoryInstructions(interaction: RepliableInteraction) {
+	return interaction.reply({
+		ephemeral: true,
+		content:
+			"## Memory Match Instructions\n" +
+			"### The objective is to find matching emoji pairs by clicking on tiles and remembering which emoji is where.\n" +
+			`The first player is determined randomly. Since they get an advantage by going first, the second player gets the middle tile as a bonus point. The two players are assigned colors (${constants.emojis.misc.blue} ${constants.emojis.misc.green}), which are shown above the board.\n` +
+			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you're sure of a match, click tiles you haven't seen before to expand your knowledge of the board.*\n" +
+			"If you find matching emojis, those two tiles will not be flipped back over, but change to your color instead. You will also receive two points and a bonus turn (unless bonus turns are disabled via `bonus-turns`).\n" +
+			`If the two flipped tiles do not match, it will be the other player's turn. The tiles will be flipped back over once the other player starts their turn or after ${
+				GAME_COLLECTOR_TIME / 60 / 1000
+			} seconds.\n` +
+			"*By default, there are only two of each emoji. However, in easy mode (`easy-mode`), there are four of each, which means there's two matches for each emoji.*\n" +
+			"Continue taking turns until all the tiles are flipped over. The player with the highest number of points at the end wins the game.\n" +
+			`If a player ends the game, either by pressing the "End Game" button or not taking their turn within ${
+				GAME_COLLECTOR_TIME / 60 / 1000
+			} minutes, they lose 2 points.\n` +
+			"**Enjoy playing Memory Match and have fun testing your and your opponents' memory skills!**",
+	});
 }
