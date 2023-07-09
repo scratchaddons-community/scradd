@@ -65,7 +65,8 @@ setInterval(async () => {
 					if (!channel?.isTextBased())
 						throw new TypeError("Could not find weekly channel");
 
-					const now = new Date(reminder.date);
+					const date = new Date();
+					date.setUTCDate(date.getUTCDate() - 7);
 					const nextWeeklyDate = new Date(reminder.date);
 					nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
 
@@ -87,8 +88,8 @@ setInterval(async () => {
 								"October",
 								"November",
 								"December",
-							][now.getUTCMonth()] || ""
-						} ${nth(now.getUTCDate(), { bold: false, jokes: false })}`,
+							][date.getUTCMonth()] || ""
+						} ${nth(date.getUTCDate(), { bold: false, jokes: false })}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
