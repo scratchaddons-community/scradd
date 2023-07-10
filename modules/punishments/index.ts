@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, GuildMember } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import constants from "../../common/constants.js";
 import { client, defineCommand, defineButton, defineSelect } from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
@@ -100,8 +100,8 @@ defineCommand(
 			allowedMentions: { users: [] },
 
 			content: `${constants.emojis.statuses.yes} ${
-				strikes ? "W" : "Verbally w"
-			}arned ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
+				strikes ? "Warned" : "Verbally warned"
+			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
 		});
 	},
 );

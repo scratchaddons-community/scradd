@@ -1,7 +1,6 @@
 import {
 	inlineCode,
 	Message,
-	chatInputApplicationCommandMention,
 	type RepliableInteraction,
 } from "discord.js";
 import { serializeError } from "serialize-error";
