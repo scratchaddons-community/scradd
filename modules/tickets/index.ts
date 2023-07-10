@@ -55,12 +55,12 @@ defineEvent("messageCreate", async (message) => {
 							label: "Contact Mods",
 							custom_id: "_contactMods",
 						},
-						// {
-						// 	type: ComponentType.Button,
-						// 	style: ButtonStyle.Link,
-						// 	label: "SA Support",
-						// url: `https://discord.com/channels/${config.guild.id}/${config.channels.support}`,
-						// },
+						{
+							type: ComponentType.Button,
+							style: ButtonStyle.Link,
+							label: "SA Support",
+							url: `https://discord.com/channels/${config.guild.id}/${config.channels.support}`,
+						},
 					],
 				},
 			],
