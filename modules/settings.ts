@@ -23,7 +23,7 @@ export const userSettingsDatabase = new Database<{
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
-	resourcesDmed?: true;
+	resourcesDmed?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -123,24 +123,24 @@ export function updateSettings(
 		boardPings:
 			settings.boardPings === "toggle"
 				? !old.boardPings
-				: settings.boardPings ?? settingsForUser?.boardPings,
+				: settings.boardPings ?? old.boardPings,
 		levelUpPings:
 			settings.levelUpPings === "toggle"
 				? !old.levelUpPings
-				: settings.levelUpPings ?? settingsForUser?.levelUpPings,
+				: settings.levelUpPings ?? old.levelUpPings,
 		autoreactions:
 			settings.autoreactions === "toggle"
 				? !old.autoreactions
-				: settings.autoreactions ?? settingsForUser?.autoreactions,
+				: settings.autoreactions ?? old.autoreactions,
 		useMentions:
 			settings.useMentions === "toggle"
 				? !old.useMentions
-				: settings.useMentions ?? settingsForUser?.useMentions,
+				: settings.useMentions ?? old.useMentions,
 
 		dmReminders:
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
-				: settings.dmReminders ?? settingsForUser?.dmReminders,
+				: settings.dmReminders ?? old.dmReminders,
 
 		resourcesDmed: settings.resourcesDmed,
 	};
@@ -201,39 +201,19 @@ export function updateSettings(
 export function getSettings(
 	user: { id: Snowflake },
 	defaults?: true,
-): {
-	boardPings: boolean;
-	levelUpPings: boolean;
-	autoreactions: boolean;
-	useMentions: boolean;
-	dmReminders: boolean;
-	resourcesDmed: boolean;
-};
+): Required<typeof userSettingsDatabase.data[number]>;
 export function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
-): {
-	boardPings?: boolean;
-	levelUpPings?: boolean;
-	autoreactions?: boolean;
-	useMentions?: boolean;
-	dmReminders?: boolean;
-	resourcesDmed?: true;
-};
+): typeof userSettingsDatabase.data[number];
 export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
-	const settings: {
-		boardPings?: boolean;
-		levelUpPings?: boolean;
-		autoreactions?: boolean;
-		useMentions?: boolean;
-		dmReminders?: boolean;
-		resourcesDmed?: boolean;
-	} = userSettingsDatabase.data.find((settings) => settings.user === user.id) ?? {};
+	const settings = userSettingsDatabase.data.find((settings) => settings.user === user.id) ?? {
+		user: user.id,
+	};
 	if (defaults) {
 		const defaultSettings = getDefaultSettings(user);
 		for (const setting of Object.keys(defaultSettings)) {
-			if (!Object.prototype.hasOwnProperty.call(defaultSettings, setting)) return;
-			if (settings[setting] === undefined) settings[setting] = defaultSettings[setting];
+			settings[setting] ??= defaultSettings[setting];
 		}
 	}
 	return settings;
