@@ -1,4 +1,4 @@
-import { type MessageCreateOptions, time, TimestampStyles } from "discord.js";
+import { type MessageCreateOptions, time, TimestampStyles, type Snowflake } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
@@ -77,7 +77,18 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 
 	const { active } = config.roles;
-	const activeMembers = weeklyWinners.filter((item) => item.xp > 300);
+	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
+	const activeMembers = [
+		...latestActiveMembers,
+		...Object.entries(
+			recentXpDatabase.data.reduce<Record<Snowflake, number>>((acc, gain) => {
+				acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
+				return acc;
+			}, {}),
+		)
+			.map((entry) => ({ xp: entry[1], user: entry[0] }))
+			.filter((item) => item.xp >= 500),
+	];
 	if (active) {
 		await Promise.all([
 			...active.members.map(async (roleMember) => {
@@ -157,7 +168,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			.join("\n") || "*Nobody got any XP this week!*"
 	}\n\n*This week, ${chatters.toLocaleString(
 		"en-us",
-	)} people chatted, and ${activeMembers.length.toLocaleString(
+	)} people chatted, and ${latestActiveMembers.length.toLocaleString(
 		"en-us",
 	)} people were active. Altogether, people gained ${allXp.toLocaleString(
 		"en-us",
