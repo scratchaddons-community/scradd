@@ -61,8 +61,10 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 				{
 					attachment: Buffer.from(
-						["bigint", "symbol", "function"].includes(type)
-							? `"${output}"`
+						["bigint", "symbol"].includes(type)
+							? `"${output.toString().replaceAll('"', '\\"')}"`
+							: type === "function"
+							? output.toString()
 							: type === "object"
 							? JSON.stringify(output, undefined, "  ")
 							: type === "undefined"
@@ -70,7 +72,9 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 							: output.toString(),
 						"utf8",
 					),
-					name: `output.${"string" === type ? "txt" : "json"}`,
+					name: `output.${
+						"string" === type ? "txt" : "function" === type ? "js" : "json"
+					}`,
 				},
 			],
 		});
