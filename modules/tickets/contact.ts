@@ -274,16 +274,8 @@ export default async function contactMods(
 		interaction.type === InteractionType.ModalSubmit &&
 		interaction.fields.getTextInputValue("BODY");
 
-	const date = new Date();
 	const thread = await config.channels.tickets.threads.create({
-		name: `${member.user.displayName} (${date
-			.getUTCFullYear()
-			.toLocaleString("en-us", { useGrouping: false })}-${(
-			date.getUTCMonth() + 1
-		).toLocaleString("en-us", { minimumIntegerDigits: 2 })}-${date
-			.getUTCDate()
-			.toLocaleString("en-us", { minimumIntegerDigits: 2 })})`,
-
+		name: `${member.user.displayName} (${member.id})`,
 		reason: "Ticket opened",
 		type: ChannelType.PrivateThread,
 		invitable: false,

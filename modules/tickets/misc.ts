@@ -1,6 +1,5 @@
 import type { GuildMember, PartialGuildMember, PartialUser, ThreadChannel, User } from "discord.js";
 import config from "../../common/config.js";
-import { asyncFilter } from "../../util/promises.js";
 
 /**
  * Find a ticket for a user.
@@ -16,24 +15,7 @@ export async function getThreadFromMember(
 
 	const { threads } = await config.channels.tickets.threads.fetchActive();
 
-	return (
-		await asyncFilter(
-			threads.toJSON(),
-			async (thread) => (await getUserFromTicket(thread))?.id === user.id && thread,
-		).next()
-	).value;
-}
-
-/**
- * Get the non-mod involved in a ticket.
- *
- * @param thread - Ticket thread.
- *
- * @returns User who messages are being sent to.
- */
-export async function getUserFromTicket(thread: ThreadChannel): Promise<void | User> {
-	const messages = await thread.messages.fetch({ after: thread.id, limit: 2 });
-	return messages.first()?.mentions.users.first();
+	return threads.find((thread) => thread.name.match(/\(d+\)$/)?.[1] === user.id);
 }
 
 export const TICKET_CATEGORIES = [
