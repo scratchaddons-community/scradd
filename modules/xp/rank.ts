@@ -80,7 +80,7 @@ export default async function getUserRank(
 										bold: false,
 										jokes: false,
 								  })}`
-							: "Inactive",
+							: "Inactive this week",
 
 						inline: true,
 					},
