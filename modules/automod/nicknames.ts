@@ -18,6 +18,7 @@ export default async function changeNickname(member: GuildMember) {
 				"Set nickname to " + member.displayName,
 			);
 		await setNickname(member, newNick, "Has bad words");
+		return;
 	}
 
 	const members = (await config.guild.members.fetch({ query: newNick, limit: 100 })).filter(
@@ -32,13 +33,15 @@ export default async function changeNickname(member: GuildMember) {
 				const censored = censor(found.user.displayName);
 				const nick = censored ? censored.censored : found.user.displayName;
 
-				if (nick === found.displayName) continue;
-
-				setNickname(found, nick, "Conflicts");
-				unsafe.delete(id);
+				if (nick !== found.displayName) {
+					setNickname(found, nick, "Conflicts");
+					unsafe.delete(id);
+				}
 			}
 		}
+
 		const unchanged = safe.concat(unsafe);
+
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
 			const censored = censor(member.user.displayName);
 			const nick = censored ? censored.censored : member.user.displayName;
@@ -48,14 +51,23 @@ export default async function changeNickname(member: GuildMember) {
 				unchanged.delete(member.id);
 			}
 		}
+		if (unchanged.size > 1) {
+			for (const member of unchanged.values()) {
+				const censored = censor(member.user.username);
+				const nick = censored ? censored.censored : member.user.username;
 
-		if (unchanged.size > 1)
+				if (nick !== member.displayName) {
+					setNickname(member, nick, "Conflicts");
+					unchanged.delete(member.id);
+				}
+			}
+		}
+
+		const sorted = unchanged.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
+		if (unchanged.size === 2) unchanged.delete(sorted.firstKey() ?? "");
+		else if (unchanged.size > 1)
 			await log(
-				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(
-					unchanged
-						.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0))
-						.toJSON(),
-				)}`,
+				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(sorted.toJSON())}`,
 			);
 	}
 }
