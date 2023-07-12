@@ -1,8 +1,4 @@
-import {
-	inlineCode,
-	Message,
-	type RepliableInteraction,
-} from "discord.js";
+import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
 import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
 import { sanitizePath } from "../util/files.js";

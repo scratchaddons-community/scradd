@@ -193,8 +193,5 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 export async function guildScheduledEventDelete(event: GuildScheduledEvent) {
 	if (event.guildId !== config.guild.id) return;
 
-	await log(
-		`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`,
-		"voice",
-	);
+	await log(`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`, "voice");
 }
