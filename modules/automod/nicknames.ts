@@ -21,7 +21,7 @@ export default async function changeNickname(member: GuildMember) {
 
 	if (newNick !== member.displayName) {
 		const unpinagble = isPingable(member.displayName);
-		await setNickname(
+		return await setNickname(
 			member,
 			newNick,
 			`${censored ? "Has bad words" : ""}${censored && unpinagble ? "; " : ""}${
