@@ -141,7 +141,7 @@ const events: {
 						"server",
 						{
 							button: {
-								label: "View Permission",
+								label: "Permissions",
 								url:
 									"https://discordlookup.com/permissions-calculator/" +
 									change.new,

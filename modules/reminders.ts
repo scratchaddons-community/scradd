@@ -266,7 +266,7 @@ defineCommand(
 							{
 								customId: "_cancelReminder",
 								type: ComponentType.StringSelect,
-								placeholder: "Cancel Reminder",
+								placeholder: "Cancel",
 								options: reminders.map((reminder) => ({
 									value: reminder.id + "",
 									description: `${reminder.reminder}`.slice(0, 100),
@@ -352,7 +352,7 @@ defineCommand(
 					components: [
 						{
 							type: ComponentType.Button,
-							label: "Cancel Reminder",
+							label: "Cancel",
 							customId: `${id}_cancelReminder`,
 							style: ButtonStyle.Danger,
 						},

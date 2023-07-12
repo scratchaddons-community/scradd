@@ -128,7 +128,7 @@ defineCommand(
 			.find((role) => role.name.startsWith(PREFIX));
 
 		await interaction.showModal({
-			title: "Create Role",
+			title: "Create Custom Role",
 			customId: "_customRole",
 			components: [
 				{

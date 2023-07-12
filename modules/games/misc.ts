@@ -34,7 +34,7 @@ export async function checkIfUserPlaying(
 
 				components: [
 					{
-						label: "Go to game",
+						label: "Game",
 						style: ButtonStyle.Link,
 						type: ComponentType.Button,
 						url: current.url,
@@ -42,7 +42,7 @@ export async function checkIfUserPlaying(
 					...(current.end
 						? [
 								{
-									label: "End game",
+									label: "End",
 									style: ButtonStyle.Danger,
 									type: ComponentType.Button,
 									customId: `${interaction.user.id}_endGame`,

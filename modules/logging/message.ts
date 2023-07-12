@@ -39,7 +39,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 		"messages",
 		{
 			embeds,
-			button: { label: "View Context", url: message.url },
+			button: { label: "Context", url: message.url },
 
 			files: content
 				? [{ content, extension: "md" }, ...files.map((file) => file.url)]
@@ -75,7 +75,7 @@ export async function messageDeleteBulk(
 		"messages",
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
-			button: { label: "View Context", url: messages.first()?.url ?? "" },
+			button: { label: "Context", url: messages.first()?.url ?? "" },
 		},
 	);
 }
@@ -106,7 +106,7 @@ export async function messageReactionRemoveAll(
 				},
 			],
 
-			button: { label: "View Context", url: message.url },
+			button: { label: "Context", url: message.url },
 		},
 	);
 }
@@ -125,7 +125,7 @@ export async function messageUpdate(
 				newMessage.id
 			}) ${newMessage.flags.has("Crossposted") ? "" : "un"}published`,
 			"messages",
-			{ button: { label: "View Message", url: newMessage.url } },
+			{ button: { label: "Message", url: newMessage.url } },
 		);
 	}
 	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
@@ -136,7 +136,7 @@ export async function messageUpdate(
 				newMessage.id
 			})`,
 			"messages",
-			{ button: { label: "View Message", url: newMessage.url }, embeds: oldMessage.embeds },
+			{ button: { label: "Message", url: newMessage.url }, embeds: oldMessage.embeds },
 		);
 	}
 
@@ -148,7 +148,7 @@ export async function messageUpdate(
 				newMessage.id
 			}) ${newMessage.pinned ? "" : "un"}pinned`,
 			"messages",
-			{ button: { label: "View Message", url: newMessage.url } },
+			{ button: { label: "Message", url: newMessage.url } },
 		);
 	}
 
@@ -186,7 +186,7 @@ export async function messageUpdate(
 					newMessage.id
 				}) edited`,
 				"messages",
-				{ button: { label: "View Message", url: newMessage.url }, files },
+				{ button: { label: "Message", url: newMessage.url }, files },
 			);
 		}
 	}

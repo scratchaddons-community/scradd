@@ -121,7 +121,7 @@ export default async function sayCommand(
 					{
 						type: ComponentType.TextInput,
 						customId: "message",
-						label: "Message Content",
+						label: "Message content",
 						maxLength: 2000,
 						required: true,
 						style: TextInputStyle.Paragraph,
@@ -175,7 +175,7 @@ export async function say(
 				message.id
 			})`,
 			"messages",
-			{ button: { label: "View Message", url: message.url } },
+			{ button: { label: "Message", url: message.url } },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);
 	}

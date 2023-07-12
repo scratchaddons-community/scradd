@@ -150,11 +150,11 @@ const allFields = {
 const modCategory = "mod";
 const categoryToDescription = {
 	appeal: "Strike Appeal",
-	report: "Report",
+	report: "User Report",
 	role: "Role Request",
 	bug: "Scradd Bug",
 	rules: "Rule Clarification",
-	server: "Add An Other Scratch Server",
+	server: "Other Scratch Servers",
 	other: "Other",
 	[modCategory]: "Contact User",
 } satisfies Record<Category | typeof modCategory, string>;
@@ -216,7 +216,7 @@ export async function gatherTicketInfo(
 	if (!fields) throw new ReferenceError(`Unknown ticket category: ${option}`);
 
 	await interaction.showModal({
-		title: `Ticket: ${categoryToDescription[option]}`,
+		title: categoryToDescription[option],
 		customId: `${option}_contactMods`,
 		components: fields.map((field) => ({
 			type: ComponentType.ActionRow,
@@ -333,7 +333,7 @@ export default async function contactMods(
 
 		embeds: [
 			{
-				title: "Ticket: " + categoryToDescription[option],
+				title: categoryToDescription[option],
 
 				color: member.displayColor,
 
@@ -415,7 +415,7 @@ export async function contactUser(
 				components: [
 					{
 						type: ComponentType.Button,
-						label: "Confirm",
+						label: "Contact",
 						style: ButtonStyle.Success,
 						customId: `confirm-${interaction.id}`,
 					},

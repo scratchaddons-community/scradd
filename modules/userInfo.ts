@@ -125,7 +125,7 @@ defineCommand(
 							customId: `${user.id}_xp`,
 							style: ButtonStyle.Secondary,
 							type: ComponentType.Button,
-							label: "View XP",
+							label: "XP",
 						},
 						{
 							customId: `${user.id}_exploreBoard`,
@@ -139,7 +139,7 @@ defineCommand(
 										customId: `${user.id}_viewStrikes`,
 										style: ButtonStyle.Secondary,
 										type: ComponentType.Button,
-										label: "List Strikes",
+										label: "Strikes",
 									} as const,
 							  ]
 							: []),

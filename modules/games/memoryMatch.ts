@@ -248,13 +248,13 @@ async function playGame(
 		const user = users[turn % 2] ?? users[0];
 		const content = `🎲 ${user.toString()}, your turn!`;
 		const gameLinkButton = {
-			label: "Go to game",
+			label: "Game",
 			style: ButtonStyle.Link,
 			type: ComponentType.Button,
 			url: message.url,
 		} as const;
 		const endGameButton = {
-			label: "End game",
+			label: "End",
 			style: ButtonStyle.Danger,
 			type: ComponentType.Button,
 			customId: `${users.map((user) => user.id).join("-")}_endGame`,

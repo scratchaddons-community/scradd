@@ -36,7 +36,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 					{
 						type: ComponentType.TextInput,
 						style: TextInputStyle.Paragraph,
-						label: "Code To Run",
+						label: "Code to run",
 						required: true,
 						customId: "code",
 					},

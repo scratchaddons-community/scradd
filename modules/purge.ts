@@ -179,15 +179,9 @@ defineCommand(
 						components: [
 							{
 								type: ComponentType.Button,
-								label: "Confirm",
+								label: "Purge",
 								style: ButtonStyle.Success,
 								customId: `confirm-${interaction.id}`,
-							},
-							{
-								type: ComponentType.Button,
-								label: "Cancel",
-								customId: `cancel-${interaction.id}`,
-								style: ButtonStyle.Danger,
 							},
 						],
 					},
@@ -221,14 +215,6 @@ defineCommand(
 								sliced.length === 1 ? "" : "s"
 							}!`,
 						);
-						collector.stop();
-						return;
-					}
-					case "cancel": {
-						await buttonInteraction.reply({
-							content: `${constants.emojis.statuses.no} Purge canceled!`,
-							ephemeral: true,
-						});
 						collector.stop();
 						return;
 					}

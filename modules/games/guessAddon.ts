@@ -489,7 +489,7 @@ export default async function guessAddon(
 							components: [
 								{
 									type: ComponentType.Button,
-									label: "Go to game",
+									label: "Game",
 									style: ButtonStyle.Link,
 									url: oldMessage.url,
 								},
