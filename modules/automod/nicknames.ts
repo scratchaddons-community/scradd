@@ -7,7 +7,7 @@ import censor from "./language.js";
 
 export default async function changeNickname(member: GuildMember) {
 	const censored = censor(member.displayName);
-	const newNick = censored ? censored.censored : member.displayName;
+	const newNick = findName(member);
 
 	if (censored) {
 		if (member.nickname)
@@ -17,8 +17,17 @@ export default async function changeNickname(member: GuildMember) {
 				censored.strikes,
 				"Set nickname to " + member.displayName,
 			);
-		await setNickname(member, newNick, "Has bad words");
-		return;
+	}
+
+	if (newNick !== member.displayName) {
+		const unpinagble = isPingable(member.displayName);
+		await setNickname(
+			member,
+			newNick,
+			`${censored ? "Has bad words" : ""}${censored && unpinagble ? "; " : ""}${
+				unpinagble ? "Unpingable" : ""
+			}`,
+		);
 	}
 
 	const members = (await config.guild.members.fetch({ query: newNick, limit: 100 })).filter(
@@ -33,7 +42,7 @@ export default async function changeNickname(member: GuildMember) {
 				const censored = censor(found.user.displayName);
 				const nick = censored ? censored.censored : found.user.displayName;
 
-				if (nick !== found.displayName) {
+				if (nick !== found.displayName && isPingable(nick)) {
 					setNickname(found, nick, "Conflicts");
 					unsafe.delete(id);
 				}
@@ -46,7 +55,7 @@ export default async function changeNickname(member: GuildMember) {
 			const censored = censor(member.user.displayName);
 			const nick = censored ? censored.censored : member.user.displayName;
 
-			if (nick !== member.displayName) {
+			if (nick !== newNick && isPingable(nick)) {
 				setNickname(member, nick, "Conflicts");
 				unchanged.delete(member.id);
 			}
@@ -56,7 +65,7 @@ export default async function changeNickname(member: GuildMember) {
 				const censored = censor(member.user.username);
 				const nick = censored ? censored.censored : member.user.username;
 
-				if (nick !== member.displayName) {
+				if (nick !== member.displayName && isPingable(nick)) {
 					setNickname(member, nick, "Conflicts");
 					unchanged.delete(member.id);
 				}
@@ -82,4 +91,25 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		await log(
 			`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		);
+}
+
+function findName(member: GuildMember) {
+	const censoredNick = (censor(member.displayName) || undefined)?.censored || member.displayName;
+	if (isPingable(censoredNick)) return censoredNick;
+
+	const censoredDisplay =
+		(censor(member.user.displayName) || undefined)?.censored || member.user.displayName;
+	if (isPingable(censoredDisplay)) return censoredDisplay;
+
+	const censoredTag = (censor(member.user.tag) || undefined)?.censored || member.user.tag;
+	if (isPingable(censoredTag)) return censoredTag;
+
+	return censoredNick;
+}
+
+function isPingable(name: string) {
+	const normalized = name.normalize("NFD").replaceAll(/\p{Diacritic}/g, "");
+	return /[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]{3,}|^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>? -]+$/u.test(
+		normalized,
+	);
 }
