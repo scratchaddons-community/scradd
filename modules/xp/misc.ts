@@ -45,7 +45,7 @@ function getIncrementForLevel(level: number) {
 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 
 	if (xpForLevel !== undefined && xpForPreviousLevel !== undefined)
-		return xpForLevel - xpForPreviousLevel - 1;
+		return xpForLevel - xpForPreviousLevel;
 
 	if (level % INCREMENT_FREQUENCY === 0) {
 		const number = Math.ceil((level - XP_PER_LEVEL.length) / INCREMENT_FREQUENCY) + 2;
