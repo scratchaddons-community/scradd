@@ -101,8 +101,7 @@ export default async function memoryMatch(
 				return;
 			}
 
-			if (!buttonInteraction.customId.startsWith("confirm-"))
-			return
+			if (!buttonInteraction.customId.startsWith("confirm-")) return;
 
 			if (isOtherUser) {
 				collector.stop();
