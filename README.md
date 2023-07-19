@@ -33,7 +33,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 
 #### Set up the repository locally
 
-1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) if you haven’t already.
+1. Download [git](https://git-scm.com) and [Node.JS](https://nodejs.org) if you haven’t already.
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
 4. Set up the .env file as described in [`global.d.ts`](https://github.com/scratchaddons-community/scradd/blob/main/common/types/global.d.ts#L37L45).
