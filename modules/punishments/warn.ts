@@ -190,10 +190,15 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
-	const { url: logUrl } = await interaction.reply({fetchReply: true,content:
-		 `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,}
-	);	if (
+	const user =
+		member?.user ??
+		(await client.users.fetch(strike.user).catch(() => {})) ??
+		`<@${strike.user}>`;
+	const { url: logUrl } = await interaction.reply({
+		fetchReply: true,
+		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
+	});
+	if (
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
 	)
@@ -226,7 +231,10 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
+	const user =
+		member?.user ??
+		(await client.users.fetch(strike.user).catch(() => {})) ??
+		`<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${
