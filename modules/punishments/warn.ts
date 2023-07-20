@@ -230,9 +230,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user =
-		(await client.users.fetch(strike.user).catch(() => {})) ??
-		`<@${strike.user}>`;
+	const user = (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${
