@@ -189,13 +189,11 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 		// Double equals because RoboTop warns are stored as numbers in the database
 		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
-	const user = (await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
-	const { url: logUrl } = await interaction.reply({
-		fetchReply: true,
-		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
-	});
 	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	if (
+	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
+	const { url: logUrl } = await interaction.reply({fetchReply: true,content:
+		 `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,}
+	);	if (
 		member?.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
 	)
@@ -227,19 +225,14 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user = (await client.users.fetch(strike.user).catch(() => {})) || `<@${strike.user}>`;
+	const member = await config.guild.members.fetch(strike.user).catch(() => {});
+	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${
 			constants.emojis.statuses.yes
 		} Added ${user.toString()}’s strike \`${id}\` back!`,
 	});
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	if (
-		member?.communicationDisabledUntil &&
-		Number(member.communicationDisabledUntil) > Date.now()
-	)
-		await member.disableCommunicationUntil(Date.now(), "Too many strikes");
 	await log(
 		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
 			interaction.member
