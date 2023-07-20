@@ -230,9 +230,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
 	const user =
-		member?.user ??
 		(await client.users.fetch(strike.user).catch(() => {})) ??
 		`<@${strike.user}>`;
 	const { url: logUrl } = await interaction.reply({
