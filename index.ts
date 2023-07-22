@@ -8,18 +8,18 @@ import { login, client } from "strife.js";
 import constants from "./common/constants.js";
 
 let GlobalFonts = null,
-  Chart = null;
+	Chart = null;
 
 if (process.env.CANVAS !== "false") {
-  console.log('canvas enabled')
-  GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
-  Chart = (await import("chart.js")).Chart;
+	console.log("canvas enabled");
+	GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
+	Chart = (await import("chart.js")).Chart;
 
-  GlobalFonts.registerFromPath(
-	  path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
-	  "Sora",
-  );
-  Chart.defaults.font.family = "Sora";
+	GlobalFonts.registerFromPath(
+		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
+		"Sora",
+	);
+	Chart.defaults.font.family = "Sora";
 }
 
 dns.setDefaultResultOrder("ipv4first");

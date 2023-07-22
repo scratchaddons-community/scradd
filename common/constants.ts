@@ -58,6 +58,6 @@ export default {
 		robotop: "323630372531470346",
 		disboard: "302050872383242240",
 	},
-	
+
 	canvasEnabled: process.env.CANVAS !== "false",
 };

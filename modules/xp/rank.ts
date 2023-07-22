@@ -23,36 +23,44 @@ export default async function getUserRank(
 	const rank = top.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
-  
-  async function makeCanvas(){if (constants.canvasEnabled) {
-  const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
-	const canvas = createCanvas(1000, 50);
-	const context = canvas.getContext("2d");
-	context.fillStyle = "#0003";
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
-	const rectangleSize = canvas.width * progress;
-	const paddingPixels = 0.18 * canvas.height;
-	context.fillRect(0, 0, rectangleSize, canvas.height);
-	context.font = `${canvas.height * 0.9}px Sora`;
-	if (progress < 0.145) {
-		context.fillStyle = "#666";
-		context.textAlign = "end";
-		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
-			canvas.width - paddingPixels,
-			canvas.height - paddingPixels,
-		);
-	} else {
-		context.fillStyle = "#0009";
-		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
-			paddingPixels,
-			canvas.height - paddingPixels,
-		);
+
+	async function makeCanvas() {
+		if (constants.canvasEnabled) {
+			const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
+			const canvas = createCanvas(1000, 50);
+			const context = canvas.getContext("2d");
+			context.fillStyle = "#0003";
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
+			const rectangleSize = canvas.width * progress;
+			const paddingPixels = 0.18 * canvas.height;
+			context.fillRect(0, 0, rectangleSize, canvas.height);
+			context.font = `${canvas.height * 0.9}px Sora`;
+			if (progress < 0.145) {
+				context.fillStyle = "#666";
+				context.textAlign = "end";
+				context.fillText(
+					progress.toLocaleString("en-us", {
+						maximumFractionDigits: 1,
+						style: "percent",
+					}),
+					canvas.width - paddingPixels,
+					canvas.height - paddingPixels,
+				);
+			} else {
+				context.fillStyle = "#0009";
+				context.fillText(
+					progress.toLocaleString("en-us", {
+						maximumFractionDigits: 1,
+						style: "percent",
+					}),
+					paddingPixels,
+					canvas.height - paddingPixels,
+				);
+			}
+			return canvas;
+		}
 	}
-	return canvas
-  }}
 
 	await interaction.reply({
 		embeds: [
@@ -109,6 +117,8 @@ export default async function getUserRank(
 			},
 		],
 
-		files: constants.canvasEnabled ? [{ attachment: (await makeCanvas())!.toBuffer("image/png"), name: "progress.png" }] : [],
+		files: constants.canvasEnabled
+			? [{ attachment: (await makeCanvas())!.toBuffer("image/png"), name: "progress.png" }]
+			: [],
 	});
 }
