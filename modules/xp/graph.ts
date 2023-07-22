@@ -1,6 +1,6 @@
 import { type AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./misc.js";
-import constants from "../../common/constants.ts";
+import constants from "../../common/constants.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
