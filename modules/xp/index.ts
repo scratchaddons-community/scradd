@@ -7,7 +7,6 @@ import { getSettings } from "../settings.js";
 import { client, defineCommand, defineEvent, defineButton, defineSelect } from "strife.js";
 import getUserRank from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
-import graph from "./graph.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
@@ -23,6 +22,7 @@ defineCommand(
 		description: "Commands to view users’ XP amounts",
 
 		subcommands: {
+		  ...{
 			rank: {
 				description: "View a user’s XP rank",
 
@@ -44,7 +44,10 @@ defineCommand(
 					},
 				},
 			},
+		},
+		...(constants.canvasEnabled ? {
 			graph: { description: "Graph users’ XP over the last week" },
+		} : {}),
 		},
 	},
 
@@ -131,4 +134,6 @@ defineButton("xp", async (interaction, userId = "") => {
 	await getUserRank(interaction, await client.users.fetch(userId));
 });
 
-defineSelect("weeklyXpGraph", graph);
+if (constants.canvasEnabled) {
+  defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
+}
