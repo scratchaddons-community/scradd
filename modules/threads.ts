@@ -239,9 +239,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	);
 });
 
-defineEvent("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== config.guild.id || !newlyCreated) return;
-
+defineEvent("threadCreate", async (thread) => {
 	const { roles } = getThreadConfig(thread);
 	if (roles.length)
 		await thread.send({
@@ -251,6 +249,7 @@ defineEvent("threadCreate", async (thread, newlyCreated) => {
 });
 
 defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
+	if (thread.guild.id !== config.guild.id) return;
 	const options = getThreadConfig(thread);
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
 	if (wasArchived && !thread.archived) {

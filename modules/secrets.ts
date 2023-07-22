@@ -14,9 +14,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.guild?.id !== config.guild.id ||
 		message.channel.id === message.id ||
-		message.type === MessageType.ThreadStarterMessage ||
-		message.channel.isDMBased() ||
-		message.flags.has("Ephemeral")
+		message.channel.isDMBased()
 	)
 		return;
 

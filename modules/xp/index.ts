@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType, MessageType } from "discord.js";
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
@@ -10,9 +10,7 @@ import { giveXpForMessage } from "./giveXp.js";
 import graph from "./graph.js";
 
 defineEvent("messageCreate", async (message) => {
-	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage) return;
-
-	if (message.channel.isDMBased() || message.guild?.id !== config.guild.id) return;
+	if (message.guild?.id !== config.guild.id) return;
 
 	giveXpForMessage(message);
 });

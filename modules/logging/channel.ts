@@ -335,7 +335,6 @@ export async function channelUpdate(
 		);
 }
 export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyThreadChannel) {
-	if (newThread.guild.id !== config.guild.id) return;
 	if (!shouldLog(newThread)) return;
 
 	//todo appliedTags

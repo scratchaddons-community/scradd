@@ -5,12 +5,10 @@ import {
 	type ModalActionRowComponentData,
 	TextInputStyle,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
 import { defineCommand, defineEvent, client, defineModal } from "strife.js";
-import { asyncFilter } from "../util/promises.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
@@ -116,11 +114,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-
-	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
-
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
 	const { emoji } = reaction;

@@ -20,8 +20,7 @@ import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export async function messageDelete(message: Message<boolean> | PartialMessage) {
-	if (!shouldLog(message.channel)) return;
-
+	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
 	const shush =
 		message.partial ||
 		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
@@ -115,7 +114,7 @@ export async function messageUpdate(
 	partialMessage: Message<boolean> | PartialMessage,
 ) {
 	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
-	if (!shouldLog(newMessage.channel)) return;
+	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
 
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 		await log(
