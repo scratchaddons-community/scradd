@@ -49,9 +49,9 @@ function decodeRegexes(regexes: RegExp[]) {
 export const badWordRegexps = badWords.map(
 	([strings = [], words = [], prefixes = []]) =>
 		new RegExp(
-			(strings.length ? `${decodeRegexes(strings)}|` : "") +
-				`\\b(?:${words.length ? `(?:${decodeRegexes(words)})\\b` : ""}${
-					prefixes.length ? `|${decodeRegexes(prefixes)}` : ""
+			(strings.length ? `${decodeRegexes(strings)}|` : "(?!x)x") +
+				`\\b(?:${words.length ? `(?:${decodeRegexes(words)})\\b` : "(?!x)x"}${
+					prefixes.length ? `|${decodeRegexes(prefixes)}` : "(?!x)x"
 				})`,
 			"gi",
 		),
