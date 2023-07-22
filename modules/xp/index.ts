@@ -22,32 +22,34 @@ defineCommand(
 		description: "Commands to view users’ XP amounts",
 
 		subcommands: {
-		  ...{
-			rank: {
-				description: "View a user’s XP rank",
+			...{
+				rank: {
+					description: "View a user’s XP rank",
 
-				options: {
-					user: {
-						type: ApplicationCommandOptionType.User,
-						description: "User to view (defaults to you)",
+					options: {
+						user: {
+							type: ApplicationCommandOptionType.User,
+							description: "User to view (defaults to you)",
+						},
+					},
+				},
+
+				top: {
+					description: "View the server XP leaderboard",
+
+					options: {
+						user: {
+							type: ApplicationCommandOptionType.User,
+							description: "User to jump to",
+						},
 					},
 				},
 			},
-
-			top: {
-				description: "View the server XP leaderboard",
-
-				options: {
-					user: {
-						type: ApplicationCommandOptionType.User,
-						description: "User to jump to",
-					},
-				},
-			},
-		},
-		...(constants.canvasEnabled ? {
-			graph: { description: "Graph users’ XP over the last week" },
-		} : {}),
+			...(constants.canvasEnabled
+				? {
+						graph: { description: "Graph users’ XP over the last week" },
+				  }
+				: {}),
 		},
 	},
 
@@ -135,5 +137,5 @@ defineButton("xp", async (interaction, userId = "") => {
 });
 
 if (constants.canvasEnabled) {
-  defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
+	defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
 }
