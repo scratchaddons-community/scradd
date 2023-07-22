@@ -51,6 +51,8 @@ declare global {
 			NODE_ENV?: "development" | "production";
 			PORT?: `${number}`;
 			CDBL_AUTH?: string;
+			/** Defaults to `true` */
+			CANVAS?: `${boolean}`;
 		}
 	}
 }

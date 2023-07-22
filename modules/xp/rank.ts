@@ -1,4 +1,3 @@
-import { createCanvas } from "@napi-rs/canvas";
 import type { ButtonInteraction, ChatInputCommandInteraction, User } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -24,7 +23,9 @@ export default async function getUserRank(
 	const rank = top.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
-
+  
+  async function makeCanvas(){if (constants.canvasEnabled) {
+  const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
 	const canvas = createCanvas(1000, 50);
 	const context = canvas.getContext("2d");
 	context.fillStyle = "#0003";
@@ -50,6 +51,8 @@ export default async function getUserRank(
 			canvas.height - paddingPixels,
 		);
 	}
+	return canvas
+  }}
 
 	await interaction.reply({
 		embeds: [
@@ -106,6 +109,6 @@ export default async function getUserRank(
 			},
 		],
 
-		files: [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }],
+		files: constants.canvasEnabled ? [{ attachment: (await makeCanvas())!.toBuffer("image/png"), name: "progress.png" }] : [],
 	});
 }
