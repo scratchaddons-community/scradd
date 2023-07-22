@@ -10,6 +10,7 @@ import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
 import { defineCommand, defineEvent, client, defineModal } from "strife.js";
+import { asyncFilter } from "../util/promises.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
@@ -132,15 +133,14 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
 		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
-			message.reactions
-				.valueOf()
-				.find(
-					(otherReaction) =>
-						otherReaction.emoji.name !== emoji.name &&
-						emojis?.includes(otherReaction.emoji.name || "") &&
-						otherReaction.users.resolve(user.id),
+			const promises = message.reactions.valueOf().map(async (otherReaction) => {
+				if (
+					emoji.name !== otherReaction.emoji.name &&
+					emojis?.includes(otherReaction.emoji.name || "")
 				)
-				?.users.remove(user);
+					await otherReaction.users.remove(user);
+			});
+			await Promise.all(promises);
 		}
 	}
 });
