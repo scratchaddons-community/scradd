@@ -10,8 +10,7 @@ import constants from "./common/constants.js";
 let GlobalFonts = null,
 	Chart = null;
 
-if (process.env.CANVAS !== "false") {
-	console.log("canvas enabled");
+if (constants.canvasEnabled) {
 	GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
 	Chart = (await import("chart.js")).Chart;
 

@@ -1,11 +1,6 @@
 import { type AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./misc.js";
-
-let graphEnabled = false;
-
-if (process.env.CANVAS !== "false") {
-	graphEnabled = true;
-}
+import constants from "../../common/constants.ts";
 
 export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
@@ -13,7 +8,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 
 	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
 
-	if (graphEnabled) {
+	if (constants.canvasEnabled) {
 		const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
 		const Chart = (await import("chart.js/auto")).Chart;
 		// @ts-ignore
