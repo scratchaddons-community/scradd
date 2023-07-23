@@ -33,44 +33,51 @@ const robotopStrikes = url
 	  )
 	: [];
 
+const strikesCache: Record<string, any /* TODO */> = {};
+
 export default async function filterToStrike(filter: string) {
 	if (/^\d{1,4}$/.test(filter)) {
 		const strike = strikeDatabase.data.find((strike) => String(strike.id) === filter);
 		const info = robotopStrikes.find((strike) => String(strike.id) === filter);
 		if (strike && info) return { ...info, ...strike, id: String(info.id) };
 	}
-	const channel = await getLoggingThread(filter.startsWith("0") ? undefined : "members");
-	const messageId = convertBase(filter, convertBase.MAX_BASE, 10);
 
-	const messageFromId = await channel?.messages.fetch(messageId).catch(() => {});
-	const message = messageFromId || (await channel?.messages.fetch(filter).catch(() => {}));
-	if (!message) return;
-
-	const strikeId = messageFromId ? filter : convertBase(filter, 10, convertBase.MAX_BASE);
+	const strikeId = /^\d{17,20}$/.test(filter)
+		? convertBase(filter, 10, convertBase.MAX_BASE)
+		: filter;
 	const strike = strikeDatabase.data.find((strike) => String(strike.id) === strikeId);
 	if (!strike) return;
+	if (strikesCache[strikeId]) return { ...strike, ...strikesCache[strikeId] };
+
+	const channel = await getLoggingThread(filter.startsWith("0") ? undefined : "members");
+	const message = await channel?.messages
+		.fetch(convertBase(strikeId, convertBase.MAX_BASE, 10))
+		.catch(() => {});
+	if (!message) return;
 
 	if (
 		strikeId.startsWith("0") &&
 		message.type === MessageType.AutoModerationAction &&
 		message.embeds[0]
 	) {
-		return {
-			...strike,
+		const data = {
 			mod: "AutoMod",
 			reason: `${
 				message.embeds[0].fields.find((field) => field.name === "rule_name")?.value
 			}\n>>> ${message.embeds[0].description}`,
 		};
+		strikesCache[strikeId] = data;
+		return { ...strike, ...data };
 	}
 
 	const { url } = message.attachments.first() || {};
-	return {
-		...strike,
+	const data = {
 		mod: [...message.content.matchAll(GlobalUsersPattern)]?.[1]?.groups?.id,
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
 			: message.content.match(/```.*\n([^]+)\n```$/)?.[1] ?? message.content,
 	};
+	strikesCache[strikeId] = data;
+	return { ...strike, ...data };
 }
