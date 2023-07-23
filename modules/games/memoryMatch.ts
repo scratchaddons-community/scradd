@@ -17,6 +17,7 @@ import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
+import { logGame, playNeeded, tourneyThread } from "./tourney.js";
 
 const EMPTY_TILE = "⬛";
 
@@ -45,8 +46,38 @@ export default async function memoryMatch(
 			],
 		});
 	}
+
 	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
 	const bonusTurns = interaction.options.getBoolean("bonus-turns") ?? true;
+
+	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
+	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
+	if (needToPlay && !tourneyQualifies) {
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You need to play that user in the Memory Match Tournament! Please start a game with easy mode off and bonus turns on.`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							label: "Instructions",
+							customId: `_showMemoryInstructions`,
+							style: ButtonStyle.Secondary,
+						},
+						{
+							type: ComponentType.Button,
+							label: "Tournament Information",
+							url: tourneyThread?.url ?? "",
+							style: ButtonStyle.Link,
+						},
+					],
+				},
+			],
+		});
+	}
+
 	const message = await interaction.reply({
 		fetchReply: true,
 		content: `${
@@ -57,7 +88,11 @@ export default async function memoryMatch(
 						!bonusTurns ? "no bonus turns" : ""
 				  })`
 				: ""
-		} by ${interaction.user.toString()}!** Do you accept?`,
+		} by ${interaction.user.toString()}!** Do you accept?${
+			tourneyQualifies
+				? "\n\n__This game will be a part of the Memory Match Tournament!__"
+				: ""
+		}`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -339,11 +374,11 @@ async function playGame(
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
+		const winner = await config.guild.members.fetch(users[+secondWon]?.id || "");
 
 		await thread?.setArchived(true, "Game over");
 
-		await message.reply({
+		const { url } = await message.reply({
 			content,
 			embeds: [
 				{
@@ -363,6 +398,14 @@ async function playGame(
 				},
 			],
 		});
+
+		if (await playNeeded([users[0].id, users[1].id])) {
+			await logGame({
+				winner: users[+secondWon]?.id ?? "",
+				loser: users[+!secondWon]?.id ?? "",
+				url,
+			});
+		}
 	}
 }
 
