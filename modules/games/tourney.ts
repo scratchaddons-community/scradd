@@ -4,9 +4,7 @@ import config from "../../common/config.js";
 const MESSAGE_HEADER = "## Pending Rounds";
 
 const { threads } = (await config.channels.mod?.threads.fetch()) ?? {};
-export const tourneyThread = threads?.find(
-	({ name }) => name === "Memory Match Tournament management",
-);
+const tourneyThread = threads?.find(({ name }) => name === "Memory Match Tournament management");
 
 export async function playNeeded(ids: [Snowflake, Snowflake]) {
 	const match = await getMatch(ids);
@@ -45,7 +43,7 @@ export async function logGame({
 	await message.edit(`${MESSAGE_HEADER}\n${newMatches}`);
 
 	await message.channel.send({
-		allowedMentions: {},
+		allowedMentions: { users: [] },
 		content: `🎲 ${userMention(winner)} beat ${userMention(loser)} - ${url}`,
 	});
 	return true;
