@@ -207,9 +207,7 @@ defineModal("customRole", async (interaction) => {
 		message
 			.createMessageComponentCollector({
 				componentType: ComponentType.Button,
-				filter: (buttonInteraction) =>
-					interaction.user.id === buttonInteraction.user.id &&
-					buttonInteraction.customId.endsWith(`-${interaction.id}`),
+				filter: (buttonInteraction) => interaction.user.id === buttonInteraction.user.id,
 				max: 1,
 				time: constants.collectorTime,
 			})

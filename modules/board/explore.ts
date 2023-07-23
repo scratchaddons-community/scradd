@@ -160,7 +160,7 @@ export default async function makeSlideshow(
 	const reply = await interaction.editReply(await getNextMessage());
 
 	const collector = reply.createMessageComponentCollector({
-		filter: (buttonInteraction: { customId: string; user: { id: any } }) =>
+		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === interaction.user.id,
 
@@ -168,7 +168,7 @@ export default async function makeSlideshow(
 	});
 
 	collector
-		.on("collect", async (buttonInteraction: { deferUpdate: () => any; customId: string }) => {
+		.on("collect", async (buttonInteraction) => {
 			await buttonInteraction.deferUpdate();
 			if (buttonInteraction.customId === previousId) index--;
 			else index++;
