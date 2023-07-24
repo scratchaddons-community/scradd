@@ -7,6 +7,8 @@ import pkg from "./package.json" assert { type: "json" };
 import { login, client } from "strife.js";
 import constants from "./common/constants.js";
 
+dns.setDefaultResultOrder("ipv4first");
+
 if (constants.canvasEnabled) {
 	const GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
 	const Chart = (await import("chart.js")).Chart;
@@ -17,8 +19,6 @@ if (constants.canvasEnabled) {
 	);
 	Chart.defaults.font.family = "Sora";
 }
-
-dns.setDefaultResultOrder("ipv4first");
 
 await login({
 	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
