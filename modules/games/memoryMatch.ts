@@ -426,7 +426,6 @@ async function setupGame(difficulty: 2 | 4) {
 			"🗿",
 			"👀",
 			"🧐",
-			"🤔",
 			"🤨",
 			"🥶",
 			"💀",
