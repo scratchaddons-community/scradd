@@ -14,7 +14,7 @@ import { defineButton, defineCommand } from "strife.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
-	user: Snowflake;
+	id: Snowflake;
 	/** Whether to ping the user when their message gets on the board. */
 	boardPings?: boolean;
 	/** Whether to ping the user when they level up. */
@@ -106,20 +106,9 @@ export function updateSettings(
 		resourcesDmed?: true;
 	},
 ) {
-	const settingsForUser = getSettings(user, false);
-	const defaultSettings = getDefaultSettings(user);
-
-	const old = {
-		autoreactions: settingsForUser?.autoreactions ?? defaultSettings.autoreactions,
-		boardPings: settingsForUser?.boardPings ?? defaultSettings.boardPings,
-		levelUpPings: settingsForUser?.levelUpPings ?? defaultSettings.levelUpPings,
-		useMentions: settingsForUser?.useMentions ?? defaultSettings.useMentions,
-		dmReminders: settingsForUser?.dmReminders ?? defaultSettings.dmReminders,
-		resourcesDmed: defaultSettings.resourcesDmed,
-	};
-
+	const old = getSettings(user);
 	const updated = {
-		user: user.id,
+		id: user.id,
 		boardPings:
 			settings.boardPings === "toggle"
 				? !old.boardPings
@@ -136,18 +125,14 @@ export function updateSettings(
 			settings.useMentions === "toggle"
 				? !old.useMentions
 				: settings.useMentions ?? old.useMentions,
-
 		dmReminders:
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
-
-		resourcesDmed: settings.resourcesDmed,
+		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
-	userSettingsDatabase.data = settingsForUser
-		? userSettingsDatabase.data.map((data) => (data.user === user.id ? updated : data))
-		: [...userSettingsDatabase.data, updated];
+	userSettingsDatabase.updateById(updated, {});
 
 	return {
 		ephemeral: true,
@@ -207,8 +192,8 @@ export function getSettings(
 	defaults: false,
 ): typeof userSettingsDatabase.data[number];
 export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
-	const settings = userSettingsDatabase.data.find((settings) => settings.user === user.id) ?? {
-		user: user.id,
+	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
+		id: user.id,
 	};
 	if (defaults) {
 		const defaultSettings = getDefaultSettings(user);
