@@ -43,9 +43,7 @@ defineCommand(
 			},
 		},
 		...(constants.canvasEnabled
-			? {
-					graph: { description: "Graph users’ XP over the last week" },
-			  }
+			? { graph: { description: "Graph users’ XP over the last week" } }
 			: {}),
 	},
 
