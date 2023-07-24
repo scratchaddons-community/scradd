@@ -426,10 +426,7 @@ export async function contactUser(
 	});
 
 	const collector = message.createMessageComponentCollector({
-		filter: (buttonInteraction) =>
-			buttonInteraction.customId.endsWith(`-${interaction.id}`) &&
-			buttonInteraction.user.id === interaction.user.id,
-
+		filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id,
 		time: constants.collectorTime,
 		max: 1,
 	});

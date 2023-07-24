@@ -29,7 +29,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		config.channels.tickets?.permissionsFor(message.author)?.has("ViewChannel") &&
+		config.channels.tickets?.permissionsFor(message.author)?.has("ViewChannel") && // TODO
 		!getSettings(message.author).resourcesDmed
 	) {
 		await message.channel.send({

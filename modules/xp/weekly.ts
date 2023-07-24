@@ -72,9 +72,6 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		},
 	];
 	const weeklyWinners = getFullWeeklyData();
-	recentXpDatabase.data = recentXpDatabase.data.filter(
-		({ time }) => time + 604_800_000 > Date.now(),
-	);
 
 	const { active } = config.roles;
 	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
@@ -104,6 +101,10 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			),
 		]);
 	}
+
+	recentXpDatabase.data = recentXpDatabase.data.filter(
+		({ time }) => time + 604_800_000 > Date.now(),
+	);
 
 	const date = new Date();
 	date.setUTCDate(date.getUTCDate() - 7);

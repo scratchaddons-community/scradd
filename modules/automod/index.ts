@@ -67,21 +67,24 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	}
 });
 defineEvent.pre("messageCreate", async (message) => {
+	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
+		return false;
+
+	if (message.guild?.id === config.guild.id) return await automodMessage(message);
+	return true;
+});
+defineEvent("messageUpdate", async (_, message) => {
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
 		message.guild?.id === config.guild.id
 	)
-		return await automodMessage(message);
-	return true;
-});
-defineEvent("messageUpdate", async (_, message) => {
-	await automodMessage(message.partial ? await message.fetch() : message);
+		await automodMessage(message.partial ? await message.fetch() : message);
 });
 defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== config.guild.id) return true;
+	if (message.guild?.id !== config.guild.id) return false;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
 		const censored = censor(reaction.emoji.name);
@@ -99,7 +102,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	return true;
 });
 defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== config.guild.id || !newlyCreated) return true;
+	if (thread.guild.id !== config.guild.id || !newlyCreated) return false;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {
@@ -117,6 +120,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 	}
 });
 defineEvent("guildMemberUpdate", async (_, member) => {
+	if (member.guild.id !== config.guild.id) return;
 	await changeNickname(member);
 });
 defineEvent("presenceUpdate", async (_, newPresence) => {

@@ -121,7 +121,7 @@ setInterval(async () => {
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
-							minimumFractionDigits: count.count > 999 ? 1 : 0,
+							minimumFractionDigits: +(count.count > 999),
 							notation: "compact",
 						})} users`,
 						"Automated update to sync count",

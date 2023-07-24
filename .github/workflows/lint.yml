@@ -3,14 +3,14 @@ on:
     push:
     workflow_dispatch:
     schedule:
-        - cron: 30 12 * * * # 30 minutes before Dependabot
+        - cron: 00 12 * * * # 1 hour before Dependabot
 
 permissions: write-all
 
 jobs:
     bump:
         name: Bump dependencies
-        if: startsWith(github.ref_name, 'dependabot/') != true
+        if: github.ref_name == "main"
         runs-on: ubuntu-20.04
 
         steps:

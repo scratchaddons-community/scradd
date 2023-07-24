@@ -1,4 +1,3 @@
-import { MessageType } from "discord.js";
 import { defineEvent } from "strife.js";
 import { truncateText } from "../util/text.js";
 import { stripMarkdown } from "../util/markdown.js";
@@ -7,11 +6,7 @@ import constants from "../common/constants.js";
 import { nth } from "../util/numbers.js";
 
 defineEvent("messageCreate", async (message) => {
-	if (
-		!message.flags.has("Ephemeral") &&
-		message.type !== MessageType.ThreadStarterMessage &&
-		message.channel.id === config.channels.updates?.id
-	) {
+	if (message.channel.id === config.channels.updates?.id) {
 		await message.startThread({
 			name: truncateText(
 				stripMarkdown(message.cleanContent)?.split("\n")[0] || "New update!",
@@ -83,7 +78,7 @@ defineEvent("guildMemberRemove", async (member) => {
 	);
 });
 
-defineEvent("guildMemberAdd", async () => {
+defineEvent("guildMemberAdd", async (member) => {
 	await config.channels.info?.setName(
 		`Info - ${(
 			config.guild.memberCount - (config.guild.memberCount > 1_005 ? 5 : 0)
@@ -93,6 +88,6 @@ defineEvent("guildMemberAdd", async () => {
 			minimumFractionDigits: config.guild.memberCount > 1_000 ? 2 : 0,
 			notation: "compact",
 		})} members`,
-		"Member joined",
+		`${member.user.tag} joined the server`,
 	);
 });

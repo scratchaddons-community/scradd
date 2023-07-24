@@ -10,11 +10,7 @@ const reactionsName = REACTIONS_NAME.toLowerCase();
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-
-	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
-
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
 	const { emoji } = reaction;

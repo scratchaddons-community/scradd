@@ -5,7 +5,6 @@ import {
 	type ModalActionRowComponentData,
 	TextInputStyle,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
 import twemojiRegexp from "../util/twemojiRegexp.js";
@@ -115,11 +114,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-
-	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
-
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
 	const { emoji } = reaction;
@@ -132,15 +127,14 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
 		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
-			message.reactions
-				.valueOf()
-				.find(
-					(otherReaction) =>
-						otherReaction.emoji.name !== emoji.name &&
-						emojis?.includes(otherReaction.emoji.name || "") &&
-						otherReaction.users.resolve(user.id),
+			const promises = message.reactions.valueOf().map(async (otherReaction) => {
+				if (
+					emoji.name !== otherReaction.emoji.name &&
+					emojis?.includes(otherReaction.emoji.name || "")
 				)
-				?.users.remove(user);
+					await otherReaction.users.remove(user);
+			});
+			await Promise.all(promises);
 		}
 	}
 });

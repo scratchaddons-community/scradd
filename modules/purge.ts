@@ -190,16 +190,10 @@ defineCommand(
 		}
 
 		const generated = await generateMessage();
-		await interaction.reply(generated);
+		const reply = await interaction.reply(generated);
 		if (!generated.embeds) return;
 
-		const collector = interaction.channel?.createMessageComponentCollector({
-			filter: (buttonInteraction) => {
-				return buttonInteraction.customId.endsWith(`-${interaction.id}`);
-			},
-
-			time: constants.collectorTime,
-		});
+		const collector = reply.createMessageComponentCollector({ time: constants.collectorTime });
 
 		collector
 			?.on("collect", async (buttonInteraction) => {

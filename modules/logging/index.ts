@@ -58,6 +58,8 @@ import {
 	voiceStateUpdate,
 } from "./voice.js";
 
+const createdInvites = new Set<string>();
+
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
 } = {
@@ -167,6 +169,9 @@ const events: {
 		}
 	},
 	async [AuditLogEvent.InviteCreate](entry) {
+		if (createdInvites.has(entry.target.code)) return;
+		createdInvites.add(entry.target.code);
+		
 		await log(
 			`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
 				entry.target.code
