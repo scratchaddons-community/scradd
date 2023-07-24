@@ -25,7 +25,8 @@ export default async function getUserRank(
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
 	async function makeCanvasFiles() {
-		if (constants.canvasEnabled) {
+		if (!constants.canvasEnabled) return [];
+		
 			const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
 			const canvas = createCanvas(1000, 50);
 			const context = canvas.getContext("2d");
@@ -59,9 +60,6 @@ export default async function getUserRank(
 				);
 			}
 			return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
-		} else {
-			return [];
-		}
 	}
 
 	await interaction.reply({
