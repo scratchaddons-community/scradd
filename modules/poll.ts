@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
-import twemojiRegexp from "../util/twemojiRegexp.js";
+import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { defineCommand, defineEvent, client, defineModal } from "strife.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
