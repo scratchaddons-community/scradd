@@ -26,40 +26,40 @@ export default async function getUserRank(
 
 	async function makeCanvasFiles() {
 		if (!constants.canvasEnabled) return [];
-		
-			const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
-			const canvas = createCanvas(1000, 50);
-			const context = canvas.getContext("2d");
-			context.fillStyle = "#0003";
-			context.fillRect(0, 0, canvas.width, canvas.height);
-			context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
-			const rectangleSize = canvas.width * progress;
-			const paddingPixels = 0.18 * canvas.height;
-			context.fillRect(0, 0, rectangleSize, canvas.height);
-			context.font = `${canvas.height * 0.9}px Sora`;
-			if (progress < 0.145) {
-				context.fillStyle = "#666";
-				context.textAlign = "end";
-				context.fillText(
-					progress.toLocaleString("en-us", {
-						maximumFractionDigits: 1,
-						style: "percent",
-					}),
-					canvas.width - paddingPixels,
-					canvas.height - paddingPixels,
-				);
-			} else {
-				context.fillStyle = "#0009";
-				context.fillText(
-					progress.toLocaleString("en-us", {
-						maximumFractionDigits: 1,
-						style: "percent",
-					}),
-					paddingPixels,
-					canvas.height - paddingPixels,
-				);
-			}
-			return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
+
+		const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
+		const canvas = createCanvas(1000, 50);
+		const context = canvas.getContext("2d");
+		context.fillStyle = "#0003";
+		context.fillRect(0, 0, canvas.width, canvas.height);
+		context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
+		const rectangleSize = canvas.width * progress;
+		const paddingPixels = 0.18 * canvas.height;
+		context.fillRect(0, 0, rectangleSize, canvas.height);
+		context.font = `${canvas.height * 0.9}px Sora`;
+		if (progress < 0.145) {
+			context.fillStyle = "#666";
+			context.textAlign = "end";
+			context.fillText(
+				progress.toLocaleString("en-us", {
+					maximumFractionDigits: 1,
+					style: "percent",
+				}),
+				canvas.width - paddingPixels,
+				canvas.height - paddingPixels,
+			);
+		} else {
+			context.fillStyle = "#0009";
+			context.fillText(
+				progress.toLocaleString("en-us", {
+					maximumFractionDigits: 1,
+					style: "percent",
+				}),
+				paddingPixels,
+				canvas.height - paddingPixels,
+			);
+		}
+		return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
 	}
 
 	await interaction.reply({

@@ -171,7 +171,7 @@ const events: {
 	async [AuditLogEvent.InviteCreate](entry) {
 		if (createdInvites.has(entry.target.code)) return;
 		createdInvites.add(entry.target.code);
-		
+
 		await log(
 			`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
 				entry.target.code
