@@ -24,7 +24,7 @@ export default async function getUserRank(
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
-	async function makeCanvas() {
+	async function makeCanvasFiles() {
 		if (constants.canvasEnabled) {
 			const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
 			const canvas = createCanvas(1000, 50);
@@ -58,7 +58,9 @@ export default async function getUserRank(
 					canvas.height - paddingPixels,
 				);
 			}
-			return canvas;
+			return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
+		} else {
+			return [];
 		}
 	}
 
@@ -117,8 +119,6 @@ export default async function getUserRank(
 			},
 		],
 
-		files: constants.canvasEnabled
-			? [{ attachment: (await makeCanvas())!.toBuffer("image/png"), name: "progress.png" }]
-			: [],
+		files: await makeCanvasFiles(),
 	});
 }

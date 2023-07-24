@@ -7,12 +7,9 @@ import pkg from "./package.json" assert { type: "json" };
 import { login, client } from "strife.js";
 import constants from "./common/constants.js";
 
-let GlobalFonts = null,
-	Chart = null;
-
 if (constants.canvasEnabled) {
-	GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
-	Chart = (await import("chart.js")).Chart;
+	const GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
+	const Chart = (await import("chart.js")).Chart;
 
 	GlobalFonts.registerFromPath(
 		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),

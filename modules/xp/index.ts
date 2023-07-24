@@ -22,35 +22,33 @@ defineCommand(
 		description: "Commands to view users’ XP amounts",
 
 		subcommands: {
-			...{
-				rank: {
-					description: "View a user’s XP rank",
+			rank: {
+				description: "View a user’s XP rank",
 
-					options: {
-						user: {
-							type: ApplicationCommandOptionType.User,
-							description: "User to view (defaults to you)",
-						},
-					},
-				},
-
-				top: {
-					description: "View the server XP leaderboard",
-
-					options: {
-						user: {
-							type: ApplicationCommandOptionType.User,
-							description: "User to jump to",
-						},
+				options: {
+					user: {
+						type: ApplicationCommandOptionType.User,
+						description: "User to view (defaults to you)",
 					},
 				},
 			},
-			...(constants.canvasEnabled
-				? {
-						graph: { description: "Graph users’ XP over the last week" },
-				  }
-				: {}),
+
+			top: {
+				description: "View the server XP leaderboard",
+
+				options: {
+					user: {
+						type: ApplicationCommandOptionType.User,
+						description: "User to jump to",
+					},
+				},
+			},
 		},
+		...(constants.canvasEnabled
+			? {
+					graph: { description: "Graph users’ XP over the last week" },
+			  }
+			: {}),
 	},
 
 	async (interaction) => {
