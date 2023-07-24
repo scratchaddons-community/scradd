@@ -10,7 +10,7 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: github.ref_name == "main"
+        if: github.ref_name == 'main'
         runs-on: ubuntu-20.04
 
         steps:
