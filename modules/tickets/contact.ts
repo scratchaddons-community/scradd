@@ -10,10 +10,9 @@ import {
 	InteractionResponse,
 	InteractionType,
 	ModalSubmitInteraction,
-	type TextInputComponentData,
-	TextInputStyle,
 	time,
 	TimestampStyles,
+	type PrivateThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -22,156 +21,28 @@ import log, { LoggingEmojis } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import {
 	type Category,
-	getThreadFromMember,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
+	TICKETS_BY_MEMBER,
+	allFields,
+	categoryToDescription,
+	MOD_CATEGORY,
 } from "./misc.js";
 
-const allFields = {
-	appeal: [
-		{
-			type: ComponentType.TextInput,
-			customId: "strike",
-			required: true,
-			style: TextInputStyle.Short,
-			maxLength: 20,
-			label: "Strike ID to appeal (from /strikes user)",
-		},
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			style: TextInputStyle.Paragraph,
-			maxLength: 1024,
-			label: "Why should we remove this strike?",
-		},
-	],
-
-	report: [
-		{
-			type: ComponentType.TextInput,
-			customId: "user",
-			required: true,
-			minLength: 2,
-			maxLength: 37,
-			style: TextInputStyle.Short,
-			label: "Who are you reporting?",
-		},
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			maxLength: 1024,
-			style: TextInputStyle.Paragraph,
-			label: "Why are you reporting them?",
-		},
-	],
-
-	role: [
-		{
-			type: ComponentType.TextInput,
-			customId: "role",
-			required: true,
-			minLength: 10,
-			maxLength: 50,
-			style: TextInputStyle.Short,
-			label: "Which role(s) are you requesting?",
-		},
-		{
-			type: ComponentType.TextInput,
-			customId: "account",
-			required: true,
-			maxLength: 500,
-			style: TextInputStyle.Paragraph,
-			label: "What are your GitHub/Transifex usernames?",
-		},
-	],
-
-	bug: [
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			maxLength: 1024,
-			style: TextInputStyle.Paragraph,
-			label: "What is the bug?",
-		},
-	],
-
-	rules: [
-		{
-			type: ComponentType.TextInput,
-			customId: "rule",
-			required: true,
-			maxLength: 20,
-			style: TextInputStyle.Short,
-			label: "Which rule do you have questions on?",
-		},
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			maxLength: 1024,
-			style: TextInputStyle.Paragraph,
-			label: "What is your question?",
-		},
-	],
-
-	server: [
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			maxLength: 75,
-			style: TextInputStyle.Short,
-			label: "Server invite",
-		},
-	],
-
-	other: [
-		{
-			type: ComponentType.TextInput,
-			customId: "BODY",
-			minLength: 20,
-			required: true,
-			maxLength: 1024,
-			style: TextInputStyle.Paragraph,
-			label: "Why are you contacting us?",
-		},
-	],
-} satisfies Record<Category, TextInputComponentData[]>;
-
-const modCategory = "mod";
-const categoryToDescription = {
-	appeal: "Strike Appeal",
-	report: "User Report",
-	role: "Role Request",
-	bug: "Scradd Bug",
-	rules: "Rule Clarification",
-	server: "Other Scratch Servers",
-	other: "Other",
-	[modCategory]: "Contact User",
-} satisfies Record<Category | typeof modCategory, string>;
-
-export async function gatherTicketInfo(
+export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,
 ): Promise<InteractionResponse<boolean> | undefined>;
-export async function gatherTicketInfo(
+export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: Exclude<Category, "appeal">,
 ): Promise<InteractionResponse<boolean> | undefined>;
-export async function gatherTicketInfo(
+export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: "appeal",
 	strikeId: string,
 ): Promise<InteractionResponse<boolean> | undefined>;
-export async function gatherTicketInfo(
+export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
 	strikeId?: string,
@@ -198,16 +69,6 @@ export async function gatherTicketInfo(
 		});
 	}
 
-	const existing = await getThreadFromMember(interaction.user);
-	if (existing)
-		return await interaction.reply({
-			content: `${
-				constants.emojis.statuses.no
-			} You already have an open ticket! Please send the mods messages in ${existing.toString()}.`,
-
-			ephemeral: true,
-		});
-
 	if (!TICKET_CATEGORIES.includes(option))
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
@@ -231,7 +92,7 @@ export default async function contactMods(
 		| ButtonInteraction,
 	options: Category | GuildMember,
 ) {
-	const option = options instanceof GuildMember ? modCategory : options;
+	const option = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
 		options instanceof GuildMember
@@ -240,14 +101,6 @@ export default async function contactMods(
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	if (!config.channels.tickets) throw new ReferenceError("Could not find tickets channel!");
-
-	const oldThread = await getThreadFromMember(member);
-	if (oldThread)
-		return await interaction.editReply(
-			`${
-				constants.emojis.statuses.no
-			} You already have an open ticket! Please use ${oldThread?.toString()}.`,
-		);
 
 	const fields =
 		interaction.type === InteractionType.ModalSubmit
@@ -261,7 +114,7 @@ export default async function contactMods(
 						rules: { Rule: "rule" },
 						server: {},
 						other: {},
-						[modCategory]: {},
+						[MOD_CATEGORY]: {},
 					}[option],
 			  ).map<APIEmbedField>(([name, key]) => ({
 					name,
@@ -273,16 +126,37 @@ export default async function contactMods(
 		option !== "role" &&
 		interaction.type === InteractionType.ModalSubmit &&
 		interaction.fields.getTextInputValue("BODY");
+	const details = {
+		title: categoryToDescription[option],
 
-	const thread = await config.channels.tickets.threads.create({
+		color: member.displayColor,
+
+		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
+		...(body
+			? fields.length === 0
+				? { description: body }
+				: { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+			: { fields }),
+	};
+
+	const oldThread = TICKETS_BY_MEMBER[member.id];
+	if (oldThread) {
+		await oldThread.send({ embeds: [details] });
+		return oldThread;
+	}
+
+	const thread = (await config.channels.tickets.threads.create({
 		name: `${member.user.displayName} (${member.id})`,
-		reason: "Ticket opened",
+		reason: `${interaction.user.tag} contacted ${
+			option === MOD_CATEGORY ? member.user.tag : "mods"
+		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
-	});
+	})) as PrivateThreadChannel;
+	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
-			option === modCategory ? member.toString() : "mods"
+			option === MOD_CATEGORY ? member.toString() : "mods"
 		}: ${thread?.toString()}`,
 	);
 
@@ -332,18 +206,7 @@ export default async function contactMods(
 			: [],
 
 		embeds: [
-			{
-				title: categoryToDescription[option],
-
-				color: member.displayColor,
-
-				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
-				...(body
-					? fields.length === 0
-						? { description: body }
-						: { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
-					: { fields }),
-			},
+			details,
 			{
 				title: `${member.displayName}’s strikes`,
 				description: filtered.length
@@ -379,7 +242,7 @@ export default async function contactMods(
 			},
 		],
 		content:
-			option === modCategory || process.env.NODE_ENV === "development"
+			option === MOD_CATEGORY || process.env.NODE_ENV === "development"
 				? ""
 				: config.roles.mod?.toString(),
 		allowedMentions: { parse: ["roles"] },
@@ -395,7 +258,7 @@ export async function contactUser(
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
 ) {
 	await interaction.deferReply({ ephemeral: true });
-	const existingThread = await getThreadFromMember(member);
+	const existingThread = TICKETS_BY_MEMBER[member.id];
 
 	if (existingThread) {
 		await interaction.editReply(

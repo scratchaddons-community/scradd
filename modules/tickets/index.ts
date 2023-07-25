@@ -18,12 +18,12 @@ import {
 import { getSettings, updateSettings } from "../settings.js";
 import {
 	type Category,
-	getThreadFromMember,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
+	TICKETS_BY_MEMBER,
 } from "./misc.js";
-import contactMods, { contactUser, gatherTicketInfo } from "./contact.js";
+import contactMods, { contactUser, showTicketModal } from "./contact.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (
@@ -100,10 +100,10 @@ defineButton("contactMods", async (interaction) => {
 	});
 });
 defineSelect("contactMods", async (interaction) => {
-	return await gatherTicketInfo(interaction);
+	return await showTicketModal(interaction);
 });
 defineButton("appealStrike", async (interaction, id = "") => {
-	return await gatherTicketInfo(interaction, "appeal", id);
+	return await showTicketModal(interaction, "appeal", id);
 });
 defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
@@ -167,7 +167,26 @@ defineButton("contactUser", async (interaction, userId = "") => {
 
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
-	await getThreadFromMember(member).then(async (thread) => {
-		await thread?.setArchived(true, "Member left");
-	});
+
+	await TICKETS_BY_MEMBER[member.id]?.setArchived(true, "Member left");
+});
+
+defineEvent("threadUpdate", async (oldThread, newThread) => {
+	if (
+		newThread.parent?.id !== config.channels.tickets?.id ||
+		newThread.type !== ChannelType.PrivateThread ||
+		oldThread.archived === newThread.archived
+	)
+		return;
+	const memberId = newThread.name.match(/\(d+\)$/)?.[1];
+	if (!memberId) return;
+
+	if (newThread.archived) {
+		delete TICKETS_BY_MEMBER[memberId];
+	} else if (TICKETS_BY_MEMBER[memberId]) {
+		await newThread.setArchived(true, "Reopened while another ticket is already open");
+		await newThread.setLocked(true, "Reopened while another ticket is already open");
+	} else {
+		TICKETS_BY_MEMBER[memberId] = newThread;
+	}
 });
