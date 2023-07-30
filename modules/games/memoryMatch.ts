@@ -210,7 +210,7 @@ async function playGame(
 			idle: GAME_COLLECTOR_TIME,
 		})
 		.on("collect", async (buttonInteraction) => {
-			if (turnInfo.user.id !== buttonInteraction.user.id) {
+			if (turnInfo.user.id !== buttonInteraction.user.id || shown.size > 1) {
 				await buttonInteraction.deferUpdate();
 				return;
 			}
@@ -218,10 +218,12 @@ async function playGame(
 			if (turnInfo.timeout) clearTimeout(turnInfo.timeout);
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
-			await buttonInteraction.deferUpdate();
 			await interaction.message.edit(getBoard(turn, shown));
 
-			if (shown.size === 1) return;
+			if (shown.size === 1) {
+				await buttonInteraction.deferUpdate();
+				return;
+			}
 			totalTurns++;
 
 			const selected = [...shown].map(
@@ -248,6 +250,7 @@ async function playGame(
 				turnInfo = await setupTurn(turn);
 			}
 			shown.clear();
+			await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
