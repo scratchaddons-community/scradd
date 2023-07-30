@@ -41,8 +41,9 @@ defineEvent("messageCreate", async (message) => {
 	const baseChannel = getBaseChannel(message.channel);
 	if (
 		config.channels.modlogs?.id === baseChannel?.id ||
-		(process.env.NODE_ENV === "production" &&
-			config.channels.info?.id === baseChannel?.parent?.id) ||
+		(process.env.NODE_ENV === "production"
+			? config.channels.info?.id === baseChannel?.parent?.id
+			: config.channels.admin?.id !== baseChannel?.parent?.id) ||
 		!getSettings(message.author).autoreactions
 	)
 		return;
