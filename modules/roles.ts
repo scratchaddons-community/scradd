@@ -332,7 +332,8 @@ async function qualifiesForRole(member: GuildMember) {
 	command ??= (await config.guild.commands.fetch()).find(
 		(command) => command.name === "custom-role",
 	);
-	const permissions = command && (await config.guild.commands.permissions.fetch({ command }));
+	const permissions =
+		command && (await config.guild.commands.permissions.fetch({ command }).catch(() => {}));
 	return permissions?.some(
 		(permission) =>
 			permission.type === ApplicationCommandPermissionType.User &&
