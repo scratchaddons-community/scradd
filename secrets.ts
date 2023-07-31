@@ -18,9 +18,7 @@ export function dad(name: string, _: User) {
 	const greetingIndex = Math.floor(Math.random() * greetings.length);
 	const greeting = greetings[greetingIndex];
 
-	const response =
-		customResponses[firstName] ??
-		`${greeting} ${customName}, ${comment}`;
+	const response = customResponses[firstName] ?? `${greeting} ${customName}, ${comment}`;
 
 	return response;
 }
