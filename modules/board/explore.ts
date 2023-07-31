@@ -17,6 +17,7 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
+import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
@@ -164,7 +165,7 @@ export default async function makeSlideshow(
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === interaction.user.id,
 
-		time: constants.collectorTime,
+		time: GAME_COLLECTOR_TIME,
 	});
 
 	collector
