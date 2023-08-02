@@ -74,7 +74,8 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	for (const [emoji, ...requirements] of autoreactions) {
-		if (typeof emoji == "string" && content.includes(emoji)) continue;
+		const emojis = [emoji].flat();
+		if (emojis.some((emoji) => content.includes(emoji))) continue;
 
 		const results = requirements.map((requirement) => {
 			const type = Array.isArray(requirement) ? requirement[1] : "word";
@@ -103,7 +104,6 @@ defineEvent("messageCreate", async (message) => {
 			return type === "negative" ? result && 0 : result;
 		});
 		if (results.includes(true) && !results.includes(0)) {
-			const emojis = [emoji].flat();
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
 			if (reactions > REACTION_CAP || !messageReactions) return;
