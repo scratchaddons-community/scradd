@@ -41,10 +41,10 @@ defineCommand(
 					},
 				},
 			},
+			...(constants.canvasEnabled
+				? { graph: { description: "Graph users’ XP over the last week" } }
+				: {}),
 		},
-		...(constants.canvasEnabled
-			? { graph: { description: "Graph users’ XP over the last week" } }
-			: {}),
 	},
 
 	async (interaction) => {
