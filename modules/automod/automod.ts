@@ -37,8 +37,10 @@ export default async function automodMessage(message: Message) {
 		animatedEmojis.length > 15 &&
 		Math.floor((animatedEmojis.length - 16) / 10) * PARTIAL_STRIKE_COUNT;
 
+	let needsDelete = false;
+
 	if (baseChannel?.id !== config.channels.bots?.id && typeof badAnimatedEmojis === "number") {
-		await deleteMessage();
+		needsDelete = true;
 		await warn(
 			message.author,
 			"Please don’t post that many animated emojis!",
@@ -73,7 +75,7 @@ export default async function automodMessage(message: Message) {
 		).filter((toWarn): toWarn is string => Boolean(toWarn));
 
 		if (invites.length) {
-			await deleteMessage();
+			needsDelete = true;
 			await warn(
 				message.author,
 				"Please don’t send server invites in that channel!",
@@ -89,7 +91,7 @@ export default async function automodMessage(message: Message) {
 
 		const bots = message.content.match(GlobalBotInvitesPattern);
 		if (bots?.length) {
-			await deleteMessage();
+			needsDelete = true;
 			await warn(
 				message.author,
 				"Please don’t post bot invite links!",
@@ -137,8 +139,12 @@ export default async function automodMessage(message: Message) {
 					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]);
 			}, Array(badWordRegexps.length).fill([]));
 
-		if (badWords) await deleteMessage();
-		else if (badEmbedWords) await message.suppressEmbeds();
+		if (badWords || needsDelete) {
+			if (!message.deletable)
+				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
+
+			message.delete();
+		} else if (badEmbedWords) await message.suppressEmbeds();
 
 		if (badWords || badEmbedWords) {
 			await warn(
@@ -160,16 +166,5 @@ export default async function automodMessage(message: Message) {
 		}
 	}
 
-	function deleteMessage() {
-		if (deleteMessage.deleted) return;
-
-		if (!message.deletable)
-			return log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
-
-		deleteMessage.deleted = true;
-		return message.delete();
-	}
-	deleteMessage.deleted = false;
-
-	return !deleteMessage.deleted;
+	return !needsDelete;
 }
