@@ -4,6 +4,7 @@ import { stripMarkdown } from "../util/markdown.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { nth } from "../util/numbers.js";
+import { AuditLogEvent } from "discord.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.channel.id === config.channels.updates?.id) {
@@ -51,25 +52,30 @@ defineEvent("guildMemberAdd", async (member) => {
 defineEvent("guildMemberRemove", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
+	const auditLogs = await config.guild
+		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberKick })
+		.catch(() => {});
+	const kicked = auditLogs?.entries.first()?.target?.id === member.id;
 	const banned = await config.guild.bans.fetch(member).catch(() => {});
 
-	const byes = banned
-		? [
-				`Oof… **${member.user.displayName}** got banned…`,
-				`There’s no turning back for **${member.user.displayName}**…`,
-				`I don’t think this was the best place for **${member.user.displayName}**…`,
-				`Oop, **${member.user.displayName}** angered the mods!`,
-				`**${member.user.displayName}** broke the rules and took an 🇱`,
-				`**${member.user.displayName}** talked about opacity slider too much.`,
-		  ]
-		: [
-				`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
-				`Ahh… **${member.user.displayName}** left us… hope they’ll have safe travels!`,
-				`There goes another, bye **${member.user.displayName}**!`,
-				`Oop, **${member.user.displayName}** left… will they ever come back?`,
-				`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
-				`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
-		  ];
+	const byes =
+		banned || kicked
+			? [
+					`Oof… **${member.user.displayName}** got ${banned ? "banned" : "kicked"}…`,
+					`We don’t talk about what **${member.user.displayName}** did…`,
+					`I don’t think this was the best place for **${member.user.displayName}**…`,
+					`Oop, **${member.user.displayName}** angered the mods!`,
+					`**${member.user.displayName}** broke the rules and took an 🇱`,
+					`**${member.user.displayName}** talked about opacity slider too much.`,
+			  ]
+			: [
+					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
+					`Ahh… **${member.user.displayName}** left us… hope they’ll have safe travels!`,
+					`There goes another, bye **${member.user.displayName}**!`,
+					`Oop, **${member.user.displayName}** left… will they ever come back?`,
+					`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
+					`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
+			  ];
 
 	await config.channels.welcome?.send(
 		`${constants.emojis.misc[banned ? "ban" : "leave"]} ${
