@@ -246,7 +246,9 @@ defineModal("customRole", async (interaction) => {
 	}
 
 	if (
-		name.match(/\b(?:mod(?:erator)?|admin(?:instrator)|owner|exec(?:utive)|manager|scradd)\b/i)
+		name.match(
+			/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))|owner|exec(?:utive)|manager|scradd)\b/i,
+		)
 	) {
 		return await interaction.reply({
 			ephemeral: true,
