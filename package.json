@@ -25,7 +25,7 @@
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"papaparse": "5.4.1",
-		"serialize-error": "11.0.0",
+		"serialize-error": "11.0.1",
 		"strife.js": "1.0.6"
 	},
 	"devDependencies": {
