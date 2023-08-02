@@ -139,29 +139,43 @@ export default async function automodMessage(message: Message) {
 					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]);
 			}, Array(badWordRegexps.length).fill([]));
 
-		if (badWords || needsDelete) {
+		const hasBadWords = badWords.flat().length > 0;
+		const hasBadEmbedWords = badEmbedWords.flat().length > 0;
+
+		const languageStrikes = [...(badWords ?? []), ...(badEmbedWords ?? [])].reduce(
+			(accumulator, current, index) =>
+				current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
+			0,
+		);
+		if (hasBadWords || needsDelete) {
 			if (!message.deletable)
 				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
 
 			message.delete();
-		} else if (badEmbedWords) await message.suppressEmbeds();
+			if (hasBadWords)
+				await message.channel.send(
+					`${constants.emojis.statuses.no} ${message.author.toString()}, ${
+						languageStrikes < 1 ? "that's not appropriate" : "language"
+					}!`,
+				);
+		} else if (hasBadEmbedWords) {
+			await message.suppressEmbeds();
+			await message.reply(
+				`${constants.emojis.statuses.no} ${message.author.toString()}, ${
+					languageStrikes < 1 ? "that's not appropriate" : "language"
+				}!`,
+			);
+		}
 
-		if (badWords || badEmbedWords) {
+		if (hasBadWords || hasBadEmbedWords) {
 			await warn(
 				message.interaction?.user ?? message.author,
 				"Watch your language!",
-				[...(badWords ?? []), ...(badEmbedWords ?? [])].reduce(
-					(accumulator, current, index) =>
-						current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
-					0,
-				),
+				languageStrikes,
 				`Sent message with words: ${[
 					...(badWords.flat() ?? []),
 					...(badEmbedWords.flat() ?? []),
 				].join(", ")}`,
-			);
-			await message.channel.send(
-				`${constants.emojis.statuses.no} ${message.author.toString()}, language!`,
 			);
 		}
 	}

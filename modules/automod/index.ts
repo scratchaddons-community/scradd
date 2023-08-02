@@ -31,7 +31,9 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 		if (censored.strikes) {
 			await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Language!`,
+				content: `${constants.emojis.statuses.no} ${
+					censored.strikes < 1 ? "That's not appropriate" : "Language"
+				}!`,
 			});
 			await warn(
 				interaction.user,
