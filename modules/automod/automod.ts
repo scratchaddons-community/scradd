@@ -11,7 +11,7 @@ import {
 import log, { LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
-import censor, { badWordsAllowed } from "./language.js";
+import censor, { badWordRegexps, badWordsAllowed } from "./language.js";
 import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = [
@@ -21,6 +21,7 @@ const WHITELISTED_INVITE_GUILDS = [
 	constants.testingServerId,
 	"461575285364752384", // 9th Tail Bot Hub
 	"898383289059016704", // Scratch Addons SMP Archive
+	"945340853189247016", // ScratchTools
 ];
 
 export default async function automodMessage(message: Message) {
@@ -107,22 +108,21 @@ export default async function automodMessage(message: Message) {
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
-		].reduce<undefined | { strikes: number; words: string[][] }>(
-			(bad, censored) =>
+		].reduce<string[][]>(
+			(bad, censored, index) =>
 				typeof censored === "boolean"
 					? bad
-					: typeof bad === "undefined"
-					? censored
-					: {
-							strikes: bad.strikes + censored.strikes,
-							words: bad.words.map((words, index) => [
+					: [
+							...(index ? [] : [[]]), // Increase the severity of content warns. All warns are decreased a severity later.
+							...bad.map((words, index) => [
 								...words,
 								...(censored.words?.[index] ?? []),
 							]),
-					  },
-			undefined,
+					  ],
+
+			Array(badWordRegexps.length).fill([]),
 		);
-		const embedStrikes = message.embeds
+		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
 				embed.description,
 				embed.title,
@@ -130,41 +130,28 @@ export default async function automodMessage(message: Message) {
 				embed.author?.name,
 				...embed.fields.flatMap((field) => [field.name, field.value]),
 			])
-			.reduce<undefined | { strikes: number; words: string[][] }>((bad, current) => {
+			.reduce<string[][]>((bad, current) => {
 				const censored = censor(current || "");
 				return typeof censored === "boolean"
 					? bad
-					: typeof bad === "undefined"
-					? censored
-					: {
-							strikes: bad.strikes + censored.strikes,
-							words: bad.words.map((words, index) => [
-								...words,
-								...(censored.words?.[index] ?? []),
-							]),
-					  };
-			}, undefined);
+					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]);
+			}, Array(badWordRegexps.length).fill([]));
 
 		if (badWords) await deleteMessage();
-		else if (embedStrikes) await message.suppressEmbeds();
+		else if (badEmbedWords) await message.suppressEmbeds();
 
-		if (badWords || embedStrikes) {
+		if (badWords || badEmbedWords) {
 			await warn(
 				message.interaction?.user ?? message.author,
 				"Watch your language!",
-				(badWords?.words ?? []).reduce(
+				[...(badWords ?? []), ...(badEmbedWords ?? [])].reduce(
 					(accumulator, current, index) =>
-						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
+						current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
 					0,
-				) +
-					(embedStrikes?.words ?? []).reduce(
-						(accumulator, current, index) =>
-							current.length * (index - 1 || PARTIAL_STRIKE_COUNT) + accumulator,
-						0,
-					),
+				),
 				`Sent message with words: ${[
-					...(badWords?.words.flat() ?? []),
-					...(embedStrikes?.words.flat() ?? []),
+					...(badWords.flat() ?? []),
+					...(badEmbedWords.flat() ?? []),
 				].join(", ")}`,
 			);
 			await message.channel.send(
