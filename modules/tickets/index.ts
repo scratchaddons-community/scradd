@@ -22,6 +22,7 @@ import {
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	getIdFromThread,
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 
@@ -178,7 +179,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		oldThread.archived === newThread.archived
 	)
 		return;
-	const memberId = newThread.name.match(/\(d+\)$/)?.[1];
+	const memberId = getIdFromThread(newThread);
 	if (!memberId) return;
 
 	if (newThread.archived) {

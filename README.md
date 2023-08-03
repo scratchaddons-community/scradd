@@ -10,7 +10,7 @@ Feel free to fork Scradd to use some features in your servers.
 
 The majority of Scradd is made by @RedGuy12 (`RedGuy13#5922`). Thanks to everyone with the `@Scradd Contributor` role in the SA server for help as well!
 
-Pull requests are welcome if you would like to help contribute. However, before coding new features, please discuss it with @RedGuy12 in an issue here, or the Scradd private/SA server on Discord. The issues section contains [some issues marked as "Help Wanted"](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) that you may take up without asking. [See the Roadmap also.](https://github.com/orgs/scratchaddons-community/projects/1/views/1?sortedBy%5Bdirection%5D=asc&sortedBy%5BcolumnId%5D=11568385)
+Pull requests are welcome if you would like to help contribute. However, before coding new features, please discuss it with @RedGuy12 in an issue here, or the Scradd private/SA server on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you'll do it. Please also check the [Contributing Guidelines](/.github/CONTRIBUTING.md) before starting to code for more guidelines to follow.
 
 ### Setup
 
@@ -36,25 +36,9 @@ Pull requests are welcome if you would like to help contribute. However, before 
 1. Download [git](https://git-scm.com) and [Node.JS](https://nodejs.org) if you haven’t already.
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
-4. Set up the .env file as described in [`global.d.ts`](https://github.com/scratchaddons-community/scradd/blob/main/common/types/global.d.ts#L45L58).
+4. Set up the .env file as described in [`global.d.ts`](/common/types/global.d.ts#L45L58).
 5. Code!
 
 ### File structure
 
-`index.js` is this bots’ entry point. It calls `client.js`, which initializes and exports the Discord.js `Client` object, then preforms set-up tasks. `client.js` also exports the main servers’ `Guild` object for use elsewhere.
-
-#### `events`
-
-This directory contains files each exporting event functions that are passed to Discord.js. The event name is taken from the file path. Subfolders define camel casing. It is not recommended to create directories when they only contain one file.
-
-#### `commands`
-
-This directory contains files each exporting a [Command object](/common/types/command.ts) that are each automatically registered as an Application Command. Supports chat input commands, user context menu commands, and message context menu commands.
-
-#### `common`
-
-This directory contains functions used for a feature (like potatoboard) that are used across multiple files. The `audio` subdirectory contains audio files used in some commands. The `types` subdirectory contins types used across the codebase.
-
-#### `util`
-
-This directory contains utility functions used across the codebase. It is different from `common` as its functions are not specific to this bot but could be useful in other apps as well. Each file in this directory contains multiple utility commands that each deal with the same type of data.
+This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well.

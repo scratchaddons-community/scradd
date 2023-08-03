@@ -114,7 +114,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	weeklyWinners.splice(
 		weeklyWinners.findIndex(
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
-		) + 1,
+		) + 1 || weeklyWinners.length,
 	);
 	const ids = weeklyWinners.map((gain) => gain.user);
 
