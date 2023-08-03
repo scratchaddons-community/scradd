@@ -4,6 +4,7 @@ import {
 	type TextInputComponentData,
 	ChannelType,
 	type PrivateThreadChannel,
+	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
 
@@ -11,13 +12,11 @@ const initialThreads = await config.channels.tickets?.threads.fetchActive();
 export const TICKETS_BY_MEMBER = Object.fromEntries(
 	initialThreads?.threads
 		.map((thread) => {
-			const id = thread.name.match(/\(d+\)$/)?.[1];
+			if (thread.type !== ChannelType.PrivateThread) return;
+			const id = getIdFromThread(thread);
 			return [id, thread] as const;
 		})
-		.filter(
-			(info): info is [string, PrivateThreadChannel] =>
-				!!info[0] && info[1].type === ChannelType.PrivateThread,
-		) ?? [],
+		.filter((info): info is [Snowflake, PrivateThreadChannel] => !!info?.[0]) ?? [],
 );
 
 export const TICKET_CATEGORIES = [
@@ -163,3 +162,7 @@ export const categoryToDescription = {
 	other: "Other",
 	[MOD_CATEGORY]: "Contact User",
 } satisfies Record<Category | typeof MOD_CATEGORY, string>;
+
+export function getIdFromThread(thread: PrivateThreadChannel): Snowflake | undefined {
+	return thread.name.match(/\((\d+)\)$/)?.[1];
+}
