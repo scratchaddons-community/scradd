@@ -17,6 +17,7 @@ import constants from "../common/constants.js";
 import { parseTime } from "../util/numbers.js";
 import { SpecialReminders, remindersDatabase } from "./reminders.js";
 import { disableComponents } from "../util/discord.js";
+import { joinWithAnd } from "../util/text.js";
 
 export const threadsDatabase = new Database<{
 	id: Snowflake;
@@ -234,7 +235,15 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 			if (!thread?.isThread()) return;
 			if (roles.some((role) => member.roles.resolve(role)))
 				await thread.members.add(member, "Has qualifying role");
-			else await thread.members.remove(member.id, "Has no qualifying role");
+			else {
+				await thread.members.remove(member.id, "Has no qualifying role");
+				await thread.send(
+					`### Debug info\nQualifying roles: ${joinWithAnd(
+						roles,
+						roleMention,
+					)}\nUser's roles: ${joinWithAnd(member.roles.valueOf().toJSON())}`,
+				);
+			}
 		}),
 	);
 });
