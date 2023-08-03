@@ -318,7 +318,7 @@ defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
 	}
 });
 
-async function qualifiesForRole(member: GuildMember) {
+export async function qualifiesForRole(member: GuildMember) {
 	if (member.roles.premiumSubscriberRole) return true;
 
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
