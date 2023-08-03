@@ -38,6 +38,10 @@ Please:
 
 Scradd has a couple dev commands to streamline your coding.
 
-`npm run build`: One time build `npm run start`: Run the bot `npm run dev`: Build and watch `npm run serve`: Run the bot and restart on each successful build `npm run format`: Format code (please run this before pushing)
+-   `npm run build`: One time build
+-   `npm run start`: Run the bot
+-   `npm run dev`: Build and watch
+-   `npm run serve`: Run the bot and restart on each successful build
+-   `npm run format`: Format code (please run this before pushing)
 
 In my opinion, it's easiest to do `npm run serve & npm run dev`, in which case you hardly ever need to touch the terminal. But you are free to pick any combination of commands to build and run your code.
