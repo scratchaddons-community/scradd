@@ -18,7 +18,7 @@ export async function getChatters() {
 		0,
 		weeklyWinners.findIndex(
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
-		) + 1,
+		) + 1 || weeklyWinners.length,
 	);
 	if (!weeklyWinners.length) return;
 
