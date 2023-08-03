@@ -29,6 +29,7 @@ export enum SpecialReminders {
 	RebootBot,
 	CloseThread,
 	LockThread,
+	Unban,
 }
 type Reminder = {
 	channel: Snowflake;
@@ -159,6 +160,13 @@ setInterval(async () => {
 				}
 				case SpecialReminders.LockThread: {
 					if (channel?.isThread()) await channel.setLocked(true, "Lock requested");
+					return;
+				}
+				case SpecialReminders.Unban: {
+					await config.guild.bans.remove(
+						String(reminder.reminder),
+						"Unbanned after set time period",
+					);
 					return;
 				}
 			}
