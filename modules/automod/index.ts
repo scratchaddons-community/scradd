@@ -5,6 +5,7 @@ import {
 	GuildMember,
 	MessageType,
 	type CommandInteractionOption,
+	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -105,6 +106,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 });
 defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== config.guild.id || !newlyCreated) return false;
+	if (thread.type === ChannelType.PrivateThread) return true;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {

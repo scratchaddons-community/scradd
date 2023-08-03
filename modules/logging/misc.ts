@@ -9,10 +9,11 @@ import {
 	type TextBasedChannel,
 	TextChannel,
 	ThreadChannel,
+	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
-import type { DATABASE_THREAD } from "../../common/database.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
 export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
@@ -114,6 +115,9 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 		(await config.channels.modlogs.threads.create({
 			name: group,
 			reason: "New logging thread",
+			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
+			invitable: group === DATABASE_THREAD ? false : undefined,
+			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);
 }

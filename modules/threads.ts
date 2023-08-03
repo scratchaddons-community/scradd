@@ -12,6 +12,7 @@ import {
 	ButtonStyle,
 	Role,
 	GuildMember,
+	ChannelType,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { parseTime } from "../util/numbers.js";
@@ -249,6 +250,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 });
 
 defineEvent("threadCreate", async (thread) => {
+	if (thread.type === ChannelType.PrivateThread) return;
 	const { roles } = getThreadConfig(thread);
 	if (roles.length)
 		await thread.send({
