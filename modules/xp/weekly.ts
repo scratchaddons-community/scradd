@@ -1,4 +1,10 @@
-import { type MessageCreateOptions, time, TimestampStyles, type Snowflake, userMention } from "discord.js";
+import {
+	type MessageCreateOptions,
+	time,
+	TimestampStyles,
+	type Snowflake,
+	userMention,
+} from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";

@@ -214,7 +214,6 @@ export async function backupDatabases(channel: TextBasedChannel) {
 		.map((database) => database?.attachments.first())
 		.filter((attachment): attachment is Attachment => Boolean(attachment));
 
-
 	await channel.send("# Daily Scradd Database Backup");
 	await Promise.all(
 		Array.from(Array(Math.ceil(attachments.length / 10)), () => attachments.splice(0, 10)).map(
