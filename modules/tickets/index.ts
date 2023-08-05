@@ -30,7 +30,6 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		config.channels.tickets?.permissionsFor(message.author)?.has("ViewChannel") && // TODO
 		!getSettings(message.author).resourcesDmed
 	) {
 		await message.channel.send({
@@ -50,12 +49,18 @@ defineEvent("messageCreate", async (message) => {
 						// 	label: "FAQ",
 						// 	url: `https://discord.com/channels/${config.guild.id}/1099457798452035646`,
 						// },
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Secondary,
-							label: "Contact Mods",
-							custom_id: "_contactMods",
-						},
+						...(config.channels.tickets
+							?.permissionsFor(message.author)
+							?.has("ViewChannel")
+							? [
+									{
+										type: ComponentType.Button,
+										style: ButtonStyle.Secondary,
+										label: "Contact Mods",
+										custom_id: "_contactMods",
+									} as const,
+							  ]
+							: []),
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
