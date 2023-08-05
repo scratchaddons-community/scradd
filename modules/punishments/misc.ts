@@ -33,7 +33,7 @@ const robotopStrikes = url
 	  )
 	: [];
 
-const strikesCache: Record<string, any /* TODO */> = {};
+const strikesCache: Record<string, { mod?: string; reason: string }> = {};
 
 export default async function filterToStrike(filter: string) {
 	if (/^\d{1,4}$/.test(filter)) {
