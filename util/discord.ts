@@ -193,7 +193,7 @@ export async function getAllMessages(channel: TextBasedChannel): Promise<Message
  * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
  * @author Based Off of [Rapptz/discord.py's
- *   `system_content`](https://github.com/Rapptz/discord.py/blob/1767be0/discord/message.py#L1994-L2134)
+ *   `system_content`](https://github.com/Rapptz/discord.py/blob/14faa9b/discord/message.py#L2001-L2141)
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
  *
