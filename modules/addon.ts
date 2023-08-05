@@ -1,10 +1,4 @@
-import {
-	ApplicationCommandOptionType,
-	ButtonStyle,
-	ComponentType,
-	escapeMarkdown,
-	hyperlink,
-} from "discord.js";
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } from "discord.js";
 import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
 import { manifest, addons, addonSearchOptions } from "../common/extension.js";
@@ -106,16 +100,16 @@ defineCommand(
 									{
 										inline: true,
 										name: "🫂 Contributors",
-										value: escapeMarkdown(credits),
+										value: escapeMessage(credits),
 									},
 							  ]
 							: []),
-						{ inline: true, name: "📦 Group", value: escapeMarkdown(group) },
+						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
 						{
 							inline: true,
 							name: "📝 Version added",
 
-							value: escapeMarkdown(
+							value: escapeMessage(
 								`v${addon.versionAdded}${
 									addon.latestUpdate && lastUpdatedIn
 										? ` (${

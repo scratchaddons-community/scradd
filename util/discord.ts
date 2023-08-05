@@ -28,7 +28,6 @@ import {
 	MessageMentions,
 	type AnyThreadChannel,
 	type MessageReaction,
-	escapeMarkdown,
 	chatInputApplicationCommandMention,
 	DMChannel,
 	type PartialDMChannel,
@@ -307,7 +306,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.ChannelFollowAdd: {
 			return `${
 				constants.emojis.discord.add
-			} ${message.author.toString()} has added **${escapeMarkdown(
+			} ${message.author.toString()} has added **${escapeMessage(
 				message.content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}

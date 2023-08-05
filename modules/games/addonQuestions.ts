@@ -1,4 +1,4 @@
-import { escapeMarkdown } from "discord.js";
+import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
 import { manifest, addons } from "../../common/extension.js";
 import { trimPatchVersion } from "../../util/text.js";
@@ -18,7 +18,7 @@ export type AddonQuestion = {
 
 const firstLetters = Object.fromEntries(
 		addons.map(({ name }) => [
-			`Does your addon’s name __start__ with **${escapeMarkdown(
+			`Does your addon’s name __start__ with **${escapeMessage(
 				name[0]?.toUpperCase() ?? "",
 			)}**?`,
 			false,
@@ -26,14 +26,14 @@ const firstLetters = Object.fromEntries(
 	),
 	lastLetters = Object.fromEntries(
 		addons.map(({ name }) => [
-			`Does your addon’s name __end__ with **${escapeMarkdown(
+			`Does your addon’s name __end__ with **${escapeMessage(
 				name.at(-1)?.toUpperCase() ?? "",
 			)}**?`,
 			false,
 		]),
 	);
 
-const versionMarkdown = `**[${escapeMarkdown(
+const versionMarkdown = `**[${escapeMessage(
 	manifest.version_name ?? manifest.version,
 )}](https://github.com/${constants.urls.saRepo}${
 	manifest.version_name?.endsWith("-prerelease")
@@ -81,8 +81,8 @@ export default Object.fromEntries(
 	addons.map((addon) => {
 		const result: AddonQuestion[] = [];
 
-		const firstLetter = escapeMarkdown(addon.name[0]?.toUpperCase() ?? "");
-		const lastLetter = escapeMarkdown(addon.name.at(-1)?.toUpperCase() ?? "");
+		const firstLetter = escapeMessage(addon.name[0]?.toUpperCase() ?? "");
+		const lastLetter = escapeMessage(addon.name.at(-1)?.toUpperCase() ?? "");
 		result.push(
 			{
 				dependencies: {
@@ -470,8 +470,8 @@ export default Object.fromEntries(
 					({ name }) =>
 						({
 							dependencies: { [questionStrings.credits]: true },
-							question: `Did **${escapeMarkdown(name)}** contribute to your addon?`,
-							statement: `**${escapeMarkdown(name)}** contributed to this addon!`,
+							question: `Did **${escapeMessage(name)}** contribute to your addon?`,
+							statement: `**${escapeMessage(name)}** contributed to this addon!`,
 						} as const),
 				),
 			);

@@ -2,7 +2,6 @@ import {
 	ButtonStyle,
 	ChatInputCommandInteraction,
 	ComponentType,
-	escapeMarkdown,
 	GuildMember,
 	Message,
 	chatInputApplicationCommandMention,
@@ -14,6 +13,7 @@ import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import config from "../../common/config.js";
+import { escapeMessage } from "../../util/markdown.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -405,7 +405,7 @@ export default async function guessAddon(
 				},
 			],
 
-			content: `${constants.emojis.misc.addon} Your addon is **${escapeMarkdown(
+			content: `${constants.emojis.misc.addon} Your addon is **${escapeMessage(
 				foundAddon.name,
 			)}**!`,
 

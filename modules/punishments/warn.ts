@@ -3,7 +3,6 @@ import {
 	ButtonStyle,
 	type CacheType,
 	ComponentType,
-	escapeMarkdown,
 	GuildMember,
 	time,
 	TimestampStyles,
@@ -24,6 +23,7 @@ import filterToStrike, {
 	strikeDatabase,
 	STRIKES_PER_MUTE,
 } from "./misc.js";
+import { escapeMessage } from "../../util/markdown.js";
 
 export default async function warn(
 	user: GuildMember | User,
@@ -83,7 +83,7 @@ export default async function warn(
 						strikes > 0.5
 							? `warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 							: "verbally warned"
-					} in ${escapeMarkdown(config.guild.name)}!`,
+					} in ${escapeMessage(config.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
 					color: member?.displayColor,

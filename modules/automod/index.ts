@@ -1,7 +1,6 @@
 import {
 	ActivityType,
 	ApplicationCommandOptionType,
-	escapeMarkdown,
 	GuildMember,
 	MessageType,
 	type CommandInteractionOption,
@@ -15,6 +14,7 @@ import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
 import { commands, defineCommand, defineEvent } from "strife.js";
+import { escapeMessage } from "../../util/markdown.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
@@ -180,7 +180,7 @@ defineCommand(
 							: ""
 				  }**I detected the following words as bad**: ${joinWithAnd(
 						words,
-						(word) => `*${escapeMarkdown(word)}*`,
+						(word) => `*${escapeMessage(word)}*`,
 				  )}`
 				: `${constants.emojis.statuses.yes} No bad words found.`,
 		});
