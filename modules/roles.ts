@@ -120,9 +120,7 @@ defineCommand(
 				content: `${constants.emojis.statuses.no} You don’t have permission to create a custom role!`,
 			});
 
-		const existingRole = interaction.member.roles
-			.valueOf()
-			.find((role) => role.name.startsWith(PREFIX));
+		const existingRole = getCustomRole(interaction.member);
 
 		await interaction.showModal({
 			title: "Create Custom Role",
@@ -317,6 +315,12 @@ defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
 		}
 	}
 });
+
+export function getCustomRole(member: GuildMember) {
+	return member.roles
+		.valueOf()
+		.find((role) => role.name.startsWith(PREFIX));
+}
 
 export async function qualifiesForRole(member: GuildMember) {
 	if (member.roles.premiumSubscriberRole) return true;

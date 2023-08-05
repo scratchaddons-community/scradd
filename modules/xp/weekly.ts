@@ -5,7 +5,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { qualifiesForRole } from "../roles.js";
+import { getCustomRole, qualifiesForRole } from "../roles.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -141,29 +141,19 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		]);
 	}
 				
-	const customRoles = (await config.guild.roles.fetch()).filter((role) => role.name.toLowerCase().includes("✨ "));
 	weeklyWinners.forEach(async (weeklyWinner) => {
 		await config.guild.members.fetch(weeklyWinner.user)
 			.then(async (guildMember) => {
-				const filtered = customRoles.filter((customRole) => {
-					const member = customRole.members.find((member) => member.id === guildMember.id);
-					return member !== undefined;
-				});
-				
-				if (filtered.size === 0) return;
 				if (await qualifiesForRole(guildMember)) return;
 
-				guildMember.roles.remove(
-					filtered,
-					"No Longer meets the requirements to have a Custom Role"
-				);
+				const customRole = getCustomRole(guildMember);
 
-				filtered.forEach((role) => {
-					config.guild.roles.delete(
-						role,
-						"Custom Role no longer usable"
-					)
-				});
+				if (customRole === undefined) return;
+
+				config.guild.roles.delete(
+					customRole,
+					"User no longer meets the requirements to have a Custom Role"
+				);
 			});
 	});
 
