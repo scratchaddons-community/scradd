@@ -118,5 +118,8 @@ export default async function getUserRank(
 		],
 
 		files: await makeCanvasFiles(),
+		ephemeral:
+			interaction.isButton() &&
+			interaction.message.interaction?.user.id !== interaction.user.id,
 	});
 }
