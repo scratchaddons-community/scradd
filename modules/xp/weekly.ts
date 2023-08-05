@@ -155,9 +155,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 			if (!customRole) return;
 
-			customRole.delete(
-				"No longer meets custom role requirements",
-			);
+			customRole.delete("No longer meets custom role requirements");
 		});
 	});
 
