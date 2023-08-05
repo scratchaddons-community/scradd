@@ -246,7 +246,6 @@ const events: {
 			"server",
 		);
 	},
-	// async [AuditLogEvent.IntegrationUpdate](entry) {}, // TODO
 	async [AuditLogEvent.IntegrationDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
@@ -350,7 +349,6 @@ const events: {
 			"server",
 		);
 	},
-	// async [AuditLogEvent.AutoModerationRuleUpdate](entry) {}, // TODO
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
 			`${LoggingEmojis.Thread} AutoMod Rule ${entry.target.name} (ID: ${

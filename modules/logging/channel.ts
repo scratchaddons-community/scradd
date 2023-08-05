@@ -337,8 +337,6 @@ export async function channelUpdate(
 export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyThreadChannel) {
 	if (!shouldLog(newThread)) return;
 
-	//todo appliedTags
-
 	if (oldThread.archived !== newThread.archived)
 		await log(
 			`${LoggingEmojis.Thread} ${
