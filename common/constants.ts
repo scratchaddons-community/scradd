@@ -1,4 +1,5 @@
 export default {
+	inviteUrl: "https://discord.gg/FPv957V6SD",
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200b",
 

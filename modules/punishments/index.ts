@@ -4,6 +4,7 @@ import { client, defineCommand, defineButton, defineSelect } from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
+import ban from "./ban.js";
 
 defineCommand(
 	{
@@ -107,3 +108,37 @@ defineCommand(
 );
 defineButton("removeStrike", removeStrike);
 defineButton("addStrikeBack", addStrikeBack);
+
+defineCommand(
+	{
+		name: "ban-user",
+		description: "(Mod only) Bans a user",
+		restricted: true,
+
+		options: {
+			"user": {
+				type: ApplicationCommandOptionType.User,
+				description: "The user to ban",
+				required: true,
+			},
+
+			"reason": {
+				type: ApplicationCommandOptionType.String,
+				description: "Reason for the ban",
+				required: process.env.NODE_ENV === "production",
+			},
+
+			"delete-range": {
+				type: ApplicationCommandOptionType.String,
+				description: `How far back to delete their messages (defaults to none)`,
+			},
+
+			"unban-in": {
+				type: ApplicationCommandOptionType.String,
+				description: `How much of their messages to delete (defaults to never)`,
+			},
+		},
+	},
+
+	ban,
+);

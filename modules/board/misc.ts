@@ -43,9 +43,8 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 	const COUNTS = {
 		scradd: 2,
 		admins: 2,
-		exec: 3,
-		mods: 4,
-		misc: 5,
+		mods: 3,
+		misc: 4,
 		default: 6,
 		memes: 8,
 		info: 12,
@@ -61,9 +60,6 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 	return (
 		{
 			[config.channels.tickets?.id || ""]: COUNTS.mods,
-			[config.channels.mod?.id || ""]: COUNTS.mods,
-			[config.channels.modlogs?.id || ""]: COUNTS.mods,
-			[config.channels.exec?.id || ""]: COUNTS.exec,
 			[config.channels.admin?.id || ""]: COUNTS.admins,
 			"853256939089559583": COUNTS.misc, // #ba-doosters
 			"869662117651955802": COUNTS.misc, // #devs-only
@@ -76,6 +72,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
 		}[baseChannel.id] ||
 		{
 			[config.channels.info?.id || ""]: COUNTS.info,
+			[config.channels.modlogs?.parent?.id || ""]: COUNTS.mods,
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ||
 		COUNTS.default

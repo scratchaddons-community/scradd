@@ -24,7 +24,8 @@ await login({
 	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
 	commandsGuildId: process.env.GUILD_ID,
 	async handleError(error, event) {
-		if (typeof logError === "undefined") throw error;
+		const { default: logError } = await import("./common/logError.js");
+
 		await logError(error, event);
 	},
 	productionId: constants.users.scradd,
@@ -49,8 +50,6 @@ await login({
 	commandErrorMessage: `${constants.emojis.statuses.no} An error occurred.`,
 });
 
-const { default: logError } = await import("./common/logError.js");
-
 if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
@@ -63,7 +62,7 @@ client.user.setPresence({
 		{
 			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
 			type: ActivityType.Watching,
-			url: "https://discord.gg/FPv957V6SD",
+			url: constants.inviteUrl,
 		},
 	],
 	status: "online",

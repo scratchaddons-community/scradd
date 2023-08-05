@@ -9,10 +9,11 @@ import {
 	type Snowflake,
 	time,
 	TimestampStyles,
+	ThreadAutoArchiveDuration,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import Database, { cleanDatabaseListeners } from "../common/database.js";
+import Database, { backupDatabases, cleanDatabaseListeners } from "../common/database.js";
 import censor, { badWordsAllowed } from "./automod/language.js";
 import { disableComponents } from "../util/discord.js";
 import { convertBase, nth, parseTime } from "../util/numbers.js";
@@ -29,6 +30,8 @@ export enum SpecialReminders {
 	RebootBot,
 	CloseThread,
 	LockThread,
+	Unban,
+	BackupDatabases,
 }
 type Reminder = {
 	channel: Snowflake;
@@ -62,8 +65,7 @@ setInterval(async () => {
 		if (reminder.user === client.user.id) {
 			switch (reminder.id) {
 				case SpecialReminders.Weekly: {
-					if (!channel?.isTextBased())
-						throw new TypeError("Could not find weekly channel");
+					if (!channel?.isTextBased()) return;
 
 					const date = new Date();
 					date.setUTCDate(date.getUTCDate() - 7);
@@ -96,8 +98,7 @@ setInterval(async () => {
 					return message;
 				}
 				case SpecialReminders.UpdateSACategory: {
-					if (channel?.type !== ChannelType.GuildCategory)
-						throw new TypeError("Could not find SA channel");
+					if (channel?.type !== ChannelType.GuildCategory) return;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -128,8 +129,7 @@ setInterval(async () => {
 					);
 				}
 				case SpecialReminders.Bump: {
-					if (!channel?.isTextBased())
-						throw new TypeError("Could not find bumping channel");
+					if (!channel?.isTextBased()) return;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -160,6 +160,29 @@ setInterval(async () => {
 				case SpecialReminders.LockThread: {
 					if (channel?.isThread()) await channel.setLocked(true, "Lock requested");
 					return;
+				}
+				case SpecialReminders.Unban: {
+					await config.guild.bans.remove(
+						String(reminder.reminder),
+						"Unbanned after set time period",
+					);
+					return;
+				}
+				case SpecialReminders.BackupDatabases: {
+					if (!channel?.isTextBased()) return;
+
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: reminder.channel,
+							date: Number(Date.now() + 86_400),
+							reminder: undefined,
+							id: SpecialReminders.BackupDatabases,
+							user: client.user.id,
+						},
+					];
+
+					return backupDatabases(channel);
 				}
 			}
 		}
@@ -450,3 +473,68 @@ defineEvent("messageCreate", async (message) => {
 		];
 	}
 });
+
+if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.Weekly)) {
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: config.channels.announcements?.id ?? "",
+			date: Date.now() + 3_600_000,
+			reminder: undefined,
+			id: SpecialReminders.Weekly,
+			user: client.user.id,
+		},
+	];
+}
+
+if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.UpdateSACategory)) {
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: config.channels.suggestions?.parent?.id ?? "",
+			date: Date.now(),
+			reminder: undefined,
+			id: SpecialReminders.UpdateSACategory,
+			user: client.user.id,
+		},
+	];
+}
+
+if (
+	!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.Bump) &&
+	process.env.NODE_ENV === "production"
+) {
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: BUMPING_THREAD,
+			date: Date.now() + 3_600_000,
+			reminder: undefined,
+			id: SpecialReminders.Bump,
+			user: client.user.id,
+		},
+	];
+}
+
+if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.BackupDatabases)) {
+	const { threads } = (await config.channels.mod?.threads.fetch()) ?? {};
+	const channel =
+		threads?.find(({ name }) => name === "Scradd Database Backups") ||
+		(await config.channels.mod?.threads.create({
+			name: "Scradd Database Backups",
+			reason: "For database backups",
+			type: ChannelType.PrivateThread,
+			invitable: false,
+			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+		}));
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: channel?.id ?? "",
+			date: Date.now() + 3_600_000,
+			reminder: undefined,
+			id: SpecialReminders.BackupDatabases,
+			user: client.user.id,
+		},
+	];
+}

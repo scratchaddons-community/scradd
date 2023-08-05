@@ -12,12 +12,12 @@ import {
 	ButtonStyle,
 	Role,
 	GuildMember,
+	ChannelType,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { parseTime } from "../util/numbers.js";
 import { SpecialReminders, remindersDatabase } from "./reminders.js";
 import { disableComponents } from "../util/discord.js";
-import { joinWithAnd } from "../util/text.js";
 
 export const threadsDatabase = new Database<{
 	id: Snowflake;
@@ -227,6 +227,7 @@ defineButton("cancelThreadChange", async (interaction, type) => {
 });
 
 defineEvent("guildMemberUpdate", async (_, member) => {
+	if (member.guild.id !== config.guild.id) return;
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
 			const roles = options.roles?.split("|");
@@ -237,18 +238,13 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 				await thread.members.add(member, "Has qualifying role");
 			else {
 				await thread.members.remove(member.id, "Has no qualifying role");
-				await thread.send(
-					`### Debug info\nQualifying roles: ${joinWithAnd(
-						roles,
-						roleMention,
-					)}\nUser's roles: ${joinWithAnd(member.roles.valueOf().toJSON())}`,
-				);
 			}
 		}),
 	);
 });
 
 defineEvent("threadCreate", async (thread) => {
+	if (thread.type === ChannelType.PrivateThread || thread.guild.id !== config.guild.id) return;
 	const { roles } = getThreadConfig(thread);
 	if (roles.length)
 		await thread.send({

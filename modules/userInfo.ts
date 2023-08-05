@@ -9,7 +9,9 @@ import {
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { defineCommand } from "strife.js";
-import { REACTIONS_NAME } from "./board/misc.js";
+import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
+import { xpDatabase } from "./xp/misc.js";
+import { strikeDatabase } from "./punishments/misc.js";
 
 defineCommand(
 	{
@@ -96,6 +98,38 @@ defineCommand(
 					: { name: "Banned", value: "Yes", inline: true },
 			);
 
+		const hasXp = (xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0) > 0;
+		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
+		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
+
+		const buttons = [
+			hasXp && { customId: `${user.id}_xp`, label: "XP" },
+			hasPotatoes && {
+				customId: `${user.id}_exploreBoard`,
+				label: `Explore ${REACTIONS_NAME}`,
+			},
+			member &&
+				isMod &&
+				config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
+					customId: `${user.id}_contactUser`,
+					label: "Contact User",
+				},
+			hasStrikes &&
+				(user.id == interaction.user.id || isMod) && {
+					customId: `${user.id}_viewStrikes`,
+					label: "Strikes",
+				},
+		]
+			.filter((button): button is { customId: string; label: string } => !!button)
+			.map(
+				(button) =>
+					({
+						...button,
+						style: ButtonStyle.Secondary,
+						type: ComponentType.Button,
+					} as const),
+			);
+
 		await interaction.reply({
 			embeds: [
 				{
@@ -117,47 +151,9 @@ defineCommand(
 					},
 				},
 			],
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							customId: `${user.id}_xp`,
-							style: ButtonStyle.Secondary,
-							type: ComponentType.Button,
-							label: "XP",
-						},
-						{
-							customId: `${user.id}_exploreBoard`,
-							style: ButtonStyle.Secondary,
-							type: ComponentType.Button,
-							label: `Explore ${REACTIONS_NAME}`,
-						},
-						...(user.id == interaction.user.id || isMod
-							? [
-									{
-										customId: `${user.id}_viewStrikes`,
-										style: ButtonStyle.Secondary,
-										type: ComponentType.Button,
-										label: "Strikes",
-									} as const,
-							  ]
-							: []),
-						...(member &&
-						isMod &&
-						config.channels.tickets?.permissionsFor(member)?.has("ViewChannel")
-							? [
-									{
-										customId: `${user.id}_contactUser`,
-										style: ButtonStyle.Secondary,
-										type: ComponentType.Button,
-										label: "Contact User",
-									} as const,
-							  ]
-							: []),
-					],
-				},
-			],
+			components: buttons.length
+				? [{ type: ComponentType.ActionRow, components: buttons }]
+				: undefined,
 		});
 	},
 );

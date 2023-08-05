@@ -1,5 +1,11 @@
 import exitHook from "async-exit-hook";
-import { type Message, RESTJSONErrorCodes, type Snowflake } from "discord.js";
+import {
+	type Message,
+	RESTJSONErrorCodes,
+	type Snowflake,
+	Attachment,
+	type TextBasedChannel,
+} from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
 import { extractMessageExtremities } from "../util/discord.js";
@@ -202,3 +208,16 @@ export async function cleanDatabaseListeners() {
 exitHook(async (callback) => {
 	await cleanDatabaseListeners().then(callback);
 });
+
+export async function backupDatabases(channel: TextBasedChannel) {
+	const attachments = Object.values(databases)
+		.map((database) => database?.attachments.first())
+		.filter((attachment): attachment is Attachment => Boolean(attachment));
+
+	await channel.send("# Daily Scradd Database Backup");
+	await Promise.all(
+		Array.from(Array(Math.ceil(attachments.length / 10)), () => attachments.splice(0, 10)).map(
+			(files) => channel.send({ files }),
+		),
+	);
+}

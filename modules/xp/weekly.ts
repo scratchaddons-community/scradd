@@ -1,4 +1,10 @@
-import { type MessageCreateOptions, time, TimestampStyles, type Snowflake } from "discord.js";
+import {
+	type MessageCreateOptions,
+	time,
+	TimestampStyles,
+	type Snowflake,
+	userMention,
+} from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
@@ -30,7 +36,7 @@ export async function getChatters() {
 					(
 						await client.users
 							.fetch(user.user)
-							.catch(() => ({ displayName: user.user + "#" }))
+							.catch(() => ({ displayName: userMention(user.user) }))
 					).displayName
 				} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
 		),
