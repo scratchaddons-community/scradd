@@ -10,11 +10,23 @@ import { defineEvent } from "strife.js";
 
 const REACTION_CAP = 3;
 
+const ignoreTriggers = [
+	/\bkill/,
+	/\bsuicid/,
+	/\bdepress/,
+	/\bpain/,
+	/\bsick/,
+	/\babus/,
+	/\bsad/,
+	/\bbleed/,
+]
+
 defineEvent("messageCreate", async (message) => {
 	if (
 		message.guild?.id !== config.guild.id ||
 		message.channel.id === message.id ||
-		message.channel.isDMBased()
+		message.channel.isDMBased() ||
+		ignoreTriggers.some((trigger) => message.content.match(trigger))
 	)
 		return;
 
