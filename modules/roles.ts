@@ -317,9 +317,7 @@ defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
 });
 
 export function getCustomRole(member: GuildMember) {
-	return member.roles
-		.valueOf()
-		.find((role) => role.name.startsWith(PREFIX));
+	return member.roles.valueOf().find((role) => role.name.startsWith(PREFIX));
 }
 
 export async function qualifiesForRole(member: GuildMember) {
