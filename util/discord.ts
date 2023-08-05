@@ -441,8 +441,11 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.AutoModerationAction: {
-			// TODO: flagged
-			return `**AutoMod** has blocked a message in <#${
+			return `**AutoMod** has ${
+				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
+					? "flagged"
+					: "blocked"
+			} a message in <#${
 				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value
 			}>`;
 		}
