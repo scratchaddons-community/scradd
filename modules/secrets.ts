@@ -19,7 +19,7 @@ const ignoreTriggers = [
 	/\babus/,
 	/\bsad/,
 	/\bbleed/,
-]
+];
 
 defineEvent("messageCreate", async (message) => {
 	if (
