@@ -11,6 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
+import { getCustomRole, qualifiesForRole } from "../roles.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -145,6 +146,18 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			),
 		]);
 	}
+
+	weeklyWinners.forEach(async (weeklyWinner) => {
+		await config.guild.members.fetch(weeklyWinner.user).then(async (guildMember) => {
+			if (await qualifiesForRole(guildMember)) return;
+
+			const customRole = getCustomRole(guildMember);
+
+			if (!customRole) return;
+
+			customRole.delete("No longer meets custom role requirements");
+		});
+	});
 
 	return `__**🏆 Weekly Winners week of ${
 		[

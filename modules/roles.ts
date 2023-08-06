@@ -120,9 +120,7 @@ defineCommand(
 				content: `${constants.emojis.statuses.no} You don’t have permission to create a custom role!`,
 			});
 
-		const existingRole = interaction.member.roles
-			.valueOf()
-			.find((role) => role.name.startsWith(PREFIX));
+		const existingRole = getCustomRole(interaction.member);
 
 		await interaction.showModal({
 			title: "Create Custom Role",
@@ -168,10 +166,7 @@ defineModal("customRole", async (interaction) => {
 	const name = interaction.fields.fields.get("name")?.value;
 	const color = interaction.fields.fields.get("color")?.value;
 
-	const existingRole =
-		interaction.member instanceof GuildMember
-			? interaction.member.roles.valueOf().find((role) => role.name.startsWith(PREFIX))
-			: undefined;
+	const existingRole = getCustomRole(interaction.member);
 
 	if (!name) {
 		if (!existingRole) {
@@ -295,10 +290,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	if (!(await qualifiesForRole(member))) {
-		await member.roles
-			.valueOf()
-			.find((role) => role.name.startsWith(PREFIX))
-			?.delete("No longer qualifies");
+		await getCustomRole(member)?.delete("No longer qualifies");
 	}
 });
 
@@ -318,7 +310,11 @@ defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
 	}
 });
 
-async function qualifiesForRole(member: GuildMember) {
+export function getCustomRole(member: GuildMember) {
+	return member.roles.valueOf().find((role) => role.name.startsWith(PREFIX));
+}
+
+export async function qualifiesForRole(member: GuildMember) {
 	if (member.roles.premiumSubscriberRole) return true;
 
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
