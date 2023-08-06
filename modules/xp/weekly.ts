@@ -153,12 +153,9 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 			const customRole = getCustomRole(guildMember);
 
-			if (customRole === undefined) return;
+			if (!customRole) return;
 
-			config.guild.roles.delete(
-				customRole,
-				"User no longer meets the requirements to have a Custom Role",
-			);
+			customRole.delete("No longer meets custom role requirements");
 		});
 	});
 
