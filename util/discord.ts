@@ -28,7 +28,6 @@ import {
 	MessageMentions,
 	type AnyThreadChannel,
 	type MessageReaction,
-	escapeMarkdown,
 	chatInputApplicationCommandMention,
 	DMChannel,
 	type PartialDMChannel,
@@ -194,7 +193,7 @@ export async function getAllMessages(channel: TextBasedChannel): Promise<Message
  * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
  * @author Based Off of [Rapptz/discord.py's
- *   `system_content`](https://github.com/Rapptz/discord.py/blob/1767be0/discord/message.py#L1994-L2134)
+ *   `system_content`](https://github.com/Rapptz/discord.py/blob/14faa9b/discord/message.py#L2001-L2141)
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
  *
@@ -307,7 +306,7 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		case MessageType.ChannelFollowAdd: {
 			return `${
 				constants.emojis.discord.add
-			} ${message.author.toString()} has added **${escapeMarkdown(
+			} ${message.author.toString()} has added **${escapeMessage(
 				message.content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}
@@ -441,8 +440,11 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.AutoModerationAction: {
-			// TODO: flagged
-			return `**AutoMod** has blocked a message in <#${
+			return `**AutoMod** has ${
+				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
+					? "flagged"
+					: "blocked"
+			} a message in <#${
 				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value
 			}>`;
 		}

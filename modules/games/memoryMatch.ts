@@ -23,6 +23,13 @@ const EMPTY_TILE = "⬛";
 
 const deletedPings = new Set<Snowflake>();
 
+const instructionsButton = {
+	type: ComponentType.Button,
+	label: "Instructions",
+	customId: `_showMemoryInstructions`,
+	style: ButtonStyle.Secondary,
+} as const;
+
 export default async function memoryMatch(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ) {
@@ -34,14 +41,7 @@ export default async function memoryMatch(
 			components: [
 				{
 					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.Button,
-							label: "Instructions",
-							customId: `_showMemoryInstructions`,
-							style: ButtonStyle.Secondary,
-						},
-					],
+					components: [instructionsButton],
 				},
 			],
 		});
@@ -60,12 +60,7 @@ export default async function memoryMatch(
 				{
 					type: ComponentType.ActionRow,
 					components: [
-						{
-							type: ComponentType.Button,
-							label: "Instructions",
-							customId: `_showMemoryInstructions`,
-							style: ButtonStyle.Secondary,
-						},
+						instructionsButton,
 						{
 							type: ComponentType.Button,
 							label: "Tournament Information",
@@ -109,12 +104,7 @@ export default async function memoryMatch(
 						customId: `cancel-${interaction.id}`,
 						style: ButtonStyle.Danger,
 					},
-					{
-						type: ComponentType.Button,
-						label: "Instructions",
-						customId: `_showMemoryInstructions`,
-						style: ButtonStyle.Secondary,
-					},
+					instructionsButton,
 				],
 			},
 		],

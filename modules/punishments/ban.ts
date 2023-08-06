@@ -5,7 +5,6 @@ import {
 	ButtonStyle,
 	time,
 	TimestampStyles,
-	escapeMarkdown,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -13,6 +12,7 @@ import { parseTime } from "../../util/numbers.js";
 import { SpecialReminders, remindersDatabase } from "../reminders.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
+import { escapeMessage } from "../../util/markdown.js";
 
 export default async function ban(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const memberToBan = interaction.options.getMember("user");
@@ -154,7 +154,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					?.send({
 						embeds: [
 							{
-								title: `You were banned from ${escapeMarkdown(config.guild.name)}!`,
+								title: `You were banned from ${escapeMessage(config.guild.name)}!`,
 								description:
 									(reason || "") +
 									(unbanTime

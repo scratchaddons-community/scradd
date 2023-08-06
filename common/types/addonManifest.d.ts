@@ -1,4 +1,4 @@
-/** @author [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/8d3b8eb/1/1.19.json) */
+/** @author [ScratchAddons/manifest-schema](https://github.com/ScratchAddons/manifest-schema/blob/523d60c/1/1.20.json) */
 
 /** The value manipulator. */
 type cssManipulator =
@@ -76,6 +76,8 @@ type cssManipulator =
 			source: cssManipulator;
 			/** The possible options. */
 			options: Record<string, cssManipulator>;
+			/** The default, in case the source does not map to any options. */
+			default: cssManipulator;
 	  }
 	| {
 			/** The type of the manipulator. */

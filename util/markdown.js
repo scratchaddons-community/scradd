@@ -3,14 +3,19 @@ import { escapeMarkdown, escapeMaskedLink, hyperlink } from "discord.js";
 /**
  * Escape text.
  *
- * @deprecated Djs has this.
- *
  * @param {string} text - The text to escape.
  *
  * @returns {string} The escaped text.
+ *
+ * @todo Remove after https://github.com/discordjs/discord.js/pull/9463 is merged.
  */
 export function escapeMessage(text) {
-	return escapeMarkdown(text, { maskedLink: true });
+	return escapeMarkdown(text, {
+		heading: true,
+		bulletedList: true,
+		numberedList: true,
+		maskedLink: true,
+	});
 }
 
 /**

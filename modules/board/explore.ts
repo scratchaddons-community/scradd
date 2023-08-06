@@ -77,7 +77,11 @@ export default async function makeSlideshow(
 		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
 	},
 ) {
-	await interaction.deferReply();
+	await interaction.deferReply({
+		ephemeral:
+			interaction.isButton() &&
+			interaction.message.interaction?.user.id !== interaction.user.id,
+	});
 	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
 		[...data].sort(() => Math.random() - 0.5),
