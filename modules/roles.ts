@@ -279,8 +279,11 @@ defineModal("customRole", async (interaction) => {
 });
 
 defineEvent("guildMemberRemove", async (member) => {
-	const role = getCustomRole(member as GuildMember);
-	await role?.delete(`${member.user.tag} left the server`);
+	for (const [, role] of await config.guild.roles.fetch()) {
+		if (role.name.startsWith(PREFIX) && !role.members.size) {
+			await role.delete(`${member.user.tag} left the server`);
+		}
+	}
 });
 
 defineEvent("guildMemberUpdate", async (_, member) => {
