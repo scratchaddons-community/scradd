@@ -166,10 +166,7 @@ defineModal("customRole", async (interaction) => {
 	const name = interaction.fields.fields.get("name")?.value;
 	const color = interaction.fields.fields.get("color")?.value;
 
-	const existingRole =
-		interaction.member instanceof GuildMember
-			? interaction.member.roles.valueOf().find((role) => role.name.startsWith(PREFIX))
-			: undefined;
+	const existingRole = getCustomRole(interaction.member);
 
 	if (!name) {
 		if (!existingRole) {
@@ -282,21 +279,15 @@ defineModal("customRole", async (interaction) => {
 });
 
 defineEvent("guildMemberRemove", async (member) => {
-	for (const [, role] of await config.guild.roles.fetch()) {
-		if (role.name.startsWith(PREFIX) && !role.members.size) {
-			await role.delete(`${member.user.tag} left the server`);
-		}
-	}
+	const role = getCustomRole(member as GuildMember);
+	await role?.delete(`${member.user.tag} left the server`);
 });
 
 defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	if (!(await qualifiesForRole(member))) {
-		await member.roles
-			.valueOf()
-			.find((role) => role.name.startsWith(PREFIX))
-			?.delete("No longer qualifies");
+		await getCustomRole(member)?.delete("No longer qualifies");
 	}
 });
 
