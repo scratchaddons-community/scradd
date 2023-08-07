@@ -257,7 +257,7 @@ defineEvent("threadCreate", async (thread) => {
 		});
 });
 
-defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
+defineEvent("threadUpdate", async ({ archived: wasArchived, locked: wasLocked }, thread) => {
 	if (thread.guild.id !== config.guild.id) return;
 	const options = getThreadConfig(thread);
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
@@ -269,6 +269,41 @@ defineEvent("threadUpdate", async ({ archived: wasArchived }, thread) => {
 				return await addRoleToThread({ role, thread });
 			}) ?? [],
 		);
+	}
+
+	if (!wasLocked && thread.locked && thread.parent?.type === ChannelType.GuildForum) {
+		const date = Date.now() + 43_200_000;
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: thread.id,
+				date: date,
+				reminder: undefined,
+				user: client.user.id,
+				id: SpecialReminders.CloseThread,
+			},
+		];
+		await queueReminders();
+
+		await thread.send({
+			content: `${constants.emojis.statuses.yes} I’ll close this thread ${time(
+				Math.round(date / 1_000),
+				TimestampStyles.RelativeTime,
+			)}!`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							label: "Cancel",
+							customId: "close_cancelThreadChange",
+							style: ButtonStyle.Danger,
+						},
+					],
+				},
+			],
+		});
 	}
 });
 
