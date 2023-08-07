@@ -16,8 +16,9 @@ import {
 } from "discord.js";
 import constants from "../common/constants.js";
 import { parseTime } from "../util/numbers.js";
-import { SpecialReminders, remindersDatabase } from "./reminders.js";
+import { SpecialReminders, remindersDatabase } from "./reminders/misc.js";
 import { disableComponents } from "../util/discord.js";
+import queueReminders from "./reminders/send.js";
 
 export const threadsDatabase = new Database<{
 	id: Snowflake;
@@ -161,6 +162,7 @@ defineCommand(
 				id: SpecialReminders[command === "close-in" ? "CloseThread" : "LockThread"],
 			},
 		];
+		await queueReminders();
 
 		const type = command.split("-")[0];
 		await interaction.reply({
@@ -222,6 +224,8 @@ defineButton("cancelThreadChange", async (interaction, type) => {
 					reminder.channel === interaction.channel?.id
 				),
 		);
+		await queueReminders();
+
 		await interaction.reply(`${constants.emojis.statuses.yes} Canceled ${type}!`);
 	}
 });

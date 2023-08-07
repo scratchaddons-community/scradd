@@ -8,7 +8,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
-import { remindersDatabase, SpecialReminders } from "../reminders.js";
+import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
 import { getCustomRole, qualifiesForRole } from "../roles.js";

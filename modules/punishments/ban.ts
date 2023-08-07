@@ -9,10 +9,11 @@ import {
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { parseTime } from "../../util/numbers.js";
-import { SpecialReminders, remindersDatabase } from "../reminders.js";
+import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
+import queueReminders from "../reminders/send.js";
 
 export default async function ban(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const memberToBan = interaction.options.getMember("user");
@@ -56,6 +57,8 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					reminder: userToBan.id,
 				},
 			];
+			await queueReminders();
+
 			await interaction.reply(
 				`${
 					constants.emojis.statuses.yes
@@ -73,6 +76,8 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 						reminder.reminder === userToBan.id
 					),
 			);
+			await queueReminders();
+
 			await interaction.reply(
 				`${
 					constants.emojis.statuses.yes
@@ -149,6 +154,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							reminder: userToBan.id,
 						},
 					];
+				await queueReminders();
 
 				await userToBan
 					?.send({
