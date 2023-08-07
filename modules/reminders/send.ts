@@ -158,7 +158,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						...remindersDatabase.data,
 						{
 							channel: reminder.channel,
-							date: Number(Date.now() + 86_400),
+							date: Number(Date.now() + 86_400_000),
 							reminder: undefined,
 							id: SpecialReminders.BackupDatabases,
 							user: client.user.id,
