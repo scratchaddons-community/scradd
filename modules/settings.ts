@@ -5,12 +5,14 @@ import {
 	type InteractionReplyOptions,
 	type Snowflake,
 	User,
+	userMention,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
 import { defineButton, defineCommand } from "strife.js";
+import { disableComponents } from "../util/discord.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -81,11 +83,9 @@ defineCommand(
 
 defineButton("toggleSetting", async (interaction, setting = "") => {
 	if (
-		!interaction.message.flags.has("Ephemeral") &&
-		!(
-			interaction.message.mentions.parsedUsers.size &&
-			interaction.message.mentions.users.has(interaction.user.id)
-		)
+		interaction.message.interaction?.user.id !== interaction.user.id &&
+		!interaction.message.content.includes(userMention(interaction.user.id)) &&
+		!interaction.message.flags.has("Ephemeral")
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -93,6 +93,11 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 		});
 	}
 	await interaction.reply(updateSettings(interaction.user, { [setting]: "toggle" }));
+
+	if (!interaction.message.flags.has("Ephemeral"))
+		await interaction.message.edit({
+			components: disableComponents(interaction.message.components),
+		});
 });
 
 export function updateSettings(
