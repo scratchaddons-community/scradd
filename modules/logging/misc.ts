@@ -37,7 +37,7 @@ export default async function log(
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
-		button?: { label: string; url: string };
+		buttons?: { label: string; url: string }[];
 	} = {},
 ) {
 	const thread = await getLoggingThread(group);
@@ -68,16 +68,13 @@ export default async function log(
 				: ""),
 		allowedMentions: { users: [] },
 		embeds: extra.embeds,
-		components: extra.button && [
+		components: extra.buttons && [
 			{
-				components: [
-					{
-						label: extra.button.label,
-						style: ButtonStyle.Link,
-						type: ComponentType.Button,
-						url: extra.button.url,
-					},
-				],
+				components: extra.buttons.map((button) => ({
+					...button,
+					style: ButtonStyle.Link,
+					type: ComponentType.Button,
+				})),
 				type: ComponentType.ActionRow,
 			},
 		],

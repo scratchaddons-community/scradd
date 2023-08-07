@@ -142,12 +142,14 @@ const events: {
 						)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 						"server",
 						{
-							button: {
-								label: "Permissions",
-								url:
-									"https://discordlookup.com/permissions-calculator/" +
-									change.new,
-							},
+							buttons: [
+								{
+									label: "Permissions",
+									url:
+										"https://discordlookup.com/permissions-calculator/" +
+										change.new,
+								},
+							],
 						},
 					);
 					break;

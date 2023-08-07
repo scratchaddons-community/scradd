@@ -175,7 +175,7 @@ export async function say(
 				message.id
 			})`,
 			"messages",
-			{ button: { label: "Message", url: message.url } },
+			{ buttons: [{ label: "Message", url: message.url }] },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);
 	}

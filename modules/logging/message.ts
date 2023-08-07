@@ -26,7 +26,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
 			databaseThread.id !== message.channel.id);
 
-	const content = !shush && (await messageToText(message));
+	const content = !shush && (messageToText(message, false));
 	const { embeds, files } = shush
 		? { embeds: [], files: [] }
 		: extractMessageExtremities(message);
@@ -38,7 +38,17 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 		"messages",
 		{
 			embeds,
-			button: { label: "Context", url: message.url },
+			buttons: [
+				{ label: "Context", url: message.url },
+				...(message.reference
+					? [
+							{
+								label: "Referenced Message",
+								url: `https://discord.com/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
+							},
+					  ]
+					: []),
+			],
 
 			files: content
 				? [{ content, extension: "md" }, ...files.map((file) => file.url)]
@@ -74,7 +84,7 @@ export async function messageDeleteBulk(
 		"messages",
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
-			button: { label: "Context", url: messages.first()?.url ?? "" },
+			buttons: [{ label: "Context", url: messages.first()?.url ?? "" }],
 		},
 	);
 }
@@ -105,7 +115,7 @@ export async function messageReactionRemoveAll(
 				},
 			],
 
-			button: { label: "Context", url: message.url },
+			buttons: [{ label: "Context", url: message.url }],
 		},
 	);
 }
@@ -124,7 +134,7 @@ export async function messageUpdate(
 				newMessage.id
 			}) ${newMessage.flags.has("Crossposted") ? "" : "un"}published`,
 			"messages",
-			{ button: { label: "Message", url: newMessage.url } },
+			{ buttons: [{ label: "Message", url: newMessage.url }] },
 		);
 	}
 	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
@@ -135,7 +145,7 @@ export async function messageUpdate(
 				newMessage.id
 			})`,
 			"messages",
-			{ button: { label: "Message", url: newMessage.url }, embeds: oldMessage.embeds },
+			{ buttons: [{ label: "Message", url: newMessage.url }], embeds: oldMessage.embeds },
 		);
 	}
 
@@ -147,7 +157,7 @@ export async function messageUpdate(
 				newMessage.id
 			}) ${newMessage.pinned ? "" : "un"}pinned`,
 			"messages",
-			{ button: { label: "Message", url: newMessage.url } },
+			{ buttons: [{ label: "Message", url: newMessage.url }] },
 		);
 	}
 
@@ -185,7 +195,7 @@ export async function messageUpdate(
 					newMessage.id
 				}) edited`,
 				"messages",
-				{ button: { label: "Message", url: newMessage.url }, files },
+				{ buttons: [{ label: "Message", url: newMessage.url }], files },
 			);
 		}
 	}

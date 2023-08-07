@@ -199,7 +199,9 @@ export async function getAllMessages(channel: TextBasedChannel): Promise<Message
  *
  * @returns Text representation of the message.
  */
-export async function messageToText(message: Message, replies = true): Promise<string> {
+export function messageToText(message: Message, replies: false): string;
+export async function messageToText(message: Message, replies?: true): Promise<string>;
+export function messageToText(message: Message, replies = true): Awaitable<string> {
 	const actualContent = message.flags.has("Loading")
 		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
 			? `${constants.emojis.discord.error} The application did not respond`
@@ -241,13 +243,17 @@ export async function messageToText(message: Message, replies = true): Promise<s
 		}
 
 		case MessageType.ChannelPinnedMessage: {
-			const pinned = await message.fetchReference().catch(() => message);
+			if (!replies)
+				return `${
+					constants.emojis.discord.pin
+				} ${message.author.toString()} pinned **a message** to this channel. See all **pinned messages**.`;
 
 			return `${
 				constants.emojis.discord.pin
-			} ${message.author.toString()} pinned [a message](${
-				pinned.url
-			}) to this channel. See all [pinned messages](${pinned.channel.url}).`;
+			} ${message.author.toString()} pinned [a message](${message.url.replace(
+				message.id,
+				message.reference?.messageId || "",
+			)}) to this channel. See all [pinned messages](${message.channel.url}).`;
 		}
 
 		case MessageType.UserJoin: {
@@ -344,25 +350,33 @@ export async function messageToText(message: Message, replies = true): Promise<s
 
 		case MessageType.Reply: {
 			if (!replies) return message.content;
-			const repliedMessage = await message.fetchReference().catch(() => {});
+			return message
+				.fetchReference()
+				.catch(() => {})
+				.then(async (reply) => {
+					if (!reply)
+						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
-			if (!repliedMessage)
-				return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
-
-			const cleanContent = await messageToText(repliedMessage, false);
-
-			return `*[Replying to](${repliedMessage.url}) ${repliedMessage.author.toString()}${
-				cleanContent ? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "*"
-			}\n\n${message.content}`;
+					const cleanContent = messageToText(reply, false);
+					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
+						cleanContent
+							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
+							: "*"
+					}\n\n${message.content}`;
+				});
 		}
 
 		case MessageType.ThreadStarterMessage: {
-			const reference = await message.fetchReference().catch(() => {});
-
-			// The resolved message for the reference will be a Message
-			return reference
-				? (await messageToText(reference, replies)) || actualContent
-				: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
+			if (!replies) return actualContent;
+			return message
+				.fetchReference()
+				.catch(() => {})
+				.then((reference) =>
+					// The resolved message for the reference will be a Message
+					reference
+						? messageToText(reference, replies) || actualContent
+						: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
+				);
 		}
 
 		case MessageType.GuildInviteReminder: {
@@ -421,18 +435,20 @@ export async function messageToText(message: Message, replies = true): Promise<s
 			if (!replies) return actualContent;
 
 			const commandName = message.interaction?.commandName.split(" ")[0];
-			const command = (await config.guild.commands.fetch()).find(
-				({ name }) => name === commandName,
-			);
-
-			return `*${message.interaction?.user.toString() ?? ""} used ${
-				command
-					? chatInputApplicationCommandMention(
-							message.interaction?.commandName ?? "",
-							command.id ?? "",
-					  )
-					: bold(`/${message.interaction?.commandName ?? ""}`)
-			}:*\n${actualContent}`;
+			return config.guild.commands
+				.fetch()
+				.then((commands) => commands.find(({ name }) => name === commandName))
+				.then(
+					(command) =>
+						`*${message.interaction?.user.toString() ?? ""} used ${
+							command
+								? chatInputApplicationCommandMention(
+										message.interaction?.commandName ?? "",
+										command.id ?? "",
+								  )
+								: bold(`/${message.interaction?.commandName ?? ""}`)
+						}:*\n${actualContent}`,
+				);
 		}
 
 		case MessageType.Call: {

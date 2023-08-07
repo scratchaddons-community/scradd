@@ -152,7 +152,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 			}) edited by ${interaction.user.toString()}`,
 			"messages",
 			{
-				button: { label: "Message", url: edited.url },
+				buttons: [{ label: "Message", url: edited.url }],
 				files: shouldLog(edited.channel) ? files : [],
 			},
 		);
