@@ -15,6 +15,8 @@ http.createServer((request, response) => {
 					response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
 				});
 			}
+		} else {
+			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not Found");
 		}
 	} catch (error) {
 		response.writeHead(500).end(error.name + ": " + error.message);
