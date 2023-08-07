@@ -234,8 +234,8 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
-			const roles = options.roles?.split("|");
-			if (!roles?.length) return;
+			const roles = options.roles && options.roles.split("|");
+			if (!roles || !roles.length) return;
 			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
 			if (!thread?.isThread()) return;
 			if (roles.some((role) => member.roles.resolve(role)))
