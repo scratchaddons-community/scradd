@@ -196,6 +196,6 @@ export async function cancelReminder(interaction: MessageComponentInteraction, i
 	}
 
 	remindersDatabase.data = filtered;
-		await queueReminders();
+	await queueReminders();
 	return true;
 }
