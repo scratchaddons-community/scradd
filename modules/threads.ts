@@ -40,7 +40,7 @@ defineCommand(
 						type: ApplicationCommandOptionType.String,
 						required: true,
 						description:
-							"How long until closing the thread, a UNIX timestamp to close it at, or “never” (defaults to 1 hour)",
+							"How long until closing the thread, a UNIX timestamp to close it at, or “never”",
 					},
 				},
 			},
@@ -304,6 +304,12 @@ defineEvent("threadUpdate", async ({ archived: wasArchived, locked: wasLocked },
 				},
 			],
 		});
+	}
+
+	if (thread.archived && !thread.locked && thread.parent?.id === config.channels.tickets?.id) {
+		await thread.setArchived(false, "To lock it");
+		await thread.setLocked(true, "Was closed");
+		await thread.setArchived(true, "Was closed");
 	}
 });
 
