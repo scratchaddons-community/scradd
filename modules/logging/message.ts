@@ -26,7 +26,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
 			databaseThread.id !== message.channel.id);
 
-	const content = !shush && (messageToText(message, false));
+	const content = !shush && messageToText(message, false);
 	const { embeds, files } = shush
 		? { embeds: [], files: [] }
 		: extractMessageExtremities(message);
