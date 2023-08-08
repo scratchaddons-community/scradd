@@ -55,10 +55,13 @@ export default async function logError(
  *
  * @returns The standardized error.
  */
-export function generateError(error: any, returnObject: true): { [key: string]: any };
-export function generateError(error: any, returnObject?: false): string;
-export function generateError(error: any, returnObject = false): string | { [key: string]: any } {
-	if (typeof error === "object" || error.toString !== "function") {
+export function generateError(error: unknown, returnObject: true): { [key: string]: any };
+export function generateError(error: unknown, returnObject?: false): string;
+export function generateError(
+	error: unknown,
+	returnObject = false,
+): string | { [key: string]: any } {
+	if (typeof error === "object" && error) {
 		const serialized = serializeError(error);
 
 		if (typeof serialized === "string") return serialized;
@@ -66,18 +69,22 @@ export function generateError(error: any, returnObject = false): string | { [key
 		delete serialized.message;
 		delete serialized.stack;
 		delete serialized.errors;
+		delete serialized.cause;
 
-		const subErrors: unknown[] | undefined =
+		const subErrors =
 			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
 
 		const object = {
-			name: returnObject ? error.name : undefined,
-			message: error.message,
-			stack: sanitizePath(error.stack || new Error("dummy message").stack).split("\n"),
+			name: returnObject && "name" in error ? error.name : undefined,
+			message: "message" in error ? error.message : undefined,
+			stack: sanitizePath(
+				`${("stack" in error ? error : new Error("dummy message")).stack}`,
+			).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
+			cause: "cause" in error && generateError(error.cause, true),
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");
 	}
-	return error.toString();
+	return `${error}`;
 }
