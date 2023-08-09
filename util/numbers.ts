@@ -122,5 +122,5 @@ export function parseTime(time: string): Date {
 		date.getUTCDate() + +weeks * 7 + +days,
 	);
 	date.setUTCHours(date.getUTCHours() + +hours, date.getUTCMinutes() + +minutes);
-	return date
+	return date;
 }
