@@ -98,23 +98,29 @@ export function parseTime(time: string): Date {
 	}
 
 	const {
+		years = 0,
+		months = 0,
 		weeks = 0,
 		days = 0,
 		hours = 0,
 		minutes = 0,
 	} = time.match(
 		new RegExp(
-			/^(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
+			/^(?:(?<years>\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
+				/(?:(?<months>\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
+				/(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
 				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
 				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
 				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
 		),
 	)?.groups ?? {};
 
-	const totalDays = Number(days) + 7 * Number(weeks);
-	const totalHours = Number(hours) + 24 * totalDays;
-	const totalMinutes = Number(minutes) + 60 * totalHours;
-	const totalSeconds = 60 * totalMinutes;
-	const totalMilliseconds = Date.now() + 1_000 * totalSeconds;
-	return new Date(totalMilliseconds);
+	const date = new Date();
+	date.setUTCFullYear(
+		date.getUTCFullYear() + +years,
+		date.getUTCMonth() + +months,
+		date.getUTCDate() + +weeks * 7 + +days,
+	);
+	date.setUTCHours(date.getUTCHours() + +hours, date.getUTCMinutes() + +minutes);
+	return date
 }
