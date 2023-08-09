@@ -251,7 +251,7 @@ defineModal("customRole", async (interaction) => {
 		});
 	}
 
-	if (color && !(color in Colors) && color !== "Random" && !/^#[a0-9a-f]{6}$/.test(color)) {
+	if (color && !(color in Colors) && color !== "Random" && !/^#[0-9a-f]{6}$/i.test(color)) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not parse that color!`,
