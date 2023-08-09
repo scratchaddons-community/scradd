@@ -44,7 +44,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 					? [
 							{
 								label: "Referenced Message",
-								url: `https://discord.com/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
+								url: `https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
 							},
 					  ]
 					: []),
