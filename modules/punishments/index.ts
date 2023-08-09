@@ -135,7 +135,7 @@ defineCommand(
 
 			"unban-in": {
 				type: ApplicationCommandOptionType.String,
-				description: `How much of their messages to delete (defaults to never)`,
+				description: `When to unban them in (defaults to never)`,
 			},
 		},
 	},
