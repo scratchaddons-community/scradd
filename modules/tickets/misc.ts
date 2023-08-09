@@ -12,11 +12,10 @@ const initialThreads = await config.channels.tickets?.threads.fetchActive();
 export const TICKETS_BY_MEMBER = Object.fromEntries(
 	initialThreads?.threads
 		.map((thread) => {
-			if (thread.type !== ChannelType.PrivateThread) return;
-			const id = getIdFromThread(thread);
-			return [id, thread] as const;
+			const id = getIdFromName(thread.name);
+			return [id, thread.type === ChannelType.PrivateThread ? thread : undefined] as const;
 		})
-		.filter((info): info is [Snowflake, PrivateThreadChannel] => !!info?.[0]) ?? [],
+		.filter((info): info is [Snowflake, PrivateThreadChannel | undefined] => !!info?.[0]) ?? [],
 );
 
 export const TICKET_CATEGORIES = [
@@ -163,6 +162,6 @@ export const categoryToDescription = {
 	[MOD_CATEGORY]: "Contact User",
 } satisfies Record<Category | typeof MOD_CATEGORY, string>;
 
-export function getIdFromThread(thread: PrivateThreadChannel): Snowflake | undefined {
-	return thread.name.match(/\((\d+)\)$/)?.[1];
+export function getIdFromName(name: string): Snowflake | undefined {
+	return name.match(/\((\d+)\)$/)?.[1];
 }

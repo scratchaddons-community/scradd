@@ -22,7 +22,7 @@ import {
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
-	getIdFromThread,
+	getIdFromName,
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 
@@ -184,11 +184,11 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		oldThread.archived === newThread.archived
 	)
 		return;
-	const memberId = getIdFromThread(newThread);
+	const memberId = getIdFromName(newThread.name);
 	if (!memberId) return;
 
 	if (newThread.archived) {
-		delete TICKETS_BY_MEMBER[memberId];
+		TICKETS_BY_MEMBER[memberId] = undefined;
 	} else if (TICKETS_BY_MEMBER[memberId]) {
 		await newThread.setArchived(true, "Reopened while another ticket is already open");
 		await newThread.setLocked(true, "Reopened while another ticket is already open");
