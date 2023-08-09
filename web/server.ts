@@ -1,5 +1,6 @@
 import { cleanDatabaseListeners } from "../common/database.js";
 import http from "node:http";
+import logError from "../common/logError.js";
 
 http.createServer((request, response) => {
 	try {
@@ -19,7 +20,8 @@ http.createServer((request, response) => {
 			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not Found");
 		}
 	} catch (error) {
-		response.writeHead(500).end(error.name + ": " + error.message);
+		response.writeHead(500).end("Internal Server Error");
+		logError(error, request.url ?? "");
 	}
 }).listen(process.env.PORT, () => {
 	console.log("Server up!");
