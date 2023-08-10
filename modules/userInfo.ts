@@ -134,7 +134,13 @@ defineCommand(
 			embeds: [
 				{
 					color: member?.displayColor,
-					// image: user.bannerURL() ?? user.accentColor,
+					image: {
+						url:
+							user.bannerURL({ size: 1024 }) ??
+							`https://singlecolorimage.com/get/${user.accentColor?.toString(
+								16,
+							)}/600x105`,
+					},
 					thumbnail: { url: (member ?? user).displayAvatarURL() },
 					fields,
 					author: {
