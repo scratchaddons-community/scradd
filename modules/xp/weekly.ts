@@ -147,17 +147,13 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		]);
 	}
 
-	weeklyWinners.forEach(async (weeklyWinner) => {
-		await config.guild.members.fetch(weeklyWinner.user).then(async (guildMember) => {
-			if (await qualifiesForRole(guildMember)) return;
-
-			const customRole = getCustomRole(guildMember);
-
-			if (!customRole) return;
-
-			customRole.delete("No longer meets custom role requirements");
-		});
-	});
+	await Promise.all(
+		weeklyWinners.map(async (weeklyWinner) => {
+			const guildMember = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
+			if (!guildMember || (await qualifiesForRole(guildMember))) return;
+			getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
+		}),
+	);
 
 	return `__**🏆 Weekly Winners week of ${
 		[
