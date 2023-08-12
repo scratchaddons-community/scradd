@@ -79,9 +79,10 @@ defineEvent("messageCreate", async (message) => {
 					content: dad(name, message.author),
 					allowedMentions: { users: [] },
 				});
+			} else if (getSettings(message.author, false).autoreactions !== undefined) {
+				reactions++;
+				return await message.react("👋").catch(() => {});
 			}
-			reactions++;
-			return await message.react("👋").catch(() => {});
 		}
 	}
 
