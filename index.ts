@@ -10,14 +10,21 @@ import constants from "./common/constants.js";
 dns.setDefaultResultOrder("ipv4first");
 
 if (constants.canvasEnabled) {
-	const GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
-	const Chart = (await import("chart.js")).Chart;
+	const { Module } = await import("node:module");
+	const require = Module.createRequire(import.meta.url);
 
+	const { GlobalFonts } = await import("@napi-rs/canvas");
 	GlobalFonts.registerFromPath(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
+		require.resolve("@fontsource-variable/sora/files/sora-latin-wght-normal.woff2"),
 		"Sora",
 	);
-	Chart.defaults.font.family = "Sora";
+	GlobalFonts.registerFromPath(
+		require.resolve("@fontsource-variable/sora/files/sora-latin-ext-wght-normal.woff2"),
+		"SoraExt",
+	);
+
+	const { Chart } = await import("chart.js");
+	Chart.defaults.font.family = constants.fonts;
 }
 
 await login({

@@ -36,7 +36,7 @@ export default async function getUserRank(
 		const rectangleSize = canvas.width * progress;
 		const paddingPixels = 0.18 * canvas.height;
 		context.fillRect(0, 0, rectangleSize, canvas.height);
-		context.font = `${canvas.height * 0.9}px Sora`;
+		context.font = `${canvas.height * 0.9}px ${constants.fonts}`;
 		if (progress < 0.145) {
 			context.fillStyle = "#666";
 			context.textAlign = "end";

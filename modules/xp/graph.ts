@@ -3,6 +3,7 @@ import { recentXpDatabase } from "./misc.js";
 import { createCanvas } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
+import constants from "../../common/constants.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
@@ -30,7 +31,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				},
 				y: { min: 0 },
 			},
-			font: { family: "Sora", weight: "400", style: "normal" },
+			font: { family: constants.fonts, weight: "400", style: "normal" },
 			elements: { point: { radius: 0 } },
 		},
 		plugins: [

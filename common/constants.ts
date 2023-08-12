@@ -61,4 +61,5 @@ export default {
 	},
 
 	canvasEnabled: process.env.CANVAS !== "false",
+	fonts: "Sora, SoraExt, sans-serif",
 };
