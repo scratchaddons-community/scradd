@@ -75,7 +75,7 @@ defineCommand(
 					content: `${
 						constants.emojis.statuses.no
 					} No messages matched those filters! Note: I cannot purge messages that are older than 2 weeks or more than ${MAX_FETCH_COUNT} messages ${
-						message ? `before [this message](${channel?.url}/${message})` : "ago"
+						message ? `before [this message](<${channel?.url}/${message}>)` : "ago"
 					}.`,
 					ephemeral: true,
 				};
