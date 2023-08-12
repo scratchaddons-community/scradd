@@ -96,13 +96,7 @@ defineCommand(
 							: ""),
 					fields: [
 						...(credits
-							? [
-									{
-										inline: true,
-										name: "🫂 Contributors",
-										value: escapeMessage(credits),
-									},
-							  ]
+							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
 						{
