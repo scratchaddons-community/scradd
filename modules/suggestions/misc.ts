@@ -1,4 +1,4 @@
-import { ForumChannel, cleanContent, type Snowflake } from "discord.js";
+import { cleanContent, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
@@ -61,14 +61,3 @@ export const oldSuggestions = config.channels.old_suggestions
 			}),
 	  )
 	: [];
-
-export function getAnswer(appliedTags: Snowflake[], channel: ForumChannel) {
-	return (
-		channel.availableTags.find((tag) => tag.moderated && appliedTags.includes(tag.id)) ?? {
-			name: channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
-			emoji: { name: "❓", id: null },
-			moderated: true,
-			id: "",
-		}
-	);
-}
