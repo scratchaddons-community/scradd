@@ -31,6 +31,7 @@ export default async function warn(
 	strikes: number = DEFAULT_STRIKES,
 	contextOrModerator: string | User = client.user,
 ) {
+	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
 			strike.user === user.id && strike.date + EXPIRY_LENGTH > Date.now() && !strike.removed,
@@ -133,7 +134,7 @@ export default async function warn(
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
 			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
-		return;
+		return true;
 	}
 
 	const totalMuteCount = Math.trunc(totalStrikeCount / STRIKES_PER_MUTE);
@@ -168,6 +169,8 @@ export default async function warn(
 			)
 			.catch(() => {});
 	}
+
+	return true
 }
 export async function removeStrike(interaction: ButtonInteraction<CacheType>, id: string) {
 	const strike = id && (await filterToStrike(id));

@@ -95,15 +95,15 @@ defineCommand(
 		const reason = interaction.options.getString("reason") || "No reason given.";
 		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
 		await interaction.deferReply();
-		await warn(user, reason, strikes, interaction.user);
+		const success = await warn(user, reason, strikes, interaction.user);
 
-		await interaction.editReply({
-			allowedMentions: { users: [] },
-
-			content: `${constants.emojis.statuses.yes} ${
-				strikes ? "Warned" : "Verbally warned"
-			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
-		});
+		await interaction.editReply(
+			success
+				? `${constants.emojis.statuses.yes} ${
+						strikes ? "Warned" : "Verbally warned"
+				  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+				: `${constants.emojis.statuses.no} Can not warn <@${user.toString()}>.`,
+		);
 	},
 );
 defineButton("removeStrike", removeStrike);
