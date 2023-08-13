@@ -13,7 +13,7 @@ import { generateError } from "../../common/logError.js";
 export default async function getCode(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const { owner } = await client.application.fetch();
 	const owners =
-		owner instanceof User ? [owner.id] : [...(owner?.members.map((member) => member.id) ?? [])];
+		owner instanceof User ? [owner.id] : owner?.members.map((member) => member.id) ?? [];
 	if (process.env.NODE_ENV === "production" && !owners.includes(interaction.user.id))
 		return await interaction.reply({
 			ephemeral: true,

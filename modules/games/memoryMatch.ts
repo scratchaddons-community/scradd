@@ -216,7 +216,8 @@ async function playGame(
 			}
 			totalTurns++;
 
-			const selected = [...shown].map(
+			const selected = Array.from(
+				shown,
 				([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
 			);
 
