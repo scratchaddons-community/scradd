@@ -111,17 +111,10 @@ export default async function automodMessage(message: Message) {
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
 		].reduce<string[][]>(
-			(bad, censored, index) =>
+			(bad, censored) =>
 				typeof censored === "boolean"
 					? bad
-					: [
-							...(index ? [] : [[]]), // Increase the severity of content warns. All warns are decreased a severity later.
-							...bad.map((words, index) => [
-								...words,
-								...(censored.words?.[index] ?? []),
-							]),
-					  ],
-
+					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]),
 			Array(badWordRegexps.length).fill([]),
 		);
 		const badEmbedWords = message.embeds
@@ -142,11 +135,18 @@ export default async function automodMessage(message: Message) {
 		const hasBadWords = badWords.flat().length > 0;
 		const hasBadEmbedWords = badEmbedWords.flat().length > 0;
 
-		const languageStrikes = [...(badWords ?? []), ...(badEmbedWords ?? [])].reduce(
-			(accumulator, current, index) =>
-				current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
-			0,
-		);
+		const languageStrikes =
+			badWords.reduce(
+				(accumulator, current, index) =>
+					current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
+				0,
+			) +
+			badEmbedWords.reduce(
+				(accumulator, current, index) =>
+					current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
+				0,
+			);
+		
 		if (hasBadWords || needsDelete) {
 			if (!message.deletable)
 				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
@@ -173,8 +173,8 @@ export default async function automodMessage(message: Message) {
 				"Watch your language!",
 				languageStrikes,
 				`Sent message with words: ${[
-					...(badWords.flat() ?? []),
 					...(badEmbedWords.flat() ?? []),
+					...(badWords.flat() ?? []),
 				].join(", ")}`,
 			);
 		}
