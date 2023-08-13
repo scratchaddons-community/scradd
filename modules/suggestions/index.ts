@@ -4,12 +4,14 @@ import {
 	ThreadChannel,
 	type Snowflake,
 	ForumChannel,
+	Colors,
 } from "discord.js";
 import { client, defineCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import getTop from "./getTop.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
+import { lerpColors } from "../../util/numbers.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.parent?.id === config.channels.suggestions?.id) addToDatabase(thread);
@@ -74,14 +76,21 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 				author: user
 					? { icon_url: user.displayAvatarURL(), name: "Answered by " + user.displayName }
 					: undefined,
-				description: entry.target.parent?.topic
-					?.split(`\n- **${newAnswer.name}**: `)[1]
-					?.split("\n")[0],
-				footer: { text: `Was previously ${oldAnswer.name}` },
+				color:
+					newAnswer.position < 0
+						? undefined
+						: lerpColors(
+								[Colors.Green, Colors.Blue, Colors.Yellow, Colors.Red],
+								newAnswer.position,
+						  ),
 				title:
 					(newAnswer.emoji
 						? `${newAnswer.emoji.name || `<:_:${newAnswer.emoji.id}>`} `
 						: "") + newAnswer.name,
+				description: entry.target.parent?.topic
+					?.split(`\n- **${newAnswer.name}**: `)[1]
+					?.split("\n")[0],
+				footer: { text: `Was previously ${oldAnswer.name}` },
 			},
 		],
 	});
