@@ -146,7 +146,7 @@ export default async function automodMessage(message: Message) {
 					current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
 				0,
 			);
-		
+
 		if (hasBadWords || needsDelete) {
 			if (!message.deletable)
 				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);

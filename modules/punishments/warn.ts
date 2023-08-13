@@ -170,7 +170,7 @@ export default async function warn(
 			.catch(() => {});
 	}
 
-	return true
+	return true;
 }
 export async function removeStrike(interaction: ButtonInteraction<CacheType>, id: string) {
 	const strike = id && (await filterToStrike(id));
