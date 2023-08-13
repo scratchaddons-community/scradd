@@ -121,9 +121,10 @@ export default async function memoryMatch(
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
-				if (isUser || isOtherUser)
+				if (isUser || isOtherUser) {
 					await message.edit({ components: disableComponents(message.components) });
-				return;
+					collector.stop();
+				}
 			}
 
 			if (!buttonInteraction.customId.startsWith("confirm-")) return;
