@@ -57,7 +57,7 @@ export const badWordRegexps = badWords.map(
 		),
 );
 
-export default function censor(text: string) {
+export default function censor(text: string, strikeShift = 0) {
 	const words: string[][] = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
@@ -77,7 +77,8 @@ export default function censor(text: string) {
 
 				strikes: words.reduce(
 					(accumulator, current, index) =>
-						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
+						current.length * Math.max(index - strikeShift, PARTIAL_STRIKE_COUNT) +
+						accumulator,
 					0,
 				),
 

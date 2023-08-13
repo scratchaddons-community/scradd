@@ -110,12 +110,18 @@ export default async function automodMessage(message: Message) {
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
-		].reduce<string[][]>(
+		].reduce<{ strikes: number; words: string[][] }>(
 			(bad, censored) =>
 				typeof censored === "boolean"
 					? bad
-					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]),
-			Array(badWordRegexps.length).fill([]),
+					: {
+							strikes: bad.strikes + censored.strikes,
+							words: bad.words.map((words, index) => [
+								...words,
+								...(censored.words?.[index] ?? []),
+							]),
+					  },
+			{ strikes: 0, words: Array(badWordRegexps.length).fill([]) },
 		);
 		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
@@ -125,27 +131,26 @@ export default async function automodMessage(message: Message) {
 				embed.author?.name,
 				...embed.fields.flatMap((field) => [field.name, field.value]),
 			])
-			.reduce<string[][]>((bad, current) => {
-				const censored = censor(current || "");
-				return typeof censored === "boolean"
-					? bad
-					: bad.map((words, index) => [...words, ...(censored.words?.[index] ?? [])]);
-			}, Array(badWordRegexps.length).fill([]));
-
-		const hasBadWords = badWords.flat().length > 0;
-		const hasBadEmbedWords = badEmbedWords.flat().length > 0;
-
-		const languageStrikes =
-			badWords.reduce(
-				(accumulator, current, index) =>
-					current.length * Math.max(index - 1, PARTIAL_STRIKE_COUNT) + accumulator,
-				0,
-			) +
-			badEmbedWords.reduce(
-				(accumulator, current, index) =>
-					current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
-				0,
+			.reduce<{ strikes: number; words: string[][] }>(
+				(bad, current) => {
+					const censored = censor(current || "", 1);
+					return censored
+						? {
+								strikes: bad.strikes + censored.strikes,
+								words: bad.words.map((words, index) => [
+									...words,
+									...(censored.words?.[index] ?? []),
+								]),
+						  }
+						: bad;
+				},
+				{ strikes: 0, words: Array(badWordRegexps.length).fill([]) },
 			);
+
+		const hasBadWords = badWords.strikes > 0;
+		const hasBadEmbedWords = badEmbedWords.strikes > 0;
+
+		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
 
 		if (hasBadWords || needsDelete) {
 			if (!message.deletable)
@@ -173,8 +178,8 @@ export default async function automodMessage(message: Message) {
 				"Watch your language!",
 				languageStrikes,
 				`Sent message with words: ${[
-					...(badEmbedWords.flat() ?? []),
-					...(badWords.flat() ?? []),
+					...(badEmbedWords.words.flat() ?? []),
+					...(badWords.words.flat() ?? []),
 				].join(", ")}`,
 			);
 		}

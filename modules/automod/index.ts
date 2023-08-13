@@ -90,7 +90,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	if (message.guild?.id !== config.guild.id) return false;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
-		const censored = censor(reaction.emoji.name);
+		const censored = censor(reaction.emoji.name, 1);
 		if (censored) {
 			await warn(
 				partialUser.partial ? await partialUser.fetch() : partialUser,
