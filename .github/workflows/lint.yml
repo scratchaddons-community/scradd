@@ -50,7 +50,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.0
               with:
                   node-version: "18.12.1"
                   cache: npm
@@ -97,7 +97,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.0
               with:
                   node-version: "18.12.1"
                   cache: npm
@@ -119,7 +119,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.0
               with:
                   node-version: "18.12.1"
                   cache: npm
