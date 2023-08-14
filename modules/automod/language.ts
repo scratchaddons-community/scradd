@@ -1,5 +1,5 @@
 import { ChannelType, PermissionFlagsBits, type TextBasedChannel } from "discord.js";
-import badWords from "../../badWords.js";
+import badWords from "./badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
