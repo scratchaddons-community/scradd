@@ -1,9 +1,4 @@
-import {
-	escapeMarkdown,
-	escapeMaskedLink,
-	hyperlink,
-	type Snowflake,
-} from "discord.js";
+import { escapeMarkdown, escapeMaskedLink, hyperlink, type Snowflake } from "discord.js";
 import config from "../common/config.js";
 
 /** @todo Remove after https://github.com/discordjs/discord.js/pull/9463 is merged. */

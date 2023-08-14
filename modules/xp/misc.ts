@@ -83,7 +83,7 @@ export function getLevelForXp(xp: number) {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
 
 	if (foundLevel !== -2) return foundLevel;
-	
+
 	let level = XP_PER_LEVEL.length;
 
 	while (getXpForLevel(level) < xp) level++;
