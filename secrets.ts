@@ -13,16 +13,16 @@ export function dad(name: string, _: User) {
 		) ??
 		split[0] ??
 		name;
-	const customName =
-		customNames[firstName]|| name;
-	const comment = customComments[firstName] ||"I’m Scradd!";
+	const customName = customNames[firstName] || name;
+	const comment = customComments[firstName] || "I’m Scradd!";
 
 	const greetingIndex = Math.floor(Math.random() * greetings.length);
 	const greeting = greetings[greetingIndex];
 
-	return customResponses[firstName] ?? `${greeting} ${customName}${
-						customTriggers.includes(firstName) ? "!" : ","
-				  } ${comment}`;
+	return (
+		customResponses[firstName] ??
+		`${greeting} ${customName}${customTriggers.includes(firstName) ? "!" : ","} ${comment}`
+	);
 }
 
 const greetings = ["Hi"] as const;
