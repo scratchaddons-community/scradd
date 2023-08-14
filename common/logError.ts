@@ -81,7 +81,7 @@ export function generateError(
 				`${("stack" in error ? error : new Error("dummy message")).stack}`,
 			).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
-			cause: "cause" in error && generateError(error.cause, true),
+			cause: "cause" in error ? generateError(error.cause, true) : undefined,
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");
