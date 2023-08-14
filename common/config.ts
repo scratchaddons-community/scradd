@@ -13,7 +13,7 @@ async function getConfig() {
 			? (
 					await fetch(
 						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (res) => await res.json<any>())
+					).then(async (res) => await res.json<{ tag_name: string }>())
 			  ).tag_name
 			: "master";
 

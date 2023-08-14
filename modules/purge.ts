@@ -120,7 +120,7 @@ defineCommand(
 			return {
 				ephemeral: true,
 				content: `Are you sure you want to purge th${
-					sliced.length === 1 ? `is message` : `ese ${sliced.length} messages`
+					sliced.length === 1 ? "is message" : `ese ${sliced.length} messages`
 				}?`,
 				embeds,
 				components: [

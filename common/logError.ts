@@ -1,7 +1,6 @@
 import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
 import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
-import { sanitizePath } from "../util/files.js";
 import { cleanDatabaseListeners } from "./database.js";
 import { commandInteractionToString } from "../util/discord.js";
 
@@ -18,15 +17,19 @@ process
  * @returns The logged message.
  */
 export default async function logError(
-	error: any,
+	error: unknown,
 	event: string | RepliableInteraction,
 ): Promise<Message<true> | undefined> {
 	try {
 		console.error(error);
-		if (error && ["DeprecationWarning", "ExperimentalWarning"].includes(error.name)) return;
+
+		const name = `${
+			(error && typeof error === "object" && "name" in error && error.name) || "Error"
+		}`;
+		if (["DeprecationWarning", "ExperimentalWarning"].includes(name)) return;
 
 		return await log(
-			`${LoggingErrorEmoji} **${error.name}** occurred in ${
+			`${LoggingErrorEmoji} **${name}** occurred in ${
 				typeof event == "string"
 					? inlineCode(event)
 					: event.isChatInputCommand()
@@ -55,12 +58,12 @@ export default async function logError(
  *
  * @returns The standardized error.
  */
-export function generateError(error: unknown, returnObject: true): { [key: string]: any };
+export function generateError(error: unknown, returnObject: true): { [key: string]: unknown };
 export function generateError(error: unknown, returnObject?: false): string;
 export function generateError(
 	error: unknown,
 	returnObject = false,
-): string | { [key: string]: any } {
+): string | { [key: string]: unknown } {
 	if (typeof error === "object" && error) {
 		const serialized = serializeError(error);
 
@@ -87,4 +90,9 @@ export function generateError(
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");
 	}
 	return `${error}`;
+}
+
+export function sanitizePath(unclean: string, relative = true): string {
+	const sanitized = decodeURIComponent(unclean).replaceAll("\\", "/").replaceAll("file:///", "");
+	return relative ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;
 }

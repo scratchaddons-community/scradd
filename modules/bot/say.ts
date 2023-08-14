@@ -110,7 +110,7 @@ export default async function sayCommand(
 	}
 
 	await interaction.showModal({
-		title: `Send Message`,
+		title: "Send Message",
 		customId: `${reply ?? ""}_say`,
 
 		components: [

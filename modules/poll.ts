@@ -124,7 +124,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		message.embeds[0]?.footer?.text &&
 		user.id !== client.user.id
 	) {
-		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
+		const emojis = message.embeds[0].description?.match(/^\S+/gm);
 		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
 			const promises = message.reactions.valueOf().map(async (otherReaction) => {

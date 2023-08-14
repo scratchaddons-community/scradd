@@ -11,7 +11,7 @@ import constants from "../../common/constants.js";
 
 export const GAME_COLLECTOR_TIME = constants.collectorTime * 4;
 
-export const CURRENTLY_PLAYING = new Collection<Snowflake, { url: string; end?: () => any }>();
+export const CURRENTLY_PLAYING = new Collection<Snowflake, { url: string; end?: () => unknown }>();
 
 /**
  * Reply to the interaction if the interaction user is already playing a game.

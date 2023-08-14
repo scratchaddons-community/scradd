@@ -502,8 +502,7 @@ export default async function guessAddon(
 
 				const nextMessage = buttonInteraction.customId.startsWith("back.")
 					? typeof backInfo === "object"
-						? // eslint-disable-next-line @typescript-eslint/no-use-before-define -- These functions depend on each other.
-						  await reply(
+						? await reply(
 								backInfo.askedQuestions,
 								backInfo.probabilities,
 								askedCount - 1,
@@ -511,8 +510,7 @@ export default async function guessAddon(
 								buttonInteraction.component.label ?? undefined,
 						  )
 						: new TypeError("backInfo must be an object to go back")
-					: // eslint-disable-next-line @typescript-eslint/no-use-before-define -- These functions depend on each other.
-					  await reply(
+					: await reply(
 							askedQuestions,
 							addonProbabilities.slice(1),
 							askedCount + 1,
@@ -564,7 +562,6 @@ function answerQuestion(
 		const questionInfo = addon.find(({ question }) => question === justAsked);
 
 		if (probabilityShift > 0 && questionInfo?.dependencies)
-			// eslint-disable-next-line fp/no-mutating-assign -- This is meant to mutate.
 			Object.assign(dependencies, questionInfo.dependencies);
 
 		const allDependencies = addon.reduce<Dependencies>(

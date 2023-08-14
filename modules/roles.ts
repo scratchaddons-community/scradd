@@ -178,7 +178,7 @@ defineModal("customRole", async (interaction) => {
 
 		const message = await interaction.reply({
 			fetchReply: true,
-			content: `🗑 Are you sure you want to delete your custom role?`,
+			content: "🗑 Are you sure you want to delete your custom role?",
 			components: [
 				{
 					type: ComponentType.ActionRow,

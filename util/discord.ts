@@ -174,7 +174,6 @@ export async function getAllMessages(
 export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
 	const messages = [];
 
-	// eslint-disable-next-line fp/no-let -- This needs to be changable
 	let lastId: Snowflake | undefined;
 
 	do {
@@ -581,7 +580,6 @@ export async function paginate<Item>(
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / itemsPerPage);
 
-	// eslint-disable-next-line no-let -- This must be changable.
 	let offset = Math.floor((rawOffset ?? 0) / itemsPerPage) * itemsPerPage;
 
 	/**
@@ -688,7 +686,6 @@ export async function paginate<Item>(
 		};
 	}
 
-	// eslint-disable-next-line no-let -- This needs to be changable.
 	let message = await reply(await generateMessage());
 	if (numberOfPages === 1 || !user) return;
 

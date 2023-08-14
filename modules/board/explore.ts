@@ -96,7 +96,6 @@ export default async function makeSlideshow(
 	const previousId = generateHash("prev");
 
 	const messages: InteractionReplyOptions[] = [];
-	// eslint-disable-next-line fp/no-let -- This needs to change.
 	let index = 0;
 
 	/**

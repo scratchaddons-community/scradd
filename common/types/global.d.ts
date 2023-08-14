@@ -37,7 +37,7 @@ declare global {
 		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
 		 *   Model (DOM) object.
 		 */
-		keys<U extends PropertyKey>(entries: Record<U, any>): (U extends number ? `${U}` : U)[];
+		keys<U extends PropertyKey>(entries: Record<U, unknown>): (U extends number ? `${U}` : U)[];
 	}
 	interface Body {
 		json<T = unknown>(): Promise<T>;
@@ -68,6 +68,7 @@ declare module "strife.js" {
 		censored?: "channel" | false;
 	}
 	export interface ContextMenuCommandData<
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		T extends typeof ApplicationCommandType["Message" | "User"],
 	> {
 		censored?: never;

@@ -130,12 +130,12 @@ defineCommand(
 
 			"delete-range": {
 				type: ApplicationCommandOptionType.String,
-				description: `How far back to delete their messages (defaults to none)`,
+				description: "How far back to delete their messages (defaults to none)",
 			},
 
 			"unban-in": {
 				type: ApplicationCommandOptionType.String,
-				description: `When to unban them in (defaults to never)`,
+				description: "When to unban them in (defaults to never)",
 			},
 		},
 	},

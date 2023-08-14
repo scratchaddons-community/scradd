@@ -130,7 +130,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		await Promise.all([
 			...role.members.map(async (weeklyMember) => {
 				if (!ids.includes(weeklyMember.id))
-					return await weeklyMember.roles.remove(role, `No longer weekly winner`);
+					return await weeklyMember.roles.remove(role, "No longer weekly winner");
 			}),
 			...weeklyWinners.map(
 				async ({ user: userId }, index) =>
@@ -140,7 +140,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 						.then((member) =>
 							member?.roles.add(
 								index || !config.roles.epic ? role : [role, config.roles.epic],
-								`Weekly winner`,
+								"Weekly winner",
 							),
 						),
 			),

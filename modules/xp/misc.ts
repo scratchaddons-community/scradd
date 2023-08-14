@@ -83,8 +83,7 @@ export function getLevelForXp(xp: number) {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
 
 	if (foundLevel !== -2) return foundLevel;
-
-	// eslint-disable-next-line fp/no-let -- We need to use let here.
+	
 	let level = XP_PER_LEVEL.length;
 
 	while (getXpForLevel(level) < xp) level++;

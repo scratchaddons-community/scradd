@@ -76,7 +76,7 @@ defineEvent("messageCreate", async (message) => {
 });
 defineButton("contactMods", async (interaction) => {
 	await interaction.reply({
-		content: `👍 Thanks for reaching out!`,
+		content: "👍 Thanks for reaching out!",
 		components: [
 			{
 				type: ComponentType.ActionRow,

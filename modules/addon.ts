@@ -70,16 +70,14 @@ defineCommand(
 						: "Others"
 			  }`;
 
-		const credits = joinWithAnd(
-			addon.credits?.map((credit) => {
-				const note = ("note" in credit && credit.note) || "";
-				return credit.link
-					? hyperlink(credit.name, credit.link, note)
-					: interaction.channel
-					? tooltip(credit.name, note)
-					: credit.name;
-			}) ?? [],
-		);
+		const credits = joinWithAnd(addon.credits ?? [], (credit) => {
+			const note = ("note" in credit && credit.note) || "";
+			return credit.link
+				? hyperlink(credit.name, credit.link, note)
+				: interaction.channel
+				? tooltip(credit.name, note)
+				: credit.name;
+		});
 
 		const lastUpdatedIn =
 			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;

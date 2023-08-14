@@ -3,7 +3,6 @@ import {
 	escapeMaskedLink,
 	hyperlink,
 	type Snowflake,
-	type TextBasedChannel,
 } from "discord.js";
 import config from "../common/config.js";
 

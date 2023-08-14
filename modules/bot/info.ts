@@ -58,7 +58,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 				embeds: [
 					{
 						title: "Status",
-						description: `I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).`,
+						description: "I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
 
 						fields: [
 							{

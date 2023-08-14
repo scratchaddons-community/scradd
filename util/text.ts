@@ -28,7 +28,10 @@ export function joinWithAnd<Item extends { toString: () => string }>(
 	callback?: ((item: Item) => string) | undefined,
 ): string;
 export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
-export function joinWithAnd(array: any[], callback = (item: any) => item.toString()): string {
+export function joinWithAnd(
+	array: { toString: () => string }[],
+	callback = (item: { toString: () => string }) => item.toString(),
+): string {
 	const last = array.pop();
 
 	if (last === undefined) return "";
@@ -61,7 +64,7 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
- * Encodes text using the Caeser Chiper.
+ * Encodes text using the Caesar Cipher.
  *
  * @param text - The text to encode.
  * @param rot - The rotate shift.
@@ -86,10 +89,8 @@ export function caesar(text: string, rot = 13) {
 export function normalize(text: string) {
 	return text
 		.normalize("NFD")
-		.replace(
-			/[\p{Diacritic}\u00AD\u0300-\u036f\u0489\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F]/gu,
-			"",
-		);
+		.replace(/[\p{Dia}\p{M}]+/gu, "")
+		.replace(/[\s\p{Z}]+/gu, " ");
 }
 
 /**

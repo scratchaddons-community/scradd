@@ -127,7 +127,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 						{
 							type: ComponentType.Button,
 							label: "Cancel",
-							customId: `cancel`,
+							customId: "cancel",
 							style: ButtonStyle.Secondary,
 						},
 					],
@@ -161,7 +161,6 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							reminder: userToBan.id,
 						},
 					];
-				await queueReminders();
 
 				await userToBan
 					?.send({
@@ -202,6 +201,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							: ""
 					}`,
 				);
+				await queueReminders();
 			})
 			.on("end", async () => {
 				await interaction.editReply({ components: disableComponents(message.components) });

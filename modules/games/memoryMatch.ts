@@ -26,7 +26,7 @@ const deletedPings = new Set<Snowflake>();
 const instructionsButton = {
 	type: ComponentType.Button,
 	label: "Instructions",
-	customId: `_showMemoryInstructions`,
+	customId: "_showMemoryInstructions",
 	style: ButtonStyle.Secondary,
 } as const;
 
