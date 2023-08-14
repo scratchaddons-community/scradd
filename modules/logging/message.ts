@@ -6,6 +6,7 @@ import {
 	type GuildTextBasedChannel,
 	type MessageReaction,
 	Colors,
+	type UserMention,
 } from "discord.js";
 import { diffString } from "json-diff";
 import config from "../../common/config.js";
@@ -17,6 +18,7 @@ import {
 	getMessageJSON,
 } from "../../util/discord.js";
 import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
+import { joinWithAnd } from "../../util/text.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export async function messageDelete(message: Message<boolean> | PartialMessage) {
@@ -64,23 +66,38 @@ export async function messageDeleteBulk(
 	const messagesInfo = (
 		await Promise.all(
 			messages.reverse().map(async (message) => {
+				const embeds = `${
+					message.embeds.length > 0 ? `${message.embeds.length} embed` : ""
+				}${message.embeds.length > 1 ? "s" : ""}`;
+				const attachments = `${
+					message.attachments.size > 0 ? `${message.attachments.size} attachment` : ""
+				}${message.attachments.size > 1 ? "s" : ""}`;
+				const extremities =
+					message.embeds.length + message.attachments.size > 0
+						? ` (${embeds}${embeds && attachments && ", "}${attachments})`
+						: "";
+
+				const author = message.author
+					? `${message.author.tag} - ${message.author.id}`
+					: "[unknown author]";
 				const content = !message.partial && (await messageToText(message));
 
-				return `${message.author?.tag ?? "[unknown]"}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? " (" : ""
-				}${message.embeds.length > 0 ? `${message.embeds.length} embeds` : ""}${
-					message.embeds.length > 0 && message.attachments.size > 0 ? ", " : ""
-				}${message.attachments.size > 0 ? `${message.attachments.size} attachments` : ""}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? ")" : ""
-				}${content ? `:\n${content}` : ""}`;
+				return `${author}${extremities}${content ? `:\n${content}` : ""}`;
 			}),
 		)
 	).join("\n\n---\n\n");
 
+	const allAuthors = messages.map(({ author }) => author?.toString());
+	const unknownCount = allAuthors.filter((author) => !author).length;
+	const authors = [
+		...new Set(allAuthors.filter((author): author is UserMention => Boolean(author))),
+		...(unknownCount ? [`${unknownCount} unknown users`] : []),
+	];
+
 	await log(
-		`${LoggingEmojis.MessageDelete} ${
-			messages.size
-		} messages in ${channel.toString()} bulk deleted`,
+		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
+			authors,
+		)} in ${channel.toString()} bulk deleted`,
 		"messages",
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
