@@ -3,7 +3,7 @@ import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
 import { manifest, addons, addonSearchOptions } from "../common/extension.js";
 import { defineCommand } from "strife.js";
-import { escapeMessage, generateTooltip } from "../util/markdown.js";
+import { escapeMessage, tooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
 defineCommand(
@@ -76,7 +76,7 @@ defineCommand(
 				return credit.link
 					? hyperlink(credit.name, credit.link, note)
 					: interaction.channel
-					? generateTooltip(interaction.channel, credit.name, note)
+					? tooltip(credit.name, note)
 					: credit.name;
 			}) ?? [],
 		);
@@ -108,8 +108,7 @@ defineCommand(
 									addon.latestUpdate && lastUpdatedIn
 										? ` (${
 												interaction.channel
-													? generateTooltip(
-															interaction.channel,
+													? tooltip(
 															lastUpdatedIn,
 															addon.latestUpdate.temporaryNotice,
 													  )
