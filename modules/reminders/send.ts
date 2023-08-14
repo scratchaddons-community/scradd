@@ -134,7 +134,6 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					await cleanDatabaseListeners();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
 					process.exit(1);
-					// fallthrough - todo https://github.com/eslint/eslint/issues/17466
 				}
 				case SpecialReminders.CloseThread: {
 					if (channel?.isThread()) await channel.setArchived(true, "Close requested");

@@ -16,6 +16,7 @@
 		"moduleResolution": "Node16",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
+		"noFallthroughCasesInSwitch":true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,

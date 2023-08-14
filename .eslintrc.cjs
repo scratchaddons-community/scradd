@@ -16,6 +16,7 @@ module.exports = {
 		"semi": ["error", "always"],
 		"no-mixed-spaces-and-tabs": "off",
 		"no-sparse-arrays": "off",
+		"no-fallthrough": "off",
 	},
 	ignorePatterns: "dist",
 };
