@@ -11,14 +11,14 @@ import { defineEvent } from "strife.js";
 const REACTION_CAP = 3;
 
 const ignoreTriggers = [
-	/\bkill/,
-	/\bsuicid/,
-	/\bdepress/,
-	/\bpain/,
-	/\bsick/,
-	/\babus/,
-	/\bkms/,
-	/\bbleed/,
+	/\bkill/i,
+	/\bsuicid/i,
+	/\bdepress/i,
+	/\bpain/i,
+	/\bsick/i,
+	/\babus/i,
+	/\bkms/i,
+	/\bbleed/i,
 ];
 
 defineEvent("messageCreate", async (message) => {
@@ -31,6 +31,7 @@ defineEvent("messageCreate", async (message) => {
 		return;
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
+	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 
 	let reactions = 0;
 
@@ -60,8 +61,8 @@ defineEvent("messageCreate", async (message) => {
 	)
 		return;
 
-	if (content.match(/^i[\p{Pi}\p{Pf}＂＇'"`՚]?m\b/u)) {
-		const name = content
+	if (cleanContent.match(/^i[\p{Pi}\p{Pf}＂＇'"`՚]?m\b/u)) {
+		const name = cleanContent
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}\n𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
 			)[0]
