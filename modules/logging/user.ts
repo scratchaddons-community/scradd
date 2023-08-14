@@ -1,16 +1,13 @@
 import {
-	type APIRole,
 	AuditLogEvent,
 	GuildAuditLogsEntry,
 	GuildMember,
 	type PartialGuildMember,
 	type PartialUser,
-	roleMention,
 	time,
 	User,
 } from "discord.js";
 import config from "../../common/config.js";
-import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 
 export async function memberKick(entry: GuildAuditLogsEntry<AuditLogEvent.MemberKick>) {
@@ -44,51 +41,13 @@ export async function memberBanRemove(entry: GuildAuditLogsEntry<AuditLogEvent.M
 		"members",
 	);
 }
-export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.MemberRoleUpdate>) {
-	if (!entry.target) return;
-
-	const addedRoles = entry.changes
-		.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
-		.map((change) => change.new)
-		.flat();
-
-	const removedRoles = entry.changes
-		.filter((change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove")
-		.map((change) => change.new)
-		.flat();
-
-	if (addedRoles.length)
-		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} gained ${joinWithAnd(
-				addedRoles,
-				({ id }) => roleMention(id),
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-				entry.reason ? ` (${entry.reason})` : ""
-			}`,
-			"members",
-		);
-
-	if (removedRoles.length)
-		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} lost ${joinWithAnd(
-				removedRoles,
-				({ id }) => roleMention(id),
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-				entry.reason ? ` (${entry.reason})` : ""
-			}`,
-			"members",
-		);
-}
 
 export async function guildMemberAdd(member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
 
 	if (member.user.flags?.has("Spammer")) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${member.toString()} marked as likely spammer`,
-			"members",
-		);
+		await log(`${LoggingEmojis.User} ${member.toString()} marked as likely spammer`, "members");
 	}
 }
 export async function guildMemberRemove(member: GuildMember | PartialGuildMember) {
@@ -103,7 +62,7 @@ export async function guildMemberUpdate(
 	if (oldMember.avatar !== newMember.avatar) {
 		const url = newMember.avatarURL({ size: 128 });
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
+			`${LoggingEmojis.User} ${newMember.toString()} ${
 				url ? "changed" : "removed"
 			} their server avatar`,
 			"members",
@@ -117,7 +76,7 @@ export async function guildMemberUpdate(
 			Number(newMember.communicationDisabledUntil) > Date.now()
 		)
 			await log(
-				`${LoggingEmojis.UserUpdate} ${newMember.toString()} timed out until ${time(
+				`${LoggingEmojis.Punishment} ${newMember.toString()} timed out until ${time(
 					newMember.communicationDisabledUntil,
 				)}`,
 				"members",
@@ -127,7 +86,7 @@ export async function guildMemberUpdate(
 			Number(oldMember.communicationDisabledUntil) > Date.now()
 		)
 			await log(
-				`${LoggingEmojis.UserUpdate} ${newMember.toString()}’s timeout was removed`,
+				`${LoggingEmojis.Punishment} ${newMember.toString()}’s timeout was removed`,
 				"members",
 			);
 	}
@@ -140,7 +99,7 @@ export async function guildMemberUpdate(
 			oldMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
 	) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
+			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
 				automodQuarantine ? "" : "un"
 			}quarantined based on AutoMod rules`,
 			"members",
@@ -150,7 +109,7 @@ export async function guildMemberUpdate(
 	const verified = !!newMember.flags?.has("BypassesVerification");
 	if (!!oldMember.flags?.has("BypassesVerification") !== verified) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()} ${
+			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
 				verified ? "" : "un"
 			}verified by a moderator`,
 			"members",
@@ -159,7 +118,7 @@ export async function guildMemberUpdate(
 
 	if (oldMember.nickname !== newMember.nickname)
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newMember.toString()}${
+			`${LoggingEmojis.User} ${newMember.toString()}${
 				newMember.nickname
 					? ` was nicknamed ${newMember.nickname}`
 					: "’s nickname was removed"
@@ -172,16 +131,14 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 	if (oldUser.partial) return;
 
 	if (oldUser.avatar !== newUser.avatar) {
-		await log(
-			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their avatar`,
-			"members",
-			{ files: [newUser.displayAvatarURL({ size: 128 })] },
-		);
+		await log(`${LoggingEmojis.User} ${newUser.toString()} changed their avatar`, "members", {
+			files: [newUser.displayAvatarURL({ size: 128 })],
+		});
 	}
 
 	if (oldUser.globalName !== newUser.globalName)
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newUser.toString()}${
+			`${LoggingEmojis.User} ${newUser.toString()}${
 				newUser.globalName
 					? oldUser.globalName
 						? ` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
@@ -194,7 +151,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 	const quarantined = !!newUser.flags?.has("Quarantined");
 	if (!!oldUser.flags?.has("Quarantined") !== quarantined) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newUser.toString()} ${
+			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
 			"members",
@@ -204,7 +161,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 	const spammer = !!newUser.flags?.has("Spammer");
 	if (!!oldUser.flags?.has("Spammer") !== spammer) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newUser.toString()} ${
+			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				spammer ? "" : "un"
 			}marked as likely spammer`,
 			"members",
@@ -213,7 +170,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 
 	if (oldUser.tag !== newUser.tag) {
 		await log(
-			`${LoggingEmojis.UserUpdate} ${newUser.toString()} changed their username from ${
+			`${LoggingEmojis.User} ${newUser.toString()} changed their username from ${
 				oldUser.tag
 			} to ${newUser.tag}`,
 			"members",
