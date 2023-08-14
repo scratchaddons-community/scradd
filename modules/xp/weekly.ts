@@ -11,7 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { getCustomRole, qualifiesForRole } from "../roles.js";
+import { getCustomRole, qualifiesForRole } from "../roles/custom.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();

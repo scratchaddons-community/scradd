@@ -1,165 +1,79 @@
-import config from "../common/config.js";
-import Database from "../common/database.js";
 import {
-	Collection,
-	ComponentType,
 	GuildMember,
-	TextInputStyle,
-	type Snowflake,
+	type ApplicationCommandPermissionsUpdateData,
+	type ModalSubmitInteraction,
+	type PartialGuildMember,
+	ComponentType,
+	ButtonStyle,
 	Colors,
 	type ColorResolvable,
-	ButtonStyle,
-	ApplicationCommandPermissionType,
 	ApplicationCommand,
+	ChatInputCommandInteraction,
+	TextInputStyle,
+	type Snowflake,
+	ApplicationCommandPermissionType,
 } from "discord.js";
-import { client, defineCommand, defineEvent, defineModal } from "strife.js";
-import constants from "../common/constants.js";
-import { disableComponents } from "../util/discord.js";
-import { recentXpDatabase } from "./xp/misc.js";
-import censor from "./automod/language.js";
-import warn from "./punishments/warn.js";
+import constants from "../../common/constants.js";
+import { disableComponents } from "../../util/discord.js";
+import censor from "../automod/language.js";
+import warn from "../punishments/warn.js";
+import config from "../../common/config.js";
+import { client } from "strife.js";
+import { recentXpDatabase } from "../xp/misc.js";
 
 const PREFIX = "✨ ";
 let command: ApplicationCommand | undefined;
 
-export const rolesDatabase = new Database<{
-	id: Snowflake;
-	designer: boolean;
-	scradd: boolean;
-	formerAdmin: boolean;
-	formerMod: boolean;
-	dev: boolean;
-	translator: boolean;
-	contributor: boolean;
-	og: boolean;
-	epic: boolean;
-	booster: boolean;
-}>("roles");
-await rolesDatabase.init();
+export async function customRole(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+	command ??= interaction.command ?? undefined;
+	if (!(interaction.member instanceof GuildMember))
+		throw new TypeError("interaction.member is not a GuildMember!");
 
-const persistedRoles = {
-	designer: "916020774509375528",
-	scradd: "1008190416396484700",
-	formerAdmin: ["1069776422467555328", config.roles.admin?.id || ""],
-	formerMod: ["881623848137682954", config.roles.mod?.id || ""],
-	dev: "806608777835053098",
-	translator: "841696608592330794",
-	contributor: "991413187427700786",
-	epic: config.roles.epic?.id || "",
-	booster: config.roles.booster?.id || "",
-	og: "1107170572963684402",
-};
-
-defineEvent("guildMemberAdd", async () => {
-	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
-		const inviter = invite.inviter?.id ?? "";
-		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));
-		return accumulator;
-	}, new Collection<Snowflake, number>());
-	inviters.map(async (count, user) => {
-		if (count < 20) return;
-		const inviter = await config.guild.members.fetch(user).catch(() => {});
-		if (
-			!inviter ||
-			inviter.id === constants.users.hans ||
-			inviter.user.bot ||
-			!config.roles.epic ||
-			inviter.roles.resolve(config.roles.epic.id)
-		)
-			return;
-		await inviter.roles.add(config.roles.epic, "Invited 20+ people");
-		await config.channels.general?.send(
-			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${config.roles.epic.toString()} as a thank-you.`,
-		);
-	});
-});
-
-defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-
-	const memberRoles = {
-		id: member.id,
-		...Object.fromEntries(
-			Object.entries(persistedRoles).map(([key, ids]) => [
-				key,
-				[ids].flat().some((id) => !!member.roles.resolve(id)),
-			]),
-		),
-	};
-
-	if (!Object.values(memberRoles).includes(false)) return;
-	rolesDatabase.updateById(memberRoles, {});
-});
-
-defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-
-	const memberRoles = rolesDatabase.data.find((entry) => entry.id === member.id);
-	for (const roleName of Object.keys(persistedRoles))
-		if (memberRoles?.[roleName])
-			member.roles.add([persistedRoles[roleName]].flat()[0] ?? "", "Persisting roles");
-});
-
-defineEvent("guildMemberUpdate", async (_, member) => {
-	if (member.guild.id !== config.guild.id) return;
-
-	if (member.roles.premiumSubscriberRole && config.roles.booster)
-		await member.roles.add(config.roles.booster, "Boosted the server");
-});
-
-defineCommand(
-	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
-	async (interaction) => {
-		command ??= interaction.command ?? undefined;
-		if (!(interaction.member instanceof GuildMember))
-			throw new TypeError("interaction.member is not a GuildMember!");
-
-		if (!(await qualifiesForRole(interaction.member)))
-			return await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You don’t have permission to create a custom role!`,
-			});
-
-		const existingRole = getCustomRole(interaction.member);
-
-		await interaction.showModal({
-			title: "Create Custom Role",
-			customId: "_customRole",
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							customId: "name",
-							label: `Role name${existingRole ? " (leave blank to delete)" : ""}`,
-							style: TextInputStyle.Short,
-							type: ComponentType.TextInput,
-							maxLength: 100,
-							required: !existingRole,
-							value: existingRole?.name.replace(PREFIX, ""),
-						},
-					],
-				},
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							customId: "color",
-							label: "Role color",
-							style: TextInputStyle.Short,
-							type: ComponentType.TextInput,
-							maxLength: 100,
-							required: false,
-							value: existingRole?.hexColor,
-						},
-					],
-				},
-			],
+	if (!(await qualifiesForRole(interaction.member)))
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You don’t have permission to create a custom role!`,
 		});
-	},
-);
 
-defineModal("customRole", async (interaction) => {
+	const existingRole = getCustomRole(interaction.member);
+
+	await interaction.showModal({
+		title: "Create Custom Role",
+		customId: "_customRole",
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: "name",
+						label: `Role name${existingRole ? " (leave blank to delete)" : ""}`,
+						style: TextInputStyle.Short,
+						type: ComponentType.TextInput,
+						maxLength: 100,
+						required: !existingRole,
+						value: existingRole?.name.replace(PREFIX, ""),
+					},
+				],
+			},
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: "color",
+						label: "Role color",
+						style: TextInputStyle.Short,
+						type: ComponentType.TextInput,
+						maxLength: 100,
+						required: false,
+						value: existingRole?.hexColor,
+					},
+				],
+			},
+		],
+	});
+}
+
+export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember!");
 
@@ -276,25 +190,22 @@ defineModal("customRole", async (interaction) => {
 	});
 	await interaction.member.roles.add(role, "Custom role created");
 	return await interaction.reply(`${constants.emojis.statuses.yes} Created your custom role!`);
-});
-
-defineEvent("guildMemberRemove", async (member) => {
+}
+export async function deleteMemberRole(member: PartialGuildMember | GuildMember) {
 	for (const [, role] of await config.guild.roles.fetch()) {
 		if (role.name.startsWith(PREFIX) && !role.members.size) {
 			await role.delete(`${member.user.tag} left the server`);
 		}
 	}
-});
-
-defineEvent("guildMemberUpdate", async (_, member) => {
+}
+export async function recheckMemberRole(_: PartialGuildMember | GuildMember, member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
 	if (!(await qualifiesForRole(member))) {
 		await getCustomRole(member)?.delete("No longer qualifies");
 	}
-});
-
-defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
+}
+export async function recheckAllRoles(permissions: ApplicationCommandPermissionsUpdateData) {
 	if (permissions.guildId !== config.guild.id || permissions.applicationId !== client.user.id)
 		return;
 
@@ -308,7 +219,7 @@ defineEvent("applicationCommandPermissionsUpdate", async (permissions) => {
 			if (!(await qualifiesForRole(member))) await role.delete("No longer qualifies");
 		}
 	}
-});
+}
 
 export function getCustomRole(member: GuildMember) {
 	return member.roles.valueOf().find((role) => role.name.startsWith(PREFIX));
