@@ -17,7 +17,7 @@ const ignoreTriggers = [
 	/\bpain/,
 	/\bsick/,
 	/\babus/,
-	/\bsad/,
+	/\bkms/,
 	/\bbleed/,
 ];
 
