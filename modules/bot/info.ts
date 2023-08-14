@@ -15,7 +15,7 @@ import {
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
 import pkg from "../../package.json" assert { type: "json" };
-import { autoreactions, dadEasterEggCount } from "../../secrets.js";
+import { autoreactions, dadEasterEggCount } from "../secrets/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { getSettings } from "../settings.js";

@@ -1,11 +1,11 @@
 import { MessageType } from "discord.js";
-import { getSettings } from "./settings.js";
-import { BOARD_EMOJI } from "./board/misc.js";
-import config from "../common/config.js";
-import { getBaseChannel, reactAll } from "../util/discord.js";
-import { stripMarkdown } from "../util/markdown.js";
-import { normalize } from "../util/text.js";
-import { autoreactions, dad } from "../secrets.js";
+import { getSettings } from "../settings.js";
+import { BOARD_EMOJI } from "../board/misc.js";
+import config from "../../common/config.js";
+import { getBaseChannel, reactAll } from "../../util/discord.js";
+import { stripMarkdown } from "../../util/markdown.js";
+import { normalize } from "../../util/text.js";
+import { autoreactions, dad } from "./secrets.js";
 import { defineEvent } from "strife.js";
 
 const REACTION_CAP = 3;
