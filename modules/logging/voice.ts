@@ -57,7 +57,7 @@ export async function guildScheduledEventUpdate(
 									{ lineterm: "" },
 								)
 									.join("\n")
-									.replace(/^--- \n\+\+\+ \n/, ""),
+									.replace(/^-{3} \n\+{3} \n/, ""),
 
 								extension: "diff",
 							},

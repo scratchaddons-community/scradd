@@ -43,19 +43,19 @@ const versionMarkdown = `**[${escapeMessage(
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Code Editor**?",
+		"Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
 	costumeEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Costume Editor**?",
+		"Is your addon listed under **Scratch Editor Features** → **Costume Editor**?",
 	playerEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Project Player**?",
-	otherEditorCategory: "Is your addon listed under **Scratch Editor Features** -> **Others**?",
+		"Is your addon listed under **Scratch Editor Features** → **Project Player**?",
+	otherEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Others**?",
 
 	websiteCategory: "Is your addon listed under **Scratch Website Features**?",
 	projectPagesCategory:
-		"Is your addon listed under **Scratch Website Features** -> **Project Pages**?",
-	profilesCategory: "Is your addon listed under **Scratch Website Features** -> **Profiles**?",
-	forumsCategory: "Is your addon listed under **Scratch Website Features** -> **Forums**?",
-	otherWebsiteCategory: "Is your addon listed under **Scratch Website Features** -> **Others**?",
+		"Is your addon listed under **Scratch Website Features** → **Project Pages**?",
+	profilesCategory: "Is your addon listed under **Scratch Website Features** → **Profiles**?",
+	forumsCategory: "Is your addon listed under **Scratch Website Features** → **Forums**?",
+	otherWebsiteCategory: "Is your addon listed under **Scratch Website Features** → **Others**?",
 
 	themesCategory: "Is your addon listed under **Themes**?",
 	popupCategory: "Is your addon listed under **Extension Popup Features**?",
@@ -141,7 +141,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.codeEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Code Editor**!",
+									"This addon is listed under **Scratch Editor Features** → **Code Editor**!",
 						  }
 						: addon.tags.includes("costumeEditor")
 						? {
@@ -154,7 +154,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.costumeEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Costume Editor**!",
+									"This addon is listed under **Scratch Editor Features** → **Costume Editor**!",
 						  }
 						: addon.tags.includes("projectPlayer")
 						? {
@@ -167,7 +167,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.playerEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Project Player**!",
+									"This addon is listed under **Scratch Editor Features** → **Project Player**!",
 						  }
 						: {
 								dependencies: {
@@ -179,7 +179,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.otherEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Others**!",
+									"This addon is listed under **Scratch Editor Features** → **Others**!",
 						  },
 				);
 
@@ -208,7 +208,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.profilesCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Profiles**!",
+									"This addon is listed under **Scratch Website Features** → **Profiles**!",
 						  }
 						: addon.tags.includes("projectPage")
 						? {
@@ -221,7 +221,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.projectPagesCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Project Pages**!",
+									"This addon is listed under **Scratch Website Features** → **Project Pages**!",
 						  }
 						: addon.tags.includes("forums")
 						? {
@@ -234,7 +234,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.forumsCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Forums**!",
+									"This addon is listed under **Scratch Website Features** → **Forums**!",
 						  }
 						: {
 								dependencies: {
@@ -246,7 +246,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.otherWebsiteCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Others**!",
+									"This addon is listed under **Scratch Website Features** → **Others**!",
 						  },
 				);
 
@@ -272,14 +272,14 @@ export default Object.fromEntries(
 						dependencies: {
 							[questionStrings.themesCategory]: true,
 
-							[`Is your addon listed under **Themes** -> **${
+							[`Is your addon listed under **Themes** → **${
 								addon.tags.includes("editor") ? "Website" : "Editor"
 							} Themes**?`]: false,
 						},
 
-						question: `Is your addon listed under **Themes** -> **${theme} Themes**?`,
+						question: `Is your addon listed under **Themes** → **${theme} Themes**?`,
 
-						statement: `This addon is listed under **Themes** -> **${theme} Themes**!`,
+						statement: `This addon is listed under **Themes** → **${theme} Themes**!`,
 					},
 				);
 

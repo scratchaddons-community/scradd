@@ -13,9 +13,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
-	const { emoji } = reaction;
-
-	if (emoji.name === BOARD_EMOJI) {
+	if (reaction.emoji.name === BOARD_EMOJI) {
 		if (
 			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
 			(message.channel.id === config.channels.board?.id &&

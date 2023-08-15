@@ -13,8 +13,6 @@ import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";
 
-if (!config.channels.board) throw new ReferenceError("Could not find board channel");
-const { board } = config.channels;
 export const BOARD_EMOJI = "🥔",
 	REACTIONS_NAME = "Potatoes";
 
@@ -141,7 +139,7 @@ export async function generateBoardMessage(
 				{
 					color:
 						message.type === MessageType.AutoModerationAction
-							? 0x99a1f2
+							? 0x99_a1_f2
 							: message.member?.displayColor,
 					description: censored ? censored.censored : description,
 
@@ -172,7 +170,8 @@ export async function generateBoardMessage(
 
 	if (info instanceof Message) return await messageToBoardData(info);
 
-	const onBoard = info.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
+	const onBoard =
+		info.onBoard && (await config.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
 
 	if (onBoard) {
 		const linkButton = onBoard.components?.[0]?.components?.[0];
@@ -184,8 +183,9 @@ export async function generateBoardMessage(
 		return {
 			allowedMentions: { users: [] },
 
-			components:
-				buttons.length > 0 ? [{ type: ComponentType.ActionRow, components: buttons }] : [],
+			components: buttons.length
+				? [{ type: ComponentType.ActionRow, components: buttons }]
+				: [],
 
 			content: onBoard.content,
 			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),

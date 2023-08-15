@@ -169,7 +169,7 @@ export async function autoClose({ locked: wasLocked }: AnyThreadChannel, thread:
 
 		await thread.send({
 			content: `${constants.emojis.statuses.yes} I’ll close this thread ${time(
-				Math.round(date / 1_000),
+				Math.round(date / 1000),
 				TimestampStyles.RelativeTime,
 			)}!`,
 			components: [

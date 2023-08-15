@@ -84,7 +84,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 			}
 			const message = this.message;
 
-			const data = this.#data?.length && papaparse.unparse(Array.from(this.#data)).trim();
+			const data = this.#data?.length && papaparse.unparse([...this.#data]).trim();
 
 			const files = data
 				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
@@ -216,8 +216,9 @@ export async function backupDatabases(channel: TextBasedChannel) {
 
 	await channel.send("# Daily Scradd Database Backup");
 	await Promise.all(
-		Array.from(Array(Math.ceil(attachments.length / 10)), () => attachments.splice(0, 10)).map(
-			(files) => channel.send({ files }),
+		Array.from(
+			{ length: Math.ceil(attachments.length / 10) },
+			() => channel.send({ files: attachments.splice(0, 10) }),
 		),
 	);
 }

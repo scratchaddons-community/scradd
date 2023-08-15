@@ -53,7 +53,7 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
 				config.channels.support
 			}>.`,
 
@@ -63,7 +63,7 @@ export async function showTicketModal(
 
 	if (option === SERVER_CATEGORY) {
 		return await interaction.reply({
-			content: `${constants.emojis.statuses.no} Please don't contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
+			content: `${constants.emojis.statuses.no} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
 
 			ephemeral: true,
 		});
@@ -133,9 +133,9 @@ export default async function contactMods(
 
 		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 		...(body
-			? fields.length === 0
-				? { description: body }
-				: { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+			? fields.length
+				? { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+				: { description: body }
 			: { fields }),
 	};
 

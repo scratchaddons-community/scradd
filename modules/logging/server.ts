@@ -90,7 +90,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 						{ lineterm: "" },
 					)
 						.join("\n")
-						.replace(/^--- \n\+\+\+ \n/, ""),
+						.replace(/^-{3} \n\+{3} \n/, ""),
 					extension: "diff",
 				},
 			],
@@ -120,12 +120,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 		);
 	}
 	const community = newGuild.features.includes("COMMUNITY");
-	if (oldGuild.features.includes("COMMUNITY") !== community)
-		await log(
-			`${LoggingEmojis.SettingChange} Community ${community ? "enabled" : "disabled"}`,
-			"server",
-		);
-	else {
+	if (oldGuild.features.includes("COMMUNITY") === community) {
 		if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id) {
 			await log(
 				`${LoggingEmojis.SettingChange} Community updates channel ${
@@ -144,6 +139,11 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 				"server",
 			);
 		}
+	} else {
+		await log(
+			`${LoggingEmojis.SettingChange} Community ${community ? "enabled" : "disabled"}`,
+			"server",
+		);
 	}
 	const monetized = newGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL");
 	if (oldGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL") !== monetized)

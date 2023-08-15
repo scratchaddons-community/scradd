@@ -74,8 +74,7 @@ defineCommand(
 				});
 			}
 			case "top": {
-				const allXp = [...xpDatabase.data];
-				const top = allXp.sort((one, two) => two.xp - one.xp);
+				const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
 				const user = interaction.options.getUser("user");
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
@@ -131,5 +130,6 @@ defineButton("xp", async (interaction, userId = "") => {
 });
 
 if (constants.canvasEnabled) {
-	defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
+	const { default: weeklyXpGraph } = await import("./graph.js");
+	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }

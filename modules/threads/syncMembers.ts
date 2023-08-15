@@ -56,11 +56,9 @@ export async function updateMemberThreads(
 			if (!roles || !roles.length) return;
 			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
 			if (!thread?.isThread()) return;
-			if (roles.some((role) => member.roles.resolve(role)))
-				await thread.members.add(member, "Has qualifying role");
-			else {
-				await thread.members.remove(member.id, "Has no qualifying role");
-			}
+			await (roles.some((role) => member.roles.resolve(role))
+				? thread.members.add(member, "Has qualifying role")
+				: thread.members.remove(member.id, "Has no qualifying role"));
 		}),
 	);
 }

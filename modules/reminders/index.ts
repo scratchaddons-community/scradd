@@ -89,7 +89,7 @@ defineEvent("messageCreate", async (message) => {
 			),
 			{
 				channel: BUMPING_THREAD,
-				date: Date.now() + 7200000,
+				date: Date.now() + 7_200_000,
 				reminder: undefined,
 				id: SpecialReminders.Bump,
 				user: client.user.id,

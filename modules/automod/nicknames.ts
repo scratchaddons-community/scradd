@@ -9,15 +9,13 @@ export default async function changeNickname(member: GuildMember) {
 	const censored = censor(member.displayName);
 	const newNick = findName(member);
 
-	if (censored) {
-		if (member.nickname)
-			await warn(
-				member,
-				"Watch your language!",
-				censored.strikes,
-				"Set nickname to " + member.displayName,
-			);
-	}
+	if (censored && member.nickname)
+		await warn(
+			member,
+			"Watch your language!",
+			censored.strikes,
+			"Set nickname to " + member.displayName,
+		);
 
 	if (newNick !== member.displayName) {
 		const unpingable = isPingable(member.displayName);
@@ -37,7 +35,7 @@ export default async function changeNickname(member: GuildMember) {
 	if (members.size > 1) {
 		const [safe, unsafe] = members.partition((found) => found.user.displayName === newNick);
 
-		if (safe.size > 0) {
+		if (safe.size) {
 			for (const [id, found] of unsafe) {
 				const censored = censor(found.user.displayName);
 				const nick = censored ? censored.censored : found.user.displayName;
@@ -49,6 +47,7 @@ export default async function changeNickname(member: GuildMember) {
 			}
 		}
 
+		// eslint-disable-next-line unicorn/prefer-spread -- This is not an array
 		const unchanged = safe.concat(unsafe);
 
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
@@ -82,15 +81,12 @@ export default async function changeNickname(member: GuildMember) {
 }
 
 async function setNickname(member: GuildMember, newNickname: string, reason: string) {
-	if (member.moderatable)
-		await member.setNickname(
-			member.user.displayName === newNickname ? null : newNickname,
-			reason,
-		);
-	else
-		await log(
-			`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
-		);
+	await (member.moderatable
+		? // eslint-disable-next-line unicorn/no-null
+		  member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
+		: log(
+				`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+		  ));
 }
 
 function findName(member: GuildMember) {
@@ -108,7 +104,7 @@ function findName(member: GuildMember) {
 }
 
 function isPingable(name: string) {
-	const normalized = name.normalize("NFD").replaceAll(/\p{Diacritic}/g, "");
+	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
 	return /[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]{3,}|^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>? -]+$/u.test(
 		normalized,
 	);

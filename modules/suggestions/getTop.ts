@@ -25,17 +25,17 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 					),
 			)
 			.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
-		async ({ answer, author, count, title, ...ref }) =>
+		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				"url" in ref
+				"url" in reference
 					? "👍"
 					: suggestions?.defaultReactionEmoji?.name ??
 					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 			} ${hyperlink(
 				`${title}`,
-				"url" in ref
-					? ref.url
-					: `https://discord.com/channels/${config.guild.id}/${ref.id}/${ref.id}`,
+				"url" in reference
+					? reference.url
+					: `https://discord.com/channels/${config.guild.id}/${reference.id}/${reference.id}`,
 				answer,
 			)}${
 				nick

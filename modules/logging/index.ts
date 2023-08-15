@@ -137,14 +137,14 @@ const events: {
 		entry: GuildAuditLogsEntry<AuditLogEvent.AutoModerationRuleCreate>,
 	) {
 		await log(
-			`${LoggingEmojis.Integration} AutoMod "${
+			`${LoggingEmojis.Integration} AutoMod “${
 				{
 					[AutoModerationRuleTriggerType.Keyword]: "Block Custom Words",
 					[AutoModerationRuleTriggerType.Spam]: "Block Suspected Spam Content",
 					[AutoModerationRuleTriggerType.KeywordPreset]: "Block Commonly Flagged Words",
 					[AutoModerationRuleTriggerType.MentionSpam]: "Block Mention Spam",
 				}[entry.target.triggerType]
-			}" Rule ${entry.target.name} (ID: ${entry.target.id}) created${extraAuditLogsInfo(
+			}” Rule ${entry.target.name} (ID: ${entry.target.id}) created${extraAuditLogsInfo(
 				entry,
 			)}`,
 			"server",

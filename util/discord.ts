@@ -592,7 +592,7 @@ export async function paginate<Item>(
 			(_, index) => index >= offset && index < offset + itemsPerPage,
 		);
 
-		if (filtered.length === 0) {
+		if (!filtered.length) {
 			return {
 				content: `${constants.emojis.statuses.no} ${failMessage}`,
 				ephemeral: true,
@@ -624,7 +624,7 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "<< Previous",
 									style: ButtonStyle.Primary,
-									disabled: offset === 0,
+									disabled: offset < 1,
 									customId: previousId,
 								},
 								{

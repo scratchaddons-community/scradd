@@ -21,7 +21,7 @@ defineCommand(
 		await interaction.reply({
 			ephemeral: true,
 			content:
-				"**Moderator Interest Form**\n__This is not a mod application.__ This form mainly exists just to determine who in the server wants moderator in the first place. Filling out this form does not guarantee anything. However, if you don't fill out the form, you do not have any chance of promotion.\nAlso, know that this form is not the only step in being promoted. If admins think you are a good candidate for moderator, they will DM you further questions before promoting you.\nFinally, please note that 2-factor authentication (2FA) is required for moderators in this server. If you are unable to enable 2FA, please try using <https://totp.app/>.\nThanks for being a part of the server and filling out the form!",
+				"**Moderator Interest Form**\n__This is not a mod application.__ This form mainly exists just to determine who in the server wants moderator in the first place. Filling out this form does not guarantee anything. However, if you don’t fill out the form, you do not have any chance of promotion.\nAlso, know that this form is not the only step in being promoted. If admins think you are a good candidate for moderator, they will DM you further questions before promoting you.\nFinally, please note that 2-factor authentication (2FA) is required for moderators in this server. If you are unable to enable 2FA, please try using <https://totp.app/>.\nThanks for being a part of the server and filling out the form!",
 
 			components: [
 				{

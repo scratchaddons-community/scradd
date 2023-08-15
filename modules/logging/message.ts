@@ -66,14 +66,14 @@ export async function messageDeleteBulk(
 	const messagesInfo = (
 		await Promise.all(
 			messages.reverse().map(async (message) => {
-				const embeds = `${
-					message.embeds.length > 0 ? `${message.embeds.length} embed` : ""
-				}${message.embeds.length > 1 ? "s" : ""}`;
+				const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
+					message.embeds.length > 1 ? "s" : ""
+				}`;
 				const attachments = `${
-					message.attachments.size > 0 ? `${message.attachments.size} attachment` : ""
+					message.attachments.size ? `${message.attachments.size} attachment` : ""
 				}${message.attachments.size > 1 ? "s" : ""}`;
 				const extremities =
-					message.embeds.length + message.attachments.size > 0
+					message.embeds.length || message.attachments.size
 						? ` (${embeds}${embeds && attachments && ", "}${attachments})`
 						: "";
 
@@ -186,7 +186,7 @@ export async function messageUpdate(
 			{ lineterm: "" },
 		)
 			.join("\n")
-			.replace(/^--- \n\+\+\+ \n/, "");
+			.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
 		const extraDiff = diffString(
@@ -195,16 +195,18 @@ export async function messageUpdate(
 			{ color: false },
 		);
 		if (extraDiff) {
-			const updatedFiles = newMessage.attachments.map((attachment) => attachment.url);
+			const updatedFiles = new Set(
+				newMessage.attachments.map((attachment) => attachment.url),
+			);
 			files.push(
 				{ content: extraDiff, extension: "diff" },
 				...oldMessage.attachments
 					.map((attachment) => attachment.url)
-					.filter((attachment) => !updatedFiles.includes(attachment)),
+					.filter((attachment) => !updatedFiles.has(attachment)),
 			);
 		}
 
-		if (files.length > 0) {
+		if (files.length) {
 			await log(
 				`${
 					LoggingEmojis.MessageEdit

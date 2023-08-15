@@ -62,6 +62,7 @@ export async function run(interaction: ModalSubmitInteraction<CacheType>) {
 				{
 					attachment: Buffer.from(
 						["bigint", "symbol"].includes(type)
+							// eslint-disable-next-line unicorn/string-content
 							? `"${output.toString().replaceAll('"', '\\"')}"`
 							: type === "function"
 							? output.toString()

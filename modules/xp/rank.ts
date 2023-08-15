@@ -27,7 +27,7 @@ export default async function getUserRank(
 	async function makeCanvasFiles() {
 		if (!constants.canvasEnabled) return [];
 
-		const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
+		const { createCanvas } = await import("@napi-rs/canvas");
 		const canvas = createCanvas(1000, 50);
 		const context = canvas.getContext("2d");
 		context.fillStyle = "#0003";

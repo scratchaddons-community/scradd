@@ -77,7 +77,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 									{ lineterm: "" },
 								)
 									.join("\n")
-									.replace(/^--- \n\+\+\+ \n/, ""),
+									.replace(/^-{3} \n\+{3} \n/, ""),
 
 								extension: "diff",
 							},

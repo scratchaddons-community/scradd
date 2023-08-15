@@ -15,13 +15,11 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 
 	const addedRoles = entry.changes
 		.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
-		.map((change) => change.new)
-		.flat();
+		.flatMap((change) => change.new);
 
 	const removedRoles = entry.changes
 		.filter((change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove")
-		.map((change) => change.new)
-		.flat();
+		.flatMap((change) => change.new);
 
 	if (addedRoles.length)
 		await log(

@@ -31,7 +31,7 @@ export function convertBase(
 	outBase: number,
 	chars = convertBase.defaultChars,
 ) {
-	const range = chars.split("");
+	const range = [...chars];
 	if (sourceBase < 2 || sourceBase > range.length)
 		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
 	if (outBase < 2 || outBase > range.length)
@@ -39,8 +39,7 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = value
-		.split("")
+	let decValue = [...value]
 		.reverse() // Stop changing this to `.reduceRight()`! It’s not the same!
 		.reduce((carry, digit, loopIndex) => {
 			const biggestBaseIndex = range.indexOf(digit);
@@ -91,9 +90,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 export function parseTime(time: string): Date {
 	const number = Number(time);
 
-	if (!isNaN(number)) {
+	if (!Number.isNaN(number)) {
 		if (number > 1_000_000_000_000) return new Date(number);
-		else if (number > 1_000_000_000) return new Date(number * 1_000);
+		else if (number > 1_000_000_000) return new Date(number * 1000);
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 

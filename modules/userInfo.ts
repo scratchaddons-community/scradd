@@ -98,12 +98,12 @@ defineCommand(
 					: { name: "Banned", value: "Yes", inline: true },
 			);
 
-		const hasXp = (xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0) > 0;
+		const xp = (xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0) ;
 		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
 		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
 
 		const buttons = [
-			hasXp && { customId: `${user.id}_xp`, label: "XP" },
+			xp && { customId: `${user.id}_xp`, label: "XP" },
 			hasPotatoes && {
 				customId: `${user.id}_exploreBoard`,
 				label: `Explore ${REACTIONS_NAME}`,

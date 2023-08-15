@@ -140,7 +140,7 @@ export async function channelUpdate(
 	const tags = !!newChannel.flags?.has("RequireTag");
 	if (!!oldChannel.flags?.has("RequireTag") !== tags) {
 		await log(
-			`${LoggingEmojis.Channel} "Require people to select tags when posting" ${
+			`${LoggingEmojis.Channel} “Require people to select tags when posting” ${
 				tags ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
 			"channels",
@@ -259,7 +259,7 @@ export async function channelUpdate(
 						{ lineterm: "" },
 					)
 						.join("\n")
-						.replace(/^--- \n\+\+\+ \n/, ""),
+						.replace(/^-{3} \n\+{3} \n/, ""),
 
 					extension: "diff",
 				},

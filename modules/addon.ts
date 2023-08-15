@@ -49,9 +49,9 @@ defineCommand(
 			: addon.tags.includes("easterEgg")
 			? "Easter Eggs"
 			: addon.tags.includes("theme")
-			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
+			? `Themes → ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
 			: addon.tags.includes("community")
-			? `Scratch Website Features -> ${
+			? `Scratch Website Features → ${
 					addon.tags.includes("profiles")
 						? "Profiles"
 						: addon.tags.includes("projectPage")
@@ -60,7 +60,7 @@ defineCommand(
 						? "Forums"
 						: "Others"
 			  }`
-			: `Scratch Editor Features -> ${
+			: `Scratch Editor Features → ${
 					addon.tags.includes("codeEditor")
 						? "Code Editor"
 						: addon.tags.includes("costumeEditor")

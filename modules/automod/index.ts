@@ -33,7 +33,7 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 			await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That's not appropriate" : "Language"
+					censored.strikes < 1 ? "That’s not appropriate" : "Language"
 				}!`,
 			});
 			await warn(
@@ -47,27 +47,6 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	}
 
 	return true;
-
-	function censorOptions(options: readonly CommandInteractionOption[]): {
-		strikes: number;
-		words: string[];
-	} {
-		let strikes = 0;
-		const words: string[] = [];
-
-		for (const option of options) {
-			const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
-			const censoredOptions = (option.options && censorOptions(option.options)) || undefined;
-
-			strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
-			words.push(
-				...(censoredValue?.words.flat() ?? []),
-				...(censoredOptions?.words.flat() ?? []),
-			);
-		}
-
-		return { strikes, words };
-	}
 });
 defineEvent.pre("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
@@ -169,7 +148,7 @@ defineCommand(
 			ephemeral: true,
 
 			content: words
-				? `⚠️ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
+				? `⚠️ **${words.length} bad word${words.length ? "s" : ""} detected**!\n${
 						config.roles.mod &&
 						(interaction.member instanceof GuildMember
 							? interaction.member.roles.resolve(config.roles.mod.id)
@@ -186,3 +165,24 @@ defineCommand(
 		});
 	},
 );
+
+function censorOptions(options: readonly CommandInteractionOption[]): {
+	strikes: number;
+	words: string[];
+} {
+	let strikes = 0;
+	const words: string[] = [];
+
+	for (const option of options) {
+		const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
+		const censoredOptions = (option.options && censorOptions(option.options)) || undefined;
+
+		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
+		words.push(
+			...(censoredValue?.words.flat() ?? []),
+			...(censoredOptions?.words.flat() ?? []),
+		);
+	}
+
+	return { strikes, words };
+}

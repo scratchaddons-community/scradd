@@ -71,7 +71,7 @@ export default function censor(text: string, strikeShift = 0) {
 		});
 	}, normalize(text));
 
-	return words.flat().length > 0
+	return words.flat().length
 		? {
 				censored,
 

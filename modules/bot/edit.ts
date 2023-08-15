@@ -132,7 +132,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		lineterm: "",
 	})
 		.join("\n")
-		.replace(/^--- \n\+\+\+ \n/, "");
+		.replace(/^-{3} \n\+{3} \n/, "");
 
 	const extraDiff = diffString(
 		{ ...oldJSON, content: undefined },
@@ -143,7 +143,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });
 
-	if (files.length > 0) {
+	if (files.length) {
 		await log(
 			`${
 				LoggingEmojis.MessageEdit

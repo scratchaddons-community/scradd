@@ -84,7 +84,7 @@ export default async function giveXp(
 	const member =
 		user instanceof GuildMember ? user : await config.guild.members.fetch(user).catch(() => {});
 
-	const xp = Array.from(xpDatabase.data);
+	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[xpDatabaseIndex]?.xp || 0;
 	const newXp = oldXp === 0 && amount < 0 ? 0 : oldXp + amount * (Math.sign(oldXp) || 1);
@@ -112,7 +112,7 @@ export default async function giveXp(
 		);
 	}
 
-	const weekly = Array.from(recentXpDatabase.data);
+	const weekly = [...recentXpDatabase.data];
 	const weeklyIndex = weekly.findIndex(
 		(entry) =>
 			entry.user === user.id &&
@@ -185,7 +185,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
 					text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank${
-						!showButton ? "\nToggle pings with /settings" : ""
+						showButton ? "" : "\nToggle pings with /settings"
 					}`,
 				},
 			},

@@ -71,7 +71,7 @@ export default async function updateBoard(message: Message) {
 		];
 	}
 
-	const top = Array.from(boardDatabase.data).sort((one, two) => two.reactions - one.reactions);
+	const top = [...boardDatabase.data].sort((one, two) => two.reactions - one.reactions);
 	top.splice(
 		top.findIndex(
 			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,

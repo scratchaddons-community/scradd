@@ -228,8 +228,8 @@ defineCommand(
 				const generated = await generateMessage();
 				await interaction.editReply(generated);
 
-				if (!generated.embeds) collector.stop();
-				else collector.resetTimer();
+				if (generated.embeds) {collector.resetTimer();}
+				else {collector.stop();}
 			})
 			.on("end", async () => {
 				await interaction.editReply({

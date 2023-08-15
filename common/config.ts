@@ -13,7 +13,7 @@ async function getConfig() {
 			? (
 					await fetch(
 						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (res) => await res.json<{ tag_name: string }>())
+					).then(async (response) => await response.json<{ tag_name: string }>())
 			  ).tag_name
 			: "master";
 
@@ -84,14 +84,18 @@ async function getConfig() {
 			if (!channel || !types.includes(channel.type)) return false;
 
 			switch (matchType) {
-				case "full":
+				case "full": {
 					return channel.name === name;
-				case "partial":
+				}
+				case "partial": {
 					return channel.name.includes(name);
-				case "start":
+				}
+				case "start": {
 					return channel.name.startsWith(name);
-				case "end":
+				}
+				case "end": {
 					return channel.name.endsWith(name);
+				}
 			}
 		});
 	}

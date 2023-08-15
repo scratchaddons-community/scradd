@@ -149,14 +149,14 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} ${
-				censored.strikes < 1 ? "That's not appropriate" : "Language"
+				censored.strikes < 1 ? "That’s not appropriate" : "Language"
 			}!`,
 		});
 	}
 
 	if (
-		name.match(
-			/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))|owner|exec(?:utive)|manager|scradd)\b/i,
+		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
+			name,
 		)
 	) {
 		return await interaction.reply({
@@ -165,7 +165,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	if (color && !(color in Colors) && color !== "Random" && !/^#[0-9a-f]{6}$/i.test(color)) {
+	if (color && !(color in Colors) && color !== "Random" && !/^#[\da-f]{6}$/i.test(color)) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not parse that color!`,
@@ -231,11 +231,11 @@ export async function qualifiesForRole(member: GuildMember) {
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(
-		recentXp.reduce<Record<Snowflake, number>>((acc, gain) => {
-			if (gain.time > maxDate) return acc;
+		recentXp.reduce<Record<Snowflake, number>>((accumulator, gain) => {
+			if (gain.time > maxDate) return accumulator;
 
-			acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
-			return acc;
+			accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
+			return accumulator;
 		}, {}),
 	).sort((one, two) => two[1] - one[1]);
 	if (lastWeekly[0]?.[0] === member.user.id) return true;

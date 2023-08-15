@@ -35,9 +35,9 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		toSend: Reminder[];
 		toPostpone: Reminder[];
 	}>(
-		(acc, reminder) => {
-			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
-			return acc;
+		(accumulator, reminder) => {
+			accumulator[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
+			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
 	);
@@ -118,7 +118,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						...remindersDatabase.data,
 						{
 							channel: BUMPING_THREAD,
-							date: Date.now() + 1800000,
+							date: Date.now() + 1_800_000,
 							reminder: undefined,
 							id: SpecialReminders.Bump,
 							user: client.user.id,
