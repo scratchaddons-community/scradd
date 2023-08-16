@@ -71,19 +71,14 @@ defineEvent("messageCreate", async (message) => {
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
 
-		if (name) {
-			if (
-				process.env.NODE_ENV !== "production" ||
-				config.channels.bots?.id === baseChannel?.id
-			) {
-				return await message.reply({
-					content: dad(name, message.author),
-					allowedMentions: { users: [] },
-				});
-			} else if (getSettings(message.author, false).autoreactions !== undefined) {
-				reactions++;
-				return await message.react("👋").catch(() => {});
-			}
+		if (
+			name &&
+			(process.env.NODE_ENV !== "production" || config.channels.bots?.id === baseChannel?.id)
+		) {
+			return await message.reply({
+				content: dad(name, message.author),
+				allowedMentions: { users: [] },
+			});
 		}
 	}
 
