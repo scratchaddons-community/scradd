@@ -3,7 +3,7 @@ import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
+	type BaseMessageOptions,
 } from "discord.js";
 import { client, defineCommand } from "strife.js";
 import constants from "../common/constants.js";
@@ -77,7 +77,6 @@ defineCommand(
 					} No messages matched those filters! Note: I cannot purge messages that are older than 2 weeks or more than ${MAX_FETCH_COUNT} messages ${
 						message ? `before [this message](<${channel?.url}/${message}>)` : "ago"
 					}.`,
-					ephemeral: true,
 				};
 			}
 
@@ -118,7 +117,6 @@ defineCommand(
 			});
 
 			return {
-				ephemeral: true,
 				content: `Are you sure you want to purge th${
 					sliced.length === 1 ? "is message" : `ese ${sliced.length} messages`
 				}?`,
@@ -186,11 +184,11 @@ defineCommand(
 						],
 					},
 				],
-			} satisfies InteractionReplyOptions;
+			} satisfies BaseMessageOptions;
 		}
 
 		const generated = await generateMessage();
-		const reply = await interaction.reply(generated);
+		let reply = await interaction.reply({ ...generated, ephemeral: true, fetchReply: true });
 		if (!generated.embeds) return;
 
 		const collector = reply.createMessageComponentCollector({ time: constants.collectorTime });
@@ -226,15 +224,13 @@ defineCommand(
 				await buttonInteraction.deferUpdate();
 
 				const generated = await generateMessage();
-				await interaction.editReply(generated);
+				reply = await reply.edit(generated);
 
-				if (generated.embeds) {collector.resetTimer();}
-				else {collector.stop();}
+				if (generated.embeds) collector.resetTimer();
+				else collector.stop();
 			})
 			.on("end", async () => {
-				await interaction.editReply({
-					components: disableComponents((await interaction.fetchReply()).components),
-				});
+				await reply.edit({ components: disableComponents(reply.components) });
 			});
 	},
 );
