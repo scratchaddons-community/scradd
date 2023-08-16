@@ -10,6 +10,7 @@ import {
 	ButtonInteraction,
 	type CacheType,
 	ChatInputCommandInteraction,
+	type MessageEditOptions,
 } from "discord.js";
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
@@ -77,10 +78,11 @@ export default async function makeSlideshow(
 		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
 	},
 ) {
-	await interaction.deferReply({
+	let reply = await interaction.deferReply({
 		ephemeral:
 			interaction.isButton() &&
 			interaction.message.interaction?.user.id !== interaction.user.id,
+		fetchReply: true,
 	});
 	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
@@ -95,7 +97,7 @@ export default async function makeSlideshow(
 	const nextId = generateHash("next");
 	const previousId = generateHash("prev");
 
-	const messages: InteractionReplyOptions[] = [];
+	const messages: MessageEditOptions[] = [];
 	let index = 0;
 
 	/**
@@ -103,7 +105,7 @@ export default async function makeSlideshow(
 	 *
 	 * @returns The reply information.
 	 */
-	async function getNextMessage(): Promise<InteractionReplyOptions> {
+	async function getNextMessage(): Promise<MessageEditOptions> {
 		const info = (await fetchedMessages.next()).value;
 
 		const reply = info
@@ -161,7 +163,7 @@ export default async function makeSlideshow(
 		return reply;
 	}
 
-	const reply = await interaction.editReply(await getNextMessage());
+	reply = await reply.edit(await getNextMessage());
 
 	const collector = reply.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
@@ -176,17 +178,14 @@ export default async function makeSlideshow(
 			await buttonInteraction.deferUpdate();
 			if (buttonInteraction.customId === previousId) index--;
 			else index++;
-			await interaction.editReply(messages[Number(index)] ?? (await getNextMessage()));
+			reply = await reply.edit(messages[Number(index)] ?? (await getNextMessage()));
 
 			collector.resetTimer();
 		})
 		.on("end", async () => {
-			const source = await interaction.fetchReply();
-
-			await interaction.editReply({
+			await reply.edit({
 				allowedMentions: { users: [] },
-
-				components: disableComponents(source.components),
+				components: disableComponents(reply?.components ?? []),
 			});
 		});
 }
