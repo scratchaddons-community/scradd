@@ -100,13 +100,14 @@ defineCommand(
 											.catch(() => ({ displayName: `<@${xp.user}>` }))
 								  ).displayName
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
-					async (data) =>
-						await interaction[interaction.replied ? "editReply" : "reply"](data),
+					(data) => interaction.reply(data),
 					{
-						singular: "user",
 						title: `Leaderboard for ${config.guild.name}`,
+						singular: "user",
+
 						user: interaction.user,
 						rawOffset: index,
+
 						generateComponents() {
 							return getSettings(interaction.user, false)?.useMentions === undefined
 								? [

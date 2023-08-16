@@ -53,17 +53,15 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 								  ).displayName
 					  }`
 			}`,
-		async (data) => await interaction[interaction.replied ? "editReply" : "reply"](data),
+		(data) => interaction.reply(data),
 		{
 			title: `Top suggestions${nick ? ` by ${nick}` : ""}${
 				answerFilter ? `${nick ? " and" : ""} answered with ${answerFilter}` : ""
 			}`,
-
-			user: interaction.user,
 			format: authorFilter instanceof GuildMember ? authorFilter : undefined,
-
 			singular: "suggestion",
 			failMessage: "No suggestions found! Try changing any filters you may have used.",
+			user: interaction.user,
 		},
 	);
 }

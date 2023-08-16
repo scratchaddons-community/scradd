@@ -64,31 +64,15 @@ export async function getStrikes(
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : ""
 			}`,
-		async (data) => {
-			const newData = { ...data };
-			if (
-				newData.embeds?.[0] &&
-				"footer" in newData.embeds[0] &&
-				newData.embeds[0].footer?.text
-			) {
-				newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
-					/\d+ $/,
-					`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-				);
-			}
-			return await (interaction.replied
-				? interaction.editReply(newData)
-				: interaction.reply(newData));
-		},
+		(data) => interaction.reply({...data,ephemeral:true}),
 		{
 			title: `${(member ?? user).displayName}’s strikes`,
-			singular: "",
-			plural: "",
-			failMessage: `${selected.toString()} has never been warned!`,
 			format: member || user,
-			ephemeral: true,
-			showIndexes: false,
+			singular: "strike",
+			failMessage: `${selected.toString()} has never been warned!`,
+			
 			user: interaction.user,
+			totalCount: totalStrikeCount,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {
