@@ -23,16 +23,11 @@ defineEvent("messageCreate", async (message) => {
 		try {
 			const response = await fetch(apiUrl);
 
-			if (!response.ok) {
-				throw new Error("API request failed");
-			}
+			
 
 			const data = await response.json();
 			return data;
-		} catch (error) {
-			console.error("An error occurred:", error);
-			throw error;
-		}
+		} catch (error) {}
 	}
 	function long(text: string, maxLength: number, appendText: string): string {
 		if (text.length > maxLength) {
@@ -102,9 +97,9 @@ defineEvent("messageCreate", async (message) => {
 					],
 				});
 			})
-			.catch((error) => {
+			.catch(() => {
 				//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
-				console.error("An error occurred:", error);
+				
 			});
 	} else if (type === "users") {
 		const username = urlParts[4];
@@ -155,9 +150,8 @@ defineEvent("messageCreate", async (message) => {
 					],
 				});
 			})
-			.catch((error) => {
-				// Handle errors
-				console.error("An error occurred:", error);
+			.catch(() => {
+				
 			});
 	} else if (type === "studios") {
 		const studioId = urlParts[4];
@@ -222,11 +216,11 @@ defineEvent("messageCreate", async (message) => {
 					],
 				});
 			})
-			.catch((error) => {
+			.catch(() => {
 				//babeh shark
-				console.error("An error occurred:", error);
+				
 			});
 	} else {
-		console.log("Invalid URL");
+		
 	}
 });
