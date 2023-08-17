@@ -41,4 +41,4 @@ Pull requests are welcome if you would like to help contribute. However, before 
 
 ### File structure
 
-This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well. 
+This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well.
