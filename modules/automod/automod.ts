@@ -117,7 +117,7 @@ export default async function automodMessage(message: Message) {
 								...(censored.words?.[index] ?? []),
 							]),
 					  },
-			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
+			{ strikes: 0, words: Array<string[]>(badWordRegexps.length).fill([]) },
 		);
 		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
@@ -142,7 +142,7 @@ export default async function automodMessage(message: Message) {
 				},
 				{
 					strikes: 0,
-					words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]),
+					words: Array<string[]>(badWordRegexps.length).fill([]),
 				},
 			);
 

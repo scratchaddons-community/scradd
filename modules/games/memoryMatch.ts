@@ -12,6 +12,7 @@ import {
 	ThreadAutoArchiveDuration,
 	ChannelType,
 	type RepliableInteraction,
+	GuildEmoji,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -351,8 +352,6 @@ async function playGame(
 					} as const;
 				}),
 			})),
-
-			allowedMentions: { users: [] },
 		};
 	}
 
@@ -439,23 +438,16 @@ async function setupGame(difficulty: 2 | 4) {
 						{ name: "callum", id: "1119305606323523624" },
 				  ]
 				: []),
-		].map((emoji): [string, APIMessageComponentEmoji] =>
+		].map((emoji): [string, APIMessageComponentEmoji | GuildEmoji] =>
 			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],
 		),
-	// eslint-disable-next-line unicorn/prefer-spread
-	).concat(
-		(await config.guild.emojis.fetch())
-			.filter((emoji) => emoji.available)
-			.mapValues((emoji) => ({
-				id: emoji.id,
-				name: emoji.name ?? undefined,
-				animated: emoji.animated || undefined,
-			})),
-	);
+		// eslint-disable-next-line unicorn/prefer-spread
+	).concat((await config.guild.emojis.fetch()).filter((emoji) => emoji.available));
 	const selected = allEmojis.random(24 / difficulty);
-	const emojis = [...selected, ...Array.from({ length: difficulty - 1 }).fill(selected)].sort(
-		() => Math.random() - 0.5,
-	);
+	const emojis = Array<typeof selected>(difficulty)
+		.fill(selected)
+		.flat()
+		.sort(() => Math.random() - 0.5);
 
 	const chunks = [];
 	while (emojis.length) {
