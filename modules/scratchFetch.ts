@@ -3,19 +3,18 @@ import fetch from "node-fetch";
 import { getSettings } from "./settings.js";
 
 defineEvent("messageCreate", async (message) => {
-  const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
-  if (!getSettings(message.author,false).scratchEmbeds && !notSet) {
-  return
-  
-  }
-	const scratchUrlRegex =  /(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?(?!>)/; //gpt wrote the regex and like half of this code
+	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
+	if (!getSettings(message.author, false).scratchEmbeds && !notSet) {
+		return;
+	}
+	const scratchUrlRegex =
+		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?(?!>)/; //gpt wrote the regex and like half of this code
 	const match = message.content.match(scratchUrlRegex);
 
 	if (!match) {
-		
 		return;
 	}
-  
+
 	const urlParts = match[0].split("/");
 	const type = urlParts[3]; // m ybrain is dead
 
@@ -94,7 +93,7 @@ defineEvent("messageCreate", async (message) => {
 								icon_url: data.author.profile.images["90x90"],
 							},
 							footer: {
-								text: notSet ? "Disable this using /settings":"",
+								text: notSet ? "Disable this using /settings" : "",
 								icon_url: ``,
 							},
 							url: `https://scratch.mit.edu/projects/${projectId}`,
@@ -147,7 +146,7 @@ defineEvent("messageCreate", async (message) => {
 								icon_url: ``,
 							},
 							footer: {
-								text: notSet ? "Disable this using /settings":"",
+								text: notSet ? "Disable this using /settings" : "",
 								icon_url: ``,
 							},
 							url: `https://scratch.mit.edu/users/${username}`,
@@ -214,7 +213,7 @@ defineEvent("messageCreate", async (message) => {
 								icon_url: ``,
 							},
 							footer: {
-								text: notSet ? "Disable this using /settings":"",
+								text: notSet ? "Disable this using /settings" : "",
 								icon_url: ``,
 							},
 							url: `https://scratch.mit.edu/studios/${studioId}`,
