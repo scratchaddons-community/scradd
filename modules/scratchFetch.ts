@@ -22,8 +22,6 @@ defineEvent("messageCreate", async (message) => {
 		try {
 			const response = await fetch(apiUrl);
 
-			
-
 			const data = await response.json();
 			return data;
 		} catch (error) {}
@@ -98,7 +96,6 @@ defineEvent("messageCreate", async (message) => {
 			})
 			.catch(() => {
 				//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
-				
 			});
 	} else if (type === "users") {
 		const username = urlParts[4];
@@ -149,9 +146,7 @@ defineEvent("messageCreate", async (message) => {
 					],
 				});
 			})
-			.catch(() => {
-				
-			});
+			.catch(() => {});
 	} else if (type === "studios") {
 		const studioId = urlParts[4];
 
@@ -217,9 +212,7 @@ defineEvent("messageCreate", async (message) => {
 			})
 			.catch(() => {
 				//babeh shark
-				
 			});
 	} else {
-		
 	}
 });
