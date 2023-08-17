@@ -26,6 +26,7 @@ export const userSettingsDatabase = new Database<{
 	useMentions?: boolean;
 	dmReminders?: boolean;
 	resourcesDmed?: boolean;
+	scratchFetch?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -65,6 +66,10 @@ defineCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
+			"scratchFetch": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Get scratch page information from a sent link",
+			},
 		},
 	},
 
@@ -76,6 +81,7 @@ defineCommand(
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
 				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
 				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
+				scratchFetch: interaction.options.getBoolean("scratchFetch") ?? undefined,
 			}),
 		);
 	},
@@ -108,6 +114,7 @@ export function updateSettings(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
+		scratchFetch?: boolean | "toggle";
 		resourcesDmed?: true;
 	},
 ) {
@@ -134,6 +141,10 @@ export function updateSettings(
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
+		scratchFetch:
+			settings.scratchFetch === "toggle"
+				? !old.scratchFetch
+				: settings.scratchFetch ?? old.scratchFetch,
 		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
@@ -157,6 +168,12 @@ export function updateSettings(
 						customId: "levelUpPings_toggleSetting",
 						type: ComponentType.Button,
 						label: "Level Up Pings",
+						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "scratchFetch_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Links",
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 					},
 				],
@@ -216,6 +233,7 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions: getWeeklyXp(user.id) > 100,
+		scratchFetch: true,
 		resourcesDmed: false,
 	};
 }
