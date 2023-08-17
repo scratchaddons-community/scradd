@@ -141,10 +141,10 @@ export function updateSettings(
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
-				scratchEmbeds:
-				settings.scratchEmbeds === "toggle"
-					? !old.scratchEmbeds
-					: settings.scratchEmbeds ?? old.scratchEmbeds,
+		scratchEmbeds:
+			settings.scratchEmbeds === "toggle"
+				? !old.scratchEmbeds
+				: settings.scratchEmbeds ?? old.scratchEmbeds,
 		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
