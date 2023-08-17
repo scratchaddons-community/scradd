@@ -25,6 +25,7 @@ export const userSettingsDatabase = new Database<{
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
+	scratchEmbeds?: boolean;
 	resourcesDmed?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
@@ -65,6 +66,10 @@ defineCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
+			"scratch-embeds": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send link info when you send a scratch link",
+			},
 		},
 	},
 
@@ -76,6 +81,7 @@ defineCommand(
 				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
 				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
 				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
+				scratchEmbeds: interaction.options.getBoolean("scratch-embeds") ?? undefined,
 			}),
 		);
 	},
@@ -108,6 +114,7 @@ export function updateSettings(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
+		scratchEmbeds?: boolean | "toggle";
 		resourcesDmed?: true;
 	},
 ) {
@@ -134,6 +141,10 @@ export function updateSettings(
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
+				scratchEmbeds:
+				settings.scratchEmbeds === "toggle"
+					? !old.scratchEmbeds
+					: settings.scratchEmbeds ?? old.scratchEmbeds,
 		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
@@ -158,6 +169,12 @@ export function updateSettings(
 						type: ComponentType.Button,
 						label: "Level Up Pings",
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "scratchEmbeds_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
 					},
 				],
 			},
@@ -213,6 +230,7 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 	return {
 		autoreactions: true,
 		dmReminders: true,
+		scratchEmbeds: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions: getWeeklyXp(user.id) > 100,
