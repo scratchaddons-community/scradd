@@ -2,11 +2,11 @@ import { defineEvent } from "strife.js";
 import fetch from "node-fetch";
 
 defineEvent("messageCreate", async (message) => {
-	const scratchUrlRegex = /https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?/; //gpt wrote the regex and like half of this code
+	const scratchUrlRegex =  /(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?(?!>)/; //gpt wrote the regex and like half of this code
 	const match = message.content.match(scratchUrlRegex);
 
 	if (!match) {
-		console.log("returned");
+		
 		return;
 	}
 
