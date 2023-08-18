@@ -93,18 +93,20 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			.map((entry) => ({ xp: entry[1], user: entry[0] }))
 			.filter((item) => item.xp >= 500),
 	];
-	if (config.roles.active) {
+
+	const activeRole = config.roles.active;
+	if (activeRole) {
 		await Promise.all([
-			...config.roles.active.members.map(async (roleMember) => {
+			...activeRole.members.map(async (roleMember) => {
 				if (!activeMembers.some((item) => item.user === roleMember.id))
-					return await roleMember.roles.remove(config.roles.active, "Inactive");
+					return await roleMember.roles.remove(activeRole, "Inactive");
 			}),
 			...activeMembers.map(
 				async ({ user: memberId }) =>
 					await config.guild.members
 						.fetch(memberId)
 						.catch(() => {})
-						.then((activeMember) => activeMember?.roles.add(config.roles.active, "Active")),
+						.then((activeMember) => activeMember?.roles.add(activeRole, "Active")),
 			),
 		]);
 	}
