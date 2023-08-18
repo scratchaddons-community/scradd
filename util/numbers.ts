@@ -31,7 +31,7 @@ export function convertBase(
 	outBase: number,
 	chars = convertBase.defaultChars,
 ) {
-	const range = chars.split("");
+	const range = [...chars];
 	if (sourceBase < 2 || sourceBase > range.length)
 		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
 	if (outBase < 2 || outBase > range.length)
@@ -39,8 +39,7 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = value
-		.split("")
+	let decValue = [...value]
 		.reverse() // Stop changing this to `.reduceRight()`! It’s not the same!
 		.reduce((carry, digit, loopIndex) => {
 			const biggestBaseIndex = range.indexOf(digit);
@@ -61,6 +60,7 @@ export function convertBase(
 }
 
 convertBase.defaultChars =
+	// eslint-disable-next-line unicorn/string-content
 	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
 convertBase.MAX_BASE = convertBase.defaultChars.length;
 
@@ -79,9 +79,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 	return (
 		(bold ? `**${formatted}**` : formatted) +
 		(jokes
-			? String(number).includes("69")
+			? number.toString().includes("69")
 				? ` (nic${"e".repeat(Math.floor(number.toString().length / 2))})`
-				: /^[1-9]0+$/.test(String(number))
+				: /^[1-9]0+$/.test(number.toString())
 				? ` (${"🥳".repeat(number.toString().length - 1)})`
 				: ""
 			: "")
@@ -91,9 +91,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 export function parseTime(time: string): Date {
 	const number = Number(time);
 
-	if (!isNaN(number)) {
+	if (!Number.isNaN(number)) {
 		if (number > 1_000_000_000_000) return new Date(number);
-		else if (number > 1_000_000_000) return new Date(number * 1_000);
+		else if (number > 1_000_000_000) return new Date(number * 1000);
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 

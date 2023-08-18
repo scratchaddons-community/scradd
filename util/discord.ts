@@ -206,6 +206,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
 					message.author.displayName,
+					// eslint-disable-next-line unicorn/string-content
 			  )} is thinking...`
 		: message.content;
 
@@ -267,6 +268,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Welcome ${message.author.toString()}. Say hi!`,
 				`${message.author.toString()} hopped into the server.`,
 				`Everyone welcome ${message.author.toString()}!`,
+				// eslint-disable-next-line unicorn/string-content
 				`Glad you're here, ${message.author.toString()}.`,
 				`Good to see you, ${message.author.toString()}.`,
 				`Yay you made it, ${message.author.toString()}!`,
@@ -352,7 +354,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return message
 				.fetchReference()
 				.catch(() => {})
-				.then(async (reply) => {
+				.then((reply) => {
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
@@ -370,11 +372,12 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return message
 				.fetchReference()
 				.catch(() => {})
-				.then((reference) =>
+				.then(async (reference) =>
 					// The resolved message for the reference will be a Message
 					reference
-						? messageToText(reference, replies) || actualContent
-						: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
+						? (await messageToText(reference, replies)) || actualContent
+						: // eslint-disable-next-line unicorn/string-content
+						  `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
 				);
 		}
 
@@ -443,7 +446,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 							command
 								? chatInputApplicationCommandMention(
 										message.interaction?.commandName ?? "",
-										command.id ?? "",
+										command.id,
 								  )
 								: bold(`/${message.interaction?.commandName ?? ""}`)
 						}:*\n${actualContent}`,
@@ -482,7 +485,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
-): Promise<MessageReaction[] | void> {
+): Promise<MessageReaction[] | undefined> {
 	const messageReactions = [];
 	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
 	for (const reaction of reactions) {
@@ -528,82 +531,74 @@ export function disableComponents(
  * @param reply - A function to send pages.
  * @param options - Additional options.
  * @param options.title - The title of the embed.
- * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
+ * @param options.format - A user to format the embed against.
  * @param options.singular - A noun that describes a item of the array.
  * @param options.plural - `singular` pluralized. Defaults to just adding an `s` to the end.
  * @param options.failMessage - A message to show when `array` is empty.
- * @param options.format - A user to format the embed against.
- * @param options.ephemeral - Whether the message is ephemeral.
+ * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
  * @param options.rawOffset - The index of an item to jump to.
- * @param options.itemsPerPage - The number of items to display at a time. Defaults to 15.
- * @param options.showIndexes - Whether to show the index of each item.
+ * @param options.totalCount - Whether to show the index of each item.
  * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
  * @param options.disableCustomComponents - Whether to disable the custom components when the pagination buttons go inactive.
  */
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (
-		options: BaseMessageOptions & { fetchReply: true; ephemeral?: boolean },
-	) => Promise<Message>,
+	reply: (options: InteractionReplyOptions & { fetchReply: true }) => Promise<Message>,
 	{
 		title,
-		user,
+		format,
 		singular,
 		plural = `${singular}s`,
 		failMessage = `No ${plural} found!`,
-		format,
-		ephemeral = false,
+
+		user,
 		rawOffset,
-		itemsPerPage = 15,
-		showIndexes = true,
+		totalCount,
+
 		generateComponents,
-		disableCustomComponents = false,
 		customComponentLocation = "below",
 	}: {
 		title: string;
-		user: User | false;
+		format?: GuildMember | User;
 		singular: string;
 		plural?: string;
 		failMessage?: string;
-		format?: GuildMember | User;
-		ephemeral?: boolean;
+
+		user: User | false;
 		rawOffset?: number;
-		itemsPerPage?: number;
-		showIndexes?: boolean;
+		totalCount?: number;
+
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
-		disableCustomComponents?: boolean;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
+	const ITEMS_PER_PAGE = 15;
+
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / itemsPerPage);
+	const numberOfPages = Math.ceil(array.length / ITEMS_PER_PAGE);
 
-	let offset = Math.floor((rawOffset ?? 0) / itemsPerPage) * itemsPerPage;
+	let offset = Math.floor((rawOffset ?? 0) / ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
 
 	/**
 	 * Generate an embed that has the next page.
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage(): Promise<InteractionReplyOptions & { fetchReply: true }> {
+	async function generateMessage(): Promise<BaseMessageOptions & { fetchReply: true }> {
 		const filtered = array.filter(
-			(_, index) => index >= offset && index < offset + itemsPerPage,
+			(_, index) => index >= offset && index < offset + ITEMS_PER_PAGE,
 		);
 
-		if (filtered.length === 0) {
-			return {
-				content: `${constants.emojis.statuses.no} ${failMessage}`,
-				ephemeral: true,
-				fetchReply: true,
-			};
+		if (!filtered.length) {
+			return { content: `${constants.emojis.statuses.no} ${failMessage}`, fetchReply: true };
 		}
 
 		const content = (
 			await Promise.all(
 				filtered.map(async (current, index, all) => {
-					const line = `${showIndexes ? `${index + offset + 1}) ` : ""}${await toString(
+					const line = `${totalCount ? `${index + offset + 1}) ` : ""}${await toString(
 						current,
 						index,
 						all,
@@ -624,14 +619,14 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "<< Previous",
 									style: ButtonStyle.Primary,
-									disabled: offset === 0,
+									disabled: offset < 1,
 									customId: previousId,
 								},
 								{
 									type: ComponentType.Button,
 									label: "Next >>",
 									style: ButtonStyle.Primary,
-									disabled: offset + itemsPerPage >= array.length,
+									disabled: offset + ITEMS_PER_PAGE >= array.length,
 									customId: nextId,
 								},
 							],
@@ -648,6 +643,8 @@ export async function paginate<Item>(
 				});
 		}
 
+		const count = totalCount ?? array.length;
+
 		return {
 			components,
 
@@ -657,11 +654,9 @@ export async function paginate<Item>(
 					description: content,
 
 					footer: {
-						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
+						text: `Page ${offset / ITEMS_PER_PAGE + 1}/${numberOfPages}${
 							constants.footerSeperator
-						}${array.length.toLocaleString("en-us")} ${
-							array.length === 1 ? singular : plural
-						}`,
+						}${count.toLocaleString("en-us")} ${count === 1 ? singular : plural}`,
 					},
 
 					author: format
@@ -680,8 +675,6 @@ export async function paginate<Item>(
 						: constants.themeColor,
 				},
 			],
-
-			ephemeral: Boolean(ephemeral),
 			fetchReply: true,
 		};
 	}
@@ -699,23 +692,17 @@ export async function paginate<Item>(
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += itemsPerPage;
-			else offset -= itemsPerPage;
+			if (buttonInteraction.customId === nextId) offset += ITEMS_PER_PAGE;
+			else offset -= ITEMS_PER_PAGE;
 
 			await buttonInteraction.deferUpdate();
-			message = await reply(await generateMessage());
+			message = await message.edit(await generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {
 			const [pagination, ...rest] = message.components;
-			await reply({
-				components:
-					disableCustomComponents || !pagination
-						? disableComponents(message.components)
-						: [...disableComponents([pagination]), ...rest],
-
-				fetchReply: true,
-			});
+			if (pagination)
+				await message.edit({ components: [...disableComponents([pagination]), ...rest] });
 		});
 }
 

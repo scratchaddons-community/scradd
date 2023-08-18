@@ -39,8 +39,9 @@ defineCommand(
 		},
 	},
 	async (interaction) => {
-		if (interaction.options.getSubcommand(true) === "list") listReminders(interaction);
-		else createReminder(interaction);
+		await (interaction.options.getSubcommand(true) === "list"
+			? listReminders(interaction)
+			: createReminder(interaction));
 	},
 );
 
@@ -89,7 +90,7 @@ defineEvent("messageCreate", async (message) => {
 			),
 			{
 				channel: BUMPING_THREAD,
-				date: Date.now() + 7200000,
+				date: Date.now() + 7_200_000,
 				reminder: undefined,
 				id: SpecialReminders.Bump,
 				user: client.user.id,

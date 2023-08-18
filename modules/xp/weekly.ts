@@ -11,7 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { getCustomRole, qualifiesForRole } from "../roles.js";
+import { getCustomRole, qualifiesForRole } from "../roles/custom.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -51,6 +51,7 @@ export async function getChatters() {
 	return {
 		embeds: [
 			{
+				// eslint-disable-next-line unicorn/string-content
 				description: "```\n" + filtered.join("\n").replaceAll("```", "'''") + "\n```",
 				footer: ending
 					? {
@@ -61,7 +62,7 @@ export async function getChatters() {
 					  }
 					: undefined,
 				color: constants.themeColor,
-				thumbnail: winner ? { url: winner?.displayAvatarURL() } : undefined,
+				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
 	} satisfies MessageCreateOptions;
@@ -80,31 +81,32 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	];
 	const weeklyWinners = getFullWeeklyData();
 
-	const { active } = config.roles;
 	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
 	const activeMembers = [
 		...latestActiveMembers,
 		...Object.entries(
-			recentXpDatabase.data.reduce<Record<Snowflake, number>>((acc, gain) => {
-				acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
-				return acc;
+			recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
+				accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
+				return accumulator;
 			}, {}),
 		)
 			.map((entry) => ({ xp: entry[1], user: entry[0] }))
 			.filter((item) => item.xp >= 500),
 	];
-	if (active) {
+
+	const activeRole = config.roles.active;
+	if (activeRole) {
 		await Promise.all([
-			...active.members.map(async (roleMember) => {
+			...activeRole.members.map(async (roleMember) => {
 				if (!activeMembers.some((item) => item.user === roleMember.id))
-					return await roleMember.roles.remove(active, "Inactive");
+					return await roleMember.roles.remove(activeRole, "Inactive");
 			}),
 			...activeMembers.map(
 				async ({ user: memberId }) =>
 					await config.guild.members
 						.fetch(memberId)
 						.catch(() => {})
-						.then((activeMember) => activeMember?.roles.add(active, "Active")),
+						.then((activeMember) => activeMember?.roles.add(activeRole, "Active")),
 			),
 		]);
 	}
@@ -123,13 +125,13 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
 		) + 1 || weeklyWinners.length,
 	);
-	const ids = weeklyWinners.map((gain) => gain.user);
+	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
 	const role = config.roles.weekly_winner;
 	if (role) {
 		await Promise.all([
 			...role.members.map(async (weeklyMember) => {
-				if (!ids.includes(weeklyMember.id))
+				if (!ids.has(weeklyMember.id))
 					return await weeklyMember.roles.remove(role, "No longer weekly winner");
 			}),
 			...weeklyWinners.map(
@@ -151,7 +153,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		weeklyWinners.map(async (weeklyWinner) => {
 			const guildMember = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
 			if (!guildMember || (await qualifiesForRole(guildMember))) return;
-			getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
+			await getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
 		}),
 	);
 

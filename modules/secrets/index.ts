@@ -11,14 +11,14 @@ import { defineEvent } from "strife.js";
 const REACTION_CAP = 3;
 
 const ignoreTriggers = [
-	/\bkill/,
-	/\bsuicid/,
-	/\bdepress/,
-	/\bpain/,
-	/\bsick/,
-	/\babus/,
-	/\bkms/,
-	/\bbleed/,
+	/\bkill/i,
+	/\bsuicid/i,
+	/\bdepress/i,
+	/\bpain/i,
+	/\bsick/i,
+	/\babus/i,
+	/\bkms/i,
+	/\bbleed/i,
 ];
 
 defineEvent("messageCreate", async (message) => {
@@ -31,6 +31,7 @@ defineEvent("messageCreate", async (message) => {
 		return;
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
+	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 
 	let reactions = 0;
 
@@ -60,8 +61,8 @@ defineEvent("messageCreate", async (message) => {
 	)
 		return;
 
-	if (content.match(/^i[\p{Pi}\p{Pf}＂＇'"`՚]?m\b/u)) {
-		const name = content
+	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚]?m\b/u.test(cleanContent)) {
+		const name = cleanContent
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}\n𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
 			)[0]
@@ -70,53 +71,51 @@ defineEvent("messageCreate", async (message) => {
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
 
-		if (name) {
-			if (
-				process.env.NODE_ENV !== "production" ||
-				config.channels.bots?.id === baseChannel?.id
-			) {
-				return await message.reply({
-					content: dad(name, message.author),
-					allowedMentions: { users: [] },
-				});
-			} else if (getSettings(message.author, false).autoreactions !== undefined) {
-				reactions++;
-				return await message.react("👋").catch(() => {});
-			}
+		if (
+			name &&
+			(process.env.NODE_ENV !== "production" || config.channels.bots?.id === baseChannel?.id)
+		) {
+			return await message.reply({
+				content: dad(name, message.author),
+				allowedMentions: { users: [] },
+			});
 		}
 	}
 
+	let doReact = false;
 	for (const [emoji, ...requirements] of autoreactions) {
 		const emojis = [emoji].flat();
 		if (emojis.some((emoji) => content.includes(emoji))) continue;
 
-		const results = requirements.map((requirement) => {
-			const type = Array.isArray(requirement) ? requirement[1] : "word";
+		for (const requirement of requirements) {
+			const [rawMatch, type = "word"] = Array.isArray(requirement)
+				? requirement
+				: [requirement];
+			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
-			if (Array.isArray(requirement) && requirement[1] === "ping") {
-				return message.mentions.has(requirement[0], {
+			if (type[1] === "ping") {
+				return message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRepliedUser: true,
 					ignoreRoles: true,
 				});
 			}
 
-			const pre = type === "partial" || type === "raw" ? "" : type === "full" ? "^" : "\\b";
+			const result = new RegExp(
+				type === "partial" || type === "raw"
+					? match
+					: `${type === "full" ? "^" : "\\b"}${match}${
+							type === "plural" ? "(?:e?s)?" : ""
+					  }${type === "full" ? "$" : "\\b"}`,
+				"i",
+			).test(type === "raw" ? message.content : content);
 
-			const rawMatch = Array.isArray(requirement) ? requirement[0] : requirement;
-			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
+			if (type === "negative" && result) return;
 
-			const appendage = type === "plural" ? "(?:e?s)?" : "";
+			doReact ||= result;
+		}
 
-			const post = type === "partial" || type === "raw" ? "" : type === "full" ? "$" : "\\b";
-
-			const result = new RegExp(`${pre}${match}${appendage}${post}`, "i").test(
-				type === "raw" ? message.content : content,
-			);
-
-			return type === "negative" ? result && 0 : result;
-		});
-		if (results.includes(true) && !results.includes(0)) {
+		if (doReact) {
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
 			if (reactions > REACTION_CAP || !messageReactions) return;

@@ -54,7 +54,7 @@ defineCommand(
 			fields.push({
 				name: "Roles",
 				value:
-					member?.roles
+					member.roles
 						.valueOf()
 						.sorted((one, two) => two.comparePositionTo(one))
 						.filter((role) => role.id !== config.guild.id)
@@ -75,7 +75,7 @@ defineCommand(
 			fields.push({
 				name: "Voice Channel",
 				value:
-					member.voice.channel?.toString() +
+					member.voice.channel.toString() +
 					`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
 						member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
 					}${
@@ -98,12 +98,12 @@ defineCommand(
 					: { name: "Banned", value: "Yes", inline: true },
 			);
 
-		const hasXp = (xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0) > 0;
+		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
 		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
 		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
 
 		const buttons = [
-			hasXp && { customId: `${user.id}_xp`, label: "XP" },
+			xp && { customId: `${user.id}_xp`, label: "XP" },
 			hasPotatoes && {
 				customId: `${user.id}_exploreBoard`,
 				label: `Explore ${REACTIONS_NAME}`,

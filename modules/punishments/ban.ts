@@ -26,7 +26,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
 	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase().trim();
 	const deleteLength = Math.min(
-		604800,
+		604_800,
 		(deleteRange && deleteRange !== "none" && +parseTime(deleteRange) - Date.now()) || 0,
 	);
 
@@ -163,7 +163,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					];
 
 				await userToBan
-					?.send({
+					.send({
 						embeds: [
 							{
 								title: `You were banned from ${escapeMessage(config.guild.name)}!`,
@@ -209,7 +209,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 	} else {
 		await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} I can't ban ${userToBan}!`,
+			content: `${constants.emojis.statuses.no} I can’t ban ${userToBan}!`,
 		});
 	}
 }

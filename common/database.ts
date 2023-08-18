@@ -12,23 +12,22 @@ import { extractMessageExtremities } from "../util/discord.js";
 import logError from "./logError.js";
 import { getLoggingThread } from "../modules/logging/misc.js";
 
-let timeouts: {
-	[key: Snowflake]:
-		| { callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout }
-		| undefined;
-} = {};
+let timeouts: Record<
+	Snowflake,
+	{ callback: () => Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
+> = {};
 
 export const DATABASE_THREAD = "databases";
 
 const thread = await getLoggingThread(DATABASE_THREAD);
 
-const databases: { [key: string]: Message<true> | undefined } = {};
+const databases: Record<string, Message<true> | undefined> = {};
 
 for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =
-			message.author.id === client.user?.id
+			message.author.id === client.user.id
 				? message
 				: message.attachments.size
 				? await thread.send({
@@ -41,7 +40,7 @@ for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
 
 const contructed: string[] = [];
 
-export default class Database<Data extends { [key: string]: string | number | boolean | null }> {
+export default class Database<Data extends Record<string, string | number | boolean | null>> {
 	message: Message<true> | undefined;
 
 	#data: ReadonlyArray<Data> | undefined;
@@ -84,7 +83,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 			}
 			const message = this.message;
 
-			const data = this.#data?.length && papaparse.unparse(Array.from(this.#data)).trim();
+			const data = this.#data?.length && papaparse.unparse([...this.#data]).trim();
 
 			const files = data
 				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
@@ -138,7 +137,7 @@ export default class Database<Data extends { [key: string]: string | number | bo
 		};
 
 		timeouts[this.message.id] = {
-			timeout: setTimeout(async () => await callback(), 15_000),
+			timeout: setTimeout(callback, 15_000),
 			callback,
 		};
 		timeoutId && clearTimeout(timeoutId.timeout);
@@ -198,7 +197,9 @@ export default class Database<Data extends { [key: string]: string | number | bo
 }
 
 export async function cleanDatabaseListeners() {
-	console.log(`Cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts)}`);
+	console.log(
+		`Cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts).join(",")}`,
+	);
 	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 	timeouts = {};
 	console.log("Listeners cleaned");
@@ -215,9 +216,7 @@ export async function backupDatabases(channel: TextBasedChannel) {
 		.filter((attachment): attachment is Attachment => Boolean(attachment));
 
 	await channel.send("# Daily Scradd Database Backup");
-	await Promise.all(
-		Array.from(Array(Math.ceil(attachments.length / 10)), () => attachments.splice(0, 10)).map(
-			(files) => channel.send({ files }),
-		),
-	);
+	while (attachments.length) {
+		await channel.send({ files: attachments.splice(0, 10) });
+	}
 }

@@ -15,7 +15,7 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 		authorFilter instanceof GuildMember ? authorFilter.displayName : authorFilter?.nick;
 
 	await paginate(
-		[...(await oldSuggestions), ...suggestionsDatabase.data]
+		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				({ answer, author }) =>
 					!(
@@ -25,17 +25,17 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 					),
 			)
 			.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
-		async ({ answer, author, count, title, ...ref }) =>
+		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				"url" in ref
+				"url" in reference
 					? "👍"
 					: suggestions?.defaultReactionEmoji?.name ??
 					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 			} ${hyperlink(
 				`${title}`,
-				"url" in ref
-					? ref.url
-					: `https://discord.com/channels/${config.guild.id}/${ref.id}/${ref.id}`,
+				"url" in reference
+					? reference.url
+					: `https://discord.com/channels/${config.guild.id}/${reference.id}/${reference.id}`,
 				answer,
 			)}${
 				nick
@@ -53,17 +53,15 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 								  ).displayName
 					  }`
 			}`,
-		async (data) => await interaction[interaction.replied ? "editReply" : "reply"](data),
+		(data) => interaction.reply(data),
 		{
 			title: `Top suggestions${nick ? ` by ${nick}` : ""}${
 				answerFilter ? `${nick ? " and" : ""} answered with ${answerFilter}` : ""
 			}`,
-
-			user: interaction.user,
 			format: authorFilter instanceof GuildMember ? authorFilter : undefined,
-
 			singular: "suggestion",
 			failMessage: "No suggestions found! Try changing any filters you may have used.",
+			user: interaction.user,
 		},
 	);
 }

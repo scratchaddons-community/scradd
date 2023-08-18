@@ -94,8 +94,8 @@ export async function channelUpdate(
 	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
 		return;
 
-	const removedActive = !!newChannel.flags?.has("ActiveChannelsRemoved");
-	if (!!oldChannel.flags?.has("ActiveChannelsRemoved") !== removedActive) {
+	const removedActive = newChannel.flags.has("ActiveChannelsRemoved");
+	if (oldChannel.flags.has("ActiveChannelsRemoved") !== removedActive) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -103,8 +103,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const clyde = !!newChannel.flags?.has("ClydeAI");
-	if (!!oldChannel.flags?.has("ClydeAI") !== clyde) {
+	const clyde = newChannel.flags.has("ClydeAI");
+	if (oldChannel.flags.has("ClydeAI") !== clyde) {
 		await log(
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
@@ -112,8 +112,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const removedFeed = !!newChannel.flags?.has("GuildFeedRemoved");
-	if (!!oldChannel.flags?.has("GuildFeedRemoved") !== removedFeed) {
+	const removedFeed = newChannel.flags.has("GuildFeedRemoved");
+	if (oldChannel.flags.has("GuildFeedRemoved") !== removedFeed) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -121,8 +121,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const resource = !!newChannel.flags?.has("IsGuildResourceChannel");
-	if (!!oldChannel.flags?.has("IsGuildResourceChannel") !== resource) {
+	const resource = newChannel.flags.has("IsGuildResourceChannel");
+	if (oldChannel.flags.has("IsGuildResourceChannel") !== resource) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				resource ? "" : "un"
@@ -130,17 +130,17 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const spam = !!newChannel.flags?.has("IsSpam");
-	if (!!oldChannel.flags?.has("IsSpam") !== spam) {
+	const spam = newChannel.flags.has("IsSpam");
+	if (oldChannel.flags.has("IsSpam") !== spam) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${spam ? "" : "un"}marked as spam`,
 			"channels",
 		);
 	}
-	const tags = !!newChannel.flags?.has("RequireTag");
-	if (!!oldChannel.flags?.has("RequireTag") !== tags) {
+	const tags = newChannel.flags.has("RequireTag");
+	if (oldChannel.flags.has("RequireTag") !== tags) {
 		await log(
-			`${LoggingEmojis.Channel} "Require people to select tags when posting" ${
+			`${LoggingEmojis.Channel} “Require people to select tags when posting” ${
 				tags ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
 			"channels",
@@ -218,7 +218,7 @@ export async function channelUpdate(
 		if (oldChannel.userLimit !== newChannel.userLimit)
 			await log(
 				`${LoggingEmojis.Channel} ${newChannel.toString()}’s user limit set to ${
-					newChannel.userLimit ?? "∞"
+					newChannel.userLimit || "∞"
 				} users`,
 				"channels",
 			);
@@ -259,7 +259,7 @@ export async function channelUpdate(
 						{ lineterm: "" },
 					)
 						.join("\n")
-						.replace(/^--- \n\+\+\+ \n/, ""),
+						.replace(/^-{3} \n\+{3} \n/, ""),
 
 					extension: "diff",
 				},

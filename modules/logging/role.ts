@@ -15,13 +15,11 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 
 	const addedRoles = entry.changes
 		.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
-		.map((change) => change.new)
-		.flat();
+		.flatMap((change) => change.new);
 
 	const removedRoles = entry.changes
 		.filter((change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove")
-		.map((change) => change.new)
-		.flat();
+		.flatMap((change) => change.new);
 
 	if (addedRoles.length)
 		await log(
@@ -70,7 +68,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "color": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
-						change.new
+						typeof change.new === "number" && change.new
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
 					}${extraAuditLogsInfo(entry)}`,
@@ -108,9 +106,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 						buttons: [
 							{
 								label: "Permissions",
-								url:
-									"https://discordlookup.com/permissions-calculator/" +
-									change.new,
+								url: `https://discordlookup.com/permissions-calculator/${change.new}`,
 							},
 						],
 					},
@@ -120,7 +116,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "position": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
-						change.new
+						typeof change.new === "number" && change.new
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
 					}${extraAuditLogsInfo(entry)}`,

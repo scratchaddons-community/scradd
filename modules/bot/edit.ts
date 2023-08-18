@@ -2,7 +2,6 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	type MessageEditOptions,
 	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,
@@ -73,7 +72,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
-	const json = await new Promise<MessageEditOptions>((resolve) => {
+	const json = await new Promise((resolve) => {
 		resolve(JSON.parse(text));
 	}).catch(async (error: unknown) => {
 		await interaction.reply({
@@ -132,7 +131,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		lineterm: "",
 	})
 		.join("\n")
-		.replace(/^--- \n\+\+\+ \n/, "");
+		.replace(/^-{3} \n\+{3} \n/, "");
 
 	const extraDiff = diffString(
 		{ ...oldJSON, content: undefined },
@@ -143,7 +142,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });
 
-	if (files.length > 0) {
+	if (files.length) {
 		await log(
 			`${
 				LoggingEmojis.MessageEdit

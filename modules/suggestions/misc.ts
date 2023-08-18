@@ -22,42 +22,38 @@ export const suggestionsDatabase = new Database<{
 await suggestionsDatabase.init();
 
 export const oldSuggestions = config.channels.old_suggestions
-	? getAllMessages(config.channels.old_suggestions).then((suggestions) =>
-			suggestions.map((message) => {
-				const [embed] = message.embeds;
+	? (await getAllMessages(config.channels.old_suggestions)).map((message) => {
+			const [embed] = message.embeds;
 
-				const segments = message.thread?.name.split(" | ");
+			const segments = message.thread?.name.split(" | ");
 
-				return {
-					answer:
-						suggestionAnswers.find((answer) =>
-							[
-								segments?.[0]?.toLowerCase(),
-								segments?.at(-1)?.toLowerCase(),
-							].includes(answer.toLowerCase()),
-						) ?? suggestionAnswers[0],
+			return {
+				answer:
+					suggestionAnswers.find((answer) =>
+						[segments?.[0]?.toLowerCase(), segments?.at(-1)?.toLowerCase()].includes(
+							answer.toLowerCase(),
+						),
+					) ?? suggestionAnswers[0],
 
-					author:
-						(message.author.id === constants.users.robotop
-							? message.embeds[0]?.footer?.text.split(": ")[1]
-							: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
-									?.groups?.userId) ?? message.author,
+				author:
+					(message.author.id === constants.users.robotop
+						? message.embeds[0]?.footer?.text.split(": ")[1]
+						: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
+								?.groups?.userId) ?? message.author,
 
-					count:
-						(message.reactions.valueOf().first()?.count ?? 0) -
-						(message.reactions.valueOf().at(1)?.count ?? 0),
+				count:
+					(message.reactions.valueOf().first()?.count ?? 0) -
+					(message.reactions.valueOf().at(1)?.count ?? 0),
 
-					title: truncateText(
-						embed?.title ??
-							(embed?.description &&
-								cleanContent(embed.description, message.channel)) ??
-							embed?.image?.url ??
-							message.content,
-						100,
-					),
+				title: truncateText(
+					embed?.title ??
+						(embed?.description && cleanContent(embed.description, message.channel)) ??
+						embed?.image?.url ??
+						message.content,
+					100,
+				),
 
-					url: message.url,
-				};
-			}),
-	  )
+				url: message.url,
+			};
+	  })
 	: [];

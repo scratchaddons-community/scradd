@@ -20,38 +20,37 @@ import log, { LoggingEmojis } from "../logging/misc.js";
 import { matchSorter } from "match-sorter";
 
 const fetchedChannels = new Set<Snowflake>();
-export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
+export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
 	if (!interaction.channel) return [];
 	if (!fetchedChannels.has(interaction.channel.id)) {
-		interaction.channel.messages
-			.fetch({ limit: 100 })
-			.then(() => fetchedChannels.add(interaction.channel?.id ?? ""));
+		interaction.channel.messages.fetch({ limit: 100 }).then(
+			() => fetchedChannels.add(interaction.channel?.id ?? ""),
+			() => {},
+		);
 	}
-	const messages = await Promise.all(
-		interaction.channel.messages.cache
-			.sort((one, two) => +two.createdAt - +one.createdAt)
-			.filter(
-				(message) =>
-					!message.flags.has("Ephemeral") &&
-					(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
-			)
-			.map(async (message) => {
-				const content = await messageToText(message, false);
-				return {
-					id: message.id,
-					embeds: message.embeds.map((embed) => embed.toJSON()),
-					interaction: message.interaction && "/" + message.interaction.commandName,
-					attachments: message.attachments.map((attachment) => attachment.name),
-					stickers: message.stickers.map((sticker) => sticker.name),
-					author: message.author.displayName,
-					components: message.components,
-					createdTimestamp: message.createdTimestamp,
-					content: stripMarkdown(
-						interaction.channel ? cleanContent(content, interaction.channel) : content,
-					),
-				};
-			}) ?? [],
-	);
+	const messages = interaction.channel.messages.cache
+		.sort((one, two) => +two.createdAt - +one.createdAt)
+		.filter(
+			(message) =>
+				!message.flags.has("Ephemeral") &&
+				(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
+		)
+		.map((message) => {
+			const content = messageToText(message, false);
+			return {
+				id: message.id,
+				embeds: message.embeds.map((embed) => embed.toJSON()),
+				interaction: message.interaction && "/" + message.interaction.commandName,
+				attachments: message.attachments.map((attachment) => attachment.name),
+				stickers: message.stickers.map((sticker) => sticker.name),
+				author: message.author.displayName,
+				components: message.components,
+				createdTimestamp: message.createdTimestamp,
+				content: stripMarkdown(
+					interaction.channel ? cleanContent(content, interaction.channel) : content,
+				),
+			};
+		});
 	const reply = interaction.options.getString("reply");
 	return matchSorter(messages, reply ?? "", {
 		keys: [

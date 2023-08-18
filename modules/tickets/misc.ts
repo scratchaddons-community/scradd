@@ -15,7 +15,7 @@ export const TICKETS_BY_MEMBER = Object.fromEntries(
 			const id = getIdFromName(thread.name);
 			return [id, thread.type === ChannelType.PrivateThread ? thread : undefined] as const;
 		})
-		.filter((info): info is [Snowflake, PrivateThreadChannel | undefined] => !!info?.[0]) ?? [],
+		.filter((info): info is [Snowflake, PrivateThreadChannel | undefined] => !!info[0]) ?? [],
 );
 
 export const TICKET_CATEGORIES = [

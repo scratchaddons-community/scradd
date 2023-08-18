@@ -72,12 +72,16 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 						files: [
 							{
 								content: unifiedDiff(
-									`${change.old ?? ""}`.split("\n"),
-									`${change.new ?? ""}`.split("\n"),
+									`${(change.old as APISticker["description"]) ?? ""}`.split(
+										"\n",
+									),
+									`${(change.new as APISticker["description"]) ?? ""}`.split(
+										"\n",
+									),
 									{ lineterm: "" },
 								)
 									.join("\n")
-									.replace(/^--- \n\+\+\+ \n/, ""),
+									.replace(/^-{3} \n\+{3} \n/, ""),
 
 								extension: "diff",
 							},
@@ -90,8 +94,8 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 				await log(
 					`${LoggingEmojis.Expressions} Sticker ${
 						entry.target.name
-					}’s related emoji (ID: ${entry.target.id}) ${
-						change.new ? `set to ${change.new}` : "removed"
+					}’s related emoji (ID: ${entry.target.id}) set to ${
+						change.new
 					}${extraAuditLogsInfo(entry)}`,
 					"server",
 				);

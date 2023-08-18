@@ -12,7 +12,7 @@ import { defineCommand, defineEvent, client, defineModal } from "strife.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
-const bannedReactions = ["🥔"];
+const bannedReactions = new Set("🥔");
 
 defineCommand(
 	{
@@ -41,17 +41,20 @@ defineCommand(
 	async (interaction) => {
 		const optionCount = interaction.options.getInteger("options") ?? 2;
 		const components = [];
-		for (let i = 0; i < optionCount; i++)
+		for (let index = 0; index < optionCount; index++)
 			components.push({
 				type: ComponentType.ActionRow,
 				components: [
 					{
 						type: ComponentType.TextInput,
-						customId: `${i}`,
-						label: `Option #${i + 1}`,
+						customId: `${index}`,
+						label: `Option #${index + 1}`,
 						required: true,
 						style: TextInputStyle.Short,
-						value: optionCount <= DEFAULT_VALUES.length ? DEFAULT_VALUES[i] : undefined,
+						value:
+							optionCount <= DEFAULT_VALUES.length
+								? DEFAULT_VALUES[index]
+								: undefined,
 					},
 				],
 			} satisfies ActionRowData<ModalActionRowComponentData>);
@@ -84,7 +87,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 				],
 				customReactions: [
 					...customReactions,
-					!emoji || customReactions.includes(emoji) || bannedReactions.includes(emoji)
+					!emoji || customReactions.includes(emoji) || bannedReactions.has(emoji)
 						? undefined
 						: emoji,
 				],

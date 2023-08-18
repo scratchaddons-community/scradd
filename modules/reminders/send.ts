@@ -35,9 +35,11 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		toSend: Reminder[];
 		toPostpone: Reminder[];
 	}>(
-		(acc, reminder) => {
-			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
-			return acc;
+		(accumulator, reminder) => {
+			accumulator[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(
+				reminder,
+			);
+			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
 	);
@@ -98,10 +100,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
 					).then(
 						async (response) =>
-							await response?.json<{ count: number; _chromeCountDate: string }>(),
+							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
 
-					return await channel?.setName(
+					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
@@ -118,7 +120,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						...remindersDatabase.data,
 						{
 							channel: BUMPING_THREAD,
-							date: Date.now() + 1800000,
+							date: Date.now() + 1_800_000,
 							reminder: undefined,
 							id: SpecialReminders.Bump,
 							user: client.user.id,
@@ -144,10 +146,11 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					return;
 				}
 				case SpecialReminders.Unban: {
-					await config.guild.bans.remove(
-						String(reminder.reminder),
-						"Unbanned after set time period",
-					);
+					if (typeof reminder.reminder == "string")
+						await config.guild.bans.remove(
+							reminder.reminder,
+							"Unbanned after set time period",
+						);
 					return;
 				}
 				case SpecialReminders.BackupDatabases: {

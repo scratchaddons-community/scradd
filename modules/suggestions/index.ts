@@ -5,7 +5,7 @@ import getTop from "./getTop.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 
-defineEvent("threadCreate", async (thread) => {
+defineEvent("threadCreate", (thread) => {
 	if (thread.parent?.id === config.channels.suggestions?.id) addToDatabase(thread);
 });
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -19,9 +19,9 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	if (reaction.message.guild?.id !== config.guild.id) return;
 
-	updateReactions(reaction);
+	await updateReactions(reaction);
 });
-defineEvent("threadUpdate", async (_, newThread) => {
+defineEvent("threadUpdate", (_, newThread) => {
 	if (newThread.parent?.id !== config.channels.suggestions?.id) return;
 	if (newThread.locked) {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== newThread.id);
@@ -42,7 +42,7 @@ defineEvent("threadUpdate", async (_, newThread) => {
 		{ author: newThread.ownerId ?? client.user.id, count: 0 },
 	);
 });
-defineEvent("threadDelete", async (thread) => {
+defineEvent("threadDelete", (thread) => {
 	if (thread.parent?.id === config.channels.suggestions?.id)
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
 });

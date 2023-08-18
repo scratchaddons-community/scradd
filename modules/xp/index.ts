@@ -11,7 +11,7 @@ import { giveXpForMessage } from "./giveXp.js";
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
 
-	giveXpForMessage(message);
+	await giveXpForMessage(message);
 });
 
 defineCommand(
@@ -74,8 +74,7 @@ defineCommand(
 				});
 			}
 			case "top": {
-				const allXp = [...xpDatabase.data];
-				const top = allXp.sort((one, two) => two.xp - one.xp);
+				const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
 				const user = interaction.options.getUser("user");
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
@@ -101,15 +100,16 @@ defineCommand(
 											.catch(() => ({ displayName: `<@${xp.user}>` }))
 								  ).displayName
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
-					async (data) =>
-						await interaction[interaction.replied ? "editReply" : "reply"](data),
+					(data) => interaction.reply(data),
 					{
-						singular: "user",
 						title: `Leaderboard for ${config.guild.name}`,
+						singular: "user",
+
 						user: interaction.user,
 						rawOffset: index,
+
 						generateComponents() {
-							return getSettings(interaction.user, false)?.useMentions === undefined
+							return getSettings(interaction.user, false).useMentions === undefined
 								? [
 										{
 											customId: "levelUpPings_toggleSetting",
@@ -131,5 +131,6 @@ defineButton("xp", async (interaction, userId = "") => {
 });
 
 if (constants.canvasEnabled) {
-	defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
+	const { default: weeklyXpGraph } = await import("./graph.js");
+	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
