@@ -163,7 +163,7 @@ const events: {
 };
 defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 	// @ts-expect-error T2345 -- No concrete fix to this
-	if (guild.id === config.guild.id) events[entry.action]?.(entry);
+	if (guild.id === config.guild.id) await events[entry.action]?.(entry);
 });
 
 defineEvent("channelUpdate", channelUpdate);

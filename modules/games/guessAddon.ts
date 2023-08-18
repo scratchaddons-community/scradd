@@ -45,7 +45,7 @@ export default async function guessAddon(
 			| false
 			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string } = false,
 		justAnswered = "",
-	): Promise<Message | void> {
+	): Promise<Message | undefined> {
 		const questions =
 			typeof backInfo === "string"
 				? [backInfo]
@@ -53,24 +53,27 @@ export default async function guessAddon(
 
 		const oldMessage = interaction.replied ? await interaction.fetchReply() : undefined;
 
-		if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0))
-			return await answerWithAddon(
+		if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0)) {
+			await answerWithAddon(
 				addonProbabilities,
 				askedCount,
 				askedQuestions,
 				backInfo,
 				justAnswered,
 			);
+			return;
+		}
 
 		if (!questions[0]) {
 			if ((addonProbabilities[1]?.[1] || 0) < (addonProbabilities[0]?.[1] || 0)) {
-				return await answerWithAddon(
+				await answerWithAddon(
 					addonProbabilities,
 					askedCount,
 					askedQuestions,
 					backInfo,
 					justAnswered,
 				);
+				return;
 			}
 
 			if (!oldMessage) throw new ReferenceError("No questions exist on initialization");
@@ -206,7 +209,8 @@ export default async function guessAddon(
 					});
 					await buttonInteraction.reply("🛑 Ended the game.");
 
-					return collector.stop();
+					collector.stop();
+					return;
 				}
 
 				await buttonInteraction.deferUpdate();
@@ -227,7 +231,8 @@ export default async function guessAddon(
 						CURRENTLY_PLAYING.set(interaction.user.id, { url: nextMessage.url });
 					else CURRENTLY_PLAYING.delete(interaction.user.id);
 
-					return collector.stop();
+					collector.stop();
+					return;
 				}
 
 				const probabilityShift = buttonInteraction.customId.startsWith("yes.")
@@ -497,7 +502,7 @@ function getNextQuestions(
 	addonProbabilities: Probabilities,
 	askedQuestions: string[] = [],
 ): string[] {
-	const frequencies: { [key: string]: number } = {};
+	const frequencies: Record<string, number> = {};
 
 	const questions = Object.entries(QUESTIONS_BY_ADDON)
 		.map(([addon, questions]) =>
@@ -514,6 +519,7 @@ function getNextQuestions(
 		.flat(2);
 
 	for (const question of questions) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		frequencies[question.question] ??= 0;
 		frequencies[question.question]++;
 	}

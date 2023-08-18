@@ -207,7 +207,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			"server",
 		);
 	} else
-		interaction.reply({
+		await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You don’t have permission to sync my configuration!`,
 		});

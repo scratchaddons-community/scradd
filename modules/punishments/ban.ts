@@ -163,7 +163,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					];
 
 				await userToBan
-					?.send({
+					.send({
 						embeds: [
 							{
 								title: `You were banned from ${escapeMessage(config.guild.name)}!`,

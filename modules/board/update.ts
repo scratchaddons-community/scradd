@@ -24,7 +24,7 @@ export default async function updateBoard(message: Message) {
 		if (count < Math.floor(minReactions * 0.8)) {
 			await boardMessage.delete();
 		} else {
-			const content = boardMessage.content.replace(/\d+/, String(count));
+			const content = boardMessage.content.replace(/\d+/, count.toString());
 			await boardMessage.edit(content);
 		}
 	} else if (count >= minReactions) {

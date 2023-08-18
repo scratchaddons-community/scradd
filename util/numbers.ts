@@ -60,6 +60,7 @@ export function convertBase(
 }
 
 convertBase.defaultChars =
+	// eslint-disable-next-line unicorn/string-content
 	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
 convertBase.MAX_BASE = convertBase.defaultChars.length;
 
@@ -78,9 +79,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 	return (
 		(bold ? `**${formatted}**` : formatted) +
 		(jokes
-			? String(number).includes("69")
+			? number.toString().includes("69")
 				? ` (nic${"e".repeat(Math.floor(number.toString().length / 2))})`
-				: /^[1-9]0+$/.test(String(number))
+				: /^[1-9]0+$/.test(number.toString())
 				? ` (${"🥳".repeat(number.toString().length - 1)})`
 				: ""
 			: "")

@@ -39,7 +39,7 @@ export async function getStrikes(
 	const member =
 		selected instanceof GuildMember
 			? selected
-			: await config.guild.members.fetch(selected.id).catch(() => {});
+			: await config.guild.members.fetch(selected.id).catch(() => user);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === selected.id)
@@ -64,13 +64,13 @@ export async function getStrikes(
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : ""
 			}`,
-		(data) => interaction.reply({...data,ephemeral:true}),
+		(data) => interaction.reply({ ...data, ephemeral: true }),
 		{
-			title: `${(member ?? user).displayName}’s strikes`,
-			format: member || user,
+			title: `${member.displayName}’s strikes`,
+			format: member,
 			singular: "strike",
 			failMessage: `${selected.toString()} has never been warned!`,
-			
+
 			user: interaction.user,
 			totalCount: totalStrikeCount,
 
@@ -83,14 +83,14 @@ export async function getStrikes(
 							placeholder: "View more information on a strike",
 
 							options: filtered.map((strike) => ({
-								label: String(strike.id),
-								value: String(strike.id),
+								label: strike.id.toString(),
+								value: strike.id.toString(),
 							})),
 						},
 					];
 				}
 				return filtered.map((strike) => ({
-					label: String(strike.id),
+					label: strike.id.toString(),
 					style: ButtonStyle.Secondary,
 					customId: `${strike.id}_strike`,
 					type: ComponentType.Button,
@@ -118,7 +118,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 		);
 	}
 
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch((): undefined => {});
 	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
 
 	const moderator =
@@ -168,7 +168,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: String(strike.count), inline: true },
+					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
 					...(moderator
 						? [
 								{

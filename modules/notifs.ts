@@ -10,7 +10,7 @@ defineEvent("messageCreate", async (message) => {
 	if (message.channel.id === config.channels.updates?.id) {
 		await message.startThread({
 			name: truncateText(
-				stripMarkdown(message.cleanContent)?.split("\n")[0] || "New update!",
+				stripMarkdown(message.cleanContent).split("\n")[0] || "New update!",
 				50,
 			),
 
@@ -23,7 +23,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	const greetings = [
-		`Everybody please welcome ${member.toString()} to ${config.guild.name}; they’re our ${nth(
+		`Everybody please welcome ${member} to ${config.guild.name}; they’re our ${nth(
 			config.guild.memberCount,
 		)} member!`,
 		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
@@ -45,7 +45,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${constants.emojis.misc.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}${
-			String(config.guild.memberCount).includes("87") ? " (WAS THAT THE BITE OF 87?!?!?)" : ""
+			(config.guild.memberCount).toString().includes("87") ? " (WAS THAT THE BITE OF 87?!?!?)" : ""
 		}`,
 	);
 });

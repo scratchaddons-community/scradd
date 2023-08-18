@@ -2,13 +2,13 @@ import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
 
-const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+const guild = await client.guilds.fetch(process.env.GUILD_ID);
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
 	const roles = await guild.roles.fetch();
 
-	const latestRelease: string =
+	const latestRelease: string = // todo find an eslint rule
 		process.env.NODE_ENV == "production"
 			? (
 					await fetch(
@@ -79,9 +79,9 @@ async function getConfig() {
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
 	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
-		const types = [type].flat() as ChannelType[];
+		const types = new Set<ChannelType>([type].flat());
 		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.includes(channel.type)) return false;
+			if (!channel || !types.has(channel.type)) return false;
 
 			switch (matchType) {
 				case "full": {

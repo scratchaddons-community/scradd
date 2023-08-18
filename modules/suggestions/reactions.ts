@@ -14,7 +14,7 @@ export default async function updateReactions(reaction: MessageReaction) {
 		const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
 		if (
 			(defaultEmoji?.id
-				? defaultEmoji?.id === reaction.emoji.id
+				? defaultEmoji.id === reaction.emoji.id
 				: defaultEmoji?.name === reaction.emoji.name) &&
 			!message.channel.locked
 		) {
@@ -30,7 +30,7 @@ export default async function updateReactions(reaction: MessageReaction) {
 	return true;
 }
 
-export function addToDatabase(thread: AnyThreadChannel<boolean>) {
+export function addToDatabase(thread: AnyThreadChannel) {
 	suggestionsDatabase.data = [
 		...suggestionsDatabase.data,
 		{ ...getSuggestionData(thread), count: 0 },
@@ -38,7 +38,7 @@ export function addToDatabase(thread: AnyThreadChannel<boolean>) {
 }
 
 export function getSuggestionData(
-	thread: AnyThreadChannel<boolean>,
+	thread: AnyThreadChannel,
 ): Omit<typeof suggestionsDatabase.data[number], "count"> {
 	return {
 		answer:

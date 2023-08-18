@@ -52,7 +52,7 @@ defineCommand(
 	},
 );
 
-defineButton("strike", async (interaction, id) => await getStrikeById(interaction, id ?? ""));
+defineButton("strike", async (interaction, id) => await getStrikeById(interaction, id));
 defineButton("viewStrikes", async (interaction, userId = "") => {
 	await getStrikes(await client.users.fetch(userId), interaction);
 });

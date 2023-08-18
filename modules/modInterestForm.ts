@@ -135,7 +135,7 @@ defineModal("modInterestForm", async (interaction) => {
 	const { url } = await thread.send({
 		embeds: [
 			{
-				color: interaction.member?.displayColor,
+				color: interaction.member.displayColor,
 				author: {
 					name: interaction.user.tag,
 					icon_url: interaction.user.displayAvatarURL(),
@@ -145,7 +145,7 @@ defineModal("modInterestForm", async (interaction) => {
 					{
 						name: "Roles",
 						value:
-							interaction.member?.roles
+							interaction.member.roles
 								.valueOf()
 								.sorted((one, two) => two.comparePositionTo(one))
 								.filter((role) => role.id !== config.guild.id)

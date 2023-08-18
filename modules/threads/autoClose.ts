@@ -126,7 +126,7 @@ export async function cancelThreadChange(interaction: ButtonInteraction, type: s
 	if (type === "noclose") {
 		const oldConfig = getThreadConfig(interaction.channel);
 		threadsDatabase.updateById(
-			{ id: interaction.channel?.id || "", keepOpen: false },
+			{ id: interaction.channel.id, keepOpen: false },
 			{ roles: oldConfig.roles.join("|") },
 		);
 		await interaction.reply(

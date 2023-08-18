@@ -174,7 +174,7 @@ export async function generateBoardMessage(
 		info.onBoard && (await config.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
 
 	if (onBoard) {
-		const linkButton = onBoard.components?.[0]?.components?.[0];
+		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
 				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]

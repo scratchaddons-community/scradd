@@ -4,6 +4,7 @@ import {
 	GuildMember,
 	type PartialGuildMember,
 	ChatInputCommandInteraction,
+	roleMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
@@ -28,9 +29,9 @@ export async function syncMembers(interaction: ChatInputCommandInteraction<"cach
 			options,
 		);
 		return await interaction.reply(
-			`${
-				constants.emojis.statuses.yes
-			} I will no longer add all ${role.toString()} to this thread! (note that *I* will not remove them)`,
+			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
+				role.id,
+			)} to this thread! (note that *I* will not remove them)`,
 		);
 	}
 
@@ -39,7 +40,7 @@ export async function syncMembers(interaction: ChatInputCommandInteraction<"cach
 		options,
 	);
 	await interaction.reply(
-		`${constants.emojis.statuses.yes} I will add all ${role.toString()} to this thread!`,
+		`${constants.emojis.statuses.yes} I will add all ${roleMention(role.id)} to this thread!`,
 	);
 
 	if (role instanceof Role) await addRoleToThread({ role, thread: interaction.channel });
@@ -74,7 +75,7 @@ export async function updateThreadMembers(
 				const role = await config.guild.roles.fetch(roleId).catch(() => {});
 				if (!role) return;
 				return await addRoleToThread({ role, thread });
-			}) ?? [],
+			}),
 		);
 	}
 }

@@ -92,11 +92,11 @@ export async function guildMemberUpdate(
 	}
 
 	const automodQuarantine =
-		newMember.flags?.has("AutomodQuarantinedBio") ||
-		newMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname");
+		newMember.flags.has("AutomodQuarantinedBio") ||
+		newMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname");
 	if (
-		(oldMember.flags?.has("AutomodQuarantinedBio") ||
-			oldMember.flags?.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
+		(oldMember.flags.has("AutomodQuarantinedBio") ||
+			oldMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
 	) {
 		await log(
 			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
@@ -106,8 +106,8 @@ export async function guildMemberUpdate(
 		);
 	}
 
-	const verified = !!newMember.flags?.has("BypassesVerification");
-	if (!!oldMember.flags?.has("BypassesVerification") !== verified) {
+	const verified = newMember.flags.has("BypassesVerification");
+	if (oldMember.flags.has("BypassesVerification") !== verified) {
 		await log(
 			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
 				verified ? "" : "un"

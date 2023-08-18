@@ -115,13 +115,12 @@ defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
 
 	await interaction.deferReply({ ephemeral: true });
-	const thread = id && (await contactMods(interaction, id));
-	if (thread)
-		await interaction.editReply(
-			`${
-				constants.emojis.statuses.yes
-			} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
-		);
+	const thread = await contactMods(interaction, id);
+	await interaction.editReply(
+		`${
+			constants.emojis.statuses.yes
+		} **Ticket opened!** Send the mods messages in ${thread.toString()}.`,
+	);
 });
 
 defineCommand(

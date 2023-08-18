@@ -1,7 +1,6 @@
 import {
 	ButtonInteraction,
 	ButtonStyle,
-	type CacheType,
 	ComponentType,
 	GuildMember,
 	time,
@@ -67,7 +66,7 @@ export default async function warn(
 			],
 		},
 	);
-	giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
+	await giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
 	const member =
 		user instanceof GuildMember
@@ -172,7 +171,7 @@ export default async function warn(
 
 	return true;
 }
-export async function removeStrike(interaction: ButtonInteraction<CacheType>, id: string) {
+export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -194,9 +193,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => {});
 	const user =
-		member?.user ??
-		(await client.users.fetch(strike.user).catch(() => {})) ??
-		`<@${strike.user}>`;
+		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
@@ -214,7 +211,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	);
 	if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
 }
-export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, id: string) {
+export async function addStrikeBack(interaction: ButtonInteraction, id: string) {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -233,7 +230,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user = (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
+	const user = await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`);
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${

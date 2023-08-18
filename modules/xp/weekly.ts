@@ -62,7 +62,7 @@ export async function getChatters() {
 					  }
 					: undefined,
 				color: constants.themeColor,
-				thumbnail: winner ? { url: winner?.displayAvatarURL() } : undefined,
+				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
 	} satisfies MessageCreateOptions;
@@ -153,7 +153,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		weeklyWinners.map(async (weeklyWinner) => {
 			const guildMember = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
 			if (!guildMember || (await qualifiesForRole(guildMember))) return;
-			getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
+			await getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
 		}),
 	);
 

@@ -37,20 +37,20 @@ const strikesCache: Record<string, { mod?: string; reason: string }> = {};
 
 export default async function filterToStrike(filter: string) {
 	if (/^\d{1,4}$/.test(filter)) {
-		const strike = strikeDatabase.data.find((strike) => String(strike.id) === filter);
-		const info = robotopStrikes.find((strike) => String(strike.id) === filter);
-		if (strike && info) return { ...info, ...strike, id: String(info.id) };
+		const strike = strikeDatabase.data.find((strike) => strike.id.toString() === filter);
+		const info = robotopStrikes.find((strike) => strike.id.toString() === filter);
+		if (strike && info) return { ...info, ...strike, id: info.id.toString() };
 	}
 
 	const strikeId = /^\d{17,20}$/.test(filter)
 		? convertBase(filter, 10, convertBase.MAX_BASE)
 		: filter;
-	const strike = strikeDatabase.data.find((strike) => String(strike.id) === strikeId);
+	const strike = strikeDatabase.data.find((strike) => strike.id.toString() === strikeId);
 	if (!strike) return;
 	if (strikesCache[strikeId]) return { ...strike, ...strikesCache[strikeId] };
 
 	const channel = await getLoggingThread(filter.startsWith("0") ? undefined : "members");
-	const message = await channel?.messages
+	const message = await channel.messages
 		.fetch(convertBase(strikeId, convertBase.MAX_BASE, 10))
 		.catch(() => {});
 	if (!message) return;
@@ -72,7 +72,7 @@ export default async function filterToStrike(filter: string) {
 
 	const { url } = message.attachments.first() || {};
 	const data = {
-		mod: [...message.content.matchAll(GlobalUsersPattern)]?.[1]?.groups?.id,
+		mod: [...message.content.matchAll(GlobalUsersPattern)][1]?.groups?.id,
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())

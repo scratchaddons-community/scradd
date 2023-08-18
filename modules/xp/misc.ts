@@ -93,11 +93,7 @@ export function getLevelForXp(xp: number) {
 
 export function getWeeklyXp(user: Snowflake) {
 	return recentXpDatabase.data.reduce((accumulator, gain) => {
-		if (
-			gain.user !== user ||
-			(gain.time ?? Number.POSITIVE_INFINITY) + 604_800_000 < Date.now()
-		)
-			return accumulator;
+		if (gain.user !== user || gain.time + 604_800_000 < Date.now()) return accumulator;
 		accumulator += gain.xp;
 		return accumulator;
 	}, 0);
@@ -106,8 +102,7 @@ export function getWeeklyXp(user: Snowflake) {
 export function getFullWeeklyData() {
 	return Object.entries(
 		recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
-			if ((gain.time ?? Number.POSITIVE_INFINITY) + 604_800_000 < Date.now())
-				return accumulator;
+			if (gain.time + 604_800_000 < Date.now()) return accumulator;
 
 			accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
 			return accumulator;

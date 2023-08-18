@@ -194,14 +194,14 @@ defineCommand(
 		const collector = reply.createMessageComponentCollector({ time: constants.collectorTime });
 
 		collector
-			?.on("collect", async (buttonInteraction) => {
+			.on("collect", async (buttonInteraction) => {
 				const split = buttonInteraction.customId.split("-");
 				split.pop();
 
 				switch (split[0]) {
 					case "confirm": {
 						const sliced = filtered.slice(start, deleteTo);
-						await channel?.bulkDelete(sliced);
+						await channel.bulkDelete(sliced);
 						await buttonInteraction.reply(
 							`${constants.emojis.statuses.yes} Purged ${sliced.length} message${
 								sliced.length === 1 ? "" : "s"

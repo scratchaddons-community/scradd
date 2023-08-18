@@ -21,7 +21,7 @@ import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
-export async function messageDelete(message: Message<boolean> | PartialMessage) {
+export async function messageDelete(message: Message | PartialMessage) {
 	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
 	const shush =
 		message.partial ||
@@ -59,7 +59,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 	);
 }
 export async function messageDeleteBulk(
-	messages: Collection<string, Message<boolean> | PartialMessage>,
+	messages: Collection<string, Message | PartialMessage>,
 	channel: GuildTextBasedChannel,
 ) {
 	if (!shouldLog(channel)) return;
@@ -106,7 +106,7 @@ export async function messageDeleteBulk(
 	);
 }
 export async function messageReactionRemoveAll(
-	partialMessage: Message<boolean> | PartialMessage,
+	partialMessage: Message | PartialMessage,
 	reactions: Collection<string, MessageReaction>,
 ) {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
@@ -137,8 +137,8 @@ export async function messageReactionRemoveAll(
 	);
 }
 export async function messageUpdate(
-	oldMessage: Message<boolean> | PartialMessage,
-	partialMessage: Message<boolean> | PartialMessage,
+	oldMessage: Message | PartialMessage,
+	partialMessage: Message | PartialMessage,
 ) {
 	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;

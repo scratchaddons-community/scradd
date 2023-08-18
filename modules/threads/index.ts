@@ -58,7 +58,7 @@ defineCommand(
 	async (interaction) => {
 		if (interaction.options.getSubcommand(true) === "sync-members")
 			return syncMembers(interaction);
-		setUpAutoClose(interaction);
+		await setUpAutoClose(interaction);
 	},
 );
 

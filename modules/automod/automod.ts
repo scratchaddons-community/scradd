@@ -59,12 +59,12 @@ export default async function automodMessage(message: Message) {
 		config.channels.info?.id !== parentChannel?.id &&
 		config.channels.advertise &&
 		config.channels.advertise.id !== baseChannel?.id &&
-		!message.author?.bot
+		!message.author.bot
 	) {
 		const invites = (
 			await Promise.all(
 				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
-					const invite = await client?.fetchInvite(code).catch(() => {});
+					const invite = await client.fetchInvite(code).catch(() => {});
 					return invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id) && code;
 				}),
 			)
@@ -114,10 +114,10 @@ export default async function automodMessage(message: Message) {
 							strikes: bad.strikes + censored.strikes,
 							words: bad.words.map((words, index) => [
 								...words,
-								...(censored.words?.[index] ?? []),
+								...(censored.words[index] ?? []),
 							]),
 					  },
-			{ strikes: 0, words: Array<string[]>(badWordRegexps.length).fill([]) },
+			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 		);
 		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
@@ -135,30 +135,31 @@ export default async function automodMessage(message: Message) {
 								strikes: bad.strikes + censored.strikes,
 								words: bad.words.map((words, index) => [
 									...words,
-									...(censored.words?.[index] ?? []),
+									...(censored.words[index] ?? []),
 								]),
 						  }
 						: bad;
 				},
 				{
 					strikes: 0,
-					words: Array<string[]>(badWordRegexps.length).fill([]),
+					words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]),
 				},
 			);
 
 		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
 
 		if (badWords.strikes || needsDelete) {
-			if (!message.deletable)
-				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
-
-			message.delete();
-			if (badWords.strikes)
-				await message.channel.send(
-					`${constants.emojis.statuses.no} ${message.author.toString()}, ${
-						languageStrikes < 1 ? "that’s not appropriate" : "language"
-					}!`,
-				);
+			if (message.deletable) {
+				await message.delete();
+				if (badWords.strikes)
+					await message.channel.send(
+						`${constants.emojis.statuses.no} ${message.author.toString()}, ${
+							languageStrikes < 1 ? "that’s not appropriate" : "language"
+						}!`,
+					);
+			} else {
+				await log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
+			}
 		} else if (badEmbedWords.strikes) {
 			await message.suppressEmbeds();
 			await message.reply(
@@ -174,8 +175,8 @@ export default async function automodMessage(message: Message) {
 				"Watch your language!",
 				languageStrikes,
 				`Sent message with words: ${[
-					...(badEmbedWords.words.flat() ?? []),
-					...(badWords.words.flat() ?? []),
+					...badEmbedWords.words.flat(),
+					...badWords.words.flat(),
 				].join(", ")}`,
 			);
 		}

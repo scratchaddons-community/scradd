@@ -6,7 +6,7 @@ import { trimPatchVersion } from "../../util/text.js";
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
 
-export type Dependencies = { [key: string]: boolean | undefined };
+export type Dependencies = Record<string, boolean | undefined>;
 export type AddonQuestion = {
 	/** Questions that, if this question is `true`, must have this answer. */
 	dependencies?: Dependencies;
@@ -42,8 +42,7 @@ const versionMarkdown = `**[${escapeMessage(
 })**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
-	codeEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
+	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
 	costumeEditorCategory:
 		"Is your addon listed under **Scratch Editor Features** → **Costume Editor**?",
 	playerEditorCategory:

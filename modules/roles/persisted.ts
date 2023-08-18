@@ -30,7 +30,7 @@ const persistedRoles = {
 	og: "1107170572963684402",
 };
 
-export async function persistedLeave(member: PartialGuildMember | GuildMember) {
+export function persistedLeave(member: PartialGuildMember | GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
 	const memberRoles = {
@@ -53,5 +53,5 @@ export async function persistedRejoin(member: GuildMember) {
 	const memberRoles = rolesDatabase.data.find((entry) => entry.id === member.id);
 	for (const roleName of Object.keys(persistedRoles))
 		if (memberRoles?.[roleName])
-			member.roles.add([persistedRoles[roleName]].flat()[0] ?? "", "Persisting roles");
+			await member.roles.add([persistedRoles[roleName]].flat()[0] ?? "", "Persisting roles");
 }

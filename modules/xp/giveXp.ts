@@ -12,7 +12,7 @@ import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import { DEFAULT_XP, getLevelForXp, getXpForLevel, recentXpDatabase, xpDatabase } from "./misc.js";
 
-const latestMessages: { [key: Snowflake]: Message[] } = {};
+const latestMessages: Record<Snowflake, Message[]> = {};
 
 export async function giveXpForMessage(message: Message) {
 	if (!latestMessages[message.channel.id]) {
@@ -74,11 +74,7 @@ export async function giveXpForMessage(message: Message) {
  * @param url - A link to a message or other that gave them this XP.
  * @param amount - How much XP to give.
  */
-export default async function giveXp(
-	to: User | GuildMember,
-	url?: string,
-	amount: number = DEFAULT_XP,
-) {
+export default async function giveXp(to: User | GuildMember, url?: string, amount = DEFAULT_XP) {
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =
@@ -96,7 +92,7 @@ export default async function giveXp(
 
 	const oldLevel = getLevelForXp(Math.abs(oldXp));
 	const newLevel = getLevelForXp(Math.abs(newXp));
-	if (oldLevel < newLevel && member) sendLevelUpMessage(member, newXp, url);
+	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
 	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
 
@@ -114,9 +110,7 @@ export default async function giveXp(
 
 	const weekly = [...recentXpDatabase.data];
 	const weeklyIndex = weekly.findIndex(
-		(entry) =>
-			entry.user === user.id &&
-			(entry.time ?? Number.POSITIVE_INFINITY) + 3_600_000 > Date.now(),
+		(entry) => entry.user === user.id && entry.time + 3_600_000 > Date.now(),
 	);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 	if (weeklyIndex === -1) {
@@ -134,7 +128,7 @@ export default async function giveXp(
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
-	const showButton = getSettings(member, false)?.levelUpPings === undefined;
+	const showButton = getSettings(member, false).levelUpPings === undefined;
 
 	await config.channels.bots?.send({
 		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
@@ -159,8 +153,8 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 
 		embeds: [
 			{
-				color: member?.displayColor,
-				author: { icon_url: member.displayAvatarURL(), name: member?.displayName },
+				color: member.displayColor,
+				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 				title: `You’re at level ${newLevel * Math.sign(newXp)}!`,
 				url,
 

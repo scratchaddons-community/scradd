@@ -2,7 +2,6 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	type MessageEditOptions,
 	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,
@@ -73,7 +72,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
-	const json = await new Promise<MessageEditOptions>((resolve) => {
+	const json = await new Promise((resolve) => {
 		resolve(JSON.parse(text));
 	}).catch(async (error: unknown) => {
 		await interaction.reply({

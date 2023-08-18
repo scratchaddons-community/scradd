@@ -4,22 +4,26 @@ import {
 	type GuildAuditLogsEntry,
 	type AnyThreadChannel,
 	ThreadAutoArchiveDuration,
+	channelMention,
+	ThreadChannel,
 } from "discord.js";
 import log, { LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";
 
 export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadCreate>) {
 	if (entry.target.type !== ChannelType.PrivateThread) return;
 	await log(
-		`${
-			LoggingEmojis.Thread
-		} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Thread} Private thread ${channelMention(
+			entry.target.id,
+		)} created${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }
 export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadDelete>) {
 	await log(
 		`${LoggingEmojis.Thread} Thread #${entry.target.name} ${
-			entry.target.parent ? `in ${entry.target.parent.toString()} ` : ""
+			entry.target instanceof ThreadChannel && entry.target.parent
+				? `in ${entry.target.parent.toString()} `
+				: ""
 		}(ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
@@ -49,8 +53,8 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			"channels",
 		);
 	}
-	const removedActive = !!newThread.flags?.has("ActiveChannelsRemoved");
-	if (!!oldThread.flags?.has("ActiveChannelsRemoved") !== removedActive) {
+	const removedActive = newThread.flags.has("ActiveChannelsRemoved");
+	if (oldThread.flags.has("ActiveChannelsRemoved") !== removedActive) {
 		await log(
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -58,8 +62,8 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			"channels",
 		);
 	}
-	const clyde = !!newThread.flags?.has("ClydeAI");
-	if (!!oldThread.flags?.has("ClydeAI") !== clyde) {
+	const clyde = newThread.flags.has("ClydeAI");
+	if (oldThread.flags.has("ClydeAI") !== clyde) {
 		await log(
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
@@ -67,8 +71,8 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			"channels",
 		);
 	}
-	const removedFeed = !!newThread.flags?.has("GuildFeedRemoved");
-	if (!!oldThread.flags?.has("GuildFeedRemoved") !== removedFeed) {
+	const removedFeed = newThread.flags.has("GuildFeedRemoved");
+	if (oldThread.flags.has("GuildFeedRemoved") !== removedFeed) {
 		await log(
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -76,15 +80,15 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			"channels",
 		);
 	}
-	const spam = !!newThread.flags?.has("IsSpam");
-	if (!!oldThread.flags?.has("IsSpam") !== spam) {
+	const spam = newThread.flags.has("IsSpam");
+	if (oldThread.flags.has("IsSpam") !== spam) {
 		await log(
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${spam ? "" : "un"}marked as spam`,
 			"channels",
 		);
 	}
-	const pinned = !!newThread.flags?.has("Pinned");
-	if (!!oldThread.flags?.has("Pinned") !== pinned) {
+	const pinned = newThread.flags.has("Pinned");
+	if (oldThread.flags.has("Pinned") !== pinned) {
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()} ${
 				newThread.flags.has("Pinned") ? "" : "un"

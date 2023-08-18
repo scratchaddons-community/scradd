@@ -206,6 +206,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
 					message.author.displayName,
+					// eslint-disable-next-line unicorn/string-content
 			  )} is thinking...`
 		: message.content;
 
@@ -267,6 +268,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Welcome ${message.author.toString()}. Say hi!`,
 				`${message.author.toString()} hopped into the server.`,
 				`Everyone welcome ${message.author.toString()}!`,
+				// eslint-disable-next-line unicorn/string-content
 				`Glad you're here, ${message.author.toString()}.`,
 				`Good to see you, ${message.author.toString()}.`,
 				`Yay you made it, ${message.author.toString()}!`,
@@ -352,7 +354,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return message
 				.fetchReference()
 				.catch(() => {})
-				.then(async (reply) => {
+				.then((reply) => {
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
@@ -370,10 +372,11 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return message
 				.fetchReference()
 				.catch(() => {})
-				.then((reference) =>
+				.then(async (reference) =>
 					// The resolved message for the reference will be a Message
 					reference
-						? messageToText(reference, replies) || actualContent
+						? (await messageToText(reference, replies)) || actualContent
+						// eslint-disable-next-line unicorn/string-content
 						: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
 				);
 		}
@@ -443,7 +446,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 							command
 								? chatInputApplicationCommandMention(
 										message.interaction?.commandName ?? "",
-										command.id ?? "",
+										command.id,
 								  )
 								: bold(`/${message.interaction?.commandName ?? ""}`)
 						}:*\n${actualContent}`,
@@ -482,7 +485,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
-): Promise<MessageReaction[] | void> {
+): Promise<MessageReaction[] | undefined> {
 	const messageReactions = [];
 	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
 	for (const reaction of reactions) {
@@ -693,7 +696,7 @@ export async function paginate<Item>(
 			else offset -= ITEMS_PER_PAGE;
 
 			await buttonInteraction.deferUpdate();
-			message.edit(await generateMessage());
+			message = await message.edit(await generateMessage());
 			collector.resetTimer();
 		})
 		.on("end", async () => {

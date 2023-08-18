@@ -175,7 +175,7 @@ function censorOptions(options: readonly CommandInteractionOption[]): {
 
 	for (const option of options) {
 		const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
-		const censoredOptions = (option.options && censorOptions(option.options)) || undefined;
+		const censoredOptions = option.options && censorOptions(option.options);
 
 		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
 		words.push(

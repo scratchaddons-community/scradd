@@ -15,7 +15,7 @@ export default async function getTop(interaction: ChatInputCommandInteraction<"c
 		authorFilter instanceof GuildMember ? authorFilter.displayName : authorFilter?.nick;
 
 	await paginate(
-		[...(await oldSuggestions), ...suggestionsDatabase.data]
+		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				({ answer, author }) =>
 					!(

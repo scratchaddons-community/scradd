@@ -23,9 +23,8 @@ export default async function logError(
 	try {
 		console.error(error);
 
-		const name = `${
-			(error && typeof error === "object" && "name" in error && error.name) || "Error"
-		}`;
+		const name =
+			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
 		if (["DeprecationWarning", "ExperimentalWarning"].includes(name)) return;
 
 		return await log(
@@ -58,12 +57,12 @@ export default async function logError(
  *
  * @returns The standardized error.
  */
-export function generateError(error: unknown, returnObject: true): { [key: string]: unknown };
+export function generateError(error: unknown, returnObject: true): Record<string, unknown>;
 export function generateError(error: unknown, returnObject?: false): string;
 export function generateError(
 	error: unknown,
 	returnObject = false,
-): string | { [key: string]: unknown } {
+): string | Record<string, unknown> {
 	if (typeof error === "object" && error) {
 		const serialized = serializeError(error);
 

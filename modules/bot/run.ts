@@ -1,5 +1,4 @@
 import {
-	type CacheType,
 	ChatInputCommandInteraction,
 	ComponentType,
 	ModalSubmitInteraction,
@@ -18,11 +17,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} This command is reserved for ${
-				process.env.NODE_ENV === "production"
-					? owner instanceof User
-						? owner.displayName
-						: "the " + owner?.name + " team"
-					: "Scradd developers"
+				owner instanceof User ? owner.displayName : "the " + owner?.name + " team"
 			} only!`,
 		});
 
@@ -46,35 +41,40 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 	});
 }
 
-export async function run(interaction: ModalSubmitInteraction<CacheType>) {
+export async function run(interaction: ModalSubmitInteraction) {
 	await interaction.deferReply();
 	const code = interaction.fields.getTextInputValue("code").trim();
 	try {
-		const output = await eval(
+		const output: unknown = await eval(
 			`(async () => {${
 				code.includes("\n") || code.includes("return") ? code : `return ${code}`
 			}})()`,
 		);
-		const type = typeof output;
+
 		await interaction.editReply({
 			files: [
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 				{
 					attachment: Buffer.from(
-						["bigint", "symbol"].includes(type)
-							// eslint-disable-next-line unicorn/string-content
-							? `"${output.toString().replaceAll('"', '\\"')}"`
-							: type === "function"
+						typeof output === "bigint" || typeof output === "symbol"
+							? // eslint-disable-next-line unicorn/string-content
+							  `"${output.toString().replaceAll('"', '\\"')}"`
+							: typeof output === "function"
 							? output.toString()
-							: type === "object"
+							: typeof output === "object"
 							? JSON.stringify(output, undefined, "  ")
-							: type === "undefined"
+							: output === undefined
 							? "undefined"
-							: output.toString(),
+							: // eslint-disable-next-line @typescript-eslint/no-base-to-string
+							  output.toString(),
 						"utf8",
 					),
 					name: `output.${
-						"string" === type ? "txt" : "function" === type ? "js" : "json"
+						"string" === typeof output
+							? "txt"
+							: "function" === typeof output
+							? "js"
+							: "json"
 					}`,
 				},
 			],

@@ -66,7 +66,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 										x: previous.x + 3_600_000 * index,
 									}),
 								),
-								{ x: xp.time, y: xp.xp + previous?.y },
+								{ x: xp.time, y: xp.xp + previous.y },
 							];
 						}, []);
 					return {

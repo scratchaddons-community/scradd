@@ -11,7 +11,7 @@ import { giveXpForMessage } from "./giveXp.js";
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
 
-	giveXpForMessage(message);
+	await giveXpForMessage(message);
 });
 
 defineCommand(
@@ -109,7 +109,7 @@ defineCommand(
 						rawOffset: index,
 
 						generateComponents() {
-							return getSettings(interaction.user, false)?.useMentions === undefined
+							return getSettings(interaction.user, false).useMentions === undefined
 								? [
 										{
 											customId: "levelUpPings_toggleSetting",

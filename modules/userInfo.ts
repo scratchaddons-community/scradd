@@ -54,7 +54,7 @@ defineCommand(
 			fields.push({
 				name: "Roles",
 				value:
-					member?.roles
+					member.roles
 						.valueOf()
 						.sorted((one, two) => two.comparePositionTo(one))
 						.filter((role) => role.id !== config.guild.id)
@@ -75,7 +75,7 @@ defineCommand(
 			fields.push({
 				name: "Voice Channel",
 				value:
-					member.voice.channel?.toString() +
+					member.voice.channel.toString() +
 					`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
 						member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
 					}${

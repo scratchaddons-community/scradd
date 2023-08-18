@@ -231,7 +231,8 @@ async function playGame(
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
-					return await endGame();
+					await endGame();
+					return;
 				}
 			}
 			if (!match || !bonusTurns) {
@@ -265,14 +266,14 @@ async function playGame(
 	CURRENTLY_PLAYING.set(users[0].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[0].toString()} ended the game`, users[0]);
 		},
 	});
 	CURRENTLY_PLAYING.set(users[1].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[1].toString()} ended the game`, users[1]);
 		},
 	});
@@ -341,9 +342,9 @@ async function playGame(
 						emoji: discovered ? emoji : EMPTY_TILE,
 						customId: id,
 						style: ButtonStyle[
-							scores[0]?.includes(id)
+							scores[0].includes(id)
 								? "Primary"
-								: scores[1]?.includes(id)
+								: scores[1].includes(id)
 								? "Success"
 								: "Secondary"
 						],
@@ -447,7 +448,7 @@ async function setupGame(difficulty: 2 | 4) {
 			.mapValues((emoji) => ({ animated: emoji.animated ?? false, id: emoji.id })),
 	);
 	const selected = allEmojis.random(24 / difficulty);
-	const emojis = Array<typeof selected>(difficulty)
+	const emojis = Array.from<typeof selected>({ length: difficulty })
 		.fill(selected)
 		.flat()
 		.sort(() => Math.random() - 0.5);
@@ -464,7 +465,7 @@ async function setupGame(difficulty: 2 | 4) {
 	return chunks;
 }
 
-export async function messageDelete(message: Message | PartialMessage) {
+export function messageDelete(message: Message | PartialMessage) {
 	return !deletedPings.delete(message.id);
 }
 

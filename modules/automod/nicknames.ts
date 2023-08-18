@@ -19,13 +19,14 @@ export default async function changeNickname(member: GuildMember) {
 
 	if (newNick !== member.displayName) {
 		const unpingable = isPingable(member.displayName);
-		return await setNickname(
+		await setNickname(
 			member,
 			newNick,
 			`${censored ? "Has bad words" : ""}${censored && unpingable ? "; " : ""}${
 				unpingable ? "Unpingable" : ""
 			}`,
 		);
+		return;
 	}
 
 	const members = (await config.guild.members.fetch({ query: newNick, limit: 100 })).filter(
@@ -41,7 +42,7 @@ export default async function changeNickname(member: GuildMember) {
 				const nick = censored ? censored.censored : found.user.displayName;
 
 				if (nick !== found.displayName && isPingable(nick)) {
-					setNickname(found, nick, "Conflicts");
+					await setNickname(found, nick, "Conflicts");
 					unsafe.delete(id);
 				}
 			}
@@ -55,7 +56,7 @@ export default async function changeNickname(member: GuildMember) {
 			const nick = censored ? censored.censored : member.user.displayName;
 
 			if (nick !== newNick && isPingable(nick)) {
-				setNickname(member, nick, "Conflicts");
+				await setNickname(member, nick, "Conflicts");
 				unchanged.delete(member.id);
 			}
 		}
@@ -65,7 +66,7 @@ export default async function changeNickname(member: GuildMember) {
 				const nick = censored ? censored.censored : member.user.username;
 
 				if (nick !== member.displayName && isPingable(nick)) {
-					setNickname(member, nick, "Conflicts");
+					await setNickname(member, nick, "Conflicts");
 					unchanged.delete(member.id);
 				}
 			}

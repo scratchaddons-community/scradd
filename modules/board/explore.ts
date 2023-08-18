@@ -8,7 +8,6 @@ import {
 	ComponentType,
 	type InteractionReplyOptions,
 	ButtonInteraction,
-	type CacheType,
 	ChatInputCommandInteraction,
 	type MessageEditOptions,
 } from "discord.js";
@@ -67,7 +66,7 @@ async function textChannelMatches(
 }
 
 export default async function makeSlideshow(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction<CacheType>,
+	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
 	{
 		minReactions = defaultMinReactions,
 		user,
@@ -185,7 +184,7 @@ export default async function makeSlideshow(
 		.on("end", async () => {
 			await reply.edit({
 				allowedMentions: { users: [] },
-				components: disableComponents(reply?.components ?? []),
+				components: disableComponents(reply.components),
 			});
 		});
 }

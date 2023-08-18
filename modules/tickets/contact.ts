@@ -32,16 +32,16 @@ import {
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: Exclude<Category, "appeal">,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: "appeal",
 	strikeId: string,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
@@ -73,8 +73,6 @@ export async function showTicketModal(
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
 	const fields = allFields[option];
-
-	if (!fields) throw new ReferenceError(`Unknown ticket category: ${option}`);
 
 	await interaction.showModal({
 		title: categoryToDescription[option],
@@ -157,7 +155,7 @@ export default async function contactMods(
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
 			option === MOD_CATEGORY ? member.toString() : "mods"
-		}: ${thread?.toString()}`,
+		}: ${thread.toString()}`,
 	);
 
 	const strikes = strikeDatabase.data
@@ -175,7 +173,7 @@ export default async function contactMods(
 
 	const filtered = strikes.filter((_, index) => index < 15);
 
-	await thread?.send({
+	await thread.send({
 		components: filtered.length
 			? [
 					{
@@ -190,15 +188,15 @@ export default async function contactMods(
 											placeholder: "View more information on a strike",
 
 											options: filtered.map((strike) => ({
-												label: String(strike.id),
-												value: String(strike.id),
+												label: strike.id.toString(),
+												value: strike.id.toString(),
 											})),
 										},
 								  ]
 								: filtered.map((strike) => ({
 										type: ComponentType.Button,
 										customId: `${strike.id}_strike`,
-										label: String(strike.id),
+										label: strike.id.toString(),
 										style: ButtonStyle.Secondary,
 								  })),
 					},
@@ -248,7 +246,7 @@ export default async function contactMods(
 		allowedMentions: { parse: ["roles"] },
 	});
 
-	await thread?.members.add(member, "Thread created");
+	await thread.members.add(member, "Thread created");
 
 	return thread;
 }
@@ -298,12 +296,11 @@ export async function contactUser(
 		.on("collect", async (buttonInteraction) => {
 			await buttonInteraction.deferReply({ ephemeral: true });
 			const thread = await contactMods(interaction, member);
-			if (thread)
-				await buttonInteraction.editReply(
-					`${
-						constants.emojis.statuses.yes
-					} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-				);
+			await buttonInteraction.editReply(
+				`${
+					constants.emojis.statuses.yes
+				} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
+			);
 		})
 		.on("end", async () => {
 			await interaction.editReply({ components: disableComponents(message.components) });

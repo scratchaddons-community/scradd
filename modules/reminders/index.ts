@@ -39,8 +39,9 @@ defineCommand(
 		},
 	},
 	async (interaction) => {
-		if (interaction.options.getSubcommand(true) === "list") listReminders(interaction);
-		else createReminder(interaction);
+		await (interaction.options.getSubcommand(true) === "list"
+			? listReminders(interaction)
+			: createReminder(interaction));
 	},
 );
 

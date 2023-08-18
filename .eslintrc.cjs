@@ -1,12 +1,17 @@
 /** @type {import("eslint").ESLint.ConfigData} */
 module.exports = {
 	env: { es2021: true, node: true },
-	extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:unicorn/all"],
+	extends: [
+		"eslint:recommended",
+		"plugin:unicorn/all",
+		"plugin:@typescript-eslint/strict-type-checked",
+	],
 	ignorePatterns: "dist",
 	overrides: [
 		{
+			extends: ["plugin:@typescript-eslint/disable-type-checked"],
 			files: ".eslintrc.cjs",
-			parserOptions: { sourceType: "script" },
+			parserOptions: { project: false, sourceType: "script" },
 			rules: {
 				"sort-keys": ["error", "asc", { caseSensitive: false, natural: true }],
 				"unicorn/prevent-abbreviations": "off",
@@ -15,11 +20,56 @@ module.exports = {
 		},
 	],
 	parser: "@typescript-eslint/parser",
-	parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+	parserOptions: {
+		ecmaVersion: "latest",
+		project: true,
+		sourceType: "module",
+		tsconfigRootDir: __dirname,
+	},
 	plugins: ["@typescript-eslint"],
 	rules: {
+		"@typescript-eslint/no-base-to-string": [
+			"error",
+			{
+				ignoredTypeNames: [
+					//todo
+					"AnonymousGuild",
+					"BaseGuildEmoji",
+					"CategoryChannel",
+					"ClientUser",
+					"OAuth2Guild",
+					"ReactionEmoji",
+					"DirectoryChannel",
+					"PublicThreadChannel",
+					"PrivateThreadChannel",
+					"Guild",
+					"GuildEmoji",
+					"GuildPreviewEmoji",
+					"InviteGuild",
+					"PartialDMChannel",
+					"PartialGuildMember",
+					"PartialMessage",
+					"PartialUser",
+					"BaseGuildTextChannel",
+					"BaseGuildVoiceChannel",
+					"ForumChannel",
+					"NewsChannel",
+					"TextChannel",
+					"StageChannel",
+					"VoiceChannel",
+				],
+			},
+		],
+		"@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
+		"@typescript-eslint/no-unsafe-member-access": "off",
+		"@typescript-eslint/restrict-template-expressions": "off",
 		"no-fallthrough": "off",
 		"no-mixed-spaces-and-tabs": "off",
+		"no-restricted-syntax": [
+			"error",
+			"CallExpression[callee.name='String']",
+			"TSIndexSignature",
+		],
 		"no-sparse-arrays": "off",
 		"quotes": ["error", "double", { avoidEscape: true }],
 		"semi": ["error", "always"],
