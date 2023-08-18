@@ -45,7 +45,9 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${constants.emojis.misc.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}${
-			(config.guild.memberCount).toString().includes("87") ? " (WAS THAT THE BITE OF 87?!?!?)" : ""
+			config.guild.memberCount.toString().includes("87")
+				? " (WAS THAT THE BITE OF 87?!?!?)"
+				: ""
 		}`,
 	);
 });

@@ -376,8 +376,8 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					// The resolved message for the reference will be a Message
 					reference
 						? (await messageToText(reference, replies)) || actualContent
-						// eslint-disable-next-line unicorn/string-content
-						: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
+						: // eslint-disable-next-line unicorn/string-content
+						  `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
 				);
 		}
 

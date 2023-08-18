@@ -98,7 +98,7 @@ defineCommand(
 					: { name: "Banned", value: "Yes", inline: true },
 			);
 
-		const xp = (xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0) ;
+		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
 		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
 		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
 
