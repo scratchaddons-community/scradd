@@ -119,6 +119,8 @@ export default async function automodMessage(message: Message) {
 					  },
 			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 		);
+		if (badWords.strikes) needsDelete = true;
+
 		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
 				embed.description,
@@ -148,7 +150,7 @@ export default async function automodMessage(message: Message) {
 
 		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
 
-		if (badWords.strikes || needsDelete) {
+		if (needsDelete) {
 			if (message.deletable) {
 				await message.delete();
 				if (badWords.strikes)
