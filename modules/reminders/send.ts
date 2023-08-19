@@ -195,3 +195,5 @@ function getNextInterval() {
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }
+
+await queueReminders();
