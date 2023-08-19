@@ -4,7 +4,7 @@ import { GlobalUsersPattern } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { getLoggingThread } from "../logging/misc.js";
 
-export const EXPIRY_LENGTH = 1_814_400_000,
+export const EXPIRY_LENGTH = 1_260_000 * (process.env.NODE_ENV === "production" ? 1440 : 1),
 	STRIKES_PER_MUTE = 3,
 	MUTE_LENGTHS = [8, 16, 36],
 	PARTIAL_STRIKE_COUNT = 1 / (STRIKES_PER_MUTE + 1),
