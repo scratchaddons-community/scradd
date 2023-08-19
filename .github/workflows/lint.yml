@@ -10,7 +10,7 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: github.ref_name == 'main'
+        if: github.ref_name == 'main' && github.repository_owner == 'scratchadons-community'
         runs-on: ubuntu-20.04
 
         steps:
@@ -42,6 +42,7 @@ jobs:
         name: Format
         if: startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
+        needs: bump
 
         steps:
             - name: Checkout
