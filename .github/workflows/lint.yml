@@ -40,7 +40,7 @@ jobs:
 
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') != true
+        if: ${{ always() }} startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
         needs: bump
 
