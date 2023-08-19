@@ -119,7 +119,7 @@ export async function generateBoardMessage(
 					components: [
 						...(extraButtons.pre || []),
 						{
-							label: "Context",
+							label: "Message",
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							url: message.url,
