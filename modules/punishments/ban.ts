@@ -22,9 +22,9 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 			? memberToBan.user
 			: interaction.options.getUser("user", true);
 	const reason = interaction.options.getString("reason");
-	const unbanIn = interaction.options.getString("unban-in")?.toLowerCase().trim();
+	const unbanIn = interaction.options.getString("unban-in")?.toLowerCase();
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
-	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase().trim();
+	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase();
 	const deleteLength = Math.min(
 		604_800,
 		(deleteRange && deleteRange !== "none" && +parseTime(deleteRange) - Date.now()) || 0,
@@ -64,7 +64,6 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					reminder: userToBan.id,
 				},
 			];
-			await queueReminders();
 
 			await interaction.reply(
 				`${
@@ -74,6 +73,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					TimestampStyles.RelativeTime,
 				)}.`,
 			);
+			await queueReminders();
 		} else if (unbanIn === "never" && unbanTimer) {
 			remindersDatabase.data = remindersDatabase.data.filter(
 				(reminder) =>
@@ -83,7 +83,6 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 						reminder.reminder === userToBan.id
 					),
 			);
-			await queueReminders();
 
 			await interaction.reply(
 				`${
@@ -93,6 +92,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					TimestampStyles.RelativeTime,
 				)}.`,
 			);
+			await queueReminders();
 		} else {
 			await interaction.reply({
 				ephemeral: true,
@@ -150,7 +150,14 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					return;
 				}
 
-				if (unbanTime)
+				if (unbanTime && untilUnban) {
+					if (untilUnban < 30_000 || untilUnban > 315_360_000_000) {
+						await interaction.reply({
+							ephemeral: true,
+							content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
+						});
+						return;
+					}
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
@@ -161,6 +168,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							reminder: userToBan.id,
 						},
 					];
+				}
 
 				await userToBan
 					.send({
@@ -196,7 +204,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 				});
 				await buttonInteraction.reply(
 					`${constants.emojis.statuses.yes} Banned ${userToBan}!${
-						unbanTime
+						unbanTime && untilUnban
 							? ` I will unban them ${time(unbanTime, TimestampStyles.RelativeTime)}.`
 							: ""
 					}`,

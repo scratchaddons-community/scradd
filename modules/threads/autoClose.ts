@@ -27,7 +27,7 @@ export async function setUpAutoClose(interaction: ChatInputCommandInteraction<"c
 
 	const command = interaction.options.getSubcommand(true);
 	const options = getThreadConfig(interaction.channel);
-	const timer = interaction.options.getString("time", true).toLowerCase().trim();
+	const timer = interaction.options.getString("time", true).toLowerCase();
 	if (timer === "never") {
 		if (command === "lock-in")
 			return await interaction.reply({

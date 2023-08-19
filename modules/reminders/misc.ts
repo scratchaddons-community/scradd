@@ -3,7 +3,6 @@ import Database from "../../common/database.js";
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
-import queueReminders from "./send.js";
 
 export enum SpecialReminders {
 	Weekly,
@@ -99,4 +98,3 @@ if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.
 		},
 	];
 }
-await queueReminders();

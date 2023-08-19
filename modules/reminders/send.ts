@@ -20,7 +20,7 @@ export default async function queueReminders(): Promise<undefined | NodeJS.Timeo
 	const interval = getNextInterval();
 	if (interval === undefined) return;
 
-	if (interval < 30_000) {
+	if (interval < 100) {
 		return await sendReminders();
 	} else {
 		nextReminder = setTimeout(sendReminders, interval);
@@ -36,9 +36,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		toPostpone: Reminder[];
 	}>(
 		(accumulator, reminder) => {
-			accumulator[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(
-				reminder,
-			);
+			accumulator[reminder.date - Date.now() < 500 ? "toSend" : "toPostpone"].push(reminder);
 			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
@@ -197,3 +195,5 @@ function getNextInterval() {
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }
+
+await queueReminders();
