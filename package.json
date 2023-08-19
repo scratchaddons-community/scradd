@@ -51,8 +51,8 @@
 		"@railway/cli": "3.4.0"
 	},
 	"engines": {
-		"node": "18.12.1",
-		"npm": "8.13.2"
+		"node": "18",
+		"npm": "8"
 	},
 	"overrides": {
 		"@discordjs/builders": "dev",
