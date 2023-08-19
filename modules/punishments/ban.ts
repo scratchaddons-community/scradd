@@ -22,9 +22,9 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 			? memberToBan.user
 			: interaction.options.getUser("user", true);
 	const reason = interaction.options.getString("reason");
-	const unbanIn = interaction.options.getString("unban-in")?.toLowerCase().trim();
+	const unbanIn = interaction.options.getString("unban-in")?.toLowerCase();
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
-	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase().trim();
+	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase();
 	const deleteLength = Math.min(
 		604_800,
 		(deleteRange && deleteRange !== "none" && +parseTime(deleteRange) - Date.now()) || 0,

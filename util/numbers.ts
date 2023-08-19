@@ -104,23 +104,35 @@ export function parseTime(time: string): Date {
 		days = 0,
 		hours = 0,
 		minutes = 0,
+		seconds = 0,
 	} = time.match(
 		new RegExp(
-			/^(?:(?<years>\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
+			/^\s*(?:(?<years>\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
 				/(?:(?<months>\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
 				/(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
 				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
 				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
-				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
+				/(?:(?<minutes>\d+(?:.\d+)?)\s*m(?:in(?:ute)?s?)?)?\s*/.source +
+				/(?:(?<seconds>\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
+			"i",
 		),
 	)?.groups ?? {};
 
 	const date = new Date();
-	date.setUTCFullYear(
-		date.getUTCFullYear() + +years,
-		date.getUTCMonth() + +months,
-		date.getUTCDate() + +weeks * 7 + +days,
-	);
-	date.setUTCHours(date.getUTCHours() + +hours, date.getUTCMinutes() + +minutes);
-	return date;
+	const otherDate = new Date(date);
+
+	date.setUTCFullYear(date.getUTCFullYear() + +years);
+	otherDate.setUTCFullYear(otherDate.getUTCFullYear() + Math.ceil(+years));
+	const fractionalYears = (+otherDate - +date) * (+years % 1);
+
+	date.setUTCMonth(date.getUTCMonth() + +months);
+	otherDate.setUTCFullYear(date.getUTCFullYear(), otherDate.getUTCMonth() + Math.ceil(+months));
+	const fractionalMonths = (+otherDate - +date) * (+months % 1);
+
+	const totalDays = +weeks * 7 + +days;
+	const totalHours = totalDays * 24 + +hours;
+	const totalMinutes = totalHours * 60 + +minutes;
+	const totalSeconds = totalMinutes * 60 + +seconds;
+
+	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }

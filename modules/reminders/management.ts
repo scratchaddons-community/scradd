@@ -120,7 +120,7 @@ export async function createReminder(interaction: ChatInputCommandInteraction<"c
 		});
 	}
 
-	const date = parseTime(interaction.options.getString("time", true).toLowerCase().trim());
+	const date = parseTime(interaction.options.getString("time", true));
 	if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
 		return await interaction.reply({
 			ephemeral: true,
