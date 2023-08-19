@@ -36,9 +36,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		toPostpone: Reminder[];
 	}>(
 		(accumulator, reminder) => {
-			accumulator[reminder.date - Date.now() < 500 ? "toSend" : "toPostpone"].push(
-				reminder,
-			);
+			accumulator[reminder.date - Date.now() < 500 ? "toSend" : "toPostpone"].push(reminder);
 			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
