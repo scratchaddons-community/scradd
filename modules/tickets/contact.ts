@@ -18,7 +18,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
-import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
+import { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
 import {
 	type Category,
 	SA_CATEGORY,
@@ -211,7 +211,13 @@ export default async function contactMods(
 					? filtered
 							.map(
 								(strike) =>
-									`${strike.removed ? "~~" : ""}\`${strike.id}\`${
+									`${
+										strike.removed
+											? "~~"
+											: strike.date + EXPIRY_LENGTH > Date.now()
+											? ""
+											: "*"
+									}\`${strike.id}\`${
 										strike.count === 1
 											? ""
 											: ` (${
@@ -222,7 +228,13 @@ export default async function contactMods(
 									} - ${time(
 										new Date(strike.date),
 										TimestampStyles.RelativeTime,
-									)}${strike.removed ? "~~" : ""}`,
+									)}${
+										strike.removed
+											? "~~"
+											: strike.date + EXPIRY_LENGTH > Date.now()
+											? ""
+											: "*"
+									}`,
 							)
 							.join("\n")
 					: `${constants.emojis.statuses.no} ${member.toString()} has never been warned!`,

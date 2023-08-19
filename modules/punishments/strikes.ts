@@ -14,7 +14,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import filterToStrike, { PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
+import filterToStrike, { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
@@ -55,14 +55,16 @@ export async function getStrikes(
 	await paginate(
 		strikes,
 		(strike) =>
-			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
+			`${strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"}\`${
+				strike.id
+			}\`${
 				strike.count === 1
 					? ""
 					: ` (${
 							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
 					  })`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-				strike.removed ? "~~" : ""
+				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,
 		(data) => interaction.reply({ ...data, ephemeral: true }),
 		{
@@ -160,8 +162,10 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
-				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
-					strike.removed ? "~~" : ""
+				title: `${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+				}Strike \`${strike.id}\`${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 				}`,
 
 				description: strike.reason,
