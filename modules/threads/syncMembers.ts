@@ -9,6 +9,7 @@ import {
 import constants from "../../common/constants.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 import config from "../../common/config.js";
+import { getBaseChannel } from "../../util/discord.js";
 
 export async function syncMembers(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	if (!interaction.channel?.isThread())
@@ -57,9 +58,11 @@ export async function updateMemberThreads(
 			if (!roles || !roles.length) return;
 			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
 			if (!thread?.isThread()) return;
-			await (roles.some((role) => member.roles.resolve(role))
-				? thread.members.add(member, "Has qualifying role")
-				: thread.members.remove(member.id, "Has no qualifying role"));
+			if (roles.some((role) => member.roles.resolve(role))) {
+				const baseChannel = getBaseChannel(thread);
+				if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))
+					await thread.members.add(member, "Has qualifying role");
+			} else await thread.members.remove(member.id, "Has no qualifying role");
 		}),
 	);
 }
@@ -82,6 +85,10 @@ export async function updateThreadMembers(
 
 function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
 	return Promise.all(
-		role.members.map((member) => thread.members.add(member, "Has qualifying role initially")),
+		role.members.map(
+			(member) =>
+				(getBaseChannel(thread)?.permissionsFor(member).has("ViewChannel") ?? true) &&
+				thread.members.add(member, "Has qualifying role initially"),
+		),
 	);
 }

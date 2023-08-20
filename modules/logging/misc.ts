@@ -26,7 +26,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
 			baseChannel
-				.permissionsFor(config.roles.mod || config.guild.id)
+				.permissionsFor(config.roles.staff || config.guild.id)
 				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }

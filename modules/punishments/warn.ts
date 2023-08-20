@@ -129,7 +129,7 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
-		(!config.roles.mod || !member.roles.resolve(config.roles.mod.id)) &&
+		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
 			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
