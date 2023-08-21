@@ -132,7 +132,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 											style: ButtonStyle.Primary,
 											type: ComponentType.Button,
 											label: "Sync",
-											customId: "_syncConstants",
+											customId: "_syncConfig",
 										},
 									],
 								},
