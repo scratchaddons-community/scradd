@@ -93,7 +93,7 @@ defineCommand(
 							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 							: ""),
 					fields: [
-						...(credits
+						...(addon.credits
 							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
@@ -101,20 +101,18 @@ defineCommand(
 							inline: true,
 							name: "📝 Version added",
 
-							value: escapeMessage(
-								`v${addon.versionAdded}${
-									addon.latestUpdate && lastUpdatedIn
-										? ` (${
-												interaction.channel
-													? tooltip(
-															lastUpdatedIn,
-															addon.latestUpdate.temporaryNotice,
-													  )
-													: lastUpdatedIn
-										  })`
-										: ""
-								}`,
-							),
+							value: `v${addon.versionAdded}${
+								addon.latestUpdate && lastUpdatedIn
+									? ` (${
+											interaction.channel
+												? tooltip(
+														lastUpdatedIn,
+														addon.latestUpdate.temporaryNotice,
+												  )
+												: lastUpdatedIn
+									  })`
+									: ""
+							}`,
 						},
 					],
 
