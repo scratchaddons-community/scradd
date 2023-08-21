@@ -86,7 +86,7 @@ defineCommand(
 				inline: true,
 			});
 
-		const banned = await config.guild.bans.fetch(user.id).catch(() => {});
+		const banned = await config.guild.bans.fetch(user.id).catch(() => void 0);
 		if (banned)
 			fields.push(
 				isMod

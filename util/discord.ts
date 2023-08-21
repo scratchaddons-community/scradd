@@ -353,7 +353,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return message.content;
 			return message
 				.fetchReference()
-				.catch(() => {})
+				.catch(() => void 0)
 				.then((reply) => {
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
@@ -371,7 +371,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return actualContent;
 			return message
 				.fetchReference()
-				.catch(() => {})
+				.catch(() => void 0)
 				.then(async (reference) =>
 					// The resolved message for the reference will be a Message
 					reference

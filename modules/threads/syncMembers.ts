@@ -56,7 +56,7 @@ export async function updateMemberThreads(
 		threadsDatabase.data.map(async (options) => {
 			const roles = options.roles && options.roles.split("|");
 			if (!roles || !roles.length) return;
-			const thread = await config.guild.channels.fetch(options.id).catch(() => {});
+			const thread = await config.guild.channels.fetch(options.id).catch(() => void 0);
 			if (!thread?.isThread()) return;
 			if (roles.some((role) => member.roles.resolve(role))) {
 				const baseChannel = getBaseChannel(thread);
@@ -75,7 +75,7 @@ export async function updateThreadMembers(
 		const options = getThreadConfig(thread);
 		await Promise.all(
 			options.roles.map(async (roleId) => {
-				const role = await config.guild.roles.fetch(roleId).catch(() => {});
+				const role = await config.guild.roles.fetch(roleId).catch(() => void 0);
 				if (!role) return;
 				return await addRoleToThread({ role, thread });
 			}),

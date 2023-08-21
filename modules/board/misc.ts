@@ -171,7 +171,8 @@ export async function generateBoardMessage(
 	if (info instanceof Message) return await messageToBoardData(info);
 
 	const onBoard =
-		info.onBoard && (await config.channels.board?.messages.fetch(info.onBoard).catch(() => {}));
+		info.onBoard &&
+		(await config.channels.board?.messages.fetch(info.onBoard).catch(() => void 0));
 
 	if (onBoard) {
 		const linkButton = onBoard.components[0]?.components?.[0];
@@ -193,11 +194,11 @@ export async function generateBoardMessage(
 		};
 	}
 
-	const channel = await config.guild.channels.fetch(info.channel).catch(() => {});
+	const channel = await config.guild.channels.fetch(info.channel).catch(() => void 0);
 
 	if (!channel?.isTextBased()) return;
 
-	const message = await channel.messages.fetch(info.source).catch(() => {});
+	const message = await channel.messages.fetch(info.source).catch(() => void 0);
 
 	if (!message) return;
 

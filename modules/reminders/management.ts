@@ -129,7 +129,7 @@ export async function createReminder(interaction: ChatInputCommandInteraction<"c
 	}
 
 	const channel = dms
-		? (await interaction.user.createDM().catch(() => {}))?.id
+		? (await interaction.user.createDM().catch(() => void 0))?.id
 		: interaction.channel?.id;
 	if (!channel)
 		return await interaction.reply({

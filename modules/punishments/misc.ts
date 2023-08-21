@@ -52,7 +52,7 @@ export default async function filterToStrike(filter: string) {
 	const channel = await getLoggingThread(filter.startsWith("0") ? undefined : "members");
 	const message = await channel.messages
 		.fetch(convertBase(strikeId, convertBase.MAX_BASE, 10))
-		.catch(() => {});
+		.catch(() => void 0);
 	if (!message) return;
 
 	if (

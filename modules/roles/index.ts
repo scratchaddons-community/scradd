@@ -19,7 +19,7 @@ defineEvent("guildMemberAdd", async () => {
 	}, new Collection<Snowflake, number>());
 	inviters.map(async (count, user) => {
 		if (count < 20) return;
-		const inviter = await config.guild.members.fetch(user).catch(() => {});
+		const inviter = await config.guild.members.fetch(user).catch(() => void 0);
 		if (
 			!inviter ||
 			inviter.id === constants.users.hans ||

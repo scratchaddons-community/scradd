@@ -37,7 +37,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
 		});
 	}
-	const ban = !memberToBan && (await config.guild.bans.fetch(userToBan).catch(() => {}));
+	const ban = !memberToBan && (await config.guild.bans.fetch(userToBan).catch(() => void 0));
 
 	if (ban) {
 		const unbanTimer = remindersDatabase.data.find(
@@ -192,7 +192,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							},
 						],
 					})
-					.catch(() => {});
+					.catch(() => void 0);
 
 				await config.guild.bans.create(userToBan, {
 					reason:

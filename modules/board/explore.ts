@@ -40,7 +40,7 @@ async function textChannelMatches(
 			const fetchedChannel =
 				channelWanted instanceof CategoryChannel
 					? channelWanted
-					: await config.guild.channels.fetch(channelWanted.id).catch(() => {});
+					: await config.guild.channels.fetch(channelWanted.id).catch(() => void 0);
 
 			if (fetchedChannel?.type !== ChannelType.GuildCategory)
 				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
@@ -55,7 +55,7 @@ async function textChannelMatches(
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			const thread = await config.guild.channels.fetch(channelFound).catch(() => {});
+			const thread = await config.guild.channels.fetch(channelFound).catch(() => void 0);
 			return thread?.parent?.id === channelWanted.id;
 		}
 

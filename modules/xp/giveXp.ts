@@ -78,7 +78,9 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =
-		user instanceof GuildMember ? user : await config.guild.members.fetch(user).catch(() => {});
+		user instanceof GuildMember
+			? user
+			: await config.guild.members.fetch(user).catch(() => void 0);
 
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);

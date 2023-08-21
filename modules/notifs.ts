@@ -56,9 +56,9 @@ defineEvent("guildMemberRemove", async (member) => {
 
 	const auditLogs = await config.guild
 		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberKick })
-		.catch(() => {});
+		.catch(() => void 0);
 	const kicked = auditLogs?.entries.first()?.target?.id === member.id;
-	const banned = await config.guild.bans.fetch(member).catch(() => {});
+	const banned = await config.guild.bans.fetch(member).catch(() => void 0);
 
 	const byes =
 		banned || kicked

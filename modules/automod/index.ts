@@ -107,7 +107,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	await changeNickname(member);
 });
 defineEvent.pre("userUpdate", async (_, user) => {
-	const member = await config.guild.members.fetch(user).catch(() => {});
+	const member = await config.guild.members.fetch(user).catch(() => void 0);
 	if (member) {
 		await changeNickname(member);
 		return true;

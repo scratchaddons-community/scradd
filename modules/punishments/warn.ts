@@ -71,7 +71,7 @@ export default async function warn(
 	const member =
 		user instanceof GuildMember
 			? user
-			: await config.guild.members.fetch(user.id).catch(() => {});
+			: await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
@@ -117,7 +117,7 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => {});
+		.catch(() => void 0);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -166,7 +166,7 @@ export default async function warn(
 					TimestampStyles.LongDate,
 				)}, you will be banned.**__`,
 			)
-			.catch(() => {});
+			.catch(() => void 0);
 	}
 
 	return true;
@@ -191,7 +191,7 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 		// Double equals because RoboTop warns are stored as numbers in the database
 		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
 		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
 	const { url: logUrl } = await interaction.reply({
