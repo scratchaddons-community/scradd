@@ -11,7 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { getCustomRole, qualifiesForRole } from "../roles/custom.js";
+import { recheckMemberRole } from "../roles/custom.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -151,9 +151,8 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 	await Promise.all(
 		weeklyWinners.map(async (weeklyWinner) => {
-			const guildMember = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
-			if (!guildMember || (await qualifiesForRole(guildMember))) return;
-			await getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
+			const member = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
+			if (member) await recheckMemberRole(member, member);
 		}),
 	);
 

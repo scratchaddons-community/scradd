@@ -5,7 +5,7 @@ import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
 import {
 	createCustomRole,
-	deleteMemberRole,
+	deleteMemberRoles,
 	recheckMemberRole,
 	recheckAllRoles,
 	customRole,
@@ -53,7 +53,7 @@ defineCommand(
 
 defineModal("customRole", createCustomRole);
 
-defineEvent("guildMemberRemove", deleteMemberRole);
+defineEvent("guildMemberRemove", deleteMemberRoles);
 
 defineEvent("guildMemberUpdate", recheckMemberRole);
 
