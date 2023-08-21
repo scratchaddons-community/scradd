@@ -160,6 +160,8 @@ export async function generateBoardMessage(
 					},
 
 					timestamp: message.createdAt.toISOString(),
+
+					footer: message.editedAt ? { text: "Edited" } : undefined,
 				},
 				...embeds,
 			],
