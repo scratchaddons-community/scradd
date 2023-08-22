@@ -3,6 +3,7 @@ import badWords from "./badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
+import config from "../../common/config.js";
 
 function decodeRegexps(regexps: RegExp[]) {
 	return regexps
@@ -92,7 +93,8 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 
 	return (
 		baseChannel?.type === ChannelType.DM ||
-		channel?.type === ChannelType.PrivateThread ||
+		(baseChannel?.id === config.channels.tickets?.id &&
+			channel?.type === ChannelType.PrivateThread) ||
 		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
 }
