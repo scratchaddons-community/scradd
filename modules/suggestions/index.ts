@@ -95,7 +95,7 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 		],
 	});
 });
-defineEvent("threadDelete", async (thread) => {
+defineEvent("threadDelete", (thread) => {
 	if (thread.parent?.id === config.channels.suggestions?.id)
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
 });
