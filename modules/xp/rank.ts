@@ -1,7 +1,7 @@
 import type { ButtonInteraction, ChatInputCommandInteraction, User } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { convertBase, nth } from "../../util/numbers.js";
+import { nth } from "../../util/numbers.js";
 import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
 
 export default async function getUserRank(
@@ -11,7 +11,7 @@ export default async function getUserRank(
 	const allXp = xpDatabase.data;
 	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
-	const member = await config.guild.members.fetch(user.id).catch(() => {});
+	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
@@ -27,12 +27,12 @@ export default async function getUserRank(
 	async function makeCanvasFiles() {
 		if (!constants.canvasEnabled) return [];
 
-		const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
+		const { createCanvas } = await import("@napi-rs/canvas");
 		const canvas = createCanvas(1000, 50);
 		const context = canvas.getContext("2d");
 		context.fillStyle = "#0003";
 		context.fillRect(0, 0, canvas.width, canvas.height);
-		context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
+		context.fillStyle = `#${constants.themeColor.toString(16)}`;
 		const rectangleSize = canvas.width * progress;
 		const paddingPixels = 0.18 * canvas.height;
 		context.fillRect(0, 0, rectangleSize, canvas.height);
@@ -41,20 +41,14 @@ export default async function getUserRank(
 			context.fillStyle = "#666";
 			context.textAlign = "end";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				canvas.width - paddingPixels,
 				canvas.height - paddingPixels,
 			);
 		} else {
 			context.fillStyle = "#0009";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				paddingPixels,
 				canvas.height - paddingPixels,
 			);

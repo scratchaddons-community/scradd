@@ -20,38 +20,37 @@ import log, { LoggingEmojis } from "../logging/misc.js";
 import { matchSorter } from "match-sorter";
 
 const fetchedChannels = new Set<Snowflake>();
-export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
+export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
 	if (!interaction.channel) return [];
 	if (!fetchedChannels.has(interaction.channel.id)) {
-		interaction.channel.messages
-			.fetch({ limit: 100 })
-			.then(() => fetchedChannels.add(interaction.channel?.id ?? ""));
+		interaction.channel.messages.fetch({ limit: 100 }).then(
+			() => fetchedChannels.add(interaction.channel?.id ?? ""),
+			() => void 0,
+		);
 	}
-	const messages = await Promise.all(
-		interaction.channel.messages.cache
-			.sort((one, two) => +two.createdAt - +one.createdAt)
-			.filter(
-				(message) =>
-					!message.flags.has("Ephemeral") &&
-					(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
-			)
-			.map(async (message) => {
-				const content = await messageToText(message, false);
-				return {
-					id: message.id,
-					embeds: message.embeds.map((embed) => embed.toJSON()),
-					interaction: message.interaction && "/" + message.interaction.commandName,
-					attachments: message.attachments.map((attachment) => attachment.name),
-					stickers: message.stickers.map((sticker) => sticker.name),
-					author: message.author.displayName,
-					components: message.components,
-					createdTimestamp: message.createdTimestamp,
-					content: stripMarkdown(
-						interaction.channel ? cleanContent(content, interaction.channel) : content,
-					),
-				};
-			}) ?? [],
-	);
+	const messages = interaction.channel.messages.cache
+		.sort((one, two) => +two.createdAt - +one.createdAt)
+		.filter(
+			(message) =>
+				!message.flags.has("Ephemeral") &&
+				(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
+		)
+		.map((message) => {
+			const content = messageToText(message, false);
+			return {
+				id: message.id,
+				embeds: message.embeds.map((embed) => embed.toJSON()),
+				interaction: message.interaction && "/" + message.interaction.commandName,
+				attachments: message.attachments.map((attachment) => attachment.name),
+				stickers: message.stickers.map((sticker) => sticker.name),
+				author: message.author.displayName,
+				components: message.components,
+				createdTimestamp: message.createdTimestamp,
+				content: stripMarkdown(
+					interaction.channel ? cleanContent(content, interaction.channel) : content,
+				),
+			};
+		});
 	const reply = interaction.options.getString("reply");
 	return matchSorter(messages, reply ?? "", {
 		keys: [
@@ -110,7 +109,7 @@ export default async function sayCommand(
 	}
 
 	await interaction.showModal({
-		title: `Send Message`,
+		title: "Send Message",
 		customId: `${reply ?? ""}_say`,
 
 		components: [
@@ -149,7 +148,8 @@ export async function say(
 	content = silent ? content.replace("@silent", "").trim() : content;
 	const noPing = reply?.startsWith("-");
 	reply = noPing ? reply?.replace("-", "") : reply;
-	const oldMessage = reply && (await interaction.channel?.messages.fetch(reply).catch(() => {}));
+	const oldMessage =
+		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
 	if (reply && !oldMessage)
 		return interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,

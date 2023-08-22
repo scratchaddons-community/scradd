@@ -28,12 +28,15 @@ export function joinWithAnd<Item extends { toString: () => string }>(
 	callback?: ((item: Item) => string) | undefined,
 ): string;
 export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
-export function joinWithAnd(array: any[], callback = (item: any) => item.toString()): string {
+export function joinWithAnd(
+	array: { toString: () => string }[],
+	callback = (item: { toString: () => string }) => item.toString(),
+): string {
 	const last = array.pop();
 
 	if (last === undefined) return "";
 
-	if (array.length === 0) return callback(last);
+	if (!array.length) return callback(last);
 
 	return `${
 		array.length === 1
@@ -51,8 +54,8 @@ export function joinWithAnd(array: any[], callback = (item: any) => item.toStrin
  * @returns The truncated string.
  */
 export function truncateText(text: string, maxLength: number): string {
-	const condensed = (text.split("\n")[0] ?? text)?.replaceAll(/\s+/g, " ");
-	const trimmed = condensed.substring(0, maxLength + 1);
+	const condensed = (text.split("\n")[0] ?? text).replaceAll(/\s+/g, " ");
+	const trimmed = condensed.slice(0, maxLength + 1);
 	const segments = Array.from(new Intl.Segmenter().segment(trimmed), ({ segment }) => segment);
 
 	if (trimmed.length > maxLength) segments.pop();
@@ -61,7 +64,7 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
- * Encodes text using the Caeser Chiper.
+ * Encodes text using the Caesar Cipher.
  *
  * @param text - The text to encode.
  * @param rot - The rotate shift.
@@ -69,7 +72,7 @@ export function truncateText(text: string, maxLength: number): string {
  * @returns The encoded text.
  */
 export function caesar(text: string, rot = 13) {
-	return text.replace(/[a-z]/gi, (chr) => {
+	return text.replaceAll(/[a-z]/gi, (chr) => {
 		const start = chr <= "Z" ? 65 : 97;
 
 		return String.fromCodePoint(start + (((chr.codePointAt(0) ?? 0) - start + rot) % 26));
@@ -86,10 +89,8 @@ export function caesar(text: string, rot = 13) {
 export function normalize(text: string) {
 	return text
 		.normalize("NFD")
-		.replace(
-			/[\p{Diacritic}\u00AD\u0300-\u036f\u0489\u061C\u070F\u17B4\u17B5\u180E\u200A-\u200F\u2060-\u2064\u206A-\u206F]/gu,
-			"",
-		);
+		.replaceAll(/[\p{Dia}\p{M}]+/gu, "")
+		.replaceAll(/[\s\p{Z}]+/gu, " ");
 }
 
 /**

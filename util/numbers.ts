@@ -31,7 +31,7 @@ export function convertBase(
 	outBase: number,
 	chars = convertBase.defaultChars,
 ) {
-	const range = chars.split("");
+	const range = [...chars];
 	if (sourceBase < 2 || sourceBase > range.length)
 		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
 	if (outBase < 2 || outBase > range.length)
@@ -39,8 +39,7 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = value
-		.split("")
+	let decValue = [...value]
 		.reverse() // Stop changing this to `.reduceRight()`! It’s not the same!
 		.reduce((carry, digit, loopIndex) => {
 			const biggestBaseIndex = range.indexOf(digit);
@@ -61,6 +60,7 @@ export function convertBase(
 }
 
 convertBase.defaultChars =
+	// eslint-disable-next-line unicorn/string-content
 	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-/=[];',.";
 convertBase.MAX_BASE = convertBase.defaultChars.length;
 
@@ -79,9 +79,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 	return (
 		(bold ? `**${formatted}**` : formatted) +
 		(jokes
-			? String(number).includes("69")
+			? number.toString().includes("69")
 				? ` (nic${"e".repeat(Math.floor(number.toString().length / 2))})`
-				: /^[1-9]0+$/.test(String(number))
+				: /^[1-9]0+$/.test(number.toString())
 				? ` (${"🥳".repeat(number.toString().length - 1)})`
 				: ""
 			: "")
@@ -91,9 +91,9 @@ export function nth(number: number, { bold = true, jokes = true } = {}) {
 export function parseTime(time: string): Date {
 	const number = Number(time);
 
-	if (!isNaN(number)) {
+	if (!Number.isNaN(number)) {
 		if (number > 1_000_000_000_000) return new Date(number);
-		else if (number > 1_000_000_000) return new Date(number * 1_000);
+		else if (number > 1_000_000_000) return new Date(number * 1000);
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 
@@ -104,25 +104,37 @@ export function parseTime(time: string): Date {
 		days = 0,
 		hours = 0,
 		minutes = 0,
+		seconds = 0,
 	} = time.match(
 		new RegExp(
-			/^(?:(?<years>\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
-				/(?:(?<months>\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
-				/(?:(?<weeks>\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
-				/(?:(?<days>\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
-				/(?:(?<hours>\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
-				/(?:(?<minutes>\d+)\s*m(?:in(?:ute)?s?)?)?$/.source,
+			/^\s*(?:(?<years>.\d+|\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
+				/(?:(?<months>.\d+|\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
+				/(?:(?<weeks>.\d+|\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
+				/(?:(?<days>.\d+|\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
+				/(?:(?<hours>.\d+|\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
+				/(?:(?<minutes>.\d+|\d+(?:.\d+)?)\s*m(?:in(?:ute)?s?)?)?\s*/.source +
+				/(?:(?<seconds>.\d+|\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
+			"i",
 		),
 	)?.groups ?? {};
 
 	const date = new Date();
-	date.setUTCFullYear(
-		date.getUTCFullYear() + +years,
-		date.getUTCMonth() + +months,
-		date.getUTCDate() + +weeks * 7 + +days,
-	);
-	date.setUTCHours(date.getUTCHours() + +hours, date.getUTCMinutes() + +minutes);
-	return date;
+	const otherDate = new Date(date);
+
+	date.setUTCFullYear(date.getUTCFullYear() + +years);
+	otherDate.setUTCFullYear(otherDate.getUTCFullYear() + Math.ceil(+years));
+	const fractionalYears = (+otherDate - +date) * (+years % 1);
+
+	date.setUTCMonth(date.getUTCMonth() + +months);
+	otherDate.setUTCFullYear(date.getUTCFullYear(), otherDate.getUTCMonth() + Math.ceil(+months));
+	const fractionalMonths = (+otherDate - +date) * (+months % 1);
+
+	const totalDays = +weeks * 7 + +days;
+	const totalHours = totalDays * 24 + +hours;
+	const totalMinutes = totalHours * 60 + +minutes;
+	const totalSeconds = totalMinutes * 60 + +seconds;
+
+	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }
 
 export function lerpColors(colors: number[], percent: number) {

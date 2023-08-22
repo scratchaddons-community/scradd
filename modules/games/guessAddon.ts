@@ -45,7 +45,7 @@ export default async function guessAddon(
 			| false
 			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string } = false,
 		justAnswered = "",
-	): Promise<Message | void> {
+	): Promise<Message | undefined> {
 		const questions =
 			typeof backInfo === "string"
 				? [backInfo]
@@ -53,24 +53,27 @@ export default async function guessAddon(
 
 		const oldMessage = interaction.replied ? await interaction.fetchReply() : undefined;
 
-		if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0))
-			return await answerWithAddon(
+		if ((addonProbabilities[1]?.[1] || 0) + 4 < (addonProbabilities[0]?.[1] || 0)) {
+			await answerWithAddon(
 				addonProbabilities,
 				askedCount,
 				askedQuestions,
 				backInfo,
 				justAnswered,
 			);
+			return;
+		}
 
 		if (!questions[0]) {
 			if ((addonProbabilities[1]?.[1] || 0) < (addonProbabilities[0]?.[1] || 0)) {
-				return await answerWithAddon(
+				await answerWithAddon(
 					addonProbabilities,
 					askedCount,
 					askedQuestions,
 					backInfo,
 					justAnswered,
 				);
+				return;
 			}
 
 			if (!oldMessage) throw new ReferenceError("No questions exist on initialization");
@@ -206,7 +209,8 @@ export default async function guessAddon(
 					});
 					await buttonInteraction.reply("🛑 Ended the game.");
 
-					return collector.stop();
+					collector.stop();
+					return;
 				}
 
 				await buttonInteraction.deferUpdate();
@@ -227,7 +231,8 @@ export default async function guessAddon(
 						CURRENTLY_PLAYING.set(interaction.user.id, { url: nextMessage.url });
 					else CURRENTLY_PLAYING.delete(interaction.user.id);
 
-					return collector.stop();
+					collector.stop();
+					return;
 				}
 
 				const probabilityShift = buttonInteraction.customId.startsWith("yes.")
@@ -240,7 +245,7 @@ export default async function guessAddon(
 					? -2
 					: 0;
 
-				const previouslyAsked = Array.from(askedQuestions);
+				const previouslyAsked = [...askedQuestions];
 				const newProbabilities = answerQuestion(
 					questions[0] ?? "",
 					probabilityShift,
@@ -267,7 +272,7 @@ export default async function guessAddon(
 				collector.stop();
 			})
 			.on("end", async (collected) => {
-				if (collected.size > 0) return;
+				if (collected.size) return;
 
 				CURRENTLY_PLAYING.delete(interaction.user.id);
 
@@ -280,59 +285,6 @@ export default async function guessAddon(
 		return message;
 	}
 
-	/**
-	 * Determine the best question to ask next.
-	 *
-	 * @param addonProbabilities - The probabilities of each addon being the answer.
-	 * @param askedQuestions - Questions to ignore.
-	 *
-	 * @returns A new question to ask.
-	 */
-	function getNextQuestions(
-		addonProbabilities: Probabilities,
-		askedQuestions: string[] = [],
-	): string[] {
-		const frequencies: { [key: string]: number } = {};
-
-		const questions = Object.entries(QUESTIONS_BY_ADDON)
-			.map(([addon, questions]) =>
-				Array.from<AddonQuestion[]>({
-					length: Math.round(
-						(Array.from(addonProbabilities).findLastIndex(([id]) => id === addon) + 1) /
-							addonProbabilities.length +
-							((addonProbabilities.find(([id]) => id === addon)?.[1] ?? 0) + 1),
-					),
-				}).fill(
-					questions.filter(
-						(questionInfo) => !askedQuestions.includes(questionInfo.question),
-					),
-				),
-			)
-			.flat(2);
-
-		for (const question of questions) {
-			frequencies[question.question] ??= 0;
-			frequencies[question.question]++;
-		}
-
-		const frequenciesArray = Object.entries(frequencies);
-
-		return frequenciesArray
-			.reduce<typeof frequenciesArray>((previous, current, _, { length }) => {
-				const currentDistance = Math.abs(current[1] / length - 0.5);
-				const previousDistance = Math.abs((previous[0]?.[1] ?? 0) / length - 0.5);
-
-				return currentDistance < previousDistance
-					? current[1] < Math.round(length / 9)
-						? []
-						: [current]
-					: currentDistance > previousDistance
-					? previous
-					: [...previous, current];
-			}, [])
-			.map(([question]) => question)
-			.sort(() => Math.random() - 0.5);
-	}
 	/**
 	 * Reply to an interaction when the addon is determined.
 	 *
@@ -502,8 +454,7 @@ export default async function guessAddon(
 
 				const nextMessage = buttonInteraction.customId.startsWith("back.")
 					? typeof backInfo === "object"
-						? // eslint-disable-next-line @typescript-eslint/no-use-before-define -- These functions depend on each other.
-						  await reply(
+						? await reply(
 								backInfo.askedQuestions,
 								backInfo.probabilities,
 								askedCount - 1,
@@ -511,8 +462,7 @@ export default async function guessAddon(
 								buttonInteraction.component.label ?? undefined,
 						  )
 						: new TypeError("backInfo must be an object to go back")
-					: // eslint-disable-next-line @typescript-eslint/no-use-before-define -- These functions depend on each other.
-					  await reply(
+					: await reply(
 							askedQuestions,
 							addonProbabilities.slice(1),
 							askedCount + 1,
@@ -541,6 +491,59 @@ export default async function guessAddon(
 }
 
 /**
+ * Determine the best question to ask next.
+ *
+ * @param addonProbabilities - The probabilities of each addon being the answer.
+ * @param askedQuestions - Questions to ignore.
+ *
+ * @returns A new question to ask.
+ */
+function getNextQuestions(
+	addonProbabilities: Probabilities,
+	askedQuestions: string[] = [],
+): string[] {
+	const frequencies: Record<string, number> = {};
+
+	const questions = Object.entries(QUESTIONS_BY_ADDON)
+		.map(([addon, questions]) =>
+			Array.from<AddonQuestion[]>({
+				length: Math.round(
+					(addonProbabilities.findLastIndex(([id]) => id === addon) + 1) /
+						addonProbabilities.length +
+						((addonProbabilities.find(([id]) => id === addon)?.[1] ?? 0) + 1),
+				),
+			}).fill(
+				questions.filter((questionInfo) => !askedQuestions.includes(questionInfo.question)),
+			),
+		)
+		.flat(2);
+
+	for (const question of questions) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		frequencies[question.question] ??= 0;
+		frequencies[question.question]++;
+	}
+
+	const frequenciesArray = Object.entries(frequencies);
+
+	return frequenciesArray
+		.reduce<typeof frequenciesArray>((previous, current, _, { length }) => {
+			const currentDistance = Math.abs(current[1] / length - 0.5);
+			const previousDistance = Math.abs((previous[0]?.[1] ?? 0) / length - 0.5);
+
+			return currentDistance < previousDistance
+				? current[1] < Math.round(length / 9)
+					? []
+					: [current]
+				: currentDistance > previousDistance
+				? previous
+				: [...previous, current];
+		}, [])
+		.map(([question]) => question)
+		.sort(() => Math.random() - 0.5);
+}
+
+/**
  * Update probabilities based on an answered question.
  *
  * @param justAsked - The question that was answered.
@@ -564,7 +567,6 @@ function answerQuestion(
 		const questionInfo = addon.find(({ question }) => question === justAsked);
 
 		if (probabilityShift > 0 && questionInfo?.dependencies)
-			// eslint-disable-next-line fp/no-mutating-assign -- This is meant to mutate.
 			Object.assign(dependencies, questionInfo.dependencies);
 
 		const allDependencies = addon.reduce<Dependencies>(
@@ -605,7 +607,7 @@ function answerQuestion(
 					: answerQuestion(
 							current[0],
 							(current[1] ? 1 : -1) * probabilityShift,
-							Array.from(accumulated).sort((one, two) => two[1] - one[1]),
+							[...accumulated].sort((one, two) => two[1] - one[1]),
 							askedQuestions,
 					  ),
 			initialUpdated,

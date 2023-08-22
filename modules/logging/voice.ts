@@ -52,12 +52,16 @@ export async function guildScheduledEventUpdate(
 						files: [
 							{
 								content: unifiedDiff(
-									`${change.old ?? ""}`.split("\n"),
-									`${change.new ?? ""}`.split("\n"),
+									`${
+										(change.old as APIGuildScheduledEvent["description"]) ?? ""
+									}`.split("\n"),
+									`${
+										(change.new as APIGuildScheduledEvent["description"]) ?? ""
+									}`.split("\n"),
 									{ lineterm: "" },
 								)
 									.join("\n")
-									.replace(/^--- \n\+\+\+ \n/, ""),
+									.replace(/^-{3} \n\+{3} \n/, ""),
 
 								extension: "diff",
 							},
@@ -134,7 +138,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		);
 	}
 
-	if (newState.suppress && newState.channel?.type === ChannelType.GuildStageVoice) return;
+	if (newState.suppress && newState.channel.type === ChannelType.GuildStageVoice) return;
 
 	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
 		await log(

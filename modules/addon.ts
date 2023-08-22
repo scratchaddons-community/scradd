@@ -3,7 +3,7 @@ import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
 import { manifest, addons, addonSearchOptions } from "../common/extension.js";
 import { defineCommand } from "strife.js";
-import { escapeMessage, generateTooltip } from "../util/markdown.js";
+import { escapeMessage, tooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
 defineCommand(
@@ -49,9 +49,9 @@ defineCommand(
 			: addon.tags.includes("easterEgg")
 			? "Easter Eggs"
 			: addon.tags.includes("theme")
-			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
+			? `Themes → ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
 			: addon.tags.includes("community")
-			? `Scratch Website Features -> ${
+			? `Scratch Website Features → ${
 					addon.tags.includes("profiles")
 						? "Profiles"
 						: addon.tags.includes("projectPage")
@@ -60,7 +60,7 @@ defineCommand(
 						? "Forums"
 						: "Others"
 			  }`
-			: `Scratch Editor Features -> ${
+			: `Scratch Editor Features → ${
 					addon.tags.includes("codeEditor")
 						? "Code Editor"
 						: addon.tags.includes("costumeEditor")
@@ -70,16 +70,14 @@ defineCommand(
 						: "Others"
 			  }`;
 
-		const credits = joinWithAnd(
-			addon.credits?.map((credit) => {
-				const note = ("note" in credit && credit.note) || "";
-				return credit.link
-					? hyperlink(credit.name, credit.link, note)
-					: interaction.channel
-					? generateTooltip(interaction.channel, credit.name, note)
-					: credit.name;
-			}) ?? [],
-		);
+		const credits = joinWithAnd(addon.credits ?? [], (credit) => {
+			const note = ("note" in credit && credit.note) || "";
+			return credit.link
+				? hyperlink(credit.name, credit.link, note)
+				: interaction.channel
+				? tooltip(credit.name, note)
+				: credit.name;
+		});
 
 		const lastUpdatedIn =
 			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;
@@ -95,7 +93,7 @@ defineCommand(
 							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 							: ""),
 					fields: [
-						...(credits
+						...(addon.credits
 							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
@@ -103,21 +101,18 @@ defineCommand(
 							inline: true,
 							name: "📝 Version added",
 
-							value: escapeMessage(
-								`v${addon.versionAdded}${
-									addon.latestUpdate && lastUpdatedIn
-										? ` (${
-												interaction.channel
-													? generateTooltip(
-															interaction.channel,
-															lastUpdatedIn,
-															addon.latestUpdate.temporaryNotice,
-													  )
-													: lastUpdatedIn
-										  })`
-										: ""
-								}`,
-							),
+							value: `v${addon.versionAdded}${
+								addon.latestUpdate && lastUpdatedIn
+									? ` (${
+											interaction.channel
+												? tooltip(
+														lastUpdatedIn,
+														addon.latestUpdate.temporaryNotice,
+												  )
+												: lastUpdatedIn
+									  })`
+									: ""
+							}`,
 						},
 					],
 

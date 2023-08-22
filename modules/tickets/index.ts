@@ -76,7 +76,7 @@ defineEvent("messageCreate", async (message) => {
 });
 defineButton("contactMods", async (interaction) => {
 	await interaction.reply({
-		content: `👍 Thanks for reaching out!`,
+		content: "👍 Thanks for reaching out!",
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -115,13 +115,12 @@ defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
 
 	await interaction.deferReply({ ephemeral: true });
-	const thread = id && (await contactMods(interaction, id));
-	if (thread)
-		await interaction.editReply(
-			`${
-				constants.emojis.statuses.yes
-			} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
-		);
+	const thread = await contactMods(interaction, id);
+	await interaction.editReply(
+		`${
+			constants.emojis.statuses.yes
+		} **Ticket opened!** Send the mods messages in ${thread.toString()}.`,
+	);
 });
 
 defineCommand(
@@ -189,6 +188,11 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 
 	if (newThread.archived) {
 		TICKETS_BY_MEMBER[memberId] = undefined;
+		if (!newThread.locked) {
+			await newThread.setArchived(false, "To lock it");
+			await newThread.setLocked(true, "Was closed");
+			await newThread.setArchived(true, "Was closed");
+		}
 	} else if (TICKETS_BY_MEMBER[memberId]) {
 		await newThread.setArchived(true, "Reopened while another ticket is already open");
 		await newThread.setLocked(true, "Reopened while another ticket is already open");

@@ -14,7 +14,7 @@ import warn from "../punishments/warn.js";
 import censor, { badWordRegexps, badWordsAllowed } from "./language.js";
 import { stripMarkdown } from "../../util/markdown.js";
 
-const WHITELISTED_INVITE_GUILDS = [
+const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
 	"751206349614088204", // Scratch Addons development
 	"837024174865776680", // TurboWarp
@@ -22,7 +22,7 @@ const WHITELISTED_INVITE_GUILDS = [
 	"461575285364752384", // 9th Tail Bot Hub
 	"898383289059016704", // Scratch Addons SMP Archive
 	"945340853189247016", // ScratchTools
-];
+]);
 
 export default async function automodMessage(message: Message) {
 	const allowBadWords = badWordsAllowed(message.channel);
@@ -59,17 +59,13 @@ export default async function automodMessage(message: Message) {
 		config.channels.info?.id !== parentChannel?.id &&
 		config.channels.advertise &&
 		config.channels.advertise.id !== baseChannel?.id &&
-		!message.author?.bot
+		!message.author.bot
 	) {
 		const invites = (
 			await Promise.all(
 				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
-					const invite = await client?.fetchInvite(code).catch(() => {});
-					return (
-						invite?.guild &&
-						!WHITELISTED_INVITE_GUILDS.includes(invite.guild.id) &&
-						code
-					);
+					const invite = await client.fetchInvite(code).catch(() => void 0);
+					return invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id) && code;
 				}),
 			)
 		).filter((toWarn): toWarn is string => Boolean(toWarn));
@@ -110,7 +106,7 @@ export default async function automodMessage(message: Message) {
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
-		].reduce<{ strikes: number; words: string[][] }>(
+		].reduce(
 			(bad, censored) =>
 				typeof censored === "boolean"
 					? bad
@@ -118,11 +114,13 @@ export default async function automodMessage(message: Message) {
 							strikes: bad.strikes + censored.strikes,
 							words: bad.words.map((words, index) => [
 								...words,
-								...(censored.words?.[index] ?? []),
+								...(censored.words[index] ?? []),
 							]),
 					  },
-			{ strikes: 0, words: Array(badWordRegexps.length).fill([]) },
+			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 		);
+		if (badWords.strikes) needsDelete = true;
+
 		const badEmbedWords = message.embeds
 			.flatMap((embed) => [
 				embed.description,
@@ -131,7 +129,7 @@ export default async function automodMessage(message: Message) {
 				embed.author?.name,
 				...embed.fields.flatMap((field) => [field.name, field.value]),
 			])
-			.reduce<{ strikes: number; words: string[][] }>(
+			.reduce(
 				(bad, current) => {
 					const censored = censor(current || "", 1);
 					return censored
@@ -139,47 +137,48 @@ export default async function automodMessage(message: Message) {
 								strikes: bad.strikes + censored.strikes,
 								words: bad.words.map((words, index) => [
 									...words,
-									...(censored.words?.[index] ?? []),
+									...(censored.words[index] ?? []),
 								]),
 						  }
 						: bad;
 				},
-				{ strikes: 0, words: Array(badWordRegexps.length).fill([]) },
+				{
+					strikes: 0,
+					words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]),
+				},
 			);
-
-		const hasBadWords = badWords.strikes > 0;
-		const hasBadEmbedWords = badEmbedWords.strikes > 0;
 
 		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
 
-		if (hasBadWords || needsDelete) {
-			if (!message.deletable)
-				log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
-
-			message.delete();
-			if (hasBadWords)
-				await message.channel.send(
-					`${constants.emojis.statuses.no} ${message.author.toString()}, ${
-						languageStrikes < 1 ? "that's not appropriate" : "language"
-					}!`,
-				);
-		} else if (hasBadEmbedWords) {
+		if (needsDelete) {
+			if (message.deletable) {
+				await message.delete();
+				if (badWords.strikes)
+					await message.channel.send(
+						`${constants.emojis.statuses.no} ${message.author.toString()}, ${
+							languageStrikes < 1 ? "that’s not appropriate" : "language"
+						}!`,
+					);
+			} else {
+				await log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
+			}
+		} else if (badEmbedWords.strikes) {
 			await message.suppressEmbeds();
 			await message.reply(
 				`${constants.emojis.statuses.no} ${message.author.toString()}, ${
-					languageStrikes < 1 ? "that's not appropriate" : "language"
+					languageStrikes < 1 ? "that’s not appropriate" : "language"
 				}!`,
 			);
 		}
 
-		if (hasBadWords || hasBadEmbedWords) {
+		if (badWords.strikes || badEmbedWords.strikes) {
 			await warn(
 				message.interaction?.user ?? message.author,
 				"Watch your language!",
 				languageStrikes,
 				`Sent message with words: ${[
-					...(badEmbedWords.words.flat() ?? []),
-					...(badWords.words.flat() ?? []),
+					...badEmbedWords.words.flat(),
+					...badWords.words.flat(),
 				].join(", ")}`,
 			);
 		}

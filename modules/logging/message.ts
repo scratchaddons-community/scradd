@@ -6,6 +6,7 @@ import {
 	type GuildTextBasedChannel,
 	type MessageReaction,
 	Colors,
+	type UserMention,
 } from "discord.js";
 import { diffString } from "json-diff";
 import config from "../../common/config.js";
@@ -17,9 +18,10 @@ import {
 	getMessageJSON,
 } from "../../util/discord.js";
 import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
+import { joinWithAnd } from "../../util/text.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
-export async function messageDelete(message: Message<boolean> | PartialMessage) {
+export async function messageDelete(message: Message | PartialMessage) {
 	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
 	const shush =
 		message.partial ||
@@ -43,7 +45,7 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 				...(message.reference
 					? [
 							{
-								label: "Referenced Message",
+								label: "Reference",
 								url: `https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
 							},
 					  ]
@@ -57,30 +59,45 @@ export async function messageDelete(message: Message<boolean> | PartialMessage) 
 	);
 }
 export async function messageDeleteBulk(
-	messages: Collection<string, Message<boolean> | PartialMessage>,
+	messages: Collection<string, Message | PartialMessage>,
 	channel: GuildTextBasedChannel,
 ) {
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
 			messages.reverse().map(async (message) => {
+				const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
+					message.embeds.length > 1 ? "s" : ""
+				}`;
+				const attachments = `${
+					message.attachments.size ? `${message.attachments.size} attachment` : ""
+				}${message.attachments.size > 1 ? "s" : ""}`;
+				const extremities =
+					message.embeds.length || message.attachments.size
+						? ` (${embeds}${embeds && attachments && ", "}${attachments})`
+						: "";
+
+				const author = message.author
+					? `${message.author.tag} - ${message.author.id}`
+					: "[unknown author]";
 				const content = !message.partial && (await messageToText(message));
 
-				return `${message.author?.tag ?? "[unknown]"}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? " (" : ""
-				}${message.embeds.length > 0 ? `${message.embeds.length} embeds` : ""}${
-					message.embeds.length > 0 && message.attachments.size > 0 ? ", " : ""
-				}${message.attachments.size > 0 ? `${message.attachments.size} attachments` : ""}${
-					message.embeds.length > 0 || message.attachments.size > 0 ? ")" : ""
-				}${content ? `:\n${content}` : ""}`;
+				return `${author}${extremities}${content ? `:\n${content}` : ""}`;
 			}),
 		)
 	).join("\n\n---\n\n");
 
+	const allAuthors = messages.map(({ author }) => author?.toString());
+	const unknownCount = allAuthors.filter((author) => !author).length;
+	const authors = [
+		...new Set(allAuthors.filter((author): author is UserMention => Boolean(author))),
+		...(unknownCount ? [`${unknownCount} unknown users`] : []),
+	];
+
 	await log(
-		`${LoggingEmojis.MessageDelete} ${
-			messages.size
-		} messages in ${channel.toString()} bulk deleted`,
+		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
+			authors,
+		)} in ${channel.toString()} bulk deleted`,
 		"messages",
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
@@ -89,7 +106,7 @@ export async function messageDeleteBulk(
 	);
 }
 export async function messageReactionRemoveAll(
-	partialMessage: Message<boolean> | PartialMessage,
+	partialMessage: Message | PartialMessage,
 	reactions: Collection<string, MessageReaction>,
 ) {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
@@ -98,7 +115,7 @@ export async function messageReactionRemoveAll(
 
 	await log(
 		`${
-			LoggingEmojis.Emoji
+			LoggingEmojis.Expressions
 		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
 			message.id
 		})`,
@@ -115,13 +132,13 @@ export async function messageReactionRemoveAll(
 				},
 			],
 
-			buttons: [{ label: "Context", url: message.url }],
+			buttons: [{ label: "Message", url: message.url }],
 		},
 	);
 }
 export async function messageUpdate(
-	oldMessage: Message<boolean> | PartialMessage,
-	partialMessage: Message<boolean> | PartialMessage,
+	oldMessage: Message | PartialMessage,
+	partialMessage: Message | PartialMessage,
 ) {
 	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
@@ -169,7 +186,7 @@ export async function messageUpdate(
 			{ lineterm: "" },
 		)
 			.join("\n")
-			.replace(/^--- \n\+\+\+ \n/, "");
+			.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
 		const extraDiff = diffString(
@@ -178,16 +195,18 @@ export async function messageUpdate(
 			{ color: false },
 		);
 		if (extraDiff) {
-			const updatedFiles = newMessage.attachments.map((attachment) => attachment.url);
+			const updatedFiles = new Set(
+				newMessage.attachments.map((attachment) => attachment.url),
+			);
 			files.push(
 				{ content: extraDiff, extension: "diff" },
 				...oldMessage.attachments
 					.map((attachment) => attachment.url)
-					.filter((attachment) => !updatedFiles.includes(attachment)),
+					.filter((attachment) => !updatedFiles.has(attachment)),
 			);
 		}
 
-		if (files.length > 0) {
+		if (files.length) {
 			await log(
 				`${
 					LoggingEmojis.MessageEdit

@@ -28,7 +28,7 @@ export const addons = (
 
 export const addonSearchOptions = {
 	keys: [
-		(item: typeof addons[number]) => item.id.replace(/-/g, " "),
+		(item: typeof addons[number]) => item.id.replaceAll("-", " "),
 		"id",
 		"name",
 		"description",

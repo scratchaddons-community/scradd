@@ -17,14 +17,14 @@ export default async function updateBoard(message: Message) {
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
 	const boardMessage = boardMessageId
-		? await config.channels.board.messages.fetch(boardMessageId).catch(() => {})
+		? await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0)
 		: undefined;
 
 	if (boardMessage) {
 		if (count < Math.floor(minReactions * 0.8)) {
 			await boardMessage.delete();
 		} else {
-			const content = boardMessage.content.replace(/\d+/, String(count));
+			const content = boardMessage.content.replace(/\d+/, count.toString());
 			await boardMessage.edit(content);
 		}
 	} else if (count >= minReactions) {
@@ -71,7 +71,7 @@ export default async function updateBoard(message: Message) {
 		];
 	}
 
-	const top = Array.from(boardDatabase.data).sort((one, two) => two.reactions - one.reactions);
+	const top = [...boardDatabase.data].sort((one, two) => two.reactions - one.reactions);
 	top.splice(
 		top.findIndex(
 			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,
@@ -80,7 +80,8 @@ export default async function updateBoard(message: Message) {
 	const topIds = await Promise.all(
 		top.map(async ({ onBoard }) => {
 			const toPin =
-				onBoard && (await config.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+				onBoard &&
+				(await config.channels.board?.messages.fetch(onBoard)?.catch(() => void 0));
 
 			if (toPin) await toPin.pin("Is a top-reacted message");
 

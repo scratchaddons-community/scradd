@@ -20,7 +20,7 @@ export default async function queueReminders(): Promise<undefined | NodeJS.Timeo
 	const interval = getNextInterval();
 	if (interval === undefined) return;
 
-	if (interval < 30_000) {
+	if (interval < 100) {
 		return await sendReminders();
 	} else {
 		nextReminder = setTimeout(sendReminders, interval);
@@ -35,16 +35,16 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		toSend: Reminder[];
 		toPostpone: Reminder[];
 	}>(
-		(acc, reminder) => {
-			acc[reminder.date - Date.now() < 60_000 ? "toSend" : "toPostpone"].push(reminder);
-			return acc;
+		(accumulator, reminder) => {
+			accumulator[reminder.date - Date.now() < 500 ? "toSend" : "toPostpone"].push(reminder);
+			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
 	);
 	remindersDatabase.data = toPostpone;
 
 	const promises = toSend.map(async (reminder) => {
-		const channel = await client.channels.fetch(reminder.channel).catch(() => {});
+		const channel = await client.channels.fetch(reminder.channel).catch(() => void 0);
 		if (reminder.user === client.user.id) {
 			switch (reminder.id) {
 				case SpecialReminders.Weekly: {
@@ -98,10 +98,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
 					).then(
 						async (response) =>
-							await response?.json<{ count: number; _chromeCountDate: string }>(),
+							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
 
-					return await channel?.setName(
+					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
@@ -118,7 +118,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						...remindersDatabase.data,
 						{
 							channel: BUMPING_THREAD,
-							date: Date.now() + 1800000,
+							date: Date.now() + 1_800_000,
 							reminder: undefined,
 							id: SpecialReminders.Bump,
 							user: client.user.id,
@@ -133,7 +133,6 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				case SpecialReminders.RebootBot: {
 					await cleanDatabaseListeners();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
-					// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
 					process.exit(1);
 				}
 				case SpecialReminders.CloseThread: {
@@ -145,10 +144,11 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					return;
 				}
 				case SpecialReminders.Unban: {
-					await config.guild.bans.remove(
-						String(reminder.reminder),
-						"Unbanned after set time period",
-					);
+					if (typeof reminder.reminder == "string")
+						await config.guild.bans.remove(
+							reminder.reminder,
+							"Unbanned after set time period",
+						);
 					return;
 				}
 				case SpecialReminders.BackupDatabases: {
@@ -183,7 +183,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				allowedMentions: { users: [reminder.user] },
 				flags: silent ? MessageFlags.SuppressNotifications : undefined,
 			})
-			.catch(() => {});
+			.catch(() => void 0);
 	});
 	await Promise.all(promises);
 
@@ -195,3 +195,5 @@ function getNextInterval() {
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }
+
+await queueReminders();

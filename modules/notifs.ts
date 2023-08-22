@@ -10,7 +10,7 @@ defineEvent("messageCreate", async (message) => {
 	if (message.channel.id === config.channels.updates?.id) {
 		await message.startThread({
 			name: truncateText(
-				stripMarkdown(message.cleanContent)?.split("\n")[0] || "New update!",
+				stripMarkdown(message.cleanContent).split("\n")[0] || "New update!",
 				50,
 			),
 
@@ -23,7 +23,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	const greetings = [
-		`Everybody please welcome ${member.toString()} to ${config.guild.name}; they’re our ${nth(
+		`Everybody please welcome ${member} to ${config.guild.name}; they’re our ${nth(
 			config.guild.memberCount,
 		)} member!`,
 		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
@@ -45,7 +45,9 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${constants.emojis.misc.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}${
-			String(config.guild.memberCount).includes("87") ? " (WAS THAT THE BITE OF 87?!?!?)" : ""
+			config.guild.memberCount.toString().includes("87")
+				? " (WAS THAT THE BITE OF 87?!?!?)"
+				: ""
 		}`,
 	);
 });
@@ -54,9 +56,9 @@ defineEvent("guildMemberRemove", async (member) => {
 
 	const auditLogs = await config.guild
 		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberKick })
-		.catch(() => {});
+		.catch(() => void 0);
 	const kicked = auditLogs?.entries.first()?.target?.id === member.id;
-	const banned = await config.guild.bans.fetch(member).catch(() => {});
+	const banned = await config.guild.bans.fetch(member).catch(() => void 0);
 
 	const byes =
 		banned || kicked
@@ -87,11 +89,11 @@ defineEvent("guildMemberRemove", async (member) => {
 defineEvent("guildMemberAdd", async (member) => {
 	await config.channels.info?.setName(
 		`Info - ${(
-			config.guild.memberCount - (config.guild.memberCount > 1_005 ? 5 : 0)
+			config.guild.memberCount - (config.guild.memberCount > 1005 ? 5 : 0)
 		).toLocaleString("en-us", {
 			compactDisplay: "short",
 			maximumFractionDigits: 2,
-			minimumFractionDigits: config.guild.memberCount > 1_000 ? 2 : 0,
+			minimumFractionDigits: config.guild.memberCount > 1000 ? 2 : 0,
 			notation: "compact",
 		})} members`,
 		`${member.user.tag} joined the server`,

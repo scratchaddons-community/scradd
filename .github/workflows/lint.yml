@@ -2,6 +2,7 @@ name: Lint
 on:
     push:
     workflow_dispatch:
+    pull_request_target:
     schedule:
         - cron: 00 12 * * * # 1 hour before Dependabot
 
@@ -10,7 +11,7 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: github.ref_name == 'main'
+        if: github.ref_name == 'main' && github.repository_owner == 'scratchaddons-community'
         runs-on: ubuntu-20.04
 
         steps:
@@ -40,8 +41,9 @@ jobs:
 
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') != true
+        if: ${{ always() }} && startsWith(github.ref_name, 'dependabot/') != true
         runs-on: ubuntu-20.04
+        needs: bump
 
         steps:
             - name: Checkout
@@ -50,7 +52,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.1
               with:
                   node-version: "18.12.1"
                   cache: npm
@@ -86,6 +88,28 @@ jobs:
             - name: Analyze
               uses: github/codeql-action/analyze@v2
 
+    lint:
+        name: Lint
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3.5.3
+              with:
+                  ref: ${{ github.head_ref }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "18.12.1"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+
     build:
         name: Build
         runs-on: ubuntu-20.04
@@ -97,7 +121,7 @@ jobs:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.1
               with:
                   node-version: "18.12.1"
                   cache: npm

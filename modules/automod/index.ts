@@ -33,7 +33,7 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 			await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That's not appropriate" : "Language"
+					censored.strikes < 1 ? "That’s not appropriate" : "Language"
 				}!`,
 			});
 			await warn(
@@ -47,27 +47,6 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	}
 
 	return true;
-
-	function censorOptions(options: readonly CommandInteractionOption[]): {
-		strikes: number;
-		words: string[];
-	} {
-		let strikes = 0;
-		const words: string[] = [];
-
-		for (const option of options) {
-			const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
-			const censoredOptions = (option.options && censorOptions(option.options)) || undefined;
-
-			strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
-			words.push(
-				...(censoredValue?.words.flat() ?? []),
-				...(censoredOptions?.words.flat() ?? []),
-			);
-		}
-
-		return { strikes, words };
-	}
 });
 defineEvent.pre("messageCreate", async (message) => {
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
@@ -127,6 +106,14 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
 	await changeNickname(member);
 });
+defineEvent.pre("userUpdate", async (_, user) => {
+	const member = await config.guild.members.fetch(user).catch(() => void 0);
+	if (member) {
+		await changeNickname(member);
+		return true;
+	}
+	return false;
+});
 defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== config.guild.id) return;
 
@@ -135,10 +122,14 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 			? newPresence.activities[0].state
 			: newPresence.activities[0]?.name;
 	const censored = status && censor(status);
-	if (censored && config.roles.mod && newPresence.member?.roles.resolve(config.roles.mod.id)) {
+	if (
+		censored &&
+		config.roles.staff &&
+		newPresence.member?.roles.resolve(config.roles.staff.id)
+	) {
 		await warn(
 			newPresence.member,
-			"Watch your language!",
+			"As a representative of the server, staff members are not allowed to have bad word in their statuses",
 			censored.strikes,
 			"Set status to " + status,
 		);
@@ -169,11 +160,11 @@ defineCommand(
 			ephemeral: true,
 
 			content: words
-				? `⚠️ **${words.length} bad word${words.length > 0 ? "s" : ""} detected**!\n${
-						config.roles.mod &&
+				? `⚠️ **${words.length} bad word${words.length ? "s" : ""} detected**!\n${
+						config.roles.staff &&
 						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(config.roles.mod.id)
-							: interaction.member.roles.includes(config.roles.mod.id))
+							? interaction.member.roles.resolve(config.roles.staff.id)
+							: interaction.member.roles.includes(config.roles.staff.id))
 							? `That text gives **${Math.trunc(result.strikes)} strike${
 									result.strikes === 1 ? "" : "s"
 							  }**.\n\n`
@@ -186,3 +177,24 @@ defineCommand(
 		});
 	},
 );
+
+function censorOptions(options: readonly CommandInteractionOption[]): {
+	strikes: number;
+	words: string[];
+} {
+	let strikes = 0;
+	const words: string[] = [];
+
+	for (const option of options) {
+		const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
+		const censoredOptions = option.options && censorOptions(option.options);
+
+		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
+		words.push(
+			...(censoredValue?.words.flat() ?? []),
+			...(censoredOptions?.words.flat() ?? []),
+		);
+	}
+
+	return { strikes, words };
+}

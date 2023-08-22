@@ -3,7 +3,6 @@ import Database from "../../common/database.js";
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
-import queueReminders from "./send.js";
 
 export enum SpecialReminders {
 	Weekly,
@@ -35,7 +34,7 @@ export function getUserReminders(id: string) {
 		.sort((one, two) => one.date - two.date);
 }
 
-if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.Weekly)) {
+if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Weekly)) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
@@ -48,7 +47,7 @@ if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.
 	];
 }
 
-if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.UpdateSACategory)) {
+if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.UpdateSACategory)) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
@@ -62,7 +61,7 @@ if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.
 }
 
 if (
-	!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.Bump) &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Bump) &&
 	process.env.NODE_ENV === "production"
 ) {
 	remindersDatabase.data = [
@@ -77,7 +76,7 @@ if (
 	];
 }
 
-if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.BackupDatabases)) {
+if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases)) {
 	const { threads } = (await config.channels.mod?.threads.fetch()) ?? {};
 	const channel =
 		threads?.find(({ name }) => name === "Scradd Database Backups") ||
@@ -99,4 +98,3 @@ if (!remindersDatabase.data.find((reminder) => reminder.id === SpecialReminders.
 		},
 	];
 }
-await queueReminders();

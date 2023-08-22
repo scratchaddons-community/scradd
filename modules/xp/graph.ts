@@ -38,12 +38,11 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 			{
 				id: "customCanvasBackgroundColor",
 				beforeDraw(chart) {
-					const { ctx } = chart;
-					ctx.save();
-					ctx.globalCompositeOperation = "destination-over";
-					ctx.fillStyle = "white";
-					ctx.fillRect(0, 0, chart.width, chart.height);
-					ctx.restore();
+					chart.ctx.save();
+					chart.ctx.globalCompositeOperation = "destination-over";
+					chart.ctx.fillStyle = "white";
+					chart.ctx.fillRect(0, 0, chart.width, chart.height);
+					chart.ctx.restore();
 				},
 			},
 		],
@@ -53,10 +52,13 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				.map((user) => {
 					const data = recentXp
 						.filter((gain) => gain.time < maxDate && gain.user === user.id)
-						.reduce<{ x: number; y: number }[]>((acc, xp) => {
-							const previous = acc.at(-1) ?? { y: 0, x: recentXp[0]?.time ?? 0 };
+						.reduce<{ x: number; y: number }[]>((accumulator, xp) => {
+							const previous = accumulator.at(-1) ?? {
+								y: 0,
+								x: recentXp[0]?.time ?? 0,
+							};
 							return [
-								...acc,
+								...accumulator,
 								...Array.from(
 									{ length: Math.floor((xp.time - previous.x) / 3_600_000) },
 									(_, index) => ({
@@ -64,7 +66,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 										x: previous.x + 3_600_000 * index,
 									}),
 								),
-								{ x: xp.time, y: xp.xp + previous?.y },
+								{ x: xp.time, y: xp.xp + previous.y },
 							];
 						}, []);
 					return {

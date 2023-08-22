@@ -26,7 +26,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
 			baseChannel
-				?.permissionsFor(config.roles.mod || config.guild.id)
+				.permissionsFor(config.roles.staff || config.guild.id)
 				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }
@@ -120,23 +120,23 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 }
 
 export enum LoggingEmojis {
-	Member = "👥",
-	UserUpdate = "👤",
 	SettingChange = "📋",
-	ServerUpdate = "✨",
-	Invite = "👋",
-	Role = "🏷",
-	MessageDelete = "🗑",
-	MessageUpdate = "🌐",
-	MessageEdit = "📝",
-	Voice = "🔊",
 	Channel = "🗄",
 	Punishment = "🔨",
-	Event = "🗓",
-	Bot = "🤖",
-	Emoji = "😳",
-	Thread = "📂",
+	Role = "🏷",
 	Integration = "🖇",
+	Thread = "📂",
+	ServerUpdate = "✨",
+	Voice = "🔊",
+	Expressions = "😳",
+	User = "👤",
+	Event = "🗓",
+	Invite = "👋",
+	MessageUpdate = "🌐",
+	MessageEdit = "📝",
+	Bot = "🤖",
+	MessageDelete = "🗑",
+	Member = "👥",
 }
 
 export const LoggingErrorEmoji = constants.emojis.statuses.no;

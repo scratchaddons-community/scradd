@@ -13,8 +13,6 @@ import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";
 
-if (!config.channels.board) throw new ReferenceError("Could not find board channel");
-const { board } = config.channels;
 export const BOARD_EMOJI = "🥔",
 	REACTIONS_NAME = "Potatoes";
 
@@ -40,15 +38,7 @@ await boardDatabase.init();
  * @returns The reaction count.
  */
 export function boardReactionCount(channel?: TextBasedChannel): number {
-	const COUNTS = {
-		scradd: 2,
-		admins: 2,
-		mods: 3,
-		misc: 4,
-		default: 6,
-		memes: 8,
-		info: 12,
-	};
+	const COUNTS = { scradd: 2, admins: 2, mods: 3, misc: 4, default: 6, memes: 8, info: 12 };
 
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
@@ -121,7 +111,7 @@ export async function generateBoardMessage(
 					components: [
 						...(extraButtons.pre || []),
 						{
-							label: "Context",
+							label: "Message",
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							url: message.url,
@@ -141,7 +131,7 @@ export async function generateBoardMessage(
 				{
 					color:
 						message.type === MessageType.AutoModerationAction
-							? 0x99a1f2
+							? 0x99_a1_f2
 							: message.member?.displayColor,
 					description: censored ? censored.censored : description,
 
@@ -162,6 +152,8 @@ export async function generateBoardMessage(
 					},
 
 					timestamp: message.createdAt.toISOString(),
+
+					footer: message.editedAt ? { text: "Edited" } : undefined,
 				},
 				...embeds,
 			],
@@ -172,10 +164,12 @@ export async function generateBoardMessage(
 
 	if (info instanceof Message) return await messageToBoardData(info);
 
-	const onBoard = info.onBoard && (await board.messages.fetch(info.onBoard).catch(() => {}));
+	const onBoard =
+		info.onBoard &&
+		(await config.channels.board?.messages.fetch(info.onBoard).catch(() => void 0));
 
 	if (onBoard) {
-		const linkButton = onBoard.components?.[0]?.components?.[0];
+		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
 				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]
@@ -184,8 +178,9 @@ export async function generateBoardMessage(
 		return {
 			allowedMentions: { users: [] },
 
-			components:
-				buttons.length > 0 ? [{ type: ComponentType.ActionRow, components: buttons }] : [],
+			components: buttons.length
+				? [{ type: ComponentType.ActionRow, components: buttons }]
+				: [],
 
 			content: onBoard.content,
 			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),
@@ -193,11 +188,11 @@ export async function generateBoardMessage(
 		};
 	}
 
-	const channel = await config.guild.channels.fetch(info.channel).catch(() => {});
+	const channel = await config.guild.channels.fetch(info.channel).catch(() => void 0);
 
 	if (!channel?.isTextBased()) return;
 
-	const message = await channel.messages.fetch(info.source).catch(() => {});
+	const message = await channel.messages.fetch(info.source).catch(() => void 0);
 
 	if (!message) return;
 

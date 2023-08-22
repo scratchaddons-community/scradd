@@ -26,7 +26,7 @@ const deletedPings = new Set<Snowflake>();
 const instructionsButton = {
 	type: ComponentType.Button,
 	label: "Instructions",
-	customId: `_showMemoryInstructions`,
+	customId: "_showMemoryInstructions",
 	style: ButtonStyle.Secondary,
 } as const;
 
@@ -38,12 +38,7 @@ export default async function memoryMatch(
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [instructionsButton],
-				},
-			],
+			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
 
@@ -80,7 +75,7 @@ export default async function memoryMatch(
 		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
-						!bonusTurns ? "no bonus turns" : ""
+						bonusTurns ? "" : "no bonus turns"
 				  })`
 				: ""
 		} by ${interaction.user.toString()}!** Do you accept?${
@@ -121,9 +116,10 @@ export default async function memoryMatch(
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
-				if (isUser || isOtherUser)
+				if (isUser || isOtherUser) {
 					await message.edit({ components: disableComponents(message.components) });
-				return;
+					collector.stop();
+				}
 			}
 
 			if (!buttonInteraction.customId.startsWith("confirm-")) return;
@@ -216,7 +212,8 @@ async function playGame(
 			}
 			totalTurns++;
 
-			const selected = [...shown].map(
+			const selected = Array.from(
+				shown,
 				([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
 			);
 
@@ -229,7 +226,8 @@ async function playGame(
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
-					return await endGame();
+					await endGame();
+					return;
 				}
 			}
 			if (!match || !bonusTurns) {
@@ -263,14 +261,14 @@ async function playGame(
 	CURRENTLY_PLAYING.set(users[0].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[0].toString()} ended the game`, users[0]);
 		},
 	});
 	CURRENTLY_PLAYING.set(users[1].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[1].toString()} ended the game`, users[1]);
 		},
 	});
@@ -297,13 +295,18 @@ async function playGame(
 					components: [
 						{
 							type: ComponentType.ActionRow,
-							components: [gameLinkButton, endGameButton],
+							components: [gameLinkButton, endGameButton, instructionsButton],
 						},
 					],
 			  })
 			: message.reply({
 					content,
-					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [endGameButton, instructionsButton],
+						},
+					],
 			  }));
 
 		const timeout = turn
@@ -329,19 +332,19 @@ async function playGame(
 			}`,
 
 			components: chunks.map((chunk, rowIndex) => ({
-				type: ComponentType.ActionRow,
+				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown].concat(...scores).includes(id);
+					const discovered = [...shown, ...scores].includes(id);
 
 					return {
 						type: ComponentType.Button,
 						emoji: discovered ? emoji : EMPTY_TILE,
 						customId: id,
 						style: ButtonStyle[
-							scores[0]?.includes(id)
+							scores[0].includes(id)
 								? "Primary"
-								: scores[1]?.includes(id)
+								: scores[1].includes(id)
 								? "Success"
 								: "Secondary"
 						],
@@ -349,8 +352,6 @@ async function playGame(
 					} as const;
 				}),
 			})),
-
-			allowedMentions: { users: [] },
 		};
 	}
 
@@ -440,25 +441,23 @@ async function setupGame(difficulty: 2 | 4) {
 		].map((emoji): [string, APIMessageComponentEmoji] =>
 			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],
 		),
+		// eslint-disable-next-line unicorn/prefer-spread
 	).concat(
 		(await config.guild.emojis.fetch())
 			.filter((emoji) => emoji.available)
-			.mapValues((emoji) => ({
-				id: emoji.id,
-				name: emoji.name ?? undefined,
-				animated: emoji.animated || undefined,
-			})),
+			.mapValues((emoji) => ({ animated: emoji.animated ?? false, id: emoji.id })),
 	);
 	const selected = allEmojis.random(24 / difficulty);
-	const emojis = selected
-		.concat(...Array<APIMessageComponentEmoji[]>(difficulty - 1).fill(selected))
+	const emojis = Array.from<typeof selected>({ length: difficulty })
+		.fill(selected)
+		.flat()
 		.sort(() => Math.random() - 0.5);
 
 	const chunks = [];
 	while (emojis.length) {
 		chunks.push(
 			chunks.length === 2
-				? emojis.splice(0, 2).concat([{ name: EMPTY_TILE }], emojis.splice(0, 2))
+				? [...emojis.splice(0, 2), { name: EMPTY_TILE }, ...emojis.splice(0, 2)]
 				: emojis.splice(0, 5),
 		);
 	}
@@ -466,7 +465,7 @@ async function setupGame(difficulty: 2 | 4) {
 	return chunks;
 }
 
-export async function messageDelete(message: Message | PartialMessage) {
+export function messageDelete(message: Message | PartialMessage) {
 	return !deletedPings.delete(message.id);
 }
 
@@ -477,16 +476,16 @@ export function showMemoryInstructions(interaction: RepliableInteraction) {
 			"## Memory Match Instructions\n" +
 			"### The objective is to find matching emoji pairs by clicking on tiles and remembering which emoji is where.\n" +
 			`The first player is determined randomly. Since they get an advantage by going first, the second player gets the middle tile as a bonus point. The two players are assigned colors (${constants.emojis.misc.blue} ${constants.emojis.misc.green}), which are shown above the board.\n` +
-			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you're sure of a match, click tiles you haven't seen before to expand your knowledge of the board.*\n" +
+			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you’re sure of a match, click tiles you haven’t seen before to expand your knowledge of the board.*\n" +
 			"If you find matching emojis, those two tiles will not be flipped back over, but change to your color instead. You will also receive two points and a bonus turn (unless bonus turns are disabled via `bonus-turns`).\n" +
-			`If the two flipped tiles do not match, it will be the other player's turn. The tiles will be flipped back over once the other player starts their turn or after ${
+			`If the two flipped tiles do not match, it will be the other player’s turn. The tiles will be flipped back over once the other player starts their turn or after ${
 				GAME_COLLECTOR_TIME / 60 / 1000
 			} seconds.\n` +
-			"*By default, there are only two of each emoji. However, in easy mode (`easy-mode`), there are four of each, which means there's two matches for each emoji.*\n" +
+			"*By default, there are only two of each emoji. However, in easy mode (`easy-mode`), there are four of each, which means there’s two matches for each emoji.*\n" +
 			"Continue taking turns until all the tiles are flipped over. The player with the highest number of points at the end wins the game.\n" +
-			`If a player ends the game, either by pressing the "End Game" button or not taking their turn within ${
+			`If a player ends the game, either by pressing the “End Game” button or not taking their turn within ${
 				GAME_COLLECTOR_TIME / 60 / 1000
 			} minutes, they lose 2 points.\n` +
-			"**Enjoy playing Memory Match and have fun testing your and your opponents' memory skills!**",
+			"**Enjoy playing Memory Match and have fun testing your and your opponents’ memory skills!**",
 	});
 }

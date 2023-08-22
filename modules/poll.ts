@@ -12,7 +12,7 @@ import { defineCommand, defineEvent, client, defineModal } from "strife.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
-const bannedReactions = ["🥔"];
+const bannedReactions = new Set("🥔");
 
 defineCommand(
 	{
@@ -41,17 +41,20 @@ defineCommand(
 	async (interaction) => {
 		const optionCount = interaction.options.getInteger("options") ?? 2;
 		const components = [];
-		for (let i = 0; i < optionCount; i++)
+		for (let index = 0; index < optionCount; index++)
 			components.push({
 				type: ComponentType.ActionRow,
 				components: [
 					{
 						type: ComponentType.TextInput,
-						customId: `${i}`,
-						label: `Option #${i + 1}`,
+						customId: `${index}`,
+						label: `Option #${index + 1}`,
 						required: true,
 						style: TextInputStyle.Short,
-						value: optionCount <= DEFAULT_VALUES.length ? DEFAULT_VALUES[i] : undefined,
+						value:
+							optionCount <= DEFAULT_VALUES.length
+								? DEFAULT_VALUES[index]
+								: undefined,
 					},
 				],
 			} satisfies ActionRowData<ModalActionRowComponentData>);
@@ -69,14 +72,14 @@ defineCommand(
 
 defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 	const question = characters.join("");
-	const regex = new RegExp(`^${twemojiRegexp.default.source}`);
+	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
 
 	const { customReactions, options } = interaction.fields.fields.reduce<{
 		customReactions: (string | undefined)[];
 		options: string[];
 	}>(
 		({ customReactions, options }, field) => {
-			const emoji = field.value.match(regex)?.[0];
+			const emoji = field.value.match(regexp)?.[0];
 			return {
 				options: [
 					...options,
@@ -84,7 +87,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 				],
 				customReactions: [
 					...customReactions,
-					!emoji || customReactions.includes(emoji) || bannedReactions.includes(emoji)
+					!emoji || customReactions.includes(emoji) || bannedReactions.has(emoji)
 						? undefined
 						: emoji,
 				],
@@ -124,7 +127,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		message.embeds[0]?.footer?.text &&
 		user.id !== client.user.id
 	) {
-		const emojis = message.embeds[0].description?.match(/^[^\s]+/gm);
+		const emojis = message.embeds[0].description?.match(/^\S+/gm);
 		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
 			const promises = message.reactions.valueOf().map(async (otherReaction) => {

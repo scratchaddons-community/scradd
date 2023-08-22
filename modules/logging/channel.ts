@@ -14,10 +14,9 @@ import {
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
-	type AnyThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";
+import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 
 export async function channelCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ChannelCreate>) {
 	if (!(entry.target instanceof Base)) return;
@@ -87,23 +86,6 @@ export async function channelOverwriteDelete(
 		"channels",
 	);
 }
-export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadCreate>) {
-	if (entry.target.type !== ChannelType.PrivateThread) return;
-	await log(
-		`${
-			LoggingEmojis.Thread
-		} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
-		"channels",
-	);
-}
-export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadDelete>) {
-	await log(
-		`${LoggingEmojis.Thread} Thread #${entry.target.name} ${
-			entry.target.parent ? `in ${entry.target.parent.toString()} ` : ""
-		}(ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
-		"channels",
-	);
-}
 
 export async function channelUpdate(
 	oldChannel: DMChannel | NonThreadGuildBasedChannel,
@@ -112,8 +94,8 @@ export async function channelUpdate(
 	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
 		return;
 
-	const removedActive = !!newChannel.flags?.has("ActiveChannelsRemoved");
-	if (!!oldChannel.flags?.has("ActiveChannelsRemoved") !== removedActive) {
+	const removedActive = newChannel.flags.has("ActiveChannelsRemoved");
+	if (oldChannel.flags.has("ActiveChannelsRemoved") !== removedActive) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -121,8 +103,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const clyde = !!newChannel.flags?.has("ClydeAI");
-	if (!!oldChannel.flags?.has("ClydeAI") !== clyde) {
+	const clyde = newChannel.flags.has("ClydeAI");
+	if (oldChannel.flags.has("ClydeAI") !== clyde) {
 		await log(
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
@@ -130,8 +112,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const removedFeed = !!newChannel.flags?.has("GuildFeedRemoved");
-	if (!!oldChannel.flags?.has("GuildFeedRemoved") !== removedFeed) {
+	const removedFeed = newChannel.flags.has("GuildFeedRemoved");
+	if (oldChannel.flags.has("GuildFeedRemoved") !== removedFeed) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
@@ -139,8 +121,8 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const resource = !!newChannel.flags?.has("IsGuildResourceChannel");
-	if (!!oldChannel.flags?.has("IsGuildResourceChannel") !== resource) {
+	const resource = newChannel.flags.has("IsGuildResourceChannel");
+	if (oldChannel.flags.has("IsGuildResourceChannel") !== resource) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				resource ? "" : "un"
@@ -148,17 +130,17 @@ export async function channelUpdate(
 			"channels",
 		);
 	}
-	const spam = !!newChannel.flags?.has("IsSpam");
-	if (!!oldChannel.flags?.has("IsSpam") !== spam) {
+	const spam = newChannel.flags.has("IsSpam");
+	if (oldChannel.flags.has("IsSpam") !== spam) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${spam ? "" : "un"}marked as spam`,
 			"channels",
 		);
 	}
-	const tags = !!newChannel.flags?.has("RequireTag");
-	if (!!oldChannel.flags?.has("RequireTag") !== tags) {
+	const tags = newChannel.flags.has("RequireTag");
+	if (oldChannel.flags.has("RequireTag") !== tags) {
 		await log(
-			`${LoggingEmojis.Channel} "Require people to select tags when posting" ${
+			`${LoggingEmojis.Channel} “Require people to select tags when posting” ${
 				tags ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
 			"channels",
@@ -236,7 +218,7 @@ export async function channelUpdate(
 		if (oldChannel.userLimit !== newChannel.userLimit)
 			await log(
 				`${LoggingEmojis.Channel} ${newChannel.toString()}’s user limit set to ${
-					newChannel.userLimit ?? "∞"
+					newChannel.userLimit || "∞"
 				} users`,
 				"channels",
 			);
@@ -277,7 +259,7 @@ export async function channelUpdate(
 						{ lineterm: "" },
 					)
 						.join("\n")
-						.replace(/^--- \n\+\+\+ \n/, ""),
+						.replace(/^-{3} \n\+{3} \n/, ""),
 
 					extension: "diff",
 				},
@@ -333,89 +315,4 @@ export async function channelUpdate(
 			} View`,
 			"channels",
 		);
-}
-export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyThreadChannel) {
-	if (!shouldLog(newThread)) return;
-
-	if (oldThread.archived !== newThread.archived)
-		await log(
-			`${LoggingEmojis.Thread} ${
-				newThread.archived ? `${newThread.url} closed` : `${newThread.toString()} opened`
-			}`,
-			"channels",
-		);
-
-	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
-		await log(
-			`${LoggingEmojis.Thread} ${newThread.toString()}’s hide after inactivity set to ${
-				{
-					[ThreadAutoArchiveDuration.OneHour]: "1 Hour",
-					[ThreadAutoArchiveDuration.OneDay]: "24 Hours",
-					[ThreadAutoArchiveDuration.ThreeDays]: "3 Days",
-					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
-				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay]
-			}`,
-			"channels",
-		);
-	}
-	const removedActive = !!newThread.flags?.has("ActiveChannelsRemoved");
-	if (!!oldThread.flags?.has("ActiveChannelsRemoved") !== removedActive) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} Active Channels`,
-			"channels",
-		);
-	}
-	const clyde = !!newThread.flags?.has("ClydeAI");
-	if (!!oldThread.flags?.has("ClydeAI") !== clyde) {
-		await log(
-			`${LoggingEmojis.Integration} ClydeAI ${
-				clyde ? "enabled" : "disabled"
-			} in ${newThread.toString()}`,
-			"channels",
-		);
-	}
-	const removedFeed = !!newThread.flags?.has("GuildFeedRemoved");
-	if (!!oldThread.flags?.has("GuildFeedRemoved") !== removedFeed) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} the server feed`,
-			"channels",
-		);
-	}
-	const spam = !!newThread.flags?.has("IsSpam");
-	if (!!oldThread.flags?.has("IsSpam") !== spam) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${spam ? "" : "un"}marked as spam`,
-			"channels",
-		);
-	}
-	const pinned = !!newThread.flags?.has("Pinned");
-	if (!!oldThread.flags?.has("Pinned") !== pinned) {
-		await log(
-			`${LoggingEmojis.Thread} ${newThread.toString()} ${
-				newThread.flags.has("Pinned") ? "" : "un"
-			}pinned in ${newThread.parent?.toString()}!`,
-			"messages",
-		);
-	}
-
-	if (oldThread.locked !== newThread.locked)
-		await log(
-			`${LoggingEmojis.Thread} ${newThread.toString()} ${
-				newThread.locked ? "locked" : "unlocked"
-			}`,
-			"channels",
-		);
-
-	if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
-		await log(
-			`${LoggingEmojis.Thread} ${newThread.toString()}’s slowmode was set to ${
-				newThread.rateLimitPerUser
-			} second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
-			"channels",
-		);
-	}
 }

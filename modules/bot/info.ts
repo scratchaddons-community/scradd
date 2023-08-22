@@ -15,14 +15,14 @@ import {
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
 import pkg from "../../package.json" assert { type: "json" };
-import { autoreactions, dadEasterEggCount } from "../../secrets.js";
+import { autoreactions, dadEasterEggCount } from "../secrets/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { getSettings } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => {});
+const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => void 0);
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
@@ -58,7 +58,8 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 				embeds: [
 					{
 						title: "Status",
-						description: `I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).`,
+						description:
+							"I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
 
 						fields: [
 							{
@@ -96,10 +97,10 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 							{
 								name: "RAM usage",
 								value:
-									(process.memoryUsage.rss() / 1000000).toLocaleString("en-us", {
-										maximumFractionDigits: 2,
-										minimumFractionDigits: 2,
-									}) + " MB",
+									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
+										"en-us",
+										{ maximumFractionDigits: 2, minimumFractionDigits: 2 },
+									) + " MB",
 								inline: true,
 							},
 						],
@@ -128,7 +129,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 											style: ButtonStyle.Primary,
 											type: ComponentType.Button,
 											label: "Sync",
-											customId: "_syncConstants",
+											customId: "_syncConfig",
 										},
 									],
 								},
@@ -203,7 +204,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			"server",
 		);
 	} else
-		interaction.reply({
+		await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You don’t have permission to sync my configuration!`,
 		});
@@ -219,48 +220,40 @@ function getConfig() {
 		{
 			description: "**CHANNELS**",
 
-			fields: [
-				...Object.entries(config.channels)
-					.filter(
-						(
-							channel,
-						): channel is [typeof channel[0], Exclude<typeof channel[1], string>] =>
-							typeof channel[1] !== "string",
-					)
-					.map((channel) => ({
-						name: `${channel[0]
-							.split("_")
-							.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-							.join(" ")} ${
-							channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
-						}`,
+			fields: Object.entries(config.channels)
+				.filter(
+					(channel): channel is [typeof channel[0], Exclude<typeof channel[1], string>] =>
+						typeof channel[1] !== "string",
+				)
+				.map((channel) => ({
+					name: `${channel[0]
+						.split("_")
+						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+						.join(" ")} ${
+						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
+					}`,
 
-						value: channel[1]?.toString() ?? "*None*",
-						inline: true,
-					})),
-			],
-
+					value: channel[1]?.toString() ?? "*None*",
+					inline: true,
+				})),
 			color: constants.themeColor,
 		},
 		{
 			description: "**ROLES**",
-			fields: [
-				...Object.entries(config.roles)
-					.filter(
-						(role): role is [typeof role[0], Role | undefined] =>
-							typeof role[1] !== "string",
-					)
-					.map((role) => ({
-						name: `${role[0]
-							.split("_")
-							.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-							.join(" ")} role`,
+			fields: Object.entries(config.roles)
+				.filter(
+					(role): role is [typeof role[0], Role | undefined] =>
+						typeof role[1] !== "string",
+				)
+				.map((role) => ({
+					name: `${role[0]
+						.split("_")
+						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+						.join(" ")} role`,
 
-						value: role[1]?.toString() ?? "*None*",
-						inline: true,
-					})),
-			],
-
+					value: role[1]?.toString() ?? "*None*",
+					inline: true,
+				})),
 			color: constants.themeColor,
 		},
 	];

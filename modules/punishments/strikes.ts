@@ -14,7 +14,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import filterToStrike, { PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
+import filterToStrike, { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
@@ -39,7 +39,7 @@ export async function getStrikes(
 	const member =
 		selected instanceof GuildMember
 			? selected
-			: await config.guild.members.fetch(selected.id).catch(() => {});
+			: await config.guild.members.fetch(selected.id).catch(() => user);
 
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === selected.id)
@@ -55,40 +55,27 @@ export async function getStrikes(
 	await paginate(
 		strikes,
 		(strike) =>
-			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
+			`${strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"}\`${
+				strike.id
+			}\`${
 				strike.count === 1
 					? ""
 					: ` (${
 							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
 					  })`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-				strike.removed ? "~~" : ""
+				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,
-		async (data) => {
-			const newData = { ...data };
-			if (
-				newData.embeds?.[0] &&
-				"footer" in newData.embeds[0] &&
-				newData.embeds[0].footer?.text
-			) {
-				newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
-					/\d+ $/,
-					`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-				);
-			}
-			return await (interaction.replied
-				? interaction.editReply(newData)
-				: interaction.reply(newData));
-		},
+		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
 		{
-			title: `${(member ?? user).displayName}’s strikes`,
-			singular: "",
-			plural: "",
+			title: `${member.displayName}’s strikes`,
+			format: member,
+			singular: "strike",
 			failMessage: `${selected.toString()} has never been warned!`,
-			format: member || user,
-			ephemeral: true,
-			showIndexes: false,
+
 			user: interaction.user,
+			totalCount: totalStrikeCount,
+			ephemeral: true,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {
@@ -99,20 +86,19 @@ export async function getStrikes(
 							placeholder: "View more information on a strike",
 
 							options: filtered.map((strike) => ({
-								label: String(strike.id),
-								value: String(strike.id),
+								label: strike.id.toString(),
+								value: strike.id.toString(),
 							})),
 						},
 					];
 				}
 				return filtered.map((strike) => ({
-					label: String(strike.id),
+					label: strike.id.toString(),
 					style: ButtonStyle.Secondary,
 					customId: `${strike.id}_strike`,
 					type: ComponentType.Button,
 				}));
 			},
-			customComponentLocation: "above",
 		},
 	);
 }
@@ -134,13 +120,13 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 		);
 	}
 
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
 			? strike.mod
-			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
 	const nick = (member ?? user)?.displayName;
 	const { useMentions } = getSettings(interaction.member.user);
 	return await interaction.editReply({
@@ -176,15 +162,17 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
-				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
-					strike.removed ? "~~" : ""
+				title: `${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+				}Strike \`${strike.id}\`${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 				}`,
 
 				description: strike.reason,
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: String(strike.count), inline: true },
+					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
 					...(moderator
 						? [
 								{

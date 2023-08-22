@@ -2,26 +2,29 @@ import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
 
-const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+const guild = await client.guilds.fetch(process.env.GUILD_ID);
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
 	const roles = await guild.roles.fetch();
 
-	const latestRelease: string =
+	const latestRelease: string = // todo find an eslint rule
 		process.env.NODE_ENV == "production"
 			? (
 					await fetch(
 						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (res) => await res.json<any>())
+					).then(async (response) => await response.json<{ tag_name: string }>())
 			  ).tag_name
 			: "master";
 
 	return {
 		roles: {
-			admin: roles.find((role) => role.name.toLowerCase().includes("admin")),
+			admin: roles.find((role) => role.editable && role.name.toLowerCase().includes("admin")),
+			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
+			staff:
+				roles.find((role) => role.name.toLowerCase().includes("staff")) ||
+				roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
@@ -79,19 +82,23 @@ async function getConfig() {
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
 	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
-		const types = [type].flat() as ChannelType[];
+		const types = new Set<ChannelType>([type].flat());
 		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.includes(channel.type)) return false;
+			if (!channel || !types.has(channel.type)) return false;
 
 			switch (matchType) {
-				case "full":
+				case "full": {
 					return channel.name === name;
-				case "partial":
+				}
+				case "partial": {
 					return channel.name.includes(name);
-				case "start":
+				}
+				case "start": {
 					return channel.name.startsWith(name);
-				case "end":
+				}
+				case "end": {
 					return channel.name.endsWith(name);
+				}
 			}
 		});
 	}

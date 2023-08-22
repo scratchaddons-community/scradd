@@ -15,6 +15,6 @@ declare module "@twemoji/parser" {
 }
 
 declare module "@twemoji/parser/dist/lib/regex.js" {
-	const regex: { default: RegExp };
-	export default regex;
+	const regexp: { default: RegExp };
+	export default regexp;
 }

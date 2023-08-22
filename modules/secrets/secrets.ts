@@ -1,5 +1,6 @@
 import type { User } from "discord.js";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function dad(name: string, _: User) {
 	const split = name.split(/\b/);
 	const firstName =
@@ -12,15 +13,16 @@ export function dad(name: string, _: User) {
 		) ??
 		split[0] ??
 		name;
-	const customName = customNames[firstName] ?? name;
-	const comment = customComments[firstName] ?? "I’m Scradd!";
+	const customName = customNames[firstName] || name;
+	const comment = customComments[firstName] || "I’m Scradd!";
 
 	const greetingIndex = Math.floor(Math.random() * greetings.length);
 	const greeting = greetings[greetingIndex];
 
-	const response = customResponses[firstName] ?? `${greeting} ${customName}, ${comment}`;
-
-	return response;
+	return (
+		customResponses[firstName] ??
+		`${greeting} ${customName}${customTriggers.includes(firstName) ? "!" : ","} ${comment}`
+	);
 }
 
 const greetings = ["Hi"] as const;
@@ -33,8 +35,6 @@ export const dadEasterEggCount =
 	Object.keys(customNames).length +
 	Object.keys(customComments).length +
 	customTriggers.length;
-
-// const ignoreTriggers = ["kill", "suicid", "depress", "pain", "sick", "abus", "sad", "bleed"] as const; // todo
 
 /**
  * - `word`
