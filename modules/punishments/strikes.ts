@@ -66,7 +66,7 @@ export async function getStrikes(
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,
-		(data) => interaction.reply({ ...data, ephemeral: true }),
+		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
 		{
 			title: `${member.displayName}’s strikes`,
 			format: member,
@@ -75,6 +75,7 @@ export async function getStrikes(
 
 			user: interaction.user,
 			totalCount: totalStrikeCount,
+			ephemeral: true,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {
@@ -98,7 +99,6 @@ export async function getStrikes(
 					type: ComponentType.Button,
 				}));
 			},
-			customComponentLocation: "above",
 		},
 	);
 }

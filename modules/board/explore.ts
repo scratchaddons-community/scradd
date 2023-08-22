@@ -77,12 +77,10 @@ export default async function makeSlideshow(
 		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
 	},
 ) {
-	let reply = await interaction.deferReply({
-		ephemeral:
-			interaction.isButton() &&
-			interaction.message.interaction?.user.id !== interaction.user.id,
-		fetchReply: true,
-	});
+	const ephemeral =
+		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
+	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });
+
 	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
 		[...data].sort(() => Math.random() - 0.5),
@@ -128,8 +126,6 @@ export default async function makeSlideshow(
 					],
 			  })
 			: ({
-					allowedMentions: { users: [] },
-
 					components: [
 						{
 							components: [
@@ -147,9 +143,7 @@ export default async function makeSlideshow(
 					],
 
 					content: `${constants.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
-
 					embeds: [],
-					ephemeral: true,
 					files: [],
 			  } satisfies InteractionReplyOptions);
 
@@ -162,14 +156,15 @@ export default async function makeSlideshow(
 		return reply;
 	}
 
-	reply = await reply.edit(await getNextMessage());
+	reply = await interaction.editReply(await getNextMessage());
 
 	const collector = reply.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === interaction.user.id,
 
-		time: GAME_COLLECTOR_TIME,
+		idle: GAME_COLLECTOR_TIME,
+		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
 	});
 
 	collector
@@ -177,12 +172,12 @@ export default async function makeSlideshow(
 			await buttonInteraction.deferUpdate();
 			if (buttonInteraction.customId === previousId) index--;
 			else index++;
-			reply = await reply.edit(messages[Number(index)] ?? (await getNextMessage()));
-
-			collector.resetTimer();
+			reply = await interaction.editReply(
+				messages[Number(index)] ?? (await getNextMessage()),
+			);
 		})
 		.on("end", async () => {
-			await reply.edit({
+			await interaction.editReply({
 				allowedMentions: { users: [] },
 				components: disableComponents(reply.components),
 			});

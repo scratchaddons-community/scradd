@@ -15,55 +15,33 @@ import warn from "../punishments/warn.js";
 import { getLevelForXp, xpDatabase } from "../xp/misc.js";
 import { getUserReminders, remindersDatabase } from "./misc.js";
 import config from "../../common/config.js";
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents, paginate } from "../../util/discord.js";
 import queueReminders from "./send.js";
 
 export async function listReminders(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const reminders = getUserReminders(interaction.user.id);
 
-	if (!reminders.length)
-		return await interaction.reply({
+	await paginate(
+		reminders,
+		(reminder) =>
+			`\`${reminder.id}\`) ${time(
+				new Date(reminder.date),
+				TimestampStyles.RelativeTime,
+			)}: <#${reminder.channel}> ${reminder.reminder}`,
+		(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
+		{
+			title: "Your reminders",
+			format:
+				interaction.member instanceof GuildMember ? interaction.member : interaction.user,
+			singular: "reminder",
+			failMessage: "You don’t have any reminders set!",
+
+			user: interaction.user,
+			totalCount: reminders.length,
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have any reminders set!`,
-		});
 
-	return await interaction.reply({
-		ephemeral: true,
-		embeds: [
-			{
-				color:
-					interaction.member instanceof GuildMember
-						? interaction.member.displayColor
-						: undefined,
-
-				author: {
-					icon_url: (interaction.member instanceof GuildMember
-						? interaction.member
-						: interaction.user
-					).displayAvatarURL(),
-					name: (interaction.member instanceof GuildMember
-						? interaction.member
-						: interaction.user
-					).displayName,
-				},
-				footer: {
-					text: `${reminders.length} reminder${reminders.length === 1 ? "" : "s"}`,
-				},
-				description: reminders
-					.map(
-						(reminder) =>
-							`\`${reminder.id}\`) ${time(
-								new Date(reminder.date),
-								TimestampStyles.RelativeTime,
-							)}: <#${reminder.channel}> ${reminder.reminder}`,
-					)
-					.join("\n"),
-			},
-		],
-		components: [
-			{
-				type: ComponentType.ActionRow,
-				components: [
+			generateComponents(reminders) {
+				return [
 					{
 						customId: "_cancelReminder",
 						type: ComponentType.StringSelect,
@@ -74,10 +52,10 @@ export async function listReminders(interaction: ChatInputCommandInteraction<"ca
 							label: reminder.id + "",
 						})),
 					},
-				],
+				];
 			},
-		],
-	});
+		},
+	);
 }
 
 export async function createReminder(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
