@@ -528,7 +528,7 @@ export function disableComponents(
  *
  * @param array - The array to be paginated.
  * @param toString - A function to convert each element of the array to a string.
- * @param editReply - A function to send pages.
+ * @param reply - A function to send pages.
  * @param options - Additional options.
  * @param options.title - The title of the embed.
  * @param options.format - A user to format the embed against.
@@ -577,7 +577,7 @@ export async function paginate<Item>(
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
-	const ITEMS_PER_PAGE = 5;
+	const ITEMS_PER_PAGE = 15;
 
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
@@ -596,10 +596,7 @@ export async function paginate<Item>(
 		);
 
 		if (!filtered.length) {
-			return {
-				content: `${constants.emojis.statuses.no} ${failMessage}`,
-				ephemeral,
-			};
+			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
 		}
 
 		const content = (

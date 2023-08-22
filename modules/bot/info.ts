@@ -99,10 +99,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 								value:
 									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
 										"en-us",
-										{
-											maximumFractionDigits: 2,
-											minimumFractionDigits: 2,
-										},
+										{ maximumFractionDigits: 2, minimumFractionDigits: 2 },
 									) + " MB",
 								inline: true,
 							},

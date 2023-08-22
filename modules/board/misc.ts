@@ -38,15 +38,7 @@ await boardDatabase.init();
  * @returns The reaction count.
  */
 export function boardReactionCount(channel?: TextBasedChannel): number {
-	const COUNTS = {
-		scradd: 2,
-		admins: 2,
-		mods: 3,
-		misc: 4,
-		default: 6,
-		memes: 8,
-		info: 12,
-	};
+	const COUNTS = { scradd: 2, admins: 2, mods: 3, misc: 4, default: 6, memes: 8, info: 12 };
 
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 

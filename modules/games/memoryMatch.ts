@@ -38,12 +38,7 @@ export default async function memoryMatch(
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [instructionsButton],
-				},
-			],
+			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
 

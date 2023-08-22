@@ -57,14 +57,7 @@ export default async function warn(
 				: "verbally warned"
 		} by ${moderator.toString()}`,
 		"members",
-		{
-			files: [
-				{
-					content: reason + (context && `\n>>> ${context}`),
-					extension: "md",
-				},
-			],
-		},
+		{ files: [{ content: reason + (context && `\n>>> ${context}`), extension: "md" }] },
 	);
 	await giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
