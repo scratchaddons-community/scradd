@@ -3,7 +3,7 @@ import {
 	ButtonStyle,
 	Colors,
 	ComponentType,
-	type Message,
+	Message,
 	MessageType,
 	ChannelType,
 	type Attachment,
@@ -15,7 +15,6 @@ import {
 	type BaseMessageOptions,
 	type EmojiIdentifierResolvable,
 	type GuildTextBasedChannel,
-	type InteractionReplyOptions,
 	type MessageActionRowComponent,
 	type MessageEditOptions,
 	type Snowflake,
@@ -33,6 +32,7 @@ import {
 	type PartialDMChannel,
 	bold,
 	ChatInputCommandInteraction,
+	InteractionResponse,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -353,7 +353,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return message.content;
 			return message
 				.fetchReference()
-				.catch(() => {})
+				.catch(() => void 0)
 				.then((reply) => {
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
@@ -371,7 +371,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return actualContent;
 			return message
 				.fetchReference()
-				.catch(() => {})
+				.catch(() => void 0)
 				.then(async (reference) =>
 					// The resolved message for the reference will be a Message
 					reference
@@ -544,7 +544,9 @@ export function disableComponents(
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: InteractionReplyOptions & { fetchReply: true }) => Promise<Message>,
+	reply: (
+		options: BaseMessageOptions & { ephemeral: boolean },
+	) => Promise<Message | InteractionResponse>,
 	{
 		title,
 		format,
@@ -555,9 +557,10 @@ export async function paginate<Item>(
 		user,
 		rawOffset,
 		totalCount,
+		ephemeral = false,
 
 		generateComponents,
-		customComponentLocation = "below",
+		customComponentLocation = "above",
 	}: {
 		title: string;
 		format?: GuildMember | User;
@@ -568,6 +571,7 @@ export async function paginate<Item>(
 		user: User | false;
 		rawOffset?: number;
 		totalCount?: number;
+		ephemeral?: boolean;
 
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
 		customComponentLocation?: "above" | "below";
@@ -586,19 +590,19 @@ export async function paginate<Item>(
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage(): Promise<BaseMessageOptions & { fetchReply: true }> {
+	async function generateMessage() {
 		const filtered = array.filter(
 			(_, index) => index >= offset && index < offset + ITEMS_PER_PAGE,
 		);
 
 		if (!filtered.length) {
-			return { content: `${constants.emojis.statuses.no} ${failMessage}`, fetchReply: true };
+			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
 		}
 
 		const content = (
 			await Promise.all(
 				filtered.map(async (current, index, all) => {
-					const line = `${totalCount ? `${index + offset + 1}) ` : ""}${await toString(
+					const line = `${totalCount ? "" : `${index + offset + 1}) `}${await toString(
 						current,
 						index,
 						all,
@@ -647,7 +651,6 @@ export async function paginate<Item>(
 
 		return {
 			components,
-
 			embeds: [
 				{
 					title,
@@ -663,7 +666,6 @@ export async function paginate<Item>(
 						? {
 								// eslint-disable-next-line id-match -- We didn’t name this.
 								icon_url: format.displayAvatarURL(),
-
 								name: format.displayName,
 						  }
 						: undefined,
@@ -675,19 +677,23 @@ export async function paginate<Item>(
 						: constants.themeColor,
 				},
 			],
-			fetchReply: true,
-		};
+			ephemeral,
+		} satisfies BaseMessageOptions & { ephemeral: boolean };
 	}
 
 	let message = await reply(await generateMessage());
 	if (numberOfPages === 1 || !user) return;
+
+	const editReply = (data: BaseMessageOptions & { ephemeral: boolean }) =>
+		ephemeral ? reply(data) : message.edit(data);
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === user.id,
 
-		time: constants.collectorTime,
+		idle: constants.collectorTime,
+		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
 	});
 
 	collector
@@ -696,13 +702,14 @@ export async function paginate<Item>(
 			else offset -= ITEMS_PER_PAGE;
 
 			await buttonInteraction.deferUpdate();
-			message = await message.edit(await generateMessage());
-			collector.resetTimer();
+			message = await editReply(await generateMessage());
 		})
 		.on("end", async () => {
-			const [pagination, ...rest] = message.components;
-			if (pagination)
-				await message.edit({ components: [...disableComponents([pagination]), ...rest] });
+			const [pagination, ...rest] = message instanceof Message ? message.components : [];
+			await editReply({
+				components: pagination ? [...disableComponents([pagination]), ...rest] : [],
+				ephemeral,
+			});
 		});
 }
 

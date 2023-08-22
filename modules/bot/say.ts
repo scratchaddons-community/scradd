@@ -25,7 +25,7 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 	if (!fetchedChannels.has(interaction.channel.id)) {
 		interaction.channel.messages.fetch({ limit: 100 }).then(
 			() => fetchedChannels.add(interaction.channel?.id ?? ""),
-			() => {},
+			() => void 0,
 		);
 	}
 	const messages = interaction.channel.messages.cache
@@ -148,7 +148,8 @@ export async function say(
 	content = silent ? content.replace("@silent", "").trim() : content;
 	const noPing = reply?.startsWith("-");
 	reply = noPing ? reply?.replace("-", "") : reply;
-	const oldMessage = reply && (await interaction.channel?.messages.fetch(reply).catch(() => {}));
+	const oldMessage =
+		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
 	if (reply && !oldMessage)
 		return interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,

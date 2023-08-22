@@ -5,7 +5,7 @@ import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
 import {
 	createCustomRole,
-	deleteMemberRole,
+	deleteMemberRoles,
 	recheckMemberRole,
 	recheckAllRoles,
 	customRole,
@@ -19,7 +19,7 @@ defineEvent("guildMemberAdd", async () => {
 	}, new Collection<Snowflake, number>());
 	inviters.map(async (count, user) => {
 		if (count < 20) return;
-		const inviter = await config.guild.members.fetch(user).catch(() => {});
+		const inviter = await config.guild.members.fetch(user).catch(() => void 0);
 		if (
 			!inviter ||
 			inviter.id === constants.users.hans ||
@@ -53,7 +53,7 @@ defineCommand(
 
 defineModal("customRole", createCustomRole);
 
-defineEvent("guildMemberRemove", deleteMemberRole);
+defineEvent("guildMemberRemove", deleteMemberRoles);
 
 defineEvent("guildMemberUpdate", recheckMemberRole);
 

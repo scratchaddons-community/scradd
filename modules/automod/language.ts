@@ -4,8 +4,8 @@ import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 
-function decodeRegexes(regexes: RegExp[]) {
-	return regexes
+function decodeRegexps(regexps: RegExp[]) {
+	return regexps
 		.map(({ source }) =>
 			caesar(source).replaceAll(
 				/[ a-z]/gi,
@@ -49,9 +49,9 @@ function decodeRegexes(regexes: RegExp[]) {
 export const badWordRegexps = badWords.map(
 	([strings = [], words = [], prefixes = []]) =>
 		new RegExp(
-			(strings.length ? `${decodeRegexes(strings)}|` : "(?!x)x") +
-				`\\b(?:${words.length ? `(?:${decodeRegexes(words)})\\b` : "(?!x)x"}${
-					prefixes.length ? `|${decodeRegexes(prefixes)}` : "(?!x)x"
+			(strings.length ? `${decodeRegexps(strings)}|` : "(?!x)x") +
+				`\\b(?:${words.length ? `(?:${decodeRegexps(words)})\\b` : "(?!x)x"}${
+					prefixes.length ? `|${decodeRegexps(prefixes)}` : "(?!x)x"
 				})`,
 			"gi",
 		),

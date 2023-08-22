@@ -107,7 +107,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	await changeNickname(member);
 });
 defineEvent.pre("userUpdate", async (_, user) => {
-	const member = await config.guild.members.fetch(user).catch(() => {});
+	const member = await config.guild.members.fetch(user).catch(() => void 0);
 	if (member) {
 		await changeNickname(member);
 		return true;
@@ -122,10 +122,14 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 			? newPresence.activities[0].state
 			: newPresence.activities[0]?.name;
 	const censored = status && censor(status);
-	if (censored && config.roles.mod && newPresence.member?.roles.resolve(config.roles.mod.id)) {
+	if (
+		censored &&
+		config.roles.staff &&
+		newPresence.member?.roles.resolve(config.roles.staff.id)
+	) {
 		await warn(
 			newPresence.member,
-			"Watch your language!",
+			"As a representative of the server, staff members are not allowed to have bad word in their statuses",
 			censored.strikes,
 			"Set status to " + status,
 		);
@@ -157,10 +161,10 @@ defineCommand(
 
 			content: words
 				? `⚠️ **${words.length} bad word${words.length ? "s" : ""} detected**!\n${
-						config.roles.mod &&
+						config.roles.staff &&
 						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(config.roles.mod.id)
-							: interaction.member.roles.includes(config.roles.mod.id))
+							? interaction.member.roles.resolve(config.roles.staff.id)
+							: interaction.member.roles.includes(config.roles.staff.id))
 							? `That text gives **${Math.trunc(result.strikes)} strike${
 									result.strikes === 1 ? "" : "s"
 							  }**.\n\n`

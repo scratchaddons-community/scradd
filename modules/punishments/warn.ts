@@ -57,21 +57,14 @@ export default async function warn(
 				: "verbally warned"
 		} by ${moderator.toString()}`,
 		"members",
-		{
-			files: [
-				{
-					content: reason + (context && `\n>>> ${context}`),
-					extension: "md",
-				},
-			],
-		},
+		{ files: [{ content: reason + (context && `\n>>> ${context}`), extension: "md" }] },
 	);
 	await giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
 	const member =
 		user instanceof GuildMember
 			? user
-			: await config.guild.members.fetch(user.id).catch(() => {});
+			: await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
@@ -117,7 +110,7 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => {});
+		.catch(() => void 0);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -129,7 +122,7 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
-		(!config.roles.mod || !member.roles.resolve(config.roles.mod.id)) &&
+		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
 			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
@@ -166,7 +159,7 @@ export default async function warn(
 					TimestampStyles.LongDate,
 				)}, you will be banned.**__`,
 			)
-			.catch(() => {});
+			.catch(() => void 0);
 	}
 
 	return true;
@@ -191,7 +184,7 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 		// Double equals because RoboTop warns are stored as numbers in the database
 		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
 		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
 	const { url: logUrl } = await interaction.reply({

@@ -11,7 +11,7 @@ export default async function getUserRank(
 	const allXp = xpDatabase.data;
 	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
-	const member = await config.guild.members.fetch(user.id).catch((): undefined => {});
+	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
@@ -41,20 +41,14 @@ export default async function getUserRank(
 			context.fillStyle = "#666";
 			context.textAlign = "end";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				canvas.width - paddingPixels,
 				canvas.height - paddingPixels,
 			);
 		} else {
 			context.fillStyle = "#0009";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				paddingPixels,
 				canvas.height - paddingPixels,
 			);

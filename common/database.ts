@@ -136,10 +136,7 @@ export default class Database<Data extends Record<string, string | number | bool
 			return await promise;
 		};
 
-		timeouts[this.message.id] = {
-			timeout: setTimeout(callback, 15_000),
-			callback,
-		};
+		timeouts[this.message.id] = { timeout: setTimeout(callback, 15_000), callback };
 		timeoutId && clearTimeout(timeoutId.timeout);
 	}
 

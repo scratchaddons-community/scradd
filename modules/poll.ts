@@ -72,14 +72,14 @@ defineCommand(
 
 defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 	const question = characters.join("");
-	const regex = new RegExp(`^${twemojiRegexp.default.source}`);
+	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
 
 	const { customReactions, options } = interaction.fields.fields.reduce<{
 		customReactions: (string | undefined)[];
 		options: string[];
 	}>(
 		({ customReactions, options }, field) => {
-			const emoji = field.value.match(regex)?.[0];
+			const emoji = field.value.match(regexp)?.[0];
 			return {
 				options: [
 					...options,

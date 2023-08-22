@@ -17,7 +17,7 @@ export default async function updateBoard(message: Message) {
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
 	const boardMessage = boardMessageId
-		? await config.channels.board.messages.fetch(boardMessageId).catch(() => {})
+		? await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0)
 		: undefined;
 
 	if (boardMessage) {
@@ -80,7 +80,8 @@ export default async function updateBoard(message: Message) {
 	const topIds = await Promise.all(
 		top.map(async ({ onBoard }) => {
 			const toPin =
-				onBoard && (await config.channels.board?.messages.fetch(onBoard)?.catch(() => {}));
+				onBoard &&
+				(await config.channels.board?.messages.fetch(onBoard)?.catch(() => void 0));
 
 			if (toPin) await toPin.pin("Is a top-reacted message");
 

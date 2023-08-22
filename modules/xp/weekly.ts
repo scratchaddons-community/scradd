@@ -11,7 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { getCustomRole, qualifiesForRole } from "../roles/custom.js";
+import { recheckMemberRole } from "../roles/custom.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -20,7 +20,7 @@ export async function getChatters() {
 		winnerId &&
 		(await config.guild.members
 			.fetch(winnerId)
-			.catch(() => client.users.fetch(winnerId).catch(() => {})));
+			.catch(() => client.users.fetch(winnerId).catch(() => void 0)));
 	weeklyWinners.splice(
 		0,
 		weeklyWinners.findIndex(
@@ -105,7 +105,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 				async ({ user: memberId }) =>
 					await config.guild.members
 						.fetch(memberId)
-						.catch(() => {})
+						.catch(() => void 0)
 						.then((activeMember) => activeMember?.roles.add(activeRole, "Active")),
 			),
 		]);
@@ -138,7 +138,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 				async ({ user: userId }, index) =>
 					await config.guild.members
 						.fetch(userId)
-						.catch(() => {})
+						.catch(() => void 0)
 						.then((member) =>
 							member?.roles.add(
 								index || !config.roles.epic ? role : [role, config.roles.epic],
@@ -151,9 +151,8 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 	await Promise.all(
 		weeklyWinners.map(async (weeklyWinner) => {
-			const guildMember = await config.guild.members.fetch(weeklyWinner.user).catch(() => {});
-			if (!guildMember || (await qualifiesForRole(guildMember))) return;
-			await getCustomRole(guildMember)?.delete("No longer meets custom role requirements");
+			const member = await config.guild.members.fetch(weeklyWinner.user).catch(() => void 0);
+			if (member) await recheckMemberRole(member, member);
 		}),
 	);
 

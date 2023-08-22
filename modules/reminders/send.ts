@@ -44,7 +44,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 	remindersDatabase.data = toPostpone;
 
 	const promises = toSend.map(async (reminder) => {
-		const channel = await client.channels.fetch(reminder.channel).catch(() => {});
+		const channel = await client.channels.fetch(reminder.channel).catch(() => void 0);
 		if (reminder.user === client.user.id) {
 			switch (reminder.id) {
 				case SpecialReminders.Weekly: {
@@ -183,7 +183,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				allowedMentions: { users: [reminder.user] },
 				flags: silent ? MessageFlags.SuppressNotifications : undefined,
 			})
-			.catch(() => {});
+			.catch(() => void 0);
 	});
 	await Promise.all(promises);
 

@@ -107,10 +107,10 @@ export async function setUpAutoClose(interaction: ChatInputCommandInteraction<"c
 
 export async function cancelThreadChange(interaction: ButtonInteraction, type: string) {
 	if (
-		!config.roles.mod ||
+		!config.roles.staff ||
 		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.mod.id)
-			: interaction.member?.roles.includes(config.roles.mod.id))
+			? interaction.member.roles.resolve(config.roles.staff.id)
+			: interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,

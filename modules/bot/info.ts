@@ -22,7 +22,7 @@ import { getSettings } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => {});
+const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => void 0);
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
@@ -99,10 +99,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 								value:
 									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
 										"en-us",
-										{
-											maximumFractionDigits: 2,
-											minimumFractionDigits: 2,
-										},
+										{ maximumFractionDigits: 2, minimumFractionDigits: 2 },
 									) + " MB",
 								inline: true,
 							},
@@ -132,7 +129,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 											style: ButtonStyle.Primary,
 											type: ComponentType.Button,
 											label: "Sync",
-											customId: "_syncConstants",
+											customId: "_syncConfig",
 										},
 									],
 								},

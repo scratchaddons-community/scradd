@@ -38,12 +38,7 @@ export default async function memoryMatch(
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [instructionsButton],
-				},
-			],
+			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
 
@@ -300,13 +295,18 @@ async function playGame(
 					components: [
 						{
 							type: ComponentType.ActionRow,
-							components: [gameLinkButton, endGameButton],
+							components: [gameLinkButton, endGameButton, instructionsButton],
 						},
 					],
 			  })
 			: message.reply({
 					content,
-					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [endGameButton, instructionsButton],
+						},
+					],
 			  }));
 
 		const timeout = turn

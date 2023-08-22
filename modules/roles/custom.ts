@@ -12,6 +12,7 @@ import {
 	TextInputStyle,
 	type Snowflake,
 	ApplicationCommandPermissionType,
+	FormattingPatterns,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -20,6 +21,7 @@ import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
 import { recentXpDatabase } from "../xp/misc.js";
+import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 
 const PREFIX = "✨ ";
 let command: ApplicationCommand | undefined;
@@ -69,6 +71,24 @@ export async function customRole(interaction: ChatInputCommandInteraction<"cache
 					},
 				],
 			},
+			...(config.guild.features.includes("ROLE_ICONS") &&
+			interaction.member.roles.resolve(config.roles.staff?.id ?? "")
+				? [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									customId: "icon",
+									label: "A unicode emoji, emoji ID, or URL",
+									style: TextInputStyle.Short,
+									type: ComponentType.TextInput,
+									required: false,
+									value: existingRole?.iconURL() ?? undefined,
+								} as const,
+							],
+						},
+				  ]
+				: []),
 		],
 	});
 }
@@ -78,7 +98,8 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		throw new TypeError("interaction.member is not a GuildMember!");
 
 	const name = interaction.fields.fields.get("name")?.value;
-	const color = interaction.fields.fields.get("color")?.value;
+	const color = interaction.fields.fields.get("color")?.value || "#000000";
+	const icon = interaction.fields.fields.get("icon")?.value;
 
 	const existingRole = getCustomRole(interaction.member);
 
@@ -157,7 +178,8 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (
 		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
 			name,
-		)
+		) &&
+		!interaction.member.roles.resolve(config.roles.staff?.id ?? "")
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -165,19 +187,29 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	if (color && !(color in Colors) && color !== "Random" && !/^#[\da-f]{6}$/i.test(color)) {
+	if (!(color in Colors) && color !== "Random" && !/^#[\da-f]{6}$/i.test(color)) {
+		// todo: make colors case-insensitive
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not parse that color!`,
 		});
 	}
 
+	const iconData = icon ? await resolveIcon(icon) : undefined;
+	if (icon && !iconData)
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the like is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
+		});
+
 	if (existingRole) {
-		await existingRole.setColor(
-			(color as ColorResolvable) || "#000000",
-			`Edited by ${interaction.user.tag}`,
-		);
-		await existingRole.setName(PREFIX + name, `Edited by ${interaction.user.tag}`);
+		await existingRole.edit({
+			color: color as ColorResolvable,
+			name: PREFIX + name,
+			reason: `Edited by ${interaction.user.tag}`,
+			position: (config.roles.staff?.position ?? 0) + 1,
+			...iconData,
+		});
 
 		return await interaction.reply(`${constants.emojis.statuses.yes} Updated your role!`);
 	}
@@ -186,12 +218,13 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		color: (color as ColorResolvable) || "#000000",
 		name: PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
-		position: (config.guild.roles.premiumSubscriberRole?.position ?? 0) + 1,
+		position: (config.roles.staff?.position ?? 0) + 1,
+		...iconData,
 	});
 	await interaction.member.roles.add(role, "Custom role created");
 	return await interaction.reply(`${constants.emojis.statuses.yes} Created your custom role!`);
 }
-export async function deleteMemberRole(member: PartialGuildMember | GuildMember) {
+export async function deleteMemberRoles(member: PartialGuildMember | GuildMember) {
 	for (const [, role] of await config.guild.roles.fetch()) {
 		if (role.name.startsWith(PREFIX) && !role.members.size) {
 			await role.delete(`${member.user.tag} left the server`);
@@ -201,8 +234,21 @@ export async function deleteMemberRole(member: PartialGuildMember | GuildMember)
 export async function recheckMemberRole(_: PartialGuildMember | GuildMember, member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
+	const role = getCustomRole(member);
+
 	if (!(await qualifiesForRole(member))) {
-		await getCustomRole(member)?.delete("No longer qualifies");
+		await role?.delete("No longer qualifies");
+		return;
+	}
+
+	if (
+		config.guild.features.includes("ROLE_ICONS") &&
+		!member.roles.resolve(config.roles.staff?.id ?? "")
+	) {
+		// eslint-disable-next-line unicorn/no-null
+		await role?.setUnicodeEmoji(null, "No longer qualifies");
+		// eslint-disable-next-line unicorn/no-null
+		await role?.setIcon(null, "No longer qualifies");
 	}
 }
 export async function recheckAllRoles(permissions: ApplicationCommandPermissionsUpdateData) {
@@ -226,8 +272,8 @@ export function getCustomRole(member: GuildMember) {
 }
 
 export async function qualifiesForRole(member: GuildMember) {
-	if (member.roles.premiumSubscriberRole) return true;
-
+	if (member.roles.premiumSubscriberRole || member.roles.resolve(config.roles.staff?.id ?? ""))
+		return true;
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(
@@ -244,11 +290,44 @@ export async function qualifiesForRole(member: GuildMember) {
 		(command) => command.name === "custom-role",
 	);
 	const permissions =
-		command && (await config.guild.commands.permissions.fetch({ command }).catch(() => {}));
+		command && (await config.guild.commands.permissions.fetch({ command }).catch(() => void 0));
 	return permissions?.some(
 		(permission) =>
 			permission.type === ApplicationCommandPermissionType.User &&
 			permission.id === member.user.id &&
 			permission.permission,
 	);
+}
+
+const isTwemoji = new RegExp(`^${twemojiRegexp.default.source}$`);
+const isServerEmoji = new RegExp(`^${FormattingPatterns.Emoji.source}$`);
+const validContentTypes = new Set([
+	"image/jpeg",
+	"image/png",
+	"image/apng",
+	"image/gif",
+	"image/webp",
+]);
+/** Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URL, string starting with https:// */
+async function resolveIcon(icon: string) {
+	if (isTwemoji.test(icon)) return { unicodeEmoji: icon };
+
+	const id = icon.match(isServerEmoji)?.groups?.id || (/^\d{17,20}$/.test(icon) && icon);
+	const url = id && config.guild.emojis.resolve(id)?.url;
+	if (url) return { icon: url };
+
+	if (icon.startsWith("data:")) return { icon };
+
+	if (!/^https?:\/\//.test(icon)) return;
+
+	const response = await fetch(icon, { method: "HEAD" });
+	if (!response.ok) return;
+
+	const contentLength = +(response.headers.get("Content-Length") ?? Number.POSITIVE_INFINITY);
+	if (contentLength > 256_000) return;
+
+	const contentType = response.headers.get("Content-Type");
+	if (!contentType || !validContentTypes.has(contentType)) return;
+
+	return { icon };
 }

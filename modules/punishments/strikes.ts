@@ -66,7 +66,7 @@ export async function getStrikes(
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,
-		(data) => interaction.reply({ ...data, ephemeral: true }),
+		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
 		{
 			title: `${member.displayName}’s strikes`,
 			format: member,
@@ -75,6 +75,7 @@ export async function getStrikes(
 
 			user: interaction.user,
 			totalCount: totalStrikeCount,
+			ephemeral: true,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {
@@ -98,7 +99,6 @@ export async function getStrikes(
 					type: ComponentType.Button,
 				}));
 			},
-			customComponentLocation: "above",
 		},
 	);
 }
@@ -120,13 +120,13 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 		);
 	}
 
-	const member = await config.guild.members.fetch(strike.user).catch((): undefined => {});
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
 			? strike.mod
-			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
 	const nick = (member ?? user)?.displayName;
 	const { useMentions } = getSettings(interaction.member.user);
 	return await interaction.editReply({

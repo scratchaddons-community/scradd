@@ -45,7 +45,7 @@ export async function messageDelete(message: Message | PartialMessage) {
 				...(message.reference
 					? [
 							{
-								label: "Referenced Message",
+								label: "Reference",
 								url: `https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
 							},
 					  ]
@@ -132,7 +132,7 @@ export async function messageReactionRemoveAll(
 				},
 			],
 
-			buttons: [{ label: "Context", url: message.url }],
+			buttons: [{ label: "Message", url: message.url }],
 		},
 	);
 }

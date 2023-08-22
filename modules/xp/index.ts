@@ -120,6 +120,7 @@ defineCommand(
 								  ]
 								: undefined;
 						},
+						customComponentLocation: "below",
 					},
 				);
 			}

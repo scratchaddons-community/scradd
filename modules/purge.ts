@@ -191,7 +191,10 @@ defineCommand(
 		let reply = await interaction.reply({ ...generated, ephemeral: true, fetchReply: true });
 		if (!generated.embeds) return;
 
-		const collector = reply.createMessageComponentCollector({ time: constants.collectorTime });
+		const collector = reply.createMessageComponentCollector({
+			idle: constants.collectorTime,
+			time: 14 * 60 * 1000 + 50,
+		});
 
 		collector
 			.on("collect", async (buttonInteraction) => {
@@ -224,13 +227,12 @@ defineCommand(
 				await buttonInteraction.deferUpdate();
 
 				const generated = await generateMessage();
-				reply = await reply.edit(generated);
+				reply = await interaction.editReply(generated);
 
-				if (generated.embeds) collector.resetTimer();
-				else collector.stop();
+				if (!generated.embeds) collector.stop();
 			})
 			.on("end", async () => {
-				await reply.edit({ components: disableComponents(reply.components) });
+				await interaction.editReply({ components: disableComponents(reply.components) });
 			});
 	},
 );
