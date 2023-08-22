@@ -30,7 +30,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 	await updateReactions(reaction);
 });
 defineEvent("threadUpdate", (_, newThread) => {
-	if (!config.channels.suggestions || newThread.parent?.id !== config.channels.suggestions?.id)
+	if (!config.channels.suggestions || newThread.parent?.id !== config.channels.suggestions.id)
 		return;
 	if (newThread.locked) {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== newThread.id);
@@ -67,7 +67,7 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 	if (oldAnswer.name === newAnswer.name) return;
 
 	const user =
-		(await config.guild.members.fetch(entry.executor?.id ?? "").catch(() => {})) ??
+		(await config.guild.members.fetch(entry.executor?.id ?? "").catch(() => void 0)) ??
 		entry.executor;
 
 	await entry.target.send({
@@ -87,7 +87,7 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 					(newAnswer.emoji
 						? `${newAnswer.emoji.name || `<:_:${newAnswer.emoji.id}>`} `
 						: "") + newAnswer.name,
-				description: entry.target.parent?.topic
+				description: entry.target.parent.topic
 					?.split(`\n- **${newAnswer.name}**: `)[1]
 					?.split("\n")[0],
 				footer: { text: `Was previously ${oldAnswer.name}` },
