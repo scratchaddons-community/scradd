@@ -82,7 +82,7 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	for (const [emoji, ...requirements] of autoreactions) {
+	reactionLoop: for (const [emoji, ...requirements] of autoreactions) {
 		let doReact = false;
 		const emojis = [emoji].flat();
 		if (emojis.some((emoji) => content.includes(emoji))) continue;
@@ -94,7 +94,7 @@ defineEvent("messageCreate", async (message) => {
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type[1] === "ping") {
-				doReact = message.mentions.has(match, {
+				doReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRepliedUser: true,
 					ignoreRoles: true,
@@ -109,9 +109,9 @@ defineEvent("messageCreate", async (message) => {
 					"i",
 				).test(type === "raw" ? message.content : content);
 
-				if (type === "negative" && result) return;
+				if (type === "negative" && result) continue reactionLoop;
 
-				doReact = result;
+				doReact ||= result;
 			}
 		}
 
