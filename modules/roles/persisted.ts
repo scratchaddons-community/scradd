@@ -20,7 +20,7 @@ await rolesDatabase.init();
 const persistedRoles = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
-	formerAdmin: ["1069776422467555328", config.roles.admin?.id || ""],
+	formerAdmin: ["1069776422467555328", "806603332944134164"],
 	formerMod: ["881623848137682954", config.roles.mod?.id || ""],
 	dev: "806608777835053098",
 	translator: "841696608592330794",

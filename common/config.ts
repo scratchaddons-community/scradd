@@ -19,7 +19,6 @@ async function getConfig() {
 
 	return {
 		roles: {
-			admin: roles.find((role) => role.editable && role.name.toLowerCase().includes("admin")),
 			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
 			staff:
