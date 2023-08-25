@@ -18,7 +18,7 @@
 		"@napi-rs/canvas": "0.1.44",
 		"@twemoji/parser": "14.1.0",
 		"async-exit-hook": "2.0.1",
-		"chart.js": "4.3.3",
+		"chart.js": "4.4.0",
 		"chartjs-adapter-date-fns": "3.0.0",
 		"date-fns": "2.30.0",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
