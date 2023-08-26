@@ -102,7 +102,7 @@ defineCommand(
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 					(data) => interaction.reply(data),
 					{
-						title: `Leaderboard for ${config.guild.name}`,
+						title: "XP leaderboard",
 						singular: "user",
 
 						user: interaction.user,

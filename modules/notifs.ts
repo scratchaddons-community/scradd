@@ -23,7 +23,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	const greetings = [
-		`Everybody please welcome ${member} to ${config.guild.name}; they’re our ${nth(
+		`Everybody please welcome ${member} to the server; they’re our ${nth(
 			config.guild.memberCount,
 		)} member!`,
 		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
