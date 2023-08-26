@@ -12,6 +12,9 @@ import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
+import { boardDatabase, boardReactionCount } from "../board/misc.js";
+import { asyncFilter } from "../../util/promises.js";
+import updateBoard from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -166,6 +169,37 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					];
 
 					return backupDatabases(channel);
+				}
+				case SpecialReminders.SyncRandomPotato: {
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: reminder.channel,
+							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
+							id: SpecialReminders.BackupDatabases,
+							user: client.user.id,
+						},
+					];
+
+					const message = await asyncFilter([...boardDatabase.data], async (info) => {
+						if (info.onBoard) return false;
+
+						const channel = await config.guild.channels
+							.fetch(info.channel)
+							.catch(() => void 0);
+						if (!channel?.isTextBased()) return false;
+
+						const reactionsNeeded = boardReactionCount(channel);
+						if (info.reactions < reactionsNeeded) return false;
+
+						const message = await channel.messages
+							.fetch(info.source)
+							.catch(() => void 0);
+						return message ?? false;
+					}).next();
+
+					if (message.value) await updateBoard(message.value);
+					return;
 				}
 			}
 		}

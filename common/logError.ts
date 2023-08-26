@@ -72,6 +72,8 @@ export function generateError(
 		delete serialized.stack;
 		delete serialized.errors;
 		delete serialized.cause;
+		delete serialized.error;
+		delete serialized.surpressed;
 
 		const subErrors =
 			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
@@ -84,6 +86,8 @@ export function generateError(
 			).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
 			cause: "cause" in error ? generateError(error.cause, true) : undefined,
+			error: "error" in error ? generateError(error.error, true) : undefined,
+			surpressed: "surpressed" in error ? generateError(error.surpressed, true) : undefined,
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");
