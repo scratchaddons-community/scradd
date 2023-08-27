@@ -331,7 +331,7 @@ async function playGame(
 				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown, ...scores].includes(id);
+					const discovered = [...shown, ...scores.flat()].includes(id);
 
 					return {
 						type: ComponentType.Button,
