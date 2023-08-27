@@ -13,7 +13,6 @@ import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
 import { boardDatabase, boardReactionCount } from "../board/misc.js";
-import { asyncFilter } from "../../util/promises.js";
 import updateBoard from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
@@ -181,24 +180,32 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					const message = await asyncFilter([...boardDatabase.data], async (info) => {
-						if (info.onBoard) return false;
+					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
+						if (info.onBoard) continue;
+
+						const reactionsNeeded = boardReactionCount({ id: info.channel });
+						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
+							continue;
 
 						const channel = await config.guild.channels
 							.fetch(info.channel)
 							.catch(() => void 0);
-						if (!channel?.isTextBased()) return false;
+						if (!channel?.isTextBased()) continue;
 
-						const reactionsNeeded = boardReactionCount(channel);
-						if (info.reactions < reactionsNeeded) return false;
+						if (reactionsNeeded === undefined) {
+							const reactionsNeeded = boardReactionCount(channel);
+							if (info.reactions < reactionsNeeded) continue;
+						}
 
 						const message = await channel.messages
 							.fetch(info.source)
 							.catch(() => void 0);
-						return message ?? false;
-					}).next();
+						if (message) {
+							await updateBoard(message);
+							break;
+						}
+					}
 
-					if (message.value) await updateBoard(message.value);
 					return;
 				}
 			}
