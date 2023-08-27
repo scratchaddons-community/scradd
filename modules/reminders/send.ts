@@ -77,7 +77,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 								"November",
 								"December",
 							][date.getUTCMonth()] || ""
-						} ${nth(date.getUTCDate(), { bold: false, jokes: false })}`,
+						} ${nth(date.getUTCDate())}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);

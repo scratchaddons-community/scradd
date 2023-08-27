@@ -88,10 +88,7 @@ export default async function getUserRank(
 						value: weeklyRank
 							? approximateWeeklyRank === 10
 								? "Top 10"
-								: `About ${nth(Math.max(0, approximateWeeklyRank - 5), {
-										bold: false,
-										jokes: false,
-								  })}`
+								: `About ${nth(Math.max(0, approximateWeeklyRank - 5))}`
 							: "Inactive this week",
 
 						inline: true,
