@@ -31,7 +31,7 @@ await login({
 	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
 	commandsGuildId: process.env.GUILD_ID,
 	async handleError(error, event) {
-		const { default: logError } = await import("./common/logError.js");
+		const { default: logError } = await import("./modules/logging/errors.js");
 
 		await logError(error, event);
 	},

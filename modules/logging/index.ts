@@ -14,7 +14,7 @@ import {
 	channelOverwriteUpdate,
 	channelOverwriteDelete,
 	channelUpdate,
-} from "./channel.js";
+} from "./channels.js";
 import {
 	memberKick,
 	memberPrune,
@@ -24,13 +24,13 @@ import {
 	guildMemberAdd,
 	guildMemberUpdate,
 	userUpdate,
-} from "./user.js";
+} from "./users.js";
 import {
 	messageDelete,
 	messageDeleteBulk,
 	messageReactionRemoveAll,
 	messageUpdate,
-} from "./message.js";
+} from "./messages.js";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,
@@ -47,8 +47,8 @@ import {
 	stickerUpdate,
 	stickerDelete,
 } from "./expressions.js";
-import { memberRoleUpdate, roleCreate, roleUpdate, roleDelete } from "./role.js";
-import { threadCreate, threadDelete, threadUpdate } from "./thread.js";
+import { memberRoleUpdate, roleCreate, roleUpdate, roleDelete } from "./roles.js";
+import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 
 const events: {
 	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;

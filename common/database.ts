@@ -9,7 +9,7 @@ import {
 import papaparse from "papaparse";
 import { client } from "strife.js";
 import { extractMessageExtremities } from "../util/discord.js";
-import logError from "./logError.js";
+import logError from "../modules/logging/errors.js";
 import { getLoggingThread } from "../modules/logging/misc.js";
 
 let timeouts: Record<

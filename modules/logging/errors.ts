@@ -1,8 +1,8 @@
 import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
-import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
-import { cleanDatabaseListeners } from "./database.js";
-import { commandInteractionToString } from "../util/discord.js";
+import log, { LoggingErrorEmoji } from "./misc.js";
+import { cleanDatabaseListeners } from "../../common/database.js";
+import { commandInteractionToString } from "../../util/discord.js";
 
 process
 	.on("uncaughtException", (error, origin) => logError(error, origin))
