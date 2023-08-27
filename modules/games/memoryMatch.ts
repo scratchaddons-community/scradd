@@ -205,11 +205,9 @@ async function playGame(
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
 			await interaction.message.edit(getBoard(turn, shown));
+			await buttonInteraction.deferUpdate();
 
-			if (shown.size === 1) {
-				await buttonInteraction.deferUpdate();
-				return;
-			}
+			if (shown.size === 1) return;
 			totalTurns++;
 
 			const selected = Array.from(
@@ -237,7 +235,6 @@ async function playGame(
 				turnInfo = await setupTurn(turn);
 			}
 			shown.clear();
-			await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
