@@ -175,7 +175,7 @@ export default async function contactMods(
 						? ""
 						: config.roles.mod?.toString(),
 				allowedMentions: { parse: ["roles"] },
-		}));
+		  }));
 
 	await thread.members.add(member, "Thread created");
 	return thread;
