@@ -195,7 +195,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	const iconData = icon ? await resolveIcon(icon) : undefined;
+	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: undefined, icon: undefined };
 	if (icon && !iconData)
 		return await interaction.reply({
 			ephemeral: true,
