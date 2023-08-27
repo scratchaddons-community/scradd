@@ -319,6 +319,11 @@ async function resolveIcon(icon: string) {
 	if (icon.startsWith("data:")) return { icon };
 
 	if (!/^https?:\/\//.test(icon)) return;
+	try {
+		new URL(icon);
+	} catch {
+		return;
+	}
 
 	const response = await fetch(icon, { method: "HEAD" });
 	if (!response.ok) return;
