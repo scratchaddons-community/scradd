@@ -1,4 +1,10 @@
-import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
+import {
+	ChannelType,
+	ForumChannel,
+	TextChannel,
+	type NonThreadGuildBasedChannel,
+	NewsChannel,
+} from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
 
@@ -112,3 +118,8 @@ export async function syncConfig() {
 	config.channels = newConfig.channels;
 }
 export default config;
+
+const threads = await config.guild.channels.fetchActiveThreads();
+export function getInitialChannelThreads(channel: ForumChannel | TextChannel | NewsChannel) {
+	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+}

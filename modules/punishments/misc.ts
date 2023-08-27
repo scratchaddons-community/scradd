@@ -11,7 +11,7 @@ import {
 	Message,
 	type BaseMessageOptions,
 } from "discord.js";
-import Database from "../../common/database.js";
+import Database, { DATABASE_THREAD } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { getLoggingThread } from "../logging/misc.js";
@@ -33,7 +33,7 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-const databases = await (await getLoggingThread("databases")).messages.fetch({ limit: 100 });
+const databases = await (await getLoggingThread(DATABASE_THREAD)).messages.fetch({ limit: 100 });
 const { url } =
 	databases
 		.find((message) => message.attachments.first()?.name === "robotop_warns.json")

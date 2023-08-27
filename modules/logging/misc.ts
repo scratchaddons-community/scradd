@@ -12,7 +12,7 @@ import {
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
-import config from "../../common/config.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
@@ -105,10 +105,8 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (!group) return config.channels.modlogs;
 
-	const threads = await config.channels.modlogs.threads.fetchActive();
-
 	return (
-		threads.threads.find((thread) => thread.name === group) ||
+		getInitialChannelThreads(config.channels.modlogs).find((thread) => thread.name === group) ||
 		(await config.channels.modlogs.threads.create({
 			name: group,
 			reason: "New logging thread",

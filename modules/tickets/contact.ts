@@ -162,7 +162,7 @@ export default async function contactMods(
 					...data,
 					embeds: [details, ...(data.embeds ?? [])],
 					content:
-						category === MOD_CATEGORY || process.env.NODE_ENV === "development"
+						category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
 							? ""
 							: config.roles.mod?.toString(),
 					allowedMentions: { parse: ["roles"] },
@@ -171,7 +171,7 @@ export default async function contactMods(
 		: thread.send({
 				embeds: [details],
 				content:
-					category === MOD_CATEGORY || process.env.NODE_ENV === "development"
+					category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
 						? ""
 						: config.roles.mod?.toString(),
 				allowedMentions: { parse: ["roles"] },

@@ -12,8 +12,9 @@ import constants from "../../common/constants.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 
-const databaseThread = await getLoggingThread("databases");
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
 		interaction.targetMessage.type !== MessageType.Default ||
