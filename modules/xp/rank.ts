@@ -25,10 +25,11 @@ export default async function getUserRank(
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
 	const members = await config.guild.members.fetch();
-	const serverRank = allXp
-		.filter(({ user }) => members.has(user))
-		.sort((one, two) => two.xp - one.xp)
-		.findIndex((info) => info.user === user.id);
+	const serverRank =
+		allXp
+			.filter(({ user }) => members.has(user))
+			.sort((one, two) => two.xp - one.xp)
+			.findIndex((info) => info.user === user.id) + 1;
 
 	async function makeCanvasFiles() {
 		if (!constants.canvasEnabled) return [];
@@ -108,11 +109,13 @@ export default async function getUserRank(
 						rank
 							? `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
 									"en-us",
-							  )} (${serverRank.toLocaleString(
-									"en-us",
-							  )}/${members.size.toLocaleString("en-us")} in the server)${
-									constants.footerSeperator
-							  }`
+							  )}${
+									serverRank
+										? ` (${serverRank.toLocaleString(
+												"en-us",
+										  )}/${members.size.toLocaleString("en-us")} in the server)`
+										: ""
+							  }${constants.footerSeperator}`
 							: ""
 					}View the leaderboard with /xp top`,
 				},
