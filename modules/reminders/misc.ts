@@ -77,7 +77,10 @@ if (
 	];
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases)) {
+if (
+	process.env.NODE_ENV === "production" &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases)
+) {
 	const { threads } = (await config.channels.mod?.threads.fetch()) ?? {};
 	const channel =
 		threads?.find(({ name }) => name === "Scradd Database Backups") ||

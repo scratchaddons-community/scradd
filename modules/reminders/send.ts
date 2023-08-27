@@ -176,7 +176,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						{
 							channel: reminder.channel,
 							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
-							id: SpecialReminders.BackupDatabases,
+							id: SpecialReminders.SyncRandomPotato,
 							user: client.user.id,
 						},
 					];
