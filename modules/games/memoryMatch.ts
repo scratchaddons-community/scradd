@@ -358,6 +358,7 @@ async function playGame(
 	async function endGame(content?: string, user?: User) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
+		await turnInfo.ping.delete();
 
 		await message.edit({ components: disableComponents((await message.fetch()).components) });
 
