@@ -222,13 +222,12 @@ async function playGame(
 			);
 			if (match) {
 				scores[turn % 2]?.push(...shown);
-				await interaction.message.edit(getBoard(turn));
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
 					await endGame();
 					return;
-				}
+				} else await interaction.message.edit(getBoard(turn));
 			}
 			if (!match || !bonusTurns) {
 				turn++;
@@ -242,9 +241,6 @@ async function playGame(
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
-				await turnInfo.ping.edit({
-					components: disableComponents(turnInfo.ping.components),
-				});
 				return endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
@@ -360,7 +356,12 @@ async function playGame(
 		CURRENTLY_PLAYING.delete(users[1].id);
 		await turnInfo.ping.delete();
 
-		await message.edit({ components: disableComponents((await message.fetch()).components) });
+		await message.edit({
+			components: getBoard(turn).components.map(({ components, type }) => ({
+				components: components.map((button) => ({ ...button, disabled: true })),
+				type,
+			})),
+		});
 
 		const firstScore = scores[0].length - (users[0].id === user?.id ? 2 : 0),
 			secondScore = scores[1].length - (users[1].id === user?.id ? 2 : 0);
