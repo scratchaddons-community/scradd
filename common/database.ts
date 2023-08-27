@@ -209,7 +209,7 @@ exitHook(async (callback) => {
 
 export async function backupDatabases(channel: TextBasedChannel) {
 	if (process.env.NODE_ENV !== "production") return;
-	
+
 	const attachments = Object.values(databases)
 		.map((database) => database?.attachments.first())
 		.filter((attachment): attachment is Attachment => Boolean(attachment));

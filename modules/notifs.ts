@@ -49,12 +49,12 @@ defineEvent("guildMemberAdd", async (member) => {
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
 		`Watch out! ${member.toString()} is here! They’re our **${memberCount}**!`,
 	];
-const greetings = [
-	...rawGreetings,
-	...rawGreetings,
-	...rawGreetings,
-	`I hope ${member.toString()}, our **${memberCount}** member, doesn’t give us up or let us down`,
-];
+	const greetings = [
+		...rawGreetings,
+		...rawGreetings,
+		...rawGreetings,
+		`I hope ${member.toString()}, our **${memberCount}** member, doesn’t give us up or let us down`,
+	];
 
 	await config.channels.welcome?.send(
 		`${constants.emojis.misc.join} ${
