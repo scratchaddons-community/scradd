@@ -98,7 +98,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		throw new TypeError("interaction.member is not a GuildMember!");
 
 	const name = interaction.fields.fields.get("name")?.value;
-	const color = interaction.fields.fields.get("color")?.value || "#000000";
+	const color =( interaction.fields.fields.get("color")?.value || "#000000") as Extract<ColorResolvable,string>;
 	const icon = interaction.fields.fields.get("icon")?.value;
 
 	const existingRole = getCustomRole(interaction.member);
@@ -204,7 +204,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 
 	if (existingRole) {
 		await existingRole.edit({
-			color: color as ColorResolvable,
+			color: color,
 			name: PREFIX + name,
 			reason: `Edited by ${interaction.user.tag}`,
 			position: (config.roles.staff?.position ?? 0) + 1,
@@ -215,7 +215,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	}
 
 	const role = await config.guild.roles.create({
-		color: (color as ColorResolvable) || "#000000",
+		color: (color),
 		name: PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
 		position: (config.roles.staff?.position ?? 0) + 1,
