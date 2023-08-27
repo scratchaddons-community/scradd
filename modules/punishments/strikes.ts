@@ -4,17 +4,14 @@ import {
 	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	time,
-	TimestampStyles,
 	User,
 	type RepliableInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import filterToStrike, { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
+import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
@@ -35,71 +32,14 @@ export async function getStrikes(
 		});
 	}
 
-	const user = selected instanceof GuildMember ? selected.user : selected;
 	const member =
 		selected instanceof GuildMember
 			? selected
-			: await config.guild.members.fetch(selected.id).catch(() => user);
-
-	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === selected.id)
-		.sort((one, two) => two.date - one.date);
-
-	const totalStrikeCount = Math.trunc(
-		strikes.reduce(
-			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
-			0,
-		),
-	);
-
-	await paginate(
-		strikes,
-		(strike) =>
-			`${strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"}\`${
-				strike.id
-			}\`${
-				strike.count === 1
-					? ""
-					: ` (${
-							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
-					  })`
-			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
-			}`,
+			: await config.guild.members.fetch(selected.id).catch(() => selected);
+	await listStrikes(
+		member,
 		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
-		{
-			title: `${member.displayName}’s strikes`,
-			format: member,
-			singular: "strike",
-			failMessage: `${selected.toString()} has never been warned!`,
-
-			user: interaction.user,
-			totalCount: totalStrikeCount,
-			ephemeral: true,
-
-			generateComponents(filtered) {
-				if (filtered.length > 5) {
-					return [
-						{
-							type: ComponentType.StringSelect,
-							customId: "_selectStrike",
-							placeholder: "View more information on a strike",
-
-							options: filtered.map((strike) => ({
-								label: strike.id.toString(),
-								value: strike.id.toString(),
-							})),
-						},
-					];
-				}
-				return filtered.map((strike) => ({
-					label: strike.id.toString(),
-					style: ButtonStyle.Secondary,
-					customId: `${strike.id}_strike`,
-					type: ComponentType.Button,
-				}));
-			},
-		},
+		interaction.user,
 	);
 }
 

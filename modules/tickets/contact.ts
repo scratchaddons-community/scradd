@@ -10,15 +10,13 @@ import {
 	InteractionResponse,
 	InteractionType,
 	ModalSubmitInteraction,
-	time,
-	TimestampStyles,
 	type PrivateThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
-import { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
+import { listStrikes } from "../punishments/misc.js";
 import {
 	type Category,
 	SA_CATEGORY,
@@ -90,7 +88,7 @@ export default async function contactMods(
 		| ButtonInteraction,
 	options: Category | GuildMember,
 ) {
-	const option = options instanceof GuildMember ? MOD_CATEGORY : options;
+	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
 		options instanceof GuildMember
@@ -113,7 +111,7 @@ export default async function contactMods(
 						server: {},
 						other: {},
 						[MOD_CATEGORY]: {},
-					}[option],
+					}[category],
 			  ).map<APIEmbedField>(([name, key]) => ({
 					name,
 					value: interaction.fields.getTextInputValue(key),
@@ -121,11 +119,11 @@ export default async function contactMods(
 			  }))
 			: [];
 	const body =
-		option !== "role" &&
+		category !== "role" &&
 		interaction.type === InteractionType.ModalSubmit &&
 		interaction.fields.getTextInputValue("BODY");
 	const details = {
-		title: categoryToDescription[option],
+		title: categoryToDescription[category],
 
 		color: member.displayColor,
 
@@ -146,7 +144,7 @@ export default async function contactMods(
 	const thread = (await config.channels.tickets.threads.create({
 		name: `${member.user.displayName} (${member.id})`,
 		reason: `${interaction.user.tag} contacted ${
-			option === MOD_CATEGORY ? member.user.tag : "mods"
+			category === MOD_CATEGORY ? member.user.tag : "mods"
 		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
@@ -154,112 +152,32 @@ export default async function contactMods(
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
-			option === MOD_CATEGORY ? member.toString() : "mods"
+			category === MOD_CATEGORY ? member.toString() : "mods"
 		}: ${thread.toString()}`,
 	);
 
-	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === member.id)
-		.sort((one, two) => two.date - one.date);
-
-	const totalStrikeCount = Math.trunc(
-		strikes.reduce(
-			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
-			0,
-		),
-	);
-
-	const numberOfPages = Math.ceil(strikes.length / 15);
-
-	const filtered = strikes.filter((_, index) => index < 15);
-
-	await thread.send({
-		components: filtered.length
-			? [
-					{
-						type: ComponentType.ActionRow,
-
-						components:
-							filtered.length > 5
-								? [
-										{
-											type: ComponentType.StringSelect,
-											customId: "_selectStrike",
-											placeholder: "View more information on a strike",
-
-											options: filtered.map((strike) => ({
-												label: strike.id.toString(),
-												value: strike.id.toString(),
-											})),
-										},
-								  ]
-								: filtered.map((strike) => ({
-										type: ComponentType.Button,
-										customId: `${strike.id}_strike`,
-										label: strike.id.toString(),
-										style: ButtonStyle.Secondary,
-								  })),
-					},
-			  ]
-			: [],
-
-		embeds: [
-			details,
-			{
-				title: `${member.displayName}’s strikes`,
-				description: filtered.length
-					? filtered
-							.map(
-								(strike) =>
-									`${
-										strike.removed
-											? "~~"
-											: strike.date + EXPIRY_LENGTH > Date.now()
-											? ""
-											: "*"
-									}\`${strike.id}\`${
-										strike.count === 1
-											? ""
-											: ` (${
-													strike.count === PARTIAL_STRIKE_COUNT
-														? "verbal"
-														: `\\*${strike.count}`
-											  })`
-									} - ${time(
-										new Date(strike.date),
-										TimestampStyles.RelativeTime,
-									)}${
-										strike.removed
-											? "~~"
-											: strike.date + EXPIRY_LENGTH > Date.now()
-											? ""
-											: "*"
-									}`,
-							)
-							.join("\n")
-					: `${constants.emojis.statuses.no} ${member.toString()} has never been warned!`,
-
-				footer: filtered.length
-					? {
-							text: `Page 1/${numberOfPages}${
-								constants.footerSeperator
-							} ${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-					  }
-					: undefined,
-
-				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
-				color: member.displayColor,
-			},
-		],
-		content:
-			option === MOD_CATEGORY || process.env.NODE_ENV === "development"
-				? ""
-				: config.roles.mod?.toString(),
-		allowedMentions: { parse: ["roles"] },
-	});
+	await (["appeal", "report", "other", MOD_CATEGORY].includes(category)
+		? listStrikes(member, (data) =>
+				thread.send({
+					...data,
+					embeds: [details, ...(data.embeds ?? [])],
+					content:
+						category === MOD_CATEGORY || process.env.NODE_ENV === "development"
+							? ""
+							: config.roles.mod?.toString(),
+					allowedMentions: { parse: ["roles"] },
+				}),
+		  )
+		: thread.send({
+				embeds: [details],
+				content:
+					category === MOD_CATEGORY || process.env.NODE_ENV === "development"
+						? ""
+						: config.roles.mod?.toString(),
+				allowedMentions: { parse: ["roles"] },
+		}));
 
 	await thread.members.add(member, "Thread created");
-
 	return thread;
 }
 
