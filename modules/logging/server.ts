@@ -392,7 +392,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to welcome messages with a sticker.” ${
-				noJoinReplies ? "enabled" : "disabled"
+				noJoinReplies ? "disabled" : "enabled"
 			}`,
 			"server",
 		);
@@ -407,7 +407,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a random welcome message when someone joins this server.” ${
-				noJoins ? "enabled" : "disabled"
+				noJoins ? "disabled" : "enabled"
 			}`,
 			"server",
 		);
@@ -420,7 +420,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 	)
 		await log(
 			`${LoggingEmojis.SettingChange} “Send a message when someone boosts this server.” ${
-				noBoosts ? "enabled" : "disabled"
+				noBoosts ? "disabled" : "enabled"
 			}`,
 			"server",
 		);
@@ -436,7 +436,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 			`${
 				LoggingEmojis.SettingChange
 			} “Prompt members to reply to Server Subscription congratulation messages with a sticker” ${
-				noSubscriptionReplies ? "enabled" : "disabled"
+				noSubscriptionReplies ? "disabled" : "enabled"
 			}`,
 			"server",
 		);
@@ -452,7 +452,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 			`${
 				LoggingEmojis.SettingChange
 			} “Send a message when someone purchases or renews a Server Subscripton” ${
-				noSubscriptions ? "enabled" : "disabled"
+				noSubscriptions ? "disabled" : "enabled"
 			}`,
 			"server",
 		);
