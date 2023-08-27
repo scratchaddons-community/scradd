@@ -1,5 +1,4 @@
 import { defineEvent } from "strife.js";
-import fetch from "node-fetch";
 import { getSettings } from "./settings.js";
 
 defineEvent("messageCreate", async (message) => {
