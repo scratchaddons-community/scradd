@@ -54,7 +54,7 @@ export async function channelOverwriteCreate(
 				: entry.extra.type === AuditLogOptionsType.Member
 				? userMention(entry.extra.id)
 				: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
+		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }
@@ -68,7 +68,7 @@ export async function channelOverwriteUpdate(
 				: entry.extra.type === AuditLogOptionsType.Member
 				? userMention(entry.extra.id)
 				: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
+		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }
@@ -82,7 +82,7 @@ export async function channelOverwriteDelete(
 				: entry.extra.type === AuditLogOptionsType.Member
 				? userMention(entry.extra.id)
 				: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} updated${extraAuditLogsInfo(entry)}`,
+		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
 		"channels",
 	);
 }

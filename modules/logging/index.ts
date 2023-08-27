@@ -129,7 +129,7 @@ const events: {
 		await log(
 			`${LoggingEmojis.Integration} Permissions for ${userMention(
 				entry.extra.applicationId,
-			)}’s commands updated${extraAuditLogsInfo(entry)}`,
+			)}’s commands changed${extraAuditLogsInfo(entry)}`,
 			"server",
 		);
 	},
