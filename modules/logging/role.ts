@@ -53,7 +53,7 @@ export async function roleCreate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleCr
 }
 
 export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUpdate>) {
-	const iconChanges = [];
+	let iconChanged = false;
 
 	for (const change of entry.changes) {
 		const key = change.key as keyof APIRole | "icon_hash";
@@ -128,30 +128,22 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "icon_hash":
 			case "unicode_emoji": {
-				iconChanges.push(
-					change as { key: "icon_hash" | "unicode_emoji"; new: string; old: string },
-				);
+				iconChanged ||= true;
 			}
 		}
 	}
 
-	if (!iconChanges.length) return;
-	const newIcon = iconChanges.find((change) => change.new);
+	if (!iconChanged || !(entry.target instanceof Role)) return;
 	await log(
-		`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role icon ${
-			newIcon?.key === "unicode_emoji"
-				? `set to ${newIcon.new}`
-				: newIcon
+		`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role icon ${
+			entry.target.unicodeEmoji
+				? `set to ${entry.target.unicodeEmoji}`
+				: entry.target.icon
 				? "changed"
 				: "removed"
 		}${extraAuditLogsInfo(entry)}`,
 		"server",
-		{
-			files:
-				newIcon?.key === "icon_hash" && entry.target instanceof Role
-					? [entry.target.iconURL({ size: 128 }) ?? ""]
-					: [],
-		},
+		{ files: entry.target.icon ? [entry.target.iconURL({ size: 128 }) ?? ""] : [] },
 	);
 }
 
