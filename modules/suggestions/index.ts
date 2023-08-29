@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import { client, defineCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
-import getTop from "./getTop.js";
+import top from "./top.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 
@@ -49,8 +49,8 @@ defineEvent("threadDelete", (thread) => {
 
 defineCommand(
 	{
-		name: "get-top-suggestions",
-		description: "Get the top suggestions",
+		name: "top-suggestions",
+		description: "List the top suggestions",
 
 		options: {
 			answer: {
@@ -65,5 +65,5 @@ defineCommand(
 			},
 		},
 	},
-	getTop,
+	top,
 );

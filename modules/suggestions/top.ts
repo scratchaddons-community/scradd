@@ -5,7 +5,7 @@ import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
-export default async function getTop(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function top(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const authorFilter = interaction.options.getMember("user");
 	const answerFilter = interaction.options.getString("answer");
 	const { suggestions } = config.channels;
