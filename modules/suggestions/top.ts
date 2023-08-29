@@ -35,7 +35,7 @@ export default async function top(interaction: ChatInputCommandInteraction<"cach
 				`${title}`,
 				"url" in reference
 					? reference.url
-					: `https://discord.com/channels/${config.guild.id}/${reference.id}/${reference.id}`,
+					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
 				answer,
 			)}${
 				nick
