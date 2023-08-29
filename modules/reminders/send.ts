@@ -12,7 +12,7 @@ import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
-import { boardDatabase, boardReactionCount } from "../board/misc.js";
+import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
 import updateBoard from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
@@ -200,8 +200,9 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						const message = await channel.messages
 							.fetch(info.source)
 							.catch(() => void 0);
-						if (message) {
-							await updateBoard(message);
+						const reaction = message?.reactions.resolve(BOARD_EMOJI);
+						if (reaction) {
+							await updateBoard(reaction);
 							break;
 						}
 					}

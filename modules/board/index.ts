@@ -26,7 +26,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	if (user.id === message.author.id && process.env.NODE_ENV === "production")
 		return await reaction.users.remove(user);
 
-	await updateBoard(message);
+	await updateBoard(reaction);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
@@ -35,7 +35,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 
 	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
 
-	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
+	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
 });
 
 defineCommand(
@@ -77,7 +77,11 @@ defineCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		await updateBoard(interaction.targetMessage);
+		const reaction = interaction.targetMessage.reactions.resolve(BOARD_EMOJI) ?? {
+			count: 0,
+			message: interaction.targetMessage,
+		};
+		await updateBoard(reaction);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
 	},
 );

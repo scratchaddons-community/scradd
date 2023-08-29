@@ -1,74 +1,58 @@
-import { ChannelType, Message } from "discord.js";
+import { ChannelType, Message, MessageReaction } from "discord.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
-import { boardDatabase, boardReactionCount, BOARD_EMOJI, generateBoardMessage } from "./misc.js";
+import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 
 /**
  * Update the count on a message on the board.
  *
  * @param message - The board message to update.
  */
-export default async function updateBoard(message: Message) {
+export default async function updateBoard(
+	reaction: MessageReaction | { count: number; message: Message },
+) {
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
-	const count = message.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
+	const { count, message } = reaction;
 	const minReactions = boardReactionCount(message.channel);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
-	const boardMessage = boardMessageId
-		? await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0)
-		: undefined;
+	const boardMessage =
+		boardMessageId &&
+		(await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0));
 
 	if (boardMessage) {
 		if (count < Math.floor(minReactions * 0.8)) {
 			await boardMessage.delete();
+			updateById({ source: message.id, onBoard: 0, reactions: count });
 		} else {
 			const content = boardMessage.content.replace(/\d+/, count.toString());
 			await boardMessage.edit(content);
+			updateById({ source: message.id, reactions: count });
 		}
 	} else if (count >= minReactions) {
-		await giveXp(message.author, message.url);
+		const fetched = await message.fetch();
+		await giveXp(fetched.author, fetched.url);
 
 		const sentMessage = await config.channels.board.send({
-			...(await generateBoardMessage(message)),
-			allowedMentions: getSettings(message.author).boardPings ? undefined : { users: [] },
+			...(await generateBoardMessage(fetched)),
+			allowedMentions: getSettings(fetched.author).boardPings ? undefined : { users: [] },
 		});
 
 		if (config.channels.board.type === ChannelType.GuildAnnouncement)
 			await sentMessage.crosspost();
 
-		boardDatabase.data = [
-			...boardDatabase.data.filter((item) => item.source !== message.id),
-			...(count
-				? ([
-						{
-							channel: message.channel.id,
-							onBoard: sentMessage.id,
-							reactions: count,
-							source: message.id,
-							user: message.author.id,
-						},
-				  ] as const)
-				: []),
-		];
-	}
-
-	if (boardMessage || count < minReactions) {
-		boardDatabase.data = [
-			...boardDatabase.data.filter((item) => item.source !== message.id),
-			...(count
-				? ([
-						{
-							channel: message.channel.id,
-							onBoard: boardMessage?.id ?? 0,
-							reactions: count,
-							source: message.id,
-							user: message.author.id,
-						},
-				  ] as const)
-				: []),
-		];
+		updateById(
+			{ source: fetched.id, onBoard: sentMessage.id, reactions: count },
+			{ channel: fetched.channel.id, user: fetched.author.id },
+		);
+	} else {
+		const fetched = await message.fetch();
+		updateById(
+			{ source: message.id, reactions: count, onBoard: 0 },
+			{ channel: message.channel.id, user: fetched.author.id },
+		);
 	}
 
 	const top = [...boardDatabase.data].sort((one, two) => two.reactions - one.reactions);
@@ -96,4 +80,21 @@ export default async function updateBoard(message: Message) {
 				.map(async (pin) => await pin.unpin("No longer a top-reacted message")),
 		);
 	}
+}
+
+function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
+	newData: typeof boardDatabase.data[number]["source"] extends string
+		? Pick<typeof boardDatabase.data[number], Keys> & { source: string }
+		: never,
+	oldData?: Omit<typeof boardDatabase.data[number], Keys | "source">,
+) {
+	const data = [...boardDatabase.data];
+	const index = data.findIndex((suggestion) => suggestion.source === newData.source);
+	const found = data[index];
+	if (found) {
+		data[index] = { ...found, ...newData };
+	} else if (oldData) {
+		data.push({ ...oldData, ...newData } as unknown as typeof boardDatabase.data[number]);
+	}
+	boardDatabase.data = data;
 }
