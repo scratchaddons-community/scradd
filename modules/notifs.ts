@@ -82,7 +82,6 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** talked about opacity slider too much`,
 					`**${member.user.displayName}** did the no-no`,
 					`**${member.user.displayName}** was banished to the deep pits of hell`,
-					`Someone mailed **${member.user.displayName}** a pipe bomb`,
 					`Oop, the ban hammer met **${member.user.displayName}**`,
 			  ]
 			: [
