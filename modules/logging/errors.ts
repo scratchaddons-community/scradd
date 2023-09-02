@@ -25,7 +25,11 @@ export default async function logError(
 
 		const name =
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
-		if (["DeprecationWarning", "ExperimentalWarning"].includes(name)) return;
+		if (
+			"ExperimentalWarning" == name ||
+			("DeprecationWarning" == name && process.env.NODE_ENV !== "production")
+		)
+			return;
 
 		return await log(
 			`${LoggingErrorEmoji} **${name}** occurred in ${
