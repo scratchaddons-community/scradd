@@ -87,26 +87,19 @@ async function getConfig() {
 		name: string,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
-	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
+	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
-		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.has(channel.type)) return false;
-
-			switch (matchType) {
-				case "full": {
-					return channel.name === name;
-				}
-				case "partial": {
-					return channel.name.includes(name);
-				}
-				case "start": {
-					return channel.name.startsWith(name);
-				}
-				case "end": {
-					return channel.name.endsWith(name);
-				}
-			}
-		});
+		return channels.find(
+			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> =>
+				!!channel &&
+				types.has(channel.type) &&
+				{
+					full: channel.name === name,
+					partial: channel.name.includes(name),
+					start: channel.name.startsWith(name),
+					end: channel.name.endsWith(name),
+				}[matchType],
+		);
 	}
 }
 
