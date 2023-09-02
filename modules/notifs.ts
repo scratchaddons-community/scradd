@@ -30,7 +30,7 @@ defineEvent("guildMemberAdd", async (member) => {
 			: countString.includes("69")
 			? " (nice)"
 			: countString.includes("87")
-			? `WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+			? ` (WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
 			: "");
 
 	const rawGreetings = [
