@@ -31,7 +31,16 @@ export const boardDatabase = new Database<{
 }>("board");
 await boardDatabase.init();
 
-const COUNTS = { scradd: 2, admins: 2, mods: 3, misc: 4, default: 6, memes: 8, info: 12 };
+const COUNTS = {
+	scradd: 2,
+	admins: 2,
+	mods: 3,
+	private: 4,
+	misc: 5,
+	default: 6,
+	memes: 8,
+	info: 12,
+};
 /**
  * Determines the board reaction count for a channel.
  *
@@ -50,16 +59,16 @@ export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake 
 	const baseCount = baseReactionCount(channel.id);
 	if (!(channel instanceof BaseChannel)) return baseCount;
 
-	if (!channel.isTextBased()) return COUNTS.misc;
+	if (!channel.isTextBased()) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.misc;
+	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
 	if (baseChannel.isVoiceBased()) return COUNTS.misc;
 
 	return (
 		baseReactionCount(baseChannel.id) ??
 		{
 			[config.channels.info?.id || ""]: COUNTS.info,
-			[config.channels.modlogs?.parent?.id || ""]: COUNTS.mods,
+			[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ??
 		COUNTS.default
@@ -69,10 +78,10 @@ function baseReactionCount(id: Snowflake) {
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
 	return {
-		[config.channels.tickets?.id || ""]: COUNTS.mods,
+		[config.channels.tickets?.id || ""]: COUNTS.private,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
-		"853256939089559583": COUNTS.misc, // #ba-doosters
-		"869662117651955802": COUNTS.misc, // #devs-only
+		"853256939089559583": COUNTS.private, // #ba-doosters
+		"869662117651955802": COUNTS.private, // #devs-only
 		"811065897057255424": COUNTS.memes, // #memes
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
 		"806656240129671188": COUNTS.memes, // #showcase
