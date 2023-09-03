@@ -124,32 +124,21 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							style: ButtonStyle.Danger,
 							customId: "confirm",
 						},
-						{
-							type: ComponentType.Button,
-							label: "Cancel",
-							customId: "cancel",
-							style: ButtonStyle.Secondary,
-						},
 					],
 				},
 			],
 			fetchReply: true,
+			ephemeral: true,
 		});
 
 		const collector = message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
-			filter: (buttonInteraction) => interaction.user.id === buttonInteraction.user.id,
 			max: 1,
 			time: constants.collectorTime,
 		});
 
 		collector
 			.on("collect", async (buttonInteraction) => {
-				if (buttonInteraction.customId === "cancel") {
-					await buttonInteraction.deferUpdate();
-					return;
-				}
-
 				if (unbanTime && untilUnban) {
 					if (untilUnban < 30_000 || untilUnban > 315_360_000_000) {
 						await interaction.reply({
