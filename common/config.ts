@@ -24,13 +24,12 @@ async function getConfig() {
 			  ).tag_name
 			: "master";
 
+	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
 		roles: {
-			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff:
-				roles.find((role) => role.name.toLowerCase().includes("staff")) ||
-				roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
