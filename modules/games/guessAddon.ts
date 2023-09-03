@@ -374,7 +374,7 @@ export default async function guessAddon(
 						"addon",
 						(
 							await config.guild.commands.fetch()
-						).find((command) => command.name === "addon")?.id ?? "",
+						).find((command) => command.name === "addon")?.id ?? "0",
 					)} command for more information about this addon!*`,
 
 					author: {

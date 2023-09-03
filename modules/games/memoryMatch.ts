@@ -370,7 +370,7 @@ async function playGame(
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await config.guild.members.fetch(users[+secondWon]?.id || "");
+		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
 
 		await thread?.setArchived(true, "Game over");
 
@@ -397,8 +397,8 @@ async function playGame(
 
 		if (tournament) {
 			await logGame({
-				winner: users[+secondWon]?.id ?? "",
-				loser: users[+!secondWon]?.id ?? "",
+				winner: users[secondWon ? 1 : 0].id ,
+				loser: users[secondWon ? 0 : 1].id ,
 				url,
 			});
 		}
@@ -425,7 +425,7 @@ async function setupGame(difficulty: 2 | 4) {
 			"💩",
 			"🍢",
 			...(process.env.NODE_ENV === "production"
-				? [
+				? ([
 						{ name: "bowling_ball", id: "1104935019232899183" },
 						{ name: "hog", id: "1090372592642306048" },
 						{ name: "mater", id: "1073805840584282224" },
@@ -435,7 +435,7 @@ async function setupGame(difficulty: 2 | 4) {
 						{ name: "sxd", id: "962798819572056164" },
 						{ name: "wasteof", id: "1044651861682176080" },
 						{ name: "callum", id: "1119305606323523624" },
-				  ]
+				  ] as const)
 				: []),
 		].map((emoji): [string, APIMessageComponentEmoji] =>
 			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],

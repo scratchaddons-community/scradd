@@ -57,7 +57,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 						),
 				),
 				{
-					channel: "",
+					channel: "0",
 					date: +unbanTime,
 					user: client.user.id,
 					id: SpecialReminders.Unban,
@@ -161,7 +161,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
-							channel: "",
+							channel: "0",
 							date: +unbanTime,
 							user: client.user.id,
 							id: SpecialReminders.Unban,

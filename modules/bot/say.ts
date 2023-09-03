@@ -24,7 +24,7 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 	if (!interaction.channel) return [];
 	if (!fetchedChannels.has(interaction.channel.id)) {
 		interaction.channel.messages.fetch({ limit: 100 }).then(
-			() => fetchedChannels.add(interaction.channel?.id ?? ""),
+			() => interaction.channel && fetchedChannels.add(interaction.channel.id),
 			() => void 0,
 		);
 	}
@@ -170,7 +170,7 @@ export async function say(
 		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
-				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "",
+				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,

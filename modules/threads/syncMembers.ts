@@ -71,7 +71,6 @@ export async function updateMemberThreads(
 
 			const inThread = thread.members.resolve(newMember.id);
 			if (qualifies) {
-
 				if (!inThread) await thread.members.add(newMember, "Has qualifying role");
 			} else if (inThread) {
 				await thread.members.remove(newMember.id, "Has no qualifying role");

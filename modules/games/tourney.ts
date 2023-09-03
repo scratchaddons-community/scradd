@@ -30,17 +30,16 @@ export async function logGame({
 	const match = await getMatch([winner, loser]);
 	if (!message || !match) return false;
 
-	if (winner === match[0]) match[2] = (Number(match[2]) + 1).toString();
-	else match[3] = (Number(match[3]) + 1).toString();
+	if (winner === match[0]) match[2] = `${Number(match[2]) + 1}`;
+	else match[3] = `${Number(match[3]) + 1}`;
 
 	const matches = await getMatches();
 	const newMatches = matches
 		.map((players) => {
-			const newMatch =
-				players?.includes(winner) && players.includes(loser) ? match : players ?? [];
-			return `${userMention(newMatch[0] ?? "")}v${userMention(newMatch[1] ?? "")} ${
-				newMatch[2]
-			}-${newMatch[3]}`;
+			const newMatch = players.includes(winner) && players.includes(loser) ? match : players;
+			return `${userMention(newMatch[0])}v${userMention(newMatch[1])} ${newMatch[2]}-${
+				newMatch[3]
+			}`;
 		})
 		.join("\n");
 	await message.edit(`${MESSAGE_HEADER}\n${newMatches}`);
@@ -55,7 +54,7 @@ export async function logGame({
 /** `[idOne, idTwo, oneWon, twoWon][]` */
 async function getMatch(ids: [Snowflake, Snowflake]) {
 	const matches = await getMatches();
-	return matches.find((players) => players?.includes(ids[0]) && players.includes(ids[1]));
+	return matches.find((players) => players.includes(ids[0]) && players.includes(ids[1]));
 }
 
 async function getMatches() {
@@ -65,7 +64,15 @@ async function getMatches() {
 	return message.content
 		.split("\n")
 		.slice(1)
-		.map((line) => line.match(/^<@(\d+)>v<@(\d+)> (\d)-(\d)$/)?.slice(1));
+		.map(
+			(line) =>
+				line.match(/^<@(\d+)>v<@(\d+)> (\d)-(\d)$/)?.slice(1) as [
+					Snowflake,
+					Snowflake,
+					`${number}`,
+					`${number}`,
+				],
+		);
 }
 
 async function getMessage() {

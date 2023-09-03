@@ -35,11 +35,14 @@ export function getUserReminders(id: string) {
 		.sort((one, two) => one.date - two.date);
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Weekly)) {
+if (
+	config.channels.announcements &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Weekly)
+) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
-			channel: config.channels.announcements?.id ?? "",
+			channel: config.channels.announcements.id,
 			date: Date.now() + 302_400_000,
 			reminder: undefined,
 			id: SpecialReminders.Weekly,
@@ -48,11 +51,14 @@ if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.
 	];
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.UpdateSACategory)) {
+if (
+	config.channels.suggestions?.parent &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.UpdateSACategory)
+) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
-			channel: config.channels.suggestions?.parent?.id ?? "",
+			channel: config.channels.suggestions.parent.id,
 			date: Date.now(),
 			reminder: undefined,
 			id: SpecialReminders.UpdateSACategory,
@@ -62,8 +68,8 @@ if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.
 }
 
 if (
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Bump) &&
-	process.env.NODE_ENV === "production"
+	process.env.NODE_ENV === "production" &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Bump)
 ) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
@@ -78,8 +84,8 @@ if (
 }
 
 if (
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases) &&
-	process.env.NODE_ENV === "production"
+	process.env.NODE_ENV === "production" &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases)
 ) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
@@ -93,11 +99,14 @@ if (
 	];
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomPotato)) {
+if (
+	config.channels.board &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomPotato)
+) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
-			channel: config.channels.board?.id ?? "",
+			channel: config.channels.board.id,
 			date: Date.now(),
 			id: SpecialReminders.SyncRandomPotato,
 			user: client.user.id,
