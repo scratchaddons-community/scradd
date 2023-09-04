@@ -1,10 +1,13 @@
 import { userMention, type Snowflake } from "discord.js";
-import config from "../../common/config.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
 
 const MESSAGE_HEADER = "## Pending Rounds";
 
-const { threads } = (await config.channels.mod?.threads.fetch()) ?? {};
-const tourneyThread = threads?.find(({ name }) => name === "Memory Match Tournament management");
+const tourneyThread =
+	config.channels.mod &&
+	getInitialChannelThreads(config.channels.mod).find(
+		({ name }) => name === "Memory Match Tournament management",
+	);
 
 export async function playNeeded(ids: [Snowflake, Snowflake]) {
 	const match = await getMatch(ids);

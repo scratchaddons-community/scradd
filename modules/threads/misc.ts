@@ -28,7 +28,7 @@ export function getThreadConfig(thread: AnyThreadChannel) {
 					keepOpen: false,
 				},
 				[config.channels.admin?.id || ""]: {
-					roles: config.roles.admin ? [config.roles.admin.id] : [],
+					roles: config.roles.staff ? [config.roles.staff.id] : [],
 					keepOpen: false,
 				},
 		  }[thread.parent?.id || ""] ?? { roles: [], keepOpen: false };

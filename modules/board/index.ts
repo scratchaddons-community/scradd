@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import makeSlideshow, { defaultMinReactions } from "./explore.js";
+import makeSlideshow, { NO_POTATOES_MESSAGE, defaultMinReactions } from "./explore.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { client, defineCommand, defineEvent, defineButton } from "strife.js";
@@ -13,22 +13,20 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
-	if (reaction.emoji.name === BOARD_EMOJI) {
-		if (
-			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
-			(message.channel.id === config.channels.board?.id &&
-				message.author.id === client.user.id) ||
-			[`explore-${reactionsName}`, `explore${reactionsName}`].includes(
-				message.interaction?.commandName || "",
-			)
-		) {
-			await reaction.users.remove(user);
+	if (reaction.emoji.name !== BOARD_EMOJI) return;
 
-			return;
-		}
+	if (
+		message.author.id === client.user.id &&
+		(message.channel.id === config.channels.board?.id || message.webhookId) &&
+		(message.content.startsWith(`**${BOARD_EMOJI}`) ||
+			message.content.endsWith(NO_POTATOES_MESSAGE))
+	)
+		return;
 
-		await updateBoard(message);
-	}
+	if (user.id === message.author.id && process.env.NODE_ENV === "production")
+		return await reaction.users.remove(user);
+
+	await updateBoard(message);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;

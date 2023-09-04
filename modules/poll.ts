@@ -7,12 +7,13 @@ import {
 } from "discord.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
+import { BOARD_EMOJI } from "./board/misc.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { defineCommand, defineEvent, client, defineModal } from "strife.js";
 
 const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
 const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
-const bannedReactions = new Set("🥔");
+const bannedReactions = new Set(BOARD_EMOJI);
 
 defineCommand(
 	{

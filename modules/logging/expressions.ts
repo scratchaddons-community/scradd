@@ -75,9 +75,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 									`${(change.old as APISticker["description"]) ?? ""}`.split(
 										"\n",
 									),
-									`${(change.new as APISticker["description"]) ?? ""}`.split(
-										"\n",
-									),
+									`${entry.target.description ?? ""}`.split("\n"),
 									{ lineterm: "" },
 								)
 									.join("\n")

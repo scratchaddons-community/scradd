@@ -205,11 +205,9 @@ async function playGame(
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
 			await interaction.message.edit(getBoard(turn, shown));
+			await buttonInteraction.deferUpdate();
 
-			if (shown.size === 1) {
-				await buttonInteraction.deferUpdate();
-				return;
-			}
+			if (shown.size === 1) return;
 			totalTurns++;
 
 			const selected = Array.from(
@@ -222,13 +220,12 @@ async function playGame(
 			);
 			if (match) {
 				scores[turn % 2]?.push(...shown);
-				await interaction.message.edit(getBoard(turn));
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
 					await endGame();
 					return;
-				}
+				} else await interaction.message.edit(getBoard(turn));
 			}
 			if (!match || !bonusTurns) {
 				turn++;
@@ -238,13 +235,9 @@ async function playGame(
 				turnInfo = await setupTurn(turn);
 			}
 			shown.clear();
-			await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
-				await turnInfo.ping.edit({
-					components: disableComponents(turnInfo.ping.components),
-				});
 				return endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
@@ -335,7 +328,7 @@ async function playGame(
 				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown, ...scores].includes(id);
+					const discovered = [...shown, ...scores.flat()].includes(id);
 
 					return {
 						type: ComponentType.Button,
@@ -358,8 +351,14 @@ async function playGame(
 	async function endGame(content?: string, user?: User) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
+		await turnInfo.ping.delete();
 
-		await message.edit({ components: disableComponents((await message.fetch()).components) });
+		await message.edit({
+			components: getBoard(turn).components.map(({ components, type }) => ({
+				components: components.map((button) => ({ ...button, disabled: true })),
+				type,
+			})),
+		});
 
 		const firstScore = scores[0].length - (users[0].id === user?.id ? 2 : 0),
 			secondScore = scores[1].length - (users[1].id === user?.id ? 2 : 0);

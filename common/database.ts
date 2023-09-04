@@ -9,7 +9,7 @@ import {
 import papaparse from "papaparse";
 import { client } from "strife.js";
 import { extractMessageExtremities } from "../util/discord.js";
-import logError from "./logError.js";
+import logError from "../modules/logging/errors.js";
 import { getLoggingThread } from "../modules/logging/misc.js";
 
 let timeouts: Record<
@@ -208,6 +208,8 @@ exitHook(async (callback) => {
 });
 
 export async function backupDatabases(channel: TextBasedChannel) {
+	if (process.env.NODE_ENV !== "production") return;
+
 	const attachments = Object.values(databases)
 		.map((database) => database?.attachments.first())
 		.filter((attachment): attachment is Attachment => Boolean(attachment));

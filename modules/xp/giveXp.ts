@@ -96,12 +96,17 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
-	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
+	const members = await config.guild.members.fetch();
+	const rank = xp
+		.filter(({ user }) => members.has(user))
+		.sort((one, two) => two.xp - one.xp)
+		.findIndex((info) => info.user === user.id);
 
 	if (
-		config.roles.epic &&
-		rank / config.guild.memberCount < 0.01 &&
+		rank > -1 &&
+		(config.guild.memberCount > 2000 ? rank < 20 : rank / config.guild.memberCount < 0.01) &&
 		member &&
+		config.roles.epic &&
 		!member.roles.resolve(config.roles.epic.id)
 	) {
 		await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
@@ -180,7 +185,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
-					text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank${
+					text: `View your XP with /xp rank${
 						showButton ? "" : "\nToggle pings with /settings"
 					}`,
 				},
