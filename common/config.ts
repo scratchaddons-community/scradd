@@ -9,7 +9,7 @@ import constants from "./constants.js";
 import { client } from "strife.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
-if (!guild.available) throw new ReferenceError("Guid is unavailable!");
+if (!guild.available) throw new ReferenceError("Guild is unavailable!");
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
