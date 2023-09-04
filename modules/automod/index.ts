@@ -100,6 +100,10 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
 });
+defineEvent("guildMemberAdd", async (member) => {
+	if (member.guild.id !== config.guild.id) return;
+	await changeNickname(member);
+});
 defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
 	await changeNickname(member);
