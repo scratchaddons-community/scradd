@@ -577,7 +577,7 @@ export async function paginate<Item>(
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
-	const ITEMS_PER_PAGE = 15;
+	const ITEMS_PER_PAGE = 20;
 
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");

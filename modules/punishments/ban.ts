@@ -197,7 +197,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 				await config.guild.bans.create(userToBan, {
 					reason:
 						(reason ? reason + "\n" : "") +
-						`> Banned by ${buttonInteraction.user.tag} via /ban${
+						`> Banned by ${buttonInteraction.user.tag} via /ban-user${
 							unbanTime ? ` until ${unbanTime.toDateString()}` : ""
 						}`,
 					deleteMessageSeconds: deleteLength,

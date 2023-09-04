@@ -22,32 +22,43 @@ defineEvent("messageCreate", async (message) => {
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
+	const countString = config.guild.memberCount.toString();
+	const memberCount =
+		nth(config.guild.memberCount) +
+		(/^[1-9]0+$/.test(countString)
+			? ` (${"🥳".repeat(countString.length - 1)})`
+			: countString.includes("69")
+			? " (nice)"
+			: countString.includes("87")
+			? `WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+			: "");
+
+	const rawGreetings = [
+		`Everybody please welcome ${member} to the server; they’re our **${memberCount}** member!`,
+		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our **${memberCount}** member!`,
+		`Here we go again… ${member.toString()} is here, our **${memberCount}** member!`,
+		`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our **${memberCount}**)!`,
+		`Is it a bird? Is it a plane? No, it’s ${member.toString()}, our **${memberCount}** member!`,
+		`Welcome:tm: ${member.toString()}! You’re our **${memberCount}** member!`,
+		`${member.toString()}, if you really want to be here, I guess you can be our **${memberCount}** member…`,
+		`${member.toString()}, our **${memberCount}** member, is here (they didn’t bring pizza)`,
+		`Watch out, ${member.toString()}, the **${memberCount}** member, has joined the circus!`,
+		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our ${memberCount})`,
+		`A wild ${member.toString()} appeared (our **${memberCount}** member)`,
+		`${member.toString()}, our **${memberCount}** member, just spawned in`,
+		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
+		`Watch out! ${member.toString()} is here! They’re our **${memberCount}**!`,
+	];
 	const greetings = [
-		`Everybody please welcome ${member} to ${config.guild.name}; they’re our ${nth(
-			config.guild.memberCount,
-		)} member!`,
-		`A big shoutout to ${member.toString()}, we’re glad you’ve joined us as our ${nth(
-			config.guild.memberCount,
-		)} member!`,
-		`Here we go again… ${member.toString()} is here, our ${nth(
-			config.guild.memberCount,
-		)} member!`,
-		`||Do I always have to let you know when there is a new member?|| ${member.toString()} is here (our ${nth(
-			config.guild.memberCount,
-		)})!`,
-		`Is it a bird? Is it a plane? No, it’s ${member.toString()}, our ${nth(
-			config.guild.memberCount,
-		)} member!`,
-		`Welcome:tm: ${member.toString()}! You’re our ${nth(config.guild.memberCount)} member!`,
+		...rawGreetings,
+		...rawGreetings,
+		...rawGreetings,
+		`I hope ${member.toString()}, our **${memberCount}** member, doesn’t give us up or let us down`,
 	];
 
 	await config.channels.welcome?.send(
 		`${constants.emojis.misc.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
-		}${
-			config.guild.memberCount.toString().includes("87")
-				? " (WAS THAT THE BITE OF 87?!?!?)"
-				: ""
 		}`,
 	);
 });
@@ -63,12 +74,16 @@ defineEvent("guildMemberRemove", async (member) => {
 	const byes =
 		banned || kicked
 			? [
-					`Oof… **${member.user.displayName}** got ${banned ? "banned" : "kicked"}…`,
+					`Oof… **${member.user.displayName}** got booted…`,
 					`We don’t talk about what **${member.user.displayName}** did…`,
 					`I don’t think this was the best place for **${member.user.displayName}**…`,
-					`Oop, **${member.user.displayName}** angered the mods!`,
+					`Whoops, **${member.user.displayName}** angered the mods!`,
 					`**${member.user.displayName}** broke the rules and took an 🇱`,
-					`**${member.user.displayName}** talked about opacity slider too much.`,
+					`**${member.user.displayName}** talked about opacity slider too much`,
+					`**${member.user.displayName}** did the no-no`,
+					`**${member.user.displayName}** was banished to the deep pits of hell`,
+					`Someone mailed **${member.user.displayName}** a pipe bomb`,
+					`Oop, the ban hammer met **${member.user.displayName}**`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -77,6 +92,10 @@ defineEvent("guildMemberRemove", async (member) => {
 					`Oop, **${member.user.displayName}** left… will they ever come back?`,
 					`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
 					`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
+					`**${member.user.displayName}** couldn’t handle it here.`,
+					`Bye(sexual) **${member.user.displayName}**`,
+					`**${member.user.displayName}** used quantum bogosort and disintegrated`,
+					`**${member.user.displayName}** has vanished into the abyss`,
 			  ];
 
 	await config.channels.welcome?.send(

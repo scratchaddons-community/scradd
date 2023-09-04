@@ -1,9 +1,17 @@
-import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
+import {
+	ChannelType,
+	ForumChannel,
+	TextChannel,
+	type NonThreadGuildBasedChannel,
+	NewsChannel,
+} from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
-console.log(guild);
+
+if (!guild.available) throw new ReferenceError("Guid is unavailable!");
+
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
@@ -20,7 +28,6 @@ async function getConfig() {
 
 	return {
 		roles: {
-			admin: roles.find((role) => role.editable && role.name.toLowerCase().includes("admin")),
 			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
 			staff:
@@ -113,3 +120,8 @@ export async function syncConfig() {
 	config.channels = newConfig.channels;
 }
 export default config;
+
+const threads = await config.guild.channels.fetchActiveThreads();
+export function getInitialChannelThreads(channel: ForumChannel | TextChannel | NewsChannel) {
+	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+}
