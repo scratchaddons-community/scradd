@@ -3,7 +3,7 @@ import { getSettings } from "./settings.js";
 
 defineEvent("messageCreate", async (message) => {
 	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
-	if (!getSettings(message.author, false).scratchEmbeds && !notSet) {
+	if (!getSettings(message.author).scratchEmbeds) {
 		return;
 	}
 	const scratchUrlRegex =
@@ -17,7 +17,7 @@ defineEvent("messageCreate", async (message) => {
 	const urlParts = match[0].split("/");
 	const type = urlParts[3]; // m ybrain is dead
 
-	async function fetchApiData(apiUrl: string): Promise<any> {
+	async function fetchApiData(apiUrl: string): Promise<any>{
 		try {
 			const response = await fetch(apiUrl);
 
@@ -46,7 +46,7 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-							color: 0x00ffff,
+							
 							fields: [
 								{
 									name: `views`,
@@ -69,24 +69,18 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-							image: {
-								url: data.images["282x218"],
-								height: 0,
-								width: 0,
-							},
+							
 							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
+								url: data.images["282x218"],
 							},
-							author: {
-								name: `by: ${data.author.username}`,
+							author: { 	
+								name: data.author.username,
 								url: `https://scratch.mit.edu/users/${data.author.username}`,
 								icon_url: data.author.profile.images["90x90"],
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
+								
 							},
 							url: `https://scratch.mit.edu/projects/${projectId}`,
 						},
@@ -107,38 +101,32 @@ defineEvent("messageCreate", async (message) => {
 					embeds: [
 						{
 							title: data.username,
-							description: data.scratchteam ? "Scratch Team" : "",
-							color: 0x00ffff,
+							description: ``,
+							
 							fields: [
-								{
-									name: `WIWO`,
-									value: data.status,
-									inline: true,
-								},
 								{
 									name: `About`,
 									value: data.bio,
-									inline: true, //i tried to make this false but then it wouldnt send. instead of fixing the problem i ignored it
+									
 								},
+								{
+									name: `WIWO`,
+									value: data.status,
+									
+								},
+								
 							],
-							image: {
-								url: data.profile.images["90x90"],
-								height: 0,
-								width: 0,
-							},
+							
 							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
+								url: data.profile.images["90x90"],
+								
 							},
 							author: {
-								name: ``,
-								url: ``,
-								icon_url: ``,
+								name: data.scratchteam ? "Scratch Team" : "",
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
+								
 							},
 							url: `https://scratch.mit.edu/users/${username}`,
 						},
@@ -160,13 +148,13 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: long(data.description, 400, "..."),
-							color: 0x00ffff,
+							
 							fields: [
 								{
 									name: `comments`,
 									value: data.comments_allowed
 										? `${data.stats.comments}`
-										: "comments off",
+										: `${data.stats.comments}(Off)`,
 									inline: true,
 								},
 								{
@@ -185,20 +173,10 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-							image: {
-								url: data.image,
-								height: 0,
-								width: 0,
-							},
+							
 							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
-							},
-							author: {
-								name: ``,
-								url: ``,
-								icon_url: ``,
+								url: data.image,
+								
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
