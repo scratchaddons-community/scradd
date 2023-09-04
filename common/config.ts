@@ -3,7 +3,7 @@ import constants from "./constants.js";
 import { client } from "strife.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
-console.log(guild)
+console.log(guild);
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
