@@ -12,13 +12,13 @@ import warn from "../punishments/warn.js";
 import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
-import { commands, defineCommand, defineEvent } from "strife.js";
+import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
 
-	const command = commands.get(interaction.command?.name ?? "");
+	const command = commands[interaction.command?.name ?? ""];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
 	if (
@@ -134,7 +134,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 	}
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "is-bad-word",
 		description: "Checks text for language",

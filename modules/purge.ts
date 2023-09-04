@@ -5,13 +5,13 @@ import {
 	ComponentType,
 	type BaseMessageOptions,
 } from "discord.js";
-import { client, defineCommand } from "strife.js";
+import { client, defineChatCommand } from "strife.js";
 import constants from "../common/constants.js";
 import { disableComponents, messageToText } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "purge",
 		description: "(Mod only) Bulk deletes a specified amount of messages",

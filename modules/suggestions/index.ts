@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { client, defineCommand, defineEvent } from "strife.js";
+import { client, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import top from "./top.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
@@ -47,7 +47,7 @@ defineEvent("threadDelete", (thread) => {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "top-suggestions",
 		description: "List the top suggestions",

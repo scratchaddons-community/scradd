@@ -11,7 +11,7 @@ import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
-import { defineButton, defineCommand } from "strife.js";
+import { defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 
 export const userSettingsDatabase = new Database<{
@@ -29,7 +29,7 @@ export const userSettingsDatabase = new Database<{
 }>("user_settings");
 await userSettingsDatabase.init();
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "settings",
 		description: "Customize personal settings",

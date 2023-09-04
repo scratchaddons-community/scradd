@@ -1,19 +1,19 @@
 import { ApplicationCommandType, ApplicationCommandOptionType, User } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { client, defineCommand, defineButton, defineModal } from "strife.js";
+import { client, defineChatCommand, defineButton, defineModal, defineMenuCommand, defineSubcommands } from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say, sayAutocomplete } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
 
-defineCommand(
+defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message },
 	editMessage,
 );
 defineModal("edit", submitEdit);
 
 const { owner } = await client.application.fetch();
-defineCommand(
+defineChatCommand(
 	{
 		name: "run",
 		description: `(${
@@ -30,7 +30,7 @@ defineCommand(
 );
 defineModal("run", run);
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "kill",
 		description: `(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
@@ -48,7 +48,7 @@ defineCommand(
 	},
 );
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "say",
 		description: "(Mod only) Send a message",
@@ -78,7 +78,7 @@ defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",

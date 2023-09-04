@@ -1,4 +1,4 @@
-import { defineButton, defineCommand, defineEvent } from "strife.js";
+import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import config from "../../common/config.js";
 import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "../threads/syncMembers.js";
@@ -15,7 +15,7 @@ defineEvent("threadCreate", async (thread) => {
 		});
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "thread",
 		description: "Commands to manage threads",

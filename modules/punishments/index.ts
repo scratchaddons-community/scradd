@@ -1,12 +1,12 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineButton, defineSelect } from "strife.js";
+import { client, defineChatCommand, defineButton, defineSelect, defineSubcommands } from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
 import ban from "./ban.js";
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "strikes",
 		description: "Commands to view strike information",
@@ -62,7 +62,7 @@ defineSelect("selectStrike", async (interaction) => {
 	if (id) await getStrikeById(interaction, id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "warn",
 		description: "(Mod only) Warns a user",
@@ -109,7 +109,7 @@ defineCommand(
 defineButton("removeStrike", removeStrike);
 defineButton("addStrikeBack", addStrikeBack);
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "ban-user",
 		description: "(Mod only) Bans a user",

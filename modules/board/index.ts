@@ -3,7 +3,7 @@ import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
 import makeSlideshow, { NO_POTATOES_MESSAGE, defaultMinReactions } from "./explore.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineEvent, defineButton } from "strife.js";
+import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
@@ -38,7 +38,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
@@ -73,7 +73,7 @@ defineButton("exploreBoard", async (interaction, userId) => {
 	await makeSlideshow(interaction, { user: userId });
 });
 
-defineCommand(
+defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });

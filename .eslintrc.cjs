@@ -18,6 +18,7 @@ module.exports = {
 				"unicorn/string-content": "off",
 			},
 		},
+		{ files: "*.d.ts", rules: { "@typescript-eslint/no-unused-vars": "off" } },
 	],
 	parser: "@typescript-eslint/parser",
 	parserOptions: {
@@ -62,6 +63,10 @@ module.exports = {
 		],
 		"@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 		"@typescript-eslint/no-unsafe-member-access": "off",
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{ args: "all", argsIgnorePattern: /^_+$/.source, caughtErrors: "all" },
+		],
 		"@typescript-eslint/restrict-template-expressions": "off",
 		"no-fallthrough": "off",
 		"no-mixed-spaces-and-tabs": "off",

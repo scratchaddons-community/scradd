@@ -8,12 +8,12 @@ import {
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import { defineCommand } from "strife.js";
+import { defineChatCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/misc.js";
 import { strikeDatabase } from "./punishments/misc.js";
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "user-info",
 		description: "View information about a user",

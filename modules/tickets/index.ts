@@ -9,7 +9,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
 	client,
-	defineCommand,
+	defineChatCommand,
 	defineEvent,
 	defineButton,
 	defineModal,
@@ -123,7 +123,7 @@ defineModal("contactMods", async (interaction, id) => {
 	);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "contact-user",
 		description: "(Mod only) Start a private ticket with a user",

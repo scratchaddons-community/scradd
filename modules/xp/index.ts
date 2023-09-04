@@ -4,7 +4,7 @@ import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { client, defineCommand, defineEvent, defineButton, defineSelect } from "strife.js";
+import { client, defineSubcommands, defineEvent, defineButton, defineSelect } from "strife.js";
 import getUserRank from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
 
@@ -14,7 +14,7 @@ defineEvent("messageCreate", async (message) => {
 	await giveXpForMessage(message);
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "xp",
 		description: "Commands to view users’ XP amounts",
