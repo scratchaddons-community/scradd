@@ -106,12 +106,12 @@ defineEvent("messageCreate", async (message) => {
 							fields: [
 								{
 									name: `About`,
-									value: data.bio,
+									value: data.profile.bio,
 									
 								},
 								{
 									name: `WIWO`,
-									value: data.status,
+									value: data.profile.status,
 									
 								},
 								
