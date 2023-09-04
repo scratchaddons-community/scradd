@@ -358,6 +358,7 @@ async function playGame(
 	async function endGame(content?: string, user?: User) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
+		deletedPings.add(turnInfo.ping.id);
 		await turnInfo.ping.delete();
 
 		await message.edit({
