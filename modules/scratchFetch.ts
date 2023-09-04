@@ -17,7 +17,7 @@ defineEvent("messageCreate", async (message) => {
 	const urlParts = match[0].split("/");
 	const type = urlParts[3]; // m ybrain is dead
 
-	async function fetchApiData(apiUrl: string): Promise<any>{
+	async function fetchApiData(apiUrl: string): Promise<any> {
 		try {
 			const response = await fetch(apiUrl);
 
@@ -46,7 +46,7 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-							
+
 							fields: [
 								{
 									name: `views`,
@@ -69,18 +69,17 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-							
+
 							thumbnail: {
 								url: data.images["282x218"],
 							},
-							author: { 	
+							author: {
 								name: data.author.username,
 								url: `https://scratch.mit.edu/users/${data.author.username}`,
 								icon_url: data.author.profile.images["90x90"],
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
-								
 							},
 							url: `https://scratch.mit.edu/projects/${projectId}`,
 						},
@@ -102,31 +101,26 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.username,
 							description: ``,
-							
+
 							fields: [
 								{
 									name: `About`,
 									value: data.bio,
-									
 								},
 								{
 									name: `WIWO`,
 									value: data.status,
-									
 								},
-								
 							],
-							
+
 							thumbnail: {
 								url: data.profile.images["90x90"],
-								
 							},
 							author: {
 								name: data.scratchteam ? "Scratch Team" : "",
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
-								
 							},
 							url: `https://scratch.mit.edu/users/${username}`,
 						},
@@ -148,7 +142,7 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: long(data.description, 400, "..."),
-							
+
 							fields: [
 								{
 									name: `comments`,
@@ -173,10 +167,9 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-							
+
 							thumbnail: {
 								url: data.image,
-								
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
