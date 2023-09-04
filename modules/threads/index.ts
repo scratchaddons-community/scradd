@@ -55,10 +55,9 @@ defineSubcommands(
 			},
 		},
 	},
-	async (interaction) => {
-		if (interaction.options.getSubcommand(true) === "sync-members")
-			return syncMembers(interaction);
-		await setUpAutoClose(interaction);
+	async (interaction, options) => {
+		if (options.subcommand === "sync-members") return syncMembers(interaction, options.options);
+		await setUpAutoClose(interaction, options);
 	},
 );
 

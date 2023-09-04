@@ -12,6 +12,7 @@ import {
 	ThreadAutoArchiveDuration,
 	ChannelType,
 	type RepliableInteraction,
+	GuildMember,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -32,8 +33,14 @@ const instructionsButton = {
 
 export default async function memoryMatch(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: {
+		"user": User | GuildMember;
+		"easy-mode"?: boolean;
+		"bonus-turns"?: boolean;
+		"thread"?: boolean;
+	},
 ) {
-	const otherUser = interaction.options.getUser("user", true);
+	const otherUser = options.user instanceof GuildMember ? options.user.user : options.user;
 	if (otherUser.bot || interaction.user.id === otherUser.id) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -42,8 +49,8 @@ export default async function memoryMatch(
 		});
 	}
 
-	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
-	const bonusTurns = interaction.options.getBoolean("bonus-turns") ?? true;
+	const easyMode = options["easy-mode"] ?? false;
+	const bonusTurns = options["bonus-turns"] ?? true;
 
 	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
 	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
@@ -132,7 +139,7 @@ export default async function memoryMatch(
 					),
 					easyMode,
 					bonusTurns,
-					useThread: interaction.options.getBoolean("thread") ?? true,
+					useThread: options.thread ?? true,
 				});
 			} else await buttonInteraction.deferUpdate();
 		})
@@ -397,8 +404,8 @@ async function playGame(
 
 		if (tournament) {
 			await logGame({
-				winner: users[secondWon ? 1 : 0].id ,
-				loser: users[secondWon ? 0 : 1].id ,
+				winner: users[secondWon ? 1 : 0].id,
+				loser: users[secondWon ? 0 : 1].id,
 				url,
 			});
 		}

@@ -5,23 +5,21 @@ import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
-export default async function top(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	const authorFilter = interaction.options.getMember("user");
-	const answerFilter = interaction.options.getString("answer");
+export default async function top(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: { user?: User | GuildMember; answer?: string },
+) {
 	const { suggestions } = config.channels;
-	const useMentions = getSettings(interaction.user).useMentions;
-
-	const nick =
-		authorFilter instanceof GuildMember ? authorFilter.displayName : authorFilter?.nick;
+	const { useMentions } = getSettings(interaction.user);
 
 	await paginate(
 		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				({ answer, author }) =>
 					!(
-						(answerFilter && answer !== answerFilter) ||
-						(authorFilter instanceof GuildMember &&
-							(author instanceof User ? author.id : author) !== authorFilter.id)
+						(options.answer && answer !== options.answer) ||
+						(options.user instanceof GuildMember &&
+							(author instanceof User ? author.id : author) !== options.user.id)
 					),
 			)
 			.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
@@ -38,7 +36,7 @@ export default async function top(interaction: ChatInputCommandInteraction<"cach
 					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
 				answer,
 			)}${
-				nick
+				options.user?.displayName
 					? ""
 					: ` by ${
 							useMentions
@@ -55,10 +53,14 @@ export default async function top(interaction: ChatInputCommandInteraction<"cach
 			}`,
 		(data) => interaction.reply(data),
 		{
-			title: `Top suggestions${nick ? ` by ${nick}` : ""}${
-				answerFilter ? `${nick ? " and" : ""} answered with ${answerFilter}` : ""
+			title: `Top suggestions${
+				options.user?.displayName ? ` by ${options.user.displayName}` : ""
+			}${
+				options.answer
+					? `${options.user?.displayName ? " and" : ""} answered with ${options.answer}`
+					: ""
 			}`,
-			format: authorFilter instanceof GuildMember ? authorFilter : undefined,
+			format: options.user instanceof GuildMember ? options.user : undefined,
 			singular: "suggestion",
 			failMessage: "No suggestions found! Try changing any filters you may have used.",
 			user: interaction.user,

@@ -100,17 +100,16 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: { message: string; reply?: string },
 ) {
-	const content = interaction.options.getString("message", true);
-	const reply = interaction.options.getString("reply");
-	if (content !== "-") {
-		await say(interaction, content, reply || undefined);
+	if (options.message !== "-") {
+		await say(interaction, options.message, options.reply || undefined);
 		return;
 	}
 
 	await interaction.showModal({
 		title: "Send Message",
-		customId: `${reply ?? ""}_say`,
+		customId: `${options.reply ?? ""}_say`,
 
 		components: [
 			{

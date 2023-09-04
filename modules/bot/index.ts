@@ -1,6 +1,13 @@
 import { ApplicationCommandType, ApplicationCommandOptionType, User } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { client, defineChatCommand, defineButton, defineModal, defineMenuCommand, defineSubcommands } from "strife.js";
+import {
+	client,
+	defineChatCommand,
+	defineButton,
+	defineModal,
+	defineMenuCommand,
+	defineSubcommands,
+} from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say, sayAutocomplete } from "./say.js";
@@ -71,7 +78,6 @@ defineChatCommand(
 		restricted: true,
 		censored: "channel",
 	},
-
 	sayCommand,
 );
 defineModal("say", async (interaction, reply) => {
@@ -84,9 +90,9 @@ defineSubcommands(
 		description: "Learn about me",
 
 		subcommands: {
-			status: { description: "Show bot status" },
-			credits: { description: "Show credit information" },
-			config: { description: "Show configuration settings" },
+			status: { description: "Show bot status", options: {} },
+			credits: { description: "Show credit information", options: {} },
+			config: { description: "Show configuration settings", options: {} },
 		},
 	},
 	info,

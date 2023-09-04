@@ -35,13 +35,13 @@ defineSubcommands(
 					},
 				},
 			},
-			list: { description: "View your reminders" },
+			list: { description: "View your reminders", options: {} },
 		},
 	},
-	async (interaction) => {
-		await (interaction.options.getSubcommand(true) === "list"
+	async (interaction, options) => {
+		await (options.subcommand === "list"
 			? listReminders(interaction)
-			: createReminder(interaction));
+			: createReminder(interaction, options.options));
 	},
 );
 

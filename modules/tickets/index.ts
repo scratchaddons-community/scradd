@@ -138,9 +138,8 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
-		const member = interaction.options.getMember("user");
-		if (!(member instanceof GuildMember)) {
+	async (interaction, options) => {
+		if (!(options.user instanceof GuildMember)) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find user.`,
 				ephemeral: true,
@@ -149,7 +148,7 @@ defineChatCommand(
 			return;
 		}
 
-		await contactUser(member, interaction);
+		await contactUser(options.user, interaction);
 	},
 );
 

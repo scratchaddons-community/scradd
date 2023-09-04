@@ -47,8 +47,11 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 	);
 }
 
-export default async function info(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	switch (interaction.options.getSubcommand(true)) {
+export default async function info(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	{ subcommand }: { subcommand: "status" | "credits" | "config" },
+) {
+	switch (subcommand) {
 		case "status": {
 			const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 

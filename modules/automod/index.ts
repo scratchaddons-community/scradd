@@ -150,8 +150,8 @@ defineChatCommand(
 		censored: false,
 	},
 
-	async (interaction) => {
-		const result = censor(interaction.options.getString("text", true));
+	async (interaction, options) => {
+		const result = censor(options.text);
 
 		const words = result && result.words.flat();
 		await interaction.reply({

@@ -26,12 +26,17 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
-		const user = await (interaction.options.getUser("user") ?? interaction.user).fetch();
-		const rawMember =
-			interaction.options.getMember("user") ??
-			(user.id === interaction.user.id ? interaction.member : undefined);
-		const member = rawMember instanceof GuildMember ? rawMember : undefined;
+	async (interaction, options) => {
+		const user = await (
+			(options.user instanceof GuildMember ? options.user.user : options.user) ??
+			interaction.user
+		).fetch();
+		const member =
+			options.user instanceof GuildMember
+				? options.user
+				: interaction.member instanceof GuildMember
+				? interaction.member
+				: undefined;
 		const isMod =
 			config.roles.mod &&
 			(interaction.member instanceof GuildMember

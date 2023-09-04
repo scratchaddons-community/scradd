@@ -39,8 +39,8 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
-		const optionCount = interaction.options.getInteger("options") ?? 2;
+	async (interaction, options) => {
+		const optionCount = options.options ?? 2;
 		const components = [];
 		for (let index = 0; index < optionCount; index++)
 			components.push({
@@ -63,10 +63,7 @@ defineChatCommand(
 		await interaction.showModal({
 			title: "Set Up Poll",
 			components,
-			customId:
-				Number(interaction.options.getBoolean("vote-mode") ?? true) +
-				interaction.options.getString("question", true) +
-				"_poll",
+			customId: Number(options["vote-mode"] ?? true) + options.question + "_poll",
 		});
 	},
 );

@@ -39,9 +39,8 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
-		const input = interaction.options.getString("addon", true);
-		const addon = matchSorter(addons, input, addonSearchOptions)[0];
+	async (interaction, options) => {
+		const addon = matchSorter(addons, options.addon, addonSearchOptions)[0];
 
 		if (!addon) {
 			await interaction.reply({

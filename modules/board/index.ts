@@ -62,10 +62,10 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
-		const minReactions = interaction.options.getInteger("minimum-reactions") ?? undefined;
-		const user = interaction.options.getUser("user")?.id;
-		const channel = interaction.options.getChannel("channel") ?? undefined;
+	async (interaction, options) => {
+		const minReactions = options["minimum-reactions"];
+		const user = options.user?.id;
+		const channel = options.channel;
 		await makeSlideshow(interaction, { minReactions, user, channel });
 	},
 );

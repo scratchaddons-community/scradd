@@ -11,7 +11,10 @@ import { getThreadConfig, threadsDatabase } from "./misc.js";
 import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 
-export async function syncMembers(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function syncMembers(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	{ role }: { role: Role },
+) {
 	if (!interaction.channel?.isThread())
 		return await interaction.reply({
 			ephemeral: true,
@@ -19,7 +22,6 @@ export async function syncMembers(interaction: ChatInputCommandInteraction<"cach
 		});
 
 	const options = getThreadConfig(interaction.channel);
-	const role = interaction.options.getRole("role", true);
 	const roles = options.roles;
 	if (roles.includes(role.id)) {
 		threadsDatabase.updateById(

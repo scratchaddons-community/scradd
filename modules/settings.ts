@@ -68,14 +68,14 @@ defineChatCommand(
 		},
 	},
 
-	async (interaction) => {
+	async (interaction, options) => {
 		await interaction.reply(
 			updateSettings(interaction.user, {
-				autoreactions: interaction.options.getBoolean("autoreactions") ?? undefined,
-				boardPings: interaction.options.getBoolean("board-pings") ?? undefined,
-				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
-				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
-				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
+				autoreactions: options.autoreactions,
+				boardPings: options["board-pings"],
+				levelUpPings: options["level-up-pings"],
+				useMentions: options["use-mentions"],
+				dmReminders: options["dm-reminders"],
 			}),
 		);
 	},
