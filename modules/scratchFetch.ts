@@ -154,7 +154,7 @@ defineEvent("messageCreate", async (message) => {
 									name: `comments`,
 									value: data.comments_allowed
 										? `${data.stats.comments}`
-										: `${data.stats.comments}(Off)`,
+										: `${data.stats.comments} (off)`,
 									inline: true,
 								},
 								{
