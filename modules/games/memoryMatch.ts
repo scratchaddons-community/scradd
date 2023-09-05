@@ -40,8 +40,11 @@ export default async function memoryMatch(
 		"thread"?: boolean;
 	},
 ) {
-	const otherUser = options.user instanceof GuildMember ? options.user.user : options.user;
-	if (otherUser.bot || interaction.user.id === otherUser.id) {
+	if (
+		options.user instanceof GuildMember ||
+		options.user.bot ||
+		interaction.user.id === options.user.id
+	) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
@@ -52,7 +55,7 @@ export default async function memoryMatch(
 	const easyMode = options["easy-mode"] ?? false;
 	const bonusTurns = options["bonus-turns"] ?? true;
 
-	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
+	const needToPlay = await playNeeded([interaction.user.id, options.user.id]);
 	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
 	if (needToPlay && !tourneyQualifies) {
 		return await interaction.reply({
@@ -79,7 +82,7 @@ export default async function memoryMatch(
 		fetchReply: true,
 		content: `${
 			constants.emojis.misc.challenge
-		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
+		} **${options.user.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
 						bonusTurns ? "" : "no bonus turns"
@@ -119,7 +122,7 @@ export default async function memoryMatch(
 		})
 		.on("collect", async (buttonInteraction) => {
 			const isUser = interaction.user.id === buttonInteraction.user.id;
-			const isOtherUser = otherUser.id === buttonInteraction.user.id;
+			const isOtherUser = options.user.id === buttonInteraction.user.id;
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
@@ -134,9 +137,10 @@ export default async function memoryMatch(
 			if (isOtherUser) {
 				collector.stop();
 				await playGame(buttonInteraction, {
-					users: ([interaction.user, otherUser] satisfies [User, User]).sort(
-						() => Math.random() - 0.5,
-					),
+					users:
+						Math.random() > 0.5
+							? [interaction.user, options.user]
+							: [options.user, interaction.user],
 					easyMode,
 					bonusTurns,
 					useThread: options.thread ?? true,
@@ -156,7 +160,12 @@ async function playGame(
 		easyMode,
 		useThread,
 		bonusTurns,
-	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
+	}: {
+		users: [User | GuildMember, User | GuildMember];
+		easyMode: boolean;
+		useThread: boolean;
+		bonusTurns: boolean;
+	},
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -355,7 +364,7 @@ async function playGame(
 		};
 	}
 
-	async function endGame(content?: string, user?: User) {
+	async function endGame(content?: string, user?: User | GuildMember) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
 		deletedPings.add(turnInfo.ping.id);
