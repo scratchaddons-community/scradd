@@ -41,8 +41,8 @@ export default async function memoryMatch(
 	},
 ) {
 	if (
-		options.user instanceof GuildMember ||
-		options.user.bot ||
+		!(options.user instanceof GuildMember) ||
+		options.user.user.bot ||
 		interaction.user.id === options.user.id
 	) {
 		return await interaction.reply({
