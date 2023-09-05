@@ -106,7 +106,7 @@ defineSubcommands(
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 					(data) => interaction.reply(data),
 					{
-						title: "XP leaderboard",
+						title: "XP Leaderboard",
 						singular: "user",
 
 						user: interaction.user,
