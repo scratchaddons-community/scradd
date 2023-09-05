@@ -16,7 +16,12 @@ import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
-	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
+	if (
+		!interaction.inGuild() ||
+		interaction.guild?.id !== config.guild.id ||
+		!interaction.isChatInputCommand()
+	)
+		return true;
 
 	const command = commands[interaction.command?.name ?? ""];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
@@ -65,7 +70,7 @@ defineEvent("messageUpdate", async (_, message) => {
 defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== config.guild.id) return false;
+	if (message.guild?.id !== config.guild.id) return true;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
 		const censored = censor(reaction.emoji.name, 1);

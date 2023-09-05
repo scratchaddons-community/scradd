@@ -19,6 +19,7 @@ defineChatCommand(
 	{
 		name: "poll",
 		description: "Poll people on a question",
+		access: false,
 		options: {
 			"question": {
 				type: ApplicationCommandOptionType.String,
@@ -121,6 +122,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const { emoji } = reaction;
 
 	if (
+		message.author.id === client.user.id &&
 		message.interaction?.commandName === "poll" &&
 		message.embeds[0]?.footer?.text &&
 		user.id !== client.user.id

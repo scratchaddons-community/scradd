@@ -17,9 +17,7 @@ import { escapeMessage } from "../../util/markdown.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
-export default async function guessAddon(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
-) {
+export default async function guessAddon(interaction: ChatInputCommandInteraction) {
 	if (await checkIfUserPlaying(interaction)) return;
 	await reply();
 
