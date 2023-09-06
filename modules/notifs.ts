@@ -43,7 +43,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${member.toString()}, if you really want to be here, I guess you can be our **${memberCount}** member…`,
 		`${member.toString()}, our **${memberCount}** member, is here! (they didn’t bring pizza though)`,
 		`Watch out, ${member.toString()}, the **${memberCount}** member, has joined the circus!`,
-		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our ${memberCount})`,
+		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our **${memberCount}**)`,
 		`A wild ${member.toString()} appeared (our **${memberCount}** member)`,
 		`${member.toString()}, our **${memberCount}** member, just spawned in!`,
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
