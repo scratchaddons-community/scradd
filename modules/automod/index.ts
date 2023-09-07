@@ -23,7 +23,12 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	)
 		return true;
 
-	const command = commands[interaction.command?.name ?? ""];
+	const command =
+		commands[interaction.command?.name ?? ""]?.find(
+			(command) =>
+				typeof command.access === "boolean" ||
+				!![command.access].flat().includes(interaction.guild?.id),
+		) ?? commands[interaction.command?.name ?? ""]?.[0];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
 	if (

@@ -88,6 +88,7 @@ defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",
+		access: true,
 
 		subcommands: {
 			status: { description: "Show bot status", options: {} },

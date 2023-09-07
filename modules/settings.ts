@@ -37,20 +37,20 @@ defineChatCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Enable pings when your messages get on #${config.channels.board?.name}`,
+				description: `Ping you when your messages get on #${config.channels.board?.name}`,
 			},
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Enable pings you when you level up",
+				description: "Ping you when you level up",
 			},
 			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Enable automatic funny emoji reactions to your messages",
+				description: "Add automatic funny emoji reactions to your messages",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
 				description:
-					"Enable using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
+					"Use mentions instead of usernames in embeds so you can view profiles (prone to Discord bugs)",
 			},
 			"dm-reminders": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -65,6 +65,38 @@ defineChatCommand(
 				autoreactions: options.autoreactions,
 				boardPings: options["board-pings"],
 				levelUpPings: options["level-up-pings"],
+				useMentions: options["use-mentions"],
+				dmReminders: options["dm-reminders"],
+			}),
+		);
+	},
+);
+
+defineChatCommand(
+	{
+		name: "settings",
+		description: "Customize personal settings",
+
+		options: {
+			"board-pings": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: `Pings you when your messages get on #${config.channels.board?.name} in the fan server`,
+			},
+			"use-mentions": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Replace mentions with usernames in embeds to avoid seeing raw IDs",
+			},
+			"dm-reminders": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send reminders in your DMs by default",
+			},
+		},
+	},
+
+	async (interaction, options) => {
+		await interaction.reply(
+			updateSettings(interaction.user, {
+				boardPings: options["board-pings"],
 				useMentions: options["use-mentions"],
 				dmReminders: options["dm-reminders"],
 			}),
@@ -206,7 +238,7 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
-		useMentions: getWeeklyXp(user.id) > 100,
+		useMentions: getWeeklyXp(user.id) > 100, // todo: default to false if not in fan server
 		resourcesDmed: false,
 	};
 }

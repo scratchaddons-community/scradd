@@ -16,10 +16,9 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		await message.reactions.resolve(reaction).users.remove(partialUser.id);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
-	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-	if (reaction.message.guild?.id !== config.guild.id) return;
-
-	await updateReactions(reaction);
+	await updateReactions(
+		partialReaction.partial ? await partialReaction.fetch() : partialReaction,
+	);
 });
 defineEvent("threadUpdate", (_, newThread) => {
 	if (newThread.parent?.id !== config.channels.suggestions?.id) return;
@@ -51,6 +50,7 @@ defineChatCommand(
 	{
 		name: "top-suggestions",
 		description: "List the top suggestions",
+		access: true,
 
 		options: {
 			answer: {

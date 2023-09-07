@@ -6,11 +6,12 @@ import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function top(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction,
 	options: { user?: User | GuildMember; answer?: string },
 ) {
 	const { suggestions } = config.channels;
 	const { useMentions } = getSettings(interaction.user);
+	const user = options.user instanceof GuildMember ? options.user.user : options.user;
 
 	await paginate(
 		[...oldSuggestions, ...suggestionsDatabase.data]
@@ -18,8 +19,7 @@ export default async function top(
 				({ answer, author }) =>
 					!(
 						(options.answer && answer !== options.answer) ||
-						(options.user instanceof GuildMember &&
-							(author instanceof User ? author.id : author) !== options.user.id)
+						(user && (author instanceof User ? author.id : author) !== user.id)
 					),
 			)
 			.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
@@ -36,7 +36,7 @@ export default async function top(
 					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
 				answer,
 			)}${
-				options.user?.displayName
+				user
 					? ""
 					: ` by ${
 							useMentions
@@ -53,14 +53,9 @@ export default async function top(
 			}`,
 		(data) => interaction.reply(data),
 		{
-			title: `Top suggestions${
-				options.user?.displayName ? ` by ${options.user.displayName}` : ""
-			}${
-				options.answer
-					? `${options.user?.displayName ? " and" : ""} answered with ${options.answer}`
-					: ""
-			}`,
-			format: options.user instanceof GuildMember ? options.user : undefined,
+			title: `Top suggestions${user ? ` by ${user.displayName}` : ""}${
+				options.answer && user ? " and" : ""
+			}${options.answer ? ` answered with ${options.answer}` : ""}`,
 			singular: "suggestion",
 			failMessage: "No suggestions found! Try changing any filters you may have used.",
 			user: interaction.user,

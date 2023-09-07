@@ -48,7 +48,7 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 }
 
 export default async function info(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction,
 	{ subcommand }: { subcommand: "status" | "credits" | "config" },
 ) {
 	switch (subcommand) {
@@ -123,7 +123,7 @@ export default async function info(
 					config.roles.staff &&
 					(interaction.member instanceof GuildMember
 						? interaction.member.roles.resolve(config.roles.staff.id)
-						: interaction.member.roles.includes(config.roles.staff.id))
+						: interaction.member?.roles.includes(config.roles.staff.id))
 						? [
 								{
 									type: ComponentType.ActionRow,

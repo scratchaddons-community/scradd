@@ -93,8 +93,9 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 
 	return (
 		baseChannel?.type === ChannelType.DM ||
-		(baseChannel?.id === config.channels.tickets?.id &&
+		baseChannel?.guild.id !== config.guild.id ||
+		(baseChannel.id === config.channels.tickets?.id &&
 			channel?.type === ChannelType.PrivateThread) ||
-		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+		!baseChannel.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
 	);
 }

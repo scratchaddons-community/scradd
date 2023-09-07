@@ -18,7 +18,7 @@ export function bigIntPower(one: bigint, two: bigint): bigint {
 /**
  * Convert a number between bases.
  *
- * @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ * @author zakariamouhid [`convertBaseBigInt`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
  *
  * @param value - The number to convert.
  * @param sourceBase - The base of the input number.
