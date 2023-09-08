@@ -17,6 +17,7 @@ defineChatCommand(
 	{
 		name: "user-info",
 		description: "View information about a user",
+		access: true,
 
 		options: {
 			user: {
@@ -41,7 +42,7 @@ defineChatCommand(
 			config.roles.mod &&
 			(interaction.member instanceof GuildMember
 				? interaction.member.roles.resolve(config.roles.mod.id)
-				: interaction.member.roles.includes(config.roles.mod.id));
+				: interaction.member?.roles.includes(config.roles.mod.id));
 
 		const fields = [
 			{ name: "ID", value: user.id, inline: true },
@@ -62,7 +63,7 @@ defineChatCommand(
 					member.roles
 						.valueOf()
 						.sorted((one, two) => two.comparePositionTo(one))
-						.filter((role) => role.id !== config.guild.id)
+						.filter((role) => role.id !== interaction.guild?.id)
 						.toJSON()
 						.join(" ") || "*No roles*",
 				inline: false,
@@ -91,7 +92,8 @@ defineChatCommand(
 				inline: true,
 			});
 
-		const banned = await config.guild.bans.fetch(user.id).catch(() => void 0);
+		const banned =
+			!member && (await interaction.guild?.bans.fetch(user.id).catch(() => void 0));
 		if (banned)
 			fields.push(
 				isMod
@@ -103,9 +105,13 @@ defineChatCommand(
 					: { name: "Banned", value: "Yes", inline: true },
 			);
 
-		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
+		const xp =
+			interaction.guild?.id === config.guild.id &&
+			xpDatabase.data.find((entry) => entry.user === user.id)?.xp;
 		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
-		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
+		const hasStrikes =
+			(user.id == interaction.user.id || isMod) &&
+			strikeDatabase.data.some((strike) => strike.user === user.id);
 
 		const buttons = [
 			xp && { customId: `${user.id}_xp`, label: "XP" },
@@ -119,11 +125,7 @@ defineChatCommand(
 					customId: `${user.id}_contactUser`,
 					label: "Contact User",
 				},
-			hasStrikes &&
-				(user.id == interaction.user.id || isMod) && {
-					customId: `${user.id}_viewStrikes`,
-					label: "Strikes",
-				},
+			hasStrikes && { customId: `${user.id}_viewStrikes`, label: "Strikes" },
 		]
 			.filter((button): button is { customId: string; label: string } => !!button)
 			.map(
@@ -153,7 +155,7 @@ defineChatCommand(
 						url:
 							member &&
 							`https://discordlookup.com/permissions-calculator/${
-								(interaction.channel
+								(interaction.channel && !interaction.channel.isDMBased()
 									? member.permissionsIn(interaction.channel)
 									: member.permissions
 								).bitfield
