@@ -145,6 +145,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 
 	if (files.length) {
 		await log(
+			//todo
 			`${
 				LoggingEmojis.MessageEdit
 			} Message by ${edited.author.toString()} in ${edited.channel.toString()} (ID: ${

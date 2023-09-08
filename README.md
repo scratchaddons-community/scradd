@@ -29,7 +29,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 2. Enable Community in Server Settings. Use `#roles` for the Rules or Guidelines channel and `#mod-logs` for the Community Updates Channel.
 3. Enable Developer Mode in your User Settings -> Advanced.
 4. Right-click on your new testing server, copy its ID, and note it for future use.
-5. Invite your bot at https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[GUILD_ID_HERE]&permissions=8&scope=applications.commands%20bot
+5. Invite your bot at https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[SERVER_ID_HERE]&permissions=8&scope=applications.commands%20bot
 
 #### Set up the repository locally
 

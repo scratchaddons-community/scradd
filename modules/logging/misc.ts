@@ -111,7 +111,7 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 			name: group,
 			reason: "New logging thread",
 			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
-			invitable: group === DATABASE_THREAD ? false : undefined,
+			invitable: group !== DATABASE_THREAD && undefined,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);

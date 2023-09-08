@@ -76,11 +76,12 @@ defineChatCommand(
 	{
 		name: "settings",
 		description: "Customize personal settings",
+		access: [constants.guilds.dev, constants.guilds.testing],
 
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Pings you when your messages get on #${config.channels.board?.name} in the fan server`,
+				description: `Pings you when your messages get on #${config.channels.board?.name} in the community server`,
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,

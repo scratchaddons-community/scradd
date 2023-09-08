@@ -166,7 +166,7 @@ export async function say(
 		  }));
 
 	if (message) {
-		await log(
+		await log( // todo: find out where graham wants this
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
 				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",

@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import makeSlideshow, { NO_POTATOES_MESSAGE, defaultMinReactions } from "./explore.js";
+import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
@@ -10,20 +10,18 @@ const reactionsName = REACTIONS_NAME.toLowerCase();
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== config.guild.id) return;
-	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
-
 	if (reaction.emoji.name !== BOARD_EMOJI) return;
 
+	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	if (
 		message.author.id === client.user.id &&
 		(message.channel.id === config.channels.board?.id || message.webhookId) &&
 		(message.content.startsWith(`**${BOARD_EMOJI}`) ||
-			message.content.endsWith(NO_POTATOES_MESSAGE))
+			message.content.endsWith(NO_BOARDS_MESSAGE))
 	)
 		return;
 
+	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 	if (user.id === message.author.id && process.env.NODE_ENV === "production")
 		return await reaction.users.remove(user);
 
@@ -31,11 +29,6 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
-	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-
-	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
-
 	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
 });
 
@@ -43,6 +36,7 @@ defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
+		access: false,
 
 		options: {
 			"channel": {
@@ -75,7 +69,7 @@ defineButton("exploreBoard", async (interaction, userId) => {
 });
 
 defineMenuCommand(
-	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
+	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
 		const reaction = interaction.targetMessage.reactions.resolve(BOARD_EMOJI) ?? {

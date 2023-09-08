@@ -108,14 +108,14 @@ defineChatCommand(
 		const xp =
 			interaction.guild?.id === config.guild.id &&
 			xpDatabase.data.find((entry) => entry.user === user.id)?.xp;
-		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
+		const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 		const hasStrikes =
 			(user.id == interaction.user.id || isMod) &&
 			strikeDatabase.data.some((strike) => strike.user === user.id);
 
 		const buttons = [
 			xp && { customId: `${user.id}_xp`, label: "XP" },
-			hasPotatoes && {
+			hasBoards && {
 				customId: `${user.id}_exploreBoard`,
 				label: `Explore ${REACTIONS_NAME}`,
 			},

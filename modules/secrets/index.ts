@@ -21,6 +21,7 @@ const ignoreTriggers = [
 	/\bbleed/i,
 ];
 
+// todo ask graham about secrets
 defineEvent("messageCreate", async (message) => {
 	if (
 		message.guild?.id !== config.guild.id ||

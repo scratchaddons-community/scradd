@@ -419,6 +419,8 @@ async function playGame(
 async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	const twemojis = [
 		"🥔",
+		"⭐",
+		"🍀",
 		"😏",
 		"😭",
 		"🗿",

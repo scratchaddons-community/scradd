@@ -72,20 +72,20 @@ export default function censor(text: string, strikeShift = 0) {
 		});
 	}, normalize(text));
 
-	return words.flat().length
-		? {
-				censored,
+	return (
+		!!words.flat().length && {
+			censored,
 
-				strikes: words.reduce(
-					(accumulator, current, index) =>
-						current.length * Math.max(index - strikeShift, PARTIAL_STRIKE_COUNT) +
-						accumulator,
-					0,
-				),
+			strikes: words.reduce(
+				(accumulator, current, index) =>
+					current.length * Math.max(index - strikeShift, PARTIAL_STRIKE_COUNT) +
+					accumulator,
+				0,
+			),
 
-				words,
-		  }
-		: false;
+			words,
+		}
+	);
 }
 
 export function badWordsAllowed(channel?: TextBasedChannel | null) {

@@ -132,9 +132,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	while (embeds.length > 10) embeds.pop();
-
-	return { embeds, files: message.attachments.toJSON() };
+	return { embeds: embeds.slice(0, 10), files: message.attachments.toJSON() };
 }
 
 /**
@@ -514,9 +512,7 @@ export function disableComponents(
 			...component.data,
 
 			disabled:
-				component.type === ComponentType.Button
-					? component.style !== ButtonStyle.Link
-					: true,
+				component.type !== ComponentType.Button || component.style !== ButtonStyle.Link,
 		})),
 
 		type: ComponentType.ActionRow,
