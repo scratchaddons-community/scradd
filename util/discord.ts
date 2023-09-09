@@ -558,6 +558,7 @@ export async function paginate<Item>(
 		rawOffset,
 		totalCount,
 		ephemeral = false,
+		perPage = 20,
 
 		generateComponents,
 		customComponentLocation = "above",
@@ -572,18 +573,17 @@ export async function paginate<Item>(
 		rawOffset?: number;
 		totalCount?: number;
 		ephemeral?: boolean;
+		perPage?: number;
 
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
-	const ITEMS_PER_PAGE = 20;
-
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / ITEMS_PER_PAGE);
+	const numberOfPages = Math.ceil(array.length / perPage);
 
-	let offset = Math.floor((rawOffset ?? 0) / ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
+	let offset = Math.floor((rawOffset ?? 0) / perPage) * perPage;
 
 	/**
 	 * Generate an embed that has the next page.
@@ -591,9 +591,7 @@ export async function paginate<Item>(
 	 * @returns The next page.
 	 */
 	async function generateMessage() {
-		const filtered = array.filter(
-			(_, index) => index >= offset && index < offset + ITEMS_PER_PAGE,
-		);
+		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		if (!filtered.length) {
 			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
@@ -630,7 +628,7 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "Next >>",
 									style: ButtonStyle.Primary,
-									disabled: offset + ITEMS_PER_PAGE >= array.length,
+									disabled: offset + perPage >= array.length,
 									customId: nextId,
 								},
 							],
@@ -657,7 +655,7 @@ export async function paginate<Item>(
 					description: content,
 
 					footer: {
-						text: `Page ${offset / ITEMS_PER_PAGE + 1}/${numberOfPages}${
+						text: `Page ${offset / perPage + 1}/${numberOfPages}${
 							constants.footerSeperator
 						}${count.toLocaleString("en-us")} ${count === 1 ? singular : plural}`,
 					},
@@ -698,8 +696,8 @@ export async function paginate<Item>(
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += ITEMS_PER_PAGE;
-			else offset -= ITEMS_PER_PAGE;
+			if (buttonInteraction.customId === nextId) offset += perPage;
+			else offset -= perPage;
 
 			await buttonInteraction.deferUpdate();
 			message = await editReply(await generateMessage());

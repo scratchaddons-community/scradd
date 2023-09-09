@@ -64,6 +64,7 @@ export default async function top(
 			singular: "suggestion",
 			failMessage: "No suggestions found! Try changing any filters you may have used.",
 			user: interaction.user,
+			perPage: 15,
 		},
 	);
 }
