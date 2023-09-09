@@ -21,10 +21,8 @@ const ignoreTriggers = [
 	/\bbleed/i,
 ];
 
-// todo ask graham about secrets
 defineEvent("messageCreate", async (message) => {
 	if (
-		message.guild?.id !== config.guild.id ||
 		message.channel.id === message.id ||
 		message.channel.isDMBased() ||
 		ignoreTriggers.some((trigger) => message.content.match(trigger))
@@ -58,6 +56,7 @@ defineEvent("messageCreate", async (message) => {
 		(process.env.NODE_ENV === "production"
 			? config.channels.info?.id === baseChannel?.parent?.id
 			: config.channels.admin?.id !== baseChannel?.parent?.id) ||
+		(message.guild?.id !== config.guild.id && !baseChannel?.name.match(/\bbots\b/i)) ||
 		!(await getSettings(message.author)).autoreactions
 	)
 		return;
@@ -74,7 +73,9 @@ defineEvent("messageCreate", async (message) => {
 
 		if (
 			name &&
-			(process.env.NODE_ENV !== "production" || config.channels.bots?.id === baseChannel?.id)
+			(process.env.NODE_ENV !== "production" ||
+				message.guild?.id !== config.guild.id ||
+				config.channels.bots?.id === baseChannel?.id)
 		) {
 			return await message.reply({
 				content: dad(name, message.author),
