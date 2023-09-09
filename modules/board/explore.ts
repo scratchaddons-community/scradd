@@ -84,10 +84,13 @@ export default async function makeSlideshow(
 
 	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
-		[...data].sort(() => Math.random() - 0.5),
+		data
+			.filter(
+				(message) =>
+					message.reactions >= minReactions && message.user === (user ?? message.user),
+			)
+			.sort(() => Math.random() - 0.5),
 		async (message) =>
-			message.reactions >= minReactions &&
-			message.user === (user ?? message.user) &&
 			(channelWanted ? await textChannelMatches(channelWanted, message.channel) : true) &&
 			message,
 	);

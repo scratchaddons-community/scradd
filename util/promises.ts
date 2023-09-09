@@ -3,15 +3,23 @@ export async function* asyncFilter<T, X>(
 	array: T[],
 	predicate: (value: T, index: number, array: T[]) => Promise<X | false>,
 ) {
-	const promises = array.map((value, index) => predicate(value, index, array));
+	const BATCH_SIZE = 50;
 
-	while (promises.length > 0) {
-		const resolved = await Promise.race(
-			promises.map(async (promise, index) => ({ result: await promise, index })),
-		);
+	let currentIndex = 0;
+	while (currentIndex < array.length) {
+		const batch = array.slice(currentIndex, currentIndex + BATCH_SIZE);
+		const promises = batch.map((value, index) => predicate(value, currentIndex + index, array));
 
-		promises.splice(resolved.index, 1);
-		if (resolved.result !== false) yield resolved.result;
+		while (promises.length > 0) {
+			const resolved = await Promise.race(
+				promises.map(async (promise, index) => ({ result: await promise, index })),
+			);
+
+			promises.splice(resolved.index, 1);
+			if (resolved.result !== false) yield resolved.result;
+		}
+
+		currentIndex += BATCH_SIZE;
 	}
 }
 
