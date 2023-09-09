@@ -58,7 +58,7 @@ defineEvent("messageCreate", async (message) => {
 		(process.env.NODE_ENV === "production"
 			? config.channels.info?.id === baseChannel?.parent?.id
 			: config.channels.admin?.id !== baseChannel?.parent?.id) ||
-		!getSettings(message.author).autoreactions
+		!(await getSettings(message.author)).autoreactions
 	)
 		return;
 

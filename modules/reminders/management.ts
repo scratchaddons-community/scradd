@@ -63,7 +63,7 @@ export async function createReminder(
 	options: { dms?: boolean; time: string; reminder: string },
 ) {
 	const reminders = getUserReminders(interaction.user.id);
-	const dms = options.dms ?? getSettings(interaction.user).dmReminders;
+	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
 	if (!dms && !badWordsAllowed(interaction.channel)) {
 		const censored = censor(options.reminder);

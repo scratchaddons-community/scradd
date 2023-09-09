@@ -569,7 +569,9 @@ export async function paginate<Item>(
 		totalCount?: number;
 		ephemeral?: boolean;
 
-		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
+		generateComponents?: (
+			items: Item[],
+		) => Awaitable<MessageActionRowComponentData[] | undefined>;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
@@ -635,7 +637,7 @@ export async function paginate<Item>(
 				: [];
 
 		if (generateComponents) {
-			const extraComponents = generateComponents(filtered);
+			const extraComponents = await generateComponents(filtered);
 			if (extraComponents?.length)
 				components[customComponentLocation === "above" ? "unshift" : "push"]({
 					type: ComponentType.ActionRow,

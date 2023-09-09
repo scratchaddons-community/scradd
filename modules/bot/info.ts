@@ -142,7 +142,7 @@ export default async function info(
 			break;
 		}
 		case "credits": {
-			const useMentions = getSettings(interaction.user).useMentions;
+			const { useMentions } = await getSettings(interaction.user);
 
 			await interaction.reply({
 				embeds: [

@@ -96,7 +96,9 @@ defineSubcommands(
 					top,
 					async (xp) =>
 						`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${
-							getSettings(interaction.user).useMentions
+							(
+								await getSettings(interaction.user)
+							).useMentions
 								? `<@${xp.user}>`
 								: (
 										await client.users
@@ -112,8 +114,9 @@ defineSubcommands(
 						user: interaction.user,
 						rawOffset: index,
 
-						generateComponents() {
-							return getSettings(interaction.user, false).useMentions === undefined
+						async generateComponents() {
+							return (await getSettings(interaction.user, false)).useMentions ===
+								undefined
 								? [
 										{
 											customId: "levelUpPings_toggleSetting",

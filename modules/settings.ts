@@ -61,7 +61,7 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		await interaction.reply(
-			updateSettings(interaction.user, {
+			await updateSettings(interaction.user, {
 				autoreactions: options.autoreactions,
 				boardPings: options["board-pings"],
 				levelUpPings: options["level-up-pings"],
@@ -96,7 +96,7 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		await interaction.reply(
-			updateSettings(interaction.user, {
+			await updateSettings(interaction.user, {
 				boardPings: options["board-pings"],
 				useMentions: options["use-mentions"],
 				dmReminders: options["dm-reminders"],
@@ -116,7 +116,7 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 			content: `${constants.emojis.statuses.no} You don’t have permission to update other people’s settings!`,
 		});
 	}
-	await interaction.reply(updateSettings(interaction.user, { [setting]: "toggle" }));
+	await interaction.reply(await updateSettings(interaction.user, { [setting]: "toggle" }));
 
 	if (!interaction.message.flags.has("Ephemeral"))
 		await interaction.message.edit({
@@ -124,7 +124,7 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 		});
 });
 
-export function updateSettings(
+export async function updateSettings(
 	user: User,
 	settings: {
 		autoreactions?: boolean | "toggle";
@@ -135,7 +135,7 @@ export function updateSettings(
 		resourcesDmed?: true;
 	},
 ) {
-	const old = getSettings(user);
+	const old = await getSettings(user);
 	const updated = {
 		id: user.id,
 		boardPings:
@@ -212,20 +212,20 @@ export function updateSettings(
 	} satisfies InteractionReplyOptions;
 }
 
-export function getSettings(
+export async function getSettings(
 	user: { id: Snowflake },
 	defaults?: true,
-): Required<typeof userSettingsDatabase.data[number]>;
-export function getSettings(
+): Promise<Required<typeof userSettingsDatabase.data[number]>>;
+export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
-): typeof userSettingsDatabase.data[number];
-export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
+): Promise<typeof userSettingsDatabase.data[number]>;
+export async function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
 	if (defaults) {
-		const defaultSettings = getDefaultSettings(user);
+		const defaultSettings = await getDefaultSettings(user);
 		for (const setting of Object.keys(defaultSettings)) {
 			settings[setting] ??= defaultSettings[setting];
 		}
@@ -233,13 +233,15 @@ export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	return settings;
 }
 
-export function getDefaultSettings(user: { id: Snowflake }) {
+export async function getDefaultSettings(user: { id: Snowflake }) {
 	return {
 		autoreactions: true,
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
-		useMentions: getWeeklyXp(user.id) > 100, // todo: default to false if not in fan server
+		useMentions:
+			getWeeklyXp(user.id) > 100 ||
+			!(await config.guild.members.fetch(user.id).catch(() => {})),
 		resourcesDmed: false,
 	};
 }

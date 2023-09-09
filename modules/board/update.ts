@@ -36,7 +36,9 @@ export default async function updateBoard(
 
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(fetched)),
-			allowedMentions: getSettings(fetched.author).boardPings ? undefined : { users: [] },
+			allowedMentions: {
+				users: (await getSettings(fetched.author)).boardPings ? [fetched.author.id] : [],
+			},
 		});
 
 		await giveXp(fetched.author, sentMessage.url);

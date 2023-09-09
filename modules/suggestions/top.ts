@@ -10,7 +10,7 @@ export default async function top(
 	options: { user?: User | GuildMember; answer?: string },
 ) {
 	const { suggestions } = config.channels;
-	const { useMentions } = getSettings(interaction.user);
+	const { useMentions } = await getSettings(interaction.user);
 	const user = options.user instanceof GuildMember ? options.user.user : options.user;
 
 	await paginate(

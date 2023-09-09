@@ -139,10 +139,11 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
-	const showButton = getSettings(member, false).levelUpPings === undefined;
+	const showButton = (await getSettings(member, false)).levelUpPings === undefined;
+	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;
 
 	await config.channels.bots?.send({
-		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
+		allowedMentions: (await getSettings(member)).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
 		components: showButton
 			? [
@@ -151,9 +152,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 							{
 								customId: "levelUpPings_toggleSetting",
 								type: ComponentType.Button,
-								label: `${
-									getDefaultSettings(member).levelUpPings ? "Disable" : "Enable"
-								} Pings`,
+								label: `${pingsDefault ? "Disable" : "Enable"} Pings`,
 								style: ButtonStyle.Success,
 							},
 						],
