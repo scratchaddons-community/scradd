@@ -33,11 +33,13 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	Collection,
+	ApplicationCommand,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
+import { client } from "strife.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
@@ -434,20 +436,29 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
 
-			const commandName = message.interaction?.commandName.split(" ")[0];
-			return config.guild.commands
-				.fetch()
+			const commands = Promise.all([
+				...(message.guild ? [message.guild.commands.fetch()] : []),
+				client.application.commands.fetch(),
+			]);
+
+			const subcommandName = message.interaction?.commandName ?? "";
+			const commandName = subcommandName.split(" ")[0];
+			return commands
+				.then((commands) =>
+					// eslint-disable-next-line unicorn/prefer-spread
+					new Collection<string, ApplicationCommand>().concat(...commands),
+				)
 				.then((commands) => commands.find(({ name }) => name === commandName))
+				.then((command) =>
+					command
+						? chatInputApplicationCommandMention(subcommandName, command.id)
+						: bold(`/${subcommandName}`),
+				)
 				.then(
-					(command) =>
-						`*${message.interaction?.user.toString() ?? ""} used ${
-							command
-								? chatInputApplicationCommandMention(
-										message.interaction?.commandName ?? "",
-										command.id,
-								  )
-								: bold(`/${message.interaction?.commandName ?? ""}`)
-						}:*\n${actualContent}`,
+					(formatted) =>
+						`*${
+							message.interaction?.user.toString() ?? ""
+						} used ${formatted}:*\n${actualContent}`,
 				);
 		}
 
