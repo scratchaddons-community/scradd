@@ -30,7 +30,7 @@ export default async function top(
 					: suggestions?.defaultReactionEmoji?.name ??
 					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
 			} ${hyperlink(
-				`${title}`,
+				padTitle(title),
 				"url" in reference
 					? reference.url
 					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
@@ -66,4 +66,14 @@ export default async function top(
 			user: interaction.user,
 		},
 	);
+}
+/** @todo - Strip full links, they can't be escaped. */
+function padTitle(title: string | number) {
+	const left = count(`${title}`, "[");
+	const right = count(`${title}`, "]");
+	return title + "]".repeat(Math.max(0, left - right));
+}
+
+function count(string: string, substring: string) {
+	return string.split(substring).length - 1;
 }

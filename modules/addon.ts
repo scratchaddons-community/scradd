@@ -83,7 +83,7 @@ defineChatCommand(
 			return credit.link
 				? hyperlink(credit.name, credit.link, note)
 				: interaction.channel
-				? tooltip(credit.name, note)
+				? tooltip(credit.name, note, interaction.guild?.id)
 				: credit.name;
 		});
 
@@ -116,6 +116,7 @@ defineChatCommand(
 												? tooltip(
 														lastUpdatedIn,
 														addon.latestUpdate.temporaryNotice,
+														interaction.guild?.id,
 												  )
 												: lastUpdatedIn
 									  })`
