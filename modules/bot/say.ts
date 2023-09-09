@@ -166,14 +166,16 @@ export async function say(
 		  }));
 
 	if (message) {
-		await log( // todo: find out where graham wants this
+		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
 				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,
-			"messages",
+			interaction.guild?.id === config.guild.id
+				? "messages"
+				: interaction.guild?.publicUpdatesChannel ?? undefined,
 			{ buttons: [{ label: "Message", url: message.url }] },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);
