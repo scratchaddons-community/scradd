@@ -10,7 +10,6 @@ import { client, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import top from "./top.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
 
