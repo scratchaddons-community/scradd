@@ -4,7 +4,6 @@ import {
 	GuildMember,
 	MessageType,
 	type CommandInteractionOption,
-	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -13,13 +12,13 @@ import warn from "../punishments/warn.js";
 import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import censor, { badWordsAllowed } from "./language.js";
-import { commands, defineCommand, defineEvent } from "strife.js";
+import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
 
-	const command = commands.get(interaction.command?.name ?? "");
+	const command = commands[interaction.command?.name ?? ""];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
 	if (
@@ -85,7 +84,6 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 });
 defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
 	if (thread.guild.id !== config.guild.id || !newlyCreated) return false;
-	if (thread.type === ChannelType.PrivateThread) return true;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {
@@ -101,6 +99,10 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (censored && !badWordsAllowed(newThread)) {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
+});
+defineEvent("guildMemberAdd", async (member) => {
+	if (member.guild.id !== config.guild.id) return;
+	await changeNickname(member);
 });
 defineEvent("guildMemberUpdate", async (_, member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -136,7 +138,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 	}
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "is-bad-word",
 		description: "Checks text for language",
@@ -152,8 +154,8 @@ defineCommand(
 		censored: false,
 	},
 
-	async (interaction) => {
-		const result = censor(interaction.options.getString("text", true));
+	async (interaction, options) => {
+		const result = censor(options.text);
 
 		const words = result && result.words.flat();
 		await interaction.reply({

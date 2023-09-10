@@ -2,12 +2,12 @@ import { ApplicationCommandOptionType } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { defineButton, defineSelect, client, defineCommand, defineEvent } from "strife.js";
+import { defineButton, defineSelect, client, defineEvent, defineSubcommands } from "strife.js";
 import queueReminders from "./send.js";
 import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "reminders",
 		description: "Commands to manage reminders",
@@ -35,13 +35,13 @@ defineCommand(
 					},
 				},
 			},
-			list: { description: "View your reminders" },
+			list: { description: "View your reminders", options: {} },
 		},
 	},
-	async (interaction) => {
-		await (interaction.options.getSubcommand(true) === "list"
+	async (interaction, options) => {
+		await (options.subcommand === "list"
 			? listReminders(interaction)
-			: createReminder(interaction));
+			: createReminder(interaction, options.options));
 	},
 );
 

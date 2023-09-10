@@ -12,6 +12,7 @@ import {
 	ThreadAutoArchiveDuration,
 	ChannelType,
 	type RepliableInteraction,
+	GuildMember,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -32,9 +33,18 @@ const instructionsButton = {
 
 export default async function memoryMatch(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: {
+		"user": User | GuildMember;
+		"easy-mode"?: boolean;
+		"bonus-turns"?: boolean;
+		"thread"?: boolean;
+	},
 ) {
-	const otherUser = interaction.options.getUser("user", true);
-	if (otherUser.bot || interaction.user.id === otherUser.id) {
+	if (
+		!(options.user instanceof GuildMember) ||
+		options.user.user.bot ||
+		interaction.user.id === options.user.id
+	) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
@@ -42,10 +52,10 @@ export default async function memoryMatch(
 		});
 	}
 
-	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
-	const bonusTurns = interaction.options.getBoolean("bonus-turns") ?? true;
+	const easyMode = options["easy-mode"] ?? false;
+	const bonusTurns = options["bonus-turns"] ?? true;
 
-	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
+	const needToPlay = await playNeeded([interaction.user.id, options.user.id]);
 	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
 	if (needToPlay && !tourneyQualifies) {
 		return await interaction.reply({
@@ -72,7 +82,7 @@ export default async function memoryMatch(
 		fetchReply: true,
 		content: `${
 			constants.emojis.misc.challenge
-		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
+		} **${options.user.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
 						bonusTurns ? "" : "no bonus turns"
@@ -112,7 +122,7 @@ export default async function memoryMatch(
 		})
 		.on("collect", async (buttonInteraction) => {
 			const isUser = interaction.user.id === buttonInteraction.user.id;
-			const isOtherUser = otherUser.id === buttonInteraction.user.id;
+			const isOtherUser = options.user.id === buttonInteraction.user.id;
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
@@ -127,12 +137,13 @@ export default async function memoryMatch(
 			if (isOtherUser) {
 				collector.stop();
 				await playGame(buttonInteraction, {
-					users: ([interaction.user, otherUser] satisfies [User, User]).sort(
-						() => Math.random() - 0.5,
-					),
+					users:
+						Math.random() > 0.5
+							? [interaction.user, options.user]
+							: [options.user, interaction.user],
 					easyMode,
 					bonusTurns,
-					useThread: interaction.options.getBoolean("thread") ?? true,
+					useThread: options.thread ?? true,
 				});
 			} else await buttonInteraction.deferUpdate();
 		})
@@ -149,7 +160,12 @@ async function playGame(
 		easyMode,
 		useThread,
 		bonusTurns,
-	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
+	}: {
+		users: [User | GuildMember, User | GuildMember];
+		easyMode: boolean;
+		useThread: boolean;
+		bonusTurns: boolean;
+	},
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -205,11 +221,9 @@ async function playGame(
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
 			await interaction.message.edit(getBoard(turn, shown));
+			await buttonInteraction.deferUpdate();
 
-			if (shown.size === 1) {
-				await buttonInteraction.deferUpdate();
-				return;
-			}
+			if (shown.size === 1) return;
 			totalTurns++;
 
 			const selected = Array.from(
@@ -222,13 +236,12 @@ async function playGame(
 			);
 			if (match) {
 				scores[turn % 2]?.push(...shown);
-				await interaction.message.edit(getBoard(turn));
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
 					await endGame();
 					return;
-				}
+				} else await interaction.message.edit(getBoard(turn));
 			}
 			if (!match || !bonusTurns) {
 				turn++;
@@ -238,13 +251,9 @@ async function playGame(
 				turnInfo = await setupTurn(turn);
 			}
 			shown.clear();
-			await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
-				await turnInfo.ping.edit({
-					components: disableComponents(turnInfo.ping.components),
-				});
 				return endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
@@ -335,7 +344,7 @@ async function playGame(
 				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown, ...scores].includes(id);
+					const discovered = [...shown, ...scores.flat()].includes(id);
 
 					return {
 						type: ComponentType.Button,
@@ -355,11 +364,18 @@ async function playGame(
 		};
 	}
 
-	async function endGame(content?: string, user?: User) {
+	async function endGame(content?: string, user?: User | GuildMember) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
+		deletedPings.add(turnInfo.ping.id);
+		await turnInfo.ping.delete();
 
-		await message.edit({ components: disableComponents((await message.fetch()).components) });
+		await message.edit({
+			components: getBoard(turn).components.map(({ components, type }) => ({
+				components: components.map((button) => ({ ...button, disabled: true })),
+				type,
+			})),
+		});
 
 		const firstScore = scores[0].length - (users[0].id === user?.id ? 2 : 0),
 			secondScore = scores[1].length - (users[1].id === user?.id ? 2 : 0);
@@ -371,7 +387,7 @@ async function playGame(
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await config.guild.members.fetch(users[+secondWon]?.id || "");
+		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
 
 		await thread?.setArchived(true, "Game over");
 
@@ -398,8 +414,8 @@ async function playGame(
 
 		if (tournament) {
 			await logGame({
-				winner: users[+secondWon]?.id ?? "",
-				loser: users[+!secondWon]?.id ?? "",
+				winner: users[secondWon ? 1 : 0].id,
+				loser: users[secondWon ? 0 : 1].id,
 				url,
 			});
 		}
@@ -426,7 +442,7 @@ async function setupGame(difficulty: 2 | 4) {
 			"💩",
 			"🍢",
 			...(process.env.NODE_ENV === "production"
-				? [
+				? ([
 						{ name: "bowling_ball", id: "1104935019232899183" },
 						{ name: "hog", id: "1090372592642306048" },
 						{ name: "mater", id: "1073805840584282224" },
@@ -436,7 +452,7 @@ async function setupGame(difficulty: 2 | 4) {
 						{ name: "sxd", id: "962798819572056164" },
 						{ name: "wasteof", id: "1044651861682176080" },
 						{ name: "callum", id: "1119305606323523624" },
-				  ]
+				  ] as const)
 				: []),
 		].map((emoji): [string, APIMessageComponentEmoji] =>
 			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],

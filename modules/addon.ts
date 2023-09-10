@@ -1,12 +1,18 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ButtonStyle,
+	ComponentType,
+	hyperlink,
+	AutocompleteInteraction,
+} from "discord.js";
 import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
 import { manifest, addons, addonSearchOptions } from "../common/extension.js";
-import { defineCommand } from "strife.js";
+import { defineChatCommand } from "strife.js";
 import { escapeMessage, tooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
@@ -16,9 +22,12 @@ defineCommand(
 
 		options: {
 			addon: {
-				autocomplete(interaction) {
-					const query = interaction.options.getString("addon");
-					return matchSorter(addons, query ?? "", addonSearchOptions).map((addon) => ({
+				autocomplete(interaction: AutocompleteInteraction) {
+					return matchSorter(
+						addons,
+						interaction.options.getString("addon") ?? "",
+						addonSearchOptions,
+					).map((addon) => ({
 						name: addon.name,
 						value: addon.id,
 					}));
@@ -30,9 +39,8 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const input = interaction.options.getString("addon", true);
-		const addon = matchSorter(addons, input, addonSearchOptions)[0];
+	async (interaction, options) => {
+		const addon = matchSorter(addons, options.addon, addonSearchOptions)[0];
 
 		if (!addon) {
 			await interaction.reply({

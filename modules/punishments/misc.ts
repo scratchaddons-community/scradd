@@ -1,6 +1,18 @@
-import { MessageType, type Snowflake } from "discord.js";
-import Database from "../../common/database.js";
-import { GlobalUsersPattern } from "../../util/discord.js";
+import {
+	GuildMember,
+	MessageType,
+	User,
+	type Snowflake,
+	time,
+	TimestampStyles,
+	ComponentType,
+	ButtonStyle,
+	InteractionResponse,
+	Message,
+	type BaseMessageOptions,
+} from "discord.js";
+import Database, { DATABASE_THREAD } from "../../common/database.js";
+import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { getLoggingThread } from "../logging/misc.js";
 
@@ -21,7 +33,7 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-const databases = await (await getLoggingThread("databases")).messages.fetch({ limit: 100 });
+const databases = await (await getLoggingThread(DATABASE_THREAD)).messages.fetch({ limit: 100 });
 const { url } =
 	databases
 		.find((message) => message.attachments.first()?.name === "robotop_warns.json")
@@ -80,4 +92,73 @@ export default async function filterToStrike(filter: string) {
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
+}
+
+export async function listStrikes(
+	member: GuildMember | User,
+	reply: (
+		options: BaseMessageOptions & { ephemeral: boolean },
+	) => Promise<Message | InteractionResponse>,
+	commandUser: false | User = false,
+) {
+	const strikes = strikeDatabase.data
+		.filter((strike) => strike.user === member.id)
+		.sort((one, two) => two.date - one.date);
+
+	const totalStrikeCount = Math.trunc(
+		strikes.reduce(
+			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
+			0,
+		),
+	);
+
+	await paginate(
+		strikes,
+		(strike) =>
+			`${strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"}\`${
+				strike.id
+			}\`${
+				strike.count === 1
+					? ""
+					: ` (${
+							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
+					  })`
+			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
+				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+			}`,
+		reply,
+		{
+			title: `${member.displayName}’s strikes`,
+			format: member,
+			singular: "strike",
+			failMessage: `${member.toString()} has never been warned!`,
+
+			user: commandUser,
+			totalCount: totalStrikeCount,
+			ephemeral: true,
+
+			generateComponents(filtered) {
+				if (filtered.length > 5) {
+					return [
+						{
+							type: ComponentType.StringSelect,
+							customId: "_selectStrike",
+							placeholder: "View more information on a strike",
+
+							options: filtered.map((strike) => ({
+								label: strike.id.toString(),
+								value: strike.id.toString(),
+							})),
+						},
+					];
+				}
+				return filtered.map((strike) => ({
+					label: strike.id.toString(),
+					style: ButtonStyle.Secondary,
+					customId: `${strike.id}_strike`,
+					type: ComponentType.Button,
+				}));
+			},
+		},
+	);
 }

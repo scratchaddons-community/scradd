@@ -1,21 +1,22 @@
 import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
-import { defineCommand, defineButton, defineModal } from "strife.js";
-import config from "../common/config.js";
+import { defineChatCommand, defineButton, defineModal } from "strife.js";
+import config, { getInitialChannelThreads } from "../common/config.js";
 import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
 import { EXPIRY_LENGTH, strikeDatabase } from "./punishments/misc.js";
 import constants from "../common/constants.js";
 import giveXp from "./xp/giveXp.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
-const threads = await config.channels.admin.threads.fetchActive();
 const thread =
-	threads.threads.find((thread) => thread.name === "Moderator Interest Forms") ||
+	getInitialChannelThreads(config.channels.admin).find(
+		(thread) => thread.name === "Moderator Interest Forms",
+	) ||
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
 		reason: "For mod interest forms",
 	}));
 
-defineCommand(
+defineChatCommand(
 	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
 	async (interaction) => {
 		await interaction.reply({

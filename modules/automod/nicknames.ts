@@ -73,8 +73,10 @@ export default async function changeNickname(member: GuildMember) {
 		}
 
 		const sorted = unchanged.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
-		if (unchanged.size === 2) unchanged.delete(sorted.firstKey() ?? "");
-		else if (unchanged.size > 1)
+		if (unchanged.size === 2) {
+			const oldest = sorted.firstKey();
+			if (oldest) unchanged.delete(oldest);
+		} else if (unchanged.size > 1)
 			await log(
 				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(sorted.toJSON())}`,
 			);

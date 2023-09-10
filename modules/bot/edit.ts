@@ -11,9 +11,10 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { generateError } from "../../common/logError.js";
+import { generateError } from "../logging/errors.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 
-const databaseThread = await getLoggingThread("databases");
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
 		interaction.targetMessage.type !== MessageType.Default ||
@@ -68,7 +69,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 	});
 }
 
-export async function submitEdit(interaction: ModalSubmitInteraction, id?: string) {
+export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
@@ -97,7 +98,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		});
 	});
 	if (!json) return;
-	const message = await interaction.channel?.messages.fetch(id ?? "");
+	const message = await interaction.channel?.messages.fetch(id);
 	if (!message) throw new TypeError("Used command in DM!");
 	const oldJSON = getMessageJSON(message);
 	const edited = await message.edit(json).catch(async (error: unknown) => {

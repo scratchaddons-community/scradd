@@ -5,6 +5,7 @@ import {
 	ButtonStyle,
 	time,
 	TimestampStyles,
+	User,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -15,16 +16,19 @@ import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
 import queueReminders from "../reminders/send.js";
 
-export default async function ban(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	const memberToBan = interaction.options.getMember("user");
-	const userToBan =
-		memberToBan instanceof GuildMember
-			? memberToBan.user
-			: interaction.options.getUser("user", true);
-	const reason = interaction.options.getString("reason");
-	const unbanIn = interaction.options.getString("unban-in")?.toLowerCase();
+export default async function ban(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: {
+		"user": User | GuildMember;
+		"reason"?: string;
+		"unban-in"?: string;
+		"delete-range"?: string;
+	},
+) {
+	const userToBan = options.user instanceof GuildMember ? options.user.user : options.user;
+	const unbanIn = options["unban-in"]?.toLowerCase();
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
-	const deleteRange = interaction.options.getString("delete-range")?.toLowerCase();
+	const deleteRange = options["delete-range"]?.toLowerCase();
 	const deleteLength = Math.min(
 		604_800,
 		(deleteRange && deleteRange !== "none" && +parseTime(deleteRange) - Date.now()) || 0,
@@ -37,7 +41,9 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
 		});
 	}
-	const ban = !memberToBan && (await config.guild.bans.fetch(userToBan).catch(() => void 0));
+	const ban =
+		options.user instanceof User &&
+		(await config.guild.bans.fetch(userToBan).catch(() => void 0));
 
 	if (ban) {
 		const unbanTimer = remindersDatabase.data.find(
@@ -57,7 +63,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 						),
 				),
 				{
-					channel: "",
+					channel: "0",
 					date: +unbanTime,
 					user: client.user.id,
 					id: SpecialReminders.Unban,
@@ -109,7 +115,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 		return;
 	}
 
-	if (memberToBan instanceof GuildMember ? memberToBan.bannable : true) {
+	if (options.user instanceof GuildMember ? options.user.bannable : true) {
 		const message = await interaction.reply({
 			content: `Are you sure you want to ban **${userToBan.toString()}**${
 				unbanTime ? " until " + time(unbanTime, TimestampStyles.LongDate) : ""
@@ -124,32 +130,21 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							style: ButtonStyle.Danger,
 							customId: "confirm",
 						},
-						{
-							type: ComponentType.Button,
-							label: "Cancel",
-							customId: "cancel",
-							style: ButtonStyle.Secondary,
-						},
 					],
 				},
 			],
 			fetchReply: true,
+			ephemeral: true,
 		});
 
 		const collector = message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
-			filter: (buttonInteraction) => interaction.user.id === buttonInteraction.user.id,
 			max: 1,
 			time: constants.collectorTime,
 		});
 
 		collector
 			.on("collect", async (buttonInteraction) => {
-				if (buttonInteraction.customId === "cancel") {
-					await buttonInteraction.deferUpdate();
-					return;
-				}
-
 				if (unbanTime && untilUnban) {
 					if (untilUnban < 30_000 || untilUnban > 315_360_000_000) {
 						await interaction.reply({
@@ -161,7 +156,7 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
-							channel: "",
+							channel: "0",
 							date: +unbanTime,
 							user: client.user.id,
 							id: SpecialReminders.Unban,
@@ -176,15 +171,15 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 							{
 								title: `You were banned from ${escapeMessage(config.guild.name)}!`,
 								description:
-									(reason || "") +
+									(options.reason || "") +
 									(unbanTime
 										? `\n> You will be [automatically unbanned](${
 												constants.inviteUrl
 										  }) ${time(unbanTime, TimestampStyles.RelativeTime)}`
 										: ""),
 								color:
-									memberToBan instanceof GuildMember
-										? memberToBan.displayColor
+									options.user instanceof GuildMember
+										? options.user.displayColor
 										: undefined,
 								thumbnail: config.guild.icon
 									? { url: config.guild.iconURL() || "" }
@@ -196,8 +191,8 @@ export default async function ban(interaction: ChatInputCommandInteraction<"cach
 
 				await config.guild.bans.create(userToBan, {
 					reason:
-						(reason ? reason + "\n" : "") +
-						`> Banned by ${buttonInteraction.user.tag} via /ban${
+						(options.reason ? options.reason + "\n" : "") +
+						`> Banned by ${buttonInteraction.user.tag} via /ban-user${
 							unbanTime ? ` until ${unbanTime.toDateString()}` : ""
 						}`,
 					deleteMessageSeconds: deleteLength,

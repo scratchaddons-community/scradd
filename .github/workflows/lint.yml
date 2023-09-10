@@ -2,7 +2,6 @@ name: Lint
 on:
     push:
     workflow_dispatch:
-    pull_request_target:
     schedule:
         - cron: 00 12 * * * # 1 hour before Dependabot
 
@@ -16,7 +15,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v3.6.0
               with:
                   ref: ${{ github.head_ref }}
 
@@ -47,7 +46,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v3.6.0
               with:
                   ref: ${{ github.head_ref }}
 
@@ -75,7 +74,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v3.6.0
               with:
                   ref: ${{ github.head_ref }}
 
@@ -94,7 +93,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v3.6.0
               with:
                   ref: ${{ github.head_ref }}
 
@@ -116,7 +115,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v3.6.0
               with:
                   ref: ${{ github.head_ref }}
 

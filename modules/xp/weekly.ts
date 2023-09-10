@@ -69,16 +69,19 @@ export async function getChatters() {
 }
 
 export default async function getWeekly(nextWeeklyDate: Date) {
-	remindersDatabase.data = [
-		...remindersDatabase.data,
-		{
-			channel: config.channels.announcements?.id || "",
-			date: Number(nextWeeklyDate),
-			reminder: undefined,
-			id: SpecialReminders.Weekly,
-			user: client.user.id,
-		},
-	];
+	if (config.channels.announcements) {
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: config.channels.announcements.id,
+				date: Number(nextWeeklyDate),
+				reminder: undefined,
+				id: SpecialReminders.Weekly,
+				user: client.user.id,
+			},
+		];
+	}
+
 	const weeklyWinners = getFullWeeklyData();
 
 	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
@@ -171,7 +174,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			"November",
 			"December",
 		][date.getUTCMonth()] || ""
-	} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n${
+	} ${nth(date.getUTCDate())}**__\n${
 		weeklyWinners
 			.map(
 				(gain, index) =>

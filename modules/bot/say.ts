@@ -24,7 +24,7 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 	if (!interaction.channel) return [];
 	if (!fetchedChannels.has(interaction.channel.id)) {
 		interaction.channel.messages.fetch({ limit: 100 }).then(
-			() => fetchedChannels.add(interaction.channel?.id ?? ""),
+			() => interaction.channel && fetchedChannels.add(interaction.channel.id),
 			() => void 0,
 		);
 	}
@@ -100,17 +100,16 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: { message: string; reply?: string },
 ) {
-	const content = interaction.options.getString("message", true);
-	const reply = interaction.options.getString("reply");
-	if (content !== "-") {
-		await say(interaction, content, reply || undefined);
+	if (options.message !== "-") {
+		await say(interaction, options.message, options.reply || undefined);
 		return;
 	}
 
 	await interaction.showModal({
 		title: "Send Message",
-		customId: `${reply ?? ""}_say`,
+		customId: `${options.reply ?? ""}_say`,
 
 		components: [
 			{
@@ -170,7 +169,7 @@ export async function say(
 		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
-				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "",
+				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,

@@ -11,7 +11,10 @@ import { getThreadConfig, threadsDatabase } from "./misc.js";
 import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 
-export async function syncMembers(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function syncMembers(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	{ role }: { role: Role },
+) {
 	if (!interaction.channel?.isThread())
 		return await interaction.reply({
 			ephemeral: true,
@@ -19,7 +22,6 @@ export async function syncMembers(interaction: ChatInputCommandInteraction<"cach
 		});
 
 	const options = getThreadConfig(interaction.channel);
-	const role = interaction.options.getRole("role", true);
 	const roles = options.roles;
 	if (roles.includes(role.id)) {
 		threadsDatabase.updateById(
@@ -48,21 +50,33 @@ export async function syncMembers(interaction: ChatInputCommandInteraction<"cach
 }
 
 export async function updateMemberThreads(
-	_: GuildMember | PartialGuildMember,
-	member: GuildMember,
+	oldMember: GuildMember | PartialGuildMember,
+	newMember: GuildMember,
 ) {
-	if (member.guild.id !== config.guild.id) return;
+	if (newMember.guild.id !== config.guild.id) return;
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
 			const roles = options.roles && options.roles.split("|");
 			if (!roles || !roles.length) return;
+
+			const qualifies = roles.some((role) => newMember.roles.resolve(role));
+			if (!oldMember.partial) {
+				const qualified = roles.some((role) => oldMember.roles.resolve(role));
+				if (qualified === qualifies) return;
+			}
+
 			const thread = await config.guild.channels.fetch(options.id).catch(() => void 0);
 			if (!thread?.isThread()) return;
-			if (roles.some((role) => member.roles.resolve(role))) {
-				const baseChannel = getBaseChannel(thread);
-				if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))
-					await thread.members.add(member, "Has qualifying role");
-			} else await thread.members.remove(member.id, "Has no qualifying role");
+
+			const baseChannel = getBaseChannel(thread);
+			if (!baseChannel?.permissionsFor(newMember).has("ViewChannel")) return;
+
+			const inThread = thread.members.resolve(newMember.id);
+			if (qualifies) {
+				if (!inThread) await thread.members.add(newMember, "Has qualifying role");
+			} else if (inThread) {
+				await thread.members.remove(newMember.id, "Has no qualifying role");
+			}
 		}),
 	);
 }

@@ -29,7 +29,7 @@ export async function giveXpForMessage(message: Message) {
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
+		return ![message.author.id, message.interaction?.user.id].some((user) =>
 			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
 		);
 	});
@@ -96,12 +96,21 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
-	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
+	const sorted = xp.sort((one, two) => two.xp - one.xp);
+
+	const members = await config.guild.members.fetch();
+	const serverRank = sorted
+		.filter(({ user }) => members.has(user))
+		.findIndex((info) => info.user === user.id);
+
+	const rank = sorted.findIndex((info) => info.user === user.id);
 
 	if (
-		config.roles.epic &&
-		rank / config.guild.memberCount < 0.01 &&
+		(config.guild.memberCount > 2000
+			? rank < 20
+			: serverRank / config.guild.memberCount < 0.01) &&
 		member &&
+		config.roles.epic &&
 		!member.roles.resolve(config.roles.epic.id)
 	) {
 		await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
@@ -180,7 +189,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
-					text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank${
+					text: `View your XP with /xp rank${
 						showButton ? "" : "\nToggle pings with /settings"
 					}`,
 				},

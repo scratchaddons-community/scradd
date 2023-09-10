@@ -1,6 +1,6 @@
 import { cleanDatabaseListeners } from "../common/database.js";
 import http from "node:http";
-import logError from "../common/logError.js";
+import logError from "../modules/logging/errors.js";
 
 http.createServer((request, response) => {
 	try {

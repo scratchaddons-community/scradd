@@ -6,10 +6,11 @@ import {
 	ForumChannel,
 	Colors,
 } from "discord.js";
-import { client, defineCommand, defineEvent } from "strife.js";
+import { client, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
-import getTop from "./getTop.js";
+import top from "./top.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
 
@@ -100,10 +101,10 @@ defineEvent("threadDelete", (thread) => {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
-		name: "get-top-suggestions",
-		description: "Get the top suggestions",
+		name: "top-suggestions",
+		description: "List the top suggestions",
 
 		options: {
 			answer: {
@@ -118,5 +119,5 @@ defineCommand(
 			},
 		},
 	},
-	getTop,
+	top,
 );

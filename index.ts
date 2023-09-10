@@ -9,6 +9,14 @@ import constants from "./common/constants.js";
 
 dns.setDefaultResultOrder("ipv4first");
 
+if (
+	process.env.BOT_TOKEN.startsWith(
+		Buffer.from(constants.users.scradd).toString("base64") + ".",
+	) &&
+	!process.argv.includes("--production")
+)
+	throw new Error("Refusing to run on production Scradd without `--production` flag");
+
 if (constants.canvasEnabled) {
 	const { Module } = await import("node:module");
 	const require = Module.createRequire(import.meta.url);
@@ -28,14 +36,13 @@ if (constants.canvasEnabled) {
 }
 
 await login({
-	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
-	commandsGuildId: process.env.GUILD_ID,
+	modulesDirectory: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
+	defaultCommandAccess: process.env.GUILD_ID,
 	async handleError(error, event) {
-		const { default: logError } = await import("./common/logError.js");
+		const { default: logError } = await import("./modules/logging/errors.js");
 
 		await logError(error, event);
 	},
-	productionId: constants.users.scradd,
 	clientOptions: {
 		intents: [
 			GatewayIntentBits.Guilds,

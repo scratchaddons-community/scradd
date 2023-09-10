@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from "discord.js";
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType, GuildMember } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { client, defineCommand, defineEvent, defineButton, defineSelect } from "strife.js";
+import { client, defineSubcommands, defineEvent, defineButton, defineSelect } from "strife.js";
 import getUserRank from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
 
@@ -14,7 +14,7 @@ defineEvent("messageCreate", async (message) => {
 	await giveXpForMessage(message);
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "xp",
 		description: "Commands to view users’ XP amounts",
@@ -41,18 +41,22 @@ defineCommand(
 					},
 				},
 			},
-			...(constants.canvasEnabled
-				? { graph: { description: "Graph users’ XP over the last week" } }
-				: {}),
+			...(constants.canvasEnabled && {
+				graph: {
+					description: "Graph users’ XP over the last week",
+					options: {},
+				} as const,
+			}),
 		},
 	},
 
-	async (interaction) => {
-		const command = interaction.options.getSubcommand(true);
-
-		switch (command) {
+	async (interaction, options) => {
+		switch (options?.subcommand) {
 			case "rank": {
-				const user = interaction.options.getUser("user") ?? interaction.user;
+				const user =
+					options.options.user instanceof GuildMember
+						? options.options.user.user
+						: options.options.user ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
 			}
@@ -76,7 +80,7 @@ defineCommand(
 			case "top": {
 				const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
-				const user = interaction.options.getUser("user");
+				const { user } = options.options;
 				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
 				if (index === -1) {
 					return await interaction.reply({
@@ -102,7 +106,7 @@ defineCommand(
 						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 					(data) => interaction.reply(data),
 					{
-						title: `Leaderboard for ${config.guild.name}`,
+						title: "XP Leaderboard",
 						singular: "user",
 
 						user: interaction.user,

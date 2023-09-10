@@ -1,6 +1,6 @@
 {
 	"name": "scradd",
-	"version": "2.9.1",
+	"version": "2.9.3",
 	"private": true,
 	"type": "module",
 	"main": "dist/index.js",
@@ -15,10 +15,10 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@fontsource-variable/sora": "5.0.8",
-		"@napi-rs/canvas": "0.1.43",
+		"@napi-rs/canvas": "0.1.44",
 		"@twemoji/parser": "14.1.0",
 		"async-exit-hook": "2.0.1",
-		"chart.js": "4.3.3",
+		"chart.js": "4.4.0",
 		"chartjs-adapter-date-fns": "3.0.0",
 		"date-fns": "2.30.0",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
@@ -27,25 +27,25 @@
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"papaparse": "5.4.1",
-		"serialize-error": "11.0.1",
-		"strife.js": "1.0.6"
+		"serialize-error": "11.0.2",
+		"strife.js": "^2.0.0"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
 		"@types/chrome": "latest",
 		"@types/difflib": "0.2.1",
-		"@types/eslint": "<=8.47.0",
+		"@types/eslint": "<=8.48.0",
 		"@types/json-diff": "<=1.0.6",
 		"@types/node": "<=18.11.1",
 		"@types/papaparse": "<=5.4.1",
-		"@typescript-eslint/eslint-plugin": "6.4.0",
-		"@typescript-eslint/parser": "6.4.0",
-		"eslint": "8.47.0",
+		"@typescript-eslint/eslint-plugin": "6.6.0",
+		"@typescript-eslint/parser": "6.6.0",
+		"eslint": "8.48.0",
 		"eslint-plugin-unicorn": "48.0.1",
 		"nodemon": "3.0.1",
 		"prettier": "2.8.0",
-		"typescript": "5.1.6"
+		"typescript": "5.2.2"
 	},
 	"optionalDependencies": {
 		"@railway/cli": "3.4.0"

@@ -1,8 +1,15 @@
-import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
+import {
+	ChannelType,
+	ForumChannel,
+	TextChannel,
+	type NonThreadGuildBasedChannel,
+	NewsChannel,
+} from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
+if (!guild.available) throw new ReferenceError("Guild is unavailable!");
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
@@ -17,14 +24,12 @@ async function getConfig() {
 			  ).tag_name
 			: "master";
 
+	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
 		roles: {
-			admin: roles.find((role) => role.editable && role.name.toLowerCase().includes("admin")),
-			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff:
-				roles.find((role) => role.name.toLowerCase().includes("staff")) ||
-				roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
@@ -81,26 +86,19 @@ async function getConfig() {
 		name: string,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
-	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
+	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
-		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.has(channel.type)) return false;
-
-			switch (matchType) {
-				case "full": {
-					return channel.name === name;
-				}
-				case "partial": {
-					return channel.name.includes(name);
-				}
-				case "start": {
-					return channel.name.startsWith(name);
-				}
-				case "end": {
-					return channel.name.endsWith(name);
-				}
-			}
-		});
+		return channels.find(
+			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> =>
+				!!channel &&
+				types.has(channel.type) &&
+				{
+					full: channel.name === name,
+					partial: channel.name.includes(name),
+					start: channel.name.startsWith(name),
+					end: channel.name.endsWith(name),
+				}[matchType],
+		);
 	}
 }
 
@@ -112,3 +110,8 @@ export async function syncConfig() {
 	config.channels = newConfig.channels;
 }
 export default config;
+
+const threads = await config.guild.channels.fetchActiveThreads();
+export function getInitialChannelThreads(channel: ForumChannel | TextChannel | NewsChannel) {
+	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+}

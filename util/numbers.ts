@@ -72,19 +72,10 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  * @param options.bold - Whether to bold the output using Markdown.
  * @param options.jokes - Toggle jokes after the number.
  */
-export function nth(number: number, { bold = true, jokes = true } = {}) {
-	const formatted =
-		number.toLocaleString("en-us") +
-		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th");
+export function nth(number: number) {
 	return (
-		(bold ? `**${formatted}**` : formatted) +
-		(jokes
-			? number.toString().includes("69")
-				? ` (nic${"e".repeat(Math.floor(number.toString().length / 2))})`
-				: /^[1-9]0+$/.test(number.toString())
-				? ` (${"🥳".repeat(number.toString().length - 1)})`
-				: ""
-			: "")
+		number.toLocaleString("en-us") +
+		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th")
 	);
 }
 

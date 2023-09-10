@@ -1,6 +1,6 @@
 import { type AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./misc.js";
-import { createCanvas } from "@napi-rs/canvas";
+import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
 import constants from "../../common/constants.js";
@@ -15,9 +15,9 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d");
+	const context = canvas.getContext("2d") as SKRSContext2D & CanvasRenderingContext2D;
 
-	new Chart(context as unknown as CanvasRenderingContext2D, {
+	new Chart(context, {
 		options: {
 			responsive: false,
 			animation: false,

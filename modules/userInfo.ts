@@ -8,12 +8,12 @@ import {
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import { defineCommand } from "strife.js";
+import { defineChatCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/misc.js";
 import { strikeDatabase } from "./punishments/misc.js";
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "user-info",
 		description: "View information about a user",
@@ -26,12 +26,17 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const user = await (interaction.options.getUser("user") ?? interaction.user).fetch();
-		const rawMember =
-			interaction.options.getMember("user") ??
-			(user.id === interaction.user.id ? interaction.member : undefined);
-		const member = rawMember instanceof GuildMember ? rawMember : undefined;
+	async (interaction, options) => {
+		const user = await (
+			(options.user instanceof GuildMember ? options.user.user : options.user) ??
+			interaction.user
+		).fetch();
+		const member =
+			options.user instanceof GuildMember
+				? options.user
+				: interaction.member instanceof GuildMember
+				? interaction.member
+				: undefined;
 		const isMod =
 			config.roles.mod &&
 			(interaction.member instanceof GuildMember

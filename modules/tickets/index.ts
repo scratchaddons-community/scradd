@@ -9,7 +9,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
 	client,
-	defineCommand,
+	defineChatCommand,
 	defineEvent,
 	defineButton,
 	defineModal,
@@ -123,7 +123,7 @@ defineModal("contactMods", async (interaction, id) => {
 	);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "contact-user",
 		description: "(Mod only) Start a private ticket with a user",
@@ -138,9 +138,8 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const member = interaction.options.getMember("user");
-		if (!(member instanceof GuildMember)) {
+	async (interaction, options) => {
+		if (!(options.user instanceof GuildMember)) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find user.`,
 				ephemeral: true,
@@ -149,7 +148,7 @@ defineCommand(
 			return;
 		}
 
-		await contactUser(member, interaction);
+		await contactUser(options.user, interaction);
 	},
 );
 

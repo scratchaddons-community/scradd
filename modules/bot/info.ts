@@ -47,8 +47,11 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 	);
 }
 
-export default async function info(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	switch (interaction.options.getSubcommand(true)) {
+export default async function info(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	{ subcommand }: { subcommand: "status" | "credits" | "config" },
+) {
+	switch (subcommand) {
 		case "status": {
 			const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
@@ -117,10 +120,10 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 				embeds: getConfig(),
 
 				components:
-					config.roles.admin &&
+					config.roles.staff &&
 					(interaction.member instanceof GuildMember
-						? interaction.member.roles.resolve(config.roles.admin.id)
-						: interaction.member.roles.includes(config.roles.admin.id))
+						? interaction.member.roles.resolve(config.roles.staff.id)
+						: interaction.member.roles.includes(config.roles.staff.id))
 						? [
 								{
 									type: ComponentType.ActionRow,
@@ -186,10 +189,10 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 export async function syncConfigButton(interaction: ButtonInteraction) {
 	if (
-		config.roles.admin &&
+		config.roles.staff &&
 		(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.admin.id)
-			: interaction.member?.roles.includes(config.roles.admin.id))
+			? interaction.member.roles.resolve(config.roles.staff.id)
+			: interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		await syncConfig();
 		await interaction.message.edit({ embeds: getConfig() });

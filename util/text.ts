@@ -89,8 +89,9 @@ export function caesar(text: string, rot = 13) {
 export function normalize(text: string) {
 	return text
 		.normalize("NFD")
-		.replaceAll(/[\p{Dia}\p{M}]+/gu, "")
-		.replaceAll(/[\s\p{Z}]+/gu, " ");
+		.replaceAll(/[\p{Dia}\p{M}\p{Cf}\p{Zs}\p{Sk}]+/gu, "") // TODO: stripping these could cause censor().censored to look odd
+		.replaceAll(/[ \t]+/gu, " ")
+		.replaceAll(/[\p{Zl}\p{Zp}\r\n\f]+/gu, "\n");
 }
 
 /**

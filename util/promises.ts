@@ -3,11 +3,15 @@ export async function* asyncFilter<T, X>(
 	array: T[],
 	predicate: (value: T, index: number, array: T[]) => Promise<X | false>,
 ) {
-	for (const [index, value] of array.entries()) {
-		// eslint-disable-next-line no-await-in-loop -- This is the whole point of this function.
-		const newValue = await predicate(value, index, array);
+	const promises = array.map((value, index) => predicate(value, index, array));
 
-		if (newValue !== false) yield newValue;
+	while (promises.length > 0) {
+		const resolved = await Promise.race(
+			promises.map(async (promise, index) => ({ result: await promise, index })),
+		);
+
+		promises.splice(resolved.index, 1);
+		if (resolved.result !== false) yield resolved.result;
 	}
 }
 

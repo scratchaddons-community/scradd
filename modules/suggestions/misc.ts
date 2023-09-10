@@ -50,10 +50,9 @@ export const oldSuggestions = config.channels.old_suggestions
 						(embed?.description && cleanContent(embed.description, message.channel)) ??
 						embed?.image?.url ??
 						message.content,
-					100,
+					75,
 				),
-
-				url: message.url,
+				...(message.thread ? { id: message.thread.id } : { url: message.url }),
 			};
 	  })
 	: [];

@@ -53,12 +53,15 @@ export async function roleCreate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleCr
 }
 
 export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUpdate>) {
+	if (!(entry.target instanceof Role)) return;
+	let iconChanged = false;
+
 	for (const change of entry.changes) {
-		const key = change.key as Extract<typeof change.key, keyof APIRole>;
+		const key = change.key as keyof APIRole | "icon_hash";
 		switch (key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} (@${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} (@${
 						change.old
 					}) renamed to @${change.new}${extraAuditLogsInfo(entry)}`,
 					"server",
@@ -67,7 +70,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "color": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role color ${
 						typeof change.new === "number" && change.new
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
@@ -79,7 +82,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "hoist": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(
-						entry.target?.id ?? "",
+						entry.target.id,
 					)} set to display role members ${
 						change.new ? "separately from" : "combined with"
 					} online members${extraAuditLogsInfo(entry)}`,
@@ -89,7 +92,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "mentionable": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} set to ${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} set to ${
 						change.new ? "" : "dis"
 					}allow anyone to @mention this role${extraAuditLogsInfo(entry)}`,
 					"server",
@@ -99,7 +102,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "permissions": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(
-						entry.target?.id ?? "",
+						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 					"server",
 					{
@@ -115,7 +118,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "position": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role color ${
 						typeof change.new === "number" && change.new
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
@@ -124,8 +127,25 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 				);
 				break;
 			}
+			case "icon_hash":
+			case "unicode_emoji": {
+				iconChanged ||= true;
+			}
 		}
 	}
+
+	if (!iconChanged || !(entry.target instanceof Role)) return;
+	await log(
+		`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role icon ${
+			entry.target.unicodeEmoji
+				? `set to ${entry.target.unicodeEmoji}`
+				: entry.target.icon
+				? "changed"
+				: "removed"
+		}${extraAuditLogsInfo(entry)}`,
+		"server",
+		{ files: entry.target.icon ? [entry.target.iconURL({ size: 128 }) ?? ""] : [] },
+	);
 }
 
 export async function roleDelete(role: Role) {

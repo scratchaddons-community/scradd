@@ -19,6 +19,7 @@ import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 
+export const NO_POTATOES_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
 /**
@@ -142,7 +143,7 @@ export default async function makeSlideshow(
 						},
 					],
 
-					content: `${constants.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
+					content: `${constants.emojis.statuses.no} ${NO_POTATOES_MESSAGE}`,
 					embeds: [],
 					files: [],
 			  } satisfies InteractionReplyOptions);

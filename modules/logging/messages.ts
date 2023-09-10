@@ -195,14 +195,14 @@ export async function messageUpdate(
 			{ color: false },
 		);
 		if (extraDiff) {
-			const updatedFiles = new Set(
+			const changedFiles = new Set(
 				newMessage.attachments.map((attachment) => attachment.url),
 			);
 			files.push(
 				{ content: extraDiff, extension: "diff" },
 				...oldMessage.attachments
 					.map((attachment) => attachment.url)
-					.filter((attachment) => !updatedFiles.has(attachment)),
+					.filter((attachment) => !changedFiles.has(attachment)),
 			);
 		}
 

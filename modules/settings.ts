@@ -11,7 +11,7 @@ import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
-import { defineButton, defineCommand } from "strife.js";
+import { defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 
 export const userSettingsDatabase = new Database<{
@@ -29,7 +29,7 @@ export const userSettingsDatabase = new Database<{
 }>("user_settings");
 await userSettingsDatabase.init();
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "settings",
 		description: "Customize personal settings",
@@ -39,25 +39,16 @@ defineCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: `Enable pings when your messages get on #${config.channels.board?.name}`,
 			},
-
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Enable pings you when you level up",
 			},
-
-			"weekly-pings": {
-				type: ApplicationCommandOptionType.Boolean,
-				description: `Enable pings if you are one of the most active people each week (#${config.channels.announcements?.name})`,
-			},
-
 			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Enable automatic funny emoji reactions to your messages",
 			},
-
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
-
 				description:
 					"Enable using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
 			},
@@ -68,14 +59,14 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
+	async (interaction, options) => {
 		await interaction.reply(
 			updateSettings(interaction.user, {
-				autoreactions: interaction.options.getBoolean("autoreactions") ?? undefined,
-				boardPings: interaction.options.getBoolean("board-pings") ?? undefined,
-				levelUpPings: interaction.options.getBoolean("level-up-pings") ?? undefined,
-				useMentions: interaction.options.getBoolean("use-mentions") ?? undefined,
-				dmReminders: interaction.options.getBoolean("dm-reminders") ?? undefined,
+				autoreactions: options.autoreactions,
+				boardPings: options["board-pings"],
+				levelUpPings: options["level-up-pings"],
+				useMentions: options["use-mentions"],
+				dmReminders: options["dm-reminders"],
 			}),
 		);
 	},

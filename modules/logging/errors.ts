@@ -1,8 +1,8 @@
 import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
-import log, { LoggingErrorEmoji } from "../modules/logging/misc.js";
-import { cleanDatabaseListeners } from "./database.js";
-import { commandInteractionToString } from "../util/discord.js";
+import log, { LoggingErrorEmoji } from "./misc.js";
+import { cleanDatabaseListeners } from "../../common/database.js";
+import { commandInteractionToString } from "../../util/discord.js";
 
 process
 	.on("uncaughtException", (error, origin) => logError(error, origin))
@@ -25,7 +25,11 @@ export default async function logError(
 
 		const name =
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
-		if (["DeprecationWarning", "ExperimentalWarning"].includes(name)) return;
+		if (
+			"ExperimentalWarning" == name ||
+			("DeprecationWarning" == name && process.env.NODE_ENV !== "production")
+		)
+			return;
 
 		return await log(
 			`${LoggingErrorEmoji} **${name}** occurred in ${
@@ -72,6 +76,8 @@ export function generateError(
 		delete serialized.stack;
 		delete serialized.errors;
 		delete serialized.cause;
+		delete serialized.error;
+		delete serialized.surpressed;
 
 		const subErrors =
 			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
@@ -84,6 +90,8 @@ export function generateError(
 			).split("\n"),
 			errors: subErrors?.map((sub) => generateError(sub, true)),
 			cause: "cause" in error ? generateError(error.cause, true) : undefined,
+			error: "error" in error ? generateError(error.error, true) : undefined,
+			surpressed: "surpressed" in error ? generateError(error.surpressed, true) : undefined,
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
 		return returnObject ? object : JSON.stringify(object, undefined, "  ");

@@ -72,7 +72,8 @@ export async function customRole(interaction: ChatInputCommandInteraction<"cache
 				],
 			},
 			...(config.guild.features.includes("ROLE_ICONS") &&
-			interaction.member.roles.resolve(config.roles.staff?.id ?? "")
+			config.roles.staff &&
+			interaction.member.roles.resolve(config.roles.staff.id)
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -98,7 +99,10 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		throw new TypeError("interaction.member is not a GuildMember!");
 
 	const name = interaction.fields.fields.get("name")?.value;
-	const color = interaction.fields.fields.get("color")?.value || "#000000";
+	const color = (interaction.fields.fields.get("color")?.value || "#000000") as Extract<
+		ColorResolvable,
+		string
+	>;
 	const icon = interaction.fields.fields.get("icon")?.value;
 
 	const existingRole = getCustomRole(interaction.member);
@@ -179,7 +183,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
 			name,
 		) &&
-		!interaction.member.roles.resolve(config.roles.staff?.id ?? "")
+		!(config.roles.staff && interaction.member.roles.resolve(config.roles.staff.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -195,7 +199,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	const iconData = icon ? await resolveIcon(icon) : undefined;
+	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: undefined, icon: undefined };
 	if (icon && !iconData)
 		return await interaction.reply({
 			ephemeral: true,
@@ -204,7 +208,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 
 	if (existingRole) {
 		await existingRole.edit({
-			color: color as ColorResolvable,
+			color: color,
 			name: PREFIX + name,
 			reason: `Edited by ${interaction.user.tag}`,
 			position: (config.roles.staff?.position ?? 0) + 1,
@@ -215,7 +219,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	}
 
 	const role = await config.guild.roles.create({
-		color: (color as ColorResolvable) || "#000000",
+		color: color,
 		name: PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
 		position: (config.roles.staff?.position ?? 0) + 1,
@@ -243,7 +247,7 @@ export async function recheckMemberRole(_: PartialGuildMember | GuildMember, mem
 
 	if (
 		config.guild.features.includes("ROLE_ICONS") &&
-		!member.roles.resolve(config.roles.staff?.id ?? "")
+		!(config.roles.staff && member.roles.resolve(config.roles.staff.id))
 	) {
 		// eslint-disable-next-line unicorn/no-null
 		await role?.setUnicodeEmoji(null, "No longer qualifies");
@@ -272,7 +276,10 @@ export function getCustomRole(member: GuildMember) {
 }
 
 export async function qualifiesForRole(member: GuildMember) {
-	if (member.roles.premiumSubscriberRole || member.roles.resolve(config.roles.staff?.id ?? ""))
+	if (
+		member.roles.premiumSubscriberRole ||
+		(config.roles.staff && member.roles.resolve(config.roles.staff.id))
+	)
 		return true;
 	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
@@ -319,6 +326,11 @@ async function resolveIcon(icon: string) {
 	if (icon.startsWith("data:")) return { icon };
 
 	if (!/^https?:\/\//.test(icon)) return;
+	try {
+		new URL(icon);
+	} catch {
+		return;
+	}
 
 	const response = await fetch(icon, { method: "HEAD" });
 	if (!response.ok) return;

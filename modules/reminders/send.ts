@@ -12,6 +12,8 @@ import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
+import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
+import updateBoard from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -74,7 +76,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 								"November",
 								"December",
 							][date.getUTCMonth()] || ""
-						} ${nth(date.getUTCDate(), { bold: false, jokes: false })}`,
+						} ${nth(date.getUTCDate())}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
@@ -166,6 +168,46 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					];
 
 					return backupDatabases(channel);
+				}
+				case SpecialReminders.SyncRandomPotato: {
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: reminder.channel,
+							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
+							id: SpecialReminders.SyncRandomPotato,
+							user: client.user.id,
+						},
+					];
+
+					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
+						if (info.onBoard) continue;
+
+						const reactionsNeeded = boardReactionCount({ id: info.channel });
+						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
+							continue;
+
+						const channel = await config.guild.channels
+							.fetch(info.channel)
+							.catch(() => void 0);
+						if (!channel?.isTextBased()) continue;
+
+						if (reactionsNeeded === undefined) {
+							const reactionsNeeded = boardReactionCount(channel);
+							if (info.reactions < reactionsNeeded) continue;
+						}
+
+						const message = await channel.messages
+							.fetch(info.source)
+							.catch(() => void 0);
+						const reaction = message?.reactions.resolve(BOARD_EMOJI);
+						if (reaction) {
+							await updateBoard(reaction);
+							break;
+						}
+					}
+
+					return;
 				}
 			}
 		}

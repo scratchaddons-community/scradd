@@ -61,7 +61,7 @@ defineEvent("messageCreate", async (message) => {
 	)
 		return;
 
-	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚]?m\b/u.test(cleanContent)) {
+	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
 		const name = cleanContent
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}\n𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
@@ -82,8 +82,8 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	let doReact = false;
-	for (const [emoji, ...requirements] of autoreactions) {
+	reactionLoop: for (const [emoji, ...requirements] of autoreactions) {
+		let doReact = false;
 		const emojis = [emoji].flat();
 		if (emojis.some((emoji) => content.includes(emoji))) continue;
 
@@ -94,25 +94,25 @@ defineEvent("messageCreate", async (message) => {
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type[1] === "ping") {
-				return message.mentions.has(match, {
+				doReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRepliedUser: true,
 					ignoreRoles: true,
 				});
+			} else {
+				const result = new RegExp(
+					type === "partial" || type === "raw"
+						? match
+						: `${type === "full" ? "^" : "\\b"}${match}${
+								type === "plural" ? "(?:e?s)?" : ""
+						  }${type === "full" ? "$" : "\\b"}`,
+					"i",
+				).test(type === "raw" ? message.content : content);
+
+				if (type === "negative" && result) continue reactionLoop;
+
+				doReact ||= result;
 			}
-
-			const result = new RegExp(
-				type === "partial" || type === "raw"
-					? match
-					: `${type === "full" ? "^" : "\\b"}${match}${
-							type === "plural" ? "(?:e?s)?" : ""
-					  }${type === "full" ? "$" : "\\b"}`,
-				"i",
-			).test(type === "raw" ? message.content : content);
-
-			if (type === "negative" && result) return;
-
-			doReact ||= result;
 		}
 
 		if (doReact) {
