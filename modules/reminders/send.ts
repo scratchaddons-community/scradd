@@ -183,7 +183,9 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
 						if (info.onBoard) continue;
 
-						const reactionsNeeded = boardReactionCount({ id: info.channel });
+						const date = new Date(Number(BigInt(info.source) >> 22n) + 1_420_070_400_000);
+
+						const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
 						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
 							continue;
 
@@ -193,7 +195,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						if (!channel?.isTextBased()) continue;
 
 						if (reactionsNeeded === undefined) {
-							const reactionsNeeded = boardReactionCount(channel);
+							const reactionsNeeded = boardReactionCount(channel, date);
 							if (info.reactions < reactionsNeeded) continue;
 						}
 

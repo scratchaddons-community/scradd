@@ -49,19 +49,27 @@ const COUNTS = {
  *
  * @returns The reaction count.
  */
-export function boardReactionCount(channel?: TextBasedChannel): number;
-export function boardReactionCount(channel: { id: Snowflake }): number | undefined;
-export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake }) {
-	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
-	if (!channel) return COUNTS.default;
+export function boardReactionCount(channel?: TextBasedChannel, time?: Date): number;
+export function boardReactionCount(channel: { id: Snowflake }, time?: Date): number | undefined;
+export function boardReactionCount(
+	channel?: TextBasedChannel | { id: Snowflake },
+	time = new Date(),
+) {
+	const timeShift = (Date.now() - +time) / 86_400_000 / 200 + 1;
 
-	if (channel.id === config.channels.updates?.id) return COUNTS.info;
-	if (!(channel instanceof BaseChannel)) return baseReactionCount(channel.id);
+	if (process.env.NODE_ENV !== "production") return COUNTS.scradd * timeShift;
+	if (!channel) return COUNTS.default * timeShift;
 
-	if (!channel.isTextBased()) return COUNTS.default;
+	if (channel.id === config.channels.updates?.id) return COUNTS.info * timeShift;
+	if (!(channel instanceof BaseChannel)) {
+		const count = baseReactionCount(channel.id);
+		return count && count * timeShift;
+	}
+
+	if (!channel.isTextBased()) return COUNTS.default * timeShift;
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
-	if (baseChannel.isVoiceBased()) return COUNTS.misc;
+	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default * timeShift;
+	if (baseChannel.isVoiceBased()) return COUNTS.misc * timeShift;
 
 	const count =
 		baseReactionCount(baseChannel.id) ??
@@ -73,7 +81,7 @@ export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake 
 		COUNTS.default;
 	const privateThread = +(channel.type === ChannelType.PrivateThread) + 1;
 
-	return Math.max(2, Math.ceil(count / privateThread));
+	return Math.max(2, (count / privateThread) * timeShift);
 }
 function baseReactionCount(id: Snowflake) {
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
