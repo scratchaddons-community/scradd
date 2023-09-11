@@ -14,7 +14,7 @@ export default async function updateBoard(
 ) {
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
 	const { count, message } = reaction;
-	const reactionThreshold = boardReactionCount(message.channel,message.createdAt);
+	const reactionThreshold = boardReactionCount(message.channel, message.createdAt);
 	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
