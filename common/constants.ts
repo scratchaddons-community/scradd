@@ -36,7 +36,6 @@ export default {
 			ban: "<:ban:1041864907194388480>",
 			green: "<:success:1117217865536381030>",
 			blue: "<:primary:1117217909857587210>",
-			challenge: "<:challenge:1117600711665012797>",
 		},
 	},
 
