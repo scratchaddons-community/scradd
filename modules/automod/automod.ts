@@ -54,6 +54,12 @@ export default async function automodMessage(message: Message) {
 		);
 	}
 
+	const invites = await Promise.all(
+		(message.content.match(GlobalInvitesPattern) ?? []).map(
+			async (code) => await client.fetchInvite(code).catch(() => void 0),
+		),
+	);
+
 	if (
 		!allowBadWords &&
 		config.channels.info?.id !== parentChannel?.id &&
@@ -61,22 +67,17 @@ export default async function automodMessage(message: Message) {
 		config.channels.advertise.id !== baseChannel?.id &&
 		!message.author.bot
 	) {
-		const invites = (
-			await Promise.all(
-				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
-					const invite = await client.fetchInvite(code).catch(() => void 0);
-					return invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id) && code;
-				}),
-			)
-		).filter((toWarn): toWarn is string => Boolean(toWarn));
+		const badInvites = invites
+			.filter((invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id))
+			.map((invite) => invite?.code);
 
-		if (invites.length) {
+		if (badInvites.length) {
 			needsDelete = true;
 			await warn(
 				message.author,
 				"Please don’t send server invites in that channel!",
-				invites.length,
-				invites.join("\n"),
+				badInvites.length,
+				badInvites.join("\n"),
 			);
 			await message.channel.send(
 				`${
@@ -106,6 +107,7 @@ export default async function automodMessage(message: Message) {
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
+			...invites.map((invite) => !!invite?.guild && censor(invite.guild.name)),
 		].reduce(
 			(bad, censored) =>
 				typeof censored === "boolean"
