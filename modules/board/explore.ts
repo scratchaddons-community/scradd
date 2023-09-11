@@ -1,8 +1,6 @@
 import {
 	ChannelType,
 	ButtonStyle,
-	CategoryChannel,
-	type APIInteractionDataResolvedChannel,
 	type GuildBasedChannel,
 	type Snowflake,
 	ComponentType,
