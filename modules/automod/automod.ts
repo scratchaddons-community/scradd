@@ -45,7 +45,7 @@ export default async function automodMessage(message: Message) {
 			message.author,
 			"Please don’t post that many animated emojis!",
 			badAnimatedEmojis,
-			animatedEmojis?.map((emoji) => emoji).join(""),
+			animatedEmojis?.join(""),
 		);
 		await message.channel.send(
 			`${
@@ -94,7 +94,7 @@ export default async function automodMessage(message: Message) {
 				message.author,
 				"Please don’t post bot invite links!",
 				bots.length,
-				bots.join("\n"),
+				bots.join("\n"), // todo: improve this
 			);
 			await message.channel.send(
 				`${
@@ -177,12 +177,9 @@ export default async function automodMessage(message: Message) {
 		if (badWords.strikes || badEmbedWords.strikes) {
 			await warn(
 				message.interaction?.user ?? message.author,
-				"Watch your language!",
+				"Please watch your language!",
 				languageStrikes,
-				`Sent message with words: ${[
-					...badEmbedWords.words.flat(),
-					...badWords.words.flat(),
-				].join(", ")}`,
+				[...badEmbedWords.words.flat(), ...badWords.words.flat()].join(", "),
 			);
 		}
 	}

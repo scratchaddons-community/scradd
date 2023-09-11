@@ -92,7 +92,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 			};
 		},
 		{ customReactions: [], options: [] },
-	);
+	); // TODO: censor it
 	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
 	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
 

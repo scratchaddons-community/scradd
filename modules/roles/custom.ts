@@ -167,7 +167,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (censored) {
 		await warn(
 			interaction.user,
-			"Watch your language!",
+			"Please watch your language!",
 			censored.strikes,
 			`Attempted to make custom role @${name}`,
 		);

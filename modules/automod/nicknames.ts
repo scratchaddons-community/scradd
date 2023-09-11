@@ -12,7 +12,7 @@ export default async function changeNickname(member: GuildMember) {
 	if (censored && member.nickname)
 		await warn(
 			member,
-			"Watch your language!",
+			"Please watch your language!",
 			censored.strikes,
 			"Set nickname to " + member.displayName,
 		);
