@@ -131,6 +131,7 @@ module.exports = {
 		],
 	},
 };
+// todo: https://github.com/eslint/eslint/pull/17500/files
 // todo: no empty func
 // todo: stop nesting why tf are there 14-level nesting places
 // todo: no promise all

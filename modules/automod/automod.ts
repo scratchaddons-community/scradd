@@ -27,8 +27,6 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 export default async function automodMessage(message: Message) {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
-	const parentChannel =
-		baseChannel && baseChannel.isDMBased() ? baseChannel : baseChannel?.parent;
 
 	const animatedEmojis = message.content.match(GlobalAnimatedEmoji);
 

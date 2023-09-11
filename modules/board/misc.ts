@@ -8,6 +8,7 @@ import {
 	type Snowflake,
 	type TextBasedChannel,
 	BaseChannel,
+	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
@@ -55,30 +56,30 @@ export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake 
 	if (!channel) return COUNTS.default;
 
 	if (channel.id === config.channels.updates?.id) return COUNTS.info;
-
-	const baseCount = baseReactionCount(channel.id);
-	if (!(channel instanceof BaseChannel)) return baseCount;
+	if (!(channel instanceof BaseChannel)) return baseReactionCount(channel.id);
 
 	if (!channel.isTextBased()) return COUNTS.default;
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
 	if (baseChannel.isVoiceBased()) return COUNTS.misc;
 
-	return (
+	const count =
 		baseReactionCount(baseChannel.id) ??
 		{
 			[config.channels.info?.id || ""]: COUNTS.info,
 			[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ??
-		COUNTS.default
-	);
+		COUNTS.default;
+	const privateThread = +(channel.type === ChannelType.PrivateThread) + 1;
+
+	return Math.max(2, Math.ceil(count / privateThread));
 }
 function baseReactionCount(id: Snowflake) {
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
 	return {
-		[config.channels.tickets?.id || ""]: COUNTS.private,
+		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
 		"869662117651955802": COUNTS.private, // #devs-only
