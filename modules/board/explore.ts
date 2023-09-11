@@ -31,23 +31,15 @@ export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
  * @returns Whether the channel is a match.
  */
 async function textChannelMatches(
-	channelWanted: APIInteractionDataResolvedChannel | GuildBasedChannel,
+	channelWanted: GuildBasedChannel,
 	channelFound: Snowflake,
 ): Promise<boolean> {
 	if (channelWanted.id === channelFound) return true;
 
 	switch (channelWanted.type) {
 		case ChannelType.GuildCategory: {
-			const fetchedChannel =
-				channelWanted instanceof CategoryChannel
-					? channelWanted
-					: await config.guild.channels.fetch(channelWanted.id).catch(() => void 0);
-
-			if (fetchedChannel?.type !== ChannelType.GuildCategory)
-				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
-
 			return await firstTrueyPromise(
-				fetchedChannel.children
+				channelWanted.children
 					.valueOf()
 					.map(async (child) => await textChannelMatches(child, channelFound)),
 			);
@@ -69,14 +61,12 @@ async function textChannelMatches(
 export default async function makeSlideshow(
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
 	{
-		minReactions = defaultMinReactions,
 		user,
-		channel: channelWanted,
-	}: {
-		minReactions?: number;
-		user?: string;
-		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
-	},
+		channel,
+		minReactions = Math.round(
+			boardReactionCount(channel?.isTextBased() ? channel : undefined) * 0.4,
+		),
+	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number },
 ) {
 	const ephemeral =
 		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
@@ -91,8 +81,7 @@ export default async function makeSlideshow(
 			)
 			.sort(() => Math.random() - 0.5),
 		async (message) =>
-			(channelWanted ? await textChannelMatches(channelWanted, message.channel) : true) &&
-			message,
+			(channel ? await textChannelMatches(channel, message.channel) : true) && message,
 	);
 
 	const nextId = generateHash("next");
