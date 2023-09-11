@@ -1,4 +1,4 @@
-import type { Message } from "discord.js";
+import { ChannelType, type Message } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -62,10 +62,11 @@ export default async function automodMessage(message: Message) {
 
 	if (
 		!allowBadWords &&
-		config.channels.info?.id !== parentChannel?.id &&
+		!message.author.bot &&
 		config.channels.advertise &&
 		config.channels.advertise.id !== baseChannel?.id &&
-		!message.author.bot
+		config.channels.announcements?.id !== baseChannel?.id &&
+		baseChannel?.type !== ChannelType.GuildAnnouncement
 	) {
 		const badInvites = invites
 			.filter((invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id))
