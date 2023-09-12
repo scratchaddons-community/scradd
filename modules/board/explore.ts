@@ -70,9 +70,8 @@ export default async function makeSlideshow(
 		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
 	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });
 
-	const { data } = boardDatabase;
 	const fetchedMessages = asyncFilter(
-		data
+		boardDatabase.data
 			.filter(
 				(message) =>
 					message.reactions >= minReactions && message.user === (user ?? message.user),
@@ -139,7 +138,7 @@ export default async function makeSlideshow(
 			  } satisfies InteractionReplyOptions);
 
 		if (!reply) {
-			boardDatabase.data = data.filter(({ source }) => source !== info?.source);
+			boardDatabase.data = boardDatabase.data.filter(({ source }) => source !== info?.source);
 
 			return await getNextMessage();
 		}
