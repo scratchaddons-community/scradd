@@ -199,8 +199,8 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: undefined, icon: undefined };
-	if (icon && !iconData)
+	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: null, icon: null };
+	if (!iconData)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the like is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
@@ -249,9 +249,7 @@ export async function recheckMemberRole(_: PartialGuildMember | GuildMember, mem
 		config.guild.features.includes("ROLE_ICONS") &&
 		!(config.roles.staff && member.roles.resolve(config.roles.staff.id))
 	) {
-		// eslint-disable-next-line unicorn/no-null
 		await role?.setUnicodeEmoji(null, "No longer qualifies");
-		// eslint-disable-next-line unicorn/no-null
 		await role?.setIcon(null, "No longer qualifies");
 	}
 }
