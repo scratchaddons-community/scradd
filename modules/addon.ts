@@ -82,9 +82,7 @@ defineChatCommand(
 			const note = ("note" in credit && credit.note) || "";
 			return credit.link
 				? hyperlink(credit.name, credit.link, note)
-				: interaction.channel
-				? tooltip(credit.name, note, interaction.guild?.id)
-				: credit.name;
+				: tooltip(credit.name, note, interaction.guild?.id);
 		});
 
 		const lastUpdatedIn =
@@ -111,15 +109,11 @@ defineChatCommand(
 
 							value: `v${addon.versionAdded}${
 								addon.latestUpdate && lastUpdatedIn
-									? ` (${
-											interaction.channel
-												? tooltip(
-														lastUpdatedIn,
-														addon.latestUpdate.temporaryNotice,
-														interaction.guild?.id,
-												  )
-												: lastUpdatedIn
-									  })`
+									? ` (${tooltip(
+											lastUpdatedIn,
+											addon.latestUpdate.temporaryNotice,
+											interaction.guild?.id,
+									  )})`
 									: ""
 							}`,
 						},
