@@ -31,186 +31,181 @@ defineEvent("messageCreate", async (message) => {
 		}
 		return text;
 	}
-switch(type) {
-	case "projects":
-		const projectId = urlParts[4];
+	switch (type) {
+		case "projects":
+			const projectId = urlParts[4];
 
-		 
+			fetchApiData(`https://api.scratch.mit.edu/projects/${projectId}/`)
+				.then((data) => {
+					//I hate hate hate hate this aaaaa
 
-		fetchApiData(`https://api.scratch.mit.edu/projects/${projectId}/`)
-			.then((data) => {
-				//I hate hate hate hate this aaaaa
-
-				message.channel.send({
-					embeds: [
-						{
-							title: data.title,
-							description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-							color: 0x00ffff,
-							fields: [
-								{
-									name: `views`,
-									value: data.stats.views,
-									inline: true,
+					message.channel.send({
+						embeds: [
+							{
+								title: data.title,
+								description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
+								color: 0x00ffff,
+								fields: [
+									{
+										name: `views`,
+										value: data.stats.views,
+										inline: true,
+									},
+									{
+										name: `loves`,
+										value: data.stats.loves,
+										inline: true,
+									},
+									{
+										name: `favorites`,
+										value: data.stats.favorites,
+										inline: true,
+									},
+									{
+										name: `remixes`,
+										value: data.stats.remixes,
+										inline: true,
+									},
+								],
+								image: {
+									url: data.images["282x218"],
+									height: 0,
+									width: 0,
 								},
-								{
-									name: `loves`,
-									value: data.stats.loves,
-									inline: true,
+								thumbnail: {
+									url: ``,
+									height: 0,
+									width: 0,
 								},
-								{
-									name: `favorites`,
-									value: data.stats.favorites,
-									inline: true,
+								author: {
+									name: `by: ${data.author.username}`,
+									url: `https://scratch.mit.edu/users/${data.author.username}`,
+									icon_url: data.author.profile.images["90x90"],
 								},
-								{
-									name: `remixes`,
-									value: data.stats.remixes,
-									inline: true,
+								footer: {
+									text: notSet ? "Disable this using /settings" : "",
+									icon_url: ``,
 								},
-							],
-							image: {
-								url: data.images["282x218"],
-								height: 0,
-								width: 0,
+								url: `https://scratch.mit.edu/projects/${projectId}`,
 							},
-							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
-							},
-							author: {
-								name: `by: ${data.author.username}`,
-								url: `https://scratch.mit.edu/users/${data.author.username}`,
-								icon_url: data.author.profile.images["90x90"],
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
-							},
-							url: `https://scratch.mit.edu/projects/${projectId}`,
-						},
-					],
+						],
+					});
+				})
+				.catch(() => {
+					//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
 				});
-			})
-			.catch(() => {
-				//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
-			});
 			break;
-	case "users":
-		const username = urlParts[4];
+		case "users":
+			const username = urlParts[4];
 
-		
-		fetchApiData(`https://api.scratch.mit.edu/users/${username}/`)
-			.then((data) => {
-				message.channel.send({
-					embeds: [
-						{
-							title: data.username,
-							description: data.scratchteam ? "Scratch Team" : "",
-							color: 0x00ffff,
-							fields: [
-								{
-									name: `WIWO`,
-									value: data.profile.status,
-									
+			fetchApiData(`https://api.scratch.mit.edu/users/${username}/`)
+				.then((data) => {
+					message.channel.send({
+						embeds: [
+							{
+								title: data.username,
+								description: data.scratchteam ? "Scratch Team" : "",
+								color: 0x00ffff,
+								fields: [
+									{
+										name: `WIWO`,
+										value: data.profile.status,
+									},
+									{
+										name: `About`,
+										value: data.profile.bio,
+									},
+								],
+								image: {
+									url: data.profile.images["90x90"],
+									height: 0,
+									width: 0,
 								},
-								{
-									name: `About`,
-									value: data.profile.bio,
-									
+								thumbnail: {
+									url: ``,
+									height: 0,
+									width: 0,
 								},
-							],
-							image: {
-								url: data.profile.images["90x90"],
-								height: 0,
-								width: 0,
+								author: {
+									name: ``,
+									url: ``,
+									icon_url: ``,
+								},
+								footer: {
+									text: notSet ? "Disable this using /settings" : "",
+									icon_url: ``,
+								},
+								url: `https://scratch.mit.edu/users/${username}`,
 							},
-							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
+						],
+					});
+				})
+				.catch(() => {});
+			break;
+		case "studios":
+			const studioId = urlParts[4];
+
+			fetchApiData(`https://api.scratch.mit.edu/studios/${studioId}/`)
+				.then((data) => {
+					//mnm,nmnm,nn/m.n.,nmn/mn
+
+					message.channel.send({
+						embeds: [
+							{
+								title: data.title,
+								description: long(data.description, 400, "..."),
+								color: 0x00ffff,
+								fields: [
+									{
+										name: `comments`,
+										value: data.comments_allowed
+											? `${data.stats.comments}`
+											: "comments off",
+										inline: true,
+									},
+									{
+										name: `followers`,
+										value: data.stats.followers,
+										inline: true,
+									},
+									{
+										name: `managers`,
+										value: data.stats.managers,
+										inline: true,
+									},
+									{
+										name: `projects`,
+										value: data.stats.projects,
+										inline: true,
+									},
+								],
+								image: {
+									url: data.image,
+									height: 0,
+									width: 0,
+								},
+								thumbnail: {
+									url: ``,
+									height: 0,
+									width: 0,
+								},
+								author: {
+									name: ``,
+									url: ``,
+									icon_url: ``,
+								},
+								footer: {
+									text: notSet ? "Disable this using /settings" : "",
+									icon_url: ``,
+								},
+								url: `https://scratch.mit.edu/studios/${studioId}`,
 							},
-							author: {
-								name: ``,
-								url: ``,
-								icon_url: ``,
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
-							},
-							url: `https://scratch.mit.edu/users/${username}`,
-						},
-					],
+						],
+					});
+				})
+				.catch(() => {
+					//babeh shark
 				});
-			})
-			.catch(() => {});
 			break;
-	case "studios":
-		const studioId = urlParts[4];
-
-		fetchApiData(`https://api.scratch.mit.edu/studios/${studioId}/`)
-			.then((data) => {
-				//mnm,nmnm,nn/m.n.,nmn/mn
-
-				message.channel.send({
-					embeds: [
-						{
-							title: data.title,
-							description: long(data.description, 400, "..."),
-							color: 0x00ffff,
-							fields: [
-								{
-									name: `comments`,
-									value: data.comments_allowed
-										? `${data.stats.comments}`
-										: "comments off",
-									inline: true,
-								},
-								{
-									name: `followers`,
-									value: data.stats.followers,
-									inline: true,
-								},
-								{
-									name: `managers`,
-									value: data.stats.managers,
-									inline: true,
-								},
-								{
-									name: `projects`,
-									value: data.stats.projects,
-									inline: true,
-								},
-							],
-							image: {
-								url: data.image,
-								height: 0,
-								width: 0,
-							},
-							thumbnail: {
-								url: ``,
-								height: 0,
-								width: 0,
-							},
-							author: {
-								name: ``,
-								url: ``,
-								icon_url: ``,
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
-							},
-							url: `https://scratch.mit.edu/studios/${studioId}`,
-						},
-					],
-				});
-			})
-			.catch(() => {
-				//babeh shark
-			});
-			break;
-	}}
-);
+	}
+});
