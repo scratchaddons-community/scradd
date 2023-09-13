@@ -3,7 +3,7 @@ import { getSettings } from "./settings.js";
 
 defineEvent("messageCreate", async (message) => {
 	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
-	if (!getSettings(message.author, false).scratchEmbeds && !notSet) {
+	if (!getSettings(message.author).scratchEmbeds) {
 		return;
 	}
 	const scratchUrlRegex =
@@ -15,7 +15,7 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	const urlParts = match[0].split("/");
-	const type = urlParts[3]; // m ybrain is dead
+	const type = urlParts[3];
 
 	async function fetchApiData(apiUrl: string): Promise<any> {
 		try {
@@ -44,7 +44,7 @@ defineEvent("messageCreate", async (message) => {
 							{
 								title: data.title,
 								description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-								color: 0x00ffff,
+								
 								fields: [
 									{
 										name: `views`,
@@ -67,18 +67,11 @@ defineEvent("messageCreate", async (message) => {
 										inline: true,
 									},
 								],
-								image: {
-									url: data.images["282x218"],
-									height: 0,
-									width: 0,
-								},
 								thumbnail: {
-									url: ``,
-									height: 0,
-									width: 0,
+									url: data.images["282x218"],
 								},
 								author: {
-									name: `by: ${data.author.username}`,
+									name: data.author.username,
 									url: `https://scratch.mit.edu/users/${data.author.username}`,
 									icon_url: data.author.profile.images["90x90"],
 								},
@@ -104,36 +97,28 @@ defineEvent("messageCreate", async (message) => {
 						embeds: [
 							{
 								title: data.username,
-								description: data.scratchteam ? "Scratch Team" : "",
-								color: 0x00ffff,
+								description:"",
+								
 								fields: [
-									{
-										name: `WIWO`,
-										value: data.profile.status,
-									},
+									
 									{
 										name: `About`,
 										value: data.profile.bio,
 									},
+									{
+										name: `WIWO`,
+										value: data.profile.status,
+									},
 								],
-								image: {
-									url: data.profile.images["90x90"],
-									height: 0,
-									width: 0,
-								},
 								thumbnail: {
-									url: ``,
-									height: 0,
-									width: 0,
+									url: data.profile.images["90x90"],
 								},
 								author: {
-									name: ``,
-									url: ``,
-									icon_url: ``,
+									name: data.scratchteam ? "Scratch Team" : "",
 								},
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
-									icon_url: ``,
+									
 								},
 								url: `https://scratch.mit.edu/users/${username}`,
 							},
@@ -154,13 +139,13 @@ defineEvent("messageCreate", async (message) => {
 							{
 								title: data.title,
 								description: long(data.description, 400, "..."),
-								color: 0x00ffff,
+								
 								fields: [
 									{
 										name: `comments`,
 										value: data.comments_allowed
 											? `${data.stats.comments}`
-											: "comments off",
+											: `${data.stats.comments} (off)`,
 										inline: true,
 									},
 									{
@@ -179,15 +164,8 @@ defineEvent("messageCreate", async (message) => {
 										inline: true,
 									},
 								],
-								image: {
-									url: data.image,
-									height: 0,
-									width: 0,
-								},
 								thumbnail: {
-									url: ``,
-									height: 0,
-									width: 0,
+									url: data.image,
 								},
 								author: {
 									name: ``,
