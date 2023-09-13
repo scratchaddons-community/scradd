@@ -44,7 +44,7 @@ defineEvent("messageCreate", async (message) => {
 							{
 								title: data.title,
 								description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-								
+
 								fields: [
 									{
 										name: `views`,
@@ -97,10 +97,9 @@ defineEvent("messageCreate", async (message) => {
 						embeds: [
 							{
 								title: data.username,
-								description:"",
-								
+								description: "",
+
 								fields: [
-									
 									{
 										name: `About`,
 										value: data.profile.bio,
@@ -118,7 +117,6 @@ defineEvent("messageCreate", async (message) => {
 								},
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
-									
 								},
 								url: `https://scratch.mit.edu/users/${username}`,
 							},
@@ -139,7 +137,7 @@ defineEvent("messageCreate", async (message) => {
 							{
 								title: data.title,
 								description: long(data.description, 400, "..."),
-								
+
 								fields: [
 									{
 										name: `comments`,
