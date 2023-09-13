@@ -55,21 +55,19 @@ export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
 	time = new Date(),
 ) {
-	const timeShift = (Date.now() - +time) / 86_400_000 / 200 + 1;
+	if (process.env.NODE_ENV !== "production") return shift(COUNTS.scradd);
+	if (!channel) return shift(COUNTS.default);
 
-	if (process.env.NODE_ENV !== "production") return COUNTS.scradd * timeShift;
-	if (!channel) return COUNTS.default * timeShift;
-
-	if (channel.id === config.channels.updates?.id) return COUNTS.info * timeShift;
+	if (channel.id === config.channels.updates?.id) return shift(COUNTS.info);
 	if (!(channel instanceof BaseChannel)) {
 		const count = baseReactionCount(channel.id);
-		return count && count * timeShift;
+		return count && shift(count);
 	}
 
-	if (!channel.isTextBased()) return COUNTS.default * timeShift;
+	if (!channel.isTextBased()) return shift(COUNTS.default);
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default * timeShift;
-	if (baseChannel.isVoiceBased()) return COUNTS.misc * timeShift;
+	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
+	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
 	const count =
 		baseReactionCount(baseChannel.id) ??
@@ -79,9 +77,16 @@ export function boardReactionCount(
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ??
 		COUNTS.default;
-	const privateThread = +(channel.type === ChannelType.PrivateThread) + 1;
+	return shift(count);
 
-	return Math.max(2, (count / privateThread) * timeShift);
+	function shift(count: number) {
+		const privateThread =
+			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
+				? 2 / 3
+				: 1;
+		const timeShift = (Date.now() - +time) / 86_400_000 / 200 + 1;
+		return Math.max(2, Math.round(count * privateThread * timeShift));
+	}
 }
 function baseReactionCount(id: Snowflake) {
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
