@@ -3,7 +3,7 @@ import { getSettings } from "./settings.js";
 
 defineEvent("messageCreate", async (message) => {
 	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
-	if (!getSettings(message.author).scratchEmbeds) {
+	if (!getSettings(message.author, false).scratchEmbeds && !notSet) {
 		return;
 	}
 	const scratchUrlRegex =
@@ -31,13 +31,13 @@ defineEvent("messageCreate", async (message) => {
 		}
 		return text;
 	}
-
-	if (type === "projects") {
+switch(type) {
+	case "projects":
 		const projectId = urlParts[4];
 
-		const apiUrl = `https://api.scratch.mit.edu/projects/${projectId}/`;
+		 
 
-		fetchApiData(apiUrl)
+		fetchApiData(`https://api.scratch.mit.edu/projects/${projectId}/`)
 			.then((data) => {
 				//I hate hate hate hate this aaaaa
 
@@ -46,7 +46,7 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-
+							color: 0x00ffff,
 							fields: [
 								{
 									name: `views`,
@@ -69,17 +69,24 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-
-							thumbnail: {
+							image: {
 								url: data.images["282x218"],
+								height: 0,
+								width: 0,
+							},
+							thumbnail: {
+								url: ``,
+								height: 0,
+								width: 0,
 							},
 							author: {
-								name: data.author.username,
+								name: `by: ${data.author.username}`,
 								url: `https://scratch.mit.edu/users/${data.author.username}`,
 								icon_url: data.author.profile.images["90x90"],
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
+								icon_url: ``,
 							},
 							url: `https://scratch.mit.edu/projects/${projectId}`,
 						},
@@ -89,38 +96,49 @@ defineEvent("messageCreate", async (message) => {
 			.catch(() => {
 				//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
 			});
-	} else if (type === "users") {
+			break;
+	case "users":
 		const username = urlParts[4];
 
-		const apiUrl = `https://api.scratch.mit.edu/users/${username}/`;
-
-		fetchApiData(apiUrl)
+		
+		fetchApiData(`https://api.scratch.mit.edu/users/${username}/`)
 			.then((data) => {
 				message.channel.send({
 					embeds: [
 						{
 							title: data.username,
-							description: ``,
-
+							description: data.scratchteam ? "Scratch Team" : "",
+							color: 0x00ffff,
 							fields: [
-								{
-									name: `About`,
-									value: data.profile.bio,
-								},
 								{
 									name: `WIWO`,
 									value: data.profile.status,
+									
+								},
+								{
+									name: `About`,
+									value: data.profile.bio,
+									
 								},
 							],
-
-							thumbnail: {
+							image: {
 								url: data.profile.images["90x90"],
+								height: 0,
+								width: 0,
+							},
+							thumbnail: {
+								url: ``,
+								height: 0,
+								width: 0,
 							},
 							author: {
-								name: data.scratchteam ? "Scratch Team" : "",
+								name: ``,
+								url: ``,
+								icon_url: ``,
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
+								icon_url: ``,
 							},
 							url: `https://scratch.mit.edu/users/${username}`,
 						},
@@ -128,12 +146,11 @@ defineEvent("messageCreate", async (message) => {
 				});
 			})
 			.catch(() => {});
-	} else if (type === "studios") {
+			break;
+	case "studios":
 		const studioId = urlParts[4];
 
-		const apiUrl = `https://api.scratch.mit.edu/studios/${studioId}/`;
-
-		fetchApiData(apiUrl)
+		fetchApiData(`https://api.scratch.mit.edu/studios/${studioId}/`)
 			.then((data) => {
 				//mnm,nmnm,nn/m.n.,nmn/mn
 
@@ -142,13 +159,13 @@ defineEvent("messageCreate", async (message) => {
 						{
 							title: data.title,
 							description: long(data.description, 400, "..."),
-
+							color: 0x00ffff,
 							fields: [
 								{
 									name: `comments`,
 									value: data.comments_allowed
 										? `${data.stats.comments}`
-										: `${data.stats.comments} (off)`,
+										: "comments off",
 									inline: true,
 								},
 								{
@@ -167,9 +184,20 @@ defineEvent("messageCreate", async (message) => {
 									inline: true,
 								},
 							],
-
-							thumbnail: {
+							image: {
 								url: data.image,
+								height: 0,
+								width: 0,
+							},
+							thumbnail: {
+								url: ``,
+								height: 0,
+								width: 0,
+							},
+							author: {
+								name: ``,
+								url: ``,
+								icon_url: ``,
 							},
 							footer: {
 								text: notSet ? "Disable this using /settings" : "",
@@ -183,6 +211,6 @@ defineEvent("messageCreate", async (message) => {
 			.catch(() => {
 				//babeh shark
 			});
-	} else {
-	}
-});
+			break;
+	}}
+);
