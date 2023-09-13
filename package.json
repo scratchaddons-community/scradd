@@ -10,7 +10,8 @@
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
 		"serve": "nodemon --enable-source-maps . --watch dist",
-		"start": "node --enable-source-maps ."
+		"start": "node --enable-source-maps .",
+		"test": "npm run build; node --test"
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {

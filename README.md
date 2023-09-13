@@ -45,7 +45,7 @@ This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Pleas
 
 ### Commands
 
-When testing your code, it is recommended to run `npm run serve & npm run dev` to automatically build and restart the bot all in the same terminal. Before committing your code, it is necessary to run `npm run format`, then `npm run lint` and fix any lint errors, then repeat both until no more lint errors are left. See below for a full description of all available commands:
+When testing your code, it is recommended to run `npm run serve & npm run dev` to automatically build and restart the bot all in the same terminal. Before committing your code, it is necessary to run `npm run format`, then `npm run lint` and fix any lint errors, finally `npm run test` and fix any failing test, then repeat all three until no more lint errors are left. See below for a full description of all available commands:
 
 -   To build the code once, run `npm run build`.
 -   To start the bot after building the code, run `npm start`.
@@ -53,3 +53,4 @@ When testing your code, it is recommended to run `npm run serve & npm run dev` t
 -   To restart the bot on every successful build, run `npm run serve`.
 -   To format the code, run `npm run format`. This command must be run before your PR is merged. If you don't run it, it is automatically run in the workflow.
 -   To lint the code, run `npm run lint`. No lint errors may be present when your PR is merged. Warnings may be allowed depending on the context. Some lint errors may be fixed automatically with `npm run lint -- --fix`, but it is important to manually confirm it worked as intended. The workflow fails if warnings are present.
+-   To unit test the code, run `npm run test`. We only have a few unit tests currently. No tests may fail when your PR is merged. We use the Node.JS native test runner for tests.
