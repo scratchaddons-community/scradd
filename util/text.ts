@@ -54,13 +54,13 @@ export function joinWithAnd(
  * @returns The truncated string.
  */
 export function truncateText(text: string, maxLength: number): string {
-	const condensed = (text.split("\n")[0] ?? text).replaceAll(/\s+/g, " ");
+	const condensed = (text.split("\n")[0] ?? text).replaceAll(/\s+/g, " ").trim();
 	const trimmed = condensed.slice(0, maxLength + 1);
 	const segments = Array.from(new Intl.Segmenter().segment(trimmed), ({ segment }) => segment);
 
 	if (trimmed.length > maxLength) segments.pop();
-	const output = segments.join("");
-	return output + (output === condensed ? "" : "…");
+	const output = segments.join("").trim();
+	return output + (output === condensed && !text.includes("\n") ? "" : "…");
 }
 
 /**
