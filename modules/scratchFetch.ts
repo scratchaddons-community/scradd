@@ -32,7 +32,7 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	let msgEmbeds = [];
-	
+
 	for (let i of match) {
 		const urlParts = i.split("/");
 
