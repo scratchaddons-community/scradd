@@ -1,5 +1,6 @@
 import { defineEvent } from "strife.js";
 import { getSettings } from "./settings.js";
+import constants from "../common/constants.js";
 
 defineEvent("messageCreate", async (message) => {
 	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
@@ -34,7 +35,7 @@ defineEvent("messageCreate", async (message) => {
 	switch (type) {
 		case "projects":
 			const projectdata = await fetchApiData(
-				`https://api.scratch.mit.edu/projects/${urlParts[4]}/`,
+				`https://${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
 			).catch(() => {});
 
 			message.reply({
@@ -86,7 +87,7 @@ defineEvent("messageCreate", async (message) => {
 			break;
 		case "users":
 			const userdata = await fetchApiData(
-				`https://api.scratch.mit.edu/users/${urlParts[4]}/`,
+				`https://${constants.urls.scratchApi}/users/${urlParts[4]}/`,
 			).catch(() => {});
 
 			message.reply({
@@ -124,7 +125,7 @@ defineEvent("messageCreate", async (message) => {
 			break;
 		case "studios":
 			const studiodata = await fetchApiData(
-				`https://api.scratch.mit.edu/studios/${urlParts[4]}/`,
+				`https://${constants.urls.scratchApi}/studios/${urlParts[4]}/`,
 			).catch(() => {});
 			message.reply({
 				embeds: [

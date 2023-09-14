@@ -44,6 +44,7 @@ export default {
 		saRepo: "ScratchAddons/ScratchAddons",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
+		scratchApi: "api.scratch.mit.edu",
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
