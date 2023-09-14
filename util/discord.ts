@@ -382,7 +382,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
+			return "The best way to setup a server is with your buddies!";
 		}
 
 		case MessageType.RoleSubscriptionPurchase: {

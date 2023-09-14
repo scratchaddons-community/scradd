@@ -85,8 +85,7 @@ export default async function changeNickname(member: GuildMember) {
 
 async function setNickname(member: GuildMember, newNickname: string, reason: string) {
 	await (member.moderatable
-		? // eslint-disable-next-line unicorn/no-null
-		  member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
+		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
 				`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		  ));
