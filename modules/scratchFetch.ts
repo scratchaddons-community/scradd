@@ -7,15 +7,16 @@ defineEvent("messageCreate", async (message) => {
 		return;
 	}
 	const scratchUrlRegex =
-		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?(?!>)/; //gpt wrote the regex and like half of this code
+		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios|discuss)\/[/-\w]+\/?(?!>)/; //gpt wrote the regex and like half of this code
 	const match = message.content.match(scratchUrlRegex);
-
+	
 	if (!match) {
 		return;
 	}
 
 	const urlParts = match[0].split("/");
 	const type = urlParts[3];
+	//message.channel.send(`type:${type}`);
 
 	async function fetchApiData(apiUrl: string): Promise<any> {
 		try {
@@ -33,155 +34,205 @@ defineEvent("messageCreate", async (message) => {
 	}
 	switch (type) {
 		case "projects":
-			const projectId = urlParts[4];
+			
+			const projectdata = await fetchApiData(`https://api.scratch.mit.edu/projects/${urlParts[4]}/`).catch(() => {});
+			
 
-			fetchApiData(`https://api.scratch.mit.edu/projects/${projectId}/`)
-				.then((data) => {
-					//I hate hate hate hate this aaaaa
-
-					message.channel.send({
+					message.reply({
 						embeds: [
 							{
-								title: data.title,
-								description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
+								title: projectdata.title,
+								description: `**desc**: ${projectdata.description}\n**inst**: ${projectdata.instructions}`,
+								color: 0x885cd4,
+
 
 								fields: [
 									{
 										name: `views`,
-										value: data.stats.views,
+										value: projectdata.stats.views,
 										inline: true,
 									},
 									{
 										name: `loves`,
-										value: data.stats.loves,
+										value: projectdata.stats.loves,
 										inline: true,
 									},
 									{
 										name: `favorites`,
-										value: data.stats.favorites,
+										value: projectdata.stats.favorites,
 										inline: true,
 									},
 									{
 										name: `remixes`,
-										value: data.stats.remixes,
+										value: projectdata.stats.remixes,
 										inline: true,
 									},
 								],
 								thumbnail: {
-									url: data.images["282x218"],
+									url: projectdata.images["282x218"],
 								},
 								author: {
-									name: data.author.username,
-									url: `https://scratch.mit.edu/users/${data.author.username}`,
-									icon_url: data.author.profile.images["90x90"],
+									name: projectdata.author.username,
+									url: `https://scratch.mit.edu/users/${projectdata.author.username}`,
+									icon_url: projectdata.author.profile.images["90x90"],
 								},
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
-									icon_url: ``,
+									
 								},
-								url: `https://scratch.mit.edu/projects/${projectId}`,
+								url: `https://scratch.mit.edu/projects/${urlParts[4]}`,
 							},
-						],
+						],allowedMentions: { repliedUser: false },
 					});
-				})
-				.catch(() => {
-					//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
-				});
+				
 			break;
 		case "users":
-			const username = urlParts[4];
-
-			fetchApiData(`https://api.scratch.mit.edu/users/${username}/`)
-				.then((data) => {
-					message.channel.send({
+			const userdata = await fetchApiData(`https://api.scratch.mit.edu/users/${urlParts[4]}/`).catch(() => {});
+			
+					message.reply({
 						embeds: [
 							{
-								title: data.username,
+								title: userdata.username,
 								description: "",
+								color: 0x885cd4,
 
 								fields: [
 									{
 										name: `About`,
-										value: data.profile.bio,
+										value: userdata.profile.bio,
 									},
 									{
 										name: `WIWO`,
-										value: data.profile.status,
+										value: userdata.profile.status,
 									},
 								],
 								thumbnail: {
-									url: data.profile.images["90x90"],
+									url: userdata.profile.images["90x90"],
 								},
 								author: {
-									name: data.scratchteam ? "Scratch Team" : "",
+									name: userdata.scratchteam ? "Scratch Team" : "",
 								},
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
 								},
-								url: `https://scratch.mit.edu/users/${username}`,
+								url: `https://scratch.mit.edu/users/${urlParts[4]}`,
 							},
-						],
+						],allowedMentions: { repliedUser: false },
 					});
-				})
-				.catch(() => {});
+				
 			break;
 		case "studios":
-			const studioId = urlParts[4];
-
-			fetchApiData(`https://api.scratch.mit.edu/studios/${studioId}/`)
-				.then((data) => {
-					//mnm,nmnm,nn/m.n.,nmn/mn
-
-					message.channel.send({
+			const studiodata = await fetchApiData(`https://api.scratch.mit.edu/studios/${urlParts[4]}/`).catch(() => {});
+			message.reply({
 						embeds: [
 							{
-								title: data.title,
-								description: long(data.description, 400, "..."),
+								title: studiodata.title,
+								description: long(studiodata.description, 400, "..."),
+								color: 0x885cd4,
 
 								fields: [
 									{
 										name: `comments`,
-										value: data.comments_allowed
-											? `${data.stats.comments}`
-											: `${data.stats.comments} (off)`,
+										value: studiodata.comments_allowed
+											? `${studiodata.stats.comments}`
+											: `${studiodata.stats.comments} (off)`,
 										inline: true,
 									},
 									{
 										name: `followers`,
-										value: data.stats.followers,
+										value: studiodata.stats.followers,
 										inline: true,
 									},
 									{
 										name: `managers`,
-										value: data.stats.managers,
+										value: studiodata.stats.managers,
 										inline: true,
 									},
 									{
 										name: `projects`,
-										value: data.stats.projects,
+										value: studiodata.stats.projects,
 										inline: true,
 									},
 								],
 								thumbnail: {
-									url: data.image,
+									url: studiodata.image,
 								},
-								author: {
-									name: ``,
-									url: ``,
-									icon_url: ``,
-								},
+								
+								
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
-									icon_url: ``,
+									
 								},
-								url: `https://scratch.mit.edu/studios/${studioId}`,
+								url: `https://scratch.mit.edu/studios/${urlParts[4]}`,
 							},
-						],
+						],allowedMentions: { repliedUser: false },
 					});
-				})
-				.catch(() => {
-					//babeh shark
-				});
+				
 			break;
-	}
+		case "discuss": 
+		//message.channel.send(`subtype:${urlParts[4]}`);
+		//message.channel.send(`id:${urlParts[5]}`);
+		
+		switch (urlParts[4]) {
+			case "topic": 
+			const topicdata = await fetchApiData(`https://scratchdb.lefty.one/v3/forum/topic/info/${urlParts[5]}/`).catch(() => {});
+			const topicposts = await fetchApiData(`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}/`).catch(() => {});
+			const topicfirst = topicposts[0]
+					message.reply({
+						embeds: [
+							{
+								title: topicdata.title,
+								description: topicfirst.content.bb /*`**In**: ${topicdata.category} ${topicdata.closed=0 ? "closed":""}`*/,
+
+								fields: [
+								
+									{
+										name: "posts",
+										value: topicdata.post_count,
+									}
+								],
+								footer: {
+									text: notSet ? "Disable this using /settings" : "",
+									
+								},
+								author: {
+									name: topicfirst.username,
+									url: `https://scratch.mit.edu/users/${topicfirst.username}`,
+								},
+								url: `https://scratch.mit.edu/discuss/topic/${urlParts[5]}`,
+							},
+						],allowedMentions: { repliedUser: false },
+					});
+				
+			break;
+			case "post": 
+			
+			const postdata = await fetchApiData(`https://scratchdb.lefty.one/v3/forum/post/info/${urlParts[5]}/`).catch(() => {});
+			message.reply({
+				embeds: [
+					{
+						title: postdata.title,
+						description: postdata.content.bb,
+						color: 0x885cd4,
+
+						
+						
+						footer: {
+							text: notSet ? "Disable this using /settings" : "",
+							
+						},
+						author: {
+							name: postdata.username,
+							url: `https://scratch.mit.edu/users/${postdata.username}`,
+						},
+						url: `https://scratch.mit.edu/discuss/post/${urlParts[5]}`,
+						}
+				],allowedMentions: { repliedUser: false },
+			});
+			break;
+			default: break;
+		}
+		break;
+		}
 });
+
