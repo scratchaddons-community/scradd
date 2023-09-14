@@ -121,9 +121,17 @@ defineSubcommands(
 											label: "Toggle Mentions",
 											style: ButtonStyle.Success,
 										},
+
+										{
+											customId: `${interaction.user.id}_xp`,
+											type: ComponentType.Button,
+											label: "xp",
+											style: ButtonStyle.Success,
+										},
 								  ]
 								: undefined;
 						},
+
 						customComponentLocation: "below",
 					},
 				);
