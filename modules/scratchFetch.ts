@@ -8,7 +8,7 @@ defineEvent("messageCreate", async (message) => {
 		return;
 	}
 	const scratchUrlRegex =
-		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios|discuss)\/[?=/-\w]+\/?(?!>)/gi; //gpt wrote the regex and like half of this code
+		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios|discuss)\/[/-\w]+\/?(?!>)/gi; //gpt wrote the regex and like half of this code
 	const matches = message.content.match(scratchUrlRegex);
 
 	if (!matches) {
@@ -32,7 +32,7 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	let msgEmbeds = [];
-	message.channel.send(`${match}`);
+	
 	for (let i of match) {
 		const urlParts = i.split("/");
 
