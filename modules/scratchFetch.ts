@@ -1,7 +1,8 @@
 import { defineEvent } from "strife.js";
 import { getSettings } from "./settings.js";
 import constants from "../common/constants.js";
-
+import { truncateText } from "../util/text.js";
+import { nth } from "../util/numbers.js";
 async function fetchApiData(apiUrl: string): Promise<any> {
 	try {
 		const response = await fetch(apiUrl);
@@ -9,29 +10,6 @@ async function fetchApiData(apiUrl: string): Promise<any> {
 		const data = await response.json();
 		return data;
 	} catch (error) {}
-}
-function long(text: string, maxLength: number, appendText: string): string {
-	if (text.length > maxLength) {
-		return text.substr(0, maxLength) + appendText;
-	}
-	return text;
-}
-function getOrdinal(i: number) {
-	var j = i % 10,
-		k = i % 100;
-	if (j == 1 && k != 11) {
-		return i + "st";
-	}
-	if (j == 2 && k != 12) {
-		return i + "nd";
-	}
-	if (j == 3 && k != 13) {
-		return i + "rd";
-	}
-	return i + "th";
-}
-function FindDupes(arr: Array<any>) {
-	return arr.filter((item, index) => arr.indexOf(item) === index);
 }
 
 defineEvent("messageCreate", async (message) => {
@@ -47,7 +25,7 @@ defineEvent("messageCreate", async (message) => {
 		return;
 	}
 
-	const match = FindDupes(matches).slice(0, 5);
+	const match = [...new Set(matches)].slice(0, 5);
 	let msgEmbeds = [];
 
 	for (let i of match) {
@@ -60,36 +38,41 @@ defineEvent("messageCreate", async (message) => {
 					const projectdata = await fetchApiData(
 						`${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
 					).catch(() => {});
+					let parentdata = null;
+					if (projectdata.remix.parent != null) {
+						parentdata = await fetchApiData(
+							`${constants.urls.scratchApi}/projects/${projectdata.remix.parent}/`,
+						);
+					}
 
-					msgEmbeds.push({
+					let embed = {
 						title: projectdata.title,
-						description: `**desc**: ${projectdata.description}\n**inst**: ${projectdata.instructions}`,
+						description: ``,
 						color: constants.scratchColor,
 
 						fields: [
 							{
-								name: `${constants.emojis.scratch.view}Views`,
-								value: projectdata.stats.views,
+								name: `${constants.emojis.scratch.love} Loves`,
+								value: projectdata.stats.loves,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.love}Loves`,
-								value: projectdata.stats.loves,
+								name: `${constants.emojis.scratch.fav} Favs`,
+								value: projectdata.stats.favorites,
 								inline: true,
 							},
 							{
 								name: constants.zeroWidthSpace,
 								value: constants.zeroWidthSpace,
 							}, // spacer for a 2x2 grid of stats
-
 							{
-								name: `${constants.emojis.scratch.fav}Favs`,
-								value: projectdata.stats.favorites,
+								name: `${constants.emojis.scratch.remix} Remixes`,
+								value: projectdata.stats.remixes,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.remix}Remixes`,
-								value: projectdata.stats.remixes,
+								name: `${constants.emojis.scratch.view} Views`,
+								value: projectdata.stats.views,
 								inline: true,
 							},
 						],
@@ -97,7 +80,11 @@ defineEvent("messageCreate", async (message) => {
 							url: projectdata.images["282x218"],
 						},
 						author: {
-							name: projectdata.author.username,
+							name: `${projectdata.author.username} ${
+								projectdata.remix.parent != null
+									? `${constants.footerSeperator}Remix of ${parentdata.title}`
+									: ``
+							}`,
 							url: `https://scratch.mit.edu/users/${projectdata.author.username}`,
 							icon_url: projectdata.author.profile.images["90x90"],
 						},
@@ -105,7 +92,25 @@ defineEvent("messageCreate", async (message) => {
 							text: notSet ? "Disable this using /settings" : "",
 						},
 						url: `https://scratch.mit.edu/projects/${urlParts[4]}`,
-					});
+						timestamp: new Date(projectdata.history.shared).toISOString(),
+					};
+
+					if (projectdata.instructions != "") {
+						embed.fields.unshift({
+							name: `Instructions`,
+							value: projectdata.instructions,
+							inline: false,
+						});
+					}
+					if (projectdata.description != "") {
+						embed.fields.unshift({
+							name: `Notes and Credits`,
+							value: projectdata.description,
+							inline: false,
+						});
+					}
+
+					msgEmbeds.push(embed);
 
 					break;
 				case "users":
@@ -117,9 +122,9 @@ defineEvent("messageCreate", async (message) => {
 						title: `${userdata.username}${
 							userdata.status == "Scratch Team" ? "*" : ""
 						}`,
-						description: `follows: ${getOrdinal(
+						description: `follows: ${nth(
 							userdata.statistics.ranks.country.followers,
-						)} in ${userdata.country}, ${getOrdinal(
+						)} in ${userdata.country}, ${nth(
 							userdata.statistics.ranks.followers,
 						)} in World`,
 						color: constants.scratchColor,
@@ -134,12 +139,12 @@ defineEvent("messageCreate", async (message) => {
 								value: userdata.work,
 							},
 							{
-								name: `${constants.emojis.scratch.followers}Followers`,
+								name: `${constants.emojis.scratch.followers} Followers`,
 								value: userdata.statistics.followers,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.following}Following`,
+								name: `${constants.emojis.scratch.following} Following`,
 								value: userdata.statistics.following,
 								inline: true,
 							},
@@ -158,6 +163,7 @@ defineEvent("messageCreate", async (message) => {
 							text: notSet ? "Disable this using /settings" : "",
 						},
 						url: `https://scratch.mit.edu/users/${urlParts[4]}`,
+						timestamp: new Date(userdata.joined).toISOString(),
 					});
 
 					break;
@@ -167,29 +173,29 @@ defineEvent("messageCreate", async (message) => {
 					).catch(() => {});
 					msgEmbeds.push({
 						title: studiodata.title,
-						description: long(studiodata.description, 400, "..."),
+						description: truncateText(studiodata.description, 400),
 						color: constants.scratchColor,
 
 						fields: [
 							{
-								name: `${constants.emojis.scratch.comments}comments`,
+								name: `${constants.emojis.scratch.comments} Comments`,
 								value: studiodata.comments_allowed
 									? `${studiodata.stats.comments}`
 									: `${studiodata.stats.comments} (off)`,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.followers}followers`,
+								name: `${constants.emojis.scratch.followers} Followers`,
 								value: studiodata.stats.followers,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.managers}managers`,
+								name: `${constants.emojis.scratch.managers} Managers`,
 								value: studiodata.stats.managers,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.scratch.projects}projects`,
+								name: `${constants.emojis.scratch.projects} Projects`,
 								value: studiodata.stats.projects,
 								inline: true,
 							},
@@ -202,6 +208,7 @@ defineEvent("messageCreate", async (message) => {
 							text: notSet ? "Disable this using /settings" : "",
 						},
 						url: `https://scratch.mit.edu/studios/${urlParts[4]}`,
+						timestamp: new Date(studiodata.history.created).toISOString(),
 					});
 					break;
 				case "discuss":
