@@ -81,6 +81,13 @@ defineChatCommand(
 	},
 	sayCommand,
 );
+defineMenuCommand(
+	// TODO: multiserver
+	{ name: "Send Reply", type: ApplicationCommandType.Message, restricted: true },
+	async (interaction) => {
+		await sayCommand(interaction, { message: "-", reply: interaction.targetMessage.id });
+	},
+);
 defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
 });

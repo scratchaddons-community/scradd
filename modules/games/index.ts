@@ -1,7 +1,7 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import guessAddon from "./guessAddon.js";
 import memoryMatch, { messageDelete, showMemoryInstructions } from "./memoryMatch.js";
-import { defineButton, defineChatCommand, defineEvent } from "strife.js";
+import { defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -37,6 +37,13 @@ defineChatCommand(
 		},
 	},
 	memoryMatch,
+);
+defineMenuCommand(
+	// TODO: multiserver
+	{ name: "Play Memory Match", type: ApplicationCommandType.User },
+	async (interaction) => {
+		await memoryMatch(interaction, { user: interaction.targetMember });
+	},
 );
 defineEvent.pre("messageDelete", messageDelete);
 defineButton("showMemoryInstructions", showMemoryInstructions);

@@ -5,9 +5,8 @@ import {
 	type Snowflake,
 	ComponentType,
 	type InteractionReplyOptions,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
 	type MessageEditOptions,
+	type RepliableInteraction,
 } from "discord.js";
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
@@ -58,7 +57,7 @@ async function textChannelMatches(
 }
 
 export default async function makeSlideshow(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+	interaction: RepliableInteraction,
 	{
 		user,
 		channel,

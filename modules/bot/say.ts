@@ -1,5 +1,4 @@
 import {
-	type ModalSubmitInteraction,
 	type ChatInputCommandInteraction,
 	ComponentType,
 	chatInputApplicationCommandMention,
@@ -10,6 +9,8 @@ import {
 	Constants,
 	MessageType,
 	type Snowflake,
+	type RepliableInteraction,
+	MessageContextMenuCommandInteraction,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
@@ -99,7 +100,7 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 }
 
 export default async function sayCommand(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
 	options: { message: string; reply?: string },
 ) {
 	if (options.message !== "-") {
@@ -137,11 +138,7 @@ export default async function sayCommand(
  * @param interaction - The interaction that triggered this mimic.
  * @param content - What to mimic.
  */
-export async function say(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
-	content: string,
-	reply?: string,
-) {
+export async function say(interaction: RepliableInteraction, content: string, reply?: string) {
 	await interaction.deferReply({ ephemeral: true });
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;

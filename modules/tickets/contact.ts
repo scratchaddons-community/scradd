@@ -4,13 +4,12 @@ import {
 	ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
-	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
 	InteractionResponse,
 	InteractionType,
-	ModalSubmitInteraction,
 	type PrivateThreadChannel,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -82,10 +81,7 @@ export async function showTicketModal(
 	});
 }
 export default async function contactMods(
-	interaction:
-		| ModalSubmitInteraction
-		| ChatInputCommandInteraction<"cached" | "raw">
-		| ButtonInteraction,
+	interaction: RepliableInteraction,
 	options: Category | GuildMember,
 ) {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
@@ -181,10 +177,7 @@ export default async function contactMods(
 	return thread;
 }
 
-export async function contactUser(
-	member: GuildMember,
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
-) {
+export async function contactUser(member: GuildMember, interaction: RepliableInteraction) {
 	await interaction.deferReply({ ephemeral: true });
 	const existingThread = TICKETS_BY_MEMBER[member.id];
 

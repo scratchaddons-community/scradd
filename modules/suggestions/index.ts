@@ -1,12 +1,13 @@
 import {
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	AuditLogEvent,
 	ThreadChannel,
 	type Snowflake,
 	ForumChannel,
 	Colors,
 } from "discord.js";
-import { client, defineChatCommand, defineEvent } from "strife.js";
+import { client, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
 import top from "./top.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
@@ -119,4 +120,11 @@ defineChatCommand(
 		},
 	},
 	top,
+);
+defineMenuCommand(
+	// TODO: multiserver
+	{ name: "List Suggestions", type: ApplicationCommandType.User },
+	async (interaction) => {
+		await top(interaction, { user: interaction.targetUser });
+	},
 );

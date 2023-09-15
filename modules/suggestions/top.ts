@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, GuildMember, hyperlink, User } from "discord.js";
+import { GuildMember, hyperlink, User, type RepliableInteraction } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
@@ -6,7 +6,7 @@ import { getSettings } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function top(
-	interaction: ChatInputCommandInteraction,
+	interaction: RepliableInteraction,
 	options: { user?: User | GuildMember; answer?: string },
 ) {
 	const { suggestions } = config.channels;
