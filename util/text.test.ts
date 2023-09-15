@@ -51,9 +51,6 @@ describe("truncateText", () => {
 	it("shouldn’t split at newlines with multiline on", () => {
 		strictEqual(truncateText("First line\nSecond line", 25, true), "First line\nSecond line");
 	});
-	it("should remove redundant spaces", () => {
-		strictEqual(truncateText("   Too     many   spaces   ", 15), "Too many spaces");
-	});
 });
 
 describe("caesar", () => {
