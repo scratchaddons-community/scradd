@@ -2,6 +2,7 @@ export default {
 	inviteUrl: "https://discord.gg/FPv957V6SD",
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200B",
+	scratchColor: 0x885cd4,
 
 	emojis: {
 		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
@@ -37,6 +38,18 @@ export default {
 			green: "<:success:1117217865536381030>",
 			blue: "<:primary:1117217909857587210>",
 		},
+
+		scratch: {
+			love: "<:heart:1151842300033519667>",
+			fav: "<:fav:1151842297340776488>",
+			remix: "<:remix:1151842289635827842>",
+			view: "<:view:1151842294287306832>",
+			followers: "<:people:1152194973186408519>",
+			following: "<:person:1152194976025935882>",
+			projects: "<:blocks:1152194965720547448>",
+			managers: "<:person:1152194976025935882>",
+			comments: "<:comment:1152194969298280448>",
+		},
 	},
 
 	urls: {
@@ -44,7 +57,7 @@ export default {
 		saRepo: "ScratchAddons/ScratchAddons",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
-		scratchApi: "api.scratch.mit.edu",
+		scratchApi: "https://api.scratch.mit.edu",
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
