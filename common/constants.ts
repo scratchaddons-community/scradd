@@ -2,8 +2,7 @@ export default {
 	inviteUrl: "https://discord.gg/FPv957V6SD",
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200B",
-	scratchColor: 0x885cd4,
-
+	
 	emojis: {
 		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
 
@@ -61,6 +60,7 @@ export default {
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+	scratchColor: 0x885cd4,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	testingServerId: "938438560925761619",
