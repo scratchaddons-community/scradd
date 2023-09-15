@@ -2,7 +2,7 @@ export default {
 	inviteUrl: "https://discord.gg/FPv957V6SD",
 	collectorTime: 45_000,
 	zeroWidthSpace: "\u200B",
-	
+
 	emojis: {
 		statuses: { yes: "<:yes:1016127835217334322>", no: "<:no:1016127863273037935>" },
 
