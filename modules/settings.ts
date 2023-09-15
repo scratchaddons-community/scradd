@@ -73,7 +73,7 @@ defineChatCommand(
 				useMentions: options["use-mentions"],
 				dmReminders: options["dm-reminders"],
 				scratchEmbeds: options["scratch-embeds"],
-			})
+			}),
 		);
 	},
 );
