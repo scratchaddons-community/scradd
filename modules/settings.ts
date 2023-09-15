@@ -26,6 +26,7 @@ export const userSettingsDatabase = new Database<{
 	useMentions?: boolean;
 	dmReminders?: boolean;
 	resourcesDmed?: boolean;
+	scratchEmbeds?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -56,18 +57,23 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
+			"scratch-embeds": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send a neat embed when you send a scratch link",
+			},
 		},
 	},
 
 	async (interaction, options) => {
-		await interaction.reply(
+		return await interaction.reply(
 			updateSettings(interaction.user, {
 				autoreactions: options.autoreactions,
 				boardPings: options["board-pings"],
 				levelUpPings: options["level-up-pings"],
 				useMentions: options["use-mentions"],
 				dmReminders: options["dm-reminders"],
-			}),
+				scratchEmbeds: options["scratch-embeds"],
+			})
 		);
 	},
 );
@@ -100,6 +106,7 @@ export function updateSettings(
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
 		resourcesDmed?: true;
+		scratchEmbeds?: boolean | "toggle";
 	},
 ) {
 	const old = getSettings(user);
@@ -126,6 +133,10 @@ export function updateSettings(
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
 		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
+		scratchEmbeds:
+			settings.scratchEmbeds === "toggle"
+				? !old.scratchEmbeds
+				: settings.scratchEmbeds ?? old.scratchEmbeds,
 	};
 
 	userSettingsDatabase.updateById(updated, {});
@@ -149,6 +160,12 @@ export function updateSettings(
 						type: ComponentType.Button,
 						label: "Level Up Pings",
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+					},
+					{
+						customId: "scratchEmbeds_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
 					},
 				],
 			},
@@ -208,5 +225,6 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions: getWeeklyXp(user.id) > 100,
 		resourcesDmed: false,
+		scratchEmbeds: true,
 	};
 }
