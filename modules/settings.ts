@@ -59,13 +59,13 @@ defineChatCommand(
 			},
 			"scratch-embeds": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Send a neat embed when you send a scratch link",
+				description: "Send information about Scratch links in your messages",
 			},
 		},
 	},
 
 	async (interaction, options) => {
-		return await interaction.reply(
+		await interaction.reply(
 			updateSettings(interaction.user, {
 				autoreactions: options.autoreactions,
 				boardPings: options["board-pings"],
@@ -162,10 +162,10 @@ export function updateSettings(
 						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 					},
 					{
-						customId: "scratchEmbeds_toggleSetting",
+						customId: "useMentions_toggleSetting",
 						type: ComponentType.Button,
-						label: "Scratch Link Embeds",
-						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
+						label: "Use Mentions",
+						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 				],
 			},
@@ -173,16 +173,16 @@ export function updateSettings(
 				type: ComponentType.ActionRow,
 				components: [
 					{
+						customId: "scratchEmbeds_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
+					},
+					{
 						customId: "autoreactions_toggleSetting",
 						type: ComponentType.Button,
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
-					},
-					{
-						customId: "useMentions_toggleSetting",
-						type: ComponentType.Button,
-						label: "Use Mentions",
-						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 					{
 						customId: "dmReminders_toggleSetting",

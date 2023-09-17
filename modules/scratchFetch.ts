@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// TODO: actually type this
 
 import { defineEvent } from "strife.js";
 import { getSettings } from "./settings.js";
@@ -14,21 +15,26 @@ defineEvent("messageCreate", async (message) => {
 	if (!getSettings(message.author).scratchEmbeds) {
 		return;
 	}
+
 	const scratchUrlRegex =
-		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios|discuss)\/[/-\w]+\/?(?!>)/gi; //gpt wrote the regex and like half of this code
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
 	const matches = [...new Set(message.content.match(scratchUrlRegex))].slice(0, 5);
 
 	const embeds: APIEmbed[] = [];
 
 	for (const match of matches) {
-		const urlParts = match.split("/");
+		if (match.startsWith("<") && match.endsWith(">")) continue;
+
+		const start = match.startsWith("http") ? 0 : 1,
+			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
+		const urlParts = match.slice(start, end).split("/");
 
 		switch (urlParts[3]) {
 			case "projects": {
 				const project = await gracefulFetch(
 					`${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
 				);
-				if (!project || project.code) return;
+				if (!project || project.code) continue;
 
 				const parent =
 					project.remix.parent &&
@@ -111,7 +117,7 @@ defineEvent("messageCreate", async (message) => {
 				const user = await gracefulFetch(
 					`https://scratchdb.lefty.one/v3/user/info/${urlParts[4]}/`,
 				);
-				if (!user || user.error) return;
+				if (!user || user.error) continue;
 
 				const embed = {
 					title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
@@ -171,7 +177,7 @@ defineEvent("messageCreate", async (message) => {
 				const studio = await gracefulFetch(
 					`${constants.urls.scratchApi}/studios/${urlParts[4]}/`,
 				);
-				if (!studio || studio.code) return;
+				if (!studio || studio.code) continue;
 
 				embeds.push({
 					title: studio.title,
@@ -216,7 +222,7 @@ defineEvent("messageCreate", async (message) => {
 									`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}?o=oldest`,
 								)
 						  )?.[0];
-				if (!post || post.error || post.deleted) return;
+				if (!post || post.error || post.deleted) continue;
 
 				const editedString = post.editor
 					? `\n\n*Last edited by ${post.editor} (${time(
