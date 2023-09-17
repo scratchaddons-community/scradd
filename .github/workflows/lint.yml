@@ -1,6 +1,7 @@
 name: Lint
 on:
     push:
+    pull_request_target:
     workflow_dispatch:
     schedule:
         - cron: 00 12 * * * # 1 hour before Dependabot
