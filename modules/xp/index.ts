@@ -78,7 +78,7 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await top(interaction, options.options.user.user);
+				await top(interaction, options.options.user);
 			}
 		}
 	},
@@ -96,7 +96,7 @@ if (constants.canvasEnabled) {
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
 
-export async function top(interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction, user: User | undefined) {
+export async function top(interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction, user?: User | GuildMember) {
 	const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
 	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
