@@ -14,6 +14,7 @@ import { backupDatabases, cleanDatabaseListeners } from "../../common/database.j
 import config from "../../common/config.js";
 import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
 import updateBoard from "../board/update.js";
+import { gracefulFetch } from "../../util/promises.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -96,12 +97,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					const count = await fetch(
+					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
-					).then(
-						async (response) =>
-							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
+					if (!count) return;
 
 					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {

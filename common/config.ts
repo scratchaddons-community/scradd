@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
+import { gracefulFetch } from "../util/promises.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
 if (!guild.available) throw new ReferenceError("Guild is unavailable!");
@@ -16,13 +17,13 @@ async function getConfig() {
 	const roles = await guild.roles.fetch();
 
 	const latestRelease: string = // todo find an eslint rule
-		process.env.NODE_ENV == "production"
-			? (
-					await fetch(
-						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (response) => await response.json<{ tag_name: string }>())
-			  ).tag_name
-			: "master";
+		(process.env.NODE_ENV == "production" &&
+			(
+				await gracefulFetch<{ tag_name: string }>(
+					`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
+				)
+			)?.tag_name) ||
+		"master";
 
 	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {

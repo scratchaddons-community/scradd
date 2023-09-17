@@ -15,6 +15,7 @@ import Database, { DATABASE_THREAD } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { getLoggingThread } from "../logging/misc.js";
+import { gracefulFetch } from "../../util/promises.js";
 
 export const EXPIRY_LENGTH = 1_260_000 * (process.env.NODE_ENV === "production" ? 1440 : 1),
 	STRIKES_PER_MUTE = 3,
@@ -38,12 +39,8 @@ const { url } =
 	databases
 		.find((message) => message.attachments.first()?.name === "robotop_warns.json")
 		?.attachments.first() ?? {};
-const robotopStrikes = url
-	? await fetch(url).then(
-			async (response) =>
-				await response.json<{ id: number; mod: Snowflake; reason: string }[]>(),
-	  )
-	: [];
+const robotopStrikes =
+	(url && (await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(url))) || [];
 
 const strikesCache: Record<string, { mod?: string; reason: string }> = {};
 
