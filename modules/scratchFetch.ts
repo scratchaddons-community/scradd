@@ -6,7 +6,7 @@ import { getSettings } from "./settings.js";
 import constants from "../common/constants.js";
 import { truncateText } from "../util/text.js";
 import { nth } from "../util/numbers.js";
-import type { APIEmbed } from "discord.js";
+import { time, type APIEmbed, TimestampStyles } from "discord.js";
 import { gracefulFetch } from "../util/promises.js";
 
 defineEvent("messageCreate", async (message) => {
@@ -28,6 +28,8 @@ defineEvent("messageCreate", async (message) => {
 				const project = await gracefulFetch(
 					`${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
 				);
+				if (!project || project.code) return;
+
 				const parent =
 					project.remix.parent &&
 					(await gracefulFetch(
@@ -64,14 +66,21 @@ defineEvent("messageCreate", async (message) => {
 							value: project.stats.views,
 							inline: true,
 						},
+						parent
+							? {
+									name: "Remix of",
+									value: `[${parent.title}](https://scratch.mit.edu/projects/${project.remix.parent}/)`,
+									inline: true,
+							  }
+							: {
+									name: constants.zeroWidthSpace,
+									value: constants.zeroWidthSpace,
+									inline: true,
+							  },
 					],
-					thumbnail: {
-						url: project.images["282x218"],
-					},
+					thumbnail: { url: project.images["282x218"] },
 					author: {
-						name: `${project.author.username}${
-							parent ? `${constants.footerSeperator}Remix of ${parent.title}` : ""
-						}`,
+						name: project.author.username,
 						url: `https://scratch.mit.edu/users/${project.author.username}`,
 						icon_url: project.author.profile.images["90x90"],
 					},
@@ -102,25 +111,28 @@ defineEvent("messageCreate", async (message) => {
 				const user = await gracefulFetch(
 					`https://scratchdb.lefty.one/v3/user/info/${urlParts[4]}/`,
 				);
+				if (!user || user.error) return;
 
 				const embed = {
 					title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
 					color: constants.scratchColor,
 
-					fields: [
-						{
-							name: `${constants.emojis.scratch.followers} Followers`,
-							value:
-								user.statistics.followers +
-								` (ranked ${nth(user.statistics.ranks.followers)})`,
-							inline: true,
-						},
-						{
-							name: `${constants.emojis.scratch.following} Following`,
-							value: user.statistics.following,
-							inline: true,
-						},
-					],
+					fields: user.statistics
+						? [
+								{
+									name: `${constants.emojis.scratch.followers} Followers`,
+									value: `${user.statistics.followers} (ranked ${nth(
+										user.statistics.ranks.followers,
+									)})`,
+									inline: true,
+								},
+								{
+									name: `${constants.emojis.scratch.following} Following`,
+									value: user.statistics.following,
+									inline: true,
+								},
+						  ]
+						: [],
 					thumbnail: {
 						url: `https://cdn2.scratch.mit.edu/get_image/user/${user.id}_90x90.png`,
 					},
@@ -159,6 +171,8 @@ defineEvent("messageCreate", async (message) => {
 				const studio = await gracefulFetch(
 					`${constants.urls.scratchApi}/studios/${urlParts[4]}/`,
 				);
+				if (!studio || studio.code) return;
+
 				embeds.push({
 					title: studio.title,
 					description: truncateText(studio.description, 4096, true),
@@ -166,24 +180,19 @@ defineEvent("messageCreate", async (message) => {
 
 					fields: [
 						{
-							name: `${constants.emojis.scratch.comments} Comments`,
-							value:
-								studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
-							inline: true,
-						},
-						{
 							name: `${constants.emojis.scratch.followers} Followers`,
 							value: studio.stats.followers,
 							inline: true,
 						},
 						{
-							name: `${constants.emojis.scratch.managers} Managers`,
-							value: studio.stats.managers,
+							name: `${constants.emojis.scratch.projects} Projects`,
+							value: studio.stats.projects,
 							inline: true,
 						},
 						{
-							name: `${constants.emojis.scratch.projects} Projects`,
-							value: studio.stats.projects,
+							name: `${constants.emojis.scratch.comments} Comments`,
+							value:
+								studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
 							inline: true,
 						},
 					],
@@ -201,18 +210,29 @@ defineEvent("messageCreate", async (message) => {
 						? await gracefulFetch(
 								`https://scratchdb.lefty.one/v3/forum/post/info/${urlParts[5]}/`,
 						  )
-						: (
+						: urlParts[4] === "topic" &&
+						  (
 								await gracefulFetch(
 									`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}?o=oldest`,
 								)
-						  )[0];
+						  )?.[0];
+				if (!post || post.error || post.deleted) return;
 
-				const embed = {
-					title: post.topic.title,
-					description: truncateText(post.content.html, 4096, true),
+				const editedString = post.editor
+					? `\n\n*Last edited by ${post.editor} (${time(
+							new Date(post.time.edited),
+							TimestampStyles.ShortDateTime,
+					  )})*`
+					: "";
+
+				embeds.push({
+					title: post.topic.title + constants.footerSeperator + post.topic.category,
+					description: truncateText(post.content.html + editedString, 4096, true),
 					color: constants.scratchColor,
-
-					fields: [{ name: "Category", value: post.topic.category, inline: true }],
+					fields:
+						post.topic.closed && urlParts[4] === "topic"
+							? [{ name: "Closed?", value: "Yes", inline: true }]
+							: undefined,
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
 					author: {
 						name: post.username,
@@ -220,14 +240,7 @@ defineEvent("messageCreate", async (message) => {
 					},
 					url: `https://scratch.mit.edu/discuss/topic/${urlParts[5]}`,
 					timestamp: new Date(post.time.posted).toISOString(),
-				};
-				if (post.topic.closed) {
-					embed.fields.push({ name: "Closed?", value: "Yes", inline: true });
-				}
-
-				embeds.push(embed);
-
-				break;
+				});
 			}
 		}
 	}
