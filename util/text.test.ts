@@ -36,20 +36,26 @@ describe("joinWithAnd", function () {
 });
 
 describe("truncateText", () => {
-	it("should truncate a long text to the specified maxLength", () => {
+	it("shouldn’t have trailing spaces", () => {
 		strictEqual(
 			truncateText("This is a very long text that needs to be truncated.", 20),
 			"This is a very long…",
 		);
 	});
-	it("should not truncate if maxLength is greater than or equal to text length", () => {
+	it("should not truncate if maxLength is greater than text length", () => {
 		strictEqual(truncateText("Short text", 50), "Short text");
+	});
+	it("should not truncate if maxLength is equal to text length", () => {
+		strictEqual(truncateText("Short text", 10), "Short text");
 	});
 	it("should split at newlines", () => {
 		strictEqual(truncateText("First line\nSecond line", 25), "First line…");
 	});
 	it("shouldn’t split at newlines with multiline on", () => {
 		strictEqual(truncateText("First line\nSecond line", 25, true), "First line\nSecond line");
+	});
+	it("should count the …", () => {
+		strictEqual(truncateText("foobar", 4), "foo…");
 	});
 });
 
