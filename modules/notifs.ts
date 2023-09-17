@@ -9,10 +9,7 @@ import { AuditLogEvent } from "discord.js";
 defineEvent("messageCreate", async (message) => {
 	if (message.channel.id === config.channels.updates?.id) {
 		await message.startThread({
-			name: truncateText(
-				stripMarkdown(message.cleanContent).split("\n")[0] || "New update!",
-				50,
-			),
+			name: truncateText(stripMarkdown(message.cleanContent) || "New update!", 50),
 
 			reason: "New upcoming update",
 		});

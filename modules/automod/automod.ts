@@ -1,4 +1,4 @@
-import type { Message } from "discord.js";
+import { ChannelType, type Message } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -27,8 +27,6 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 export default async function automodMessage(message: Message) {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
-	const parentChannel =
-		baseChannel && baseChannel.isDMBased() ? baseChannel : baseChannel?.parent;
 
 	const animatedEmojis = message.content.match(GlobalAnimatedEmoji);
 
@@ -45,7 +43,7 @@ export default async function automodMessage(message: Message) {
 			message.author,
 			"Please don’t post that many animated emojis!",
 			badAnimatedEmojis,
-			animatedEmojis?.map((emoji) => emoji).join(""),
+			animatedEmojis?.join(""),
 		);
 		await message.channel.send(
 			`${
@@ -54,58 +52,62 @@ export default async function automodMessage(message: Message) {
 		);
 	}
 
-	if (
-		!allowBadWords &&
-		config.channels.info?.id !== parentChannel?.id &&
-		config.channels.advertise &&
-		config.channels.advertise.id !== baseChannel?.id &&
-		!message.author.bot
-	) {
-		const invites = (
-			await Promise.all(
-				(message.content.match(GlobalInvitesPattern) ?? []).map(async (code) => {
-					const invite = await client.fetchInvite(code).catch(() => void 0);
-					return invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id) && code;
-				}),
-			)
-		).filter((toWarn): toWarn is string => Boolean(toWarn));
-
-		if (invites.length) {
-			needsDelete = true;
-			await warn(
-				message.author,
-				"Please don’t send server invites in that channel!",
-				invites.length,
-				invites.join("\n"),
-			);
-			await message.channel.send(
-				`${
-					constants.emojis.statuses.no
-				} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
-			);
-		}
-
-		const bots = message.content.match(GlobalBotInvitesPattern);
-		if (bots?.length) {
-			needsDelete = true;
-			await warn(
-				message.author,
-				"Please don’t post bot invite links!",
-				bots.length,
-				bots.join("\n"),
-			);
-			await message.channel.send(
-				`${
-					constants.emojis.statuses.no
-				} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
-			);
-		}
-	}
+	const invites = await Promise.all(
+		(message.content.match(GlobalInvitesPattern) ?? []).map(
+			async (code) => await client.fetchInvite(code).catch(() => void 0),
+		),
+	);
 
 	if (!allowBadWords) {
+		if (
+			!message.author.bot &&
+			config.channels.advertise &&
+			config.channels.advertise.id !== baseChannel?.id &&
+			config.channels.announcements?.id !== baseChannel?.id &&
+			baseChannel?.type !== ChannelType.GuildAnnouncement
+		) {
+			const badInvites = invites
+				.filter(
+					(invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
+				)
+				.map((invite) => invite?.code);
+
+			if (badInvites.length) {
+				needsDelete = true;
+				await warn(
+					message.author,
+					"Please don’t send server invites in that channel!",
+					badInvites.length,
+					badInvites.join("\n"),
+				);
+				await message.channel.send(
+					`${
+						constants.emojis.statuses.no
+					} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
+				);
+			}
+
+			const bots = message.content.match(GlobalBotInvitesPattern);
+			if (bots?.length) {
+				needsDelete = true;
+				await warn(
+					message.author,
+					"Please don’t post bot invite links!",
+					bots.length,
+					bots.join("\n"), // todo: improve this
+				);
+				await message.channel.send(
+					`${
+						constants.emojis.statuses.no
+					} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
+				);
+			}
+		}
+
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),
+			...invites.map((invite) => !!invite?.guild && censor(invite.guild.name)),
 		].reduce(
 			(bad, censored) =>
 				typeof censored === "boolean"
@@ -174,12 +176,9 @@ export default async function automodMessage(message: Message) {
 		if (badWords.strikes || badEmbedWords.strikes) {
 			await warn(
 				message.interaction?.user ?? message.author,
-				"Watch your language!",
+				"Please watch your language!",
 				languageStrikes,
-				`Sent message with words: ${[
-					...badEmbedWords.words.flat(),
-					...badWords.words.flat(),
-				].join(", ")}`,
+				[...badEmbedWords.words.flat(), ...badWords.words.flat()].join(", "),
 			);
 		}
 	}

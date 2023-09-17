@@ -12,7 +12,7 @@ export default async function changeNickname(member: GuildMember) {
 	if (censored && member.nickname)
 		await warn(
 			member,
-			"Watch your language!",
+			"Please watch your language!",
 			censored.strikes,
 			"Set nickname to " + member.displayName,
 		);
@@ -85,8 +85,7 @@ export default async function changeNickname(member: GuildMember) {
 
 async function setNickname(member: GuildMember, newNickname: string, reason: string) {
 	await (member.moderatable
-		? // eslint-disable-next-line unicorn/no-null
-		  member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
+		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
 				`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		  ));
@@ -108,7 +107,7 @@ function findName(member: GuildMember) {
 
 function isPingable(name: string) {
 	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
-	return /[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]{3,}|^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>? -]+$/u.test(
+	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
 		normalized,
 	);
 }

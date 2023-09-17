@@ -24,6 +24,6 @@ export function tooltip(
 	guildId: Snowflake = config.guild.id,
 ): string {
 	return tooltipText
-		? hyperlink(escapeMaskedLink(display), `discord://-/${guildId}`, tooltipText)
+		? hyperlink(display, `https://discord.com/channels/${guildId}`, tooltipText)
 		: escapeMaskedLink(display);
 }

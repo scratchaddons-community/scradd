@@ -6,7 +6,7 @@ import {
 	ComponentType,
 	ButtonStyle,
 	Colors,
-	type ColorResolvable,
+	type HexColorString,
 	ApplicationCommand,
 	ChatInputCommandInteraction,
 	TextInputStyle,
@@ -22,6 +22,13 @@ import config from "../../common/config.js";
 import { client } from "strife.js";
 import { recentXpDatabase } from "../xp/misc.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
+
+const COLORS = Object.fromEntries(
+	([...Object.keys(Colors), "Random"] as (keyof typeof Colors | "Random")[]).flatMap((color) => [
+		[color.toLowerCase(), color],
+		[color.replaceAll(/(?<!^)([A-Z])/g, " $1").toLowerCase(), color],
+	]),
+);
 
 const PREFIX = "✨ ";
 let command: ApplicationCommand | undefined;
@@ -99,10 +106,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		throw new TypeError("interaction.member is not a GuildMember!");
 
 	const name = interaction.fields.fields.get("name")?.value;
-	const color = (interaction.fields.fields.get("color")?.value || "#000000") as Extract<
-		ColorResolvable,
-		string
-	>;
+	const rawColor = interaction.fields.fields.get("color")?.value || "#000000";
 	const icon = interaction.fields.fields.get("icon")?.value;
 
 	const existingRole = getCustomRole(interaction.member);
@@ -167,7 +171,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (censored) {
 		await warn(
 			interaction.user,
-			"Watch your language!",
+			"Please watch your language!",
 			censored.strikes,
 			`Attempted to make custom role @${name}`,
 		);
@@ -191,16 +195,16 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	if (!(color in Colors) && color !== "Random" && !/^#[\da-f]{6}$/i.test(color)) {
-		// todo: make colors case-insensitive
+	const color = COLORS[rawColor.toLowerCase()];
+	if (!color && !/^#[\da-f]{6}$/i.test(rawColor)) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not parse that color!`,
 		});
 	}
 
-	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: undefined, icon: undefined };
-	if (icon && !iconData)
+	const iconData = icon ? await resolveIcon(icon) : { unicodeEmoji: null, icon: null };
+	if (!iconData)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the like is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
@@ -208,7 +212,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 
 	if (existingRole) {
 		await existingRole.edit({
-			color: color,
+			color: color ?? (rawColor as HexColorString),
 			name: PREFIX + name,
 			reason: `Edited by ${interaction.user.tag}`,
 			position: (config.roles.staff?.position ?? 0) + 1,
@@ -249,9 +253,7 @@ export async function recheckMemberRole(_: PartialGuildMember | GuildMember, mem
 		config.guild.features.includes("ROLE_ICONS") &&
 		!(config.roles.staff && member.roles.resolve(config.roles.staff.id))
 	) {
-		// eslint-disable-next-line unicorn/no-null
 		await role?.setUnicodeEmoji(null, "No longer qualifies");
-		// eslint-disable-next-line unicorn/no-null
 		await role?.setIcon(null, "No longer qualifies");
 	}
 }
