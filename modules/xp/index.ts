@@ -88,7 +88,7 @@ defineButton("xp", async (interaction, userId = "") => {
 });
 
 defineButton("viewLeaderboard", async (interaction, userId) => {
-	await top(interaction, (await client.users.fetch(userId)).user);
+	await top(interaction, await client.users.fetch(userId));
 });
 
 if (constants.canvasEnabled) {
