@@ -217,7 +217,7 @@ defineEvent("messageCreate", async (message) => {
 							const posts = await fetchApiData(
 								`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}?o=oldest`,
 							).catch(() => {});
-						
+
 							const post = posts[0];
 							const topicdata = post.topic;
 							let embed = {
@@ -247,7 +247,7 @@ defineEvent("messageCreate", async (message) => {
 									value: constants.zeroWidthSpace,
 								});
 							}
-						
+
 							msgEmbeds.push(embed);
 
 							break;
