@@ -78,7 +78,7 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await XPLeaderboard(interaction, options.options.user as User);
+				await top(interaction, options.options.user);
 			}
 		}
 	},
@@ -88,7 +88,7 @@ defineButton("xp", async (interaction, userId = "") => {
 });
 
 defineButton("viewLeaderboard", async (interaction, userId) => {
-	await XPLeaderboard(interaction, (await config.guild.members.fetch(userId)).user);
+	await top(interaction, (await client.users.fetch(userId)).user);
 });
 
 if (constants.canvasEnabled) {
@@ -96,7 +96,7 @@ if (constants.canvasEnabled) {
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
 
-export async function XPLeaderboard(interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction, user: User | undefined) {
+export async function top(interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction, user: User | undefined) {
 	const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
 	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
