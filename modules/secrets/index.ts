@@ -6,7 +6,7 @@ import { getBaseChannel, reactAll } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import { autoreactions, dad } from "./secrets.js";
-import { defineEvent } from "strife.js";
+import { client, defineEvent } from "strife.js";
 
 const REACTION_CAP = 3;
 
@@ -52,12 +52,22 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	const baseChannel = getBaseChannel(message.channel);
+
 	if (
-		config.channels.modlogs?.id === baseChannel?.id ||
-		(process.env.NODE_ENV === "production"
-			? config.channels.info?.id === baseChannel?.parent?.id
-			: config.channels.admin?.id !== baseChannel?.parent?.id) ||
-		!getSettings(message.author).autoreactions
+		process.env.NODE_ENV === "production"
+			? config.channels.modlogs?.id === baseChannel?.parent?.id
+			: config.channels.admin?.id !== baseChannel?.parent?.id
+	)
+		return;
+
+	const pingsScradd = message.mentions.has(client.user, {
+		ignoreEveryone: true,
+		ignoreRepliedUser: true,
+		ignoreRoles: true,
+	});
+	if (
+		!pingsScradd &&
+		(config.channels.info?.id === baseChannel?.id || !getSettings(message.author).autoreactions)
 	)
 		return;
 
@@ -73,7 +83,9 @@ defineEvent("messageCreate", async (message) => {
 
 		if (
 			name &&
-			(process.env.NODE_ENV !== "production" || config.channels.bots?.id === baseChannel?.id)
+			(process.env.NODE_ENV !== "production" ||
+				config.channels.bots?.id === baseChannel?.id ||
+				pingsScradd)
 		) {
 			return await message.reply({
 				content: dad(name, message.author),
