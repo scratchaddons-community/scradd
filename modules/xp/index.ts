@@ -1,4 +1,12 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType, GuildMember, User, ChatInputCommandInteraction, ButtonInteraction } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	User,
+	ChatInputCommandInteraction,
+	ButtonInteraction,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
@@ -96,7 +104,10 @@ if (constants.canvasEnabled) {
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
 
-export async function top(interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction, user?: User | GuildMember) {
+export async function top(
+	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
+	user?: User | GuildMember,
+) {
 	const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
 
 	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;

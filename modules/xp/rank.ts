@@ -1,4 +1,10 @@
-import { ComponentType, type ButtonInteraction, type ChatInputCommandInteraction, type User, ButtonStyle } from "discord.js";
+import {
+	ComponentType,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type User,
+	ButtonStyle,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
@@ -101,17 +107,19 @@ export default async function getUserRank(
 					},
 				],
 
-				footer: rank ? {
-					text: `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
-									"en-us",
-							  )}${
-									serverRank
-										? ` (${serverRank.toLocaleString(
-												"en-us",
-										  )}/${members.size.toLocaleString("en-us")} in the server)`
-										: ""
-							  }`
-				} : undefined,
+				footer: rank
+					? {
+							text: `Ranked ${rank.toLocaleString(
+								"en-us",
+							)}/${top.length.toLocaleString("en-us")}${
+								serverRank
+									? ` (${serverRank.toLocaleString(
+											"en-us",
+									  )}/${members.size.toLocaleString("en-us")} in the server)`
+									: ""
+							}`,
+					  }
+					: undefined,
 
 				image: { url: "attachment://progress.png" },
 			},
@@ -124,11 +132,11 @@ export default async function getUserRank(
 						type: ComponentType.Button,
 						customId: `${user.id}_viewLeaderboard`,
 						label: "View Leaderboard",
-						style: ButtonStyle.Primary
-					}
+						style: ButtonStyle.Primary,
+					},
 				],
-				type: ComponentType.ActionRow
-			}
+				type: ComponentType.ActionRow,
+			},
 		],
 
 		files: await makeCanvasFiles(),

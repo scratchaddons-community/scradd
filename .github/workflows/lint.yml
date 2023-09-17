@@ -11,7 +11,9 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: github.event_name != 'pull_request_target' && github.ref_name == 'main' && github.repository_owner == 'scratchaddons-community'
+        if:
+            github.event_name != 'pull_request_target' && github.ref_name == 'main' &&
+            github.repository_owner == 'scratchaddons-community'
         runs-on: ubuntu-20.04
 
         steps:
