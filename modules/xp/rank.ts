@@ -101,10 +101,8 @@ export default async function getUserRank(
 					},
 				],
 
-				footer: {
-					text: `${
-						rank
-							? `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
+				footer: rank ? {
+					text: `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
 									"en-us",
 							  )}${
 									serverRank
@@ -112,10 +110,8 @@ export default async function getUserRank(
 												"en-us",
 										  )}/${members.size.toLocaleString("en-us")} in the server)`
 										: ""
-							  }${constants.footerSeperator}`
-							: ""
-					}View the leaderboard with /xp top or the button below`,
-				},
+							  }`
+				} : undefined,
 
 				image: { url: "attachment://progress.png" },
 			},
