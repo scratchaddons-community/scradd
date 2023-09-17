@@ -29,18 +29,9 @@ export default {
 			raisedHand: "<:raised_hand:1083046563049381898>",
 		},
 
-		misc: {
-			addon: "<:new_addon:817273401869205524>",
-			join: "<:join:1041863919708418068>",
-			leave: "<:leave:1041863867757756477>",
-			ban: "<:ban:1041864907194388480>",
-			green: "<:success:1117217865536381030>",
-			blue: "<:primary:1117217909857587210>",
-		},
-
 		scratch: {
 			love: "<:heart:1151842300033519667>",
-			fav: "<:fav:1151842297340776488>",
+			favorite: "<:fav:1151842297340776488>",
 			remix: "<:remix:1151842289635827842>",
 			view: "<:view:1151842294287306832>",
 			followers: "<:people:1152194973186408519>",
@@ -48,6 +39,15 @@ export default {
 			projects: "<:blocks:1152194965720547448>",
 			managers: "<:person:1152194976025935882>",
 			comments: "<:comment:1152194969298280448>",
+		},
+
+		misc: {
+			addon: "<:new_addon:817273401869205524>",
+			join: "<:join:1041863919708418068>",
+			leave: "<:leave:1041863867757756477>",
+			ban: "<:ban:1041864907194388480>",
+			green: "<:success:1117217865536381030>",
+			blue: "<:primary:1117217909857587210>",
 		},
 	},
 
@@ -60,7 +60,7 @@ export default {
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
-	scratchColor: 0x885cd4,
+	scratchColor: 0x88_5c_d4,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	testingServerId: "938438560925761619",
