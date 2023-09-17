@@ -30,15 +30,14 @@ export default {
 		},
 
 		scratch: {
-			love: "<:heart:1151842300033519667>",
-			favorite: "<:fav:1151842297340776488>",
-			remix: "<:remix:1151842289635827842>",
-			view: "<:view:1151842294287306832>",
-			followers: "<:people:1152194973186408519>",
-			following: "<:person:1152194976025935882>",
-			projects: "<:blocks:1152194965720547448>",
-			managers: "<:person:1152194976025935882>",
-			comments: "<:comment:1152194969298280448>",
+			love: "<:love:899019444112740422>",
+			favorite: "<:favorite:899019502417764363>",
+			remix: "<:remix:899019502417764363>",
+			view: "<:view:899019673436299314>",
+			followers: "<:followers:1152834505816674375>",
+			following: "<:follow:899019598807048212>",
+			projects: "<:blocks:1152834423784480768>",
+			comments: "<:comment:1152834193135521822>",
 		},
 
 		misc: {
@@ -52,11 +51,13 @@ export default {
 	},
 
 	urls: {
-		usercountJson: "https://scratchaddons.com/usercount.json",
 		saRepo: "ScratchAddons/ScratchAddons",
+		usercountJson: "https://scratchaddons.com/usercount.json",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
+		scratch: "https://scratch.mit.edu",
 		scratchApi: "https://api.scratch.mit.edu",
+		scratchdb: "https://scratchdb.lefty.one/v3",
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,

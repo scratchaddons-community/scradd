@@ -10,6 +10,8 @@ import { nth } from "../util/numbers.js";
 import { time, type APIEmbed, TimestampStyles } from "discord.js";
 import { gracefulFetch } from "../util/promises.js";
 
+const EMBED_LENGTH = 500;
+
 defineEvent("messageCreate", async (message) => {
 	const notSet = getSettings(message.author, false).scratchEmbeds === undefined;
 	if (!getSettings(message.author).scratchEmbeds) {
@@ -48,64 +50,40 @@ defineEvent("messageCreate", async (message) => {
 
 					fields: [
 						{
-							name: `${constants.emojis.scratch.love} Loves`,
-							value: project.stats.loves,
+							name: `${constants.emojis.scratch.love}${project.stats.loves} ${constants.emojis.scratch.favorite}${project.stats.favorites}`,
+							value: `**${constants.emojis.scratch.remix}${project.stats.remixes} ${constants.emojis.scratch.view}${project.stats.views}**`,
 							inline: true,
 						},
-						{
-							name: `${constants.emojis.scratch.favorite} Favorites`,
-							value: project.stats.favorites,
-							inline: true,
-						},
-						{
-							name: constants.zeroWidthSpace,
-							value: constants.zeroWidthSpace,
-							inline: true,
-						}, // spacer for a 2x2 grid of stats
-						{
-							name: `${constants.emojis.scratch.remix} Remixes`,
-							value: project.stats.remixes,
-							inline: true,
-						},
-						{
-							name: `${constants.emojis.scratch.view} Views`,
-							value: project.stats.views,
-							inline: true,
-						},
-						parent
-							? {
-									name: "Remix of",
-									value: `[${parent.title}](https://scratch.mit.edu/projects/${project.remix.parent}/)`,
-									inline: true,
-							  }
-							: {
-									name: constants.zeroWidthSpace,
-									value: constants.zeroWidthSpace,
-									inline: true,
-							  },
 					],
 					thumbnail: { url: project.images["282x218"] },
 					author: {
 						name: project.author.username,
-						url: `https://scratch.mit.edu/users/${project.author.username}`,
+						url: `${constants.urls.scratch}/users/${project.author.username}`,
 						icon_url: project.author.profile.images["90x90"],
 					},
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `https://scratch.mit.edu/projects/${urlParts[4]}`,
+					url: `${constants.urls.scratch}/projects/${urlParts[4]}`,
 					timestamp: new Date(project.history.shared).toISOString(),
 				};
 
+				if (parent) {
+					embed.fields.push({
+						name: "⬆️ Remix of",
+						value: `[${parent.title}](${constants.urls.scratch}/projects/${project.remix.parent}/)`,
+						inline: true,
+					});
+				}
 				if (project.description) {
 					embed.fields.unshift({
-						name: "Notes and Credits",
-						value: truncateText(project.description, 1024, true),
+						name: "🫂 Notes and Credits",
+						value: truncateText(project.description, EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
 				if (project.instructions) {
 					embed.fields.unshift({
-						name: "Instructions",
-						value: truncateText(project.instructions, 1024, true),
+						name: "📜 Instructions",
+						value: truncateText(project.instructions, EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
@@ -115,7 +93,7 @@ defineEvent("messageCreate", async (message) => {
 			}
 			case "users": {
 				const user = await gracefulFetch(
-					`https://scratchdb.lefty.one/v3/user/info/${urlParts[4]}/`,
+					`${constants.urls.scratchdb}/user/info/${urlParts[4]}/`,
 				);
 				if (!user || user.error) continue;
 
@@ -150,22 +128,22 @@ defineEvent("messageCreate", async (message) => {
 						}`,
 					},
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `https://scratch.mit.edu/users/${urlParts[4]}`,
+					url: `${constants.urls.scratch}/users/${urlParts[4]}`,
 					timestamp: new Date(user.joined).toISOString(),
 				};
 
 				if (user.work) {
 					embed.fields.unshift({
 						// eslint-disable-next-line unicorn/string-content
-						name: "What I'm working on",
-						value: truncateText(user.work, 1024, true),
+						name: "🛠️ What I'm working on",
+						value: truncateText(user.work, EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
 				if (user.bio) {
 					embed.fields.unshift({
-						name: "About me",
-						value: truncateText(user.bio, 1024, true),
+						name: "👋 About me",
+						value: truncateText(user.bio, EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
@@ -181,7 +159,7 @@ defineEvent("messageCreate", async (message) => {
 
 				embeds.push({
 					title: studio.title,
-					description: truncateText(studio.description, 4096, true),
+					description: truncateText(studio.description, EMBED_LENGTH, true),
 					color: constants.scratchColor,
 
 					fields: [
@@ -205,7 +183,7 @@ defineEvent("messageCreate", async (message) => {
 					thumbnail: { url: studio.image },
 
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `https://scratch.mit.edu/studios/${urlParts[4]}`,
+					url: `${constants.urls.scratch}/studios/${urlParts[4]}`,
 					timestamp: new Date(studio.history.created).toISOString(),
 				});
 				break;
@@ -214,12 +192,12 @@ defineEvent("messageCreate", async (message) => {
 				const post =
 					urlParts[4] === "post"
 						? await gracefulFetch(
-								`https://scratchdb.lefty.one/v3/forum/post/info/${urlParts[5]}/`,
+								`${constants.urls.scratchdb}/forum/post/info/${urlParts[5]}/`,
 						  )
 						: urlParts[4] === "topic" &&
 						  (
 								await gracefulFetch(
-									`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}?o=oldest`,
+									`${constants.urls.scratchdb}/forum/topic/posts/${urlParts[5]}?o=oldest`,
 								)
 						  )?.[0];
 				if (!post || post.error || post.deleted) continue;
@@ -232,19 +210,17 @@ defineEvent("messageCreate", async (message) => {
 					: "";
 
 				embeds.push({
-					title: post.topic.title + constants.footerSeperator + post.topic.category,
-					description: truncateText(post.content.html + editedString, 4096, true),
+					title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${
+						constants.footerSeperator
+					}${post.topic.category}`,
+					description: truncateText(post.content.html + editedString, EMBED_LENGTH, true),
 					color: constants.scratchColor,
-					fields:
-						post.topic.closed && urlParts[4] === "topic"
-							? [{ name: "Closed?", value: "Yes", inline: true }]
-							: undefined,
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
 					author: {
 						name: post.username,
-						url: `https://scratch.mit.edu/users/${post.username}`,
+						url: `${constants.urls.scratch}/users/${post.username}`,
 					},
-					url: `https://scratch.mit.edu/discuss/topic/${urlParts[5]}`,
+					url: `${constants.urls.scratch}/discuss/topic/${urlParts[5]}`,
 					timestamp: new Date(post.time.posted).toISOString(),
 				});
 			}
