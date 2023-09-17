@@ -98,14 +98,14 @@ defineEvent("messageCreate", async (message) => {
 					if (projectdata.instructions != "") {
 						embed.fields.unshift({
 							name: `Instructions`,
-							value: projectdata.instructions,
+							value: truncateText(projectdata.instructions, 10000),
 							inline: false,
 						});
 					}
 					if (projectdata.description != "") {
 						embed.fields.unshift({
 							name: `Notes and Credits`,
-							value: projectdata.description,
+							value: truncateText(projectdata.description, 10000),
 							inline: false,
 						});
 					}
@@ -214,34 +214,41 @@ defineEvent("messageCreate", async (message) => {
 				case "discuss":
 					switch (urlParts[4]) {
 						case "topic":
-							const topicdata = await fetchApiData(
-								`https://scratchdb.lefty.one/v3/forum/topic/info/${urlParts[5]}/`,
+							const posts = await fetchApiData(
+								`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}?o=oldest`,
 							).catch(() => {});
-							const topicposts = await fetchApiData(
-								`https://scratchdb.lefty.one/v3/forum/topic/posts/${urlParts[5]}/`,
-							).catch(() => {});
-							const topicfirst = topicposts[0];
-							msgEmbeds.push({
-								title: topicdata.title,
-								description: topicfirst.content.bb`**In**: ${
-									topicdata.category
-								} ${(topicdata.closed = 0 ? "closed" : "")}`,
+						
+							const post = posts[0];
+							const topicdata = post.topic;
+							let embed = {
+								title: `${topicdata.title}`,
+								description: ` ${post.content.bb}`,
+								color: constants.scratchColor,
 
 								fields: [
 									{
-										name: "posts",
-										value: topicdata.post_count,
+										name: "Catagory",
+										value: topicdata.category,
 									},
 								],
 								footer: {
 									text: notSet ? "Disable this using /settings" : "",
 								},
 								author: {
-									name: topicfirst.username,
-									url: `https://scratch.mit.edu/users/${topicfirst.username}`,
+									name: post.username,
+									url: `https://scratch.mit.edu/users/${post.username}`,
 								},
 								url: `https://scratch.mit.edu/discuss/topic/${urlParts[5]}`,
-							});
+								timestamp: new Date(post.time.posted).toISOString(),
+							};
+							if (topicdata.closed == "1") {
+								embed.fields.unshift({
+									name: `Closed`,
+									value: constants.zeroWidthSpace,
+								});
+							}
+						
+							msgEmbeds.push(embed);
 
 							break;
 						case "post":
@@ -249,7 +256,7 @@ defineEvent("messageCreate", async (message) => {
 								`https://scratchdb.lefty.one/v3/forum/post/info/${urlParts[5]}/`,
 							).catch(() => {});
 							msgEmbeds.push({
-								title: postdata.title,
+								title: postdata.topic.title,
 								description: postdata.content.bb,
 								color: constants.scratchColor,
 
@@ -261,10 +268,13 @@ defineEvent("messageCreate", async (message) => {
 									url: `https://scratch.mit.edu/users/${postdata.username}`,
 								},
 								url: `https://scratch.mit.edu/discuss/post/${urlParts[5]}`,
+								timestamp: new Date(postdata.time.posted).toISOString(),
 							});
 					}
 			}
-		} catch {}
+		} catch (error) {
+			message.reply(`${error}`);
+		}
 	}
 
 	if (msgEmbeds.length != 0) {
