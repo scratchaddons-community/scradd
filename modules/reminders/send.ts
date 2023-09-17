@@ -101,7 +101,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
 					);
 					if (!count) return;
-					
+
 					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
