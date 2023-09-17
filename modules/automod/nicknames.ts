@@ -107,7 +107,7 @@ function findName(member: GuildMember) {
 
 function isPingable(name: string) {
 	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
-	return /[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]{3,}|^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>? -]+$/u.test(
+	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
 		normalized,
 	);
 }
