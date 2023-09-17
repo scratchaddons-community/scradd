@@ -1,4 +1,4 @@
-import type { ButtonInteraction, ChatInputCommandInteraction, User } from "discord.js";
+import { ComponentType, type ButtonInteraction, type ChatInputCommandInteraction, type User, ButtonStyle } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
@@ -114,11 +114,25 @@ export default async function getUserRank(
 										: ""
 							  }${constants.footerSeperator}`
 							: ""
-					}View the leaderboard with /xp top`,
+					}View the leaderboard with /xp top or the button below`,
 				},
 
 				image: { url: "attachment://progress.png" },
 			},
+		],
+
+		components: [
+			{
+				components: [
+					{
+						type: ComponentType.Button,
+						customId: `${user.id}_viewLeaderboard`,
+						label: "View Leaderboard",
+						style: ButtonStyle.Primary
+					}
+				],
+				type: ComponentType.ActionRow
+			}
 		],
 
 		files: await makeCanvasFiles(),
