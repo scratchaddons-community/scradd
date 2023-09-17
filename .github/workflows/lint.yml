@@ -11,7 +11,7 @@ permissions: write-all
 jobs:
     bump:
         name: Bump dependencies
-        if: github.ref_name == 'main' && github.repository_owner == 'scratchaddons-community'
+        if: ${{ github.head_ref || github.ref_name }} == 'main' && github.event.pull_request.head.repo.full_name == 'scratchaddons-community'
         runs-on: ubuntu-20.04
 
         steps:
@@ -19,6 +19,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Bump
               id: sync_types
@@ -29,7 +30,6 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v4.16.0
               with:
                   commit_message: Bump dependencies
-                  branch: ${{ github.head_ref }}
 
             - name: Comment
               if: steps.commit.outputs.changes_detected == 'true'
@@ -41,7 +41,7 @@ jobs:
 
     format:
         name: Format
-        if: ${{ always() }} && startsWith(github.ref_name, 'dependabot/') != true
+        if: ${{ always() }} && startsWith(github.ref_name, 'dependabot/') == false
         runs-on: ubuntu-20.04
         needs: bump
 
@@ -50,6 +50,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v3.8.1
@@ -67,7 +68,6 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v4.16.0
               with:
                   commit_message: Format
-                  branch: ${{ github.head_ref }}
 
     analyze:
         name: Analyze
@@ -78,6 +78,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup CodeQL
               uses: github/codeql-action/init@v2.3.3
@@ -97,6 +98,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v3.8.1
@@ -119,6 +121,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v3.8.1
@@ -141,6 +144,7 @@ jobs:
               uses: actions/checkout@v4.0.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v3.8.1
