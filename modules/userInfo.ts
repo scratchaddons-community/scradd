@@ -44,41 +44,28 @@ defineChatCommand(
 				: interaction.member.roles.includes(config.roles.mod.id));
 
 		const fields = [
-			{ name: "ID", value: user.id, inline: true },
+			{ name: "🏷️ ID", value: user.id, inline: true },
 			{
-				name: "Created Account",
+				name: "🆕 Created Account",
 				value: time(user.createdAt, TimestampStyles.RelativeTime),
 				inline: true,
 			},
 			user.globalName
-				? { name: "Display Name", value: user.globalName, inline: true }
+				? { name: "🪪 Display Name", value: user.globalName, inline: true }
 				: { name: constants.zeroWidthSpace, value: constants.zeroWidthSpace, inline: true },
 		];
 
-		if (member)
-			fields.push({
-				name: "Roles",
-				value:
-					member.roles
-						.valueOf()
-						.sorted((one, two) => two.comparePositionTo(one))
-						.filter((role) => role.id !== config.guild.id)
-						.toJSON()
-						.join(" ") || "*No roles*",
-				inline: false,
-			});
-
 		if (member?.joinedAt)
 			fields.push({
-				name: "Joined Server",
+				name: "➡️ Joined Server",
 				value: time(member.joinedAt, TimestampStyles.RelativeTime),
 				inline: true,
 			});
 		if (member?.nickname)
-			fields.push({ name: "Nickname", value: member.nickname, inline: true });
+			fields.push({ name: "👋 Nickname", value: member.nickname, inline: true });
 		if (member?.voice.channel)
 			fields.push({
-				name: "Voice Channel",
+				name: "🔊 Voice Channel",
 				value:
 					member.voice.channel.toString() +
 					`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
@@ -91,16 +78,29 @@ defineChatCommand(
 				inline: true,
 			});
 
+		if (member)
+			fields.push({
+				name: "🗄️ Roles",
+				value:
+					member.roles
+						.valueOf()
+						.sorted((one, two) => two.comparePositionTo(one))
+						.filter((role) => role.id !== config.guild.id)
+						.toJSON()
+						.join(" ") || "*No roles*",
+				inline: false,
+			});
+
 		const banned = await config.guild.bans.fetch(user.id).catch(() => void 0);
 		if (banned)
 			fields.push(
 				isMod
 					? {
-							name: "Ban Reason",
+							name: "🔨 Ban Reason",
 							value: banned.reason ?? "No reason provided",
 							inline: true,
 					  }
-					: { name: "Banned", value: "Yes", inline: true },
+					: { name: "🔨 Banned", value: "Yes", inline: true },
 			);
 
 		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;

@@ -1,4 +1,4 @@
-import { cleanContent, type Snowflake } from "discord.js";
+import { ForumChannel, cleanContent, type Snowflake, type GuildForumTag } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
@@ -7,9 +7,9 @@ import constants from "../../common/constants.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
-	...(config.channels.suggestions?.availableTags
-		.filter((tag) => tag.moderated)
-		.map((tag) => tag.name) ?? []),
+	...(config.channels.suggestions
+		? getAnswers(config.channels.suggestions).map(([, tag]) => tag.name)
+		: []),
 ] as const;
 
 export const suggestionsDatabase = new Database<{
@@ -56,3 +56,25 @@ export const oldSuggestions = config.channels.old_suggestions
 			};
 	  })
 	: [];
+
+export function getAnswer(
+	appliedTags: Snowflake[],
+	channel: ForumChannel,
+): Omit<GuildForumTag, "id"> & { index: number; position: number; id?: GuildForumTag["id"] } {
+	const tags = getAnswers(channel);
+	const [index, tag] = tags.find(([, tag]) => appliedTags.includes(tag.id)) ?? [
+		-1,
+		{
+			name: channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+			emoji: { name: "❓", id: null },
+			moderated: true,
+			id: undefined,
+		},
+	];
+
+	return { ...tag, index, position: index / (tags.length - 1) };
+}
+
+export function getAnswers(channel: ForumChannel) {
+	return [...channel.availableTags.entries()].filter(([, tag]) => tag.moderated);
+}

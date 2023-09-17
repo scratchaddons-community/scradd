@@ -124,3 +124,30 @@ export function parseTime(time: string): Date {
 
 	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }
+
+export function lerpColors(colors: number[], percent: number) {
+	if (colors.length === 0) throw new RangeError("Color array must not be empty.");
+	if (colors.length === 1) return colors[0];
+
+	const segmentCount = colors.length - 1;
+	const segmentIndex = Math.floor(segmentCount * percent);
+	const segmentPercent =
+		segmentCount === 1 ? percent : (percent - segmentIndex / segmentCount) * segmentCount;
+
+	const color1 = colors[segmentIndex] ?? 0;
+	const color2 = colors[segmentIndex + 1] ?? 0;
+
+	const red1 = (color1 >> 16) & 0xff;
+	const green1 = (color1 >> 8) & 0xff;
+	const blue1 = color1 & 0xff;
+
+	const red2 = (color2 >> 16) & 0xff;
+	const green2 = (color2 >> 8) & 0xff;
+	const blue2 = color2 & 0xff;
+
+	const red = Math.round(red1 + (red2 - red1) * segmentPercent);
+	const green = Math.round(green1 + (green2 - green1) * segmentPercent);
+	const blue = Math.round(blue1 + (blue2 - blue1) * segmentPercent);
+
+	return (red << 16) | (green << 8) | blue;
+}
