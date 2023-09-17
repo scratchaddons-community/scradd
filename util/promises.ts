@@ -47,3 +47,10 @@ export async function firstTrueyPromise(promises: Promise<unknown>[]) {
 
 	return await Promise.race(newPromises);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function gracefulFetch<T = any>(apiUrl: string): Promise<T | undefined> {
+	return fetch(apiUrl)
+		.then((response) => response.json<T>())
+		.catch(() => void 0);
+}
