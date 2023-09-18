@@ -28,7 +28,7 @@
 		"match-sorter": "6.3.1",
 		"papaparse": "5.4.1",
 		"serialize-error": "11.0.2",
-		"strife.js": "^2.0.0"
+		"strife.js": "3.0.1"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
