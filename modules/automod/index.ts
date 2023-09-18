@@ -47,9 +47,9 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 			});
 			await warn(
 				interaction.user,
-				"Watch your language!",
+				"Please watch your language!",
 				censored.strikes,
-				`Used command ${interaction.toString()}`,
+				`Used command \`${interaction.toString()}\``,
 			);
 			return false;
 		}
@@ -83,7 +83,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 		if (censored) {
 			await warn(
 				partialUser.partial ? await partialUser.fetch() : partialUser,
-				"Watch your language!",
+				"Please watch your language!",
 				censored.strikes,
 				`Reacted with :${reaction.emoji.name}:`,
 			);
@@ -143,7 +143,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 	) {
 		await warn(
 			newPresence.member,
-			"As a representative of the server, staff members are not allowed to have bad word in their statuses",
+			"As server representatives, staff members are not allowed to have bad words in their statuses. Please change yours now to avoid another warn.",
 			censored.strikes,
 			"Set status to " + status,
 		);

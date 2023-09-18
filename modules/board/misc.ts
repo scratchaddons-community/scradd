@@ -8,6 +8,7 @@ import {
 	type Snowflake,
 	type TextBasedChannel,
 	BaseChannel,
+	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
@@ -49,36 +50,50 @@ const COUNTS = {
  *
  * @returns The reaction count.
  */
-export function boardReactionCount(channel?: TextBasedChannel): number;
-export function boardReactionCount(channel: { id: Snowflake }): number | undefined;
-export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake }) {
-	if (process.env.NODE_ENV !== "production") return COUNTS.admins;
-	if (!channel) return COUNTS.default;
+export function boardReactionCount(channel?: TextBasedChannel, time?: Date): number;
+export function boardReactionCount(channel: { id: Snowflake }, time?: Date): number | undefined;
+export function boardReactionCount(
+	channel?: TextBasedChannel | { id: Snowflake },
+	time = new Date(),
+) {
+	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
+	if (!channel) return shift(COUNTS.default);
 
-	if (channel.id === config.channels.updates?.id) return COUNTS.info;
-	const baseCount = baseReactionCount(channel.id);
-	if (baseCount || !(channel instanceof BaseChannel)) return baseCount;
+	if (channel.id === config.channels.updates?.id) return shift(COUNTS.info);
+	if (!(channel instanceof BaseChannel)) {
+		const count = baseReactionCount(channel.id);
+		return count && shift(count);
+	}
 
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.default;
-	if (baseChannel.guild.id === constants.guilds.testing) return COUNTS.mods;
-	if (baseChannel.guild.id === constants.guilds.dev) return COUNTS.misc;
-	if (!baseChannel.isTextBased()) return COUNTS.default;
-	if (baseChannel.isVoiceBased()) return COUNTS.misc;
+	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
+	if (baseChannel.guild.id === constants.guilds.testing) return shift(COUNTS.mods);
+	if (baseChannel.guild.id === constants.guilds.dev) return shift(COUNTS.misc);
+	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
+	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
-	return (
+	const count =
 		baseReactionCount(baseChannel.id) ??
 		{
 			[config.channels.info?.id || ""]: COUNTS.info,
 			[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ??
-		COUNTS.default
-	);
+		COUNTS.default;
+	return shift(count);
+
+	function shift(count: number) {
+		const privateThread =
+			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
+				? 2 / 3
+				: 1;
+		const timeShift = (Date.now() - +time) / 86_400_000 / 200 + 1;
+		return Math.max(2, Math.round(count * privateThread * timeShift));
+	}
 }
 function baseReactionCount(id: Snowflake) {
 	return {
-		[config.channels.tickets?.id || ""]: COUNTS.private,
+		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
 		"869662117651955802": COUNTS.private, // #devs-only
@@ -125,6 +140,8 @@ export async function generateBoardMessage(
 			color:
 				message.type === MessageType.AutoModerationAction
 					? 0x99_a1_f2
+					: message.type === MessageType.GuildInviteReminder
+					? undefined
 					: message.member?.displayColor,
 			description: censored ? censored.censored : description,
 
@@ -132,11 +149,15 @@ export async function generateBoardMessage(
 				icon_url:
 					message.type === MessageType.AutoModerationAction
 						? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+								: message.type === MessageType.GuildInviteReminder
+								? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 						: (message.member ?? message.author).displayAvatarURL(),
 
 				name:
 					message.type === MessageType.AutoModerationAction
 						? "AutoMod 🤖"
+								: message.type === MessageType.GuildInviteReminder
+								? "Invite your friends 🤖"
 						: (message.member?.displayName ??
 								(censoredName
 									? censoredName.censored
@@ -144,7 +165,10 @@ export async function generateBoardMessage(
 						  (message.author.bot ? " 🤖" : ""),
 			},
 
-			timestamp: message.createdAt.toISOString(),
+			timestamp:
+						message.type === MessageType.GuildInviteReminder
+							? undefined
+							: message.createdAt.toISOString(),
 
 			footer: message.editedAt ? { text: "Edited" } : undefined,
 		});

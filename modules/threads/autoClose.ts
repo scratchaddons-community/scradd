@@ -155,7 +155,12 @@ export async function autoClose({ locked: wasLocked }: AnyThreadChannel, thread:
 	const options = getThreadConfig(thread);
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
 
-	if (!wasLocked && thread.locked && thread.parent?.type === ChannelType.GuildForum) {
+	if (
+		!wasLocked &&
+		thread.locked &&
+		(thread.type === ChannelType.PrivateThread ||
+			thread.parent?.type === ChannelType.GuildForum)
+	) {
 		const date = Date.now() + 43_200_000;
 		remindersDatabase.data = [
 			...remindersDatabase.data,

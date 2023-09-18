@@ -79,9 +79,7 @@ export default async function memoryMatch(
 
 	const message = await interaction.reply({
 		fetchReply: true,
-		content: `${
-			constants.emojis.misc.challenge
-		} **${options.user.toString()}, you are challenged to a game of Memory Match${
+		content: `💪 **${options.user.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
 						bonusTurns ? "" : "no bonus turns"

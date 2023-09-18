@@ -125,8 +125,8 @@ export async function channelUpdate(
 	if (oldChannel.flags.has("IsGuildResourceChannel") !== resource) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
-				resource ? "" : "un"
-			}made a Resource Page`,
+				resource ? "added to" : "removed from"
+			} the Resource Pages`,
 			"channels",
 		);
 	}

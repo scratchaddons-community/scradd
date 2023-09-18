@@ -77,7 +77,7 @@ export async function createReminder(
 			});
 			await warn(
 				interaction.user,
-				"Watch your language!",
+				"Please watch your language!",
 				censored.strikes,
 				`Used command ${interaction.toString()}`,
 			);

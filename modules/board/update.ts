@@ -14,7 +14,8 @@ export default async function updateBoard(
 ) {
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
 	const { count, message } = reaction;
-	const minReactions = boardReactionCount(message.channel);
+	const reactionThreshold = boardReactionCount(message.channel, message.createdAt);
+	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
 
@@ -23,7 +24,7 @@ export default async function updateBoard(
 		(await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0));
 
 	if (boardMessage) {
-		if (count < Math.floor(minReactions * 0.8)) {
+		if (count < minReactions) {
 			await boardMessage.delete();
 			updateById({ source: message.id, onBoard: 0, reactions: count });
 		} else {
@@ -31,7 +32,7 @@ export default async function updateBoard(
 			await boardMessage.edit(content);
 			updateById({ source: message.id, reactions: count });
 		}
-	} else if (count >= minReactions) {
+	} else if (count >= reactionThreshold) {
 		const fetched = await message.fetch();
 
 		const sentMessage = await config.channels.board.send({

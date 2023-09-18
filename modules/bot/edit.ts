@@ -2,7 +2,6 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,
 } from "discord.js";
@@ -17,7 +16,6 @@ import { DATABASE_THREAD } from "../../common/database.js";
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
-		interaction.targetMessage.type !== MessageType.Default ||
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
