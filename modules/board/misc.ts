@@ -149,15 +149,15 @@ export async function generateBoardMessage(
 				icon_url:
 					message.type === MessageType.AutoModerationAction
 						? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
-								: message.type === MessageType.GuildInviteReminder
-								? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
+						: message.type === MessageType.GuildInviteReminder
+						? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 						: (message.member ?? message.author).displayAvatarURL(),
 
 				name:
 					message.type === MessageType.AutoModerationAction
 						? "AutoMod 🤖"
-								: message.type === MessageType.GuildInviteReminder
-								? "Invite your friends 🤖"
+						: message.type === MessageType.GuildInviteReminder
+						? "Invite your friends 🤖"
 						: (message.member?.displayName ??
 								(censoredName
 									? censoredName.censored
@@ -166,9 +166,9 @@ export async function generateBoardMessage(
 			},
 
 			timestamp:
-						message.type === MessageType.GuildInviteReminder
-							? undefined
-							: message.createdAt.toISOString(),
+				message.type === MessageType.GuildInviteReminder
+					? undefined
+					: message.createdAt.toISOString(),
 
 			footer: message.editedAt ? { text: "Edited" } : undefined,
 		});

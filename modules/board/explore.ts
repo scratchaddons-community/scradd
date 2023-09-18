@@ -84,7 +84,8 @@ export default async function makeSlideshow(
 					channel,
 					message.channel,
 					interaction.guild ?? undefined,
-				))) && message,
+				))) &&
+			message,
 	);
 
 	const nextId = generateHash("next");
