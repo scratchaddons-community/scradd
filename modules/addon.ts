@@ -37,6 +37,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.String,
 			},
 		},
+		access: true,
 	},
 
 	async (interaction, options) => {

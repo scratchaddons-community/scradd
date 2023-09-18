@@ -115,7 +115,7 @@ export default async function ban(
 		return;
 	}
 
-	if (options.user instanceof GuildMember ? options.user.bannable : true) {
+	if (options.user instanceof User || options.user.bannable) {
 		const message = await interaction.reply({
 			content: `Are you sure you want to ban **${userToBan.toString()}**${
 				unbanTime ? " until " + time(unbanTime, TimestampStyles.LongDate) : ""

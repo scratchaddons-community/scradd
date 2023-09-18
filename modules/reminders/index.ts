@@ -12,6 +12,7 @@ defineSubcommands(
 		name: "reminders",
 		description: "Commands to manage reminders",
 		censored: false,
+		access: true,
 		subcommands: {
 			add: {
 				description: "Sets a reminder",

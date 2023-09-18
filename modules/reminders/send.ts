@@ -168,13 +168,13 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 
 					return backupDatabases(channel);
 				}
-				case SpecialReminders.SyncRandomPotato: {
+				case SpecialReminders.SyncRandomBoard: {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
 							channel: reminder.channel,
 							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
-							id: SpecialReminders.SyncRandomPotato,
+							id: SpecialReminders.SyncRandomBoard,
 							user: client.user.id,
 						},
 					];
@@ -190,7 +190,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
 							continue;
 
-						const channel = await config.guild.channels
+						const channel = await client.channels
 							.fetch(info.channel)
 							.catch(() => void 0);
 						if (!channel?.isTextBased()) continue;

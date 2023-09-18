@@ -34,12 +34,15 @@ export default async function updateBoard(
 		}
 	} else if (count >= reactionThreshold) {
 		const fetched = await message.fetch();
-		await giveXp(fetched.author, fetched.url);
 
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(fetched)),
-			allowedMentions: getSettings(fetched.author).boardPings ? undefined : { users: [] },
+			allowedMentions: {
+				users: (await getSettings(fetched.author)).boardPings ? [fetched.author.id] : [],
+			},
 		});
+
+		await giveXp(fetched.author, sentMessage.url);
 
 		if (config.channels.board.type === ChannelType.GuildAnnouncement)
 			await sentMessage.crosspost();

@@ -121,9 +121,7 @@ export default Object.fromEntries(
 							[questionStrings.themesCategory]: false,
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
-
-							[questionStrings.easterEgg]:
-								forcedEasterEgg === addon.id ? undefined : false,
+							[questionStrings.easterEgg]: forcedEasterEgg === addon.id && undefined,
 						},
 
 						question: questionStrings.editorCategory,
@@ -259,9 +257,7 @@ export default Object.fromEntries(
 							[questionStrings.editorCategory]: false,
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
-
-							[questionStrings.easterEgg]:
-								forcedEasterEgg === addon.id ? undefined : false,
+							[questionStrings.easterEgg]: forcedEasterEgg === addon.id && undefined,
 						},
 
 						question: questionStrings.themesCategory,

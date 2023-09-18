@@ -136,3 +136,4 @@ module.exports = {
 // todo: no empty func
 // todo: stop nesting why tf are there 14-level nesting places
 // todo: no promise all
+// todo: unicorn/prefer-spread with objects

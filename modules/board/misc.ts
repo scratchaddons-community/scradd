@@ -14,9 +14,11 @@ import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
 import censor from "../automod/language.js";
+import constants from "../../common/constants.js";
+import { client } from "strife.js";
 
-export const BOARD_EMOJI = "🥔",
-	REACTIONS_NAME = "Potatoes";
+export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
+	REACTIONS_NAME = process.env.NODE_ENV === "production" ? "Potatoes" : "Stars";
 
 export const boardDatabase = new Database<{
 	/** The number of reactions this message has. */
@@ -33,7 +35,6 @@ export const boardDatabase = new Database<{
 await boardDatabase.init();
 
 const COUNTS = {
-	scradd: 2,
 	admins: 2,
 	mods: 3,
 	private: 4,
@@ -55,7 +56,7 @@ export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
 	time = new Date(),
 ) {
-	if (process.env.NODE_ENV !== "production") return shift(COUNTS.scradd);
+	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);
 
 	if (channel.id === config.channels.updates?.id) return shift(COUNTS.info);
@@ -64,9 +65,11 @@ export function boardReactionCount(
 		return count && shift(count);
 	}
 
-	if (!channel.isTextBased()) return shift(COUNTS.default);
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
+	if (baseChannel.guild.id === constants.guilds.testing) return shift(COUNTS.mods);
+	if (baseChannel.guild.id === constants.guilds.dev) return shift(COUNTS.misc);
+	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
 	const count =
@@ -89,8 +92,6 @@ export function boardReactionCount(
 	}
 }
 function baseReactionCount(id: Snowflake) {
-	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
-
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
@@ -135,15 +136,48 @@ export async function generateBoardMessage(
 		const censored = censor(description);
 		const censoredName = censor(message.author.displayName);
 
-		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
+		embeds.unshift({
+			color:
+				message.type === MessageType.AutoModerationAction
+					? 0x99_a1_f2
+					: message.type === MessageType.GuildInviteReminder
+					? undefined
+					: message.member?.displayColor,
+			description: censored ? censored.censored : description,
+
+			author: {
+				icon_url:
+					message.type === MessageType.AutoModerationAction
+						? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+						: message.type === MessageType.GuildInviteReminder
+						? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
+						: (message.member ?? message.author).displayAvatarURL(),
+
+				name:
+					message.type === MessageType.AutoModerationAction
+						? "AutoMod 🤖"
+						: message.type === MessageType.GuildInviteReminder
+						? "Invite your friends 🤖"
+						: (message.member?.displayName ??
+								(censoredName
+									? censoredName.censored
+									: message.author.displayName)) +
+						  (message.author.bot ? " 🤖" : ""),
+			},
+
+			timestamp:
+				message.type === MessageType.GuildInviteReminder
+					? undefined
+					: message.createdAt.toISOString(),
+
+			footer: message.editedAt ? { text: "Edited" } : undefined,
+		});
 
 		return {
 			allowedMentions: { users: [] },
-
 			components: [
 				{
 					type: ComponentType.ActionRow,
-
 					components: [
 						...(extraButtons.pre || []),
 						{
@@ -156,53 +190,10 @@ export async function generateBoardMessage(
 					],
 				},
 			],
-
-			content: `**${BOARD_EMOJI} ${count}** | ${
-				message.channel.isThread() && message.channel.parent
-					? `${message.channel.toString()} (${message.channel.parent.toString()})`
-					: message.channel.toString()
-			} | ${message.author.toString()}`,
-
-			embeds: [
-				{
-					color:
-						message.type === MessageType.AutoModerationAction
-							? 0x99_a1_f2
-							: message.type === MessageType.GuildInviteReminder
-							? undefined
-							: message.member?.displayColor,
-					description: censored ? censored.censored : description,
-
-					author: {
-						icon_url:
-							message.type === MessageType.AutoModerationAction
-								? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
-								: message.type === MessageType.GuildInviteReminder
-								? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
-								: (message.member ?? message.author).displayAvatarURL(),
-
-						name:
-							message.type === MessageType.AutoModerationAction
-								? "AutoMod 🤖"
-								: message.type === MessageType.GuildInviteReminder
-								? "Invite your friends 🤖"
-								: (message.member?.displayName ??
-										(censoredName
-											? censoredName.censored
-											: message.author.displayName)) +
-								  (message.author.bot ? " 🤖" : ""),
-					},
-
-					timestamp:
-						message.type === MessageType.GuildInviteReminder
-							? undefined
-							: message.createdAt.toISOString(),
-
-					footer: message.editedAt ? { text: "Edited" } : undefined,
-				},
-				...embeds,
-			],
-
+			content: `**${BOARD_EMOJI} ${count}** | ${formatChannel(
+				message.channel,
+			)} | ${message.author.toString()}`,
+			embeds: embeds.slice(0, 10),
 			files,
 		};
 	}
@@ -233,13 +224,25 @@ export async function generateBoardMessage(
 		};
 	}
 
-	const channel = await config.guild.channels.fetch(info.channel).catch(() => void 0);
-
+	const channel = await client.channels.fetch(info.channel).catch(() => void 0);
 	if (!channel?.isTextBased()) return;
 
 	const message = await channel.messages.fetch(info.source).catch(() => void 0);
-
 	if (!message) return;
 
 	return await messageToBoardData(message);
+}
+
+function formatChannel(channel: TextBasedChannel) {
+	const thread = channel.isThread() && channel.parent?.toString();
+	const otherServer =
+		!channel.isDMBased() &&
+		{ [constants.guilds.dev]: "SA Dev", [constants.guilds.testing]: "Scradd Testing" }[
+			channel.guild.id
+		];
+
+	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
+	if (thread) return `${channel.toString()} (${thread})`;
+	if (otherServer) return `${channel.toString()} (${otherServer})`;
+	return `${channel.toString()}`;
 }

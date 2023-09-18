@@ -174,7 +174,9 @@ export async function say(
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,
-			"messages",
+			interaction.guild?.id === config.guild.id
+				? "messages"
+				: interaction.guild?.publicUpdatesChannel ?? undefined,
 			{ buttons: [{ label: "Message", url: message.url }] },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);

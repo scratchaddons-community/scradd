@@ -18,7 +18,7 @@ import config from "../../common/config.js";
 import { disableComponents, paginate } from "../../util/discord.js";
 import queueReminders from "./send.js";
 
-export async function listReminders(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function listReminders(interaction: ChatInputCommandInteraction) {
 	const reminders = getUserReminders(interaction.user.id);
 
 	await paginate(
@@ -59,11 +59,11 @@ export async function listReminders(interaction: ChatInputCommandInteraction<"ca
 }
 
 export async function createReminder(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction,
 	options: { dms?: boolean; time: string; reminder: string },
 ) {
 	const reminders = getUserReminders(interaction.user.id);
-	const dms = options.dms ?? getSettings(interaction.user).dmReminders;
+	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
 	if (!dms && !badWordsAllowed(interaction.channel)) {
 		const censored = censor(options.reminder);

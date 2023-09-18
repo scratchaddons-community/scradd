@@ -148,10 +148,15 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			} Message by ${edited.author.toString()} in ${edited.channel.toString()} (ID: ${
 				edited.id
 			}) edited by ${interaction.user.toString()}`,
-			"messages",
+			interaction.guild?.id === config.guild.id
+				? "messages"
+				: interaction.guild?.publicUpdatesChannel ?? undefined,
 			{
 				buttons: [{ label: "Message", url: edited.url }],
-				files: shouldLog(edited.channel) ? files : [],
+				files:
+					interaction.guild?.id !== config.guild.id || shouldLog(edited.channel)
+						? files
+						: [],
 			},
 		);
 	}

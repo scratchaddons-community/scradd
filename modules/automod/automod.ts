@@ -16,12 +16,13 @@ import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
-	"751206349614088204", // Scratch Addons development
-	"837024174865776680", // TurboWarp
-	constants.testingServerId,
-	"461575285364752384", // 9th Tail Bot Hub
+	constants.guilds.dev,
+	constants.guilds.testing,
 	"898383289059016704", // Scratch Addons SMP Archive
+	"837024174865776680", // TurboWarp
 	"945340853189247016", // ScratchTools
+	"461575285364752384", // 9th Tail Bot Hub
+	"333355888058302465", // DISBOARD
 ]);
 
 export default async function automodMessage(message: Message) {

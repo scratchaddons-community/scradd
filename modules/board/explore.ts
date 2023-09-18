@@ -17,7 +17,7 @@ import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 
-export const NO_POTATOES_MESSAGE = "No messages found. Try changing any filters you may have used.";
+export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
 /**
@@ -31,6 +31,7 @@ export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 async function textChannelMatches(
 	channelWanted: GuildBasedChannel,
 	channelFound: Snowflake,
+	guild = "guild" in channelWanted ? channelWanted.guild : config.guild,
 ): Promise<boolean> {
 	if (channelWanted.id === channelFound) return true;
 
@@ -39,14 +40,14 @@ async function textChannelMatches(
 			return await firstTrueyPromise(
 				channelWanted.children
 					.valueOf()
-					.map(async (child) => await textChannelMatches(child, channelFound)),
+					.map(async (child) => await textChannelMatches(child, channelFound, guild)),
 			);
 		}
 		case ChannelType.GuildForum:
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			const thread = await config.guild.channels.fetch(channelFound).catch(() => void 0);
+			const thread = await guild.channels.fetch(channelFound).catch(() => void 0);
 			return thread?.parent?.id === channelWanted.id;
 		}
 
@@ -64,7 +65,7 @@ export default async function makeSlideshow(
 		minReactions = Math.round(
 			boardReactionCount(channel?.isTextBased() ? channel : undefined) * 0.4,
 		),
-	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number },
+	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
 ) {
 	const ephemeral =
 		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
@@ -78,7 +79,13 @@ export default async function makeSlideshow(
 			)
 			.sort(() => Math.random() - 0.5),
 		async (message) =>
-			(channel ? await textChannelMatches(channel, message.channel) : true) && message,
+			(!channel ||
+				(await textChannelMatches(
+					channel,
+					message.channel,
+					interaction.guild ?? undefined,
+				))) &&
+			message,
 	);
 
 	const nextId = generateHash("next");
@@ -132,7 +139,7 @@ export default async function makeSlideshow(
 						},
 					],
 
-					content: `${constants.emojis.statuses.no} ${NO_POTATOES_MESSAGE}`,
+					content: `${constants.emojis.statuses.no} ${NO_BOARDS_MESSAGE}`,
 					embeds: [],
 					files: [],
 			  } satisfies InteractionReplyOptions);

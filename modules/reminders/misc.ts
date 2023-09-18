@@ -12,7 +12,7 @@ export enum SpecialReminders {
 	LockThread,
 	Unban,
 	BackupDatabases,
-	SyncRandomPotato,
+	SyncRandomBoard,
 }
 export type Reminder = {
 	channel: Snowflake;
@@ -101,14 +101,14 @@ if (
 
 if (
 	config.channels.board &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomPotato)
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomBoard)
 ) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
 			channel: config.channels.board.id,
 			date: Date.now(),
-			id: SpecialReminders.SyncRandomPotato,
+			id: SpecialReminders.SyncRandomBoard,
 			user: client.user.id,
 		},
 	];

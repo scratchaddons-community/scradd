@@ -15,6 +15,7 @@ defineChatCommand(
 	{
 		name: "purge",
 		description: "(Mod only) Bulk deletes a specified amount of messages",
+		access: false,
 
 		options: {
 			count: {
@@ -60,7 +61,7 @@ defineChatCommand(
 			.toJSON()
 			.filter(
 				(message) =>
-					(options.user ? message.author.id === options.user.id : true) &&
+					(!options.user || message.author.id === options.user.id) &&
 					message.bulkDeletable,
 			);
 

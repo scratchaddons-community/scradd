@@ -30,7 +30,7 @@ defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		!getSettings(message.author).resourcesDmed
+		!(await getSettings(message.author)).resourcesDmed
 	) {
 		await message.channel.send({
 			components: [
@@ -71,7 +71,7 @@ defineEvent("messageCreate", async (message) => {
 				},
 			],
 		});
-		updateSettings(message.author, { resourcesDmed: true });
+		await updateSettings(message.author, { resourcesDmed: true });
 	}
 });
 defineButton("contactMods", async (interaction) => {
