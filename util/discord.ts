@@ -33,11 +33,13 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	Collection,
+	ApplicationCommand,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
+import { client } from "strife.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
@@ -132,9 +134,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	while (embeds.length > 10) embeds.pop();
-
-	return { embeds, files: message.attachments.toJSON() };
+	return { embeds: embeds.slice(0, 10), files: message.attachments.toJSON() };
 }
 
 /**
@@ -436,20 +436,29 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
 
-			const commandName = message.interaction?.commandName.split(" ")[0];
-			return config.guild.commands
-				.fetch()
+			const commands = Promise.all([
+				...(message.guild ? [message.guild.commands.fetch()] : []),
+				client.application.commands.fetch(),
+			]);
+
+			const subcommandName = message.interaction?.commandName ?? "";
+			const commandName = subcommandName.split(" ")[0];
+			return commands
+				.then((commands) =>
+					// eslint-disable-next-line unicorn/prefer-spread
+					new Collection<string, ApplicationCommand>().concat(...commands),
+				)
 				.then((commands) => commands.find(({ name }) => name === commandName))
+				.then((command) =>
+					command
+						? chatInputApplicationCommandMention(subcommandName, command.id)
+						: bold(`/${subcommandName}`),
+				)
 				.then(
-					(command) =>
-						`*${message.interaction?.user.toString() ?? ""} used ${
-							command
-								? chatInputApplicationCommandMention(
-										message.interaction?.commandName ?? "",
-										command.id,
-								  )
-								: bold(`/${message.interaction?.commandName ?? ""}`)
-						}:*\n${actualContent}`,
+					(formatted) =>
+						`*${
+							message.interaction?.user.toString() ?? ""
+						} used ${formatted}:*\n${actualContent}`,
 				);
 		}
 
@@ -514,9 +523,7 @@ export function disableComponents(
 			...component.data,
 
 			disabled:
-				component.type === ComponentType.Button
-					? component.style !== ButtonStyle.Link
-					: true,
+				component.type !== ComponentType.Button || component.style !== ButtonStyle.Link,
 		})),
 
 		type: ComponentType.ActionRow,
@@ -575,7 +582,9 @@ export async function paginate<Item>(
 		ephemeral?: boolean;
 		perPage?: number;
 
-		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
+		generateComponents?: (
+			items: Item[],
+		) => Awaitable<MessageActionRowComponentData[] | undefined>;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
@@ -637,7 +646,7 @@ export async function paginate<Item>(
 				: [];
 
 		if (generateComponents) {
-			const extraComponents = generateComponents(filtered);
+			const extraComponents = await generateComponents(filtered);
 			if (extraComponents?.length)
 				components[customComponentLocation === "above" ? "unshift" : "push"]({
 					type: ComponentType.ActionRow,

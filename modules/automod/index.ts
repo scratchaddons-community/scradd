@@ -16,9 +16,19 @@ import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
-	if (!interaction.inGuild() || !interaction.isChatInputCommand()) return true;
+	if (
+		!interaction.inGuild() ||
+		interaction.guild?.id !== config.guild.id ||
+		!interaction.isChatInputCommand()
+	)
+		return true;
 
-	const command = commands[interaction.command?.name ?? ""];
+	const command =
+		commands[interaction.command?.name ?? ""]?.find(
+			(command) =>
+				typeof command.access === "boolean" ||
+				!![command.access].flat().includes(interaction.guild?.id),
+		) ?? commands[interaction.command?.name ?? ""]?.[0];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
 	if (
@@ -54,18 +64,19 @@ defineEvent.pre("messageCreate", async (message) => {
 	if (message.guild?.id === config.guild.id) return await automodMessage(message);
 	return true;
 });
-defineEvent("messageUpdate", async (_, message) => {
+defineEvent("messageUpdate", async (_, partialMessage) => {
+	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
 		message.guild?.id === config.guild.id
 	)
-		await automodMessage(message.partial ? await message.fetch() : message);
+		await automodMessage(message);
 });
 defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-	if (message.guild?.id !== config.guild.id) return false;
+	if (message.guild?.id !== config.guild.id) return true;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
 		const censored = censor(reaction.emoji.name, 1);
@@ -83,7 +94,8 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	return true;
 });
 defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
-	if (thread.guild.id !== config.guild.id || !newlyCreated) return false;
+	if (!newlyCreated) return false;
+	if (thread.guild.id !== config.guild.id) return true;
 
 	const censored = censor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {

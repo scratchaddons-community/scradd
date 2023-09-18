@@ -23,7 +23,6 @@ const ignoreTriggers = [
 
 defineEvent("messageCreate", async (message) => {
 	if (
-		message.guild?.id !== config.guild.id ||
 		message.channel.id === message.id ||
 		message.channel.isDMBased() ||
 		ignoreTriggers.some((trigger) => message.content.match(trigger))
@@ -67,7 +66,9 @@ defineEvent("messageCreate", async (message) => {
 	});
 	if (
 		!pingsScradd &&
-		(config.channels.info?.id === baseChannel?.id || !getSettings(message.author).autoreactions)
+		(config.channels.info?.id === baseChannel?.id ||
+			(message.guild?.id !== config.guild.id && !baseChannel?.name.match(/\bbots\b/i)) ||
+			!(await getSettings(message.author)).autoreactions)
 	)
 		return;
 
@@ -83,9 +84,10 @@ defineEvent("messageCreate", async (message) => {
 
 		if (
 			name &&
-			(process.env.NODE_ENV !== "production" ||
-				config.channels.bots?.id === baseChannel?.id ||
-				pingsScradd)
+			(pingsScradd ||
+				process.env.NODE_ENV !== "production" ||
+				message.guild?.id !== config.guild.id ||
+				config.channels.bots?.id === baseChannel?.id)
 		) {
 			return await message.reply({
 				content: dad(name, message.author),

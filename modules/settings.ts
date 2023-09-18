@@ -37,20 +37,20 @@ defineChatCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Enable pings when your messages get on #${config.channels.board?.name}`,
+				description: `Ping you when your messages get on #${config.channels.board?.name}`,
 			},
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Enable pings you when you level up",
+				description: "Ping you when you level up",
 			},
 			"autoreactions": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Enable automatic funny emoji reactions to your messages",
+				description: "Add automatic funny emoji reactions to your messages",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
 				description:
-					"Enable using pings instead of usernames so you can view profiles (may not work due to Discord bugs)",
+					"Use mentions instead of usernames in embeds so you can view profiles (prone to Discord bugs)",
 			},
 			"dm-reminders": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -61,10 +61,43 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		await interaction.reply(
-			updateSettings(interaction.user, {
+			await updateSettings(interaction.user, {
 				autoreactions: options.autoreactions,
 				boardPings: options["board-pings"],
 				levelUpPings: options["level-up-pings"],
+				useMentions: options["use-mentions"],
+				dmReminders: options["dm-reminders"],
+			}),
+		);
+	},
+);
+
+defineChatCommand(
+	{
+		name: "settings",
+		description: "Customize personal settings",
+		access: [constants.guilds.dev, constants.guilds.testing],
+
+		options: {
+			"board-pings": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: `Pings you when your messages get on #${config.channels.board?.name} in the community server`,
+			},
+			"use-mentions": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Replace mentions with usernames in embeds to avoid seeing raw IDs",
+			},
+			"dm-reminders": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send reminders in your DMs by default",
+			},
+		},
+	},
+
+	async (interaction, options) => {
+		await interaction.reply(
+			await updateSettings(interaction.user, {
+				boardPings: options["board-pings"],
 				useMentions: options["use-mentions"],
 				dmReminders: options["dm-reminders"],
 			}),
@@ -83,7 +116,7 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 			content: `${constants.emojis.statuses.no} You don’t have permission to update other people’s settings!`,
 		});
 	}
-	await interaction.reply(updateSettings(interaction.user, { [setting]: "toggle" }));
+	await interaction.reply(await updateSettings(interaction.user, { [setting]: "toggle" }));
 
 	if (!interaction.message.flags.has("Ephemeral"))
 		await interaction.message.edit({
@@ -91,7 +124,7 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 		});
 });
 
-export function updateSettings(
+export async function updateSettings(
 	user: User,
 	settings: {
 		autoreactions?: boolean | "toggle";
@@ -102,7 +135,7 @@ export function updateSettings(
 		resourcesDmed?: true;
 	},
 ) {
-	const old = getSettings(user);
+	const old = await getSettings(user);
 	const updated = {
 		id: user.id,
 		boardPings:
@@ -179,20 +212,20 @@ export function updateSettings(
 	} satisfies InteractionReplyOptions;
 }
 
-export function getSettings(
+export async function getSettings(
 	user: { id: Snowflake },
 	defaults?: true,
-): Required<typeof userSettingsDatabase.data[number]>;
-export function getSettings(
+): Promise<Required<typeof userSettingsDatabase.data[number]>>;
+export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
-): typeof userSettingsDatabase.data[number];
-export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
+): Promise<typeof userSettingsDatabase.data[number]>;
+export async function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
 	if (defaults) {
-		const defaultSettings = getDefaultSettings(user);
+		const defaultSettings = await getDefaultSettings(user);
 		for (const setting of Object.keys(defaultSettings)) {
 			settings[setting] ??= defaultSettings[setting];
 		}
@@ -200,13 +233,15 @@ export function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
 	return settings;
 }
 
-export function getDefaultSettings(user: { id: Snowflake }) {
+export async function getDefaultSettings(user: { id: Snowflake }) {
 	return {
 		autoreactions: true,
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
-		useMentions: getWeeklyXp(user.id) > 100,
+		useMentions:
+			getWeeklyXp(user.id) > 100 ||
+			!(await config.guild.members.fetch(user.id).catch(() => {})),
 		resourcesDmed: false,
 	};
 }

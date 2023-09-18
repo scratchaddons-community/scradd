@@ -22,7 +22,7 @@ import { getSettings } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => void 0);
+const testingServer = await client.guilds.fetch(constants.guilds.testing).catch(() => void 0);
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
@@ -48,7 +48,7 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 }
 
 export default async function info(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction,
 	{ subcommand }: { subcommand: "status" | "credits" | "config" },
 ) {
 	switch (subcommand) {
@@ -123,7 +123,7 @@ export default async function info(
 					config.roles.staff &&
 					(interaction.member instanceof GuildMember
 						? interaction.member.roles.resolve(config.roles.staff.id)
-						: interaction.member.roles.includes(config.roles.staff.id))
+						: interaction.member?.roles.includes(config.roles.staff.id))
 						? [
 								{
 									type: ComponentType.ActionRow,
@@ -142,7 +142,7 @@ export default async function info(
 			break;
 		}
 		case "credits": {
-			const useMentions = getSettings(interaction.user).useMentions;
+			const { useMentions } = await getSettings(interaction.user);
 
 			await interaction.reply({
 				embeds: [

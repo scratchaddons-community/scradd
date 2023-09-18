@@ -10,7 +10,7 @@ import { client } from "strife.js";
 import { gracefulFetch } from "../util/promises.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
-if (!guild.available) throw new ReferenceError("Guild is unavailable!");
+if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
@@ -27,6 +27,13 @@ async function getConfig() {
 
 	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
+		guild,
+
+		urls: {
+			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
+			latestRelease,
+		},
+
 		roles: {
 			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
@@ -41,21 +48,17 @@ async function getConfig() {
 			),
 		},
 
-		urls: {
-			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
-			latestRelease,
-		},
-
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
 				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
-			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
+			tickets: getChannel("contact", ChannelType.GuildText, "start"),
+			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
@@ -66,21 +69,17 @@ async function getConfig() {
 			general: getChannel("general", ChannelType.GuildText),
 
 			support: "826250884279173162",
-			server: "1138116320249000077",
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
 
-			bots: getChannel("bots", ChannelType.GuildText, "partial"),
-
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ||
 				getChannel("promo", ChannelType.GuildText, "partial"),
+			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
-
-		guild,
 	};
 
 	function getChannel<T extends ChannelType>(

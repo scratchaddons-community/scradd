@@ -1,9 +1,7 @@
 import {
-	Collection,
 	type ChatInputCommandInteraction,
 	ComponentType,
 	ButtonStyle,
-	type APIMessageComponentEmoji,
 	type Snowflake,
 	ButtonInteraction,
 	Message,
@@ -19,6 +17,7 @@ import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./mi
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { logGame, playNeeded } from "./tourney.js";
+import { autoreactions } from "../secrets/secrets.js";
 
 const EMPTY_TILE = "⬛";
 
@@ -186,7 +185,7 @@ async function playGame(
 	await interaction.deferUpdate();
 	const tournament = !easyMode && bonusTurns && (await playNeeded([users[0].id, users[1].id]));
 	const scores: [string[], string[]] = [[], ["22"]];
-	const chunks = await setupGame(easyMode ? 4 : 2);
+	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
 	const message = await interaction.message.edit(getBoard(0));
 	const thread =
 		useThread &&
@@ -224,14 +223,9 @@ async function playGame(
 			if (shown.size === 1) return;
 			totalTurns++;
 
-			const selected = Array.from(
-				shown,
-				([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
-			);
+			const selected = Array.from(shown, ([row = 6, column = 6]) => chunks[+row]?.[+column]);
 
-			const match = selected.every(
-				(item) => item.name === selected[0]?.name && item.id === selected[0]?.id,
-			);
+			const match = selected.every((item) => item === selected[0]);
 			if (match) {
 				scores[turn % 2]?.push(...shown);
 
@@ -385,7 +379,7 @@ async function playGame(
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await config.guild.members.fetch(users[secondWon ? 1 : 0].id);
+		const winner = await interaction.guild?.members.fetch(users[secondWon ? 1 : 0].id);
 
 		await thread?.setArchived(true, "Game over");
 
@@ -399,8 +393,8 @@ async function playGame(
 							: `${constants.emojis.misc.green} ${secondUser}`
 					}`,
 					title: `Memory Match ${tournament ? "Tournament " : ""}Results`,
-					color: winner.displayColor,
-					thumbnail: { url: winner.displayAvatarURL() },
+					color: winner?.displayColor,
+					thumbnail: winner && { url: winner.displayAvatarURL() },
 					footer: {
 						text: `${totalTurns.toLocaleString()} turn${
 							totalTurns === 1 ? "" : "s"
@@ -420,48 +414,42 @@ async function playGame(
 	}
 }
 
-async function setupGame(difficulty: 2 | 4) {
-	const allEmojis = new Collection(
-		[
-			"🥔",
-			"🍡",
-			"🥑",
-			"😏",
-			"🦆",
-			"🇫🇷",
-			"📻",
-			"😭",
-			"🗿",
-			"👀",
-			"🧐",
-			"🤨",
-			"🥶",
-			"💀",
-			"💩",
-			"🍢",
-			...(process.env.NODE_ENV === "production"
-				? ([
-						{ name: "bowling_ball", id: "1104935019232899183" },
-						{ name: "hog", id: "1090372592642306048" },
-						{ name: "mater", id: "1073805840584282224" },
-						{ name: "new", id: "1091409541079507104" },
-						{ name: "rick", id: "962421165295554601", animated: true },
-						{ name: "rip", id: "1082693496739201205" },
-						{ name: "sxd", id: "962798819572056164" },
-						{ name: "wasteof", id: "1044651861682176080" },
-						{ name: "callum", id: "1119305606323523624" },
-				  ] as const)
-				: []),
-		].map((emoji): [string, APIMessageComponentEmoji] =>
-			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],
-		),
-		// eslint-disable-next-line unicorn/prefer-spread
-	).concat(
-		(await config.guild.emojis.fetch())
-			.filter((emoji) => emoji.available)
-			.mapValues((emoji) => ({ animated: emoji.animated ?? false, id: emoji.id })),
+async function setupGame(difficulty: 2 | 4, guild = config.guild) {
+	const twemojis = [
+		"🥔",
+		"⭐",
+		"🍀",
+		"😏",
+		"😭",
+		"🗿",
+		"👀",
+		"🧐",
+		"🤨",
+		"🥶",
+		"💀",
+		"💩",
+		"🍢",
+		"🐴",
+		"🪀",
+		"😡",
+		"🎶",
+		"😶",
+		"🙄",
+		"😎",
+		"🥺",
+		"👉",
+		"👈",
+	];
+	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
+	const guildEmojis = (await guild.emojis.fetch())
+		.filter((emoji) => emoji.available)
+		.map((emoji) => emoji.toString());
+	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
+
+	const selected = Array.from(
+		{ length: Math.min(24 / difficulty, allEmojis.length) },
+		() => allEmojis.splice(Math.floor(Math.random() * allEmojis.length), 1)[0] ?? "",
 	);
-	const selected = allEmojis.random(24 / difficulty);
 	const emojis = Array.from<typeof selected>({ length: difficulty })
 		.fill(selected)
 		.flat()
@@ -471,7 +459,7 @@ async function setupGame(difficulty: 2 | 4) {
 	while (emojis.length) {
 		chunks.push(
 			chunks.length === 2
-				? [...emojis.splice(0, 2), { name: EMPTY_TILE }, ...emojis.splice(0, 2)]
+				? [...emojis.splice(0, 2), EMPTY_TILE, ...emojis.splice(0, 2)]
 				: emojis.splice(0, 5),
 		);
 	}

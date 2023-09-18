@@ -125,7 +125,9 @@ export async function top(
 		top,
 		async (xp) =>
 			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${
-				getSettings(interaction.user).useMentions
+				(
+					await getSettings(interaction.user)
+				).useMentions
 					? `<@${xp.user}>`
 					: (
 							await client.users
@@ -141,8 +143,8 @@ export async function top(
 			user: interaction.user,
 			rawOffset: index,
 
-			generateComponents() {
-				return getSettings(interaction.user, false).useMentions === undefined
+			async generateComponents() {
+				return (await getSettings(interaction.user, false)).useMentions === undefined
 					? [
 							{
 								customId: "levelUpPings_toggleSetting",
@@ -156,4 +158,12 @@ export async function top(
 			customComponentLocation: "below",
 		},
 	);
+}
+defineButton("xp", async (interaction, userId = "") => {
+	await getUserRank(interaction, await client.users.fetch(userId));
+});
+
+if (constants.canvasEnabled) {
+	const { default: weeklyXpGraph } = await import("./graph.js");
+	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }

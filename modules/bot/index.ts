@@ -14,7 +14,7 @@ import sayCommand, { say, sayAutocomplete } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
 
 defineMenuCommand(
-	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message },
+	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
 	editMessage,
 );
 defineModal("edit", submitEdit);
@@ -77,6 +77,7 @@ defineChatCommand(
 
 		restricted: true,
 		censored: "channel",
+		access: false,
 	},
 	sayCommand,
 );
@@ -88,6 +89,7 @@ defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",
+		access: true,
 
 		subcommands: {
 			status: { description: "Show bot status", options: {} },

@@ -32,15 +32,15 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 }
 
 export default async function log(
-	content?: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
-	group?: LogGroup,
+	content: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
+	group?: LogGroup | TextChannel,
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
 		buttons?: { label: string; url: string }[];
 	} = {},
 ) {
-	const thread = await getLoggingThread(group);
+	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
 	const externalFileIndex = extra.files?.findIndex((file) => {
 		if (typeof file === "string" || file.content.includes("```")) return true;
@@ -111,7 +111,7 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 			name: group,
 			reason: "New logging thread",
 			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
-			invitable: group === DATABASE_THREAD ? false : undefined,
+			invitable: group !== DATABASE_THREAD && undefined,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);
