@@ -1,4 +1,5 @@
-import type { ApplicationCommandType, Snowflake } from "discord.js";
+import type { Snowflake } from "discord.js";
+import type { MenuCommandContext } from "strife.js";
 
 declare global {
 	interface ReadonlyArray<T> {
@@ -58,7 +59,7 @@ declare global {
 }
 
 declare module "strife.js" {
-	export interface BaseChatInputCommandData {
+	export interface AugmentedChatCommandData<_InGuild extends boolean> {
 		/**
 		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
 		 * words.
@@ -67,10 +68,13 @@ declare module "strife.js" {
 		 */
 		censored?: "channel" | false;
 	}
-	export interface ContextMenuCommandData<
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		T extends typeof ApplicationCommandType["Message" | "User"],
+	export interface AugmentedMenuCommandData<
+		_InGuild extends boolean,
+		_Context extends MenuCommandContext,
 	> {
 		censored?: never;
+	}
+	export interface DefaultCommandAccess {
+		inGuild: true;
 	}
 }

@@ -22,7 +22,7 @@ import { getSettings } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch(constants.testingServerId).catch(() => void 0);
+const testingServer = await client.guilds.fetch(constants.guilds.testing).catch(() => void 0);
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
@@ -47,8 +47,11 @@ async function getRole(roleId: Snowflake, useMentions = false): Promise<string> 
 	);
 }
 
-export default async function info(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	switch (interaction.options.getSubcommand(true)) {
+export default async function info(
+	interaction: ChatInputCommandInteraction,
+	{ subcommand }: { subcommand: "status" | "credits" | "config" },
+) {
+	switch (subcommand) {
 		case "status": {
 			const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
@@ -63,7 +66,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 						fields: [
 							{
-								name: "Mode",
+								name: "⚙️ Mode",
 
 								value:
 									process.env.NODE_ENV === "production"
@@ -72,16 +75,16 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 								inline: true,
 							},
-							{ name: "Version", value: `v${pkg.version}`, inline: true },
+							{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },
 							{
-								name: "Last restarted",
+								name: "🔁 Last restarted",
 
 								value: time(client.readyAt, TimestampStyles.RelativeTime),
 
 								inline: true,
 							},
 							{
-								name: "Ping",
+								name: "🏓 Ping",
 
 								value: `${Math.abs(
 									Number(message.createdAt) - Number(interaction.createdAt),
@@ -90,12 +93,12 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 								inline: true,
 							},
 							{
-								name: "WebSocket latency",
-								value: `${client.ws.ping.toLocaleString("en-us")}ms`,
+								name: "↕️ WebSocket latency",
+								value: `${Math.abs(client.ws.ping).toLocaleString("en-us")}ms`,
 								inline: true,
 							},
 							{
-								name: "RAM usage",
+								name: "💾 RAM usage",
 								value:
 									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
 										"en-us",
@@ -120,7 +123,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 					config.roles.staff &&
 					(interaction.member instanceof GuildMember
 						? interaction.member.roles.resolve(config.roles.staff.id)
-						: interaction.member.roles.includes(config.roles.staff.id))
+						: interaction.member?.roles.includes(config.roles.staff.id))
 						? [
 								{
 									type: ComponentType.ActionRow,
@@ -139,7 +142,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 			break;
 		}
 		case "credits": {
-			const useMentions = getSettings(interaction.user).useMentions;
+			const { useMentions } = await getSettings(interaction.user);
 
 			await interaction.reply({
 				embeds: [
@@ -149,22 +152,22 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 						fields: [
 							{
-								name: "Developers",
+								name: "🧑‍💻 Developers",
 								value: await getRole(developers, useMentions),
 								inline: true,
 							},
 							{
-								name: "Designers",
+								name: "🖌️ Designers",
 								value: await getRole(designers, useMentions),
 								inline: true,
 							},
 							{
-								name: "Additional beta testers",
+								name: "🧪 Additional beta testers",
 								value: await getRole(testers, useMentions),
 								inline: true,
 							},
 							{
-								name: "Third-party code libraries",
+								name: "🗄️ Third-party code libraries",
 
 								value: joinWithAnd(
 									Object.entries(pkg.dependencies),
@@ -246,7 +249,7 @@ function getConfig() {
 						typeof role[1] !== "string",
 				)
 				.map((role) => ({
-					name: `${role[0]
+					name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
 						.split("_")
 						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
 						.join(" ")} role`,

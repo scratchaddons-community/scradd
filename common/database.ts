@@ -119,9 +119,9 @@ export default class Database<Data extends Record<string, string | number | bool
 				.then(async (edited) => {
 					const attachment = edited.attachments.first()?.url;
 
-					const written = attachment
-						? (await fetch(attachment).then(async (res) => await res.text())).trim()
-						: false;
+					const written =
+						attachment &&
+						(await fetch(attachment).then(async (res) => await res.text())).trim();
 
 					if (attachment && written !== data) {
 						throw new Error("Data changed through write!", {

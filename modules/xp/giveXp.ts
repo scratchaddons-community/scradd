@@ -29,7 +29,7 @@ export async function giveXpForMessage(message: Message) {
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
+		return ![message.author.id, message.interaction?.user.id].some((user) =>
 			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
 		);
 	});
@@ -96,15 +96,19 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
+	const sorted = xp.sort((one, two) => two.xp - one.xp);
+
 	const members = await config.guild.members.fetch();
-	const rank = xp
+	const serverRank = sorted
 		.filter(({ user }) => members.has(user))
-		.sort((one, two) => two.xp - one.xp)
 		.findIndex((info) => info.user === user.id);
 
+	const rank = sorted.findIndex((info) => info.user === user.id);
+
 	if (
-		rank > -1 &&
-		(config.guild.memberCount > 2000 ? rank < 20 : rank / config.guild.memberCount < 0.01) &&
+		(config.guild.memberCount > 2000
+			? rank < 20
+			: serverRank / config.guild.memberCount < 0.01) &&
 		member &&
 		config.roles.epic &&
 		!member.roles.resolve(config.roles.epic.id)
@@ -135,10 +139,11 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
-	const showButton = getSettings(member, false).levelUpPings === undefined;
+	const showButton = (await getSettings(member, false)).levelUpPings === undefined;
+	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;
 
 	await config.channels.bots?.send({
-		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
+		allowedMentions: (await getSettings(member)).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
 		components: showButton
 			? [
@@ -147,9 +152,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 							{
 								customId: "levelUpPings_toggleSetting",
 								type: ComponentType.Button,
-								label: `${
-									getDefaultSettings(member).levelUpPings ? "Disable" : "Enable"
-								} Pings`,
+								label: `${pingsDefault ? "Disable" : "Enable"} Pings`,
 								style: ButtonStyle.Success,
 							},
 						],

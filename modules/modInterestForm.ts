@@ -1,5 +1,5 @@
 import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
-import { defineCommand, defineButton, defineModal } from "strife.js";
+import { defineChatCommand, defineButton, defineModal } from "strife.js";
 import config, { getInitialChannelThreads } from "../common/config.js";
 import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
 import { EXPIRY_LENGTH, strikeDatabase } from "./punishments/misc.js";
@@ -16,7 +16,7 @@ const thread =
 		reason: "For mod interest forms",
 	}));
 
-defineCommand(
+defineChatCommand(
 	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
 	async (interaction) => {
 		await interaction.reply({

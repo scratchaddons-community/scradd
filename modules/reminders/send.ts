@@ -12,8 +12,9 @@ import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
-import { boardDatabase, boardReactionCount } from "../board/misc.js";
+import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
 import updateBoard from "../board/update.js";
+import { gracefulFetch } from "../../util/promises.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -96,12 +97,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					const count = await fetch(
+					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
-					).then(
-						async (response) =>
-							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
+					if (!count) return;
 
 					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
@@ -169,13 +168,13 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 
 					return backupDatabases(channel);
 				}
-				case SpecialReminders.SyncRandomPotato: {
+				case SpecialReminders.SyncRandomBoard: {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
 							channel: reminder.channel,
 							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
-							id: SpecialReminders.SyncRandomPotato,
+							id: SpecialReminders.SyncRandomBoard,
 							user: client.user.id,
 						},
 					];
@@ -183,25 +182,30 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
 						if (info.onBoard) continue;
 
-						const reactionsNeeded = boardReactionCount({ id: info.channel });
+						const date = new Date(
+							Number(BigInt(info.source) >> 22n) + 1_420_070_400_000,
+						);
+
+						const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
 						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
 							continue;
 
-						const channel = await config.guild.channels
+						const channel = await client.channels
 							.fetch(info.channel)
 							.catch(() => void 0);
 						if (!channel?.isTextBased()) continue;
 
 						if (reactionsNeeded === undefined) {
-							const reactionsNeeded = boardReactionCount(channel);
+							const reactionsNeeded = boardReactionCount(channel, date);
 							if (info.reactions < reactionsNeeded) continue;
 						}
 
 						const message = await channel.messages
 							.fetch(info.source)
 							.catch(() => void 0);
-						if (message) {
-							await updateBoard(message);
+						const reaction = message?.reactions.resolve(BOARD_EMOJI);
+						if (reaction) {
+							await updateBoard(reaction);
 							break;
 						}
 					}

@@ -7,32 +7,37 @@ import {
 } from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
+import { gracefulFetch } from "../util/promises.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
-
-if (!guild.available) throw new ReferenceError("Guid is unavailable!");
-
+if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
 	const roles = await guild.roles.fetch();
 
 	const latestRelease: string = // todo find an eslint rule
-		process.env.NODE_ENV == "production"
-			? (
-					await fetch(
-						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (response) => await response.json<{ tag_name: string }>())
-			  ).tag_name
-			: "master";
+		(process.env.NODE_ENV == "production" &&
+			(
+				await gracefulFetch<{ tag_name: string }>(
+					`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
+				)
+			)?.tag_name) ||
+		"master";
 
+	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
+		guild,
+
+		urls: {
+			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
+			latestRelease,
+		},
+
 		roles: {
-			mod: roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff:
-				roles.find((role) => role.name.toLowerCase().includes("staff")) ||
-				roles.find((role) => role.editable && role.name.toLowerCase().includes("mod")),
+			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
@@ -43,21 +48,17 @@ async function getConfig() {
 			),
 		},
 
-		urls: {
-			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
-			latestRelease,
-		},
-
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
 				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
-			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
+			tickets: getChannel("contact", ChannelType.GuildText, "start"),
+			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
@@ -68,47 +69,36 @@ async function getConfig() {
 			general: getChannel("general", ChannelType.GuildText),
 
 			support: "826250884279173162",
-			server: "1138116320249000077",
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
 
-			bots: getChannel("bots", ChannelType.GuildText, "partial"),
-
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ||
 				getChannel("promo", ChannelType.GuildText, "partial"),
+			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
-
-		guild,
 	};
 
 	function getChannel<T extends ChannelType>(
 		name: string,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
-	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
+	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
-		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.has(channel.type)) return false;
-
-			switch (matchType) {
-				case "full": {
-					return channel.name === name;
-				}
-				case "partial": {
-					return channel.name.includes(name);
-				}
-				case "start": {
-					return channel.name.startsWith(name);
-				}
-				case "end": {
-					return channel.name.endsWith(name);
-				}
-			}
-		});
+		return channels.find(
+			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> =>
+				!!channel &&
+				types.has(channel.type) &&
+				{
+					full: channel.name === name,
+					partial: channel.name.includes(name),
+					start: channel.name.startsWith(name),
+					end: channel.name.endsWith(name),
+				}[matchType],
+		);
 	}
 }
 

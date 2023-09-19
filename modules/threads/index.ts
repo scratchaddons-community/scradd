@@ -1,12 +1,11 @@
-import { defineButton, defineCommand, defineEvent } from "strife.js";
-import config from "../../common/config.js";
+import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "../threads/syncMembers.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "../threads/autoClose.js";
 import { getThreadConfig } from "./misc.js";
 
 defineEvent("threadCreate", async (thread) => {
-	if (thread.type === ChannelType.PrivateThread || thread.guild.id !== config.guild.id) return;
+	if (thread.type === ChannelType.PrivateThread) return;
 	const { roles } = getThreadConfig(thread);
 	if (roles.length)
 		await thread.send({
@@ -15,7 +14,7 @@ defineEvent("threadCreate", async (thread) => {
 		});
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "thread",
 		description: "Commands to manage threads",
@@ -55,10 +54,9 @@ defineCommand(
 			},
 		},
 	},
-	async (interaction) => {
-		if (interaction.options.getSubcommand(true) === "sync-members")
-			return syncMembers(interaction);
-		await setUpAutoClose(interaction);
+	async (interaction, options) => {
+		if (options.subcommand === "sync-members") return syncMembers(interaction, options.options);
+		await setUpAutoClose(interaction, options);
 	},
 );
 

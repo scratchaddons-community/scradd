@@ -1,190 +1,231 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// TODO: actually type this
+
 import { defineEvent } from "strife.js";
 import { getSettings } from "./settings.js";
+import constants from "../common/constants.js";
+import { truncateText } from "../util/text.js";
+import { nth } from "../util/numbers.js";
+import { time, type APIEmbed, TimestampStyles } from "discord.js";
+import { gracefulFetch } from "../util/promises.js";
+
+const EMBED_LENGTH = 500;
 
 defineEvent("messageCreate", async (message) => {
-	const notSet = getSettings(message.author, false)?.scratchEmbeds === undefined;
+	const notSet = getSettings(message.author, false).scratchEmbeds === undefined;
 	if (!getSettings(message.author).scratchEmbeds) {
 		return;
 	}
+
 	const scratchUrlRegex =
-		/(?<!<)https?:\/\/scratch\.mit\.edu\/(projects|users|studios)\/\w+\/?(?!>)/; //gpt wrote the regex and like half of this code
-	const match = message.content.match(scratchUrlRegex);
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
+	const matches = [...new Set(message.content.match(scratchUrlRegex))].slice(0, 5);
 
-	if (!match) {
-		return;
-	}
+	const embeds: APIEmbed[] = [];
 
-	const urlParts = match[0].split("/");
-	const type = urlParts[3]; // m ybrain is dead
+	for (const match of matches) {
+		if (match.startsWith("<") && match.endsWith(">")) continue;
 
-	async function fetchApiData(apiUrl: string): Promise<any> {
-		try {
-			const response = await fetch(apiUrl);
+		const start = match.startsWith("http") ? 0 : 1,
+			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
+		const urlParts = match.slice(start, end).split("/");
 
-			const data = await response.json();
-			return data;
-		} catch (error) {}
-	}
-	function long(text: string, maxLength: number, appendText: string): string {
-		if (text.length > maxLength) {
-			return text.substr(0, maxLength) + appendText;
+		switch (urlParts[3]) {
+			case "projects": {
+				const project = await gracefulFetch(
+					`${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
+				);
+				if (!project || project.code) continue;
+
+				const parent =
+					project.remix.parent &&
+					(await gracefulFetch(
+						`${constants.urls.scratchApi}/projects/${project.remix.parent}/`,
+					));
+
+				const embed = {
+					title: project.title,
+					color: constants.scratchColor,
+
+					fields: [
+						{
+							name: `${constants.emojis.scratch.love}${project.stats.loves} ${constants.emojis.scratch.favorite}${project.stats.favorites}`,
+							value: `**${constants.emojis.scratch.remix}${project.stats.remixes} ${constants.emojis.scratch.view}${project.stats.views}**`,
+							inline: true,
+						},
+					],
+					thumbnail: { url: project.images["282x218"] },
+					author: {
+						name: project.author.username,
+						url: `${constants.urls.scratch}/users/${project.author.username}`,
+						icon_url: project.author.profile.images["90x90"],
+					},
+					footer: notSet ? { text: "Disable this using /settings" } : undefined,
+					url: `${constants.urls.scratch}/projects/${urlParts[4]}`,
+					timestamp: new Date(project.history.shared).toISOString(),
+				};
+
+				if (parent) {
+					embed.fields.push({
+						name: "⬆️ Remix of",
+						value: `[${parent.title}](${constants.urls.scratch}/projects/${project.remix.parent}/)`,
+						inline: true,
+					});
+				}
+				if (project.description) {
+					embed.fields.unshift({
+						name: "🫂 Notes and Credits",
+						value: truncateText(project.description, EMBED_LENGTH / 2, true),
+						inline: false,
+					});
+				}
+				if (project.instructions) {
+					embed.fields.unshift({
+						name: "📜 Instructions",
+						value: truncateText(project.instructions, EMBED_LENGTH / 2, true),
+						inline: false,
+					});
+				}
+
+				embeds.push(embed);
+				break;
+			}
+			case "users": {
+				const user = await gracefulFetch(
+					`${constants.urls.scratchdb}/user/info/${urlParts[4]}/`,
+				);
+				if (!user || user.error) continue;
+
+				const embed = {
+					title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
+					color: constants.scratchColor,
+
+					fields: user.statistics
+						? [
+								{
+									name: `${constants.emojis.scratch.followers} Followers`,
+									value: `${user.statistics.followers} (ranked ${nth(
+										user.statistics.ranks.followers,
+									)})`,
+									inline: true,
+								},
+								{
+									name: `${constants.emojis.scratch.following} Following`,
+									value: user.statistics.following,
+									inline: true,
+								},
+						  ]
+						: [],
+					thumbnail: {
+						url: `https://cdn2.scratch.mit.edu/get_image/user/${user.id}_90x90.png`,
+					},
+					author: {
+						name: `${user.country}${
+							user.status == "New Scratcher"
+								? `${constants.footerSeperator}${user.status}`
+								: ""
+						}`,
+					},
+					footer: notSet ? { text: "Disable this using /settings" } : undefined,
+					url: `${constants.urls.scratch}/users/${urlParts[4]}`,
+					timestamp: new Date(user.joined).toISOString(),
+				};
+
+				if (user.work) {
+					embed.fields.unshift({
+						// eslint-disable-next-line unicorn/string-content
+						name: "🛠️ What I'm working on",
+						value: truncateText(user.work, EMBED_LENGTH / 2, true),
+						inline: false,
+					});
+				}
+				if (user.bio) {
+					embed.fields.unshift({
+						name: "👋 About me",
+						value: truncateText(user.bio, EMBED_LENGTH / 2, true),
+						inline: false,
+					});
+				}
+
+				embeds.push(embed);
+				break;
+			}
+			case "studios": {
+				const studio = await gracefulFetch(
+					`${constants.urls.scratchApi}/studios/${urlParts[4]}/`,
+				);
+				if (!studio || studio.code) continue;
+
+				embeds.push({
+					title: studio.title,
+					description: truncateText(studio.description, EMBED_LENGTH, true),
+					color: constants.scratchColor,
+
+					fields: [
+						{
+							name: `${constants.emojis.scratch.followers} Followers`,
+							value: studio.stats.followers,
+							inline: true,
+						},
+						{
+							name: `${constants.emojis.scratch.projects} Projects`,
+							value: studio.stats.projects,
+							inline: true,
+						},
+						{
+							name: `${constants.emojis.scratch.comments} Comments`,
+							value:
+								studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
+							inline: true,
+						},
+					],
+					thumbnail: { url: studio.image },
+
+					footer: notSet ? { text: "Disable this using /settings" } : undefined,
+					url: `${constants.urls.scratch}/studios/${urlParts[4]}`,
+					timestamp: new Date(studio.history.created).toISOString(),
+				});
+				break;
+			}
+			case "discuss": {
+				const post =
+					urlParts[4] === "post"
+						? await gracefulFetch(
+								`${constants.urls.scratchdb}/forum/post/info/${urlParts[5]}/`,
+						  )
+						: urlParts[4] === "topic" &&
+						  (
+								await gracefulFetch(
+									`${constants.urls.scratchdb}/forum/topic/posts/${urlParts[5]}?o=oldest`,
+								)
+						  )?.[0];
+				if (!post || post.error || post.deleted) continue;
+
+				const editedString = post.editor
+					? `\n\n*Last edited by ${post.editor} (${time(
+							new Date(post.time.edited),
+							TimestampStyles.ShortDateTime,
+					  )})*`
+					: "";
+
+				embeds.push({
+					title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${
+						constants.footerSeperator
+					}${post.topic.category}`,
+					description: truncateText(post.content.html + editedString, EMBED_LENGTH, true),
+					color: constants.scratchColor,
+					footer: notSet ? { text: "Disable this using /settings" } : undefined,
+					author: {
+						name: post.username,
+						url: `${constants.urls.scratch}/users/${post.username}`,
+					},
+					url: `${constants.urls.scratch}/discuss/topic/${urlParts[5]}`,
+					timestamp: new Date(post.time.posted).toISOString(),
+				});
+			}
 		}
-		return text;
 	}
 
-	if (type === "projects") {
-		const projectId = urlParts[4];
-
-		const apiUrl = `https://api.scratch.mit.edu/projects/${projectId}/`;
-
-		fetchApiData(apiUrl)
-			.then((data) => {
-				//I hate hate hate hate this aaaaa
-
-				message.channel.send({
-					embeds: [
-						{
-							title: data.title,
-							description: `**desc**: ${data.description}\n**inst**: ${data.instructions}`,
-
-							fields: [
-								{
-									name: `views`,
-									value: data.stats.views,
-									inline: true,
-								},
-								{
-									name: `loves`,
-									value: data.stats.loves,
-									inline: true,
-								},
-								{
-									name: `favorites`,
-									value: data.stats.favorites,
-									inline: true,
-								},
-								{
-									name: `remixes`,
-									value: data.stats.remixes,
-									inline: true,
-								},
-							],
-
-							thumbnail: {
-								url: data.images["282x218"],
-							},
-							author: {
-								name: data.author.username,
-								url: `https://scratch.mit.edu/users/${data.author.username}`,
-								icon_url: data.author.profile.images["90x90"],
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-							},
-							url: `https://scratch.mit.edu/projects/${projectId}`,
-						},
-					],
-				});
-			})
-			.catch(() => {
-				//AKJGFDJHGADJHGJHADGJHGBDJKWD WHYYYYYYYYYYYYYYYYYYYYYY
-			});
-	} else if (type === "users") {
-		const username = urlParts[4];
-
-		const apiUrl = `https://api.scratch.mit.edu/users/${username}/`;
-
-		fetchApiData(apiUrl)
-			.then((data) => {
-				message.channel.send({
-					embeds: [
-						{
-							title: data.username,
-							description: ``,
-
-							fields: [
-								{
-									name: `About`,
-									value: data.profile.bio,
-									
-								},
-								{
-									name: `WIWO`,
-									value: data.profile.status,
-									
-								},
-							],
-
-							thumbnail: {
-								url: data.profile.images["90x90"],
-							},
-							author: {
-								name: data.scratchteam ? "Scratch Team" : "",
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-							},
-							url: `https://scratch.mit.edu/users/${username}`,
-						},
-					],
-				});
-			})
-			.catch(() => {});
-	} else if (type === "studios") {
-		const studioId = urlParts[4];
-
-		const apiUrl = `https://api.scratch.mit.edu/studios/${studioId}/`;
-
-		fetchApiData(apiUrl)
-			.then((data) => {
-				//mnm,nmnm,nn/m.n.,nmn/mn
-
-				message.channel.send({
-					embeds: [
-						{
-							title: data.title,
-							description: long(data.description, 400, "..."),
-
-							fields: [
-								{
-									name: `comments`,
-									value: data.comments_allowed
-										? `${data.stats.comments}`
-										: `${data.stats.comments} (off)`,
-									inline: true,
-								},
-								{
-									name: `followers`,
-									value: data.stats.followers,
-									inline: true,
-								},
-								{
-									name: `managers`,
-									value: data.stats.managers,
-									inline: true,
-								},
-								{
-									name: `projects`,
-									value: data.stats.projects,
-									inline: true,
-								},
-							],
-
-							thumbnail: {
-								url: data.image,
-							},
-							footer: {
-								text: notSet ? "Disable this using /settings" : "",
-								icon_url: ``,
-							},
-							url: `https://scratch.mit.edu/studios/${studioId}`,
-						},
-					],
-				});
-			})
-			.catch(() => {
-				//babeh shark
-			});
-	} else {
-	}
+	if (embeds.length) await message.reply({ embeds });
 });

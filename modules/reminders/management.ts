@@ -18,7 +18,7 @@ import config from "../../common/config.js";
 import { disableComponents, paginate } from "../../util/discord.js";
 import queueReminders from "./send.js";
 
-export async function listReminders(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function listReminders(interaction: ChatInputCommandInteraction) {
 	const reminders = getUserReminders(interaction.user.id);
 
 	await paginate(
@@ -58,13 +58,15 @@ export async function listReminders(interaction: ChatInputCommandInteraction<"ca
 	);
 }
 
-export async function createReminder(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function createReminder(
+	interaction: ChatInputCommandInteraction,
+	options: { dms?: boolean; time: string; reminder: string },
+) {
 	const reminders = getUserReminders(interaction.user.id);
-	const dms = interaction.options.getBoolean("dms") ?? getSettings(interaction.user).dmReminders;
-	const reminder = interaction.options.getString("reminder", true);
+	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
 	if (!dms && !badWordsAllowed(interaction.channel)) {
-		const censored = censor(reminder);
+		const censored = censor(options.reminder);
 
 		if (censored) {
 			await interaction.reply({
@@ -75,7 +77,7 @@ export async function createReminder(interaction: ChatInputCommandInteraction<"c
 			});
 			await warn(
 				interaction.user,
-				"Watch your language!",
+				"Please watch your language!",
 				censored.strikes,
 				`Used command ${interaction.toString()}`,
 			);
@@ -98,7 +100,7 @@ export async function createReminder(interaction: ChatInputCommandInteraction<"c
 		});
 	}
 
-	const date = parseTime(interaction.options.getString("time", true));
+	const date = parseTime(options.time);
 	if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -118,7 +120,7 @@ export async function createReminder(interaction: ChatInputCommandInteraction<"c
 	const id = convertBase(Date.now() + "", 10, convertBase.MAX_BASE);
 	remindersDatabase.data = [
 		...remindersDatabase.data,
-		{ channel, date: +date, reminder, user: interaction.user.id, id },
+		{ channel, date: +date, reminder: options.reminder, user: interaction.user.id, id },
 	];
 	await queueReminders();
 

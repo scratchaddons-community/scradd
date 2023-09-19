@@ -1,17 +1,17 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import guessAddon from "./guessAddon.js";
 import memoryMatch, { messageDelete, showMemoryInstructions } from "./memoryMatch.js";
-import { defineButton, defineCommand, defineEvent } from "strife.js";
+import { defineButton, defineChatCommand, defineEvent } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 
-defineCommand(
-	{ name: "guess-addon", description: "Think of an addon for me to guess it" },
+defineChatCommand(
+	{ name: "guess-addon", description: "Think of an addon for me to guess it", access: true },
 	guessAddon,
 );
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "memory-match",
 		description: "Play a memory matching game against someone else",

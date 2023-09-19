@@ -12,14 +12,12 @@ import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
-import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
+import { client } from "strife.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
-export default async function guessAddon(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
-) {
+export default async function guessAddon(interaction: ChatInputCommandInteraction) {
 	if (await checkIfUserPlaying(interaction)) return;
 	await reply();
 
@@ -373,8 +371,8 @@ export default async function guessAddon(
 					}\n\n*Run the ${chatInputApplicationCommandMention(
 						"addon",
 						(
-							await config.guild.commands.fetch()
-						).find((command) => command.name === "addon")?.id ?? "",
+							await client.application.commands.fetch()
+						).find((command) => command.name === "addon")?.id ?? "0",
 					)} command for more information about this addon!*`,
 
 					author: {

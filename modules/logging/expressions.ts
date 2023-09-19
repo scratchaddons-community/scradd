@@ -4,6 +4,7 @@ import {
 	type GuildAuditLogsEntry,
 	formatEmoji,
 	type APISticker,
+	GuildEmoji,
 } from "discord.js";
 import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 import { unifiedDiff } from "difflib";
@@ -18,10 +19,11 @@ export async function emojiCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Emoji
 	);
 }
 export async function emojiUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiUpdate>) {
+	if (!(entry.target instanceof GuildEmoji)) return;
 	for (const change of entry.changes) {
 		if (change.key !== "name") return;
 		await log(
-			`${LoggingEmojis.Expressions} ${formatEmoji(entry.target?.id ?? "")} (:${
+			`${LoggingEmojis.Expressions} ${formatEmoji(entry.target.id)} (:${
 				change.old
 			}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
 			"server",

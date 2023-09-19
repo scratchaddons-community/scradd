@@ -68,7 +68,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 			? strike.mod
 			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
 	const nick = (member ?? user)?.displayName;
-	const { useMentions } = getSettings(interaction.member.user);
+	const { useMentions } = await getSettings(interaction.member.user);
 	return await interaction.editReply({
 		components: isModerator
 			? [

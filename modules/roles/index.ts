@@ -1,6 +1,6 @@
 import config from "../../common/config.js";
 import { type Snowflake, Collection } from "discord.js";
-import { defineCommand, defineEvent, defineModal } from "strife.js";
+import { defineChatCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
 import {
@@ -46,7 +46,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 		await member.roles.add(config.roles.booster, "Boosted the server");
 });
 
-defineCommand(
+defineChatCommand(
 	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
 	customRole,
 );

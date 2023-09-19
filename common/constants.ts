@@ -29,6 +29,17 @@ export default {
 			raisedHand: "<:raised_hand:1083046563049381898>",
 		},
 
+		scratch: {
+			love: "<:love:899019444112740422>",
+			favorite: "<:favorite:899019502417764363>",
+			remix: "<:remix:899019502417764363>",
+			view: "<:view:899019673436299314>",
+			followers: "<:followers:1152834505816674375>",
+			following: "<:follow:899019598807048212>",
+			projects: "<:blocks:1152834423784480768>",
+			comments: "<:comment:1152834193135521822>",
+		},
+
 		misc: {
 			addon: "<:new_addon:817273401869205524>",
 			join: "<:join:1041863919708418068>",
@@ -36,21 +47,24 @@ export default {
 			ban: "<:ban:1041864907194388480>",
 			green: "<:success:1117217865536381030>",
 			blue: "<:primary:1117217909857587210>",
-			challenge: "<:challenge:1117600711665012797>",
 		},
 	},
 
 	urls: {
-		usercountJson: "https://scratchaddons.com/usercount.json",
 		saRepo: "ScratchAddons/ScratchAddons",
+		usercountJson: "https://scratchaddons.com/usercount.json",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
+		scratch: "https://scratch.mit.edu",
+		scratchApi: "https://api.scratch.mit.edu",
+		scratchdb: "https://scratchdb.lefty.one/v3",
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+	scratchColor: 0x88_5c_d4,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	testingServerId: "938438560925761619",
+	guilds: { testing: "938438560925761619", dev: "751206349614088204" },
 
 	users: {
 		scradd: "929928324959055932",
@@ -62,4 +76,4 @@ export default {
 
 	canvasEnabled: process.env.CANVAS !== "false",
 	fonts: "Sora, SoraExt, sans-serif",
-};
+} as const;

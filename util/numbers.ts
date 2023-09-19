@@ -1,7 +1,7 @@
 /**
  * `x**y`
  *
- * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ * @author ryasmi [`bigIntPow`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L19)
  *
  * @param one `x`.
  * @param two `y`.
@@ -18,7 +18,7 @@ export function bigIntPower(one: bigint, two: bigint): bigint {
 /**
  * Convert a number between bases.
  *
- * @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ * @author ryasmi [`convertBase`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L79)
  *
  * @param value - The number to convert.
  * @param sourceBase - The base of the input number.
@@ -68,9 +68,6 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  * Adds a numerical suffix to a number.
  *
  * @param number - The number to suffix.
- * @param options - Options.
- * @param options.bold - Whether to bold the output using Markdown.
- * @param options.jokes - Toggle jokes after the number.
  */
 export function nth(number: number) {
 	return (
@@ -126,4 +123,31 @@ export function parseTime(time: string): Date {
 	const totalSeconds = totalMinutes * 60 + +seconds;
 
 	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
+}
+
+export function lerpColors(colors: number[], percent: number) {
+	if (colors.length === 0) throw new RangeError("Color array must not be empty.");
+	if (colors.length === 1) return colors[0];
+
+	const segmentCount = colors.length - 1;
+	const segmentIndex = Math.floor(segmentCount * percent);
+	const segmentPercent =
+		segmentCount === 1 ? percent : (percent - segmentIndex / segmentCount) * segmentCount;
+
+	const color1 = colors[segmentIndex] ?? 0;
+	const color2 = colors[segmentIndex + 1] ?? 0;
+
+	const red1 = (color1 >> 16) & 0xff;
+	const green1 = (color1 >> 8) & 0xff;
+	const blue1 = color1 & 0xff;
+
+	const red2 = (color2 >> 16) & 0xff;
+	const green2 = (color2 >> 8) & 0xff;
+	const blue2 = color2 & 0xff;
+
+	const red = Math.round(red1 + (red2 - red1) * segmentPercent);
+	const green = Math.round(green1 + (green2 - green1) * segmentPercent);
+	const blue = Math.round(blue1 + (blue2 - blue1) * segmentPercent);
+
+	return (red << 16) | (green << 8) | blue;
 }

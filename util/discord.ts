@@ -33,11 +33,13 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	Collection,
+	ApplicationCommand,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
+import { client } from "strife.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
@@ -132,9 +134,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	while (embeds.length > 10) embeds.pop();
-
-	return { embeds, files: message.attachments.toJSON() };
+	return { embeds: embeds.slice(0, 10), files: message.attachments.toJSON() };
 }
 
 /**
@@ -358,7 +358,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
-					const cleanContent = messageToText(reply, false);
+					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
 						cleanContent
 							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
@@ -382,7 +382,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
+			return "The best way to setup a server is with your buddies!";
 		}
 
 		case MessageType.RoleSubscriptionPurchase: {
@@ -436,20 +436,29 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
 
-			const commandName = message.interaction?.commandName.split(" ")[0];
-			return config.guild.commands
-				.fetch()
+			const commands = Promise.all([
+				...(message.guild ? [message.guild.commands.fetch()] : []),
+				client.application.commands.fetch(),
+			]);
+
+			const subcommandName = message.interaction?.commandName ?? "";
+			const commandName = subcommandName.split(" ")[0];
+			return commands
+				.then((commands) =>
+					// eslint-disable-next-line unicorn/prefer-spread
+					new Collection<string, ApplicationCommand>().concat(...commands),
+				)
 				.then((commands) => commands.find(({ name }) => name === commandName))
+				.then((command) =>
+					command
+						? chatInputApplicationCommandMention(subcommandName, command.id)
+						: bold(`/${subcommandName}`),
+				)
 				.then(
-					(command) =>
-						`*${message.interaction?.user.toString() ?? ""} used ${
-							command
-								? chatInputApplicationCommandMention(
-										message.interaction?.commandName ?? "",
-										command.id,
-								  )
-								: bold(`/${message.interaction?.commandName ?? ""}`)
-						}:*\n${actualContent}`,
+					(formatted) =>
+						`*${
+							message.interaction?.user.toString() ?? ""
+						} used ${formatted}:*\n${actualContent}`,
 				);
 		}
 
@@ -514,9 +523,7 @@ export function disableComponents(
 			...component.data,
 
 			disabled:
-				component.type === ComponentType.Button
-					? component.style !== ButtonStyle.Link
-					: true,
+				component.type !== ComponentType.Button || component.style !== ButtonStyle.Link,
 		})),
 
 		type: ComponentType.ActionRow,
@@ -558,6 +565,7 @@ export async function paginate<Item>(
 		rawOffset,
 		totalCount,
 		ephemeral = false,
+		perPage = 20,
 
 		generateComponents,
 		customComponentLocation = "above",
@@ -572,18 +580,19 @@ export async function paginate<Item>(
 		rawOffset?: number;
 		totalCount?: number;
 		ephemeral?: boolean;
+		perPage?: number;
 
-		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
+		generateComponents?: (
+			items: Item[],
+		) => Awaitable<MessageActionRowComponentData[] | undefined>;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
-	const ITEMS_PER_PAGE = 20;
-
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / ITEMS_PER_PAGE);
+	const numberOfPages = Math.ceil(array.length / perPage);
 
-	let offset = Math.floor((rawOffset ?? 0) / ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
+	let offset = Math.floor((rawOffset ?? 0) / perPage) * perPage;
 
 	/**
 	 * Generate an embed that has the next page.
@@ -591,9 +600,7 @@ export async function paginate<Item>(
 	 * @returns The next page.
 	 */
 	async function generateMessage() {
-		const filtered = array.filter(
-			(_, index) => index >= offset && index < offset + ITEMS_PER_PAGE,
-		);
+		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		if (!filtered.length) {
 			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
@@ -630,7 +637,7 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "Next >>",
 									style: ButtonStyle.Primary,
-									disabled: offset + ITEMS_PER_PAGE >= array.length,
+									disabled: offset + perPage >= array.length,
 									customId: nextId,
 								},
 							],
@@ -639,7 +646,7 @@ export async function paginate<Item>(
 				: [];
 
 		if (generateComponents) {
-			const extraComponents = generateComponents(filtered);
+			const extraComponents = await generateComponents(filtered);
 			if (extraComponents?.length)
 				components[customComponentLocation === "above" ? "unshift" : "push"]({
 					type: ComponentType.ActionRow,
@@ -657,7 +664,7 @@ export async function paginate<Item>(
 					description: content,
 
 					footer: {
-						text: `Page ${offset / ITEMS_PER_PAGE + 1}/${numberOfPages}${
+						text: `Page ${offset / perPage + 1}/${numberOfPages}${
 							constants.footerSeperator
 						}${count.toLocaleString("en-us")} ${count === 1 ? singular : plural}`,
 					},
@@ -698,8 +705,8 @@ export async function paginate<Item>(
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += ITEMS_PER_PAGE;
-			else offset -= ITEMS_PER_PAGE;
+			if (buttonInteraction.customId === nextId) offset += perPage;
+			else offset -= perPage;
 
 			await buttonInteraction.deferUpdate();
 			message = await editReply(await generateMessage());

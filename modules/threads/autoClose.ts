@@ -18,34 +18,36 @@ import { client } from "strife.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 
-export async function setUpAutoClose(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function setUpAutoClose(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	options: { subcommand: "close-in" | "lock-in"; options: { time: string } },
+) {
 	if (!interaction.channel?.isThread())
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} This command can only be used in threads!`,
 		});
 
-	const command = interaction.options.getSubcommand(true);
-	const options = getThreadConfig(interaction.channel);
-	const timer = interaction.options.getString("time", true).toLowerCase();
+	const config = getThreadConfig(interaction.channel);
+	const timer = options.options.time.toLowerCase();
 	if (timer === "never") {
-		if (command === "lock-in")
+		if (options.subcommand === "lock-in")
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} That option is not supported for this command!`,
 			});
 
 		threadsDatabase.updateById(
-			{ id: interaction.channel.id, keepOpen: !options.keepOpen },
-			{ roles: options.roles.join("|") },
+			{ id: interaction.channel.id, keepOpen: !config.keepOpen },
+			{ roles: config.roles.join("|") },
 		);
 
 		return await interaction.reply({
 			content: `${constants.emojis.statuses.yes} This thread will ${
-				options.keepOpen ? "not " : ""
+				config.keepOpen ? "not " : ""
 			}be prevented from closing!`,
 
-			components: options.keepOpen
+			components: config.keepOpen
 				? []
 				: [
 						{
@@ -78,12 +80,12 @@ export async function setUpAutoClose(interaction: ChatInputCommandInteraction<"c
 			date: +date,
 			reminder: undefined,
 			user: client.user.id,
-			id: SpecialReminders[command === "close-in" ? "CloseThread" : "LockThread"],
+			id: SpecialReminders[options.subcommand === "close-in" ? "CloseThread" : "LockThread"],
 		},
 	];
 	await queueReminders();
 
-	const type = command.split("-")[0];
+	const type = options.subcommand.split("-")[0];
 	await interaction.reply({
 		content: `${constants.emojis.statuses.yes} I’ll ${type} this thread ${time(
 			date,
@@ -153,7 +155,12 @@ export async function autoClose({ locked: wasLocked }: AnyThreadChannel, thread:
 	const options = getThreadConfig(thread);
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
 
-	if (!wasLocked && thread.locked && thread.parent?.type === ChannelType.GuildForum) {
+	if (
+		!wasLocked &&
+		thread.locked &&
+		(thread.type === ChannelType.PrivateThread ||
+			thread.parent?.type === ChannelType.GuildForum)
+	) {
 		const date = Date.now() + 43_200_000;
 		remindersDatabase.data = [
 			...remindersDatabase.data,
