@@ -35,12 +35,12 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
+		access: false,
 	},
 	memoryMatch,
 );
 defineMenuCommand(
-	// TODO: multiserver
-	{ name: "Play Memory Match", type: ApplicationCommandType.User },
+	{ name: "Play Memory Match", type: ApplicationCommandType.User, access: false },
 	async (interaction) => {
 		await memoryMatch(interaction, { user: interaction.targetMember });
 	},

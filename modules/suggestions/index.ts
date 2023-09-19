@@ -122,8 +122,7 @@ defineChatCommand(
 	top,
 );
 defineMenuCommand(
-	// TODO: multiserver
-	{ name: "List Suggestions", type: ApplicationCommandType.User },
+	{ name: "List Suggestions", type: ApplicationCommandType.User, access: true },
 	async (interaction) => {
 		await top(interaction, { user: interaction.targetUser });
 	},

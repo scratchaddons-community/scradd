@@ -245,8 +245,12 @@ defineChatCommand(
 	purge,
 );
 defineMenuCommand(
-	// TODO: multiserver
-	{ name: "Purge To Here", type: ApplicationCommandType.Message, restricted: true },
+	{
+		name: "Purge To Here",
+		type: ApplicationCommandType.Message,
+		access: false,
+		restricted: true,
+	},
 	async (interaction) => {
 		await purge(interaction, { count: interaction.targetMessage.id });
 	},

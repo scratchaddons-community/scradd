@@ -82,8 +82,7 @@ defineChatCommand(
 	sayCommand,
 );
 defineMenuCommand(
-	// TODO: multiserver
-	{ name: "Send Reply", type: ApplicationCommandType.Message, restricted: true },
+	{ name: "Send Reply", type: ApplicationCommandType.Message, restricted: true, access: false },
 	async (interaction) => {
 		await sayCommand(interaction, { message: "-", reply: interaction.targetMessage.id });
 	},
@@ -96,7 +95,7 @@ defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",
-		access: true,
+		access: true, // todo
 
 		subcommands: {
 			status: { description: "Show bot status", options: {} },

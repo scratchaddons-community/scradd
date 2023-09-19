@@ -65,9 +65,7 @@ defineChatCommand(
 	},
 );
 defineMenuCommand(
-	// TODO: multiserver
-	{ name: `Explore ${REACTIONS_NAME}`, type: ApplicationCommandType.User },
-
+	{ name: `Explore ${REACTIONS_NAME}`, type: ApplicationCommandType.User, access: false },
 	async (interaction) => {
 		await makeSlideshow(interaction, { user: interaction.targetUser.id });
 	},

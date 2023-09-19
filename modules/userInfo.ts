@@ -180,10 +180,12 @@ defineChatCommand(
 		await userInfo(interaction, { user, member });
 	},
 );
-defineMenuCommand({ name: "User Info", type: ApplicationCommandType.User }, async (interaction) => {
-	// TODO: multiserver
-	const user = await interaction.targetUser.fetch();
-	const member =
-		interaction.targetMember instanceof GuildMember ? interaction.targetMember : undefined;
-	await userInfo(interaction, { user, member });
-});
+defineMenuCommand(
+	{ name: "User Info", type: ApplicationCommandType.User, access: true },
+	async (interaction) => {
+		const user = await interaction.targetUser.fetch();
+		const member =
+			interaction.targetMember instanceof GuildMember ? interaction.targetMember : undefined;
+		await userInfo(interaction, { user, member });
+	},
+);
