@@ -36,7 +36,7 @@ defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
-		access: false,
+		access: true,
 
 		options: {
 			"channel": {
@@ -65,7 +65,7 @@ defineChatCommand(
 	},
 );
 defineMenuCommand(
-	{ name: `Explore ${REACTIONS_NAME}`, type: ApplicationCommandType.User, access: false },
+	{ name: `Explore ${REACTIONS_NAME}`, type: ApplicationCommandType.User, access: true },
 	async (interaction) => {
 		await makeSlideshow(interaction, { user: interaction.targetUser.id });
 	},

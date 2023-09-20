@@ -49,7 +49,7 @@ export default {
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	guilds: { testing: "938438560925761619", dev: "751206349614088204" },
+	testingGuildId: "938438560925761619",
 
 	users: {
 		scradd: "929928324959055932",

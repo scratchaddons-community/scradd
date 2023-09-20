@@ -40,9 +40,9 @@ defineChatCommand(
 	memoryMatch,
 );
 defineMenuCommand(
-	{ name: "Play Memory Match", type: ApplicationCommandType.User, access: false },
+	{ name: "Play Memory Match", type: ApplicationCommandType.User, access: true },
 	async (interaction) => {
-		await memoryMatch(interaction, { user: interaction.targetMember });
+		await memoryMatch(interaction, { user: interaction.targetMember ?? undefined });
 	},
 );
 defineEvent.pre("messageDelete", messageDelete);

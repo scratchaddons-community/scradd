@@ -33,7 +33,7 @@ const instructionsButton = {
 export default async function memoryMatch(
 	interaction: RepliableInteraction,
 	options: {
-		"user": User | GuildMember | APIInteractionGuildMember;
+		"user"?: User | GuildMember | APIInteractionGuildMember;
 		"easy-mode"?: boolean;
 		"bonus-turns"?: boolean;
 		"thread"?: boolean;

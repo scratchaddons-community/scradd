@@ -67,8 +67,8 @@ export function boardReactionCount(
 
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
-	if (baseChannel.guild.id === constants.guilds.testing) return shift(COUNTS.mods);
-	if (baseChannel.guild.id === constants.guilds.dev) return shift(COUNTS.misc);
+	if (baseChannel.guild.id === constants.testingGuildId) return shift(COUNTS.mods);
+	if (baseChannel.guild.id !== config.guild.id) return shift(COUNTS.misc);
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
@@ -237,9 +237,10 @@ function formatChannel(channel: TextBasedChannel) {
 	const thread = channel.isThread() && channel.parent?.toString();
 	const otherServer =
 		!channel.isDMBased() &&
-		{ [constants.guilds.dev]: "SA Dev", [constants.guilds.testing]: "Scradd Testing" }[
+		({ ["751206349614088204"]: "SA Dev", [constants.testingGuildId]: "Scradd Testing" }[
 			channel.guild.id
-		];
+		] ??
+			(channel.guild.id !== config.guild.id && "Other Server"));
 
 	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
 	if (thread) return `${channel.toString()} (${thread})`;
