@@ -102,12 +102,12 @@ export default async function contactMods(
 		interaction.type === InteractionType.ModalSubmit
 			? Object.entries(
 					{
-						appeal: { "Strike ID": "strike" },
-						report: { "Reported User": "user" },
-						role: { "Role(s)": "role", "Account(s)": "account" },
+						appeal: { "🔨 Strike ID": "strike" },
+						report: { "👤 Reported User": "user" },
+						role: { "🗄️ Role(s)": "role", "👥 Account(s)": "account" },
 						bug: {},
 						update: {},
-						rules: { Rule: "rule" },
+						rules: { "📜 Rule": "rule" },
 						server: {},
 						other: {},
 						[MOD_CATEGORY]: {},

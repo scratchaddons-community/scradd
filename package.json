@@ -10,7 +10,8 @@
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
 		"serve": "nodemon --enable-source-maps . --watch dist",
-		"start": "node --enable-source-maps ."
+		"start": "node --enable-source-maps .",
+		"test": "npm run build; node --test"
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
@@ -39,8 +40,8 @@
 		"@types/json-diff": "<=1.0.6",
 		"@types/node": "<=18.11.1",
 		"@types/papaparse": "<=5.4.1",
-		"@typescript-eslint/eslint-plugin": "6.6.0",
-		"@typescript-eslint/parser": "6.6.0",
+		"@typescript-eslint/eslint-plugin": "6.7.2",
+		"@typescript-eslint/parser": "6.7.2",
 		"eslint": "8.49.0",
 		"eslint-plugin-unicorn": "48.0.1",
 		"nodemon": "3.0.1",
@@ -51,8 +52,8 @@
 		"@railway/cli": "3.4.0"
 	},
 	"engines": {
-		"node": "^18.11.1",
-		"npm": "^8.0.0"
+		"node": ">=18.11.1",
+		"npm": ">=8.0.0"
 	},
 	"overrides": {
 		"@discordjs/builders": "dev",

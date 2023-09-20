@@ -58,51 +58,52 @@ export default async function automodMessage(message: Message) {
 		),
 	);
 
-	if (
-		!allowBadWords &&
-		!message.author.bot &&
-		config.channels.advertise &&
-		config.channels.advertise.id !== baseChannel?.id &&
-		config.channels.announcements?.id !== baseChannel?.id &&
-		baseChannel?.type !== ChannelType.GuildAnnouncement
-	) {
-		const badInvites = invites
-			.filter((invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id))
-			.map((invite) => invite?.code);
-
-		if (badInvites.length) {
-			needsDelete = true;
-			await warn(
-				message.author,
-				"Please don’t send server invites in that channel!",
-				badInvites.length,
-				badInvites.join("\n"),
-			);
-			await message.channel.send(
-				`${
-					constants.emojis.statuses.no
-				} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
-			);
-		}
-
-		const bots = message.content.match(GlobalBotInvitesPattern);
-		if (bots?.length) {
-			needsDelete = true;
-			await warn(
-				message.author,
-				"Please don’t post bot invite links!",
-				bots.length,
-				bots.join("\n"), // todo: improve this
-			);
-			await message.channel.send(
-				`${
-					constants.emojis.statuses.no
-				} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
-			);
-		}
-	}
-
 	if (!allowBadWords) {
+		if (
+			!message.author.bot &&
+			config.channels.advertise &&
+			config.channels.advertise.id !== baseChannel?.id &&
+			config.channels.announcements?.id !== baseChannel?.id &&
+			baseChannel?.type !== ChannelType.GuildAnnouncement
+		) {
+			const badInvites = invites
+				.filter(
+					(invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
+				)
+				.map((invite) => invite?.code);
+
+			if (badInvites.length) {
+				needsDelete = true;
+				await warn(
+					message.author,
+					"Please don’t send server invites in that channel!",
+					badInvites.length,
+					badInvites.join("\n"),
+				);
+				await message.channel.send(
+					`${
+						constants.emojis.statuses.no
+					} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
+				);
+			}
+
+			const bots = message.content.match(GlobalBotInvitesPattern);
+			if (bots?.length) {
+				needsDelete = true;
+				await warn(
+					message.author,
+					"Please don’t post bot invite links!",
+					bots.length,
+					bots.join("\n"), // todo: improve this
+				);
+				await message.channel.send(
+					`${
+						constants.emojis.statuses.no
+					} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
+				);
+			}
+		}
+
 		const badWords = [
 			censor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => censor(name)),

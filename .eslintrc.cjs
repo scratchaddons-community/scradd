@@ -86,6 +86,7 @@ module.exports = {
 		"unicorn/no-await-expression-member": "off",
 		"unicorn/no-keyword-prefix": "off",
 		"unicorn/no-nested-ternary": "off",
+		"unicorn/no-null": ["warn", { checkStrictEquality: true }],
 		"unicorn/no-process-exit": "off",
 		"unicorn/no-unreadable-array-destructuring": "off",
 		"unicorn/number-literal-case": "off",

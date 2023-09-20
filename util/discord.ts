@@ -358,7 +358,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
-					const cleanContent = messageToText(reply, false);
+					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
 						cleanContent
 							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
@@ -382,7 +382,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
+			return "The best way to setup a server is with your buddies!";
 		}
 
 		case MessageType.RoleSubscriptionPurchase: {
