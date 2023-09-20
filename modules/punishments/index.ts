@@ -107,7 +107,7 @@ defineChatCommand(
 				? `${constants.emojis.statuses.yes} ${
 						strikes ? "Warned" : "Verbally warned"
 				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
-				: `${constants.emojis.statuses.no} Can not warn <@${options.user.toString()}>.`,
+				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
 );
