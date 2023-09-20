@@ -99,6 +99,9 @@ defineSubcommands(
 		}
 	},
 );
+defineButton("viewLeaderboard", async (interaction, userId) => {
+	await top(interaction, await client.users.fetch(userId));
+});
 
 export async function top(
 	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
@@ -132,7 +135,7 @@ export async function top(
 					  ).displayName
 			} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 		(data) => interaction.reply(data),
-		{
+		{ // todo: ephemeral?
 			title: "XP Leaderboard",
 			singular: "user",
 
@@ -155,6 +158,9 @@ export async function top(
 		},
 	);
 }
+defineButton("xp", async (interaction, userId = "") => {
+	await getUserRank(interaction, await client.users.fetch(userId));
+});
 defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
 	await getUserRank(interaction, interaction.targetUser);
 });
@@ -163,7 +169,3 @@ if (constants.canvasEnabled) {
 	const { default: weeklyXpGraph } = await import("./graph.js");
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
-
-defineButton("viewLeaderboard", async (interaction, userId) => {
-	await top(interaction, await client.users.fetch(userId));
-});

@@ -156,7 +156,7 @@ defineChatCommand(
 defineMenuCommand(
 	{ name: "Contact User", type: ApplicationCommandType.User, restricted: true },
 	async (interaction) => {
-		if (!(interaction.member instanceof GuildMember)) {
+		if (!(interaction.targetMember instanceof GuildMember)) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find user.`,
 				ephemeral: true,
@@ -165,7 +165,7 @@ defineMenuCommand(
 			return;
 		}
 
-		await contactUser(interaction.member, interaction);
+		await contactUser(interaction.targetMember, interaction);
 	},
 );
 

@@ -120,7 +120,7 @@ defineChatCommand(
 				? `${constants.emojis.statuses.yes} ${
 						strikes ? "Warned" : "Verbally warned"
 				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
-				: `${constants.emojis.statuses.no} Can not warn <@${options.user.toString()}>.`,
+				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
 );
@@ -174,7 +174,7 @@ defineModal("warn", async (interaction, id) => {
 			? `${constants.emojis.statuses.yes} ${
 					strikes < 1 ? "Warned" : "Verbally warned"
 			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
-			: `${constants.emojis.statuses.no} Can not warn <@${user.toString()}>.`,
+			: `${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
 	);
 });
 defineButton("removeStrike", removeStrike);

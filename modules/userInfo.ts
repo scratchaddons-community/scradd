@@ -78,9 +78,9 @@ async function userInfo(
 	if (banned)
 		fields.push(
 			isMod
-				? {
+				? { // todo: oops
 						name: "🔨 Ban Reason",
-						value: banned.reason ?? "No reason provided",
+						value: banned.reason ?? "No reason given.",
 						inline: true,
 				  }
 				: { name: "🔨 Banned", value: "Yes", inline: true },

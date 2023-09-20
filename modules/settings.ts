@@ -103,7 +103,7 @@ defineChatCommand(
 			},
 		},
 	},
-	settingsCommand,
+	settingsCommand, // todo: dont show them all
 );
 
 defineButton("toggleSetting", async (interaction, setting = "") => {

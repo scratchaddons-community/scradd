@@ -122,7 +122,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 					{
 						type: ComponentType.Button,
 						customId: `${user.id}_viewLeaderboard`,
-						label: "View Leaderboard",
+						label: "Leaderboard",
 						style: ButtonStyle.Primary,
 					},
 				],
