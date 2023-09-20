@@ -41,7 +41,7 @@ const COUNTS = {
 	default: 6,
 	memes: 8,
 	info: 12,
-};
+} as const;
 /**
  * Determines the board reaction count for a channel.
  *
