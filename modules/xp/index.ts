@@ -140,6 +140,9 @@ export async function top(
 
 			user: interaction.user,
 			rawOffset: index,
+			ephemeral:
+				interaction.isButton() &&
+				interaction.message.interaction?.user.id !== interaction.user.id,
 
 			generateComponents() {
 				return getSettings(interaction.user, false).useMentions === undefined
