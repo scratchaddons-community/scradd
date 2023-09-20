@@ -97,7 +97,7 @@ defineChatCommand(
 				isMod
 					? {
 							name: "🔨 Ban Reason",
-							value: banned.reason ?? "No reason provided",
+							value: banned.reason ?? "No reason given.",
 							inline: true,
 					  }
 					: { name: "🔨 Banned", value: "Yes", inline: true },
