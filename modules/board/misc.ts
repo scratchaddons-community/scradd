@@ -84,7 +84,8 @@ export function boardReactionCount(
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
 				? 2 / 3
 				: 1;
-		const timeShift = (Date.now() - +time) / 86_400_000 / 200 + 1;
+		/** 300 = number of days for required potato count to double */
+		const timeShift = (Date.now() - +time) / 86_400_000 / 300 + 1;
 		return Math.max(2, Math.round(count * privateThread * timeShift));
 	}
 }
