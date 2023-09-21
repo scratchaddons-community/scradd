@@ -4,6 +4,8 @@ import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
 import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 
+let postingToBoard = false;
+
 /**
  * Update the count on a message on the board.
  *
@@ -12,6 +14,8 @@ import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.
 export default async function updateBoard(
 	reaction: MessageReaction | { count: number; message: Message },
 ) {
+	if (postingToBoard) return;
+	postingToBoard = true;
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
 	const { count, message } = reaction;
 	const reactionThreshold = boardReactionCount(message.channel, message.createdAt);
@@ -81,6 +85,8 @@ export default async function updateBoard(
 				.map(async (pin) => await pin.unpin("No longer a top-reacted message")),
 		);
 	}
+
+	postingToBoard = false;
 }
 
 function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
