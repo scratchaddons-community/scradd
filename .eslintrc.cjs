@@ -54,6 +54,7 @@ module.exports = {
 					"BaseGuildTextChannel",
 					"BaseGuildVoiceChannel",
 					"ForumChannel",
+					"MediaChannel",
 					"NewsChannel",
 					"TextChannel",
 					"StageChannel",

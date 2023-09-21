@@ -43,6 +43,7 @@ async function textChannelMatches(
 			);
 		}
 		case ChannelType.GuildForum:
+		case ChannelType.GuildMedia:
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
