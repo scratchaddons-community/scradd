@@ -3,6 +3,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
+	User,
 	time,
 	TimestampStyles,
 } from "discord.js";
@@ -12,6 +13,7 @@ import { defineChatCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/misc.js";
 import { strikeDatabase } from "./punishments/misc.js";
+import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 
 defineChatCommand(
 	{
@@ -103,37 +105,50 @@ defineChatCommand(
 					: { name: "🔨 Banned", value: "Yes", inline: true },
 			);
 
-		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
+		const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
+			({ author }) => (author instanceof User ? author.id : author) === user.id,
+		);
 		const hasPotatoes = boardDatabase.data.some((message) => message.user === user.id);
+		const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
 		const hasStrikes = strikeDatabase.data.some((strike) => strike.user === user.id);
 
-		const buttons = [
-			xp && { customId: `${user.id}_xp`, label: "XP" },
-			hasPotatoes && {
-				customId: `${user.id}_exploreBoard`,
-				label: `Explore ${REACTIONS_NAME}`,
-			},
-			member &&
-				isMod &&
-				config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
-					customId: `${user.id}_contactUser`,
-					label: "Contact User",
+		const buttonData = [
+			[
+				hasSuggestions && { customId: `${user.id}_suggestions`, label: "List Suggestions" },
+				hasPotatoes && {
+					customId: `${user.id}_exploreBoard`,
+					label: `Explore ${REACTIONS_NAME}`,
 				},
-			hasStrikes &&
-				(user.id == interaction.user.id || isMod) && {
-					customId: `${user.id}_viewStrikes`,
-					label: "Strikes",
-				},
-		]
-			.filter((button): button is { customId: string; label: string } => !!button)
-			.map(
-				(button) =>
-					({
-						...button,
-						style: ButtonStyle.Secondary,
-						type: ComponentType.Button,
-					} as const),
-			);
+			],
+			[
+				xp && { customId: `${user.id}_xp`, label: "XP" },
+				hasStrikes &&
+					(user.id == interaction.user.id || isMod) && {
+						customId: `${user.id}_viewStrikes`,
+						label: "Strikes",
+					},
+				member &&
+					isMod &&
+					config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
+						customId: `${user.id}_contactUser`,
+						label: "Contact User",
+					},
+			],
+		];
+		const rows = buttonData
+			.map((row) =>
+				row
+					.filter((button): button is { customId: string; label: string } => !!button)
+					.map(
+						(button) =>
+							({
+								...button,
+								style: ButtonStyle.Secondary,
+								type: ComponentType.Button,
+							} as const),
+					),
+			)
+			.filter(({ length }) => length);
 
 		await interaction.reply({
 			embeds: [
@@ -162,8 +177,8 @@ defineChatCommand(
 					},
 				},
 			],
-			components: buttons.length
-				? [{ type: ComponentType.ActionRow, components: buttons }]
+			components: rows.length
+				? rows.map((components) => ({ type: ComponentType.ActionRow, components } as const))
 				: undefined,
 		});
 	},

@@ -13,7 +13,7 @@
 		"lib": ["ESNext", "DOM"],
 		"maxNodeModuleJsDepth": 0,
 		"module": "NodeNext",
-		"noEmitOnError": true,
+		"noEmitOnError": false,
 		"noErrorTruncation": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
