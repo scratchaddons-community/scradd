@@ -199,8 +199,13 @@ export default async function ban(
 				});
 				await buttonInteraction.reply(
 					`${constants.emojis.statuses.yes} Banned ${userToBan}!${
+						options.reason ? " " + options.reason : ""
+					}${
 						unbanTime && untilUnban
-							? ` I will unban them ${time(unbanTime, TimestampStyles.RelativeTime)}.`
+							? `\nI will unban them ${time(
+									unbanTime,
+									TimestampStyles.RelativeTime,
+							  )}.`
 							: ""
 					}`,
 				);
