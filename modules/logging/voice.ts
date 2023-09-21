@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	GuildAuditLogsEntry,
 	GuildScheduledEvent,
+	type PartialGuildScheduledEvent,
 	VoiceState,
 	GuildScheduledEventStatus,
 	time,
@@ -235,8 +236,8 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		);
 	}
 }
-export async function guildScheduledEventDelete(event: GuildScheduledEvent) {
-	if (event.guildId !== config.guild.id) return;
+export async function guildScheduledEventDelete(event: GuildScheduledEvent | PartialGuildScheduledEvent) {
+	if (event.guildId !== config.guild.id || event.partial) return;
 
 	await log(`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`, "voice");
 }
