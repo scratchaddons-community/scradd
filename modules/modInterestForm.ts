@@ -1,10 +1,18 @@
-import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
-import { defineChatCommand, defineButton, defineModal } from "strife.js";
+import {
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	MessageMentions,
+	TextInputStyle,
+	time,
+} from "discord.js";
+import { defineChatCommand, defineButton, defineModal, client } from "strife.js";
 import config, { getInitialChannelThreads } from "../common/config.js";
 import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
 import { EXPIRY_LENGTH, strikeDatabase } from "./punishments/misc.js";
 import constants from "../common/constants.js";
 import giveXp from "./xp/giveXp.js";
+import { getAllMessages } from "../util/discord.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
 const thread =
@@ -15,6 +23,32 @@ const thread =
 		name: "Moderator Interest Forms",
 		reason: "For mod interest forms",
 	}));
+
+const applications = Object.fromEntries(
+	(await getAllMessages(thread))
+		.filter((message) => message.author.id === client.user.id && message.embeds.length)
+		.map(
+			(message) =>
+				[
+					message.embeds[0]?.description?.match(MessageMentions.UsersPattern)?.[1] ?? "",
+					{
+						timezone: message.embeds[0]?.fields.find(
+							(field) => field.name == "Timezone",
+						)?.value,
+						activity: message.embeds[0]?.fields.find(
+							(field) => field.name == "Activity",
+						)?.value,
+						age: message.embeds[0]?.fields.find((field) => field.name == "Age")?.value,
+						experience: message.embeds[0]?.fields.find(
+							(field) => field.name == "Previous Experience",
+						)?.value,
+						misc: message.embeds[0]?.fields.find((field) => field.name == "Misc")
+							?.value,
+						message,
+					},
+				] as const,
+		),
+);
 
 defineChatCommand(
 	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
@@ -55,6 +89,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 100,
+						value: applications[interaction.user.id]?.timezone,
 					},
 				],
 			},
@@ -67,6 +102,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 1000,
+						value: applications[interaction.user.id]?.activity,
 					},
 				],
 			},
@@ -79,6 +115,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 10,
+						value: applications[interaction.user.id]?.age,
 					},
 				],
 			},
@@ -91,6 +128,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 1000,
+						value: applications[interaction.user.id]?.experience,
 					},
 				],
 			},
@@ -104,6 +142,7 @@ defineButton("modInterestForm", async (interaction) => {
 						type: ComponentType.TextInput,
 						required: false,
 						maxLength: 1000,
+						value: applications[interaction.user.id]?.misc,
 					},
 				],
 			},
@@ -115,7 +154,7 @@ defineModal("modInterestForm", async (interaction) => {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
-	const allXp = [...xpDatabase.data].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const allXp = [ ...xpDatabase.data ].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 	const xp = Math.floor(allXp.find((entry) => entry.user === interaction.user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
 	const rank = allXp.findIndex((info) => info.user === interaction.user.id) + 1;
@@ -132,8 +171,14 @@ defineModal("modInterestForm", async (interaction) => {
 		.filter((strike) => strike.date + EXPIRY_LENGTH * 2 > Date.now())
 		.reduce((accumulator, { count, removed }) => count * Number(!removed) + accumulator, 0);
 
-	const misc = interaction.fields.fields.get("misc")?.value;
-	const { url } = await thread.send({
+	const fields = {
+		timezone: interaction.fields.getTextInputValue("timezone"),
+		activity: interaction.fields.getTextInputValue("activity"),
+		age: interaction.fields.getTextInputValue("age"),
+		experience: interaction.fields.getTextInputValue("experience"),
+		misc: interaction.fields.fields.get("misc")?.value,
+	};
+	const data = {
 		embeds: [
 			{
 				color: interaction.member.displayColor,
@@ -186,34 +231,24 @@ defineModal("modInterestForm", async (interaction) => {
 						value: constants.zeroWidthSpace,
 						inline: false,
 					},
-					{
-						name: "Timezone",
-						value: interaction.fields.getTextInputValue("timezone"),
-						inline: true,
-					},
-					{
-						name: "Activity",
-						value: interaction.fields.getTextInputValue("activity"),
-						inline: true,
-					},
-					{
-						name: "Age",
-						value: interaction.fields.getTextInputValue("age"),
-						inline: true,
-					},
-					{
-						name: "Previous Experience",
-						value: interaction.fields.getTextInputValue("experience"),
-						inline: true,
-					},
-					...(misc ? [{ name: "Misc", value: misc, inline: true }] : []),
+					{ name: "Timezone", value: fields.timezone, inline: true },
+					{ name: "Activity", value: fields.activity, inline: true },
+					{ name: "Age", value: fields.age, inline: true },
+					{ name: "Previous Experience", value: fields.experience, inline: true },
+					...(fields.misc ? [ { name: "Misc", value: fields.misc, inline: true } ] : []),
 				],
 			},
 		],
-	});
+	};
+	const message = await (applications[ interaction.user.id ]?.message.reply(data) ??
+		thread.send(data));
+	applications[ interaction.user.id ] = {
+		...fields,
+		message: applications[ interaction.user.id ]?.message ?? message,
+	};
 	await interaction.reply({
 		ephemeral: true,
 		content: `${constants.emojis.statuses.yes} Thanks for filling it out!`,
 	});
-	await giveXp(interaction.user, url);
+	await giveXp(interaction.user, message.url);
 });

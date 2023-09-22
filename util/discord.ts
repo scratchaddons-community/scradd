@@ -33,6 +33,7 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	ThreadChannel,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -167,11 +168,15 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
+export async function getAllMessages(
+	channel: GuildTextBasedChannel | ThreadChannel,
+): Promise<Message<true>[]>;
 export async function getAllMessages(
 	channel: DMChannel | PartialDMChannel,
 ): Promise<Message<false>[]>;
-export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
+export async function getAllMessages(
+	channel: TextBasedChannel | ThreadChannel,
+): Promise<Message[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;
