@@ -154,7 +154,7 @@ defineModal("modInterestForm", async (interaction) => {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
-	const allXp = [ ...xpDatabase.data ].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const allXp = [...xpDatabase.data].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 	const xp = Math.floor(allXp.find((entry) => entry.user === interaction.user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
 	const rank = allXp.findIndex((info) => info.user === interaction.user.id) + 1;
@@ -235,16 +235,16 @@ defineModal("modInterestForm", async (interaction) => {
 					{ name: "Activity", value: fields.activity, inline: true },
 					{ name: "Age", value: fields.age, inline: true },
 					{ name: "Previous Experience", value: fields.experience, inline: true },
-					...(fields.misc ? [ { name: "Misc", value: fields.misc, inline: true } ] : []),
+					...(fields.misc ? [{ name: "Misc", value: fields.misc, inline: true }] : []),
 				],
 			},
 		],
 	};
-	const message = await (applications[ interaction.user.id ]?.message.reply(data) ??
+	const message = await (applications[interaction.user.id]?.message.reply(data) ??
 		thread.send(data));
-	applications[ interaction.user.id ] = {
+	applications[interaction.user.id] = {
 		...fields,
-		message: applications[ interaction.user.id ]?.message ?? message,
+		message: applications[interaction.user.id]?.message ?? message,
 	};
 	await interaction.reply({
 		ephemeral: true,
