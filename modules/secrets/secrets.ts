@@ -1,7 +1,7 @@
-import type { User } from "discord.js";
+import type { GuildMember } from "discord.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function dad(name: string, _: User) {
+export function dad(name: string, _: GuildMember) {
 	const split = name.split(/\b/);
 	const firstName =
 		split.find(

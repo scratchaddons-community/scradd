@@ -83,12 +83,13 @@ defineEvent("messageCreate", async (message) => {
 
 		if (
 			name &&
+			message.member &&
 			(process.env.NODE_ENV !== "production" ||
 				config.channels.bots?.id === baseChannel?.id ||
 				pingsScradd)
 		) {
 			return await message.reply({
-				content: dad(name, message.author),
+				content: dad(name, message.member),
 				allowedMentions: { users: [] },
 			});
 		}
