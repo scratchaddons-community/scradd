@@ -81,7 +81,6 @@ async function userInfo(
 		fields.push(
 			isMod
 				? {
-						// todo: oops
 						name: "🔨 Ban Reason",
 						value: banned.reason ?? "No reason given.",
 						inline: true,
@@ -89,38 +88,50 @@ async function userInfo(
 				: { name: "🔨 Banned", value: "Yes", inline: true },
 		);
 
+	const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
+		({ author }) => (author instanceof User ? author.id : author) === user.id,
+	);
+	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const xp =
 		interaction.guild?.id === config.guild.id &&
 		xpDatabase.data.find((entry) => entry.user === user.id)?.xp;
-	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const hasStrikes =
 		(user.id == interaction.user.id || isMod) &&
 		strikeDatabase.data.some((strike) => strike.user === user.id);
 
-	// TODO: suggestions button
-	const buttons = [
-		xp && { customId: `${user.id}_xp`, label: "XP" },
-		hasBoards && {
-			customId: `${user.id}_exploreBoard`,
-			label: `Explore ${REACTIONS_NAME}`,
-		},
-		member &&
-			isMod &&
-			config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
-				customId: `${user.id}_contactUser`,
-				label: "Contact User",
+	const buttonData = [
+		[
+			hasSuggestions && { customId: `${user.id}_suggestions`, label: "List Suggestions" },
+			hasBoards && {
+				customId: `${user.id}_exploreBoard`,
+				label: `Explore ${REACTIONS_NAME}`,
 			},
-		hasStrikes && { customId: `${user.id}_viewStrikes`, label: "Strikes" },
-	]
-		.filter((button): button is { customId: string; label: string } => !!button)
-		.map(
-			(button) =>
-				({
-					...button,
-					style: ButtonStyle.Secondary,
-					type: ComponentType.Button,
-				} as const),
-		);
+		],
+		[
+			xp && { customId: `${user.id}_xp`, label: "XP" },
+			hasStrikes && { customId: `${user.id}_viewStrikes`, label: "Strikes" },
+			member &&
+				isMod &&
+				config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
+					customId: `${user.id}_contactUser`,
+					label: "Contact User",
+				},
+		],
+	];
+	const rows = buttonData
+		.map((row) =>
+			row
+				.filter((button): button is { customId: string; label: string } => !!button)
+				.map(
+					(button) =>
+						({
+							...button,
+							style: ButtonStyle.Secondary,
+							type: ComponentType.Button,
+						} as const),
+				),
+		)
+		.filter(({ length }) => length);
 
 	await interaction.reply({
 		embeds: [
@@ -149,8 +160,8 @@ async function userInfo(
 				},
 			},
 		],
-		components: buttons.length
-			? [{ type: ComponentType.ActionRow, components: buttons }]
+		components: rows.length
+			? rows.map((components) => ({ type: ComponentType.ActionRow, components } as const))
 			: undefined,
 	});
 }
