@@ -38,7 +38,7 @@ export default async function ban(
 	if (untilUnban && (untilUnban < 30_000 || untilUnban > 315_360_000_000)) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
+			content: `${constants.emojis.statuses.no} Could not parse the unban time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
 		});
 	}
 	const ban =
@@ -149,7 +149,7 @@ export default async function ban(
 					if (untilUnban < 30_000 || untilUnban > 315_360_000_000) {
 						await interaction.reply({
 							ephemeral: true,
-							content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
+							content: `${constants.emojis.statuses.no} Could not parse the unban time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t unban them sooner than 30 seconds or later than 10 years.`,
 						});
 						return;
 					}
@@ -199,8 +199,13 @@ export default async function ban(
 				});
 				await buttonInteraction.reply(
 					`${constants.emojis.statuses.yes} Banned ${userToBan}!${
+						options.reason ? " " + options.reason : ""
+					}${
 						unbanTime && untilUnban
-							? ` I will unban them ${time(unbanTime, TimestampStyles.RelativeTime)}.`
+							? `\nI will unban them ${time(
+									unbanTime,
+									TimestampStyles.RelativeTime,
+							  )}.`
 							: ""
 					}`,
 				);

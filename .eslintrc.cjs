@@ -19,6 +19,10 @@ module.exports = {
 			},
 		},
 		{ files: "*.d.ts", rules: { "@typescript-eslint/no-unused-vars": "off" } },
+		{
+			files: "modules/secrets/secrets.ts",
+			rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
+		},
 	],
 	parser: "@typescript-eslint/parser",
 	parserOptions: {
@@ -54,6 +58,7 @@ module.exports = {
 					"BaseGuildTextChannel",
 					"BaseGuildVoiceChannel",
 					"ForumChannel",
+					"MediaChannel",
 					"NewsChannel",
 					"TextChannel",
 					"StageChannel",

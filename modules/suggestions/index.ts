@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { client, defineChatCommand, defineEvent } from "strife.js";
+import { client, defineButton, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import top from "./top.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
@@ -67,3 +67,7 @@ defineChatCommand(
 	},
 	top,
 );
+
+defineButton("suggestions", async (interaction, userId) => {
+	await top(interaction, { user: await client.users.fetch(userId) });
+});

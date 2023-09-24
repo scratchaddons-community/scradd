@@ -71,7 +71,7 @@ defineEvent("messageCreate", async (message) => {
 	)
 		return;
 
-	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
+	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’’]?m\b/u.test(cleanContent)) {
 		const name = cleanContent
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
@@ -83,12 +83,13 @@ defineEvent("messageCreate", async (message) => {
 
 		if (
 			name &&
+			message.member &&
 			(process.env.NODE_ENV !== "production" ||
 				config.channels.bots?.id === baseChannel?.id ||
 				pingsScradd)
 		) {
 			return await message.reply({
-				content: dad(name, message.author),
+				content: dad(name, message.member),
 				allowedMentions: { users: [] },
 			});
 		}
