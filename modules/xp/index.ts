@@ -137,7 +137,6 @@ export async function top(
 			} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 		(data) => interaction.reply(data),
 		{
-			// todo: ephemeral?
 			title: "XP Leaderboard",
 			singular: "user",
 
