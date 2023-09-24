@@ -6,6 +6,7 @@ import {
 	type Snowflake,
 	User,
 	userMention,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -29,6 +30,26 @@ export const userSettingsDatabase = new Database<{
 }>("user_settings");
 await userSettingsDatabase.init();
 
+async function settingsCommand(
+	interaction: RepliableInteraction,
+	options: {
+		"board-pings"?: boolean;
+		"level-up-pings"?: boolean;
+		"autoreactions"?: boolean;
+		"use-mentions"?: boolean;
+		"dm-reminders"?: boolean;
+	},
+) {
+	await interaction.reply(
+		await updateSettings(interaction.user, {
+			autoreactions: options.autoreactions,
+			boardPings: options["board-pings"],
+			levelUpPings: options["level-up-pings"],
+			useMentions: options["use-mentions"],
+			dmReminders: options["dm-reminders"],
+		}),
+	);
+}
 defineChatCommand(
 	{
 		name: "settings",
@@ -58,18 +79,7 @@ defineChatCommand(
 			},
 		},
 	},
-
-	async (interaction, options) => {
-		await interaction.reply(
-			await updateSettings(interaction.user, {
-				autoreactions: options.autoreactions,
-				boardPings: options["board-pings"],
-				levelUpPings: options["level-up-pings"],
-				useMentions: options["use-mentions"],
-				dmReminders: options["dm-reminders"],
-			}),
-		);
-	},
+	settingsCommand,
 );
 
 defineChatCommand(
@@ -93,16 +103,7 @@ defineChatCommand(
 			},
 		},
 	},
-
-	async (interaction, options) => {
-		await interaction.reply(
-			await updateSettings(interaction.user, {
-				boardPings: options["board-pings"],
-				useMentions: options["use-mentions"],
-				dmReminders: options["dm-reminders"],
-			}),
-		);
-	},
+	settingsCommand, // todo: dont show them all
 );
 
 defineButton("toggleSetting", async (interaction, setting = "") => {
