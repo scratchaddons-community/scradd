@@ -33,6 +33,7 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	ThreadChannel,
 	Collection,
 	ApplicationCommand,
 } from "discord.js";
@@ -167,11 +168,15 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
+export async function getAllMessages(
+	channel: GuildTextBasedChannel | ThreadChannel,
+): Promise<Message<true>[]>;
 export async function getAllMessages(
 	channel: DMChannel | PartialDMChannel,
 ): Promise<Message<false>[]>;
-export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
+export async function getAllMessages(
+	channel: TextBasedChannel | ThreadChannel,
+): Promise<Message[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;
@@ -230,7 +235,8 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() &&
-				message.channel.parent?.type === ChannelType.GuildForum
+				(message.channel.parent?.type === ChannelType.GuildForum ||
+					message.channel.parent?.type === ChannelType.GuildMedia)
 					? "post title"
 					: "channel name"
 			}: **${escapeMessage(message.content)}**`;

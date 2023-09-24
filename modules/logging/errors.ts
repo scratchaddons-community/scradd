@@ -100,6 +100,13 @@ export function generateError(
 }
 
 export function sanitizePath(unclean: string, relative = true): string {
-	const sanitized = decodeURIComponent(unclean).replaceAll("\\", "/").replaceAll("file:///", "");
+	let decoded = undefined;
+	try {
+		decoded = decodeURIComponent(unclean);
+	} catch {
+		decoded = unclean;
+	}
+
+	const sanitized = decoded.replaceAll("\\", "/").replaceAll("file:///", "");
 	return relative ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;
 }

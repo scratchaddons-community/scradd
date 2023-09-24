@@ -3,6 +3,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
+	User,
 	time,
 	TimestampStyles,
 	type RepliableInteraction,
@@ -15,6 +16,7 @@ import { defineChatCommand, defineMenuCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/misc.js";
 import { strikeDatabase } from "./punishments/misc.js";
+import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 
 async function userInfo(
 	interaction: RepliableInteraction,

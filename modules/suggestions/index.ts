@@ -7,7 +7,7 @@ import {
 	ForumChannel,
 	Colors,
 } from "discord.js";
-import { client, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
+import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
 import top from "./top.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
@@ -127,3 +127,6 @@ defineMenuCommand(
 		await top(interaction, { user: interaction.targetUser });
 	},
 );
+defineButton("suggestions", async (interaction, userId) => {
+	await top(interaction, { user: await client.users.fetch(userId) });
+});

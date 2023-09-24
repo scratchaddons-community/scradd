@@ -159,7 +159,8 @@ export async function autoClose({ locked: wasLocked }: AnyThreadChannel, thread:
 		!wasLocked &&
 		thread.locked &&
 		(thread.type === ChannelType.PrivateThread ||
-			thread.parent?.type === ChannelType.GuildForum)
+			thread.parent?.type === ChannelType.GuildForum ||
+			thread.parent?.type === ChannelType.GuildMedia)
 	) {
 		const date = Date.now() + 43_200_000;
 		remindersDatabase.data = [

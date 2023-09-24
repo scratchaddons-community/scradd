@@ -4,6 +4,7 @@ import {
 	TextChannel,
 	type NonThreadGuildBasedChannel,
 	NewsChannel,
+	MediaChannel,
 } from "discord.js";
 import constants from "./constants.js";
 import { client } from "strife.js";
@@ -115,6 +116,8 @@ export async function syncConfig() {
 export default config;
 
 const threads = await config.guild.channels.fetchActiveThreads();
-export function getInitialChannelThreads(channel: ForumChannel | TextChannel | NewsChannel) {
+export function getInitialChannelThreads(
+	channel: ForumChannel | MediaChannel | TextChannel | NewsChannel,
+) {
 	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
 }

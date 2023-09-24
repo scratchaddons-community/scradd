@@ -16,7 +16,6 @@ import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { logGame, playNeeded } from "./tourney.js";
 import { autoreactions } from "../secrets/secrets.js";
 
 const EMPTY_TILE = "⬛";
@@ -55,29 +54,6 @@ export default async function memoryMatch(
 	const easyMode = options["easy-mode"] ?? false;
 	const bonusTurns = options["bonus-turns"] ?? true;
 
-	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
-	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
-	if (needToPlay && !tourneyQualifies) {
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You need to play that user in the Memory Match Tournament! Please start a game with easy mode off and bonus turns on.`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						instructionsButton,
-						{
-							type: ComponentType.Button,
-							label: "Tournament Information",
-							url: "https://discord.com/channels/806602307750985799/1129445243331301447/1129445243331301447",
-							style: ButtonStyle.Link,
-						},
-					],
-				},
-			],
-		});
-	}
-
 	const message = await interaction.reply({
 		fetchReply: true,
 		content: `💪 **${otherUser.toString()}, you are challenged to a game of Memory Match${
@@ -86,11 +62,7 @@ export default async function memoryMatch(
 						bonusTurns ? "" : "no bonus turns"
 				  })`
 				: ""
-		} by ${interaction.user.toString()}!** Do you accept?${
-			tourneyQualifies
-				? "\n\n__This game will be a part of the Memory Match Tournament!__"
-				: ""
-		}`,
+		} by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -184,7 +156,6 @@ async function playGame(
 	}
 
 	await interaction.deferUpdate();
-	const tournament = !easyMode && bonusTurns && (await playNeeded([users[0].id, users[1].id]));
 	const scores: [string[], string[]] = [[], ["22"]];
 	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
 	const message = await interaction.message.edit(getBoard(0));
@@ -329,9 +300,7 @@ async function playGame(
 				constants.emojis.misc.green
 			} ${users[1].toString()} - **${scores[1].length}** point${
 				scores[1].length === 1 ? "" : "s"
-			}${secondTurn}${
-				tournament ? "\n\n__This game will be a part of the Memory Match Tournament!__" : ""
-			}`,
+			}${secondTurn}`,
 
 			components: chunks.map((chunk, rowIndex) => ({
 				type: ComponentType.ActionRow as const,
@@ -384,7 +353,7 @@ async function playGame(
 
 		await thread?.setArchived(true, "Game over");
 
-		const { url } = await message.reply({
+		await message.reply({
 			content,
 			embeds: [
 				{
@@ -393,7 +362,7 @@ async function playGame(
 							? `${constants.emojis.misc.blue} ${firstUser}`
 							: `${constants.emojis.misc.green} ${secondUser}`
 					}`,
-					title: `Memory Match ${tournament ? "Tournament " : ""}Results`,
+					title: "Memory Match Results",
 					color: winner?.displayColor,
 					thumbnail: winner && { url: winner.displayAvatarURL() },
 					footer: {
@@ -404,14 +373,6 @@ async function playGame(
 				},
 			],
 		});
-
-		if (tournament) {
-			await logGame({
-				winner: users[secondWon ? 1 : 0].id,
-				loser: users[secondWon ? 0 : 1].id,
-				url,
-			});
-		}
 	}
 }
 
