@@ -36,7 +36,7 @@ defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
-		access: false,
+		access: true,
 
 		options: {
 			"channel": {
