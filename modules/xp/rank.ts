@@ -131,7 +131,7 @@ export default async function getUserRank(
 					{
 						type: ComponentType.Button,
 						customId: `${user.id}_viewLeaderboard`,
-						label: "View Leaderboard",
+						label: "Leaderboard",
 						style: ButtonStyle.Primary,
 					},
 				],

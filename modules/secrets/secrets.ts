@@ -1,7 +1,7 @@
-import type { User } from "discord.js";
+import type { GuildMember, Snowflake } from "discord.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function dad(name: string, _: User) {
+export function dad(name: string, _: GuildMember) {
 	const split = name.split(/\b/);
 	const firstName =
 		split.find(
@@ -13,15 +13,14 @@ export function dad(name: string, _: User) {
 		) ??
 		split[0] ??
 		name;
-	const customName = customNames[firstName] || name;
-	const comment = customComments[firstName] || "I’m Scradd!";
-
-	const greetingIndex = Math.floor(Math.random() * greetings.length);
-	const greeting = greetings[greetingIndex];
 
 	return (
-		customResponses[firstName] ??
-		`${greeting} ${customName}${customTriggers.includes(firstName) ? "!" : ","} ${comment}`
+		customResponses[firstName] ||
+		`${greetings[Math.floor(Math.random() * greetings.length)]} ${
+			customNames[firstName] || name
+		}${customTriggers.includes(firstName) ? "!" : ","} ${
+			customComments[firstName] || "I’m Scradd!"
+		}`
 	);
 }
 
@@ -29,7 +28,7 @@ const greetings = ["Hi"] as const;
 const customResponses: Record<string, string> = {};
 const customNames: Record<string, string> = {};
 const customComments: Record<string, string> = {};
-const customTriggers: string[] = [];
+const customTriggers: string[] = Object.keys({});
 export const dadEasterEggCount =
 	Object.keys(customResponses).length +
 	Object.keys(customNames).length +
@@ -51,6 +50,6 @@ export const autoreactions: [
 		| string
 		| RegExp
 		| [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"]
-		| [string, "ping"]
+		| [Snowflake, "ping"]
 	)[],
 ][] = [];
