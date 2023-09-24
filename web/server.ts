@@ -1,13 +1,13 @@
 import { cleanDatabaseListeners } from "../common/database.js";
 import http from "node:http";
 import logError from "../common/logError.js";
-import fs from "fs"
+import fs from "fs";
 import { client } from "strife.js";
 
 http.createServer(async (request, response) => {
 	try {
 		const requestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
-		const params = new URLSearchParams(new URL(request.url ?? "").search)
+		const params = new URLSearchParams(new URL(request.url ?? "").search);
 
 		if (requestUrl.pathname === "/clean-database-listeners") {
 			if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
@@ -21,10 +21,9 @@ http.createServer(async (request, response) => {
 			}
 		} else if (requestUrl.pathname === "/appeal") {
 			if (!params?.get("code")) return;
-			let codeParam: string = params.get("code") || '';
-			let tokenResponseData = await (await fetch(
-				"https://discord.com/api/oauth2/token",
-				{
+			let codeParam: string = params.get("code") || "";
+			let tokenResponseData = await (
+				await fetch("https://discord.com/api/oauth2/token", {
 					method: "POST",
 					body: new URLSearchParams({
 						client_id: "929928324959055932",
@@ -37,31 +36,45 @@ http.createServer(async (request, response) => {
 					headers: {
 						"Content-Type": "application/x-www-form-urlencoded",
 					},
-				}
-			)).json();
+				})
+			).json();
 			let token_type: string = (tokenResponseData as any)?.token_type;
 			let access_token: string = (tokenResponseData as any)?.access_token;
 			if (access_token) {
-			let user = await (await fetch("https://discord.com/api/users/@me", {
-          headers: {
-            authorization: `${token_type} ${access_token}`,
-          },
-        })).json();
-		let userId: string = (user as any)?.id
-		if (userId) {
-			let bannedUser: object = (await client.users.fetch(userId).catch()) || {username:""}
-			fs.readFile('./appeal/appeal.html', function (err, html) {
-				if (err) {
-					throw err; 
+				let user = await (
+					await fetch("https://discord.com/api/users/@me", {
+						headers: {
+							authorization: `${token_type} ${access_token}`,
+						},
+					})
+				).json();
+				let userId: string = (user as any)?.id;
+				if (userId) {
+					let bannedUser: object = (await client.users.fetch(userId).catch()) || {
+						username: "",
+					};
+					fs.readFile("./appeal/appeal.html", function (err, html) {
+						if (err) {
+							throw err;
+						}
+						response
+							.writeHead(503, { "Content-Type": "text/html" })
+							.end(
+								html
+									.toString()
+									.replaceAll("{username}", (bannedUser as any)?.username || ""),
+							);
+					});
+				} else {
+					response
+						.writeHead(503, { "Content-Type": "text/plain" })
+						.end("Verification Failed");
 				}
-				response.writeHead(503, { "Content-Type": "text/html" }).end(html.toString().replaceAll("{username}", (bannedUser as any)?.username || ""));
-			})
-		} else {
-			response.writeHead(503, { "Content-Type": "text/plain" }).end("Verification Failed");
-		}
-	} else {
-		response.writeHead(503, { "Content-Type": "text/plain" }).end("Verification Failed");
-	}
+			} else {
+				response
+					.writeHead(503, { "Content-Type": "text/plain" })
+					.end("Verification Failed");
+			}
 		} else {
 			response.writeHead(404, { "Content-Type": "text/plain" }).end("Not Found");
 		}
