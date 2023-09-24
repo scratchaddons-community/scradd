@@ -75,7 +75,9 @@ async function userInfo(
 			inline: false,
 		});
 
-	const banned = await config.guild.bans.fetch(user.id).catch(() => void 0);
+	const banned =
+		interaction.guild?.id === config.guild.id &&
+		(await config.guild.bans.fetch(user.id).catch(() => void 0));
 	if (banned)
 		fields.push(
 			isMod
