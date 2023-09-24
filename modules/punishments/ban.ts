@@ -145,6 +145,7 @@ export default async function ban(
 
 		collector
 			.on("collect", async (buttonInteraction) => {
+				await buttonInteraction.deferReply();
 				if (unbanTime && untilUnban) {
 					if (untilUnban < 30_000 || untilUnban > 315_360_000_000) {
 						await interaction.reply({
@@ -197,7 +198,7 @@ export default async function ban(
 						}`,
 					deleteMessageSeconds: deleteLength,
 				});
-				await buttonInteraction.reply(
+				await buttonInteraction.editReply(
 					`${constants.emojis.statuses.yes} Banned ${userToBan}!${
 						options.reason ? " " + options.reason : ""
 					}${
