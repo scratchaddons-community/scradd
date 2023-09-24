@@ -35,6 +35,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
+		access: false,
 	},
 	memoryMatch,
 );
