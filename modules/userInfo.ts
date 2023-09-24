@@ -7,7 +7,6 @@ import {
 	time,
 	TimestampStyles,
 	type RepliableInteraction,
-	User,
 	ApplicationCommandType,
 } from "discord.js";
 import config from "../common/config.js";
