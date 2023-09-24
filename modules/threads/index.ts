@@ -19,7 +19,6 @@ defineSubcommands(
 		name: "thread",
 		description: "Commands to manage threads",
 		restricted: true,
-		access: false, //todo
 		subcommands: {
 			"close-in": {
 				description: "Close this thread after a specified amount of time",
