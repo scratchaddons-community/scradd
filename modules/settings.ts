@@ -103,7 +103,7 @@ defineChatCommand(
 			},
 		},
 	},
-	settingsCommand, // todo: dont show them all
+	settingsCommand,
 );
 
 defineButton("toggleSetting", async (interaction, setting = "") => {
@@ -179,23 +179,6 @@ export async function updateSettings(
 						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
 					},
 					{
-						customId: "levelUpPings_toggleSetting",
-						type: ComponentType.Button,
-						label: "Level Up Pings",
-						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
-					},
-				],
-			},
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						customId: "autoreactions_toggleSetting",
-						type: ComponentType.Button,
-						label: "Autoreactions",
-						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
-					},
-					{
 						customId: "useMentions_toggleSetting",
 						type: ComponentType.Button,
 						label: "Use Mentions",
@@ -209,6 +192,29 @@ export async function updateSettings(
 					},
 				],
 			},
+			...((await config.guild.members.fetch(user.id).catch(() => {}))
+				? [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									customId: "autoreactions_toggleSetting",
+									type: ComponentType.Button,
+									label: "Autoreactions",
+									style: ButtonStyle[
+										updated.autoreactions ? "Success" : "Danger"
+									],
+								} as const,
+								{
+									customId: "levelUpPings_toggleSetting",
+									type: ComponentType.Button,
+									label: "Level Up Pings",
+									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+								} as const,
+							],
+						},
+				  ]
+				: []),
 		],
 	} satisfies InteractionReplyOptions;
 }
