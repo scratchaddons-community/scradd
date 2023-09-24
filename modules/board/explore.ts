@@ -5,9 +5,8 @@ import {
 	type Snowflake,
 	ComponentType,
 	type InteractionReplyOptions,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
 	type MessageEditOptions,
+	type RepliableInteraction,
 } from "discord.js";
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
@@ -44,6 +43,7 @@ async function textChannelMatches(
 			);
 		}
 		case ChannelType.GuildForum:
+		case ChannelType.GuildMedia:
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
@@ -58,7 +58,7 @@ async function textChannelMatches(
 }
 
 export default async function makeSlideshow(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+	interaction: RepliableInteraction,
 	{
 		user,
 		channel,

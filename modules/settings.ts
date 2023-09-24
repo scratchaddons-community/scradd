@@ -6,6 +6,7 @@ import {
 	type Snowflake,
 	User,
 	userMention,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -31,6 +32,26 @@ export const userSettingsDatabase = new Database<{
 }>("user_settings");
 await userSettingsDatabase.init();
 
+async function settingsCommand(
+	interaction: RepliableInteraction,
+	options: {
+		"board-pings"?: boolean;
+		"level-up-pings"?: boolean;
+		"autoreactions"?: boolean;
+		"use-mentions"?: boolean;
+		"dm-reminders"?: boolean;
+	},
+) {
+	await interaction.reply(
+		await updateSettings(interaction.user, {
+			autoreactions: options.autoreactions,
+			boardPings: options["board-pings"],
+			levelUpPings: options["level-up-pings"],
+			useMentions: options["use-mentions"],
+			dmReminders: options["dm-reminders"],
+		}),
+	);
+}
 defineChatCommand(
 	{
 		name: "settings",
@@ -64,26 +85,14 @@ defineChatCommand(
 			},
 		},
 	},
-
-	async (interaction, options) => {
-		await interaction.reply(
-			await updateSettings(interaction.user, {
-				autoreactions: options.autoreactions,
-				boardPings: options["board-pings"],
-				levelUpPings: options["level-up-pings"],
-				useMentions: options["use-mentions"],
-				dmReminders: options["dm-reminders"],
-				scratchEmbeds: options["scratch-embeds"],
-			}),
-		);
-	},
+	settingsCommand,
 );
 
 defineChatCommand(
 	{
 		name: "settings",
 		description: "Customize personal settings",
-		access: [constants.guilds.dev, constants.guilds.testing],
+		access: config.otherGuildIds,
 
 		options: {
 			"board-pings": {
@@ -104,16 +113,7 @@ defineChatCommand(
 			},
 		},
 	},
-
-	async (interaction, options) => {
-		await interaction.reply(
-			await updateSettings(interaction.user, {
-				boardPings: options["board-pings"],
-				useMentions: options["use-mentions"],
-				dmReminders: options["dm-reminders"],
-			}),
-		);
-	},
+	settingsCommand,
 );
 
 defineButton("toggleSetting", async (interaction, setting = "") => {
@@ -193,36 +193,7 @@ export async function updateSettings(
 				type: ComponentType.ActionRow,
 				components: [
 					{
-						customId: "boardPings_toggleSetting",
-						type: ComponentType.Button,
-						label: "Board Pings",
-						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
-					},
-					{
-						customId: "levelUpPings_toggleSetting",
-						type: ComponentType.Button,
-						label: "Level Up Pings",
-						style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
-					},
-					{
 						customId: "useMentions_toggleSetting",
-						type: ComponentType.Button,
-						label: "Use Mentions",
-						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
-					},
-				],
-			},
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						customId: "scratchEmbeds_toggleSetting",
-						type: ComponentType.Button,
-						label: "Scratch Link Embeds",
-						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
-					},
-					{
-						customId: "autoreactions_toggleSetting",
 						type: ComponentType.Button,
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
@@ -233,8 +204,43 @@ export async function updateSettings(
 						label: "DM Reminders",
 						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
 					},
+					{
+						customId: "scratchEmbeds_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
+					},
 				],
 			},
+			...((await config.guild.members.fetch(user.id).catch(() => {}))
+				? [
+					{
+						customId: "boardPings_toggleSetting",
+						type: ComponentType.Button,
+						label: "Board Pings",
+						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
+					},
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									customId: "autoreactions_toggleSetting",
+									type: ComponentType.Button,
+									label: "Autoreactions",
+									style: ButtonStyle[
+										updated.autoreactions ? "Success" : "Danger"
+									],
+								} as const,
+								{
+									customId: "levelUpPings_toggleSetting",
+									type: ComponentType.Button,
+									label: "Level Up Pings",
+									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+								} as const,
+							],
+						},
+				  ]
+				: []),
 		],
 	} satisfies InteractionReplyOptions;
 }

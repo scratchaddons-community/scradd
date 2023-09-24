@@ -3,50 +3,18 @@ on:
     push:
     pull_request_target:
     workflow_dispatch:
-    schedule:
-        - cron: 00 12 * * * # 1 hour before Dependabot
 
 permissions: write-all
 
 jobs:
-    bump:
-        name: Bump dependencies
-        if:
-            github.event_name != 'pull_request_target' && github.ref_name == 'main' &&
-            github.repository_owner == 'scratchaddons-community'
-        runs-on: ubuntu-20.04
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4.0.0
-
-            - name: Bump
-              id: sync_types
-              uses: RedGuy12/sync-types@v1.2.16
-
-            - name: Commit
-              id: commit
-              uses: stefanzweifel/git-auto-commit-action@v4.16.0
-              with:
-                  commit_message: Bump dependencies
-
-            - name: Comment
-              if: steps.commit.outputs.changes_detected == 'true'
-              run: |
-                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
-                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     format:
         name: Format
-        if: ${{ always() }} && startsWith(github.ref_name, 'dependabot/') == false
+        if: startsWith(github.ref_name, 'dependabot/') == false
         runs-on: ubuntu-20.04
-        needs: bump
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.0.0
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -74,7 +42,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.0.0
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -94,7 +62,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.0.0
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -117,7 +85,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.0.0
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -140,7 +108,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.0.0
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}

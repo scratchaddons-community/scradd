@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
@@ -12,7 +13,14 @@ import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings } from "../settings.js";
-import { client, defineSubcommands, defineEvent, defineButton, defineSelect } from "strife.js";
+import {
+	client,
+	defineSubcommands,
+	defineEvent,
+	defineButton,
+	defineSelect,
+	defineMenuCommand,
+} from "strife.js";
 import getUserRank from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
 
@@ -91,18 +99,10 @@ defineSubcommands(
 		}
 	},
 );
-defineButton("xp", async (interaction, userId = "") => {
-	await getUserRank(interaction, await client.users.fetch(userId));
-});
 
 defineButton("viewLeaderboard", async (interaction, userId) => {
 	await top(interaction, await client.users.fetch(userId));
 });
-
-if (constants.canvasEnabled) {
-	const { default: weeklyXpGraph } = await import("./graph.js");
-	defineSelect("weeklyXpGraph", weeklyXpGraph);
-}
 
 export async function top(
 	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
@@ -142,6 +142,9 @@ export async function top(
 
 			user: interaction.user,
 			rawOffset: index,
+			ephemeral:
+				interaction.isButton() &&
+				interaction.message.interaction?.user.id !== interaction.user.id,
 
 			async generateComponents() {
 				return (await getSettings(interaction.user, false)).useMentions === undefined
@@ -161,6 +164,9 @@ export async function top(
 }
 defineButton("xp", async (interaction, userId = "") => {
 	await getUserRank(interaction, await client.users.fetch(userId));
+});
+defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
+	await getUserRank(interaction, interaction.targetUser);
 });
 
 if (constants.canvasEnabled) {

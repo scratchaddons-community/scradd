@@ -64,7 +64,7 @@ export default {
 	scratchColor: 0x88_5c_d4,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
-	guilds: { testing: "938438560925761619", dev: "751206349614088204" },
+	testingGuildId: "938438560925761619",
 
 	users: {
 		scradd: "929928324959055932",

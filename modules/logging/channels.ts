@@ -29,6 +29,7 @@ export async function channelCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Cha
 				[ChannelType.GuildAnnouncement]: "Announcement",
 				[ChannelType.GuildStageVoice]: "Stage",
 				[ChannelType.GuildForum]: "Forum",
+				[ChannelType.GuildMedia]: "Media",
 			}[entry.target.type]
 		} channel ${entry.target.toString()} (#${entry.target.name}) created${
 			entry.target.parent ? ` under ${entry.target.parent}` : ""
@@ -170,6 +171,7 @@ export async function channelUpdate(
 					[ChannelType.GuildAnnouncement]: "n Announcement",
 					[ChannelType.GuildStageVoice]: " Stage",
 					[ChannelType.GuildForum]: " Forum",
+					[ChannelType.GuildMedia]: " Media",
 				}[newChannel.type]
 			} Channel`,
 			"channels",
@@ -193,7 +195,10 @@ export async function channelUpdate(
 	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
-				newChannel.type === ChannelType.GuildForum ? "post " : ""
+				newChannel.type === ChannelType.GuildForum ||
+				newChannel.type === ChannelType.GuildMedia
+					? "post "
+					: ""
 			}slowmode set to ${newChannel.rateLimitPerUser} seconds`,
 			"channels",
 		);
@@ -267,7 +272,11 @@ export async function channelUpdate(
 		});
 	}
 
-	if (oldChannel.type !== ChannelType.GuildForum || newChannel.type !== ChannelType.GuildForum)
+	if (
+		(oldChannel.type !== ChannelType.GuildForum &&
+			oldChannel.type !== ChannelType.GuildMedia) ||
+		oldChannel.type !== newChannel.type
+	)
 		return;
 
 	if (
@@ -305,6 +314,9 @@ export async function channelUpdate(
 			}`,
 			"channels",
 		);
+
+	if (oldChannel.type !== ChannelType.GuildForum || newChannel.type !== ChannelType.GuildForum)
+		return;
 
 	if (oldChannel.defaultForumLayout !== newChannel.defaultForumLayout)
 		await log(

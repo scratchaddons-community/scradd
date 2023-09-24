@@ -31,7 +31,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Integer,
 				description: "The number of options to have (defaults to 2)",
 				minValue: 1,
-				maxValue: 5,
+				maxValue: DEFAULT_SHAPES.length,
 			},
 			"vote-mode": {
 				type: ApplicationCommandOptionType.Boolean,
