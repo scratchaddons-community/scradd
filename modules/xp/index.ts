@@ -91,18 +91,10 @@ defineSubcommands(
 		}
 	},
 );
-defineButton("xp", async (interaction, userId = "") => {
-	await getUserRank(interaction, await client.users.fetch(userId));
-});
 
 defineButton("viewLeaderboard", async (interaction, userId) => {
 	await top(interaction, await client.users.fetch(userId));
 });
-
-if (constants.canvasEnabled) {
-	const { default: weeklyXpGraph } = await import("./graph.js");
-	defineSelect("weeklyXpGraph", weeklyXpGraph);
-}
 
 export async function top(
 	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
