@@ -1,19 +1,10 @@
-import {
-	ComponentType,
-	type ButtonInteraction,
-	type ChatInputCommandInteraction,
-	type User,
-	ButtonStyle,
-} from "discord.js";
+import { ComponentType, type User, ButtonStyle, type RepliableInteraction } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
 import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
 
-export default async function getUserRank(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
-	user: User,
-) {
+export default async function getUserRank(interaction: RepliableInteraction, user: User) {
 	const allXp = xpDatabase.data;
 	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 

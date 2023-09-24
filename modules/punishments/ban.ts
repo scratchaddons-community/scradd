@@ -1,11 +1,11 @@
 import {
 	GuildMember,
-	type ChatInputCommandInteraction,
 	ComponentType,
 	ButtonStyle,
 	time,
 	TimestampStyles,
 	User,
+	type RepliableInteraction,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -17,7 +17,7 @@ import { escapeMessage } from "../../util/markdown.js";
 import queueReminders from "../reminders/send.js";
 
 export default async function ban(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: RepliableInteraction,
 	options: {
 		"user": User | GuildMember;
 		"reason"?: string;

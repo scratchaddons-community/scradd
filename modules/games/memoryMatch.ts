@@ -1,5 +1,4 @@
 import {
-	type ChatInputCommandInteraction,
 	ComponentType,
 	ButtonStyle,
 	type Snowflake,
@@ -11,6 +10,7 @@ import {
 	ChannelType,
 	type RepliableInteraction,
 	GuildMember,
+	type APIInteractionGuildMember,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -30,9 +30,9 @@ const instructionsButton = {
 } as const;
 
 export default async function memoryMatch(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: RepliableInteraction,
 	options: {
-		"user": User | GuildMember;
+		"user"?: User | GuildMember | APIInteractionGuildMember;
 		"easy-mode"?: boolean;
 		"bonus-turns"?: boolean;
 		"thread"?: boolean;
@@ -49,13 +49,14 @@ export default async function memoryMatch(
 			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
+	const otherUser = options.user;
 
 	const easyMode = options["easy-mode"] ?? false;
 	const bonusTurns = options["bonus-turns"] ?? true;
 
 	const message = await interaction.reply({
 		fetchReply: true,
-		content: `💪 **${options.user.toString()}, you are challenged to a game of Memory Match${
+		content: `💪 **${otherUser.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
 						bonusTurns ? "" : "no bonus turns"
@@ -91,7 +92,7 @@ export default async function memoryMatch(
 		})
 		.on("collect", async (buttonInteraction) => {
 			const isUser = interaction.user.id === buttonInteraction.user.id;
-			const isOtherUser = options.user.id === buttonInteraction.user.id;
+			const isOtherUser = otherUser.id === buttonInteraction.user.id;
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
@@ -108,8 +109,8 @@ export default async function memoryMatch(
 				await playGame(buttonInteraction, {
 					users:
 						Math.random() > 0.5
-							? [interaction.user, options.user]
-							: [options.user, interaction.user],
+							? [interaction.user, otherUser.user]
+							: [otherUser.user, interaction.user],
 					easyMode,
 					bonusTurns,
 					useThread: options.thread ?? true,
@@ -130,7 +131,7 @@ async function playGame(
 		useThread,
 		bonusTurns,
 	}: {
-		users: [User | GuildMember, User | GuildMember];
+		users: [User, User];
 		easyMode: boolean;
 		useThread: boolean;
 		bonusTurns: boolean;

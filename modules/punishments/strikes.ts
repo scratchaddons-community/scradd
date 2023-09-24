@@ -1,7 +1,5 @@
 import {
-	ButtonInteraction,
 	ButtonStyle,
-	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
 	User,
@@ -13,10 +11,7 @@ import constants from "../../common/constants.js";
 import { getSettings } from "../settings.js";
 import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 
-export async function getStrikes(
-	selected: GuildMember | User,
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
-) {
+export async function getStrikes(selected: GuildMember | User, interaction: RepliableInteraction) {
 	if (
 		selected.id !== interaction.user.id &&
 		!(

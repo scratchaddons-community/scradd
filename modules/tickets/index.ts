@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
@@ -14,6 +15,7 @@ import {
 	defineButton,
 	defineModal,
 	defineSelect,
+	defineMenuCommand,
 } from "strife.js";
 import { getSettings, updateSettings } from "../settings.js";
 import {
@@ -149,6 +151,21 @@ defineChatCommand(
 		}
 
 		await contactUser(options.user, interaction);
+	},
+);
+defineMenuCommand(
+	{ name: "Contact User", type: ApplicationCommandType.User, restricted: true },
+	async (interaction) => {
+		if (!(interaction.targetMember instanceof GuildMember)) {
+			await interaction.reply({
+				content: `${constants.emojis.statuses.no} Could not find user.`,
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		await contactUser(interaction.targetMember, interaction);
 	},
 );
 
