@@ -13,10 +13,8 @@ import { gracefulFetch } from "../util/promises.js";
 const EMBED_LENGTH = 500;
 
 defineEvent("messageCreate", async (message) => {
-	const notSet = getSettings(message.author, false).scratchEmbeds === undefined;
-	if (!getSettings(message.author).scratchEmbeds) {
-		return;
-	}
+	if (!(await getSettings(message.author)).scratchEmbeds) return;
+	const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
 
 	const scratchUrlRegex =
 		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
