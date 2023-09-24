@@ -106,7 +106,7 @@ export function sanitizePath(unclean: string, relative = true): string {
 	} catch {
 		decoded = unclean;
 	}
-	
+
 	const sanitized = decoded.replaceAll("\\", "/").replaceAll("file:///", "");
 	return relative ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;
 }
