@@ -95,7 +95,7 @@ defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",
-		access: true, // todo
+		access: true,
 
 		subcommands: {
 			status: { description: "Show bot status", options: {} },
