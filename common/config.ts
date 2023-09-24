@@ -12,6 +12,8 @@ import { gracefulFetch } from "../util/promises.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
 if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
+const guilds = await client.guilds.fetch();
+guilds.delete(guild.id);
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
@@ -29,6 +31,7 @@ async function getConfig() {
 	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
 		guild,
+		otherGuildIds: [...guilds.keys()],
 
 		urls: {
 			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,

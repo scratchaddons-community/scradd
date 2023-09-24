@@ -16,8 +16,7 @@ import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
-	constants.guilds.dev,
-	constants.guilds.testing,
+	...config.otherGuildIds,
 	"898383289059016704", // Scratch Addons SMP Archive
 	"837024174865776680", // TurboWarp
 	"945340853189247016", // ScratchTools

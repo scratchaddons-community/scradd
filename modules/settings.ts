@@ -76,7 +76,7 @@ defineChatCommand(
 	{
 		name: "settings",
 		description: "Customize personal settings",
-		access: [constants.guilds.dev, constants.guilds.testing],
+		access: config.otherGuildIds,
 
 		options: {
 			"board-pings": {
