@@ -321,8 +321,11 @@ function nodesToText(node: Nodes, escape = true): string {
 			if (node.attrs?.class !== "blocks") break;
 			return `\`\`\`\n${cleanCodeBlockContent(unescaped)}\n\`\`\``;
 		}
+		case "li": {
+			return `- ${content}`;
+			// todo: ordered lists
+		}
 	}
-	// todo: lists
 
 	return content;
 }
