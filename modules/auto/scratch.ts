@@ -32,7 +32,7 @@ export default async function scratch(message: Message) {
 			match
 				.slice(start, end)
 				.replace(
-					/https:\/\/scratch.mit.edu\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
+					/https?:\/\/scratch\.(?:mit\.edu|org)\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
 					"https://scratch.mit.edu/discuss/post/",
 				)
 				.split("#")[0]
