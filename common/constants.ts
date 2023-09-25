@@ -29,6 +29,17 @@ export default {
 			raisedHand: "<:raised_hand:1083046563049381898>",
 		},
 
+		scratch: {
+			love: "<:love:899019444112740422>",
+			favorite: "<:favorite:899019502417764363>",
+			remix: "<:remix:899019502417764363>",
+			view: "<:view:899019673436299314>",
+			followers: "<:followers:1152834505816674375>",
+			following: "<:follow:899019598807048212>",
+			projects: "<:blocks:1152834423784480768>",
+			comments: "<:comment:1152834193135521822>",
+		},
+
 		misc: {
 			addon: "<:new_addon:817273401869205524>",
 			join: "<:join:1041863919708418068>",
@@ -40,13 +51,17 @@ export default {
 	},
 
 	urls: {
-		usercountJson: "https://scratchaddons.com/usercount.json",
 		saRepo: "ScratchAddons/ScratchAddons",
+		usercountJson: "https://scratchaddons.com/usercount.json",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
+		scratch: "https://scratch.mit.edu",
+		scratchApi: "https://api.scratch.mit.edu",
+		scratchdb: "https://scratchdb.lefty.one/v3",
 	},
 
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+	scratchColor: 0x88_5c_d4,
 	footerSeperator: " • ",
 	webhookName: "scradd-webhook",
 	testingGuildId: "938438560925761619",

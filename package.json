@@ -28,6 +28,7 @@
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"papaparse": "5.4.1",
+		"posthtml-parser": "^0.11.0",
 		"serialize-error": "11.0.2",
 		"strife.js": "3.0.1"
 	},

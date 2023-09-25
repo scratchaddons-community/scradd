@@ -16,7 +16,7 @@ import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { autoreactions } from "../secrets/secrets.js";
+import { autoreactions } from "../auto/secrets.js";
 
 const EMPTY_TILE = "⬛";
 

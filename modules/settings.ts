@@ -26,6 +26,7 @@ export const userSettingsDatabase = new Database<{
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
+	scratchEmbeds?: boolean;
 	resourcesDmed?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
@@ -38,6 +39,7 @@ async function settingsCommand(
 		"autoreactions"?: boolean;
 		"use-mentions"?: boolean;
 		"dm-reminders"?: boolean;
+		"scratch-embeds"?: boolean;
 	},
 ) {
 	await interaction.reply(
@@ -47,6 +49,7 @@ async function settingsCommand(
 			levelUpPings: options["level-up-pings"],
 			useMentions: options["use-mentions"],
 			dmReminders: options["dm-reminders"],
+			scratchEmbeds: options["scratch-embeds"],
 		}),
 	);
 }
@@ -77,6 +80,10 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
+			"scratch-embeds": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send information about Scratch links found in your messages",
+			},
 		},
 	},
 	settingsCommand,
@@ -100,6 +107,10 @@ defineChatCommand(
 			"dm-reminders": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
+			},
+			"scratch-embeds": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Send information about Scratch links found in your messages",
 			},
 		},
 	},
@@ -133,6 +144,7 @@ export async function updateSettings(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
+		scratchEmbeds?: boolean | "toggle";
 		resourcesDmed?: true;
 	},
 ) {
@@ -159,6 +171,10 @@ export async function updateSettings(
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
+		scratchEmbeds:
+			settings.scratchEmbeds === "toggle"
+				? !old.scratchEmbeds
+				: settings.scratchEmbeds ?? old.scratchEmbeds,
 		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
@@ -173,16 +189,10 @@ export async function updateSettings(
 				type: ComponentType.ActionRow,
 				components: [
 					{
-						customId: "boardPings_toggleSetting",
+						customId: "scratchEmbeds_toggleSetting",
 						type: ComponentType.Button,
-						label: "Board Pings",
-						style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
-					},
-					{
-						customId: "useMentions_toggleSetting",
-						type: ComponentType.Button,
-						label: "Use Mentions",
-						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
 					},
 					{
 						customId: "dmReminders_toggleSetting",
@@ -198,18 +208,24 @@ export async function updateSettings(
 							type: ComponentType.ActionRow,
 							components: [
 								{
+									customId: "levelUpPings_toggleSetting",
+									type: ComponentType.Button,
+									label: "Level Up Pings",
+									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+								} as const,
+								{
+									customId: "boardPings_toggleSetting",
+									type: ComponentType.Button,
+									label: "Board Pings",
+									style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
+								} as const,
+								{
 									customId: "autoreactions_toggleSetting",
 									type: ComponentType.Button,
 									label: "Autoreactions",
 									style: ButtonStyle[
 										updated.autoreactions ? "Success" : "Danger"
 									],
-								} as const,
-								{
-									customId: "levelUpPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Level Up Pings",
-									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
 								} as const,
 							],
 						},
@@ -249,6 +265,7 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 		useMentions:
 			getWeeklyXp(user.id) > 100 ||
 			!(await config.guild.members.fetch(user.id).catch(() => {})),
+		scratchEmbeds: true,
 		resourcesDmed: false,
 	};
 }
