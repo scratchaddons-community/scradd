@@ -51,10 +51,10 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	if (await scratch(message)) return;
-
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.parent?.id) return;
+
+	if (await scratch(message)) return;
 
 	const pingsScradd = message.mentions.has(client.user, {
 		ignoreEveryone: true,

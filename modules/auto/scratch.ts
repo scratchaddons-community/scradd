@@ -6,10 +6,12 @@ import { getSettings } from "../settings.js";
 import constants from "../../common/constants.js";
 import { truncateText } from "../../util/text.js";
 import { nth } from "../../util/numbers.js";
-import { time, type APIEmbed, TimestampStyles, Message } from "discord.js";
+import { time, type APIEmbed, TimestampStyles, Message, cleanCodeBlockContent } from "discord.js";
 import { gracefulFetch } from "../../util/promises.js";
+import { escapeMessage } from "../../util/markdown.js";
+import { parser, type Node } from "posthtml-parser";
 
-const EMBED_LENGTH = 500;
+const EMBED_LENGTH = 750;
 
 export default async function scratch(message: Message) {
 	if (!(await getSettings(message.author)).scratchEmbeds) return false;
@@ -26,7 +28,16 @@ export default async function scratch(message: Message) {
 
 		const start = match.startsWith("http") ? 0 : 1,
 			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
-		const urlParts = match.slice(start, end).split("/");
+		const urlParts =
+			match
+				.slice(start, end)
+				.replace(
+					/https:\/\/scratch.mit.edu\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
+					"https://scratch.mit.edu/discuss/post/",
+				)
+				.split("#")[0]
+				?.split("?")[0]
+				?.split("/") ?? [];
 
 		switch (urlParts[3]) {
 			case "projects": {
@@ -73,14 +84,22 @@ export default async function scratch(message: Message) {
 				if (project.description) {
 					embed.fields.unshift({
 						name: "🫂 Notes and Credits",
-						value: truncateText(project.description, EMBED_LENGTH / 2, true),
+						value: truncateText(
+							linkifyMentions(project.description),
+							EMBED_LENGTH / 2,
+							true,
+						),
 						inline: false,
 					});
 				}
 				if (project.instructions) {
 					embed.fields.unshift({
 						name: "📜 Instructions",
-						value: truncateText(project.instructions, EMBED_LENGTH / 2, true),
+						value: truncateText(
+							linkifyMentions(project.instructions),
+							EMBED_LENGTH / 2,
+							true,
+						),
 						inline: false,
 					});
 				}
@@ -133,14 +152,14 @@ export default async function scratch(message: Message) {
 					embed.fields.unshift({
 						// eslint-disable-next-line unicorn/string-content
 						name: "🛠️ What I'm working on",
-						value: truncateText(user.work, EMBED_LENGTH / 2, true),
+						value: truncateText(htmlToMarkdown(user.work), EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
 				if (user.bio) {
 					embed.fields.unshift({
 						name: "👋 About me",
-						value: truncateText(user.bio, EMBED_LENGTH / 2, true),
+						value: truncateText(htmlToMarkdown(user.bio), EMBED_LENGTH / 2, true),
 						inline: false,
 					});
 				}
@@ -156,7 +175,11 @@ export default async function scratch(message: Message) {
 
 				embeds.push({
 					title: studio.title,
-					description: truncateText(studio.description, EMBED_LENGTH, true),
+					description: truncateText(
+						linkifyMentions(studio.description),
+						EMBED_LENGTH,
+						true,
+					),
 					color: constants.scratchColor,
 
 					fields: [
@@ -210,7 +233,11 @@ export default async function scratch(message: Message) {
 					title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${
 						constants.footerSeperator
 					}${post.topic.category}`,
-					description: truncateText(post.content.html + editedString, EMBED_LENGTH, true),
+					description: truncateText(
+						htmlToMarkdown(post.content.html) + editedString,
+						EMBED_LENGTH,
+						true,
+					),
 					color: constants.scratchColor,
 					footer: notSet ? { text: "Disable this using /settings" } : undefined,
 					author: {
@@ -229,4 +256,73 @@ export default async function scratch(message: Message) {
 		return true;
 	}
 	return false;
+}
+
+function linkifyMentions(string: string) {
+	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
+		name = name.replaceAll("\\", "");
+		return `[${name}](${constants.urls.scratch}/users/${name})`;
+	});
+}
+
+function htmlToMarkdown(string: string) {
+	const nodes = parser(string, { decodeEntities: true, recognizeNoValueAttribute: true });
+	return nodesToText(nodes);
+}
+
+type Nodes = Node | Nodes[];
+function nodesToText(node: Nodes, escape = true): string {
+	if (Array.isArray(node)) return node.map((node) => nodesToText(node, escape)).join("");
+
+	if (typeof node !== "object") return escape ? escapeMessage(node.toString()) : node.toString();
+	const content =
+		typeof node.content !== "number" && !node.content?.length ? "" : nodesToText(node.content);
+	const unescaped = content && nodesToText(node.content ?? "", false);
+
+	switch (node.tag) {
+		case "br": {
+			return "\n";
+		}
+		case "a": {
+			const url = new URL(node.attrs?.href?.toString() ?? "", "https://scratch.mit.edu");
+			return `[${content}](${url})`;
+		}
+		case "span": {
+			const output =
+				typeof node.attrs?.class === "string" &&
+				{
+					"bb-bold": `**${content}**`,
+					"bb-italic": `*${content}*`,
+					"bb-underline": `__${content}__`,
+					"bb-strikethrough": `~~${content}~~`,
+					"bb-big": `**${content}**`,
+					// eslint-disable-next-line unicorn/string-content
+					"bb-small": `\`${unescaped.replaceAll("`", "'")}\``,
+				}[node.attrs.class];
+			if (output) return output;
+			break;
+		}
+		case "img": {
+			const url = new URL(node.attrs?.src?.toString() ?? "", "https://scratch.mit.edu");
+			return `[${content || node.attrs?.alt || url.pathname.split("/").at(-1)}](${url})`;
+		}
+		case "blockquote": {
+			return `\n${content.trim().replaceAll(/^/gm, "> ")}\n`;
+		}
+		case "p": {
+			if (node.attrs?.class !== "bb-quote-author") break;
+			return `**${content}**\n`;
+		}
+		case "div": {
+			if (node.attrs?.class !== "code") break;
+			return `\`\`\`\n${cleanCodeBlockContent(unescaped)}\n\`\`\``;
+		}
+		case "pre": {
+			if (node.attrs?.class !== "blocks") break;
+			return `\`\`\`\n${cleanCodeBlockContent(unescaped)}\n\`\`\``;
+		}
+	}
+	// todo: lists
+
+	return content;
 }
