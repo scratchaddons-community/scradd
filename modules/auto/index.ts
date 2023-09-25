@@ -142,8 +142,7 @@ defineEvent("messageUpdate", async (_, message) => {
 
 	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
 	const found = fetched.find(
-		(found) =>
-			found.reference?.messageId === message.id && found.author.id === client.user.id,
+		(found) => found.reference?.messageId === message.id && found.author.id === client.user.id,
 	);
 	console.log(fetched, found);
 	const send = (data: BaseMessageOptions) =>
