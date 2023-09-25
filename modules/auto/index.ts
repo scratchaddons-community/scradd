@@ -7,6 +7,7 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import { autoreactions, dad } from "./secrets.js";
 import { client, defineEvent } from "strife.js";
+import scratch from "./scratch.js";
 
 const REACTION_CAP = 3;
 
@@ -50,14 +51,10 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	const baseChannel = getBaseChannel(message.channel);
+	if (await scratch(message)) return;
 
-	if (
-		process.env.NODE_ENV === "production"
-			? config.channels.modlogs?.id === baseChannel?.parent?.id
-			: config.channels.admin?.id !== baseChannel?.parent?.id
-	)
-		return;
+	const baseChannel = getBaseChannel(message.channel);
+	if (config.channels.modlogs?.id === baseChannel?.parent?.id) return;
 
 	const pingsScradd = message.mentions.has(client.user, {
 		ignoreEveryone: true,
@@ -86,7 +83,6 @@ defineEvent("messageCreate", async (message) => {
 			name &&
 			message.member &&
 			(pingsScradd ||
-				process.env.NODE_ENV !== "production" ||
 				message.guild?.id !== config.guild.id ||
 				config.channels.bots?.id === baseChannel?.id)
 		) {

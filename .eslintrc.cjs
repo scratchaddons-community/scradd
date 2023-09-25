@@ -20,7 +20,7 @@ module.exports = {
 		},
 		{ files: "*.d.ts", rules: { "@typescript-eslint/no-unused-vars": "off" } },
 		{
-			files: "modules/secrets/secrets.ts",
+			files: ["modules/auto/secrets.ts", "modules/_private/secrets.ts"],
 			rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 		},
 	],

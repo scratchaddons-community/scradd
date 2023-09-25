@@ -2,18 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
 
-import { defineEvent } from "strife.js";
-import { getSettings } from "./settings.js";
-import constants from "../common/constants.js";
-import { truncateText } from "../util/text.js";
-import { nth } from "../util/numbers.js";
-import { time, type APIEmbed, TimestampStyles } from "discord.js";
-import { gracefulFetch } from "../util/promises.js";
+import { getSettings } from "../settings.js";
+import constants from "../../common/constants.js";
+import { truncateText } from "../../util/text.js";
+import { nth } from "../../util/numbers.js";
+import { time, type APIEmbed, TimestampStyles, Message } from "discord.js";
+import { gracefulFetch } from "../../util/promises.js";
 
 const EMBED_LENGTH = 500;
 
-defineEvent("messageCreate", async (message) => {
-	if (!(await getSettings(message.author)).scratchEmbeds) return;
+export default async function scratch(message: Message) {
+	if (!(await getSettings(message.author)).scratchEmbeds) return false;
 	const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
 
 	const scratchUrlRegex =
@@ -225,5 +224,9 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	if (embeds.length) await message.reply({ embeds });
-});
+	if (embeds.length) {
+		await message.reply({ embeds });
+		return true;
+	}
+	return false;
+}
