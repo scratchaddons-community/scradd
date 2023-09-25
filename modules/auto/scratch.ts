@@ -251,11 +251,7 @@ export default async function scratch(message: Message) {
 		}
 	}
 
-	if (embeds.length) {
-		await message.reply({ embeds });
-		return true;
-	}
-	return false;
+	return embeds.length ? embeds : false;
 }
 
 function linkifyMentions(string: string) {
