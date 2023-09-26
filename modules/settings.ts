@@ -202,7 +202,7 @@ export async function updateSettings(
 					},
 				],
 			},
-			...((await config.guild.members.fetch(user.id).catch(() => {}))
+			...((await config.guild.members.fetch(user.id).catch(() => void 0))
 				? [
 						{
 							type: ComponentType.ActionRow,
@@ -264,7 +264,7 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions:
 			getWeeklyXp(user.id) > 100 ||
-			!(await config.guild.members.fetch(user.id).catch(() => {})),
+			!(await config.guild.members.fetch(user.id).catch(() => void 0)),
 		scratchEmbeds: true,
 		resourcesDmed: false,
 	};
