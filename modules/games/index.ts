@@ -48,9 +48,10 @@ defineButton("endGame", async (interaction, users) => {
 			content: `${constants.emojis.statuses.no} You can’t end someone else’s game!`,
 		});
 
-	await interaction.message.edit({
-		components: disableComponents(interaction.message.components),
-	});
+	if (!interaction.message.flags.has("Ephemeral"))
+		await interaction.message.edit({
+			components: disableComponents(interaction.message.components),
+		});
 
 	const current = CURRENTLY_PLAYING.get(interaction.user.id);
 	if (!current)
