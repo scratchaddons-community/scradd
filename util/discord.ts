@@ -667,11 +667,7 @@ export async function paginate<Item>(
 					},
 
 					author: format
-						? {
-								// eslint-disable-next-line id-match -- We didn’t name this.
-								icon_url: format.displayAvatarURL(),
-								name: format.displayName,
-						  }
+						? { icon_url: format.displayAvatarURL(), name: format.displayName }
 						: undefined,
 
 					color: format

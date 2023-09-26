@@ -1,8 +1,7 @@
 import { GuildMember, hyperlink, User, type RepliableInteraction } from "discord.js";
-import { client } from "strife.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
-import { getSettings } from "../settings.js";
+import { mentionUser } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function top(
@@ -10,7 +9,6 @@ export default async function top(
 	options: { user?: User | GuildMember; answer?: string },
 ) {
 	const { suggestions } = config.channels;
-	const { useMentions } = getSettings(interaction.user);
 
 	await paginate(
 		[...oldSuggestions, ...suggestionsDatabase.data]
@@ -35,29 +33,12 @@ export default async function top(
 					? reference.url
 					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
 				answer,
-			)}${
-				options.user?.displayName
-					? ""
-					: ` by ${
-							useMentions
-								? author instanceof User
-									? author.toString()
-									: `<@${author}>`
-								: (author instanceof User
-										? author
-										: await client.users
-												.fetch(author)
-												.catch(() => ({ displayName: `<@${author}>` }))
-								  ).displayName
-					  }`
-			}`,
+			)}${options.user ? "" : ` by ${await mentionUser(author, interaction.user)}`}`,
 		(data) => interaction.reply(data),
 		{
-			title: `Top suggestions${
-				options.user?.displayName ? ` by ${options.user.displayName}` : ""
-			}${
+			title: `Top suggestions${options.user ? ` by ${options.user.displayName}` : ""}${
 				options.answer
-					? `${options.user?.displayName ? " and" : ""} answered with ${options.answer}`
+					? `${options.user ? " and" : ""} answered with ${options.answer}`
 					: ""
 			}`,
 			format: options.user instanceof GuildMember ? options.user : undefined,

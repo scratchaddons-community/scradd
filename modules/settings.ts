@@ -6,12 +6,13 @@ import {
 	type Snowflake,
 	User,
 	userMention,
+	type Awaitable,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
-import { defineButton, defineChatCommand } from "strife.js";
+import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 
 export const userSettingsDatabase = new Database<{
@@ -209,4 +210,21 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		useMentions: getWeeklyXp(user.id) > 100,
 		resourcesDmed: false,
 	};
+}
+
+export function mentionUser(user: User, interactor: { id: Snowflake }): string;
+export function mentionUser(
+	user: User | Snowflake,
+	interactor: { id: Snowflake },
+): Awaitable<string>;
+export function mentionUser(user: User | Snowflake, interactor: { id: Snowflake }) {
+	const { useMentions } = getSettings(interactor);
+	return useMentions
+		? userMention(user instanceof User ? user.id : user)
+		: user instanceof User
+		? user.displayName
+		: client.users
+				.fetch(user)
+				.catch(() => ({ displayName: userMention(user) }))
+				.then((user) => user.displayName);
 }
