@@ -116,17 +116,6 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 				);
 				break;
 			}
-			case "position": {
-				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role color ${
-						typeof change.new === "number" && change.new
-							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
-							: "reset"
-					}${extraAuditLogsInfo(entry)}`,
-					"server",
-				);
-				break;
-			}
 			case "icon_hash":
 			case "unicode_emoji": {
 				iconChanged ||= true;
