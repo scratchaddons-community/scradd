@@ -142,9 +142,11 @@ defineEvent("messageUpdate", async (_, message) => {
 
 	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
 	const found = fetched.find(
-		(found) => found.reference?.messageId === message.id && found.author.id === client.user.id,
+		(found) =>
+			found.reference?.messageId === message.id &&
+			found.author.id === client.user.id &&
+			+found.createdAt - +message.createdAt < 1000,
 	);
-	console.log(fetched, found);
 	const send = (data: BaseMessageOptions) =>
 		fetched.size ? found?.edit(data) : message.reply(data);
 
@@ -211,7 +213,9 @@ defineEvent("messageDelete", async (message) => {
 	await fetched
 		.find(
 			(found) =>
-				found.reference?.messageId === message.id && found.author.id === message.author?.id,
+				found.reference?.messageId === message.id &&
+				found.author.id === client.user.id &&
+				+found.createdAt - +message.createdAt < 1000,
 		)
 		?.delete();
 });
