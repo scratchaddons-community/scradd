@@ -82,7 +82,6 @@ module.exports = {
 		],
 		"no-sparse-arrays": "off",
 		"quotes": ["error", "double", { avoidEscape: true }],
-		"semi": ["error", "always"],
 		"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/] }],
 		"unicorn/explicit-length-check": "off",
 		"unicorn/filename-case": ["error", { case: "camelCase" }],
