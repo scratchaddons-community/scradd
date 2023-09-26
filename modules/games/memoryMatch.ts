@@ -113,7 +113,9 @@ export default async function memoryMatch(
 							: [options.user, interaction.user],
 					easyMode,
 					bonusTurns,
-					useThread: options.thread ?? true,
+					useThread: options.thread ??
+						(!((await config.guild.members.fetch(options.user.id)).presence?.clientStatus?.mobile) || 
+						!((await config.guild.members.fetch(interaction.user.id)).presence?.clientStatus?.mobile) ? false : true),
 				});
 			} else await buttonInteraction.deferUpdate();
 		})
