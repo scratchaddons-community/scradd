@@ -96,7 +96,8 @@ export function extractMessageExtremities(
 				}
 
 				if (newEmbed.url && tryCensor(newEmbed.url)) newEmbed.url = "";
-				if (newEmbed.image?.url && tryCensor(newEmbed.image.url)) newEmbed.image = undefined;
+				if (newEmbed.image?.url && tryCensor(newEmbed.image.url))
+					newEmbed.image = undefined;
 
 				if (newEmbed.thumbnail?.url && tryCensor(newEmbed.thumbnail.url))
 					newEmbed.thumbnail = undefined;
