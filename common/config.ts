@@ -33,6 +33,7 @@ async function getConfig() {
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
 			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find(
 				(role) => role.editable && role.name.toLowerCase().includes("booster"),
