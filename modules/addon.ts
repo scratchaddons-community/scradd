@@ -100,7 +100,7 @@ defineChatCommand(
 							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 							: ""),
 					fields: [
-						...(addon.credits
+						...(credits.length
 							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
