@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import censor from "../automod/language.js";
+import tryCensor from "../automod/language.js";
 import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
@@ -167,7 +167,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		return;
 	}
 
-	const censored = censor(name);
+	const censored = tryCensor(name);
 	if (censored) {
 		await warn(
 			interaction.user,

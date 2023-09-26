@@ -29,17 +29,11 @@ export async function getChatters() {
 	);
 	if (!weeklyWinners.length) return;
 
-	const formatted = await Promise.all(
-		weeklyWinners.map(
-			async (user) =>
-				`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
-					(
-						await client.users
-							.fetch(user.user)
-							.catch(() => ({ displayName: userMention(user.user) }))
-					).displayName
-				} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
-		),
+	const formatted = weeklyWinners.map(
+		(user) =>
+			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${userMention(
+				user.user,
+			)} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
@@ -51,8 +45,7 @@ export async function getChatters() {
 	return {
 		embeds: [
 			{
-				// eslint-disable-next-line unicorn/string-content
-				description: "```\n" + filtered.join("\n").replaceAll("```", "'''") + "\n```",
+				description: filtered.join("\n"),
 				footer: ending
 					? {
 							icon_url: config.guild.iconURL() ?? undefined,

@@ -12,7 +12,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
-import { getSettings } from "../settings.js";
+import { getSettings, mentionUser } from "../settings.js";
 import {
 	client,
 	defineSubcommands,
@@ -124,17 +124,10 @@ export async function top(
 	await paginate(
 		top,
 		async (xp) =>
-			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${
-				(
-					await getSettings(interaction.user)
-				).useMentions
-					? `<@${xp.user}>`
-					: (
-							await client.users
-								.fetch(xp.user)
-								.catch(() => ({ displayName: `<@${xp.user}>` }))
-					  ).displayName
-			} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
+			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
+				xp.user,
+				interaction.user,
+			)} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 		(data) => interaction.reply(data),
 		{
 			title: "XP Leaderboard",

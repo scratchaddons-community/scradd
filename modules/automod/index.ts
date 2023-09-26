@@ -11,7 +11,7 @@ import { joinWithAnd } from "../../util/text.js";
 import warn from "../punishments/warn.js";
 import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
-import censor, { badWordsAllowed } from "./language.js";
+import tryCensor, { badWordsAllowed } from "./language.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 
@@ -79,7 +79,7 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	if (message.guild?.id !== config.guild.id) return true;
 
 	if (reaction.emoji.name && !badWordsAllowed(message.channel)) {
-		const censored = censor(reaction.emoji.name, 1);
+		const censored = tryCensor(reaction.emoji.name, 1);
 		if (censored) {
 			await warn(
 				partialUser.partial ? await partialUser.fetch() : partialUser,
@@ -97,7 +97,7 @@ defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
 	if (!newlyCreated) return false;
 	if (thread.guild.id !== config.guild.id) return true;
 
-	const censored = censor(thread.name);
+	const censored = tryCensor(thread.name);
 	if (censored && !badWordsAllowed(thread)) {
 		await thread.delete("Bad words");
 		return false;
@@ -107,7 +107,7 @@ defineEvent.pre("threadCreate", async (thread, newlyCreated) => {
 defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (newThread.guild.id !== config.guild.id) return;
 
-	const censored = censor(newThread.name);
+	const censored = tryCensor(newThread.name);
 	if (censored && !badWordsAllowed(newThread)) {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
@@ -135,7 +135,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 		newPresence.activities[0]?.type === ActivityType.Custom
 			? newPresence.activities[0].state
 			: newPresence.activities[0]?.name;
-	const censored = status && censor(status);
+	const censored = status && tryCensor(status);
 	if (
 		censored &&
 		config.roles.staff &&
@@ -167,7 +167,7 @@ defineChatCommand(
 	},
 
 	async (interaction, options) => {
-		const result = censor(options.text);
+		const result = tryCensor(options.text);
 
 		const words = result && result.words.flat();
 		await interaction.reply({
@@ -200,7 +200,7 @@ function censorOptions(options: readonly CommandInteractionOption[]): {
 	const words: string[] = [];
 
 	for (const option of options) {
-		const censoredValue = (option.value === "string" && censor(option.value)) || undefined;
+		const censoredValue = (option.value === "string" && tryCensor(option.value)) || undefined;
 		const censoredOptions = option.options && censorOptions(option.options);
 
 		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);

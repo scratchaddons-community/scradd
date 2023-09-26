@@ -8,7 +8,7 @@ import {
 	MessageComponentInteraction,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import censor, { badWordsAllowed } from "../automod/language.js";
+import tryCensor, { badWordsAllowed } from "../automod/language.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import { getSettings } from "../settings.js";
 import warn from "../punishments/warn.js";
@@ -66,7 +66,7 @@ export async function createReminder(
 	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
 	if (!dms && !badWordsAllowed(interaction.channel)) {
-		const censored = censor(options.reminder);
+		const censored = tryCensor(options.reminder);
 
 		if (censored) {
 			await interaction.reply({
