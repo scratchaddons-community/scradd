@@ -1,37 +1,42 @@
-import { strictEqual } from "node:assert";
+import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 import { caesar, joinWithAnd, normalize, trimPatchVersion, truncateText } from "./text.js";
 
-describe("joinWithAnd", function () {
-	it("should join an array of 3 items correctly", function () {
+describe("joinWithAnd", () => {
+	it("should join an array of 3 items correctly", () => {
 		strictEqual(joinWithAnd(["foo", "bar", "baz"]), "foo, bar, and baz");
 	});
-	it("should join an array of 2 items correctly", function () {
+	it("should join an array of 2 items correctly", () => {
 		strictEqual(joinWithAnd(["foo", "bar"]), "foo and bar");
 	});
-	it("should handle an array of 1 item correctly", function () {
+	it("should handle an array of 1 item correctly", () => {
 		strictEqual(joinWithAnd(["one"]), "one");
 	});
-	it("should handle an empty array correctly", function () {
+	it("should handle an empty array correctly", () => {
 		strictEqual(joinWithAnd([]), "");
 	});
-	it("should join an array of 3 items with a callback correctly", function () {
+	it("should join an array of 3 items with a callback correctly", () => {
 		strictEqual(
 			joinWithAnd([1, 2, 3], (item) => `item${item}`),
 			"item1, item2, and item3",
 		);
 	});
-	it("should join an array of 2 items with a callback correctly", function () {
+	it("should join an array of 2 items with a callback correctly", () => {
 		strictEqual(
 			joinWithAnd([1, 2], (item) => `item${item}`),
 			"item1 and item2",
 		);
 	});
-	it("should join an array of 1 item with a callback correctly", function () {
+	it("should join an array of 1 item with a callback correctly", () => {
 		strictEqual(
 			joinWithAnd([1], (item) => `item${item}`),
 			"item1",
 		);
+	});
+	it("shouldn’t change the original array", () => {
+		const array = ["foo", "bar", "baz"];
+		joinWithAnd(array);
+		deepStrictEqual(array, ["foo", "bar", "baz"]);
 	});
 });
 
