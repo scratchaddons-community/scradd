@@ -44,15 +44,15 @@ import { generateHash, truncateText } from "./text.js";
  * Extract extremities (embeds, stickers, and attachments) from a message.
  *
  * @param message - The message to extract extremeties from.
- * @param censor - Function to censor bad words. Omit to not censor.
+ * @param tryCensor - Function to censor bad words. Omit to not censor.
  */
 export function extractMessageExtremities(
 	message: Message,
-	censor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
+	tryCensor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
 ): { embeds: APIEmbed[]; files: Attachment[] } {
 	const embeds = [
 		...message.stickers
-			.filter((sticker) => !censor?.(sticker.name))
+			.filter((sticker) => !tryCensor?.(sticker.name))
 			.map(
 				(sticker): APIEmbed => ({
 					color: Colors.Blurple,
@@ -83,45 +83,40 @@ export function extractMessageExtremities(
 					newEmbed.fields = [];
 				}
 
-				if (!censor) return newEmbed;
+				if (!tryCensor) return newEmbed;
 
 				if (newEmbed.description) {
-					const censored = censor(newEmbed.description);
-
+					const censored = tryCensor(newEmbed.description);
 					if (censored) newEmbed.description = censored.censored;
 				}
 
 				if (newEmbed.title) {
-					const censored = censor(newEmbed.title);
-
+					const censored = tryCensor(newEmbed.title);
 					if (censored) newEmbed.title = censored.censored;
 				}
 
-				if (newEmbed.url && censor(newEmbed.url)) newEmbed.url = "";
+				if (newEmbed.url && tryCensor(newEmbed.url)) newEmbed.url = "";
+				if (newEmbed.image?.url && tryCensor(newEmbed.image.url)) newEmbed.image = undefined;
 
-				if (newEmbed.image?.url && censor(newEmbed.image.url)) newEmbed.image = undefined;
-
-				if (newEmbed.thumbnail?.url && censor(newEmbed.thumbnail.url))
+				if (newEmbed.thumbnail?.url && tryCensor(newEmbed.thumbnail.url))
 					newEmbed.thumbnail = undefined;
 
 				if (newEmbed.footer?.text) {
-					const censored = censor(newEmbed.footer.text);
-
+					const censored = tryCensor(newEmbed.footer.text);
 					if (censored) newEmbed.footer.text = censored.censored;
 				}
 
 				if (newEmbed.author) {
-					const censoredName = censor(newEmbed.author.name);
-					const censoredUrl = newEmbed.author.url && censor(newEmbed.author.url);
-
+					const censoredName = tryCensor(newEmbed.author.name);
 					if (censoredName) newEmbed.author.name = censoredName.censored;
 
+					const censoredUrl = newEmbed.author.url && tryCensor(newEmbed.author.url);
 					if (censoredUrl) newEmbed.author.url = "";
 				}
 
 				newEmbed.fields = (newEmbed.fields ?? []).map((field) => {
-					const censoredName = censor(field.name);
-					const censoredValue = censor(field.value);
+					const censoredName = tryCensor(field.name);
+					const censoredValue = tryCensor(field.value);
 					return {
 						inline: field.inline,
 						name: censoredName ? censoredName.censored : field.name,

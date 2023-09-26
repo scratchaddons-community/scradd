@@ -13,7 +13,7 @@ import {
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
-import censor from "../automod/language.js";
+import tryCensor, { censor } from "../automod/language.js";
 
 export const BOARD_EMOJI = "🥔",
 	REACTIONS_NAME = "Potatoes";
@@ -129,13 +129,7 @@ export async function generateBoardMessage(
 	 * @returns The converted message.
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = extractMessageExtremities(message, censor);
-
-		const description = await messageToText(message);
-
-		const censored = censor(description);
-		const censoredName = censor(message.author.displayName);
-
+		const { files, embeds } = extractMessageExtremities(message, tryCensor);
 		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
 
 		return {
@@ -172,7 +166,7 @@ export async function generateBoardMessage(
 							: message.type === MessageType.GuildInviteReminder
 							? undefined
 							: message.member?.displayColor,
-					description: censored ? censored.censored : description,
+					description: censor(await messageToText(message)),
 
 					author: {
 						icon_url:
@@ -188,9 +182,7 @@ export async function generateBoardMessage(
 								: message.type === MessageType.GuildInviteReminder
 								? "Invite your friends 🤖"
 								: (message.member?.displayName ??
-										(censoredName
-											? censoredName.censored
-											: message.author.displayName)) +
+										censor(message.author.displayName)) +
 								  (message.author.bot ? " 🤖" : ""),
 					},
 

@@ -11,7 +11,7 @@ import {
 import log, { LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
-import censor, { badWordRegexps, badWordsAllowed } from "./language.js";
+import tryCensor, { badWordRegexps, badWordsAllowed } from "./language.js";
 import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([
@@ -105,9 +105,9 @@ export default async function automodMessage(message: Message) {
 		}
 
 		const badWords = [
-			censor(stripMarkdown(message.content)),
-			...message.stickers.map(({ name }) => censor(name)),
-			...invites.map((invite) => !!invite?.guild && censor(invite.guild.name)),
+			tryCensor(stripMarkdown(message.content)),
+			...message.stickers.map(({ name }) => tryCensor(name)),
+			...invites.map((invite) => !!invite?.guild && tryCensor(invite.guild.name)),
 		].reduce(
 			(bad, censored) =>
 				typeof censored === "boolean"
@@ -133,7 +133,7 @@ export default async function automodMessage(message: Message) {
 			])
 			.reduce(
 				(bad, current) => {
-					const censored = censor(current || "", 1);
+					const censored = tryCensor(current || "", 1);
 					return censored
 						? {
 								strikes: bad.strikes + censored.strikes,
