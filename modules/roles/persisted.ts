@@ -24,7 +24,7 @@ const persistedRoles = {
 	formerMod: ["881623848137682954", config.roles.mod?.id],
 	dev: "806608777835053098",
 	translator: "841696608592330794",
-	contributor: "991413187427700786",
+	contributor: config.roles.dev?.id,
 	epic: config.roles.epic?.id,
 	booster: config.roles.booster?.id,
 	og: "1107170572963684402",

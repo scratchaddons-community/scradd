@@ -32,16 +32,19 @@ export function joinWithAnd(
 	array: { toString: () => string }[],
 	callback = (item: { toString: () => string }) => item.toString(),
 ): string {
-	const last = array.pop();
+	const last = array.at(-1);
 
 	if (last === undefined) return "";
 
-	if (!array.length) return callback(last);
+	if (array.length === 1) return callback(last);
 
 	return `${
-		array.length === 1
+		array.length === 2
 			? `${array[0] ? callback(array[0]) : ""} `
-			: array.map((item) => `${callback(item)}, `).join("")
+			: array
+					.slice(0, -1)
+					.map((item) => `${callback(item)}, `)
+					.join("")
 	}and ${callback(last)}`;
 }
 
