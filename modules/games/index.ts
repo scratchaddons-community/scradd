@@ -5,10 +5,16 @@ import { defineButton, defineChatCommand, defineEvent, defineMenuCommand } from 
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
+import hangman from "./hangman.js";
 
 defineChatCommand(
 	{ name: "guess-addon", description: "Think of an addon for me to guess it", access: true },
 	guessAddon,
+);
+
+defineChatCommand(
+	{ name: "hangman", description: "Try to guess who from the server I’m thinking of" },
+	hangman,
 );
 
 defineChatCommand(
