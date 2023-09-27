@@ -274,8 +274,8 @@ export async function mentionUser(user: User | Snowflake, interactor: { id: Snow
 	const { useMentions } = await getSettings(interactor);
 	return useMentions
 		? userMention(user instanceof User ? user.id : user)
-		: user instanceof User
-		? user.displayName
-		: (await client.users.fetch(user).catch(() => ({ displayName: userMention(user) })))
-				.displayName;
+		: (user instanceof User
+				? user
+				: await client.users.fetch(user).catch(() => ({ displayName: userMention(user) }))
+		  ).displayName;
 }
