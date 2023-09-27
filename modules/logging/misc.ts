@@ -48,7 +48,7 @@ export default async function log(
 		const lines = file.content.split("\n");
 		return lines.length > 10 || lines.find((line) => line.length > 100);
 	});
-	const embeddedFiles = extra.files?.splice(0, externalIndex === -1 ? externalIndex : undefined);
+	const embeddedFiles = extra.files?.splice(0, externalIndex === -1 ? undefined : externalIndex);
 
 	return await thread.send({
 		content:
