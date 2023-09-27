@@ -122,6 +122,7 @@ module.exports = {
 				},
 			},
 		],
+		"unicorn/relative-url-style": ["error", "always"],
 		"unicorn/string-content": [
 			"warn",
 			{
