@@ -40,7 +40,7 @@ export function convertBase(
 	const outBaseBig = BigInt(outBase);
 
 	let decValue = [...value]
-		.reverse() // Stop changing this to `.reduceRight()`! It’s not the same!
+		.toReversed()
 		.reduce((carry, digit, loopIndex) => {
 			const biggestBaseIndex = range.indexOf(digit);
 			if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
