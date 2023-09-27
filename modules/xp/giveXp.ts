@@ -96,7 +96,7 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
-	const sorted = xp.sort((one, two) => two.xp - one.xp);
+	const sorted = xp.toSorted((one, two) => two.xp - one.xp);
 
 	const members = await config.guild.members.fetch();
 	const serverRank = sorted

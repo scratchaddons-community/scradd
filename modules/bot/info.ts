@@ -170,7 +170,9 @@ export default async function info(
 			members.push({ user: await client.users.fetch(constants.users.retron) });
 
 		return joinWithAnd(
-			members.sort((one, two) => one.user.displayName.localeCompare(two.user.displayName)),
+			members.toSorted((one, two) =>
+				one.user.displayName.localeCompare(two.user.displayName),
+			),
 			({ user }) => mentionUser(user, interaction.user),
 		);
 	}

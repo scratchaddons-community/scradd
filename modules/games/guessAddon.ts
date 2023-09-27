@@ -38,7 +38,7 @@ export default async function guessAddon(
 		askedQuestions: string[] = [],
 		addonProbabilities: Probabilities = addons
 			.map((addon) => [addon.id, 0] as const)
-			.sort(() => Math.random() - 0.5),
+			.toSorted(() => Math.random() - 0.5),
 		askedCount = 0,
 		backInfo:
 			| string
@@ -540,7 +540,7 @@ function getNextQuestions(
 				: [...previous, current];
 		}, [])
 		.map(([question]) => question)
-		.sort(() => Math.random() - 0.5);
+		.toSorted(() => Math.random() - 0.5);
 }
 
 /**
@@ -607,12 +607,12 @@ function answerQuestion(
 					: answerQuestion(
 							current[0],
 							(current[1] ? 1 : -1) * probabilityShift,
-							[...accumulated].sort((one, two) => two[1] - one[1]),
+							accumulated.toSorted((one, two) => two[1] - one[1]),
 							askedQuestions,
 					  ),
 			initialUpdated,
 		)
-		.sort((one, two) => two[1] - one[1]);
+		.toSorted((one, two) => two[1] - one[1]);
 
 	askedQuestions.push(...justAskedQuestions);
 
