@@ -8,7 +8,6 @@ import {
 	ButtonStyle,
 	GuildMember,
 	User,
-	userMention,
 	ChatInputCommandInteraction,
 	ButtonInteraction,
 } from "discord.js";
@@ -18,7 +17,7 @@ import pkg from "../../package.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../auto/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
-import { getSettings } from "../settings.js";
+import { mentionUser } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
@@ -26,26 +25,6 @@ const testingServer = await client.guilds.fetch(constants.testingGuildId).catch(
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
-
-/**
- * Get all users with a role.
- *
- * @param roleId - Role to fetch.
- * @param useMentions - Whether to use mentions or usernames.
- *
- * @returns Users with the role.
- */
-async function getRole(roleId: Snowflake, useMentions = false): Promise<string> {
-	const role = await testingServer?.roles.fetch(roleId);
-	const members: { user: User }[] = role?.members.toJSON() ?? [];
-	if (roleId === designers)
-		members.push({ user: await client.users.fetch(constants.users.retron) });
-
-	return joinWithAnd(
-		members.sort((one, two) => one.user.displayName.localeCompare(two.user.displayName)),
-		(member) => (useMentions ? userMention(member.user.id) : member.user.displayName),
-	);
-}
 
 export default async function info(
 	interaction: ChatInputCommandInteraction,
@@ -142,8 +121,6 @@ export default async function info(
 			break;
 		}
 		case "credits": {
-			const { useMentions } = await getSettings(interaction.user);
-
 			await interaction.reply({
 				embeds: [
 					{
@@ -153,17 +130,17 @@ export default async function info(
 						fields: [
 							{
 								name: "🧑‍💻 Developers",
-								value: await getRole(developers, useMentions),
+								value: await getRole(developers),
 								inline: true,
 							},
 							{
 								name: "🖌️ Designers",
-								value: await getRole(designers, useMentions),
+								value: await getRole(designers),
 								inline: true,
 							},
 							{
 								name: "🧪 Additional beta testers",
-								value: await getRole(testers, useMentions),
+								value: await getRole(testers),
 								inline: true,
 							},
 							{
@@ -184,6 +161,23 @@ export default async function info(
 				],
 			});
 		}
+	}
+
+	async function getRole(roleId: Snowflake): Promise<string> {
+		const role = await testingServer?.roles.fetch(roleId);
+		const members: { user: User }[] = role?.members.toJSON() ?? [];
+		if (roleId === designers)
+			members.push({ user: await client.users.fetch(constants.users.retron) });
+
+		return joinWithAnd(
+			await Promise.all(
+				members
+					.toSorted((one, two) =>
+						one.user.displayName.localeCompare(two.user.displayName),
+					)
+					.map(({ user }) => mentionUser(user, interaction.user)),
+			),
+		);
 	}
 }
 

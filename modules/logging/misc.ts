@@ -42,16 +42,13 @@ export default async function log(
 ) {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
-	const externalFileIndex = extra.files?.findIndex((file) => {
+	const externalIndex = extra.files?.findIndex((file) => {
 		if (typeof file === "string" || file.content.includes("```")) return true;
 
 		const lines = file.content.split("\n");
 		return lines.length > 10 || lines.find((line) => line.length > 100);
 	});
-	const embeddedFiles =
-		externalFileIndex === -1
-			? extra.files?.splice(0)
-			: extra.files?.splice(0, externalFileIndex);
+	const embeddedFiles = extra.files?.splice(0, externalIndex === -1 ? undefined : externalIndex);
 
 	return await thread.send({
 		content:
@@ -79,7 +76,7 @@ export default async function log(
 			},
 		],
 		files: await Promise.all(
-			extra.files?.slice(0, 10).map(async (file) => {
+			extra.files?.map(async (file) => {
 				if (typeof file === "string") {
 					const response = await fetch(file);
 					return {

@@ -138,7 +138,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 		).join("");
 		const wrongs = guesses
 			.filter((guess) => guess.length > 1 || !word.includes(guess))
-			.sort((one, two) => two.length - one.length || one.localeCompare(two));
+			.toSorted((one, two) => two.length - one.length || one.localeCompare(two));
 
 		const [consonants, vowels] = ["BCDFGHJKLMNPQRSTVWXZ", "AEIOUY0123456789_."].map((letters) =>
 			Array.from(letters, (label) => ({ value: label.toLowerCase(), label })).filter(

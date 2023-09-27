@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import censor from "../automod/language.js";
+import tryCensor from "../automod/language.js";
 import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
@@ -167,7 +167,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		return;
 	}
 
-	const censored = censor(name);
+	const censored = tryCensor(name);
 	if (censored) {
 		await warn(
 			interaction.user,
@@ -283,7 +283,7 @@ export async function qualifiesForRole(member: GuildMember) {
 		(config.roles.staff && member.roles.resolve(config.roles.staff.id))
 	)
 		return true;
-	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
+	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(
 		recentXp.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -292,7 +292,7 @@ export async function qualifiesForRole(member: GuildMember) {
 			accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
 			return accumulator;
 		}, {}),
-	).sort((one, two) => two[1] - one[1]);
+	).toSorted((one, two) => two[1] - one[1]);
 	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
 	command ??= (await config.guild.commands.fetch()).find(
@@ -327,12 +327,7 @@ async function resolveIcon(icon: string) {
 
 	if (icon.startsWith("data:")) return { icon };
 
-	if (!/^https?:\/\//.test(icon)) return;
-	try {
-		new URL(icon);
-	} catch {
-		return;
-	}
+	if (!/^https?:\/\//.test(icon) || !URL.canParse(icon)) return;
 
 	const response = await fetch(icon, { method: "HEAD" });
 	if (!response.ok) return;

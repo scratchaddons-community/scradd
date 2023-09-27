@@ -154,7 +154,7 @@ defineModal("modInterestForm", async (interaction) => {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
-	const allXp = [...xpDatabase.data].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const allXp = xpDatabase.data.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 	const xp = Math.floor(allXp.find((entry) => entry.user === interaction.user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
 	const rank = allXp.findIndex((info) => info.user === interaction.user.id) + 1;

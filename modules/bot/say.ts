@@ -30,7 +30,7 @@ export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | 
 		);
 	}
 	const messages = interaction.channel.messages.cache
-		.sort((one, two) => +two.createdAt - +one.createdAt)
+		.sorted((one, two) => +two.createdAt - +one.createdAt)
 		.filter(
 			(message) =>
 				!message.flags.has("Ephemeral") &&
