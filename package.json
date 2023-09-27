@@ -9,8 +9,8 @@
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
-		"serve": "nodemon --enable-source-maps . --watch dist",
-		"start": "node --enable-source-maps .",
+		"serve": "nodemon --env-file=.env --enable-source-maps . --watch dist",
+		"start": "node --env-file=.env --enable-source-maps .",
 		"test": "npm run build && node --test"
 	},
 	"prettier": "@redguy12/prettier-config",
@@ -24,7 +24,6 @@
 		"date-fns": "2.30.0",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
-		"dotenv": "16.3.1",
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"papaparse": "5.4.1",
