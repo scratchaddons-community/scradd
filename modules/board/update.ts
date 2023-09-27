@@ -78,7 +78,7 @@ export default async function updateBoard(
 		}),
 	);
 	const pins = await config.channels.board.messages.fetchPinned();
-	if (pins.size > top.length) {
+	if (pins.size > topIds.length) {
 		await Promise.all(
 			pins
 				.filter((pin) => !topIds.includes(pin.id))
