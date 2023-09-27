@@ -20,7 +20,7 @@ export default async function top(
 						(user && (author instanceof User ? author.id : author) !== user.id)
 					),
 			)
-			.sort((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
+			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
 				"url" in reference

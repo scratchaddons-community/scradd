@@ -46,8 +46,10 @@ export default async function changeNickname(member: GuildMember) {
 			}
 		}
 
-		// eslint-disable-next-line unicorn/prefer-spread -- This is not an array
-		const unchanged = safe.concat(unsafe);
+		const unchanged = safe
+			// eslint-disable-next-line unicorn/prefer-spread -- This is not an array
+			.concat(unsafe)
+			.sorted((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
 
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
 			const nick = censor(member.user.displayName);
@@ -66,13 +68,12 @@ export default async function changeNickname(member: GuildMember) {
 			}
 		}
 
-		const sorted = unchanged.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
 		if (unchanged.size === 2) {
-			const oldest = sorted.firstKey();
+			const oldest = unchanged.firstKey();
 			if (oldest) unchanged.delete(oldest);
 		} else if (unchanged.size > 1)
 			await log(
-				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(sorted.toJSON())}`,
+				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(unchanged.toJSON())}`,
 			);
 	}
 }

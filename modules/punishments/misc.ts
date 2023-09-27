@@ -100,7 +100,7 @@ export async function listStrikes(
 ) {
 	const strikes = strikeDatabase.data
 		.filter((strike) => strike.user === member.id)
-		.sort((one, two) => two.date - one.date);
+		.toSorted((one, two) => two.date - one.date);
 
 	const totalStrikeCount = Math.trunc(
 		strikes.reduce(

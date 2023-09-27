@@ -63,7 +63,7 @@ export default async function updateBoard(
 		);
 	}
 
-	const top = [...boardDatabase.data].sort((one, two) => two.reactions - one.reactions);
+	const top = boardDatabase.data.toSorted((one, two) => two.reactions - one.reactions);
 	top.splice(
 		top.findIndex(
 			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,

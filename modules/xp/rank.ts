@@ -6,7 +6,7 @@ import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./m
 
 export default async function getUserRank(interaction: RepliableInteraction, user: User) {
 	const allXp = xpDatabase.data;
-	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const top = allXp.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
@@ -25,7 +25,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 	const serverRank =
 		allXp
 			.filter(({ user }) => members.has(user))
-			.sort((one, two) => two.xp - one.xp)
+			.toSorted((one, two) => two.xp - one.xp)
 			.findIndex((info) => info.user === user.id) + 1;
 
 	async function makeCanvasFiles() {

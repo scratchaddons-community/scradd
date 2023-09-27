@@ -283,7 +283,7 @@ export async function qualifiesForRole(member: GuildMember) {
 		(config.roles.staff && member.roles.resolve(config.roles.staff.id))
 	)
 		return true;
-	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
+	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(
 		recentXp.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -292,7 +292,7 @@ export async function qualifiesForRole(member: GuildMember) {
 			accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
 			return accumulator;
 		}, {}),
-	).sort((one, two) => two[1] - one[1]);
+	).toSorted((one, two) => two[1] - one[1]);
 	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
 	command ??= (await config.guild.commands.fetch()).find(

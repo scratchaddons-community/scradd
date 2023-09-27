@@ -172,7 +172,9 @@ export default async function info(
 		return joinWithAnd(
 			await Promise.all(
 				members
-					.sort((one, two) => one.user.displayName.localeCompare(two.user.displayName))
+					.toSorted((one, two) =>
+						one.user.displayName.localeCompare(two.user.displayName),
+					)
 					.map(({ user }) => mentionUser(user, interaction.user)),
 			),
 		);

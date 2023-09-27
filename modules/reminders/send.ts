@@ -179,7 +179,9 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
+					for (const info of boardDatabase.data.toSorted(
+						() => Math.random() - 0.5,
+					)) {
 						if (info.onBoard) continue;
 
 						const date = new Date(
@@ -236,7 +238,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 }
 
 function getNextInterval() {
-	const reminder = [...remindersDatabase.data].sort((one, two) => one.date - two.date)[0];
+	const reminder = remindersDatabase.data.toSorted((one, two) => one.date - two.date)[0];
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }

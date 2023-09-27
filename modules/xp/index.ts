@@ -108,7 +108,7 @@ export async function top(
 	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
 	user?: User | GuildMember,
 ) {
-	const top = [...xpDatabase.data].sort((one, two) => two.xp - one.xp);
+	const top = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
 	if (index === -1) {
