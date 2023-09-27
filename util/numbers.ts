@@ -39,17 +39,14 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = [...value]
-		.toReversed()
-		.reduce((carry, digit, loopIndex) => {
-			const biggestBaseIndex = range.indexOf(digit);
-			if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
-				throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
-			return (
-				carry +
-				BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
-			);
-		}, 0n);
+	let decValue = [...value].toReversed().reduce((carry, digit, loopIndex) => {
+		const biggestBaseIndex = range.indexOf(digit);
+		if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
+			throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
+		return (
+			carry + BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
+		);
+	}, 0n);
 
 	let output = "";
 	while (decValue > 0) {
