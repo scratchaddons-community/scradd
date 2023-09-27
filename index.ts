@@ -1,5 +1,4 @@
-import path from "node:path";
-import url from "node:url";
+import { fileURLToPath } from "node:url";
 import dns from "node:dns";
 import { ActivityType, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
@@ -18,16 +17,17 @@ if (
 	throw new Error("Refusing to run on production Scradd without `--production` flag");
 
 if (constants.canvasEnabled) {
-	const { Module } = await import("node:module");
-	const require = Module.createRequire(import.meta.url);
-
 	const { GlobalFonts } = await import("@napi-rs/canvas");
 	GlobalFonts.registerFromPath(
-		require.resolve("@fontsource-variable/sora/files/sora-latin-wght-normal.woff2"),
+		fileURLToPath(
+			import.meta.resolve("@fontsource-variable/sora/files/sora-latin-wght-normal.woff2"),
+		),
 		"Sora",
 	);
 	GlobalFonts.registerFromPath(
-		require.resolve("@fontsource-variable/sora/files/sora-latin-ext-wght-normal.woff2"),
+		fileURLToPath(
+			import.meta.resolve("@fontsource-variable/sora/files/sora-latin-ext-wght-normal.woff2"),
+		),
 		"SoraExt",
 	);
 
@@ -36,7 +36,7 @@ if (constants.canvasEnabled) {
 }
 
 await login({
-	modulesDirectory: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
+	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
 	defaultCommandAccess: process.env.GUILD_ID,
 	async handleError(error, event) {
 		const { default: logError } = await import("./modules/logging/errors.js");
