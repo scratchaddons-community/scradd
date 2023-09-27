@@ -66,7 +66,7 @@ export default async function changeNickname(member: GuildMember) {
 			}
 		}
 
-		const sorted = unchanged.toSorted(
+		const sorted = unchanged.sort(
 			(one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0),
 		);
 		if (unchanged.size === 2) {
