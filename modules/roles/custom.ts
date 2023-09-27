@@ -327,12 +327,7 @@ async function resolveIcon(icon: string) {
 
 	if (icon.startsWith("data:")) return { icon };
 
-	if (!/^https?:\/\//.test(icon)) return;
-	try {
-		new URL(icon);
-	} catch {
-		return;
-	}
+	if (!/^https?:\/\//.test(icon) || !URL.canParse(icon)) return;
 
 	const response = await fetch(icon, { method: "HEAD" });
 	if (!response.ok) return;
