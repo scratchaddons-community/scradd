@@ -179,9 +179,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					for (const info of boardDatabase.data.toSorted(
-						() => Math.random() - 0.5,
-					)) {
+					for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
 						if (info.onBoard) continue;
 
 						const date = new Date(
