@@ -24,7 +24,7 @@ export const addons = (
 					})),
 			),
 	)
-).sort((one, two) => one.name.localeCompare(two.name));
+).toSorted((one, two) => one.name.localeCompare(two.name));
 
 export const addonSearchOptions = {
 	keys: [

@@ -77,7 +77,7 @@ export default async function makeSlideshow(
 				(message) =>
 					message.reactions >= minReactions && message.user === (user ?? message.user),
 			)
-			.sort(() => Math.random() - 0.5),
+			.toSorted(() => Math.random() - 0.5),
 		async (message) =>
 			(channel ? await textChannelMatches(channel, message.channel) : true) && message,
 	);

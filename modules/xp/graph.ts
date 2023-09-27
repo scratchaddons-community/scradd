@@ -11,7 +11,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 
 	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
 
-	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
+	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 
 	const canvas = createCanvas(1000, 750);
@@ -77,7 +77,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 						],
 					};
 				})
-				.sort((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0)),
+				.toSorted((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0)),
 		},
 	});
 

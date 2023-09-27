@@ -32,7 +32,7 @@ await remindersDatabase.init();
 export function getUserReminders(id: string) {
 	return remindersDatabase.data
 		.filter((reminder) => reminder.user === id)
-		.sort((one, two) => one.date - two.date);
+		.toSorted((one, two) => one.date - two.date);
 }
 
 if (

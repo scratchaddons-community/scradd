@@ -426,7 +426,7 @@ async function setupGame(difficulty: 2 | 4) {
 	const emojis = Array.from<typeof selected>({ length: difficulty })
 		.fill(selected)
 		.flat()
-		.sort(() => Math.random() - 0.5);
+		.toSorted(() => Math.random() - 0.5);
 
 	const chunks = [];
 	while (emojis.length) {
