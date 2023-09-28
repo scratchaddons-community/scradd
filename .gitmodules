@@ -1,0 +1,4 @@
+[submodule "extension"]
+	path = extension
+	url = https://github.com/ScratchAddons/ScratchAddons.git
+	shallow = true

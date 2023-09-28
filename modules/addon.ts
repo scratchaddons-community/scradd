@@ -7,18 +7,17 @@ import {
 } from "discord.js";
 import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
-import { manifest, addons, addonSearchOptions } from "../common/extension.js";
+import addons, { addonSearchOptions } from "../common/extension.js";
 import { defineChatCommand } from "strife.js";
 import { escapeMessage, tooltip } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
+import manifest from "../extension/manifest.json" assert { type: "json" };
 
 defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${
-			manifest.version_name ?? manifest.version
-		}`,
+		description: `Replies with information about a specific addon available in v${manifest.version_name}`,
 
 		options: {
 			addon: {
@@ -127,11 +126,9 @@ defineChatCommand(
 
 					title: addon.name,
 
-					url: `https://github.com/${constants.urls.saRepo}/tree/${
-						manifest.version_name?.endsWith("-prerelease")
-							? "master"
-							: `v${encodeURI(manifest.version)}`
-					}/addons/${encodeURIComponent(addon.id)}/`,
+					url: `https://github.com/${constants.urls.saRepo}/tree/v${encodeURI(
+						manifest.version,
+					)}/addons/${encodeURIComponent(addon.id)}/`,
 				},
 			],
 

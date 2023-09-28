@@ -54,7 +54,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc.join} ${
+		`${constants.emojis.welcome.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}`,
 	);
@@ -96,7 +96,7 @@ defineEvent("guildMemberRemove", async (member) => {
 			  ];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc[banned ? "ban" : "leave"]} ${
+		`${constants.emojis.welcome[banned ? "ban" : "leave"]} ${
 			byes[Math.floor(Math.random() * byes.length)]
 		}`,
 	);

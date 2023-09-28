@@ -7,13 +7,14 @@ import {
 	chatInputApplicationCommandMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import { addons, manifest } from "../../common/extension.js";
+import addons from "../../common/extension.js";
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
+import manifest from "../../extension/manifest.json" assert { type: "json" };
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -81,9 +82,7 @@ export default async function guessAddon(
 			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
-				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
-					manifest.version_name ?? manifest.version
-				})`,
+				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${manifest.version_name})`,
 			);
 
 			CURRENTLY_PLAYING.delete(interaction.user.id);

@@ -1,10 +1,10 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
-		"baseUrl": "./",
-		"checkJs": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
+		"baseUrl": "./",
+		"checkJs": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
@@ -29,6 +29,6 @@
 		"target": "ES2021",
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["node_modules", ".git", "dist"],
+	"exclude": ["node_modules", ".git", "dist", "extension"],
 	"typeAcquisition": { "enable": true }
 }

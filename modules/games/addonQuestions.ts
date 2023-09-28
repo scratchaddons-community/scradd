@@ -1,7 +1,8 @@
 import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
-import { manifest, addons } from "../../common/extension.js";
+import addons from "../../common/extension.js";
 import { trimPatchVersion } from "../../util/text.js";
+import manifest from "../../extension/manifest.json" assert { type: "json" };
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
@@ -33,13 +34,9 @@ const firstLetters = Object.fromEntries(
 		]),
 	);
 
-const versionMarkdown = `**[${escapeMessage(
-	manifest.version_name ?? manifest.version,
-)}](https://github.com/${constants.urls.saRepo}${
-	manifest.version_name?.endsWith("-prerelease")
-		? ""
-		: `/releases/tag/v${encodeURI(manifest.version)}`
-})**`;
+const versionMarkdown = `**[${escapeMessage(manifest.version_name)}](https://github.com/${
+	constants.urls.saRepo
+}/releases/tag/v${encodeURI(manifest.version)})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",

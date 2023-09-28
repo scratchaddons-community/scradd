@@ -6,7 +6,7 @@ module.exports = {
 		"plugin:unicorn/all",
 		"plugin:@typescript-eslint/strict-type-checked",
 	],
-	ignorePatterns: "dist",
+	ignorePatterns: ["dist", "extension"],
 	overrides: [
 		{
 			extends: ["plugin:@typescript-eslint/disable-type-checked"],
@@ -20,7 +20,7 @@ module.exports = {
 		},
 		{ files: "*.d.ts", rules: { "@typescript-eslint/no-unused-vars": "off" } },
 		{
-			files: "modules/secrets/secrets.ts",
+			files: ["modules/_private/**", "modules/secrets/secrets.ts", "common/constants.ts"],
 			rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 		},
 	],
@@ -32,6 +32,8 @@ module.exports = {
 		tsconfigRootDir: __dirname,
 	},
 	plugins: ["@typescript-eslint"],
+	reportUnusedDisableDirectives: true,
+	root: true,
 	rules: {
 		"@typescript-eslint/no-base-to-string": [
 			"error",

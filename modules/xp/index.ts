@@ -49,7 +49,7 @@ defineSubcommands(
 					},
 				},
 			},
-			...(constants.canvasEnabled && {
+			...(process.env.CANVAS !== "false" && {
 				graph: {
 					description: "Graph users’ XP over the last week",
 					options: {},
@@ -99,7 +99,7 @@ defineButton("viewLeaderboard", async (interaction, userId) => {
 	await top(interaction, await client.users.fetch(userId));
 });
 
-if (constants.canvasEnabled) {
+if (process.env.CANVAS !== "false") {
 	const { default: weeklyXpGraph } = await import("./graph.js");
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }

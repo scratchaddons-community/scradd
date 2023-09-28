@@ -14,10 +14,18 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4.1.0
+              with:
+                  submodules: true
 
             - name: Bump
               id: sync_types
               uses: RedGuy12/sync-types@v1.2.16
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
 
             - name: Install
               run: npm ci

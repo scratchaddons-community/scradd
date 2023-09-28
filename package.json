@@ -2,12 +2,13 @@
 	"name": "scradd",
 	"version": "2.9.4",
 	"private": true,
+	"homepage": "https://discord.gg/FPv957V6SD",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
-		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
+		"format": "prettier --write \"**\" \"!dist/**\" \"!extension/**\" --ignore-unknown",
 		"lint": "eslint .",
 		"serve": "nodemon --env-file=.env --enable-source-maps . --watch dist",
 		"start": "node --env-file=.env --enable-source-maps .",
@@ -33,7 +34,6 @@
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/async-exit-hook": "<=2.0.1",
-		"@types/chrome": "latest",
 		"@types/difflib": "0.2.1",
 		"@types/eslint": "<=8.49.0",
 		"@types/json-diff": "<=1.0.6",
