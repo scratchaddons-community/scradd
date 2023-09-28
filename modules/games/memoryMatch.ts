@@ -106,6 +106,12 @@ export default async function memoryMatch(
 
 			if (isOtherUser) {
 				collector.stop();
+
+				const player1Presence = interaction.guild?.presences.resolve(interaction.user.id);
+				const player2Presence = interaction.guild?.presences.resolve(options.user.id);
+
+				const presenceCheck = player1Presence?.status !== player1Presence?.clientStatus?.mobile || player2Presence?.status !== player2Presence?.clientStatus?.mobile;
+
 				await playGame(buttonInteraction, {
 					users:
 						Math.random() > 0.5
@@ -113,16 +119,7 @@ export default async function memoryMatch(
 							: [options.user, interaction.user],
 					easyMode,
 					bonusTurns,
-					useThread:
-						options.thread ??
-						(!(
-							await config.guild.members.fetch(options.user.id)
-						).presence?.clientStatus?.mobile ||
-						!(
-							await config.guild.members.fetch(interaction.user.id)
-						).presence?.clientStatus?.mobile
-							? false
-							: true),
+					useThread: options.thread ?? presenceCheck
 				});
 			} else await buttonInteraction.deferUpdate();
 		})
