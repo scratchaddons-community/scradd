@@ -26,8 +26,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"thread": {
-				description:
-					"Whether to create a thread for chatting alongside the game (defaults to true)",
+				description: "Whether to create a thread for chatting alongside the game",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"bonus-turns": {
