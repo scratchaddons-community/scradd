@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { client, defineCommand, defineEvent } from "strife.js";
+import { client, defineButton, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
-import getTop from "./getTop.js";
+import top from "./top.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 
@@ -47,10 +47,10 @@ defineEvent("threadDelete", (thread) => {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
-		name: "get-top-suggestions",
-		description: "Get the top suggestions",
+		name: "top-suggestions",
+		description: "List the top suggestions",
 
 		options: {
 			answer: {
@@ -65,5 +65,9 @@ defineCommand(
 			},
 		},
 	},
-	getTop,
+	top,
 );
+
+defineButton("suggestions", async (interaction, userId) => {
+	await top(interaction, { user: await client.users.fetch(userId) });
+});

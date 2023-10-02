@@ -8,11 +8,12 @@ import {
 	type Snowflake,
 	type TextBasedChannel,
 	BaseChannel,
+	ChannelType,
 } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
-import censor from "../automod/language.js";
+import tryCensor, { censor } from "../automod/language.js";
 
 export const BOARD_EMOJI = "🥔",
 	REACTIONS_NAME = "Potatoes";
@@ -31,7 +32,16 @@ export const boardDatabase = new Database<{
 }>("board");
 await boardDatabase.init();
 
-const COUNTS = { scradd: 2, admins: 2, mods: 3, misc: 4, default: 6, memes: 8, info: 12 };
+const COUNTS = {
+	scradd: 2,
+	admins: 2,
+	mods: 3,
+	private: 4,
+	misc: 5,
+	default: 6,
+	memes: 8,
+	info: 12,
+} as const;
 /**
  * Determines the board reaction count for a channel.
  *
@@ -39,40 +49,54 @@ const COUNTS = { scradd: 2, admins: 2, mods: 3, misc: 4, default: 6, memes: 8, i
  *
  * @returns The reaction count.
  */
-export function boardReactionCount(channel?: TextBasedChannel): number;
-export function boardReactionCount(channel: { id: Snowflake }): number | undefined;
-export function boardReactionCount(channel?: TextBasedChannel | { id: Snowflake }) {
-	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
-	if (!channel) return COUNTS.default;
+export function boardReactionCount(channel?: TextBasedChannel, time?: Date): number;
+export function boardReactionCount(channel: { id: Snowflake }, time?: Date): number | undefined;
+export function boardReactionCount(
+	channel?: TextBasedChannel | { id: Snowflake },
+	time = new Date(),
+) {
+	if (process.env.NODE_ENV !== "production") return shift(COUNTS.scradd);
+	if (!channel) return shift(COUNTS.default);
 
-	if (channel.id === config.channels.updates?.id) return COUNTS.info;
+	if (channel.id === config.channels.updates?.id) return shift(COUNTS.info);
+	if (!(channel instanceof BaseChannel)) {
+		const count = baseReactionCount(channel.id);
+		return count && shift(count);
+	}
 
-	const baseCount = baseReactionCount(channel.id);
-	if (!(channel instanceof BaseChannel)) return baseCount;
-
-	if (!channel.isTextBased()) return COUNTS.misc;
+	if (!channel.isTextBased()) return shift(COUNTS.default);
 	const baseChannel = getBaseChannel(channel);
-	if (!baseChannel || baseChannel.isDMBased()) return COUNTS.misc;
-	if (baseChannel.isVoiceBased()) return COUNTS.misc;
+	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
+	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
-	return (
+	const count =
 		baseReactionCount(baseChannel.id) ??
 		{
 			[config.channels.info?.id || ""]: COUNTS.info,
-			[config.channels.modlogs?.parent?.id || ""]: COUNTS.mods,
+			[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
 			"866028754962612294": COUNTS.misc, // #The Cache
 		}[baseChannel.parent?.id || ""] ??
-		COUNTS.default
-	);
+		COUNTS.default;
+	return shift(count);
+
+	function shift(count: number) {
+		const privateThread =
+			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
+				? 2 / 3
+				: 1;
+		/** 300 = number of days for required potato count to double. */
+		const timeShift = (Date.now() - +time) / 86_400_000 / 300 + 1;
+		return Math.max(2, Math.round(count * privateThread * timeShift));
+	}
 }
 function baseReactionCount(id: Snowflake) {
 	if (process.env.NODE_ENV !== "production") return COUNTS.scradd;
 
 	return {
-		[config.channels.tickets?.id || ""]: COUNTS.mods,
+		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
-		"853256939089559583": COUNTS.misc, // #ba-doosters
-		"869662117651955802": COUNTS.misc, // #devs-only
+		"853256939089559583": COUNTS.private, // #ba-doosters
+		"869662117651955802": COUNTS.private, // #devs-only
 		"811065897057255424": COUNTS.memes, // #memes
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
 		"806656240129671188": COUNTS.memes, // #showcase
@@ -105,13 +129,7 @@ export async function generateBoardMessage(
 	 * @returns The converted message.
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = extractMessageExtremities(message, censor);
-
-		const description = await messageToText(message);
-
-		const censored = censor(description);
-		const censoredName = censor(message.author.displayName);
-
+		const { files, embeds } = extractMessageExtremities(message, tryCensor);
 		while (embeds.length > 9) embeds.pop(); // 9 and not 10 because we still need to add ours
 
 		return {
@@ -145,26 +163,33 @@ export async function generateBoardMessage(
 					color:
 						message.type === MessageType.AutoModerationAction
 							? 0x99_a1_f2
+							: message.type === MessageType.GuildInviteReminder
+							? undefined
 							: message.member?.displayColor,
-					description: censored ? censored.censored : description,
+					description: censor(await messageToText(message)),
 
 					author: {
 						icon_url:
 							message.type === MessageType.AutoModerationAction
 								? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+								: message.type === MessageType.GuildInviteReminder
+								? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 								: (message.member ?? message.author).displayAvatarURL(),
 
 						name:
 							message.type === MessageType.AutoModerationAction
 								? "AutoMod 🤖"
+								: message.type === MessageType.GuildInviteReminder
+								? "Invite your friends 🤖"
 								: (message.member?.displayName ??
-										(censoredName
-											? censoredName.censored
-											: message.author.displayName)) +
+										censor(message.author.displayName)) +
 								  (message.author.bot ? " 🤖" : ""),
 					},
 
-					timestamp: message.createdAt.toISOString(),
+					timestamp:
+						message.type === MessageType.GuildInviteReminder
+							? undefined
+							: message.createdAt.toISOString(),
 
 					footer: message.editedAt ? { text: "Edited" } : undefined,
 				},

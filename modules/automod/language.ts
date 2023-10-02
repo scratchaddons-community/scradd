@@ -58,7 +58,7 @@ export const badWordRegexps = badWords.map(
 		),
 );
 
-export default function censor(text: string, strikeShift = 0) {
+export default function tryCensor(text: string, strikeShift = 0) {
 	const words: string[][] = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
@@ -86,6 +86,11 @@ export default function censor(text: string, strikeShift = 0) {
 				words,
 		  }
 		: false;
+}
+
+export function censor(text: string) {
+	const censored = tryCensor(text);
+	return censored ? censored.censored : text;
 }
 
 export function badWordsAllowed(channel?: TextBasedChannel | null) {

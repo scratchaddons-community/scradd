@@ -2,7 +2,6 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,
 } from "discord.js";
@@ -17,7 +16,6 @@ import { DATABASE_THREAD } from "../../common/database.js";
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
-		interaction.targetMessage.type !== MessageType.Default ||
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
@@ -69,7 +67,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 	});
 }
 
-export async function submitEdit(interaction: ModalSubmitInteraction, id?: string) {
+export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
@@ -98,7 +96,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		});
 	});
 	if (!json) return;
-	const message = await interaction.channel?.messages.fetch(id ?? "");
+	const message = await interaction.channel?.messages.fetch(id);
 	if (!message) throw new TypeError("Used command in DM!");
 	const oldJSON = getMessageJSON(message);
 	const edited = await message.edit(json).catch(async (error: unknown) => {

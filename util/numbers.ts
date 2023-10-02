@@ -1,7 +1,7 @@
 /**
  * `x**y`
  *
- * @author zakariamouhid [`bigIntPow`](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ * @author ryasmi [`bigIntPow`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L19)
  *
  * @param one `x`.
  * @param two `y`.
@@ -18,7 +18,7 @@ export function bigIntPower(one: bigint, two: bigint): bigint {
 /**
  * Convert a number between bases.
  *
- * @author zakariamouhid [`convertBaseBigInt `](https://gist.github.com/ryansmith94/91d7fd30710264affeb9#gistcomment-3136187)
+ * @author ryasmi [`convertBase`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L79)
  *
  * @param value - The number to convert.
  * @param sourceBase - The base of the input number.
@@ -39,17 +39,14 @@ export function convertBase(
 
 	const outBaseBig = BigInt(outBase);
 
-	let decValue = [...value]
-		.reverse() // Stop changing this to `.reduceRight()`! It’s not the same!
-		.reduce((carry, digit, loopIndex) => {
-			const biggestBaseIndex = range.indexOf(digit);
-			if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
-				throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
-			return (
-				carry +
-				BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
-			);
-		}, 0n);
+	let decValue = [...value].toReversed().reduce((carry, digit, loopIndex) => {
+		const biggestBaseIndex = range.indexOf(digit);
+		if (biggestBaseIndex === -1 || biggestBaseIndex > sourceBase - 1)
+			throw new ReferenceError(`Invalid digit ${digit} for base ${sourceBase}.`);
+		return (
+			carry + BigInt(biggestBaseIndex) * bigIntPower(BigInt(sourceBase), BigInt(loopIndex))
+		);
+	}, 0n);
 
 	let output = "";
 	while (decValue > 0) {
@@ -68,9 +65,6 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  * Adds a numerical suffix to a number.
  *
  * @param number - The number to suffix.
- * @param options - Options.
- * @param options.bold - Whether to bold the output using Markdown.
- * @param options.jokes - Toggle jokes after the number.
  */
 export function nth(number: number) {
 	return (

@@ -32,16 +32,19 @@ export function joinWithAnd(
 	array: { toString: () => string }[],
 	callback = (item: { toString: () => string }) => item.toString(),
 ): string {
-	const last = array.pop();
+	const last = array.at(-1);
 
 	if (last === undefined) return "";
 
-	if (!array.length) return callback(last);
+	if (array.length === 1) return callback(last);
 
 	return `${
-		array.length === 1
+		array.length === 2
 			? `${array[0] ? callback(array[0]) : ""} `
-			: array.map((item) => `${callback(item)}, `).join("")
+			: array
+					.slice(0, -1)
+					.map((item) => `${callback(item)}, `)
+					.join("")
 	}and ${callback(last)}`;
 }
 
@@ -53,14 +56,17 @@ export function joinWithAnd(
  *
  * @returns The truncated string.
  */
-export function truncateText(text: string, maxLength: number): string {
-	const condensed = (text.split("\n")[0] ?? text).replaceAll(/\s+/g, " ");
-	const trimmed = condensed.slice(0, maxLength + 1);
+export function truncateText(text: string, maxLength: number, multiline = false): string {
+	text = text.replaceAll(/\n+/g, "\n").trim();
+	const condensed = (!multiline && text.split("\n")[0]) || text;
+	const trimmed = condensed.slice(0, maxLength);
 	const segments = Array.from(new Intl.Segmenter().segment(trimmed), ({ segment }) => segment);
 
 	if (trimmed.length > maxLength) segments.pop();
-	const output = segments.join("");
-	return output + (output === condensed ? "" : "…");
+	const output = segments.join("").trim();
+	return output === text
+		? output
+		: output.slice(0, output.length === maxLength ? -1 : undefined) + "…";
 }
 
 /**
@@ -89,8 +95,9 @@ export function caesar(text: string, rot = 13) {
 export function normalize(text: string) {
 	return text
 		.normalize("NFD")
-		.replaceAll(/[\p{Dia}\p{M}]+/gu, "")
-		.replaceAll(/[\s\p{Z}]+/gu, " ");
+		.replaceAll(/[\p{Dia}\p{M}\p{Cf}\p{Sk}]+/gu, "")
+		.replaceAll(/[\p{Zs}\t]+/gu, " ")
+		.replaceAll(/[\p{Zl}\p{Zp}\r\n\f]+/gu, "\n");
 }
 
 /**

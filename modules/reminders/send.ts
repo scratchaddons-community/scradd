@@ -12,8 +12,9 @@ import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
-import { boardDatabase, boardReactionCount } from "../board/misc.js";
+import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
 import updateBoard from "../board/update.js";
+import { gracefulFetch } from "../../util/promises.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -96,12 +97,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					const count = await fetch(
+					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
-					).then(
-						async (response) =>
-							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
+					if (!count) return;
 
 					return await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
@@ -180,10 +179,14 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
+					for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
 						if (info.onBoard) continue;
 
-						const reactionsNeeded = boardReactionCount({ id: info.channel });
+						const date = new Date(
+							Number(BigInt(info.source) >> 22n) + 1_420_070_400_000,
+						);
+
+						const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
 						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
 							continue;
 
@@ -193,15 +196,16 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						if (!channel?.isTextBased()) continue;
 
 						if (reactionsNeeded === undefined) {
-							const reactionsNeeded = boardReactionCount(channel);
+							const reactionsNeeded = boardReactionCount(channel, date);
 							if (info.reactions < reactionsNeeded) continue;
 						}
 
 						const message = await channel.messages
 							.fetch(info.source)
 							.catch(() => void 0);
-						if (message) {
-							await updateBoard(message);
+						const reaction = message?.reactions.resolve(BOARD_EMOJI);
+						if (reaction) {
+							await updateBoard(reaction);
 							break;
 						}
 					}
@@ -232,7 +236,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 }
 
 function getNextInterval() {
-	const reminder = [...remindersDatabase.data].sort((one, two) => one.date - two.date)[0];
+	const reminder = remindersDatabase.data.toSorted((one, two) => one.date - two.date)[0];
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }

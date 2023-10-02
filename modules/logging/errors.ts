@@ -25,7 +25,11 @@ export default async function logError(
 
 		const name =
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
-		if (["DeprecationWarning", "ExperimentalWarning"].includes(name)) return;
+		if (
+			"ExperimentalWarning" == name ||
+			("DeprecationWarning" == name && process.env.NODE_ENV !== "production")
+		)
+			return;
 
 		return await log(
 			`${LoggingErrorEmoji} **${name}** occurred in ${
@@ -96,6 +100,13 @@ export function generateError(
 }
 
 export function sanitizePath(unclean: string, relative = true): string {
-	const sanitized = decodeURIComponent(unclean).replaceAll("\\", "/").replaceAll("file:///", "");
+	let decoded = undefined;
+	try {
+		decoded = decodeURIComponent(unclean);
+	} catch {
+		decoded = unclean;
+	}
+
+	const sanitized = decoded.replaceAll("\\", "/").replaceAll("file:///", "");
 	return relative ? sanitized.replaceAll(sanitizePath(process.cwd(), false), ".") : sanitized;
 }

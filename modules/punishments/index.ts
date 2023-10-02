@@ -1,12 +1,18 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineButton, defineSelect } from "strife.js";
+import {
+	client,
+	defineChatCommand,
+	defineButton,
+	defineSelect,
+	defineSubcommands,
+} from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
 import ban from "./ban.js";
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "strikes",
 		description: "Commands to view strike information",
@@ -38,15 +44,15 @@ defineCommand(
 
 		censored: false,
 	},
-	async (interaction) => {
-		switch (interaction.options.getSubcommand(true)) {
+	async (interaction, options) => {
+		switch (options.subcommand) {
 			case "user": {
-				const selected = interaction.options.getUser("user") ?? interaction.user;
+				const selected = options.options.user ?? interaction.user;
 				await getStrikes(selected, interaction);
 				break;
 			}
 			case "id": {
-				await getStrikeById(interaction, interaction.options.getString("id", true));
+				await getStrikeById(interaction, options.options.id);
 			}
 		}
 	},
@@ -62,7 +68,7 @@ defineSelect("selectStrike", async (interaction) => {
 	if (id) await getStrikeById(interaction, id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "warn",
 		description: "(Mod only) Warns a user",
@@ -90,26 +96,25 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const user = interaction.options.getUser("user", true);
-		const reason = interaction.options.getString("reason") || "No reason given.";
-		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
+	async (interaction, options) => {
+		const reason = options.reason || "No reason given.";
+		const strikes = options.strikes ?? DEFAULT_STRIKES;
 		await interaction.deferReply();
-		const success = await warn(user, reason, strikes, interaction.user);
+		const success = await warn(options.user, reason, strikes, interaction.user);
 
 		await interaction.editReply(
 			success
 				? `${constants.emojis.statuses.yes} ${
 						strikes ? "Warned" : "Verbally warned"
-				  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
-				: `${constants.emojis.statuses.no} Can not warn <@${user.toString()}>.`,
+				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
 );
 defineButton("removeStrike", removeStrike);
 defineButton("addStrikeBack", addStrikeBack);
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "ban-user",
 		description: "(Mod only) Bans a user",

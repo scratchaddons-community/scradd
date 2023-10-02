@@ -10,7 +10,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getSettings } from "../settings.js";
+import { mentionUser } from "../settings.js";
 import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 
 export async function getStrikes(
@@ -68,7 +68,6 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 			? strike.mod
 			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
 	const nick = (member ?? user)?.displayName;
-	const { useMentions } = getSettings(interaction.member.user);
 	return await interaction.editReply({
 		components: isModerator
 			? [
@@ -120,9 +119,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 									value:
 										typeof moderator === "string"
 											? moderator
-											: useMentions
-											? moderator.toString()
-											: moderator.displayName,
+											: mentionUser(moderator, interaction.member),
 									inline: true,
 								},
 						  ]
@@ -131,7 +128,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 						? [
 								{
 									name: "👤 Target user",
-									value: useMentions ? user.toString() : user.displayName,
+									value: mentionUser(user, interaction.member),
 									inline: true,
 								},
 						  ]

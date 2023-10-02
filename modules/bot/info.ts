@@ -8,17 +8,16 @@ import {
 	ButtonStyle,
 	GuildMember,
 	User,
-	userMention,
 	ChatInputCommandInteraction,
 	ButtonInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
-import pkg from "../../package.json" assert { type: "json" };
+import { version, dependencies } from "../../package.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../secrets/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
-import { getSettings } from "../settings.js";
+import { mentionUser } from "../settings.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
@@ -27,28 +26,11 @@ const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
 
-/**
- * Get all users with a role.
- *
- * @param roleId - Role to fetch.
- * @param useMentions - Whether to use mentions or usernames.
- *
- * @returns Users with the role.
- */
-async function getRole(roleId: Snowflake, useMentions = false): Promise<string> {
-	const role = await testingServer?.roles.fetch(roleId);
-	const members: { user: User }[] = role?.members.toJSON() ?? [];
-	if (roleId === designers)
-		members.push({ user: await client.users.fetch(constants.users.retron) });
-
-	return joinWithAnd(
-		members.sort((one, two) => one.user.displayName.localeCompare(two.user.displayName)),
-		(member) => (useMentions ? userMention(member.user.id) : member.user.displayName),
-	);
-}
-
-export default async function info(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
-	switch (interaction.options.getSubcommand(true)) {
+export default async function info(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	{ subcommand }: { subcommand: "status" | "credits" | "config" },
+) {
+	switch (subcommand) {
 		case "status": {
 			const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
@@ -63,7 +45,7 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 						fields: [
 							{
-								name: "Mode",
+								name: "⚙️ Mode",
 
 								value:
 									process.env.NODE_ENV === "production"
@@ -72,16 +54,16 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 								inline: true,
 							},
-							{ name: "Version", value: `v${pkg.version}`, inline: true },
+							{ name: "🔢 Version", value: `v${version}`, inline: true },
 							{
-								name: "Last restarted",
+								name: "🔁 Last restarted",
 
 								value: time(client.readyAt, TimestampStyles.RelativeTime),
 
 								inline: true,
 							},
 							{
-								name: "Ping",
+								name: "🏓 Ping",
 
 								value: `${Math.abs(
 									Number(message.createdAt) - Number(interaction.createdAt),
@@ -90,12 +72,12 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 								inline: true,
 							},
 							{
-								name: "WebSocket latency",
-								value: `${client.ws.ping.toLocaleString("en-us")}ms`,
+								name: "↕️ WebSocket latency",
+								value: `${Math.abs(client.ws.ping).toLocaleString("en-us")}ms`,
 								inline: true,
 							},
 							{
-								name: "RAM usage",
+								name: "💾 RAM usage",
 								value:
 									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
 										"en-us",
@@ -139,8 +121,6 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 			break;
 		}
 		case "credits": {
-			const useMentions = getSettings(interaction.user).useMentions;
-
 			await interaction.reply({
 				embeds: [
 					{
@@ -149,25 +129,25 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 
 						fields: [
 							{
-								name: "Developers",
-								value: await getRole(developers, useMentions),
+								name: "🧑‍💻 Developers",
+								value: await getRole(developers),
 								inline: true,
 							},
 							{
-								name: "Designers",
-								value: await getRole(designers, useMentions),
+								name: "🖌️ Designers",
+								value: await getRole(designers),
 								inline: true,
 							},
 							{
-								name: "Additional beta testers",
-								value: await getRole(testers, useMentions),
+								name: "🧪 Additional beta testers",
+								value: await getRole(testers),
 								inline: true,
 							},
 							{
-								name: "Third-party code libraries",
+								name: "🗄️ Third-party code libraries",
 
 								value: joinWithAnd(
-									Object.entries(pkg.dependencies),
+									Object.entries(dependencies),
 									([dependency, version]) =>
 										`\`${escapeMessage(`${dependency}@${version}`)}\``,
 								),
@@ -181,6 +161,20 @@ export default async function info(interaction: ChatInputCommandInteraction<"cac
 				],
 			});
 		}
+	}
+
+	async function getRole(roleId: Snowflake): Promise<string> {
+		const role = await testingServer?.roles.fetch(roleId);
+		const members: { user: User }[] = role?.members.toJSON() ?? [];
+		if (roleId === designers)
+			members.push({ user: await client.users.fetch(constants.users.retron) });
+
+		return joinWithAnd(
+			members.toSorted((one, two) =>
+				one.user.displayName.localeCompare(two.user.displayName),
+			),
+			({ user }) => mentionUser(user, interaction.user),
+		);
 	}
 }
 
@@ -246,7 +240,7 @@ function getConfig() {
 						typeof role[1] !== "string",
 				)
 				.map((role) => ({
-					name: `${role[0]
+					name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
 						.split("_")
 						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
 						.join(" ")} role`,

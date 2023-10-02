@@ -9,10 +9,7 @@ import { AuditLogEvent } from "discord.js";
 defineEvent("messageCreate", async (message) => {
 	if (message.channel.id === config.channels.updates?.id) {
 		await message.startThread({
-			name: truncateText(
-				stripMarkdown(message.cleanContent).split("\n")[0] || "New update!",
-				50,
-			),
+			name: truncateText(stripMarkdown(message.cleanContent) || "New update!", 50),
 
 			reason: "New upcoming update",
 		});
@@ -30,7 +27,7 @@ defineEvent("guildMemberAdd", async (member) => {
 			: countString.includes("69")
 			? " (nice)"
 			: countString.includes("87")
-			? `WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+			? ` (WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
 			: "");
 
 	const rawGreetings = [
@@ -41,11 +38,11 @@ defineEvent("guildMemberAdd", async (member) => {
 		`Is it a bird? Is it a plane? No, it’s ${member.toString()}, our **${memberCount}** member!`,
 		`Welcome:tm: ${member.toString()}! You’re our **${memberCount}** member!`,
 		`${member.toString()}, if you really want to be here, I guess you can be our **${memberCount}** member…`,
-		`${member.toString()}, our **${memberCount}** member, is here (they didn’t bring pizza)`,
+		`${member.toString()}, our **${memberCount}** member, is here! (they didn’t bring pizza though)`,
 		`Watch out, ${member.toString()}, the **${memberCount}** member, has joined the circus!`,
-		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our ${memberCount})`,
+		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our **${memberCount}**)`,
 		`A wild ${member.toString()} appeared (our **${memberCount}** member)`,
-		`${member.toString()}, our **${memberCount}** member, just spawned in`,
+		`${member.toString()}, our **${memberCount}** member, just spawned in!`,
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
 		`Watch out! ${member.toString()} is here! They’re our **${memberCount}**!`,
 	];
@@ -53,11 +50,11 @@ defineEvent("guildMemberAdd", async (member) => {
 		...rawGreetings,
 		...rawGreetings,
 		...rawGreetings,
-		`I hope ${member.toString()}, our **${memberCount}** member, doesn’t give us up or let us down`,
+		`I hope ${member.toString()}, our **${memberCount}** member, doesn’t give us up or let us down…`,
 	];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc.join} ${
+		`${constants.emojis.welcome.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}`,
 	);
@@ -79,10 +76,10 @@ defineEvent("guildMemberRemove", async (member) => {
 					`I don’t think this was the best place for **${member.user.displayName}**…`,
 					`Whoops, **${member.user.displayName}** angered the mods!`,
 					`**${member.user.displayName}** broke the rules and took an 🇱`,
-					`**${member.user.displayName}** talked about opacity slider too much`,
-					`**${member.user.displayName}** did the no-no`,
-					`**${member.user.displayName}** was banished to the deep pits of hell`,
-					`Oop, the ban hammer met **${member.user.displayName}**`,
+					`**${member.user.displayName}** talked about opacity slider too much.`,
+					`**${member.user.displayName}** did the no-no.`,
+					`Someone mailed **${member.user.displayName}** a pipe bomb…`,
+					`Oop, the ban hammer met **${member.user.displayName}**!`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -92,12 +89,12 @@ defineEvent("guildMemberRemove", async (member) => {
 					`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
 					`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
 					`**${member.user.displayName}** couldn’t handle it here.`,
-					`**${member.user.displayName}** used quantum bogosort and disintegrated`,
-					`**${member.user.displayName}** has vanished into the abyss`,
+					`**${member.user.displayName}** used quantum bogosort and disintegrated.`,
+					`**${member.user.displayName}** has vanished into the abyss.`,
 			  ];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc[banned ? "ban" : "leave"]} ${
+		`${constants.emojis.welcome[banned ? "ban" : "leave"]} ${
 			byes[Math.floor(Math.random() * byes.length)]
 		}`,
 	);

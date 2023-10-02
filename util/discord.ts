@@ -33,6 +33,7 @@ import {
 	bold,
 	ChatInputCommandInteraction,
 	InteractionResponse,
+	ThreadChannel,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -43,15 +44,15 @@ import { generateHash, truncateText } from "./text.js";
  * Extract extremities (embeds, stickers, and attachments) from a message.
  *
  * @param message - The message to extract extremeties from.
- * @param censor - Function to censor bad words. Omit to not censor.
+ * @param tryCensor - Function to censor bad words. Omit to not censor.
  */
 export function extractMessageExtremities(
 	message: Message,
-	censor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
+	tryCensor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
 ): { embeds: APIEmbed[]; files: Attachment[] } {
 	const embeds = [
 		...message.stickers
-			.filter((sticker) => !censor?.(sticker.name))
+			.filter((sticker) => !tryCensor?.(sticker.name))
 			.map(
 				(sticker): APIEmbed => ({
 					color: Colors.Blurple,
@@ -82,45 +83,41 @@ export function extractMessageExtremities(
 					newEmbed.fields = [];
 				}
 
-				if (!censor) return newEmbed;
+				if (!tryCensor) return newEmbed;
 
 				if (newEmbed.description) {
-					const censored = censor(newEmbed.description);
-
+					const censored = tryCensor(newEmbed.description);
 					if (censored) newEmbed.description = censored.censored;
 				}
 
 				if (newEmbed.title) {
-					const censored = censor(newEmbed.title);
-
+					const censored = tryCensor(newEmbed.title);
 					if (censored) newEmbed.title = censored.censored;
 				}
 
-				if (newEmbed.url && censor(newEmbed.url)) newEmbed.url = "";
+				if (newEmbed.url && tryCensor(newEmbed.url)) newEmbed.url = "";
+				if (newEmbed.image?.url && tryCensor(newEmbed.image.url))
+					newEmbed.image = undefined;
 
-				if (newEmbed.image?.url && censor(newEmbed.image.url)) newEmbed.image = undefined;
-
-				if (newEmbed.thumbnail?.url && censor(newEmbed.thumbnail.url))
+				if (newEmbed.thumbnail?.url && tryCensor(newEmbed.thumbnail.url))
 					newEmbed.thumbnail = undefined;
 
 				if (newEmbed.footer?.text) {
-					const censored = censor(newEmbed.footer.text);
-
+					const censored = tryCensor(newEmbed.footer.text);
 					if (censored) newEmbed.footer.text = censored.censored;
 				}
 
 				if (newEmbed.author) {
-					const censoredName = censor(newEmbed.author.name);
-					const censoredUrl = newEmbed.author.url && censor(newEmbed.author.url);
-
+					const censoredName = tryCensor(newEmbed.author.name);
 					if (censoredName) newEmbed.author.name = censoredName.censored;
 
+					const censoredUrl = newEmbed.author.url && tryCensor(newEmbed.author.url);
 					if (censoredUrl) newEmbed.author.url = "";
 				}
 
 				newEmbed.fields = (newEmbed.fields ?? []).map((field) => {
-					const censoredName = censor(field.name);
-					const censoredValue = censor(field.value);
+					const censoredName = tryCensor(field.name);
+					const censoredValue = tryCensor(field.value);
 					return {
 						inline: field.inline,
 						name: censoredName ? censoredName.censored : field.name,
@@ -167,17 +164,20 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
+export async function getAllMessages(
+	channel: GuildTextBasedChannel | ThreadChannel,
+): Promise<Message<true>[]>;
 export async function getAllMessages(
 	channel: DMChannel | PartialDMChannel,
 ): Promise<Message<false>[]>;
-export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
+export async function getAllMessages(
+	channel: TextBasedChannel | ThreadChannel,
+): Promise<Message[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;
 
 	do {
-		// eslint-disable-next-line no-await-in-loop -- We can’t use `Promise.all` here
 		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
 
 		messages.push(...fetchedMessages.toJSON());
@@ -230,7 +230,8 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() &&
-				message.channel.parent?.type === ChannelType.GuildForum
+				(message.channel.parent?.type === ChannelType.GuildForum ||
+					message.channel.parent?.type === ChannelType.GuildMedia)
 					? "post title"
 					: "channel name"
 			}: **${escapeMessage(message.content)}**`;
@@ -358,7 +359,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
-					const cleanContent = messageToText(reply, false);
+					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
 						cleanContent
 							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
@@ -382,7 +383,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
+			return "The best way to setup a server is with your buddies!";
 		}
 
 		case MessageType.RoleSubscriptionPurchase: {
@@ -487,7 +488,6 @@ export async function reactAll(
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
 ): Promise<MessageReaction[] | undefined> {
 	const messageReactions = [];
-	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
 	for (const reaction of reactions) {
 		try {
 			const messageReaction = await message.react(reaction);
@@ -558,6 +558,7 @@ export async function paginate<Item>(
 		rawOffset,
 		totalCount,
 		ephemeral = false,
+		perPage = 20,
 
 		generateComponents,
 		customComponentLocation = "above",
@@ -572,18 +573,17 @@ export async function paginate<Item>(
 		rawOffset?: number;
 		totalCount?: number;
 		ephemeral?: boolean;
+		perPage?: number;
 
 		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
-	const ITEMS_PER_PAGE = 20;
-
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / ITEMS_PER_PAGE);
+	const numberOfPages = Math.ceil(array.length / perPage);
 
-	let offset = Math.floor((rawOffset ?? 0) / ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
+	let offset = Math.floor((rawOffset ?? 0) / perPage) * perPage;
 
 	/**
 	 * Generate an embed that has the next page.
@@ -591,9 +591,7 @@ export async function paginate<Item>(
 	 * @returns The next page.
 	 */
 	async function generateMessage() {
-		const filtered = array.filter(
-			(_, index) => index >= offset && index < offset + ITEMS_PER_PAGE,
-		);
+		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		if (!filtered.length) {
 			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
@@ -630,7 +628,7 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "Next >>",
 									style: ButtonStyle.Primary,
-									disabled: offset + ITEMS_PER_PAGE >= array.length,
+									disabled: offset + perPage >= array.length,
 									customId: nextId,
 								},
 							],
@@ -657,17 +655,13 @@ export async function paginate<Item>(
 					description: content,
 
 					footer: {
-						text: `Page ${offset / ITEMS_PER_PAGE + 1}/${numberOfPages}${
+						text: `Page ${offset / perPage + 1}/${numberOfPages}${
 							constants.footerSeperator
 						}${count.toLocaleString("en-us")} ${count === 1 ? singular : plural}`,
 					},
 
 					author: format
-						? {
-								// eslint-disable-next-line id-match -- We didn’t name this.
-								icon_url: format.displayAvatarURL(),
-								name: format.displayName,
-						  }
+						? { icon_url: format.displayAvatarURL(), name: format.displayName }
 						: undefined,
 
 					color: format
@@ -698,8 +692,8 @@ export async function paginate<Item>(
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += ITEMS_PER_PAGE;
-			else offset -= ITEMS_PER_PAGE;
+			if (buttonInteraction.customId === nextId) offset += perPage;
+			else offset -= perPage;
 
 			await buttonInteraction.deferUpdate();
 			message = await editReply(await generateMessage());

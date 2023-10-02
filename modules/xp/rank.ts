@@ -1,4 +1,10 @@
-import type { ButtonInteraction, ChatInputCommandInteraction, User } from "discord.js";
+import {
+	ComponentType,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type User,
+	ButtonStyle,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
@@ -9,7 +15,7 @@ export default async function getUserRank(
 	user: User,
 ) {
 	const allXp = xpDatabase.data;
-	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const top = allXp.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
@@ -28,11 +34,11 @@ export default async function getUserRank(
 	const serverRank =
 		allXp
 			.filter(({ user }) => members.has(user))
-			.sort((one, two) => two.xp - one.xp)
+			.toSorted((one, two) => two.xp - one.xp)
 			.findIndex((info) => info.user === user.id) + 1;
 
 	async function makeCanvasFiles() {
-		if (!constants.canvasEnabled) return [];
+		if (process.env.CANVAS === "false") return [];
 
 		const { createCanvas } = await import("@napi-rs/canvas");
 		const canvas = createCanvas(1000, 50);
@@ -101,23 +107,35 @@ export default async function getUserRank(
 					},
 				],
 
-				footer: {
-					text: `${
-						rank
-							? `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
-									"en-us",
-							  )}${
-									serverRank
-										? ` (${serverRank.toLocaleString(
-												"en-us",
-										  )}/${members.size.toLocaleString("en-us")} in the server)`
-										: ""
-							  }${constants.footerSeperator}`
-							: ""
-					}View the leaderboard with /xp top`,
-				},
+				footer: rank
+					? {
+							text: `Ranked ${rank.toLocaleString(
+								"en-us",
+							)}/${top.length.toLocaleString("en-us")}${
+								serverRank
+									? ` (${serverRank.toLocaleString(
+											"en-us",
+									  )}/${members.size.toLocaleString("en-us")} in the server)`
+									: ""
+							}`,
+					  }
+					: undefined,
 
 				image: { url: "attachment://progress.png" },
+			},
+		],
+
+		components: [
+			{
+				components: [
+					{
+						type: ComponentType.Button,
+						customId: `${user.id}_viewLeaderboard`,
+						label: "Leaderboard",
+						style: ButtonStyle.Primary,
+					},
+				],
+				type: ComponentType.ActionRow,
 			},
 		],
 

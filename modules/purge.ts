@@ -5,13 +5,13 @@ import {
 	ComponentType,
 	type BaseMessageOptions,
 } from "discord.js";
-import { client, defineCommand } from "strife.js";
+import { client, defineChatCommand } from "strife.js";
 import constants from "../common/constants.js";
 import { disableComponents, messageToText } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "purge",
 		description: "(Mod only) Bulk deletes a specified amount of messages",
@@ -41,16 +41,14 @@ defineCommand(
 		restricted: true,
 	},
 
-	async (interaction) => {
-		const count = interaction.options.getString("count", true);
-		const user = interaction.options.getUser("user") ?? undefined;
-		const message =
-			interaction.options.getString("message")?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ??
-			undefined;
-		const numberCount = Number(count);
+	async (interaction, options) => {
+		const message = options.message?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ?? undefined;
+		const numberCount = Number(options.count);
 		const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
 		const { channel: channelId, id: countId } = (useId &&
-			count.match(/^(?:(?<channel>\d+)-)?(?<id>\d+)$/)?.groups) || { id: count };
+			options.count.match(/^(?:(?<channel>\d+)-)?(?<id>\d+)$/)?.groups) || {
+			id: options.count,
+		};
 		const channel = channelId ? await client.channels.fetch(channelId) : interaction.channel;
 		if (!channel?.isTextBased() || channel.isDMBased())
 			return await interaction.reply(
@@ -61,7 +59,9 @@ defineCommand(
 		const filtered = messages
 			.toJSON()
 			.filter(
-				(message) => (user ? message.author.id === user.id : true) && message.bulkDeletable,
+				(message) =>
+					(options.user ? message.author.id === options.user.id : true) &&
+					message.bulkDeletable,
 			);
 
 		let start = 0;

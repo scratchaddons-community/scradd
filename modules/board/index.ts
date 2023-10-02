@@ -3,7 +3,7 @@ import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
 import makeSlideshow, { NO_POTATOES_MESSAGE, defaultMinReactions } from "./explore.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineEvent, defineButton } from "strife.js";
+import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
@@ -26,7 +26,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	if (user.id === message.author.id && process.env.NODE_ENV === "production")
 		return await reaction.users.remove(user);
 
-	await updateBoard(message);
+	await updateBoard(reaction);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
@@ -35,10 +35,10 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 
 	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
 
-	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
+	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
@@ -62,10 +62,10 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const minReactions = interaction.options.getInteger("minimum-reactions") ?? undefined;
-		const user = interaction.options.getUser("user")?.id;
-		const channel = interaction.options.getChannel("channel") ?? undefined;
+	async (interaction, options) => {
+		const minReactions = options["minimum-reactions"];
+		const user = options.user?.id;
+		const channel = options.channel;
 		await makeSlideshow(interaction, { minReactions, user, channel });
 	},
 );
@@ -73,11 +73,15 @@ defineButton("exploreBoard", async (interaction, userId) => {
 	await makeSlideshow(interaction, { user: userId });
 });
 
-defineCommand(
+defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		await updateBoard(interaction.targetMessage);
+		const reaction = interaction.targetMessage.reactions.resolve(BOARD_EMOJI) ?? {
+			count: 0,
+			message: interaction.targetMessage,
+		};
+		await updateBoard(reaction);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
 	},
 );

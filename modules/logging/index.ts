@@ -63,7 +63,7 @@ const events: {
 	[AuditLogEvent.MemberBanAdd]: memberBanAdd,
 	[AuditLogEvent.MemberBanRemove]: memberBanRemove,
 	[AuditLogEvent.MemberRoleUpdate]: memberRoleUpdate,
-	async [AuditLogEvent.BotAdd](entry: GuildAuditLogsEntry<AuditLogEvent.BotAdd>) {
+	async [AuditLogEvent.BotAdd](entry) {
 		if (!entry.target) return;
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.toString()} added${extraAuditLogsInfo(
@@ -75,7 +75,7 @@ const events: {
 	[AuditLogEvent.RoleCreate]: roleCreate,
 	[AuditLogEvent.RoleUpdate]: roleUpdate,
 	[AuditLogEvent.InviteCreate]: inviteCreate,
-	async [AuditLogEvent.WebhookCreate](entry: GuildAuditLogsEntry<AuditLogEvent.WebhookCreate>) {
+	async [AuditLogEvent.WebhookCreate](entry) {
 		if (entry.target.type !== WebhookType.Incoming) return;
 		await log(
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} (ID: ${
@@ -85,7 +85,7 @@ const events: {
 		);
 	},
 	// async [AuditLogEvent.WebhookUpdate](entry) {},
-	async [AuditLogEvent.WebhookDelete](entry: GuildAuditLogsEntry<AuditLogEvent.WebhookDelete>) {
+	async [AuditLogEvent.WebhookDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} deleted${extraAuditLogsInfo(
 				entry,
@@ -96,9 +96,7 @@ const events: {
 	[AuditLogEvent.EmojiCreate]: emojiCreate,
 	[AuditLogEvent.EmojiUpdate]: emojiUpdate,
 	[AuditLogEvent.EmojiDelete]: emojiDelete,
-	async [AuditLogEvent.IntegrationCreate](
-		entry: GuildAuditLogsEntry<AuditLogEvent.IntegrationCreate>,
-	) {
+	async [AuditLogEvent.IntegrationCreate](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
 				entry.target.id
@@ -106,9 +104,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.IntegrationDelete](
-		entry: GuildAuditLogsEntry<AuditLogEvent.IntegrationDelete>,
-	) {
+	async [AuditLogEvent.IntegrationDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
 				entry.target.id
@@ -123,9 +119,7 @@ const events: {
 	[AuditLogEvent.GuildScheduledEventUpdate]: guildScheduledEventUpdate,
 	[AuditLogEvent.ThreadCreate]: threadCreate,
 	[AuditLogEvent.ThreadDelete]: threadDelete,
-	async [AuditLogEvent.ApplicationCommandPermissionUpdate](
-		entry: GuildAuditLogsEntry<AuditLogEvent.ApplicationCommandPermissionUpdate>,
-	) {
+	async [AuditLogEvent.ApplicationCommandPermissionUpdate](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Permissions for ${userMention(
 				entry.extra.applicationId,
@@ -133,9 +127,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.AutoModerationRuleCreate](
-		entry: GuildAuditLogsEntry<AuditLogEvent.AutoModerationRuleCreate>,
-	) {
+	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
 		await log(
 			`${LoggingEmojis.Integration} AutoMod “${
 				{
@@ -150,9 +142,7 @@ const events: {
 			"server",
 		);
 	},
-	async [AuditLogEvent.AutoModerationRuleDelete](
-		entry: GuildAuditLogsEntry<AuditLogEvent.AutoModerationRuleDelete>,
-	) {
+	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} AutoMod Rule ${entry.target.name} (ID: ${
 				entry.target.id

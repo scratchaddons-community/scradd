@@ -3,16 +3,16 @@ import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LoggingErrorEmoji } from "../logging/misc.js";
 import warn from "../punishments/warn.js";
-import censor from "./language.js";
+import tryCensor, { censor } from "./language.js";
 
 export default async function changeNickname(member: GuildMember) {
-	const censored = censor(member.displayName);
+	const censored = tryCensor(member.displayName);
 	const newNick = findName(member);
 
 	if (censored && member.nickname)
 		await warn(
 			member,
-			"Watch your language!",
+			"Please watch your language!",
 			censored.strikes,
 			"Set nickname to " + member.displayName,
 		);
@@ -38,9 +38,7 @@ export default async function changeNickname(member: GuildMember) {
 
 		if (safe.size) {
 			for (const [id, found] of unsafe) {
-				const censored = censor(found.user.displayName);
-				const nick = censored ? censored.censored : found.user.displayName;
-
+				const nick = censor(found.user.displayName);
 				if (nick !== found.displayName && isPingable(nick)) {
 					await setNickname(found, nick, "Conflicts");
 					unsafe.delete(id);
@@ -52,9 +50,7 @@ export default async function changeNickname(member: GuildMember) {
 		const unchanged = safe.concat(unsafe);
 
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
-			const censored = censor(member.user.displayName);
-			const nick = censored ? censored.censored : member.user.displayName;
-
+			const nick = censor(member.user.displayName);
 			if (nick !== newNick && isPingable(nick)) {
 				await setNickname(member, nick, "Conflicts");
 				unchanged.delete(member.id);
@@ -62,9 +58,7 @@ export default async function changeNickname(member: GuildMember) {
 		}
 		if (unchanged.size > 1) {
 			for (const member of unchanged.values()) {
-				const censored = censor(member.user.username);
-				const nick = censored ? censored.censored : member.user.username;
-
+				const nick = censor(member.user.username);
 				if (nick !== member.displayName && isPingable(nick)) {
 					await setNickname(member, nick, "Conflicts");
 					unchanged.delete(member.id);
@@ -73,8 +67,10 @@ export default async function changeNickname(member: GuildMember) {
 		}
 
 		const sorted = unchanged.sort((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
-		if (unchanged.size === 2) unchanged.delete(sorted.firstKey() ?? "");
-		else if (unchanged.size > 1)
+		if (unchanged.size === 2) {
+			const oldest = sorted.firstKey();
+			if (oldest) unchanged.delete(oldest);
+		} else if (unchanged.size > 1)
 			await log(
 				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd(sorted.toJSON())}`,
 			);
@@ -83,30 +79,28 @@ export default async function changeNickname(member: GuildMember) {
 
 async function setNickname(member: GuildMember, newNickname: string, reason: string) {
 	await (member.moderatable
-		? // eslint-disable-next-line unicorn/no-null
-		  member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
+		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
 				`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		  ));
 }
 
 function findName(member: GuildMember) {
-	const censoredNick = (censor(member.displayName) || undefined)?.censored || member.displayName;
-	if (isPingable(censoredNick)) return censoredNick;
+	const nick = censor(member.displayName);
+	if (isPingable(nick)) return nick;
 
-	const censoredDisplay =
-		(censor(member.user.displayName) || undefined)?.censored || member.user.displayName;
-	if (isPingable(censoredDisplay)) return censoredDisplay;
+	const user = censor(member.user.displayName);
+	if (isPingable(user)) return user;
 
-	const censoredTag = (censor(member.user.tag) || undefined)?.censored || member.user.tag;
-	if (isPingable(censoredTag)) return censoredTag;
+	const tag = censor(member.user.tag);
+	if (isPingable(tag)) return tag;
 
-	return censoredNick;
+	return nick;
 }
 
 function isPingable(name: string) {
 	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
-	return /[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]{3,}|^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>? -]+$/u.test(
+	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
 		normalized,
 	);
 }

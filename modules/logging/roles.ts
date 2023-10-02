@@ -53,6 +53,7 @@ export async function roleCreate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleCr
 }
 
 export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUpdate>) {
+	if (!(entry.target instanceof Role)) return;
 	let iconChanged = false;
 
 	for (const change of entry.changes) {
@@ -60,7 +61,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 		switch (key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} (@${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} (@${
 						change.old
 					}) renamed to @${change.new}${extraAuditLogsInfo(entry)}`,
 					"server",
@@ -69,7 +70,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "color": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role color ${
 						typeof change.new === "number" && change.new
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
@@ -81,7 +82,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "hoist": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(
-						entry.target?.id ?? "",
+						entry.target.id,
 					)} set to display role members ${
 						change.new ? "separately from" : "combined with"
 					} online members${extraAuditLogsInfo(entry)}`,
@@ -91,7 +92,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			case "mentionable": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")} set to ${
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} set to ${
 						change.new ? "" : "dis"
 					}allow anyone to @mention this role${extraAuditLogsInfo(entry)}`,
 					"server",
@@ -101,7 +102,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "permissions": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(
-						entry.target?.id ?? "",
+						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 					"server",
 					{
@@ -112,17 +113,6 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 							},
 						],
 					},
-				);
-				break;
-			}
-			case "position": {
-				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target?.id ?? "")}’s role color ${
-						typeof change.new === "number" && change.new
-							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
-							: "reset"
-					}${extraAuditLogsInfo(entry)}`,
-					"server",
 				);
 				break;
 			}
