@@ -92,7 +92,6 @@ defineEvent("guildMemberRemove", async (member) => {
 					`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
 					`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
 					`**${member.user.displayName}** couldn’t handle it here.`,
-					`Bye(sexual) **${member.user.displayName}**`,
 					`**${member.user.displayName}** used quantum bogosort and disintegrated`,
 					`**${member.user.displayName}** has vanished into the abyss`,
 			  ];
