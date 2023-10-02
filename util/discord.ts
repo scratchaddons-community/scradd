@@ -178,7 +178,6 @@ export async function getAllMessages(
 	let lastId: Snowflake | undefined;
 
 	do {
-		// eslint-disable-next-line no-await-in-loop -- We can’t use `Promise.all` here
 		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
 
 		messages.push(...fetchedMessages.toJSON());
@@ -489,7 +488,6 @@ export async function reactAll(
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
 ): Promise<MessageReaction[] | undefined> {
 	const messageReactions = [];
-	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
 	for (const reaction of reactions) {
 		try {
 			const messageReaction = await message.react(reaction);
