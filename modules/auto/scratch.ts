@@ -33,7 +33,7 @@ export default async function scratch(message: Message) {
 				.slice(start, end)
 				.replace(
 					/https?:\/\/scratch\.(?:mit\.edu|org)\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
-					"https://scratch.mit.edu/discuss/post/",
+					constants.urls.scratch + "/discuss/post/",
 				)
 				.split("#")[0]
 				?.split("?")[0]
@@ -280,7 +280,7 @@ function nodesToText(node: Nodes, escape = true): string {
 			return "\n";
 		}
 		case "a": {
-			const url = new URL(node.attrs?.href?.toString() ?? "", "https://scratch.mit.edu");
+			const url = new URL(node.attrs?.href?.toString() ?? "", constants.urls.scratch);
 			return `[${content}](${url})`;
 		}
 		case "span": {
@@ -299,7 +299,7 @@ function nodesToText(node: Nodes, escape = true): string {
 			break;
 		}
 		case "img": {
-			const url = new URL(node.attrs?.src?.toString() ?? "", "https://scratch.mit.edu");
+			const url = new URL(node.attrs?.src?.toString() ?? "", constants.urls.scratch);
 			return `[${content || node.attrs?.alt || url.pathname.split("/").at(-1)}](${url})`;
 		}
 		case "blockquote": {

@@ -1,7 +1,8 @@
 import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
-import { manifest, addons } from "../../common/extension.js";
+import addons from "@sa-community/addons-data" assert { type: "json" };
 import { trimPatchVersion } from "../../util/text.js";
+import { version as saVersion } from "@sa-community/addons-data/package.json" assert { type: "json" };
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
@@ -17,29 +18,23 @@ export type AddonQuestion = {
 };
 
 const firstLetters = Object.fromEntries(
-		addons.map(({ name }) => [
+		addons.map((addon) => [
 			`Does your addon’s name __start__ with **${escapeMessage(
-				name[0]?.toUpperCase() ?? "",
+				addon.manifest.name[0]?.toUpperCase() ?? "",
 			)}**?`,
 			false,
 		]),
 	),
 	lastLetters = Object.fromEntries(
-		addons.map(({ name }) => [
+		addons.map((addon) => [
 			`Does your addon’s name __end__ with **${escapeMessage(
-				name.at(-1)?.toUpperCase() ?? "",
+				addon.manifest.name.at(-1)?.toUpperCase() ?? "",
 			)}**?`,
 			false,
 		]),
 	);
 
-const versionMarkdown = `**[${escapeMessage(
-	manifest.version_name ?? manifest.version,
-)}](https://github.com/${constants.urls.saRepo}${
-	manifest.version_name?.endsWith("-prerelease")
-		? ""
-		: `/releases/tag/v${encodeURI(manifest.version)}`
-})**`;
+const versionMarkdown = `**[${saVersion}](https://github.com/${constants.urls.saRepo}/releases/tag/v${saVersion})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
@@ -77,7 +72,7 @@ const questionStrings = {
 const forcedEasterEgg = "cat-blocks";
 
 export default Object.fromEntries(
-	addons.map((addon) => {
+	addons.map(({ manifest: addon, addonId }) => {
 		const result: AddonQuestion[] = [];
 
 		const firstLetter = escapeMessage(addon.name[0]?.toUpperCase() ?? "");
@@ -121,7 +116,7 @@ export default Object.fromEntries(
 							[questionStrings.themesCategory]: false,
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
-							[questionStrings.easterEgg]: forcedEasterEgg === addon.id && undefined,
+							[questionStrings.easterEgg]: forcedEasterEgg === addonId && undefined,
 						},
 
 						question: questionStrings.editorCategory,
@@ -257,7 +252,8 @@ export default Object.fromEntries(
 							[questionStrings.editorCategory]: false,
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
-							[questionStrings.easterEgg]: forcedEasterEgg === addon.id && undefined,
+
+							[questionStrings.easterEgg]: forcedEasterEgg === addonId && undefined,
 						},
 
 						question: questionStrings.themesCategory,
@@ -310,7 +306,7 @@ export default Object.fromEntries(
 				break;
 			}
 		}
-		if (forcedEasterEgg === addon.id) {
+		if (forcedEasterEgg === addonId) {
 			result.push({
 				question: questionStrings.easterEgg,
 				statement: "This addon is an easter egg addon!",
@@ -399,11 +395,10 @@ export default Object.fromEntries(
 			});
 		}
 
-		const brandNew =
-			trimPatchVersion(manifest.version) === trimPatchVersion(addon.versionAdded);
+		const brandNew = trimPatchVersion(saVersion) === trimPatchVersion(addon.versionAdded);
 		const updated =
 			addon.latestUpdate &&
-			trimPatchVersion(manifest.version) === trimPatchVersion(addon.latestUpdate.version);
+			trimPatchVersion(saVersion) === trimPatchVersion(addon.latestUpdate.version);
 
 		if (brandNew || updated) {
 			const featured = addon.tags.includes("recommended") || addon.tags.includes("featured");
@@ -507,6 +502,6 @@ export default Object.fromEntries(
 				statement: "This addon has notice(s) on the settings page!",
 			});
 		}
-		return [addon.id, result] as const;
+		return [addonId, result] as const;
 	}),
 );

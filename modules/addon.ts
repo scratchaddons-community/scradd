@@ -7,18 +7,17 @@ import {
 } from "discord.js";
 import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
-import { manifest, addons, addonSearchOptions } from "../common/extension.js";
+import addons from "@sa-community/addons-data" assert { type: "json" };
 import { defineChatCommand } from "strife.js";
-import { escapeMessage, tooltip } from "../util/markdown.js";
+import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
+import { version as saVersion } from "@sa-community/addons-data/package.json" assert { type: "json" };
 
 defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${
-			manifest.version_name ?? manifest.version
-		}`,
+		description: `Replies with information about a specific addon available in v${saVersion}`,
 
 		options: {
 			addon: {
@@ -26,11 +25,8 @@ defineChatCommand(
 					return matchSorter(
 						addons,
 						interaction.options.getString("addon") ?? "",
-						addonSearchOptions,
-					).map((addon) => ({
-						name: addon.name,
-						value: addon.id,
-					}));
+						constants.addonSearchOptions,
+					).map((addon) => ({ name: addon.manifest.name, value: addon.addonId }));
 				},
 				description: "The name of the addon",
 				required: true,
@@ -41,9 +37,10 @@ defineChatCommand(
 	},
 
 	async (interaction, options) => {
-		const addon = matchSorter(addons, options.addon, addonSearchOptions)[0];
+		const { manifest: addon, addonId } =
+			matchSorter(addons, options.addon, constants.addonSearchOptions)[0] ?? {};
 
-		if (!addon) {
+		if (!addon || !addonId) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find a matching addon!`,
 
@@ -80,10 +77,13 @@ defineChatCommand(
 			  }`;
 
 		const credits = joinWithAnd(addon.credits ?? [], (credit) => {
-			const note = ("note" in credit && credit.note) || "";
-			return credit.link
-				? hyperlink(credit.name, credit.link, note)
-				: tooltip(credit.name, note, interaction.guild?.id);
+			return credit.note || credit.link
+				? hyperlink(
+						credit.name,
+						credit.link ?? interaction.channel?.url ?? "",
+						credit.note ?? "",
+				  )
+				: credit.name;
 		});
 
 		const lastUpdatedIn =
@@ -110,29 +110,23 @@ defineChatCommand(
 
 							value: `v${addon.versionAdded}${
 								addon.latestUpdate && lastUpdatedIn
-									? ` (${tooltip(
+									? ` (${hyperlink(
 											lastUpdatedIn,
-											addon.latestUpdate.temporaryNotice,
-											interaction.guild?.id,
+											interaction.channel?.url ?? "",
+											addon.latestUpdate.temporaryNotice ?? "",
 									  )})`
 									: ""
 							}`,
 						},
 					],
 
-					footer: { text: addon.id },
+					footer: { text: addonId },
 
-					thumbnail: {
-						url: `${constants.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
-					},
+					thumbnail: { url: `${constants.urls.addonImageRoot}/${addonId}.png` },
 
 					title: addon.name,
 
-					url: `https://github.com/${constants.urls.saRepo}/tree/${
-						manifest.version_name?.endsWith("-prerelease")
-							? "master"
-							: `v${encodeURI(manifest.version)}`
-					}/addons/${encodeURIComponent(addon.id)}/`,
+					url: `https://github.com/${constants.urls.saRepo}/tree/v${saVersion}/addons/${addonId}/`,
 				},
 			],
 
@@ -143,9 +137,7 @@ defineChatCommand(
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
-							url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
-								addon.id,
-							)}`,
+							url: `${constants.urls.settingsPage}#addon-${addonId}`,
 							label: "Enable Addon",
 						},
 					],

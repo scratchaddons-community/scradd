@@ -57,7 +57,7 @@ defineSubcommands(
 					},
 				},
 			},
-			...(constants.canvasEnabled && {
+			...(process.env.CANVAS !== "false" && {
 				graph: {
 					description: "Graph users’ XP over the last week",
 					options: {},
@@ -99,10 +99,18 @@ defineSubcommands(
 		}
 	},
 );
+defineButton("xp", async (interaction, userId = "") => {
+	await getUserRank(interaction, await client.users.fetch(userId));
+});
 
 defineButton("viewLeaderboard", async (interaction, userId) => {
 	await top(interaction, await client.users.fetch(userId));
 });
+
+if (process.env.CANVAS !== "false") {
+	const { default: weeklyXpGraph } = await import("./graph.js");
+	defineSelect("weeklyXpGraph", weeklyXpGraph);
+}
 
 export async function top(
 	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
@@ -155,14 +163,6 @@ export async function top(
 		},
 	);
 }
-defineButton("xp", async (interaction, userId = "") => {
-	await getUserRank(interaction, await client.users.fetch(userId));
-});
 defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
 	await getUserRank(interaction, interaction.targetUser);
 });
-
-if (constants.canvasEnabled) {
-	const { default: weeklyXpGraph } = await import("./graph.js");
-	defineSelect("weeklyXpGraph", weeklyXpGraph);
-}

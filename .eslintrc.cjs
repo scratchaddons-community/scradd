@@ -20,7 +20,7 @@ module.exports = {
 		},
 		{ files: "*.d.ts", rules: { "@typescript-eslint/no-unused-vars": "off" } },
 		{
-			files: ["modules/auto/secrets.ts", "modules/_private/secrets.ts"],
+			files: ["modules/_private/**", "modules/auto/secrets.ts", "common/constants.ts"],
 			rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 		},
 	],
@@ -32,6 +32,8 @@ module.exports = {
 		tsconfigRootDir: __dirname,
 	},
 	plugins: ["@typescript-eslint"],
+	reportUnusedDisableDirectives: true,
+	root: true,
 	rules: {
 		"@typescript-eslint/no-base-to-string": [
 			"error",

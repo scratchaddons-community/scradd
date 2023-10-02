@@ -19,11 +19,17 @@ jobs:
               id: sync_types
               uses: RedGuy12/sync-types@v1.2.16
 
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
             - name: Install
               run: npm ci
 
             - name: Check format
-              run: npm run format
+              run: npx prettier --check "**" "!dist/**" --ignore-unknown
 
             - name: Lint
               run: npm run lint

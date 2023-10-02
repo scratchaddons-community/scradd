@@ -54,7 +54,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc.join} ${
+		`${constants.emojis.welcome.join} ${
 			greetings[Math.floor(Math.random() * greetings.length)] ?? ""
 		}`,
 	);
@@ -78,7 +78,6 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** broke the rules and took an 🇱`,
 					`**${member.user.displayName}** talked about opacity slider too much.`,
 					`**${member.user.displayName}** did the no-no.`,
-					`**${member.user.displayName}** was banished to the deep pits of hell.`,
 					`Someone mailed **${member.user.displayName}** a pipe bomb…`,
 					`Oop, the ban hammer met **${member.user.displayName}**!`,
 			  ]
@@ -90,13 +89,12 @@ defineEvent("guildMemberRemove", async (member) => {
 					`Can we get an F in the chat for **${member.user.displayName}**? They left!`,
 					`Ope, **${member.user.displayName}** got eaten by an evil kumquat and left!`,
 					`**${member.user.displayName}** couldn’t handle it here.`,
-					`Bye(sexual) **${member.user.displayName}**`,
 					`**${member.user.displayName}** used quantum bogosort and disintegrated.`,
 					`**${member.user.displayName}** has vanished into the abyss.`,
 			  ];
 
 	await config.channels.welcome?.send(
-		`${constants.emojis.misc[banned ? "ban" : "leave"]} ${
+		`${constants.emojis.welcome[banned ? "ban" : "leave"]} ${
 			byes[Math.floor(Math.random() * byes.length)]
 		}`,
 	);
