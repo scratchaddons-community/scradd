@@ -272,7 +272,7 @@ async function getMember(player: User) {
 }
 
 async function makeCanvasFiles(url: string, win: boolean) {
-	if (!constants.canvasEnabled) return [];
+	if (process.env.CANVAS === "false") return [];
 
 	const { createCanvas, loadImage } = await import("@napi-rs/canvas");
 	const canvas = createCanvas(200, 181);

@@ -11,6 +11,7 @@ import {
 	type RepliableInteraction,
 	GuildMember,
 	type APIInteractionGuildMember,
+	Base,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -108,7 +109,10 @@ export default async function memoryMatch(
 				collector.stop();
 
 				const player1Presence = interaction.guild?.presences.resolve(interaction.user.id);
-				const player2Presence = interaction.guild?.presences.resolve(options.user.id);
+				const player2Presence =
+					options.user instanceof Base
+						? interaction.guild?.presences.resolve(options.user.id)
+						: undefined;
 
 				const presenceCheck =
 					player1Presence?.status !== player1Presence?.clientStatus?.mobile ||
