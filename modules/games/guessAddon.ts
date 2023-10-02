@@ -7,13 +7,14 @@ import {
 	chatInputApplicationCommandMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import { addons, manifest } from "../../common/extension.js";
+import addons from "@sa-community/addons-data" assert { type: "json" };
 import { disableComponents } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
+import { version as saVersion } from "@sa-community/addons-data/package.json" assert { type: "json" };
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -37,7 +38,7 @@ export default async function guessAddon(
 	async function reply(
 		askedQuestions: string[] = [],
 		addonProbabilities: Probabilities = addons
-			.map((addon) => [addon.id, 0] as const)
+			.map((addon) => [addon.addonId, 0] as const)
 			.toSorted(() => Math.random() - 0.5),
 		askedCount = 0,
 		backInfo:
@@ -81,9 +82,7 @@ export default async function guessAddon(
 			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
-				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
-					manifest.version_name ?? manifest.version
-				})`,
+				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${saVersion})`,
 			);
 
 			CURRENTLY_PLAYING.delete(interaction.user.id);
@@ -304,7 +303,7 @@ export default async function guessAddon(
 			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string },
 		justAnswered: string,
 	) {
-		const foundAddon = addons.find(({ id }) => id === addonProbabilities[0]?.[0]);
+		const foundAddon = addons.find(({ addonId }) => addonId === addonProbabilities[0]?.[0]);
 
 		if (!foundAddon) {
 			throw new ReferenceError(
@@ -314,7 +313,8 @@ export default async function guessAddon(
 			);
 		}
 
-		const nextChoice = addons.find(({ id }) => id === addonProbabilities[1]?.[0])?.name;
+		const nextChoice = addons.find(({ addonId }) => addonId === addonProbabilities[1]?.[0])
+			?.manifest.name;
 
 		const oldMessage = await interaction.fetchReply();
 
@@ -329,7 +329,7 @@ export default async function guessAddon(
 						oldMessage.embeds[0]?.description
 							? `${oldMessage.embeds[0]?.description ?? ""} **${justAnswered}**\n`
 							: ""
-					}- Is it the **${foundAddon.name}** addon?`,
+					}- Is it the **${foundAddon.manifest.name}** addon?`,
 				},
 			],
 		});
@@ -358,12 +358,12 @@ export default async function guessAddon(
 			],
 
 			content: `${constants.emojis.misc.addon} Your addon is **${escapeMessage(
-				foundAddon.name,
+				foundAddon.manifest.name,
 			)}**!`,
 
 			embeds: [
 				{
-					title: foundAddon.name,
+					title: foundAddon.manifest.name,
 
 					description: `${
 						Object.entries(QUESTIONS_BY_ADDON)
@@ -392,12 +392,10 @@ export default async function guessAddon(
 					color: constants.themeColor,
 
 					thumbnail: {
-						url: `${constants.urls.addonImageRoot}/${encodeURI(foundAddon.id)}.png`,
+						url: `${constants.urls.addonImageRoot}/${foundAddon.addonId}.png`,
 					},
 
-					url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
-						foundAddon.id,
-					)}`,
+					url: `${constants.urls.settingsPage}#addon-${foundAddon.addonId}`,
 
 					footer: {
 						text: `Guessed after ${askedCount} questions.${
@@ -563,13 +561,13 @@ function answerQuestion(
 
 	const dependencies: Dependencies = {};
 	const initialUpdated = probabilitiesBefore.map(([addonId, probability]): Probability => {
-		const addon = QUESTIONS_BY_ADDON[addonId] ?? [];
-		const questionInfo = addon.find(({ question }) => question === justAsked);
+		const addonQuestions = QUESTIONS_BY_ADDON[addonId] ?? [];
+		const questionInfo = addonQuestions.find(({ question }) => question === justAsked);
 
 		if (probabilityShift > 0 && questionInfo?.dependencies)
 			Object.assign(dependencies, questionInfo.dependencies);
 
-		const allDependencies = addon.reduce<Dependencies>(
+		const allDependencies = addonQuestions.reduce<Dependencies>(
 			(accumulated, { dependencies: addonDependencies = {} }) => ({
 				...accumulated,
 				...addonDependencies,
@@ -583,7 +581,7 @@ function answerQuestion(
 				(probabilityShift < 0 && allDependencies[justAsked] !== false))
 		) {
 			justAskedQuestions.push(
-				...addon
+				...addonQuestions
 					.filter(({ dependencies: addonDependencies = {} }) =>
 						Object.keys(addonDependencies).includes(justAsked),
 					)

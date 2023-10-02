@@ -16,6 +16,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
               with:
+                  submodules: true
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
@@ -44,6 +45,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
               with:
+                  submodules: true
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
@@ -64,6 +66,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
               with:
+                  submodules: true
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
@@ -87,6 +90,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
               with:
+                  submodules: true
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
@@ -110,6 +114,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
               with:
+                  submodules: true
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 

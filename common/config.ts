@@ -6,9 +6,7 @@ import {
 	NewsChannel,
 	MediaChannel,
 } from "discord.js";
-import constants from "./constants.js";
 import { client } from "strife.js";
-import { gracefulFetch } from "../util/promises.js";
 
 const guild = await client.guilds.fetch(process.env.GUILD_ID);
 if (!guild.available) throw new ReferenceError("Guild is unavailable!");
@@ -17,36 +15,9 @@ async function getConfig() {
 	const channels = await guild.channels.fetch();
 	const roles = await guild.roles.fetch();
 
-	const latestRelease: string = // todo find an eslint rule
-		(process.env.NODE_ENV == "production" &&
-			(
-				await gracefulFetch<{ tag_name: string }>(
-					`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-				)
-			)?.tag_name) ||
-		"master";
-
 	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
-		roles: {
-			mod,
-			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
-			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
-			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
-			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
-			booster: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("booster"),
-			),
-			active: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("active"),
-			),
-		},
-
-		urls: {
-			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
-			latestRelease,
-		},
+		guild,
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
@@ -82,7 +53,20 @@ async function getConfig() {
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
 
-		guild,
+		roles: {
+			mod,
+			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
+			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
+			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
+			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
+			booster: roles.find(
+				(role) => role.editable && role.name.toLowerCase().includes("booster"),
+			),
+			active: roles.find(
+				(role) => role.editable && role.name.toLowerCase().includes("active"),
+			),
+		},
 	};
 
 	function getChannel<T extends ChannelType>(
@@ -96,10 +80,10 @@ async function getConfig() {
 				!!channel &&
 				types.has(channel.type) &&
 				{
+					end: channel.name.endsWith(name),
 					full: channel.name === name,
 					partial: channel.name.includes(name),
 					start: channel.name.startsWith(name),
-					end: channel.name.endsWith(name),
 				}[matchType],
 		);
 	}
@@ -109,7 +93,6 @@ const config = await getConfig();
 export async function syncConfig() {
 	const newConfig = await getConfig();
 	config.roles = newConfig.roles;
-	config.urls = newConfig.urls;
 	config.channels = newConfig.channels;
 }
 export default config;

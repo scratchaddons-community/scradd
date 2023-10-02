@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import dns from "node:dns";
 import { ActivityType, GatewayIntentBits } from "discord.js";
-import pkg from "./package.json" assert { type: "json" };
+import { homepage, version } from "./package.json" assert { type: "json" };
 import { login, client } from "strife.js";
 import constants from "./common/constants.js";
 
@@ -15,7 +15,7 @@ if (
 )
 	throw new Error("Refusing to run on production Scradd without `--production` flag");
 
-if (constants.canvasEnabled) {
+if (process.env.CANVAS !== "false") {
 	const { GlobalFonts } = await import("@napi-rs/canvas");
 	GlobalFonts.registerFromPath(
 		fileURLToPath(
@@ -67,7 +67,7 @@ if (process.env.NODE_ENV === "production") {
 	await import("./web/server.js");
 
 	const { default: log, LoggingEmojis } = await import("./modules/logging/misc.js");
-	await log(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`, "server");
+	await log(`${LoggingEmojis.Bot} Restarted bot on version **v${version}**`, "server");
 }
 
 client.user.setPresence({
@@ -75,7 +75,7 @@ client.user.setPresence({
 		{
 			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
 			type: ActivityType.Watching,
-			url: constants.inviteUrl,
+			url: homepage,
 		},
 	],
 	status: "online",

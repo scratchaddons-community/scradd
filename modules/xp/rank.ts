@@ -38,7 +38,7 @@ export default async function getUserRank(
 			.findIndex((info) => info.user === user.id) + 1;
 
 	async function makeCanvasFiles() {
-		if (!constants.canvasEnabled) return [];
+		if (process.env.CANVAS === "false") return [];
 
 		const { createCanvas } = await import("@napi-rs/canvas");
 		const canvas = createCanvas(1000, 50);
