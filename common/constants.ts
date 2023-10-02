@@ -1,4 +1,17 @@
+import addons from "@sa-community/addons-data" assert { type: "json" };
+
 export default {
+	addonSearchOptions: {
+		keys: [
+			({ addonId }: typeof addons[number]) => addonId.replaceAll("-", " "),
+			"id",
+			"name",
+			"description",
+			"settings.*.name",
+			"credits.*.name",
+		],
+	},
+
 	collectorTime: 45_000,
 
 	emojis: {
@@ -46,10 +59,10 @@ export default {
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
-		usercountJson: "https://scratchaddons.com/usercount.json",
-		saRepo: "ScratchAddons/ScratchAddons",
 		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
+		saRepo: "ScratchAddons/ScratchAddons",
 		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
+		usercountJson: "https://scratchaddons.com/usercount.json",
 	},
 
 	users: {

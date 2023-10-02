@@ -6,7 +6,7 @@ module.exports = {
 		"plugin:unicorn/all",
 		"plugin:@typescript-eslint/strict-type-checked",
 	],
-	ignorePatterns: ["dist", "extension"],
+	ignorePatterns: "dist",
 	overrides: [
 		{
 			extends: ["plugin:@typescript-eslint/disable-type-checked"],

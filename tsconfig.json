@@ -29,6 +29,6 @@
 		"target": "ES2021",
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["node_modules", ".git", "dist", "extension"],
+	"exclude": ["node_modules", ".git", "dist"],
 	"typeAcquisition": { "enable": true }
 }
