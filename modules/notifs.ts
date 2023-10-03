@@ -79,7 +79,8 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** talked about opacity slider too much.`,
 					`**${member.user.displayName}** did the no-no.`,
 					`Someone mailed **${member.user.displayName}** a pipe bomb…`,
-					`Oop, the ban hammer met **${member.user.displayName}**!`,
+					`Oop, the hammer met **${member.user.displayName}**!`,
+					`**${member.user.displayName}** needs a life`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -91,6 +92,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** couldn’t handle it here.`,
 					`**${member.user.displayName}** used quantum bogosort and disintegrated.`,
 					`**${member.user.displayName}** has vanished into the abyss.`,
+					`**${member.user.displayName}** got a life!`,
 			  ];
 
 	await config.channels.welcome?.send(
