@@ -4,6 +4,7 @@ import { ActivityType, GatewayIntentBits } from "discord.js";
 import pkg from "./package.json" assert { type: "json" };
 import { login, client } from "strife.js";
 import constants from "./common/constants.js";
+import mongoose from "mongoose";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -14,6 +15,8 @@ if (
 	!process.argv.includes("--production")
 )
 	throw new Error("Refusing to run on production Scradd without `--production` flag");
+
+await mongoose.connect(process.env.MONGO_URI);
 
 if (process.env.CANVAS !== "false") {
 	const { GlobalFonts } = await import("@napi-rs/canvas");
