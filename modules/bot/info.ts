@@ -13,7 +13,7 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
-import { version, dependencies } from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../auto/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
@@ -54,7 +54,7 @@ export default async function info(
 
 								inline: true,
 							},
-							{ name: "🔢 Version", value: `v${version}`, inline: true },
+							{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },
 							{
 								name: "🔁 Last restarted",
 
@@ -147,7 +147,7 @@ export default async function info(
 								name: "🗄️ Third-party code libraries",
 
 								value: joinWithAnd(
-									Object.entries(dependencies),
+									Object.entries(pkg.dependencies),
 									([dependency, version]) =>
 										`\`${escapeMessage(`${dependency}@${version}`)}\``,
 								),

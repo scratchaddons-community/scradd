@@ -13,7 +13,7 @@ import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import { escapeMessage } from "../../util/markdown.js";
-import { version as saVersion } from "@sa-community/addons-data/package.json" assert { type: "json" };
+import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
 import { client } from "strife.js";
 
 type Probability = readonly [string, number];
@@ -80,7 +80,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
-				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${saVersion})`,
+				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${sa.version})`,
 			);
 
 			CURRENTLY_PLAYING.delete(interaction.user.id);

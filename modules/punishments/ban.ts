@@ -15,7 +15,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import { escapeMessage } from "../../util/markdown.js";
 import queueReminders from "../reminders/send.js";
-import { homepage } from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" assert { type: "json" };
 
 export default async function ban(
 	interaction: RepliableInteraction,
@@ -175,10 +175,9 @@ export default async function ban(
 								description:
 									(options.reason || "") +
 									(unbanTime
-										? `\n> You will be [automatically unbanned](${homepage}) ${time(
-												unbanTime,
-												TimestampStyles.RelativeTime,
-										  )}`
+										? `\n> You will be [automatically unbanned](${
+												pkg.homepage
+										  }) ${time(unbanTime, TimestampStyles.RelativeTime)}`
 										: ""),
 								color:
 									options.user instanceof GuildMember

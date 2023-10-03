@@ -45,15 +45,28 @@ declare global {
 	}
 	namespace NodeJS {
 		interface ProcessEnv {
+			/** The main guild ID for the bot to operate in. Requires Administrator permission in this server. */
 			GUILD_ID: Snowflake;
+			/** The bot's token. */
 			BOT_TOKEN: string;
-			// BOT_SECRET: string;
-			/** Defaults to `"development"` */
+			/** The URI to use when connecting to MongoDB. */
+			MONGO_URI: string;
+			/**
+			 * The mode for the bot to run in. Defaults to `"development"`.
+			 *
+			 * For consistency, always compare against `"production"` in code.
+			 */
 			NODE_ENV?: "development" | "production";
-			PORT?: `${number}`;
-			CDBL_AUTH?: string;
-			/** Defaults to `true` */
+			/**
+			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. Defaults to `true`.
+			 *
+			 * For consistency, always compare against `"true"` in code.
+			 */
 			CANVAS?: `${boolean}`;
+			/** The port to run the web server on in production. Not used in development. */
+			PORT?: `${number}`;
+			/** The API key to force a database write in production. Not used in development. */
+			CDBL_AUTH?: string;
 		}
 	}
 }

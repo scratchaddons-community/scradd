@@ -2,7 +2,7 @@ import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
 import addons from "@sa-community/addons-data" assert { type: "json" };
 import { trimPatchVersion } from "../../util/text.js";
-import { version as saVersion } from "@sa-community/addons-data/package.json" assert { type: "json" };
+import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
@@ -34,7 +34,7 @@ const firstLetters = Object.fromEntries(
 		]),
 	);
 
-const versionMarkdown = `**[${saVersion}](https://github.com/${constants.urls.saRepo}/releases/tag/v${saVersion})**`;
+const versionMarkdown = `**[${sa.version}](https://github.com/${constants.urls.saRepo}/releases/tag/v${sa.version})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
@@ -395,10 +395,10 @@ export default Object.fromEntries(
 			});
 		}
 
-		const brandNew = trimPatchVersion(saVersion) === trimPatchVersion(addon.versionAdded);
+		const brandNew = trimPatchVersion(sa.version) === trimPatchVersion(addon.versionAdded);
 		const updated =
 			addon.latestUpdate &&
-			trimPatchVersion(saVersion) === trimPatchVersion(addon.latestUpdate.version);
+			trimPatchVersion(sa.version) === trimPatchVersion(addon.latestUpdate.version);
 
 		if (brandNew || updated) {
 			const featured = addon.tags.includes("recommended") || addon.tags.includes("featured");
