@@ -1,4 +1,4 @@
-import { ChannelType, type Message } from "discord.js";
+import { ChannelType, Constants, MessageType, type Message } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -150,8 +150,13 @@ export default async function automodMessage(message: Message) {
 				},
 			);
 
-		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
+		if (
+			badEmbedWords.strikes &&
+			!(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type)
+		)
+			needsDelete = true;
 
+		const languageStrikes = badWords.strikes + badEmbedWords.strikes;
 		if (needsDelete) {
 			if (message.deletable) {
 				await message.delete();

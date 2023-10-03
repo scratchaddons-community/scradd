@@ -4,6 +4,7 @@ import {
 	GuildMember,
 	MessageType,
 	type CommandInteractionOption,
+	AutoModerationActionType,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -179,6 +180,21 @@ defineChatCommand(
 		});
 	},
 );
+
+defineEvent("autoModerationActionExecution", async (action) => {
+	if (
+		action.guild.id === config.guild.id &&
+		action.action.type === AutoModerationActionType.SendAlertMessage &&
+		action.alertSystemMessageId &&
+		tryCensor(action.content)
+	) {
+		const channel =
+			action.action.metadata.channelId &&
+			(await config.guild.channels.fetch(action.action.metadata.channelId));
+		if (channel && channel.isTextBased())
+			await channel.messages.delete(action.alertSystemMessageId);
+	}
+});
 
 function censorOptions(options: readonly CommandInteractionOption[]): {
 	strikes: number;
