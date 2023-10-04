@@ -170,10 +170,13 @@ export default async function info(
 			members.push({ user: await client.users.fetch(constants.users.retron) });
 
 		return joinWithAnd(
-			members.toSorted((one, two) =>
-				one.user.displayName.localeCompare(two.user.displayName),
+			await Promise.all(
+				members
+					.toSorted((one, two) =>
+						one.user.displayName.localeCompare(two.user.displayName),
+					)
+					.map(({ user }) => mentionUser(user, interaction.user)),
 			),
-			({ user }) => mentionUser(user, interaction.user),
 		);
 	}
 }

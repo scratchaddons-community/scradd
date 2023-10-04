@@ -119,7 +119,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 									value:
 										typeof moderator === "string"
 											? moderator
-											: mentionUser(moderator, interaction.member),
+											: await mentionUser(moderator, interaction.member),
 									inline: true,
 								},
 						  ]
@@ -128,7 +128,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 						? [
 								{
 									name: "👤 Target user",
-									value: mentionUser(user, interaction.member),
+									value: await mentionUser(user, interaction.member),
 									inline: true,
 								},
 						  ]
