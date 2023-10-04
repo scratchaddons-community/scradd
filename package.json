@@ -16,7 +16,7 @@
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@fontsource-variable/sora": "5.0.8",
+		"@fontsource-variable/sora": "5.0.12",
 		"@napi-rs/canvas": "0.1.44",
 		"@sa-community/addons-data": "1.34.1-3",
 		"@twemoji/parser": "14.1.0",
