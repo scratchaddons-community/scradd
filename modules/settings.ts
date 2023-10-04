@@ -222,11 +222,10 @@ export async function mentionUser(
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const player1Presence = guild.presences.resolve(interactor.id);
-	const url =
-		player1Presence?.status === player1Presence?.clientStatus?.desktop
-			? `discord://-/users/${id}`
-			: `<https://discord.com/users/${id}>`;
+	const presence = guild.presences.resolve(interactor.id);
+	const url = `<${
+		presence?.status === presence?.clientStatus?.desktop ? "discord://-" : "https://discord.com"
+	}/users/${id}>`;
 
 	const { displayName } =
 		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
