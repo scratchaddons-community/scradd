@@ -8,6 +8,7 @@ import {
 	userMention,
 	type RepliableInteraction,
 	hyperlink,
+	Guild,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -272,7 +273,11 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 	};
 }
 
-export async function mentionUser(user: User | Snowflake, interactor: { id: Snowflake }) {
+export async function mentionUser(
+	user: User | Snowflake,
+	interactor: { id: Snowflake },
+	guild: Guild,
+) {
 	const { useMentions } = await getSettings(interactor);
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);

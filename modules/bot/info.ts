@@ -175,7 +175,9 @@ export default async function info(
 					.toSorted((one, two) =>
 						one.user.displayName.localeCompare(two.user.displayName),
 					)
-					.map(({ user }) => mentionUser(user, interaction.user)),
+					.map(({ user }) =>
+						mentionUser(user, interaction.user, interaction.guild ?? config.guild),
+					),
 			),
 		);
 	}

@@ -33,7 +33,15 @@ export default async function top(
 					? reference.url
 					: `https://discord.com/channels/${config.guild.id}/${reference.id}`,
 				answer,
-			)}${user ? "" : ` by ${await mentionUser(author, interaction.user)}`}`,
+			)}${
+				user
+					? ""
+					: ` by ${await mentionUser(
+							author,
+							interaction.user,
+							interaction.guild ?? config.guild,
+					  )}`
+			}`,
 		(data) => interaction.reply(data),
 		{
 			title: `Top suggestions${user ? ` by ${user.displayName}` : ""}${

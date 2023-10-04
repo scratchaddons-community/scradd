@@ -135,6 +135,7 @@ export async function top(
 			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
 				xp.user,
 				interaction.user,
+				interaction.guild ?? config.guild,
 			)} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
 		(data) => interaction.reply(data),
 		{
