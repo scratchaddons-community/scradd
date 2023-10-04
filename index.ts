@@ -60,6 +60,7 @@ await login({
 			GatewayIntentBits.DirectMessages,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.GuildScheduledEvents,
+			GatewayIntentBits.AutoModerationExecution,
 		],
 		presence: { status: "dnd" },
 	},

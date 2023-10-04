@@ -7,6 +7,7 @@ import {
 	User,
 	userMention,
 	type RepliableInteraction,
+	hyperlink,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -14,6 +15,7 @@ import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
 import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
+import { censor } from "./automod/language.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -272,10 +274,16 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 
 export async function mentionUser(user: User | Snowflake, interactor: { id: Snowflake }) {
 	const { useMentions } = await getSettings(interactor);
-	return useMentions
-		? userMention(user instanceof User ? user.id : user)
-		: (user instanceof User
-				? user
-				: await client.users.fetch(user).catch(() => ({ displayName: userMention(user) }))
-		  ).displayName;
+	const id = user instanceof User ? user.id : user;
+	if (useMentions) return userMention(id);
+
+	const player1Presence = guild.presences.resolve(interactor.id);
+	const url =
+		player1Presence?.status === player1Presence?.clientStatus?.desktop
+			? `discord://-/users/${id}`
+			: `<https://discord.com/users/${id}>`;
+
+	const { displayName } =
+		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
+	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
 }
