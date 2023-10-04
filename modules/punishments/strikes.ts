@@ -16,6 +16,7 @@ import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 export async function getStrikes(
 	selected: GuildMember | User,
 	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+	options?: { expired?: boolean; removed?: boolean },
 ) {
 	if (
 		selected.id !== interaction.user.id &&
@@ -39,6 +40,7 @@ export async function getStrikes(
 	await listStrikes(
 		member,
 		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
+		options,
 		interaction.user,
 	);
 }

@@ -96,10 +96,16 @@ export async function listStrikes(
 	reply: (
 		options: BaseMessageOptions & { ephemeral: boolean },
 	) => Promise<Message | InteractionResponse>,
+	{ expired = true, removed = false } = {},
 	commandUser: false | User = false,
 ) {
 	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === member.id)
+		.filter(
+			(strike) =>
+				strike.user === member.id &&
+				(removed || !strike.removed) &&
+				(expired || strike.date + EXPIRY_LENGTH > Date.now()),
+		)
 		.toSorted((one, two) => two.date - one.date);
 
 	const totalStrikeCount = Math.trunc(
