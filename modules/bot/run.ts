@@ -87,4 +87,6 @@ export async function run(interaction: ModalSubmitInteraction) {
 			],
 		});
 	}
+
+	await (await interaction.followUp(interaction.user.toString())).delete();
 }
