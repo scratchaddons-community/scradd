@@ -5,7 +5,6 @@ import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
 import {
 	createCustomRole,
-	deleteMemberRoles,
 	recheckMemberRole,
 	recheckAllRoles,
 	customRole,
@@ -36,7 +35,6 @@ defineEvent("guildMemberAdd", async () => {
 });
 
 defineEvent("guildMemberRemove", persistedLeave);
-
 defineEvent("guildMemberAdd", persistedRejoin);
 
 defineEvent("guildMemberUpdate", async (_, member) => {
@@ -50,11 +48,7 @@ defineChatCommand(
 	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
 	customRole,
 );
-
 defineModal("customRole", createCustomRole);
-
-defineEvent("guildMemberRemove", deleteMemberRoles);
-
+defineEvent("guildMemberRemove", recheckAllRoles);
 defineEvent("guildMemberUpdate", recheckMemberRole);
-
 defineEvent("applicationCommandPermissionsUpdate", recheckAllRoles);
