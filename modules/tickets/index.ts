@@ -72,7 +72,7 @@ defineEvent("messageCreate", async (message) => {
 				},
 			],
 		});
-		resourcesDmed.add(message.author.id)
+		resourcesDmed.add(message.author.id);
 	}
 });
 defineButton("contactMods", async (interaction) => {
