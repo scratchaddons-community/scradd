@@ -27,7 +27,6 @@ export const userSettingsDatabase = new Database<{
 	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
-	resourcesDmed?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -101,7 +100,6 @@ export function updateSettings(
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
-		resourcesDmed?: true;
 	},
 ) {
 	const old = getSettings(user);
@@ -127,7 +125,6 @@ export function updateSettings(
 			settings.dmReminders === "toggle"
 				? !old.dmReminders
 				: settings.dmReminders ?? old.dmReminders,
-		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
 	userSettingsDatabase.updateById(updated, {});
@@ -209,7 +206,6 @@ export function getDefaultSettings(user: { id: Snowflake }) {
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
 		useMentions: getWeeklyXp(user.id) > 100,
-		resourcesDmed: false,
 	};
 }
 

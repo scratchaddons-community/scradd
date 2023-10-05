@@ -15,7 +15,7 @@ import {
 	defineModal,
 	defineSelect,
 } from "strife.js";
-import { getSettings, updateSettings } from "../settings.js";
+import { updateSettings } from "../settings.js";
 import {
 	type Category,
 	SA_CATEGORY,
@@ -26,11 +26,13 @@ import {
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 
+const resourcesDmed = new Set<string>();
+
 defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		!getSettings(message.author).resourcesDmed
+		!resourcesDmed.has(message.author.id)
 	) {
 		await message.channel.send({
 			components: [
@@ -71,7 +73,7 @@ defineEvent("messageCreate", async (message) => {
 				},
 			],
 		});
-		updateSettings(message.author, { resourcesDmed: true });
+		resourcesDmed.add(message.author.id)
 	}
 });
 defineButton("contactMods", async (interaction) => {
