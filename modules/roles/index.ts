@@ -3,12 +3,7 @@ import { type Snowflake, Collection } from "discord.js";
 import { defineChatCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
-import {
-	createCustomRole,
-	recheckMemberRole,
-	recheckAllRoles,
-	customRole,
-} from "./custom.js";
+import { createCustomRole, recheckMemberRole, recheckAllRoles, customRole } from "./custom.js";
 
 defineEvent("guildMemberAdd", async () => {
 	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
