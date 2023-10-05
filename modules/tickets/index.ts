@@ -15,7 +15,6 @@ import {
 	defineModal,
 	defineSelect,
 } from "strife.js";
-import { updateSettings } from "../settings.js";
 import {
 	type Category,
 	SA_CATEGORY,
