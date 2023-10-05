@@ -43,12 +43,12 @@ async function getConfig() {
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-
-			bots: getChannel("bots", ChannelType.GuildText, "partial"),
+			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ||
 				getChannel("promo", ChannelType.GuildText, "partial"),
+			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},

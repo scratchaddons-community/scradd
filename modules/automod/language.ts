@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits, type TextBasedChannel } from "discord.js";
+import { ChannelType, type TextBasedChannel } from "discord.js";
 import badWords from "./badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
@@ -98,8 +98,9 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 
 	return (
 		baseChannel?.type === ChannelType.DM ||
+		baseChannel?.id === config.channels.devs?.id ||
+		baseChannel?.parent?.id === config.channels.mod?.parent?.id ||
 		(baseChannel?.id === config.channels.tickets?.id &&
-			channel?.type === ChannelType.PrivateThread) ||
-		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+			channel?.type === ChannelType.PrivateThread)
 	);
 }
