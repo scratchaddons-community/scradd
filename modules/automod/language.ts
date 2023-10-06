@@ -32,7 +32,7 @@ function decodeRegexps(regexps: RegExp[]) {
 							"p": "⒫⍴pｐⓟℙₚᴘρϱⲣрየꮲᑭꓑ𝐏",
 							"q": "⒬۹9oqｑⓠℚϙϱԛфգզⵕᑫ𝐐",
 							"r": "⒭rｒⓡℝℛℜʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑",
-							"s": "⒮§$₴5sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
+							"s": "⒮§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
 							"t": "⒯⊤⟙ℑtｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千",
 							"u": "⒰*∪⋃uｕⓤꞟᴜꭎꭒɥvʋυսሀሁᑌꓴ𝐔-",
 							"v": "⒱℣√∨⋁☑✅✔✔️۷٧uvｖⅴⓥⱽᴠνѵⴸꮙꮩᐯᐺꓦ𝐕",
@@ -64,8 +64,9 @@ export default function tryCensor(text: string, strikeShift = 0) {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			words[index]?.push(word);
+			if (!Number.isNaN(+word)) return word;
 
+			words[index]?.push(word);
 			return word.length < 3
 				? "#".repeat(word.length)
 				: word[0] + "#".repeat(word.length - 1);
