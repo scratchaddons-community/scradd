@@ -23,7 +23,6 @@ import {
 	type ActionRowData,
 	GuildMember,
 	FormattingPatterns,
-	Invite,
 	MessageMentions,
 	type AnyThreadChannel,
 	type MessageReaction,
