@@ -6,7 +6,7 @@ import {
 	getBaseChannel,
 	GlobalAnimatedEmoji,
 	GlobalBotInvitesPattern,
-	GlobalInvitesPattern,
+	InvitesPattern,
 } from "../../util/discord.js";
 import log, { LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
@@ -52,9 +52,14 @@ export default async function automodMessage(message: Message) {
 		);
 	}
 
+	const links = message.content.match(InvitesPattern) ?? [];
 	const invites = await Promise.all(
-		(message.content.match(GlobalInvitesPattern) ?? []).map(
-			async (code) => await client.fetchInvite(code).catch(() => void 0),
+		links.map(
+			async (link) =>
+				[
+					link,
+					await client.fetchInvite(link.split("/").at(-1) ?? link).catch(() => void 0),
+				] as const,
 		),
 	);
 
@@ -68,9 +73,10 @@ export default async function automodMessage(message: Message) {
 		) {
 			const badInvites = invites
 				.filter(
-					(invite) => invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
+					([, invite]) =>
+						invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
 				)
-				.map((invite) => invite?.code);
+				.map(([link]) => link);
 
 			if (badInvites.length) {
 				needsDelete = true;
@@ -107,7 +113,7 @@ export default async function automodMessage(message: Message) {
 		const badWords = [
 			tryCensor(stripMarkdown(message.content)),
 			...message.stickers.map(({ name }) => tryCensor(name)),
-			...invites.map((invite) => !!invite?.guild && tryCensor(invite.guild.name)),
+			...invites.map(([, invite]) => !!invite?.guild && tryCensor(invite.guild.name)),
 		].reduce(
 			(bad, censored) =>
 				typeof censored === "boolean"

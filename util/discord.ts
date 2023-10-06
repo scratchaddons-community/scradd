@@ -728,8 +728,9 @@ export function getBaseChannel<Channel extends TextBasedChannel | null | undefin
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
 export const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern, "g");
 
-/** A global regular expression variant of {@link Invite.InvitesPattern}. */
-export const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern, "g");
+/** An enhanced variant of {@link Invite.InvitesPattern}. */
+export const InvitesPattern =
+	/discord(?:(?:(?:app)?\.com|:\/(?:\/-?)?)\/invite|\.gg(?:\/invite)?)\/(?<code>[\w-]{2,255})/gi;
 
 /** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
 export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");

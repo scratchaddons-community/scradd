@@ -18,16 +18,6 @@ defineEvent("inviteDelete", async (invite) => {
 		{ upsert: true },
 	);
 });
-console.log(
-	await Invite.aggregate<{ _id: string; totalUses: number }>([
-		{ $group: { _id: "$member", totalUses: { $sum: "$uses" } } },
-		{ $match: { totalUses: { $gte: 20 } } },
-	]),
-	await Invite.aggregate<{ _id: string; totalUses: number }>([
-		{ $group: { _id: "$member", totalUses: { $sum: "$uses" } } },
-		{ $match: { totalUses: { $gte: 4 } } },
-	]),
-);
 defineEvent("guildMemberAdd", async () => {
 	for (const [, invite] of await config.guild.invites.fetch()) {
 		if (!invite.uses) continue;
