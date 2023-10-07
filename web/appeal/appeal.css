@@ -1,92 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap");
 
 body {
-    font-family: "Sora", sans-serif;
+	font-family: "Sora", sans-serif;
 }
 
 .nav {
-    background-color: #5764F4;
-    padding: 1rem;
-    color: white;
-    font-weight: 600;
-    font-size: 1.2rem;
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: 100vw;
-    padding-left: 10rem;
+	background-color: #5764f4;
+	padding: 1rem;
+	color: white;
+	font-weight: 600;
+	font-size: 1.2rem;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100vw;
+	padding-left: 10rem;
 }
 
 body {
-    padding-left: 10rem;
-    padding-right: 10rem;
-    padding-top: 3rem;
+	padding-left: 10rem;
+	padding-right: 10rem;
+	padding-top: 3rem;
 }
 
 .blurple {
-    color: #5764F4;
+	color: #5764f4;
 }
 
 .appeal-form {
-    margin-top: 3rem;
+	margin-top: 3rem;
 }
 
 .scradd-nav {
-    height: 1.2rem;
-    margin-right: 1rem;
-    transform: scale(150%);
-    position: relative;
-    top: .15rem;
-    margin-left: .5rem;
+	height: 1.2rem;
+	margin-right: 1rem;
+	transform: scale(150%);
+	position: relative;
+	top: 0.15rem;
+	margin-left: 0.5rem;
 }
 
 textarea {
-    background-color: #EFEFEF;
-    border: 0px;
-    outline: none;
-    padding: .75rem;
-    font-family: "Sora", sans-serif;
-    border-radius: .5rem;
-    resize: vertical;
-    max-height: 20rem;
-    min-height: 6rem;
-    width: 40rem;
-    max-width: 100%;
+	background-color: #efefef;
+	border: 0px;
+	outline: none;
+	padding: 0.75rem;
+	font-family: "Sora", sans-serif;
+	border-radius: 0.5rem;
+	resize: vertical;
+	max-height: 20rem;
+	min-height: 6rem;
+	width: 40rem;
+	max-width: 100%;
 }
 
 textarea::placeholder {
-    opacity: .5;
+	opacity: 0.5;
 }
 
 button {
-    background-color: #5764F4;
-    color: white;
-    border: 0px;
-    outline: none;
-    padding: .75rem;
-    font-family: "Sora", sans-serif;
-    border-radius: .5rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    cursor: pointer;
-    transition: opacity .3s, transform .3s;
-    transform: none;
-    opacity: 1;
+	background-color: #5764f4;
+	color: white;
+	border: 0px;
+	outline: none;
+	padding: 0.75rem;
+	font-family: "Sora", sans-serif;
+	border-radius: 0.5rem;
+	padding-left: 2rem;
+	padding-right: 2rem;
+	cursor: pointer;
+	transition: opacity 0.3s, transform 0.3s;
+	transform: none;
+	opacity: 1;
 }
 
 button:hover {
-    transform: scale(102%);
-    opacity: .8;
+	transform: scale(102%);
+	opacity: 0.8;
 }
 
 .appeal-form button {
-    display: block;
-    margin-top: 1.5rem;
+	display: block;
+	margin-top: 1.5rem;
 }
 
 p.disclaimer {
-    font-weight: 200;
-    font-size: .8rem;
-    opacity: .5;
-    max-width: 25rem;
+	font-weight: 200;
+	font-size: 0.8rem;
+	opacity: 0.5;
+	max-width: 25rem;
 }
