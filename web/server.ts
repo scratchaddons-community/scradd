@@ -3,13 +3,29 @@ import http from "node:http";
 import logError from "../modules/logging/errors.js";
 import fileSystem from "node:fs/promises";
 import { client } from "strife.js";
+import {
+	REST,
+	Routes,
+	type RESTPostOAuth2AccessTokenResult,
+	type RESTGetAPICurrentUserResult,
+} from "discord.js";
 
+const PAGES = {
+	appeal: await fileSystem.readFile("./web/appeal.html", "utf8"),
+	css: await fileSystem.readFile("./web/style.css"),
+};
+
+const rest = new REST({ version: "10" });
 http.createServer(async (request, response) => {
 	try {
-		const requestUrl = new URL(request.url ?? "", `https://${request.headers.host}`);
+		const requestUrl = new URL(
+			request.url ?? "",
+			`http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
+		);
 
 		switch (requestUrl.pathname) {
-			case "/clean-database-listeners": {
+			case "/clean-database-listeners":
+			case "/clean-database-listeners/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
 
@@ -20,57 +36,44 @@ http.createServer(async (request, response) => {
 
 				break;
 			}
-			case "/appeal": {
-				const code = new URLSearchParams(new URL(request.url ?? "").search).get("code");
-				if (!code) return;
+			case "/ban-appeal":
+			case "/ban-appeal/": {
+				if (!process.env.CLIENT_SECRET)
+					return response
+						.writeHead(500, { "Content-Type": "text/plain" })
+						.end("No client secret provided");
 
-				const tokenResponseData = await (
-					await fetch("https://discord.com/api/oauth2/token", {
-						method: "POST",
-						body: new URLSearchParams({
-							client_id: "929928324959055932",
-							client_secret: "",
-							code,
-							grant_type: "authorization_code",
-							redirect_uri: "https://sa-discord.up.railway.app/appeal",
-							scope: "identify",
-						}).toString(),
-						headers: { "Content-Type": "application/x-www-form-urlencoded" },
-					})
-				).json();
-				const token_type: string = (tokenResponseData as any)?.token_type;
-				const access_token: string = (tokenResponseData as any)?.access_token;
-				if (!access_token) {
-					response
-						.writeHead(503, { "Content-Type": "text/plain" })
-						.end("Verification Failed");
-				}
+				const code = new URLSearchParams(requestUrl.search).get("code");
+				if (!code)
+					return response
+						.writeHead(404, { "Content-Type": "text/plain" })
+						.end("Not Found"); // TODO: redirect to Discord
 
-				const user = await (
-					await fetch("https://discord.com/api/users/@me", {
-						headers: {
-							authorization: `${token_type} ${access_token}`,
-						},
-					})
-				).json();
-				const userId: string = (user as any)?.id;
-				if (!userId)
-					response
-						.writeHead(503, { "Content-Type": "text/plain" })
-						.end("Verification Failed");
+				const tokenData = (await rest.post(Routes.oauth2TokenExchange(), {
+					body: new URLSearchParams({
+						client_id: client.user.id,
+						client_secret: process.env.CLIENT_SECRET,
+						code,
+						grant_type: "authorization_code",
+						redirect_uri: requestUrl.origin + requestUrl.pathname,
+						scope: "identify",
+					}),
+					passThroughBody: true,
+					headers: { "Content-Type": "application/x-www-form-urlencoded" },
+					auth: false,
+				})) as RESTPostOAuth2AccessTokenResult;
+				const user = (await rest.get(Routes.user(), {
+					headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` },
+					auth: false,
+				})) as RESTGetAPICurrentUserResult;
 
-				const bannedUser = (await client.users.fetch(userId).catch(() => void 0)) || {
-					username: "",
-				};
-				const html = await fileSystem.readFile("./appeal/appeal.html", "utf8");
 				response
 					.writeHead(200, { "Content-Type": "text/html" })
-					.end(html.replaceAll("{username}", (bannedUser as any)?.username || ""));
+					.end(PAGES.appeal.replaceAll("{username}", user.global_name ?? user.username));
 				break;
 			}
-			case "/appeal.css": {
-				const css = await fileSystem.readFile("./appeal/appeal.css");
-				response.writeHead(200, { "Content-Type": "text/css" }).end(css);
+			case "/style.css": {
+				response.writeHead(200, { "Content-Type": "text/css" }).end(PAGES.css);
 				break;
 			}
 			default: {

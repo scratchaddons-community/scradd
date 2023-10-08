@@ -11,8 +11,8 @@ body {
 	font-weight: 600;
 	font-size: 1.2rem;
 	position: fixed;
-	left: 0px;
-	top: 0px;
+	left: 0;
+	top: 0;
 	width: 100vw;
 	padding-left: 10rem;
 }
@@ -42,7 +42,7 @@ body {
 
 textarea {
 	background-color: #efefef;
-	border: 0px;
+	border: 0;
 	outline: none;
 	padding: 0.75rem;
 	font-family: "Sora", sans-serif;
@@ -61,7 +61,7 @@ textarea::placeholder {
 button {
 	background-color: #5764f4;
 	color: white;
-	border: 0px;
+	border: 0;
 	outline: none;
 	padding: 0.75rem;
 	font-family: "Sora", sans-serif;

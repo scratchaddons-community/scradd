@@ -14,6 +14,12 @@
 		"start": "node --env-file=.env --enable-source-maps .",
 		"test": "npm run build && node --test"
 	},
+	"browserslist": [
+		"chrome 80",
+		"edge 80",
+		"opera 67",
+		"ff 86"
+	],
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@fontsource-variable/sora": "5.0.12",
