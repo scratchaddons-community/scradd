@@ -23,7 +23,7 @@ export default async function top(
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				"url" in reference
+				"old" in reference
 					? "👍"
 					: suggestions?.defaultReactionEmoji?.name ??
 					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
