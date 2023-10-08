@@ -4,11 +4,11 @@ export default {
 	addonSearchOptions: {
 		keys: [
 			({ addonId }: typeof addons[number]) => addonId.replaceAll("-", " "),
-			"id",
-			"name",
-			"description",
-			"settings.*.name",
-			"credits.*.name",
+			"addonId",
+			"manifest.name",
+			"manifest.description",
+			"manifest.settings.*.name",
+			"manifest.credits.*.name",
 		],
 	},
 
