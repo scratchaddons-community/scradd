@@ -11,21 +11,21 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.1
               with:
-                  node-version: "18.12.1"
+                  node-version: "20.6.0"
                   cache: npm
 
             - name: Download bad words
-              run: curl ${{ secrets.BAD_WORDS }} --output badWords.ts
+              run: curl ${{ secrets.BAD_WORDS }} --output modules/automod/badWords.ts
 
             - name: Download secrets
-              run: curl ${{ secrets.SECRETS }} --output secrets.ts
+              run: curl ${{ secrets.SECRETS }} --output modules/auto/secrets.ts
 
             - name: Install
               run: npm ci --force

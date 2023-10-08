@@ -1,17 +1,14 @@
-import type { ButtonInteraction, ChatInputCommandInteraction, User } from "discord.js";
+import { ComponentType, type User, ButtonStyle, type RepliableInteraction } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { convertBase, nth } from "../../util/numbers.js";
+import { nth } from "../../util/numbers.js";
 import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
 
-export default async function getUserRank(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
-	user: User,
-) {
+export default async function getUserRank(interaction: RepliableInteraction, user: User) {
 	const allXp = xpDatabase.data;
-	const top = [...allXp].sort((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const top = allXp.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
 
-	const member = await config.guild.members.fetch(user.id).catch(() => {});
+	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
@@ -24,37 +21,38 @@ export default async function getUserRank(
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
-	async function makeCanvasFiles() {
-		if (!constants.canvasEnabled) return [];
+	const members = await config.guild.members.fetch();
+	const serverRank =
+		allXp
+			.filter(({ user }) => members.has(user))
+			.toSorted((one, two) => two.xp - one.xp)
+			.findIndex((info) => info.user === user.id) + 1;
 
-		const createCanvas = (await import("@napi-rs/canvas")).createCanvas;
+	async function makeCanvasFiles() {
+		if (process.env.CANVAS === "false") return [];
+
+		const { createCanvas } = await import("@napi-rs/canvas");
 		const canvas = createCanvas(1000, 50);
 		const context = canvas.getContext("2d");
 		context.fillStyle = "#0003";
 		context.fillRect(0, 0, canvas.width, canvas.height);
-		context.fillStyle = `#${convertBase(String(constants.themeColor), 10, 16)}`;
+		context.fillStyle = `#${constants.themeColor.toString(16)}`;
 		const rectangleSize = canvas.width * progress;
 		const paddingPixels = 0.18 * canvas.height;
 		context.fillRect(0, 0, rectangleSize, canvas.height);
-		context.font = `${canvas.height * 0.9}px Sora`;
+		context.font = `${canvas.height * 0.9}px ${constants.fonts}`;
 		if (progress < 0.145) {
 			context.fillStyle = "#666";
 			context.textAlign = "end";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				canvas.width - paddingPixels,
 				canvas.height - paddingPixels,
 			);
 		} else {
 			context.fillStyle = "#0009";
 			context.fillText(
-				progress.toLocaleString("en-us", {
-					maximumFractionDigits: 1,
-					style: "percent",
-				}),
+				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
 				paddingPixels,
 				canvas.height - paddingPixels,
 			);
@@ -87,10 +85,7 @@ export default async function getUserRank(
 						value: weeklyRank
 							? approximateWeeklyRank === 10
 								? "Top 10"
-								: `About ${nth(Math.max(0, approximateWeeklyRank - 5), {
-										bold: false,
-										jokes: false,
-								  })}`
+								: `About ${nth(Math.max(0, approximateWeeklyRank - 5))}`
 							: "Inactive this week",
 
 						inline: true,
@@ -103,17 +98,35 @@ export default async function getUserRank(
 					},
 				],
 
-				footer: {
-					text: `${
-						rank
-							? `Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString(
-									"en-us",
-							  )}${constants.footerSeperator}`
-							: ""
-					}View the leaderboard with /xp top`,
-				},
+				footer: rank
+					? {
+							text: `Ranked ${rank.toLocaleString(
+								"en-us",
+							)}/${top.length.toLocaleString("en-us")}${
+								serverRank
+									? ` (${serverRank.toLocaleString(
+											"en-us",
+									  )}/${members.size.toLocaleString("en-us")} in the server)`
+									: ""
+							}`,
+					  }
+					: undefined,
 
 				image: { url: "attachment://progress.png" },
+			},
+		],
+
+		components: [
+			{
+				components: [
+					{
+						type: ComponentType.Button,
+						customId: `${user.id}_viewLeaderboard`,
+						label: "Leaderboard",
+						style: ButtonStyle.Primary,
+					},
+				],
+				type: ComponentType.ActionRow,
 			},
 		],
 

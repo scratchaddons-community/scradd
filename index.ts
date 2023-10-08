@@ -1,34 +1,50 @@
-import path from "node:path";
-import url from "node:url";
+import { fileURLToPath } from "node:url";
 import dns from "node:dns";
 import { ActivityType, GatewayIntentBits } from "discord.js";
-import "dotenv/config";
 import pkg from "./package.json" assert { type: "json" };
 import { login, client } from "strife.js";
 import constants from "./common/constants.js";
+import mongoose from "mongoose";
 
 dns.setDefaultResultOrder("ipv4first");
 
-if (constants.canvasEnabled) {
-	const GlobalFonts = (await import("@napi-rs/canvas")).GlobalFonts;
-	const Chart = (await import("chart.js")).Chart;
+if (
+	process.env.BOT_TOKEN.startsWith(
+		Buffer.from(constants.users.scradd).toString("base64") + ".",
+	) &&
+	!process.argv.includes("--production")
+)
+	throw new Error("Refusing to run on production Scradd without `--production` flag");
 
+await mongoose.connect(process.env.MONGO_URI);
+
+if (process.env.CANVAS !== "false") {
+	const { GlobalFonts } = await import("@napi-rs/canvas");
 	GlobalFonts.registerFromPath(
-		path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), `../common/sora/font.ttf`),
+		fileURLToPath(
+			import.meta.resolve("@fontsource-variable/sora/files/sora-latin-wght-normal.woff2"),
+		),
 		"Sora",
 	);
-	Chart.defaults.font.family = "Sora";
+	GlobalFonts.registerFromPath(
+		fileURLToPath(
+			import.meta.resolve("@fontsource-variable/sora/files/sora-latin-ext-wght-normal.woff2"),
+		),
+		"SoraExt",
+	);
+
+	const { Chart } = await import("chart.js");
+	Chart.defaults.font.family = constants.fonts;
 }
 
 await login({
-	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
-	commandsGuildId: process.env.GUILD_ID,
+	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
+	defaultCommandAccess: process.env.GUILD_ID,
 	async handleError(error, event) {
-		const { default: logError } = await import("./common/logError.js");
+		const { default: logError } = await import("./modules/logging/errors.js");
 
 		await logError(error, event);
 	},
-	productionId: constants.users.scradd,
 	clientOptions: {
 		intents: [
 			GatewayIntentBits.Guilds,
@@ -44,6 +60,7 @@ await login({
 			GatewayIntentBits.DirectMessages,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.GuildScheduledEvents,
+			GatewayIntentBits.AutoModerationExecution,
 		],
 		presence: { status: "dnd" },
 	},
@@ -62,7 +79,7 @@ client.user.setPresence({
 		{
 			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
 			type: ActivityType.Watching,
-			url: constants.inviteUrl,
+			url: pkg.homepage,
 		},
 	],
 	status: "online",

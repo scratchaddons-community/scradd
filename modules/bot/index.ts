@@ -1,19 +1,26 @@
 import { ApplicationCommandType, ApplicationCommandOptionType, User } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { client, defineCommand, defineButton, defineModal } from "strife.js";
+import {
+	client,
+	defineChatCommand,
+	defineButton,
+	defineModal,
+	defineMenuCommand,
+	defineSubcommands,
+} from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say, sayAutocomplete } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
 
-defineCommand(
-	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message },
+defineMenuCommand(
+	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
 	editMessage,
 );
 defineModal("edit", submitEdit);
 
 const { owner } = await client.application.fetch();
-defineCommand(
+defineChatCommand(
 	{
 		name: "run",
 		description: `(${
@@ -30,7 +37,7 @@ defineCommand(
 );
 defineModal("run", run);
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "kill",
 		description: `(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
@@ -44,12 +51,11 @@ defineCommand(
 		await cleanDatabaseListeners();
 		await interaction.reply("Killing bot…");
 		process.emitWarning(`${interaction.user.tag} is killing the bot`);
-		// eslint-disable-next-line unicorn/no-process-exit -- This is how you restart the process on Railway.
 		process.exit(1);
 	},
 );
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "say",
 		description: "(Mod only) Send a message",
@@ -71,23 +77,30 @@ defineCommand(
 
 		restricted: true,
 		censored: "channel",
+		access: false,
 	},
-
 	sayCommand,
+);
+defineMenuCommand(
+	{ name: "Send Reply", type: ApplicationCommandType.Message, restricted: true, access: false },
+	async (interaction) => {
+		await sayCommand(interaction, { message: "-", reply: interaction.targetMessage.id });
+	},
 );
 defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "info",
 		description: "Learn about me",
+		access: true,
 
 		subcommands: {
-			status: { description: "Show bot status" },
-			credits: { description: "Show credit information" },
-			config: { description: "Show configuration settings" },
+			status: { description: "Show bot status", options: {} },
+			credits: { description: "Show credit information", options: {} },
+			config: { description: "Show configuration settings", options: {} },
 		},
 	},
 	info,

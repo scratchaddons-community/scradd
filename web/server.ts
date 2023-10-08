@@ -1,6 +1,6 @@
 import { cleanDatabaseListeners } from "../common/database.js";
 import http from "node:http";
-import logError from "../common/logError.js";
+import logError from "../modules/logging/errors.js";
 import fs from "fs";
 import { client } from "strife.js";
 
@@ -10,14 +10,17 @@ http.createServer(async (request, response) => {
 		const params = new URLSearchParams(new URL(request.url ?? "").search);
 
 		if (requestUrl.pathname === "/clean-database-listeners") {
-			if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
-				response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
-			else {
+			if (requestUrl.searchParams.get("auth") === process.env.CDBL_AUTH) {
 				process.emitWarning("cleanDatabaseListeners called");
-				cleanDatabaseListeners().then(() => {
-					process.emitWarning("cleanDatabaseListeners ran");
-					response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
-				});
+				cleanDatabaseListeners().then(
+					() => {
+						process.emitWarning("cleanDatabaseListeners ran");
+						response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
+					},
+					(error) => logError(error, request.url ?? ""),
+				);
+			} else {
+				response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
 			}
 		} else if (requestUrl.pathname === "/appeal") {
 			if (!params?.get("code")) return;
@@ -94,7 +97,9 @@ http.createServer(async (request, response) => {
 		}
 	} catch (error) {
 		response.writeHead(500).end("Internal Server Error");
-		logError(error, request.url ?? "");
+		logError(error, request.url ?? "").catch((error) => {
+			throw error;
+		});
 	}
 }).listen(process.env.PORT, () => {
 	console.log("Server up!");

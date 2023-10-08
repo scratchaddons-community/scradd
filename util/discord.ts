@@ -3,7 +3,7 @@ import {
 	ButtonStyle,
 	Colors,
 	ComponentType,
-	type Message,
+	Message,
 	MessageType,
 	ChannelType,
 	type Attachment,
@@ -15,7 +15,6 @@ import {
 	type BaseMessageOptions,
 	type EmojiIdentifierResolvable,
 	type GuildTextBasedChannel,
-	type InteractionReplyOptions,
 	type MessageActionRowComponent,
 	type MessageEditOptions,
 	type Snowflake,
@@ -24,7 +23,6 @@ import {
 	type ActionRowData,
 	GuildMember,
 	FormattingPatterns,
-	Invite,
 	MessageMentions,
 	type AnyThreadChannel,
 	type MessageReaction,
@@ -33,25 +31,29 @@ import {
 	type PartialDMChannel,
 	bold,
 	ChatInputCommandInteraction,
+	InteractionResponse,
+	ThreadChannel,
+	Collection,
+	ApplicationCommand,
 } from "discord.js";
-import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
+import { client } from "strife.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
  *
  * @param message - The message to extract extremeties from.
- * @param censor - Function to censor bad words. Omit to not censor.
+ * @param tryCensor - Function to censor bad words. Omit to not censor.
  */
 export function extractMessageExtremities(
 	message: Message,
-	censor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
+	tryCensor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
 ): { embeds: APIEmbed[]; files: Attachment[] } {
 	const embeds = [
 		...message.stickers
-			.filter((sticker) => !censor?.(sticker.name))
+			.filter((sticker) => !tryCensor?.(sticker.name))
 			.map(
 				(sticker): APIEmbed => ({
 					color: Colors.Blurple,
@@ -82,45 +84,42 @@ export function extractMessageExtremities(
 					newEmbed.fields = [];
 				}
 
-				if (!censor) return newEmbed;
+				if (!tryCensor) return newEmbed;
 
 				if (newEmbed.description) {
-					const censored = censor(newEmbed.description);
-
+					const censored = tryCensor(newEmbed.description);
 					if (censored) newEmbed.description = censored.censored;
 				}
 
 				if (newEmbed.title) {
-					const censored = censor(newEmbed.title);
-
+					const censored = tryCensor(newEmbed.title);
 					if (censored) newEmbed.title = censored.censored;
 				}
 
-				if (newEmbed.url && censor(newEmbed.url)) newEmbed.url = "";
+				if (newEmbed.url && tryCensor(newEmbed.url)) newEmbed.url = "";
 
-				if (newEmbed.image?.url && censor(newEmbed.image.url)) newEmbed.image = undefined;
+				if (newEmbed.image?.url && tryCensor(newEmbed.image.url))
+					newEmbed.image = undefined;
 
-				if (newEmbed.thumbnail?.url && censor(newEmbed.thumbnail.url))
+				if (newEmbed.thumbnail?.url && tryCensor(newEmbed.thumbnail.url))
 					newEmbed.thumbnail = undefined;
 
 				if (newEmbed.footer?.text) {
-					const censored = censor(newEmbed.footer.text);
-
+					const censored = tryCensor(newEmbed.footer.text);
 					if (censored) newEmbed.footer.text = censored.censored;
 				}
 
 				if (newEmbed.author) {
-					const censoredName = censor(newEmbed.author.name);
-					const censoredUrl = newEmbed.author.url && censor(newEmbed.author.url);
-
+					const censoredName = tryCensor(newEmbed.author.name);
 					if (censoredName) newEmbed.author.name = censoredName.censored;
 
+					const censoredUrl = newEmbed.author.url && tryCensor(newEmbed.author.url);
 					if (censoredUrl) newEmbed.author.url = "";
 				}
 
 				newEmbed.fields = (newEmbed.fields ?? []).map((field) => {
-					const censoredName = censor(field.name);
-					const censoredValue = censor(field.value);
+					const censoredName = tryCensor(field.name);
+					const censoredValue = tryCensor(field.value);
 					return {
 						inline: field.inline,
 						name: censoredName ? censoredName.censored : field.name,
@@ -132,9 +131,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	while (embeds.length > 10) embeds.pop();
-
-	return { embeds, files: message.attachments.toJSON() };
+	return { embeds: embeds.slice(0, 10), files: message.attachments.toJSON() };
 }
 
 /**
@@ -167,18 +164,20 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
+export async function getAllMessages(
+	channel: GuildTextBasedChannel | ThreadChannel,
+): Promise<Message<true>[]>;
 export async function getAllMessages(
 	channel: DMChannel | PartialDMChannel,
 ): Promise<Message<false>[]>;
-export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
+export async function getAllMessages(
+	channel: TextBasedChannel | ThreadChannel,
+): Promise<Message[]> {
 	const messages = [];
 
-	// eslint-disable-next-line fp/no-let -- This needs to be changable
 	let lastId: Snowflake | undefined;
 
 	do {
-		// eslint-disable-next-line no-await-in-loop -- We can’t use `Promise.all` here
 		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
 
 		messages.push(...fetchedMessages.toJSON());
@@ -207,6 +206,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
 					message.author.displayName,
+					// eslint-disable-next-line unicorn/string-content
 			  )} is thinking...`
 		: message.content;
 
@@ -230,7 +230,8 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() &&
-				message.channel.parent?.type === ChannelType.GuildForum
+				(message.channel.parent?.type === ChannelType.GuildForum ||
+					message.channel.parent?.type === ChannelType.GuildMedia)
 					? "post title"
 					: "channel name"
 			}: **${escapeMessage(message.content)}**`;
@@ -268,6 +269,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Welcome ${message.author.toString()}. Say hi!`,
 				`${message.author.toString()} hopped into the server.`,
 				`Everyone welcome ${message.author.toString()}!`,
+				// eslint-disable-next-line unicorn/string-content
 				`Glad you're here, ${message.author.toString()}.`,
 				`Good to see you, ${message.author.toString()}.`,
 				`Yay you made it, ${message.author.toString()}!`,
@@ -352,12 +354,12 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return message.content;
 			return message
 				.fetchReference()
-				.catch(() => {})
-				.then(async (reply) => {
+				.catch(() => void 0)
+				.then((reply) => {
 					if (!reply)
 						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
 
-					const cleanContent = messageToText(reply, false);
+					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
 						cleanContent
 							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
@@ -370,17 +372,18 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return actualContent;
 			return message
 				.fetchReference()
-				.catch(() => {})
-				.then((reference) =>
+				.catch(() => void 0)
+				.then(async (reference) =>
 					// The resolved message for the reference will be a Message
 					reference
-						? messageToText(reference, replies) || actualContent
-						: `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
+						? (await messageToText(reference, replies)) || actualContent
+						: // eslint-disable-next-line unicorn/string-content
+						  `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
 				);
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
+			return "The best way to setup a server is with your buddies!";
 		}
 
 		case MessageType.RoleSubscriptionPurchase: {
@@ -434,20 +437,29 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.ChatInputCommand: {
 			if (!replies) return actualContent;
 
-			const commandName = message.interaction?.commandName.split(" ")[0];
-			return config.guild.commands
-				.fetch()
+			const commands = Promise.all([
+				...(message.guild ? [message.guild.commands.fetch()] : []),
+				client.application.commands.fetch(),
+			]);
+
+			const subcommandName = message.interaction?.commandName ?? "";
+			const commandName = subcommandName.split(" ")[0];
+			return commands
+				.then((commands) =>
+					// eslint-disable-next-line unicorn/prefer-spread
+					new Collection<string, ApplicationCommand>().concat(...commands),
+				)
 				.then((commands) => commands.find(({ name }) => name === commandName))
+				.then((command) =>
+					command
+						? chatInputApplicationCommandMention(subcommandName, command.id)
+						: bold(`/${subcommandName}`),
+				)
 				.then(
-					(command) =>
-						`*${message.interaction?.user.toString() ?? ""} used ${
-							command
-								? chatInputApplicationCommandMention(
-										message.interaction?.commandName ?? "",
-										command.id ?? "",
-								  )
-								: bold(`/${message.interaction?.commandName ?? ""}`)
-						}:*\n${actualContent}`,
+					(formatted) =>
+						`*${
+							message.interaction?.user.toString() ?? ""
+						} used ${formatted}:*\n${actualContent}`,
 				);
 		}
 
@@ -483,9 +495,8 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
-): Promise<MessageReaction[] | void> {
+): Promise<MessageReaction[] | undefined> {
 	const messageReactions = [];
-	// eslint-disable-next-line no-await-in-loop -- This is the point of this function.
 	for (const reaction of reactions) {
 		try {
 			const messageReaction = await message.react(reaction);
@@ -512,9 +523,7 @@ export function disableComponents(
 			...component.data,
 
 			disabled:
-				component.type === ComponentType.Button
-					? component.style !== ButtonStyle.Link
-					: true,
+				component.type !== ComponentType.Button || component.style !== ButtonStyle.Link,
 		})),
 
 		type: ComponentType.ActionRow,
@@ -529,15 +538,13 @@ export function disableComponents(
  * @param reply - A function to send pages.
  * @param options - Additional options.
  * @param options.title - The title of the embed.
- * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
+ * @param options.format - A user to format the embed against.
  * @param options.singular - A noun that describes a item of the array.
  * @param options.plural - `singular` pluralized. Defaults to just adding an `s` to the end.
  * @param options.failMessage - A message to show when `array` is empty.
- * @param options.format - A user to format the embed against.
- * @param options.ephemeral - Whether the message is ephemeral.
+ * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
  * @param options.rawOffset - The index of an item to jump to.
- * @param options.itemsPerPage - The number of items to display at a time. Defaults to 15.
- * @param options.showIndexes - Whether to show the index of each item.
+ * @param options.totalCount - Whether to show the index of each item.
  * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
  * @param options.disableCustomComponents - Whether to disable the custom components when the pagination buttons go inactive.
  */
@@ -545,67 +552,64 @@ export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (
-		options: BaseMessageOptions & { fetchReply: true; ephemeral?: boolean },
-	) => Promise<Message>,
+		options: BaseMessageOptions & { ephemeral: boolean },
+	) => Promise<Message | InteractionResponse>,
 	{
 		title,
-		user,
+		format,
 		singular,
 		plural = `${singular}s`,
 		failMessage = `No ${plural} found!`,
-		format,
-		ephemeral = false,
+
+		user,
 		rawOffset,
-		itemsPerPage = 15,
-		showIndexes = true,
+		totalCount,
+		ephemeral = false,
+		perPage = 20,
+
 		generateComponents,
-		disableCustomComponents = false,
-		customComponentLocation = "below",
+		customComponentLocation = "above",
 	}: {
 		title: string;
-		user: User | false;
+		format?: GuildMember | User;
 		singular: string;
 		plural?: string;
 		failMessage?: string;
-		format?: GuildMember | User;
-		ephemeral?: boolean;
+
+		user: User | false;
 		rawOffset?: number;
-		itemsPerPage?: number;
-		showIndexes?: boolean;
-		generateComponents?: (items: Item[]) => MessageActionRowComponentData[] | undefined;
-		disableCustomComponents?: boolean;
+		totalCount?: number;
+		ephemeral?: boolean;
+		perPage?: number;
+
+		generateComponents?: (
+			items: Item[],
+		) => Awaitable<MessageActionRowComponentData[] | undefined>;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
-	const numberOfPages = Math.ceil(array.length / itemsPerPage);
+	const numberOfPages = Math.ceil(array.length / perPage);
 
-	// eslint-disable-next-line no-let -- This must be changable.
-	let offset = Math.floor((rawOffset ?? 0) / itemsPerPage) * itemsPerPage;
+	let offset = Math.floor((rawOffset ?? 0) / perPage) * perPage;
 
 	/**
 	 * Generate an embed that has the next page.
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage(): Promise<InteractionReplyOptions & { fetchReply: true }> {
-		const filtered = array.filter(
-			(_, index) => index >= offset && index < offset + itemsPerPage,
-		);
+	async function generateMessage() {
+		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
-		if (filtered.length === 0) {
-			return {
-				content: `${constants.emojis.statuses.no} ${failMessage}`,
-				ephemeral: true,
-				fetchReply: true,
-			};
+		if (!filtered.length) {
+			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
 		}
 
 		const content = (
 			await Promise.all(
 				filtered.map(async (current, index, all) => {
-					const line = `${showIndexes ? `${index + offset + 1}) ` : ""}${await toString(
+					const line = `${totalCount ? "" : `${index + offset + 1}) `}${await toString(
 						current,
 						index,
 						all,
@@ -626,14 +630,14 @@ export async function paginate<Item>(
 									type: ComponentType.Button,
 									label: "<< Previous",
 									style: ButtonStyle.Primary,
-									disabled: offset === 0,
+									disabled: offset < 1,
 									customId: previousId,
 								},
 								{
 									type: ComponentType.Button,
 									label: "Next >>",
 									style: ButtonStyle.Primary,
-									disabled: offset + itemsPerPage >= array.length,
+									disabled: offset + perPage >= array.length,
 									customId: nextId,
 								},
 							],
@@ -642,7 +646,7 @@ export async function paginate<Item>(
 				: [];
 
 		if (generateComponents) {
-			const extraComponents = generateComponents(filtered);
+			const extraComponents = await generateComponents(filtered);
 			if (extraComponents?.length)
 				components[customComponentLocation === "above" ? "unshift" : "push"]({
 					type: ComponentType.ActionRow,
@@ -650,29 +654,23 @@ export async function paginate<Item>(
 				});
 		}
 
+		const count = totalCount ?? array.length;
+
 		return {
 			components,
-
 			embeds: [
 				{
 					title,
 					description: content,
 
 					footer: {
-						text: `Page ${offset / itemsPerPage + 1}/${numberOfPages}${
+						text: `Page ${offset / perPage + 1}/${numberOfPages}${
 							constants.footerSeperator
-						}${array.length.toLocaleString("en-us")} ${
-							array.length === 1 ? singular : plural
-						}`,
+						}${count.toLocaleString("en-us")} ${count === 1 ? singular : plural}`,
 					},
 
 					author: format
-						? {
-								// eslint-disable-next-line id-match -- We didn’t name this.
-								icon_url: format.displayAvatarURL(),
-
-								name: format.displayName,
-						  }
+						? { icon_url: format.displayAvatarURL(), name: format.displayName }
 						: undefined,
 
 					color: format
@@ -682,42 +680,38 @@ export async function paginate<Item>(
 						: constants.themeColor,
 				},
 			],
-
-			ephemeral: Boolean(ephemeral),
-			fetchReply: true,
-		};
+			ephemeral,
+		} satisfies BaseMessageOptions & { ephemeral: boolean };
 	}
 
-	// eslint-disable-next-line no-let -- This needs to be changable.
 	let message = await reply(await generateMessage());
 	if (numberOfPages === 1 || !user) return;
+
+	const editReply = (data: BaseMessageOptions & { ephemeral: boolean }) =>
+		ephemeral ? reply(data) : message.edit(data);
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === user.id,
 
-		time: constants.collectorTime,
+		idle: constants.collectorTime,
+		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
 	});
 
 	collector
 		.on("collect", async (buttonInteraction) => {
-			if (buttonInteraction.customId === nextId) offset += itemsPerPage;
-			else offset -= itemsPerPage;
+			if (buttonInteraction.customId === nextId) offset += perPage;
+			else offset -= perPage;
 
 			await buttonInteraction.deferUpdate();
-			message = await reply(await generateMessage());
-			collector.resetTimer();
+			message = await editReply(await generateMessage());
 		})
 		.on("end", async () => {
-			const [pagination, ...rest] = message.components;
-			await reply({
-				components:
-					disableCustomComponents || !pagination
-						? disableComponents(message.components)
-						: [...disableComponents([pagination]), ...rest],
-
-				fetchReply: true,
+			const [pagination, ...rest] = message instanceof Message ? message.components : [];
+			await editReply({
+				components: pagination ? [...disableComponents([pagination]), ...rest] : [],
+				ephemeral,
 			});
 		});
 }
@@ -743,8 +737,9 @@ export function getBaseChannel<Channel extends TextBasedChannel | null | undefin
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
 export const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern, "g");
 
-/** A global regular expression variant of {@link Invite.InvitesPattern}. */
-export const GlobalInvitesPattern = new RegExp(Invite.InvitesPattern, "g");
+/** An enhanced variant of {@link Invite.InvitesPattern}. */
+export const InvitesPattern =
+	/discord(?:(?:(?:app)?\.com|:\/(?:\/-?)?)\/invite|\.gg(?:\/invite)?)\/(?<code>[\w-]{2,255})/gi;
 
 /** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
 export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");

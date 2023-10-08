@@ -1,11 +1,12 @@
-import { ChannelType, PermissionFlagsBits, type TextBasedChannel } from "discord.js";
-import badWords from "../../badWords.js";
+import { ChannelType, type TextBasedChannel } from "discord.js";
+import badWords from "./badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
+import config from "../../common/config.js";
 
-function decodeRegexes(regexes: RegExp[]) {
-	return regexes
+function decodeRegexps(regexps: RegExp[]) {
+	return regexps
 		.map(({ source }) =>
 			caesar(source).replaceAll(
 				/[ a-z]/gi,
@@ -31,7 +32,7 @@ function decodeRegexes(regexes: RegExp[]) {
 							"p": "⒫⍴pｐⓟℙₚᴘρϱⲣрየꮲᑭꓑ𝐏",
 							"q": "⒬۹9oqｑⓠℚϙϱԛфգզⵕᑫ𝐐",
 							"r": "⒭rｒⓡℝℛℜʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑",
-							"s": "⒮§$₴5sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
+							"s": "⒮§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
 							"t": "⒯⊤⟙ℑtｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千",
 							"u": "⒰*∪⋃uｕⓤꞟᴜꭎꭒɥvʋυսሀሁᑌꓴ𝐔-",
 							"v": "⒱℣√∨⋁☑✅✔✔️۷٧uvｖⅴⓥⱽᴠνѵⴸꮙꮩᐯᐺꓦ𝐕",
@@ -49,41 +50,48 @@ function decodeRegexes(regexes: RegExp[]) {
 export const badWordRegexps = badWords.map(
 	([strings = [], words = [], prefixes = []]) =>
 		new RegExp(
-			(strings.length ? `${decodeRegexes(strings)}|` : "(?!x)x") +
-				`\\b(?:${words.length ? `(?:${decodeRegexes(words)})\\b` : "(?!x)x"}${
-					prefixes.length ? `|${decodeRegexes(prefixes)}` : "(?!x)x"
+			(strings.length ? `${decodeRegexps(strings)}|` : "(?!x)x") +
+				`\\b(?:${words.length ? `(?:${decodeRegexps(words)})\\b` : "(?!x)x"}${
+					prefixes.length ? `|${decodeRegexps(prefixes)}` : "(?!x)x"
 				})`,
 			"gi",
 		),
 );
 
-export default function censor(text: string) {
+export default function tryCensor(text: string, strikeShift = 0) {
 	const words: string[][] = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			words[index]?.push(word);
+			if (!Number.isNaN(+word)) return word;
 
+			words[index]?.push(word);
 			return word.length < 3
 				? "#".repeat(word.length)
 				: word[0] + "#".repeat(word.length - 1);
 		});
 	}, normalize(text));
 
-	return words.flat().length > 0
-		? {
-				censored,
+	return (
+		!!words.flat().length && {
+			censored,
 
-				strikes: words.reduce(
-					(accumulator, current, index) =>
-						current.length * Math.max(index, PARTIAL_STRIKE_COUNT) + accumulator,
-					0,
-				),
+			strikes: words.reduce(
+				(accumulator, current, index) =>
+					current.length * Math.max(index - strikeShift, PARTIAL_STRIKE_COUNT) +
+					accumulator,
+				0,
+			),
 
-				words,
-		  }
-		: false;
+			words,
+		}
+	);
+}
+
+export function censor(text: string) {
+	const censored = tryCensor(text);
+	return censored ? censored.censored : text;
 }
 
 export function badWordsAllowed(channel?: TextBasedChannel | null) {
@@ -91,7 +99,10 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 
 	return (
 		baseChannel?.type === ChannelType.DM ||
-		channel?.type === ChannelType.PrivateThread ||
-		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+		baseChannel?.guild.id !== config.guild.id ||
+		baseChannel.id === config.channels.devs?.id ||
+		baseChannel.parent?.id === config.channels.mod?.parent?.id ||
+		(baseChannel.id === config.channels.tickets?.id &&
+			channel?.type === ChannelType.PrivateThread)
 	);
 }

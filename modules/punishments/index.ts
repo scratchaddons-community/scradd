@@ -1,12 +1,25 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+	ComponentType,
+	TextInputStyle,
+} from "discord.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineButton, defineSelect } from "strife.js";
+import {
+	client,
+	defineChatCommand,
+	defineButton,
+	defineSelect,
+	defineSubcommands,
+	defineMenuCommand,
+	defineModal,
+} from "strife.js";
 import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
 import ban from "./ban.js";
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "strikes",
 		description: "Commands to view strike information",
@@ -32,27 +45,41 @@ defineCommand(
 						type: ApplicationCommandOptionType.User,
 						description: "(Mod only) The user to see strikes for",
 					},
+					expired: {
+						type: ApplicationCommandOptionType.Boolean,
+						description: "Show expired strikes, italicized (defaults to true)",
+					},
+					removed: {
+						type: ApplicationCommandOptionType.Boolean,
+						description: "Show removed strikes, crossed out (defaults to false)",
+					},
 				},
 			},
 		},
 
 		censored: false,
 	},
-	async (interaction) => {
-		switch (interaction.options.getSubcommand(true)) {
+	async (interaction, options) => {
+		switch (options.subcommand) {
 			case "user": {
-				const selected = interaction.options.getUser("user") ?? interaction.user;
-				await getStrikes(selected, interaction);
+				const selected = options.options.user ?? interaction.user;
+				await getStrikes(selected, interaction, options.options);
 				break;
 			}
 			case "id": {
-				await getStrikeById(interaction, interaction.options.getString("id", true));
+				await getStrikeById(interaction, options.options.id);
 			}
 		}
 	},
 );
+defineMenuCommand(
+	{ name: "List Strikes", type: ApplicationCommandType.User, restricted: true },
+	async (interaction) => {
+		await getStrikes(interaction.targetUser, interaction);
+	},
+);
 
-defineButton("strike", async (interaction, id) => await getStrikeById(interaction, id ?? ""));
+defineButton("strike", async (interaction, id) => await getStrikeById(interaction, id));
 defineButton("viewStrikes", async (interaction, userId = "") => {
 	await getStrikes(await client.users.fetch(userId), interaction);
 });
@@ -62,7 +89,7 @@ defineSelect("selectStrike", async (interaction) => {
 	if (id) await getStrikeById(interaction, id);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "warn",
 		description: "(Mod only) Warns a user",
@@ -90,26 +117,78 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const user = interaction.options.getUser("user", true);
-		const reason = interaction.options.getString("reason") || "No reason given.";
-		const strikes = interaction.options.getInteger("strikes") ?? DEFAULT_STRIKES;
+	async (interaction, options) => {
+		const reason = options.reason || "No reason given.";
+		const strikes = options.strikes ?? DEFAULT_STRIKES;
 		await interaction.deferReply();
-		await warn(user, reason, strikes, interaction.user);
+		const success = await warn(options.user, reason, strikes, interaction.user);
 
-		await interaction.editReply({
-			allowedMentions: { users: [] },
-
-			content: `${constants.emojis.statuses.yes} ${
-				strikes ? "Warned" : "Verbally warned"
-			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`,
+		await interaction.editReply(
+			success
+				? `${constants.emojis.statuses.yes} ${
+						strikes ? "Warned" : "Verbally warned"
+				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
+		);
+	},
+);
+defineMenuCommand(
+	{ name: "Warn User", type: ApplicationCommandType.User, restricted: true },
+	async (interaction) => {
+		await interaction.showModal({
+			title: "Warn User",
+			customId: `${interaction.targetUser.id}_warn`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "Reason",
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Paragraph,
+							customId: "reason",
+							value:
+								process.env.NODE_ENV === "production"
+									? undefined
+									: "No reason given.",
+						},
+					],
+				},
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "Strikes",
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Short,
+							customId: "strikes",
+							value: "1",
+						},
+					],
+				},
+			],
 		});
 	},
 );
+defineModal("warn", async (interaction, id) => {
+	const user = await client.users.fetch(id);
+	const reason = interaction.fields.getTextInputValue("reason");
+	const strikes = +interaction.fields.getTextInputValue("strikes");
+	await interaction.deferReply();
+
+	const success = await warn(user, reason, Number.isNaN(strikes) ? 1 : strikes, interaction.user);
+	await interaction.editReply(
+		success
+			? `${constants.emojis.statuses.yes} ${
+					strikes < 1 ? "Warned" : "Verbally warned"
+			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+			: `${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
+	);
+});
 defineButton("removeStrike", removeStrike);
 defineButton("addStrikeBack", addStrikeBack);
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "ban-user",
 		description: "(Mod only) Bans a user",
@@ -130,15 +209,72 @@ defineCommand(
 
 			"delete-range": {
 				type: ApplicationCommandOptionType.String,
-				description: `How far back to delete their messages (defaults to none)`,
+				description: "How far back to delete their messages (defaults to none)",
 			},
 
 			"unban-in": {
 				type: ApplicationCommandOptionType.String,
-				description: `When to unban them in (defaults to never)`,
+				description: "When to unban them in (defaults to never)",
 			},
 		},
 	},
 
 	ban,
 );
+defineMenuCommand(
+	{ name: "Ban User", type: ApplicationCommandType.User, restricted: true },
+	async (interaction) => {
+		await interaction.showModal({
+			title: "Ban User",
+			customId: `${interaction.targetUser.id}_ban`,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "Reason",
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Paragraph,
+							customId: "reason",
+							value:
+								process.env.NODE_ENV === "production"
+									? undefined
+									: "No reason given.",
+						},
+					],
+				},
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "Message Delete Range",
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Short,
+							customId: "delete-range",
+							required: false,
+						},
+					],
+				},
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							label: "Unban In",
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Short,
+							customId: "unban-in",
+							required: false,
+						},
+					],
+				},
+			],
+		});
+	},
+);
+defineModal("ban", async (interaction, id) => {
+	const user = await client.users.fetch(id);
+	const reason = interaction.fields.getTextInputValue("reason");
+	const deleteRange = interaction.fields.fields.get("delete-range")?.value;
+	const unbanIn = interaction.fields.fields.get("unban-in")?.value;
+	await ban(interaction, { user, reason, "delete-range": deleteRange, "unban-in": unbanIn });
+});

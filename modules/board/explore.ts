@@ -1,15 +1,12 @@
 import {
 	ChannelType,
 	ButtonStyle,
-	CategoryChannel,
-	type APIInteractionDataResolvedChannel,
 	type GuildBasedChannel,
 	type Snowflake,
 	ComponentType,
 	type InteractionReplyOptions,
-	ButtonInteraction,
-	type CacheType,
-	ChatInputCommandInteraction,
+	type MessageEditOptions,
+	type RepliableInteraction,
 } from "discord.js";
 import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
@@ -19,6 +16,7 @@ import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 
+export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
 /**
@@ -30,32 +28,26 @@ export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
  * @returns Whether the channel is a match.
  */
 async function textChannelMatches(
-	channelWanted: APIInteractionDataResolvedChannel | GuildBasedChannel,
+	channelWanted: GuildBasedChannel,
 	channelFound: Snowflake,
+	guild = "guild" in channelWanted ? channelWanted.guild : config.guild,
 ): Promise<boolean> {
 	if (channelWanted.id === channelFound) return true;
 
 	switch (channelWanted.type) {
 		case ChannelType.GuildCategory: {
-			const fetchedChannel =
-				channelWanted instanceof CategoryChannel
-					? channelWanted
-					: await config.guild.channels.fetch(channelWanted.id).catch(() => {});
-
-			if (fetchedChannel?.type !== ChannelType.GuildCategory)
-				throw new TypeError("Channel#type disagrees with itself pre and post fetch");
-
 			return await firstTrueyPromise(
-				fetchedChannel.children
+				channelWanted.children
 					.valueOf()
-					.map(async (child) => await textChannelMatches(child, channelFound)),
+					.map(async (child) => await textChannelMatches(child, channelFound, guild)),
 			);
 		}
 		case ChannelType.GuildForum:
+		case ChannelType.GuildMedia:
 		case ChannelType.GuildText:
 		case ChannelType.GuildAnnouncement: {
 			// If channelFound is a matching non-thread it will have already returned at the start of the function, so only check for threads.
-			const thread = await config.guild.channels.fetch(channelFound).catch(() => {});
+			const thread = await guild.channels.fetch(channelFound).catch(() => void 0);
 			return thread?.parent?.id === channelWanted.id;
 		}
 
@@ -66,37 +58,40 @@ async function textChannelMatches(
 }
 
 export default async function makeSlideshow(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction<CacheType>,
+	interaction: RepliableInteraction,
 	{
-		minReactions = defaultMinReactions,
 		user,
-		channel: channelWanted,
-	}: {
-		minReactions?: number;
-		user?: string;
-		channel?: APIInteractionDataResolvedChannel | GuildBasedChannel;
-	},
+		channel,
+		minReactions = Math.round(
+			boardReactionCount(channel?.isTextBased() ? channel : undefined) * 0.4,
+		),
+	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
 ) {
-	await interaction.deferReply({
-		ephemeral:
-			interaction.isButton() &&
-			interaction.message.interaction?.user.id !== interaction.user.id,
-	});
-	const { data } = boardDatabase;
+	const ephemeral =
+		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
+	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });
+
 	const fetchedMessages = asyncFilter(
-		[...data].sort(() => Math.random() - 0.5),
+		boardDatabase.data
+			.filter(
+				(message) =>
+					message.reactions >= minReactions && message.user === (user ?? message.user),
+			)
+			.toSorted(() => Math.random() - 0.5),
 		async (message) =>
-			message.reactions >= minReactions &&
-			message.user === (user ?? message.user) &&
-			(channelWanted ? await textChannelMatches(channelWanted, message.channel) : true) &&
+			(!channel ||
+				(await textChannelMatches(
+					channel,
+					message.channel,
+					interaction.guild ?? undefined,
+				))) &&
 			message,
 	);
 
 	const nextId = generateHash("next");
 	const previousId = generateHash("prev");
 
-	const messages: InteractionReplyOptions[] = [];
-	// eslint-disable-next-line fp/no-let -- This needs to change.
+	const messages: MessageEditOptions[] = [];
 	let index = 0;
 
 	/**
@@ -104,7 +99,7 @@ export default async function makeSlideshow(
 	 *
 	 * @returns The reply information.
 	 */
-	async function getNextMessage(): Promise<InteractionReplyOptions> {
+	async function getNextMessage(): Promise<MessageEditOptions> {
 		const info = (await fetchedMessages.next()).value;
 
 		const reply = info
@@ -128,8 +123,6 @@ export default async function makeSlideshow(
 					],
 			  })
 			: ({
-					allowedMentions: { users: [] },
-
 					components: [
 						{
 							components: [
@@ -146,15 +139,13 @@ export default async function makeSlideshow(
 						},
 					],
 
-					content: `${constants.emojis.statuses.no} No messages found. Try changing any filters you may have used.`,
-
+					content: `${constants.emojis.statuses.no} ${NO_BOARDS_MESSAGE}`,
 					embeds: [],
-					ephemeral: true,
 					files: [],
 			  } satisfies InteractionReplyOptions);
 
 		if (!reply) {
-			boardDatabase.data = data.filter(({ source }) => source !== info?.source);
+			boardDatabase.data = boardDatabase.data.filter(({ source }) => source !== info?.source);
 
 			return await getNextMessage();
 		}
@@ -162,14 +153,15 @@ export default async function makeSlideshow(
 		return reply;
 	}
 
-	const reply = await interaction.editReply(await getNextMessage());
+	reply = await interaction.editReply(await getNextMessage());
 
 	const collector = reply.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			[previousId, nextId].includes(buttonInteraction.customId) &&
 			buttonInteraction.user.id === interaction.user.id,
 
-		time: GAME_COLLECTOR_TIME,
+		idle: GAME_COLLECTOR_TIME,
+		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
 	});
 
 	collector
@@ -177,17 +169,14 @@ export default async function makeSlideshow(
 			await buttonInteraction.deferUpdate();
 			if (buttonInteraction.customId === previousId) index--;
 			else index++;
-			await interaction.editReply(messages[Number(index)] ?? (await getNextMessage()));
-
-			collector.resetTimer();
+			reply = await interaction.editReply(
+				messages[Number(index)] ?? (await getNextMessage()),
+			);
 		})
 		.on("end", async () => {
-			const source = await interaction.fetchReply();
-
 			await interaction.editReply({
 				allowedMentions: { users: [] },
-
-				components: disableComponents(source.components),
+				components: disableComponents(reply.components),
 			});
 		});
 }

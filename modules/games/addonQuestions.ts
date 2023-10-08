@@ -1,12 +1,13 @@
 import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
-import { manifest, addons } from "../../common/extension.js";
+import addons from "@sa-community/addons-data" assert { type: "json" };
 import { trimPatchVersion } from "../../util/text.js";
+import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
 
-export type Dependencies = { [key: string]: boolean | undefined };
+export type Dependencies = Record<string, boolean | undefined>;
 export type AddonQuestion = {
 	/** Questions that, if this question is `true`, must have this answer. */
 	dependencies?: Dependencies;
@@ -17,45 +18,38 @@ export type AddonQuestion = {
 };
 
 const firstLetters = Object.fromEntries(
-		addons.map(({ name }) => [
+		addons.map((addon) => [
 			`Does your addon’s name __start__ with **${escapeMessage(
-				name[0]?.toUpperCase() ?? "",
+				addon.manifest.name[0]?.toUpperCase() ?? "",
 			)}**?`,
 			false,
 		]),
 	),
 	lastLetters = Object.fromEntries(
-		addons.map(({ name }) => [
+		addons.map((addon) => [
 			`Does your addon’s name __end__ with **${escapeMessage(
-				name.at(-1)?.toUpperCase() ?? "",
+				addon.manifest.name.at(-1)?.toUpperCase() ?? "",
 			)}**?`,
 			false,
 		]),
 	);
 
-const versionMarkdown = `**[${escapeMessage(
-	manifest.version_name ?? manifest.version,
-)}](https://github.com/${constants.urls.saRepo}${
-	manifest.version_name?.endsWith("-prerelease")
-		? ""
-		: `/releases/tag/v${encodeURI(manifest.version)}`
-})**`;
+const versionMarkdown = `**[${sa.version}](https://github.com/${constants.urls.saRepo}/releases/tag/v${sa.version})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
-	codeEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Code Editor**?",
+	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
 	costumeEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Costume Editor**?",
+		"Is your addon listed under **Scratch Editor Features** → **Costume Editor**?",
 	playerEditorCategory:
-		"Is your addon listed under **Scratch Editor Features** -> **Project Player**?",
-	otherEditorCategory: "Is your addon listed under **Scratch Editor Features** -> **Others**?",
+		"Is your addon listed under **Scratch Editor Features** → **Project Player**?",
+	otherEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Others**?",
 
 	websiteCategory: "Is your addon listed under **Scratch Website Features**?",
 	projectPagesCategory:
-		"Is your addon listed under **Scratch Website Features** -> **Project Pages**?",
-	profilesCategory: "Is your addon listed under **Scratch Website Features** -> **Profiles**?",
-	forumsCategory: "Is your addon listed under **Scratch Website Features** -> **Forums**?",
-	otherWebsiteCategory: "Is your addon listed under **Scratch Website Features** -> **Others**?",
+		"Is your addon listed under **Scratch Website Features** → **Project Pages**?",
+	profilesCategory: "Is your addon listed under **Scratch Website Features** → **Profiles**?",
+	forumsCategory: "Is your addon listed under **Scratch Website Features** → **Forums**?",
+	otherWebsiteCategory: "Is your addon listed under **Scratch Website Features** → **Others**?",
 
 	themesCategory: "Is your addon listed under **Themes**?",
 	popupCategory: "Is your addon listed under **Extension Popup Features**?",
@@ -78,7 +72,7 @@ const questionStrings = {
 const forcedEasterEgg = "cat-blocks";
 
 export default Object.fromEntries(
-	addons.map((addon) => {
+	addons.map(({ manifest: addon, addonId }) => {
 		const result: AddonQuestion[] = [];
 
 		const firstLetter = escapeMessage(addon.name[0]?.toUpperCase() ?? "");
@@ -122,9 +116,7 @@ export default Object.fromEntries(
 							[questionStrings.themesCategory]: false,
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
-
-							[questionStrings.easterEgg]:
-								forcedEasterEgg === addon.id ? undefined : false,
+							[questionStrings.easterEgg]: forcedEasterEgg === addonId && undefined,
 						},
 
 						question: questionStrings.editorCategory,
@@ -141,7 +133,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.codeEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Code Editor**!",
+									"This addon is listed under **Scratch Editor Features** → **Code Editor**!",
 						  }
 						: addon.tags.includes("costumeEditor")
 						? {
@@ -154,7 +146,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.costumeEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Costume Editor**!",
+									"This addon is listed under **Scratch Editor Features** → **Costume Editor**!",
 						  }
 						: addon.tags.includes("projectPlayer")
 						? {
@@ -167,7 +159,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.playerEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Project Player**!",
+									"This addon is listed under **Scratch Editor Features** → **Project Player**!",
 						  }
 						: {
 								dependencies: {
@@ -179,7 +171,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.otherEditorCategory,
 								statement:
-									"This addon is listed under **Scratch Editor Features** -> **Others**!",
+									"This addon is listed under **Scratch Editor Features** → **Others**!",
 						  },
 				);
 
@@ -208,7 +200,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.profilesCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Profiles**!",
+									"This addon is listed under **Scratch Website Features** → **Profiles**!",
 						  }
 						: addon.tags.includes("projectPage")
 						? {
@@ -221,7 +213,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.projectPagesCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Project Pages**!",
+									"This addon is listed under **Scratch Website Features** → **Project Pages**!",
 						  }
 						: addon.tags.includes("forums")
 						? {
@@ -234,7 +226,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.forumsCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Forums**!",
+									"This addon is listed under **Scratch Website Features** → **Forums**!",
 						  }
 						: {
 								dependencies: {
@@ -246,7 +238,7 @@ export default Object.fromEntries(
 
 								question: questionStrings.otherWebsiteCategory,
 								statement:
-									"This addon is listed under **Scratch Website Features** -> **Others**!",
+									"This addon is listed under **Scratch Website Features** → **Others**!",
 						  },
 				);
 
@@ -261,8 +253,7 @@ export default Object.fromEntries(
 							[questionStrings.websiteCategory]: false,
 							[questionStrings.popupCategory]: false,
 
-							[questionStrings.easterEgg]:
-								forcedEasterEgg === addon.id ? undefined : false,
+							[questionStrings.easterEgg]: forcedEasterEgg === addonId && undefined,
 						},
 
 						question: questionStrings.themesCategory,
@@ -272,14 +263,14 @@ export default Object.fromEntries(
 						dependencies: {
 							[questionStrings.themesCategory]: true,
 
-							[`Is your addon listed under **Themes** -> **${
+							[`Is your addon listed under **Themes** → **${
 								addon.tags.includes("editor") ? "Website" : "Editor"
 							} Themes**?`]: false,
 						},
 
-						question: `Is your addon listed under **Themes** -> **${theme} Themes**?`,
+						question: `Is your addon listed under **Themes** → **${theme} Themes**?`,
 
-						statement: `This addon is listed under **Themes** -> **${theme} Themes**!`,
+						statement: `This addon is listed under **Themes** → **${theme} Themes**!`,
 					},
 				);
 
@@ -315,7 +306,7 @@ export default Object.fromEntries(
 				break;
 			}
 		}
-		if (forcedEasterEgg === addon.id) {
+		if (forcedEasterEgg === addonId) {
 			result.push({
 				question: questionStrings.easterEgg,
 				statement: "This addon is an easter egg addon!",
@@ -404,11 +395,10 @@ export default Object.fromEntries(
 			});
 		}
 
-		const brandNew =
-			trimPatchVersion(manifest.version) === trimPatchVersion(addon.versionAdded);
+		const brandNew = trimPatchVersion(sa.version) === trimPatchVersion(addon.versionAdded);
 		const updated =
 			addon.latestUpdate &&
-			trimPatchVersion(manifest.version) === trimPatchVersion(addon.latestUpdate.version);
+			trimPatchVersion(sa.version) === trimPatchVersion(addon.latestUpdate.version);
 
 		if (brandNew || updated) {
 			const featured = addon.tags.includes("recommended") || addon.tags.includes("featured");
@@ -512,6 +502,6 @@ export default Object.fromEntries(
 				statement: "This addon has notice(s) on the settings page!",
 			});
 		}
-		return [addon.id, result] as const;
+		return [addonId, result] as const;
 	}),
 );

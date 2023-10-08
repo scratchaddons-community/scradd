@@ -1,58 +1,28 @@
 name: Lint
 on:
     push:
+    pull_request_target:
     workflow_dispatch:
-    schedule:
-        - cron: 00 12 * * * # 1 hour before Dependabot
 
 permissions: write-all
 
 jobs:
-    bump:
-        name: Bump dependencies
-        if: github.ref_name == 'main'
-        runs-on: ubuntu-20.04
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3.5.3
-              with:
-                  ref: ${{ github.head_ref }}
-
-            - name: Bump
-              id: sync_types
-              uses: RedGuy12/sync-types@v1.2.16
-
-            - name: Commit
-              id: commit
-              uses: stefanzweifel/git-auto-commit-action@v4.16.0
-              with:
-                  commit_message: Bump dependencies
-                  branch: ${{ github.head_ref }}
-
-            - name: Comment
-              if: steps.commit.outputs.changes_detected == 'true'
-              run: |
-                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
-                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') != true
+        if: startsWith(github.ref_name, 'dependabot/') == false
         runs-on: ubuntu-20.04
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.1
               with:
-                  node-version: "18.12.1"
+                  node-version: "20.6.0"
                   cache: npm
 
             - name: Install
@@ -65,7 +35,6 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v4.16.0
               with:
                   commit_message: Format
-                  branch: ${{ github.head_ref }}
 
     analyze:
         name: Analyze
@@ -73,9 +42,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup CodeQL
               uses: github/codeql-action/init@v2.3.3
@@ -86,20 +56,44 @@ jobs:
             - name: Analyze
               uses: github/codeql-action/analyze@v2
 
+    lint:
+        name: Lint
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.0
+              with:
+                  ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+
     build:
         name: Build
         runs-on: ubuntu-20.04
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3.5.3
+              uses: actions/checkout@v4.1.0
               with:
                   ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v3.7.0
+              uses: actions/setup-node@v3.8.1
               with:
-                  node-version: "18.12.1"
+                  node-version: "20.6.0"
                   cache: npm
 
             - name: Install
@@ -107,3 +101,26 @@ jobs:
 
             - name: Build
               run: npm run build
+
+    test:
+        name: Test
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.0
+              with:
+                  ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Test
+              run: npm run test

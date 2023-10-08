@@ -1,51 +1,42 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import makeSlideshow, { defaultMinReactions } from "./explore.js";
+import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { client, defineCommand, defineEvent, defineButton } from "strife.js";
+import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
+	if (reaction.emoji.name !== BOARD_EMOJI) return;
+
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
+	if (
+		message.author.id === client.user.id &&
+		(message.channel.id === config.channels.board?.id || message.webhookId) &&
+		(message.content.startsWith(`**${BOARD_EMOJI}`) ||
+			message.content.endsWith(NO_BOARDS_MESSAGE))
+	)
+		return;
+
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
+	if (user.id === message.author.id && process.env.NODE_ENV === "production")
+		return await reaction.users.remove(user);
 
-	const { emoji } = reaction;
-
-	if (emoji.name === BOARD_EMOJI) {
-		if (
-			(user.id === message.author.id && process.env.NODE_ENV === "production") ||
-			(message.channel.id === config.channels.board?.id &&
-				message.author.id === client.user.id) ||
-			[`explore-${reactionsName}`, `explore${reactionsName}`].includes(
-				message.interaction?.commandName || "",
-			)
-		) {
-			await reaction.users.remove(user);
-
-			return;
-		}
-
-		await updateBoard(message);
-	}
+	await updateBoard(reaction);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
-	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
-
-	if (!message.inGuild() || message.guild.id !== config.guild.id) return;
-
-	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(message);
+	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
 		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
+		access: true,
 
 		options: {
 			"channel": {
@@ -66,22 +57,32 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const minReactions = interaction.options.getInteger("minimum-reactions") ?? undefined;
-		const user = interaction.options.getUser("user")?.id;
-		const channel = interaction.options.getChannel("channel") ?? undefined;
+	async (interaction, options) => {
+		const minReactions = options["minimum-reactions"];
+		const user = options.user?.id;
+		const channel = options.channel;
 		await makeSlideshow(interaction, { minReactions, user, channel });
+	},
+);
+defineMenuCommand(
+	{ name: `Explore ${REACTIONS_NAME}`, type: ApplicationCommandType.User, access: true },
+	async (interaction) => {
+		await makeSlideshow(interaction, { user: interaction.targetUser.id });
 	},
 );
 defineButton("exploreBoard", async (interaction, userId) => {
 	await makeSlideshow(interaction, { user: userId });
 });
 
-defineCommand(
-	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message },
+defineMenuCommand(
+	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		await updateBoard(interaction.targetMessage);
+		const reaction = interaction.targetMessage.reactions.resolve(BOARD_EMOJI) ?? {
+			count: 0,
+			message: interaction.targetMessage,
+		};
+		await updateBoard(reaction);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
 	},
 );

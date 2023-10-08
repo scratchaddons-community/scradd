@@ -2,8 +2,6 @@ import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
 	MessageContextMenuCommandInteraction,
-	type MessageEditOptions,
-	MessageType,
 	ModalSubmitInteraction,
 	TextInputStyle,
 } from "discord.js";
@@ -12,12 +10,12 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { generateError } from "../../common/logError.js";
+import { generateError } from "../logging/errors.js";
+import { DATABASE_THREAD } from "../../common/database.js";
 
-const databaseThread = await getLoggingThread("databases");
+const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
-		interaction.targetMessage.type !== MessageType.Default ||
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
@@ -69,11 +67,11 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 	});
 }
 
-export async function submitEdit(interaction: ModalSubmitInteraction, id?: string) {
+export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
 	const text =
 		interaction.fields.getTextInputValue("json1") +
 		interaction.fields.getTextInputValue("json2");
-	const json = await new Promise<MessageEditOptions>((resolve) => {
+	const json = await new Promise((resolve) => {
 		resolve(JSON.parse(text));
 	}).catch(async (error: unknown) => {
 		await interaction.reply({
@@ -98,7 +96,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		});
 	});
 	if (!json) return;
-	const message = await interaction.channel?.messages.fetch(id ?? "");
+	const message = await interaction.channel?.messages.fetch(id);
 	if (!message) throw new TypeError("Used command in DM!");
 	const oldJSON = getMessageJSON(message);
 	const edited = await message.edit(json).catch(async (error: unknown) => {
@@ -132,7 +130,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 		lineterm: "",
 	})
 		.join("\n")
-		.replace(/^--- \n\+\+\+ \n/, "");
+		.replace(/^-{3} \n\+{3} \n/, "");
 
 	const extraDiff = diffString(
 		{ ...oldJSON, content: undefined },
@@ -143,17 +141,22 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id?: strin
 	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });
 
-	if (files.length > 0) {
+	if (files.length) {
 		await log(
 			`${
 				LoggingEmojis.MessageEdit
 			} Message by ${edited.author.toString()} in ${edited.channel.toString()} (ID: ${
 				edited.id
 			}) edited by ${interaction.user.toString()}`,
-			"messages",
+			interaction.guild?.id === config.guild.id
+				? "messages"
+				: interaction.guild?.publicUpdatesChannel ?? undefined,
 			{
 				buttons: [{ label: "Message", url: edited.url }],
-				files: shouldLog(edited.channel) ? files : [],
+				files:
+					interaction.guild?.id !== config.guild.id || shouldLog(edited.channel)
+						? files
+						: [],
 			},
 		);
 	}

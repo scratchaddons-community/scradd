@@ -1,0 +1,55 @@
+name: Bump dependencies
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: 00 12 * * * # 30 min before Dependabot
+
+permissions: write-all
+
+jobs:
+    bump:
+        name: Bump
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.0
+
+            - name: Bump
+              id: sync_types
+              uses: RedGuy12/sync-types@v1.2.16
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v3.8.1
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Check format
+              run: npx prettier --check "**" "!dist/**" --ignore-unknown
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Attempt build
+              run: npm run build
+
+            - name: Test
+              run: npm run test
+
+            - name: Commit
+              id: commit
+              uses: stefanzweifel/git-auto-commit-action@v4.16.0
+              with:
+                  commit_message: Bump dependencies
+
+            - name: Comment
+              if: steps.commit.outputs.changes_detected == 'true'
+              run: |
+                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
+                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

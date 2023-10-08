@@ -12,7 +12,7 @@ import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import { DEFAULT_XP, getLevelForXp, getXpForLevel, recentXpDatabase, xpDatabase } from "./misc.js";
 
-const latestMessages: { [key: Snowflake]: Message[] } = {};
+const latestMessages: Record<Snowflake, Message[]> = {};
 
 export async function giveXpForMessage(message: Message) {
 	if (!latestMessages[message.channel.id]) {
@@ -29,7 +29,7 @@ export async function giveXpForMessage(message: Message) {
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
+		return ![message.author.id, message.interaction?.user.id].some((user) =>
 			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
 		);
 	});
@@ -74,17 +74,15 @@ export async function giveXpForMessage(message: Message) {
  * @param url - A link to a message or other that gave them this XP.
  * @param amount - How much XP to give.
  */
-export default async function giveXp(
-	to: User | GuildMember,
-	url?: string,
-	amount: number = DEFAULT_XP,
-) {
+export default async function giveXp(to: User | GuildMember, url?: string, amount = DEFAULT_XP) {
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =
-		user instanceof GuildMember ? user : await config.guild.members.fetch(user).catch(() => {});
+		user instanceof GuildMember
+			? user
+			: await config.guild.members.fetch(user).catch(() => void 0);
 
-	const xp = Array.from(xpDatabase.data);
+	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[xpDatabaseIndex]?.xp || 0;
 	const newXp = oldXp === 0 && amount < 0 ? 0 : oldXp + amount * (Math.sign(oldXp) || 1);
@@ -96,14 +94,23 @@ export default async function giveXp(
 
 	const oldLevel = getLevelForXp(Math.abs(oldXp));
 	const newLevel = getLevelForXp(Math.abs(newXp));
-	if (oldLevel < newLevel && member) sendLevelUpMessage(member, newXp, url);
+	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
-	const rank = xp.sort((one, two) => two.xp - one.xp).findIndex((info) => info.user === user.id);
+	const sorted = xp.toSorted((one, two) => two.xp - one.xp);
+
+	const members = await config.guild.members.fetch();
+	const serverRank = sorted
+		.filter(({ user }) => members.has(user))
+		.findIndex((info) => info.user === user.id);
+
+	const rank = sorted.findIndex((info) => info.user === user.id);
 
 	if (
-		config.roles.epic &&
-		rank / config.guild.memberCount < 0.01 &&
+		(config.guild.memberCount > 2000
+			? rank < 20
+			: serverRank / config.guild.memberCount < 0.01) &&
 		member &&
+		config.roles.epic &&
 		!member.roles.resolve(config.roles.epic.id)
 	) {
 		await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
@@ -112,11 +119,9 @@ export default async function giveXp(
 		);
 	}
 
-	const weekly = Array.from(recentXpDatabase.data);
+	const weekly = [...recentXpDatabase.data];
 	const weeklyIndex = weekly.findIndex(
-		(entry) =>
-			entry.user === user.id &&
-			(entry.time ?? Number.POSITIVE_INFINITY) + 3_600_000 > Date.now(),
+		(entry) => entry.user === user.id && entry.time + 3_600_000 > Date.now(),
 	);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
 	if (weeklyIndex === -1) {
@@ -134,10 +139,11 @@ export default async function giveXp(
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
 	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
-	const showButton = getSettings(member, false)?.levelUpPings === undefined;
+	const showButton = (await getSettings(member, false)).levelUpPings === undefined;
+	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;
 
 	await config.channels.bots?.send({
-		allowedMentions: getSettings(member).levelUpPings ? undefined : { users: [] },
+		allowedMentions: (await getSettings(member)).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
 		components: showButton
 			? [
@@ -146,9 +152,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 							{
 								customId: "levelUpPings_toggleSetting",
 								type: ComponentType.Button,
-								label: `${
-									getDefaultSettings(member).levelUpPings ? "Disable" : "Enable"
-								} Pings`,
+								label: `${pingsDefault ? "Disable" : "Enable"} Pings`,
 								style: ButtonStyle.Success,
 							},
 						],
@@ -159,8 +163,8 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 
 		embeds: [
 			{
-				color: member?.displayColor,
-				author: { icon_url: member.displayAvatarURL(), name: member?.displayName },
+				color: member.displayColor,
+				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 				title: `You’re at level ${newLevel * Math.sign(newXp)}!`,
 				url,
 
@@ -184,8 +188,8 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
-					text: `View the leaderboard with /xp top\nView someone’s XP with /xp rank${
-						!showButton ? `\nToggle pings with /settings` : ""
+					text: `View your XP with /xp rank${
+						showButton ? "" : "\nToggle pings with /settings"
 					}`,
 				},
 			},

@@ -28,8 +28,8 @@ Pull requests are welcome if you would like to help contribute. However, before 
 1. Create a new server using the [Scradd Testing server template](https://discord.new/htbTxKBq6EVp).
 2. Enable Community in Server Settings. Use `#roles` for the Rules or Guidelines channel and `#mod-logs` for the Community Updates Channel.
 3. Enable Developer Mode in your User Settings -> Advanced.
-4. Right-click on your new testing server, copy its id, and note it for future use.
-5. Invite your bot at https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[GUILD_ID_HERE]&permissions=8&scope=applications.commands%20bot
+4. Right-click on your new testing server, copy its ID, and note it for future use.
+5. Invite your bot at https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[SERVER_ID_HERE]&permissions=8&scope=applications.commands%20bot
 
 #### Set up the repository locally
 
@@ -42,3 +42,15 @@ Pull requests are welcome if you would like to help contribute. However, before 
 ### File structure
 
 This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well.
+
+### Commands
+
+When testing your code, it is recommended to run `npm run serve & npm run dev` to automatically build and restart the bot all in the same terminal. Before committing your code, it is necessary to run `npm run format`, then `npm run lint` and fix any lint errors, finally `npm run test` and fix any failing test, then repeat all three until no more lint errors are left. See below for a full description of all available commands:
+
+-   To build the code once, run `npm run build`.
+-   To start the bot after building the code, run `npm start`.
+-   To rebuild the code on every code change, run `npm run dev`.
+-   To restart the bot on every successful build, run `npm run serve`.
+-   To format the code, run `npm run format`. This command must be run before your PR is merged. If you don't run it, it is automatically run in the workflow.
+-   To lint the code, run `npm run lint`. No lint errors may be present when your PR is merged. Warnings may be allowed depending on the context. Some lint errors may be fixed automatically with `npm run lint -- --fix`, but it is important to manually confirm it worked as intended. The workflow fails if warnings are present.
+-   To unit test the code, run `npm run test`. We only have a few unit tests currently. No tests may fail when your PR is merged. We use the Node.JS native test runner for tests.

@@ -1,20 +1,36 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	User,
+	ChatInputCommandInteraction,
+	ButtonInteraction,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getLevelForXp, xpDatabase } from "./misc.js";
 import { paginate } from "../../util/discord.js";
-import { getSettings } from "../settings.js";
-import { client, defineCommand, defineEvent, defineButton, defineSelect } from "strife.js";
+import { getSettings, mentionUser } from "../settings.js";
+import {
+	client,
+	defineSubcommands,
+	defineEvent,
+	defineButton,
+	defineSelect,
+	defineMenuCommand,
+} from "strife.js";
 import getUserRank from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
 
-	giveXpForMessage(message);
+	await giveXpForMessage(message);
 });
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "xp",
 		description: "Commands to view users’ XP amounts",
@@ -41,18 +57,22 @@ defineCommand(
 					},
 				},
 			},
-			...(constants.canvasEnabled
-				? { graph: { description: "Graph users’ XP over the last week" } }
-				: {}),
+			...(process.env.CANVAS !== "false" && {
+				graph: {
+					description: "Graph users’ XP over the last week",
+					options: {},
+				} as const,
+			}),
 		},
 	},
 
-	async (interaction) => {
-		const command = interaction.options.getSubcommand(true);
-
-		switch (command) {
+	async (interaction, options) => {
+		switch (options?.subcommand) {
 			case "rank": {
-				const user = interaction.options.getUser("user") ?? interaction.user;
+				const user =
+					options.options.user instanceof GuildMember
+						? options.options.user.user
+						: options.options.user ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
 			}
@@ -74,54 +94,7 @@ defineCommand(
 				});
 			}
 			case "top": {
-				const allXp = [...xpDatabase.data];
-				const top = allXp.sort((one, two) => two.xp - one.xp);
-
-				const user = interaction.options.getUser("user");
-				const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
-				if (index === -1) {
-					return await interaction.reply({
-						content: `${
-							constants.emojis.statuses.no
-						} ${user?.toString()} could not be found! Do they have any XP?`,
-
-						ephemeral: true,
-					});
-				}
-
-				await paginate(
-					top,
-					async (xp) =>
-						`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${
-							getSettings(interaction.user).useMentions
-								? `<@${xp.user}>`
-								: (
-										await client.users
-											.fetch(xp.user)
-											.catch(() => ({ displayName: `<@${xp.user}>` }))
-								  ).displayName
-						} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
-					async (data) =>
-						await interaction[interaction.replied ? "editReply" : "reply"](data),
-					{
-						singular: "user",
-						title: `Leaderboard for ${config.guild.name}`,
-						user: interaction.user,
-						rawOffset: index,
-						generateComponents() {
-							return getSettings(interaction.user, false)?.useMentions === undefined
-								? [
-										{
-											customId: "levelUpPings_toggleSetting",
-											type: ComponentType.Button,
-											label: "Toggle Mentions",
-											style: ButtonStyle.Success,
-										},
-								  ]
-								: undefined;
-						},
-					},
-				);
+				await top(interaction, options.options.user);
 			}
 		}
 	},
@@ -130,6 +103,67 @@ defineButton("xp", async (interaction, userId = "") => {
 	await getUserRank(interaction, await client.users.fetch(userId));
 });
 
-if (constants.canvasEnabled) {
-	defineSelect("weeklyXpGraph", (await import("./graph.js")).default);
+defineButton("viewLeaderboard", async (interaction, userId) => {
+	await top(interaction, await client.users.fetch(userId));
+});
+
+if (process.env.CANVAS !== "false") {
+	const { default: weeklyXpGraph } = await import("./graph.js");
+	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
+
+export async function top(
+	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
+	user?: User | GuildMember,
+) {
+	const top = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
+
+	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
+	if (index === -1) {
+		return await interaction.reply({
+			content: `${
+				constants.emojis.statuses.no
+			} ${user?.toString()} could not be found! Do they have any XP?`,
+
+			ephemeral: true,
+		});
+	}
+
+	await paginate(
+		top,
+		async (xp) =>
+			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
+				xp.user,
+				interaction.user,
+				interaction.guild ?? config.guild,
+			)} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
+		(data) => interaction.reply(data),
+		{
+			title: "XP Leaderboard",
+			singular: "user",
+
+			user: interaction.user,
+			rawOffset: index,
+			ephemeral:
+				interaction.isButton() &&
+				interaction.message.interaction?.user.id !== interaction.user.id,
+
+			async generateComponents() {
+				return (await getSettings(interaction.user, false)).useMentions === undefined
+					? [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Toggle Mentions",
+								style: ButtonStyle.Success,
+							},
+					  ]
+					: undefined;
+			},
+			customComponentLocation: "below",
+		},
+	);
+}
+defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
+	await getUserRank(interaction, interaction.targetUser);
+});

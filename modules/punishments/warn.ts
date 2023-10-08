@@ -1,7 +1,6 @@
 import {
 	ButtonInteraction,
 	ButtonStyle,
-	type CacheType,
 	ComponentType,
 	GuildMember,
 	time,
@@ -31,6 +30,7 @@ export default async function warn(
 	strikes: number = DEFAULT_STRIKES,
 	contextOrModerator: string | User = client.user,
 ) {
+	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
 			strike.user === user.id && strike.date + EXPIRY_LENGTH > Date.now() && !strike.removed,
@@ -57,21 +57,14 @@ export default async function warn(
 				: "verbally warned"
 		} by ${moderator.toString()}`,
 		"members",
-		{
-			files: [
-				{
-					content: reason + (context && `\n>>> ${context}`),
-					extension: "md",
-				},
-			],
-		},
+		{ files: [{ content: reason + (context && `\n>>> ${context}`), extension: "md" }] },
 	);
-	giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
+	await giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
 	const member =
 		user instanceof GuildMember
 			? user
-			: await config.guild.members.fetch(user.id).catch(() => {});
+			: await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
@@ -117,7 +110,7 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => {});
+		.catch(() => void 0);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -129,11 +122,11 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
 		await (member?.bannable &&
 		!member.roles.premiumSubscriberRole &&
-		(!config.roles.mod || !member.roles.resolve(config.roles.mod.id)) &&
+		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
 			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
-		return;
+		return true;
 	}
 
 	const totalMuteCount = Math.trunc(totalStrikeCount / STRIKES_PER_MUTE);
@@ -166,10 +159,12 @@ export default async function warn(
 					TimestampStyles.LongDate,
 				)}, you will be banned.**__`,
 			)
-			.catch(() => {});
+			.catch(() => void 0);
 	}
+
+	return true;
 }
-export async function removeStrike(interaction: ButtonInteraction<CacheType>, id: string) {
+export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -189,11 +184,9 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 		// Double equals because RoboTop warns are stored as numbers in the database
 		id == toRemove.id ? { ...toRemove, removed: true } : toRemove,
 	);
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
-		member?.user ??
-		(await client.users.fetch(strike.user).catch(() => {})) ??
-		`<@${strike.user}>`;
+		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
@@ -211,7 +204,7 @@ export async function removeStrike(interaction: ButtonInteraction<CacheType>, id
 	);
 	if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
 }
-export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, id: string) {
+export async function addStrikeBack(interaction: ButtonInteraction, id: string) {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -230,7 +223,7 @@ export async function addStrikeBack(interaction: ButtonInteraction<CacheType>, i
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user = (await client.users.fetch(strike.user).catch(() => {})) ?? `<@${strike.user}>`;
+	const user = await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`);
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${

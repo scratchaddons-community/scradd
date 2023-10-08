@@ -1,5 +1,4 @@
 import {
-	type ModalSubmitInteraction,
 	type ChatInputCommandInteraction,
 	ComponentType,
 	chatInputApplicationCommandMention,
@@ -10,6 +9,8 @@ import {
 	Constants,
 	MessageType,
 	type Snowflake,
+	type RepliableInteraction,
+	MessageContextMenuCommandInteraction,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
@@ -20,38 +21,37 @@ import log, { LoggingEmojis } from "../logging/misc.js";
 import { matchSorter } from "match-sorter";
 
 const fetchedChannels = new Set<Snowflake>();
-export async function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
+export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
 	if (!interaction.channel) return [];
 	if (!fetchedChannels.has(interaction.channel.id)) {
-		interaction.channel.messages
-			.fetch({ limit: 100 })
-			.then(() => fetchedChannels.add(interaction.channel?.id ?? ""));
+		interaction.channel.messages.fetch({ limit: 100 }).then(
+			() => interaction.channel && fetchedChannels.add(interaction.channel.id),
+			() => void 0,
+		);
 	}
-	const messages = await Promise.all(
-		interaction.channel.messages.cache
-			.sort((one, two) => +two.createdAt - +one.createdAt)
-			.filter(
-				(message) =>
-					!message.flags.has("Ephemeral") &&
-					(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
-			)
-			.map(async (message) => {
-				const content = await messageToText(message, false);
-				return {
-					id: message.id,
-					embeds: message.embeds.map((embed) => embed.toJSON()),
-					interaction: message.interaction && "/" + message.interaction.commandName,
-					attachments: message.attachments.map((attachment) => attachment.name),
-					stickers: message.stickers.map((sticker) => sticker.name),
-					author: message.author.displayName,
-					components: message.components,
-					createdTimestamp: message.createdTimestamp,
-					content: stripMarkdown(
-						interaction.channel ? cleanContent(content, interaction.channel) : content,
-					),
-				};
-			}) ?? [],
-	);
+	const messages = interaction.channel.messages.cache
+		.sorted((one, two) => +two.createdAt - +one.createdAt)
+		.filter(
+			(message) =>
+				!message.flags.has("Ephemeral") &&
+				(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
+		)
+		.map((message) => {
+			const content = messageToText(message, false);
+			return {
+				id: message.id,
+				embeds: message.embeds.map((embed) => embed.toJSON()),
+				interaction: message.interaction && "/" + message.interaction.commandName,
+				attachments: message.attachments.map((attachment) => attachment.name),
+				stickers: message.stickers.map((sticker) => sticker.name),
+				author: message.author.displayName,
+				components: message.components,
+				createdTimestamp: message.createdTimestamp,
+				content: stripMarkdown(
+					interaction.channel ? cleanContent(content, interaction.channel) : content,
+				),
+			};
+		});
 	const reply = interaction.options.getString("reply");
 	return matchSorter(messages, reply ?? "", {
 		keys: [
@@ -100,18 +100,17 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 }
 
 export default async function sayCommand(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+	options: { message: string; reply?: string },
 ) {
-	const content = interaction.options.getString("message", true);
-	const reply = interaction.options.getString("reply");
-	if (content !== "-") {
-		await say(interaction, content, reply || undefined);
+	if (options.message !== "-") {
+		await say(interaction, options.message, options.reply || undefined);
 		return;
 	}
 
 	await interaction.showModal({
-		title: `Send Message`,
-		customId: `${reply ?? ""}_say`,
+		title: "Send Message",
+		customId: `${options.reply ?? ""}_say`,
 
 		components: [
 			{
@@ -139,22 +138,20 @@ export default async function sayCommand(
  * @param interaction - The interaction that triggered this mimic.
  * @param content - What to mimic.
  */
-export async function say(
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ModalSubmitInteraction,
-	content: string,
-	reply?: string,
-) {
+export async function say(interaction: RepliableInteraction, content: string, reply?: string) {
 	await interaction.deferReply({ ephemeral: true });
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;
 	const noPing = reply?.startsWith("-");
 	reply = noPing ? reply?.replace("-", "") : reply;
-	const oldMessage = reply && (await interaction.channel?.messages.fetch(reply).catch(() => {}));
+	const oldMessage =
+		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
 	if (reply && !oldMessage)
 		return interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
 
+	// todo: censor it
 	const message = await (oldMessage
 		? oldMessage.reply({
 				content,
@@ -170,11 +167,13 @@ export async function say(
 		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
-				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "",
+				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,
-			"messages",
+			interaction.guild?.id === config.guild.id
+				? "messages"
+				: interaction.guild?.publicUpdatesChannel ?? undefined,
 			{ buttons: [{ label: "Message", url: message.url }] },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);

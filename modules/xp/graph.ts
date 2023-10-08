@@ -1,8 +1,9 @@
 import { type AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./misc.js";
-import { createCanvas } from "@napi-rs/canvas";
+import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
+import constants from "../../common/constants.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
@@ -10,13 +11,13 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 
 	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
 
-	const recentXp = [...recentXpDatabase.data].sort((one, two) => one.time - two.time);
+	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d");
+	const context = canvas.getContext("2d") as SKRSContext2D & CanvasRenderingContext2D;
 
-	new Chart(context as unknown as CanvasRenderingContext2D, {
+	new Chart(context, {
 		options: {
 			responsive: false,
 			animation: false,
@@ -30,19 +31,18 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				},
 				y: { min: 0 },
 			},
-			font: { family: "Sora", weight: "400", style: "normal" },
+			font: { family: constants.fonts, weight: "400", style: "normal" },
 			elements: { point: { radius: 0 } },
 		},
 		plugins: [
 			{
 				id: "customCanvasBackgroundColor",
 				beforeDraw(chart) {
-					const { ctx } = chart;
-					ctx.save();
-					ctx.globalCompositeOperation = "destination-over";
-					ctx.fillStyle = "white";
-					ctx.fillRect(0, 0, chart.width, chart.height);
-					ctx.restore();
+					chart.ctx.save();
+					chart.ctx.globalCompositeOperation = "destination-over";
+					chart.ctx.fillStyle = "white";
+					chart.ctx.fillRect(0, 0, chart.width, chart.height);
+					chart.ctx.restore();
 				},
 			},
 		],
@@ -52,10 +52,13 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				.map((user) => {
 					const data = recentXp
 						.filter((gain) => gain.time < maxDate && gain.user === user.id)
-						.reduce<{ x: number; y: number }[]>((acc, xp) => {
-							const previous = acc.at(-1) ?? { y: 0, x: recentXp[0]?.time ?? 0 };
+						.reduce<{ x: number; y: number }[]>((accumulator, xp) => {
+							const previous = accumulator.at(-1) ?? {
+								y: 0,
+								x: recentXp[0]?.time ?? 0,
+							};
 							return [
-								...acc,
+								...accumulator,
 								...Array.from(
 									{ length: Math.floor((xp.time - previous.x) / 3_600_000) },
 									(_, index) => ({
@@ -63,7 +66,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 										x: previous.x + 3_600_000 * index,
 									}),
 								),
-								{ x: xp.time, y: xp.xp + previous?.y },
+								{ x: xp.time, y: xp.xp + previous.y },
 							];
 						}, []);
 					return {
@@ -74,7 +77,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 						],
 					};
 				})
-				.sort((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0)),
+				.toSorted((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0)),
 		},
 	});
 

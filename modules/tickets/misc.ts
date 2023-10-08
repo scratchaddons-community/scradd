@@ -6,16 +6,20 @@ import {
 	type PrivateThreadChannel,
 	type Snowflake,
 } from "discord.js";
-import config from "../../common/config.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
 
-const initialThreads = await config.channels.tickets?.threads.fetchActive();
 export const TICKETS_BY_MEMBER = Object.fromEntries(
-	initialThreads?.threads
-		.map((thread) => {
-			const id = getIdFromName(thread.name);
-			return [id, thread.type === ChannelType.PrivateThread ? thread : undefined] as const;
-		})
-		.filter((info): info is [Snowflake, PrivateThreadChannel | undefined] => !!info?.[0]) ?? [],
+	config.channels.tickets
+		? getInitialChannelThreads(config.channels.tickets)
+				.map((thread) => {
+					const id = getIdFromName(thread.name);
+					return [
+						id,
+						thread.type === ChannelType.PrivateThread ? thread : undefined,
+					] as const;
+				})
+				.filter((info): info is [Snowflake, PrivateThreadChannel | undefined] => !!info[0])
+		: [],
 );
 
 export const TICKET_CATEGORIES = [

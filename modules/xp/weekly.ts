@@ -11,7 +11,7 @@ import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
-import { getCustomRole, qualifiesForRole } from "../roles.js";
+import { recheckMemberRole } from "../roles/custom.js";
 
 export async function getChatters() {
 	const weeklyWinners = getFullWeeklyData();
@@ -20,7 +20,7 @@ export async function getChatters() {
 		winnerId &&
 		(await config.guild.members
 			.fetch(winnerId)
-			.catch(() => client.users.fetch(winnerId).catch(() => {})));
+			.catch(() => client.users.fetch(winnerId).catch(() => void 0)));
 	weeklyWinners.splice(
 		0,
 		weeklyWinners.findIndex(
@@ -29,17 +29,11 @@ export async function getChatters() {
 	);
 	if (!weeklyWinners.length) return;
 
-	const formatted = await Promise.all(
-		weeklyWinners.map(
-			async (user) =>
-				`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${
-					(
-						await client.users
-							.fetch(user.user)
-							.catch(() => ({ displayName: userMention(user.user) }))
-					).displayName
-				} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
-		),
+	const formatted = weeklyWinners.map(
+		(user) =>
+			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${userMention(
+				user.user,
+			)} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
@@ -51,7 +45,7 @@ export async function getChatters() {
 	return {
 		embeds: [
 			{
-				description: "```\n" + filtered.join("\n").replaceAll("```", "'''") + "\n```",
+				description: filtered.join("\n"),
 				footer: ending
 					? {
 							icon_url: config.guild.iconURL() ?? undefined,
@@ -61,50 +55,54 @@ export async function getChatters() {
 					  }
 					: undefined,
 				color: constants.themeColor,
-				thumbnail: winner ? { url: winner?.displayAvatarURL() } : undefined,
+				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
 	} satisfies MessageCreateOptions;
 }
 
 export default async function getWeekly(nextWeeklyDate: Date) {
-	remindersDatabase.data = [
-		...remindersDatabase.data,
-		{
-			channel: config.channels.announcements?.id || "",
-			date: Number(nextWeeklyDate),
-			reminder: undefined,
-			id: SpecialReminders.Weekly,
-			user: client.user.id,
-		},
-	];
+	if (config.channels.announcements) {
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: config.channels.announcements.id,
+				date: Number(nextWeeklyDate),
+				reminder: undefined,
+				id: SpecialReminders.Weekly,
+				user: client.user.id,
+			},
+		];
+	}
+
 	const weeklyWinners = getFullWeeklyData();
 
-	const { active } = config.roles;
 	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
 	const activeMembers = [
 		...latestActiveMembers,
 		...Object.entries(
-			recentXpDatabase.data.reduce<Record<Snowflake, number>>((acc, gain) => {
-				acc[gain.user] = (acc[gain.user] ?? 0) + gain.xp;
-				return acc;
+			recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
+				accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
+				return accumulator;
 			}, {}),
 		)
 			.map((entry) => ({ xp: entry[1], user: entry[0] }))
 			.filter((item) => item.xp >= 500),
 	];
-	if (active) {
+
+	const activeRole = config.roles.active;
+	if (activeRole) {
 		await Promise.all([
-			...active.members.map(async (roleMember) => {
+			...activeRole.members.map(async (roleMember) => {
 				if (!activeMembers.some((item) => item.user === roleMember.id))
-					return await roleMember.roles.remove(active, "Inactive");
+					return await roleMember.roles.remove(activeRole, "Inactive");
 			}),
 			...activeMembers.map(
 				async ({ user: memberId }) =>
 					await config.guild.members
 						.fetch(memberId)
-						.catch(() => {})
-						.then((activeMember) => activeMember?.roles.add(active, "Active")),
+						.catch(() => void 0)
+						.then((activeMember) => activeMember?.roles.add(activeRole, "Active")),
 			),
 		]);
 	}
@@ -123,41 +121,36 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
 		) + 1 || weeklyWinners.length,
 	);
-	const ids = weeklyWinners.map((gain) => gain.user);
+	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
 	const role = config.roles.weekly_winner;
 	if (role) {
 		await Promise.all([
 			...role.members.map(async (weeklyMember) => {
-				if (!ids.includes(weeklyMember.id))
-					return await weeklyMember.roles.remove(role, `No longer weekly winner`);
+				if (!ids.has(weeklyMember.id))
+					return await weeklyMember.roles.remove(role, "No longer weekly winner");
 			}),
 			...weeklyWinners.map(
 				async ({ user: userId }, index) =>
 					await config.guild.members
 						.fetch(userId)
-						.catch(() => {})
+						.catch(() => void 0)
 						.then((member) =>
 							member?.roles.add(
 								index || !config.roles.epic ? role : [role, config.roles.epic],
-								`Weekly winner`,
+								"Weekly winner",
 							),
 						),
 			),
 		]);
 	}
 
-	weeklyWinners.forEach(async (weeklyWinner) => {
-		await config.guild.members.fetch(weeklyWinner.user).then(async (guildMember) => {
-			if (await qualifiesForRole(guildMember)) return;
-
-			const customRole = getCustomRole(guildMember);
-
-			if (!customRole) return;
-
-			customRole.delete("No longer meets custom role requirements");
-		});
-	});
+	await Promise.all(
+		weeklyWinners.map(async (weeklyWinner) => {
+			const member = await config.guild.members.fetch(weeklyWinner.user).catch(() => void 0);
+			if (member) await recheckMemberRole(member, member);
+		}),
+	);
 
 	return `__**🏆 Weekly Winners week of ${
 		[
@@ -174,7 +167,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			"November",
 			"December",
 		][date.getUTCMonth()] || ""
-	} ${nth(date.getUTCDate(), { bold: false, jokes: false })}**__\n${
+	} ${nth(date.getUTCDate())}**__\n${
 		weeklyWinners
 			.map(
 				(gain, index) =>

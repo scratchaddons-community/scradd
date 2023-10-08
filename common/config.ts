@@ -1,52 +1,38 @@
-import { ChannelType, type NonThreadGuildBasedChannel } from "discord.js";
-import constants from "./constants.js";
+import {
+	ChannelType,
+	ForumChannel,
+	TextChannel,
+	type NonThreadGuildBasedChannel,
+	NewsChannel,
+	MediaChannel,
+} from "discord.js";
 import { client } from "strife.js";
 
-const guild = await client.guilds.fetch(process.env.GUILD_ID ?? "");
+const guild = await client.guilds.fetch(process.env.GUILD_ID);
+if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
+const guilds = await client.guilds.fetch();
+guilds.delete(guild.id);
 
 async function getConfig() {
 	const channels = await guild.channels.fetch();
 	const roles = await guild.roles.fetch();
 
-	const latestRelease: string =
-		process.env.NODE_ENV == "production"
-			? (
-					await fetch(
-						`https://api.github.com/repos/${constants.urls.saRepo}/releases/latest`,
-					).then(async (res) => await res.json<any>())
-			  ).tag_name
-			: "master";
-
+	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
-		roles: {
-			admin: roles.find((role) => role.name.toLowerCase().includes("admin")),
-			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			mod: roles.find((role) => role.name.toLowerCase().includes("mod")),
-			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
-			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
-			booster: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("booster"),
-			),
-			active: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("active"),
-			),
-		},
-
-		urls: {
-			saSource: `https://raw.githubusercontent.com/${constants.urls.saRepo}/${latestRelease}`,
-			latestRelease,
-		},
+		guild,
+		otherGuildIds: [...guilds.keys()],
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
 				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
-			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
+			tickets: getChannel("contact", ChannelType.GuildText, "start"),
+			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
@@ -57,43 +43,52 @@ async function getConfig() {
 			general: getChannel("general", ChannelType.GuildText),
 
 			support: "826250884279173162",
-			server: "1138116320249000077",
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-
-			bots: getChannel("bots", ChannelType.GuildText, "partial"),
+			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ||
 				getChannel("promo", ChannelType.GuildText, "partial"),
+			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
 
-		guild,
+		roles: {
+			mod,
+			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
+			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
+			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
+			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
+			booster: roles.find(
+				(role) => role.editable && role.name.toLowerCase().includes("booster"),
+			),
+			active: roles.find(
+				(role) => role.editable && role.name.toLowerCase().includes("active"),
+			),
+		},
 	};
 
 	function getChannel<T extends ChannelType>(
 		name: string,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "full",
-	): (NonThreadGuildBasedChannel & { type: T }) | undefined {
-		const types = [type].flat() as ChannelType[];
-		return channels.find((channel): channel is typeof channel & { type: T } => {
-			if (!channel || !types.includes(channel.type)) return false;
-
-			switch (matchType) {
-				case "full":
-					return channel.name === name;
-				case "partial":
-					return channel.name.includes(name);
-				case "start":
-					return channel.name.startsWith(name);
-				case "end":
-					return channel.name.endsWith(name);
-			}
-		});
+	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
+		const types = new Set<ChannelType>([type].flat());
+		return channels.find(
+			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> =>
+				!!channel &&
+				types.has(channel.type) &&
+				{
+					end: channel.name.endsWith(name),
+					full: channel.name === name,
+					partial: channel.name.includes(name),
+					start: channel.name.startsWith(name),
+				}[matchType],
+		);
 	}
 }
 
@@ -101,7 +96,13 @@ const config = await getConfig();
 export async function syncConfig() {
 	const newConfig = await getConfig();
 	config.roles = newConfig.roles;
-	config.urls = newConfig.urls;
 	config.channels = newConfig.channels;
 }
 export default config;
+
+const threads = await config.guild.channels.fetchActiveThreads();
+export function getInitialChannelThreads(
+	channel: ForumChannel | MediaChannel | TextChannel | NewsChannel,
+) {
+	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+}

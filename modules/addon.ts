@@ -1,40 +1,46 @@
-import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	ButtonStyle,
+	ComponentType,
+	hyperlink,
+	AutocompleteInteraction,
+} from "discord.js";
 import { matchSorter } from "match-sorter";
 import constants from "../common/constants.js";
-import { manifest, addons, addonSearchOptions } from "../common/extension.js";
-import { defineCommand } from "strife.js";
-import { escapeMessage, generateTooltip } from "../util/markdown.js";
+import addons from "@sa-community/addons-data" assert { type: "json" };
+import { defineChatCommand } from "strife.js";
+import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
+import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${
-			manifest.version_name ?? manifest.version
-		}`,
+		description: `Replies with information about a specific addon available in v${sa.version}`,
 
 		options: {
 			addon: {
-				autocomplete(interaction) {
-					const query = interaction.options.getString("addon");
-					return matchSorter(addons, query ?? "", addonSearchOptions).map((addon) => ({
-						name: addon.name,
-						value: addon.id,
-					}));
+				autocomplete(interaction: AutocompleteInteraction) {
+					return matchSorter(
+						addons,
+						interaction.options.getString("addon") ?? "",
+						constants.addonSearchOptions,
+					).map((addon) => ({ name: addon.manifest.name, value: addon.addonId }));
 				},
 				description: "The name of the addon",
 				required: true,
 				type: ApplicationCommandOptionType.String,
 			},
 		},
+		access: true,
 	},
 
-	async (interaction) => {
-		const input = interaction.options.getString("addon", true);
-		const addon = matchSorter(addons, input, addonSearchOptions)[0];
+	async (interaction, options) => {
+		const { manifest: addon, addonId } =
+			matchSorter(addons, options.addon, constants.addonSearchOptions)[0] ?? {};
 
-		if (!addon) {
+		if (!addon || !addonId) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find a matching addon!`,
 
@@ -49,9 +55,9 @@ defineCommand(
 			: addon.tags.includes("easterEgg")
 			? "Easter Eggs"
 			: addon.tags.includes("theme")
-			? `Themes -> ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
+			? `Themes → ${addon.tags.includes("editor") ? "Editor" : "Website"} Themes`
 			: addon.tags.includes("community")
-			? `Scratch Website Features -> ${
+			? `Scratch Website Features → ${
 					addon.tags.includes("profiles")
 						? "Profiles"
 						: addon.tags.includes("projectPage")
@@ -60,7 +66,7 @@ defineCommand(
 						? "Forums"
 						: "Others"
 			  }`
-			: `Scratch Editor Features -> ${
+			: `Scratch Editor Features → ${
 					addon.tags.includes("codeEditor")
 						? "Code Editor"
 						: addon.tags.includes("costumeEditor")
@@ -70,16 +76,15 @@ defineCommand(
 						: "Others"
 			  }`;
 
-		const credits = joinWithAnd(
-			addon.credits?.map((credit) => {
-				const note = ("note" in credit && credit.note) || "";
-				return credit.link
-					? hyperlink(credit.name, credit.link, note)
-					: interaction.channel
-					? generateTooltip(interaction.channel, credit.name, note)
-					: credit.name;
-			}) ?? [],
-		);
+		const credits = joinWithAnd(addon.credits ?? [], (credit) => {
+			return credit.note || credit.link
+				? hyperlink(
+						credit.name,
+						credit.link ?? interaction.channel?.url ?? "",
+						credit.note ?? "",
+				  )
+				: credit.name;
+		});
 
 		const lastUpdatedIn =
 			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;
@@ -95,51 +100,33 @@ defineCommand(
 							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 							: ""),
 					fields: [
-						...(credits
-							? [
-									{
-										inline: true,
-										name: "🫂 Contributors",
-										value: escapeMessage(credits),
-									},
-							  ]
+						...(credits.length
+							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
 						{
 							inline: true,
 							name: "📝 Version added",
 
-							value: escapeMessage(
-								`v${addon.versionAdded}${
-									addon.latestUpdate && lastUpdatedIn
-										? ` (${
-												interaction.channel
-													? generateTooltip(
-															interaction.channel,
-															lastUpdatedIn,
-															addon.latestUpdate.temporaryNotice,
-													  )
-													: lastUpdatedIn
-										  })`
-										: ""
-								}`,
-							),
+							value: `v${addon.versionAdded}${
+								addon.latestUpdate && lastUpdatedIn
+									? ` (${hyperlink(
+											lastUpdatedIn,
+											interaction.channel?.url ?? "",
+											addon.latestUpdate.temporaryNotice ?? "",
+									  )})`
+									: ""
+							}`,
 						},
 					],
 
-					footer: { text: addon.id },
+					footer: { text: addonId },
 
-					thumbnail: {
-						url: `${constants.urls.addonImageRoot}/${encodeURIComponent(addon.id)}.png`,
-					},
+					thumbnail: { url: `${constants.urls.addonImageRoot}/${addonId}.png` },
 
 					title: addon.name,
 
-					url: `https://github.com/${constants.urls.saRepo}/tree/${
-						manifest.version_name?.endsWith("-prerelease")
-							? "master"
-							: `v${encodeURI(manifest.version)}`
-					}/addons/${encodeURIComponent(addon.id)}/`,
+					url: `https://github.com/${constants.urls.saRepo}/tree/v${sa.version}/addons/${addonId}/`,
 				},
 			],
 
@@ -150,9 +137,7 @@ defineCommand(
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
-							url: `${constants.urls.settingsPage}#addon-${encodeURIComponent(
-								addon.id,
-							)}`,
+							url: `${constants.urls.settingsPage}#addon-${addonId}`,
 							label: "Enable Addon",
 						},
 					],

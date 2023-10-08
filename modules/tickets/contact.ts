@@ -4,21 +4,18 @@ import {
 	ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
-	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
 	InteractionResponse,
 	InteractionType,
-	ModalSubmitInteraction,
-	time,
-	TimestampStyles,
 	type PrivateThreadChannel,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LoggingEmojis } from "../logging/misc.js";
-import { PARTIAL_STRIKE_COUNT, strikeDatabase } from "../punishments/misc.js";
+import { listStrikes } from "../punishments/misc.js";
 import {
 	type Category,
 	SA_CATEGORY,
@@ -32,16 +29,16 @@ import {
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: Exclude<Category, "appeal">,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: ButtonInteraction,
 	category: "appeal",
 	strikeId: string,
-): Promise<InteractionResponse<boolean> | undefined>;
+): Promise<InteractionResponse | undefined>;
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
@@ -53,7 +50,7 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don't contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
 				config.channels.support
 			}>.`,
 
@@ -63,7 +60,7 @@ export async function showTicketModal(
 
 	if (option === SERVER_CATEGORY) {
 		return await interaction.reply({
-			content: `${constants.emojis.statuses.no} Please don't contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
+			content: `${constants.emojis.statuses.no} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
 
 			ephemeral: true,
 		});
@@ -73,8 +70,6 @@ export async function showTicketModal(
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
 	const fields = allFields[option];
-
-	if (!fields) throw new ReferenceError(`Unknown ticket category: ${option}`);
 
 	await interaction.showModal({
 		title: categoryToDescription[option],
@@ -86,13 +81,10 @@ export async function showTicketModal(
 	});
 }
 export default async function contactMods(
-	interaction:
-		| ModalSubmitInteraction
-		| ChatInputCommandInteraction<"cached" | "raw">
-		| ButtonInteraction,
+	interaction: RepliableInteraction,
 	options: Category | GuildMember,
 ) {
-	const option = options instanceof GuildMember ? MOD_CATEGORY : options;
+	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
 		options instanceof GuildMember
@@ -106,16 +98,16 @@ export default async function contactMods(
 		interaction.type === InteractionType.ModalSubmit
 			? Object.entries(
 					{
-						appeal: { "Strike ID": "strike" },
-						report: { "Reported User": "user" },
-						role: { "Role(s)": "role", "Account(s)": "account" },
+						appeal: { "🔨 Strike ID": "strike" },
+						report: { "👤 Reported User": "user" },
+						role: { "🗄️ Role(s)": "role", "👥 Account(s)": "account" },
 						bug: {},
 						update: {},
-						rules: { Rule: "rule" },
+						rules: { "📜 Rule": "rule" },
 						server: {},
 						other: {},
 						[MOD_CATEGORY]: {},
-					}[option],
+					}[category],
 			  ).map<APIEmbedField>(([name, key]) => ({
 					name,
 					value: interaction.fields.getTextInputValue(key),
@@ -123,19 +115,19 @@ export default async function contactMods(
 			  }))
 			: [];
 	const body =
-		option !== "role" &&
+		category !== "role" &&
 		interaction.type === InteractionType.ModalSubmit &&
 		interaction.fields.getTextInputValue("BODY");
 	const details = {
-		title: categoryToDescription[option],
+		title: categoryToDescription[category],
 
 		color: member.displayColor,
 
 		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 		...(body
-			? fields.length === 0
-				? { description: body }
-				: { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+			? fields.length
+				? { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+				: { description: body }
 			: { fields }),
 	};
 
@@ -148,7 +140,7 @@ export default async function contactMods(
 	const thread = (await config.channels.tickets.threads.create({
 		name: `${member.user.displayName} (${member.id})`,
 		reason: `${interaction.user.tag} contacted ${
-			option === MOD_CATEGORY ? member.user.tag : "mods"
+			category === MOD_CATEGORY ? member.user.tag : "mods"
 		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
@@ -156,107 +148,33 @@ export default async function contactMods(
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
-			option === MOD_CATEGORY ? member.toString() : "mods"
-		}: ${thread?.toString()}`,
+			category === MOD_CATEGORY ? member.toString() : "mods"
+		}: ${thread.toString()}`,
 	);
 
-	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === member.id)
-		.sort((one, two) => two.date - one.date);
+	const ping =
+		category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
+			? ""
+			: config.roles.mod?.toString();
+	await (["appeal", "report", "other", MOD_CATEGORY].includes(category)
+		? listStrikes(
+				member,
+				(data) =>
+					thread.send({
+						...data,
+						embeds: [details, ...(data.embeds ?? [])],
+						content: ping,
+						allowedMentions: { parse: ["roles"] },
+					}),
+				{ removed: true },
+		  )
+		: thread.send({ embeds: [details], content: ping, allowedMentions: { parse: ["roles"] } }));
 
-	const totalStrikeCount = Math.trunc(
-		strikes.reduce(
-			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
-			0,
-		),
-	);
-
-	const numberOfPages = Math.ceil(strikes.length / 15);
-
-	const filtered = strikes.filter((_, index) => index < 15);
-
-	await thread?.send({
-		components: filtered.length
-			? [
-					{
-						type: ComponentType.ActionRow,
-
-						components:
-							filtered.length > 5
-								? [
-										{
-											type: ComponentType.StringSelect,
-											customId: "_selectStrike",
-											placeholder: "View more information on a strike",
-
-											options: filtered.map((strike) => ({
-												label: String(strike.id),
-												value: String(strike.id),
-											})),
-										},
-								  ]
-								: filtered.map((strike) => ({
-										type: ComponentType.Button,
-										customId: `${strike.id}_strike`,
-										label: String(strike.id),
-										style: ButtonStyle.Secondary,
-								  })),
-					},
-			  ]
-			: [],
-
-		embeds: [
-			details,
-			{
-				title: `${member.displayName}’s strikes`,
-				description: filtered.length
-					? filtered
-							.map(
-								(strike) =>
-									`${strike.removed ? "~~" : ""}\`${strike.id}\`${
-										strike.count === 1
-											? ""
-											: ` (${
-													strike.count === PARTIAL_STRIKE_COUNT
-														? "verbal"
-														: `\\*${strike.count}`
-											  })`
-									} - ${time(
-										new Date(strike.date),
-										TimestampStyles.RelativeTime,
-									)}${strike.removed ? "~~" : ""}`,
-							)
-							.join("\n")
-					: `${constants.emojis.statuses.no} ${member.toString()} has never been warned!`,
-
-				footer: filtered.length
-					? {
-							text: `Page 1/${numberOfPages}${
-								constants.footerSeperator
-							} ${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-					  }
-					: undefined,
-
-				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
-				color: member.displayColor,
-			},
-		],
-		content:
-			option === MOD_CATEGORY || process.env.NODE_ENV === "development"
-				? ""
-				: config.roles.mod?.toString(),
-		allowedMentions: { parse: ["roles"] },
-	});
-
-	await thread?.members.add(member, "Thread created");
-
+	await thread.members.add(member, "Thread created");
 	return thread;
 }
 
-export async function contactUser(
-	member: GuildMember,
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
-) {
+export async function contactUser(member: GuildMember, interaction: RepliableInteraction) {
 	await interaction.deferReply({ ephemeral: true });
 	const existingThread = TICKETS_BY_MEMBER[member.id];
 
@@ -298,12 +216,11 @@ export async function contactUser(
 		.on("collect", async (buttonInteraction) => {
 			await buttonInteraction.deferReply({ ephemeral: true });
 			const thread = await contactMods(interaction, member);
-			if (thread)
-				await buttonInteraction.editReply(
-					`${
-						constants.emojis.statuses.yes
-					} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
-				);
+			await buttonInteraction.editReply(
+				`${
+					constants.emojis.statuses.yes
+				} **Ticket opened!** Send ${member.toString()} a message in ${thread.toString()}.`,
+			);
 		})
 		.on("end", async () => {
 			await interaction.editReply({ components: disableComponents(message.components) });

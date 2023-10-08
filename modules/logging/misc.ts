@@ -12,7 +12,7 @@ import {
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
-import config from "../../common/config.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
@@ -26,32 +26,30 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
 			baseChannel
-				?.permissionsFor(config.roles.mod || config.guild.id)
+				.permissionsFor(config.roles.staff || config.guild.id)
 				?.has(PermissionFlagsBits.ViewChannel),
 	);
 }
 
 export default async function log(
-	content?: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
-	group?: LogGroup,
+	content: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
+	group?: LogGroup | TextChannel,
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
 		buttons?: { label: string; url: string }[];
 	} = {},
 ) {
-	const thread = await getLoggingThread(group);
+	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
-	const externalFileIndex = extra.files?.findIndex((file) => {
-		if (typeof file === "string" || file.content.includes("```")) return true;
+	const externalIndex =
+		extra.files?.findIndex((file) => {
+			if (typeof file === "string" || file.content.includes("```")) return true;
 
-		const lines = file.content.split("\n");
-		return lines.length > 10 || lines.find((line) => line.length > 100);
-	});
-	const embeddedFiles =
-		externalFileIndex === -1
-			? extra.files?.splice(0)
-			: extra.files?.splice(0, externalFileIndex);
+			const lines = file.content.split("\n");
+			return lines.length > 10 || lines.find((line) => line.length > 100);
+		}) ?? 0;
+	const embeddedFiles = extra.files?.splice(0, extra.files.length - externalIndex - 1);
 
 	return await thread.send({
 		content:
@@ -79,7 +77,7 @@ export default async function log(
 			},
 		],
 		files: await Promise.all(
-			extra.files?.slice(0, 10).map(async (file) => {
+			extra.files?.map(async (file) => {
 				if (typeof file === "string") {
 					const response = await fetch(file);
 					return {
@@ -105,38 +103,36 @@ export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (!group) return config.channels.modlogs;
 
-	const threads = await config.channels.modlogs.threads.fetchActive();
-
 	return (
-		threads.threads.find((thread) => thread.name === group) ||
+		getInitialChannelThreads(config.channels.modlogs).find((thread) => thread.name === group) ||
 		(await config.channels.modlogs.threads.create({
 			name: group,
 			reason: "New logging thread",
 			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
-			invitable: group === DATABASE_THREAD ? false : undefined,
+			invitable: group !== DATABASE_THREAD && undefined,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);
 }
 
 export enum LoggingEmojis {
-	Member = "👥",
-	UserUpdate = "👤",
 	SettingChange = "📋",
-	ServerUpdate = "✨",
-	Invite = "👋",
-	Role = "🏷",
-	MessageDelete = "🗑",
-	MessageUpdate = "🌐",
-	MessageEdit = "📝",
-	Voice = "🔊",
 	Channel = "🗄",
 	Punishment = "🔨",
-	Event = "🗓",
-	Bot = "🤖",
-	Emoji = "😳",
-	Thread = "📂",
+	Role = "🏷",
 	Integration = "🖇",
+	Thread = "📂",
+	ServerUpdate = "✨",
+	Voice = "🔊",
+	Expressions = "😳",
+	User = "👤",
+	Event = "🗓",
+	Invite = "👋",
+	MessageUpdate = "🌐",
+	MessageEdit = "📝",
+	Bot = "🤖",
+	MessageDelete = "🗑",
+	Member = "👥",
 }
 
 export const LoggingErrorEmoji = constants.emojis.statuses.no;

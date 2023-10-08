@@ -1,9 +1,6 @@
 import {
-	Collection,
-	type ChatInputCommandInteraction,
 	ComponentType,
 	ButtonStyle,
-	type APIMessageComponentEmoji,
 	type Snowflake,
 	ButtonInteraction,
 	Message,
@@ -12,12 +9,15 @@ import {
 	ThreadAutoArchiveDuration,
 	ChannelType,
 	type RepliableInteraction,
+	GuildMember,
+	type APIInteractionGuildMember,
+	Base,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { logGame, playNeeded } from "./tourney.js";
+import { autoreactions } from "../auto/secrets.js";
 
 const EMPTY_TILE = "⬛";
 
@@ -26,68 +26,44 @@ const deletedPings = new Set<Snowflake>();
 const instructionsButton = {
 	type: ComponentType.Button,
 	label: "Instructions",
-	customId: `_showMemoryInstructions`,
+	customId: "_showMemoryInstructions",
 	style: ButtonStyle.Secondary,
 } as const;
 
 export default async function memoryMatch(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+	interaction: RepliableInteraction,
+	options: {
+		"user"?: User | GuildMember | APIInteractionGuildMember;
+		"easy-mode"?: boolean;
+		"bonus-turns"?: boolean;
+		"thread"?: boolean;
+	},
 ) {
-	const otherUser = interaction.options.getUser("user", true);
-	if (otherUser.bot || interaction.user.id === otherUser.id) {
+	if (
+		!(options.user instanceof GuildMember) ||
+		options.user.user.bot ||
+		interaction.user.id === options.user.id
+	) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [instructionsButton],
-				},
-			],
+			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
+	const otherUser = options.user;
 
-	const easyMode = interaction.options.getBoolean("easy-mode") ?? false;
-	const bonusTurns = interaction.options.getBoolean("bonus-turns") ?? true;
-
-	const needToPlay = await playNeeded([interaction.user.id, otherUser.id]);
-	const tourneyQualifies = !easyMode && bonusTurns && needToPlay;
-	if (needToPlay && !tourneyQualifies) {
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You need to play that user in the Memory Match Tournament! Please start a game with easy mode off and bonus turns on.`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						instructionsButton,
-						{
-							type: ComponentType.Button,
-							label: "Tournament Information",
-							url: "https://discord.com/channels/806602307750985799/1129445243331301447/1129445243331301447",
-							style: ButtonStyle.Link,
-						},
-					],
-				},
-			],
-		});
-	}
+	const easyMode = options["easy-mode"] ?? false;
+	const bonusTurns = options["bonus-turns"] ?? true;
 
 	const message = await interaction.reply({
 		fetchReply: true,
-		content: `${
-			constants.emojis.misc.challenge
-		} **${otherUser.toString()}, you are challenged to a game of Memory Match${
+		content: `💪 **${otherUser.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
-						!bonusTurns ? "no bonus turns" : ""
+						bonusTurns ? "" : "no bonus turns"
 				  })`
 				: ""
-		} by ${interaction.user.toString()}!** Do you accept?${
-			tourneyQualifies
-				? "\n\n__This game will be a part of the Memory Match Tournament!__"
-				: ""
-		}`,
+		} by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -121,22 +97,35 @@ export default async function memoryMatch(
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
-				if (isUser || isOtherUser)
+				if (isUser || isOtherUser) {
 					await message.edit({ components: disableComponents(message.components) });
-				return;
+					collector.stop();
+				}
 			}
 
 			if (!buttonInteraction.customId.startsWith("confirm-")) return;
 
 			if (isOtherUser) {
 				collector.stop();
+
+				const player1Presence = interaction.guild?.presences.resolve(interaction.user.id);
+				const player2Presence =
+					options.user instanceof Base
+						? interaction.guild?.presences.resolve(options.user.id)
+						: undefined;
+
+				const presenceCheck =
+					player1Presence?.status !== player1Presence?.clientStatus?.mobile ||
+					player2Presence?.status !== player2Presence?.clientStatus?.mobile;
+
 				await playGame(buttonInteraction, {
-					users: ([interaction.user, otherUser] satisfies [User, User]).sort(
-						() => Math.random() - 0.5,
-					),
+					users:
+						Math.random() > 0.5
+							? [interaction.user, otherUser.user]
+							: [otherUser.user, interaction.user],
 					easyMode,
 					bonusTurns,
-					useThread: interaction.options.getBoolean("thread") ?? true,
+					useThread: options.thread ?? presenceCheck,
 				});
 			} else await buttonInteraction.deferUpdate();
 		})
@@ -153,7 +142,12 @@ async function playGame(
 		easyMode,
 		useThread,
 		bonusTurns,
-	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
+	}: {
+		users: [User, User];
+		easyMode: boolean;
+		useThread: boolean;
+		bonusTurns: boolean;
+	},
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -174,9 +168,8 @@ async function playGame(
 	}
 
 	await interaction.deferUpdate();
-	const tournament = !easyMode && bonusTurns && (await playNeeded([users[0].id, users[1].id]));
 	const scores: [string[], string[]] = [[], ["22"]];
-	const chunks = await setupGame(easyMode ? 4 : 2);
+	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
 	const message = await interaction.message.edit(getBoard(0));
 	const thread =
 		useThread &&
@@ -209,28 +202,22 @@ async function playGame(
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
 			await interaction.message.edit(getBoard(turn, shown));
+			await buttonInteraction.deferUpdate();
 
-			if (shown.size === 1) {
-				await buttonInteraction.deferUpdate();
-				return;
-			}
+			if (shown.size === 1) return;
 			totalTurns++;
 
-			const selected = [...shown].map(
-				([row = 6, column = 6]) => chunks[+row]?.[+column] ?? {},
-			);
+			const selected = Array.from(shown, ([row = 6, column = 6]) => chunks[+row]?.[+column]);
 
-			const match = selected.every(
-				(item) => item.name === selected[0]?.name && item.id === selected[0]?.id,
-			);
+			const match = selected.every((item) => item === selected[0]);
 			if (match) {
 				scores[turn % 2]?.push(...shown);
-				await interaction.message.edit(getBoard(turn));
 
 				if (scores[0].length + scores[1].length === 25) {
 					collector.stop();
-					return await endGame();
-				}
+					await endGame();
+					return;
+				} else await interaction.message.edit(getBoard(turn));
 			}
 			if (!match || !bonusTurns) {
 				turn++;
@@ -240,13 +227,9 @@ async function playGame(
 				turnInfo = await setupTurn(turn);
 			}
 			shown.clear();
-			await buttonInteraction.deferUpdate();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
-				await turnInfo.ping.edit({
-					components: disableComponents(turnInfo.ping.components),
-				});
 				return endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
@@ -263,14 +246,14 @@ async function playGame(
 	CURRENTLY_PLAYING.set(users[0].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[0].toString()} ended the game`, users[0]);
 		},
 	});
 	CURRENTLY_PLAYING.set(users[1].id, {
 		url: message.url,
 		end() {
-			collector?.stop("end");
+			collector.stop("end");
 			return endGame(`🛑 ${users[1].toString()} ended the game`, users[1]);
 		},
 	});
@@ -297,13 +280,18 @@ async function playGame(
 					components: [
 						{
 							type: ComponentType.ActionRow,
-							components: [gameLinkButton, endGameButton],
+							components: [gameLinkButton, endGameButton, instructionsButton],
 						},
 					],
 			  })
 			: message.reply({
 					content,
-					components: [{ type: ComponentType.ActionRow, components: [endGameButton] }],
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [endGameButton, instructionsButton],
+						},
+					],
 			  }));
 
 		const timeout = turn
@@ -324,24 +312,22 @@ async function playGame(
 				constants.emojis.misc.green
 			} ${users[1].toString()} - **${scores[1].length}** point${
 				scores[1].length === 1 ? "" : "s"
-			}${secondTurn}${
-				tournament ? "\n\n__This game will be a part of the Memory Match Tournament!__" : ""
-			}`,
+			}${secondTurn}`,
 
 			components: chunks.map((chunk, rowIndex) => ({
-				type: ComponentType.ActionRow,
+				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown].concat(...scores).includes(id);
+					const discovered = [...shown, ...scores.flat()].includes(id);
 
 					return {
 						type: ComponentType.Button,
 						emoji: discovered ? emoji : EMPTY_TILE,
 						customId: id,
 						style: ButtonStyle[
-							scores[0]?.includes(id)
+							scores[0].includes(id)
 								? "Primary"
-								: scores[1]?.includes(id)
+								: scores[1].includes(id)
 								? "Success"
 								: "Secondary"
 						],
@@ -349,16 +335,21 @@ async function playGame(
 					} as const;
 				}),
 			})),
-
-			allowedMentions: { users: [] },
 		};
 	}
 
-	async function endGame(content?: string, user?: User) {
+	async function endGame(content?: string, user?: User | GuildMember) {
 		CURRENTLY_PLAYING.delete(users[0].id);
 		CURRENTLY_PLAYING.delete(users[1].id);
+		deletedPings.add(turnInfo.ping.id);
+		await turnInfo.ping.delete();
 
-		await message.edit({ components: disableComponents((await message.fetch()).components) });
+		await message.edit({
+			components: getBoard(turn).components.map(({ components, type }) => ({
+				components: components.map((button) => ({ ...button, disabled: true })),
+				type,
+			})),
+		});
 
 		const firstScore = scores[0].length - (users[0].id === user?.id ? 2 : 0),
 			secondScore = scores[1].length - (users[1].id === user?.id ? 2 : 0);
@@ -370,11 +361,11 @@ async function playGame(
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await config.guild.members.fetch(users[+secondWon]?.id || "");
+		const winner = await interaction.guild?.members.fetch(users[secondWon ? 1 : 0].id);
 
 		await thread?.setArchived(true, "Game over");
 
-		const { url } = await message.reply({
+		await message.reply({
 			content,
 			embeds: [
 				{
@@ -383,9 +374,9 @@ async function playGame(
 							? `${constants.emojis.misc.blue} ${firstUser}`
 							: `${constants.emojis.misc.green} ${secondUser}`
 					}`,
-					title: `Memory Match ${tournament ? "Tournament " : ""}Results`,
-					color: winner.displayColor,
-					thumbnail: { url: winner.displayAvatarURL() },
+					title: "Memory Match Results",
+					color: winner?.displayColor,
+					thumbnail: winner && { url: winner.displayAvatarURL() },
 					footer: {
 						text: `${totalTurns.toLocaleString()} turn${
 							totalTurns === 1 ? "" : "s"
@@ -394,71 +385,55 @@ async function playGame(
 				},
 			],
 		});
-
-		if (tournament) {
-			await logGame({
-				winner: users[+secondWon]?.id ?? "",
-				loser: users[+!secondWon]?.id ?? "",
-				url,
-			});
-		}
 	}
 }
 
-async function setupGame(difficulty: 2 | 4) {
-	const allEmojis = new Collection(
-		[
-			"🥔",
-			"🍡",
-			"🥑",
-			"😏",
-			"🦆",
-			"🇫🇷",
-			"📻",
-			"😭",
-			"🗿",
-			"👀",
-			"🧐",
-			"🤨",
-			"🥶",
-			"💀",
-			"💩",
-			"🍢",
-			...(process.env.NODE_ENV === "production"
-				? [
-						{ name: "bowling_ball", id: "1104935019232899183" },
-						{ name: "hog", id: "1090372592642306048" },
-						{ name: "mater", id: "1073805840584282224" },
-						{ name: "new", id: "1091409541079507104" },
-						{ name: "rick", id: "962421165295554601", animated: true },
-						{ name: "rip", id: "1082693496739201205" },
-						{ name: "sxd", id: "962798819572056164" },
-						{ name: "wasteof", id: "1044651861682176080" },
-						{ name: "callum", id: "1119305606323523624" },
-				  ]
-				: []),
-		].map((emoji): [string, APIMessageComponentEmoji] =>
-			typeof emoji === "string" ? [emoji, { name: emoji }] : [emoji.id, emoji],
-		),
-	).concat(
-		(await config.guild.emojis.fetch())
-			.filter((emoji) => emoji.available)
-			.mapValues((emoji) => ({
-				id: emoji.id,
-				name: emoji.name ?? undefined,
-				animated: emoji.animated || undefined,
-			})),
+async function setupGame(difficulty: 2 | 4, guild = config.guild) {
+	const twemojis = [
+		"🥔",
+		"⭐",
+		"🍀",
+		"😏",
+		"😭",
+		"🗿",
+		"👀",
+		"🧐",
+		"🤨",
+		"🥶",
+		"💀",
+		"💩",
+		"🍢",
+		"🐴",
+		"🪀",
+		"😡",
+		"🎶",
+		"😶",
+		"🙄",
+		"😎",
+		"🥺",
+		"👉",
+		"👈",
+	];
+	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
+	const guildEmojis = (await guild.emojis.fetch())
+		.filter((emoji) => emoji.available)
+		.map((emoji) => emoji.toString());
+	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
+
+	const selected = Array.from(
+		{ length: Math.min(24 / difficulty, allEmojis.length) },
+		() => allEmojis.splice(Math.floor(Math.random() * allEmojis.length), 1)[0] ?? "",
 	);
-	const selected = allEmojis.random(24 / difficulty);
-	const emojis = selected
-		.concat(...Array<APIMessageComponentEmoji[]>(difficulty - 1).fill(selected))
-		.sort(() => Math.random() - 0.5);
+	const emojis = Array.from<typeof selected>({ length: difficulty })
+		.fill(selected)
+		.flat()
+		.toSorted(() => Math.random() - 0.5);
 
 	const chunks = [];
 	while (emojis.length) {
 		chunks.push(
 			chunks.length === 2
-				? emojis.splice(0, 2).concat([{ name: EMPTY_TILE }], emojis.splice(0, 2))
+				? [...emojis.splice(0, 2), EMPTY_TILE, ...emojis.splice(0, 2)]
 				: emojis.splice(0, 5),
 		);
 	}
@@ -466,7 +441,7 @@ async function setupGame(difficulty: 2 | 4) {
 	return chunks;
 }
 
-export async function messageDelete(message: Message | PartialMessage) {
+export function messageDelete(message: Message | PartialMessage) {
 	return !deletedPings.delete(message.id);
 }
 
@@ -477,16 +452,16 @@ export function showMemoryInstructions(interaction: RepliableInteraction) {
 			"## Memory Match Instructions\n" +
 			"### The objective is to find matching emoji pairs by clicking on tiles and remembering which emoji is where.\n" +
 			`The first player is determined randomly. Since they get an advantage by going first, the second player gets the middle tile as a bonus point. The two players are assigned colors (${constants.emojis.misc.blue} ${constants.emojis.misc.green}), which are shown above the board.\n` +
-			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you're sure of a match, click tiles you haven't seen before to expand your knowledge of the board.*\n" +
+			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you’re sure of a match, click tiles you haven’t seen before to expand your knowledge of the board.*\n" +
 			"If you find matching emojis, those two tiles will not be flipped back over, but change to your color instead. You will also receive two points and a bonus turn (unless bonus turns are disabled via `bonus-turns`).\n" +
-			`If the two flipped tiles do not match, it will be the other player's turn. The tiles will be flipped back over once the other player starts their turn or after ${
+			`If the two flipped tiles do not match, it will be the other player’s turn. The tiles will be flipped back over once the other player starts their turn or after ${
 				GAME_COLLECTOR_TIME / 60 / 1000
 			} seconds.\n` +
-			"*By default, there are only two of each emoji. However, in easy mode (`easy-mode`), there are four of each, which means there's two matches for each emoji.*\n" +
+			"*By default, there are only two of each emoji. However, in easy mode (`easy-mode`), there are four of each, which means there’s two matches for each emoji.*\n" +
 			"Continue taking turns until all the tiles are flipped over. The player with the highest number of points at the end wins the game.\n" +
-			`If a player ends the game, either by pressing the "End Game" button or not taking their turn within ${
+			`If a player ends the game, either by pressing the “End Game” button or not taking their turn within ${
 				GAME_COLLECTOR_TIME / 60 / 1000
 			} minutes, they lose 2 points.\n` +
-			"**Enjoy playing Memory Match and have fun testing your and your opponents' memory skills!**",
+			"**Enjoy playing Memory Match and have fun testing your and your opponents’ memory skills!**",
 	});
 }

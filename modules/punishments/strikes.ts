@@ -1,24 +1,20 @@
 import {
-	ButtonInteraction,
 	ButtonStyle,
-	ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	time,
-	TimestampStyles,
 	User,
 	type RepliableInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { paginate } from "../../util/discord.js";
-import { getSettings } from "../settings.js";
-import filterToStrike, { PARTIAL_STRIKE_COUNT, strikeDatabase } from "./misc.js";
+import { mentionUser } from "../settings.js";
+import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
-	interaction: ChatInputCommandInteraction<"cached" | "raw"> | ButtonInteraction,
+	interaction: RepliableInteraction,
+	options?: { expired?: boolean; removed?: boolean },
 ) {
 	if (
 		selected.id !== interaction.user.id &&
@@ -35,85 +31,15 @@ export async function getStrikes(
 		});
 	}
 
-	const user = selected instanceof GuildMember ? selected.user : selected;
 	const member =
 		selected instanceof GuildMember
 			? selected
-			: await config.guild.members.fetch(selected.id).catch(() => {});
-
-	const strikes = strikeDatabase.data
-		.filter((strike) => strike.user === selected.id)
-		.sort((one, two) => two.date - one.date);
-
-	const totalStrikeCount = Math.trunc(
-		strikes.reduce(
-			(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
-			0,
-		),
-	);
-
-	await paginate(
-		strikes,
-		(strike) =>
-			`${strike.removed ? "~~" : ""}\`${strike.id}\`${
-				strike.count === 1
-					? ""
-					: ` (${
-							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
-					  })`
-			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-				strike.removed ? "~~" : ""
-			}`,
-		async (data) => {
-			const newData = { ...data };
-			if (
-				newData.embeds?.[0] &&
-				"footer" in newData.embeds[0] &&
-				newData.embeds[0].footer?.text
-			) {
-				newData.embeds[0].footer.text = newData.embeds[0].footer.text.replace(
-					/\d+ $/,
-					`${totalStrikeCount} strike${totalStrikeCount === 1 ? "" : "s"}`,
-				);
-			}
-			return await (interaction.replied
-				? interaction.editReply(newData)
-				: interaction.reply(newData));
-		},
-		{
-			title: `${(member ?? user).displayName}’s strikes`,
-			singular: "",
-			plural: "",
-			failMessage: `${selected.toString()} has never been warned!`,
-			format: member || user,
-			ephemeral: true,
-			showIndexes: false,
-			user: interaction.user,
-
-			generateComponents(filtered) {
-				if (filtered.length > 5) {
-					return [
-						{
-							type: ComponentType.StringSelect,
-							customId: "_selectStrike",
-							placeholder: "View more information on a strike",
-
-							options: filtered.map((strike) => ({
-								label: String(strike.id),
-								value: String(strike.id),
-							})),
-						},
-					];
-				}
-				return filtered.map((strike) => ({
-					label: String(strike.id),
-					style: ButtonStyle.Secondary,
-					customId: `${strike.id}_strike`,
-					type: ComponentType.Button,
-				}));
-			},
-			customComponentLocation: "above",
-		},
+			: await config.guild.members.fetch(selected.id).catch(() => selected);
+	await listStrikes(
+		member,
+		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
+		options,
+		interaction.user,
 	);
 }
 
@@ -134,15 +60,14 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 		);
 	}
 
-	const member = await config.guild.members.fetch(strike.user).catch(() => {});
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => {}));
+	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
+	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
 			? strike.mod
-			: strike.mod && (await client.users.fetch(strike.mod).catch(() => {}));
+			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
 	const nick = (member ?? user)?.displayName;
-	const { useMentions } = getSettings(interaction.member.user);
 	return await interaction.editReply({
 		components: isModerator
 			? [
@@ -176,15 +101,17 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
-				title: `${strike.removed ? "~~" : ""}Strike \`${strike.id}\`${
-					strike.removed ? "~~" : ""
+				title: `${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+				}Strike \`${strike.id}\`${
+					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 				}`,
 
 				description: strike.reason,
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: String(strike.count), inline: true },
+					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
 					...(moderator
 						? [
 								{
@@ -192,9 +119,11 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 									value:
 										typeof moderator === "string"
 											? moderator
-											: useMentions
-											? moderator.toString()
-											: moderator.displayName,
+											: await mentionUser(
+													moderator,
+													interaction.member,
+													interaction.guild ?? config.guild,
+											  ),
 									inline: true,
 								},
 						  ]
@@ -203,7 +132,11 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 						? [
 								{
 									name: "👤 Target user",
-									value: useMentions ? user.toString() : user.displayName,
+									value: await mentionUser(
+										user,
+										interaction.member,
+										interaction.guild ?? config.guild,
+									),
 									inline: true,
 								},
 						  ]

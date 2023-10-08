@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
@@ -9,13 +10,13 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
 	client,
-	defineCommand,
+	defineChatCommand,
 	defineEvent,
 	defineButton,
 	defineModal,
 	defineSelect,
+	defineMenuCommand,
 } from "strife.js";
-import { getSettings, updateSettings } from "../settings.js";
 import {
 	type Category,
 	SA_CATEGORY,
@@ -26,11 +27,13 @@ import {
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 
+const resourcesDmed = new Set<string>();
+
 defineEvent("messageCreate", async (message) => {
 	if (
 		message.channel.type === ChannelType.DM &&
 		message.author.id !== client.user.id &&
-		!getSettings(message.author).resourcesDmed
+		!resourcesDmed.has(message.author.id)
 	) {
 		await message.channel.send({
 			components: [
@@ -71,12 +74,12 @@ defineEvent("messageCreate", async (message) => {
 				},
 			],
 		});
-		updateSettings(message.author, { resourcesDmed: true });
+		resourcesDmed.add(message.author.id);
 	}
 });
 defineButton("contactMods", async (interaction) => {
 	await interaction.reply({
-		content: `👍 Thanks for reaching out!`,
+		content: "👍 Thanks for reaching out!",
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -115,16 +118,15 @@ defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
 
 	await interaction.deferReply({ ephemeral: true });
-	const thread = id && (await contactMods(interaction, id));
-	if (thread)
-		await interaction.editReply(
-			`${
-				constants.emojis.statuses.yes
-			} **Ticket opened!** Send the mods messages in ${thread?.toString()}.`,
-		);
+	const thread = await contactMods(interaction, id);
+	await interaction.editReply(
+		`${
+			constants.emojis.statuses.yes
+		} **Ticket opened!** Send the mods messages in ${thread.toString()}.`,
+	);
 });
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "contact-user",
 		description: "(Mod only) Start a private ticket with a user",
@@ -139,9 +141,8 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
-		const member = interaction.options.getMember("user");
-		if (!(member instanceof GuildMember)) {
+	async (interaction, options) => {
+		if (!(options.user instanceof GuildMember)) {
 			await interaction.reply({
 				content: `${constants.emojis.statuses.no} Could not find user.`,
 				ephemeral: true,
@@ -150,7 +151,22 @@ defineCommand(
 			return;
 		}
 
-		await contactUser(member, interaction);
+		await contactUser(options.user, interaction);
+	},
+);
+defineMenuCommand(
+	{ name: "Contact User", type: ApplicationCommandType.User, restricted: true },
+	async (interaction) => {
+		if (!(interaction.targetMember instanceof GuildMember)) {
+			await interaction.reply({
+				content: `${constants.emojis.statuses.no} Could not find user.`,
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		await contactUser(interaction.targetMember, interaction);
 	},
 );
 
@@ -189,6 +205,11 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 
 	if (newThread.archived) {
 		TICKETS_BY_MEMBER[memberId] = undefined;
+		if (!newThread.locked) {
+			await newThread.setArchived(false, "To lock it");
+			await newThread.setLocked(true, "Was closed");
+			await newThread.setArchived(true, "Was closed");
+		}
 	} else if (TICKETS_BY_MEMBER[memberId]) {
 		await newThread.setArchived(true, "Reopened while another ticket is already open");
 		await newThread.setLocked(true, "Reopened while another ticket is already open");

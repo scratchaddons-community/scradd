@@ -1,17 +1,23 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import guessAddon from "./guessAddon.js";
 import memoryMatch, { messageDelete, showMemoryInstructions } from "./memoryMatch.js";
-import { defineButton, defineCommand, defineEvent } from "strife.js";
+import { defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
+import hangman from "./hangman.js";
 
-defineCommand(
-	{ name: "guess-addon", description: "Think of an addon for me to guess it" },
+defineChatCommand(
+	{ name: "guess-addon", description: "Think of an addon for me to guess it", access: true },
 	guessAddon,
 );
 
-defineCommand(
+defineChatCommand(
+	{ name: "hangman", description: "Try to guess who from the server I’m thinking of" },
+	hangman,
+);
+
+defineChatCommand(
 	{
 		name: "memory-match",
 		description: "Play a memory matching game against someone else",
@@ -26,8 +32,7 @@ defineCommand(
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"thread": {
-				description:
-					"Whether to create a thread for chatting alongside the game (defaults to true)",
+				description: "Whether to create a thread for chatting alongside the game",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"bonus-turns": {
@@ -35,8 +40,15 @@ defineCommand(
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
+		access: false,
 	},
 	memoryMatch,
+);
+defineMenuCommand(
+	{ name: "Play Memory Match", type: ApplicationCommandType.User, access: true },
+	async (interaction) => {
+		await memoryMatch(interaction, { user: interaction.targetMember ?? undefined });
+	},
 );
 defineEvent.pre("messageDelete", messageDelete);
 defineButton("showMemoryInstructions", showMemoryInstructions);
@@ -48,9 +60,10 @@ defineButton("endGame", async (interaction, users) => {
 			content: `${constants.emojis.statuses.no} You can’t end someone else’s game!`,
 		});
 
-	await interaction.message.edit({
-		components: disableComponents(interaction.message.components),
-	});
+	if (!interaction.message.flags.has("Ephemeral"))
+		await interaction.message.edit({
+			components: disableComponents(interaction.message.components),
+		});
 
 	const current = CURRENTLY_PLAYING.get(interaction.user.id);
 	if (!current)
