@@ -5,16 +5,7 @@ import { BOARD_EMOJI } from "./board/misc.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
 
-const DEFAULT_SHAPES = [
-	"🔺",
-	"🔶",
-	"🟡",
-	"🟩",
-	"🔹",
-	"💜",
-	"🟤",
-	"🏳️",
-];
+const DEFAULT_SHAPES = ["🔺", "🔶", "🟡", "🟩", "🔹", "💜", "🟤", "🏳️"];
 const bannedReactions = new Set(BOARD_EMOJI);
 
 defineChatCommand(
@@ -96,7 +87,7 @@ defineModal("poll", async (interaction, voteMode) => {
 		});
 
 	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
-	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift()??"");
+	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
 
 	const message = await interaction.reply({
 		embeds: [
