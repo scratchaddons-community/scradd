@@ -45,6 +45,14 @@ defineSubcommands(
 						type: ApplicationCommandOptionType.User,
 						description: "(Mod only) The user to see strikes for",
 					},
+					expired: {
+						type: ApplicationCommandOptionType.Boolean,
+						description: "Show expired strikes, italicized (defaults to true)",
+					},
+					removed: {
+						type: ApplicationCommandOptionType.Boolean,
+						description: "Show removed strikes, crossed out (defaults to false)",
+					},
 				},
 			},
 		},
@@ -55,7 +63,7 @@ defineSubcommands(
 		switch (options.subcommand) {
 			case "user": {
 				const selected = options.options.user ?? interaction.user;
-				await getStrikes(selected, interaction);
+				await getStrikes(selected, interaction, options.options);
 				break;
 			}
 			case "id": {

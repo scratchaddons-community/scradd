@@ -24,16 +24,15 @@ const RoleList = mongoose.model("RoleList", rolesSchema);
 export async function persistedLeave(member: PartialGuildMember | GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
-	await RoleList.findOneAndUpdate(
-		{ id: member.id },
-		Object.fromEntries(
-			Object.entries(persistedRoles).map(([key, ids]) => [
-				key,
-				[ids].flat().some((id) => id && member.roles.resolve(id)),
-			]),
-		),
-		{ upsert: true },
+	const roles = Object.fromEntries(
+		Object.entries(persistedRoles).map(([key, ids]) => [
+			key,
+			[ids].flat().some((id) => id && member.roles.resolve(id)),
+		]),
 	);
+	await RoleList.findOneAndUpdate({ id: member.id }, roles, {
+		upsert: Object.values(roles).includes(true),
+	});
 }
 
 export async function persistedRejoin(member: GuildMember) {

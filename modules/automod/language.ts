@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits, type TextBasedChannel } from "discord.js";
+import { ChannelType, type TextBasedChannel } from "discord.js";
 import badWords from "./badWords.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
@@ -32,7 +32,7 @@ function decodeRegexps(regexps: RegExp[]) {
 							"p": "⒫⍴pｐⓟℙₚᴘρϱⲣрየꮲᑭꓑ𝐏",
 							"q": "⒬۹9oqｑⓠℚϙϱԛфգզⵕᑫ𝐐",
 							"r": "⒭rｒⓡℝℛℜʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑",
-							"s": "⒮§$₴5sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
+							"s": "⒮§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒",
 							"t": "⒯⊤⟙ℑtｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千",
 							"u": "⒰*∪⋃uｕⓤꞟᴜꭎꭒɥvʋυսሀሁᑌꓴ𝐔-",
 							"v": "⒱℣√∨⋁☑✅✔✔️۷٧uvｖⅴⓥⱽᴠνѵⴸꮙꮩᐯᐺꓦ𝐕",
@@ -64,8 +64,9 @@ export default function tryCensor(text: string, strikeShift = 0) {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			words[index]?.push(word);
+			if (!Number.isNaN(+word)) return word;
 
+			words[index]?.push(word);
 			return word.length < 3
 				? "#".repeat(word.length)
 				: word[0] + "#".repeat(word.length - 1);
@@ -99,8 +100,9 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 	return (
 		baseChannel?.type === ChannelType.DM ||
 		baseChannel?.guild.id !== config.guild.id ||
+		baseChannel.id === config.channels.devs?.id ||
+		baseChannel.parent?.id === config.channels.mod?.parent?.id ||
 		(baseChannel.id === config.channels.tickets?.id &&
-			channel?.type === ChannelType.PrivateThread) ||
-		!baseChannel.permissionsFor(baseChannel.guild.id)?.has(PermissionFlagsBits.ViewChannel)
+			channel?.type === ChannelType.PrivateThread)
 	);
 }

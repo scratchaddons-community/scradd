@@ -152,26 +152,23 @@ export default async function contactMods(
 		}: ${thread.toString()}`,
 	);
 
+	const ping =
+		category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
+			? ""
+			: config.roles.mod?.toString();
 	await (["appeal", "report", "other", MOD_CATEGORY].includes(category)
-		? listStrikes(member, (data) =>
-				thread.send({
-					...data,
-					embeds: [details, ...(data.embeds ?? [])],
-					content:
-						category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
-							? ""
-							: config.roles.mod?.toString(),
-					allowedMentions: { parse: ["roles"] },
-				}),
+		? listStrikes(
+				member,
+				(data) =>
+					thread.send({
+						...data,
+						embeds: [details, ...(data.embeds ?? [])],
+						content: ping,
+						allowedMentions: { parse: ["roles"] },
+					}),
+				{ removed: true },
 		  )
-		: thread.send({
-				embeds: [details],
-				content:
-					category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
-						? ""
-						: config.roles.mod?.toString(),
-				allowedMentions: { parse: ["roles"] },
-		  }));
+		: thread.send({ embeds: [details], content: ping, allowedMentions: { parse: ["roles"] } }));
 
 	await thread.members.add(member, "Thread created");
 	return thread;

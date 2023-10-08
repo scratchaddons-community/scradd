@@ -42,13 +42,14 @@ export default async function log(
 ) {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
-	const externalIndex = extra.files?.findIndex((file) => {
-		if (typeof file === "string" || file.content.includes("```")) return true;
+	const externalIndex =
+		extra.files?.findIndex((file) => {
+			if (typeof file === "string" || file.content.includes("```")) return true;
 
-		const lines = file.content.split("\n");
-		return lines.length > 10 || lines.find((line) => line.length > 100);
-	});
-	const embeddedFiles = extra.files?.splice(0, externalIndex === -1 ? undefined : externalIndex);
+			const lines = file.content.split("\n");
+			return lines.length > 10 || lines.find((line) => line.length > 100);
+		}) ?? 0;
+	const embeddedFiles = extra.files?.splice(0, extra.files.length - externalIndex - 1);
 
 	return await thread.send({
 		content:

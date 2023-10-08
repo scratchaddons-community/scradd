@@ -87,8 +87,8 @@ export function boardReactionCount(
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
 				? 2 / 3
 				: 1;
-		/** 300 = number of days for required potato count to double. */
-		const timeShift = (Date.now() - +time) / 86_400_000 / 300 + 1;
+		/** 365 = number of days for required potato count to double. */
+		const timeShift = (Date.now() - +time) / 86_400_000 / 365 + 1;
 		return Math.max(2, Math.round(count * privateThread * timeShift));
 	}
 }
@@ -97,7 +97,7 @@ function baseReactionCount(id: Snowflake) {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
-		"869662117651955802": COUNTS.private, // #devs-only
+		[config.channels.devs?.id || ""]: COUNTS.private,
 		"811065897057255424": COUNTS.memes, // #memes
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
 		"806656240129671188": COUNTS.memes, // #showcase

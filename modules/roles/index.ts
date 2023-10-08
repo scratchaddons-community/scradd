@@ -1,25 +1,39 @@
 import config from "../../common/config.js";
-import { type Snowflake, Collection } from "discord.js";
 import { defineChatCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../../common/constants.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
-import {
-	createCustomRole,
-	deleteMemberRoles,
-	recheckMemberRole,
-	recheckAllRoles,
-	customRole,
-} from "./custom.js";
+import { createCustomRole, recheckMemberRole, recheckAllRoles, customRole } from "./custom.js";
+import mongoose from "mongoose";
 
+const Invite = mongoose.model(
+	"Invite",
+	new mongoose.Schema({ code: String, member: String, uses: Number }),
+);
+
+defineEvent("inviteDelete", async (invite) => {
+	if (!invite.uses) return;
+	await Invite.findOneAndUpdate(
+		{ code: invite.code },
+		{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+		{ upsert: true },
+	);
+});
 defineEvent("guildMemberAdd", async () => {
-	const inviters = (await config.guild.invites.fetch()).reduce((accumulator, invite) => {
-		const inviter = invite.inviter?.id ?? "";
-		accumulator.set(inviter, (accumulator.get(inviter) ?? 0) + (invite.uses ?? 0));
-		return accumulator;
-	}, new Collection<Snowflake, number>());
-	inviters.map(async (count, user) => {
-		if (count < 20) return;
-		const inviter = await config.guild.members.fetch(user).catch(() => void 0);
+	for (const [, invite] of await config.guild.invites.fetch()) {
+		if (!invite.uses) continue;
+		await Invite.findOneAndUpdate(
+			{ code: invite.code },
+			{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+			{ upsert: true },
+		);
+	}
+
+	const inviters = await Invite.aggregate<{ _id: string; totalUses: number }>([
+		{ $group: { _id: "$member", totalUses: { $sum: "$uses" } } },
+		{ $match: { totalUses: { $gte: 20 } } },
+	]);
+	for (const invite of inviters) {
+		const inviter = await config.guild.members.fetch(invite._id).catch(() => void 0);
 		if (
 			!inviter ||
 			inviter.id === constants.users.hans ||
@@ -32,11 +46,10 @@ defineEvent("guildMemberAdd", async () => {
 		await config.channels.general?.send(
 			`🎊 ${inviter.toString()} Thanks for inviting 20+ people! Here’s ${config.roles.epic.toString()} as a thank-you.`,
 		);
-	});
+	}
 });
 
 defineEvent("guildMemberRemove", persistedLeave);
-
 defineEvent("guildMemberAdd", persistedRejoin);
 
 defineEvent("guildMemberUpdate", async (_, member) => {
@@ -50,11 +63,7 @@ defineChatCommand(
 	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
 	customRole,
 );
-
 defineModal("customRole", createCustomRole);
-
-defineEvent("guildMemberRemove", deleteMemberRoles);
-
+defineEvent("guildMemberRemove", recheckAllRoles);
 defineEvent("guildMemberUpdate", recheckMemberRole);
-
 defineEvent("applicationCommandPermissionsUpdate", recheckAllRoles);

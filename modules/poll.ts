@@ -1,18 +1,11 @@
-import {
-	type ActionRowData,
-	ApplicationCommandOptionType,
-	ComponentType,
-	type ModalActionRowComponentData,
-	TextInputStyle,
-} from "discord.js";
+import { ApplicationCommandOptionType, ComponentType, TextInputStyle } from "discord.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
 import { BOARD_EMOJI } from "./board/misc.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
 
-const DEFAULT_SHAPES = ["🔺", "🟡", "🟩", "🔷", "💜"];
-const DEFAULT_VALUES = ["👍 Yes", "👎 No"];
+const DEFAULT_SHAPES = ["🔺", "🔶", "🟡", "🟩", "🔹", "💜", "🟤", "🏳️"];
 const bannedReactions = new Set(BOARD_EMOJI);
 
 defineChatCommand(
@@ -21,18 +14,6 @@ defineChatCommand(
 		description: "Poll people on a question",
 		access: false,
 		options: {
-			"question": {
-				type: ApplicationCommandOptionType.String,
-				required: true,
-				description: "The question to ask (specify questions on the next screen)",
-				maxLength: 94,
-			},
-			"options": {
-				type: ApplicationCommandOptionType.Integer,
-				description: "The number of options to have (defaults to 2)",
-				minValue: 1,
-				maxValue: DEFAULT_SHAPES.length,
-			},
 			"vote-mode": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Restrict people to one reaction on this poll (defaults to true)",
@@ -41,59 +22,71 @@ defineChatCommand(
 	},
 
 	async (interaction, options) => {
-		const optionCount = options.options ?? 2;
-		const components = [];
-		for (let index = 0; index < optionCount; index++)
-			components.push({
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						type: ComponentType.TextInput,
-						customId: `${index}`,
-						label: `Option #${index + 1}`,
-						required: true,
-						style: TextInputStyle.Short,
-						value:
-							optionCount <= DEFAULT_VALUES.length
-								? DEFAULT_VALUES[index]
-								: undefined,
-					},
-				],
-			} satisfies ActionRowData<ModalActionRowComponentData>);
-
 		await interaction.showModal({
 			title: "Set Up Poll",
-			components,
-			customId: Number(options["vote-mode"] ?? true) + options.question + "_poll",
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.TextInput,
+							customId: "question",
+							label: "The question to ask",
+							required: true,
+							style: TextInputStyle.Short,
+							maxLength: 256,
+						},
+					],
+				},
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.TextInput,
+							customId: "options",
+							label: `Options (one per line; max of ${DEFAULT_SHAPES.length})`,
+							required: true,
+							style: TextInputStyle.Paragraph,
+							value: "👍 Yes\n👎 No",
+						},
+					],
+				},
+			],
+			customId: Number(options["vote-mode"] ?? true) + "_poll",
 		});
 	},
 );
 
-defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
-	const question = characters.join("");
+defineModal("poll", async (interaction, voteMode) => {
 	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
 
-	const { customReactions, options } = interaction.fields.fields.reduce<{
-		customReactions: (string | undefined)[];
-		options: string[];
-	}>(
-		({ customReactions, options }, field) => {
-			const emoji = field.value.match(regexp)?.[0];
-			return {
-				options: [
-					...options,
-					(emoji ? field.value.replace(emoji, "") : field.value).trim(),
-				],
-				customReactions: [
-					...customReactions,
-					!emoji || customReactions.includes(emoji) || bannedReactions.has(emoji)
-						? undefined
-						: emoji,
-				],
-			};
-		},
-		{ customReactions: [], options: [] },
-	); // TODO: censor it
+	const { customReactions, options } = interaction.fields
+		.getTextInputValue("options")
+		.split("\n")
+		.reduce<{
+			customReactions: (string | undefined)[];
+			options: string[];
+		}>(
+			({ customReactions, options }, option) => {
+				const emoji = option.match(regexp)?.[0];
+				return {
+					options: [...options, (emoji ? option.replace(emoji, "") : option).trim()],
+					customReactions: [
+						...customReactions,
+						!emoji || customReactions.includes(emoji) || bannedReactions.has(emoji)
+							? undefined
+							: emoji,
+					],
+				};
+			},
+			{ customReactions: [], options: [] },
+		); // TODO: censor it
+	if (options.length > DEFAULT_SHAPES.length)
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You can’t have over ${DEFAULT_SHAPES.length} options!`,
+		});
+
 	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
 	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
 
@@ -101,7 +94,7 @@ defineModal("poll", async (interaction, [voteMode, ...characters] = "") => {
 		embeds: [
 			{
 				color: constants.themeColor,
-				title: question,
+				title: interaction.fields.getTextInputValue("question"),
 				description: options
 					.map((option, index) => `${reactions[index]} ${option}`)
 					.join("\n"),

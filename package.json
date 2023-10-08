@@ -1,6 +1,6 @@
 {
 	"name": "scradd",
-	"version": "2.9.4",
+	"version": "2.9.5",
 	"private": true,
 	"homepage": "https://discord.gg/FPv957V6SD",
 	"type": "module",
@@ -28,7 +28,7 @@
 		"discord.js": "dev",
 		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
-		"mongoose": "7.5.3",
+		"mongoose": "7.5.4",
 		"papaparse": "5.4.1",
 		"posthtml-parser": "^0.11.0",
 		"serialize-error": "11.0.2",

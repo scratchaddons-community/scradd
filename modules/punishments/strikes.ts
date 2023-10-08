@@ -11,7 +11,11 @@ import constants from "../../common/constants.js";
 import { mentionUser } from "../settings.js";
 import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
 
-export async function getStrikes(selected: GuildMember | User, interaction: RepliableInteraction) {
+export async function getStrikes(
+	selected: GuildMember | User,
+	interaction: RepliableInteraction,
+	options?: { expired?: boolean; removed?: boolean },
+) {
 	if (
 		selected.id !== interaction.user.id &&
 		!(
@@ -34,6 +38,7 @@ export async function getStrikes(selected: GuildMember | User, interaction: Repl
 	await listStrikes(
 		member,
 		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
+		options,
 		interaction.user,
 	);
 }

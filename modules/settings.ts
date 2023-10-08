@@ -30,7 +30,6 @@ export const userSettingsDatabase = new Database<{
 	useMentions?: boolean;
 	dmReminders?: boolean;
 	scratchEmbeds?: boolean;
-	resourcesDmed?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -148,7 +147,6 @@ export async function updateSettings(
 		useMentions?: boolean | "toggle";
 		dmReminders?: boolean | "toggle";
 		scratchEmbeds?: boolean | "toggle";
-		resourcesDmed?: true;
 	},
 ) {
 	const old = await getSettings(user);
@@ -178,7 +176,6 @@ export async function updateSettings(
 			settings.scratchEmbeds === "toggle"
 				? !old.scratchEmbeds
 				: settings.scratchEmbeds ?? old.scratchEmbeds,
-		resourcesDmed: settings.resourcesDmed ?? old.resourcesDmed,
 	};
 
 	userSettingsDatabase.updateById(updated, {});
@@ -269,7 +266,6 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 			getWeeklyXp(user.id) > 100 ||
 			!(await config.guild.members.fetch(user.id).catch(() => void 0)),
 		scratchEmbeds: true,
-		resourcesDmed: false,
 	};
 }
 
@@ -282,11 +278,10 @@ export async function mentionUser(
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const player1Presence = guild.presences.resolve(interactor.id);
-	const url =
-		player1Presence?.status === player1Presence?.clientStatus?.desktop
-			? `discord://-/users/${id}`
-			: `<https://discord.com/users/${id}>`;
+	const presence = guild.presences.resolve(interactor.id);
+	const url = `<${
+		presence?.status === presence?.clientStatus?.desktop ? "discord://-" : "https://discord.com"
+	}/users/${id}>`;
 
 	const { displayName } =
 		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
