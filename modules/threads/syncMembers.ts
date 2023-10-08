@@ -69,14 +69,10 @@ export async function updateMemberThreads(
 			if (!thread?.isThread()) return;
 
 			const baseChannel = getBaseChannel(thread);
-			if (!baseChannel?.permissionsFor(newMember).has("ViewChannel")) return;
 
-			const inThread = thread.members.resolve(newMember.id);
-			if (qualifies) {
-				if (!inThread) await thread.members.add(newMember, "Has qualifying role");
-			} else if (inThread) {
-				await thread.members.remove(newMember.id, "Has no qualifying role");
-			}
+			await (qualifies && baseChannel?.permissionsFor(newMember).has("ViewChannel")
+				? thread.members.add(newMember, "Has qualifying role")
+				: thread.members.remove(newMember.id, "Has no qualifying role"));
 		}),
 	);
 }
