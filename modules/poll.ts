@@ -13,12 +13,7 @@ const DEFAULT_SHAPES = [
 	"🔹",
 	"💜",
 	"🟤",
-	"✴️",
-	"★",
 	"🏳️",
-	"🔳",
-	"⭕",
-	"💠",
 ];
 const bannedReactions = new Set(BOARD_EMOJI);
 
@@ -94,18 +89,14 @@ defineModal("poll", async (interaction, voteMode) => {
 			},
 			{ customReactions: [], options: [] },
 		); // TODO: censor it
+	if (options.length > DEFAULT_SHAPES.length)
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You can’t have over ${DEFAULT_SHAPES.length} options!`,
+		});
+
 	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
-	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift());
-	if (reactions.length > 20)
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You can’t have over 20 options!`,
-		});
-	if (hasUndefined(reactions))
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} If you wish to define over ${DEFAULT_SHAPES.length} options, please provide your own emojis.`,
-		});
+	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift()??"");
 
 	const message = await interaction.reply({
 		embeds: [
@@ -150,7 +141,3 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		}
 	}
 });
-
-function hasUndefined<T>(array: (T | undefined)[]): array is (T | undefined)[] {
-	return array.includes(undefined);
-}
