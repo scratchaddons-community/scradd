@@ -3,19 +3,15 @@ import http from "node:http";
 import logError from "../modules/logging/errors.js";
 import fileSystem from "node:fs/promises";
 import { client } from "strife.js";
-import {
-	REST,
-	Routes,
-	type RESTPostOAuth2AccessTokenResult,
-	type RESTGetAPICurrentUserResult,
-} from "discord.js";
+import config from "../common/config.js";
+import constants from "../common/constants.js";
+import showAppeal, { appeal } from "./appeal.js";
 
-const PAGES = {
-	appeal: await fileSystem.readFile("./web/appeal.html", "utf8"),
-	css: await fileSystem.readFile("./web/style.css"),
-};
+const CSS = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
+	"{color}",
+	constants.themeColor.toString(16),
+);
 
-const rest = new REST({ version: "10" });
 http.createServer(async (request, response) => {
 	try {
 		const requestUrl = new URL(
@@ -27,57 +23,38 @@ http.createServer(async (request, response) => {
 			case "/clean-database-listeners":
 			case "/clean-database-listeners/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
-					response.writeHead(403, { "Content-Type": "text/plain" }).end("Forbidden");
+					response.writeHead(403, { "content-type": "text/plain" }).end("Forbidden");
 
 				process.emitWarning("cleanDatabaseListeners called");
 				await cleanDatabaseListeners();
 				process.emitWarning("cleanDatabaseListeners ran");
-				response.writeHead(200, { "Content-Type": "text/plain" }).end("Success");
+				response.writeHead(200, { "content-type": "text/plain" }).end("Success");
 
 				break;
 			}
 			case "/ban-appeal":
 			case "/ban-appeal/": {
-				if (!process.env.CLIENT_SECRET)
-					return response
-						.writeHead(500, { "Content-Type": "text/plain" })
-						.end("No client secret provided");
-
-				const code = new URLSearchParams(requestUrl.search).get("code");
-				if (!code)
-					return response
-						.writeHead(404, { "Content-Type": "text/plain" })
-						.end("Not Found"); // TODO: redirect to Discord
-
-				const tokenData = (await rest.post(Routes.oauth2TokenExchange(), {
-					body: new URLSearchParams({
-						client_id: client.user.id,
-						client_secret: process.env.CLIENT_SECRET,
-						code,
-						grant_type: "authorization_code",
-						redirect_uri: requestUrl.origin + requestUrl.pathname,
-						scope: "identify",
-					}),
-					passThroughBody: true,
-					headers: { "Content-Type": "application/x-www-form-urlencoded" },
-					auth: false,
-				})) as RESTPostOAuth2AccessTokenResult;
-				const user = (await rest.get(Routes.user(), {
-					headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` },
-					auth: false,
-				})) as RESTGetAPICurrentUserResult;
-
-				response
-					.writeHead(200, { "Content-Type": "text/html" })
-					.end(PAGES.appeal.replaceAll("{username}", user.global_name ?? user.username));
+				await (request.method === "POST"
+					? appeal(request, response)
+					: showAppeal(request, response));
 				break;
 			}
 			case "/style.css": {
-				response.writeHead(200, { "Content-Type": "text/css" }).end(PAGES.css);
+				response.writeHead(200, { "content-type": "text/css" }).end(CSS);
+				break;
+			}
+			case "/icon.png": {
+				const options = { extension: "png", forceStatic: true, size: 128 } as const;
+				response
+					.writeHead(301, {
+						location:
+							config.guild.iconURL(options) ?? client.user.displayAvatarURL(options),
+					})
+					.end();
 				break;
 			}
 			default: {
-				response.writeHead(404, { "Content-Type": "text/plain" }).end("Not Found");
+				response.writeHead(404, { "content-type": "text/plain" }).end("Not Found");
 			}
 		}
 	} catch (error) {
