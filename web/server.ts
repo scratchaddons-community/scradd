@@ -8,8 +8,8 @@ import constants from "../common/constants.js";
 import showAppeal, { appeal } from "./appeal.js";
 
 const CSS = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
-	"{color}",
-	constants.themeColor.toString(16),
+	"#000",
+	"#" + constants.themeColor.toString(16),
 );
 
 http.createServer(async (request, response) => {
