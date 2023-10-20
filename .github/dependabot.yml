@@ -4,12 +4,12 @@ updates:
       directory: "/"
       schedule:
           interval: "daily"
-          time: "12:30"
+          time: "12:45"
 
     - package-ecosystem: "npm"
       directory: "/"
       schedule:
           interval: "daily"
-          time: "12:30"
+          time: "12:45"
       ignore:
           - dependency-name: "@types/*"
