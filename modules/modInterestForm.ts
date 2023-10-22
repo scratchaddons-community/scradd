@@ -226,11 +226,7 @@ defineModal("modInterestForm", async (interaction) => {
 						value: `${getWeeklyXp(interaction.user.id).toLocaleString("en-us")} XP`,
 						inline: true,
 					},
-					{
-						name: constants.zeroWidthSpace,
-						value: constants.zeroWidthSpace,
-						inline: false,
-					},
+					{ name: constants.zws, value: constants.zws, inline: false },
 					{ name: "Timezone", value: fields.timezone, inline: true },
 					{ name: "Activity", value: fields.activity, inline: true },
 					{ name: "Age", value: fields.age, inline: true },
