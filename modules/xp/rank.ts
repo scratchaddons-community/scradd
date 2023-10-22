@@ -100,7 +100,7 @@ export default async function getUserRank(
 						inline: true,
 					},
 					{
-						name: constants.zeroWidthSpace,
+						name: constants.zws,
 						value: `**${
 							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
 						} level progress** ${xpForNextLevel.toLocaleString("en-us")} XP needed`,
