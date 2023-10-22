@@ -33,12 +33,13 @@ defineChatCommand(
 			(options.user instanceof GuildMember ? options.user.user : options.user) ??
 			interaction.user
 		).fetch();
-		const member =
-			options.user instanceof GuildMember
+		const member = options.user
+			? options.user instanceof GuildMember
 				? options.user
-				: interaction.member instanceof GuildMember
-				? interaction.member
-				: undefined;
+				: undefined
+			: interaction.member instanceof GuildMember
+			? interaction.member
+			: undefined;
 		const isMod =
 			config.roles.mod &&
 			(interaction.member instanceof GuildMember
