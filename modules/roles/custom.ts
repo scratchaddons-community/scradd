@@ -232,8 +232,6 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 }
 
 export async function recheckMemberRole(_: PartialGuildMember | GuildMember, member: GuildMember) {
-	if (member.guild.id !== config.guild.id) return;
-
 	const role = getCustomRole(member);
 	if (!role) return;
 	await recheckRole(role);
