@@ -11,8 +11,9 @@ import {
 	time,
 	roleMention,
 	userMention,
+	TextInputStyle,
 } from "discord.js";
-import { client } from "strife.js";
+import { client, defineButton, defineModal } from "strife.js";
 import config, { getInitialChannelThreads } from "../common/config.js";
 import type { IncomingMessage } from "node:http";
 import fileSystem from "node:fs/promises";
@@ -38,16 +39,21 @@ const thread =
 const appeals = Object.fromEntries(
 	(await getAllMessages(thread))
 		.filter((message) => message.author.id === client.user.id && message.embeds.length)
-		.map((message) => [
-			message.embeds[0]?.description ?? "",
-			{
-				unbanned:
-					message.embeds[1]?.fields.find((field) => field.name == "Decision")?.value ===
-					"Unban",
-				note: message.embeds[1]?.fields.find((field) => field.name == "Note")?.value,
-				date: new Date(message.createdTimestamp + 691_200_000).toDateString(),
-			},
-		]),
+		.map((message) => {
+			const decision = message.embeds[1]?.fields.find(
+				(field) => field.name == "Decision",
+			)?.value;
+			return [
+				message.embeds[0]?.description ?? "",
+				{
+					unbanned: decision === "Accepted",
+					note:
+						decision !== "Pending" &&
+						message.embeds[1]?.fields.find((field) => field.name == "Note")?.value,
+					date: new Date(message.createdTimestamp + 691_200_000).toDateString(),
+				},
+			];
+		}),
 );
 
 const APPEAL_FRAME = await fileSystem.readFile("./web/frame.html", "utf8");
@@ -234,13 +240,13 @@ export async function appeal(request: IncomingMessage) {
 					{
 						style: ButtonStyle.Success,
 						type: ComponentType.Button,
-						customId: `${user.id}_unbanVote`,
+						customId: "_unbanVote",
 						label: "Accept (0/2)",
 					},
 					{
 						style: ButtonStyle.Danger,
 						type: ComponentType.Button,
-						customId: `${user.id}_noUnban`,
+						customId: "_noUnban",
 						label: "Reject",
 					},
 				],
@@ -281,3 +287,56 @@ export async function appeal(request: IncomingMessage) {
 
 	return Mustache.render(ANSWER_PAGE, { username: user.displayName, date, id: user.id });
 }
+
+// defineButton("unbanVote", (interaction) => {});
+defineButton("noUnban", async (interaction) => {
+	await interaction.showModal({
+		components: [
+			{
+				components: [
+					{
+						customId: "note",
+						label: "Why should they not be unbanned?",
+						style: TextInputStyle.Paragraph,
+						type: ComponentType.TextInput,
+					},
+				],
+
+				type: ComponentType.ActionRow,
+			},
+		],
+
+		customId: "_noUnban",
+		title: "Deny Ban Appeal",
+	});
+});
+defineModal("noUnban", async (interaction) => {
+	await interaction.message?.edit({
+		components: [
+			{
+				components: (interaction.message.components[0]?.components ?? []).map(
+					({ data }) => ({ ...data, disabled: true }),
+				),
+				type: ComponentType.ActionRow,
+			},
+			interaction.message.components[1] ?? { type: ComponentType.ActionRow, components: [] },
+		],
+		embeds: [
+			interaction.message.embeds[0] ?? {},
+			{
+				description:
+					(interaction.message.embeds[1]?.description ?? "") +
+					`\n${constants.emojis.statuses.no} ${interaction.user}`,
+				fields: [
+					{ name: "Decision", value: "Denied", inline: true },
+					{
+						name: "Note",
+						value: interaction.fields.getTextInputValue("note"),
+						inline: true,
+					},
+				],
+			},
+		],
+	});
+	await interaction.reply(`${interaction.user} denied the ban appeal.`);
+});
