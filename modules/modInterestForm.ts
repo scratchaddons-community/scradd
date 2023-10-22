@@ -194,9 +194,13 @@ defineModal("modInterestForm", async (interaction) => {
 								.join(" ") || "*No roles*",
 						inline: false,
 					},
-					{ name: "Created", value: time(interaction.user.createdAt), inline: true },
 					{
-						name: "Joined",
+						name: "Created Account",
+						value: time(interaction.user.createdAt),
+						inline: true,
+					},
+					{
+						name: "Joined Server",
 						value: time(interaction.member.joinedAt ?? new Date()),
 						inline: true,
 					},
@@ -227,6 +231,48 @@ defineModal("modInterestForm", async (interaction) => {
 					{ name: "Age", value: fields.age, inline: true },
 					{ name: "Previous Experience", value: fields.experience, inline: true },
 					...(fields.misc ? [{ name: "Misc", value: fields.misc, inline: true }] : []),
+				],
+			},
+		],
+
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						style: ButtonStyle.Secondary,
+						type: ComponentType.Button,
+						customId: `${interaction.user.id}_userInfo`,
+						label: "User Info",
+					} as const,
+					{
+						style: ButtonStyle.Secondary,
+						type: ComponentType.Button,
+						customId: `${interaction.user.id}_xp`,
+						label: "XP",
+					} as const,
+					...(totalStrikeCount
+						? ([
+								{
+									style: ButtonStyle.Secondary,
+									type: ComponentType.Button,
+									customId: `${interaction.user.id}_viewStrikes`,
+									label: "Strikes",
+								},
+						  ] as const)
+						: []),
+					...(config.channels.tickets
+						?.permissionsFor(interaction.member)
+						?.has("ViewChannel")
+						? ([
+								{
+									style: ButtonStyle.Secondary,
+									type: ComponentType.Button,
+									customId: `${interaction.user.id}_contactUser`,
+									label: "Contact User",
+								},
+						  ] as const)
+						: []),
 				],
 			},
 		],
