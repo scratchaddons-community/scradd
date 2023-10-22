@@ -1,4 +1,3 @@
-import exitHook from "async-exit-hook";
 import {
 	type Message,
 	RESTJSONErrorCodes,
@@ -203,9 +202,39 @@ export async function cleanDatabaseListeners() {
 	client.user.setPresence({ status: "dnd" });
 }
 
-exitHook(async (callback) => {
-	await cleanDatabaseListeners().then(callback);
-});
+let called = false,
+	exited = false;
+for (const [event, code] of [
+	["exit"],
+	["beforeExit", 0],
+	["SIGHUP", 12],
+	["SIGINT", 130],
+	["SIGTERM", 143],
+	["SIGBREAK", 149],
+	["message", 0],
+] as const) {
+	process.on(event, function (message) {
+		if (called || (event === "message" && message !== "shutdown")) return;
+		called = true;
+
+		function doExit() {
+			if (exited) return;
+			exited = true;
+
+			if (event !== "exit") process.nextTick(() => process.exit(code));
+		}
+
+		if (event !== "exit" && cleanDatabaseListeners.length) {
+			void cleanDatabaseListeners().then(() => {
+				process.nextTick(doExit);
+			});
+			setTimeout(doExit, 10_000);
+		} else {
+			void cleanDatabaseListeners();
+			doExit();
+		}
+	});
+}
 
 export async function backupDatabases(channel: TextBasedChannel) {
 	if (process.env.NODE_ENV !== "production") return;
