@@ -2,7 +2,7 @@ name: Bump dependencies
 on:
     workflow_dispatch:
     schedule:
-        - cron: 00 12 * * * # 30 min before Dependabot
+        - cron: 15 12 * * * # 30 min before Dependabot
 
 permissions: write-all
 
@@ -13,7 +13,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.1.0
+              uses: actions/checkout@v4.1.1
 
             - name: Bump
               id: sync_types
@@ -42,7 +42,7 @@ jobs:
 
             - name: Commit
               id: commit
-              uses: stefanzweifel/git-auto-commit-action@v4.16.0
+              uses: stefanzweifel/git-auto-commit-action@v5.0.0
               with:
                   commit_message: Bump dependencies
 

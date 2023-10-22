@@ -245,6 +245,6 @@ export async function backupDatabases(channel: TextBasedChannel) {
 
 	await channel.send("# Daily Scradd Database Backup");
 	while (attachments.length) {
-		await channel.send({ files: attachments.slice(0, 10) });
+		await channel.send({ files: attachments.splice(0, 10) });
 	}
 }
