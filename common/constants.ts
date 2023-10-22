@@ -90,5 +90,5 @@ export default {
 	},
 
 	webhookName: "scradd-webhook",
-	zeroWidthSpace: "\u200B",
+	zws: "\u200B",
 } as const;

@@ -126,7 +126,7 @@ export default async function contactMods(
 		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 		...(body
 			? fields.length
-				? { fields: [...fields, { name: constants.zeroWidthSpace, value: body }] }
+				? { fields: [...fields, { name: constants.zws, value: body }] }
 				: { description: body }
 			: { fields }),
 	};

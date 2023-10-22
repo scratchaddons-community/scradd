@@ -36,7 +36,7 @@ async function userInfo(
 		},
 		user.globalName
 			? { name: "🪪 Display Name", value: user.globalName, inline: true }
-			: { name: constants.zeroWidthSpace, value: constants.zeroWidthSpace, inline: true },
+			: { name: constants.zws, value: constants.zws, inline: true },
 	];
 
 	if (member?.joinedAt)
