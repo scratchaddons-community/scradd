@@ -186,13 +186,10 @@ defineChatCommand(
 			(options.user instanceof GuildMember ? options.user.user : options.user) ??
 			interaction.user
 		).fetch();
-		const member =
-			options.user instanceof GuildMember
-				? options.user
-				: interaction.member instanceof GuildMember
-				? interaction.member
-				: undefined;
-		await userInfo(interaction, { user, member });
+		const member = options.user
+			? options.user instanceof GuildMember && options.user
+			: interaction.member instanceof GuildMember && interaction.member;
+		await userInfo(interaction, { user, member: member || undefined });
 	},
 );
 defineMenuCommand(
