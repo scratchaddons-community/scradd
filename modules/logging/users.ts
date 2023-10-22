@@ -58,7 +58,6 @@ export async function guildMemberUpdate(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
 ) {
-	if (newMember.guild.id !== config.guild.id) return;
 	if (oldMember.avatar !== newMember.avatar) {
 		const url = newMember.avatarURL({ size: 128 });
 		await log(

@@ -52,11 +52,13 @@ defineEvent("guildMemberAdd", async () => {
 defineEvent("guildMemberRemove", persistedLeave);
 defineEvent("guildMemberAdd", persistedRejoin);
 
-defineEvent("guildMemberUpdate", async (_, member) => {
-	if (member.guild.id !== config.guild.id) return;
+defineEvent.pre("guildMemberUpdate", async (_, member) => {
+	if (member.guild.id !== config.guild.id) return false;
 
 	if (member.roles.premiumSubscriberRole && config.roles.booster)
 		await member.roles.add(config.roles.booster, "Boosted the server");
+
+	return true;
 });
 
 defineChatCommand(

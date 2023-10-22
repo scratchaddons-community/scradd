@@ -53,7 +53,6 @@ export async function updateMemberThreads(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
 ) {
-	if (newMember.guild.id !== config.guild.id) return;
 	await Promise.all(
 		threadsDatabase.data.map(async (options) => {
 			const roles = options.roles && options.roles.split("|");
