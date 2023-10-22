@@ -1,11 +1,4 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	MessageMentions,
-	TextInputStyle,
-	time,
-} from "discord.js";
+import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
 import { defineChatCommand, defineButton, defineModal, client } from "strife.js";
 import config, { getInitialChannelThreads } from "../common/config.js";
 import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
@@ -30,7 +23,7 @@ const applications = Object.fromEntries(
 		.map(
 			(message) =>
 				[
-					message.embeds[0]?.description?.match(MessageMentions.UsersPattern)?.[1] ?? "",
+					message.embeds[0]?.description ?? "",
 					{
 						timezone: message.embeds[0]?.fields.find(
 							(field) => field.name == "Timezone",
@@ -76,6 +69,7 @@ defineChatCommand(
 );
 
 defineButton("modInterestForm", async (interaction) => {
+	const mention = interaction.user.toString();
 	await interaction.showModal({
 		customId: "_modInterestForm",
 		title: "Moderator Interest Form",
@@ -89,7 +83,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 100,
-						value: applications[interaction.user.id]?.timezone,
+						value: applications[mention]?.timezone,
 					},
 				],
 			},
@@ -102,7 +96,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 1000,
-						value: applications[interaction.user.id]?.activity,
+						value: applications[mention]?.activity,
 					},
 				],
 			},
@@ -115,7 +109,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 10,
-						value: applications[interaction.user.id]?.age,
+						value: applications[mention]?.age,
 					},
 				],
 			},
@@ -128,7 +122,7 @@ defineButton("modInterestForm", async (interaction) => {
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
 						maxLength: 1000,
-						value: applications[interaction.user.id]?.experience,
+						value: applications[mention]?.experience,
 					},
 				],
 			},
@@ -142,7 +136,7 @@ defineButton("modInterestForm", async (interaction) => {
 						type: ComponentType.TextInput,
 						required: false,
 						maxLength: 1000,
-						value: applications[interaction.user.id]?.misc,
+						value: applications[mention]?.misc,
 					},
 				],
 			},
@@ -171,6 +165,7 @@ defineModal("modInterestForm", async (interaction) => {
 		.filter((strike) => strike.date + EXPIRY_LENGTH * 2 > Date.now())
 		.reduce((accumulator, { count, removed }) => count * Number(!removed) + accumulator, 0);
 
+	const mention = interaction.user.toString();
 	const fields = {
 		timezone: interaction.fields.getTextInputValue("timezone"),
 		activity: interaction.fields.getTextInputValue("activity"),
@@ -186,7 +181,7 @@ defineModal("modInterestForm", async (interaction) => {
 					name: interaction.user.tag,
 					icon_url: interaction.user.displayAvatarURL(),
 				},
-				description: interaction.user.toString(),
+				description: mention,
 				fields: [
 					{
 						name: "Roles",
@@ -236,12 +231,8 @@ defineModal("modInterestForm", async (interaction) => {
 			},
 		],
 	};
-	const message = await (applications[interaction.user.id]?.message.reply(data) ??
-		thread.send(data));
-	applications[interaction.user.id] = {
-		...fields,
-		message: applications[interaction.user.id]?.message ?? message,
-	};
+	const message = await (applications[mention]?.message.reply(data) ?? thread.send(data));
+	applications[mention] = { ...fields, message: applications[mention]?.message ?? message };
 	await interaction.reply({
 		ephemeral: true,
 		content: `${constants.emojis.statuses.yes} Thanks for filling it out!`,
