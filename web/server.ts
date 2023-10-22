@@ -34,9 +34,16 @@ http.createServer(async (request, response) => {
 			}
 			case "/ban-appeal":
 			case "/ban-appeal/": {
-				await (request.method === "POST"
-					? appeal(request, response)
-					: showAppeal(request, response));
+				const data = await (request.method === "POST"
+					? appeal(request)
+					: showAppeal(request));
+				const array = typeof data === "object";
+				const string = typeof data === "string";
+				const status = array ? data[0] : string ? 200 : data;
+				const headers = array ? data[1] : { "content-type": "text/html" };
+				const content = array && typeof data[0] === "string" ? data[0] : string ? data : "";
+
+				response.writeHead(status, headers).end(content);
 				break;
 			}
 			case "/style.css": {

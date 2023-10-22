@@ -2,7 +2,7 @@ import type { GuildMember, PartialGuildMember } from "discord.js";
 import config from "../../common/config.js";
 import mongoose from "mongoose";
 
-const persistedRoles = {
+export const persistedRoles = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
 	admin: ["1069776422467555328", "806603332944134164"],
@@ -19,7 +19,7 @@ const rolesSchema = new mongoose.Schema({
 	id: String,
 	...Object.fromEntries(Object.keys(persistedRoles).map((role) => [role, Boolean])),
 });
-const RoleList = mongoose.model("RoleList", rolesSchema);
+export const RoleList = mongoose.model("RoleList", rolesSchema);
 
 export async function persistedLeave(member: PartialGuildMember | GuildMember) {
 	if (member.guild.id !== config.guild.id) return;

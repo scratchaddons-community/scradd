@@ -1,0 +1,28 @@
+{{#note}}
+<h1>We've reviewed your appeal</h1>
+{{#unbanned}}
+<p>
+	Thank you for your patience. We've decided to unban
+	<a href="https://discord.com/users/{{id}}">@{{username}}</a> from our Discord server!
+</p>
+<div class="note green">{{note}}</div>
+<a href="{{invite}}"><button type="button">Rejoin the server</button></a>
+{{/unbanned}}
+<!--  -->
+{{^unbanned}}
+<p>
+	Thank you for your patience. Unfortunately, we've decided not to unban
+	<a href="https://discord.com/users/{{id}}">@{{username}}</a> from our Discord server.
+</p>
+<div class="note red">{{note}}</div>
+{{/unbanned}}{{/note}}
+<!--  -->
+<!--  -->
+{{^note}}
+<h1>We've recieved your appeal</h1>
+<p>
+	Please be patient while we process your ban appeal. Our answer will be available on this page by
+	{{date}}. You are signed in as <a href="https://discord.com/users/{{id}}">@{{username}}</a> on
+	Discord.
+</p>
+{{/note}}

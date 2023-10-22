@@ -24,7 +24,7 @@ body {
 	padding: 4rem 10rem 0.25rem;
 }
 
-.blurple {
+a {
 	color: var(--theme-color);
 }
 
@@ -97,4 +97,17 @@ label {
 	display: block;
 	font-weight: bold;
 	margin-bottom: 1.5rem;
+}
+
+.note {
+	padding: 10px;
+	border-radius: 10px;
+	box-shadow: 0 0 5px;
+	margin-bottom: 1.5rem;
+}
+.red {
+	background: #f43f5e;
+}
+.green {
+	background: #22c55e;
 }

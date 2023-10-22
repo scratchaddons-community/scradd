@@ -1,41 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>SA Ban Appeal</title>
-		<link rel="stylesheet" href="./style.css" />
-		<link rel="shortcut icon" href="./icon.png" />
-	</head>
-	<body>
-		<div class="nav">
-			<img src="./icon.png" class="scradd-nav" title="Logo" />
-			Scratch Addons Ban Appeal
-		</div>
-		<h1>Appeal your ban</h1>
-		<p>You are appealing as <span class="blurple">@{username}</span> on Discord.</p>
-		<form class="appeal-form" method="post">
-			<label>
-				Why were you banned?
-				<textarea name="ban" required placeholder="I was banned because..."></textarea>
-			</label>
-			<label>
-				Why should we unban you?
-				<textarea
-					name="unban"
-					required
-					placeholder="You should unban me because..."
-				></textarea>
-			</label>
-			<label>
-				Any additional comments?
-				<textarea name="misc"></textarea>
-			</label>
-			<input type="hidden" name="{token}" />
-			<button type="submit">Submit</button>
-			<p class="disclaimer">
-				Submitting fake responses will only lower your chances of being unbanned.
-			</p>
-		</form>
-	</body>
-</html>
+<h1>Appeal your ban</h1>
+<p>You are appealing as <a href="https://discord.com/users/{{id}}">@{{username}}</a> on Discord.</p>
+<form class="appeal-form" method="post">
+	<label>
+		Why were you banned?
+		<textarea name="ban" required placeholder="I was banned because…"></textarea>
+	</label>
+	<label>
+		Why should we unban you? If you were underage, when is your birthday?
+		<textarea name="unban" required placeholder="You should unban me because…"></textarea>
+	</label>
+	<label>
+		Any additional comments?
+		<textarea name="misc"></textarea>
+	</label>
+	<input type="hidden" name="token" value="{{token}}" />
+	<button type="submit">Submit</button>
+	<p class="disclaimer">
+		Submitting troll or spam responses will only lower your chances of being unbanned.
+	</p>
+</form>
