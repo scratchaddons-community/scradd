@@ -107,9 +107,9 @@ defineEvent("messageCreate", async (message) => {
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type[1] === "ping") {
+				// todo: this triggers on raw id too?
 				doReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
-					ignoreRepliedUser: true,
 					ignoreRoles: true,
 				});
 			} else {
