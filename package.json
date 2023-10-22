@@ -20,7 +20,6 @@
 		"@napi-rs/canvas": "0.1.44",
 		"@sa-community/addons-data": "1.35.0",
 		"@twemoji/parser": "14.1.0",
-		"async-exit-hook": "2.0.1",
 		"chart.js": "4.4.0",
 		"chartjs-adapter-date-fns": "3.0.0",
 		"date-fns": "2.30.0",
@@ -35,7 +34,6 @@
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
-		"@types/async-exit-hook": "<=2.0.1",
 		"@types/difflib": "0.2.1",
 		"@types/eslint": "<=8.51.0",
 		"@types/json-diff": "<=1.0.6",
