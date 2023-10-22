@@ -83,7 +83,7 @@ async function userInfo(
 			isMod
 				? {
 						name: "🔨 Ban Reason",
-						value: banned.reason ?? "No reason given.",
+						value: banned.reason ?? constants.defaultPunishment,
 						inline: true,
 				  }
 				: { name: "🔨 Banned", value: "Yes", inline: true },

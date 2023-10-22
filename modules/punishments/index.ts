@@ -118,7 +118,7 @@ defineChatCommand(
 	},
 
 	async (interaction, options) => {
-		const reason = options.reason || "No reason given.";
+		const reason = options.reason || constants.defaultPunishment;
 		const strikes = options.strikes ?? DEFAULT_STRIKES;
 		await interaction.deferReply();
 		const success = await warn(options.user, reason, strikes, interaction.user);
@@ -150,7 +150,7 @@ defineMenuCommand(
 							value:
 								process.env.NODE_ENV === "production"
 									? undefined
-									: "No reason given.",
+									: constants.defaultPunishment,
 						},
 					],
 				},
@@ -239,7 +239,7 @@ defineMenuCommand(
 							value:
 								process.env.NODE_ENV === "production"
 									? undefined
-									: "No reason given.",
+									: constants.defaultPunishment,
 						},
 					],
 				},
