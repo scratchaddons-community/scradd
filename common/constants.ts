@@ -13,6 +13,7 @@ export default {
 	},
 
 	collectorTime: 45_000,
+	defaultPunishment: "No reason given.",
 
 	emojis: {
 		discord: {
