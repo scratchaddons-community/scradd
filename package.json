@@ -10,7 +10,7 @@
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
-		"serve": "nodemon --env-file=.env --enable-source-maps . --watch dist",
+		"serve": "nodemon --env-file=.env --enable-source-maps . --ext js,json,html,css,png",
 		"start": "node --env-file=.env --enable-source-maps .",
 		"test": "npm run build && node --test"
 	},
