@@ -29,7 +29,7 @@ export async function giveXpForMessage(message: Message) {
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id].some((user) =>
+		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
 			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
 		);
 	});
