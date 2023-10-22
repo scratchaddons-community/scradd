@@ -118,7 +118,6 @@ defineEvent("guildMemberAdd", async (member) => {
 	await changeNickname(member);
 });
 defineEvent("guildMemberUpdate", async (_, member) => {
-	if (member.guild.id !== config.guild.id) return;
 	await changeNickname(member);
 });
 defineEvent.pre("userUpdate", async (_, user) => {
