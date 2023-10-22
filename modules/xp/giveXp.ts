@@ -60,6 +60,8 @@ export async function giveXpForMessage(message: Message) {
 										MessageType.Reply,
 										MessageType.ChatInputCommand,
 										MessageType.ContextMenuCommand,
+										MessageType.RoleSubscriptionPurchase,
+										MessageType.GuildApplicationPremiumSubscription,
 									].includes(message.type),
 								)),
 					),
