@@ -277,11 +277,13 @@ defineModal("modInterestForm", async (interaction) => {
 			},
 		],
 	};
-	const message = await (applications[mention]?.message.reply(data) ?? thread.send(data));
+	const message = await (applications[mention]?.message.edit(data) ?? thread.send(data));
+	await applications[mention]?.message.reply(`${mention} updated their application.`);
 	applications[mention] = { ...fields, message: applications[mention]?.message ?? message };
+	await giveXp(interaction.user, message.url);
+
 	await interaction.reply({
 		ephemeral: true,
 		content: `${constants.emojis.statuses.yes} Thanks for filling it out!`,
 	});
-	await giveXp(interaction.user, message.url);
 });
