@@ -57,7 +57,7 @@
 		"typescript": "5.2.2"
 	},
 	"optionalDependencies": {
-		"@railway/cli": "3.5.0"
+		"@railway/cli": "3.5.1"
 	},
 	"engines": {
 		"node": ">=20.6.0",
