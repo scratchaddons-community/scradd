@@ -63,9 +63,11 @@ declare global {
 			 * For consistency, always compare against `"true"` in code.
 			 */
 			CANVAS?: `${boolean}`;
-			/** The port to run the web server on in production. Not used in development. */
+			/** The port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;
-			/** The API key to force a database write in production. Not used in development. */
+			/** The bot's client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */
+			CLIENT_SECRET?: string;
+			/** The API key to force a database write on `/cleanDatabaseListeners`. */
 			CDBL_AUTH?: string;
 		}
 	}

@@ -133,7 +133,6 @@ module.exports = {
 					'"': { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
 					"'": "’",
 					"->": "→",
-					[/http:\/\//.source]: "https://",
 				},
 			},
 		],

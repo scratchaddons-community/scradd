@@ -1,0 +1,117 @@
+@import url("/sora/index.css");
+
+* {
+	box-sizing: border-box;
+	font-family: "Sora Variable", sans-serif;
+	--theme-color: #000;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	padding: 4rem 0 0.25rem;
+	width: 80%;
+	margin: auto;
+}
+
+.nav {
+	background-color: var(--theme-color);
+	height: 4rem;
+	color: white;
+	font-weight: 600;
+	font-size: 1.2rem;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	padding: 0 10%;
+	align-items: center;
+	display: flex;
+}
+
+a {
+	color: var(--theme-color);
+	text-decoration: none;
+}
+
+.appeal-form {
+	margin-top: 3rem;
+}
+
+.scradd-nav {
+	height: 3rem;
+	margin-right: 0.5rem;
+}
+
+textarea {
+	background-color: #efefef;
+	border: 0;
+	outline: none;
+	padding: 0.75rem;
+	border-radius: 0.5rem;
+	resize: none;
+	height: 3rem;
+	max-height: 3rem;
+	min-height: 3rem;
+	width: 100%;
+	overflow: hidden;
+	display: block;
+	margin-top: 1.4rem;
+	transition: all 0.5s;
+}
+
+textarea:focus {
+	min-height: 9rem;
+	resize: vertical;
+	max-height: 20rem;
+	overflow: auto;
+}
+
+textarea::placeholder {
+	opacity: 0.5;
+}
+
+button {
+	background-color: var(--theme-color);
+	color: white;
+	border: 0;
+	padding: 0.75rem 2rem;
+	border-radius: 0.5rem;
+	transition: all 0.3s;
+}
+
+button:hover {
+	transform: scale(102%);
+	opacity: 0.8;
+}
+
+p.disclaimer {
+	font-weight: 200;
+	font-size: 0.8rem;
+	opacity: 0.5;
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: 1.5rem;
+}
+
+.note {
+	padding: 10px;
+	border-radius: 10px;
+	box-shadow: 0 0 5px;
+	margin-bottom: 1.5rem;
+	white-space: pre-line;
+}
+.red {
+	background: #f43f5e;
+}
+.green {
+	background: #22c55e;
+}

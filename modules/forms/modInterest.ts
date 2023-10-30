@@ -1,11 +1,20 @@
-import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
-import { defineChatCommand, defineButton, defineModal, client } from "strife.js";
-import config, { getInitialChannelThreads } from "../common/config.js";
-import { getLevelForXp, getWeeklyXp, xpDatabase } from "./xp/misc.js";
-import { EXPIRY_LENGTH, strikeDatabase } from "./punishments/misc.js";
-import constants from "../common/constants.js";
-import giveXp from "./xp/giveXp.js";
-import { getAllMessages } from "../util/discord.js";
+import {
+	ButtonInteraction,
+	ButtonStyle,
+	ChatInputCommandInteraction,
+	ComponentType,
+	GuildMember,
+	ModalSubmitInteraction,
+	TextInputStyle,
+	time,
+} from "discord.js";
+import { client } from "strife.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
+import { getLevelForXp, getWeeklyXp, xpDatabase } from "../xp/misc.js";
+import { EXPIRY_LENGTH, strikeDatabase } from "../punishments/misc.js";
+import constants from "../../common/constants.js";
+import giveXp from "../xp/giveXp.js";
+import { getAllMessages } from "../../util/discord.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
 const thread =
@@ -43,32 +52,31 @@ const applications = Object.fromEntries(
 		),
 );
 
-defineChatCommand(
-	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
-	async (interaction) => {
-		await interaction.reply({
-			ephemeral: true,
-			content:
-				"**Moderator Interest Form**\n__This is not a mod application.__ This form mainly exists just to determine who in the server wants moderator in the first place. Filling out this form does not guarantee anything. However, if you don’t fill out the form, you do not have any chance of promotion.\nAlso, know that this form is not the only step in being promoted. If admins think you are a good candidate for moderator, they will DM you further questions before promoting you.\nFinally, please note that 2-factor authentication (2FA) is required for moderators in this server. If you are unable to enable 2FA, please try using an online service such as <https://totp.app/>.\nThanks for being a part of the server and filling out the form!",
+export default async function confirmInterest(
+	interaction: ChatInputCommandInteraction<"raw" | "cached">,
+) {
+	await interaction.reply({
+		ephemeral: true,
+		content:
+			"**Moderator Interest Form**\n__This is not a mod application.__ This form mainly exists just to determine who in the server wants moderator in the first place. Filling out this form does not guarantee anything. However, if you don’t fill out the form, you do not have any chance of promotion.\nAlso, know that this form is not the only step in being promoted. If admins think you are a good candidate for moderator, they will DM you further questions before promoting you.\nFinally, please note that 2-factor authentication (2FA) is required for moderators in this server. If you are unable to enable 2FA, please try using an online service such as <https://totp.app/>.\nThanks for being a part of the server and filling out the form!",
 
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							customId: "_modInterestForm",
-							label: "Fill out the form",
-							style: ButtonStyle.Primary,
-							type: ComponentType.Button,
-						},
-					],
-				},
-			],
-		});
-	},
-);
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: "_modInterestForm",
+						label: "Fill out the form",
+						style: ButtonStyle.Primary,
+						type: ComponentType.Button,
+					},
+				],
+			},
+		],
+	});
+}
 
-defineButton("modInterestForm", async (interaction) => {
+export async function fillInterest(interaction: ButtonInteraction) {
 	const mention = interaction.user.toString();
 	await interaction.showModal({
 		customId: "_modInterestForm",
@@ -142,9 +150,9 @@ defineButton("modInterestForm", async (interaction) => {
 			},
 		],
 	});
-});
+}
 
-defineModal("modInterestForm", async (interaction) => {
+export async function submitIntrest(interaction: ModalSubmitInteraction) {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
@@ -286,4 +294,4 @@ defineModal("modInterestForm", async (interaction) => {
 		ephemeral: true,
 		content: `${constants.emojis.statuses.yes} Thanks for filling it out!`,
 	});
-});
+}

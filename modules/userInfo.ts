@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import { defineChatCommand, defineMenuCommand } from "strife.js";
+import { client, defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/misc.js";
 import { strikeDatabase } from "./punishments/misc.js";
@@ -93,12 +93,20 @@ async function userInfo(
 		({ author }) => (author instanceof User ? author.id : author) === user.id,
 	);
 	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
+	const showBottom = !interaction.isButton();
 	const xp =
+		showBottom &&
 		interaction.guild?.id === config.guild.id &&
 		xpDatabase.data.find((entry) => entry.user === user.id)?.xp;
 	const hasStrikes =
+		showBottom &&
 		(user.id == interaction.user.id || isMod) &&
 		strikeDatabase.data.some((strike) => strike.user === user.id);
+	const canContact =
+		!interaction.isButton() &&
+		member &&
+		isMod &&
+		config.channels.tickets?.permissionsFor(member)?.has("ViewChannel");
 
 	const buttonData = [
 		[
@@ -111,12 +119,7 @@ async function userInfo(
 		[
 			xp && { customId: `${user.id}_xp`, label: "XP" },
 			hasStrikes && { customId: `${user.id}_viewStrikes`, label: "Strikes" },
-			member &&
-				isMod &&
-				config.channels.tickets?.permissionsFor(member)?.has("ViewChannel") && {
-					customId: `${user.id}_contactUser`,
-					label: "Contact User",
-				},
+			canContact && { customId: `${user.id}_contactUser`, label: "Contact User" },
 		],
 	];
 	const rows = buttonData
@@ -135,6 +138,9 @@ async function userInfo(
 		.filter(({ length }) => length);
 
 	await interaction.reply({
+		ephemeral:
+			interaction.isButton() &&
+			interaction.message.interaction?.user.id !== interaction.user.id,
 		embeds: [
 			{
 				color: member?.displayColor,
@@ -201,3 +207,8 @@ defineMenuCommand(
 		await userInfo(interaction, { user, member });
 	},
 );
+defineButton("userInfo", async (interaction, id) => {
+	const member = await interaction.guild?.members.fetch(id).catch(() => void 0);
+	const user = member?.user ?? (await client.users.fetch(id));
+	await userInfo(interaction, { user, member });
+});
