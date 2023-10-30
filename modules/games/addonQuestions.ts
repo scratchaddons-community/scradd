@@ -2,7 +2,7 @@ import { escapeMessage } from "../../util/markdown.js";
 import constants from "../../common/constants.js";
 import addons from "@sa-community/addons-data" assert { type: "json" };
 import { trimPatchVersion } from "../../util/text.js";
-import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
+import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];
@@ -34,7 +34,7 @@ const firstLetters = Object.fromEntries(
 		]),
 	);
 
-const versionMarkdown = `**[${sa.version}](https://github.com/${constants.urls.saRepo}/releases/tag/v${sa.version})**`;
+const versionMarkdown = `**[${sa.version_name}](https://github.com/${constants.urls.saRepo}/releases/tag/v${sa.version})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",
