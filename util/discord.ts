@@ -5,7 +5,6 @@ import {
 	ComponentType,
 	Message,
 	MessageType,
-	ChannelType,
 	type Attachment,
 	type User,
 	type APIActionRowComponent,
@@ -229,9 +228,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
-				message.channel.isThread() &&
-				(message.channel.parent?.type === ChannelType.GuildForum ||
-					message.channel.parent?.type === ChannelType.GuildMedia)
+				message.channel.isThread() && message.channel.parent?.isThreadOnly()
 					? "post title"
 					: "channel name"
 			}: **${escapeMessage(message.content)}**`;

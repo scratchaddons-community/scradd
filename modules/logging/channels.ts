@@ -195,10 +195,7 @@ export async function channelUpdate(
 	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
-				newChannel.type === ChannelType.GuildForum ||
-				newChannel.type === ChannelType.GuildMedia
-					? "post "
-					: ""
+				newChannel.isThreadOnly() ? "post " : ""
 			}slowmode set to ${newChannel.rateLimitPerUser} seconds`,
 			"channels",
 		);
@@ -272,12 +269,7 @@ export async function channelUpdate(
 		});
 	}
 
-	if (
-		(oldChannel.type !== ChannelType.GuildForum &&
-			oldChannel.type !== ChannelType.GuildMedia) ||
-		oldChannel.type !== newChannel.type
-	)
-		return;
+	if (!oldChannel.isThreadOnly() || oldChannel.type !== newChannel.type) return;
 
 	if (
 		oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
