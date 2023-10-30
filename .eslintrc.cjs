@@ -55,7 +55,6 @@ module.exports = {
 					"InviteGuild",
 					"PartialDMChannel",
 					"PartialGuildMember",
-					"PartialMessage",
 					"PartialUser",
 					"BaseGuildTextChannel",
 					"BaseGuildVoiceChannel",
