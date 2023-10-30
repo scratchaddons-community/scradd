@@ -106,6 +106,8 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the warning",
 				required: process.env.NODE_ENV === "production",
+				minLength: 10,
+				maxLength: 1024,
 			},
 
 			strikes: {
@@ -205,6 +207,8 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the ban",
 				required: process.env.NODE_ENV === "production",
+				minLength: 10,
+				maxLength: 1024,
 			},
 
 			"delete-range": {
