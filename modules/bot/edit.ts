@@ -5,7 +5,6 @@ import {
 	ModalSubmitInteraction,
 	TextInputStyle,
 } from "discord.js";
-import { diffString } from "json-diff";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
@@ -128,15 +127,14 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 	const files = [];
 	const contentDiff = unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n"), {
 		lineterm: "",
-	})
+	}).join("\n");
+	const extraDiff = unifiedDiff(
+		JSON.stringify({ ...oldJSON, content: undefined }).split("\n"),
+		JSON.stringify({ ...getMessageJSON(edited), content: undefined }).split("\n"),
+		{ lineterm: "" },
+	)
 		.join("\n")
 		.replace(/^-{3} \n\+{3} \n/, "");
-
-	const extraDiff = diffString(
-		{ ...oldJSON, content: undefined },
-		{ ...getMessageJSON(edited), content: undefined },
-		{ color: false },
-	);
 
 	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });

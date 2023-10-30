@@ -25,7 +25,6 @@
 		"date-fns": "2.30.0",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
-		"json-diff": "1.0.6",
 		"match-sorter": "6.3.1",
 		"mongoose": "7.6.3",
 		"papaparse": "5.4.1",

@@ -8,15 +8,9 @@ import {
 	Colors,
 	type UserMention,
 } from "discord.js";
-import { diffString } from "json-diff";
 import config from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
-import {
-	getBaseChannel,
-	messageToText,
-	extractMessageExtremities,
-	getMessageJSON,
-} from "../../util/discord.js";
+import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
 import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 
@@ -189,22 +183,12 @@ export async function messageUpdate(
 			.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
-		const extraDiff = diffString(
-			{ ...getMessageJSON(oldMessage), content: undefined, embeds: undefined },
-			{ ...getMessageJSON(newMessage), content: undefined, embeds: undefined },
-			{ color: false },
+		const changedFiles = new Set(newMessage.attachments.map((attachment) => attachment.url));
+		files.push(
+			...oldMessage.attachments
+				.map((attachment) => attachment.url)
+				.filter((attachment) => !changedFiles.has(attachment)),
 		);
-		if (extraDiff) {
-			const changedFiles = new Set(
-				newMessage.attachments.map((attachment) => attachment.url),
-			);
-			files.push(
-				{ content: extraDiff, extension: "diff" },
-				...oldMessage.attachments
-					.map((attachment) => attachment.url)
-					.filter((attachment) => !changedFiles.has(attachment)),
-			);
-		}
 
 		if (files.length) {
 			await log(
