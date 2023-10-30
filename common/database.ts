@@ -121,7 +121,7 @@ export default class Database<Data extends Record<string, string | number | bool
 						attachment &&
 						(await fetch(attachment).then(async (res) => await res.text())).trim();
 
-					if (attachment && written !== data) {
+					if (attachment && written !== data && !written?.startsWith("<?xml")) {
 						throw new Error("Data changed through write!", {
 							cause: { written, data, database: this.name },
 						});
