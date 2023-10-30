@@ -8,7 +8,6 @@ http.createServer((request, response) => {
 
 		if (requestUrl.pathname === "/clean-database-listeners") {
 			if (requestUrl.searchParams.get("auth") === process.env.CDBL_AUTH) {
-				process.emitWarning("cleanDatabaseListeners called");
 				cleanDatabaseListeners().then(
 					() => {
 						process.emitWarning("cleanDatabaseListeners ran");
