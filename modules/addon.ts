@@ -11,13 +11,13 @@ import addons from "@sa-community/addons-data" assert { type: "json" };
 import { defineChatCommand } from "strife.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import sa from "@sa-community/addons-data/package.json" assert { type: "json" };
+import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 
 defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${sa.version}`,
+		description: `Replies with information about a specific addon available in v${sa.version_name}`,
 
 		options: {
 			addon: {
