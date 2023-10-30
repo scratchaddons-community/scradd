@@ -86,10 +86,8 @@ export function generateError(error: unknown): object {
 		const object = {
 			name: "name" in error ? error.name : undefined,
 			message: "message" in error ? error.message : undefined,
-			stack: sanitizePath(
-				// eslint-disable-next-line unicorn/error-message
-				`${("stack" in error ? error : new Error()).stack}`,
-			)
+			// eslint-disable-next-line unicorn/error-message
+			stack: sanitizePath(`${("stack" in error ? error : new Error()).stack}`)
 				.split("\n")
 				.slice(1),
 			errors: subErrors?.map((sub) => generateError(sub)),
