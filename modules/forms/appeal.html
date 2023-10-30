@@ -7,15 +7,27 @@
 <form class="appeal-form" method="post">
 	<label>
 		Why were you banned?
-		<textarea name="ban" required placeholder="I was banned because…"></textarea>
+		<textarea
+			minlength="20"
+			maxlength="1024"
+			name="ban"
+			required
+			placeholder="I was banned because…"
+		></textarea>
 	</label>
 	<label>
 		Why should we unban you? If you were underage, when is your birthday?
-		<textarea name="unban" required placeholder="You should unban me because…"></textarea>
+		<textarea
+			minlength="20"
+			maxlength="1024"
+			name="unban"
+			required
+			placeholder="You should unban me because…"
+		></textarea>
 	</label>
 	<label>
 		Any additional comments?
-		<textarea name="misc"></textarea>
+		<textarea maxlength="1024" name="misc"></textarea>
 	</label>
 	<input type="hidden" name="token" value="{{token}}" />
 	<button type="submit">Submit</button>

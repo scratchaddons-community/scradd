@@ -188,6 +188,23 @@ export default async function ban(
 									: undefined,
 							},
 						],
+						components: [
+							{
+								type: ComponentType.ActionRow,
+								components: [
+									{
+										type: ComponentType.Button,
+										style: ButtonStyle.Link,
+										label: "Appeal Ban",
+										url:
+											(process.env.NODE_ENV === "production"
+												? "https://sa-discord.up.railway.app"
+												: `http://localhost:${process.env.PORT}`) +
+											"/ban-appeal",
+									},
+								],
+							},
+						],
 					})
 					.catch(() => void 0);
 

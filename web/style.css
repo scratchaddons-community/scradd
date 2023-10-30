@@ -1,8 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("/sora/index.css");
+
+* {
+	box-sizing: border-box;
+	font-family: "Sora Variable", sans-serif;
+	--theme-color: #000;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
 
 body {
-	font-family: "Sora", sans-serif;
-	--theme-color: #000;
+	padding: 4rem 0 0.25rem;
+	width: 80%;
+	margin: auto;
 }
 
 .nav {
@@ -15,17 +29,14 @@ body {
 	left: 0;
 	top: 0;
 	width: 100vw;
-	padding: 0 10rem;
+	padding: 0 10%;
 	align-items: center;
 	display: flex;
 }
 
-body {
-	padding: 4rem 10rem 0.25rem;
-}
-
 a {
 	color: var(--theme-color);
+	text-decoration: none;
 }
 
 .appeal-form {
@@ -42,13 +53,12 @@ textarea {
 	border: 0;
 	outline: none;
 	padding: 0.75rem;
-	font-family: "Sora", sans-serif;
 	border-radius: 0.5rem;
 	resize: none;
-	height: 2rem;
-	max-height: 2rem;
-	min-height: 2rem;
-	width: 40rem;
+	height: 3rem;
+	max-height: 3rem;
+	min-height: 3rem;
+	width: 100%;
 	overflow: hidden;
 	display: block;
 	margin-top: 1.4rem;
@@ -56,7 +66,7 @@ textarea {
 }
 
 textarea:focus {
-	min-height: 8rem;
+	min-height: 9rem;
 	resize: vertical;
 	max-height: 20rem;
 	overflow: auto;
@@ -70,16 +80,9 @@ button {
 	background-color: var(--theme-color);
 	color: white;
 	border: 0;
-	outline: none;
-	padding: 0.75rem;
-	font-family: "Sora", sans-serif;
+	padding: 0.75rem 2rem;
 	border-radius: 0.5rem;
-	padding-left: 2rem;
-	padding-right: 2rem;
-	cursor: pointer;
 	transition: all 0.3s;
-	transform: none;
-	opacity: 1;
 }
 
 button:hover {
@@ -103,7 +106,7 @@ label {
 	padding: 10px;
 	border-radius: 10px;
 	box-shadow: 0 0 5px;
-	margin-bottom: 1.5rem;
+	margin-bottom: 1.5rem;white-space: pre-line;
 }
 .red {
 	background: #f43f5e;
