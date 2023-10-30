@@ -14,7 +14,7 @@ const thread =
 	) ||
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
-		reason: "For mod interest forms",
+		reason: "For moderator interest forms",
 	}));
 
 const applications = Object.fromEntries(
@@ -176,6 +176,7 @@ defineModal("modInterestForm", async (interaction) => {
 	const data = {
 		embeds: [
 			{
+				title: "Moderator Interest Form",
 				color: interaction.member.displayColor,
 				author: {
 					name: interaction.user.tag,
