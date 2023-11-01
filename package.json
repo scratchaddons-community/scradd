@@ -43,7 +43,6 @@
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/difflib": "0.2.1",
 		"@types/eslint": "<=8.52.0",
-		"@types/json-diff": "<=1.0.6",
 		"@types/mustache": "4.2.4",
 		"@types/node": "<=20.6.0",
 		"@types/papaparse": "<=5.4.1",
