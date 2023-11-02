@@ -7,6 +7,7 @@ import {
 	type MessageReaction,
 	Colors,
 	type UserMention,
+	messageLink,
 } from "discord.js";
 import { diffString } from "json-diff";
 import config from "../../common/config.js";
@@ -42,11 +43,15 @@ export async function messageDelete(message: Message | PartialMessage) {
 			embeds,
 			buttons: [
 				{ label: "Context", url: message.url },
-				...(message.reference
+				...(message.reference?.messageId
 					? [
 							{
 								label: "Reference",
-								url: `https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,
+								url: messageLink(
+									message.reference.guildId ?? "@me",
+									message.reference.channelId,
+									message.reference.messageId,
+								),
 							},
 					  ]
 					: []),

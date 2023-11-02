@@ -11,6 +11,7 @@ import {
 	time,
 	roleMention,
 	userMention,
+	OAuth2Scopes,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -48,7 +49,9 @@ export default async function appealRequest(request: IncomingMessage, response: 
 		`http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
 	);
 	const redirectUri = requestUrl.origin + requestUrl.pathname;
-	const oAuthUrl = `https://discord.com/oauth2/authorize?client_id=${client.user.id}&redirect_uri=${redirectUri}&response_type=code&scope=identify`;
+	const oAuthUrl = `https://discord.com${Routes.oauth2Authorization()}?client_id=${
+		client.user.id
+	}&redirect_uri=${redirectUri}&response_type=code&scope=${OAuth2Scopes.Identify}`;
 	// eslint-disable-next-line unicorn/string-content
 	const htmlRedirect = `<meta http-equiv="refresh" content="0;url=${oAuthUrl}">`;
 

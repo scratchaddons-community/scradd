@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	ComponentType,
 	GuildMember,
+	channelLink,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -68,7 +69,7 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url: `https://discord.com/channels/${config.guild.id}/${config.channels.support}`,
+							url: channelLink(config.guild.id,config.channels.support)
 						},
 					],
 				},
