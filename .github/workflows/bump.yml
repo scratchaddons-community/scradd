@@ -2,7 +2,7 @@ name: Bump dependencies
 on:
     workflow_dispatch:
     schedule:
-        - cron: 15 12 * * * # 30 min before Dependabot
+        - cron: 45 11 * * * # 60 min before Dependabot
 
 permissions: write-all
 
