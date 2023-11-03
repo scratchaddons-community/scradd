@@ -5,7 +5,6 @@ import {
 	ComponentType,
 	Embed,
 	GuildAuditLogsEntry,
-	PermissionFlagsBits,
 	type TextBasedChannel,
 	TextChannel,
 	ThreadChannel,
@@ -25,9 +24,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 	return Boolean(
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
-			baseChannel
-				.permissionsFor(config.roles.staff || config.guild.id)
-				?.has(PermissionFlagsBits.ViewChannel),
+			baseChannel.permissionsFor(config.roles.staff || config.guild.id)?.has("ViewChannel"),
 	);
 }
 

@@ -3,6 +3,7 @@ import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "../threads/syncMembers.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "../threads/autoClose.js";
 import { getThreadConfig } from "./misc.js";
+import { paginate } from "../../util/discord.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
@@ -52,11 +53,58 @@ defineSubcommands(
 					},
 				},
 			},
+			"list-unjoined": {
+				description: "List active threads that you are not in",
+				options: {},
+			},
 		},
 	},
 	async (interaction, options) => {
-		if (options.subcommand === "sync-members") return syncMembers(interaction, options.options);
-		await setUpAutoClose(interaction, options);
+		switch (options.subcommand) {
+			case "sync-members": {
+				return syncMembers(interaction, options.options);
+			}
+			case "list-unjoined": {
+				await interaction.deferReply({ ephemeral: true });
+				const fetched = await interaction.guild?.channels.fetchActiveThreads();
+				const threads = await Promise.all(
+					fetched?.threads.map(
+						async (thread) =>
+							[
+								thread,
+								await thread.members.fetch(interaction.user.id).catch(() => void 0),
+							] as const,
+					) ?? [],
+				);
+				const unjoined = threads
+					.filter(
+						([thread, joined]) =>
+							!joined && thread.permissionsFor(interaction.user)?.has("ViewChannel"),
+					)
+					.sort(
+						([one], [two]) =>
+							(one.parent?.rawPosition ?? 0) - (two.parent?.rawPosition ?? 0) ||
+							(one.parent?.position ?? 0) - (two.parent?.position ?? 0),
+					);
+				await paginate(
+					unjoined,
+					([thread]) => thread.parent?.toString() + " > " + thread.toString(),
+					(data) => interaction.editReply(data),
+					{
+						title: "Unjoined Threads",
+						singular: "thread",
+						failMessage: "You’ve joined all the threads here!",
+						user: interaction.user,
+						ephemeral: true,
+						totalCount: unjoined.length,
+					},
+				);
+				return;
+			}
+			default: {
+				await setUpAutoClose(interaction, options);
+			}
+		}
 	},
 );
 
