@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
@@ -58,8 +59,16 @@ export default async function scratch(message: Message) {
 
 					fields: [
 						{
-							name: `${constants.emojis.scratch.love}${project.stats.loves} ${constants.emojis.scratch.favorite}${project.stats.favorites}`,
-							value: `**${constants.emojis.scratch.remix}${project.stats.remixes} ${constants.emojis.scratch.view}${project.stats.views}**`,
+							name: `${
+								constants.emojis.scratch.love
+							}${project.stats.loves.toLocaleString()} ${
+								constants.emojis.scratch.favorite
+							}${project.stats.favorites.toLocaleString()}`,
+							value: `**${
+								constants.emojis.scratch.remix
+							}${project.stats.remixes.toLocaleString()} ${
+								constants.emojis.scratch.view
+							}${project.stats.views.toLocaleString()}**`,
 							inline: true,
 						},
 					],
@@ -121,13 +130,13 @@ export default async function scratch(message: Message) {
 						? [
 								{
 									name: `${constants.emojis.scratch.followers} Followers`,
-									value: `${user.statistics.followers} (ranked ${nth(
+									value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
 										user.statistics.ranks.followers,
 									)})`,
 									inline: true,
 								},
 								{
-									name: `${constants.emojis.scratch.following} Following`,
+									name: `${constants.emojis.scratch.following.toLocaleString()} Following`,
 									value: user.statistics.following,
 									inline: true,
 								},
@@ -184,17 +193,17 @@ export default async function scratch(message: Message) {
 
 					fields: [
 						{
-							name: `${constants.emojis.scratch.followers} Followers`,
+							name: `${constants.emojis.scratch.followers.toLocaleString()} Followers`,
 							value: studio.stats.followers,
 							inline: true,
 						},
 						{
-							name: `${constants.emojis.scratch.projects} Projects`,
+							name: `${constants.emojis.scratch.projects.toLocaleString()} Projects`,
 							value: studio.stats.projects,
 							inline: true,
 						},
 						{
-							name: `${constants.emojis.scratch.comments} Comments`,
+							name: `${constants.emojis.scratch.comments.toLocaleString()} Comments`,
 							value:
 								studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
 							inline: true,
