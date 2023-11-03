@@ -16,6 +16,7 @@ import crypto from "node:crypto";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { gracefulFetch } from "../../util/promises.js";
+import { getRequestUrl } from "../../util/text.js";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{
@@ -40,12 +41,8 @@ export default async function linkScratchRole(request: IncomingMessage, response
 		.update(HASH)
 		.digest("base64");
 
-	const requestUrl = new URL(
-		request.url ?? "",
-		`http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
-	);
-	const redirectUri =
-		"https://be6c-2601-240-4d01-85f0-89e8-c1ff-7972-c7f6.ngrok-free.app/link-scratch"; //requestUrl.origin + requestUrl.pathname;
+	const requestUrl = getRequestUrl(request);
+	const redirectUri = requestUrl.origin + requestUrl.pathname;
 	const discordUrl = `https://discord.com${Routes.oauth2Authorization()}?${new URLSearchParams({
 		client_id: client.user.id,
 		redirect_uri: redirectUri,

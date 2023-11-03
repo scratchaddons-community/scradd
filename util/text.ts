@@ -1,3 +1,5 @@
+import type { IncomingMessage } from "node:http";
+
 /**
  * Generate a short, random string based off the date. Note that the length is not fixed.
  *
@@ -109,4 +111,13 @@ export function normalize(text: string) {
  */
 export function trimPatchVersion(full: string): string {
 	return full.match(/^(?<main>\d+\.\d+)\.\d+/)?.groups?.main ?? full;
+}
+
+export function getRequestUrl(request: IncomingMessage) {
+	return new URL(
+		request.url ?? "",
+		request.headers["x-forwarded-host"]
+			? `${request.headers["x-forwarded-proto"]}://${request.headers["x-forwarded-host"]}`
+			: `http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
+	);
 }

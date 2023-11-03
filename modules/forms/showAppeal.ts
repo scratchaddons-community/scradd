@@ -27,6 +27,7 @@ import pkg from "../../package.json" assert { type: "json" };
 import { getAppealComponents } from "./handleAppeal.js";
 import appeals, { thread } from "./getAppeals.js";
 import { stripMarkdown } from "../../util/markdown.js";
+import { getRequestUrl } from "../../util/text.js";
 
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/frame.html", "utf8");
@@ -44,10 +45,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 	if (!process.env.CLIENT_SECRET)
 		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 
-	const requestUrl = new URL(
-		request.url ?? "",
-		`http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
-	);
+	const requestUrl = getRequestUrl(request)
 	const redirectUri = requestUrl.origin + requestUrl.pathname;
 	const oAuthUrl = `https://discord.com${Routes.oauth2Authorization()}?client_id=${
 		client.user.id

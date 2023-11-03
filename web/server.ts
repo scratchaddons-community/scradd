@@ -10,6 +10,7 @@ import pkg from "../package.json" assert { type: "json" };
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import linkScratchRole from "../modules/roles/scratch.js";
+import { getRequestUrl } from "../util/text.js";
 
 const CSS = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
@@ -21,11 +22,7 @@ const SORA_DIRECTORY = path.dirname(
 );
 const server = http.createServer(async (request, response) => {
 	try {
-		const requestUrl = new URL(
-			request.url ?? "",
-			`http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
-		);
-
+		const requestUrl = getRequestUrl(request);
 		const pathname = requestUrl.pathname.toLowerCase();
 		switch (pathname) {
 			case "/clean-database-listeners":
