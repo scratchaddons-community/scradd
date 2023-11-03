@@ -85,15 +85,19 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 						],
 					});
 					const modalInteraction = await componentInteraction
-						.awaitModalSubmit({ time: constants.collectorTime })
+						.awaitModalSubmit({
+							time: constants.collectorTime,
+							filter: (modalInteraction) =>
+								modalInteraction.customId === componentInteraction.id,
+						})
 						.catch(() => void 0);
-					if (modalInteraction?.customId === componentInteraction.id) {
-						await modalInteraction.deferUpdate();
-						const username = modalInteraction.fields.getTextInputValue("username");
-						if (username === user.username) collector.stop("win");
-						else guesses.push(username);
-						await tick();
-					}
+
+					if (!modalInteraction) return;
+					await modalInteraction.deferUpdate();
+					const username = modalInteraction.fields.getTextInputValue("username");
+					if (username === user.username) collector.stop("win");
+					else guesses.push(username);
+					await tick();
 				}
 				return;
 			}
