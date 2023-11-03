@@ -69,7 +69,7 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url: channelLink(config.guild.id,config.channels.support)
+							url: channelLink(config.guild.id, config.channels.support),
 						},
 					],
 				},
