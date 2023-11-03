@@ -5,6 +5,7 @@ import {
 	ChannelType,
 	ComponentType,
 	GuildMember,
+	TextInputStyle,
 	channelLink,
 } from "discord.js";
 import config from "../../common/config.js";
@@ -27,6 +28,7 @@ import {
 	getIdFromName,
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
+import log, { LoggingEmojis } from "../logging/misc.js";
 
 const resourcesDmed = new Set<string>();
 
@@ -126,6 +128,64 @@ defineModal("contactMods", async (interaction, id) => {
 		} **Ticket opened!** Send the mods messages in ${thread.toString()}.`,
 	);
 });
+defineMenuCommand(
+	{ name: "Report Message", type: ApplicationCommandType.Message, access: false },
+	async (interaction) => {
+		await interaction.showModal({
+			title: "Report Message",
+			customId: interaction.id,
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.TextInput,
+							style: TextInputStyle.Paragraph,
+							label: "Concisely explain how this message breaks the rules",
+							required: true,
+							customId: "reason",
+							minLength: 10,
+							maxLength: 200,
+						},
+					],
+				},
+			],
+		});
+
+		const modalInteraction = await interaction
+			.awaitModalSubmit({
+				time: constants.collectorTime,
+				filter: (modalInteraction) => modalInteraction.customId === interaction.id,
+			})
+			.catch(() => void 0);
+
+		if (!modalInteraction) return;
+		const reason = modalInteraction.fields.getTextInputValue("reason");
+
+		await log(
+			`${LoggingEmojis.Punishment} ${interaction.user} reported a message by ${interaction.targetMessage.author} - ${interaction.targetMessage.url}\n${reason}`,
+			undefined,
+			{
+				buttons: [
+					{
+						label: "Contact Reporter",
+						style: ButtonStyle.Secondary,
+						customId: `${interaction.user.id}_contactUser`,
+					},
+					{
+						label: "Contact Reportee",
+						style: ButtonStyle.Secondary,
+						customId: `${interaction.targetMessage.author.id}_contactUser`,
+					},
+				],
+			},
+		);
+		await interaction.reply({
+			content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
+			ephemeral: true,
+		});
+	},
+);
 
 defineChatCommand(
 	{

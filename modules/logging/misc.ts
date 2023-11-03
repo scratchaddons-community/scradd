@@ -34,7 +34,10 @@ export default async function log(
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
-		buttons?: { label: string; url: string }[];
+		buttons?: ({ label: string } & (
+			| { url: string }
+			| { customId: string; style: Exclude<ButtonStyle, ButtonStyle.Link> }
+		))[];
 	} = {},
 ) {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
@@ -66,8 +69,8 @@ export default async function log(
 		components: extra.buttons && [
 			{
 				components: extra.buttons.map((button) => ({
-					...button,
 					style: ButtonStyle.Link,
+					...button,
 					type: ComponentType.Button,
 				})),
 				type: ComponentType.ActionRow,
