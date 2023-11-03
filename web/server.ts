@@ -9,6 +9,7 @@ import appealRequest from "../modules/forms/showAppeal.js";
 import pkg from "../package.json" assert { type: "json" };
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import linkScratchRole from "../modules/roles/scratch.js";
 
 const CSS = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
@@ -42,6 +43,10 @@ const server = http.createServer(async (request, response) => {
 			case "/ban-appeal":
 			case "/ban-appeal/": {
 				return await appealRequest(request, response);
+			}
+			case "/link-scratch":
+			case "/link-scratch/": {
+				return await linkScratchRole(request, response);
 			}
 			case "/style.css": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS);
