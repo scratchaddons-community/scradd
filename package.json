@@ -28,7 +28,7 @@
 		"match-sorter": "6.3.1",
 		"mongoose": "7.6.3",
 		"papaparse": "5.4.1",
-		"serialize-error": "11.0.2",
+		"serialize-error": "11.0.3",
 		"strife.js": "^2.0.1"
 	},
 	"devDependencies": {
