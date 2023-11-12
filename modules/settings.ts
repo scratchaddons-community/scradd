@@ -232,6 +232,6 @@ export async function mentionUser(
 	const { displayName } =
 		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
 	return displayName
-		? `${hyperlink(censor(displayName), url)} ${icon} `
-		: `${userMention(id)} ${icon} `;
+		? `${hyperlink(censor(displayName), url)} ${icon}`
+		: `${userMention(id)} ${icon}`;
 }
