@@ -222,7 +222,7 @@ export async function mentionUser(
 	const icon = member.roles.icon?.unicodeEmoji;
 
 	const { useMentions } = getSettings(interactor);
-	if (useMentions) return icon + userMention(id);
+	if (useMentions) return `${userMention(id)} ${icon}`;
 
 	const presence = guild.presences.resolve(interactor.id);
 	const url = `<${
