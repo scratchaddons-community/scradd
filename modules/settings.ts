@@ -7,8 +7,6 @@ import {
 	User,
 	userMention,
 	hyperlink,
-	GuildMember,
-	Guild,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -218,8 +216,8 @@ export async function mentionUser(
 ) {
 	const id = user instanceof User ? user.id : user;
 
-	const member = (await guild.members.fetch(id).catch(() => void 0)) as GuildMember;
-	const icon = member.roles.icon?.unicodeEmoji;
+	const member = await guild.members.fetch(id).catch(() => void 0)
+	const icon = member?.roles.icon?.unicodeEmoji;
 
 	const { useMentions } = getSettings(interactor);
 	if (useMentions) return `${userMention(id)} ${icon}`;
