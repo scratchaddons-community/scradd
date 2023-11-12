@@ -216,7 +216,7 @@ export async function mentionUser(
 ) {
 	const id = user instanceof User ? user.id : user;
 
-	const member = await guild.members.fetch(id).catch(() => void 0)
+	const member = await guild.members.fetch(id).catch(() => void 0);
 	const icon = member?.roles.icon?.unicodeEmoji;
 
 	const { useMentions } = getSettings(interactor);
