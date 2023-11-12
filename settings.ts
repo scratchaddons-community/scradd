@@ -8,7 +8,7 @@ import {
 	userMention,
 	hyperlink,
 	GuildMember,
-	Guild
+	Guild,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -218,8 +218,8 @@ export async function mentionUser(
 ) {
 	const id = user instanceof User ? user.id : user;
 
-	const member = await guild.members.fetch(id).catch(() => void 0) as GuildMember;
-   	const icon = member.roles.icon?.unicodeEmoji
+	const member = (await guild.members.fetch(id).catch(() => void 0)) as GuildMember;
+	const icon = member.roles.icon?.unicodeEmoji;
 
 	const { useMentions } = getSettings(interactor);
 	if (useMentions) return icon + userMention(id);
@@ -231,5 +231,7 @@ export async function mentionUser(
 
 	const { displayName } =
 		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
-	return displayName ? `${hyperlink(censor(displayName), url)} ${icon} ` : `${userMention(id)} ${icon} `;
+	return displayName
+		? `${hyperlink(censor(displayName), url)} ${icon} `
+		: `${userMention(id)} ${icon} `;
 }
