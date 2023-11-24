@@ -65,14 +65,15 @@ defineEvent.pre("messageCreate", async (message) => {
 	if (message.guild?.id === config.guild.id) return await automodMessage(message);
 	return true;
 });
-defineEvent("messageUpdate", async (_, partialMessage) => {
-	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
+defineEvent("messageUpdate", async (_, message) => {
+	if (message.partial) return;
 	if (
 		!message.flags.has("Ephemeral") &&
 		message.type !== MessageType.ThreadStarterMessage &&
 		message.guild?.id === config.guild.id
 	)
-		await automodMessage(message);
+		return await automodMessage(message);
+	return true;
 });
 defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;

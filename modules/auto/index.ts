@@ -138,7 +138,7 @@ defineEvent("messageCreate", async (message) => {
 });
 
 defineEvent("messageUpdate", async (_, message) => {
-	if (message.partial) message = await message.fetch();
+	if (message.partial) return;
 
 	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
 	const found = fetched.find(
@@ -161,7 +161,7 @@ defineEvent("messageUpdate", async (_, message) => {
 	if (
 		message.channel.id === message.id ||
 		message.channel.isDMBased() ||
-		ignoreTriggers.some((trigger) => message.content?.match(trigger))
+		ignoreTriggers.some((trigger) => message.content.match(trigger))
 	)
 		return;
 

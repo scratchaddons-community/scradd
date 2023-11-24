@@ -143,9 +143,9 @@ export async function messageReactionRemoveAll(
 }
 export async function messageUpdate(
 	oldMessage: Message | PartialMessage,
-	partialMessage: Message | PartialMessage,
+	newMessage: Message | PartialMessage,
 ) {
-	const newMessage = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
+	if (newMessage.partial) return;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
 
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
