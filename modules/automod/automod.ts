@@ -67,9 +67,9 @@ export default async function automodMessage(message: Message) {
 		if (
 			!message.author.bot &&
 			config.channels.advertise &&
-			config.channels.advertise.id !== baseChannel?.id &&
-			config.channels.announcements?.id !== baseChannel?.id &&
-			baseChannel?.type !== ChannelType.GuildAnnouncement
+			(config.channels.advertise.id !== baseChannel?.id ||
+				(!baseChannel.isDMBased() &&
+					baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")))
 		) {
 			const badInvites = invites
 				.filter(
