@@ -1,4 +1,4 @@
-import { ChannelType, MessageType, type BaseMessageOptions } from "discord.js";
+import { ChannelType, MessageType, type BaseMessageOptions, Message } from "discord.js";
 import { getSettings } from "../settings.js";
 import { BOARD_EMOJI } from "../board/misc.js";
 import config from "../../common/config.js";
@@ -8,6 +8,7 @@ import { normalize } from "../../util/text.js";
 import { autoreactions, dad } from "./secrets.js";
 import { client, defineEvent } from "strife.js";
 import scratch from "./scratch.js";
+import constants from "../../common/constants.js";
 
 const REACTION_CAP = 3;
 
@@ -23,9 +24,6 @@ const ignoreTriggers = [
 ];
 
 defineEvent("messageCreate", async (message) => {
-	const content = stripMarkdown(normalize(message.content.toLowerCase()));
-	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
-
 	let reactions = 0;
 
 	if (
@@ -44,58 +42,9 @@ defineEvent("messageCreate", async (message) => {
 		}
 	}
 
-	const baseChannel = getBaseChannel(message.channel);
-	if (config.channels.modlogs?.id === baseChannel?.id) return;
+	if (await handleMutatable(message)) return;
 
-	const scratchData = await scratch(message);
-	if (scratchData) return await message.reply({ embeds: scratchData });
-
-	if (
-		message.channel.id === message.id ||
-		message.channel.isDMBased() ||
-		ignoreTriggers.some((trigger) => message.content.match(trigger))
-	)
-		return;
-
-	const pingsScradd = message.mentions.has(client.user, {
-		ignoreEveryone: true,
-		ignoreRepliedUser: true,
-		ignoreRoles: true,
-	});
-	if (
-		!pingsScradd &&
-		(config.channels.info?.id === baseChannel?.id ||
-			(message.guild?.id !== config.guild.id &&
-				baseChannel?.type !== ChannelType.DM &&
-				!baseChannel?.name.match(/\bbots?\b/i)) ||
-			!(await getSettings(message.author)).autoreactions)
-	)
-		return;
-
-	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’’]?m\b/u.test(cleanContent)) {
-		const name = cleanContent
-			.split(
-				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
-			)[0]
-			?.split(/\s/g)
-			.slice(1)
-			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
-			.join(" ");
-
-		if (
-			name &&
-			message.member &&
-			(pingsScradd ||
-				message.guild?.id !== config.guild.id ||
-				config.channels.bots?.id === baseChannel?.id)
-		) {
-			return await message.reply({
-				content: dad(name, message.member),
-				allowedMentions: { users: [], repliedUser: true },
-			});
-		}
-	}
-
+	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 	reactionLoop: for (const [emoji, ...requirements] of autoreactions) {
 		let doReact = false;
 		const emojis = [emoji].flat();
@@ -147,23 +96,43 @@ defineEvent("messageUpdate", async (_, message) => {
 			found.author.id === client.user.id &&
 			+found.createdAt - +message.createdAt < 1000,
 	);
-	const send = (data: BaseMessageOptions) =>
-		fetched.size ? found?.edit(data) : message.reply(data);
 
-	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
+	if (fetched.size && !found) return;
 
+	if (
+		!(await handleMutatable(
+			message,
+			found ? (data: BaseMessageOptions) => found.edit(data) : undefined,
+		))
+	)
+		await found?.edit({
+			content: constants.zws,
+			attachments: [],
+			components: [],
+			embeds: [],
+			files: [],
+		});
+});
+
+async function handleMutatable(
+	message: Message,
+	send = (data: BaseMessageOptions) => message.reply(data),
+) {
 	const baseChannel = getBaseChannel(message.channel);
-	if (config.channels.modlogs?.id === baseChannel?.id) return;
+	if (config.channels.modlogs?.id === baseChannel?.id) return false;
 
 	const scratchData = await scratch(message);
-	if (scratchData) return await send({ embeds: scratchData, content: "" });
+	if (scratchData) {
+		await send({ embeds: scratchData });
+		return true;
+	}
 
 	if (
 		message.channel.id === message.id ||
 		message.channel.isDMBased() ||
 		ignoreTriggers.some((trigger) => message.content.match(trigger))
 	)
-		return;
+		return false;
 
 	const pingsScradd = message.mentions.has(client.user, {
 		ignoreEveryone: true,
@@ -178,9 +147,10 @@ defineEvent("messageUpdate", async (_, message) => {
 				!baseChannel?.name.match(/\bbots?\b/i)) ||
 			!(await getSettings(message.author)).autoreactions)
 	)
-		return;
+		return false;
 
-	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’’]?m\b/u.test(cleanContent)) {
+	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
+	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
 		const name = cleanContent
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
@@ -197,16 +167,16 @@ defineEvent("messageUpdate", async (_, message) => {
 				message.guild?.id !== config.guild.id ||
 				config.channels.bots?.id === baseChannel?.id)
 		) {
-			return await send({
+			await send({
 				content: dad(name, message.member),
-				embeds: [],
-				allowedMentions: { users: [] },
+				allowedMentions: { users: [], repliedUser: true },
 			});
+			return true;
 		}
 	}
 
-	await found?.delete();
-});
+	return false;
+}
 
 defineEvent("messageDelete", async (message) => {
 	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
