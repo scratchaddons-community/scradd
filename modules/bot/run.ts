@@ -59,12 +59,8 @@ export async function run(interaction: ModalSubmitInteraction) {
 						typeof output === "bigint" || typeof output === "symbol"
 							? // eslint-disable-next-line unicorn/string-content
 							  `"${output.toString().replaceAll('"', '\\"')}"`
-							: typeof output === "function"
-							? output.toString()
-							: typeof output === "object"
-							? JSON.stringify(output, undefined, "  ")
-							: output === undefined
-							? "undefined"
+							: output === undefined || typeof output === "object"
+							? JSON.stringify(output, undefined, "  ") ?? "undefined"
 							: // eslint-disable-next-line @typescript-eslint/no-base-to-string
 							  output.toString(),
 						"utf8",
