@@ -37,23 +37,27 @@ defineChatCommand(
 );
 defineModal("run", run);
 
-defineChatCommand(
-	{
-		name: "kill",
-		description: `(${process.env.NODE_ENV === "production" ? "Admin" : "Scradd dev"} only) ${
-			process.env.NODE_ENV === "production" ? "Restarts" : "Kills"
-		} the bot`,
-
-		restricted: true,
-	},
-
-	async (interaction) => {
-		await cleanDatabaseListeners();
-		await interaction.reply("Killing bot…");
-		process.emitWarning(`${interaction.user.tag} is killing the bot`);
-		process.exit(1);
-	},
-);
+if (process.env.NODE_ENV === "production") {
+	defineChatCommand(
+		{ name: "restart", description: "(Admin only) Restarts the bot", restricted: true },
+		async (interaction) => {
+			await cleanDatabaseListeners();
+			await interaction.reply("Restarts bot…");
+			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
+			process.exit(1);
+		},
+	);
+} else {
+	defineChatCommand(
+		{ name: "kill", description: "(Scradd dev only) Kills the bot", restricted: true },
+		async (interaction) => {
+			await cleanDatabaseListeners();
+			await interaction.reply("Killing bot…");
+			process.emitWarning(`${interaction.user.tag} is killing the bot`);
+			process.exit(1);
+		},
+	);
+}
 
 defineChatCommand(
 	{
