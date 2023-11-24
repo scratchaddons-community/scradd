@@ -169,7 +169,7 @@ async function purge(
 
 	const collector = reply.createMessageComponentCollector({
 		idle: constants.collectorTime,
-		time: 14 * 60 * 1000 + 50,
+		time: (14 * 60 + 50) * 1000,
 	});
 
 	collector

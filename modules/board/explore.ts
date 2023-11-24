@@ -161,7 +161,7 @@ export default async function makeSlideshow(
 			buttonInteraction.user.id === interaction.user.id,
 
 		idle: GAME_COLLECTOR_TIME,
-		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
+		time: ephemeral ? (14 * 60 + 50) * 1000 : undefined,
 	});
 
 	collector

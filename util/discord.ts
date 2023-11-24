@@ -693,7 +693,7 @@ export async function paginate<Item>(
 			buttonInteraction.user.id === user.id,
 
 		idle: constants.collectorTime,
-		time: ephemeral ? 14 * 60 * 1000 + 50 : undefined,
+		time: ephemeral ? (14 * 60 + 50) * 1000 : undefined,
 	});
 
 	collector
