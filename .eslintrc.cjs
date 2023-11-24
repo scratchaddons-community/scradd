@@ -105,6 +105,8 @@ module.exports = {
 				checkShorthandImports: true,
 				checkShorthandProperties: true,
 				replacements: {
+					arg: false,
+					args: false,
 					attr: false,
 					attrs: false,
 					cmd: { command: true },
