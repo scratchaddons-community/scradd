@@ -66,7 +66,7 @@ export async function showTicketModal(
 		});
 	}
 
-	if (!TICKET_CATEGORIES.includes(option))
+	if (!option || !TICKET_CATEGORIES.includes(option))
 		throw new TypeError(`Unknown ticket category: ${option}`);
 
 	const fields = allFields[option];

@@ -124,16 +124,14 @@ async function userInfo(
 	];
 	const rows = buttonData
 		.map((row) =>
-			row
-				.filter((button): button is { customId: string; label: string } => !!button)
-				.map(
-					(button) =>
-						({
-							...button,
-							style: ButtonStyle.Secondary,
-							type: ComponentType.Button,
-						} as const),
-				),
+			row.filter(Boolean).map(
+				(button) =>
+					({
+						...button,
+						style: ButtonStyle.Secondary,
+						type: ComponentType.Button,
+					} as const),
+			),
 		)
 		.filter(({ length }) => length);
 

@@ -2,47 +2,94 @@ import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
 
 declare global {
-	interface ReadonlyArray<T> {
-		/**
-		 * Determines whether an array includes a certain element, returning true or false as appropriate.
-		 *
-		 * @author jcalz [`ReadonlyArray`](https://stackoverflow.com/a/56745484/11866686)
-		 *
-		 * @param searchElement The element to search for.
-		 * @param fromIndex The position in this array at which to begin searching for searchElement.
-		 */
-		includes<U>(
-			searchElement: T | (T & U extends never ? never : U),
-			fromIndex?: 0,
-		): searchElement is T;
+	interface Array<T> {
+		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
+		map<U>(
+			callbackfn: (value: T, index: number, array: T[]) => U,
+			thisArg?: unknown,
+		): { [K in keyof this]: U };
 	}
+	interface ReadonlyArray<T> {
+		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
+		includes(
+			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			fromIndex?: number,
+		): searchElement is T;
+		lastIndexOf(
+			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			fromIndex?: number,
+		): number;
+		indexOf(
+			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			fromIndex?: number,
+		): number;
+		map<U>(
+			callbackfn: (value: T, index: number, array: readonly T[]) => U,
+			thisArg?: unknown,
+		): { readonly [K in keyof this]: U };
+	}
+	interface ReadonlySet<T> {
+		has(value: T | (WidenLiteral<T> & NonNullable<unknown>)): boolean;
+	}
+
 	interface ObjectConstructor {
-		/**
-		 * Returns an array of key/values of the enumerable properties of an object.
-		 *
-		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
-		 *   Model (DOM) object.
-		 */
 		entries<T, U extends PropertyKey>(
 			o: Record<U, T> | ArrayLike<T>,
 		): [U extends number ? `${U}` : U, T][];
-		/**
-		 * Returns an object created by key-value entries for properties and methods.
-		 *
-		 * @param entries An iterable object that contains key-value entries for properties and methods.
-		 */
 		fromEntries<T, U extends PropertyKey>(entries: Iterable<readonly [U, T]>): Record<U, T>;
-		/**
-		 * Returns the names of the enumerable string properties and methods of an object.
-		 *
-		 * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object
-		 *   Model (DOM) object.
-		 */
 		keys<U extends PropertyKey>(entries: Record<U, unknown>): (U extends number ? `${U}` : U)[];
 	}
+
 	interface Body {
 		json<T = unknown>(): Promise<T>;
 	}
+	interface JSON {
+		stringify<T>(
+			value: T,
+			replacer?: (string | number)[] | null | undefined,
+			space?: string | number | undefined,
+		): T extends UndefinedDomain ? undefined : UndefinedDomain extends T ? undefined : string;
+		stringify<T>(
+			value: T,
+			replacer: (this: unknown, key: string, value: ToJSON<T>) => unknown,
+			space?: string | number | undefined,
+		): string;
+		stringify<T>(
+			value: T,
+			replacer?: undefined | ((this: unknown, key: string, value: ToJSON<T>) => unknown),
+			space?: string | number | undefined,
+		): string | undefined;
+
+		parse(text: string): unknown;
+		parse<T = unknown>(
+			text: string,
+			reviver: <M extends string>(this: Record<M, unknown>, key: M, value: unknown) => T,
+		): T;
+	}
+
+	interface BooleanConstructor {
+		// eslint-disable-next-line @typescript-eslint/ban-types
+		new (value?: unknown): Boolean;
+		<T>(value?: T): value is NonFalsy<T>;
+		// eslint-disable-next-line @typescript-eslint/ban-types
+		readonly prototype: Boolean;
+	}
+	interface String {
+		split<Separator extends string, Limit extends number>(
+			separator: Separator,
+			limit?: Limit,
+		): Limit extends 0 ? [] : Separator extends "" ? string[] : [string, ...string[]];
+		startsWith<P extends string>(searchString: P, position?: 0): this is `${P}${string}`;
+		endsWith<P extends string>(
+			searchString: P,
+			endPosition?: undefined,
+		): this is `${string}${P}`;
+		toLowerCase<T extends string>(this: T): Lowercase<T>;
+		toLocaleLowerCase<T extends string>(this: T): Lowercase<T>;
+		toUpperCase<T extends string>(this: T): Uppercase<T>;
+		toLocaleUpperCase<T extends string>(this: T): Uppercase<T>;
+	}
+
 	namespace NodeJS {
 		interface ProcessEnv {
 			/** The main guild ID for the bot to operate in. Requires Administrator permission in this server. */
@@ -93,3 +140,24 @@ declare module "strife.js" {
 		inGuild: true;
 	}
 }
+
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+type NonFalsy<T> = T extends false | 0 | "" | null | undefined | void | 0n ? never : T;
+type WidenLiteral<T> = T extends string
+	? string
+	: T extends number
+	? number
+	: T extends boolean
+	? boolean
+	: T extends bigint
+	? bigint
+	: T extends symbol
+	? symbol
+	: T;
+
+type UndefinedDomain =
+	| symbol
+	| ((...args: unknown[]) => unknown)
+	| (new (...args: unknown[]) => unknown)
+	| undefined;
+type ToJSON<A> = A extends { toJSON(...args: unknown[]): infer T } ? T : A;

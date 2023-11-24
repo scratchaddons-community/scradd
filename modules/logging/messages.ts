@@ -6,7 +6,6 @@ import {
 	type GuildTextBasedChannel,
 	type MessageReaction,
 	Colors,
-	type UserMention,
 	messageLink,
 } from "discord.js";
 import { diffString } from "json-diff";
@@ -95,7 +94,7 @@ export async function messageDeleteBulk(
 	const allAuthors = messages.map(({ author }) => author?.toString());
 	const unknownCount = allAuthors.filter((author) => !author).length;
 	const authors = [
-		...new Set(allAuthors.filter((author): author is UserMention => Boolean(author))),
+		...new Set(allAuthors.filter(Boolean)),
 		...(unknownCount ? [`${unknownCount} unknown users`] : []),
 	];
 

@@ -45,7 +45,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 	if (!process.env.CLIENT_SECRET)
 		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 
-	const requestUrl = getRequestUrl(request)
+	const requestUrl = getRequestUrl(request);
 	const redirectUri = requestUrl.origin + requestUrl.pathname;
 	const oAuthUrl = `https://discord.com${Routes.oauth2Authorization()}?client_id=${
 		client.user.id
@@ -194,7 +194,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 							value:
 								Object.entries(persistedRoles)
 									.map(([name, ids]) => persistant?.[name] && [ids].flat()[0])
-									.filter((role): role is string => !!role)
+									.filter(Boolean)
 									.toSorted((one, two) =>
 										config.guild.roles.comparePositions(one, two),
 									)

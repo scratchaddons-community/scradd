@@ -29,16 +29,15 @@ export default async function scratch(message: Message) {
 
 		const start = match.startsWith("http") ? 0 : 1,
 			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
-		const urlParts =
-			match
-				.slice(start, end)
-				.replace(
-					/https?:\/\/scratch\.(?:mit\.edu|org)\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
-					constants.urls.scratch + "/discuss/post/",
-				)
-				.split("#")[0]
-				?.split("?")[0]
-				?.split("/") ?? [];
+		const urlParts = match
+			.slice(start, end)
+			.replace(
+				/https?:\/\/scratch\.(?:mit\.edu|org)\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
+				constants.urls.scratch + "/discuss/post/",
+			)
+			.split("#")[0]
+			.split("?")[0]
+			.split("/");
 
 		switch (urlParts[3]) {
 			case "projects": {

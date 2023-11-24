@@ -175,7 +175,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 							oldMessage?.embeds[0]?.footer?.text.replace(
 								/\d+ questions?/,
 								(previousCount) =>
-									`${1 + Number(previousCount.split(" ")[0] ?? 0)} question${
+									`${1 + Number(previousCount.split(" ")[0])} question${
 										previousCount === "0 questions" ? "" : "s"
 									}`,
 							) ??

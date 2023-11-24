@@ -2,7 +2,6 @@ import {
 	type Message,
 	RESTJSONErrorCodes,
 	type Snowflake,
-	Attachment,
 	type TextBasedChannel,
 } from "discord.js";
 import papaparse from "papaparse";
@@ -241,7 +240,7 @@ export async function backupDatabases(channel: TextBasedChannel) {
 
 	const attachments = Object.values(databases)
 		.map((database) => database?.attachments.first())
-		.filter((attachment): attachment is Attachment => Boolean(attachment));
+		.filter(Boolean);
 
 	await channel.send("# Daily Scradd Database Backup");
 	while (attachments.length) {

@@ -1,7 +1,6 @@
 import {
 	time,
 	type Snowflake,
-	type Role,
 	TimestampStyles,
 	ChannelType,
 	ComponentType,
@@ -239,20 +238,15 @@ function getConfig() {
 		},
 		{
 			description: "**ROLES**",
-			fields: Object.entries(config.roles)
-				.filter(
-					(role): role is [typeof role[0], Role | undefined] =>
-						typeof role[1] !== "string",
-				)
-				.map((role) => ({
-					name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
-						.split("_")
-						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-						.join(" ")} role`,
+			fields: Object.entries(config.roles).map((role) => ({
+				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
+					.split("_")
+					.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
+					.join(" ")} role`,
 
-					value: role[1]?.toString() ?? "*None*",
-					inline: true,
-				})),
+				value: role[1]?.toString() ?? "*None*",
+				inline: true,
+			})),
 			color: constants.themeColor,
 		},
 	];
