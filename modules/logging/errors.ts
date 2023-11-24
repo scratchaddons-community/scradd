@@ -44,7 +44,14 @@ export default async function logError(
 					  )
 			}`,
 			"server",
-			{ files: [{ content: generateError(error), extension: "json" }] },
+			{
+				files: [
+					{
+						content: JSON.stringify(generateError(error), undefined, "  "),
+						extension: "json",
+					},
+				],
+			},
 		);
 	} catch (errorError) {
 		console.error(errorError);
@@ -61,16 +68,9 @@ export default async function logError(
  *
  * @returns The standardized error.
  */
-export function generateError(error: unknown, returnObject: true): Record<string, unknown>;
-export function generateError(error: unknown, returnObject?: false): string;
-export function generateError(
-	error: unknown,
-	returnObject = false,
-): string | Record<string, unknown> {
+export function generateError(error: unknown): object {
 	if (typeof error === "object" && error) {
 		const serialized = serializeError(error);
-
-		if (typeof serialized === "string") return serialized;
 		delete serialized.name;
 		delete serialized.message;
 		delete serialized.stack;
@@ -78,25 +78,30 @@ export function generateError(
 		delete serialized.cause;
 		delete serialized.error;
 		delete serialized.surpressed;
+		delete serialized.reason;
 
 		const subErrors =
 			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
 
 		const object = {
-			name: returnObject && "name" in error ? error.name : undefined,
+			name: "name" in error ? error.name : undefined,
 			message: "message" in error ? error.message : undefined,
 			stack: sanitizePath(
-				`${("stack" in error ? error : new Error("dummy message")).stack}`,
-			).split("\n"),
-			errors: subErrors?.map((sub) => generateError(sub, true)),
-			cause: "cause" in error ? generateError(error.cause, true) : undefined,
-			error: "error" in error ? generateError(error.error, true) : undefined,
-			surpressed: "surpressed" in error ? generateError(error.surpressed, true) : undefined,
+				// eslint-disable-next-line unicorn/error-message
+				`${("stack" in error ? error : new Error()).stack}`,
+			)
+				.split("\n")
+				.slice(1),
+			errors: subErrors?.map((sub) => generateError(sub)),
+			cause: "cause" in error ? generateError(error.cause) : undefined,
+			error: "error" in error ? generateError(error.error) : undefined,
+			surpressed: "surpressed" in error ? generateError(error.surpressed) : undefined,
+			reason: "reason" in error ? generateError(error.reason) : undefined,
 			...(typeof serialized === "object" ? serialized : { serialized }),
 		};
-		return returnObject ? object : JSON.stringify(object, undefined, "  ");
+		return object;
 	}
-	return `${error}`;
+	return { error };
 }
 
 export function sanitizePath(unclean: string, relative = true): string {

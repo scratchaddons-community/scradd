@@ -81,11 +81,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			files: [
 				{
 					attachment: Buffer.from(
-						JSON.stringify(
-							{ ...generateError(error, true), stack: undefined },
-							undefined,
-							"  ",
-						),
+						JSON.stringify(generateError(error), undefined, "  "),
 						"utf8",
 					),
 
@@ -107,7 +103,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			files: [
 				{
 					attachment: Buffer.from(
-						JSON.stringify({ ...generateError(error, true) }, undefined, "  "),
+						JSON.stringify(generateError(error), undefined, "  "),
 						"utf8",
 					),
 
