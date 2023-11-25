@@ -175,7 +175,7 @@ defineChatCommand(
 			ephemeral: true,
 
 			content: words
-				? `⚠️ **${words.length} bad word${words.length ? "s" : ""} detected**!\n${
+				? `⚠️ **${words.length} bad word${words.length === 1 ? "s" : ""} detected**!\n${
 						config.roles.staff &&
 						(interaction.member instanceof GuildMember
 							? interaction.member.roles.resolve(config.roles.staff.id)

@@ -192,8 +192,9 @@ export default class Database<Data extends Record<string, string | number | bool
 }
 
 export async function cleanDatabaseListeners() {
+	const count = Object.values(timeouts).length;
 	console.log(
-		`Cleaning ${Object.values(timeouts).length} listeners: ${Object.keys(timeouts).join(",")}`,
+		`Cleaning ${count} listener${count === 1 ? "" : "s"}: ${Object.keys(timeouts).join(",")}`,
 	);
 	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 	timeouts = {};

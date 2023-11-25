@@ -84,7 +84,9 @@ defineModal("poll", async (interaction, voteMode) => {
 	if (options.length > DEFAULT_SHAPES.length)
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You can’t have over ${DEFAULT_SHAPES.length} options!`,
+			content: `${constants.emojis.statuses.no} You can’t have over ${
+				DEFAULT_SHAPES.length
+			} option${DEFAULT_SHAPES.length === 1 ? "" : "s"}!`,
 		});
 
 	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
