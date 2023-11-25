@@ -57,7 +57,7 @@ export async function customRole(interaction: ChatInputCommandInteraction<"cache
 						label: `Role name${existingRole ? " (leave blank to delete)" : ""}`,
 						style: TextInputStyle.Short,
 						type: ComponentType.TextInput,
-						maxLength: 100,
+						maxLength: 98,
 						required: !existingRole,
 						value: existingRole?.name.replace(PREFIX, ""),
 					},
