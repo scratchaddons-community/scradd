@@ -244,7 +244,15 @@ defineButton("contactUser", async (interaction, userId = "") => {
 		});
 	}
 
-	const member = await config.guild.members.fetch(userId);
+	const member = await config.guild.members.fetch(userId).catch(() => void 0);
+	if (!member) {
+		await interaction.reply({
+			content: `${constants.emojis.statuses.no} Could not find member.`,
+			ephemeral: true,
+		});
+
+		return;
+	}
 	await contactUser(member, interaction);
 });
 
