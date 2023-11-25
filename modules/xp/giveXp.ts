@@ -109,8 +109,8 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 
 	if (
 		(config.guild.memberCount > 2000
-			? rank < 20
-			: serverRank / config.guild.memberCount < 0.01) &&
+			? serverRank / config.guild.memberCount < 0.01
+			: rank < 20) &&
 		member &&
 		config.roles.epic &&
 		!member.roles.resolve(config.roles.epic.id)
