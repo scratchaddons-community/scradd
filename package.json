@@ -43,7 +43,7 @@
 		"eslint-plugin-unicorn": "49.0.0",
 		"nodemon": "3.0.1",
 		"prettier": "2.8.0",
-		"typescript": "5.3.2"
+		"typescript": "5.3.3"
 	},
 	"optionalDependencies": {
 		"@railway/cli": "3.5.2"
