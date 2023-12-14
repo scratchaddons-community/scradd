@@ -47,7 +47,7 @@ export async function guildMemberAdd(member: GuildMember) {
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
 
 	if (member.user.flags?.has("Spammer")) {
-		await log(`${LoggingEmojis.User} ${member.toString()} marked as likely spammer`, "members");
+		await log(`${LoggingEmojis.Punishment} ${member.toString()} marked as likely spammer`, "members");
 	}
 }
 export async function guildMemberRemove(member: GuildMember | PartialGuildMember) {
