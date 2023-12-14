@@ -8,11 +8,8 @@ import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
 
-defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
-	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-	if (reaction.emoji.name !== BOARD_EMOJI) return;
-
-	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
+defineEvent("messageReactionAdd", async ({ message: partialMessage }, partialUser) => {
+	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 	if (
 		message.author.id === client.user.id &&
 		(message.channel.id === config.channels.board?.id || message.webhookId) &&
@@ -21,15 +18,18 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	)
 		return;
 
+	const reaction = message.reactions.resolve(BOARD_EMOJI);
+	if (!reaction) return;
+
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 	if (user.id === message.author.id && process.env.NODE_ENV === "production")
 		return await reaction.users.remove(user);
 
-	await updateBoard(reaction);
+	await updateBoard({ count: reaction.count, message });
 });
-defineEvent("messageReactionRemove", async (partialReaction) => {
-	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-	if (reaction.emoji.name === BOARD_EMOJI) await updateBoard(reaction);
+defineEvent("messageReactionRemove", async ({ message: partialMessage }) => {
+	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
+	await updateBoard({ count: message.reactions.resolve(BOARD_EMOJI)?.count ?? 0, message });
 });
 
 defineChatCommand(
@@ -78,11 +78,10 @@ defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		const reaction = interaction.targetMessage.reactions.resolve(BOARD_EMOJI) ?? {
-			count: 0,
+		await updateBoard({
+			count: interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0,
 			message: interaction.targetMessage,
-		};
-		await updateBoard(reaction);
+		});
 		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
 	},
 );

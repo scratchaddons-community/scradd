@@ -204,8 +204,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 							.fetch(info.source)
 							.catch(() => void 0);
 						const reaction = message?.reactions.resolve(BOARD_EMOJI);
-						if (reaction) {
-							await updateBoard(reaction);
+						if (message && reaction) {
+							await updateBoard({ count: reaction.count, message });
 							break;
 						}
 					}

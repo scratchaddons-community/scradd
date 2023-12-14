@@ -1,23 +1,20 @@
-import { ChannelType, Message, MessageReaction } from "discord.js";
+import { ChannelType, Message, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
 import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 
-let postingToBoard = false;
+const processing = new Set<Snowflake>();
 
 /**
  * Update the count on a message on the board.
  *
  * @param message - The board message to update.
  */
-export default async function updateBoard(
-	reaction: MessageReaction | { count: number; message: Message },
-) {
-	if (postingToBoard) return;
-	postingToBoard = true;
+export default async function updateBoard({ count, message }: { count: number; message: Message }) {
+	if (processing.has(message.id)) return;
+	processing.add(message.id);
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
-	const { count, message } = reaction;
 	const reactionThreshold = boardReactionCount(message.channel, message.createdAt);
 	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
@@ -37,29 +34,26 @@ export default async function updateBoard(
 			updateById({ source: message.id, reactions: count });
 		}
 	} else if (count >= reactionThreshold) {
-		const fetched = await message.fetch();
-
 		const sentMessage = await config.channels.board.send({
-			...(await generateBoardMessage(fetched)),
+			...(await generateBoardMessage(message)),
 			allowedMentions: {
-				users: (await getSettings(fetched.author)).boardPings ? [fetched.author.id] : [],
+				users: (await getSettings(message.author)).boardPings ? [message.author.id] : [],
 			},
 		});
 
-		await giveXp(fetched.author, sentMessage.url);
+		await giveXp(message.author, sentMessage.url);
 
 		if (config.channels.board.type === ChannelType.GuildAnnouncement)
 			await sentMessage.crosspost();
 
 		updateById(
-			{ source: fetched.id, onBoard: sentMessage.id, reactions: count },
-			{ channel: fetched.channel.id, user: fetched.author.id },
+			{ source: message.id, onBoard: sentMessage.id, reactions: count },
+			{ channel: message.channel.id, user: message.author.id },
 		);
 	} else {
-		const fetched = await message.fetch();
 		updateById(
 			{ source: message.id, reactions: count, onBoard: 0 },
-			{ channel: message.channel.id, user: fetched.author.id },
+			{ channel: message.channel.id, user: message.author.id },
 		);
 	}
 
@@ -89,7 +83,7 @@ export default async function updateBoard(
 		);
 	}
 
-	postingToBoard = false;
+	processing.delete(message.id);
 }
 
 function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
