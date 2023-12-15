@@ -8,7 +8,7 @@ Feel free to fork Scradd to use some features in your servers.
 
 ## Contributing
 
-The majority of Scradd is made by @RedGuy12 (`RedGuy13#5922`). Thanks to everyone with the `@Scradd Contributor` role in the SA server for help as well!
+The majority of Scradd is programmed by @RedGuy12 (`RedGuy13#5922`). Thanks to everyone with the `@Scradd Contributor` role in the SA server for help as well!
 
 Pull requests are welcome if you would like to help contribute. However, before coding new features, please discuss it with @RedGuy12 in an issue here, or the Scradd private/SA server on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you'll do it. Please also check the [Contributing Guidelines](/.github/CONTRIBUTING.md) before starting to code for more guidelines to follow.
 
@@ -41,7 +41,7 @@ Pull requests are welcome if you would like to help contribute. However, before 
 
 ### File structure
 
-This bot is made using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well.
+This bot is built using [Strife.js](https://github.com/RedGuy12/strife.js). Please follow its style guide and structure. In addition, the `common` directory contains code used across multiple features, and the `util` directory contains utility functions used across the codebase. `util` is different from `common` as its functions are not specific to this bot but could be useful in other apps as well.
 
 ### Commands
 
