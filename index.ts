@@ -70,8 +70,11 @@ await login({
 if (process.env.PORT) await import("./web/server.js");
 
 if (process.env.NODE_ENV === "production") {
-	const { default: log, LoggingEmojis } = await import("./modules/logging/misc.js");
-	await log(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`, "server");
+	const { default: log, LogSeverity, LoggingEmojis } = await import("./modules/logging/misc.js");
+	await log(
+		`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`,
+		LogSeverity.ImportantUpdate,
+	);
 }
 
 client.user.setPresence({

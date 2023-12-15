@@ -38,7 +38,7 @@ import {
 	voiceStateUpdate,
 } from "./voice.js";
 import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
-import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 import {
 	emojiCreate,
 	emojiUpdate,
@@ -69,7 +69,7 @@ const events: {
 			`${LoggingEmojis.Integration} ${entry.target.toString()} added${extraAuditLogsInfo(
 				entry,
 			)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	[AuditLogEvent.RoleCreate]: roleCreate,
@@ -81,7 +81,7 @@ const events: {
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} (ID: ${
 				entry.target.id
 			}) created${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	// async [AuditLogEvent.WebhookUpdate](entry) {},
@@ -90,7 +90,7 @@ const events: {
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} deleted${extraAuditLogsInfo(
 				entry,
 			)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	[AuditLogEvent.EmojiCreate]: emojiCreate,
@@ -101,7 +101,7 @@ const events: {
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
 				entry.target.id
 			}) added${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	async [AuditLogEvent.IntegrationDelete](entry) {
@@ -109,7 +109,7 @@ const events: {
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
 				entry.target.id
 			}) removed${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	[AuditLogEvent.StickerCreate]: stickerCreate,
@@ -124,7 +124,7 @@ const events: {
 			`${LoggingEmojis.Integration} Permissions for ${userMention(
 				entry.extra.applicationId,
 			)}’s commands changed${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
@@ -139,7 +139,7 @@ const events: {
 			}” Rule ${entry.target.name} (ID: ${entry.target.id}) created${extraAuditLogsInfo(
 				entry,
 			)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
@@ -147,7 +147,7 @@ const events: {
 			`${LoggingEmojis.Integration} AutoMod Rule ${entry.target.name} (ID: ${
 				entry.target.id
 			}) deleted${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	},
 };

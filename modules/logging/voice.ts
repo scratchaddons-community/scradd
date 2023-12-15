@@ -11,7 +11,7 @@ import {
 	time,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 
 export async function guildScheduledEventCreate(
 	entry: GuildAuditLogsEntry<AuditLogEvent.GuildScheduledEventCreate>,
@@ -20,7 +20,7 @@ export async function guildScheduledEventCreate(
 		`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${
 			entry.reason?.includes("\n") ? "\n" : ""
 		}${entry.target.url}`,
-		"voice",
+		LogSeverity.ServerChange,
 	);
 }
 export async function guildScheduledEventUpdate(
@@ -39,7 +39,7 @@ export async function guildScheduledEventUpdate(
 					} (${change.old})${extraAuditLogsInfo(entry)}\n${
 						entry.reason?.includes("\n") ? "\n" : ""
 					}${entry.target.url}`,
-					"voice",
+					LogSeverity.ServerChange,
 				);
 				break;
 			}
@@ -50,7 +50,7 @@ export async function guildScheduledEventUpdate(
 					}’s description changed${extraAuditLogsInfo(entry)}\n${
 						entry.reason?.includes("\n") ? "\n" : ""
 					}${entry.target.url}`,
-					"voice",
+					LogSeverity.ServerChange,
 					{
 						files: [
 							{
@@ -85,7 +85,7 @@ export async function guildScheduledEventUpdate(
 					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
 						entry.target.url
 					}`,
-					"voice",
+					LogSeverity.ServerChange,
 					{ files: url ? [url] : [] },
 				);
 				break;
@@ -107,7 +107,7 @@ export async function guildScheduledEventUpdate(
 					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
 						entry.target.url
 					}`,
-					"voice",
+					LogSeverity.ServerChange,
 				);
 			}
 		}
@@ -121,7 +121,7 @@ export async function guildScheduledEventUpdate(
 				}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
 					entry.target.url
 				}`,
-				"voice",
+				LogSeverity.ServerChange,
 			);
 		}
 		if (timeChanged) {
@@ -137,6 +137,7 @@ export async function guildScheduledEventUpdate(
 				}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
 					entry.target.url
 				}`,
+				LogSeverity.ServerChange,
 			);
 		}
 	}
@@ -151,7 +152,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 				`${
 					LoggingEmojis.Voice
 				} ${newState.member.toString()} left voice channel ${oldState.channel.toString()}`,
-				"voice",
+				LogSeverity.Resource,
 			);
 		}
 
@@ -162,7 +163,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 				} ${newState.member.toString()} joined voice channel ${newState.channel.toString()}, ${
 					newState.mute ? "" : "un"
 				}muted and ${newState.deaf ? "" : "un"}deafened`,
-				"voice",
+				LogSeverity.Resource,
 			);
 		}
 
@@ -171,15 +172,6 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 
 	if (!newState.channel) return;
 
-	if (Boolean(oldState.suppress) !== Boolean(newState.suppress)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.suppress ? "moved to the audience" : "became a speaker"
-			} in ${newState.channel.toString()}`,
-			"voice",
-		);
-	}
-
 	if (newState.suppress && newState.channel.type === ChannelType.GuildStageVoice) return;
 
 	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
@@ -187,7 +179,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.selfDeaf ? "" : "un"
 			}deafened in ${newState.channel.toString()}`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 
@@ -196,7 +188,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.selfMute ? "" : "un"
 			}muted in ${newState.channel.toString()}`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 
@@ -205,7 +197,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} turned camera ${
 				newState.selfVideo ? "on" : "off"
 			} in ${newState.channel.toString()}`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 
@@ -214,7 +206,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
 				newState.serverDeaf ? "" : "un-"
 			}server deafened`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 
@@ -223,7 +215,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
 				newState.serverMute ? "" : "un-"
 			}server muted`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 
@@ -232,7 +224,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.streaming ? "started" : "stopped"
 			} screen sharing in ${newState.channel.toString()}`,
-			"voice",
+			LogSeverity.Resource,
 		);
 	}
 }
@@ -241,5 +233,8 @@ export async function guildScheduledEventDelete(
 ) {
 	if (event.guildId !== config.guild.id || event.partial) return;
 
-	await log(`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`, "voice");
+	await log(
+		`${LoggingEmojis.Event} Event ${event.name} (ID: ${event.id}) removed`,
+		LogSeverity.ServerChange,
+	);
 }

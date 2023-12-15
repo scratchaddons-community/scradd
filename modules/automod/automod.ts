@@ -8,7 +8,7 @@ import {
 	GlobalBotInvitesPattern,
 	InvitesPattern,
 } from "../../util/discord.js";
-import log, { LoggingErrorEmoji } from "../logging/misc.js";
+import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./language.js";
@@ -173,7 +173,10 @@ export default async function automodMessage(message: Message) {
 						}!`,
 					);
 			} else {
-				await log(`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`);
+				await log(
+					`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`,
+					LogSeverity.Alert,
+				);
 			}
 		} else if (badEmbedWords.strikes) {
 			await message.suppressEmbeds();

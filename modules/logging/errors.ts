@@ -1,6 +1,6 @@
 import { inlineCode, Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
-import log, { LoggingErrorEmoji } from "./misc.js";
+import log, { LogSeverity, LoggingErrorEmoji } from "./misc.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
 import { commandInteractionToString } from "../../util/discord.js";
 
@@ -43,7 +43,7 @@ export default async function logError(
 								: `${event.constructor.name}: ${event.customId}`,
 					  )
 			}`,
-			"server",
+			LogSeverity.Alert,
 			{
 				files: [
 					{

@@ -14,7 +14,7 @@ import {
 import Database, { DATABASE_THREAD } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
-import { getLoggingThread } from "../logging/misc.js";
+import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { gracefulFetch } from "../../util/promises.js";
 
 export const EXPIRY_LENGTH = 1_260_000 * (process.env.NODE_ENV === "production" ? 1440 : 1),
@@ -58,7 +58,7 @@ export default async function filterToStrike(filter: string) {
 	if (!strike) return;
 	if (strikesCache[strikeId]) return { ...strike, ...strikesCache[strikeId] };
 
-	const channel = await getLoggingThread(filter.startsWith("0") ? undefined : "members");
+	const channel = await getLoggingThread(LogSeverity[filter.startsWith("0") ? "Alert" : "ImportantUpdate"]);
 	const message = await channel.messages
 		.fetch(convertBase(strikeId, convertBase.MAX_BASE, 10))
 		.catch(() => void 0);

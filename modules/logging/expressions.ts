@@ -6,7 +6,7 @@ import {
 	type APISticker,
 	GuildEmoji,
 } from "discord.js";
-import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 import { unifiedDiff } from "difflib";
 
 export async function emojiCreate(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiCreate>) {
@@ -15,7 +15,7 @@ export async function emojiCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Emoji
 		`${LoggingEmojis.Expressions} ${entry.target.toString()} created${extraAuditLogsInfo(
 			entry,
 		)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 	);
 }
 export async function emojiUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiUpdate>) {
@@ -26,7 +26,7 @@ export async function emojiUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Emoji
 			`${LoggingEmojis.Expressions} ${formatEmoji(entry.target.id)} (:${
 				change.old
 			}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	}
 }
@@ -38,7 +38,7 @@ export async function emojiDelete(entry: GuildAuditLogsEntry<AuditLogEvent.Emoji
 				? entry.target.name
 				: entry.changes.find((change) => change.key === "name")?.old
 		}: (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 	);
 }
 
@@ -47,7 +47,7 @@ export async function stickerCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id
 		}) created${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 		{ files: [entry.target.url] },
 	);
 }
@@ -60,7 +60,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 					`${LoggingEmojis.Expressions} Sticker ${change.old} (ID: ${
 						entry.target.id
 					}) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 				break;
 			}
@@ -69,7 +69,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 					`${LoggingEmojis.Expressions} Sticker ${entry.target.name}’s description (ID: ${
 						entry.target.id
 					}) changed${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 					{
 						files: [
 							{
@@ -97,7 +97,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 					}’s related emoji (ID: ${entry.target.id}) set to ${
 						change.new
 					}${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 			}
 		}
@@ -108,7 +108,7 @@ export async function stickerDelete(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id
 		}) deleted${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 		{ files: [entry.target.url] },
 	);
 }

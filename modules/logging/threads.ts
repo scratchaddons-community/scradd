@@ -7,7 +7,7 @@ import {
 	channelMention,
 	ThreadChannel,
 } from "discord.js";
-import log, { LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";
 
 export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadCreate>) {
 	if (entry.target.type !== ChannelType.PrivateThread) return;
@@ -15,7 +15,7 @@ export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Thre
 		`${LoggingEmojis.Thread} Private thread ${channelMention(
 			entry.target.id,
 		)} created${extraAuditLogsInfo(entry)}`,
-		"channels",
+		LogSeverity.ServerChange,
 	);
 }
 export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadDelete>) {
@@ -25,7 +25,7 @@ export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.Thre
 				? `in ${entry.target.parent.toString()} `
 				: ""
 		}(ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
-		"channels",
+		LogSeverity.ImportantUpdate,
 	);
 }
 
@@ -37,7 +37,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Thread} ${
 				newThread.archived ? `${newThread.url} closed` : `${newThread.toString()} opened`
 			}`,
-			"channels",
+			LogSeverity.ServerChange,
 		);
 
 	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
@@ -50,7 +50,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 					[ThreadAutoArchiveDuration.OneWeek]: "1 Week",
 				}[newThread.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay]
 			}`,
-			"channels",
+			LogSeverity.ContentEdit,
 		);
 	}
 	const removedActive = newThread.flags.has("ActiveChannelsRemoved");
@@ -59,7 +59,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${
 				removedActive ? "removed from" : "re-added to"
 			} Active Channels`,
-			"channels",
+			LogSeverity.ServerChange,
 		);
 	}
 	const clyde = newThread.flags.has("ClydeAI");
@@ -68,7 +68,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
 			} in ${newThread.toString()}`,
-			"channels",
+			LogSeverity.ContentEdit,
 		);
 	}
 	const removedFeed = newThread.flags.has("GuildFeedRemoved");
@@ -77,14 +77,14 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${
 				removedActive ? "removed from" : "re-added to"
 			} the server feed`,
-			"channels",
+			LogSeverity.ServerChange,
 		);
 	}
 	const spam = newThread.flags.has("IsSpam");
 	if (oldThread.flags.has("IsSpam") !== spam) {
 		await log(
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${spam ? "" : "un"}marked as spam`,
-			"channels",
+			LogSeverity.ImportantUpdate,
 		);
 	}
 	const pinned = newThread.flags.has("Pinned");
@@ -93,7 +93,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Thread} ${newThread.toString()} ${
 				newThread.flags.has("Pinned") ? "" : "un"
 			}pinned in ${newThread.parent?.toString()}!`,
-			"messages",
+			LogSeverity.ServerChange,
 		);
 	}
 
@@ -102,7 +102,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Thread} ${newThread.toString()} ${
 				newThread.locked ? "locked" : "unlocked"
 			}`,
-			"channels",
+			LogSeverity.ServerChange,
 		);
 
 	if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
@@ -110,7 +110,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 			`${LoggingEmojis.Thread} ${newThread.toString()}’s slowmode was set to ${
 				newThread.rateLimitPerUser
 			} second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
-			"channels",
+			LogSeverity.ContentEdit,
 		);
 	}
 }

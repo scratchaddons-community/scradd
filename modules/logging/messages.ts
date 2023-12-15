@@ -11,7 +11,7 @@ import {
 import config from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
-import log, { shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
+import log, { LogSeverity, shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 
 const databaseThread = await getLoggingThread(DATABASE_THREAD);
@@ -31,7 +31,7 @@ export async function messageDelete(message: Message | PartialMessage) {
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
 		} in ${message.channel.toString()} (ID: ${message.id}) deleted`,
-		"messages",
+		LogSeverity.ContentEdit,
 		{
 			embeds,
 			buttons: [
@@ -96,7 +96,7 @@ export async function messageDeleteBulk(
 		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
 			authors,
 		)} in ${channel.toString()} bulk deleted`,
-		"messages",
+		LogSeverity.ContentEdit,
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
 			buttons: [{ label: "Context", url: messages.first()?.url ?? "" }],
@@ -117,7 +117,7 @@ export async function messageReactionRemoveAll(
 		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
 			message.id
 		})`,
-		"messages",
+		LogSeverity.ContentEdit,
 		{
 			embeds: [
 				{
@@ -148,7 +148,7 @@ export async function messageUpdate(
 			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 				newMessage.id
 			}) ${newMessage.flags.has("Crossposted") ? "" : "un"}published`,
-			"messages",
+			LogSeverity.ServerChange,
 			{ buttons: [{ label: "Message", url: newMessage.url }] },
 		);
 	}
@@ -159,7 +159,7 @@ export async function messageUpdate(
 			} message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 				newMessage.id
 			})`,
-			"messages",
+			LogSeverity.ContentEdit,
 			{ buttons: [{ label: "Message", url: newMessage.url }], embeds: oldMessage.embeds },
 		);
 	}
@@ -171,7 +171,7 @@ export async function messageUpdate(
 			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 				newMessage.id
 			}) ${newMessage.pinned ? "" : "un"}pinned`,
-			"messages",
+			LogSeverity.ImportantUpdate,
 			{ buttons: [{ label: "Message", url: newMessage.url }] },
 		);
 	}
@@ -201,7 +201,7 @@ export async function messageUpdate(
 				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 					newMessage.id
 				}) edited`,
-				"messages",
+				LogSeverity.ContentEdit,
 				{ buttons: [{ label: "Message", url: newMessage.url }], files },
 			);
 		}

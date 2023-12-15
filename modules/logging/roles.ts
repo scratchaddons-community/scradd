@@ -6,7 +6,7 @@ import {
 	roleMention,
 	Role,
 } from "discord.js";
-import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 import config from "../../common/config.js";
 
@@ -29,7 +29,7 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
 				entry.reason ? ` (${entry.reason})` : ""
 			}`,
-			"members",
+			LogSeverity.ServerChange,
 		);
 
 	if (removedRoles.length)
@@ -40,7 +40,7 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
 				entry.reason ? ` (${entry.reason})` : ""
 			}`,
-			"members",
+			LogSeverity.ServerChange,
 		);
 }
 
@@ -48,7 +48,7 @@ export async function roleCreate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleCr
 	if (!(entry.target instanceof Base)) return;
 	await log(
 		`${LoggingEmojis.Role} ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 	);
 }
 
@@ -64,7 +64,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} (@${
 						change.old
 					}) renamed to @${change.new}${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 				break;
 			}
@@ -75,7 +75,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
 							: "reset"
 					}${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 				break;
 			}
@@ -86,7 +86,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 					)} set to display role members ${
 						change.new ? "separately from" : "combined with"
 					} online members${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 				break;
 			}
@@ -95,7 +95,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} set to ${
 						change.new ? "" : "dis"
 					}allow anyone to @mention this role${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 				);
 				break;
 			}
@@ -104,7 +104,7 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 					`${LoggingEmojis.Role} ${roleMention(
 						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
-					"server",
+					LogSeverity.ImportantUpdate,
 					{
 						buttons: [
 							{
@@ -132,12 +132,15 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 				? "changed"
 				: "removed"
 		}${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 		{ files: entry.target.icon ? [entry.target.iconURL({ size: 128 }) ?? ""] : [] },
 	);
 }
 
 export async function roleDelete(role: Role) {
 	if (role.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Role} @${role.name} (ID: ${role.id}) deleted`, "server");
+	await log(
+		`${LoggingEmojis.Role} @${role.name} (ID: ${role.id}) deleted`,
+		LogSeverity.ImportantUpdate,
+	);
 }

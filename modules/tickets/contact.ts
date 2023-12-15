@@ -14,7 +14,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import log, { LoggingEmojis } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { listStrikes } from "../punishments/misc.js";
 import {
 	type Category,
@@ -150,6 +150,7 @@ export default async function contactMods(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
 			category === MOD_CATEGORY ? member.toString() : "mods"
 		}: ${thread.toString()}`,
+		LogSeverity.Alert,
 	);
 
 	const ping =

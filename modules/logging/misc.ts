@@ -7,16 +7,12 @@ import {
 	GuildAuditLogsEntry,
 	type TextBasedChannel,
 	TextChannel,
-	ThreadChannel,
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
-
-export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
-export type LogGroup = typeof LOG_GROUPS[number];
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -28,9 +24,72 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 	);
 }
 
+export enum LogSeverity {
+	/**
+	 * Critical alerts that require actions in response. All mods should read this channel, preferably with notifications on.
+	 *
+	 * - Failed actions.
+	 * - Bot errors.
+	 * - Likely spammer detected.
+	 * - Ticket opened.
+	 * - Message reported by member.
+	 *
+	 * Discord also logs some things here:
+	 *
+	 * - AutoMod triggered.
+	 * - Community update messages.
+	 * - Raid alerts.
+	 */
+	Alert,
+	/**
+	 * Updates that are important to know or not easily noticeable otherwise. All mods should read.
+	 *
+	 * - Channel created/deleted/converted.
+	 * - Expressions changed.
+	 * - Roles list changed.
+	 * - Integrations changed.
+	 * - Server identity changed.
+	 * - Thread deleted.
+	 * - User punished.
+	 *
+	 * @todo - When migrating, the `members` thread should become this to keep warn messages all in the same thread.
+	 */
+	ImportantUpdate,
+	/**
+	 * Change to server settings or other changes affecting the whole server. All mods should skim.
+	 *
+	 * - `/say` used.
+	 * - Permissions changed.
+	 * - Channel settings changed.
+	 * - Message pinned/published.
+	 * - Thread closed/locked.
+	 * - Member server profile edited.
+	 * - Events scheduled/edited.
+	 */
+	ServerChange,
+	/**
+	 * Generally unimportant changes to server content. Optional to read.
+	 *
+	 * - Message edited/deleted.
+	 * - Messages purged.
+	 * - Reactions purged.
+	 * - Thread settings updated.
+	 */
+	ContentEdit,
+	/**
+	 * Logged as a resource for possible future reference. Optional to join the thread.
+	 *
+	 * - User global profile changed.
+	 * - Member joined/left.
+	 * - Invites created/deleted.
+	 * - Voice channel state changed.
+	 */
+	Resource,
+}
+
 export default async function log(
 	content: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
-	group?: LogGroup | TextChannel,
+	group: TextChannel | LogSeverity,
 	extra: {
 		embeds?: (Embed | APIEmbed)[];
 		files?: (string | { extension?: string; content: string })[];
@@ -95,18 +154,21 @@ export default async function log(
 	});
 }
 
-export async function getLoggingThread(
-	group?: LogGroup | typeof DATABASE_THREAD,
-): Promise<ThreadChannel>;
-export async function getLoggingThread(group?: undefined): Promise<TextChannel>;
-export async function getLoggingThread(group?: LogGroup | typeof DATABASE_THREAD | undefined) {
+export async function getLoggingThread(group: LogSeverity | typeof DATABASE_THREAD) {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
-	if (!group) return config.channels.modlogs;
+	if (group === LogSeverity.Alert) return config.channels.modlogs;
+
+	const name =
+		group === DATABASE_THREAD
+			? group
+			: `${group}. ${LogSeverity[group]
+					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+					.toLowerCase()}`;
 
 	return (
-		getInitialChannelThreads(config.channels.modlogs).find((thread) => thread.name === group) ||
+		getInitialChannelThreads(config.channels.modlogs).find((thread) => thread.name === name) ||
 		(await config.channels.modlogs.threads.create({
-			name: group,
+			name,
 			reason: "New logging thread",
 			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
 			invitable: group !== DATABASE_THREAD && undefined,

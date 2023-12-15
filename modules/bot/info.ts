@@ -17,7 +17,7 @@ import { autoreactions, dadEasterEggCount } from "../auto/secrets.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
-import log, { LoggingEmojis } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
 const testingServer = await client.guilds.fetch(constants.testingGuildId).catch(() => void 0);
@@ -199,7 +199,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			`${
 				LoggingEmojis.ServerUpdate
 			} Configuration synced by ${interaction.member?.toString()}`,
-			"server",
+			LogSeverity.ImportantUpdate,
 		);
 	} else
 		await interaction.reply({

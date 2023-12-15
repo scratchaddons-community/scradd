@@ -17,7 +17,7 @@ import { truncateText } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LoggingEmojis } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { matchSorter } from "match-sorter";
 
 const fetchedChannels = new Set<Snowflake>();
@@ -171,9 +171,9 @@ export async function say(interaction: RepliableInteraction, content: string, re
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,
-			interaction.guild?.id === config.guild.id
-				? "messages"
-				: interaction.guild?.publicUpdatesChannel ?? undefined,
+			(interaction.guild?.id !== config.guild.id &&
+				interaction.guild?.publicUpdatesChannel) ||
+				LogSeverity.ServerChange,
 			{ buttons: [{ label: "Message", url: message.url }] },
 		);
 		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);

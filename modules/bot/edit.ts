@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
+import log, { LogSeverity, getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
 import { DATABASE_THREAD } from "../../common/database.js";
@@ -142,9 +142,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			} Message by ${edited.author.toString()} in ${edited.channel.toString()} (ID: ${
 				edited.id
 			}) edited by ${interaction.user.toString()}`,
-			interaction.guild?.id === config.guild.id
-				? "messages"
-				: interaction.guild?.publicUpdatesChannel ?? undefined,
+			(interaction.guild?.id !== config.guild.id &&
+				interaction.guild?.publicUpdatesChannel) ||
+				LogSeverity.ServerChange,
 			{
 				buttons: [{ label: "Message", url: edited.url }],
 				files:

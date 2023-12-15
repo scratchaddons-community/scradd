@@ -28,7 +28,7 @@ import {
 	getIdFromName,
 } from "./misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
-import log, { LoggingEmojis } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 const resourcesDmed = new Set<string>();
 
@@ -164,7 +164,7 @@ defineMenuCommand(
 
 		await log(
 			`${LoggingEmojis.Punishment} ${interaction.user} reported a message by ${interaction.targetMessage.author} - ${interaction.targetMessage.url}\n${reason}`,
-			undefined,
+			LogSeverity.Alert,
 			{
 				buttons: [
 					{

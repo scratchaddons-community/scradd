@@ -11,7 +11,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
-import log, { LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
 import giveXp from "../xp/giveXp.js";
 import { DEFAULT_XP } from "../xp/misc.js";
 import filterToStrike, {
@@ -56,10 +56,9 @@ export default async function warn(
 				? `warned ${displayStrikes} time${displayStrikes === 1 ? "" : "s"}`
 				: "verbally warned"
 		} by ${moderator.toString()}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 		{ files: [{ content: reason + (context && `\n>>> ${context}`), extension: "md" }] },
 	);
-	await giveXp(user, logMessage.url, DEFAULT_XP * strikes * -1);
 
 	const member =
 		user instanceof GuildMember
@@ -68,7 +67,7 @@ export default async function warn(
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
-	await user
+	const { url } = await user
 		.send({
 			embeds: [
 				{
@@ -110,7 +109,9 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => void 0);
+		.catch(() => logMessage);
+
+	await giveXp(user, url, DEFAULT_XP * strikes * -1);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -125,7 +126,10 @@ export default async function warn(
 		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`));
+			: log(
+					`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`,
+					LogSeverity.Alert,
+			  ));
 		return true;
 	}
 
@@ -148,6 +152,7 @@ export default async function warn(
 					`${LoggingErrorEmoji} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,
+					LogSeverity.Alert,
 			  ));
 	}
 
@@ -200,7 +205,7 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 		`${LoggingEmojis.Punishment} Strike \`${id}\` removed from ${user.toString()} by ${
 			interaction.member
 		}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
 }
@@ -234,7 +239,7 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
 			interaction.member
 		}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, -1 * strike.count * DEFAULT_XP);
 }

@@ -8,13 +8,13 @@ import {
 	User,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
 
 export async function memberKick(entry: GuildAuditLogsEntry<AuditLogEvent.MemberKick>) {
 	if (!entry.target) return;
 	await log(
 		`${LoggingEmojis.Punishment} ${entry.target.toString()} kicked${extraAuditLogsInfo(entry)}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 	);
 }
 export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.MemberPrune>) {
@@ -22,14 +22,14 @@ export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.Membe
 		`${LoggingEmojis.Punishment} ${entry.extra.removed} members who haven’t talked in ${
 			entry.extra.days
 		} days pruned${extraAuditLogsInfo(entry)}`,
-		"server",
+		LogSeverity.ImportantUpdate,
 	);
 }
 export async function memberBanAdd(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanAdd>) {
 	if (!entry.target) return;
 	await log(
 		`${LoggingEmojis.Punishment} ${entry.target.toString()} banned${extraAuditLogsInfo(entry)}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 	);
 }
 export async function memberBanRemove(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanRemove>) {
@@ -38,21 +38,24 @@ export async function memberBanRemove(entry: GuildAuditLogsEntry<AuditLogEvent.M
 		`${LoggingEmojis.Punishment} ${entry.target.toString()} unbanned${extraAuditLogsInfo(
 			entry,
 		)}`,
-		"members",
+		LogSeverity.ImportantUpdate,
 	);
 }
 
 export async function guildMemberAdd(member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, "members");
+	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, LogSeverity.Resource);
 
 	if (member.user.flags?.has("Spammer")) {
-		await log(`${LoggingEmojis.Punishment} ${member.toString()} marked as likely spammer`, "members");
+		await log(
+			`${LoggingEmojis.Punishment} ${member.toString()} marked as likely spammer`,
+			LogSeverity.Alert,
+		);
 	}
 }
 export async function guildMemberRemove(member: GuildMember | PartialGuildMember) {
 	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} left`, "members");
+	await log(`${LoggingEmojis.Member} ${member.toString()} left`, LogSeverity.Resource);
 }
 export async function guildMemberUpdate(
 	oldMember: GuildMember | PartialGuildMember,
@@ -64,7 +67,7 @@ export async function guildMemberUpdate(
 			`${LoggingEmojis.User} ${newMember.toString()} ${
 				url ? "changed" : "removed"
 			} their server avatar`,
-			"members",
+			LogSeverity.ServerChange,
 			{ files: url ? [url] : undefined },
 		);
 	}
@@ -78,7 +81,7 @@ export async function guildMemberUpdate(
 				`${LoggingEmojis.Punishment} ${newMember.toString()} timed out until ${time(
 					newMember.communicationDisabledUntil,
 				)}`,
-				"members",
+				LogSeverity.ImportantUpdate,
 			);
 		else if (
 			oldMember.communicationDisabledUntil &&
@@ -86,7 +89,7 @@ export async function guildMemberUpdate(
 		)
 			await log(
 				`${LoggingEmojis.Punishment} ${newMember.toString()}’s timeout was removed`,
-				"members",
+				LogSeverity.ImportantUpdate,
 			);
 	}
 
@@ -101,7 +104,7 @@ export async function guildMemberUpdate(
 			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
 				automodQuarantine ? "" : "un"
 			}quarantined based on AutoMod rules`,
-			"members",
+			LogSeverity.ImportantUpdate,
 		);
 	}
 
@@ -111,7 +114,7 @@ export async function guildMemberUpdate(
 			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
 				verified ? "" : "un"
 			}verified by a moderator`,
-			"members",
+			LogSeverity.ImportantUpdate,
 		);
 	}
 
@@ -122,7 +125,7 @@ export async function guildMemberUpdate(
 					? ` was nicknamed ${newMember.nickname}`
 					: "’s nickname was removed"
 			}`,
-			"members",
+			LogSeverity.ServerChange,
 		);
 }
 
@@ -130,9 +133,13 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 	if (oldUser.partial) return;
 
 	if (oldUser.avatar !== newUser.avatar) {
-		await log(`${LoggingEmojis.User} ${newUser.toString()} changed their avatar`, "members", {
-			files: [newUser.displayAvatarURL({ size: 128 })],
-		});
+		await log(
+			`${LoggingEmojis.User} ${newUser.toString()} changed their avatar`,
+			LogSeverity.Resource,
+			{
+				files: [newUser.displayAvatarURL({ size: 128 })],
+			},
+		);
 	}
 
 	if (oldUser.globalName !== newUser.globalName)
@@ -144,7 +151,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 						: ` set their display name to ${newUser.globalName}`
 					: "’s display name was removed"
 			}`,
-			"members",
+			LogSeverity.Resource,
 		);
 
 	const quarantined = !!newUser.flags?.has("Quarantined");
@@ -153,7 +160,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
-			"members",
+			LogSeverity.Alert,
 		);
 	}
 
@@ -163,7 +170,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				spammer ? "" : "un"
 			}marked as likely spammer`,
-			"members",
+			LogSeverity.Alert,
 		);
 	}
 
@@ -172,7 +179,7 @@ export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
 			`${LoggingEmojis.User} ${newUser.toString()} changed their username from ${
 				oldUser.tag
 			} to ${newUser.tag}`,
-			"members",
+			LogSeverity.Resource,
 		);
 	}
 }
