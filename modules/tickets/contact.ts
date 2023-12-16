@@ -133,6 +133,7 @@ export default async function contactMods(
 
 	const oldThread = TICKETS_BY_MEMBER[member.id];
 	if (oldThread) {
+		await oldThread.setLocked(false);
 		await oldThread.send({ embeds: [details] });
 		return oldThread;
 	}
