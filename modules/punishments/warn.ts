@@ -102,7 +102,7 @@ export default async function warn(
 									type: ComponentType.Button,
 									style: ButtonStyle.Primary,
 									label: "Appeal Strike",
-									custom_id: `${id}_appealStrike`,
+									custom_id: `${id}_confirmStrikeAppeal`,
 								},
 							],
 						},
