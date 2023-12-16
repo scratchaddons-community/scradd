@@ -10,7 +10,7 @@ import {
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
+import config from "../../common/config.js";
 import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
@@ -163,10 +163,12 @@ export async function getLoggingThread(group: LogSeverity | typeof DATABASE_THRE
 			? group
 			: `${group}. ${LogSeverity[group]
 					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
-					.toLowerCase()}`;
+					.toLowerCase()}s`;
 
 	return (
-		getInitialChannelThreads(config.channels.modlogs).find((thread) => thread.name === name) ||
+		(await config.channels.modlogs.threads.fetch()).threads.find(
+			(thread) => thread.name === name,
+		) ||
 		(await config.channels.modlogs.threads.create({
 			name,
 			reason: "New logging thread",
