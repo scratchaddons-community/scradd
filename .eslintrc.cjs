@@ -131,9 +131,10 @@ module.exports = {
 			{
 				patterns: {
 					[/\.{3}/.source]: "…",
-					'"': { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
-					"'": "’",
-					"->": "→",
+					[/"/.source]: { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
+					[/'/.source]: "’",
+					[/->/.source]: "→",
+					[/!\?/.source]: "⁉",
 				},
 			},
 		],
