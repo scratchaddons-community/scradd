@@ -1,5 +1,4 @@
 import {
-	ActivityType,
 	ApplicationCommandOptionType,
 	GuildMember,
 	MessageType,
@@ -133,11 +132,14 @@ defineEvent.pre("userUpdate", async (_, user) => {
 defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== config.guild.id) return;
 
+	const presence = newPresence.activities[0];
+	if (!presence) return;
+
 	const status =
-		newPresence.activities[0]?.type === ActivityType.Custom
-			? newPresence.activities[0].state
-			: newPresence.activities[0]?.name;
-	const censored = status && tryCensor(status);
+		(presence.emoji?.toString() ?? "") +
+		" " +
+		(presence.state ?? newPresence.activities.find((activity) => activity.name)?.name ?? "");
+	const censored = tryCensor(status, 1);
 	if (
 		censored &&
 		config.roles.staff &&
