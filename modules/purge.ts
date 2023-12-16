@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
 import constants from "../common/constants.js";
-import { disableComponents, messageToText } from "../util/discord.js";
+import { disableComponents, messageToEmbed } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
@@ -61,19 +61,7 @@ async function purge(
 		const embeds: APIEmbed[] = [];
 
 		const last = sliced.at(-1);
-		if (sliced.length > 1 && last) {
-			embeds.push({
-				color: last.member?.displayColor,
-				description: await messageToText(last),
-
-				author: {
-					icon_url: (last.member ?? last.author).displayAvatarURL(),
-					name: (last.member ?? last.author).displayName,
-				},
-
-				timestamp: last.createdAt.toISOString(),
-			});
-		}
+		if (sliced.length > 1 && last) embeds.push(await messageToEmbed(last));
 
 		if (sliced.length > 2)
 			embeds.push({
@@ -82,17 +70,7 @@ async function purge(
 				}…*`,
 			});
 
-		embeds.push({
-			color: sliced[0].member?.displayColor,
-			description: await messageToText(sliced[0]),
-
-			author: {
-				icon_url: (sliced[0].member ?? sliced[0].author).displayAvatarURL(),
-				name: (sliced[0].member ?? sliced[0].author).displayName,
-			},
-
-			timestamp: sliced[0].createdAt.toISOString(),
-		});
+		embeds.push(await messageToEmbed(sliced[0]));
 
 		return {
 			content: `Are you sure you want to purge th${

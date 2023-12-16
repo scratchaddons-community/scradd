@@ -39,6 +39,7 @@ import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { client } from "strife.js";
+import { censor } from "../modules/automod/language.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
@@ -479,6 +480,44 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			throw new TypeError(`Unknown message type: ${message.type}`);
 		}
 	}
+}
+
+export async function messageToEmbed(message: Message, shouldCensor = false) {
+	const content = await messageToText(message),
+		author =
+			message.type === MessageType.AutoModerationAction
+				? "AutoMod 🤖"
+				: message.type === MessageType.GuildInviteReminder
+				? "Invite your friends 🤖"
+				: (message.member?.displayName ?? message.author.displayName) +
+				  (message.author.bot ? " 🤖" : "");
+	return {
+		color:
+			message.type === MessageType.AutoModerationAction
+				? 0x99_a1_f2
+				: message.type === MessageType.GuildInviteReminder
+				? undefined
+				: message.member?.displayColor,
+		description: shouldCensor ? censor(content) : content,
+
+		author: {
+			icon_url:
+				message.type === MessageType.AutoModerationAction
+					? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+					: message.type === MessageType.GuildInviteReminder
+					? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
+					: (message.member ?? message.author).displayAvatarURL(),
+
+			name: shouldCensor ? censor(author) : author,
+		},
+
+		timestamp:
+			message.type === MessageType.GuildInviteReminder
+				? undefined
+				: message.createdAt.toISOString(),
+
+		footer: message.editedAt ? { text: "Edited" } : undefined,
+	};
 }
 
 /**
