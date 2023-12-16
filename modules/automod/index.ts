@@ -5,6 +5,7 @@ import {
 	MessageType,
 	type CommandInteractionOption,
 	AutoModerationActionType,
+	underscore,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -169,24 +170,25 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		const result = tryCensor(options.text);
-
 		const words = result && result.words.flat();
+		const strikes = result && Math.trunc(result.strikes);
+
+		const isMod =
+			config.roles.staff &&
+			(interaction.member instanceof GuildMember
+				? interaction.member.roles.resolve(config.roles.staff.id)
+				: interaction.member.roles.includes(config.roles.staff.id));
+
 		await interaction.reply({
 			ephemeral: true,
 
 			content: words
-				? `⚠️ **${words.length} bad word${words.length === 1 ? "s" : ""} detected**!\n${
-						config.roles.staff &&
-						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(config.roles.staff.id)
-							: interaction.member.roles.includes(config.roles.staff.id))
-							? `That text gives **${Math.trunc(result.strikes)} strike${
-									result.strikes === 1 ? "" : "s"
-							  }**.\n\n`
-							: ""
-				  }**I detected the following words as bad**: ${joinWithAnd(
-						words,
-						(word) => `*${escapeMessage(word)}*`,
+				? `## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
+				  (isMod
+						? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
+						: "") +
+				  `*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
+						underscore(escapeMessage(word)),
 				  )}`
 				: `${constants.emojis.statuses.yes} No bad words found.`,
 		});

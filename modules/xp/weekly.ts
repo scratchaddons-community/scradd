@@ -152,7 +152,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		}),
 	);
 
-	return `__**🏆 Weekly Winners week of ${
+	return `## 🏆 Weekly Winners week of ${
 		[
 			"January",
 			"February",
@@ -167,7 +167,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			"November",
 			"December",
 		][date.getUTCMonth()] || ""
-	} ${nth(date.getUTCDate())}**__\n${
+	} ${nth(date.getUTCDate())}\n${
 		weeklyWinners
 			.map(
 				(gain, index) =>
@@ -185,8 +185,8 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		"en-us",
 	)} people were active. Altogether, people gained ${allXp.toLocaleString(
 		"en-us",
-	)} XP this week.*\n__Next week’s weekly winners will be posted ${time(
+	)} XP this week.*\n### Next week’s weekly winners will be posted ${time(
 		nextWeeklyDate,
 		TimestampStyles.RelativeTime,
-	)}.__`;
+	)}.`;
 }
