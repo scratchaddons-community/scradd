@@ -42,17 +42,19 @@ async function purge(
 
 	let start = 0;
 
-	let deleteTo = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
+	let end = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
 
 	async function generateMessage() {
-		const sliced = filtered.slice(start, deleteTo);
-		if (!sliced[0] || start >= deleteTo) {
+		const sliced = filtered.slice(start, end);
+		if (!sliced[0] || start >= end) {
 			return {
 				content: `${
 					constants.emojis.statuses.no
-				} No messages matched those filters! Note: I cannot purge messages that are older than 2 weeks or more than ${MAX_FETCH_COUNT} messages ${
-					message ? `before [this message](<${channel?.url}/${message}>)` : "ago"
-				}.`,
+				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
+					message
+						? `before [this message](<${channel?.url}/${message}>). Try searching from an older message.`
+						: "ago. Use the `message` option to search backwards from a certain point."
+				} Also, I can’t purge any messages more than 2 weeks old.`,
 			};
 		}
 
@@ -111,14 +113,14 @@ async function purge(
 							type: ComponentType.Button,
 							customId: `first-remove-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: start >= deleteTo - 1,
+							disabled: start >= end - 1,
 							label: "Remove First",
 						},
 						{
 							type: ComponentType.Button,
 							customId: `first-add-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: deleteTo >= filtered.length,
+							disabled: end >= filtered.length,
 							label: "Prepend One",
 						},
 					],
@@ -136,7 +138,7 @@ async function purge(
 							type: ComponentType.Button,
 							customId: `last-remove-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: start >= deleteTo - 1,
+							disabled: start >= end - 1,
 							label: "Remove Last",
 						},
 						{
@@ -179,7 +181,7 @@ async function purge(
 
 			switch (split[0]) {
 				case "confirm": {
-					const sliced = filtered.slice(start, deleteTo);
+					const sliced = filtered.slice(start, end);
 					await channel.bulkDelete(sliced);
 					await buttonInteraction.reply(
 						`${constants.emojis.statuses.yes} Purged ${sliced.length} message${
@@ -190,8 +192,8 @@ async function purge(
 					return;
 				}
 				case "first": {
-					if (split[1] === "remove") deleteTo--;
-					else deleteTo++;
+					if (split[1] === "remove") end--;
+					else end++;
 					break;
 				}
 				case "last": {
