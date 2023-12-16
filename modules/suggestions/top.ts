@@ -6,7 +6,7 @@ import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function top(
 	interaction: RepliableInteraction,
-	options: { user?: User | GuildMember; answer?: string },
+	options: { user?: User | GuildMember; answer?: string; all?: boolean },
 ) {
 	const { suggestions } = config.channels;
 	const user = options.user instanceof GuildMember ? options.user.user : options.user;
@@ -14,11 +14,14 @@ export default async function top(
 	await paginate(
 		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
-				({ answer, author }) =>
-					!(
-						(options.answer && answer !== options.answer) ||
-						(user && (author instanceof User ? author.id : author) !== user.id)
-					),
+				(suggestion) =>
+					(options.answer ? suggestion.answer === options.answer : true) &&
+					(user ? suggestion.author.valueOf() === user.id : true) &&
+					(options.all ||
+						!("old" in suggestion) ||
+						["Unnswered", "Good Idea", "In Development", "Implemented"].includes(
+							suggestion.answer,
+						)),
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 		async ({ answer, author, count, title, ...reference }) =>

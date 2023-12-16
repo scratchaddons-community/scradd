@@ -117,6 +117,12 @@ defineChatCommand(
 				description: "Filter suggestions to only get those by a certain user",
 				type: ApplicationCommandOptionType.User,
 			},
+
+			all: {
+				description:
+					"Include denied suggestions from the archive alongside accepted ones (defaults to false)",
+				type: ApplicationCommandOptionType.Boolean,
+			},
 		},
 	},
 	top,

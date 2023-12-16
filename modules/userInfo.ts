@@ -90,7 +90,7 @@ async function userInfo(
 		);
 
 	const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
-		({ author }) => (author instanceof User ? author.id : author) === user.id,
+		({ author }) => author.valueOf() === user.id,
 	);
 	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const showBottom = !interaction.isButton();
