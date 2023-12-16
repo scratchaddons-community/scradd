@@ -64,7 +64,7 @@ export default function tryCensor(text: string, strikeShift = 0) {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			if (!Number.isNaN(+word)) return word;
+			if (!/[a-z]/i.test(word)) return word;
 
 			words[index]?.push(word);
 			return word.length < 3
