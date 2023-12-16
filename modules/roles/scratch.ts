@@ -8,6 +8,8 @@ import {
 	OAuth2Scopes,
 	type RESTPutAPICurrentUserApplicationRoleConnectionJSONBody,
 	type RESTPutAPICurrentUserApplicationRoleConnectionResult,
+	type RESTGetAPICurrentUserResult,
+	userMention,
 } from "discord.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
@@ -17,6 +19,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { getRequestUrl } from "../../util/text.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{
@@ -125,5 +128,16 @@ export default async function linkScratchRole(request: IncomingMessage, response
 		},
 		auth: false,
 	})) as RESTPutAPICurrentUserApplicationRoleConnectionResult;
+
+	const user = (await client.rest.get(Routes.user(), {
+		headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` },
+		auth: false,
+	})) as RESTGetAPICurrentUserResult;
+	await log(
+		`${LoggingEmojis.Integration} ${userMention(
+			user.id,
+		)} linked their Scratch account [${username}](${constants.urls.scratch}/users/${username})`,
+		LogSeverity.ServerChange,
+	);
 	return response.writeHead(303, { location: config.guild.rulesChannel?.url }).end();
 }
