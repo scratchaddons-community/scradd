@@ -58,7 +58,9 @@ export default async function filterToStrike(filter: string) {
 	if (!strike) return;
 	if (strikesCache[strikeId]) return { ...strike, ...strikesCache[strikeId] };
 
-	const channel = await getLoggingThread(LogSeverity[filter.startsWith("0") ? "Alert" : "ImportantUpdate"]);
+	const channel = await getLoggingThread(
+		LogSeverity[filter.startsWith("0") ? "Alert" : "ImportantUpdate"],
+	);
 	const message = await channel.messages
 		.fetch(convertBase(strikeId, convertBase.MAX_BASE, 10))
 		.catch(() => void 0);
