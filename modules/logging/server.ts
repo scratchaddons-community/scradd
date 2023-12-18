@@ -496,7 +496,7 @@ export async function inviteDelete(invite: Invite) {
 	if (invite.guild?.id !== config.guild.id) return;
 	await log(
 		`${LoggingEmojis.Invite} Invite ${invite.code} deleted${
-			invite.uses ? ` with ${invite.uses} uses`:""
+			invite.uses ? ` with ${invite.uses} uses` : ""
 		}`,
 		LogSeverity.Resource,
 	);
