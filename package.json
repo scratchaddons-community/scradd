@@ -6,7 +6,7 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc --project tsconfig.json",
+		"build": "rm -rf dist; tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
