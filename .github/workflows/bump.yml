@@ -40,6 +40,10 @@ jobs:
             - name: Test
               run: npm run test
 
+            - name: Exit on failure
+              if: failure()
+              run: exit 0
+
             - name: Commit
               id: commit
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
