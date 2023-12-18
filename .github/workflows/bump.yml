@@ -28,8 +28,8 @@ jobs:
             - name: Install
               run: npm ci
 
-            - name: Check format
-              run: npx prettier --check "**" "!dist/**" --ignore-unknown
+            - name: Format
+              run: npm run format
 
             - name: Lint
               run: npm run lint
