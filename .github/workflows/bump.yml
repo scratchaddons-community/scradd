@@ -20,7 +20,7 @@ jobs:
               uses: RedGuy12/sync-types@v1.2.17
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.0
+              uses: actions/setup-node@v4.0.1
               with:
                   node-version: "20.6.0"
                   cache: npm
