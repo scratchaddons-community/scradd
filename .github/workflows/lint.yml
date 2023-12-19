@@ -54,7 +54,7 @@ jobs:
                   queries: security-and-quality
 
             - name: Analyze
-              uses: github/codeql-action/analyze@v2
+              uses: github/codeql-action/analyze@v2.3.3
 
     lint:
         name: Lint
