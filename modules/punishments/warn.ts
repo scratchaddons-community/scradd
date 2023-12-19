@@ -192,7 +192,8 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
-		member?.user ?? (await client.users.fetch(strike.user).catch(() => userMention(strike.user)));
+		member?.user ??
+		(await client.users.fetch(strike.user).catch(() => userMention(strike.user)));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,

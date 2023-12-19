@@ -25,7 +25,7 @@ const ignoreTriggers = [
 ];
 
 defineEvent("messageCreate", async (message) => {
-	await learn(message)
+	await learn(message);
 
 	let reactions = 0;
 

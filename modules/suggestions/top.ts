@@ -1,4 +1,11 @@
-import { GuildMember, hyperlink, User, type RepliableInteraction, channelLink, formatEmoji } from "discord.js";
+import {
+	GuildMember,
+	hyperlink,
+	User,
+	type RepliableInteraction,
+	channelLink,
+	formatEmoji,
+} from "discord.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import { mentionUser } from "../settings.js";
