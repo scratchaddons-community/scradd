@@ -26,7 +26,7 @@ const previousMessages: Record<
 	Snowflake,
 	{ content: string; author: Snowflake } | { content?: never; author?: never }
 > = {};
-const dictionary: { prompt: string; answers: string[] }[] = [];
+const dictionary: { prompt: string; responses: string[] }[] = [];
 const thread = await getThread();
 let LAST_SENT = 0;
 export default function scraddChat(message: Message) {
@@ -41,7 +41,7 @@ export default function scraddChat(message: Message) {
 	)
 		return;
 
-	const answers = matchSorter(dictionary, input, { keys: ["prompt"] })[0]?.answers;
+	const answers = matchSorter(dictionary, input, { keys: ["prompt"] })[0]?.responses;
 	if (answers?.[0]) {
 		LAST_SENT = Date.now();
 
@@ -60,7 +60,7 @@ export async function learn(message: Message) {
 	if (
 		message.channel.type === ChannelType.PrivateThread ||
 		baseChannel?.type === ChannelType.DM ||
-		baseChannel?.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
+		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
 	)
 		return;
 
@@ -79,11 +79,11 @@ export async function learn(message: Message) {
 		reply == false
 			? previous?.content
 			: reply && stripMarkdown(normalize(messageToText(reply, false).toLowerCase()));
-	if (prompt === undefined) return;
+	if (prompt === undefined || prompt === response) return;
 
 	const oldEntry = dictionary.findIndex((entry) => entry.prompt === prompt);
-	dictionary[oldEntry]?.answers.push(response) ??
-		dictionary.push({ prompt, answers: [response] });
+	dictionary[oldEntry]?.responses.push(response) ??
+		dictionary.push({ prompt, responses: [response] });
 }
 
 async function getThread() {
@@ -98,7 +98,7 @@ async function getThread() {
 		name: "Scradd Chat",
 		reason: "For Scradd Chat",
 	});
-	await createdThread.send({
+	const message = await createdThread.send({
 		content:
 			"## Scradd Chat\n### Basic regurgitating chatbot\nScradd Chat learns by tracking messages across all channels. Your messages will only be stored if you give express permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.",
 		components: [
@@ -121,12 +121,13 @@ async function getThread() {
 			},
 		],
 	});
+	await message.pin();
 	return createdThread;
 }
 export async function allowChat(interaction: ButtonInteraction) {
 	const settings = await getSettings(interaction.user);
-	if (!settings.scraddChat) {
-		await interaction.reply({
+	if (settings.scraddChat) {
+		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.yes} Your mesages will continue to be saved in all public channels.`,
 			components: [
@@ -167,7 +168,7 @@ export async function allowChat(interaction: ButtonInteraction) {
 export async function denyChat(interaction: ButtonInteraction) {
 	const settings = await getSettings(interaction.user);
 	if (!settings.scraddChat) {
-		await interaction.reply({
+		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.yes} Your mesages will continue to not be saved.`,
 			components: [
@@ -205,3 +206,6 @@ export async function denyChat(interaction: ButtonInteraction) {
 		],
 	});
 }
+
+// TODO: mongo
+// TODO: removing responses
