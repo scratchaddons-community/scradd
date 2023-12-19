@@ -7,33 +7,38 @@ export default async function updateReactions(reaction: MessageReaction) {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
 	if (
-		message.channel.isThread() &&
-		message.channel.parent?.id === config.channels.suggestions?.id &&
-		message.channel.id === message.id
-	) {
-		const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
-		if (
-			(defaultEmoji?.id
-				? defaultEmoji.id === reaction.emoji.id
-				: defaultEmoji?.name === reaction.emoji.name) &&
-			!message.channel.locked
-		) {
-			suggestionsDatabase.updateById(
-				{ id: message.id, count: reaction.count },
-				{ ...getSuggestionData(message.channel) },
-			);
-			return true;
-		} else {
-			return false;
-		}
-	}
+		!message.channel.isThread() ||
+		message.channel.parent?.id !== config.channels.suggestions?.id ||
+		message.channel.id !== message.id
+	)
+		return true;
+
+	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
+	if (
+		(defaultEmoji?.id
+			? defaultEmoji.id !== reaction.emoji.id
+			: defaultEmoji?.name !== reaction.emoji.name) ||
+		message.channel.locked
+	)
+		return false;
+
+	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+	suggestionsDatabase.updateById(
+		{ id: message.id, count },
+		{ ...getSuggestionData(message.channel) },
+	);
 	return true;
 }
 
 export function addToDatabase(thread: AnyThreadChannel) {
+	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
+
+	const message = thread.fetchStarterMessage().catch(() => void 0);
+	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+
 	suggestionsDatabase.data = [
 		...suggestionsDatabase.data,
-		{ ...getSuggestionData(thread), count: 0 },
+		{ ...getSuggestionData(thread), count },
 	];
 }
 

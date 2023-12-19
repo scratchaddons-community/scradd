@@ -36,13 +36,19 @@ defineEvent("threadUpdate", (_, newThread) => {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== newThread.id);
 		return;
 	}
+
+	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
+	const message = newThread.fetchStarterMessage().catch(() => void 0);
+	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+
 	suggestionsDatabase.updateById(
 		{
 			id: newThread.id,
 			title: newThread.name,
 			answer: getAnswer(newThread.appliedTags, config.channels.suggestions).name,
+			count,
 		},
-		{ author: newThread.ownerId ?? client.user.id, count: 0 },
+		{ author: newThread.ownerId ?? client.user.id },
 	);
 });
 defineEvent("guildAuditLogEntryCreate", async (entry) => {
