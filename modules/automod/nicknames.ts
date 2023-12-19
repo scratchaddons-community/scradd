@@ -73,7 +73,9 @@ export default async function changeNickname(member: GuildMember) {
 			if (oldest) unchanged.delete(oldest);
 		} else if (unchanged.size > 1)
 			await log(
-				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd([...unchanged.values()])}`,
+				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd([
+					...unchanged.values(),
+				])}`,
 				LogSeverity.Alert,
 			);
 	}
