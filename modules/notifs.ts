@@ -25,7 +25,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		: countString.includes("69")
 		? " (nice)"
 		: countString.endsWith("87")
-		? ` (WAS THAT THE BITE OF '87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+		? ` (WAS THAT THE BITE OF ’87${"⁉".repeat(Math.ceil(countString.length / 2))})`
 		: "";
 	const memberCount = nth(config.guild.memberCount) + jokes;
 
