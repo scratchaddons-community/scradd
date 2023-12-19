@@ -71,7 +71,7 @@ export async function updateMemberThreads(
 
 			await (qualifies && baseChannel?.permissionsFor(newMember).has("ViewChannel")
 				? thread.members.add(newMember, "Has qualifying role")
-				: thread.members.remove(newMember.id, "Has no qualifying role"));
+				: thread.members.remove(newMember, "Has no qualifying role"));
 		}),
 	);
 }
