@@ -21,7 +21,7 @@ const thread = await getLoggingThread(DATABASE_THREAD);
 
 const databases: Record<string, Message<true> | undefined> = {};
 
-for (const message of (await thread.messages.fetch({ limit: 100 })).toJSON()) {
+for (const message of (await thread.messages.fetch({ limit: 100 })).values()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =

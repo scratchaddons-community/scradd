@@ -18,7 +18,7 @@ export async function giveXpForMessage(message: Message) {
 	if (!latestMessages[message.channel.id]) {
 		const fetched = await message.channel.messages
 			.fetch({ limit: 100, before: message.id })
-			.then((messages) => messages.toJSON());
+			.then((messages) => messages.values());
 
 		const accumulator: Message[] = [];
 		for (let index = 0; index < fetched.length && accumulator.length < DEFAULT_XP; index++) {

@@ -199,7 +199,7 @@ export async function submitIntrest(interaction: ModalSubmitInteraction) {
 								.valueOf()
 								.sorted((one, two) => two.comparePositionTo(one))
 								.filter((role) => role.id !== config.guild.id)
-								.toJSON()
+								.values()
 								.join(" ") || "*No roles*",
 						inline: false,
 					},

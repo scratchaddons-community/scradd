@@ -70,7 +70,7 @@ async function userInfo(
 					.valueOf()
 					.sorted((one, two) => two.comparePositionTo(one))
 					.filter((role) => role.id !== interaction.guild?.id)
-					.toJSON()
+					.values()
 					.join(" ") || "*No roles*",
 			inline: false,
 		});

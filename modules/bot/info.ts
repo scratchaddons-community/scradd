@@ -164,7 +164,7 @@ export default async function info(
 
 	async function getRole(roleId: Snowflake): Promise<string> {
 		const role = await testingServer?.roles.fetch(roleId);
-		const members: { user: User }[] = role?.members.toJSON() ?? [];
+		const members: { user: User }[] = role?.members.values() ?? [];
 		if (roleId === designers)
 			members.push({ user: await client.users.fetch(constants.users.retron) });
 
