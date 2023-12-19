@@ -30,7 +30,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 		partialReaction.partial ? await partialReaction.fetch() : partialReaction,
 	);
 });
-defineEvent("threadUpdate", (_, newThread) => {
+defineEvent("threadUpdate", async (_, newThread) => {
 	if (!config.channels.suggestions || newThread.parent?.id !== config.channels.suggestions.id)
 		return;
 	if (newThread.locked) {
@@ -38,9 +38,9 @@ defineEvent("threadUpdate", (_, newThread) => {
 		return;
 	}
 
-	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
-	const message = newThread.fetchStarterMessage().catch(() => void 0);
-	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+	const defaultEmoji = config.channels.suggestions.defaultReactionEmoji;
+	const message = await newThread.fetchStarterMessage().catch(() => void 0);
+	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
 
 	suggestionsDatabase.updateById(
 		{
