@@ -14,6 +14,7 @@ import {
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
+	formatEmoji,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
@@ -283,8 +284,9 @@ export async function channelUpdate(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default reaction was ${
 				newChannel.defaultReactionEmoji
 					? `set to ${
-							newChannel.defaultReactionEmoji.name ||
-							`<:_:${newChannel.defaultReactionEmoji.id}>`
+							newChannel.defaultReactionEmoji.id
+								? formatEmoji(newChannel.defaultReactionEmoji.id)
+								: newChannel.defaultReactionEmoji.name
 					  }`
 					: "removed"
 			}`,

@@ -6,6 +6,7 @@ import {
 	TimestampStyles,
 	ChatInputCommandInteraction,
 	MessageComponentInteraction,
+	channelMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import tryCensor, { badWordsAllowed } from "../automod/language.js";
@@ -27,7 +28,7 @@ export async function listReminders(interaction: ChatInputCommandInteraction) {
 			`\`${reminder.id}\`) ${time(
 				new Date(reminder.date),
 				TimestampStyles.RelativeTime,
-			)}: <#${reminder.channel}> ${reminder.reminder}`,
+			)}: ${channelMention(reminder.channel)} ${reminder.reminder}`,
 		(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 		{
 			title: "Your reminders",

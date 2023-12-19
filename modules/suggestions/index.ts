@@ -6,6 +6,7 @@ import {
 	type Snowflake,
 	ForumChannel,
 	Colors,
+	formatEmoji,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
@@ -91,7 +92,9 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 						  ),
 				title:
 					(newAnswer.emoji
-						? `${newAnswer.emoji.name || `<:_:${newAnswer.emoji.id}>`} `
+						? (newAnswer.emoji.id
+								? formatEmoji(newAnswer.emoji.id)
+								: newAnswer.emoji.name) + " "
 						: "") + newAnswer.name,
 				description: entry.target.parent.topic
 					?.split(`\n- **${newAnswer.name}**: `)[1]

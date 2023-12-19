@@ -10,6 +10,7 @@ import {
 	InteractionType,
 	type PrivateThreadChannel,
 	type RepliableInteraction,
+	channelMention,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -50,9 +51,9 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in <#${
-				config.channels.support
-			}>.`,
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${channelMention(
+				config.channels.support,
+			)}.`,
 
 			ephemeral: true,
 		});
@@ -60,7 +61,11 @@ export async function showTicketModal(
 
 	if (option === SERVER_CATEGORY) {
 		return await interaction.reply({
-			content: `${constants.emojis.statuses.no} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.server}>.`,
+			content: `${
+				constants.emojis.statuses.no
+			} Please don’t contact mods for server suggestions. Instead, share them in ${channelMention(
+				config.channels.server,
+			)}.`,
 
 			ephemeral: true,
 		});

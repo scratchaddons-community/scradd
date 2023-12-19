@@ -1,4 +1,4 @@
-import { GuildMember, hyperlink, User, type RepliableInteraction, channelLink } from "discord.js";
+import { GuildMember, hyperlink, User, type RepliableInteraction, channelLink, formatEmoji } from "discord.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import { mentionUser } from "../settings.js";
@@ -28,8 +28,9 @@ export default async function top(
 			`**${count}** ${
 				"old" in reference
 					? "👍"
-					: suggestions?.defaultReactionEmoji?.name ??
-					  `<:_:${suggestions?.defaultReactionEmoji?.id}>`
+					: suggestions?.defaultReactionEmoji?.id
+					? formatEmoji(suggestions.defaultReactionEmoji.id)
+					: suggestions?.defaultReactionEmoji?.name
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(config.guild.id, reference.id),

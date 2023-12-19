@@ -8,7 +8,14 @@ import {
 } from "./misc.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
 import { convertBase, nth } from "../../util/numbers.js";
-import { ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
+import {
+	ChannelType,
+	MessageFlags,
+	TimestampStyles,
+	chatInputApplicationCommandMention,
+	time,
+	userMention,
+} from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
@@ -127,7 +134,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					];
 
 					return await channel.send({
-						content: `🔔 @here </bump:${COMMAND_ID}> the server!`,
+						content: `🔔 @here ${chatInputApplicationCommandMention(
+							"bump",
+							COMMAND_ID,
+						)} the server!`,
 						allowedMentions: { parse: ["everyone"] },
 					});
 				}
@@ -220,7 +230,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 		await channel
 			.send({
 				content: `🔔 ${
-					channel.isDMBased() ? "" : `<@${reminder.user}> `
+					channel.isDMBased() ? "" : userMention(reminder.user) + " "
 				}${content.trim()} (from ${time(
 					new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
 					TimestampStyles.RelativeTime,

@@ -6,6 +6,7 @@ import {
 	time,
 	TimestampStyles,
 	User,
+	userMention,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -191,7 +192,7 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
-		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
+		member?.user ?? (await client.users.fetch(strike.user).catch(() => userMention(strike.user)));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
@@ -228,7 +229,7 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user = await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`);
+	const user = await client.users.fetch(strike.user).catch(() => userMention(strike.user));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${

@@ -34,6 +34,7 @@ import {
 	ThreadChannel,
 	Collection,
 	ApplicationCommand,
+	channelMention,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -470,9 +471,10 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
 					? "flagged"
 					: "blocked"
-			} a message in <#${
-				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value
-			}>`;
+			} a message in ${channelMention(
+				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value ??
+					message.channel.id,
+			)}`;
 		}
 
 		default: {

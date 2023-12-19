@@ -171,7 +171,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		weeklyWinners
 			.map(
 				(gain, index) =>
-					`${["🥇", "🥈", "🥉"][index] || "🏅"} <@${gain.user}> - ${Math.floor(
+					`${["🥇", "🥈", "🥉"][index] || "🏅"} ${userMention(gain.user)} - ${Math.floor(
 						gain.xp *
 							Math.sign(
 								xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
