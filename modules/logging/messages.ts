@@ -63,7 +63,7 @@ export async function messageDeleteBulk(
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
-			messages.reverse().map(async (message) => {
+			messages.toReversed().map(async (message) => {
 				const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
 					message.embeds.length > 1 ? "s" : ""
 				}`;
