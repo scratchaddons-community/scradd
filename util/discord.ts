@@ -132,7 +132,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	return { embeds: embeds.slice(0, 10), files: message.attachments.values() };
+	return { embeds: embeds.slice(0, 10), files: [...message.attachments.values()] };
 }
 
 /**
@@ -149,7 +149,7 @@ export function getMessageJSON(message: Message): {
 	files: string[];
 } {
 	return {
-		components: message.components.map((component) => component.values()),
+		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
 		embeds: message.embeds.map((embed) => embed.toJSON()),
 		files: message.attachments.map((attachment) => attachment.url),

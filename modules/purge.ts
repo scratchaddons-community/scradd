@@ -33,8 +33,8 @@ async function purge(
 		);
 	const messages = await channel.messages.fetch({ limit: MAX_FETCH_COUNT, before: message });
 
-	const filtered = messages
-		.values()
+	const filtered = [...messages
+		.values()]
 		.filter(
 			(message) =>
 				(!options.user || message.author.id === options.user.id) && message.bulkDeletable,

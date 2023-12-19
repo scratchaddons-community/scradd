@@ -195,12 +195,13 @@ export async function submitIntrest(interaction: ModalSubmitInteraction) {
 					{
 						name: "Roles",
 						value:
-							interaction.member.roles
-								.valueOf()
-								.toSorted((one, two) => two.comparePositionTo(one))
-								.filter((role) => role.id !== config.guild.id)
-								.values()
-								.join(" ") || "*No roles*",
+							[
+								...interaction.member.roles
+									.valueOf()
+									.toSorted((one, two) => two.comparePositionTo(one))
+									.filter(({ id }) => id !== config.guild.id)
+									.values(),
+							].join(" ") || "*No roles*",
 						inline: false,
 					},
 					{

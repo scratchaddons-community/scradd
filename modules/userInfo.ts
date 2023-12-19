@@ -66,12 +66,13 @@ async function userInfo(
 		fields.push({
 			name: "🗄️ Roles",
 			value:
-				member.roles
-					.valueOf()
-					.toSorted((one, two) => two.comparePositionTo(one))
-					.filter((role) => role.id !== interaction.guild?.id)
-					.values()
-					.join(" ") || "*No roles*",
+				[
+					...member.roles
+						.valueOf()
+						.toSorted((one, two) => two.comparePositionTo(one))
+						.filter(({ id }) => id !== interaction.guild?.id)
+						.values(),
+				].join(" ") || "*No roles*",
 			inline: false,
 		});
 
