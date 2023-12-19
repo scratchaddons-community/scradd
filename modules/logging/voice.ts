@@ -55,10 +55,10 @@ export async function guildScheduledEventUpdate(
 						files: [
 							{
 								content: unifiedDiff(
-									`${
-										(change.old as APIGuildScheduledEvent["description"]) ?? ""
-									}`.split("\n"),
-									`${entry.target.description ?? ""}`.split("\n"),
+									(change.old as APIGuildScheduledEvent["description"])?.split(
+										"\n",
+									) ?? [],
+									entry.target.description?.split("\n") ?? [],
 									{ lineterm: "" },
 								)
 									.join("\n")

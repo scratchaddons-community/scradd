@@ -202,5 +202,5 @@ function formatChannel(channel: TextBasedChannel) {
 	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
 	if (thread) return `${channel.toString()} (${thread})`;
 	if (otherServer) return `${channel.toString()} (${otherServer})`;
-	return `${channel.toString()}`;
+	return channel.toString();
 }
