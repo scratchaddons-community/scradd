@@ -12,7 +12,7 @@ import {
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
-import tryCensor from "../automod/language.js";
+import tryCensor, { censor } from "../automod/language.js";
 import constants from "../../common/constants.js";
 import { client } from "strife.js";
 
@@ -130,7 +130,7 @@ export async function generateBoardMessage(
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
 		const { files, embeds } = extractMessageExtremities(message, tryCensor);
-		embeds.unshift(await messageToEmbed(message, true));
+		embeds.unshift(await messageToEmbed(message, censor));
 
 		return {
 			allowedMentions: { users: [] },

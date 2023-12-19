@@ -40,7 +40,6 @@ import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { generateHash, truncateText } from "./text.js";
 import { client } from "strife.js";
-import { censor } from "../modules/automod/language.js";
 
 /**
  * Extract extremities (embeds, stickers, and attachments) from a message.
@@ -484,7 +483,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 	}
 }
 
-export async function messageToEmbed(message: Message, shouldCensor = false) {
+export async function messageToEmbed(message: Message, censor?: (text: string) => string) {
 	const content = await messageToText(message),
 		author =
 			message.type === MessageType.AutoModerationAction
@@ -500,7 +499,7 @@ export async function messageToEmbed(message: Message, shouldCensor = false) {
 				: message.type === MessageType.GuildInviteReminder
 				? undefined
 				: message.member?.displayColor,
-		description: shouldCensor ? censor(content) : content,
+		description: censor ? censor(content) : content,
 
 		author: {
 			icon_url:
@@ -510,7 +509,7 @@ export async function messageToEmbed(message: Message, shouldCensor = false) {
 					? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 					: (message.member ?? message.author).displayAvatarURL(),
 
-			name: shouldCensor ? censor(author) : author,
+			name: censor ? censor(author) : author,
 		},
 
 		timestamp:
