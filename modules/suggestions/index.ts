@@ -15,9 +15,7 @@ import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
 
-defineEvent("threadCreate", (thread) => {
-	if (thread.parent?.id === config.channels.suggestions?.id) addToDatabase(thread);
-});
+defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;

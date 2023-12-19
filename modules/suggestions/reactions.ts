@@ -22,7 +22,7 @@ export default async function updateReactions(reaction: MessageReaction) {
 	)
 		return false;
 
-	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+	const count = (defaultEmoji?.id && message.reactions.resolve(defaultEmoji.id)?.count) || 0;
 	suggestionsDatabase.updateById(
 		{ id: message.id, count },
 		{ ...getSuggestionData(message.channel) },
@@ -30,11 +30,12 @@ export default async function updateReactions(reaction: MessageReaction) {
 	return true;
 }
 
-export function addToDatabase(thread: AnyThreadChannel) {
-	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
+export async function addToDatabase(thread: AnyThreadChannel) {
+	if (thread.parent?.id !== config.channels.suggestions?.id) return;
 
-	const message = thread.fetchStarterMessage().catch(() => void 0);
-	const count = message.reactions.resolve(defaultEmoji)?.count ?? 0;
+	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
+	const message = await thread.fetchStarterMessage().catch(() => void 0);
+	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
 
 	suggestionsDatabase.data = [
 		...suggestionsDatabase.data,
