@@ -54,7 +54,7 @@ export const oldSuggestions = config.channels.old_suggestions
 				),
 				old: true,
 				...(message.thread ? { id: message.thread.id } : { url: message.url }),
-			};
+			} as const;
 	  })
 	: [];
 

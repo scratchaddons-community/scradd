@@ -4,7 +4,6 @@ import {
 	ButtonStyle,
 	ComponentType,
 	Message,
-	MessageType,
 	type Snowflake,
 	type TextBasedChannel,
 	BaseChannel,
@@ -12,7 +11,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
-import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
+import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
 import tryCensor, { censor } from "../automod/language.js";
 import constants from "../../common/constants.js";
 import { client } from "strife.js";
@@ -131,39 +130,7 @@ export async function generateBoardMessage(
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
 		const { files, embeds } = extractMessageExtremities(message, tryCensor);
-		embeds.unshift({
-			color:
-				message.type === MessageType.AutoModerationAction
-					? 0x99_a1_f2
-					: message.type === MessageType.GuildInviteReminder
-					? undefined
-					: message.member?.displayColor,
-			description: censor(await messageToText(message)),
-
-			author: {
-				icon_url:
-					message.type === MessageType.AutoModerationAction
-						? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
-						: message.type === MessageType.GuildInviteReminder
-						? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
-						: (message.member ?? message.author).displayAvatarURL(),
-
-				name:
-					message.type === MessageType.AutoModerationAction
-						? "AutoMod 🤖"
-						: message.type === MessageType.GuildInviteReminder
-						? "Invite your friends 🤖"
-						: (message.member?.displayName ?? censor(message.author.displayName)) +
-						  (message.author.bot ? " 🤖" : ""),
-			},
-
-			timestamp:
-				message.type === MessageType.GuildInviteReminder
-					? undefined
-					: message.createdAt.toISOString(),
-
-			footer: message.editedAt ? { text: "Edited" } : undefined,
-		});
+		embeds.unshift(await messageToEmbed(message, censor));
 
 		return {
 			allowedMentions: { users: [] },
@@ -235,5 +202,5 @@ function formatChannel(channel: TextBasedChannel) {
 	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
 	if (thread) return `${channel.toString()} (${thread})`;
 	if (otherServer) return `${channel.toString()} (${otherServer})`;
-	return `${channel.toString()}`;
+	return channel.toString();
 }

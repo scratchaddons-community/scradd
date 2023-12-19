@@ -30,6 +30,7 @@ export const userSettingsDatabase = new Database<{
 	useMentions?: boolean;
 	dmReminders?: boolean;
 	scratchEmbeds?: boolean;
+	scraddChat?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -185,23 +186,6 @@ export async function updateSettings(
 		content: `${constants.emojis.statuses.yes} Updated your settings!`,
 
 		components: [
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						customId: "scratchEmbeds_toggleSetting",
-						type: ComponentType.Button,
-						label: "Scratch Link Embeds",
-						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
-					},
-					{
-						customId: "dmReminders_toggleSetting",
-						type: ComponentType.Button,
-						label: "DM Reminders",
-						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
-					},
-				],
-			},
 			...((await config.guild.members.fetch(user.id).catch(() => void 0))
 				? [
 						{
@@ -219,18 +203,33 @@ export async function updateSettings(
 									label: "Board Pings",
 									style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
 								} as const,
-								{
-									customId: "autoreactions_toggleSetting",
-									type: ComponentType.Button,
-									label: "Autoreactions",
-									style: ButtonStyle[
-										updated.autoreactions ? "Success" : "Danger"
-									],
-								} as const,
 							],
 						},
 				  ]
 				: []),
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: "scratchEmbeds_toggleSetting",
+						type: ComponentType.Button,
+						label: "Scratch Link Embeds",
+						style: ButtonStyle[updated.scratchEmbeds ? "Success" : "Danger"],
+					},
+					{
+						customId: "dmReminders_toggleSetting",
+						type: ComponentType.Button,
+						label: "DM Reminders",
+						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
+					},
+					{
+						customId: "autoreactions_toggleSetting",
+						type: ComponentType.Button,
+						label: "Autoreactions",
+						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
+					},
+				],
+			},
 		],
 	} satisfies InteractionReplyOptions;
 }
@@ -266,6 +265,7 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 			getWeeklyXp(user.id) > 100 ||
 			!(await config.guild.members.fetch(user.id).catch(() => void 0)),
 		scratchEmbeds: true,
+		scraddChat: false,
 	};
 }
 

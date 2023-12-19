@@ -161,7 +161,9 @@ async function playGame(
 			components: disableComponents(interaction.message.components),
 		});
 		await interaction.reply({
-			content: `${constants.emojis.statuses.no} <@${otherUser}> is playing a different game now!`,
+			content: `${
+				constants.emojis.statuses.no
+			} ${otherUser.toString()} is playing a different game now!`,
 			ephemeral: true,
 		});
 		return;

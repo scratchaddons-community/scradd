@@ -82,7 +82,7 @@ defineEvent("messageCreate", async (message) => {
 });
 defineButton("contactMods", async (interaction) => {
 	await interaction.reply({
-		content: "👍 Thanks for reaching out!",
+		content: `${constants.emojis.statuses.yes} Thanks for reaching out!`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -114,7 +114,28 @@ defineButton("contactMods", async (interaction) => {
 defineSelect("contactMods", async (interaction) => {
 	return await showTicketModal(interaction);
 });
-defineButton("appealStrike", async (interaction, id = "") => {
+defineButton("confirmStrikeAppeal", async (interaction, id) => {
+	return await interaction.reply({
+		ephemeral: true,
+		content:
+			"## Strike Appeal\nThis form is for letting us know if we made a mistake so we can remove the strike. If you just made a mistake, don’t worry, strikes expire after 21 days, and just a couple strikes don’t ban you.\nIf you belive this strike was given in error and needs to be removed, please click below.",
+
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						customId: `${id}_appealStrike`,
+						label: "Fill out the form",
+						style: ButtonStyle.Primary,
+						type: ComponentType.Button,
+					},
+				],
+			},
+		],
+	});
+});
+defineButton("appealStrike", async (interaction, id) => {
 	return await showTicketModal(interaction, "appeal", id);
 });
 defineModal("contactMods", async (interaction, id) => {

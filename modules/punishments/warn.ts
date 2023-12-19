@@ -6,6 +6,7 @@ import {
 	time,
 	TimestampStyles,
 	User,
+	userMention,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -102,7 +103,7 @@ export default async function warn(
 									type: ComponentType.Button,
 									style: ButtonStyle.Primary,
 									label: "Appeal Strike",
-									custom_id: `${id}_appealStrike`,
+									custom_id: `${id}_confirmStrikeAppeal`,
 								},
 							],
 						},
@@ -159,10 +160,10 @@ export default async function warn(
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {
 		await user
 			.send(
-				`__**This is your last chance. If you get another strike before ${time(
+				`## This is your last chance. If you get another strike before ${time(
 					new Date((allUserStrikes[0]?.date ?? Date.now()) + EXPIRY_LENGTH),
 					TimestampStyles.LongDate,
-				)}, you will be banned.**__`,
+				)}, you will be banned.`,
 			)
 			.catch(() => void 0);
 	}
@@ -191,7 +192,8 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	);
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user =
-		member?.user ?? (await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`));
+		member?.user ??
+		(await client.users.fetch(strike.user).catch(() => userMention(strike.user)));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
@@ -228,7 +230,7 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 	strikeDatabase.data = strikeDatabase.data.map((toRemove) =>
 		id === toRemove.id ? { ...toRemove, removed: false } : toRemove,
 	);
-	const user = await client.users.fetch(strike.user).catch(() => `<@${strike.user}>`);
+	const user = await client.users.fetch(strike.user).catch(() => userMention(strike.user));
 	const { url: logUrl } = await interaction.reply({
 		fetchReply: true,
 		content: `${

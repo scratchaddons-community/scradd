@@ -20,15 +20,14 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 
 	const countString = config.guild.memberCount.toString();
-	const memberCount =
-		nth(config.guild.memberCount) +
-		(/^[1-9]0+$/.test(countString)
-			? ` (${"🥳".repeat(countString.length - 1)})`
-			: countString.includes("69")
-			? " (nice)"
-			: countString.includes("87")
-			? ` (WAS THAT THE BITE OF 87${"⁉".repeat(Math.ceil(countString.length / 2))})`
-			: "");
+	const jokes = /^[1-9]0+$/.test(countString)
+		? ` (${"🥳".repeat(countString.length - 1)})`
+		: countString.includes("69")
+		? " (nice)"
+		: countString.endsWith("87")
+		? ` (WAS THAT THE BITE OF ’87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+		: "";
+	const memberCount = nth(config.guild.memberCount) + jokes;
 
 	const rawGreetings = [
 		`Everybody please welcome ${member} to the server; they’re our **${memberCount}** member!`,
@@ -39,8 +38,11 @@ defineEvent("guildMemberAdd", async (member) => {
 		`Welcome:tm: ${member.toString()}! You’re our **${memberCount}** member!`,
 		`Places, everyone! ${member.toString()}, our **${memberCount}** member, is here!`,
 		`${member.toString()}, our **${memberCount}** member, is here! (they didn’t bring pizza though)`,
-		`Watch out, ${member.toString()}, the **${memberCount}** member, has joined the circus!`,
-		`\`change [memberCount v] by (1)\` (hi ${member.toString()}, you’re our **${memberCount}**)`,
+		`${member.toString()}, the **${memberCount}** member, has joined the circus!`,
+		`You have been warned… Welcome to our **${memberCount}** member, ${member.toString()}!`,
+		`\`when [user v] joins:\` \`say [Hello, \`${member.toString()}\`!]\` \`set [MEMBER COUNT v] to (${config.guild.memberCount.toLocaleString(
+			"en-us",
+		)})\`${jokes}`,
 		`A wild ${member.toString()} appeared (our **${memberCount}** member)`,
 		`${member.toString()}, our **${memberCount}** member, just spawned in!`,
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
@@ -84,6 +86,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** had a skill issue`,
 					`*Somebody* sent **${member.user.displayName}** to a maximum security federal prison`,
 					`**${member.user.displayName}** choked on a watermelon`,
+					`Could someone help hide **${member.user.displayName}**’s body?`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -98,6 +101,8 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** got a life!`,
 					`**${member.user.displayName}** decided enough is enough`,
 					`**${member.user.displayName}** tried to swim in lava`,
+					`**${member.user.displayName}** fell from a high place`,
+					`**${member.user.displayName}** didn’t want to live in the same world as Blaze`,
 			  ];
 
 	await config.channels.welcome?.send(

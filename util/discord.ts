@@ -34,6 +34,7 @@ import {
 	ThreadChannel,
 	Collection,
 	ApplicationCommand,
+	channelMention,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -130,7 +131,7 @@ export function extractMessageExtremities(
 			}),
 	];
 
-	return { embeds: embeds.slice(0, 10), files: message.attachments.toJSON() };
+	return { embeds: embeds.slice(0, 10), files: [...message.attachments.values()] };
 }
 
 /**
@@ -179,7 +180,7 @@ export async function getAllMessages(
 	do {
 		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
 
-		messages.push(...fetchedMessages.toJSON());
+		messages.push(...fetchedMessages.values());
 		lastId = fetchedMessages.lastKey();
 	} while (lastId);
 
@@ -469,9 +470,10 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
 					? "flagged"
 					: "blocked"
-			} a message in <#${
-				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value
-			}>`;
+			} a message in ${channelMention(
+				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value ??
+					message.channel.id,
+			)}`;
 		}
 
 		default: {
@@ -479,6 +481,44 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			throw new TypeError(`Unknown message type: ${message.type}`);
 		}
 	}
+}
+
+export async function messageToEmbed(message: Message, censor?: (text: string) => string) {
+	const content = await messageToText(message),
+		author =
+			message.type === MessageType.AutoModerationAction
+				? "AutoMod 🤖"
+				: message.type === MessageType.GuildInviteReminder
+				? "Invite your friends 🤖"
+				: (message.member?.displayName ?? message.author.displayName) +
+				  (message.author.bot ? " 🤖" : "");
+	return {
+		color:
+			message.type === MessageType.AutoModerationAction
+				? 0x99_a1_f2
+				: message.type === MessageType.GuildInviteReminder
+				? undefined
+				: message.member?.displayColor,
+		description: censor ? censor(content) : content,
+
+		author: {
+			icon_url:
+				message.type === MessageType.AutoModerationAction
+					? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+					: message.type === MessageType.GuildInviteReminder
+					? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
+					: (message.member ?? message.author).displayAvatarURL(),
+
+			name: censor ? censor(author) : author,
+		},
+
+		timestamp:
+			message.type === MessageType.GuildInviteReminder
+				? undefined
+				: message.createdAt.toISOString(),
+
+		footer: message.editedAt ? { text: "Edited" } : undefined,
+	};
 }
 
 /**

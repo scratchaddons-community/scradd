@@ -1,10 +1,10 @@
 import {
-	ActivityType,
 	ApplicationCommandOptionType,
 	GuildMember,
 	MessageType,
 	type CommandInteractionOption,
 	AutoModerationActionType,
+	underscore,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -132,11 +132,14 @@ defineEvent.pre("userUpdate", async (_, user) => {
 defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== config.guild.id) return;
 
+	const presence = newPresence.activities[0];
+	if (!presence) return;
+
 	const status =
-		newPresence.activities[0]?.type === ActivityType.Custom
-			? newPresence.activities[0].state
-			: newPresence.activities[0]?.name;
-	const censored = status && tryCensor(status);
+		(presence.emoji?.toString() ?? "") +
+		" " +
+		(presence.state ?? newPresence.activities.find((activity) => activity.name)?.name ?? "");
+	const censored = tryCensor(status, 1);
 	if (
 		censored &&
 		config.roles.staff &&
@@ -169,24 +172,25 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		const result = tryCensor(options.text);
-
 		const words = result && result.words.flat();
+		const strikes = result && Math.trunc(result.strikes);
+
+		const isMod =
+			config.roles.staff &&
+			(interaction.member instanceof GuildMember
+				? interaction.member.roles.resolve(config.roles.staff.id)
+				: interaction.member.roles.includes(config.roles.staff.id));
+
 		await interaction.reply({
 			ephemeral: true,
 
 			content: words
-				? `⚠️ **${words.length} bad word${words.length === 1 ? "s" : ""} detected**!\n${
-						config.roles.staff &&
-						(interaction.member instanceof GuildMember
-							? interaction.member.roles.resolve(config.roles.staff.id)
-							: interaction.member.roles.includes(config.roles.staff.id))
-							? `That text gives **${Math.trunc(result.strikes)} strike${
-									result.strikes === 1 ? "" : "s"
-							  }**.\n\n`
-							: ""
-				  }**I detected the following words as bad**: ${joinWithAnd(
-						words,
-						(word) => `*${escapeMessage(word)}*`,
+				? `## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
+				  (isMod
+						? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
+						: "") +
+				  `*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
+						underscore(escapeMessage(word)),
 				  )}`
 				: `${constants.emojis.statuses.yes} No bad words found.`,
 		});

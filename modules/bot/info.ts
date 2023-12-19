@@ -164,7 +164,7 @@ export default async function info(
 
 	async function getRole(roleId: Snowflake): Promise<string> {
 		const role = await testingServer?.roles.fetch(roleId);
-		const members: { user: User }[] = role?.members.toJSON() ?? [];
+		const members: { user: User }[] = [...(role?.members.values() ?? [])];
 		if (roleId === designers)
 			members.push({ user: await client.users.fetch(constants.users.retron) });
 
@@ -211,12 +211,12 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 function getConfig() {
 	return [
 		{
-			title: "Configuration",
-			description: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
 			color: constants.themeColor,
+			description: `## Configuration\n\nThere are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
 		},
 		{
-			description: "**CHANNELS**",
+			title: "Channels",
+			color: constants.themeColor,
 
 			fields: Object.entries(config.channels)
 				.filter(
@@ -234,10 +234,11 @@ function getConfig() {
 					value: channel[1]?.toString() ?? "*None*",
 					inline: true,
 				})),
-			color: constants.themeColor,
 		},
 		{
-			description: "**ROLES**",
+			title: "Roles",
+			color: constants.themeColor,
+
 			fields: Object.entries(config.roles).map((role) => ({
 				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
 					.split("_")
@@ -247,7 +248,6 @@ function getConfig() {
 				value: role[1]?.toString() ?? "*None*",
 				inline: true,
 			})),
-			color: constants.themeColor,
 		},
 	];
 }

@@ -12,6 +12,7 @@ import {
 	time,
 	TimestampStyles,
 	Invite,
+	userMention,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis } from "./misc.js";
@@ -291,7 +292,9 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 	}
 	if (oldGuild.ownerId !== newGuild.ownerId)
 		await log(
-			`${LoggingEmojis.SettingChange} Ownership transferred to <@${newGuild.ownerId}>`,
+			`${LoggingEmojis.SettingChange} Ownership transferred to ${userMention(
+				newGuild.ownerId,
+			)}`,
 			LogSeverity.ImportantUpdate,
 		);
 

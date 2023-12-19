@@ -117,7 +117,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 				content: `# You ${reason === "win" ? "saved" : "killed"} ${user.toString()}!\n${
 					{
 						idle: "You didn’t save them in time, so they died \\:(",
-						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?!?",
+						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?⁉",
 						lose: "You couldn’t guess their username right, so they died \\:(",
 						win: "Great job!",
 					}[reason]

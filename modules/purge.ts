@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
 import constants from "../common/constants.js";
-import { disableComponents, messageToText } from "../util/discord.js";
+import { disableComponents, messageToEmbed } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
@@ -33,45 +33,33 @@ async function purge(
 		);
 	const messages = await channel.messages.fetch({ limit: MAX_FETCH_COUNT, before: message });
 
-	const filtered = messages
-		.toJSON()
-		.filter(
-			(message) =>
-				(!options.user || message.author.id === options.user.id) && message.bulkDeletable,
-		);
+	const filtered = [...messages.values()].filter(
+		(message) =>
+			(!options.user || message.author.id === options.user.id) && message.bulkDeletable,
+	);
 
 	let start = 0;
 
-	let deleteTo = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
+	let end = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
 
 	async function generateMessage() {
-		const sliced = filtered.slice(start, deleteTo);
-		if (!sliced[0] || start >= deleteTo) {
+		const sliced = filtered.slice(start, end);
+		if (!sliced[0] || start >= end) {
 			return {
 				content: `${
 					constants.emojis.statuses.no
-				} No messages matched those filters! Note: I cannot purge messages that are older than 2 weeks or more than ${MAX_FETCH_COUNT} messages ${
-					message ? `before [this message](<${channel?.url}/${message}>)` : "ago"
-				}.`,
+				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
+					message
+						? `before [this message](<${channel?.url}/${message}>). Try searching from an older message.`
+						: "ago. Use the `message` option to search backwards from a certain point."
+				} Also, I can’t purge any messages more than 2 weeks old.`,
 			};
 		}
 
 		const embeds: APIEmbed[] = [];
 
 		const last = sliced.at(-1);
-		if (sliced.length > 1 && last) {
-			embeds.push({
-				color: last.member?.displayColor,
-				description: await messageToText(last),
-
-				author: {
-					icon_url: (last.member ?? last.author).displayAvatarURL(),
-					name: (last.member ?? last.author).displayName,
-				},
-
-				timestamp: last.createdAt.toISOString(),
-			});
-		}
+		if (sliced.length > 1 && last) embeds.push(await messageToEmbed(last));
 
 		if (sliced.length > 2)
 			embeds.push({
@@ -80,17 +68,7 @@ async function purge(
 				}…*`,
 			});
 
-		embeds.push({
-			color: sliced[0].member?.displayColor,
-			description: await messageToText(sliced[0]),
-
-			author: {
-				icon_url: (sliced[0].member ?? sliced[0].author).displayAvatarURL(),
-				name: (sliced[0].member ?? sliced[0].author).displayName,
-			},
-
-			timestamp: sliced[0].createdAt.toISOString(),
-		});
+		embeds.push(await messageToEmbed(sliced[0]));
 
 		return {
 			content: `Are you sure you want to purge th${
@@ -111,14 +89,14 @@ async function purge(
 							type: ComponentType.Button,
 							customId: `first-remove-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: start >= deleteTo - 1,
+							disabled: start >= end - 1,
 							label: "Remove First",
 						},
 						{
 							type: ComponentType.Button,
 							customId: `first-add-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: deleteTo >= filtered.length,
+							disabled: end >= filtered.length,
 							label: "Prepend One",
 						},
 					],
@@ -136,7 +114,7 @@ async function purge(
 							type: ComponentType.Button,
 							customId: `last-remove-${interaction.id}`,
 							style: ButtonStyle.Primary,
-							disabled: start >= deleteTo - 1,
+							disabled: start >= end - 1,
 							label: "Remove Last",
 						},
 						{
@@ -179,7 +157,7 @@ async function purge(
 
 			switch (split[0]) {
 				case "confirm": {
-					const sliced = filtered.slice(start, deleteTo);
+					const sliced = filtered.slice(start, end);
 					await channel.bulkDelete(sliced);
 					await buttonInteraction.reply(
 						`${constants.emojis.statuses.yes} Purged ${sliced.length} message${
@@ -190,8 +168,8 @@ async function purge(
 					return;
 				}
 				case "first": {
-					if (split[1] === "remove") deleteTo--;
-					else deleteTo++;
+					if (split[1] === "remove") end--;
+					else end++;
 					break;
 				}
 				case "last": {

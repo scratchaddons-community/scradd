@@ -6,6 +6,7 @@ import {
 	type Snowflake,
 	ForumChannel,
 	Colors,
+	formatEmoji,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
@@ -14,9 +15,7 @@ import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
 
-defineEvent("threadCreate", (thread) => {
-	if (thread.parent?.id === config.channels.suggestions?.id) addToDatabase(thread);
-});
+defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -29,20 +28,26 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 		partialReaction.partial ? await partialReaction.fetch() : partialReaction,
 	);
 });
-defineEvent("threadUpdate", (_, newThread) => {
+defineEvent("threadUpdate", async (_, newThread) => {
 	if (!config.channels.suggestions || newThread.parent?.id !== config.channels.suggestions.id)
 		return;
 	if (newThread.locked) {
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== newThread.id);
 		return;
 	}
+
+	const defaultEmoji = config.channels.suggestions.defaultReactionEmoji;
+	const message = await newThread.fetchStarterMessage().catch(() => void 0);
+	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
+
 	suggestionsDatabase.updateById(
 		{
 			id: newThread.id,
 			title: newThread.name,
 			answer: getAnswer(newThread.appliedTags, config.channels.suggestions).name,
+			count,
 		},
-		{ author: newThread.ownerId ?? client.user.id, count: 0 },
+		{ author: newThread.ownerId ?? client.user.id },
 	);
 });
 defineEvent("guildAuditLogEntryCreate", async (entry) => {
@@ -85,7 +90,9 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 						  ),
 				title:
 					(newAnswer.emoji
-						? `${newAnswer.emoji.name || `<:_:${newAnswer.emoji.id}>`} `
+						? (newAnswer.emoji.id
+								? formatEmoji(newAnswer.emoji.id)
+								: newAnswer.emoji.name) + " "
 						: "") + newAnswer.name,
 				description: entry.target.parent.topic
 					?.split(`\n- **${newAnswer.name}**: `)[1]
@@ -116,6 +123,12 @@ defineChatCommand(
 			user: {
 				description: "Filter suggestions to only get those by a certain user",
 				type: ApplicationCommandOptionType.User,
+			},
+
+			all: {
+				description:
+					"Include denied suggestions from the archive alongside accepted ones (defaults to false)",
+				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
 	},

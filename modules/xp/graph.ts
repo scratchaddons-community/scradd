@@ -31,7 +31,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				},
 				y: { min: 0 },
 			},
-			font: { family: constants.fonts, weight: "400", style: "normal" },
+			font: { family: constants.fonts, weight: 400, style: "normal" },
 			elements: { point: { radius: 0 } },
 		},
 		plugins: [

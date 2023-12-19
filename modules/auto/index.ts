@@ -6,9 +6,10 @@ import { getBaseChannel, reactAll } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import { autoreactions, dad } from "./secrets.js";
-import { client, defineEvent } from "strife.js";
+import { client, defineButton, defineEvent } from "strife.js";
 import scratch from "./scratch.js";
 import constants from "../../common/constants.js";
+import scraddChat, { allowChat, denyChat, learn } from "./chat.js";
 
 const REACTION_CAP = 3;
 
@@ -24,6 +25,8 @@ const ignoreTriggers = [
 ];
 
 defineEvent("messageCreate", async (message) => {
+	await learn(message);
+
 	let reactions = 0;
 
 	if (
@@ -118,6 +121,12 @@ async function handleMutatable(
 	message: Message,
 	send = (data: BaseMessageOptions) => message.reply(data),
 ) {
+	const chatResponse = scraddChat(message);
+	if (chatResponse) {
+		await send({ content: chatResponse });
+		return true;
+	}
+
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return false;
 
@@ -189,3 +198,6 @@ defineEvent("messageDelete", async (message) => {
 		)
 		?.delete();
 });
+
+defineButton("allowChat", allowChat);
+defineButton("denyChat", denyChat);

@@ -66,12 +66,13 @@ async function userInfo(
 		fields.push({
 			name: "🗄️ Roles",
 			value:
-				member.roles
-					.valueOf()
-					.sorted((one, two) => two.comparePositionTo(one))
-					.filter((role) => role.id !== interaction.guild?.id)
-					.toJSON()
-					.join(" ") || "*No roles*",
+				[
+					...member.roles
+						.valueOf()
+						.toSorted((one, two) => two.comparePositionTo(one))
+						.filter(({ id }) => id !== interaction.guild?.id)
+						.values(),
+				].join(" ") || "*No roles*",
 			inline: false,
 		});
 
@@ -90,7 +91,7 @@ async function userInfo(
 		);
 
 	const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
-		({ author }) => (author instanceof User ? author.id : author) === user.id,
+		({ author }) => author.valueOf() === user.id,
 	);
 	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const showBottom = !interaction.isButton();
