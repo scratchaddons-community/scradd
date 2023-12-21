@@ -25,8 +25,6 @@ const ignoreTriggers = [
 ];
 
 defineEvent("messageCreate", async (message) => {
-	await learn(message);
-
 	let reactions = 0;
 
 	if (
@@ -37,15 +35,15 @@ defineEvent("messageCreate", async (message) => {
 			MessageType.GuildBoostTier3,
 		].includes(message.type)
 	) {
-		try {
-			await message.react(BOARD_EMOJI);
-			reactions++;
-		} catch {
-			return;
-		}
+		await message.react(BOARD_EMOJI).catch(() => void 0);
+		reactions++;
 	}
 
-	if (await handleMutatable(message)) return;
+	if (await handleMutatable(message)) {
+		await learn(message);
+		return;
+	}
+	await learn(message);
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 	reactionLoop: for (const [emoji, ...requirements] of autoreactions) {
