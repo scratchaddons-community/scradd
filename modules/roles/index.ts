@@ -16,7 +16,7 @@ defineEvent("inviteDelete", async (invite) => {
 		{ code: invite.code },
 		{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
 		{ upsert: true },
-	);
+	).exec();
 });
 defineEvent("guildMemberAdd", async () => {
 	for (const [, invite] of await config.guild.invites.fetch()) {
@@ -25,13 +25,13 @@ defineEvent("guildMemberAdd", async () => {
 			{ code: invite.code },
 			{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
 			{ upsert: true },
-		);
+		).exec();
 	}
 
 	const inviters = await Invite.aggregate<{ _id: string; totalUses: number }>([
 		{ $group: { _id: "$member", totalUses: { $sum: "$uses" } } },
 		{ $match: { totalUses: { $gte: 20 } } },
-	]);
+	]).exec();
 	for (const invite of inviters) {
 		const inviter = await config.guild.members.fetch(invite._id).catch(() => void 0);
 		if (

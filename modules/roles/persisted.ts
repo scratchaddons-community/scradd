@@ -32,13 +32,13 @@ export async function persistedLeave(member: PartialGuildMember | GuildMember) {
 	);
 	await RoleList.findOneAndUpdate({ id: member.id }, roles, {
 		upsert: Object.values(roles).includes(true),
-	});
+	}).exec();
 }
 
 export async function persistedRejoin(member: GuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
-	const memberRoles = await RoleList.findOneAndDelete({ id: member.id });
+	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();
 	for (const roleName of Object.keys(persistedRoles)) {
 		const role = [persistedRoles[roleName]].flat()[0];
 		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
