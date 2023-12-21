@@ -1,4 +1,10 @@
-import { ChannelType, MessageType, type BaseMessageOptions, Message, ApplicationCommandType } from "discord.js";
+import {
+	ChannelType,
+	MessageType,
+	type BaseMessageOptions,
+	Message,
+	ApplicationCommandType,
+} from "discord.js";
 import { getSettings } from "../settings.js";
 import { BOARD_EMOJI } from "../board/misc.js";
 import config from "../../common/config.js";
