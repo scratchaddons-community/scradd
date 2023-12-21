@@ -6,6 +6,8 @@ import {
 	ComponentType,
 	ButtonStyle,
 	ButtonInteraction,
+	MessageContextMenuCommandInteraction,
+	TextInputStyle,
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
@@ -23,38 +25,35 @@ import { getSettings, userSettingsDatabase } from "../settings.js";
 import constants from "../../common/constants.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
 import mongoose from "mongoose";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
-const Chats = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
-const dictionary = (await Chats.find({}))
+const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
+const dictionary = (await Chat.find({}))
 	.map((chat) => ({ response: chat.response, prompt: chat.prompt }))
 	.filter(
 		(chat): chat is { response: string; prompt: string | undefined } =>
 			!!(chat.response && !tryCensor(chat.response)),
-	)
-	.toSorted(() => Math.random() - 0.5);
-const thread = await getThread();
-let LAST_SENT = 0;
+	);
+
 export default function scraddChat(message: Message) {
 	if (
 		message.author.id === client.user.id ||
 		message.channel.id !== thread?.id ||
-		Date.now() - LAST_SENT < 1000 ||
 		(message.mentions.users.size > 0 && !message.mentions.has(client.user))
 	)
 		return;
 	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
 
-	const responses = didYouMean(prompt, dictionary, {
+	const response = didYouMean(prompt, dictionary, {
 		matchPath: ["prompt"],
 		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
-		threshold: 0.5,
-	});
-	const response = responses[Math.floor(Math.random() * responses.length)]?.response;
-	if (!response || response === prompt) return;
-
-	LAST_SENT = Date.now();
-	return response;
+		threshold: 0.7,
+	})
+		.sort(() => Math.random() - 0.5)
+		.find(({ response }) => response && response !== prompt && !removedResponses.has(response))
+		?.response.replaceAll(client.user.toString(), message.author.toString());
+	if (response) return response;
 }
 
 const previousMessages: Record<Snowflake, Message> = {};
@@ -62,7 +61,10 @@ export async function learn(message: Message) {
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
 
-	if (message.author.id === client.user.id || !(await getSettings(message.author)).scraddChat)
+	if (
+		[message.author.id, previous?.author.id].includes(client.user.id) ||
+		!(await getSettings(message.author)).scraddChat
+	)
 		return;
 
 	const baseChannel = getBaseChannel(message.channel);
@@ -100,9 +102,10 @@ export async function learn(message: Message) {
 	if (reference?.author.id === message.author.id || prompt === undefined || prompt === response)
 		return;
 	dictionary.push({ prompt, response });
-	await new Chats({ prompt, response }).save();
+	await new Chat({ prompt, response }).save();
 }
 
+const thread = await getThread();
 async function getThread() {
 	if (!config.channels.bots) return;
 
@@ -178,4 +181,66 @@ export async function denyChat(interaction: ButtonInteraction) {
 	);
 }
 
-// TODO: removing responses
+const removedResponses = new Set<string>();
+export async function removeResponse(interaction: MessageContextMenuCommandInteraction) {
+	await interaction.showModal({
+		title: "Confirm Permament Response Removal",
+		customId: interaction.id,
+		components: [
+			{
+				type: ComponentType.ActionRow,
+				components: [
+					{
+						type: ComponentType.TextInput,
+						style: TextInputStyle.Short,
+						label: "Please confirm to remove this response",
+						required: true,
+						customId: "confirm",
+						placeholder: "Type anything in this box to confirm. This is unreversible.",
+					},
+				],
+			},
+		],
+	});
+
+	const modalInteraction = await interaction
+		.awaitModalSubmit({
+			time: constants.collectorTime,
+			filter: (modalInteraction) => modalInteraction.customId === interaction.id,
+		})
+		.catch(() => void 0);
+
+	if (!modalInteraction) return;
+
+	const response = interaction.targetMessage.content.replaceAll(
+		interaction.targetMessage.author.toString(),
+		client.user.toString(),
+	);
+
+	removedResponses.add(response);
+	const { deletedCount } = await Chat.deleteMany({ response }).exec();
+
+	if (!deletedCount) {
+		return await modalInteraction.reply({
+			content: `${constants.emojis.statuses.no} Could not find that as a response to any prompt!`,
+			ephemeral: true,
+		});
+	}
+	await log(
+		`${LoggingEmojis.Bot} ${
+			interaction.user
+		} permamently removed a response from Scradd Chat (${deletedCount} prompt${
+			deletedCount === 1 ? "" : "s"
+		})`,
+		LogSeverity.ImportantUpdate,
+		{ files: [{ content: response, extension: "md" }] },
+	);
+	await modalInteraction.reply({
+		content: `${
+			constants.emojis.statuses.yes
+		} Permamently removed response. That response was associated with ${deletedCount} prompt${
+			deletedCount === 1 ? "" : "s"
+		}.`,
+		ephemeral: true,
+	});
+}
