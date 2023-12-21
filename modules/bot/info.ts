@@ -49,7 +49,7 @@ export default async function info(
 								value:
 									process.env.NODE_ENV === "production"
 										? "Production"
-										: "Testing",
+										: "Development",
 
 								inline: true,
 							},
@@ -94,28 +94,29 @@ export default async function info(
 			break;
 		}
 		case "config": {
+			const isStaff =
+				config.roles.staff &&
+				(interaction.member instanceof GuildMember
+					? interaction.member.roles.resolve(config.roles.staff.id)
+					: interaction.member?.roles.includes(config.roles.staff.id));
 			await interaction.reply({
 				embeds: getConfig(),
 
-				components:
-					config.roles.staff &&
-					(interaction.member instanceof GuildMember
-						? interaction.member.roles.resolve(config.roles.staff.id)
-						: interaction.member?.roles.includes(config.roles.staff.id))
-						? [
-								{
-									type: ComponentType.ActionRow,
-									components: [
-										{
-											style: ButtonStyle.Primary,
-											type: ComponentType.Button,
-											label: "Sync",
-											customId: "_syncConfig",
-										},
-									],
-								},
-						  ]
-						: [],
+				components: isStaff
+					? [
+							{
+								type: ComponentType.ActionRow,
+								components: [
+									{
+										style: ButtonStyle.Primary,
+										type: ComponentType.Button,
+										label: "Sync",
+										customId: "_syncConfig",
+									},
+								],
+							},
+					  ]
+					: [],
 			});
 			break;
 		}
@@ -132,11 +133,7 @@ export default async function info(
 								value: await getRole(developers),
 								inline: true,
 							},
-							{
-								name: "🖌️ Designers",
-								value: await getRole(designers),
-								inline: true,
-							},
+							{ name: "🖌️ Designers", value: await getRole(designers), inline: true },
 							{
 								name: "🧪 Additional beta testers",
 								value: await getRole(testers),

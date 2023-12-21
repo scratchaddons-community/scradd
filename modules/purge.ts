@@ -23,9 +23,7 @@ async function purge(
 	const numberCount = Number(options.count);
 	const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
 	const { channel: channelId, id: countId } = (useId &&
-		options.count.match(/^(?:(?<channel>\d+)-)?(?<id>\d+)$/)?.groups) || {
-		id: options.count,
-	};
+		options.count.match(/^(?:(?<channel>\d+)-)?(?<id>\d+)$/)?.groups) || { id: options.count };
 	const channel = channelId ? await client.channels.fetch(channelId) : interaction.channel;
 	if (!channel?.isTextBased() || channel.isDMBased())
 		return await interaction.reply(

@@ -63,10 +63,7 @@ defineModal("poll", async (interaction, voteMode) => {
 	const { customReactions, options } = interaction.fields
 		.getTextInputValue("options")
 		.split("\n")
-		.reduce<{
-			customReactions: (string | undefined)[];
-			options: string[];
-		}>(
+		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
 				const emoji = option.match(regexp)?.[0];
 				return {
@@ -125,14 +122,13 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		const emojis = message.embeds[0].description?.match(/^\S+/gm);
 		const isPollEmoji = emojis?.includes(emoji.name || "");
 		if (isPollEmoji) {
-			const promises = message.reactions.valueOf().map(async (otherReaction) => {
+			for (const [, otherReaction] of message.reactions.valueOf()) {
 				if (
 					emoji.name !== otherReaction.emoji.name &&
 					emojis?.includes(otherReaction.emoji.name || "")
 				)
 					await otherReaction.users.remove(user);
-			});
-			await Promise.all(promises);
+			}
 		}
 	}
 });

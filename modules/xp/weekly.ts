@@ -90,21 +90,16 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			.filter((item) => item.xp >= 500),
 	];
 
-	const activeRole = config.roles.active;
-	if (activeRole) {
-		await Promise.all([
-			...activeRole.members.map(async (roleMember) => {
-				if (!activeMembers.some((item) => item.user === roleMember.id))
-					return await roleMember.roles.remove(activeRole, "Inactive");
-			}),
-			...activeMembers.map(
-				async ({ user: memberId }) =>
-					await config.guild.members
-						.fetch(memberId)
-						.catch(() => void 0)
-						.then((activeMember) => activeMember?.roles.add(activeRole, "Active")),
-			),
-		]);
+	if (config.roles.active) {
+		for (const [, member] of config.roles.active.members) {
+			if (!activeMembers.some((item) => item.user === member.id))
+				await member.roles.remove(config.roles.active, "Inactive");
+		}
+
+		for (const { user } of activeMembers) {
+			const member = await config.guild.members.fetch(user).catch(() => void 0);
+			await member?.roles.add(config.roles.active, "Active");
+		}
 	}
 
 	recentXpDatabase.data = recentXpDatabase.data.filter(
@@ -125,32 +120,24 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 	const role = config.roles.weekly_winner;
 	if (role) {
-		await Promise.all([
-			...role.members.map(async (weeklyMember) => {
-				if (!ids.has(weeklyMember.id))
-					return await weeklyMember.roles.remove(role, "No longer weekly winner");
-			}),
-			...weeklyWinners.map(
-				async ({ user: userId }, index) =>
-					await config.guild.members
-						.fetch(userId)
-						.catch(() => void 0)
-						.then((member) =>
-							member?.roles.add(
-								index || !config.roles.epic ? role : [role, config.roles.epic],
-								"Weekly winner",
-							),
-						),
-			),
-		]);
+		for (const [, weeklyMember] of role.members) {
+			if (!ids.has(weeklyMember.id))
+				await weeklyMember.roles.remove(role, "No longer weekly winner");
+		}
+
+		for (const [index, { user }] of weeklyWinners.entries()) {
+			const member = await config.guild.members.fetch(user).catch(() => void 0);
+			await member?.roles.add(
+				index || !config.roles.epic ? role : [role, config.roles.epic],
+				"Weekly winner",
+			);
+		}
 	}
 
-	await Promise.all(
-		weeklyWinners.map(async (weeklyWinner) => {
-			const member = await config.guild.members.fetch(weeklyWinner.user).catch(() => void 0);
-			if (member) await recheckMemberRole(member, member);
-		}),
-	);
+	for (const winner of weeklyWinners) {
+		const member = await config.guild.members.fetch(winner.user).catch(() => void 0);
+		if (member) await recheckMemberRole(member, member);
+	}
 
 	return `## 🏆 Weekly Winners week of ${
 		[

@@ -35,38 +35,7 @@ module.exports = {
 	reportUnusedDisableDirectives: true,
 	root: true,
 	rules: {
-		"@typescript-eslint/no-base-to-string": [
-			"error",
-			{
-				ignoredTypeNames: [
-					//todo
-					"AnonymousGuild",
-					"BaseGuildEmoji",
-					"CategoryChannel",
-					"ClientUser",
-					"OAuth2Guild",
-					"ReactionEmoji",
-					"DirectoryChannel",
-					"PublicThreadChannel",
-					"PrivateThreadChannel",
-					"Guild",
-					"GuildEmoji",
-					"GuildPreviewEmoji",
-					"InviteGuild",
-					"PartialDMChannel",
-					"PartialGuildMember",
-					"PartialUser",
-					"BaseGuildTextChannel",
-					"BaseGuildVoiceChannel",
-					"ForumChannel",
-					"MediaChannel",
-					"NewsChannel",
-					"TextChannel",
-					"StageChannel",
-					"VoiceChannel",
-				],
-			},
-		],
+		"@typescript-eslint/no-base-to-string": "error",
 		"@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 		"@typescript-eslint/no-unsafe-member-access": "off",
 		"@typescript-eslint/no-unused-vars": [
@@ -74,6 +43,7 @@ module.exports = {
 			{ args: "all", argsIgnorePattern: /^_+$/.source, caughtErrors: "all" },
 		],
 		"@typescript-eslint/restrict-template-expressions": "off",
+		"max-depth": "error",
 		"no-fallthrough": "off",
 		"no-mixed-spaces-and-tabs": "off",
 		"no-restricted-syntax": [
@@ -95,7 +65,6 @@ module.exports = {
 		"unicorn/no-process-exit": "off",
 		"unicorn/no-unreadable-array-destructuring": "off",
 		"unicorn/number-literal-case": "off",
-		"unicorn/prefer-native-coercion-functions": "off", // TODO: add total-ts
 		"unicorn/prevent-abbreviations": [
 			"warn",
 			{
@@ -141,8 +110,6 @@ module.exports = {
 	},
 };
 // todo: https://github.com/eslint/eslint/pull/17500/files
-// todo: no empty func
 // todo: [..] over toJSON?
 // todo: stop nesting why tf are there 14-level nesting places
-// todo: no promise all
 // todo: unicorn/prefer-spread with objects

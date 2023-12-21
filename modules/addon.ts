@@ -86,46 +86,37 @@ defineChatCommand(
 				: credit.name;
 		});
 
-		const lastUpdatedIn =
-			addon.latestUpdate?.version && `last updated in v${addon.latestUpdate.version}`;
+		const updateInfo = `v${addon.versionAdded}${
+			addon.latestUpdate?.version
+				? ` (${hyperlink(
+						`last updated in v${addon.latestUpdate.version}`,
+						interaction.channel?.url ?? "",
+						addon.latestUpdate.temporaryNotice ?? "",
+				  )})`
+				: ""
+		}`;
 
 		await interaction.reply({
 			embeds: [
 				{
-					color: constants.themeColor,
-
 					description:
 						`${escapeMessage(addon.description)}\n` +
 						(addon.permissions?.length
 							? "\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
 							: ""),
+
 					fields: [
 						...(credits.length
 							? [{ inline: true, name: "🫂 Contributors", value: credits }]
 							: []),
 						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
-						{
-							inline: true,
-							name: "📝 Version added",
-
-							value: `v${addon.versionAdded}${
-								addon.latestUpdate && lastUpdatedIn
-									? ` (${hyperlink(
-											lastUpdatedIn,
-											interaction.channel?.url ?? "",
-											addon.latestUpdate.temporaryNotice ?? "",
-									  )})`
-									: ""
-							}`,
-						},
+						{ inline: true, name: "📝 Version added", value: updateInfo },
 					],
 
+					color: constants.themeColor,
 					footer: { text: addonId },
-
 					thumbnail: { url: `${constants.urls.addonImageRoot}/${addonId}.png` },
-
 					title: addon.name,
-
 					url: `https://github.com/${constants.urls.saRepo}/tree/v${sa.version}/addons/${addonId}/`,
 				},
 			],

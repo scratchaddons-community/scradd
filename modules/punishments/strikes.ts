@@ -66,7 +66,12 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
 			? strike.mod
-			: strike.mod && (await client.users.fetch(strike.mod).catch(() => void 0));
+			: strike.mod &&
+			  (await mentionUser(
+					strike.mod,
+					interaction.member,
+					interaction.guild ?? config.guild,
+			  ));
 	const nick = (member ?? user)?.displayName;
 	return await interaction.editReply({
 		components: isModerator
@@ -112,22 +117,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 
 				fields: [
 					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
-					...(moderator
-						? [
-								{
-									name: "🛡 Moderator",
-									value:
-										typeof moderator === "string"
-											? moderator
-											: await mentionUser(
-													moderator,
-													interaction.member,
-													interaction.guild ?? config.guild,
-											  ),
-									inline: true,
-								},
-						  ]
-						: []),
+					...(moderator ? [{ name: "🛡 Moderator", value: moderator, inline: true }] : []),
 					...(user
 						? [
 								{

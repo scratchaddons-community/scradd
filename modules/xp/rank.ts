@@ -27,50 +27,23 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 			.filter(({ user }) => members.has(user))
 			.toSorted((one, two) => two.xp - one.xp)
 			.findIndex((info) => info.user === user.id) + 1;
-
-	async function makeCanvasFiles() {
-		if (process.env.CANVAS === "false") return [];
-
-		const { createCanvas } = await import("@napi-rs/canvas");
-		const canvas = createCanvas(1000, 50);
-		const context = canvas.getContext("2d");
-		context.fillStyle = "#0003";
-		context.fillRect(0, 0, canvas.width, canvas.height);
-		context.fillStyle = `#${constants.themeColor.toString(16)}`;
-		const rectangleSize = canvas.width * progress;
-		const paddingPixels = 0.18 * canvas.height;
-		context.fillRect(0, 0, rectangleSize, canvas.height);
-		context.font = `${canvas.height * 0.9}px ${constants.fonts}`;
-		if (progress < 0.145) {
-			context.fillStyle = "#666";
-			context.textAlign = "end";
-			context.fillText(
-				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
-				canvas.width - paddingPixels,
-				canvas.height - paddingPixels,
-			);
-		} else {
-			context.fillStyle = "#0009";
-			context.fillText(
-				progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
-				paddingPixels,
-				canvas.height - paddingPixels,
-			);
-		}
-		return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
-	}
+	const rankInfo =
+		rank &&
+		`Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString("en-us")}${
+			serverRank
+				? ` (${serverRank.toLocaleString("en-us")}/${members.size.toLocaleString(
+						"en-us",
+				  )} in the server)`
+				: ""
+		}`;
 
 	await interaction.reply({
 		embeds: [
 			{
-				color: member?.displayColor,
-
 				author: {
 					icon_url: (member ?? user).displayAvatarURL(),
 					name: (member ?? user).displayName,
 				},
-
-				title: "XP Rank",
 
 				fields: [
 					{
@@ -98,20 +71,9 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 					},
 				],
 
-				footer: rank
-					? {
-							text: `Ranked ${rank.toLocaleString(
-								"en-us",
-							)}/${top.length.toLocaleString("en-us")}${
-								serverRank
-									? ` (${serverRank.toLocaleString(
-											"en-us",
-									  )}/${members.size.toLocaleString("en-us")} in the server)`
-									: ""
-							}`,
-					  }
-					: undefined,
-
+				color: member?.displayColor,
+				title: "XP Rank",
+				footer: rankInfo ? { text: rankInfo } : undefined,
 				image: { url: "attachment://progress.png" },
 			},
 		],
@@ -130,9 +92,41 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 			},
 		],
 
-		files: await makeCanvasFiles(),
+		files: await makeCanvasFiles(progress),
 		ephemeral:
 			interaction.isButton() &&
 			interaction.message.interaction?.user.id !== interaction.user.id,
 	});
+}
+
+async function makeCanvasFiles(progress: number) {
+	if (process.env.CANVAS === "false") return [];
+
+	const { createCanvas } = await import("@napi-rs/canvas");
+	const canvas = createCanvas(1000, 50);
+	const context = canvas.getContext("2d");
+	context.fillStyle = "#0003";
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = `#${constants.themeColor.toString(16)}`;
+	const rectangleSize = canvas.width * progress;
+	const paddingPixels = 0.18 * canvas.height;
+	context.fillRect(0, 0, rectangleSize, canvas.height);
+	context.font = `${canvas.height * 0.9}px ${constants.fonts}`;
+	if (progress < 0.145) {
+		context.fillStyle = "#666";
+		context.textAlign = "end";
+		context.fillText(
+			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			canvas.width - paddingPixels,
+			canvas.height - paddingPixels,
+		);
+	} else {
+		context.fillStyle = "#0009";
+		context.fillText(
+			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			paddingPixels,
+			canvas.height - paddingPixels,
+		);
+	}
+	return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
 }

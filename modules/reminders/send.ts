@@ -19,9 +19,8 @@ import {
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
-import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
-import updateBoard from "../board/update.js";
 import { gracefulFetch } from "../../util/promises.js";
+import { syncRandomBoard } from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
@@ -53,12 +52,12 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 	);
 	remindersDatabase.data = toPostpone;
 
-	const promises = toSend.map(async (reminder) => {
+	for (const reminder of toSend) {
 		const channel = await client.channels.fetch(reminder.channel).catch(() => void 0);
 		if (reminder.user === client.user.id) {
 			switch (reminder.id) {
 				case SpecialReminders.Weekly: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					const date = new Date();
 					date.setUTCDate(date.getUTCDate() - 7);
@@ -67,7 +66,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 
 					const chatters = await getChatters();
 					const message = await channel.send(await getWeekly(nextWeeklyDate));
-					if (!chatters) return message;
+					if (!chatters) continue;
 					const thread = await message.startThread({
 						name: `🏆 Weekly Winners week of ${
 							[
@@ -88,10 +87,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
-					return message;
+					continue;
 				}
 				case SpecialReminders.UpdateSACategory: {
-					if (channel?.type !== ChannelType.GuildCategory) return;
+					if (channel?.type !== ChannelType.GuildCategory) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -107,9 +106,9 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
 					);
-					if (!count) return;
+					if (!count) continue;
 
-					return await channel.setName(
+					await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
@@ -118,9 +117,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						})} users`,
 						"Automated update to sync count",
 					);
+					continue;
 				}
 				case SpecialReminders.Bump: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -133,13 +133,14 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					return await channel.send({
+					await channel.send({
 						content: `🔔 @here ${chatInputApplicationCommandMention(
 							"bump",
 							COMMAND_ID,
 						)} the server!`,
 						allowedMentions: { parse: ["everyone"] },
 					});
+					continue;
 				}
 				case SpecialReminders.RebootBot: {
 					await cleanDatabaseListeners();
@@ -148,11 +149,11 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				}
 				case SpecialReminders.CloseThread: {
 					if (channel?.isThread()) await channel.setArchived(true, "Close requested");
-					return;
+					continue;
 				}
 				case SpecialReminders.LockThread: {
 					if (channel?.isThread()) await channel.setLocked(true, "Lock requested");
-					return;
+					continue;
 				}
 				case SpecialReminders.Unban: {
 					if (typeof reminder.reminder == "string")
@@ -160,10 +161,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 							reminder.reminder,
 							"Unbanned after set time period",
 						);
-					return;
+					continue;
 				}
 				case SpecialReminders.BackupDatabases: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -176,7 +177,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					return backupDatabases(channel);
+					await backupDatabases(channel);
+					continue;
 				}
 				case SpecialReminders.SyncRandomBoard: {
 					remindersDatabase.data = [
@@ -189,42 +191,12 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
-						if (info.onBoard) continue;
-
-						const date = new Date(
-							Number(BigInt(info.source) >> 22n) + 1_420_070_400_000,
-						);
-
-						const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
-						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
-							continue;
-
-						const channel = await client.channels
-							.fetch(info.channel)
-							.catch(() => void 0);
-						if (!channel?.isTextBased()) continue;
-
-						if (reactionsNeeded === undefined) {
-							const reactionsNeeded = boardReactionCount(channel, date);
-							if (info.reactions < reactionsNeeded) continue;
-						}
-
-						const message = await channel.messages
-							.fetch(info.source)
-							.catch(() => void 0);
-						const reaction = message?.reactions.resolve(BOARD_EMOJI);
-						if (message && reaction) {
-							await updateBoard({ count: reaction.count, message });
-							break;
-						}
-					}
-
-					return;
+					await syncRandomBoard();
+					continue;
 				}
 			}
 		}
-		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
+		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") continue;
 		const silent = reminder.reminder.startsWith("@silent");
 		const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
 		await channel
@@ -239,8 +211,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				flags: silent ? MessageFlags.SuppressNotifications : undefined,
 			})
 			.catch(() => void 0);
-	});
-	await Promise.all(promises);
+	}
 
 	return await queueReminders();
 }

@@ -2,7 +2,8 @@ import { ChannelType, Message, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
-import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
+import { BOARD_EMOJI, boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
+import { client } from "strife.js";
 
 const processing = new Set<Snowflake>();
 
@@ -76,11 +77,8 @@ export default async function updateBoard({ count, message }: { count: number; m
 	);
 	const pins = await config.channels.board.messages.fetchPinned();
 	if (pins.size > topIds.length) {
-		await Promise.all(
-			pins
-				.filter((pin) => !topIds.includes(pin.id))
-				.map(async (pin) => await pin.unpin("No longer a top-reacted message")),
-		);
+		for (const [, pin] of pins.filter((pin) => !topIds.includes(pin.id)))
+			await pin.unpin("No longer a top-reacted message");
 	}
 
 	processing.delete(message.id);
@@ -101,4 +99,30 @@ function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
 		data.push({ ...oldData, ...newData } as unknown as typeof boardDatabase.data[number]);
 	}
 	boardDatabase.data = data;
+}
+
+export async function syncRandomBoard() {
+	for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
+		if (info.onBoard) continue;
+
+		const date = new Date(Number(BigInt(info.source) >> 22n) + 1_420_070_400_000);
+
+		const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
+		if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded) continue;
+
+		const channel = await client.channels.fetch(info.channel).catch(() => void 0);
+		if (!channel?.isTextBased()) continue;
+
+		if (reactionsNeeded === undefined) {
+			const reactionsNeeded = boardReactionCount(channel, date);
+			if (info.reactions < reactionsNeeded) continue;
+		}
+
+		const message = await channel.messages.fetch(info.source).catch(() => void 0);
+		const reaction = message?.reactions.resolve(BOARD_EMOJI);
+		if (message && reaction) {
+			await updateBoard({ count: reaction.count, message });
+			break;
+		}
+	}
 }

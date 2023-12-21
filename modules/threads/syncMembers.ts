@@ -53,27 +53,25 @@ export async function updateMemberThreads(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
 ) {
-	await Promise.all(
-		threadsDatabase.data.map(async (options) => {
-			const roles = options.roles && options.roles.split("|");
-			if (!roles || !roles.length) return;
+	for (const options of threadsDatabase.data) {
+		const roles = options.roles && options.roles.split("|");
+		if (!roles || !roles.length) continue;
 
-			const qualifies = roles.some((role) => newMember.roles.resolve(role));
-			if (!oldMember.partial) {
-				const qualified = roles.some((role) => oldMember.roles.resolve(role));
-				if (qualified === qualifies) return;
-			}
+		const qualifies = roles.some((role) => newMember.roles.resolve(role));
+		if (!oldMember.partial) {
+			const qualified = roles.some((role) => oldMember.roles.resolve(role));
+			if (qualified === qualifies) continue;
+		}
 
-			const thread = await config.guild.channels.fetch(options.id).catch(() => void 0);
-			if (!thread?.isThread()) return;
+		const thread = await config.guild.channels.fetch(options.id).catch(() => void 0);
+		if (!thread?.isThread()) continue;
 
-			const baseChannel = getBaseChannel(thread);
+		const baseChannel = getBaseChannel(thread);
 
-			await (qualifies && baseChannel?.permissionsFor(newMember).has("ViewChannel")
-				? thread.members.add(newMember, "Has qualifying role")
-				: thread.members.remove(newMember, "Has no qualifying role"));
-		}),
-	);
+		await (qualifies && baseChannel?.permissionsFor(newMember).has("ViewChannel")
+			? thread.members.add(newMember, "Has qualifying role")
+			: thread.members.remove(newMember, "Has no qualifying role"));
+	}
 }
 
 export async function updateThreadMembers(
@@ -82,22 +80,19 @@ export async function updateThreadMembers(
 ) {
 	if (thread.guild.id === config.guild.id && wasArchived && !thread.archived) {
 		const options = getThreadConfig(thread);
-		await Promise.all(
-			options.roles.map(async (roleId) => {
-				const role = await config.guild.roles.fetch(roleId).catch(() => void 0);
-				if (!role) return;
-				return await addRoleToThread({ role, thread });
-			}),
-		);
+		for (const roleId of options.roles) {
+			const role = await config.guild.roles.fetch(roleId).catch(() => void 0);
+			if (!role) continue;
+			await addRoleToThread({ role, thread });
+			continue;
+		}
 	}
 }
 
-function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
-	return Promise.all(
-		role.members.map(
-			(member) =>
-				(getBaseChannel(thread)?.permissionsFor(member).has("ViewChannel") ?? true) &&
-				thread.members.add(member, "Has qualifying role initially"),
-		),
-	);
+async function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
+	for (const [, member] of role.members) {
+		const baseChannel = getBaseChannel(thread);
+		if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))
+			await thread.members.add(member, "Has qualifying role initially");
+	}
 }

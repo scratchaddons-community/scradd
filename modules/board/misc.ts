@@ -33,15 +33,7 @@ export const boardDatabase = new Database<{
 }>("board");
 await boardDatabase.init();
 
-const COUNTS = {
-	admins: 2,
-	mods: 3,
-	private: 4,
-	misc: 5,
-	default: 6,
-	memes: 8,
-	info: 12,
-} as const;
+const COUNTS = { admins: 2, mods: 3, private: 4, misc: 5, default: 6, memes: 8, info: 12 } as const;
 /**
  * Determines the board reaction count for a channel.
  *

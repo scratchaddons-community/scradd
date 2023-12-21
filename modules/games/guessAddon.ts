@@ -397,16 +397,8 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 
 					footer: {
 						text: `Guessed after ${askedCount} questions.${
-							process.env.NODE_ENV === "production"
-								? ""
-								: `${constants.footerSeperator}Probability: ${addonProbabilities[0]?.[1]}`
-						}${
 							nextChoice
-								? `${constants.footerSeperator}Next choice: ${nextChoice}${
-										process.env.NODE_ENV === "production"
-											? ""
-											: ` (probability ${addonProbabilities[1]?.[1]})`
-								  }`
+								? `${constants.footerSeperator}Next choice: ${nextChoice}`
 								: ""
 						}`,
 					},

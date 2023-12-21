@@ -58,10 +58,7 @@ defineSubcommands(
 				},
 			},
 			...(process.env.CANVAS !== "false" && {
-				graph: {
-					description: "Graph users’ XP over the last week",
-					options: {},
-				} as const,
+				graph: { description: "Graph users’ XP over the last week", options: {} } as const,
 			}),
 		},
 	},

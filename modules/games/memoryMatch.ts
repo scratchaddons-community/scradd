@@ -142,12 +142,7 @@ async function playGame(
 		easyMode,
 		useThread,
 		bonusTurns,
-	}: {
-		users: [User, User];
-		easyMode: boolean;
-		useThread: boolean;
-		bonusTurns: boolean;
-	},
+	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
