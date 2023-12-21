@@ -150,7 +150,7 @@ defineModal("contactMods", async (interaction, id) => {
 	);
 });
 defineMenuCommand(
-	{ name: "Report Message", type: ApplicationCommandType.Message, access: false },
+	{ name: "Report Message", type: ApplicationCommandType.Message },
 	async (interaction) => {
 		await interaction.showModal({
 			title: "Report Message",
