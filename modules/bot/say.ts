@@ -167,7 +167,8 @@ export async function say(interaction: RepliableInteraction, content: string, re
 		await log(
 			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
 				"say",
-				(await config.guild.commands.fetch()).find(({ name }) => name === "say")?.id ?? "0",
+				(await interaction.guild?.commands.fetch())?.find(({ name }) => name === "say")
+					?.id ?? "0",
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,
