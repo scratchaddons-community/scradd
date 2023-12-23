@@ -110,7 +110,7 @@ export function normalize(text: string) {
  * @returns The patchless version.
  */
 export function trimPatchVersion(full: string): string {
-	return (/^(?<main>\d+\.\d+)\.\d+/.exec(full))?.groups?.main ?? full;
+	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main ?? full;
 }
 
 export function getRequestUrl(request: IncomingMessage) {
