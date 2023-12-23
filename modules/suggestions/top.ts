@@ -1,7 +1,7 @@
 import {
 	GuildMember,
 	hyperlink,
-	User,
+	type User,
 	type RepliableInteraction,
 	channelLink,
 	formatEmoji,
@@ -13,7 +13,7 @@ import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
 export default async function top(
 	interaction: RepliableInteraction,
-	options: { user?: User | GuildMember; answer?: string; all?: boolean },
+	options: { user?: GuildMember | User; answer?: string; all?: boolean },
 ) {
 	const { suggestions } = config.channels;
 	const user = options.user instanceof GuildMember ? options.user.user : options.user;
@@ -65,12 +65,12 @@ export default async function top(
 	);
 }
 /** @todo - Strip full links, they can't be escaped. */
-function padTitle(title: string | number) {
-	const left = count(`${title}`, "[");
-	const right = count(`${title}`, "]");
+function padTitle(title: number | string) {
+	const left = countOccurrences(`${title}`, "[");
+	const right = countOccurrences(`${title}`, "]");
 	return title + "]".repeat(Math.max(0, left - right));
 }
 
-function count(string: string, substring: string) {
+function countOccurrences(string: string, substring: string) {
 	return string.split(substring).length - 1;
 }

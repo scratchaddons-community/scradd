@@ -3,7 +3,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	User,
+	type User,
 	time,
 	TimestampStyles,
 	type RepliableInteraction,

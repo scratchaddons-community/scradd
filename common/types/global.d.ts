@@ -12,15 +12,15 @@ declare global {
 	interface ReadonlyArray<T> {
 		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
 		includes(
-			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,
 		): searchElement is T;
 		lastIndexOf(
-			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,
 		): number;
 		indexOf(
-			searchElement: T | (WidenLiteral<T> & NonNullable<unknown>),
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,
 		): number;
 		map<U>(
@@ -29,35 +29,35 @@ declare global {
 		): { readonly [K in keyof this]: U };
 	}
 	interface ReadonlySet<T> {
-		has(value: T | (WidenLiteral<T> & NonNullable<unknown>)): boolean;
+		has(value: T | (NonNullable<unknown> & WidenLiteral<T>)): boolean;
 	}
 
 	interface ObjectConstructor {
 		entries<T, U extends PropertyKey>(
-			o: Record<U, T> | ArrayLike<T>,
+			o: ArrayLike<T> | Record<U, T>,
 		): [U extends number ? `${U}` : U, T][];
 		fromEntries<T, U extends PropertyKey>(entries: Iterable<readonly [U, T]>): Record<U, T>;
 		keys<U extends PropertyKey>(entries: Record<U, unknown>): (U extends number ? `${U}` : U)[];
 	}
 
-	interface Body {
+	interface Response {
 		json<T = unknown>(): Promise<T>;
 	}
 	interface JSON {
 		stringify<T>(
 			value: T,
-			replacer?: (string | number)[] | null | undefined,
-			space?: string | number | undefined,
+			replacer?: (number | string)[] | null | undefined,
+			space?: number | string | undefined,
 		): T extends UndefinedDomain ? undefined : UndefinedDomain extends T ? undefined : string;
 		stringify<T>(
 			value: T,
 			replacer: (this: unknown, key: string, value: ToJSON<T>) => unknown,
-			space?: string | number | undefined,
+			space?: number | string | undefined,
 		): string;
 		stringify<T>(
 			value: T,
-			replacer?: undefined | ((this: unknown, key: string, value: ToJSON<T>) => unknown),
-			space?: string | number | undefined,
+			replacer?: ((this: unknown, key: string, value: ToJSON<T>) => unknown) | undefined,
+			space?: number | string | undefined,
 		): string | undefined;
 
 		parse(text: string): unknown;
@@ -107,7 +107,7 @@ declare global {
 			/**
 			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. Defaults to `true`.
 			 *
-			 * For consistency, always compare against `"true"` in code.
+			 * For consistency, always compare against `"false"` in code.
 			 */
 			CANVAS?: `${boolean}`;
 			/** The port to run the web server on. Omit to not run the server. */
@@ -153,7 +153,7 @@ declare module "discord.js" {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-type NonFalsy<T> = T extends false | 0 | "" | null | undefined | void | 0n ? never : T;
+type NonFalsy<T> = T extends "" | 0 | 0n | false | null | undefined | void ? never : T;
 type WidenLiteral<T> = T extends string
 	? string
 	: T extends number

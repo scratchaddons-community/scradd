@@ -97,6 +97,10 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 					}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 				);
+				break;
+			}
+			default: {
+				break;
 			}
 		}
 	}

@@ -3,10 +3,10 @@ import {
 	ComponentType,
 	userMention,
 	TextInputStyle,
-	ButtonInteraction,
-	ModalSubmitInteraction,
+	type ButtonInteraction,
+	type ModalSubmitInteraction,
 	MessageMentions,
-	Embed,
+	type Embed,
 	type MessageActionRowComponent,
 	type ActionRowData,
 } from "discord.js";
@@ -104,7 +104,7 @@ export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, id
 	if (users.accepters.size >= NEEDED_ACCEPT) {
 		const mention = interaction.message?.embeds[0]?.description ?? "";
 		await config.guild.bans.remove(
-			mention.match(MessageMentions.UsersPattern)?.[1] ?? "",
+			MessageMentions.UsersPattern.exec(mention)?.[1] ?? "",
 			`Appealed ban - see ${interaction.message?.url} for context`,
 		);
 		appeals[mention] = { unbanned: true, note, date: new Date().toISOString() };
@@ -144,8 +144,8 @@ export async function submitRejectAppeal(interaction: ModalSubmitInteraction, id
 	}
 }
 
-function parseIds(ids: string) {
-	const users = ids
+function parseIds(input: string) {
+	const users = input
 		.split("/")
 		.map((ids) => ids.split("-").map((id) => convertBase(id, convertBase.MAX_BASE, 10)));
 	const accepters = new Set(users[0]),

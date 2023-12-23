@@ -1,8 +1,8 @@
 import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
 	TextInputStyle,
 } from "discord.js";
 import config from "../../common/config.js";
@@ -35,7 +35,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 			{
 				components: [
 					{
-						customId: "json1",
+						customId: "jsonOne",
 						label: "JSON #1",
 						style: TextInputStyle.Paragraph,
 						type: ComponentType.TextInput,
@@ -48,7 +48,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 			{
 				components: [
 					{
-						customId: "json2",
+						customId: "jsonTwo",
 						label: "JSON #2 (concatenated with the above)",
 						style: TextInputStyle.Paragraph,
 						type: ComponentType.TextInput,
@@ -68,8 +68,8 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 
 export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
 	const text =
-		interaction.fields.getTextInputValue("json1") +
-		interaction.fields.getTextInputValue("json2");
+		interaction.fields.getTextInputValue("jsonOne") +
+		interaction.fields.getTextInputValue("jsonTwo");
 	const json = await new Promise((resolve) => {
 		resolve(JSON.parse(text));
 	}).catch(async (error: unknown) => {

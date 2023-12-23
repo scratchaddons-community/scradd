@@ -5,8 +5,8 @@ import {
 	ComponentType,
 	type BaseMessageOptions,
 	type RepliableInteraction,
-	User,
-	GuildMember,
+	type User,
+	type GuildMember,
 	ApplicationCommandType,
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
@@ -16,20 +16,20 @@ import { disableComponents, messageToEmbed } from "../util/discord.js";
 const MAX_FETCH_COUNT = 100;
 
 async function purge(
-	interaction: RepliableInteraction<"raw" | "cached">,
-	options: { count: string; user?: User | GuildMember; message?: string },
+	interaction: RepliableInteraction<"cached" | "raw">,
+	options: { count: string; user?: GuildMember | User; message?: string },
 ) {
-	const message = options.message?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ?? undefined;
+	const before = options.message?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ?? undefined;
 	const numberCount = Number(options.count);
 	const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
 	const { channel: channelId, id: countId } = (useId &&
-		options.count.match(/^(?:(?<channel>\d+)-)?(?<id>\d+)$/)?.groups) || { id: options.count };
+		/^(?:(?<channel>\d+)-)?(?<id>\d+)$/.exec(options.count)?.groups) || { id: options.count };
 	const channel = channelId ? await client.channels.fetch(channelId) : interaction.channel;
 	if (!channel?.isTextBased() || channel.isDMBased())
 		return await interaction.reply(
 			`${constants.emojis.statuses.no} Could not find that channel!`,
 		);
-	const messages = await channel.messages.fetch({ limit: MAX_FETCH_COUNT, before: message });
+	const messages = await channel.messages.fetch({ limit: MAX_FETCH_COUNT, before });
 
 	const filtered = [...messages.values()].filter(
 		(message) =>
@@ -47,8 +47,8 @@ async function purge(
 				content: `${
 					constants.emojis.statuses.no
 				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
-					message
-						? `before [this message](<${channel?.url}/${message}>). Try searching from an older message.`
+					before
+						? `before [this message](<${channel?.url}/${before}>). Try searching from an older message.`
 						: "ago. Use the `message` option to search backwards from a certain point."
 				} Also, I can’t purge any messages more than 2 weeks old.`,
 			};
@@ -139,9 +139,9 @@ async function purge(
 		} satisfies BaseMessageOptions;
 	}
 
-	const generated = await generateMessage();
-	let reply = await interaction.reply({ ...generated, ephemeral: true, fetchReply: true });
-	if (!generated.embeds) return;
+	const first = await generateMessage();
+	let reply = await interaction.reply({ ...first, ephemeral: true, fetchReply: true });
+	if (!first.embeds) return;
 
 	const collector = reply.createMessageComponentCollector({
 		idle: constants.collectorTime,

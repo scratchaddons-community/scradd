@@ -2,7 +2,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	Message,
+	type Message,
 	MessageType,
 	User,
 	type Snowflake,
@@ -76,7 +76,7 @@ export async function giveXpForMessage(message: Message) {
  * @param url - A link to a message or other that gave them this XP.
  * @param amount - How much XP to give.
  */
-export default async function giveXp(to: User | GuildMember, url?: string, amount = DEFAULT_XP) {
+export default async function giveXp(to: GuildMember | User, url?: string, amount = DEFAULT_XP) {
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =
@@ -100,10 +100,10 @@ export default async function giveXp(to: User | GuildMember, url?: string, amoun
 
 	const sorted = xp.toSorted((one, two) => two.xp - one.xp);
 
-	const members = await config.guild.members.fetch();
+	const guildMembers = await config.guild.members.fetch();
 	const serverRank = sorted
-		.filter(({ user }) => members.has(user))
-		.findIndex((info) => info.user === user.id);
+		.filter((entry) => guildMembers.has(entry.user))
+		.findIndex((entry) => entry.user === user.id);
 
 	const rank = sorted.findIndex((info) => info.user === user.id);
 

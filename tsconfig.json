@@ -10,8 +10,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
-		"lib": ["ESNext", "DOM"],
-		"maxNodeModuleJsDepth": 0,
+		"lib": ["es2023"],
 		"module": "NodeNext",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
@@ -26,9 +25,11 @@
 		"sourceMap": true,
 		"strict": true,
 		"stripInternal": true,
-		"target": "ES2021",
-		"verbatimModuleSyntax": true
+		"target": "es2022",
+		"verbatimModuleSyntax": true,
+		"types": ["node"]
 	},
 	"exclude": ["node_modules", ".git", "dist"],
-	"typeAcquisition": { "enable": true }
+	"typeAcquisition": { "enable": true },
+	"include": ["**/*", ".**/*", ".*"]
 }

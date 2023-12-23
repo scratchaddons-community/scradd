@@ -3,10 +3,10 @@ import {
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	Embed,
-	GuildAuditLogsEntry,
+	type Embed,
+	type GuildAuditLogsEntry,
 	type TextBasedChannel,
-	TextChannel,
+	type TextChannel,
 	ThreadAutoArchiveDuration,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
@@ -89,13 +89,13 @@ export enum LogSeverity {
 
 export default async function log(
 	content: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
-	group: TextChannel | LogSeverity,
+	group: LogSeverity | TextChannel,
 	extra: {
-		embeds?: (Embed | APIEmbed)[];
+		embeds?: (APIEmbed | Embed)[];
 		files?: (string | { extension?: string; content: string })[];
 		buttons?: ({ label: string } & (
-			| { url: string }
 			| { customId: string; style: Exclude<ButtonStyle, ButtonStyle.Link> }
+			| { url: string }
 		))[];
 	} = {},
 ) {

@@ -1,10 +1,10 @@
 import {
-	ButtonInteraction,
+	type ButtonInteraction,
 	ButtonStyle,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	ModalSubmitInteraction,
+	type ModalSubmitInteraction,
 	TextInputStyle,
 	time,
 } from "discord.js";
@@ -53,7 +53,7 @@ const applications = Object.fromEntries(
 );
 
 export default async function confirmInterest(
-	interaction: ChatInputCommandInteraction<"raw" | "cached">,
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ) {
 	await interaction.reply({
 		ephemeral: true,

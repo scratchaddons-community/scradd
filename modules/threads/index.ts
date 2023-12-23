@@ -62,7 +62,7 @@ defineSubcommands(
 	async (interaction, options) => {
 		switch (options.subcommand) {
 			case "sync-members": {
-				return syncMembers(interaction, options.options);
+				return await syncMembers(interaction, options.options);
 			}
 			case "list-unjoined": {
 				await interaction.deferReply({ ephemeral: true });
@@ -81,7 +81,7 @@ defineSubcommands(
 						([thread, joined]) =>
 							!joined && thread.permissionsFor(interaction.user)?.has("ViewChannel"),
 					)
-					.sort(
+					.toSorted(
 						([one], [two]) =>
 							(one.parent?.rawPosition ?? 0) - (two.parent?.rawPosition ?? 0) ||
 							(one.parent?.position ?? 0) - (two.parent?.position ?? 0),
@@ -101,7 +101,8 @@ defineSubcommands(
 				);
 				return;
 			}
-			default: {
+			case "close-in":
+			case "lock-in": {
 				await setUpAutoClose(interaction, options);
 			}
 		}

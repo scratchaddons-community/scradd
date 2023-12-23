@@ -20,7 +20,7 @@ import pkg from "../../package.json" assert { type: "json" };
 export default async function ban(
 	interaction: RepliableInteraction,
 	options: {
-		"user": User | GuildMember;
+		"user": GuildMember | User;
 		"reason"?: string;
 		"unban-in"?: string;
 		"delete-range"?: string;
@@ -30,11 +30,11 @@ export default async function ban(
 	const unbanIn = options["unban-in"]?.toLowerCase();
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
 
-	const ban =
+	const isBanned =
 		options.user instanceof User &&
 		(await config.guild.bans.fetch(userToBan).catch(() => void 0));
 
-	if (ban) {
+	if (isBanned) {
 		const unbanTimer = remindersDatabase.data.find(
 			(reminder) =>
 				reminder.user === client.user.id &&
@@ -143,8 +143,8 @@ export default async function ban(
 			max: 1,
 			time: constants.collectorTime,
 		})
-		.on("collect", async (interaction) => {
-			await confirmBan(interaction, { ...options, unbanTime, user: userToBan });
+		.on("collect", async (buttonInteraction) => {
+			await confirmBan(buttonInteraction, { ...options, unbanTime, user: userToBan });
 		})
 		.on("end", async () => {
 			await interaction.editReply({ components: disableComponents(message.components) });

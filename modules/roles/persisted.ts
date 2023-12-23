@@ -14,14 +14,15 @@ export const persistedRoles = {
 	booster: config.roles.booster?.id,
 	og: "1107170572963684402",
 } as const;
+export const RoleList = mongoose.model(
+	"RoleList",
+	new mongoose.Schema({
+		id: String,
+		...Object.fromEntries(Object.keys(persistedRoles).map((role) => [role, Boolean])),
+	}),
+);
 
-const rolesSchema = new mongoose.Schema({
-	id: String,
-	...Object.fromEntries(Object.keys(persistedRoles).map((role) => [role, Boolean])),
-});
-export const RoleList = mongoose.model("RoleList", rolesSchema);
-
-export async function persistedLeave(member: PartialGuildMember | GuildMember) {
+export async function persistedLeave(member: GuildMember | PartialGuildMember) {
 	if (member.guild.id !== config.guild.id) return;
 
 	const roles = Object.fromEntries(
@@ -40,7 +41,7 @@ export async function persistedRejoin(member: GuildMember) {
 
 	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();
 	for (const roleName of Object.keys(persistedRoles)) {
-		const role = [persistedRoles[roleName]].flat()[0];
+		const [role] = [persistedRoles[roleName]].flat();
 		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
 }

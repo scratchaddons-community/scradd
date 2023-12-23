@@ -1,11 +1,11 @@
 import {
-	AuditLogEvent,
-	GuildAuditLogsEntry,
-	GuildMember,
+	type AuditLogEvent,
+	type GuildAuditLogsEntry,
+	type GuildMember,
 	type PartialGuildMember,
 	type PartialUser,
 	time,
-	User,
+	type User,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
@@ -129,7 +129,7 @@ export async function guildMemberUpdate(
 		);
 }
 
-export async function userUpdate(oldUser: User | PartialUser, newUser: User) {
+export async function userUpdate(oldUser: PartialUser | User, newUser: User) {
 	if (oldUser.partial) return;
 
 	if (oldUser.avatar !== newUser.avatar) {

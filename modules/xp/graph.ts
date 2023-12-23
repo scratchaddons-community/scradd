@@ -1,4 +1,4 @@
-import { type AnySelectMenuInteraction } from "discord.js";
+import type { AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./misc.js";
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
@@ -15,7 +15,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d") as SKRSContext2D & CanvasRenderingContext2D;
+	const context = canvas.getContext("2d") as CanvasRenderingContext2D & SKRSContext2D;
 
 	new Chart(context, {
 		options: {

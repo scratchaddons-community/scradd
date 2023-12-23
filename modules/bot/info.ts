@@ -6,9 +6,9 @@ import {
 	ComponentType,
 	ButtonStyle,
 	GuildMember,
-	User,
-	ChatInputCommandInteraction,
-	ButtonInteraction,
+	type User,
+	type ChatInputCommandInteraction,
+	type ButtonInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
@@ -27,7 +27,7 @@ const designers = "966174686142672917",
 
 export default async function info(
 	interaction: ChatInputCommandInteraction,
-	{ subcommand }: { subcommand: "status" | "credits" | "config" },
+	{ subcommand }: { subcommand: "config" | "credits" | "status" },
 ) {
 	switch (subcommand) {
 		case "status": {

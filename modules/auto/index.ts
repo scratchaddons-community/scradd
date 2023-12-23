@@ -2,7 +2,7 @@ import {
 	ChannelType,
 	MessageType,
 	type BaseMessageOptions,
-	Message,
+	type Message,
 	ApplicationCommandType,
 } from "discord.js";
 import { getSettings } from "../settings.js";
@@ -52,9 +52,9 @@ defineEvent("messageCreate", async (message) => {
 	await learn(message);
 
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
-	reactionLoop: for (const [emoji, ...requirements] of autoreactions) {
+	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
 		let doReact = false;
-		const emojis = [emoji].flat();
+		const emojis = [rawEmojis].flat();
 		if (emojis.some((emoji) => content.includes(emoji))) continue;
 
 		for (const requirement of requirements) {

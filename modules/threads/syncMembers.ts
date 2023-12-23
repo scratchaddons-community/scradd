@@ -1,9 +1,9 @@
 import {
 	Role,
 	type AnyThreadChannel,
-	GuildMember,
+	type GuildMember,
 	type PartialGuildMember,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	roleMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
@@ -21,15 +21,14 @@ export async function syncMembers(
 			content: `${constants.emojis.statuses.no} This command can only be used in threads!`,
 		});
 
-	const options = getThreadConfig(interaction.channel);
-	const roles = options.roles;
-	if (roles.includes(role.id)) {
+	const threadConfig = getThreadConfig(interaction.channel);
+	if (threadConfig.roles.includes(role.id)) {
 		threadsDatabase.updateById(
 			{
 				id: interaction.channel.id,
-				roles: roles.filter((found) => found !== role.id).join("|"),
+				roles: threadConfig.roles.filter((found) => found !== role.id).join("|"),
 			},
-			options,
+			threadConfig,
 		);
 		return await interaction.reply(
 			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
@@ -39,8 +38,8 @@ export async function syncMembers(
 	}
 
 	threadsDatabase.updateById(
-		{ id: interaction.channel.id, roles: [...roles, role.id].join("|") },
-		options,
+		{ id: interaction.channel.id, roles: [...threadConfig.roles, role.id].join("|") },
+		threadConfig,
 	);
 	await interaction.reply(
 		`${constants.emojis.statuses.yes} I will add all ${roleMention(role.id)} to this thread!`,
@@ -54,8 +53,8 @@ export async function updateMemberThreads(
 	newMember: GuildMember,
 ) {
 	for (const options of threadsDatabase.data) {
-		const roles = options.roles && options.roles.split("|");
-		if (!roles || !roles.length) continue;
+		const roles = options.roles?.split("|");
+		if (!roles?.length) continue;
 
 		const qualifies = roles.some((role) => newMember.roles.resolve(role));
 		if (!oldMember.partial) {

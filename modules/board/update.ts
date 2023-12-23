@@ -1,4 +1,4 @@
-import { ChannelType, Message, type Snowflake } from "discord.js";
+import { ChannelType, type Message, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/giveXp.js";
@@ -61,7 +61,7 @@ export default async function updateBoard({ count, message }: { count: number; m
 	const top = boardDatabase.data.toSorted((one, two) => two.reactions - one.reactions);
 	top.splice(
 		top.findIndex(
-			(message, index) => index > 8 && message.reactions !== top[index + 1]?.reactions,
+			(boarded, index) => index > 8 && boarded.reactions !== top[index + 1]?.reactions,
 		) + 1,
 	);
 	const topIds = await Promise.all(
@@ -113,10 +113,8 @@ export async function syncRandomBoard() {
 		const channel = await client.channels.fetch(info.channel).catch(() => void 0);
 		if (!channel?.isTextBased()) continue;
 
-		if (reactionsNeeded === undefined) {
-			const reactionsNeeded = boardReactionCount(channel, date);
-			if (info.reactions < reactionsNeeded) continue;
-		}
+		if (reactionsNeeded === undefined && info.reactions < boardReactionCount(channel, date))
+			continue;
 
 		const message = await channel.messages.fetch(info.source).catch(() => void 0);
 		const reaction = message?.reactions.resolve(BOARD_EMOJI);

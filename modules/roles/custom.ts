@@ -6,13 +6,13 @@ import {
 	ButtonStyle,
 	Colors,
 	type HexColorString,
-	ApplicationCommand,
-	ChatInputCommandInteraction,
+	type ApplicationCommand,
+	type ChatInputCommandInteraction,
 	TextInputStyle,
 	type Snowflake,
 	ApplicationCommandPermissionType,
 	FormattingPatterns,
-	Role,
+	type Role,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -231,7 +231,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	return await interaction.reply(`${constants.emojis.statuses.yes} Created your custom role!`);
 }
 
-export async function recheckMemberRole(_: PartialGuildMember | GuildMember, member: GuildMember) {
+export async function recheckMemberRole(_: GuildMember | PartialGuildMember, member: GuildMember) {
 	const role = getCustomRole(member);
 	if (!role) return;
 	await recheckRole(role);
@@ -281,9 +281,7 @@ export async function qualifiesForRole(member: GuildMember) {
 	).toSorted((one, two) => two[1] - one[1]);
 	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
-	command ??= (await config.guild.commands.fetch()).find(
-		(command) => command.name === "custom-role",
-	);
+	command ??= (await config.guild.commands.fetch()).find(({ name }) => name === "custom-role");
 	const permissions =
 		command && (await config.guild.commands.permissions.fetch({ command }).catch(() => void 0));
 	return permissions?.some(

@@ -17,9 +17,9 @@ export enum SpecialReminders {
 export type Reminder = {
 	channel: Snowflake;
 	date: number;
-	reminder?: string | number;
+	reminder?: number | string;
 	user: Snowflake;
-	id: string | SpecialReminders;
+	id: SpecialReminders | string;
 };
 
 export const BUMPING_THREAD = "881619501018394725",

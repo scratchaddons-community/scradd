@@ -167,5 +167,5 @@ export const categoryToDescription = {
 } satisfies Record<Category | typeof MOD_CATEGORY, string>;
 
 export function getIdFromName(name: string): Snowflake | undefined {
-	return name.match(/\((\d+)\)$/)?.[1];
+	return /\((\d+)\)$/.exec(name)?.[1];
 }

@@ -44,11 +44,11 @@ export const dadEasterEggCount =
  * - `ping` - only direct pings (`message.mentions.has`)
  */
 export const autoreactions: [
-	string | string[],
+	string[] | string,
 	...(
-		| string
 		| RegExp
-		| [string | RegExp, "plural" | "partial" | "raw" | "full" | "negative"]
+		| string
+		| [RegExp | string, "full" | "negative" | "partial" | "plural" | "raw"]
 		| [Snowflake, "ping"]
 	)[],
 ][] = [];

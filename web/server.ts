@@ -12,7 +12,7 @@ import path from "node:path";
 import linkScratchRole from "../modules/roles/scratch.js";
 import { getRequestUrl } from "../util/text.js";
 
-const CSS = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
+const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
 	"#" + constants.themeColor.toString(16),
 );
@@ -45,7 +45,7 @@ const server = http.createServer(async (request, response) => {
 				return await linkScratchRole(request, response);
 			}
 			case "/style.css": {
-				return response.writeHead(200, { "content-type": "text/css" }).end(CSS);
+				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
 			}
 			case "/icon.png": {
 				const options = { extension: "png", forceStatic: true, size: 128 } as const;

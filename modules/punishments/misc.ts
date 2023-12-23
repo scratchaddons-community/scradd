@@ -1,14 +1,14 @@
 import {
-	GuildMember,
+	type GuildMember,
 	MessageType,
-	User,
+	type User,
 	type Snowflake,
 	time,
 	TimestampStyles,
 	ComponentType,
 	ButtonStyle,
-	InteractionResponse,
-	Message,
+	type InteractionResponse,
+	type Message,
 	type BaseMessageOptions,
 } from "discord.js";
 import Database, { DATABASE_THREAD } from "../../common/database.js";
@@ -35,20 +35,21 @@ export const strikeDatabase = new Database<{
 await strikeDatabase.init();
 
 const databases = await (await getLoggingThread(DATABASE_THREAD)).messages.fetch({ limit: 100 });
-const { url } =
-	databases
-		.find((message) => message.attachments.first()?.name === "robotop_warns.json")
-		?.attachments.first() ?? {};
+const robotopUrl = databases
+	.find((message) => message.attachments.first()?.name === "robotop_warns.json")
+	?.attachments.first()?.url;
 const robotopStrikes =
-	(url && (await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(url))) || [];
+	(robotopUrl &&
+		(await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(robotopUrl))) ||
+	[];
 
 const strikesCache: Record<string, { mod?: string; reason: string }> = {};
 
 export default async function filterToStrike(filter: string) {
 	if (/^\d{1,4}$/.test(filter)) {
+		const details = robotopStrikes.find((strike) => strike.id.toString() === filter);
 		const strike = strikeDatabase.data.find((strike) => strike.id.toString() === filter);
-		const info = robotopStrikes.find((strike) => strike.id.toString() === filter);
-		if (strike && info) return { ...info, ...strike, id: info.id.toString() };
+		if (strike && details) return { ...details, ...strike, id: details.id.toString() };
 	}
 
 	const strikeId = /^\d{17,20}$/.test(filter)
@@ -87,7 +88,7 @@ export default async function filterToStrike(filter: string) {
 
 		reason: url
 			? await fetch(url).then(async (response) => await response.text())
-			: message.content.match(/```.*\n([^]+)\n```$/)?.[1] ?? message.content,
+			: /```.*\n([^]+)\n```$/.exec(message.content)?.[1] ?? message.content,
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
@@ -97,16 +98,16 @@ export async function listStrikes(
 	member: GuildMember | User,
 	reply: (
 		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<Message | InteractionResponse>,
-	{ expired = true, removed = false } = {},
-	commandUser: false | User = false,
+	) => Promise<InteractionResponse | Message>,
+	{ expired: showExpired = true, removed: showRemoved = false } = {},
+	commandUser: User | false = false,
 ) {
 	const strikes = strikeDatabase.data
 		.filter(
 			(strike) =>
 				strike.user === member.id &&
-				(removed || !strike.removed) &&
-				(expired || strike.date + EXPIRY_LENGTH > Date.now()),
+				(showRemoved || !strike.removed) &&
+				(showExpired || strike.date + EXPIRY_LENGTH > Date.now()),
 		)
 		.toSorted((one, two) => two.date - one.date);
 

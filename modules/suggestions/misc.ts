@@ -1,4 +1,4 @@
-import { ForumChannel, cleanContent, type Snowflake, type GuildForumTag } from "discord.js";
+import { type ForumChannel, cleanContent, type Snowflake, type GuildForumTag } from "discord.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
@@ -17,7 +17,7 @@ export const suggestionsDatabase = new Database<{
 	author: Snowflake;
 	count: number;
 	id: Snowflake;
-	title: string | number;
+	title: number | string;
 }>("suggestions");
 await suggestionsDatabase.init();
 
@@ -38,7 +38,7 @@ export const oldSuggestions = config.channels.old_suggestions
 				author:
 					(message.author.id === constants.users.robotop
 						? message.embeds[0]?.footer?.text.split(": ")[1]
-						: (message.embeds[0]?.author?.iconURL ?? "").match(/\/(?<userId>\d+)\//)
+						: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
 								?.groups?.userId) ?? message.author,
 
 				count:

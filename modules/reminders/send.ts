@@ -1,10 +1,10 @@
 import { client } from "strife.js";
 import {
-	remindersDatabase,
-	type Reminder,
-	SpecialReminders,
 	BUMPING_THREAD,
 	COMMAND_ID,
+	type Reminder,
+	SpecialReminders,
+	remindersDatabase,
 } from "./misc.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
 import { convertBase, nth } from "../../util/numbers.js";
@@ -23,7 +23,7 @@ import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
-export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
+export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
 
 	const interval = getNextInterval();
@@ -37,7 +37,7 @@ export default async function queueReminders(): Promise<undefined | NodeJS.Timeo
 	}
 }
 
-async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
+async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
 
 	const { toSend, toPostpone } = remindersDatabase.data.reduce<{
@@ -217,7 +217,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 }
 
 function getNextInterval() {
-	const reminder = remindersDatabase.data.toSorted((one, two) => one.date - two.date)[0];
+	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }

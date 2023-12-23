@@ -1,4 +1,4 @@
-import { Constants, MessageType, type Message } from "discord.js";
+import { Constants, type MessageType, type Message } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";

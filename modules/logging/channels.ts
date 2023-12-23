@@ -8,7 +8,7 @@ import {
 	userMention,
 	roleMention,
 	channelMention,
-	DMChannel,
+	type DMChannel,
 	ForumLayoutType,
 	type NonThreadGuildBasedChannel,
 	SortOrderType,

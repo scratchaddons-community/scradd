@@ -5,7 +5,7 @@ import {
 	ButtonStyle,
 	TextInputStyle,
 	inlineCode,
-	User,
+	type User,
 } from "discord.js";
 import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/misc.js";
@@ -29,7 +29,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 
 	const collector = message
 		.createMessageComponentCollector({
-			filter: ({ user }) => user.id === interaction.user.id,
+			filter: (componentInteraction) => componentInteraction.user.id === interaction.user.id,
 			idle: GAME_COLLECTOR_TIME,
 		})
 		.on("collect", async (componentInteraction) => {

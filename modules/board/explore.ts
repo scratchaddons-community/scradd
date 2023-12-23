@@ -50,8 +50,11 @@ async function textChannelMatches(
 			const thread = await guild.channels.fetch(channelFound).catch(() => void 0);
 			return thread?.parent?.id === channelWanted.id;
 		}
-
-		default: {
+		case ChannelType.GuildVoice:
+		case ChannelType.AnnouncementThread:
+		case ChannelType.PublicThread:
+		case ChannelType.PrivateThread:
+		case ChannelType.GuildStageVoice: {
 			return false;
 		}
 	}
@@ -102,7 +105,7 @@ export default async function makeSlideshow(
 	async function getNextMessage(): Promise<MessageEditOptions> {
 		const info = (await fetchedMessages.next()).value;
 
-		const reply = info
+		const message = info
 			? await generateBoardMessage(info, {
 					pre: [
 						{
@@ -144,13 +147,13 @@ export default async function makeSlideshow(
 					files: [],
 			  } satisfies InteractionReplyOptions);
 
-		if (!reply) {
+		if (!message) {
 			boardDatabase.data = boardDatabase.data.filter(({ source }) => source !== info?.source);
 
 			return await getNextMessage();
 		}
-		messages.push(reply);
-		return reply;
+		messages.push(message);
+		return message;
 	}
 
 	reply = await interaction.editReply(await getNextMessage());

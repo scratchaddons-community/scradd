@@ -22,7 +22,7 @@ defineChatCommand(
 		name: "memory-match",
 		description: "Play a memory matching game against someone else",
 		options: {
-			"user": {
+			"opponent": {
 				description: "A user to challenge",
 				type: ApplicationCommandOptionType.User,
 				required: true,
@@ -47,7 +47,7 @@ defineChatCommand(
 defineMenuCommand(
 	{ name: "Play Memory Match", type: ApplicationCommandType.User, access: true },
 	async (interaction) => {
-		await memoryMatch(interaction, { user: interaction.targetMember ?? undefined });
+		await memoryMatch(interaction, { opponent: interaction.targetMember ?? undefined });
 	},
 );
 defineEvent.pre("messageDelete", messageDelete);
@@ -79,5 +79,5 @@ defineButton("endGame", async (interaction, users) => {
 		});
 
 	await interaction.deferUpdate();
-	return await current.end();
+	return current.end();
 });

@@ -1,6 +1,6 @@
 import {
 	type MessageCreateOptions,
-	time,
+	time as timestamp,
 	TimestampStyles,
 	type Snowflake,
 	userMention,
@@ -172,7 +172,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		"en-us",
 	)} people were active. Altogether, people gained ${allXp.toLocaleString(
 		"en-us",
-	)} XP this week.*\n### Next week’s weekly winners will be posted ${time(
+	)} XP this week.*\n### Next week’s weekly winners will be posted ${timestamp(
 		nextWeeklyDate,
 		TimestampStyles.RelativeTime,
 	)}.`;

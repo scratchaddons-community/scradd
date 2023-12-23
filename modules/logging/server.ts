@@ -7,11 +7,11 @@ import {
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
 	Locale,
-	AuditLogEvent,
-	GuildAuditLogsEntry,
+	type AuditLogEvent,
+	type GuildAuditLogsEntry,
 	time,
 	TimestampStyles,
-	Invite,
+	type Invite,
 	userMention,
 } from "discord.js";
 import config from "../../common/config.js";

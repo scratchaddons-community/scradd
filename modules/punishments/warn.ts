@@ -1,5 +1,5 @@
 import {
-	ButtonInteraction,
+	type ButtonInteraction,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
@@ -29,7 +29,7 @@ export default async function warn(
 	user: GuildMember | User,
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
-	contextOrModerator: string | User = client.user,
+	contextOrModerator: User | string = client.user,
 ) {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(

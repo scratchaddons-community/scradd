@@ -26,14 +26,14 @@ import {
 	type AnyThreadChannel,
 	type MessageReaction,
 	chatInputApplicationCommandMention,
-	DMChannel,
+	type DMChannel,
 	type PartialDMChannel,
 	bold,
-	ChatInputCommandInteraction,
-	InteractionResponse,
-	ThreadChannel,
+	type ChatInputCommandInteraction,
+	type InteractionResponse,
+	type ThreadChannel,
 	Collection,
-	ApplicationCommand,
+	type ApplicationCommand,
 	channelMention,
 } from "discord.js";
 import constants from "../common/constants.js";
@@ -192,7 +192,7 @@ export async function getAllMessages(
  * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
  * @author Based Off of [Rapptz/discord.py's
- *   `system_content`](https://github.com/Rapptz/discord.py/blob/14faa9b/discord/message.py#L2001-L2141)
+ *   `system_content`](https://github.com/Rapptz/discord.py/blob/08ef42f/discord/message.py#L2080-L2234)
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
  *
@@ -201,7 +201,7 @@ export async function getAllMessages(
 export function messageToText(message: Message, replies: false): string;
 export async function messageToText(message: Message, replies?: true): Promise<string>;
 export function messageToText(message: Message, replies = true): Awaitable<string> {
-	const actualContent = message.flags.has("Loading")
+	const content = message.flags.has("Loading")
 		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
@@ -212,19 +212,19 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 	switch (message.type) {
 		case MessageType.Default: {
-			return message.content;
+			return content;
 		}
 
 		case MessageType.RecipientAdd: {
 			return `${constants.emojis.discord.add} ${message.author.toString()} added ${
 				message.mentions.users.first()?.toString() ?? ""
-			} to the ${message.guild ? "thread" : "group"}.`;
+			} to the ${message.inGuild() ? "thread" : "group"}.`;
 		}
 
 		case MessageType.RecipientRemove: {
 			return `${constants.emojis.discord.remove} ${message.author.toString()} removed ${
 				message.mentions.users.first()?.toString() ?? ""
-			} from the ${message.guild ? "thread" : "group"}.`;
+			} from the ${message.inGuild() ? "thread" : "group"}.`;
 		}
 
 		case MessageType.ChannelNameChange: {
@@ -232,7 +232,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				message.channel.isThread() && message.channel.parent?.isThreadOnly()
 					? "post title"
 					: "channel name"
-			}: **${escapeMessage(message.content)}**`;
+			}: **${escapeMessage(content)}**`;
 		}
 
 		case MessageType.ChannelIconChange: {
@@ -273,15 +273,16 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Yay you made it, ${message.author.toString()}!`,
 			];
 
-			const createdAtMs = Number(message.createdAt);
-			return `${constants.emojis.discord.add} ${formats[createdAtMs % formats.length]}`;
+			return `${constants.emojis.discord.add} ${
+				formats[message.createdTimestamp % formats.length]
+			}`;
 		}
 
 		case MessageType.GuildBoost: {
 			return `${
 				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${message.content}** times` : ""
+				content ? ` **${content}** times` : ""
 			}!`;
 		}
 
@@ -289,7 +290,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return `${
 				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${message.content}** times` : ""
+				content ? ` **${content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 1**!`;
 		}
 
@@ -297,7 +298,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return `${
 				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${message.content}** times` : ""
+				content ? ` **${content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 2**!`;
 		}
 
@@ -305,7 +306,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return `${
 				constants.emojis.discord.boost
 			} ${message.author.toString()} just boosted the server${
-				message.content ? ` **${message.content}** times` : ""
+				content ? ` **${content}** times` : ""
 			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 3**!`;
 		}
 
@@ -313,16 +314,9 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return `${
 				constants.emojis.discord.add
 			} ${message.author.toString()} has added **${escapeMessage(
-				message.content,
+				content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}
-
-		// case MessageType.GuildStream: {
-		// 	// the author will be a Member
-		// 	return `${message.author.toString()} is live! Now streaming ${
-		// 		message.groupActivityApplication?.name
-		// 	}`;
-		// }
 
 		case MessageType.GuildDiscoveryDisqualified: {
 			return `${constants.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
@@ -344,39 +338,40 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			return `${
 				constants.emojis.discord.thread
 			} ${message.author.toString()} started a thread: **${escapeMessage(
-				message.content,
+				content,
 			)}** See all **threads**.`;
 		}
 
 		case MessageType.Reply: {
-			if (!replies) return message.content;
+			if (!replies) return content;
 			return message
 				.fetchReference()
 				.catch(() => void 0)
 				.then((reply) => {
 					if (!reply)
-						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${message.content}`;
+						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${content}`;
 
 					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
 						cleanContent
 							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
 							: "*"
-					}\n\n${message.content}`;
+					}\n\n${content}`;
 				});
 		}
 
 		case MessageType.ThreadStarterMessage: {
-			if (!replies) return actualContent;
+			// eslint-disable-next-line unicorn/string-content
+			const failMessage = `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
+			if (!message.reference) return failMessage;
+
+			if (!replies) return content;
+
 			return message
 				.fetchReference()
 				.catch(() => void 0)
 				.then(async (reference) =>
-					// The resolved message for the reference will be a Message
-					reference
-						? (await messageToText(reference, replies)) || actualContent
-						: // eslint-disable-next-line unicorn/string-content
-						  `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`,
+					reference ? (await messageToText(reference, replies)) || content : failMessage,
 				);
 		}
 
@@ -396,15 +391,15 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.StageStart: {
-			return `${constants.emojis.discord.stageLive} ${message.author.toString()} started **${
-				message.content
-			}**`;
+			return `${
+				constants.emojis.discord.stageLive
+			} ${message.author.toString()} started **${content}**`;
 		}
 
 		case MessageType.StageEnd: {
-			return `${constants.emojis.discord.stage} ${message.author.toString()} ended **${
-				message.content
-			}**`;
+			return `${
+				constants.emojis.discord.stage
+			} ${message.author.toString()} ended **${content}**`;
 		}
 
 		case MessageType.StageSpeaker: {
@@ -422,27 +417,25 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		case MessageType.StageTopic: {
 			return `${
 				constants.emojis.discord.stage
-			} ${message.author.toString()} changed Stage topic: **${message.content}**`;
+			} ${message.author.toString()} changed Stage topic: **${content}**`;
 		}
 
 		case MessageType.ContextMenuCommand: {
-			if (!replies) return actualContent;
+			if (!replies) return content;
 			return `*${message.interaction?.user.toString() ?? ""} used **${escapeMessage(
 				message.interaction?.commandName ?? "",
-			)}**:*\n${actualContent}`;
+			)}**:*\n${content}`;
 		}
 
 		case MessageType.ChatInputCommand: {
-			if (!replies) return actualContent;
-
-			const commands = Promise.all([
-				...(message.guild ? [message.guild.commands.fetch()] : []),
-				client.application.commands.fetch(),
-			]);
+			if (!replies) return content;
 
 			const subcommandName = message.interaction?.commandName ?? "";
-			const commandName = subcommandName.split(" ")[0];
-			return commands
+			const [commandName] = subcommandName.split(" ");
+			return Promise.all([
+				...(message.guild ? [message.guild.commands.fetch()] : []),
+				client.application.commands.fetch(),
+			])
 				.then((commands) =>
 					// eslint-disable-next-line unicorn/prefer-spread
 					new Collection<string, ApplicationCommand>().concat(...commands),
@@ -457,7 +450,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					(formatted) =>
 						`*${
 							message.interaction?.user.toString() ?? ""
-						} used ${formatted}:*\n${actualContent}`,
+						} used ${formatted}:*\n${content}`,
 				);
 		}
 
@@ -475,12 +468,10 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					message.channel.id,
 			)}`;
 		}
-
-		default: {
-			// Fallback for unknown message types
-			throw new TypeError(`Unknown message type: ${message.type}`);
-		}
 	}
+
+	// Fallback for unknown message types
+	throw new TypeError(`Unknown message type: ${message.type}`);
 }
 
 export async function messageToEmbed(message: Message, censor?: (text: string) => string) {
@@ -590,7 +581,7 @@ export async function paginate<Item>(
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (
 		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<Message | InteractionResponse>,
+	) => Promise<InteractionResponse | Message>,
 	{
 		title,
 		format,
@@ -619,9 +610,7 @@ export async function paginate<Item>(
 		ephemeral?: boolean;
 		perPage?: number;
 
-		generateComponents?: (
-			items: Item[],
-		) => Awaitable<MessageActionRowComponentData[] | undefined>;
+		generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
 		customComponentLocation?: "above" | "below";
 	},
 ): Promise<void> {

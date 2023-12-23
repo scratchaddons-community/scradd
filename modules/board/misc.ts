@@ -63,15 +63,15 @@ export function boardReactionCount(
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
-	const count =
+	return shift(
 		baseReactionCount(baseChannel.id) ??
-		{
-			[config.channels.info?.id || ""]: COUNTS.info,
-			[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
-			"866028754962612294": COUNTS.misc, // #The Cache
-		}[baseChannel.parent?.id || ""] ??
-		COUNTS.default;
-	return shift(count);
+			{
+				[config.channels.info?.id || ""]: COUNTS.info,
+				[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
+				"866028754962612294": COUNTS.misc, // #The Cache
+			}[baseChannel.parent?.id || ""] ??
+			COUNTS.default,
+	);
 
 	function shift(count: number) {
 		const privateThread =
@@ -107,7 +107,7 @@ function baseReactionCount(id: Snowflake) {
  * @returns The representation of the message.
  */
 export async function generateBoardMessage(
-	info: typeof boardDatabase.data[number] | Message,
+	info: Message | typeof boardDatabase.data[number],
 	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
 ): Promise<BaseMessageOptions | undefined> {
 	const count =

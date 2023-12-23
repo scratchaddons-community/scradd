@@ -1,17 +1,24 @@
+/// <reference lib="dom" />
+
 declare module "@twemoji/parser" {
 	export const TypeName = "emoji";
-	export function parse<AssetType = "svg" | "png">(
+	export function parse<AssetType = "png" | "svg">(
 		text: string,
 		options?: ParseOptions<AssetType>,
 	): Entity[];
 	export function toCodePoints(unicodeSurrogates: string): string[];
 
-	type ParseOptions<AssetType = "svg" | "png"> = {
+	interface ParseOptions<AssetType = "png" | "svg"> {
 		assetType?: AssetType;
 		buildUrl?: BuildUrl<AssetType>;
-	};
-	type Entity = { url: string; indices: [number, number]; text: string; type: typeof TypeName };
-	type BuildUrl<AssetType = "svg" | "png"> = (codepoints: string, assetType: AssetType) => string;
+	}
+	interface Entity {
+		url: string;
+		indices: [number, number];
+		text: string;
+		type: typeof TypeName;
+	}
+	type BuildUrl<AssetType = "png" | "svg"> = (codepoints: string, assetType: AssetType) => string;
 }
 
 declare module "@twemoji/parser/dist/lib/regex.js" {

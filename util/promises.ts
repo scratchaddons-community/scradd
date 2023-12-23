@@ -8,14 +8,15 @@ export async function* asyncFilter<T, X>(
 	let currentIndex = 0;
 	while (currentIndex < array.length) {
 		const batch = array.slice(currentIndex, currentIndex + BATCH_SIZE);
-		const promises = batch.map((value, index) => predicate(value, currentIndex + index, array));
+		const index = currentIndex;
+		const promises = batch.map((value, subindex) => predicate(value, subindex + index, array));
 
 		while (promises.length > 0) {
 			const resolved = await Promise.race(
-				promises.map(async (promise, index) => ({ result: await promise, index })),
+				promises.map(async (promise, subindex) => ({ result: await promise, subindex })),
 			);
 
-			promises.splice(resolved.index, 1);
+			promises.splice(resolved.subindex, 1);
 			if (resolved.result !== false) yield resolved.result;
 		}
 
@@ -50,7 +51,7 @@ export async function firstTrueyPromise(promises: Promise<unknown>[]) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function gracefulFetch<T = any>(apiUrl: string): Promise<T | undefined> {
-	return fetch(apiUrl)
+	return await fetch(apiUrl)
 		.then((response) => response.json<T>())
 		.catch(() => void 0);
 }

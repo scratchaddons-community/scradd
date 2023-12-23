@@ -1,12 +1,12 @@
 import { unifiedDiff } from "difflib";
 import {
 	type APIGuildScheduledEvent,
-	AuditLogEvent,
+	type AuditLogEvent,
 	ChannelType,
-	GuildAuditLogsEntry,
-	GuildScheduledEvent,
+	type GuildAuditLogsEntry,
+	type GuildScheduledEvent,
 	type PartialGuildScheduledEvent,
-	VoiceState,
+	type VoiceState,
 	GuildScheduledEventStatus,
 	time,
 } from "discord.js";
@@ -73,10 +73,13 @@ export async function guildScheduledEventUpdate(
 			}
 			case "channel_id":
 			case "entity_type":
+			case "entity_metadata":
+			case "entity_id":
 			case "location": {
 				locationChanged ||= true;
 				break;
 			}
+			case "image":
 			case "image_hash": {
 				const url = entry.target.coverImageURL({ size: 128 });
 				await log(
@@ -109,6 +112,11 @@ export async function guildScheduledEventUpdate(
 					}`,
 					LogSeverity.ServerChange,
 				);
+				break;
+			}
+			default: {
+				break;
+				// todo: log privacy?
 			}
 		}
 

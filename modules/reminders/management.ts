@@ -4,8 +4,8 @@ import {
 	GuildMember,
 	time,
 	TimestampStyles,
-	ChatInputCommandInteraction,
-	MessageComponentInteraction,
+	type ChatInputCommandInteraction,
+	type MessageComponentInteraction,
 	channelMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
@@ -41,13 +41,13 @@ export async function listReminders(interaction: ChatInputCommandInteraction) {
 			totalCount: reminders.length,
 			ephemeral: true,
 
-			generateComponents(reminders) {
+			generateComponents(page) {
 				return [
 					{
 						customId: "_cancelReminder",
 						type: ComponentType.StringSelect,
 						placeholder: "Cancel",
-						options: reminders.map((reminder) => ({
+						options: page.map((reminder) => ({
 							value: reminder.id + "",
 							description: `${reminder.reminder}`.slice(0, 100),
 							label: reminder.id + "",

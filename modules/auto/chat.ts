@@ -1,12 +1,12 @@
 import {
 	type Snowflake,
-	Message,
+	type Message,
 	MessageType,
 	ChannelType,
 	ComponentType,
 	ButtonStyle,
-	ButtonInteraction,
-	MessageContextMenuCommandInteraction,
+	type ButtonInteraction,
+	type MessageContextMenuCommandInteraction,
 	TextInputStyle,
 } from "discord.js";
 import { normalize } from "../../util/text.js";
@@ -50,7 +50,7 @@ export default function scraddChat(message: Message) {
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
 		threshold: 0.7,
 	})
-		.sort(() => Math.random() - 0.5)
+		.toSorted(() => Math.random() - 0.5)
 		.find(({ response }) => response && response !== prompt && !removedResponses.has(response))
 		?.response.replaceAll(client.user.toString(), message.author.toString());
 	if (response) return response;
@@ -110,7 +110,7 @@ async function getThread() {
 	if (!config.channels.bots) return;
 
 	const intitialThread = getInitialChannelThreads(config.channels.bots).find(
-		(thread) => thread.name === "Scradd Chat",
+		({ name }) => name === "Scradd Chat",
 	);
 	if (intitialThread) return intitialThread;
 

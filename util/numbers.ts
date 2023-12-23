@@ -90,18 +90,16 @@ export function parseTime(time: string): Date {
 		hours = 0,
 		minutes = 0,
 		seconds = 0,
-	} = time.match(
-		new RegExp(
-			/^\s*(?:(?<years>.\d+|\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
-				/(?:(?<months>.\d+|\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
-				/(?:(?<weeks>.\d+|\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
-				/(?:(?<days>.\d+|\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
-				/(?:(?<hours>.\d+|\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
-				/(?:(?<minutes>.\d+|\d+(?:.\d+)?)\s*m(?:in(?:ute)?s?)?)?\s*/.source +
-				/(?:(?<seconds>.\d+|\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
-			"i",
-		),
-	)?.groups ?? {};
+	} = new RegExp(
+		/^\s*(?:(?<years>.\d+|\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
+			/(?:(?<months>.\d+|\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
+			/(?:(?<weeks>.\d+|\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
+			/(?:(?<days>.\d+|\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
+			/(?:(?<hours>.\d+|\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
+			/(?:(?<minutes>.\d+|\d+(?:.\d+)?)\s*m(?:in(?:ute)?s?)?)?\s*/.source +
+			/(?:(?<seconds>.\d+|\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
+		"i",
+	).exec(time)?.groups ?? {};
 
 	const date = new Date();
 	const otherDate = new Date(date);
@@ -122,29 +120,28 @@ export function parseTime(time: string): Date {
 	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }
 
-export function lerpColors(colors: number[], percent: number) {
-	if (colors.length === 0) throw new RangeError("Color array must not be empty.");
-	if (colors.length === 1) return colors[0];
+// TODO: magic numbers
+const COLOR_CHANNELS = ["red", "green", "blue"] as const;
+export function lerpColors(allColors: number[], percent: number) {
+	if (allColors.length === 0) throw new RangeError("Color array must not be empty.");
+	if (allColors.length === 1) return allColors[0];
 
-	const segmentCount = colors.length - 1;
-	const segmentIndex = Math.floor(segmentCount * percent);
-	const segmentPercent =
-		segmentCount === 1 ? percent : (percent - segmentIndex / segmentCount) * segmentCount;
+	const count = allColors.length - 1;
+	const index = Math.floor(count * percent);
 
-	const color1 = colors[segmentIndex] ?? 0;
-	const color2 = colors[segmentIndex + 1] ?? 0;
+	const distance = count === 1 ? percent : (percent - index / count) * count;
+	const colors = allColors.slice(index, index + 2) as [typeof allColors[0], typeof allColors[1]];
 
-	const red1 = (color1 >> 16) & 0xff;
-	const green1 = (color1 >> 8) & 0xff;
-	const blue1 = color1 & 0xff;
+	const channelsByColor = colors.map((color) => ({
+		red: (color >> 16) & 0xff,
+		green: (color >> 8) & 0xff,
+		blue: color & 0xff,
+	}));
 
-	const red2 = (color2 >> 16) & 0xff;
-	const green2 = (color2 >> 8) & 0xff;
-	const blue2 = color2 & 0xff;
-
-	const red = Math.round(red1 + (red2 - red1) * segmentPercent);
-	const green = Math.round(green1 + (green2 - green1) * segmentPercent);
-	const blue = Math.round(blue1 + (blue2 - blue1) * segmentPercent);
-
+	const [red, green, blue] = COLOR_CHANNELS.map((channel) =>
+		channelsByColor
+			.map((color) => color[channel])
+			.reduce((one, two) => one + (two - one) * distance),
+	);
 	return (red << 16) | (green << 8) | blue;
 }

@@ -59,11 +59,11 @@ export default async function changeNickname(member: GuildMember) {
 			}
 		}
 		if (unchanged.size > 1) {
-			for (const member of unchanged.values()) {
-				const nick = censor(member.user.username);
-				if (nick !== member.displayName && isPingable(nick)) {
-					await setNickname(member, nick, "Conflicts");
-					unchanged.delete(member.id);
+			for (const found of unchanged.values()) {
+				const nick = censor(found.user.username);
+				if (nick !== found.displayName && isPingable(nick)) {
+					await setNickname(found, nick, "Conflicts");
+					unchanged.delete(found.id);
 				}
 			}
 		}

@@ -1,7 +1,7 @@
 import {
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	ComponentType,
-	ModalSubmitInteraction,
+	type ModalSubmitInteraction,
 	TextInputStyle,
 	User,
 } from "discord.js";

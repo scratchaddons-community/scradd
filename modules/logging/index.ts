@@ -1,9 +1,10 @@
 import {
 	AuditLogEvent,
 	AutoModerationRuleTriggerType,
-	GuildAuditLogsEntry,
+	type GuildAuditLogsEntry,
 	WebhookType,
 	userMention,
+	type Awaitable,
 } from "discord.js";
 import config from "../../common/config.js";
 import { defineEvent } from "strife.js";
@@ -51,7 +52,7 @@ import { memberRoleUpdate, roleCreate, roleUpdate, roleDelete } from "./roles.js
 import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 
 const events: {
-	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => void | Promise<void>;
+	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => Awaitable<void>;
 } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,
 	[AuditLogEvent.ChannelDelete]: channelDelete,

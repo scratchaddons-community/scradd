@@ -2,7 +2,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	User,
+	type User,
 	type RepliableInteraction,
 } from "discord.js";
 import { client } from "strife.js";

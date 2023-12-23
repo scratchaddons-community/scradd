@@ -57,7 +57,9 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 	let iconChanged = false;
 
 	for (const change of entry.changes) {
-		const key = change.key as keyof APIRole | "icon_hash";
+		const key = change.key as
+			| Extract<typeof change.key, keyof APIRole | "icon_hash">
+			| "unicode_emoji";
 		switch (key) {
 			case "name": {
 				await log(
@@ -119,6 +121,11 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			case "icon_hash":
 			case "unicode_emoji": {
 				iconChanged ||= true;
+				break;
+			}
+			default: {
+				break;
+				//todo: log position changes
 			}
 		}
 	}

@@ -2,10 +2,10 @@ import {
 	ComponentType,
 	ButtonStyle,
 	type Snowflake,
-	ButtonInteraction,
-	Message,
+	type ButtonInteraction,
+	type Message,
 	type PartialMessage,
-	User,
+	type User,
 	ThreadAutoArchiveDuration,
 	ChannelType,
 	type RepliableInteraction,
@@ -33,16 +33,16 @@ const instructionsButton = {
 export default async function memoryMatch(
 	interaction: RepliableInteraction,
 	options: {
-		"user"?: User | GuildMember | APIInteractionGuildMember;
+		"opponent"?: APIInteractionGuildMember | GuildMember | User;
 		"easy-mode"?: boolean;
 		"bonus-turns"?: boolean;
 		"thread"?: boolean;
 	},
 ) {
 	if (
-		!(options.user instanceof GuildMember) ||
-		options.user.user.bot ||
-		interaction.user.id === options.user.id
+		!(options.opponent instanceof GuildMember) ||
+		options.opponent.user.bot ||
+		interaction.user.id === options.opponent.id
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -50,14 +50,12 @@ export default async function memoryMatch(
 			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
 	}
-	const otherUser = options.user;
 
-	const easyMode = options["easy-mode"] ?? false;
-	const bonusTurns = options["bonus-turns"] ?? true;
+	const { opponent, "easy-mode": easyMode = false, "bonus-turns": bonusTurns = true } = options;
 
 	const message = await interaction.reply({
 		fetchReply: true,
-		content: `💪 **${otherUser.toString()}, you are challenged to a game of Memory Match${
+		content: `💪 **${opponent.toString()}, you are challenged to a game of Memory Match${
 			easyMode || !bonusTurns
 				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
 						bonusTurns ? "" : "no bonus turns"
@@ -93,7 +91,7 @@ export default async function memoryMatch(
 		})
 		.on("collect", async (buttonInteraction) => {
 			const isUser = interaction.user.id === buttonInteraction.user.id;
-			const isOtherUser = otherUser.id === buttonInteraction.user.id;
+			const isOtherUser = opponent.id === buttonInteraction.user.id;
 
 			if (buttonInteraction.customId.startsWith("cancel-")) {
 				await buttonInteraction.deferUpdate();
@@ -108,21 +106,21 @@ export default async function memoryMatch(
 			if (isOtherUser) {
 				collector.stop();
 
-				const player1Presence = interaction.guild?.presences.resolve(interaction.user.id);
-				const player2Presence =
-					options.user instanceof Base
-						? interaction.guild?.presences.resolve(options.user.id)
+				const playerPresence = interaction.guild?.presences.resolve(interaction.user.id);
+				const opponentPresence =
+					options.opponent instanceof Base
+						? interaction.guild?.presences.resolve(options.opponent.id)
 						: undefined;
 
 				const presenceCheck =
-					player1Presence?.status !== player1Presence?.clientStatus?.mobile ||
-					player2Presence?.status !== player2Presence?.clientStatus?.mobile;
+					playerPresence?.status !== playerPresence?.clientStatus?.mobile ||
+					opponentPresence?.status !== opponentPresence?.clientStatus?.mobile;
 
 				await playGame(buttonInteraction, {
-					users:
+					players:
 						Math.random() > 0.5
-							? [interaction.user, otherUser.user]
-							: [otherUser.user, interaction.user],
+							? [interaction.user, opponent.user]
+							: [opponent.user, interaction.user],
 					easyMode,
 					bonusTurns,
 					useThread: options.thread ?? presenceCheck,
@@ -138,11 +136,11 @@ export default async function memoryMatch(
 async function playGame(
 	interaction: ButtonInteraction,
 	{
-		users,
+		players,
 		easyMode,
 		useThread,
 		bonusTurns,
-	}: { users: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
+	}: { players: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
 ) {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
@@ -150,7 +148,8 @@ async function playGame(
 		});
 		return;
 	}
-	const otherUser = users.find((user) => user.id !== interaction.user.id) ?? interaction.user;
+	const otherUser =
+		players.find((player) => player.id !== interaction.user.id) ?? interaction.user;
 	if (CURRENTLY_PLAYING.get(otherUser.id)) {
 		await interaction.message.edit({
 			components: disableComponents(interaction.message.components),
@@ -165,24 +164,25 @@ async function playGame(
 	}
 
 	await interaction.deferUpdate();
+
+	let turn = 0;
+	let turnInfo = await setupNextTurn();
+	let totalTurns = 0;
+	const shown = new Set<string>();
+
 	const scores: [string[], string[]] = [[], ["22"]];
 	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
-	const message = await interaction.message.edit(getBoard(0));
+	const message = await interaction.message.edit(getBoard());
 	const thread =
 		useThread &&
 		(message.channel.type === ChannelType.GuildAnnouncement ||
 			message.channel.type === ChannelType.GuildText)
 			? await message.startThread({
-					name: `Memory Match: ${users[0].displayName} versus ${users[1].displayName}`,
+					name: `Memory Match: ${players[0].displayName} versus ${players[1].displayName}`,
 					reason: "To play the game",
 					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
 			  })
 			: undefined;
-
-	let turn = 0;
-	let turnInfo = await setupTurn(turn);
-	let totalTurns = 0;
-	const shown = new Set<string>();
 
 	const collector = message
 		.createMessageComponentCollector({
@@ -198,7 +198,7 @@ async function playGame(
 			if (turnInfo.timeout) clearTimeout(turnInfo.timeout);
 			turnInfo.timeout = undefined;
 			shown.add(buttonInteraction.customId);
-			await interaction.message.edit(getBoard(turn, shown));
+			await interaction.message.edit(getBoard(shown));
 			await buttonInteraction.deferUpdate();
 
 			if (shown.size === 1) return;
@@ -214,23 +214,24 @@ async function playGame(
 					collector.stop();
 					await endGame();
 					return;
-				} else await interaction.message.edit(getBoard(turn));
+				} else await interaction.message.edit(getBoard());
 			}
 			if (!match || !bonusTurns) {
 				turn++;
 
 				deletedPings.add(turnInfo.ping.id);
 				await turnInfo.ping.delete();
-				turnInfo = await setupTurn(turn);
+				turnInfo = await setupNextTurn();
 			}
 			shown.clear();
 		})
 		.on("end", async (_, endReason) => {
 			if (endReason === "idle") {
-				return endGame(
+				await endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
 				);
+				return;
 			}
 			if (endReason === "end") {
 				await turnInfo.ping.edit({
@@ -240,23 +241,23 @@ async function playGame(
 			}
 		});
 
-	CURRENTLY_PLAYING.set(users[0].id, {
+	CURRENTLY_PLAYING.set(players[0].id, {
 		url: message.url,
 		end() {
 			collector.stop("end");
-			return endGame(`🛑 ${users[0].toString()} ended the game`, users[0]);
+			return endGame(`🛑 ${players[0].toString()} ended the game`, players[0]);
 		},
 	});
-	CURRENTLY_PLAYING.set(users[1].id, {
+	CURRENTLY_PLAYING.set(players[1].id, {
 		url: message.url,
 		end() {
 			collector.stop("end");
-			return endGame(`🛑 ${users[1].toString()} ended the game`, users[1]);
+			return endGame(`🛑 ${players[1].toString()} ended the game`, players[1]);
 		},
 	});
 
-	async function setupTurn(turn: number) {
-		const user = users[turn % 2] ?? users[0];
+	async function setupNextTurn() {
+		const user = players[turn % 2] ?? players[0];
 		const content = `🎲 ${user.toString()}, your turn!`;
 		const gameLinkButton = {
 			label: "Game",
@@ -268,7 +269,7 @@ async function playGame(
 			label: "End",
 			style: ButtonStyle.Danger,
 			type: ComponentType.Button,
-			customId: `${users.map((user) => user.id).join("-")}_endGame`,
+			customId: `${players.map((player) => player.id).join("-")}_endGame`,
 		} as const;
 
 		const ping = await (thread
@@ -292,22 +293,22 @@ async function playGame(
 			  }));
 
 		const timeout = turn
-			? setTimeout(() => interaction.message.edit(getBoard(turn)), GAME_COLLECTOR_TIME / 60)
+			? setTimeout(() => interaction.message.edit(getBoard()), GAME_COLLECTOR_TIME / 60)
 			: undefined;
 
 		return { user, ping, timeout };
 	}
 
-	function getBoard(turn: number, shown = new Set<string>()) {
+	function getBoard(shown = new Set<string>()) {
 		const firstTurn = turn % 2 ? "" : "__",
 			secondTurn = turn % 2 ? "__" : "";
 
 		return {
-			content: `${firstTurn}${constants.emojis.misc.blue} ${users[0].toString()} - **${
+			content: `${firstTurn}${constants.emojis.misc.blue} ${players[0].toString()} - **${
 				scores[0].length
 			}** point${scores[0].length === 1 ? "" : "s"}${firstTurn}\n${secondTurn}${
 				constants.emojis.misc.green
-			} ${users[1].toString()} - **${scores[1].length}** point${
+			} ${players[1].toString()} - **${scores[1].length}** point${
 				scores[1].length === 1 ? "" : "s"
 			}${secondTurn}`,
 
@@ -335,30 +336,30 @@ async function playGame(
 		};
 	}
 
-	async function endGame(content?: string, user?: User | GuildMember) {
-		CURRENTLY_PLAYING.delete(users[0].id);
-		CURRENTLY_PLAYING.delete(users[1].id);
+	async function endGame(content?: string, user?: GuildMember | User) {
+		CURRENTLY_PLAYING.delete(players[0].id);
+		CURRENTLY_PLAYING.delete(players[1].id);
 		deletedPings.add(turnInfo.ping.id);
 		await turnInfo.ping.delete();
 
 		await message.edit({
-			components: getBoard(turn).components.map(({ components, type }) => ({
+			components: getBoard().components.map(({ components, type }) => ({
 				components: components.map((button) => ({ ...button, disabled: true })),
 				type,
 			})),
 		});
 
-		const firstScore = scores[0].length - (users[0].id === user?.id ? 2 : 0),
-			secondScore = scores[1].length - (users[1].id === user?.id ? 2 : 0);
+		const firstScore = scores[0].length - (players[0].id === user?.id ? 2 : 0),
+			secondScore = scores[1].length - (players[1].id === user?.id ? 2 : 0);
 
-		const firstUser = `${users[0].toString()} - **${firstScore}** point${
+		const firstUser = `${players[0].toString()} - **${firstScore}** point${
 				firstScore === 1 ? "" : "s"
 			}`,
-			secondUser = `${users[1].toString()} - **${secondScore}** point${
+			secondUser = `${players[1].toString()} - **${secondScore}** point${
 				secondScore === 1 ? "" : "s"
 			}`;
 		const secondWon = firstScore < secondScore;
-		const winner = await interaction.guild?.members.fetch(users[secondWon ? 1 : 0].id);
+		const winner = await interaction.guild?.members.fetch(players[secondWon ? 1 : 0].id);
 
 		await thread?.setArchived(true, "Game over");
 

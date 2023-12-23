@@ -4,9 +4,9 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	User,
-	ChatInputCommandInteraction,
-	ButtonInteraction,
+	type User,
+	type ChatInputCommandInteraction,
+	type ButtonInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -110,12 +110,12 @@ if (process.env.CANVAS !== "false") {
 }
 
 export async function top(
-	interaction: ChatInputCommandInteraction<"raw" | "cached"> | ButtonInteraction,
-	user?: User | GuildMember,
+	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
+	user?: GuildMember | User,
 ) {
-	const top = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
+	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
-	const index = user ? top.findIndex(({ user: id }) => id === user.id) : undefined;
+	const index = user ? leaderboard.findIndex(({ user: id }) => id === user.id) : undefined;
 	if (index === -1) {
 		return await interaction.reply({
 			content: `${
@@ -127,7 +127,7 @@ export async function top(
 	}
 
 	await paginate(
-		top,
+		leaderboard,
 		async (xp) =>
 			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
 				xp.user,

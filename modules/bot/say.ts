@@ -4,13 +4,13 @@ import {
 	chatInputApplicationCommandMention,
 	MessageFlags,
 	TextInputStyle,
-	AutocompleteInteraction,
+	type AutocompleteInteraction,
 	cleanContent,
 	Constants,
-	MessageType,
+	type MessageType,
 	type Snowflake,
 	type RepliableInteraction,
-	MessageContextMenuCommandInteraction,
+	type MessageContextMenuCommandInteraction,
 } from "discord.js";
 import { messageToText } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
@@ -147,7 +147,7 @@ export async function say(interaction: RepliableInteraction, content: string, re
 	const oldMessage =
 		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
 	if (reply && !oldMessage)
-		return interaction.editReply(
+		return await interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
 

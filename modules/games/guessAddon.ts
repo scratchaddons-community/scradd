@@ -1,9 +1,9 @@
 import {
 	ButtonStyle,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
-	Message,
+	type Message,
 	chatInputApplicationCommandMention,
 } from "discord.js";
 import constants from "../../common/constants.js";

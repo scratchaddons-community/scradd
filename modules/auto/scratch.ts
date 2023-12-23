@@ -7,7 +7,13 @@ import { getSettings } from "../settings.js";
 import constants from "../../common/constants.js";
 import { truncateText } from "../../util/text.js";
 import { nth } from "../../util/numbers.js";
-import { time, type APIEmbed, TimestampStyles, Message, cleanCodeBlockContent } from "discord.js";
+import {
+	time,
+	type APIEmbed,
+	TimestampStyles,
+	type Message,
+	cleanCodeBlockContent,
+} from "discord.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { parser, type Node } from "posthtml-parser";
@@ -274,10 +280,10 @@ function htmlToMarkdown(string: string) {
 	return nodesToText(nodes);
 }
 
-type Nodes = Node | Nodes[];
-function nodesToText(node: Nodes, escape = true): string {
-	if (Array.isArray(node)) return node.map((node) => nodesToText(node, escape)).join("");
-	if (typeof node !== "object") return escape ? escapeMessage(node.toString()) : node.toString();
+type NodeOrNodes = Node | NodeOrNodes[];
+function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
+	if (Array.isArray(node)) return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
+	if (typeof node !== "object") return shouldEscape ? escapeMessage(node.toString()) : node.toString();
 
 	const content =
 		typeof node.content !== "number" && !node.content?.length ? "" : nodesToText(node.content);

@@ -7,7 +7,7 @@ import {
 	time,
 	GuildMember,
 	type AnyThreadChannel,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 } from "discord.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { parseTime } from "../../util/numbers.js";
@@ -28,7 +28,7 @@ export async function setUpAutoClose(
 			content: `${constants.emojis.statuses.no} This command can only be used in threads!`,
 		});
 
-	const config = getThreadConfig(interaction.channel);
+	const threadConfig = getThreadConfig(interaction.channel);
 	const timer = options.options.time.toLowerCase();
 	if (timer === "never") {
 		if (options.subcommand === "lock-in")
@@ -38,16 +38,16 @@ export async function setUpAutoClose(
 			});
 
 		threadsDatabase.updateById(
-			{ id: interaction.channel.id, keepOpen: !config.keepOpen },
-			{ roles: config.roles.join("|") },
+			{ id: interaction.channel.id, keepOpen: !threadConfig.keepOpen },
+			{ roles: threadConfig.roles.join("|") },
 		);
 
 		return await interaction.reply({
 			content: `${constants.emojis.statuses.yes} This thread will ${
-				config.keepOpen ? "not " : ""
+				threadConfig.keepOpen ? "not " : ""
 			}be prevented from closing!`,
 
-			components: config.keepOpen
+			components: threadConfig.keepOpen
 				? []
 				: [
 						{
@@ -85,7 +85,7 @@ export async function setUpAutoClose(
 	];
 	await queueReminders();
 
-	const type = options.subcommand.split("-")[0];
+	const [type] = options.subcommand.split("-");
 	await interaction.reply({
 		content: `${constants.emojis.statuses.yes} I’ll ${type} this thread ${time(
 			date,

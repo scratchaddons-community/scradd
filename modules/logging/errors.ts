@@ -1,4 +1,4 @@
-import { inlineCode, Message, type RepliableInteraction } from "discord.js";
+import { inlineCode, type Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
 import log, { LogSeverity, LoggingErrorEmoji } from "./misc.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
@@ -18,7 +18,7 @@ process
  */
 export default async function logError(
 	error: unknown,
-	event: string | RepliableInteraction,
+	event: RepliableInteraction | string,
 ): Promise<Message<true> | undefined> {
 	try {
 		console.error(error);

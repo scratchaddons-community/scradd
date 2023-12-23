@@ -8,7 +8,7 @@ import {
 	userMention,
 	type RepliableInteraction,
 	hyperlink,
-	Guild,
+	type Guild,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -242,7 +242,7 @@ export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
 ): Promise<typeof userSettingsDatabase.data[number]>;
-export async function getSettings(user: { id: Snowflake }, defaults: boolean = true) {
+export async function getSettings(user: { id: Snowflake }, defaults = true) {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
@@ -270,7 +270,7 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 }
 
 export async function mentionUser(
-	user: User | Snowflake,
+	user: Snowflake | User,
 	interactor: { id: Snowflake },
 	guild: Guild,
 ) {

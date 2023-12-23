@@ -137,7 +137,6 @@ function almostEqual(actual: number, expected: number, message?: string | undefi
 			actual,
 			expected,
 			operator: "almostEqual",
-			// eslint-disable-next-line unicorn/prevent-abbreviations
 			stackStartFn: almostEqual,
 		});
 	}

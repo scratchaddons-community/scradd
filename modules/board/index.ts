@@ -58,10 +58,11 @@ defineChatCommand(
 	},
 
 	async (interaction, options) => {
-		const minReactions = options["minimum-reactions"];
-		const user = options.user?.id;
-		const channel = options.channel;
-		await makeSlideshow(interaction, { minReactions, user, channel });
+		await makeSlideshow(interaction, {
+			channel: options.channel,
+			user: options.user?.id,
+			minReactions: options["minimum-reactions"],
+		});
 	},
 );
 defineMenuCommand(

@@ -132,7 +132,7 @@ defineEvent.pre("userUpdate", async (_, user) => {
 defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== config.guild.id) return;
 
-	const presence = newPresence.activities[0];
+	const [presence] = newPresence.activities;
 	if (!presence) return;
 
 	const status =

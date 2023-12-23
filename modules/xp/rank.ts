@@ -21,17 +21,17 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
-	const members = await config.guild.members.fetch();
+	const guildMembers = await config.guild.members.fetch();
 	const serverRank =
 		allXp
-			.filter(({ user }) => members.has(user))
+			.filter((entry) => guildMembers.has(entry.user))
 			.toSorted((one, two) => two.xp - one.xp)
-			.findIndex((info) => info.user === user.id) + 1;
+			.findIndex((entry) => entry.user === user.id) + 1;
 	const rankInfo =
 		rank &&
 		`Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString("en-us")}${
 			serverRank
-				? ` (${serverRank.toLocaleString("en-us")}/${members.size.toLocaleString(
+				? ` (${serverRank.toLocaleString("en-us")}/${guildMembers.size.toLocaleString(
 						"en-us",
 				  )} in the server)`
 				: ""

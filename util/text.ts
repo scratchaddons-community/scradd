@@ -25,14 +25,14 @@ export function generateHash(prefix = ""): string {
  *
  * @returns The joined string.
  */
-export function joinWithAnd<Item extends { toString: () => string }>(
+export function joinWithAnd<Item extends { toString(): string }>(
 	array: Item[],
 	callback?: ((item: Item) => string) | undefined,
 ): string;
 export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
 export function joinWithAnd(
-	array: { toString: () => string }[],
-	callback = (item: { toString: () => string }) => item.toString(),
+	array: { toString(): string }[],
+	callback = (item: { toString(): string }) => item.toString(),
 ): string {
 	const last = array.at(-1);
 
@@ -110,7 +110,7 @@ export function normalize(text: string) {
  * @returns The patchless version.
  */
 export function trimPatchVersion(full: string): string {
-	return full.match(/^(?<main>\d+\.\d+)\.\d+/)?.groups?.main ?? full;
+	return (/^(?<main>\d+\.\d+)\.\d+/.exec(full))?.groups?.main ?? full;
 }
 
 export function getRequestUrl(request: IncomingMessage) {
