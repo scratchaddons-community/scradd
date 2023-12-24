@@ -284,8 +284,10 @@ function htmlToMarkdown(string: string) {
 
 type NodeOrNodes = Node | NodeOrNodes[];
 function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
-	if (Array.isArray(node)) return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
-	if (typeof node !== "object") return shouldEscape ? escapeMessage(node.toString()) : node.toString();
+	if (Array.isArray(node))
+		return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
+	if (typeof node !== "object")
+		return shouldEscape ? escapeMessage(node.toString()) : node.toString();
 
 	const content =
 		typeof node.content !== "number" && !node.content?.length ? "" : nodesToText(node.content);
