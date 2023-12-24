@@ -35,6 +35,8 @@ export default async function scratch(message: Message) {
 
 		const start = match.startsWith("http") ? 0 : 1,
 			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
+
+		// todo: use URL constructor
 		const urlParts = match
 			.slice(start, end)
 			.replace(
