@@ -11,7 +11,6 @@ import {
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
-import { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
@@ -154,16 +153,13 @@ export default async function log(
 	});
 }
 
-export async function getLoggingThread(group: LogSeverity | typeof DATABASE_THREAD) {
+export async function getLoggingThread(group: LogSeverity) {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
-	const name =
-		group === DATABASE_THREAD
-			? group
-			: `${group}. ${LogSeverity[group]
-					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
-					.toLowerCase()}s`;
+	const name = `${group}. ${LogSeverity[group]
+		.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+		.toLowerCase()}s`;
 
 	return (
 		(await config.channels.modlogs.threads.fetch()).threads.find(
@@ -172,8 +168,6 @@ export async function getLoggingThread(group: LogSeverity | typeof DATABASE_THRE
 		(await config.channels.modlogs.threads.create({
 			name,
 			reason: "New logging thread",
-			type: ChannelType[group === DATABASE_THREAD ? "PrivateThread" : "PublicThread"],
-			invitable: group !== DATABASE_THREAD && undefined,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
 		}))
 	);

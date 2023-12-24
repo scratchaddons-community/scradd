@@ -3,31 +3,42 @@ import {
 	RESTJSONErrorCodes,
 	type Snowflake,
 	type TextBasedChannel,
+	ChannelType,
+	ThreadAutoArchiveDuration,
 } from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
 import { extractMessageExtremities } from "../util/discord.js";
-import { getLoggingThread } from "../modules/logging/misc.js";
-
+import config from "./config.js";
 let timeouts: Record<
 	Snowflake,
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
 > = {};
 
-export const DATABASE_THREAD = "databases";
-
-const thread = await getLoggingThread(DATABASE_THREAD);
+if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
+const threadName = "databases";
+export const databaseThread =
+	(await config.channels.modlogs.threads.fetch()).threads.find(
+		(thread) => thread.name === threadName,
+	) ||
+	(await config.channels.modlogs.threads.create({
+		name: threadName,
+		reason: "For databases",
+		type: ChannelType.PrivateThread,
+		invitable: false,
+		autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+	}));
 
 const databases: Record<string, Message<true> | undefined> = {};
 
-for (const message of (await thread.messages.fetch({ limit: 100 })).values()) {
+for (const message of (await databaseThread.messages.fetch({ limit: 100 })).values()) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =
 			message.author.id === client.user.id
 				? message
 				: message.attachments.size
-				? await thread.send({
+				? await databaseThread.send({
 						...extractMessageExtremities(message),
 						content: message.content,
 				  })
@@ -52,7 +63,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 
 	async init() {
-		this.message = databases[this.name] ||= await thread.send(
+		this.message = databases[this.name] ||= await databaseThread.send(
 			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
 				" ",

@@ -7,12 +7,10 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LogSeverity, getLoggingThread, LoggingEmojis, shouldLog } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
-import { DATABASE_THREAD } from "../../common/database.js";
-
-const databaseThread = await getLoggingThread(DATABASE_THREAD);
+import { databaseThread } from "../../common/database.js";
 export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
 	if (
 		!interaction.targetMessage.editable ||

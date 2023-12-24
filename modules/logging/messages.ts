@@ -9,12 +9,11 @@ import {
 	messageLink,
 } from "discord.js";
 import config from "../../common/config.js";
-import { DATABASE_THREAD } from "../../common/database.js";
 import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
-import log, { LogSeverity, shouldLog, LoggingEmojis, getLoggingThread } from "./misc.js";
+import log, { LogSeverity, shouldLog, LoggingEmojis } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
+import { databaseThread } from "../../common/database.js";
 
-const databaseThread = await getLoggingThread(DATABASE_THREAD);
 export async function messageDelete(message: Message | PartialMessage) {
 	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
 	const shush =
