@@ -142,6 +142,7 @@ async function userInfo(
 			interaction.message.interaction?.user.id !== interaction.user.id,
 		embeds: [
 			{
+		description: user.toString(),
 				color: member?.displayColor,
 				image: {
 					url:
