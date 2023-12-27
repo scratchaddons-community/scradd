@@ -10,7 +10,7 @@ import {
 } from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
-import sayCommand, { say, sayAutocomplete } from "./say.js";
+import sayCommand, { say } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
 
 defineMenuCommand(
@@ -70,12 +70,6 @@ defineChatCommand(
 				description: "Message content (send ‘-’ to open a multi-line input)",
 				maxLength: 2000,
 				required: true,
-			},
-			reply: {
-				type: ApplicationCommandOptionType.String,
-				description: "The ID of a message to reply to",
-				minLength: 17,
-				autocomplete: sayAutocomplete,
 			},
 		},
 

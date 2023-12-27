@@ -4,100 +4,12 @@ import {
 	chatInputApplicationCommandMention,
 	MessageFlags,
 	TextInputStyle,
-	type AutocompleteInteraction,
-	cleanContent,
-	Constants,
-	type MessageType,
-	type Snowflake,
 	type RepliableInteraction,
 	type MessageContextMenuCommandInteraction,
 } from "discord.js";
-import { messageToText } from "../../util/discord.js";
-import { truncateText } from "../../util/text.js";
-import { stripMarkdown } from "../../util/markdown.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { matchSorter } from "match-sorter";
-
-const fetchedChannels = new Set<Snowflake>();
-export function sayAutocomplete(interaction: AutocompleteInteraction<"cached" | "raw">) {
-	if (!interaction.channel) return [];
-	if (!fetchedChannels.has(interaction.channel.id)) {
-		interaction.channel.messages.fetch({ limit: 100 }).then(
-			() => interaction.channel && fetchedChannels.add(interaction.channel.id),
-			() => void 0,
-		);
-	}
-	const messages = interaction.channel.messages.cache
-		.toSorted((one, two) => +two.createdAt - +one.createdAt)
-		.filter(
-			(message) =>
-				!message.flags.has("Ephemeral") &&
-				(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type),
-		)
-		.map((message) => {
-			const content = messageToText(message, false);
-			return {
-				id: message.id,
-				embeds: message.embeds.map((embed) => embed.toJSON()),
-				interaction: message.interaction && "/" + message.interaction.commandName,
-				attachments: message.attachments.map((attachment) => attachment.name),
-				stickers: message.stickers.map((sticker) => sticker.name),
-				author: message.author.displayName,
-				components: message.components,
-				createdTimestamp: message.createdTimestamp,
-				content: stripMarkdown(
-					interaction.channel ? cleanContent(content, interaction.channel) : content,
-				),
-			};
-		});
-	const reply = interaction.options.getString("reply");
-	return matchSorter(messages, reply ?? "", {
-		keys: [
-			"content",
-			"id",
-			"embeds.*.title",
-			"embeds.*.description",
-			"embeds.*.fields.*.name",
-			"embeds.*.fields.*.value",
-			"embeds.*.footer.text",
-			"embeds.*.author.name",
-			"interaction",
-			"attachments.*",
-			"stickers.*",
-			"author",
-			"components.*.components.*.label",
-			"components.*.components.*.placeholder",
-		],
-	}).map(getMessageInfo);
-	function getMessageInfo(message: typeof messages[number]) {
-		const component = message.components[0]?.components[0];
-		return {
-			name: `${truncateText(
-				`@${message.author} - ${
-					message.content ||
-					message.embeds[0]?.title ||
-					message.stickers[0] ||
-					message.attachments[0] ||
-					message.interaction ||
-					(component?.type === ComponentType.Button
-						? component.label
-						: component?.placeholder) ||
-					""
-				}`,
-				79,
-			)} (${new Date(message.createdTimestamp).toLocaleDateString("en-us", {
-				month: "short",
-				day: "2-digit",
-				hour: "2-digit",
-				minute: "2-digit",
-				hour12: true,
-			})})`,
-			value: message.id,
-		};
-	}
-}
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
