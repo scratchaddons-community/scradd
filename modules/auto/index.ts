@@ -180,10 +180,29 @@ async function handleMutatable(
 				message.guild?.id !== config.guild.id ||
 				config.channels.bots?.id === baseChannel?.id)
 		) {
-			await send({
-				content: dad(name, message.member),
+			const response = dad(name, message.member);
+
+			if (!Array.isArray(response)) {
+				await send({
+					content: response,
+					allowedMentions: { users: [], repliedUser: true },
+				});
+				return true;
+			}
+
+			const reply = await send({
+				content: response[0],
 				allowedMentions: { users: [], repliedUser: true },
 			});
+			for (const action of response.slice(1)) {
+				if (typeof action === "string") {
+					try {
+						await reply.edit(action);
+					} catch {
+						return true;
+					}
+				} else await new Promise((resolve) => setTimeout(resolve, action));
+			}
 			return true;
 		}
 	}
