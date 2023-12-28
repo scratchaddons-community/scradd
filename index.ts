@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
 import dns from "node:dns";
-import { ActivityType, GatewayIntentBits } from "discord.js";
+import { GatewayIntentBits } from "discord.js";
 import pkg from "./package.json" assert { type: "json" };
-import { login, client } from "strife.js";
+import { login } from "strife.js";
 import constants from "./common/constants.js";
 import mongoose from "mongoose";
 
@@ -75,14 +75,3 @@ if (process.env.NODE_ENV === "production") {
 		LogSeverity.ImportantUpdate,
 	);
 }
-
-client.user.setPresence({
-	activities: [
-		{
-			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
-			type: ActivityType.Watching,
-			url: pkg.homepage,
-		},
-	],
-	status: "online",
-});

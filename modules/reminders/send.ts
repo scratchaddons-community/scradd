@@ -15,6 +15,7 @@ import {
 	chatInputApplicationCommandMention,
 	time,
 	userMention,
+	ActivityType,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
@@ -192,6 +193,42 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					];
 
 					await syncRandomBoard();
+					continue;
+				}
+				case SpecialReminders.ChangeStatus: {
+					const statuses = [
+						"Watching the SA server!",
+						"Hope for no bugs…",
+						"Dating Callum",
+						"e",
+						"Moderating Scratch Addons",
+						"Hi, I’m Scradd!",
+						"Rico, status",
+						"Scanning potatoes",
+						"Try /addon!",
+						"beep boop beep",
+						"ims scradd",
+						"alan 👑",
+						"strawberries 😌",
+					].toSorted(() => Math.random() - 0.5);
+					const next = (Number(reminder.reminder) + 1) % statuses.length;
+
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: "0",
+							date: Date.now() + (Math.random() * 3 + 3) * 3_600_000,
+							reminder: next,
+							id: SpecialReminders.ChangeStatus,
+							user: client.user.id,
+						},
+					];
+
+					client.user.setActivity({
+						type: ActivityType.Custom,
+						name: "status",
+						state: statuses[next],
+					});
 					continue;
 				}
 			}
