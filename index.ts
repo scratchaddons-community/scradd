@@ -75,14 +75,3 @@ if (process.env.NODE_ENV === "production") {
 		LogSeverity.ImportantUpdate,
 	);
 }
-
-client.user.setPresence({
-	activities: [
-		{
-			name: process.env.NODE_ENV === "production" ? "the SA server!" : "for bugs…",
-			type: ActivityType.Watching,
-			url: pkg.homepage,
-		},
-	],
-	status: "online",
-});
