@@ -115,9 +115,7 @@ if (
 	];
 }
 
-if (
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.ChangeStatus)
-) {
+if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.ChangeStatus)) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
