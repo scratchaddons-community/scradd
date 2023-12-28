@@ -211,7 +211,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						"alan 👑",
 						"strawberries 😌",
 					].toSorted(() => Math.random() - 0.5);
-					const next = (Number(reminder.reminder) + 1) % status.length;
+					const next = (Number(reminder.reminder) + 1) % statuses.length;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -227,7 +227,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: status[next],
+						state: statuses[next],
 					});
 					continue;
 				}
