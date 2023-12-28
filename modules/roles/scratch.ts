@@ -106,7 +106,7 @@ export default async function linkScratchRole(request: IncomingMessage, response
 		return response.writeHead(401, { "content-type": "text/html" }).end(discordHtml);
 
 	const { username } = await fetch(
-		`https://auth-api.itinerary.eu.org/auth/verifyToken/${scratchToken}`,
+		`https://auth-api.itinerary.eu.org/auth/verifyToken/${encodeURI(scratchToken)}`,
 	).then((response) => response.json<{ username: string | null }>());
 	const scratch =
 		username &&
