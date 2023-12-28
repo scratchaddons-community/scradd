@@ -212,8 +212,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					}
 
 					return;
-				} case SpecialReminders.ChangeStatus: {
-
+				}
+				case SpecialReminders.ChangeStatus: {
 					let status = [
 						"Watching the SA server!",
 						"Watching for bugs...",
@@ -222,8 +222,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						"Auto-Moderating the SA Server!",
 						"Farming dangos",
 						"Rico, status",
-						"Scanning potatoes"
-					]
+						"Scanning potatoes",
+					];
 					const next = (Number(reminder.reminder) + 1) % status.length;
 
 					remindersDatabase.data = [
@@ -240,9 +240,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 					return client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: status[next]
-					})
-
+						state: status[next],
+					});
 				}
 			}
 		}
