@@ -196,16 +196,21 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.ChangeStatus: {
-					let status = [
+					const statuses = [
 						"Watching the SA server!",
-						"Watching for bugs...",
+						"Hope for no bugs…",
 						"Dating Callum",
-						"Yes",
-						"Auto-Moderating the SA Server!",
-						"Farming dangos",
+						"e",
+						"Moderating Scratch Addons",
+						"Hi, I’m Scradd!",
 						"Rico, status",
 						"Scanning potatoes",
-					];
+						"Try /addon!",
+						"beep boop beep",
+						"ims scradd",
+						"alan 👑",
+						"strawberries 😌",
+					].toSorted(() => Math.random() - 0.5);
 					const next = (Number(reminder.reminder) + 1) % status.length;
 
 					remindersDatabase.data = [
