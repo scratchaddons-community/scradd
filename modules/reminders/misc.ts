@@ -12,15 +12,15 @@ export enum SpecialReminders {
 	LockThread,
 	Unban,
 	BackupDatabases,
-	SyncRandomPotato,
+	SyncRandomBoard,
 	ChangeStatus,
 }
 export type Reminder = {
 	channel: Snowflake;
 	date: number;
-	reminder?: string | number;
+	reminder?: number | string;
 	user: Snowflake;
-	id: string | SpecialReminders;
+	id: SpecialReminders | string;
 };
 
 export const BUMPING_THREAD = "881619501018394725",
@@ -33,7 +33,7 @@ await remindersDatabase.init();
 export function getUserReminders(id: string) {
 	return remindersDatabase.data
 		.filter((reminder) => reminder.user === id)
-		.sort((one, two) => one.date - two.date);
+		.toSorted((one, two) => one.date - two.date);
 }
 
 if (
@@ -102,20 +102,22 @@ if (
 
 if (
 	config.channels.board &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomPotato)
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomBoard)
 ) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
 			channel: config.channels.board.id,
 			date: Date.now(),
-			id: SpecialReminders.SyncRandomPotato,
+			id: SpecialReminders.SyncRandomBoard,
 			user: client.user.id,
 		},
 	];
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.ChangeStatus)) {
+if (
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.ChangeStatus)
+) {
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{

@@ -1,22 +1,30 @@
 import { client } from "strife.js";
 import {
-	remindersDatabase,
-	type Reminder,
-	SpecialReminders,
 	BUMPING_THREAD,
 	COMMAND_ID,
+	type Reminder,
+	SpecialReminders,
+	remindersDatabase,
 } from "./misc.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
 import { convertBase, nth } from "../../util/numbers.js";
-import { ActivityType, ChannelType, MessageFlags, TimestampStyles, time } from "discord.js";
+import {
+	ChannelType,
+	MessageFlags,
+	TimestampStyles,
+	chatInputApplicationCommandMention,
+	time,
+	userMention,
+	ActivityType
+} from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
-import { BOARD_EMOJI, boardDatabase, boardReactionCount } from "../board/misc.js";
-import updateBoard from "../board/update.js";
+import { gracefulFetch } from "../../util/promises.js";
+import { syncRandomBoard } from "../board/update.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
-export default async function queueReminders(): Promise<undefined | NodeJS.Timeout> {
+export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
 
 	const interval = getNextInterval();
@@ -30,7 +38,7 @@ export default async function queueReminders(): Promise<undefined | NodeJS.Timeo
 	}
 }
 
-async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
+async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
 
 	const { toSend, toPostpone } = remindersDatabase.data.reduce<{
@@ -45,12 +53,12 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 	);
 	remindersDatabase.data = toPostpone;
 
-	const promises = toSend.map(async (reminder) => {
+	for (const reminder of toSend) {
 		const channel = await client.channels.fetch(reminder.channel).catch(() => void 0);
 		if (reminder.user === client.user.id) {
 			switch (reminder.id) {
 				case SpecialReminders.Weekly: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					const date = new Date();
 					date.setUTCDate(date.getUTCDate() - 7);
@@ -59,7 +67,7 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 
 					const chatters = await getChatters();
 					const message = await channel.send(await getWeekly(nextWeeklyDate));
-					if (!chatters) return message;
+					if (!chatters) continue;
 					const thread = await message.startThread({
 						name: `🏆 Weekly Winners week of ${
 							[
@@ -80,10 +88,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
-					return message;
+					continue;
 				}
 				case SpecialReminders.UpdateSACategory: {
-					if (channel?.type !== ChannelType.GuildCategory) return;
+					if (channel?.type !== ChannelType.GuildCategory) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -96,14 +104,12 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					const count = await fetch(
+					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 						`${constants.urls.usercountJson}?date=${Date.now()}`,
-					).then(
-						async (response) =>
-							await response.json<{ count: number; _chromeCountDate: string }>(),
 					);
+					if (!count) continue;
 
-					return await channel.setName(
+					await channel.setName(
 						`Scratch Addons - ${count.count.toLocaleString("en-us", {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
@@ -112,9 +118,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						})} users`,
 						"Automated update to sync count",
 					);
+					continue;
 				}
 				case SpecialReminders.Bump: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -127,10 +134,14 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					return await channel.send({
-						content: `🔔 @here </bump:${COMMAND_ID}> the server!`,
+					await channel.send({
+						content: `🔔 @here ${chatInputApplicationCommandMention(
+							"bump",
+							COMMAND_ID,
+						)} the server!`,
 						allowedMentions: { parse: ["everyone"] },
 					});
+					continue;
 				}
 				case SpecialReminders.RebootBot: {
 					await cleanDatabaseListeners();
@@ -139,11 +150,11 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				}
 				case SpecialReminders.CloseThread: {
 					if (channel?.isThread()) await channel.setArchived(true, "Close requested");
-					return;
+					continue;
 				}
 				case SpecialReminders.LockThread: {
 					if (channel?.isThread()) await channel.setLocked(true, "Lock requested");
-					return;
+					continue;
 				}
 				case SpecialReminders.Unban: {
 					if (typeof reminder.reminder == "string")
@@ -151,10 +162,10 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 							reminder.reminder,
 							"Unbanned after set time period",
 						);
-					return;
+					continue;
 				}
 				case SpecialReminders.BackupDatabases: {
-					if (!channel?.isTextBased()) return;
+					if (!channel?.isTextBased()) continue;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -167,53 +178,24 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					return backupDatabases(channel);
+					await backupDatabases(channel);
+					continue;
 				}
-				case SpecialReminders.SyncRandomPotato: {
+				case SpecialReminders.SyncRandomBoard: {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
 							channel: reminder.channel,
 							date: Date.now() + ((Math.random() * 10) / 5 + 0.5) * 60 * 60 * 1000,
-							id: SpecialReminders.SyncRandomPotato,
+							id: SpecialReminders.SyncRandomBoard,
 							user: client.user.id,
 						},
 					];
 
-					for (const info of [...boardDatabase.data].sort(() => Math.random() - 0.5)) {
-						if (info.onBoard) continue;
+					await syncRandomBoard();
+					continue;
+				} case SpecialReminders.ChangeStatus: {
 
-						const date = new Date(
-							Number(BigInt(info.source) >> 22n) + 1_420_070_400_000,
-						);
-
-						const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
-						if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded)
-							continue;
-
-						const channel = await config.guild.channels
-							.fetch(info.channel)
-							.catch(() => void 0);
-						if (!channel?.isTextBased()) continue;
-
-						if (reactionsNeeded === undefined) {
-							const reactionsNeeded = boardReactionCount(channel, date);
-							if (info.reactions < reactionsNeeded) continue;
-						}
-
-						const message = await channel.messages
-							.fetch(info.source)
-							.catch(() => void 0);
-						const reaction = message?.reactions.resolve(BOARD_EMOJI);
-						if (reaction) {
-							await updateBoard(reaction);
-							break;
-						}
-					}
-
-					return;
-				}
-				case SpecialReminders.ChangeStatus: {
 					let status = [
 						"Watching the SA server!",
 						"Watching for bugs...",
@@ -222,8 +204,8 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						"Auto-Moderating the SA Server!",
 						"Farming dangos",
 						"Rico, status",
-						"Scanning potatoes",
-					];
+						"Scanning potatoes"
+					]
 					const next = (Number(reminder.reminder) + 1) % status.length;
 
 					remindersDatabase.data = [
@@ -237,21 +219,23 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 						},
 					];
 
-					return client.user.setActivity({
+					client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: status[next],
-					});
+						state: status[next]
+					})
+					continue;
+
 				}
 			}
 		}
-		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") return;
+		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") continue;
 		const silent = reminder.reminder.startsWith("@silent");
 		const content = silent ? reminder.reminder.replace("@silent", "") : reminder.reminder;
 		await channel
 			.send({
 				content: `🔔 ${
-					channel.isDMBased() ? "" : `<@${reminder.user}> `
+					channel.isDMBased() ? "" : userMention(reminder.user) + " "
 				}${content.trim()} (from ${time(
 					new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
 					TimestampStyles.RelativeTime,
@@ -260,14 +244,13 @@ async function sendReminders(): Promise<undefined | NodeJS.Timeout> {
 				flags: silent ? MessageFlags.SuppressNotifications : undefined,
 			})
 			.catch(() => void 0);
-	});
-	await Promise.all(promises);
+	}
 
 	return await queueReminders();
 }
 
 function getNextInterval() {
-	const reminder = [...remindersDatabase.data].sort((one, two) => one.date - two.date)[0];
+	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
 	if (!reminder) return;
 	return reminder.date - Date.now();
 }
