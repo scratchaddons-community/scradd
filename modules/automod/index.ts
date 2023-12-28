@@ -4,7 +4,7 @@ import {
 	MessageType,
 	type CommandInteractionOption,
 	AutoModerationActionType,
-	underscore,
+	underline,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -190,7 +190,7 @@ defineChatCommand(
 						? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
 						: "") +
 				  `*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
-						underscore(escapeMessage(word)),
+						underline(escapeMessage(word)),
 				  )}`
 				: `${constants.emojis.statuses.yes} No bad words found.`,
 		});

@@ -58,7 +58,6 @@ module.exports = {
 	reportUnusedDisableDirectives: true,
 	root: true,
 	rules: {
-		"@typescript-eslint/comma-dangle": "off",
 		"@typescript-eslint/consistent-type-definitions": ["error", "type"],
 		"@typescript-eslint/consistent-type-imports": [
 			"error",
@@ -70,10 +69,7 @@ module.exports = {
 			{ accessibility: "no-public", overrides: { parameterProperties: "explicit" } },
 		],
 		"@typescript-eslint/explicit-module-boundary-types": "off",
-		"@typescript-eslint/indent": "off",
 		"@typescript-eslint/init-declarations": "off",
-		"@typescript-eslint/lines-around-comment": "off",
-		"@typescript-eslint/lines-between-class-members": "off",
 		"@typescript-eslint/max-params": ["warn", { max: 4 }],
 		"@typescript-eslint/member-ordering": "off",
 		"@typescript-eslint/method-signature-style": ["error", "method"],
@@ -95,7 +91,6 @@ module.exports = {
 				selector: "interface",
 			},
 		],
-		"@typescript-eslint/no-extra-parens": "off",
 		"@typescript-eslint/no-magic-numbers": [
 			"off", // TODO: enable
 			{
@@ -120,21 +115,15 @@ module.exports = {
 			{ args: "all", argsIgnorePattern: /^_+$/.source, caughtErrors: "all" },
 		],
 		"@typescript-eslint/no-use-before-define": "off",
-		"@typescript-eslint/object-curly-spacing": "off",
 		"@typescript-eslint/parameter-properties": ["error", { prefer: "parameter-property" }],
 		"@typescript-eslint/prefer-enum-initializers": "off",
 		"@typescript-eslint/prefer-nullish-coalescing": "off",
 		"@typescript-eslint/prefer-readonly-parameter-types": "off",
 		"@typescript-eslint/promise-function-async": "off",
-		"@typescript-eslint/quotes": "off",
 		"@typescript-eslint/restrict-template-expressions": "off",
 		"@typescript-eslint/return-await": ["error", "always"],
-		"@typescript-eslint/space-before-blocks": "off",
-		"@typescript-eslint/space-before-function-paren": "off",
-		"@typescript-eslint/space-infix-ops": "off",
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": "warn",
-		"@typescript-eslint/type-annotation-spacing": "off",
 		"@typescript-eslint/typedef": "off",
 		"capitalized-comments": "off",
 		"line-comment-position": "off",
@@ -150,7 +139,6 @@ module.exports = {
 		],
 		"no-sparse-arrays": "off",
 		"no-warning-comments": "warn",
-		"quotes": ["error", "double", { avoidEscape: true }],
 		"require-unicode-regexp": "off",
 		//TODO: enable when we enable eslint:all // "sort-imports": ["error", { allowSeparatedGroups: true, ignoreDeclarationSort: true }], // TODO: enable declaration sort when we can sort by source
 		"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/] }],

@@ -36,7 +36,7 @@
 		"mongoose": "7.6.3",
 		"mustache": "4.2.0",
 		"papaparse": "5.4.1",
-		"posthtml-parser": "^0.12.0",
+		"posthtml-parser": "0.12.0",
 		"serialize-error": "11.0.3",
 		"strife.js": "4.0.1"
 	},
@@ -44,7 +44,7 @@
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/difflib": "0.2.1",
 		"@types/eslint": "<=8.52.0",
-		"@types/mustache": "4.2.4",
+		"@types/mustache": "<=4.2",
 		"@types/node": "<=20.9.0",
 		"@types/papaparse": "<=5.4.1",
 		"@typescript-eslint/eslint-plugin": "6.16.0",
