@@ -79,7 +79,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 		.on("collect", async (componentInteraction) => {
 			if (!componentInteraction.isButton()) {
 				await componentInteraction.deferUpdate();
-				const guess = componentInteraction.values[0];
+				const [guess] = componentInteraction.values;
 				if (!guess || !CHARACTERS.includes(guess)) return;
 				guesses.push(guess);
 				await tick();
@@ -148,7 +148,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 				if (!modalInteraction) return;
 				await modalInteraction.deferUpdate();
 				const guess = modalInteraction.fields.getTextInputValue("username").toUpperCase();
-				if (guess.match(/^[A-Z0-9_.]$/))
+				if (/^[\d.A-Z_]$/.test(guess))
 					if (guess.toLowerCase() === user.username) collector.stop("win");
 					else guesses.push(CHARACTERS.includes(guess) ? guess : guess.toLowerCase());
 				await tick();

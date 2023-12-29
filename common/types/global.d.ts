@@ -28,7 +28,7 @@ declare global {
 		): { readonly [K in keyof this]: U };
 	}
 	interface ArrayConstructor {
-		isArray(arg: any): arg is any[] | readonly any[];
+		isArray(arg: unknown): arg is unknown[] | readonly unknown[];
 	}
 	interface ReadonlySet<T> {
 		has(value: T | (NonNullable<unknown> & WidenLiteral<T>)): boolean;

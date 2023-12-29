@@ -197,7 +197,7 @@ module.exports = {
 		],
 	},
 };
-// todo: https://github.com/eslint/eslint/pull/17500/files
+
 // todo: [..] over toJSON?
 // todo: stop nesting why tf are there 14-level nesting places
 // todo: unicorn/prefer-spread with objects

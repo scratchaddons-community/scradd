@@ -1,6 +1,9 @@
 import type { GuildMember, Snowflake } from "discord.js";
 
-export function dad(name: string, _: GuildMember) {
+export function dad(
+	name: string,
+	_: GuildMember,
+): string | readonly [string, ...(number | string)[], string] {
 	const split = name.split(/\b/);
 	const firstName =
 		split.find(

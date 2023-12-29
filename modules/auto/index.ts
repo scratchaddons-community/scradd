@@ -195,13 +195,13 @@ async function handleMutatable(
 				allowedMentions: { users: [], repliedUser: true },
 			});
 			for (const action of response.slice(1)) {
-				if (typeof action === "string") {
-					try {
-						await reply.edit(action);
-					} catch {
-						return true;
-					}
-				} else await new Promise((resolve) => setTimeout(resolve, action));
+				if (typeof action === "number") {
+					await new Promise((resolve) => setTimeout(resolve, action));
+					continue;
+				}
+
+				const edited = await reply.edit(action).catch(() => void 0);
+				if (!edited) break;
 			}
 			return true;
 		}
