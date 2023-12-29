@@ -103,29 +103,29 @@ export default async function memoryMatch(
 
 			if (!buttonInteraction.customId.startsWith("confirm-")) return;
 
-			if (isOtherUser) {
-				collector.stop();
+			if (!isOtherUser) return await buttonInteraction.deferUpdate();
 
-				const playerPresence = interaction.guild?.presences.resolve(interaction.user.id);
-				const opponentPresence =
-					options.opponent instanceof Base
-						? interaction.guild?.presences.resolve(options.opponent.id)
-						: undefined;
+			collector.stop();
 
-				const presenceCheck =
-					playerPresence?.status !== playerPresence?.clientStatus?.mobile ||
-					opponentPresence?.status !== opponentPresence?.clientStatus?.mobile;
+			const playerPresence = interaction.guild?.presences.resolve(interaction.user.id);
+			const opponentPresence =
+				options.opponent instanceof Base
+					? interaction.guild?.presences.resolve(options.opponent.id)
+					: undefined;
 
-				await playGame(buttonInteraction, {
-					players:
-						Math.random() > 0.5
-							? [interaction.user, opponent.user]
-							: [opponent.user, interaction.user],
-					easyMode,
-					bonusTurns,
-					useThread: options.thread ?? presenceCheck,
-				});
-			} else await buttonInteraction.deferUpdate();
+			const presenceCheck =
+				playerPresence?.status !== playerPresence?.clientStatus?.mobile ||
+				opponentPresence?.status !== opponentPresence?.clientStatus?.mobile;
+
+			await playGame(buttonInteraction, {
+				players:
+					Math.random() > 0.5
+						? [interaction.user, opponent.user]
+						: [opponent.user, interaction.user],
+				easyMode,
+				bonusTurns,
+				useThread: options.thread ?? presenceCheck,
+			});
 		})
 		.on("end", async (_, reason) => {
 			if (reason === "time")

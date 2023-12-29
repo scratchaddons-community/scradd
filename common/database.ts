@@ -148,23 +148,14 @@ export default class Database<Data extends Record<string, boolean | number | str
 				: [];
 			const messageContent = message.content.split("\n");
 			messageContent[3] = "";
-			if (this.#extra) {
-				messageContent[4] = "Extra misc info:";
-				messageContent[5] = this.#extra;
-			} else {
-				messageContent[4] = "";
-				messageContent[5] = "";
-			}
+			messageContent[4] = this.#extra ? "Extra misc info:" : "";
+			messageContent[5] = this.#extra || "";
 
 			const content = messageContent.join("\n").trim();
 			const promise = message
 				.edit({ content, files })
 				.catch(async (error) => {
-					if (error.code === RESTJSONErrorCodes.UnknownMessage) {
-						databases[this.name] = undefined;
-						await this.init();
-						return await callback();
-					} else {
+					if (error.code !== RESTJSONErrorCodes.UnknownMessage) {
 						return await message.edit({ content, files }).catch((error2) => {
 							throw new AggregateError(
 								[error, error2],
@@ -173,6 +164,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 							);
 						});
 					}
+
+					databases[this.name] = undefined;
+					await this.init();
+					return await callback();
 				})
 				.then(async (edited) => {
 					const attachment = edited.attachments.first()?.url;
