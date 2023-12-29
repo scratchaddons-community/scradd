@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import dns from "node:dns";
 import { GatewayIntentBits } from "discord.js";
 import pkg from "./package.json" assert { type: "json" };
-import { login } from "strife.js";
+import { client, login } from "strife.js";
 import constants from "./common/constants.js";
 import mongoose from "mongoose";
 
@@ -75,3 +75,5 @@ if (process.env.NODE_ENV === "production") {
 		LogSeverity.ImportantUpdate,
 	);
 }
+
+client.user.setStatus("online");
