@@ -38,6 +38,22 @@ export default async function queueReminders(): Promise<NodeJS.Timeout | undefin
 	}
 }
 
+const STATUSES = [
+	"Watching the SA server!",
+	"Hope for no bugs…",
+	"Dating Callum",
+	"e",
+	"Moderating Scratch Addons",
+	"Hi, I’m Scradd!",
+	"Rico, status",
+	"Scanning potatoes",
+	"Try /addon!",
+	"beep boop beep",
+	"ims scradd",
+	"alan 👑",
+	"strawberries 😌",
+].toSorted(() => Math.random() - 0.5);
+
 async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
 
@@ -196,22 +212,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.ChangeStatus: {
-					const statuses = [
-						"Watching the SA server!",
-						"Hope for no bugs…",
-						"Dating Callum",
-						"e",
-						"Moderating Scratch Addons",
-						"Hi, I’m Scradd!",
-						"Rico, status",
-						"Scanning potatoes",
-						"Try /addon!",
-						"beep boop beep",
-						"ims scradd",
-						"alan 👑",
-						"strawberries 😌",
-					].toSorted(() => Math.random() - 0.5);
-					const next = (Number(reminder.reminder) + 1) % statuses.length;
+					const next = (Number(reminder.reminder) + 1) % STATUSES.length;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -227,7 +228,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: statuses[next],
+						state: STATUSES[next],
 					});
 					continue;
 				}

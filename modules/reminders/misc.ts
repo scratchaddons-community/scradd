@@ -115,15 +115,17 @@ if (
 	];
 }
 
-if (!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.ChangeStatus)) {
-	remindersDatabase.data = [
-		...remindersDatabase.data,
-		{
-			channel: "0",
-			date: Date.now(),
-			reminder: -1,
-			id: SpecialReminders.ChangeStatus,
-			user: client.user.id,
-		},
-	];
-}
+const nextChange = remindersDatabase.data.find(
+	(reminder) => reminder.id === SpecialReminders.ChangeStatus,
+);
+
+remindersDatabase.data = [
+	...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.ChangeStatus),
+	{
+		channel: "0",
+		date: Date.now(),
+		reminder: +(nextChange?.reminder ?? 0),
+		id: SpecialReminders.ChangeStatus,
+		user: client.user.id,
+	},
+];
