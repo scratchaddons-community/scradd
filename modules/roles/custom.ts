@@ -5,7 +5,7 @@ import {
 	ComponentType,
 	ButtonStyle,
 	Colors,
-	type HexColorString,
+	type ColorResolvable,
 	type ApplicationCommand,
 	type ChatInputCommandInteraction,
 	TextInputStyle,
@@ -24,12 +24,6 @@ import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { asyncFilter } from "../../util/promises.js";
 
 const PREFIX = "✨ ";
-const COLORS = Object.fromEntries(
-	([...Object.keys(Colors), "Random"] as (keyof typeof Colors | "Random")[]).flatMap((color) => [
-		[color.toLowerCase(), color],
-		[color.replaceAll(/(?<!^)([A-Z])/g, " $1").toLowerCase(), color],
-	]),
-);
 let command: ApplicationCommand | undefined;
 
 export async function customRole(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
@@ -104,7 +98,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		throw new TypeError("interaction.member is not a GuildMember!");
 
 	const name = interaction.fields.fields.get("name")?.value;
-	const rawColor = interaction.fields.fields.get("color")?.value || "#000000";
+	const rawColor = interaction.fields.fields.get("color")?.value;
 	const icon = interaction.fields.fields.get("icon")?.value;
 
 	const existingRole = getCustomRole(interaction.member);
@@ -193,8 +187,8 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	const color = COLORS[rawColor.toLowerCase()];
-	if (!color && !/^#[\da-f]{6}$/i.test(rawColor)) {
+	const color = parseColor(rawColor);
+	if (rawColor && !color) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} Could not parse that color!`,
@@ -205,15 +199,14 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (!iconData)
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the like is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
+			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the link is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
 		});
 
 	if (existingRole) {
 		await existingRole.edit({
-			color: color ?? (rawColor as HexColorString),
+			color,
 			name: PREFIX + name,
 			reason: `Edited by ${interaction.user.tag}`,
-			position: (config.roles.staff?.position ?? 0) + 1,
 			...iconData,
 		});
 
@@ -221,7 +214,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	}
 
 	const role = await config.guild.roles.create({
-		color: color,
+		color,
 		name: PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
 		position: (config.roles.staff?.position ?? 0) + 1,
@@ -323,4 +316,24 @@ async function resolveIcon(icon: string) {
 	if (!contentType || !validContentTypes.has(contentType)) return;
 
 	return { icon };
+}
+
+const COLORS = Object.fromEntries(
+	([...Object.keys(Colors), "Random"] as const).flatMap((color) => [
+		[color.toLowerCase(), color],
+		[color.replaceAll(/(?<!^)([A-Z])/g, " $1").toLowerCase(), color],
+	]),
+);
+function parseColor(rawColor: string | undefined): Extract<ColorResolvable, string> | undefined {
+	if (!rawColor) return undefined;
+
+	const preset = COLORS[rawColor.toLowerCase()];
+	if (preset) return preset;
+
+	const color = rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const);
+	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
+
+	return color.length === 4
+		? `#${color[1]}${color.slice(1, 3)}${color.slice(2, 4)}${color[3]}`
+		: color;
 }
