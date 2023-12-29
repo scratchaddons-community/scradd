@@ -5,6 +5,7 @@ import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
 import constants from "../../common/constants.js";
 
+Chart.defaults.color = "#fff";
 export default async function graph(interaction: AnySelectMenuInteraction) {
 	if (!interaction.isUserSelectMenu())
 		throw new TypeError("weeklyXpGraph SelectMenu not a UserSelectMenu!");
@@ -40,7 +41,7 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 				beforeDraw(chart) {
 					chart.ctx.save();
 					chart.ctx.globalCompositeOperation = "destination-over";
-					chart.ctx.fillStyle = "white";
+					chart.ctx.fillStyle = "#444";
 					chart.ctx.fillRect(0, 0, chart.width, chart.height);
 					chart.ctx.restore();
 				},
