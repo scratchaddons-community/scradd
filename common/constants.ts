@@ -68,7 +68,6 @@ export default {
 	fonts: "Sora, SoraExt, sans-serif",
 	footerSeperator: " • ",
 	scratchColor: 0x88_5c_d4,
-	testingGuildId: "938438560925761619",
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {

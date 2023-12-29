@@ -20,7 +20,6 @@ import { mentionUser } from "../settings.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const testingServer = await client.guilds.fetch(constants.testingGuildId).catch(() => void 0);
 const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
@@ -160,7 +159,7 @@ export default async function info(
 	}
 
 	async function getRole(roleId: Snowflake): Promise<string> {
-		const role = await testingServer?.roles.fetch(roleId);
+		const role = await config.testingGuild?.roles.fetch(roleId);
 		const members: { user: User }[] = [...(role?.members.values() ?? [])];
 		if (roleId === designers)
 			members.push({ user: await client.users.fetch(constants.users.retron) });

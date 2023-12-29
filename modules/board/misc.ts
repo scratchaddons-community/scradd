@@ -13,7 +13,6 @@ import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
 import tryCensor, { censor } from "../automod/language.js";
-import constants from "../../common/constants.js";
 import { client } from "strife.js";
 
 export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
@@ -58,8 +57,8 @@ export function boardReactionCount(
 
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
-	if (baseChannel.guild.id === constants.testingGuildId) return shift(COUNTS.mods);
-	if (baseChannel.guild.id !== config.guild.id) return shift(COUNTS.misc);
+	if (baseChannel.guild.id !== config.guild.id)
+		return shift(COUNTS[baseChannel.guild.id === config.testingGuild?.id ? "mods" : "misc"]);
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 

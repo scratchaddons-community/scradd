@@ -18,12 +18,56 @@ import fileSystem from "node:fs/promises";
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
 
+const CONSONANTS = [
+		"B",
+		"C",
+		"D",
+		"F",
+		"G",
+		"H",
+		"J",
+		"K",
+		"L",
+		"M",
+		"N",
+		"P",
+		"Q",
+		"R",
+		"S",
+		"T",
+		"V",
+		"W",
+		"X",
+		"Z",
+	] as const,
+	VOWELS = [
+		"A",
+		"E",
+		"I",
+		"O",
+		"U",
+		"Y",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"_",
+		".",
+	] as const;
+const CHARACTERS = [...CONSONANTS, ...VOWELS] as const;
+
 export default async function hangman(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	if (await checkIfUserPlaying(interaction)) return;
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
 
-	const guesses: string[] = [];
+	const guesses: (Lowercase<string> | typeof CHARACTERS[number])[] = [];
 	const message = await interaction.reply({ embeds: [{ title: "Hangman" }], fetchReply: true });
 	await tick();
 
@@ -33,79 +77,82 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 			idle: GAME_COLLECTOR_TIME,
 		})
 		.on("collect", async (componentInteraction) => {
-			if (componentInteraction.isButton()) {
-				if (componentInteraction.customId === "hint") {
-					await componentInteraction.reply({
-						ephemeral: true,
-						content: `This will use ${HINT_PENALTY} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
-						components: [
-							{
-								type: ComponentType.ActionRow,
-								components: [
-									{
-										type: ComponentType.Button,
-										label: "Ok",
-										style: ButtonStyle.Success,
-										customId: componentInteraction.id + "-hint",
-									},
-								],
-							},
-						],
-					});
-					const buttonInteraction = await interaction.channel
-						?.awaitMessageComponent({
-							time: constants.collectorTime,
-							componentType: ComponentType.Button,
-							filter: (buttonInteraction) =>
-								buttonInteraction.customId === componentInteraction.id + "-hint",
-						})
-						.catch(() => void 0);
-					if (buttonInteraction) {
-						await buttonInteraction.deferUpdate();
-						color = displayColor;
-						await tick();
-					}
-				} else if (componentInteraction.customId === "guess") {
-					await componentInteraction.showModal({
-						title: "Guess Member",
-						customId: componentInteraction.id,
-						components: [
-							{
-								type: ComponentType.ActionRow,
-								components: [
-									{
-										type: ComponentType.TextInput,
-										style: TextInputStyle.Short,
-										label: "Member’s username",
-										required: true,
-										customId: "username",
-									},
-								],
-							},
-						],
-					});
-					const modalInteraction = await componentInteraction
-						.awaitModalSubmit({
-							time: constants.collectorTime,
-							filter: (modalInteraction) =>
-								modalInteraction.customId === componentInteraction.id,
-						})
-						.catch(() => void 0);
-
-					if (!modalInteraction) return;
-					await modalInteraction.deferUpdate();
-					const username = modalInteraction.fields.getTextInputValue("username");
-					if (username === user.username) collector.stop("win");
-					else guesses.push(username);
-					await tick();
-				}
+			if (!componentInteraction.isButton()) {
+				await componentInteraction.deferUpdate();
+				const guess = componentInteraction.values[0];
+				if (!guess || !CHARACTERS.includes(guess)) return;
+				guesses.push(guess);
+				await tick();
 				return;
 			}
 
-			await componentInteraction.deferUpdate();
-			if (!componentInteraction.values[0]) return;
-			guesses.push(componentInteraction.values[0]);
-			await tick();
+			if (componentInteraction.customId === "hint") {
+				await componentInteraction.reply({
+					ephemeral: true,
+					content: `This will use ${HINT_PENALTY} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.Button,
+									label: "Ok",
+									style: ButtonStyle.Success,
+									customId: componentInteraction.id + "-hint",
+								},
+							],
+						},
+					],
+				});
+				const buttonInteraction = await interaction.channel
+					?.awaitMessageComponent({
+						time: constants.collectorTime,
+						componentType: ComponentType.Button,
+						filter: (buttonInteraction) =>
+							buttonInteraction.customId === componentInteraction.id + "-hint",
+					})
+					.catch(() => void 0);
+				if (buttonInteraction) {
+					await buttonInteraction.deferUpdate();
+					await componentInteraction.deleteReply();
+					color = displayColor;
+					await tick();
+				}
+			} else if (componentInteraction.customId === "guess") {
+				await componentInteraction.showModal({
+					title: "Guess Member",
+					customId: componentInteraction.id,
+					components: [
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.TextInput,
+									style: TextInputStyle.Short,
+									label: "Member’s username",
+									required: true,
+									customId: "username",
+								},
+							],
+						},
+					],
+				});
+				const modalInteraction = await componentInteraction
+					.awaitModalSubmit({
+						time: constants.collectorTime,
+						filter: (modalInteraction) =>
+							modalInteraction.customId === componentInteraction.id,
+					})
+					.catch(() => void 0);
+
+				if (!modalInteraction) return;
+				await modalInteraction.deferUpdate();
+				const guess = modalInteraction.fields.getTextInputValue("username").toUpperCase();
+				if (guess.match(/^[A-Z0-9_.]$/))
+					if (guess.toLowerCase() === user.username) collector.stop("win");
+					else guesses.push(CHARACTERS.includes(guess) ? guess : guess.toLowerCase());
+				await tick();
+			}
 		})
 		.on("end", async (_, reason) => {
 			const image = await makeCanvasFiles(
@@ -137,17 +184,17 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 	});
 
 	async function tick() {
-		const word = Array.from(user.username, (letter) =>
-			guesses.includes(letter) ? letter : "-",
+		const word = Array.from(user.username.toUpperCase(), (letter) =>
+			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",
 		).join("");
 		const wrongs = guesses
 			.filter((guess) => guess.length > 1 || !word.includes(guess))
 			.toSorted((one, two) => two.length - one.length || one.localeCompare(two));
 
-		const [consonants, vowels] = ["BCDFGHJKLMNPQRSTVWXZ", "AEIOUY0123456789_."].map((letters) =>
-			Array.from(letters, (label) => ({ value: label.toLowerCase(), label })).filter(
-				({ value }) => !guesses.includes(value),
-			),
+		const [consonants, vowels] = [CONSONANTS, VOWELS].map((letters) =>
+			letters
+				.filter((letter) => !guesses.includes(letter))
+				.map((label) => ({ value: label, label })),
 		);
 
 		const wrongCount = (color === undefined ? 0 : HINT_PENALTY) + wrongs.length;
@@ -157,16 +204,12 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 				{
 					color,
 					author: { name: "Hangman" },
-					title: "Use the select menus below to guess a\nprominent server member’s __username__",
-					description: `${
+					title: "Use the select menus below to guess a prominent server member’s username",
+					description: `**(not display name!)**\n\n${
 						wrongs.length
-							? `Incorrect guesses: ${joinWithAnd(wrongs, (guess) =>
-									inlineCode(
-										guess[guess.length > 1 ? "toLowerCase" : "toUpperCase"](),
-									),
-							  )}\n`
+							? `Incorrect guesses: ${joinWithAnd(wrongs, inlineCode)}\n`
 							: ""
-					}## \`${word}\``,
+					}## \`${word.toLowerCase()}\``,
 					footer: { text: `${wrongCount}/${MAX_WRONGS} incorrect answers` },
 					image: { url: "attachment://hangman.png" },
 				},
@@ -253,9 +296,8 @@ const ROLES = [
 ];
 async function getMember(player: User) {
 	const members = await config.guild.members.fetch();
+	const testers = await config.testingGuild?.members.fetch();
 	const xp = recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
-		if (gain.time + 604_800_000 < Date.now()) return accumulator;
-
 		accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
 		return accumulator;
 	}, {});
@@ -266,7 +308,8 @@ async function getMember(player: User) {
 				member.user.discriminator === "0" &&
 				member.user.username.length > 5 &&
 				member.id !== player.id &&
-				((xp[member.id] ?? 0) >= 350 ||
+				((xp[member.id] ?? 0) >= 250 ||
+					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)
 		.random();

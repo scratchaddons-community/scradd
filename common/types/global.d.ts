@@ -10,7 +10,6 @@ declare global {
 		): { [K in keyof this]: U };
 	}
 	interface ReadonlyArray<T> {
-		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
 		includes(
 			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,

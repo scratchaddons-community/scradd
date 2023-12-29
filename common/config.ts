@@ -19,6 +19,7 @@ async function getConfig() {
 	return {
 		guild,
 		otherGuildIds: [...guilds.keys()],
+		testingGuild: await client.guilds.fetch("938438560925761619").catch(() => void 0),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
