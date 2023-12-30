@@ -9,12 +9,13 @@ import {
 	type User,
 	type ChatInputCommandInteraction,
 	type ButtonInteraction,
+	inlineCode,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
 import pkg from "../../package.json" assert { type: "json" };
+import lockFile from "../../package-lock.json" assert { type: "json" };
 import { autoreactions, dadEasterEggCount } from "../auto/secrets.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
@@ -30,66 +31,11 @@ export default async function info(
 ) {
 	switch (subcommand) {
 		case "status": {
-			const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
-
-			await interaction.editReply({
-				content: "",
-
-				embeds: [
-					{
-						title: "Status",
-						description:
-							"I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
-
-						fields: [
-							{
-								name: "⚙️ Mode",
-
-								value:
-									process.env.NODE_ENV === "production"
-										? "Production"
-										: "Development",
-
-								inline: true,
-							},
-							{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },
-							{
-								name: "🔁 Last restarted",
-
-								value: time(client.readyAt, TimestampStyles.RelativeTime),
-
-								inline: true,
-							},
-							{
-								name: "🏓 Ping",
-
-								value: `${Math.abs(
-									Number(message.createdAt) - Number(interaction.createdAt),
-								).toLocaleString("en-us")}ms`,
-
-								inline: true,
-							},
-							{
-								name: "↕️ WebSocket latency",
-								value: `${Math.abs(client.ws.ping).toLocaleString("en-us")}ms`,
-								inline: true,
-							},
-							{
-								name: "💾 RAM usage",
-								value:
-									(process.memoryUsage.rss() / 1_000_000).toLocaleString(
-										"en-us",
-										{ maximumFractionDigits: 2, minimumFractionDigits: 2 },
-									) + " MB",
-								inline: true,
-							},
-						],
-
-						thumbnail: { url: client.user.displayAvatarURL() },
-						color: constants.themeColor,
-					},
-				],
-			});
+			await status(interaction);
+			break;
+		}
+		case "credits": {
+			await credits(interaction);
 			break;
 		}
 		case "config": {
@@ -119,44 +65,121 @@ export default async function info(
 			});
 			break;
 		}
-		case "credits": {
-			await interaction.reply({
-				embeds: [
+	}
+}
+
+async function status(interaction: ChatInputCommandInteraction) {
+	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
+
+	await interaction.editReply({
+		content: "",
+
+		embeds: [
+			{
+				title: "Status",
+				thumbnail: { url: client.user.displayAvatarURL() },
+				color: constants.themeColor,
+				description:
+					"I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
+
+				fields: [
 					{
-						title: "Credits",
-						description: `Scradd is hosted on [Fly.io](https://fly.io/) using Node.JS ${process.version}.`,
-
-						fields: [
-							{
-								name: "🧑‍💻 Developers",
-								value: await getRole(developers),
-								inline: true,
-							},
-							{ name: "🖌️ Designers", value: await getRole(designers), inline: true },
-							{
-								name: "🧪 Additional beta testers",
-								value: await getRole(testers),
-								inline: true,
-							},
-							{
-								name: "🗄️ Third-party code libraries",
-
-								value: joinWithAnd(
-									Object.entries(pkg.dependencies),
-									([dependency, version]) =>
-										`\`${escapeMessage(`${dependency}@${version}`)}\``,
-								),
-
-								inline: true,
-							},
-						],
-
-						color: constants.themeColor,
+						name: "⚙️ Mode",
+						value: process.env.NODE_ENV === "production" ? "Production" : "Development",
+						inline: true,
+					},
+					{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },
+					{
+						name: "🔁 Last restarted",
+						value: time(client.readyAt, TimestampStyles.RelativeTime),
+						inline: true,
+					},
+					{
+						name: "🏓 Ping",
+						value: `${Math.abs(
+							message.createdTimestamp - interaction.createdTimestamp,
+						).toLocaleString("en-us")}ms`,
+						inline: true,
+					},
+					{
+						name: "↕️ WebSocket latency",
+						value: `${Math.abs(client.ws.ping).toLocaleString("en-us")}ms`,
+						inline: true,
+					},
+					{
+						name: "💾 RAM usage",
+						value:
+							(process.memoryUsage.rss() / 1_000_000).toLocaleString("en-us", {
+								maximumFractionDigits: 2,
+								minimumFractionDigits: 2,
+							}) + " MB",
+						inline: true,
 					},
 				],
-			});
-		}
-	}
+			},
+		],
+	});
+}
+async function credits(interaction: ChatInputCommandInteraction) {
+	const dependencies = Object.keys(pkg.dependencies)
+		.map((name) => {
+			const { version } = lockFile.dependencies[name];
+
+			if (version.startsWith("file:")) return [name] as const;
+
+			if (/^https?:\/\//.test(version)) return [name, version] as const;
+
+			if (version.startsWith("git+")) {
+				const segments = version.split("+")[1]?.split("#");
+				return segments
+					? ([`${name}@${segments[1]}`, segments[0]] as const)
+					: ([name] as const);
+			}
+			if (version.startsWith("npm:")) {
+				const segments = version.split("@");
+				const reference = `${segments.length > 2 ? "@" : ""}${segments.at(-2)}`;
+				return [`${reference}@${segments.at(-1)}`, `https://npm.im/${reference}`] as const;
+			}
+
+			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
+		})
+		.sort(([one], [two]) => one.localeCompare(two))
+		.map(
+			([specifier, link]) =>
+				"- " + (link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
+		);
+
+	const columnLength = Math.ceil(dependencies.length / 2);
+	await interaction.reply({
+		embeds: [
+			{
+				title: "Credits",
+				description: `Scradd is hosted on [Fly.io](https://fly.io/) using Node.JS ${process.version}.`,
+
+				fields: [
+					{ name: "🧑‍💻 Developers", value: await getRole(developers), inline: true },
+					{ name: "🖌️ Designers", value: await getRole(designers), inline: true },
+					{
+						name: "🧪 Additional beta testers",
+						value: await getRole(testers),
+						inline: true,
+					},
+					{
+						name: "🗄️ Third-party code libraries",
+						value: dependencies.slice(0, columnLength).join("\n"),
+						inline: true,
+					},
+					{
+						name: constants.zws,
+						value: dependencies.slice(columnLength).join("\n"),
+						inline: true,
+					},
+				],
+
+				color: constants.themeColor,
+			},
+		],
+	});
 
 	async function getRole(roleId: Snowflake): Promise<string> {
 		const role = await config.testingGuild?.roles.fetch(roleId);
@@ -177,33 +200,6 @@ export default async function info(
 		);
 	}
 }
-
-export async function syncConfigButton(interaction: ButtonInteraction) {
-	if (
-		config.roles.staff &&
-		(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.staff.id)
-			: interaction.member?.roles.includes(config.roles.staff.id))
-	) {
-		await syncConfig();
-		await interaction.message.edit({ embeds: getConfig() });
-		await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.yes} Synced configuration!`,
-		});
-		await log(
-			`${
-				LoggingEmojis.ServerUpdate
-			} Configuration synced by ${interaction.member?.toString()}`,
-			LogSeverity.ImportantUpdate,
-		);
-	} else
-		await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have permission to sync my configuration!`,
-		});
-}
-
 function getConfig() {
 	return [
 		{
@@ -246,4 +242,30 @@ function getConfig() {
 			})),
 		},
 	];
+}
+
+export async function syncConfigButton(interaction: ButtonInteraction) {
+	if (
+		config.roles.staff &&
+		(interaction.member instanceof GuildMember
+			? interaction.member.roles.resolve(config.roles.staff.id)
+			: interaction.member?.roles.includes(config.roles.staff.id))
+	) {
+		await syncConfig();
+		await interaction.message.edit({ embeds: getConfig() });
+		await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.yes} Synced configuration!`,
+		});
+		await log(
+			`${
+				LoggingEmojis.ServerUpdate
+			} Configuration synced by ${interaction.member?.toString()}`,
+			LogSeverity.ImportantUpdate,
+		);
+	} else
+		await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} You don’t have permission to sync my configuration!`,
+		});
 }
