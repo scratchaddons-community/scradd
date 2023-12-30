@@ -25,6 +25,8 @@ import filterToStrike, {
 } from "./misc.js";
 import { escapeMessage } from "../../util/markdown.js";
 
+const XP_PUNISHMENT = DEFAULT_XP * -2;
+
 export default async function warn(
 	user: GuildMember | User,
 	reason: string,
@@ -112,7 +114,7 @@ export default async function warn(
 		})
 		.catch(() => logMessage);
 
-	await giveXp(user, url, DEFAULT_XP * strikes * -1);
+	await giveXp(user, url, XP_PUNISHMENT * strikes);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -209,7 +211,7 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 		}`,
 		LogSeverity.ImportantUpdate,
 	);
-	if (user instanceof User) await giveXp(user, logUrl, strike.count * DEFAULT_XP);
+	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count * -1);
 }
 export async function addStrikeBack(interaction: ButtonInteraction, id: string) {
 	const strike = id && (await filterToStrike(id));
@@ -243,5 +245,5 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 		}`,
 		LogSeverity.ImportantUpdate,
 	);
-	if (user instanceof User) await giveXp(user, logUrl, -1 * strike.count * DEFAULT_XP);
+	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count);
 }
