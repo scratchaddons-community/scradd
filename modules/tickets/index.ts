@@ -306,3 +306,8 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		TICKETS_BY_MEMBER[memberId] = newThread;
 	}
 });
+
+defineEvent("messageReactionAdd", async (partialReaction) => {
+	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
+	if (reaction.message.channel.id === config.channels.tickets?.id) await reaction.remove();
+});
