@@ -1,7 +1,7 @@
 import {
 	ChannelType,
 	type NonThreadGuildBasedChannel,
-	Channel,
+	type Channel,
 	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
