@@ -1,7 +1,6 @@
 import {
 	ChannelType,
-	type NonThreadGuildBasedChannel,
-	type Channel,
+	type NonThreadGuildBasedChannel, Channel,
 	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
@@ -53,6 +52,7 @@ async function getConfig() {
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
+			qotd: getChannel("qotd", ChannelType.GuildText, "start"),
 		},
 
 		roles: {
