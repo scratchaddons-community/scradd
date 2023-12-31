@@ -23,14 +23,14 @@ import { backupDatabases, cleanDatabaseListeners } from "../../common/database.j
 import config from "../../common/config.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 export const qotd = mongoose.model(
 	"qotd",
 	new mongoose.Schema({
 		question: String,
-	}),
-);
+	})
+)
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -255,18 +255,18 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						},
 					];
 
-					const questions = await qotd.find();
-					const question =
-						questions[Math.floor(Math.random() * questions.length)]?.question;
-					const icon = client.user.displayAvatarURL();
+					const questions = await qotd.find()
+					const question = questions[Math.floor(Math.random() * questions.length)]?.question
+					const icon = client.user.displayAvatarURL()
 
 					const embed = new EmbedBuilder()
-						.setTitle("Question of The Day")
-						.setDescription(question ? question : "No question was set for today.")
-						.setFooter({ text: "Scradd", iconURL: icon });
+					.setTitle('Question of The Day')
+					.setDescription(question ?? 'No question was set for today.')
+					.setFooter({ text: 'Scradd', iconURL: icon })
 
-					channel.send({ embeds: [embed] });
-					await qotd.findOneAndDelete({ question: question });
+					channel.send({ embeds: [embed] })
+					await qotd.findOneAndDelete({ question: question })
+
 				}
 			}
 		}

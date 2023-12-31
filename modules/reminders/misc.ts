@@ -2,7 +2,6 @@ import type { Snowflake } from "discord.js";
 import Database from "../../common/database.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
-import { spec } from "node:test/reporters";
 
 export enum SpecialReminders {
 	Weekly,
@@ -143,7 +142,7 @@ if (
 			date: Date.now(),
 			reminder: undefined,
 			id: SpecialReminders.QOTD,
-			user: client.user.id,
+			user: client.user.id
 		},
-	];
+	]
 }
