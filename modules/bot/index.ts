@@ -12,7 +12,7 @@ import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
 import info, { syncConfigButton } from "./info.js";
-import {qotd} from '../reminders/send.js'
+import { qotd } from "../reminders/send.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -106,23 +106,22 @@ defineSubcommands(
 );
 defineButton("syncConfig", syncConfigButton);
 
-
 defineSubcommands(
 	{
-		name: 'qotd',
-		description: 'question of the day',
+		name: "qotd",
+		description: "question of the day",
 
 		subcommands: {
-			add: { 
-				description: "Add a question", 
+			add: {
+				description: "Add a question",
 				options: {
 					question: {
 						type: ApplicationCommandOptionType.String,
 						required: true,
-						description: 'The question'
-					}
-				} 
-			}
+						description: "The question",
+					},
+				},
+			},
 		},
 
 		restricted: true,
@@ -134,9 +133,9 @@ defineSubcommands(
 			const question = options.question;
 			await new qotd({
 				question: question,
-			}).save()
+			}).save();
 
-			interaction.reply({ content: 'Added question.', ephemeral: true, })
+			interaction.reply({ content: "Added question.", ephemeral: true });
 		}
-	}
-)
+	},
+);
