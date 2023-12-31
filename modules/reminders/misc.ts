@@ -2,6 +2,7 @@ import type { Snowflake } from "discord.js";
 import Database from "../../common/database.js";
 import config from "../../common/config.js";
 import { client } from "strife.js";
+import { spec } from "node:test/reporters";
 
 export enum SpecialReminders {
 	Weekly,
@@ -14,6 +15,7 @@ export enum SpecialReminders {
 	BackupDatabases,
 	SyncRandomBoard,
 	ChangeStatus,
+	QOTD,
 }
 export type Reminder = {
 	channel: Snowflake;
@@ -129,3 +131,19 @@ remindersDatabase.data = [
 		user: client.user.id,
 	},
 ];
+
+if (
+	config.channels.qotd &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.QOTD)
+) {
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: config.channels.qotd.id,
+			date: Date.now(),
+			reminder: undefined,
+			id: SpecialReminders.QOTD,
+			user: client.user.id
+		},
+	]
+}
