@@ -143,7 +143,7 @@ if (
 			date: Date.now(),
 			reminder: undefined,
 			id: SpecialReminders.QOTD,
-			user: client.user.id
+			user: client.user.id,
 		},
-	]
+	];
 }
