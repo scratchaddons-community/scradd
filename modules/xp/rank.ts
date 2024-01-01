@@ -12,8 +12,8 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
 	const level = getLevelForXp(Math.abs(xp));
-	const xpForNextLevel = getXpForLevel(level + 1) * (Math.sign(xp) || 1);
-	const xpForPreviousLevel = getXpForLevel(level) * (Math.sign(xp) || 1);
+	const xpForNextLevel = getXpForLevel(level + 1);
+	const xpForPreviousLevel = getXpForLevel(level);
 	const increment = xpForNextLevel - xpForPreviousLevel;
 	const xpGained = xp - xpForPreviousLevel;
 	const progress = xpGained / increment;
@@ -44,11 +44,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 				},
 
 				fields: [
-					{
-						name: "📊 Level",
-						value: (level * Math.sign(xp)).toLocaleString(),
-						inline: true,
-					},
+					{ name: "📊 Level", value: level.toLocaleString(), inline: true },
 					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 					{
 						name: "⏳ Weekly rank",
@@ -63,9 +59,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 					},
 					{
 						name: constants.zws,
-						value: `**${
-							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
-						} level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
+						value: `**⬆️ Next level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 					},
 				],
 

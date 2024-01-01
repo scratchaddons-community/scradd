@@ -129,7 +129,7 @@ export async function top(
 	await paginate(
 		leaderboard,
 		async (xp) =>
-			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
+			`**Level ${getLevelForXp(Math.abs(xp.xp))}** - ${await mentionUser(
 				xp.user,
 				interaction.user,
 				interaction.guild ?? config.guild,

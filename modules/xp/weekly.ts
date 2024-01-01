@@ -9,7 +9,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
-import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
+import { getFullWeeklyData, recentXpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
 import { recheckMemberRole } from "../roles/custom.js";
 
@@ -159,10 +159,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 			.map(
 				(gain, index) =>
 					`${["🥇", "🥈", "🥉"][index] || "🏅"} ${userMention(gain.user)} - ${Math.floor(
-						gain.xp *
-							Math.sign(
-								xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
-							),
+						gain.xp,
 					).toLocaleString()} XP`,
 			)
 			.join("\n") || "*Nobody got any XP this week!*"

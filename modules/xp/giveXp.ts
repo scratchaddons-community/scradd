@@ -87,7 +87,7 @@ export default async function giveXp(to: GuildMember | User, url?: string, amoun
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
 	const oldXp = xp[xpDatabaseIndex]?.xp || 0;
-	const newXp = oldXp === 0 && amount < 0 ? 0 : oldXp + amount * (Math.sign(oldXp) || 1);
+	const newXp = oldXp === 0 && amount < 0 ? 0 : oldXp + amount;
 
 	if (xpDatabaseIndex === -1) xp.push({ user: user.id, xp: amount });
 	else xp[xpDatabaseIndex] = { user: user.id, xp: newXp };
@@ -140,7 +140,7 @@ export default async function giveXp(to: GuildMember | User, url?: string, amoun
 
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
 	const newLevel = getLevelForXp(Math.abs(newXp));
-	const nextLevelXp = getXpForLevel(newLevel + 1) * Math.sign(newXp);
+	const nextLevelXp = getXpForLevel(newLevel + 1);
 	const showButton = (await getSettings(member, false)).levelUpPings === undefined;
 	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;
 
@@ -167,7 +167,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 			{
 				color: member.displayColor,
 				author: { icon_url: member.displayAvatarURL(), name: member.displayName },
-				title: `You’re at level ${newLevel * Math.sign(newXp)}!`,
+				title: `You’re at level ${newLevel}!`,
 				url,
 
 				fields: [
@@ -178,7 +178,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 					},
 					{ name: constants.zws, value: constants.zws, inline: true },
 					{
-						name: Math.sign(newXp) === -1 ? "⬇ Previous level" : "⬆️ Next level",
+						name: "⬆️ Next level",
 						value: `${nextLevelXp.toLocaleString()} XP`,
 						inline: true,
 					},
