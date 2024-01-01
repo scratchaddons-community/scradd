@@ -49,7 +49,7 @@ export default async function changeNickname(member: GuildMember) {
 		const unchanged = safe
 			// eslint-disable-next-line unicorn/prefer-spread -- This is not an array
 			.concat(unsafe)
-			.toSorted((one, two) => +(two.joinedAt ?? 0) - +(one.joinedAt ?? 0));
+			.toSorted((one, two) => (two.joinedTimestamp ?? 0) - (one.joinedTimestamp ?? 0));
 
 		if (unchanged.size > 1 && unchanged.has(member.id)) {
 			const nick = censor(member.user.displayName);

@@ -101,7 +101,7 @@ defineEvent("messageUpdate", async (_, message) => {
 		(found) =>
 			found.reference?.messageId === message.id &&
 			found.author.id === client.user.id &&
-			+found.createdAt - +message.createdAt < 1000,
+			found.createdTimestamp - message.createdTimestamp < 1000,
 	);
 
 	if (fetched.size && !found) return;
@@ -217,7 +217,7 @@ defineEvent("messageDelete", async (message) => {
 			(found) =>
 				found.reference?.messageId === message.id &&
 				found.author.id === client.user.id &&
-				+found.createdAt - +message.createdAt < 1000,
+				found.createdTimestamp - message.createdTimestamp < 1000,
 		)
 		?.delete();
 });

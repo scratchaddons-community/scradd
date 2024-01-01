@@ -16,7 +16,7 @@ export default async function updateBoard({ count, message }: { count: number; m
 	if (processing.has(message.id)) return;
 	processing.add(message.id);
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
-	const reactionThreshold = boardReactionCount(message.channel, message.createdAt);
+	const reactionThreshold = boardReactionCount(message.channel, message.createdTimestamp);
 	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
@@ -105,7 +105,7 @@ export async function syncRandomBoard() {
 	for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
 		if (info.onBoard) continue;
 
-		const date = new Date(Number(BigInt(info.source) >> 22n) + 1_420_070_400_000);
+		const date = Number(BigInt(info.source) >> 22n) + 1_420_070_400_000;
 
 		const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
 		if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded) continue;

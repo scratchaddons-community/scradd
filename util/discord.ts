@@ -202,7 +202,7 @@ export function messageToText(message: Message, replies: false): string;
 export async function messageToText(message: Message, replies?: true): Promise<string>;
 export function messageToText(message: Message, replies = true): Awaitable<string> {
 	const content = message.flags.has("Loading")
-		? (Date.now() - Number(message.createdAt)) / 1000 / 60 > 15
+		? (Date.now() - message.createdTimestamp) / 1000 / 60 > 15
 			? `${constants.emojis.discord.error} The application did not respond`
 			: `${constants.emojis.discord.typing} ${escapeMessage(
 					message.author.displayName,

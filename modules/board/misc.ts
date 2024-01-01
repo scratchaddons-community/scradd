@@ -40,11 +40,11 @@ const COUNTS = { admins: 2, mods: 3, private: 4, misc: 5, default: 6, memes: 8, 
  *
  * @returns The reaction count.
  */
-export function boardReactionCount(channel?: TextBasedChannel, time?: Date): number;
-export function boardReactionCount(channel: { id: Snowflake }, time?: Date): number | undefined;
+export function boardReactionCount(channel?: TextBasedChannel, time?: number): number;
+export function boardReactionCount(channel: { id: Snowflake }, time?: number): number | undefined;
 export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
-	time = new Date(),
+	time = Date.now(),
 ) {
 	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);
