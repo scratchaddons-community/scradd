@@ -210,13 +210,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 					},
 					{
 						name: "Strikes",
-						value: `${totalStrikeCount.toLocaleString(
-							"en-us",
-						)} (${recentStrikeCount.toLocaleString(
-							"en-us",
-						)} in the past 3 weeks; ${semiRecentStrikeCount.toLocaleString(
-							"en-us",
-						)} in the past 6 weeks)`,
+						value: `${totalStrikeCount.toLocaleString()} (${recentStrikeCount.toLocaleString()} in the past 3 weeks; ${semiRecentStrikeCount.toLocaleString()} in the past 6 weeks)`,
 						inline: true,
 					},
 					{ name: constants.zws, value: constants.zws, inline: false },

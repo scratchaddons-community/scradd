@@ -40,9 +40,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${member.toString()}, our **${memberCount}** member, is here! (they didn’t bring pizza though)`,
 		`${member.toString()}, the **${memberCount}** member, has joined the circus!`,
 		`You have been warned… Welcome to our **${memberCount}** member, ${member.toString()}!`,
-		`\`when [user v] joins:\` \`say [Hello, \`${member.toString()}\`!]\` \`set [MEMBER COUNT v] to (${config.guild.memberCount.toLocaleString(
-			"en-us",
-		)})\`${jokes}`,
+		`\`when [user v] joins:\` \`say [Hello, \`${member.toString()}\`!]\` \`set [MEMBER COUNT v] to (${config.guild.memberCount.toLocaleString()})\`${jokes}`,
 		`A wild ${member.toString()} appeared (our **${memberCount}** member)`,
 		`${member.toString()}, our **${memberCount}** member, just spawned in!`,
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
@@ -117,7 +115,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	await config.channels.info?.setName(
 		`Info - ${(
 			config.guild.memberCount - (config.guild.memberCount > 1005 ? 5 : 0)
-		).toLocaleString("en-us", {
+		).toLocaleString([], {
 			compactDisplay: "short",
 			maximumFractionDigits: 2,
 			minimumFractionDigits: config.guild.memberCount > 1000 ? 2 : 0,

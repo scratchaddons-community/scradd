@@ -126,7 +126,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					if (!count) continue;
 
 					await channel.setName(
-						`Scratch Addons - ${count.count.toLocaleString("en-us", {
+						`Scratch Addons - ${count.count.toLocaleString([], {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
 							minimumFractionDigits: +(count.count > 999),

@@ -98,18 +98,18 @@ async function status(interaction: ChatInputCommandInteraction) {
 						name: "🏓 Ping",
 						value: `${Math.abs(
 							message.createdTimestamp - interaction.createdTimestamp,
-						).toLocaleString("en-us")}ms`,
+						).toLocaleString()}ms`,
 						inline: true,
 					},
 					{
 						name: "↕️ WebSocket latency",
-						value: `${Math.abs(client.ws.ping).toLocaleString("en-us")}ms`,
+						value: `${Math.abs(client.ws.ping).toLocaleString()}ms`,
 						inline: true,
 					},
 					{
 						name: "💾 RAM usage",
 						value:
-							(process.memoryUsage.rss() / 1_000_000).toLocaleString("en-us", {
+							(process.memoryUsage.rss() / 1_000_000).toLocaleString([], {
 								maximumFractionDigits: 2,
 								minimumFractionDigits: 2,
 							}) + " MB",

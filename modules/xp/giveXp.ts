@@ -173,13 +173,13 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 				fields: [
 					{
 						name: "✨ Current XP",
-						value: `${Math.floor(newXp).toLocaleString("en-us")} XP`,
+						value: `${Math.floor(newXp).toLocaleString()} XP`,
 						inline: true,
 					},
 					{ name: constants.zws, value: constants.zws, inline: true },
 					{
 						name: Math.sign(newXp) === -1 ? "⬇ Previous level" : "⬆️ Next level",
-						value: `${nextLevelXp.toLocaleString("en-us")} XP`,
+						value: `${nextLevelXp.toLocaleString()} XP`,
 						inline: true,
 					},
 				],

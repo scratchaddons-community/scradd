@@ -29,11 +29,9 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const rankInfo =
 		rank &&
-		`Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString("en-us")}${
+		`Ranked ${rank.toLocaleString()}/${top.length.toLocaleString()}${
 			serverRank
-				? ` (${serverRank.toLocaleString("en-us")}/${guildMembers.size.toLocaleString(
-						"en-us",
-				  )} in the server)`
+				? ` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
 				: ""
 		}`;
 
@@ -48,10 +46,10 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 				fields: [
 					{
 						name: "📊 Level",
-						value: (level * Math.sign(xp)).toLocaleString("en-us"),
+						value: (level * Math.sign(xp)).toLocaleString(),
 						inline: true,
 					},
-					{ name: "✨ XP", value: xp.toLocaleString("en-us"), inline: true },
+					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 					{
 						name: "⏳ Weekly rank",
 
@@ -67,7 +65,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 						name: constants.zws,
 						value: `**${
 							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
-						} level progress** ${xpForNextLevel.toLocaleString("en-us")} XP needed`,
+						} level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 					},
 				],
 
@@ -116,14 +114,14 @@ async function makeCanvasFiles(progress: number) {
 		context.fillStyle = "#666";
 		context.textAlign = "end";
 		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			canvas.width - paddingPixels,
 			canvas.height - paddingPixels,
 		);
 	} else {
 		context.fillStyle = "#0009";
 		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			paddingPixels,
 			canvas.height - paddingPixels,
 		);

@@ -68,7 +68,7 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  */
 export function nth(number: number) {
 	return (
-		number.toLocaleString("en-us") +
+		number.toLocaleString() +
 		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th")
 	);
 }

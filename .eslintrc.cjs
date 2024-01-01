@@ -26,10 +26,7 @@ module.exports = {
 		},
 		{
 			files: ".*",
-			rules: {
-				"unicorn/prevent-abbreviations": "off",
-				"unicorn/string-content": "off",
-			},
+			rules: { "unicorn/prevent-abbreviations": "off", "unicorn/string-content": "off" },
 		},
 		{
 			files: "*.d.ts",

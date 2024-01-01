@@ -33,13 +33,13 @@ export async function getChatters() {
 		(user) =>
 			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${userMention(
 				user.user,
-			)} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
+			)} - ${Math.floor(user.xp).toLocaleString()} XP`,
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
 	const ending =
 		weeklyWinners[formatted.length] &&
-		` ${weeklyWinners[formatted.length]?.xp.toLocaleString("en-us")} XP`;
+		` ${weeklyWinners[formatted.length]?.xp.toLocaleString()} XP`;
 	const filtered = ending ? formatted.filter((line) => !line.endsWith(ending)) : formatted;
 
 	return {
@@ -163,16 +163,10 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 							Math.sign(
 								xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
 							),
-					).toLocaleString("en-us")} XP`,
+					).toLocaleString()} XP`,
 			)
 			.join("\n") || "*Nobody got any XP this week!*"
-	}\n\n*This week, ${chatters.toLocaleString(
-		"en-us",
-	)} people chatted, and ${latestActiveMembers.length.toLocaleString(
-		"en-us",
-	)} people were active. Altogether, people gained ${allXp.toLocaleString(
-		"en-us",
-	)} XP this week.*\n### Next week’s weekly winners will be posted ${timestamp(
+	}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n### Next week’s weekly winners will be posted ${timestamp(
 		nextWeeklyDate,
 		TimestampStyles.RelativeTime,
 	)}.`;

@@ -133,7 +133,7 @@ export async function top(
 				xp.user,
 				interaction.user,
 				interaction.guild ?? config.guild,
-			)} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
+			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
 		(data) => interaction.reply(data),
 		{
 			title: "XP Leaderboard",

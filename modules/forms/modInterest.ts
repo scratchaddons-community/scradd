@@ -216,23 +216,17 @@ export async function submitIntrest(interaction: ModalSubmitInteraction) {
 					},
 					{
 						name: "Strikes",
-						value: `${totalStrikeCount.toLocaleString(
-							"en-us",
-						)} (${recentStrikeCount.toLocaleString(
-							"en-us",
-						)} in the past 3 weeks; ${semiRecentStrikeCount.toLocaleString(
-							"en-us",
-						)} in the past 6 weeks)`,
+						value: `${totalStrikeCount.toLocaleString()} (${recentStrikeCount.toLocaleString()} in the past 3 weeks; ${semiRecentStrikeCount.toLocaleString()} in the past 6 weeks)`,
 						inline: true,
 					},
 					{
 						name: "XP",
-						value: `${rank}) Level ${level} - ${xp.toLocaleString("en-us")} XP`,
+						value: `${rank}) Level ${level} - ${xp.toLocaleString()} XP`,
 						inline: true,
 					},
 					{
 						name: "Weekly XP",
-						value: `${getWeeklyXp(interaction.user.id).toLocaleString("en-us")} XP`,
+						value: `${getWeeklyXp(interaction.user.id).toLocaleString()} XP`,
 						inline: true,
 					},
 					{ name: constants.zws, value: constants.zws, inline: false },
