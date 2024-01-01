@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -36,253 +37,223 @@ export default async function scratch(message: Message) {
 		const start = match.startsWith("http") ? 0 : 1,
 			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
 
-		// todo: use URL constructor
-		const urlParts = match
-			.slice(start, end)
-			.replace(
-				/https?:\/\/scratch\.(?:mit\.edu|org)\/discuss\/topic\/\d+(?:\?page=\d+)?#post-/,
-				constants.urls.scratch + "/discuss/post/",
-			)
-			.split("#")[0]
-			.split("?")[0]
-			.split("/");
+		const url = new URL(match.slice(start, end));
+		const urlParts = url.pathname.split("/");
 
-		switch (urlParts[3]) {
+		switch (urlParts[1]) {
 			case "projects": {
-				const project = await gracefulFetch(
-					`${constants.urls.scratchApi}/projects/${urlParts[4]}/`,
-				);
-				if (!project || project.code) continue;
-
-				const parent =
-					project.remix.parent &&
-					(await gracefulFetch(
-						`${constants.urls.scratchApi}/projects/${project.remix.parent}/`,
-					));
-
-				const embed = {
-					title: project.title,
-					color: constants.scratchColor,
-
-					fields: [
-						{
-							name: `${
-								constants.emojis.scratch.love
-							}${project.stats.loves.toLocaleString()} ${
-								constants.emojis.scratch.favorite
-							}${project.stats.favorites.toLocaleString()}`,
-							value: `**${
-								constants.emojis.scratch.remix
-							}${project.stats.remixes.toLocaleString()} ${
-								constants.emojis.scratch.view
-							}${project.stats.views.toLocaleString()}**`,
-							inline: true,
-						},
-					],
-					thumbnail: { url: project.images["282x218"] },
-					author: {
-						name: project.author.username,
-						url: `${constants.urls.scratch}/users/${project.author.username}`,
-						icon_url: project.author.profile.images["90x90"],
-					},
-					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `${constants.urls.scratch}/projects/${urlParts[4]}`,
-					timestamp: new Date(project.history.shared).toISOString(),
-				};
-
-				if (parent) {
-					embed.fields.push({
-						name: "⬆️ Remix of",
-						value: `[${parent.title}](${constants.urls.scratch}/projects/${project.remix.parent}/)`,
-						inline: true,
-					});
-				}
-				if (project.description) {
-					embed.fields.unshift({
-						name: "🫂 Notes and Credits",
-						value: truncateText(
-							linkifyMentions(project.description),
-							EMBED_LENGTH / 2,
-							true,
-						),
-						inline: false,
-					});
-				}
-				if (project.instructions) {
-					embed.fields.unshift({
-						name: "📜 Instructions",
-						value: truncateText(
-							linkifyMentions(project.instructions),
-							EMBED_LENGTH / 2,
-							true,
-						),
-						inline: false,
-					});
-				}
-
-				embeds.push(embed);
+				const embed = await handleProject(urlParts);
+				if (embed) embeds.push(embed);
 				break;
 			}
 			case "users": {
-				const user = await gracefulFetch(
-					`${constants.urls.scratchdb}/user/info/${urlParts[4]}/`,
-				);
-				if (!user || user.error) continue;
-
-				const embed = {
-					title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
-					color: constants.scratchColor,
-
-					fields: user.statistics
-						? [
-								{
-									name: `${constants.emojis.scratch.followers} Followers`,
-									value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
-										user.statistics.ranks.followers,
-									)})`,
-									inline: true,
-								},
-								{
-									name: `${constants.emojis.scratch.following.toLocaleString()} Following`,
-									value: user.statistics.following,
-									inline: true,
-								},
-						  ]
-						: [],
-					thumbnail: {
-						url: `https://cdn2.scratch.mit.edu/get_image/user/${user.id}_90x90.png`,
-					},
-					author: {
-						name: `${user.country}${
-							user.status == "New Scratcher"
-								? `${constants.footerSeperator}${user.status}`
-								: ""
-						}`,
-					},
-					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `${constants.urls.scratch}/users/${urlParts[4]}`,
-					timestamp: new Date(user.joined).toISOString(),
-				};
-
-				if (user.work) {
-					embed.fields.unshift({
-						// eslint-disable-next-line unicorn/string-content
-						name: "🛠️ What I'm working on",
-						value: truncateText(htmlToMarkdown(user.work), EMBED_LENGTH / 2, true),
-						inline: false,
-					});
-				}
-				if (user.bio) {
-					embed.fields.unshift({
-						name: "👋 About me",
-						value: truncateText(htmlToMarkdown(user.bio), EMBED_LENGTH / 2, true),
-						inline: false,
-					});
-				}
-
-				embeds.push(embed);
+				const embed = await handleUser(urlParts);
+				if (embed) embeds.push(embed);
 				break;
 			}
 			case "studios": {
-				const studio = await gracefulFetch(
-					`${constants.urls.scratchApi}/studios/${urlParts[4]}/`,
-				);
-				if (!studio || studio.code) continue;
-
-				embeds.push({
-					title: studio.title,
-					description: truncateText(
-						linkifyMentions(studio.description),
-						EMBED_LENGTH,
-						true,
-					),
-					color: constants.scratchColor,
-
-					fields: [
-						{
-							name: `${constants.emojis.scratch.followers.toLocaleString()} Followers`,
-							value: studio.stats.followers,
-							inline: true,
-						},
-						{
-							name: `${constants.emojis.scratch.projects.toLocaleString()} Projects`,
-							value: studio.stats.projects,
-							inline: true,
-						},
-						{
-							name: `${constants.emojis.scratch.comments.toLocaleString()} Comments`,
-							value:
-								studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
-							inline: true,
-						},
-					],
-					thumbnail: { url: studio.image },
-
-					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					url: `${constants.urls.scratch}/studios/${urlParts[4]}`,
-					timestamp: new Date(studio.history.created).toISOString(),
-				});
+				const embed = await handleStudio(urlParts);
+				if (embed) embeds.push(embed);
 				break;
 			}
 			case "discuss": {
-				const post =
-					urlParts[4] === "post"
-						? await gracefulFetch(
-								`${constants.urls.scratchdb}/forum/post/info/${urlParts[5]}/`,
-						  )
-						: urlParts[4] === "topic" &&
-						  (
-								await gracefulFetch(
-									`${constants.urls.scratchdb}/forum/topic/posts/${urlParts[5]}?o=oldest`,
-								)
-						  )?.[0];
-				if (!post || post.error || post.deleted) continue;
-
-				const editedString = post.editor
-					? `\n\n*Last edited by ${post.editor} (${time(
-							new Date(post.time.edited),
-							TimestampStyles.ShortDateTime,
-					  )})*`
-					: "";
-
-				embeds.push({
-					title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${
-						constants.footerSeperator
-					}${post.topic.category}`,
-					description: truncateText(
-						htmlToMarkdown(post.content.html) + editedString,
-						EMBED_LENGTH,
-						true,
-					),
-					color: constants.scratchColor,
-					footer: notSet ? { text: "Disable this using /settings" } : undefined,
-					author: {
-						name: post.username,
-						url: `${constants.urls.scratch}/users/${post.username}`,
-					},
-					url: `${constants.urls.scratch}/discuss/topic/${urlParts[5]}`,
-					timestamp: new Date(post.time.posted).toISOString(),
-				});
+				const embed = await handleForumPost(urlParts, url.hash);
+				if (embed) embeds.push(embed);
+				break;
 			}
 		}
-	}
 
+		const newest = embeds.at(-1);
+		if (notSet && newest && !newest.footer)
+			newest.footer = { text: "Disable this using /settings" };
+	}
 	return embeds.length ? embeds : false;
 }
 
-function linkifyMentions(string: string) {
-	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
-		name = name.replaceAll("\\", "");
-		return `[${name}](${constants.urls.scratch}/users/${name})`;
-	});
+async function handleProject(urlParts: string[]) {
+	const project = await gracefulFetch(`${constants.urls.scratchApi}/projects/${urlParts[2]}/`);
+	if (!project || project.code) return;
+
+	const parent =
+		project.remix.parent &&
+		(await gracefulFetch(`${constants.urls.scratchApi}/projects/${project.remix.parent}/`));
+
+	const embed = {
+		title: project.title,
+		color: constants.scratchColor,
+
+		fields: [
+			{
+				name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
+					constants.emojis.scratch.favorite
+				} ${project.stats.favorites.toLocaleString()}`,
+				value: `**${
+					constants.emojis.scratch.remix
+				} ${project.stats.remixes.toLocaleString()} ${
+					constants.emojis.scratch.view
+				} ${project.stats.views.toLocaleString()}**`,
+				inline: true,
+			},
+		],
+		thumbnail: { url: project.images["282x218"] },
+		author: {
+			name: project.author.username,
+			url: `${constants.urls.scratch}/users/${project.author.username}`,
+			icon_url: project.author.profile.images["90x90"],
+		},
+		url: `${constants.urls.scratch}/projects/${urlParts[2]}`,
+		timestamp: new Date(project.history.shared).toISOString(),
+	};
+
+	if (parent) {
+		embed.fields.push({
+			name: "⬆️ Remix of",
+			value: `[${parent.title}](${constants.urls.scratch}/projects/${project.remix.parent}/)`,
+			inline: true,
+		});
+	}
+	if (project.description) {
+		embed.fields.unshift({
+			name: "🫂 Notes and Credits",
+			value: truncateText(linkifyMentions(project.description), EMBED_LENGTH / 2, true),
+			inline: false,
+		});
+	}
+	if (project.instructions) {
+		embed.fields.unshift({
+			name: "📜 Instructions",
+			value: truncateText(linkifyMentions(project.instructions), EMBED_LENGTH / 2, true),
+			inline: false,
+		});
+	}
+
+	return embed;
+}
+async function handleUser(urlParts: string[]) {
+	const user = await gracefulFetch(`${constants.urls.scratchdb}/user/info/${urlParts[2]}/`);
+	if (!user || user.error) return;
+
+	const embed = {
+		title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
+		color: constants.scratchColor,
+
+		fields: user.statistics
+			? [
+					{
+						name: `${constants.emojis.scratch.followers} Followers`,
+						value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
+							user.statistics.ranks.followers,
+						)})`,
+						inline: true,
+					},
+					{
+						name: `${constants.emojis.scratch.following} Following`,
+						value: user.statistics.following.toLocaleString(),
+						inline: true,
+					},
+			  ]
+			: [],
+		thumbnail: { url: `https://cdn2.scratch.mit.edu/get_image/user/${user.id}_90x90.png` },
+		author: {
+			name: `${user.country}${
+				user.status == "New Scratcher" ? `${constants.footerSeperator}${user.status}` : ""
+			}`,
+		},
+		url: `${constants.urls.scratch}/users/${urlParts[2]}`,
+		timestamp: new Date(user.joined).toISOString(),
+	};
+
+	if (user.work) {
+		embed.fields.unshift({
+			// eslint-disable-next-line unicorn/string-content
+			name: "🛠️ What I'm working on",
+			value: truncateText(htmlToMarkdown(user.work), EMBED_LENGTH / 2, true),
+			inline: false,
+		});
+	}
+	if (user.bio) {
+		embed.fields.unshift({
+			name: "👋 About me",
+			value: truncateText(htmlToMarkdown(user.bio), EMBED_LENGTH / 2, true),
+			inline: false,
+		});
+	}
+
+	return embed;
+}
+async function handleStudio(urlParts: string[]) {
+	const studio = await gracefulFetch(`${constants.urls.scratchApi}/studios/${urlParts[2]}/`);
+	if (!studio || studio.code) return;
+
+	return {
+		title: studio.title,
+		description: truncateText(linkifyMentions(studio.description), EMBED_LENGTH, true),
+		color: constants.scratchColor,
+
+		fields: [
+			{
+				name: `${constants.emojis.scratch.followers} Followers`,
+				value: studio.stats.followers,
+				inline: true,
+			},
+			{
+				name: `${constants.emojis.scratch.projects} Projects`,
+				value: studio.stats.projects,
+				inline: true,
+			},
+			{
+				name: `${constants.emojis.scratch.comments} Comments`,
+				value: studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
+				inline: true,
+			},
+		],
+		thumbnail: { url: studio.image },
+
+		url: `${constants.urls.scratch}/studios/${urlParts[2]}`,
+		timestamp: new Date(studio.history.created).toISOString(),
+	};
+}
+async function handleForumPost(urlParts: string[], hash: string) {
+	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
+	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
+
+	const post =
+		type === "post"
+			? await gracefulFetch(`${constants.urls.scratchdb}/forum/post/info/${id}/`)
+			: type === "topic" &&
+			  (await gracefulFetch(
+					`${constants.urls.scratchdb}/forum/topic/posts/${id}?o=oldest`,
+			  ).then(([post]) => post));
+	if (!post || post.error || post.deleted) return;
+
+	const editedString = post.editor
+		? `\n\n*Last edited by ${post.editor} (${time(
+				new Date(post.time.edited),
+				TimestampStyles.ShortDateTime,
+		  )})*`
+		: "";
+
+	return {
+		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${constants.footerSeperator}${
+			post.topic.category
+		}`,
+		description: truncateText(
+			htmlToMarkdown(post.content.html) + editedString,
+			EMBED_LENGTH,
+			true,
+		),
+		color: constants.scratchColor,
+		author: { name: post.username, url: `${constants.urls.scratch}/users/${post.username}` },
+		url: `${constants.urls.scratch}/discuss/topic/${post.topic.id}`,
+		timestamp: new Date(post.time.posted).toISOString(),
+	};
 }
 
+type NodeOrNodes = Node | NodeOrNodes[];
 function htmlToMarkdown(string: string) {
 	const nodes = parser(string, { decodeEntities: true, recognizeNoValueAttribute: true });
 	return nodesToText(nodes);
 }
-
-type NodeOrNodes = Node | NodeOrNodes[];
 function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	if (Array.isArray(node))
 		return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
@@ -342,4 +313,11 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	}
 
 	return content;
+}
+
+function linkifyMentions(string: string) {
+	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
+		name = name.replaceAll("\\", "");
+		return `[${name}](${constants.urls.scratch}/users/${name})`;
+	});
 }
