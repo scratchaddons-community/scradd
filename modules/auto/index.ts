@@ -1,9 +1,10 @@
 import {
 	ChannelType,
 	MessageType,
-	type BaseMessageOptions,
+	type PartialMessage,
 	type Message,
 	ApplicationCommandType,
+	type Snowflake,
 } from "discord.js";
 import { getSettings } from "../settings.js";
 import { BOARD_EMOJI } from "../board/misc.js";
@@ -45,7 +46,22 @@ defineEvent("messageCreate", async (message) => {
 		reactions++;
 	}
 
-	if (await handleMutatable(message)) {
+	const response = await handleMutatable(message);
+	if (response) {
+		const isArray = Array.isArray(response);
+		if (!isArray) await message.reply(response);
+		else if (typeof response[0] === "object") {
+			const reply = await message.reply(response[0]);
+			for (const action of response.slice(1)) {
+				if (typeof action === "number") {
+					await new Promise((resolve) => setTimeout(resolve, action));
+					continue;
+				}
+
+				const edited = await reply.edit(action).catch(() => void 0);
+				if (!edited) break;
+			}
+		}
 		await learn(message);
 		return;
 	}
@@ -96,56 +112,32 @@ defineEvent("messageCreate", async (message) => {
 defineEvent("messageUpdate", async (_, message) => {
 	if (message.partial) return;
 
-	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
-	const found = fetched.find(
-		(found) =>
-			found.reference?.messageId === message.id &&
-			found.author.id === client.user.id &&
-			found.createdTimestamp - message.createdTimestamp < 1000,
-	);
+	const found = await getAutoResponse(message);
+	if (found === false) return;
 
-	if (fetched.size && !found) return;
-
-	if (
-		!(await handleMutatable(
-			message,
-			found ? (data: BaseMessageOptions) => found.edit(data) : undefined,
-		))
-	)
-		await found?.edit({
-			content: constants.zws,
-			attachments: [],
-			components: [],
-			embeds: [],
-			files: [],
-		});
+	const response = await handleMutatable(message);
+	const data = typeof response === "object" && !Array.isArray(response) && response;
+	if (found)
+		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
+	else if (data) await message.reply(data);
 });
 
-async function handleMutatable(
-	message: Message,
-	send = (data: BaseMessageOptions) => message.reply(data),
-) {
+async function handleMutatable(message: Message) {
 	const chatResponse = scraddChat(message);
-	if (chatResponse) {
-		await send({ content: chatResponse });
-		return true;
-	}
+	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
 
 	const baseChannel = getBaseChannel(message.channel);
-	if (config.channels.modlogs?.id === baseChannel?.id) return false;
+	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
 	const scratchData = await scratch(message);
-	if (scratchData) {
-		await send({ embeds: scratchData });
-		return true;
-	}
+	if (scratchData) return { content: "", files: [], embeds: scratchData, components: [] };
 
 	if (
 		message.channel.id === message.id ||
 		message.channel.isDMBased() ||
 		ignoreTriggers.some((trigger) => message.content.match(trigger))
 	)
-		return false;
+		return;
 
 	const pingsScradd = message.mentions.has(client.user, {
 		ignoreEveryone: true,
@@ -160,7 +152,7 @@ async function handleMutatable(
 				!baseChannel?.name.match(/\bbots?\b/i)) ||
 			!(await getSettings(message.author)).autoreactions)
 	)
-		return false;
+		return;
 
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
@@ -181,50 +173,56 @@ async function handleMutatable(
 				config.channels.bots?.id === baseChannel?.id)
 		) {
 			const response = dad(name, message.member);
-
-			if (!Array.isArray(response)) {
-				await send({
-					content: response,
-					allowedMentions: { users: [], repliedUser: true },
-				});
-				return true;
-			}
-
-			const reply = await send({
-				content: response[0],
-				allowedMentions: { users: [], repliedUser: true },
-			});
-			for (const action of response.slice(1)) {
-				if (typeof action === "number") {
-					await new Promise((resolve) => setTimeout(resolve, action));
-					continue;
-				}
-
-				const edited = await reply.edit(action).catch(() => void 0);
-				if (!edited) break;
-			}
-			return true;
+			return Array.isArray(response)
+				? [
+						{
+							content: response[0],
+							files: [],
+							embeds: [],
+							components: [],
+							allowedMentions: { users: [], repliedUser: true },
+						},
+						...response.slice(1),
+				  ]
+				: {
+						content: response,
+						files: [],
+						embeds: [],
+						components: [],
+						allowedMentions: { users: [], repliedUser: true },
+				  };
 		}
 	}
-
-	return false;
 }
 
 defineEvent("messageDelete", async (message) => {
-	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
-	await fetched
-		.find(
-			(found) =>
-				found.reference?.messageId === message.id &&
-				found.author.id === client.user.id &&
-				found.createdTimestamp - message.createdTimestamp < 1000,
-		)
-		?.delete();
+	const found = await getAutoResponse(message);
+	if (!found) return;
+
+	await found.delete();
+	autoResponses.delete(found.id);
 });
+
+const autoResponses = new Map<Snowflake, Message>();
+async function getAutoResponse(message: Message | PartialMessage) {
+	const cached = autoResponses.get(message.id);
+	if (cached) return cached;
+
+	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
+	const found = fetched.find(
+		(found) =>
+			found.reference?.messageId === message.id &&
+			found.author.id === client.user.id &&
+			found.createdTimestamp - message.createdTimestamp < 1000,
+	);
+
+	if (found) autoResponses.set(message.id, found);
+	if (fetched.size && !found) return false;
+	return found;
+}
 
 defineButton("allowChat", allowChat);
 defineButton("denyChat", denyChat);
-
 defineMenuCommand(
 	{ name: "Remove Scradd Chat Response", type: ApplicationCommandType.Message, restricted: true },
 	removeResponse,

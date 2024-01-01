@@ -48,11 +48,12 @@ export default function scraddChat(message: Message) {
 		matchPath: ["prompt"],
 		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
-		threshold: 0.7,
+		threshold: 0.6,
 	})
 		.toSorted(() => Math.random() - 0.5)
 		.find(({ response }) => response && response !== prompt && !removedResponses.has(response))
-		?.response.replaceAll(client.user.toString(), message.author.toString());
+		?.response.replaceAll(client.user.toString(), message.author.toString())
+		.replaceAll("<@0>", client.user.toString());
 	if (response) return response;
 }
 
@@ -75,10 +76,9 @@ export async function learn(message: Message) {
 	)
 		return;
 
-	const response = messageToText(message, false).replaceAll(
-		GlobalUsersPattern,
-		client.user.toString(),
-	);
+	const response = messageToText(message, false)
+		.replaceAll(message.author.toString(), "<@0>")
+		.replaceAll(GlobalUsersPattern, client.user.toString());
 	if (
 		!response ||
 		response.length > 500 ||
@@ -212,10 +212,9 @@ export async function removeResponse(interaction: MessageContextMenuCommandInter
 
 	if (!modalInteraction) return;
 
-	const response = interaction.targetMessage.content.replaceAll(
-		interaction.targetMessage.author.toString(),
-		client.user.toString(),
-	);
+	const response = interaction.targetMessage.content
+		.replaceAll(client.user.toString(), "<@0>")
+		.replaceAll(interaction.targetMessage.author.toString(), client.user.toString());
 
 	removedResponses.add(response);
 	const { deletedCount } = await Chat.deleteMany({ response }).exec();
