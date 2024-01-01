@@ -134,6 +134,7 @@ async function handleMutatable(message: Message) {
 
 	if (
 		message.channel.id === message.id ||
+		message.author.bot ||
 		message.channel.isDMBased() ||
 		ignoreTriggers.some((trigger) => message.content.match(trigger))
 	)
