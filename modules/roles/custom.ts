@@ -4,14 +4,11 @@ import {
 	type PartialGuildMember,
 	ComponentType,
 	ButtonStyle,
-	Colors,
-	type ColorResolvable,
 	type ApplicationCommand,
 	type ChatInputCommandInteraction,
 	TextInputStyle,
 	type Snowflake,
 	ApplicationCommandPermissionType,
-	FormattingPatterns,
 	type Role,
 } from "discord.js";
 import constants from "../../common/constants.js";
@@ -19,9 +16,9 @@ import { disableComponents } from "../../util/discord.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
-import { recentXpDatabase } from "../xp/misc.js";
-import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
+import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
+import { parseColor, resolveIcon } from "./misc.js";
 
 const PREFIX = "✨ ";
 let command: ApplicationCommand | undefined;
@@ -283,57 +280,4 @@ export async function qualifiesForRole(member: GuildMember) {
 			permission.id === member.user.id &&
 			permission.permission,
 	);
-}
-
-const isTwemoji = new RegExp(`^${twemojiRegexp.default.source}$`);
-const isServerEmoji = new RegExp(`^${FormattingPatterns.Emoji.source}$`);
-const validContentTypes = new Set([
-	"image/jpeg",
-	"image/png",
-	"image/apng",
-	"image/gif",
-	"image/webp",
-]);
-/** Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URL, string starting with https:// */
-async function resolveIcon(icon: string) {
-	if (isTwemoji.test(icon)) return { unicodeEmoji: icon };
-
-	const id = icon.match(isServerEmoji)?.groups?.id || (/^\d{17,20}$/.test(icon) && icon);
-	const url = id && config.guild.emojis.resolve(id)?.url;
-	if (url) return { icon: url };
-
-	if (icon.startsWith("data:")) return { icon };
-
-	if (!/^https?:\/\//.test(icon) || !URL.canParse(icon)) return;
-
-	const response = await fetch(icon, { method: "HEAD" });
-	if (!response.ok) return;
-
-	const contentLength = +(response.headers.get("Content-Length") ?? Number.POSITIVE_INFINITY);
-	if (contentLength > 256_000) return;
-
-	const contentType = response.headers.get("Content-Type");
-	if (!contentType || !validContentTypes.has(contentType)) return;
-
-	return { icon };
-}
-
-const COLORS = Object.fromEntries(
-	([...Object.keys(Colors), "Random"] as const).flatMap((color) => [
-		[color.toLowerCase(), color],
-		[color.replaceAll(/(?<!^)([A-Z])/g, " $1").toLowerCase(), color],
-	]),
-);
-function parseColor(rawColor: string | undefined): Extract<ColorResolvable, string> | undefined {
-	if (!rawColor) return undefined;
-
-	const preset = COLORS[rawColor.toLowerCase()];
-	if (preset) return preset;
-
-	const color = rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const);
-	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
-
-	return color.length === 4
-		? `#${color[1]}${color.slice(1, 3)}${color.slice(2, 4)}${color[3]}`
-		: color;
 }
