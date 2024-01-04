@@ -18,7 +18,6 @@ export const recentXpDatabase = new Database<{
 await xpDatabase.init();
 await recentXpDatabase.init();
 
-
 export function getWeeklyXp(user: Snowflake) {
 	return recentXpDatabase.data.reduce((accumulator, gain) => {
 		if (gain.user !== user || gain.time + 604_800_000 < Date.now()) return accumulator;
