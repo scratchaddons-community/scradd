@@ -3,7 +3,7 @@ import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import warn from "../punishments/warn.js";
-import tryCensor, { censor } from "./language.js";
+import tryCensor, { censor, isPingable } from "./misc.js";
 
 export default async function changeNickname(member: GuildMember) {
 	const censored = tryCensor(member.displayName);
@@ -101,11 +101,4 @@ function findName(member: GuildMember) {
 	if (isPingable(tag)) return tag;
 
 	return nick;
-}
-
-function isPingable(name: string) {
-	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
-	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
-		normalized,
-	);
 }

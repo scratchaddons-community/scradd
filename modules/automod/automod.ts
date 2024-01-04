@@ -11,7 +11,7 @@ import {
 import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
-import tryCensor, { badWordRegexps, badWordsAllowed } from "./language.js";
+import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { stripMarkdown } from "../../util/markdown.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([

@@ -12,7 +12,7 @@ import { joinWithAnd } from "../../util/text.js";
 import warn from "../punishments/warn.js";
 import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
-import tryCensor, { badWordsAllowed } from "./language.js";
+import tryCensor, { badWordsAllowed } from "./misc.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
 

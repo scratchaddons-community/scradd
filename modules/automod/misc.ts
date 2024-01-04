@@ -64,10 +64,10 @@ export default function tryCensor(text: string, strikeShift = 0) {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			if (!/[a-z]/i.test(word)) return word;
+			if ((/[\d!#*@|-]/gi.exec(word)?.length ?? 0) > word.length * 0.5 + 1) return word;
 
 			words[index]?.push(word);
-			return word.length < 3
+			return word.length < 4
 				? "#".repeat(word.length)
 				: word[0] + "#".repeat(word.length - 1);
 		});
@@ -104,5 +104,12 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 		baseChannel.parent?.id === config.channels.mod?.parent?.id ||
 		(baseChannel.id === config.channels.tickets?.id &&
 			channel?.type === ChannelType.PrivateThread)
+	);
+}
+
+export function isPingable(name: string) {
+	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
+	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
+		normalized,
 	);
 }

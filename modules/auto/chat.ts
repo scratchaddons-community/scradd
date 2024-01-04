@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
-import tryCensor from "../automod/language.js";
+import tryCensor from "../automod/misc.js";
 import { client } from "strife.js";
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 import {

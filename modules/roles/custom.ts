@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import tryCensor from "../automod/language.js";
+import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/misc.js";

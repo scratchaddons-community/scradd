@@ -16,7 +16,7 @@ import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/misc.js";
 import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
-import { censor } from "./automod/language.js";
+import { censor } from "./automod/misc.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */

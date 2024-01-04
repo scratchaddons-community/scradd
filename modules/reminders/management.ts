@@ -9,7 +9,7 @@ import {
 	channelMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import tryCensor, { badWordsAllowed } from "../automod/language.js";
+import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import { getSettings } from "../settings.js";
 import warn from "../punishments/warn.js";

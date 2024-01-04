@@ -12,7 +12,7 @@ import {
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
-import tryCensor, { censor } from "../automod/language.js";
+import tryCensor, { censor } from "../automod/misc.js";
 import { client } from "strife.js";
 
 export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
