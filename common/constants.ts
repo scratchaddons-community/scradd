@@ -9,6 +9,8 @@ export default {
 			"manifest.description",
 			"manifest.settings.*.name",
 			"manifest.credits.*.name",
+			"manifest.presets.*.name",
+			"manifest.presets.*.description",
 		],
 	},
 
