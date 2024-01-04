@@ -13,7 +13,7 @@ import {
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { getWeeklyXp } from "./xp/misc.js";
+import { getWeeklyXp } from "./xp/util.js";
 import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";

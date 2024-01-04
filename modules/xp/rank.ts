@@ -1,8 +1,19 @@
-import { ComponentType, type User, ButtonStyle, type RepliableInteraction } from "discord.js";
+import {
+	ComponentType,
+	type User,
+	ButtonStyle,
+	type RepliableInteraction,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { nth } from "../../util/numbers.js";
-import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
+import { getFullWeeklyData, xpDatabase } from "./util.js";
+import { getLevelForXp, getXpForLevel } from "./misc.js";
+import { paginate } from "../../util/discord.js";
+import { getSettings, mentionUser } from "../settings.js";
 
 export default async function getUserRank(interaction: RepliableInteraction, user: User) {
 	const allXp = xpDatabase.data;
@@ -121,4 +132,57 @@ async function makeCanvasFiles(progress: number) {
 		);
 	}
 	return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
+}
+
+export async function top(
+	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
+	user?: GuildMember | User,
+) {
+	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
+
+	const index = user ? leaderboard.findIndex(({ user: id }) => id === user.id) : undefined;
+	if (index === -1) {
+		return await interaction.reply({
+			content: `${
+				constants.emojis.statuses.no
+			} ${user?.toString()} could not be found! Do they have any XP?`,
+
+			ephemeral: true,
+		});
+	}
+
+	await paginate(
+		leaderboard,
+		async (xp) =>
+			`**Level ${getLevelForXp(Math.abs(xp.xp))}** - ${await mentionUser(
+				xp.user,
+				interaction.user,
+				interaction.guild ?? config.guild,
+			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+		(data) => interaction.reply(data),
+		{
+			title: "XP Leaderboard",
+			singular: "user",
+
+			user: interaction.user,
+			rawOffset: index,
+			ephemeral:
+				interaction.isButton() &&
+				interaction.message.interaction?.user.id !== interaction.user.id,
+
+			async generateComponents() {
+				return (await getSettings(interaction.user, false)).useMentions === undefined
+					? [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Toggle Mentions",
+								style: ButtonStyle.Success,
+							},
+					  ]
+					: undefined;
+			},
+			customComponentLocation: "below",
+		},
+	);
 }

@@ -10,7 +10,8 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
-import { DEFAULT_XP, getLevelForXp, getXpForLevel, recentXpDatabase, xpDatabase } from "./misc.js";
+import { DEFAULT_XP, getLevelForXp, getXpForLevel } from "./misc.js";
+import { recentXpDatabase, xpDatabase } from "./util.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 

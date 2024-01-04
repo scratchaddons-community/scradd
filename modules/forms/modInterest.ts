@@ -10,7 +10,8 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
-import { getLevelForXp, getWeeklyXp, xpDatabase } from "../xp/misc.js";
+import { getLevelForXp } from "../xp/misc.js";
+import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 import { EXPIRY_LENGTH, strikeDatabase } from "../punishments/misc.js";
 import constants from "../../common/constants.js";
 import giveXp from "../xp/giveXp.js";

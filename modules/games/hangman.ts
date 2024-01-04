@@ -8,7 +8,7 @@ import {
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";
-import { recentXpDatabase } from "../xp/misc.js";
+import { recentXpDatabase } from "../xp/util.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import { disableComponents } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";

@@ -1,18 +1,10 @@
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type User,
-	type ChatInputCommandInteraction,
-	type ButtonInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getLevelForXp, xpDatabase } from "./misc.js";
-import { paginate } from "../../util/discord.js";
-import { getSettings, mentionUser } from "../settings.js";
 import {
 	client,
 	defineSubcommands,
@@ -21,7 +13,7 @@ import {
 	defineSelect,
 	defineMenuCommand,
 } from "strife.js";
-import getUserRank from "./rank.js";
+import getUserRank, { top } from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
 
 defineEvent("messageCreate", async (message) => {
@@ -109,58 +101,6 @@ if (process.env.CANVAS !== "false") {
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
 
-export async function top(
-	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
-	user?: GuildMember | User,
-) {
-	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
-
-	const index = user ? leaderboard.findIndex(({ user: id }) => id === user.id) : undefined;
-	if (index === -1) {
-		return await interaction.reply({
-			content: `${
-				constants.emojis.statuses.no
-			} ${user?.toString()} could not be found! Do they have any XP?`,
-
-			ephemeral: true,
-		});
-	}
-
-	await paginate(
-		leaderboard,
-		async (xp) =>
-			`**Level ${getLevelForXp(Math.abs(xp.xp))}** - ${await mentionUser(
-				xp.user,
-				interaction.user,
-				interaction.guild ?? config.guild,
-			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
-		(data) => interaction.reply(data),
-		{
-			title: "XP Leaderboard",
-			singular: "user",
-
-			user: interaction.user,
-			rawOffset: index,
-			ephemeral:
-				interaction.isButton() &&
-				interaction.message.interaction?.user.id !== interaction.user.id,
-
-			async generateComponents() {
-				return (await getSettings(interaction.user, false)).useMentions === undefined
-					? [
-							{
-								customId: "levelUpPings_toggleSetting",
-								type: ComponentType.Button,
-								label: "Toggle Mentions",
-								style: ButtonStyle.Success,
-							},
-					  ]
-					: undefined;
-			},
-			customComponentLocation: "below",
-		},
-	);
-}
 defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
 	await getUserRank(interaction, interaction.targetUser);
 });

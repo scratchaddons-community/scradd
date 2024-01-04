@@ -1,5 +1,5 @@
 import type { AnySelectMenuInteraction } from "discord.js";
-import { recentXpDatabase } from "./misc.js";
+import { recentXpDatabase } from "./util.js";
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
