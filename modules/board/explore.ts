@@ -12,7 +12,7 @@ import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
+import { asyncFilter, anyPromise } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 
@@ -36,7 +36,7 @@ async function textChannelMatches(
 
 	switch (channelWanted.type) {
 		case ChannelType.GuildCategory: {
-			return await firstTrueyPromise(
+			return await anyPromise(
 				channelWanted.children
 					.valueOf()
 					.map(async (child) => await textChannelMatches(child, channelFound, guild)),
