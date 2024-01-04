@@ -30,7 +30,7 @@ import {
 	type PartialDMChannel,
 	bold,
 	type ChatInputCommandInteraction,
-	type InteractionResponse,
+	InteractionResponse,
 	type ThreadChannel,
 	Collection,
 	type ApplicationCommand,
@@ -558,6 +558,23 @@ export function disableComponents(
 	}));
 }
 
+type PaginateOptions<Item, U extends User | false = User | false> = {
+	title: string;
+	format?: GuildMember | User;
+	singular: string;
+	plural?: string;
+	failMessage?: string;
+
+	user: U;
+	rawOffset?: number;
+	totalCount?: number;
+	ephemeral?: boolean;
+	perPage?: number;
+
+	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
+	customComponentLocation?: "above" | "below";
+};
+
 /**
  * Creates a paginated embed from an array.
  *
@@ -582,12 +599,24 @@ export async function paginate<Item>(
 	reply: (
 		options: BaseMessageOptions & { ephemeral: boolean },
 	) => Promise<InteractionResponse | Message>,
+	options: PaginateOptions<Item, User>,
+): Promise<void>;
+export async function paginate<Item>(
+	array: Item[],
+	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => unknown,
+	options: PaginateOptions<Item, false>,
+): Promise<void>;
+export async function paginate<Item>(
+	array: Item[],
+	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => Awaitable<unknown>,
 	{
 		title,
 		format,
 		singular,
 		plural = `${singular}s`,
-		failMessage = `No ${plural} found!`,
+		failMessage = `No ${plural} found! Try changing any filters you may have used.`,
 
 		user,
 		rawOffset,
@@ -597,22 +626,7 @@ export async function paginate<Item>(
 
 		generateComponents,
 		customComponentLocation = "above",
-	}: {
-		title: string;
-		format?: GuildMember | User;
-		singular: string;
-		plural?: string;
-		failMessage?: string;
-
-		user: User | false;
-		rawOffset?: number;
-		totalCount?: number;
-		ephemeral?: boolean;
-		perPage?: number;
-
-		generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
-		customComponentLocation?: "above" | "below";
-	},
+	}: PaginateOptions<Item>,
 ): Promise<void> {
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
@@ -629,7 +643,7 @@ export async function paginate<Item>(
 		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		if (!filtered.length) {
-			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral };
+			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral: true };
 		}
 
 		const content = (
@@ -711,10 +725,18 @@ export async function paginate<Item>(
 	}
 
 	let message = await reply(await generateMessage());
-	if (numberOfPages === 1 || !user) return;
+	if (
+		numberOfPages === 1 ||
+		!user ||
+		!(message instanceof InteractionResponse) ||
+		!(message instanceof Message)
+	)
+		return;
 
 	const editReply = (data: BaseMessageOptions & { ephemeral: boolean }) =>
-		ephemeral ? reply(data) : message.edit(data);
+		ephemeral || !(message instanceof InteractionResponse) || !(message instanceof Message)
+			? reply(data)
+			: message.edit(data);
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>

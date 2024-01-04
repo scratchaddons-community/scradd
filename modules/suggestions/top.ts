@@ -58,7 +58,6 @@ export default async function top(
 			}${options.answer ? ` answered with ${options.answer}` : ""}`,
 			format: user,
 			singular: "suggestion",
-			failMessage: "No suggestions found! Try changing any filters you may have used.",
 			user: interaction.user,
 			perPage: 15,
 		},

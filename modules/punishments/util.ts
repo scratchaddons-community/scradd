@@ -132,8 +132,8 @@ export async function listStrikes(
 			title: `${member.displayName}’s strikes`,
 			format: member,
 			singular: "strike",
-			failMessage: `${member.toString()} has never been warned!`,
 
+			// @ts-expect-error TS2769
 			user: commandUser,
 			totalCount: totalStrikeCount,
 			ephemeral: true,
