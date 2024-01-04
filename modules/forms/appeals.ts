@@ -1,25 +1,44 @@
 import {
-	ButtonStyle,
 	ComponentType,
-	userMention,
 	TextInputStyle,
 	type ButtonInteraction,
 	type ModalSubmitInteraction,
 	MessageMentions,
-	type Embed,
-	type MessageActionRowComponent,
-	type ActionRowData,
 } from "discord.js";
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
+import config, { getInitialChannelThreads } from "../../common/config.js";
 import { LoggingEmojis } from "../logging/misc.js";
-import { convertBase } from "../../util/numbers.js";
-import { joinWithAnd } from "../../util/text.js";
-import appeals, { thread } from "./getAppeals.js";
 import { escapeMessage } from "../../util/markdown.js";
+import { client } from "strife.js";
+import { getAllMessages } from "../../util/discord.js";
+import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generateAppeal.js";
 
-const NEEDED_ACCEPT = 2,
-	NEEDED_REJECT = 1;
+if (!config.channels.mod) throw new ReferenceError("Could not find mod channel");
+export const appealThread =
+	getInitialChannelThreads(config.channels.mod).find(
+		(thread) => thread.name === "Ban Appeal Forms",
+	) ||
+	(await config.channels.mod.threads.create({
+		name: "Ban Appeal Forms",
+		reason: "For ban appeal forms",
+	}));
+const appeals = Object.fromEntries(
+	(await getAllMessages(appealThread))
+		.filter((message) => message.author.id === client.user.id && message.embeds.length)
+		.map((message) => {
+			const decision = message.embeds[1]?.title;
+			return [
+				message.embeds[0]?.description ?? "",
+				{
+					unbanned: decision === "Accepted",
+					note: message.embeds[1]?.fields.find(
+						(field) => field.name == `${decision} Note`,
+					)?.value,
+					date: new Date(message.createdTimestamp + 691_200_000).toDateString(),
+				},
+			];
+		}),
+);
+export default appeals;
 
 export async function confirmAcceptAppeal(interaction: ButtonInteraction, counts: string) {
 	const value = interaction.message.embeds[1]?.fields.find(
@@ -108,7 +127,7 @@ export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, id
 			`Appealed ban - see ${interaction.message?.url} for context`,
 		);
 		appeals[mention] = { unbanned: true, note, date: new Date().toISOString() };
-		await thread.send(`${mention} has beeen unbanned.`);
+		await appealThread.send(`${mention} has beeen unbanned.`);
 	}
 }
 export async function submitRejectAppeal(interaction: ModalSubmitInteraction, ids: string) {
@@ -140,84 +159,6 @@ export async function submitRejectAppeal(interaction: ModalSubmitInteraction, id
 	if (users.rejecters.size >= NEEDED_REJECT) {
 		const mention = interaction.message?.embeds[0]?.description ?? "";
 		appeals[mention] = { unbanned: false, note, date: new Date().toISOString() };
-		await thread.send(`${mention} will not be unbanned.`);
+		await appealThread.send(`${mention} will not be unbanned.`);
 	}
-}
-
-function parseIds(input: string) {
-	const users = input
-		.split("/")
-		.map((ids) => ids.split("-").map((id) => convertBase(id, convertBase.MAX_BASE, 10)));
-	const accepters = new Set(users[0]),
-		rejecters = new Set(users[1]);
-	accepters.delete("0");
-	rejecters.delete("0");
-	return { accepters, rejecters };
-}
-
-function generateAppeal(
-	data: { components?: ActionRowData<MessageActionRowComponent>; appeal?: Embed },
-	notes: { accepted?: string; rejected?: string },
-	users: { accepters: Set<string>; rejecters: Set<string> },
-) {
-	return {
-		components: [
-			getAppealComponents(users),
-			data.components ?? { type: ComponentType.ActionRow, components: [] },
-		],
-		embeds: [
-			data.appeal ?? {},
-			{
-				title:
-					users.accepters.size === NEEDED_ACCEPT
-						? "Accepted"
-						: users.rejecters.size === NEEDED_REJECT
-						? "Rejected"
-						: "Pending",
-				fields: [
-					{
-						name: "Accepters",
-						value: joinWithAnd([...users.accepters], userMention) || "Nobody",
-						inline: true,
-					},
-					{
-						name: "Rejecters",
-						value: joinWithAnd([...users.rejecters], userMention) || "Nobody",
-						inline: true,
-					},
-					{ name: constants.zws, value: constants.zws, inline: true },
-					{ name: "Accepted Note", value: notes.accepted ?? "N/A", inline: true },
-					{ name: "Rejected Note", value: notes.rejected ?? "N/A", inline: true },
-				],
-			},
-		],
-	};
-}
-
-export function getAppealComponents({
-	accepters = new Set<string>(),
-	rejecters = new Set<string>(),
-} = {}) {
-	const counts = `${Array.from(accepters, (id) => convertBase(id, 10, convertBase.MAX_BASE)).join(
-		"-",
-	)}/${Array.from(rejecters, (id) => convertBase(id, 10, convertBase.MAX_BASE)).join("-")}`;
-	return {
-		components: [
-			{
-				style: ButtonStyle.Success,
-				type: ComponentType.Button,
-				customId: `${counts}_acceptAppeal`,
-				label: `Accept (${accepters.size}/${NEEDED_ACCEPT})`,
-				disabled: rejecters.size === NEEDED_REJECT || accepters.size === NEEDED_ACCEPT,
-			} as const,
-			{
-				style: ButtonStyle.Danger,
-				type: ComponentType.Button,
-				customId: `${counts}_rejectAppeal`,
-				label: `Reject (${rejecters.size}/${NEEDED_REJECT})`,
-				disabled: rejecters.size === NEEDED_REJECT || accepters.size === NEEDED_ACCEPT,
-			} as const,
-		],
-		type: ComponentType.ActionRow,
-	};
 }

@@ -17,15 +17,15 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import fileSystem from "node:fs/promises";
-import { EXPIRY_LENGTH, strikeDatabase } from "../punishments/util.js";
+import { strikeDatabase } from "../punishments/util.js";
 import constants from "../../common/constants.js";
 import giveXp from "../xp/giveXp.js";
 import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import { RoleList, persistedRoles as persistedRoles } from "../roles/persisted.js";
 import Mustache from "mustache";
 import pkg from "../../package.json" assert { type: "json" };
-import { getAppealComponents } from "./handleAppeal.js";
-import appeals, { thread } from "./getAppeals.js";
+import { getAppealComponents } from "./generateAppeal.js";
+import appeals, { appealThread } from "./appeals.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { getRequestUrl } from "../../util/text.js";
 
@@ -153,12 +153,6 @@ export default async function appealRequest(request: IncomingMessage, response: 
 		(accumulator, { count, removed }) => count * Number(!removed) + accumulator,
 		0,
 	);
-	const recentStrikeCount = strikes
-		.filter((strike) => strike.date + EXPIRY_LENGTH > Date.now())
-		.reduce((accumulator, { count, removed }) => count * Number(!removed) + accumulator, 0);
-	const semiRecentStrikeCount = strikes
-		.filter((strike) => strike.date + EXPIRY_LENGTH * 2 > Date.now())
-		.reduce((accumulator, { count, removed }) => count * Number(!removed) + accumulator, 0);
 	const persistant = await RoleList.findOne({ id: user.id });
 	const unbanTime = remindersDatabase.data.find(
 		(reminder) =>
@@ -182,7 +176,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 			}),
 		);
 
-	const message = await thread.send({
+	const message = await appealThread.send({
 		embeds: [
 			{
 				title: "Ban Appeal",
@@ -208,11 +202,7 @@ export default async function appealRequest(request: IncomingMessage, response: 
 						value: unbanTime ? time(new Date(unbanTime)) : "Never",
 						inline: true,
 					},
-					{
-						name: "Strikes",
-						value: `${totalStrikeCount.toLocaleString()} (${recentStrikeCount.toLocaleString()} in the past 3 weeks; ${semiRecentStrikeCount.toLocaleString()} in the past 6 weeks)`,
-						inline: true,
-					},
+					{ name: "Strikes", value: totalStrikeCount.toLocaleString(), inline: true },
 					{ name: constants.zws, value: constants.zws, inline: false },
 					{
 						name: "Mod’s Perspective",

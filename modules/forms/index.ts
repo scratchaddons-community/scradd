@@ -5,7 +5,7 @@ import {
 	confirmAcceptAppeal,
 	submitRejectAppeal,
 	submitAcceptAppeal,
-} from "./handleAppeal.js";
+} from "./appeals.js";
 
 defineChatCommand(
 	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
