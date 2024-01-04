@@ -1,5 +1,5 @@
 import { AssertionError, strictEqual } from "node:assert";
-import { bigIntPower, convertBase, nth, parseTime } from "./numbers.js";
+import { bigIntPower, convertBase, lerpColors, nth, parseTime } from "./numbers.js";
 import { describe, it } from "node:test";
 
 await describe("bigintPow", async () => {
@@ -126,6 +126,24 @@ await describe("parseTime", async () => {
 	});
 	await it("should return the current time on an invalid value", () => {
 		almostEqual(+parseTime("a"), Date.now());
+	});
+});
+
+await describe("lerpColors", async () => {
+	await it("should interpolate three colors correctly", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00, 0x00_00_ff], 0.25), 0x7f_7f_00);
+	});
+	await it("should interpolate two colors correctly", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_00_ff], 0.75), 0x3f_00_bf);
+	});
+	await it("should handle single colors", () => {
+		strictEqual(lerpColors([0xff_00_00], 0.5), 0xff_00_00);
+	});
+	await it("should handle a percent of 1", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00], 1), 0x00_ff_00);
+	});
+	await it("should handle a percent of 0", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00], 0), 0xff_00_00);
 	});
 });
 

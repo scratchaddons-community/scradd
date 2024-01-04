@@ -1,30 +1,36 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
 	ChannelType,
 	type NonThreadGuildBasedChannel,
 	type Channel,
 	type ThreadManager,
+	Collection,
 } from "discord.js";
 import { client } from "strife.js";
 
-const guild = await client.guilds.fetch(process.env.GUILD_ID);
-if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
-const guilds = await client.guilds.fetch();
-guilds.delete(guild.id);
+const IS_TESTING = process.argv.some((file) => file.endsWith(".test.js"));
+
+const guild = IS_TESTING ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
+if (guild && !guild.available) throw new ReferenceError("Main guild is unavailable!");
+const guilds = guild && (await client.guilds.fetch());
+if (guilds) guilds.delete(guild.id);
 
 async function getConfig() {
-	const channels = await guild.channels.fetch();
-	const roles = await guild.roles.fetch();
+	const channels = (await guild?.channels.fetch()) ?? new Collection();
+	const roles = (await guild?.roles.fetch()) ?? new Collection();
 
 	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
 	return {
-		guild,
-		otherGuildIds: [...guilds.keys()],
-		testingGuild: await client.guilds.fetch("938438560925761619").catch(() => void 0),
+		guild: guild!,
+		otherGuildIds: guilds ? [...guilds.keys()] : [],
+		testingGuild: IS_TESTING
+			? undefined
+			: await client.guilds.fetch("938438560925761619").catch(() => void 0),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+				guild?.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
@@ -35,7 +41,8 @@ async function getConfig() {
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
-			modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
+			modlogs:
+				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
 			exec: getChannel("exec", ChannelType.GuildText, "start"),
 			admin: getChannel("admin", ChannelType.GuildText, "start"),
 
@@ -99,7 +106,7 @@ export async function syncConfig() {
 }
 export default config;
 
-const threads = await config.guild.channels.fetchActiveThreads();
+const threads = (await guild?.channels.fetchActiveThreads())?.threads || new Collection();
 export function getInitialChannelThreads(channel: Extract<Channel, { threads: ThreadManager }>) {
-	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+	return threads.filter(({ parent }) => parent?.id === channel.id);
 }
