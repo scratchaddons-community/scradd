@@ -6,6 +6,7 @@ import { defineButton, defineSelect, client, defineEvent, defineSubcommands } fr
 import queueReminders from "./send.js";
 import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
+import { addQOTD, listQOTDs } from "./qotd.js";
 
 defineSubcommands(
 	{
@@ -100,3 +101,30 @@ defineEvent("messageCreate", async (message) => {
 		await queueReminders();
 	}
 });
+
+defineSubcommands(
+	{
+		name: "qotd",
+		description: "question of the day",
+
+		subcommands: {
+			add: { description: "Add a question" },
+			list: { description: "Lists questions" },
+		},
+
+		restricted: true,
+		access: false,
+	},
+	async (interaction, { subcommand }) => {
+		switch (subcommand) {
+			case "add": {
+				await addQOTD(interaction);
+				break;
+			}
+			case "list": {
+				await listQOTDs(interaction);
+				break;
+			}
+		}
+	},
+);

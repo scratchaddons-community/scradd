@@ -53,7 +53,7 @@ async function getConfig() {
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
-			qotd: getChannel("qotd", ChannelType.GuildText, "start"),
+			qotd: getChannel("qotd", ChannelType.GuildForum),
 		},
 
 		roles: {

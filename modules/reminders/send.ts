@@ -16,21 +16,13 @@ import {
 	time,
 	userMention,
 	ActivityType,
-	EmbedBuilder,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
 import config from "../../common/config.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
-import mongoose from "mongoose";
-
-export const qotd = mongoose.model(
-	"qotd",
-	new mongoose.Schema({
-		question: String,
-	}),
-);
+import sendQOTD from "./qotd.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -234,39 +226,14 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						},
 					];
 
-					client.user.setActivity({
-						type: ActivityType.Custom,
+					client.user.setActivity({						type: ActivityType.Custom,
 						name: "status",
 						state: STATUSES[next],
 					});
 					continue;
 				}
 				case SpecialReminders.QOTD: {
-					if (!channel?.isTextBased()) continue;
-
-					remindersDatabase.data = [
-						...remindersDatabase.data,
-						{
-							channel: reminder.channel,
-							date: Date.now() + 86_400_000,
-							reminder: undefined,
-							id: SpecialReminders.QOTD,
-							user: client.user.id,
-						},
-					];
-
-					const questions = await qotd.find();
-					const question =
-						questions[Math.floor(Math.random() * questions.length)]?.question;
-					const icon = client.user.displayAvatarURL();
-
-					const embed = new EmbedBuilder()
-						.setTitle("Question of The Day")
-						.setDescription(question ?? "No question was set for today.")
-						.setFooter({ text: "Scradd", iconURL: icon });
-
-					channel.send({ embeds: [embed] });
-					await qotd.findOneAndDelete({ question: question });
+					await sendQOTD();
 				}
 			}
 		}
