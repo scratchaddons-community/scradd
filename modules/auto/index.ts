@@ -5,6 +5,7 @@ import {
 	type Message,
 	ApplicationCommandType,
 	type Snowflake,
+	type APIEmbed,
 } from "discord.js";
 import { getSettings } from "../settings.js";
 import { BOARD_EMOJI } from "../board/misc.js";
@@ -14,7 +15,7 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import { autoreactions, dad } from "./secrets.js";
 import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
-import scratch from "./scratch.js";
+import { getMatches, handleMatch } from "./scratch.js";
 import constants from "../../common/constants.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
 
@@ -129,8 +130,21 @@ async function handleMutatable(message: Message) {
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
-	const scratchData = await scratch(message);
-	if (scratchData) return { content: "", files: [], embeds: scratchData, components: [] };
+	const settings = await getSettings(message.author);
+	if (settings.scratchEmbeds) {
+		const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
+
+		const matches = getMatches(message.content);
+		const embeds: APIEmbed[] = [];
+		for (const match of matches) {
+			const embed = await handleMatch(match);
+			if (embed) {
+				embeds.push(embed);
+				if (notSet) embed.footer = { text: "Disable this using /settings" };
+			}
+		}
+		if (embeds.length) return { content: "", files: [], embeds, components: [] };
+	}
 
 	if (
 		message.channel.id === message.id ||
@@ -151,7 +165,7 @@ async function handleMutatable(message: Message) {
 			(message.guild?.id !== config.guild.id &&
 				baseChannel?.type !== ChannelType.DM &&
 				!baseChannel?.name.match(/\bbots?\b/i)) ||
-			!(await getSettings(message.author)).autoreactions)
+			!settings.autoreactions)
 	)
 		return;
 

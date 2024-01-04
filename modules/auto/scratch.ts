@@ -4,73 +4,55 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
 
-import { getSettings } from "../settings.js";
 import constants from "../../common/constants.js";
 import { truncateText } from "../../util/text.js";
 import { nth } from "../../util/numbers.js";
-import {
-	time,
-	type APIEmbed,
-	TimestampStyles,
-	type Message,
-	cleanCodeBlockContent,
-} from "discord.js";
+import { time, type APIEmbed, TimestampStyles, cleanCodeBlockContent } from "discord.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { parser, type Node } from "posthtml-parser";
 
 const EMBED_LENGTH = 750;
 
-export default async function scratch(message: Message) {
-	if (!(await getSettings(message.author)).scratchEmbeds) return false;
-	const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
-
+export function getMatches(content: string) {
 	const scratchUrlRegex =
 		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
-	const matches = [...new Set(message.content.match(scratchUrlRegex))].slice(0, 5);
-
-	const embeds: APIEmbed[] = [];
-
-	for (const match of matches) {
-		if (match.startsWith("<") && match.endsWith(">")) continue;
-
-		const start = match.startsWith("http") ? 0 : 1,
-			end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
-
-		const url = new URL(match.slice(start, end));
-		const urlParts = url.pathname.split("/");
-
-		switch (urlParts[1]) {
-			case "projects": {
-				const embed = await handleProject(urlParts);
-				if (embed) embeds.push(embed);
-				break;
-			}
-			case "users": {
-				const embed = await handleUser(urlParts);
-				if (embed) embeds.push(embed);
-				break;
-			}
-			case "studios": {
-				const embed = await handleStudio(urlParts);
-				if (embed) embeds.push(embed);
-				break;
-			}
-			case "discuss": {
-				const embed = await handleForumPost(urlParts, url.hash);
-				if (embed) embeds.push(embed);
-				break;
-			}
-		}
-
-		const newest = embeds.at(-1);
-		if (notSet && newest && !newest.footer)
-			newest.footer = { text: "Disable this using /settings" };
-	}
-	return embeds.length ? embeds : false;
+	return [...new Set(content.match(scratchUrlRegex))].slice(0, 5);
 }
 
-async function handleProject(urlParts: string[]) {
+export async function handleMatch(match: string): Promise<APIEmbed | undefined> {
+	if (match.startsWith("<") && match.endsWith(">")) return;
+
+	const start = match.startsWith("http") ? 0 : 1,
+		end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
+
+	const url = new URL(match.slice(start, end));
+	const urlParts = url.pathname.split("/");
+
+	switch (urlParts[1]) {
+		case "projects": {
+			const embed = await handleProject(urlParts);
+			if (embed) return embed;
+			break;
+		}
+		case "users": {
+			const embed = await handleUser(urlParts);
+			if (embed) return embed;
+			break;
+		}
+		case "studios": {
+			const embed = await handleStudio(urlParts);
+			if (embed) return embed;
+			break;
+		}
+		case "discuss": {
+			const embed = await handleForumPost(urlParts, url.hash);
+			if (embed) return embed;
+			break;
+		}
+	}
+}
+export async function handleProject(urlParts: string[]) {
 	const project = await gracefulFetch(`${constants.urls.scratchApi}/projects/${urlParts[2]}/`);
 	if (!project || project.code) return;
 
@@ -129,7 +111,7 @@ async function handleProject(urlParts: string[]) {
 
 	return embed;
 }
-async function handleUser(urlParts: string[]) {
+export async function handleUser(urlParts: string[]) {
 	const user = await gracefulFetch(`${constants.urls.scratchdb}/user/info/${urlParts[2]}/`);
 	if (!user || user.error) return;
 
@@ -181,7 +163,7 @@ async function handleUser(urlParts: string[]) {
 
 	return embed;
 }
-async function handleStudio(urlParts: string[]) {
+export async function handleStudio(urlParts: string[]) {
 	const studio = await gracefulFetch(`${constants.urls.scratchApi}/studios/${urlParts[2]}/`);
 	if (!studio || studio.code) return;
 
@@ -213,7 +195,7 @@ async function handleStudio(urlParts: string[]) {
 		timestamp: new Date(studio.history.created).toISOString(),
 	};
 }
-async function handleForumPost(urlParts: string[], hash: string) {
+export async function handleForumPost(urlParts: string[], hash: string) {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
 	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
 
@@ -250,7 +232,7 @@ async function handleForumPost(urlParts: string[], hash: string) {
 }
 
 type NodeOrNodes = Node | NodeOrNodes[];
-function htmlToMarkdown(string: string) {
+export function htmlToMarkdown(string: string) {
 	const nodes = parser(string, { decodeEntities: true, recognizeNoValueAttribute: true });
 	return nodesToText(nodes);
 }
@@ -315,9 +297,9 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	return content;
 }
 
-function linkifyMentions(string: string) {
+export function linkifyMentions(string: string) {
 	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
 		name = name.replaceAll("\\", "");
-		return `[${name}](${constants.urls.scratch}/users/${name})`;
+		return `[${name}](${constants.urls.scratch}/users/${name.slice(1)})`;
 	});
 }
