@@ -101,6 +101,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** tried to swim in lava`,
 					`**${member.user.displayName}** fell from a high place`,
 					`**${member.user.displayName}** didn’t want to live in the same world as Blaze`,
+					`**${member.user.displayName}** turned into a fish and suffocated`,
 			  ];
 
 	await config.channels.welcome?.send(
