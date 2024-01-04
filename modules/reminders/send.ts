@@ -226,7 +226,8 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						},
 					];
 
-					client.user.setActivity({						type: ActivityType.Custom,
+					client.user.setActivity({
+						type: ActivityType.Custom,
 						name: "status",
 						state: STATUSES[next],
 					});
