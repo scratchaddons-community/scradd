@@ -1,19 +1,32 @@
 import { describe, it } from "node:test";
 import { disableComponents, paginate } from "./discord.js";
 import {
-	ActionRow,
+	ActionRow as _ActionRow,
 	type ButtonComponent,
 	ButtonStyle,
 	ComponentType,
 	type BaseMessageOptions,
+	type APIActionRowComponent,
+	type APIMessageActionRowComponent,
+	type APITextInputComponent,
+	type TextInputComponent,
+	type MessageActionRowComponent,
 } from "discord.js";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
+
+// @ts-expect-error TS2675
+class ActionRow<T extends MessageActionRowComponent | TextInputComponent> extends _ActionRow<T> {
+	constructor(data: APIActionRowComponent<APIMessageActionRowComponent | APITextInputComponent>) {
+		super(data);
+		this.testing = true;
+	}
+	testing;
+}
 
 await describe("disableComponents", async () => {
 	await it("should disable components", () => {
 		deepStrictEqual(
 			disableComponents([
-				// @ts-expect-error TS2673
 				new ActionRow<ButtonComponent>({
 					type: ComponentType.ActionRow,
 					components: [
@@ -45,7 +58,6 @@ await describe("disableComponents", async () => {
 	await it("should disable multiple rows", () => {
 		deepStrictEqual(
 			disableComponents([
-				// @ts-expect-error TS2673
 				new ActionRow<ButtonComponent>({
 					type: ComponentType.ActionRow,
 					components: [
@@ -90,7 +102,6 @@ await describe("disableComponents", async () => {
 	await it("should not disable links", () => {
 		deepStrictEqual(
 			disableComponents([
-				// @ts-expect-error TS2673
 				new ActionRow<ButtonComponent>({
 					type: ComponentType.ActionRow,
 					components: [
