@@ -17,7 +17,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import fileSystem from "node:fs/promises";
-import { EXPIRY_LENGTH, strikeDatabase } from "../punishments/misc.js";
+import { EXPIRY_LENGTH, strikeDatabase } from "../punishments/util.js";
 import constants from "../../common/constants.js";
 import giveXp from "../xp/giveXp.js";
 import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";

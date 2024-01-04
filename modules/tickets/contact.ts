@@ -16,7 +16,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { listStrikes } from "../punishments/misc.js";
+import { listStrikes } from "../punishments/util.js";
 import {
 	type Category,
 	SA_CATEGORY,

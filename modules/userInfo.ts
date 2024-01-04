@@ -14,7 +14,7 @@ import constants from "../common/constants.js";
 import { client, defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/util.js";
-import { strikeDatabase } from "./punishments/misc.js";
+import { strikeDatabase } from "./punishments/util.js";
 import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 
 async function userInfo(

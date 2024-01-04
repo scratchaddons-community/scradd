@@ -14,18 +14,16 @@ import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
 import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
 import giveXp from "../xp/giveXp.js";
-import { DEFAULT_XP } from "../xp/misc.js";
-import filterToStrike, {
+import filterToStrike, { strikeDatabase } from "./util.js";
+import {
 	DEFAULT_STRIKES,
 	EXPIRY_LENGTH,
 	MUTE_LENGTHS,
 	PARTIAL_STRIKE_COUNT,
-	strikeDatabase,
+	XP_PUNISHMENT,
 	STRIKES_PER_MUTE,
 } from "./misc.js";
 import { escapeMessage } from "../../util/markdown.js";
-
-const XP_PUNISHMENT = DEFAULT_XP * -2;
 
 export default async function warn(
 	user: GuildMember | User,
