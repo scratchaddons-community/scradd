@@ -5,11 +5,11 @@ import {
 	type ModalSubmitInteraction,
 	MessageMentions,
 } from "discord.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
-import { LoggingEmojis } from "../logging/misc.js";
-import { escapeMessage } from "../../util/markdown.js";
+import config, { getInitialChannelThreads } from "../../../common/config.js";
+import { LoggingEmojis } from "../../logging/misc.js";
+import { escapeMessage } from "../../../util/markdown.js";
 import { client } from "strife.js";
-import { getAllMessages } from "../../util/discord.js";
+import { getAllMessages } from "../../../util/discord.js";
 import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generateAppeal.js";
 
 if (!config.channels.mod) throw new ReferenceError("Could not find mod channel");

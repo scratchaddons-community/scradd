@@ -1,6 +1,6 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-import generateAppeal, { getAppealComponents, parseIds } from "./generateAppeal.js";
+import generateAppeal, { getAppealComponents, parseIds } from "./appeals/generateAppeal.js";
 
 await describe("generateAppeal", async () => {
 	await it("should generate blank appeals", () => {

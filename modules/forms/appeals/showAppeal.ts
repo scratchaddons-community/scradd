@@ -14,31 +14,31 @@ import {
 	OAuth2Scopes,
 } from "discord.js";
 import { client } from "strife.js";
-import config from "../../common/config.js";
+import config from "../../../common/config.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import fileSystem from "node:fs/promises";
-import { strikeDatabase } from "../punishments/util.js";
-import constants from "../../common/constants.js";
-import giveXp from "../xp/giveXp.js";
-import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
-import { RoleList, persistedRoles as persistedRoles } from "../roles/persisted.js";
+import { strikeDatabase } from "../../punishments/util.js";
+import constants from "../../../common/constants.js";
+import giveXp from "../../xp/giveXp.js";
+import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
+import { RoleList, persistedRoles as persistedRoles } from "../../roles/persisted.js";
 import Mustache from "mustache";
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../../package.json" assert { type: "json" };
 import { getAppealComponents } from "./generateAppeal.js";
 import appeals, { appealThread } from "./appeals.js";
-import { stripMarkdown } from "../../util/markdown.js";
-import { getRequestUrl } from "../../util/text.js";
+import { stripMarkdown } from "../../../util/markdown.js";
+import { getRequestUrl } from "../../../util/text.js";
 
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
-const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/frame.html", "utf8");
+const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
-		content: await fileSystem.readFile("./modules/forms/answer.html", "utf8"),
+		content: await fileSystem.readFile("./modules/forms/appeals/answer.html", "utf8"),
 	}),
 	APPEAL_PAGE = Mustache.render(APPEAL_FRAME, {
-		content: await fileSystem.readFile("./modules/forms/appeal.html", "utf8"),
+		content: await fileSystem.readFile("./modules/forms/appeals/index.html", "utf8"),
 	}),
 	NOT_BANNED_PAGE = Mustache.render(APPEAL_FRAME, {
-		content: await fileSystem.readFile("./modules/forms/notBanned.html", "utf8"),
+		content: await fileSystem.readFile("./modules/forms/appeals/notBanned.html", "utf8"),
 	});
 
 export default async function appealRequest(request: IncomingMessage, response: ServerResponse) {

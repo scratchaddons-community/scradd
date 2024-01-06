@@ -6,9 +6,9 @@ import {
 	userMention,
 	ButtonStyle,
 } from "discord.js";
-import constants from "../../common/constants.js";
-import { convertBase } from "../../util/numbers.js";
-import { joinWithAnd } from "../../util/text.js";
+import constants from "../../../common/constants.js";
+import { convertBase } from "../../../util/numbers.js";
+import { joinWithAnd } from "../../../util/text.js";
 
 export const NEEDED_ACCEPT = 2,
 	NEEDED_REJECT = 1;

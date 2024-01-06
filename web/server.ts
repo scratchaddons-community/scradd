@@ -5,7 +5,7 @@ import { createReadStream, promises as fileSystem } from "node:fs";
 import { client } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import appealRequest from "../modules/forms/showAppeal.js";
+import appealRequest from "../modules/forms/appeals/showAppeal.js";
 import pkg from "../package.json" assert { type: "json" };
 import { fileURLToPath } from "node:url";
 import path from "node:path";
