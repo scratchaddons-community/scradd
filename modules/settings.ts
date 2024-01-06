@@ -16,7 +16,7 @@ import Database from "../common/database.js";
 import { getWeeklyXp } from "./xp/util.js";
 import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
-import { censor } from "./automod/misc.js";
+
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -285,5 +285,5 @@ export async function mentionUser(
 
 	const { displayName } =
 		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
-	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
+	return displayName ? hyperlink(displayName, url) : userMention(id);
 }

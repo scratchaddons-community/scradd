@@ -15,7 +15,7 @@ import { client, defineButton, defineChatCommand, defineMenuCommand } from "stri
 import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/util.js";
 import { strikeDatabase } from "./punishments/util.js";
-import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
+
 
 async function userInfo(
 	interaction: RepliableInteraction,
@@ -90,9 +90,7 @@ async function userInfo(
 				: { name: "🔨 Banned", value: "Yes", inline: true },
 		);
 
-	const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
-		({ author }) => author.valueOf() === user.id,
-	);
+	
 	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const showBottom = !interaction.isButton();
 	const xp =
@@ -111,7 +109,7 @@ async function userInfo(
 
 	const buttonData = [
 		[
-			hasSuggestions && { customId: `${user.id}_suggestions`, label: "List Suggestions" },
+			
 			hasBoards && {
 				customId: `${user.id}_exploreBoard`,
 				label: `Explore ${REACTIONS_NAME}`,

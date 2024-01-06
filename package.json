@@ -11,8 +11,10 @@
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
 		"serve": "nodemon --env-file=.env --enable-source-maps . --ext js,json,html,css,png",
-		"start": "node --env-file=.env --enable-source-maps .",
-		"test": "npm run build && node --enable-source-maps --test"
+		"start": " node --env-file=.env --enable-source-maps .",
+		"astart": "npm run node_modules && node --env-file=.env --enable-source-maps .",
+		"test": "npm run build && node --enable-source-maps --test",
+		"node_modules": "rm -rf node_modules && npm i && npm run build"
 	},
 	"browserslist": [
 		"chrome 80",
@@ -38,7 +40,7 @@
 		"papaparse": "5.4.1",
 		"posthtml-parser": "0.12.0",
 		"serialize-error": "11.0.3",
-		"strife.js": "4.0.1"
+		"strife.js": "^4.0.1"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",

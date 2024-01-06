@@ -9,10 +9,9 @@ import {
 	channelMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import { getSettings } from "../settings.js";
-import warn from "../punishments/warn.js";
+
 import { getLevelForXp } from "../xp/misc.js";
 import { xpDatabase } from "../xp/util.js";
 import { getUserReminders, remindersDatabase } from "./misc.js";
@@ -67,25 +66,7 @@ export async function createReminder(
 	const reminders = getUserReminders(interaction.user.id);
 	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
-	if (!dms && !badWordsAllowed(interaction.channel)) {
-		const censored = tryCensor(options.reminder);
 
-		if (censored) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That’s not appropriate" : "Language"
-				}!`,
-			});
-			await warn(
-				interaction.user,
-				"Please watch your language!",
-				censored.strikes,
-				`Used command ${interaction.toString()}`,
-			);
-			return;
-		}
-	}
 
 	if (
 		reminders.length >

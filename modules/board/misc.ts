@@ -12,11 +12,10 @@ import {
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
-import tryCensor, { censor } from "../automod/misc.js";
 import { client } from "strife.js";
 
-export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
-	REACTIONS_NAME = process.env.NODE_ENV === "production" ? "Potatoes" : "Stars";
+export const BOARD_EMOJI = "🍉",
+	REACTIONS_NAME =  "Watermelon";
 
 export const boardDatabase = new Database<{
 	/** The number of reactions this message has. */
@@ -120,8 +119,8 @@ export async function generateBoardMessage(
 	 * @returns The converted message.
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = extractMessageExtremities(message, tryCensor);
-		embeds.unshift(await messageToEmbed(message, censor));
+		const { files, embeds } = extractMessageExtremities(message);
+		embeds.unshift(await messageToEmbed(message));
 
 		return {
 			allowedMentions: { users: [] },

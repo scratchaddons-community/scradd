@@ -39,15 +39,12 @@ export default async function queueReminders(): Promise<NodeJS.Timeout | undefin
 }
 
 const STATUSES = [
-	"Watching the SA server!",
+	"AAAAAAAAAAAAAAAAAAAAAAAAAA",
 	"Hope for no bugs…",
-	"Dating Callum",
+	"Blueberry?",
 	"e",
-	"Moderating Scratch Addons",
-	"Hi, I’m Scradd!",
+	"Helping Out",
 	"Rico, status",
-	"Scanning potatoes",
-	"Try /addon!",
 	"beep boop beep",
 	"ims scradd",
 	"alan 👑",

@@ -13,8 +13,7 @@ import {
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import tryCensor from "../automod/misc.js";
-import warn from "../punishments/warn.js";
+
 import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
@@ -156,21 +155,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		return;
 	}
 
-	const censored = tryCensor(name);
-	if (censored) {
-		await warn(
-			interaction.user,
-			"Please watch your language!",
-			censored.strikes,
-			`Attempted to make custom role @${name}`,
-		);
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} ${
-				censored.strikes < 1 ? "That’s not appropriate" : "Language"
-			}!`,
-		});
-	}
+	
 
 	if (
 		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
