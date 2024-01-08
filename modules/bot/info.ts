@@ -185,7 +185,7 @@ async function credits(interaction: ChatInputCommandInteraction) {
 		const role = await config.testingGuild?.roles.fetch(roleId);
 		const members: { user: User }[] = [...(role?.members.values() ?? [])];
 		if (roleId === designers)
-			members.push({ user: await client.users.fetch(constants.users.retron) });
+			members.push({ user: await client.users.fetch(constants.users.weirdo) });
 
 		return joinWithAnd(
 			await Promise.all(

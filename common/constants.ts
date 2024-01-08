@@ -85,9 +85,9 @@ export default {
 	users: {
 		disboard: "302050872383242240",
 		hans: "279855717203050496",
-		retron: "765910070222913556",
 		robotop: "323630372531470346",
 		scradd: "929928324959055932",
+		weirdo: "691223009515667457",
 	},
 
 	webhookName: "scradd-webhook",
