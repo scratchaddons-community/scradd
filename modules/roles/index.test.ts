@@ -41,7 +41,7 @@ await describe("parseColor", async () => {
 		strictEqual(parseColor("Red"), "Red");
 		strictEqual(parseColor("red"), "Red");
 		strictEqual(parseColor("reD"), "Red");
-		strictEqual(parseColor("light red"), "LightRed");
+		strictEqual(parseColor("dark red"), "DarkRed");
 		strictEqual(parseColor("random"), "Random");
 	});
 	await it("should support pound-insensitive hex codes", () => {

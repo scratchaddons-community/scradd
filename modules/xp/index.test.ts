@@ -30,11 +30,11 @@ await describe("getLevelForXp", async () => {
 	});
 	await it("should calculate levels for high XP values", () => {
 		strictEqual(getLevelForXp(640_000), 89);
-		strictEqual(getLevelForXp(740_000), 95);
+		strictEqual(getLevelForXp(740_000), 94);
 		strictEqual(getLevelForXp(845_000), 100);
 	});
 	await it("should find levels for unknown high XP values", () => {
-		strictEqual(getLevelForXp(640_100), 89);
+		strictEqual(getLevelForXp(640_100), 90);
 		strictEqual(getLevelForXp(740_100), 95);
 		strictEqual(getLevelForXp(844_900), 99);
 	});

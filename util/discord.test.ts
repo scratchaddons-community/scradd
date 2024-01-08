@@ -296,7 +296,11 @@ await describe("paginate", async () => {
 			{ title: "Pagination Test", singular: "item", user: false },
 		);
 		deepStrictEqual(messages, [
-			{ content: "<:no:1016127863273037935> No items found!", ephemeral: true },
+			{
+				content:
+					"<:no:1016127863273037935> No items found! Try changing any filters you may have used.",
+				ephemeral: true,
+			},
 		]);
 	});
 });
