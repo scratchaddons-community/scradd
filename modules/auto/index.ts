@@ -29,6 +29,7 @@ const ignoreTriggers = [
 	/\bsick/i,
 	/\babus/i,
 	/\bkms/i,
+	/\bkys/i,
 	/\bbleed/i,
 ];
 
@@ -49,6 +50,7 @@ defineEvent("messageCreate", async (message) => {
 
 	const response = await handleMutatable(message);
 	if (response) {
+		if (response === true) return;
 		const isArray = Array.isArray(response);
 		if (!isArray) await message.reply(response);
 		else if (typeof response[0] === "object") {
@@ -124,9 +126,6 @@ defineEvent("messageUpdate", async (_, message) => {
 });
 
 async function handleMutatable(message: Message) {
-	const chatResponse = scraddChat(message);
-	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
-
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
@@ -146,12 +145,13 @@ async function handleMutatable(message: Message) {
 		if (embeds.length) return { content: "", files: [], embeds, components: [] };
 	}
 
-	if (
-		message.channel.id === message.id ||
-		message.author.bot ||
-		message.channel.isDMBased() ||
-		ignoreTriggers.some((trigger) => message.content.match(trigger))
-	)
+	const ignored = ignoreTriggers.some((trigger) => message.content.match(trigger));
+	if (ignored) return true;
+
+	const chatResponse = scraddChat(message);
+	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
+
+	if (message.channel.id === message.id || message.author.bot || message.channel.isDMBased())
 		return;
 
 	const pingsScradd = message.mentions.has(client.user, {
@@ -175,7 +175,7 @@ async function handleMutatable(message: Message) {
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
 			)[0]
-			?.split(/\s/g)
+			.split(/\s/g)
 			.slice(1)
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
