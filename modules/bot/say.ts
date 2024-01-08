@@ -63,7 +63,6 @@ export async function say(interaction: RepliableInteraction, content: string, re
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
 
-	// todo: censor it
 	const message = await (oldMessage
 		? oldMessage.reply({
 				content,

@@ -120,7 +120,6 @@ export function parseTime(time: string): Date {
 	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }
 
-// TODO: magic numbers
 const COLOR_CHANNELS = ["red", "green", "blue"] as const;
 export function lerpColors(allColors: number[], percent: number) {
 	if (allColors.length === 0) throw new RangeError("Color array must not be empty.");
