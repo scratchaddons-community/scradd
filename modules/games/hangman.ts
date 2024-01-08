@@ -166,7 +166,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 						}!`,
 					});
 				}
-				
+
 				if (/^[\d.A-Z_]+$/.test(guess))
 					if (guess.toLowerCase() === user.username) collector.stop("win");
 					else guesses.push(CHARACTERS.includes(guess) ? guess : guess.toLowerCase());
