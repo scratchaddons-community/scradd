@@ -32,28 +32,25 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 		) ?? commands[interaction.command?.name ?? ""]?.[0];
 	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
-	if (
-		command.censored === "channel"
-			? !badWordsAllowed(interaction.channel)
-			: command.censored ?? true
-	) {
-		const censored = censorOptions(interaction.options.data);
+	if (command.censored === "channel" ? badWordsAllowed(interaction.channel) : !command.censored)
+		return true;
 
-		if (censored.strikes) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That’s not appropriate" : "Language"
-				}!`,
-			});
-			await warn(
-				interaction.user,
-				"Please watch your language!",
-				censored.strikes,
-				`Used command \`${interaction.toString()}\``,
-			);
-			return false;
-		}
+	const censored = censorOptions(interaction.options.data);
+
+	if (censored.strikes) {
+		await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} ${
+				censored.strikes < 1 ? "That’s not appropriate" : "Language"
+			}!`,
+		});
+		await warn(
+			interaction.user,
+			"Please watch your language!",
+			censored.strikes,
+			`Used command \`${interaction.toString()}\``,
+		);
+		return false;
 	}
 
 	return true;
@@ -220,7 +217,7 @@ function censorOptions(options: readonly CommandInteractionOption[]): {
 	const words: string[] = [];
 
 	for (const option of options) {
-		const censoredValue = (option.value === "string" && tryCensor(option.value)) || undefined;
+		const censoredValue = (typeof option.value === "string" && tryCensor(option.value)) || undefined;
 		const censoredOptions = option.options && censorOptions(option.options);
 
 		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);
