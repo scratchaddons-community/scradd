@@ -50,7 +50,7 @@ export async function confirmAcceptAppeal(interaction: ButtonInteraction, counts
 				components: [
 					{
 						customId: "note",
-						label: "Why should they be unbanned?",
+						label: "Why should they be unbanned? (This may be visible to the user!)",
 						style: TextInputStyle.Paragraph,
 						type: ComponentType.TextInput,
 						value: value === "N/A" ? undefined : value,
@@ -77,7 +77,7 @@ export async function confirmRejectAppeal(interaction: ButtonInteraction, counts
 				components: [
 					{
 						customId: "note",
-						label: "Why should they not be unbanned?",
+						label: "Why should they not be unbanned? (This may be visible to the user!)",
 						style: TextInputStyle.Paragraph,
 						type: ComponentType.TextInput,
 						value: value === "N/A" ? undefined : value,
