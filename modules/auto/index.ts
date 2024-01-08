@@ -95,7 +95,7 @@ defineEvent("messageCreate", async (message) => {
 						: `${type === "full" ? "^" : "\\b"}${match}${
 								type === "plural" ? "(?:e?s)?" : ""
 						  }${type === "full" ? "$" : "\\b"}`,
-					"i",
+					"iu",
 				).test(type === "raw" ? message.content : content);
 
 				if (type === "negative" && result) continue reactionLoop;
