@@ -49,7 +49,9 @@ export default async function appealRequest(request: IncomingMessage, response: 
 	const redirectUri = requestUrl.origin + requestUrl.pathname;
 	const oAuthUrl = `https://discord.com${Routes.oauth2Authorization()}?client_id=${
 		client.user.id
-	}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${OAuth2Scopes.Identify}`;
+	}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${
+		OAuth2Scopes.Identify
+	}`;
 	// eslint-disable-next-line unicorn/string-content
 	const htmlRedirect = `<meta http-equiv="refresh" content="0;url=${oAuthUrl}">`;
 
