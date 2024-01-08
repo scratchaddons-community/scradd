@@ -4,6 +4,8 @@ import { reactAll } from "../util/discord.js";
 import { BOARD_EMOJI } from "./board/misc.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
+import warn from "./punishments/warn.js";
+import tryCensor from "./automod/misc.js";
 
 const DEFAULT_SHAPES = ["🔺", "🔶", "🟡", "🟩", "🔹", "💜", "🟤", "🏳️"];
 const bannedReactions = new Set(BOARD_EMOJI);
@@ -60,8 +62,24 @@ defineChatCommand(
 defineModal("poll", async (interaction, voteMode) => {
 	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
 
-	const { customReactions, options } = interaction.fields
-		.getTextInputValue("options")
+	const rawOptions = interaction.fields.getTextInputValue("options");
+	const censored = tryCensor(rawOptions);
+	if (censored) {
+		await warn(
+			interaction.user,
+			"Please watch your language!",
+			censored.strikes,
+			`Attempted to create poll with options:\n>>> ${rawOptions}`,
+		);
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} ${
+				censored.strikes < 1 ? "That’s not appropriate" : "Language"
+			}!`,
+		});
+	}
+
+	const { customReactions, options } = rawOptions
 		.split("\n")
 		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
@@ -77,7 +95,7 @@ defineModal("poll", async (interaction, voteMode) => {
 				};
 			},
 			{ customReactions: [], options: [] },
-		); // TODO: censor it
+		);
 	if (options.length > DEFAULT_SHAPES.length)
 		return await interaction.reply({
 			ephemeral: true,

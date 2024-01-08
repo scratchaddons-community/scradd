@@ -14,6 +14,8 @@ import { disableComponents } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import constants from "../../common/constants.js";
 import fileSystem from "node:fs/promises";
+import tryCensor from "../automod/misc.js";
+import warn from "../punishments/warn.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -148,6 +150,23 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 				if (!modalInteraction) return;
 				await modalInteraction.deferUpdate();
 				const guess = modalInteraction.fields.getTextInputValue("username").toUpperCase();
+
+				const censored = tryCensor(guess);
+				if (censored) {
+					await warn(
+						interaction.user,
+						"Please watch your language!",
+						censored.strikes,
+						`Guessed ${guess} on Hangman`,
+					);
+					return await interaction.reply({
+						ephemeral: true,
+						content: `${constants.emojis.statuses.no} ${
+							censored.strikes < 1 ? "That’s not appropriate" : "Language"
+						}!`,
+					});
+				}
+				
 				if (/^[\d.A-Z_]+$/.test(guess))
 					if (guess.toLowerCase() === user.username) collector.stop("win");
 					else guesses.push(CHARACTERS.includes(guess) ? guess : guess.toLowerCase());
@@ -308,7 +327,9 @@ async function getMember(player: User) {
 				member.user.discriminator === "0" &&
 				member.user.username.length > 5 &&
 				member.id !== player.id &&
-				((xp[member.id] ?? 0) >= 250 ||
+				!tryCensor(member.user.username) &&
+				(process.env.NODE_ENV === "production" ||
+					(xp[member.id] ?? 0) >= 250 ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)
