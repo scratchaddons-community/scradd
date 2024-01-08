@@ -128,7 +128,7 @@ module.exports = {
 		//TODO: enable when we enable eslint:all // "multiline-comment-style": ["error", "separate-lines"],
 		"no-fallthrough": [
 			"error",
-			{ allowEmptyCase: true, commentPattern: /falls through/.source },
+			{ allowEmptyCase: true, commentPattern: /.?[Ff]alls?-through.?/.source },
 		],
 		"no-inline-comments": "off",
 		"no-mixed-spaces-and-tabs": "off",
