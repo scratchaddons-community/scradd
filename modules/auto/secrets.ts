@@ -12,8 +12,8 @@ export function dad(
 				customNames[word] ||
 				customComments[word] ||
 				customTriggers.includes(word),
-		) ??
-		split[0] ??
+		) ||
+		split[0] ||
 		name;
 
 	return (
