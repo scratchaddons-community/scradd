@@ -22,6 +22,7 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 	"945340853189247016", // ScratchTools
 	"461575285364752384", // 9th Tail Bot Hub
 	"333355888058302465", // DISBOARD
+	undefined, // Invalid links
 ]);
 
 export default async function automodMessage(message: Message) {
@@ -71,22 +72,21 @@ export default async function automodMessage(message: Message) {
 				(!baseChannel.isDMBased() &&
 					baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")))
 		) {
-			const badInvites = new Set(
-				invites
-					.filter(
-						([, invite]) =>
-							invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
-					)
-					.map(([link]) => link),
-			);
+			const badInvites = [
+				...new Set(
+					invites
+						.filter(([, invite]) => !WHITELISTED_INVITE_GUILDS.has(invite?.guild?.id))
+						.map(([link]) => link),
+				),
+			];
 
-			if (badInvites.size) {
+			if (badInvites.length) {
 				needsDelete = true;
 				await warn(
 					message.author,
 					"Please don’t send server invites in that channel!",
-					badInvites.size,
-					[...badInvites].join("\n"),
+					badInvites.length,
+					badInvites.join("\n"),
 				);
 				await message.channel.send(
 					`${
@@ -95,14 +95,14 @@ export default async function automodMessage(message: Message) {
 				);
 			}
 
-			const bots = new Set(message.content.match(GlobalBotInvitesPattern));
-			if (bots.size) {
+			const bots = [...new Set(message.content.match(GlobalBotInvitesPattern))];
+			if (bots.length) {
 				needsDelete = true;
 				await warn(
 					message.author,
 					"Please don’t post bot invite links!",
-					bots.size,
-					[...bots].join("\n"),
+					bots.length,
+					bots.join("\n"),
 				);
 				await message.channel.send(
 					`${
