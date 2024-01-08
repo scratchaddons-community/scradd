@@ -126,7 +126,10 @@ module.exports = {
 		"line-comment-position": "off",
 		"max-depth": "error",
 		//TODO: enable when we enable eslint:all // "multiline-comment-style": ["error", "separate-lines"],
-		"no-fallthrough": "off",
+		"no-fallthrough": [
+			"error",
+			{ allowEmptyCase: true, commentPattern: /falls through/.source },
+		],
 		"no-inline-comments": "off",
 		"no-mixed-spaces-and-tabs": "off",
 		"no-restricted-syntax": [
