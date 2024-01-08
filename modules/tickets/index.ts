@@ -211,7 +211,7 @@ defineMenuCommand(
 defineChatCommand(
 	{
 		name: "contact-user",
-		description: "(Mod only) Start a private ticket with a user",
+		description: "Start a private ticket with a user",
 		restricted: true,
 
 		options: {

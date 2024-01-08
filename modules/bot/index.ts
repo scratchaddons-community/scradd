@@ -1,7 +1,6 @@
-import { ApplicationCommandType, ApplicationCommandOptionType, User } from "discord.js";
+import { ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
 import {
-	client,
 	defineChatCommand,
 	defineButton,
 	defineModal,
@@ -19,27 +18,12 @@ defineMenuCommand(
 );
 defineModal("edit", submitEdit);
 
-const { owner } = await client.application.fetch();
-defineChatCommand(
-	{
-		name: "run",
-		description: `(${
-			process.env.NODE_ENV === "production"
-				? owner instanceof User
-					? owner.displayName
-					: owner?.name + " team"
-				: "Scradd dev"
-		} only) Run code on Scradd`,
-
-		restricted: true,
-	},
-	getCode,
-);
+defineChatCommand({ name: "run", description: "Run code on Scradd", restricted: true }, getCode);
 defineModal("run", run);
 
 if (process.env.NODE_ENV === "production") {
 	defineChatCommand(
-		{ name: "restart", description: "(Admin only) Restarts the bot", restricted: true },
+		{ name: "restart", description: "Restarts the bot", restricted: true },
 		async (interaction) => {
 			await cleanDatabaseListeners();
 			await interaction.reply("Restarts bot…");
@@ -49,7 +33,7 @@ if (process.env.NODE_ENV === "production") {
 	);
 } else {
 	defineChatCommand(
-		{ name: "kill", description: "(Scradd dev only) Kills the bot", restricted: true },
+		{ name: "kill", description: "Kills the bot", restricted: true },
 		async (interaction) => {
 			await cleanDatabaseListeners();
 			await interaction.reply("Killing bot…");
@@ -62,7 +46,7 @@ if (process.env.NODE_ENV === "production") {
 defineChatCommand(
 	{
 		name: "say",
-		description: "(Mod only) Send a message",
+		description: "Send a message",
 
 		options: {
 			message: {

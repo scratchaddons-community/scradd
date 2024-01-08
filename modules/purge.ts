@@ -191,7 +191,7 @@ async function purge(
 defineChatCommand(
 	{
 		name: "purge",
-		description: "(Mod only) Bulk deletes a specified amount of messages",
+		description: "Bulk deletes a specified amount of messages",
 		access: false,
 
 		options: {

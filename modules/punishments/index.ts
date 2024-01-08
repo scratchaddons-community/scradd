@@ -38,12 +38,12 @@ defineSubcommands(
 			},
 
 			user: {
-				description: "View your or (mod only) someone else’s strikes",
+				description: "View your or (mods only) someone else’s strikes",
 
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
-						description: "(Mod only) The user to see strikes for",
+						description: "(Mods only) The user to see strikes for",
 					},
 					expired: {
 						type: ApplicationCommandOptionType.Boolean,
@@ -92,7 +92,7 @@ defineSelect("selectStrike", async (interaction) => {
 defineChatCommand(
 	{
 		name: "warn",
-		description: "(Mod only) Warns a user",
+		description: "Warns a user",
 		restricted: true,
 
 		options: {
@@ -193,7 +193,7 @@ defineButton("addStrikeBack", addStrikeBack);
 defineChatCommand(
 	{
 		name: "ban-user",
-		description: "(Mod only) Bans a user",
+		description: "Bans a user",
 		restricted: true,
 
 		options: {
