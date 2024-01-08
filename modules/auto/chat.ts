@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
-import tryCensor from "../automod/misc.js";
+import tryCensor, { censor } from "../automod/misc.js";
 import { client } from "strife.js";
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 import {
@@ -45,15 +45,21 @@ export default function scraddChat(message: Message) {
 		return;
 	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
 
-	const response = didYouMean(prompt, dictionary, {
+	const responses = didYouMean(prompt, dictionary, {
 		matchPath: ["prompt"],
 		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
 		threshold: 0.6,
 	})
 		.toSorted(() => Math.random() - 0.5)
-		.find(({ response }) => response && response !== prompt && !removedResponses.has(response))
-		?.response.replaceAll(client.user.toString(), message.author.toString())
+		.filter(
+			({ response }) => response && response !== prompt && !removedResponses.has(response),
+		);
+	const response = (
+		responses.find(({ response }) => !tryCensor(response))?.response ||
+		(responses[0] && censor(responses[0].response))
+	)
+		?.replaceAll(client.user.toString(), message.author.toString())
 		.replaceAll("<@0>", client.user.toString());
 	if (response) return response;
 }
