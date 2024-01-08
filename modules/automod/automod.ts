@@ -71,20 +71,22 @@ export default async function automodMessage(message: Message) {
 				(!baseChannel.isDMBased() &&
 					baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")))
 		) {
-			const badInvites = invites
-				.filter(
-					([, invite]) =>
-						invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
-				)
-				.map(([link]) => link);
+			const badInvites = new Set(
+				invites
+					.filter(
+						([, invite]) =>
+							invite?.guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild.id),
+					)
+					.map(([link]) => link),
+			);
 
-			if (badInvites.length) {
+			if (badInvites.size) {
 				needsDelete = true;
 				await warn(
 					message.author,
 					"Please don’t send server invites in that channel!",
-					badInvites.length,
-					badInvites.join("\n"),
+					badInvites.size,
+					[...badInvites].join("\n"),
 				);
 				await message.channel.send(
 					`${
@@ -93,14 +95,14 @@ export default async function automodMessage(message: Message) {
 				);
 			}
 
-			const bots = message.content.match(GlobalBotInvitesPattern);
-			if (bots?.length) {
+			const bots = new Set(message.content.match(GlobalBotInvitesPattern));
+			if (bots.size) {
 				needsDelete = true;
 				await warn(
 					message.author,
 					"Please don’t post bot invite links!",
-					bots.length,
-					bots.join("\n"), // todo: improve this
+					bots.size,
+					[...bots].join("\n"),
 				);
 				await message.channel.send(
 					`${
