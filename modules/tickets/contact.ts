@@ -142,14 +142,14 @@ export default async function contactMods(
 		return oldThread;
 	}
 
-	const thread = (await config.channels.tickets.threads.create({
+	const thread = await config.channels.tickets.threads.create({
 		name: `${member.user.displayName} (${member.id})`,
 		reason: `${interaction.user.tag} contacted ${
 			category === MOD_CATEGORY ? member.user.tag : "mods"
 		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
-	}))
+	});
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${

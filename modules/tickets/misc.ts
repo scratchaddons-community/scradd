@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
 
-export const TICKETS_BY_MEMBER = Object.fromEntries< PrivateThreadChannel | ThreadChannel>(
+export const TICKETS_BY_MEMBER = Object.fromEntries<PrivateThreadChannel | ThreadChannel>(
 	config.channels.tickets
 		? getInitialChannelThreads(config.channels.tickets)
 				.map(
