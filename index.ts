@@ -33,8 +33,31 @@ if (process.env.CANVAS !== "false") {
 		"SoraExt",
 	);
 
-	const { Chart } = await import("chart.js");
+	const { Chart, _adapters } = await import("chart.js");
 	Chart.defaults.font.family = constants.fonts;
+
+	/**
+	 * @author Parts Of this code were taken from
+	 *   [org.jgrapes.webconsole.provider.chartjs](https://github.com/mnlipp/jgrapes-webconsole/blob/4959d2e/org.jgrapes.webconsole.provider.chartjs/resources/org/jgrapes/webconsole/provider/chartjs/chart.js/adapters/chartjs-adapter-simple.js)
+	 *   and [chartjs-adapter-date-std](https://github.com/gcollin/chartjs-adapter-date-std/blob/c806f2b/src/index.ts)
+	 */
+	_adapters._date.override({
+		init: () => void 0,
+		formats: () => ({}),
+		startOf: (time: number) => new Date(time).setHours(0, 0, 0, 0),
+		diff(max: number, min: number) {
+			const diff = (max - min) / 24 / 60 / 60 / 1000;
+			return Math[diff < 0 ? "ceil" : "floor"](diff);
+		},
+		add: (time: number, amount: number) =>
+			time + Math[amount < 0 ? "ceil" : "floor"](amount) * 86_400_000,
+		format: (time: number) =>
+			new Date(time).toLocaleString("en-US", {
+				weekday: "short",
+				day: "numeric",
+				month: "short",
+			}),
+	});
 }
 
 await login({
