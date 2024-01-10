@@ -70,6 +70,8 @@ defineEvent("messageCreate", async (message) => {
 	}
 	await learn(message);
 
+	const settings = await getSettings(message.author);
+	if (!settings.autoreactions || !canDoSecrets(message)) return;
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
 		let doReact = false;
@@ -150,23 +152,7 @@ async function handleMutatable(message: Message) {
 	const chatResponse = scraddChat(message);
 	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
 
-	if (message.channel.id === message.id || message.author.bot || message.channel.isDMBased())
-		return;
-
-	const pingsScradd = message.mentions.has(client.user, {
-		ignoreEveryone: true,
-		ignoreRepliedUser: true,
-		ignoreRoles: true,
-	});
-	if (
-		!pingsScradd &&
-		(config.channels.info?.id === baseChannel?.id ||
-			(message.guild?.id !== config.guild.id &&
-				baseChannel?.type !== ChannelType.DM &&
-				!baseChannel?.name.match(/\bbots?\b/i)) ||
-			!settings.autoreactions)
-	)
-		return;
+	if (!canDoSecrets(message, true)) return;
 
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
@@ -179,13 +165,7 @@ async function handleMutatable(message: Message) {
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
 
-		if (
-			name &&
-			message.member &&
-			(pingsScradd ||
-				message.guild?.id !== config.guild.id ||
-				config.channels.bots?.id === baseChannel?.id)
-		) {
+		if (name && message.member) {
 			const response = dad(name, message.member);
 			return Array.isArray(response)
 				? [
@@ -233,6 +213,31 @@ async function getAutoResponse(message: Message | PartialMessage) {
 	if (found) autoResponses.set(message.id, found);
 	if (fetched.size && !found) return false;
 	return found;
+}
+
+function canDoSecrets(message: Message, checkDads = false) {
+	if (message.channel.isDMBased()) return false;
+	if (
+		message.mentions.has(client.user, {
+			ignoreEveryone: true,
+			ignoreRepliedUser: true,
+			ignoreRoles: true,
+		})
+	)
+		return true;
+
+	if (checkDads) {
+		const baseChannel = getBaseChannel(message.channel);
+		if (
+			message.guild?.id === config.testingGuild?.id ||
+			!baseChannel ||
+			baseChannel.type !== ChannelType.GuildText ||
+			!/\bbots?\b/i.test(baseChannel.name)
+		)
+			return false;
+	}
+
+	return message.channel.id !== message.id && !message.author.bot;
 }
 
 defineButton("allowChat", allowChat);
