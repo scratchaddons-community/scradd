@@ -163,7 +163,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					await cleanDatabaseListeners();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
 					process.exit(1);
-					// Fake "fall-through" since ESLint doesn't realize this is unreacahble
+					// Fake “fall-through” since ESLint doesn’t realize this is unreacahble
 				}
 				case SpecialReminders.CloseThread: {
 					if (channel?.isThread()) await channel.setArchived(true, "Close requested");

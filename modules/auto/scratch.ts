@@ -262,9 +262,8 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 					"bb-italic": `*${content}*`,
 					"bb-underline": `__${content}__`,
 					"bb-strikethrough": `~~${content}~~`,
-					"bb-big": `**${content}**`, // can't be a header, it might be inline
-					// eslint-disable-next-line unicorn/string-content
-					"bb-small": `\`${unescaped.replaceAll("`", "'")}\``,
+					"bb-big": `**${content}**`, // can’t be a header, it might be inline
+					"bb-small": unescaped.includes("`") ? content : `\`${unescaped}\``,
 				}[node.attrs.class];
 			if (output) return output;
 			break;

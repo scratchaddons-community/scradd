@@ -63,7 +63,7 @@ export default async function top(
 		},
 	);
 }
-/** @todo - Strip full links, they can't be escaped. */
+/** @todo - Strip full links, they can’t be escaped. */
 function padTitle(title: number | string) {
 	const left = countOccurrences(`${title}`, "[");
 	const right = countOccurrences(`${title}`, "]");

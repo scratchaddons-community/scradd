@@ -95,18 +95,18 @@ declare global {
 	namespace NodeJS {
 		/**
 		 * @example
-		 * 	GUILD_ID = ...
-		 * 	BOT_TOKEN = ...
+		 * 	GUILD_ID = …
+		 * 	BOT_TOKEN = …
 		 * 	MONGO_URI = mongodb://127.0.0.1:27017/scradd
 		 * 	NODE_ENV = development
 		 * 	CANVAS = true
 		 * 	PORT = 80
-		 * 	CLIENT_SECRET = ...
+		 * 	CLIENT_SECRET = …
 		 */
 		interface ProcessEnv {
 			/** The main guild ID for the bot to operate in. Requires Administrator permission in this server. */
 			GUILD_ID: Snowflake;
-			/** The bot's token. */
+			/** The bot’s token. */
 			BOT_TOKEN: string;
 			/** The URI to use when connecting to MongoDB. */
 			MONGO_URI: string;
@@ -124,7 +124,7 @@ declare global {
 			CANVAS?: `${boolean}`;
 			/** The port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;
-			/** The bot's client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */
+			/** The bot’s client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */
 			CLIENT_SECRET?: string;
 			/** The API key to force a database write on `/cleanDatabaseListeners`. */
 			CDBL_AUTH?: string;

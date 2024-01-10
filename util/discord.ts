@@ -191,7 +191,7 @@ export async function getAllMessages(
  * A property that returns the content that is rendered regardless of the {@link Message.type}. In some cases, this just returns the regular
  * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
  *
- * @author Based Off of [Rapptz/discord.py's
+ * @author Based Off of [Rapptz/discord.py’s
  *   `system_content`](https://github.com/Rapptz/discord.py/blob/08ef42f/discord/message.py#L2080-L2234)
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.

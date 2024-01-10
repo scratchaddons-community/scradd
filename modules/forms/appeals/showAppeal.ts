@@ -32,8 +32,8 @@ import { getRequestUrl } from "../../../util/text.js";
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
-		content: await fileSystem.readFile("./modules/forms/appeals/answer.html", "utf8"),
-	}),
+	content: await fileSystem.readFile("./modules/forms/appeals/answer.html", "utf8"),
+}),
 	APPEAL_PAGE = Mustache.render(APPEAL_FRAME, {
 		content: await fileSystem.readFile("./modules/forms/appeals/index.html", "utf8"),
 	}),
@@ -258,3 +258,42 @@ export default async function appealRequest(request: IncomingMessage, response: 
 		.writeHead(200, { "content-type": "text/html" })
 		.end(Mustache.render(ANSWER_PAGE, { username: user.displayName, date, id: user.id }));
 }
+
+
+
+const a = `
+We’ve reviewed your appeal
+
+
+
+	Thank you for your patience. We’ve decided to unban
+	@ from
+	our Discord server!
+
+
+
+	Rejoin the server
+
+
+
+
+
+	Thank you for your patience. Unfortunately, we’ve decided not to unban
+	@ from
+	our Discord server. You can not appeal this decision again.
+
+
+
+
+
+
+We’ve recieved your appeal
+
+	Please be patient while we process your ban appeal. Our answer will be available on this page by
+	. You are signed in as
+	@ on
+	Discord.
+
+
+`
+console.log(a)
