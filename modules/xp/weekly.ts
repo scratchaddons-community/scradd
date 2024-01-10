@@ -1,6 +1,6 @@
 import {
 	type MessageCreateOptions,
-	time as timestamp,
+	time,
 	TimestampStyles,
 	type Snowflake,
 	userMention,
@@ -103,7 +103,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	}
 
 	recentXpDatabase.data = recentXpDatabase.data.filter(
-		({ time }) => time + 604_800_000 > Date.now(),
+		(entry) => entry.time + 604_800_000 > Date.now(),
 	);
 
 	const date = new Date();
@@ -163,7 +163,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 					).toLocaleString()} XP`,
 			)
 			.join("\n") || "*Nobody got any XP this week!*"
-	}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n### Next week’s weekly winners will be posted ${timestamp(
+	}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n### Next week’s weekly winners will be posted ${time(
 		nextWeeklyDate,
 		TimestampStyles.RelativeTime,
 	)}.`;

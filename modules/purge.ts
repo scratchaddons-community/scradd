@@ -69,8 +69,8 @@ async function purge(
 		embeds.push(await messageToEmbed(sliced[0]));
 
 		return {
-			content: `Are you sure you want to purge th${
-				sliced.length === 1 ? "is message" : `ese ${sliced.length} messages`
+			content: `Are you sure you want to purge ${
+				sliced.length === 1 ? "this message" : `these ${sliced.length} messages`
 			}?`,
 			embeds,
 			components: [

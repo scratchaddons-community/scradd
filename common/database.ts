@@ -116,11 +116,9 @@ export default class Database<Data extends Record<string, boolean | number | str
 		const data = [...this.data];
 		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
 		const suggestion = data[index];
-		if (suggestion) {
-			data[index] = { ...suggestion, ...newData };
-		} else if (oldData) {
-			data.push({ ...oldData, ...newData } as unknown as Data);
-		}
+		if (suggestion) data[index] = { ...suggestion, ...newData };
+		else if (oldData) data.push({ ...oldData, ...newData } as unknown as Data);
+
 		this.data = data;
 	}
 

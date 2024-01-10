@@ -21,7 +21,7 @@ import { strikeDatabase } from "../../punishments/util.js";
 import constants from "../../../common/constants.js";
 import giveXp from "../../xp/giveXp.js";
 import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
-import { RoleList, persistedRoles as persistedRoles } from "../../roles/persisted.js";
+import { RoleList, persistedRoles } from "../../roles/persisted.js";
 import Mustache from "mustache";
 import pkg from "../../../package.json" assert { type: "json" };
 import { getAppealComponents } from "./generateAppeal.js";

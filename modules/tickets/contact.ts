@@ -8,7 +8,6 @@ import {
 	GuildMember,
 	type InteractionResponse,
 	InteractionType,
-	type PrivateThreadChannel,
 	type RepliableInteraction,
 	channelMention,
 } from "discord.js";
@@ -150,7 +149,7 @@ export default async function contactMods(
 		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
-	})) as PrivateThreadChannel;
+	}))
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${

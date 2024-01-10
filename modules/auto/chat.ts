@@ -29,9 +29,9 @@ import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
 const dictionary = (await Chat.find({}))
-	.map((chat) => ({ response: chat.response, prompt: chat.prompt }))
+	.map((chat) => ({ response: chat.response, prompt: chat.prompt ?? "" }))
 	.filter(
-		(chat): chat is { response: string; prompt: string | undefined } =>
+		(chat): chat is { response: string; prompt: string } =>
 			!!(chat.response && !tryCensor(chat.response)),
 	);
 

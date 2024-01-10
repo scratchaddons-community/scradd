@@ -93,11 +93,10 @@ function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
 	const data = [...boardDatabase.data];
 	const index = data.findIndex((suggestion) => suggestion.source === newData.source);
 	const found = data[index];
-	if (found) {
-		data[index] = { ...found, ...newData };
-	} else if (oldData) {
+	if (found) data[index] = { ...found, ...newData };
+	else if (oldData)
 		data.push({ ...oldData, ...newData } as unknown as typeof boardDatabase.data[number]);
-	}
+
 	boardDatabase.data = data;
 }
 
