@@ -45,6 +45,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${member.toString()}, our **${memberCount}** member, just spawned in!`,
 		`Act professional, ${member.toString()} is here, our **${memberCount}** member!`,
 		`Watch out! ${member.toString()} is here! They’re our **${memberCount}**!`,
+		`Rest here weary traveler, **${member.toString()}**. You’re the **${memberCount}** member.`,
 	];
 	const greetings = [
 		...rawGreetings,
@@ -85,6 +86,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`*Somebody* sent **${member.user.displayName}** to a maximum security federal prison`,
 					`**${member.user.displayName}** choked on a watermelon`,
 					`Could someone help hide **${member.user.displayName}**’s body?`,
+					`**${member.user.displayName}** took the candy from the mods’ white van`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -102,6 +104,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** fell from a high place`,
 					`**${member.user.displayName}** didn’t want to live in the same world as Blaze`,
 					`**${member.user.displayName}** turned into a fish and suffocated`,
+					`And another one’s gone, and another one’s gone, **${member.user.displayName}** bit the dust`,
 			  ];
 
 	await config.channels.welcome?.send(
