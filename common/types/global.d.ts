@@ -111,15 +111,16 @@ declare global {
 			/** The URI to use when connecting to MongoDB. */
 			MONGO_URI: string;
 			/**
-			 * The mode for the bot to run in. Defaults to `"development"`.
+			 * The mode for the bot to run in. For consistency, always compare against `"production"` in code.
 			 *
-			 * For consistency, always compare against `"production"` in code.
+			 * @default "development"
 			 */
 			NODE_ENV?: "development" | "production";
 			/**
-			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. Defaults to `true`.
+			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. For consistency, always
+			 * compare against `"false"` in code.
 			 *
-			 * For consistency, always compare against `"false"` in code.
+			 * @default true
 			 */
 			CANVAS?: `${boolean}`;
 			/** The port to run the web server on. Omit to not run the server. */
