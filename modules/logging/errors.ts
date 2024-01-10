@@ -91,7 +91,12 @@ export function generateError(error: unknown): object {
 				.split("\n")
 				.slice(1),
 			errors: subErrors?.map((sub) => generateError(sub)),
-			cause: "cause" in error ? generateError(error.cause) : undefined,
+			cause:
+				"cause" in error
+					? error.cause instanceof Error
+						? generateError(error.cause)
+						: error.cause
+					: undefined,
 			error: "error" in error ? generateError(error.error) : undefined,
 			surpressed: "surpressed" in error ? generateError(error.surpressed) : undefined,
 			reason: "reason" in error ? generateError(error.reason) : undefined,
