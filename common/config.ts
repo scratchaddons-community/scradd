@@ -30,27 +30,25 @@ async function getConfig() {
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild?.systemChannel || getChannel("weekly", ChannelType.GuildText, "partial"),
+				guild?.systemChannel || getChannel("week", ChannelType.GuildText, "partial"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
 			tickets: getChannel("tickets", ChannelType.GuildText, "partial"),
-			server: "1138116320249000077",
-			welcome: getChannel("welcome", ChannelType.GuildText),
+			welcome: getChannel("welcome", ChannelType.GuildText, "partial"),
 
-			mod: getChannel("staff-chat", ChannelType.GuildText, "partial"),
-			modlogs:
-				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "partial"),
+			mod: getChannel("staff", ChannelType.GuildText, "partial") || getChannel("mod", ChannelType.GuildText, "partial") ,
+			modlogs: getChannel("logs", ChannelType.GuildText, "partial"),
 			exec: getChannel("exec", ChannelType.GuildText, "partial"),
 			admin: getChannel("admin", ChannelType.GuildText, "partial"),
 
-			general: getChannel("general", ChannelType.GuildText),
+			general: getChannel("general", ChannelType.GuildText, "partial"),
 
 			support: "826250884279173162",
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
-			suggestions: getChannel("suggestions", ChannelType.GuildForum),
+			suggestions: getChannel("suggestions", ChannelType.GuildForum, "partial"),
 			bugs: getChannel("bug", ChannelType.GuildForum, "partial"),
 			devs: getChannel("devs", ChannelType.GuildText, "partial"),
 
@@ -81,7 +79,7 @@ async function getConfig() {
 	function getChannel<T extends ChannelType>(
 		name: string,
 		type: T | T[] = [],
-		matchType: "end" | "full" | "partial" | "start" = "full",
+		matchType: "end" | "full" | "partial" | "start" = "partial",
 	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
 		return channels.find(

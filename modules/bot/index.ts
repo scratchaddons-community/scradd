@@ -87,7 +87,7 @@ defineMenuCommand(
 );
 defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
-});
+}); 
 
 defineSubcommands(
 	{
@@ -99,6 +99,7 @@ defineSubcommands(
 			status: { description: "Show bot status", options: {} },
 			credits: { description: "Show credit information", options: {} },
 			config: { description: "Show configuration settings", options: {} },
+			emojis: { description: "Show all stored emojis", options: {} },
 		},
 	},
 	info,

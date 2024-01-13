@@ -63,9 +63,7 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for server suggestions. Instead, share them in ${channelMention(
-				config.channels.server,
-			)}.`,
+			} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.suggestions?.id}.`,
 
 			ephemeral: true,
 		});
