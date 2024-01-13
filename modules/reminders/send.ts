@@ -46,7 +46,7 @@ const STATUSES = [
 	"Helping Out",
 	"Rico, status",
 	"beep boop beep",
-	"ims scradd",
+	"ims scrub",
 	"alan 👑",
 	"strawberries 😌",
 ].toSorted(() => Math.random() - 0.5);

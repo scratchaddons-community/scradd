@@ -2,11 +2,12 @@
 	"name": "scradd",
 	"version": "2.9.6",
 	"private": true,
-	"homepage": "https://discord.gg/FPv957V6SD",
+	"homepage": "https://example.com ",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "rm -rf dist && tsc --project tsconfig.json",
+		"build-n-run": "npm run build && npm run start",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
 		"lint": "eslint .",
@@ -14,7 +15,8 @@
 		"start": " node --env-file=.env --enable-source-maps .",
 		"astart": "npm run node_modules && node --env-file=.env --enable-source-maps .",
 		"test": "npm run build && node --enable-source-maps --test",
-		"node_modules": "rm -rf node_modules && npm i && npm run build"
+		"node_modules": "rm -rf node_modules && npm i && npm run build",
+		"launch-n-deploy": "fly launch && fly deploy"
 	},
 	"browserslist": [
 		"chrome 80",

@@ -26,11 +26,9 @@ export const userSettingsDatabase = new Database<{
 	/** Whether to ping the user when they level up. */
 	levelUpPings?: boolean;
 	/** Whether to automatically react to their messages with random emojis. */
-	autoreactions?: boolean;
 	useMentions?: boolean;
 	dmReminders?: boolean;
 	scratchEmbeds?: boolean;
-	scraddChat?: boolean;
 }>("user_settings");
 await userSettingsDatabase.init();
 
@@ -39,7 +37,6 @@ async function settingsCommand(
 	options: {
 		"board-pings"?: boolean;
 		"level-up-pings"?: boolean;
-		"autoreactions"?: boolean;
 		"use-mentions"?: boolean;
 		"dm-reminders"?: boolean;
 		"scratch-embeds"?: boolean;
@@ -47,7 +44,6 @@ async function settingsCommand(
 ) {
 	await interaction.reply(
 		await updateSettings(interaction.user, {
-			autoreactions: options.autoreactions,
 			boardPings: options["board-pings"],
 			levelUpPings: options["level-up-pings"],
 			useMentions: options["use-mentions"],
@@ -69,10 +65,6 @@ defineChatCommand(
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Ping you when you level up",
-			},
-			"autoreactions": {
-				type: ApplicationCommandOptionType.Boolean,
-				description: "Add automatic funny emoji reactions to your messages",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -142,7 +134,6 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 export async function updateSettings(
 	user: User,
 	settings: {
-		autoreactions?: boolean | "toggle";
 		boardPings?: boolean | "toggle";
 		levelUpPings?: boolean | "toggle";
 		useMentions?: boolean | "toggle";
@@ -161,10 +152,6 @@ export async function updateSettings(
 			settings.levelUpPings === "toggle"
 				? !old.levelUpPings
 				: settings.levelUpPings ?? old.levelUpPings,
-		autoreactions:
-			settings.autoreactions === "toggle"
-				? !old.autoreactions
-				: settings.autoreactions ?? old.autoreactions,
 		useMentions:
 			settings.useMentions === "toggle"
 				? !old.useMentions
@@ -183,7 +170,7 @@ export async function updateSettings(
 
 	return {
 		ephemeral: true,
-		content: `${constants.emojis.statuses.yes} Updated your settings!`,
+		content: `${constants.emojis.statuses.yes}`,
 
 		components: [
 			...((await config.guild.members.fetch(user.id).catch(() => void 0))
@@ -222,12 +209,7 @@ export async function updateSettings(
 						label: "DM Reminders",
 						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
 					},
-					{
-						customId: "autoreactions_toggleSetting",
-						type: ComponentType.Button,
-						label: "Autoreactions",
-						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
-					},
+					
 				],
 			},
 		],
@@ -257,7 +239,7 @@ export async function getSettings(user: { id: Snowflake }, defaults = true) {
 
 export async function getDefaultSettings(user: { id: Snowflake }) {
 	return {
-		autoreactions: true,
+		
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
@@ -265,7 +247,7 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 			getWeeklyXp(user.id) > 100 ||
 			!(await config.guild.members.fetch(user.id).catch(() => void 0)),
 		scratchEmbeds: true,
-		scraddChat: false,
+		
 	};
 }
 

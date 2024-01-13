@@ -114,10 +114,11 @@ export function trimPatchVersion(full: string): string {
 }
 
 export function getRequestUrl(request: IncomingMessage) {
-	return new URL(
-		request.url ?? "",
-		request.headers["x-forwarded-host"]
-			? `${request.headers["x-forwarded-proto"]}://${request.headers["x-forwarded-host"]}`
-			: `http${"encrypted" in request.socket ? "s" : ""}://${request.headers.host}`,
-	);
+    return new URL(
+        request.url ?? "",
+        `${
+            request.headers["x-forwarded-proto"] ||
+            `http${"encrypted" in request.socket ? "s" : ""}`
+        }://${request.headers["x-forwarded-host"] || request.headers.host}`,
+    );
 }

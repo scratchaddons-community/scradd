@@ -6,7 +6,6 @@ import { client } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import appealRequest from "../modules/forms/showAppeal.js";
-import pkg from "../package.json" assert { type: "json" };
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import linkScratchRole from "../modules/roles/scratch.js";
@@ -17,6 +16,7 @@ const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceA
 	"#" + constants.themeColor.toString(16),
 );
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
+const HOME = await fileSystem.readFile("./web/home.html", "utf8");
 const SORA_DIRECTORY = path.dirname(
 	fileURLToPath(import.meta.resolve("@fontsource-variable/sora")),
 );
@@ -56,15 +56,10 @@ const server = http.createServer(async (request, response) => {
 					})
 					.end();
 			}
-			case "":
-			case "/": {
-				return response
-					.writeHead(301, {
-						location: config.guild.features.includes("DISCOVERABLE")
-							? `https://discord.com/servers/${config.guild.id}`
-							: pkg.homepage,
-					})
-					.end();
+			case "/":
+			case "": {
+				console.log("no")
+				return response.writeHead(200, { "content-type": "text/html" }).end(HOME)
 			}
 		}
 
@@ -81,6 +76,7 @@ const server = http.createServer(async (request, response) => {
 	}
 });
 
-await new Promise<void>((resolve) => server.listen(process.env.PORT, resolve));
-console.log("Server up!");
+await server.listen(3000, "0.0.0.0")
+console.log("Server up at 0.0.0.0:3000");
 export default server;
+//i saved it

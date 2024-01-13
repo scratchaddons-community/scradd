@@ -39,7 +39,7 @@ defineSubcommands(
 				},
 			},
 
-			top: {
+			leaderboard: {
 				description: "View the server XP leaderboard",
 
 				options: {
@@ -82,7 +82,7 @@ defineSubcommands(
 					],
 				});
 			}
-			case "top": {
+			case "leaderboard": {
 				await top(interaction, options.options.user);
 			}
 		}

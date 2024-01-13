@@ -25,34 +25,34 @@ async function getConfig() {
 		otherGuildIds: guilds ? [...guilds.keys()] : [],
 		testingGuild: IS_TESTING
 			? undefined
-			: await client.guilds.fetch("938438560925761619").catch(() => void 0),
+			: await client.guilds.fetch("1021061241260740713").catch(() => void 0),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild?.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+				guild?.systemChannel || getChannel("weekly", ChannelType.GuildText, "partial"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
-			tickets: getChannel("contact", ChannelType.GuildText, "start"),
+			tickets: getChannel("tickets", ChannelType.GuildText, "partial"),
 			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
-			mod: getChannel("mod-talk", ChannelType.GuildText),
+			mod: getChannel("staff-chat", ChannelType.GuildText, "partial"),
 			modlogs:
-				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
-			exec: getChannel("exec", ChannelType.GuildText, "start"),
-			admin: getChannel("admin", ChannelType.GuildText, "start"),
+				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "partial"),
+			exec: getChannel("exec", ChannelType.GuildText, "partial"),
+			admin: getChannel("admin", ChannelType.GuildText, "partial"),
 
 			general: getChannel("general", ChannelType.GuildText),
 
 			support: "826250884279173162",
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
-			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-			devs: getChannel("devs", ChannelType.GuildText, "start"),
+			bugs: getChannel("bug", ChannelType.GuildForum, "partial"),
+			devs: getChannel("devs", ChannelType.GuildText, "partial"),
 
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ||

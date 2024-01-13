@@ -21,9 +21,9 @@ import { mentionUser } from "../settings.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
 
-const designers = "966174686142672917",
-	developers = "938439909742616616",
-	testers = "938440159102386276";
+const designers = "1021061241260740719",
+	developers = "1021061241260740720",
+	testers = "1021061241260740718";
 
 export default async function info(
 	interaction: ChatInputCommandInteraction,
@@ -154,7 +154,7 @@ async function credits(interaction: ChatInputCommandInteraction) {
 		embeds: [
 			{
 				title: "Credits",
-				description: `Scradd is hosted on [Fly.io](https://fly.io/) using Node.JS ${process.version}.`,
+				description: `Scrub is hosted on [Fly.io](https://fly.io/) using Node.JS ${process.version}.\nBot code "borrowd" from @cobaltt7 and is available [on GitHub](https://github.com/scratchaddons-community/scradd)`,
 
 				fields: [
 					{ name: "🧑‍💻 Developers", value: await getRole(developers), inline: true },
