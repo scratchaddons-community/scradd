@@ -10,7 +10,6 @@ import {
 	InteractionType,
 	type PrivateThreadChannel,
 	type RepliableInteraction,
-	channelMention,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -51,8 +50,7 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${channelMention(
-				config.channels.support,
+			} Please don’t contact mods for that kind of help. Instead, put your requests in <#1173752250825449522>,
 			)}.`,
 
 			ephemeral: true,
@@ -63,7 +61,7 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.suggestions?.id}.`,
+			} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.suggestions?.id}>.`,
 
 			ephemeral: true,
 		});
@@ -103,7 +101,7 @@ export default async function contactMods(
 					{
 						appeal: { "🔨 Strike ID": "strike" },
 						report: { "👤 Reported User": "user" },
-						role: { "🗄️ Role(s)": "role", "👥 Account(s)": "account" },
+						role: { "🗄️ Role(s)": "role", "Reason": "account" },
 						bug: {},
 						update: {},
 						rules: { "📜 Rule": "rule" },

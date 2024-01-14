@@ -93,12 +93,12 @@ defineButton("contactMods", async (interaction) => {
 						options: Object.entries({
 							appeal: "Appeal a strike",
 							report: "Report a user",
-							role: "Request a contributor role",
-							bug: "Report a Scradd bug",
+							role: "Request a role",
+							bug: "Report a Scrub bug",
 							[SERVER_CATEGORY]: "Suggest a server change",
 							rules: "Get clarification on a rule",
-							[SA_CATEGORY]: "Get help with Scratch Addons",
-							server: "Add your server to Other Scratch Servers",
+							[SA_CATEGORY]: "Get help with code/art/music/other",
+							server: "Become a partner",
 							other: "Other",
 						} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>).map(
 							([value, label]) => ({ value, label }),

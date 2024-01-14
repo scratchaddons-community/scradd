@@ -94,7 +94,7 @@ export const allFields = {
 			required: true,
 			maxLength: 500,
 			style: TextInputStyle.Paragraph,
-			label: "What are your GitHub/Transifex usernames?",
+			label: "Info (why you think you deserve it)",
 		},
 	],
 
@@ -159,7 +159,7 @@ export const categoryToDescription = {
 	appeal: "Strike Appeal",
 	report: "User Report",
 	role: "Role Request",
-	bug: "Scradd Bug",
+	bug: "Scrub Bug",
 	rules: "Rule Clarification",
 	server: "Other Scratch Servers",
 	other: "Other",
