@@ -17,7 +17,6 @@ import { getWeeklyXp } from "./xp/util.js";
 import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 
-
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
 	id: Snowflake;
@@ -209,7 +208,6 @@ export async function updateSettings(
 						label: "DM Reminders",
 						style: ButtonStyle[updated.dmReminders ? "Success" : "Danger"],
 					},
-					
 				],
 			},
 		],
@@ -239,7 +237,6 @@ export async function getSettings(user: { id: Snowflake }, defaults = true) {
 
 export async function getDefaultSettings(user: { id: Snowflake }) {
 	return {
-		
 		dmReminders: true,
 		boardPings: process.env.NODE_ENV === "production",
 		levelUpPings: process.env.NODE_ENV === "production",
@@ -247,7 +244,6 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 			getWeeklyXp(user.id) > 100 ||
 			!(await config.guild.members.fetch(user.id).catch(() => void 0)),
 		scratchEmbeds: true,
-		
 	};
 }
 

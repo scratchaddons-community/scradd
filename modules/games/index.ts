@@ -6,8 +6,6 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import hangman from "./hangman.js";
 
-
-
 defineChatCommand(
 	{ name: "hangman", description: "Try to guess who from the server I’m thinking of" },
 	hangman,

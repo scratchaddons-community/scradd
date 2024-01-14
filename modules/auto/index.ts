@@ -10,15 +10,14 @@ import { BOARD_EMOJI } from "../board/misc.js";
 import { client, defineEvent } from "strife.js";
 import { getMatches, handleMatch } from "./scratch.js";
 
-
-
-
 defineEvent("messageCreate", async (message) => {
-	if (message.author.bot) {return}
+	if (message.author.bot) {
+		return;
+	}
 	let reactions = 0;
 
 	if (
-		[  
+		[
 			MessageType.GuildBoost,
 			MessageType.GuildBoostTier1,
 			MessageType.GuildBoostTier2,
@@ -43,15 +42,12 @@ defineEvent("messageCreate", async (message) => {
 			}
 		}
 		if (embeds.length)
-	if (embeds) {
-		message.reply({content:"" , embeds: embeds})
-		return;
+			if (embeds) {
+				message.reply({ content: "", embeds: embeds });
+				return;
+			}
 	}
-	
-
-	
-	
-}});
+});
 
 defineEvent("messageUpdate", async (_, message) => {
 	if (message.partial) return;
@@ -72,14 +68,10 @@ defineEvent("messageUpdate", async (_, message) => {
 			}
 		}
 		if (embeds.length)
-	
-	if (found)
-		await found.edit({embeds: embeds});
-	else await message.reply({embeds: embeds});
-}});
-
-
-
+			if (found) await found.edit({ embeds: embeds });
+			else await message.reply({ embeds: embeds });
+	}
+});
 
 defineEvent("messageDelete", async (message) => {
 	const found = await getAutoResponse(message);
@@ -106,4 +98,3 @@ async function getAutoResponse(message: Message | PartialMessage) {
 	if (fetched.size && !found) return false;
 	return found;
 }
-

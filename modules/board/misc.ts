@@ -15,7 +15,7 @@ import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../..
 import { client } from "strife.js";
 
 export const BOARD_EMOJI = "🍉",
-	REACTIONS_NAME =  "Watermelon";
+	REACTIONS_NAME = "Watermelon";
 
 export const boardDatabase = new Database<{
 	/** The number of reactions this message has. */

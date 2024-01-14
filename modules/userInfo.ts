@@ -16,7 +16,6 @@ import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
 import { xpDatabase } from "./xp/util.js";
 import { strikeDatabase } from "./punishments/util.js";
 
-
 async function userInfo(
 	interaction: RepliableInteraction,
 	{ member, user }: { member?: GuildMember; user: User },
@@ -90,7 +89,6 @@ async function userInfo(
 				: { name: "🔨 Banned", value: "Yes", inline: true },
 		);
 
-	
 	const hasBoards = boardDatabase.data.some((message) => message.user === user.id);
 	const showBottom = !interaction.isButton();
 	const xp =
@@ -109,7 +107,6 @@ async function userInfo(
 
 	const buttonData = [
 		[
-			
 			hasBoards && {
 				customId: `${user.id}_exploreBoard`,
 				label: `Explore ${REACTIONS_NAME}`,

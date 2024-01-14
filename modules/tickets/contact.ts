@@ -48,9 +48,7 @@ export async function showTicketModal(
 
 	if (option === SA_CATEGORY) {
 		return await interaction.reply({
-			content: `${
-				constants.emojis.statuses.no
-			} Please don’t contact mods for that kind of help. Instead, put your requests in <#1173752250825449522>,
+			content: `${constants.emojis.statuses.no} Please don’t contact mods for that kind of help. Instead, put your requests in <#1173752250825449522>,
 			)}.`,
 
 			ephemeral: true,
@@ -59,9 +57,7 @@ export async function showTicketModal(
 
 	if (option === SERVER_CATEGORY) {
 		return await interaction.reply({
-			content: `${
-				constants.emojis.statuses.no
-			} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.suggestions?.id}>.`,
+			content: `${constants.emojis.statuses.no} Please don’t contact mods for server suggestions. Instead, share them in <#${config.channels.suggestions?.id}>.`,
 
 			ephemeral: true,
 		});

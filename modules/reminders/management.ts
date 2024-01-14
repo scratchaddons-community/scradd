@@ -66,8 +66,6 @@ export async function createReminder(
 	const reminders = getUserReminders(interaction.user.id);
 	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
-
-
 	if (
 		reminders.length >
 		Math.ceil(

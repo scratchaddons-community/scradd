@@ -27,7 +27,7 @@ const designers = "1021061241260740719",
 
 export default async function info(
 	interaction: ChatInputCommandInteraction,
-	{ subcommand }: { subcommand: "config" | "credits" | "status" | "emojis"},
+	{ subcommand }: { subcommand: "config" | "credits" | "status" | "emojis" },
 ) {
 	switch (subcommand) {
 		case "status": {
@@ -39,40 +39,35 @@ export default async function info(
 			break;
 		}
 		case "emojis": {
-			
+			const emojis: Record<string, Record<string, string>> = constants.emojis;
+			await interaction.reply({ content: "Getting Emojis...", fetchReply: true });
+			let emojiString = "";
 
-const emojis: Record<string, Record<string, string>> = constants.emojis;
-await interaction.reply({ content: "Getting Emojis...", fetchReply: true });
-let emojiString = '';
+			for (const category in emojis) {
+				if (emojis.hasOwnProperty(category)) {
+					const emojiCategory = category;
 
-for (const category in emojis) {
-    if (emojis.hasOwnProperty(category)) {
-        const emojiCategory = category;
+					const categoryData = emojis[emojiCategory];
 
-        const categoryData = emojis[emojiCategory];
-
-        if (categoryData) {
-            for (const key in categoryData) {
-                emojiString += `${key}-${categoryData[key]}\n`;
-            }
-        }
-    }
-}
-
-
-	await interaction.editReply({
-		content: "",
-		embeds: [
-			{
-				title: "Emojis",
-				description: emojiString
+					if (categoryData) {
+						for (const key in categoryData) {
+							emojiString += `${key}-${categoryData[key]}\n`;
+						}
+					}
+				}
 			}
-		]
-				
-				
-	});
 
-			break
+			await interaction.editReply({
+				content: "",
+				embeds: [
+					{
+						title: "Emojis",
+						description: emojiString,
+					},
+				],
+			});
+
+			break;
 		}
 		case "config": {
 			const isStaff =

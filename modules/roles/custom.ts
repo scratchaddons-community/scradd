@@ -155,8 +155,6 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 		return;
 	}
 
-	
-
 	if (
 		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
 			name,

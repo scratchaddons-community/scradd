@@ -58,8 +58,8 @@ const server = http.createServer(async (request, response) => {
 			}
 			case "/":
 			case "": {
-				console.log("no")
-				return response.writeHead(200, { "content-type": "text/html" }).end(HOME)
+				console.log("no");
+				return response.writeHead(200, { "content-type": "text/html" }).end(HOME);
 			}
 		}
 
@@ -76,7 +76,7 @@ const server = http.createServer(async (request, response) => {
 	}
 });
 
-await server.listen(3000, "0.0.0.0")
+await server.listen(3000, "0.0.0.0");
 console.log("Server up at 0.0.0.0:3000");
 export default server;
 //i saved it

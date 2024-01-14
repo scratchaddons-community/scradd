@@ -39,7 +39,9 @@ async function getConfig() {
 			tickets: getChannel("tickets", ChannelType.GuildText, "partial"),
 			welcome: getChannel("welcome", ChannelType.GuildText, "partial"),
 
-			mod: getChannel("staff", ChannelType.GuildText, "partial") || getChannel("mod", ChannelType.GuildText, "partial") ,
+			mod:
+				getChannel("staff", ChannelType.GuildText, "partial") ||
+				getChannel("mod", ChannelType.GuildText, "partial"),
 			modlogs: getChannel("logs", ChannelType.GuildText, "partial"),
 			exec: getChannel("exec", ChannelType.GuildText, "partial"),
 			admin: getChannel("admin", ChannelType.GuildText, "partial"),

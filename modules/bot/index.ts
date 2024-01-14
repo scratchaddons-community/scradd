@@ -87,7 +87,7 @@ defineMenuCommand(
 );
 defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
-}); 
+});
 
 defineSubcommands(
 	{
