@@ -120,7 +120,10 @@ module.exports = {
 		"@typescript-eslint/restrict-template-expressions": "off",
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
-		"@typescript-eslint/switch-exhaustiveness-check": "warn",
+		"@typescript-eslint/switch-exhaustiveness-check": [
+			"warn",
+			{ allowDefaultCaseForExhaustiveSwitch: false },
+		],
 		"@typescript-eslint/typedef": "off",
 		"capitalized-comments": "off",
 		"line-comment-position": "off",

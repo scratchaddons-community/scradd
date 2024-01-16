@@ -68,7 +68,7 @@ export default async function updateBoard({ count, message }: { count: number; m
 		top.map(async ({ onBoard }) => {
 			const toPin =
 				onBoard &&
-				(await config.channels.board?.messages.fetch(onBoard)?.catch(() => void 0));
+				(await config.channels.board?.messages.fetch(onBoard).catch(() => void 0));
 
 			if (toPin) await toPin.pin("Is a top-reacted message");
 

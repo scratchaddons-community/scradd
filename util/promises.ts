@@ -16,6 +16,7 @@ export async function* asyncFilter<T, X>(
 				promises.map(async (promise, subindex) => ({ result: await promise, subindex })),
 			);
 
+			// eslint-disable-next-line @typescript-eslint/no-floating-promises
 			promises.splice(resolved.subindex, 1);
 			if (resolved.result !== false) yield resolved.result;
 		}
