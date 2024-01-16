@@ -287,20 +287,14 @@ await describe("paginate", async () => {
 			},
 		);
 	});
-	await it("should handle empty arrays", async () => {
+	await it("should respect the `failMessage` option", async () => {
 		const messages: (BaseMessageOptions & { ephemeral: boolean })[] = [];
 		await paginate(
 			[],
 			(value) => value,
 			(message) => messages.push(message),
-			{ title: "Pagination Test", singular: "item", user: false },
+			{ title: "Pagination Test", singular: "item", user: false, failMessage: "fail" },
 		);
-		deepStrictEqual(messages, [
-			{
-				content:
-					"<:no:1016127863273037935> No items found! Try changing any filters you may have used.",
-				ephemeral: true,
-			},
-		]);
+		deepStrictEqual(messages, [{ content: "fail", ephemeral: true }]);
 	});
 });
