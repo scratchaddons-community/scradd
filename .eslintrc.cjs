@@ -32,6 +32,7 @@ module.exports = {
 			files: "*.d.ts",
 			rules: {
 				"@typescript-eslint/consistent-type-definitions": "off",
+				"@typescript-eslint/naming-convention": "off",
 				"@typescript-eslint/no-unused-vars": "off",
 			},
 		},
@@ -71,21 +72,33 @@ module.exports = {
 		"@typescript-eslint/member-ordering": "off",
 		"@typescript-eslint/method-signature-style": ["error", "method"],
 		"@typescript-eslint/naming-convention": [
-			"off", // TODO: enable
-			{ format: ["camelCase"], selector: ["function", "parameter"] },
-			{ format: ["camelCase", "UPPER_CASE"], selector: "variable" },
+			// TODO: look into different types
+			"error",
 			{
-				format: ["PascalCase"],
-				prefix: ["is", "should", "has", "can", "did", "will"],
-				selector: "variable",
-				types: ["boolean"],
+				custom: { match: false, regex: /\d/.source },
+				format: ["camelCase", "UPPER_CASE", "PascalCase"],
+				selector: ["variable", "import"],
 			},
-			{ format: ["PascalCase"], selector: "typeLike" },
-			{ format: ["PascalCase"], prefix: ["T"], selector: "typeParameter" },
 			{
-				custom: { match: false, regex: "^I[A-Z]" },
+				custom: { match: false, regex: /\d/.source },
+				format: ["camelCase"],
+				selector: ["function", "method", "parameterProperty"],
+			},
+			{
+				custom: { match: false, regex: /\d/.source },
+				filter: { match: false, regex: /^_$/.source },
+				format: ["camelCase"],
+				selector: "parameter",
+			},
+			{
+				custom: { match: false, regex: /\d/.source },
+				format: ["camelCase", "UPPER_CASE"],
+				selector: "classProperty",
+			},
+			{
+				custom: { match: false, regex: /\d/.source },
 				format: ["PascalCase"],
-				selector: "interface",
+				selector: ["typeLike", "enumMember"],
 			},
 		],
 		"@typescript-eslint/no-magic-numbers": [
@@ -121,14 +134,14 @@ module.exports = {
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": [
-			"warn",
+			"warn", // TODO: change to error after https://github.com/typescript-eslint/typescript-eslint/issues/6682 is fixed
 			{ allowDefaultCaseForExhaustiveSwitch: false },
 		],
 		"@typescript-eslint/typedef": "off",
 		"capitalized-comments": "off",
 		"line-comment-position": "off",
 		"max-depth": "error",
-		//TODO: enable when we enable eslint:all // "multiline-comment-style": ["error", "separate-lines"],
+		//TODO: enable // "multiline-comment-style": ["error", "separate-lines"],
 		"no-fallthrough": [
 			"error",
 			{ allowEmptyCase: true, commentPattern: /[Ff]alls?[ -]?through/.source },
@@ -141,9 +154,9 @@ module.exports = {
 			"TSIndexSignature",
 		],
 		"no-sparse-arrays": "off",
-		"no-warning-comments": "warn",
+		"no-warning-comments": ["warn", { location: "anywhere" }],
 		"require-unicode-regexp": "off",
-		//TODO: enable when we enable eslint:all // "sort-imports": ["error", { allowSeparatedGroups: true, ignoreDeclarationSort: true }], // TODO: enable declaration sort when we can sort by source
+		//TODO: enable // "sort-imports": ["error", { allowSeparatedGroups: true, ignoreDeclarationSort: true }], // TODO: enable declaration sort when we can sort by source
 		"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/] }],
 		"unicorn/consistent-destructuring": "off",
 		"unicorn/explicit-length-check": "off",

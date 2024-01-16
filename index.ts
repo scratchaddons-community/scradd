@@ -33,6 +33,7 @@ if (process.env.CANVAS !== "false") {
 		"SoraExt",
 	);
 
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { Chart, _adapters } = await import("chart.js");
 	Chart.defaults.font.family = constants.fonts;
 

@@ -154,9 +154,9 @@ export default class Database<Data extends Record<string, boolean | number | str
 				.edit({ content, files })
 				.catch(async (error) => {
 					if (error.code !== RESTJSONErrorCodes.UnknownMessage) {
-						return await message.edit({ content, files }).catch((error2) => {
+						return await message.edit({ content, files }).catch((retryError) => {
 							throw new AggregateError(
-								[error, error2],
+								[error, retryError],
 								"Failed to write to database!",
 								{ cause: { data, database: this.name } },
 							);
