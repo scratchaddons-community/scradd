@@ -173,6 +173,7 @@ async function purge(
 				case "last": {
 					if (split[1] === "remove") start++;
 					else start--;
+					break;
 				}
 			}
 

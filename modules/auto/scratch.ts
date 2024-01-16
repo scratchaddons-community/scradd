@@ -289,10 +289,11 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 		}
 		case "li": {
 			return `- ${content}`;
-			// todo: ordered lists
+		}
+		default: {
+			return content;
 		}
 	}
-
 	return content;
 }
 

@@ -104,6 +104,7 @@ defineSubcommands(
 			case "close-in":
 			case "lock-in": {
 				await setUpAutoClose(interaction, options);
+				break;
 			}
 		}
 	},

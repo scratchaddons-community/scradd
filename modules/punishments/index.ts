@@ -68,6 +68,7 @@ defineSubcommands(
 			}
 			case "id": {
 				await getStrikeById(interaction, options.options.id);
+				break;
 			}
 		}
 	},

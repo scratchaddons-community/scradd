@@ -125,7 +125,6 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 			}
 			default: {
 				break;
-				//todo: log position changes
 			}
 		}
 	}

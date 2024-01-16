@@ -84,6 +84,7 @@ defineSubcommands(
 			}
 			case "top": {
 				await top(interaction, options.options.user);
+				break;
 			}
 		}
 	},
