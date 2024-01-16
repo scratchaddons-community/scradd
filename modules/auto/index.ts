@@ -229,7 +229,8 @@ function canDoSecrets(message: Message, checkDads = false) {
 	if (checkDads) {
 		const baseChannel = getBaseChannel(message.channel);
 		if (
-			message.guild?.id === config.testingGuild?.id ||
+			(message.guild?.id === config.testingGuild?.id &&
+				message.guild?.id !== config.guild.id) ||
 			!baseChannel ||
 			baseChannel.type !== ChannelType.GuildText ||
 			!/\bbots?\b/i.test(baseChannel.name)
