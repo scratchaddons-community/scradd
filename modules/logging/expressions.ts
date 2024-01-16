@@ -2,7 +2,6 @@ import {
 	Base,
 	type AuditLogEvent,
 	type GuildAuditLogsEntry,
-	formatEmoji,
 	type APISticker,
 	GuildEmoji,
 } from "discord.js";
@@ -23,7 +22,7 @@ export async function emojiUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Emoji
 	for (const change of entry.changes) {
 		if (change.key !== "name") return;
 		await log(
-			`${LoggingEmojis.Expressions} ${formatEmoji(entry.target.id)} (:${
+			`${LoggingEmojis.Expressions} ${entry.target.toString()} (:${
 				change.old
 			}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,

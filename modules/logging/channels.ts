@@ -14,10 +14,10 @@ import {
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
-	formatEmoji,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import { formatAnyEmoji } from "../../util/markdown.js";
 
 export async function channelCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ChannelCreate>) {
 	if (!(entry.target instanceof Base)) return;
@@ -283,11 +283,7 @@ export async function channelUpdate(
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default reaction was ${
 				newChannel.defaultReactionEmoji
-					? `set to ${
-							newChannel.defaultReactionEmoji.id
-								? formatEmoji(newChannel.defaultReactionEmoji.id)
-								: newChannel.defaultReactionEmoji.name
-					  }`
+					? `set to ${formatAnyEmoji(newChannel.defaultReactionEmoji)}`
 					: "removed"
 			}`,
 			LogSeverity.ServerChange,

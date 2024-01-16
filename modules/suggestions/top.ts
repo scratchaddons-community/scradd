@@ -4,12 +4,12 @@ import {
 	type User,
 	type RepliableInteraction,
 	channelLink,
-	formatEmoji,
 } from "discord.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import { mentionUser } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
+import { formatAnyEmoji } from "../../util/markdown.js";
 
 export default async function top(
 	interaction: RepliableInteraction,
@@ -33,11 +33,10 @@ export default async function top(
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				"old" in reference
-					? "👍"
-					: suggestions?.defaultReactionEmoji?.id
-					? formatEmoji(suggestions.defaultReactionEmoji.id)
-					: suggestions?.defaultReactionEmoji?.name
+				!("old" in reference) &&
+				(suggestions?.defaultReactionEmoji?.name || suggestions?.defaultReactionEmoji?.id)
+					? formatAnyEmoji(suggestions.defaultReactionEmoji)
+					: "👍"
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(config.guild.id, reference.id),

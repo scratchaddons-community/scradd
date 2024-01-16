@@ -6,7 +6,6 @@ import {
 	type Snowflake,
 	ForumChannel,
 	Colors,
-	formatEmoji,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
@@ -14,6 +13,7 @@ import top from "./top.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
+import { formatAnyEmoji } from "../../util/markdown.js";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -89,11 +89,7 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 								newAnswer.position,
 						  ),
 				title:
-					(newAnswer.emoji
-						? (newAnswer.emoji.id
-								? formatEmoji(newAnswer.emoji.id)
-								: newAnswer.emoji.name) + " "
-						: "") + newAnswer.name,
+					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
 				description: entry.target.parent.topic
 					?.split(`\n- **${newAnswer.name}**: `)[1]
 					?.split("\n")[0],
