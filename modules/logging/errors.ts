@@ -20,9 +20,8 @@ export default async function logError(
 	error: unknown,
 	event: RepliableInteraction | string,
 ): Promise<Message<true> | undefined> {
+	console.error(error);
 	try {
-		console.error(error);
-
 		const name =
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
 		if (
@@ -53,8 +52,8 @@ export default async function logError(
 				],
 			},
 		);
-	} catch (errorError) {
-		console.error(errorError);
+	} catch (loggingError) {
+		console.error(loggingError);
 		await cleanDatabaseListeners().catch(console.error);
 		process.exit(1);
 	}
