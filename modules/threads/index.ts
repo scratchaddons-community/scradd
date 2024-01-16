@@ -18,7 +18,7 @@ defineEvent("threadCreate", async (thread) => {
 defineSubcommands(
 	{
 		name: "thread",
-		description: "Commands to manage threads",
+		description: "Manage threads",
 		restricted: true,
 		subcommands: {
 			"close-in": {

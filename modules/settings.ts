@@ -59,7 +59,7 @@ async function settingsCommand(
 defineChatCommand(
 	{
 		name: "settings",
-		description: "Customize personal settings",
+		description: "Customize your personal settings",
 
 		options: {
 			"board-pings": {

@@ -10,7 +10,7 @@ import { cancelReminder, createReminder, listReminders } from "./management.js";
 defineSubcommands(
 	{
 		name: "reminders",
-		description: "Commands to manage reminders",
+		description: "Manage your reminders",
 		censored: false,
 		access: true,
 		subcommands: {

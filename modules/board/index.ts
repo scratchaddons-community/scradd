@@ -35,23 +35,23 @@ defineEvent("messageReactionRemove", async ({ message: partialMessage }) => {
 defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
-		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
+		description: `Find random messages with ${BOARD_EMOJI} reactions`,
 		access: true,
 
 		options: {
 			"channel": {
-				description: "Filter messages to only get those in a certain channel",
+				description: "Only get messages from this channel",
 				type: ApplicationCommandOptionType.Channel,
 			},
 
 			"minimum-reactions": {
-				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
+				description: `Only get messages with at least this many reactions (defaults to ${defaultMinReactions})`,
 				minValue: 1,
 				type: ApplicationCommandOptionType.Integer,
 			},
 
 			"user": {
-				description: "Filter messages to only get those by a certain user",
+				description: "Only get messages sent by this user",
 				type: ApplicationCommandOptionType.User,
 			},
 		},

@@ -116,12 +116,12 @@ defineChatCommand(
 		options: {
 			answer: {
 				choices: Object.fromEntries(suggestionAnswers.map((answer) => [answer, answer])),
-				description: "Filter suggestions to only get those with a certain answer",
+				description: "Only get suggestions with this answer",
 				type: ApplicationCommandOptionType.String,
 			},
 
 			user: {
-				description: "Filter suggestions to only get those by a certain user",
+				description: "Only get suggestions posted by this user",
 				type: ApplicationCommandOptionType.User,
 			},
 

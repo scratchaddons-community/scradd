@@ -17,7 +17,7 @@ defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${sa.version_name}`,
+		description: `Get information about an addon as of v${sa.version_name}`,
 
 		options: {
 			addon: {
@@ -28,7 +28,7 @@ defineChatCommand(
 						constants.addonSearchOptions,
 					).map((addon) => ({ name: addon.manifest.name, value: addon.addonId }));
 				},
-				description: "The name of the addon",
+				description: "The addon to show",
 				required: true,
 				type: ApplicationCommandOptionType.String,
 			},

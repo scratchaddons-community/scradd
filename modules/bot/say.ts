@@ -13,9 +13,9 @@ import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
-	options: { message: string; reply?: string },
+	options: { message?: string; reply?: string },
 ) {
-	if (options.message !== "-") {
+	if (options.message) {
 		await say(interaction, options.message, options.reply || undefined);
 		return;
 	}

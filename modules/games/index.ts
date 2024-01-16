@@ -13,26 +13,26 @@ defineChatCommand(
 );
 
 defineChatCommand(
-	{ name: "hangman", description: "Try to guess who from the server I’m thinking of" },
+	{ name: "hangman", description: "Guess who from the server I’m thinking of" },
 	hangman,
 );
 
 defineChatCommand(
 	{
 		name: "memory-match",
-		description: "Play a memory matching game against someone else",
+		description: "Play a memory matching game against a server member",
 		options: {
 			"opponent": {
-				description: "A user to challenge",
+				description: "The user to challenge",
 				type: ApplicationCommandOptionType.User,
 				required: true,
 			},
 			"easy-mode": {
-				description: "Show 2 matches per emoji (defaults to false)",
+				description: "Show two matches per emoji (defaults to false)",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"thread": {
-				description: "Whether to create a thread for chatting alongside the game",
+				description: "Create a thread for chatting alongside the game",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 			"bonus-turns": {

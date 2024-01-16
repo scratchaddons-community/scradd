@@ -22,7 +22,7 @@ import ban from "./ban.js";
 defineSubcommands(
 	{
 		name: "strikes",
-		description: "Commands to view strike information",
+		description: "View strike information",
 
 		subcommands: {
 			id: {
@@ -92,7 +92,7 @@ defineSelect("selectStrike", async (interaction) => {
 defineChatCommand(
 	{
 		name: "warn",
-		description: "Warns a user",
+		description: "Warn a user",
 		restricted: true,
 
 		options: {
@@ -112,7 +112,7 @@ defineChatCommand(
 
 			strikes: {
 				type: ApplicationCommandOptionType.Integer,
-				description: `How many strikes to add (defaults to ${DEFAULT_STRIKES})`,
+				description: `How many times to warn them (defaults to ${DEFAULT_STRIKES})`,
 				maxValue: STRIKES_PER_MUTE * MUTE_LENGTHS.length + 1,
 				minValue: 0,
 			},
@@ -193,13 +193,13 @@ defineButton("addStrikeBack", addStrikeBack);
 defineChatCommand(
 	{
 		name: "ban-user",
-		description: "Bans a user",
+		description: "Ban a member",
 		restricted: true,
 
 		options: {
 			"user": {
 				type: ApplicationCommandOptionType.User,
-				description: "The user to ban",
+				description: "The member to ban",
 				required: true,
 			},
 

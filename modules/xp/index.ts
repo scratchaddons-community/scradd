@@ -25,7 +25,7 @@ defineEvent("messageCreate", async (message) => {
 defineSubcommands(
 	{
 		name: "xp",
-		description: "Commands to view users’ XP amounts",
+		description: "View users’ XP amounts",
 
 		subcommands: {
 			rank: {

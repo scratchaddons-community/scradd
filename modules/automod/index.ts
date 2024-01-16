@@ -154,7 +154,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 defineChatCommand(
 	{
 		name: "is-bad-word",
-		description: "Checks text for language",
+		description: "Check text for banned language",
 
 		options: {
 			text: {

@@ -211,14 +211,14 @@ defineMenuCommand(
 defineChatCommand(
 	{
 		name: "contact-user",
-		description: "Start a private ticket with a user",
+		description: "Start a private mod ticket with a member",
 		restricted: true,
 
 		options: {
 			user: {
 				required: true,
 				type: ApplicationCommandOptionType.User,
-				description: "The user to contact",
+				description: "The member to contact",
 			},
 		},
 	},
