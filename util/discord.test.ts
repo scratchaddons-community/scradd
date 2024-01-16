@@ -293,7 +293,7 @@ await describe("paginate", async () => {
 			[],
 			(value) => value,
 			(message) => messages.push(message),
-			{ title: "Pagination Test", singular: "item", user: false, failMessage: "fail" },
+			{ title: "Pagination Test", singular: "item", user: false, failMessage: "<:no:1016127863273037935> fail" },
 		);
 		deepStrictEqual(messages, [{ content: "fail", ephemeral: true }]);
 	});

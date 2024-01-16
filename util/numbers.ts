@@ -82,6 +82,9 @@ export function parseTime(time: string): Date {
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 
+	const date = new Date();
+	const otherDate = new Date(date);
+	
 	const {
 		years = 0,
 		months = 0,
@@ -100,9 +103,6 @@ export function parseTime(time: string): Date {
 			/(?:(?<seconds>.\d+|\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
 		"i",
 	).exec(time)?.groups ?? {};
-
-	const date = new Date();
-	const otherDate = new Date(date);
 
 	date.setUTCFullYear(date.getUTCFullYear() + +years);
 	otherDate.setUTCFullYear(otherDate.getUTCFullYear() + Math.ceil(+years));
