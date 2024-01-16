@@ -67,28 +67,28 @@ defineSubcommands(
 			case "list-unjoined": {
 				await interaction.deferReply({ ephemeral: true });
 				const fetched = await interaction.guild?.channels.fetchActiveThreads();
-				const threads = await Promise.all(
-					fetched?.threads.map(
-						async (thread) =>
-							[
-								thread,
-								await thread.members.fetch(interaction.user.id).catch(() => void 0),
-							] as const,
-					) ?? [],
+				const threads = [];
+				for (const [, thread] of fetched?.threads ?? []) {
+					if (!thread.permissionsFor(interaction.user)?.has("ViewChannel")) continue;
+					try {
+						await thread.members.fetch(interaction.user.id);
+					} catch {
+						threads.push(thread);
+					}
+				}
+
+				const unjoined = threads.toSorted(
+					(one, two) =>
+						(one.parent &&
+							two.parent &&
+							(one.parent.rawPosition - two.parent.rawPosition ||
+								one.parent.position - two.parent.position ||
+								one.parent.name.localeCompare(two.parent.name))) ||
+						one.name.localeCompare(two.name),
 				);
-				const unjoined = threads
-					.filter(
-						([thread, joined]) =>
-							!joined && thread.permissionsFor(interaction.user)?.has("ViewChannel"),
-					)
-					.toSorted(
-						([one], [two]) =>
-							(one.parent?.rawPosition ?? 0) - (two.parent?.rawPosition ?? 0) ||
-							(one.parent?.position ?? 0) - (two.parent?.position ?? 0),
-					);
 				await paginate(
 					unjoined,
-					([thread]) => thread.parent?.toString() + " > " + thread.toString(),
+					(thread) => thread.parent?.toString() + " > " + thread.toString(),
 					(data) => interaction.editReply(data),
 					{
 						title: "Unjoined Threads",
