@@ -143,7 +143,8 @@ export async function parseArgument(
 				const fetched = parsed && (await client.users.fetch(parsed).catch(() => void 0));
 
 				if (fetched) return fetched;
-				if (schema.type === ApplicationCommandOptionType.User) break; // Mentionable falls through
+				if (schema.type === ApplicationCommandOptionType.User) break;
+				// Mentionable falls through
 			}
 			case ApplicationCommandOptionType.Role: {
 				const parsed = MessageMentions.RolesPattern.exec(argument)?.groups?.id || argument;
