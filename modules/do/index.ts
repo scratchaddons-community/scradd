@@ -1,27 +1,18 @@
 import {
-	type ApplicationCommand,
+	ApplicationCommand,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	Collection,
-	type GuildResolvable,
-	ApplicationCommandPermissionType,
-	GuildMember,
-	PermissionsBitField,
 	MessageMentions,
 } from "discord.js";
-import { commands, defineChatCommand } from "strife.js";
-import { parseArguments, splitFirstArgument } from "./misc.js";
+import { commands, defineChatCommand, defineEvent } from "strife.js";
+import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
 import constants from "../../common/constants.js";
 import config from "../../common/config.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
+import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
+import { getAllSchemas } from "./util.js";
 
-const OPERATION_PREFIX = "~ ";
-
-const commandSchemas = new Collection<
-	string,
-	ApplicationCommand<object | { guild: GuildResolvable }>
->();
 const fullPingRegex = new RegExp(`^${MessageMentions.UsersPattern.source}$`);
 
 defineChatCommand(
@@ -39,16 +30,7 @@ defineChatCommand(
 		},
 	},
 	async (interaction, { operation }) => {
-		if (!commandSchemas.size) {
-			const globalCommands = await interaction.client.application.commands.fetch();
-			const guildCommands = (await interaction.guild?.commands.fetch()) ?? new Collection();
-			// eslint-disable-next-line unicorn/prefer-spread
-			for (const [, command] of globalCommands.concat(guildCommands)) {
-				commandSchemas.set(command.name, command);
-			}
-		}
-
-		const [commandName, args] = splitFirstArgument(operation.replace(/^~\s+/, ""));
+		const [commandName, args] = splitFirstArgument(operation);
 		if (fullPingRegex.test(commandName)) {
 			return await interaction.reply({
 				ephemeral: true,
@@ -56,62 +38,43 @@ defineChatCommand(
 			});
 		}
 
-		const commandData = commands[commandName]?.[0];
-		const commandSchema = commandSchemas.get(commandName);
-
-		if (!commandData || !commandSchema) {
+		const allSchemas = await getAllSchemas(interaction.guild);
+		const schema = allSchemas.find(({ name }) => name === commandName);
+		const command =
+			commands[commandName]?.[0] || (!(schema instanceof ApplicationCommand) && schema);
+		if (!command || !schema) {
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Could not find the \`${OPERATION_PREFIX}${commandName}\` operation!`,
 			});
 		}
 
-		const isInGuild = interaction.inGuild();
-		const admin =
-			isInGuild &&
-			(interaction.member instanceof GuildMember
-				? interaction.member.permissions
-				: new PermissionsBitField(BigInt(interaction.member.permissions))
-			).has("Administrator");
-		const defaultPermission = isInGuild
-			? admin || !commandData.restricted
-			: commandSchema.dmPermission ?? false;
+		const options =
+			("type" in schema ? schema.type : ApplicationCommandType.ChatInput) !==
+				ApplicationCommandType.ChatInput ||
+			(await parseArguments(args, schema.options ?? []));
+		if (options === false) {
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} Invalid options!`, // todo show help
+			});
+		}
+		if (options === true)
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} The \`${commandName}\` command is not supported as an operation!`, // todo mention it
+			});
 
-		const permissions =
-			(isInGuild &&
-				(await commandSchema.permissions
-					.fetch({ guild: interaction.guild })
-					.catch(() => void 0))) ||
-			[];
-		const channelPermission =
-			admin ||
-			(permissions.find(
-				({ id, type }) =>
-					type === ApplicationCommandPermissionType.Channel &&
-					id === interaction.channel?.id,
-			)?.permission ??
-				true);
-		const userPermission =
-			admin ||
-			(permissions.find(
-				({ id, type }) =>
-					type === ApplicationCommandPermissionType.User && id === interaction.user.id,
-			)?.permission ??
-				true);
-		const rolePermissions = permissions.filter(
-			({ id, type }) =>
-				type === ApplicationCommandPermissionType.Role &&
-				(interaction.member instanceof GuildMember
-					? interaction.member.roles.resolve(id)
-					: interaction.member?.roles.includes(id)),
+		const permission = await hasPermission(
+			schema,
+			interaction.inCachedGuild()
+				? interaction.member
+				: interaction.inRawGuild()
+				? { ...interaction.member, id: interaction.user.id }
+				: interaction.user,
+			interaction.channel || undefined,
 		);
-		const rolePermission =
-			admin ||
-			(rolePermissions.length
-				? rolePermissions.some(({ permission }) => permission)
-				: defaultPermission);
-
-		if (!channelPermission || !userPermission || !rolePermission) {
+		if (!permission) {
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} You don’t have permission to do the \`${OPERATION_PREFIX}${commandName}\` operation!`,
@@ -120,9 +83,9 @@ defineChatCommand(
 
 		const shouldCensor =
 			interaction.guild?.id === config.guild.id &&
-			(commandData.censored === "channel"
+			(command.censored === "channel"
 				? !badWordsAllowed(interaction.channel)
-				: commandData.censored ?? true);
+				: command.censored ?? true);
 		const censoredOptions = shouldCensor && tryCensor(operation);
 		if (censoredOptions && censoredOptions.strikes) {
 			await interaction.reply({
@@ -140,22 +103,9 @@ defineChatCommand(
 			return;
 		}
 
-		const options =
-			commandSchema.type !== ApplicationCommandType.ChatInput ||
-			(await parseArguments(args, commandSchema.options));
-		if (options === true)
-			return await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} The \`${commandName}\` command is not supported as an operation!`, // todo mention it
-			});
-		if (options === false) {
-			return await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Invalid options!`, // todo show help
-			});
-		}
-
 		// eslint-disable-next-line @typescript-eslint/ban-types
-		await (commandData.command as Function)(interaction, options);
+		await (command.command as Function)(interaction, options);
 	},
 );
+
+defineEvent("applicationCommandPermissionsUpdate", handleCommandPermissionUpdate);

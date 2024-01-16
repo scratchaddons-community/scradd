@@ -11,15 +11,44 @@ import {
 import config from "../../common/config.js";
 import { client } from "strife.js";
 
+export const OPERATION_PREFIX = "~ ";
+const operationPrefixRegex = new RegExp(
+	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\s*`,
+);
+
 export function splitFirstArgument(argumentString: string) {
-	const [commandName, args = ""] = argumentString.split(/(?<=^\S+)\s+/);
+	const [commandName, args = ""] = argumentString
+		.replace(operationPrefixRegex, "")
+		.split(/(?<=^\S+)\s+/);
 	return [commandName.toLowerCase(), args] as const;
 }
 
-type Options = Record<
+export type Options = Record<
 	string,
 	GuildBasedChannel | Role | User | boolean | number | string | undefined
 >;
+
+export const UNSUPPORTED_OPTIONS = [
+	ApplicationCommandOptionType.Attachment,
+	ApplicationCommandOptionType.Subcommand,
+	ApplicationCommandOptionType.SubcommandGroup,
+] as const;
+export function schemaSupported(options: ApplicationCommandOption[]) {
+	const isSubcommands =
+		options.length &&
+		options.every(
+			(option): option is ApplicationCommandSubCommand =>
+				option.type === ApplicationCommandOptionType.Subcommand,
+		);
+	if (!isSubcommands)
+		return options.every((suboption) => !UNSUPPORTED_OPTIONS.includes(suboption.type));
+
+	return options.some(
+		(option) =>
+			!option.options?.length ||
+			!option.options.some((suboption) => UNSUPPORTED_OPTIONS.includes(suboption.type)),
+	);
+}
 
 /** @returns The parsed options, true for unsupported schema, or false for invalid options passed. */
 export async function parseArguments(
@@ -78,6 +107,7 @@ export async function parseArgument(
 	const required = "required" in schema ? schema.required ?? true : true;
 
 	if (argument) {
+		// TODO: check other option restrictions
 		switch (schema.type) {
 			case ApplicationCommandOptionType.String: {
 				return argument;
@@ -123,15 +153,19 @@ export async function parseArgument(
 				if (fetched) return fetched;
 				break;
 			}
-			case ApplicationCommandOptionType.Attachment:
 			case ApplicationCommandOptionType.Subcommand:
-			case ApplicationCommandOptionType.SubcommandGroup: {
-				return { error: true };
+			case ApplicationCommandOptionType.SubcommandGroup:
+			case ApplicationCommandOptionType.Attachment: {
+				break;
 			}
 		}
 	}
 
-	return required ? { error: false } : undefined;
+	return UNSUPPORTED_OPTIONS.includes(schema.type)
+		? { error: true }
+		: required
+		? { error: false }
+		: undefined;
 }
 
 export function partitionArguments(
