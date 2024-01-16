@@ -46,7 +46,6 @@ function getIncrementForLevel(level: number) {
  */
 export function getXpForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
-
 	if (xpForLevel !== undefined) return xpForLevel;
 
 	return getXpForLevel(level - 1) + getIncrementForLevel(level);
@@ -61,12 +60,9 @@ export function getXpForLevel(level: number): number {
  */
 export function getLevelForXp(xp: number) {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
-
 	if (foundLevel !== -2) return foundLevel;
 
 	let level = XP_PER_LEVEL.length;
-
-	while (getXpForLevel(level) < xp) level++;
-
+	while (getXpForLevel(level) <= xp) level++;
 	return level - 1;
 }
