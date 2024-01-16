@@ -28,7 +28,9 @@ const server = http.createServer(async (request, response) => {
 			case "/clean-database-listeners":
 			case "/clean-database-listeners/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
-					response.writeHead(403, { "content-type": "text/plain" }).end("Forbidden");
+					return response
+						.writeHead(403, { "content-type": "text/plain" })
+						.end("Forbidden");
 
 				await cleanDatabaseListeners();
 				process.emitWarning("cleanDatabaseListeners ran");
