@@ -20,6 +20,7 @@ import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import constants from "../../common/constants.js";
+import { columns } from "../../util/discord.js";
 
 const designers = "966174686142672917",
 	developers = "938439909742616616",
@@ -143,13 +144,8 @@ async function credits(interaction: ChatInputCommandInteraction) {
 
 			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
 		})
-		.sort(([one], [two]) => one.localeCompare(two))
-		.map(
-			([specifier, link]) =>
-				"- " + (link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
-		);
+		.sort(([one], [two]) => one.localeCompare(two));
 
-	const columnLength = Math.ceil(dependencies.length / 2);
 	await interaction.reply({
 		embeds: [
 			{
@@ -164,16 +160,14 @@ async function credits(interaction: ChatInputCommandInteraction) {
 						value: await getRole(testers),
 						inline: true,
 					},
-					{
-						name: "🗄️ Third-party code libraries",
-						value: dependencies.slice(0, columnLength).join("\n"),
-						inline: true,
-					},
-					{
-						name: constants.zws,
-						value: dependencies.slice(columnLength).join("\n"),
-						inline: true,
-					},
+					...columns(
+						dependencies,
+						"🗄️ Third-party code libraries",
+						2,
+						([specifier, link]) =>
+							"- " +
+							(link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
+					),
 				],
 
 				color: constants.themeColor,

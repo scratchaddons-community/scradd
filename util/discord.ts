@@ -35,6 +35,7 @@ import {
 	Collection,
 	type ApplicationCommand,
 	channelMention,
+	type APIEmbedField,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -817,4 +818,35 @@ export function commandInteractionToString(interaction: ChatInputCommandInteract
 		);
 
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
+}
+export function columns<Item extends { toString(): string }>(
+	array: Item[],
+	title: string,
+	count: 1 | 2 | 3,
+	callback?: ((item: Item) => string) | undefined,
+): APIEmbedField[];
+export function columns<Item>(
+	array: Item[],
+	title: string,
+	count: 1 | 2 | 3,
+	callback: (item: Item) => string,
+): APIEmbedField[];
+export function columns(
+	array: { toString(): string }[],
+	title: string = constants.zws,
+	count: 1 | 2 | 3 = 2,
+	callback = (item: { toString(): string }) => item.toString(),
+) {
+	const columnLength = Math.ceil(array.length / count);
+	return Array.from({ length: count }, (_, index) => {
+		const startIndex = index * columnLength;
+		return {
+			name: index === 0 ? title : constants.zws,
+			value: array
+				.slice(startIndex, startIndex + columnLength)
+				.map(callback)
+				.join("\n"),
+			inline: true,
+		};
+	});
 }
