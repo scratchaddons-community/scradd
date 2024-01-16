@@ -95,8 +95,8 @@ export default async function giveXp(to: GuildMember | User, url?: string, amoun
 
 	xpDatabase.data = xp;
 
-	const oldLevel = getLevelForXp(Math.abs(oldXp));
-	const newLevel = getLevelForXp(Math.abs(newXp));
+	const oldLevel = getLevelForXp(oldXp);
+	const newLevel = getLevelForXp(newXp);
 	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
 
 	const sorted = xp.toSorted((one, two) => two.xp - one.xp);
@@ -140,7 +140,7 @@ export default async function giveXp(to: GuildMember | User, url?: string, amoun
 }
 
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
-	const newLevel = getLevelForXp(Math.abs(newXp));
+	const newLevel = getLevelForXp(newXp);
 	const nextLevelXp = getXpForLevel(newLevel + 1);
 	const showButton = (await getSettings(member, false)).levelUpPings === undefined;
 	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;

@@ -158,9 +158,9 @@ export async function submitIntrest(interaction: ModalSubmitInteraction) {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
-	const allXp = xpDatabase.data.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const allXp = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 	const xp = Math.floor(allXp.find((entry) => entry.user === interaction.user.id)?.xp ?? 0);
-	const level = getLevelForXp(Math.abs(xp));
+	const level = getLevelForXp(xp);
 	const rank = allXp.findIndex((info) => info.user === interaction.user.id) + 1;
 
 	const strikes = strikeDatabase.data.filter((strike) => strike.user === interaction.user.id);

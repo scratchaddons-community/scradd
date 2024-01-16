@@ -16,19 +16,18 @@ import { paginate } from "../../util/discord.js";
 import { getSettings, mentionUser } from "../settings.js";
 
 export default async function getUserRank(interaction: RepliableInteraction, user: User) {
-	const allXp = xpDatabase.data;
-	const top = allXp.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+	const allXp = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
-	const level = getLevelForXp(Math.abs(xp));
+	const level = getLevelForXp(xp);
 	const xpForNextLevel = getXpForLevel(level + 1);
 	const xpForPreviousLevel = getXpForLevel(level);
 	const increment = xpForNextLevel - xpForPreviousLevel;
 	const xpGained = xp - xpForPreviousLevel;
 	const progress = xpGained / increment;
-	const rank = top.findIndex((info) => info.user === user.id) + 1;
+	const rank = allXp.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
@@ -36,11 +35,10 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 	const serverRank =
 		allXp
 			.filter((entry) => guildMembers.has(entry.user))
-			.toSorted((one, two) => two.xp - one.xp)
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const rankInfo =
 		rank &&
-		`Ranked ${rank.toLocaleString()}/${top.length.toLocaleString()}${
+		`Ranked ${rank.toLocaleString()}/${allXp.length.toLocaleString()}${
 			serverRank
 				? ` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
 				: ""
@@ -154,7 +152,7 @@ export async function top(
 	await paginate(
 		leaderboard,
 		async (xp) =>
-			`**Level ${getLevelForXp(Math.abs(xp.xp))}** - ${await mentionUser(
+			`**Level ${getLevelForXp(xp.xp)}** - ${await mentionUser(
 				xp.user,
 				interaction.user,
 				interaction.guild ?? config.guild,

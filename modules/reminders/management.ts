@@ -91,7 +91,7 @@ export async function createReminder(
 		reminders.length >
 		Math.ceil(
 			getLevelForXp(
-				Math.abs(xpDatabase.data.find(({ user }) => user === interaction.user.id)?.xp ?? 0),
+				xpDatabase.data.find(({ user }) => user === interaction.user.id)?.xp ?? 0,
 			) * 0.3,
 		) +
 			5
