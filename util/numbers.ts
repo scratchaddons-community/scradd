@@ -84,7 +84,7 @@ export function parseTime(time: string): Date {
 
 	const date = new Date();
 	const otherDate = new Date(date);
-	
+
 	const {
 		years = 0,
 		months = 0,
