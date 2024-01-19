@@ -30,7 +30,7 @@
 		"didyoumean2": "6.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
-		"match-sorter": "6.3.2",
+		"match-sorter": "6.3.3",
 		"mongoose": "7.6.3",
 		"mustache": "4.2.0",
 		"papaparse": "5.4.1",
