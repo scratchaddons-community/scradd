@@ -44,7 +44,7 @@ export function parseColor(
 	const preset = COLORS[rawColor.toLowerCase()];
 	if (preset) return preset;
 
-	const color = rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const);
+	const color = (rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const)).toLowerCase();
 	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
 
 	return color.length === 4

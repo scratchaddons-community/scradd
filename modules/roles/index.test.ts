@@ -48,6 +48,12 @@ await describe("parseColor", async () => {
 		strictEqual(parseColor("#000000"), "#000000");
 		strictEqual(parseColor("ffffff"), "#ffffff");
 	});
+	await it("should support case-insensitive hex codes", () => {
+		strictEqual(parseColor("fffFFF"), "#ffffff");
+		strictEqual(parseColor("#fffFFF"), "#ffffff");
+		strictEqual(parseColor("ffF"), "#ffffff");
+		strictEqual(parseColor("#ffF"), "#ffffff");
+	});
 	await it("should support hex code shorthands", () => {
 		strictEqual(parseColor("#000"), "#000000");
 		strictEqual(parseColor("fff"), "#ffffff");
