@@ -87,6 +87,8 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** choked on a watermelon`,
 					`Could someone help hide **${member.user.displayName}**’s body?`,
 					`**${member.user.displayName}** took the candy from the mods’ white van`,
+					`**${member.user.displayName}** went to the banlands`,
+					`The mods canceled **${member.user.displayName}**`,
 			  ]
 			: [
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
@@ -106,6 +108,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** turned into a fish and suffocated`,
 					`Raid Shadow Legends sponsored **${member.user.displayName}**`,
 					`And another one’s gone, and another one’s gone, **${member.user.displayName}** bit the dust`,
+					`**${member.user.displayName}** went to get some milk`,
 			  ];
 
 	await config.channels.welcome?.send(
@@ -122,8 +125,8 @@ defineEvent("guildMemberAdd", async (member) => {
 			config.guild.memberCount - (config.guild.memberCount > 1005 ? 5 : 0)
 		).toLocaleString([], {
 			compactDisplay: "short",
-			maximumFractionDigits: 2,
-			minimumFractionDigits: config.guild.memberCount > 1000 ? 2 : 0,
+			maximumFractionDigits: 1,
+			minimumFractionDigits: config.guild.memberCount > 1000 ? 1 : 0,
 			notation: "compact",
 		})} members`,
 		`${member.user.tag} joined the server`,
