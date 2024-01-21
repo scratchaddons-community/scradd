@@ -328,7 +328,7 @@ async function getMember(player: User) {
 				member.user.username.length > 5 &&
 				member.id !== player.id &&
 				!tryCensor(member.user.username) &&
-				(process.env.NODE_ENV === "production" ||
+				(process.env.NODE_ENV !== "production" ||
 					(xp[member.id] ?? 0) >= 250 ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
