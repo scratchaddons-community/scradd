@@ -7,6 +7,7 @@ import {
 	Collection,
 } from "discord.js";
 import { client } from "strife.js";
+import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 
 const IS_TESTING = process.argv.some((file) => file.endsWith(".test.js"));
 
@@ -17,9 +18,12 @@ if (guilds) guilds.delete(guild.id);
 
 async function getConfig() {
 	const channels = (await guild?.channels.fetch()) ?? new Collection();
-	const roles = (await guild?.roles.fetch()) ?? new Collection();
+	const roles =
+		(await guild?.roles.fetch())?.filter(
+			(role) => role.editable && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
+		) ?? new Collection();
 
-	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
+	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	return {
 		guild: guild!,
 		otherGuildIds: guilds ? [...guilds.keys()] : [],
@@ -65,16 +69,12 @@ async function getConfig() {
 		roles: {
 			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
+			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) || mod,
 			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
-			booster: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("booster"),
-			),
-			active: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("active"),
-			),
+			booster: roles.find((role) => role.name.toLowerCase().includes("booster")),
+			active: roles.find((role) => role.name.toLowerCase().includes("active")),
 		},
 	};
 

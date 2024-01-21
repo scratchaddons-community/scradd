@@ -18,9 +18,8 @@ import warn from "../punishments/warn.js";
 import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
-import { parseColor, resolveIcon } from "./misc.js";
+import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
 
-const PREFIX = "✨ ";
 let command: ApplicationCommand | undefined;
 
 export async function customRole(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
@@ -50,7 +49,7 @@ export async function customRole(interaction: ChatInputCommandInteraction<"cache
 						type: ComponentType.TextInput,
 						maxLength: 98,
 						required: !existingRole,
-						value: existingRole?.name.replace(PREFIX, ""),
+						value: existingRole?.name.replace(CUSTOM_ROLE_PREFIX, ""),
 					},
 				],
 			},
@@ -202,7 +201,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	if (existingRole) {
 		await existingRole.edit({
 			color,
-			name: PREFIX + name,
+			name: CUSTOM_ROLE_PREFIX + name,
 			reason: `Edited by ${interaction.user.tag}`,
 			...iconData,
 		});
@@ -212,7 +211,7 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 
 	const role = await config.guild.roles.create({
 		color,
-		name: PREFIX + name,
+		name: CUSTOM_ROLE_PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
 		position: (config.roles.staff?.position ?? 0) + 1,
 		...iconData,
@@ -228,7 +227,7 @@ export async function recheckMemberRole(_: GuildMember | PartialGuildMember, mem
 }
 export async function recheckAllRoles() {
 	for (const [, role] of await config.guild.roles.fetch()) {
-		if (role.name.startsWith(PREFIX)) {
+		if (role.name.startsWith(CUSTOM_ROLE_PREFIX)) {
 			await recheckRole(role);
 		}
 	}
@@ -251,7 +250,7 @@ async function recheckRole(role: Role, reason = "No longer qualifies") {
 }
 
 export function getCustomRole(member: GuildMember) {
-	return member.roles.valueOf().find((role) => role.name.startsWith(PREFIX));
+	return member.roles.valueOf().find((role) => role.name.startsWith(CUSTOM_ROLE_PREFIX));
 }
 export async function qualifiesForRole(member: GuildMember) {
 	if (

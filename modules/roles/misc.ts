@@ -2,6 +2,8 @@ import { Colors, type ColorResolvable, FormattingPatterns } from "discord.js";
 import config from "../../common/config.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 
+export const CUSTOM_ROLE_PREFIX = "✨ ";
+
 const isTwemoji = new RegExp(`^${twemojiRegexp.default.source}$`);
 const isServerEmoji = new RegExp(`^${FormattingPatterns.Emoji.source}$`);
 const validContentTypes = ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp"];
