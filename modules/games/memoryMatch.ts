@@ -1,10 +1,7 @@
 import {
 	ComponentType,
 	ButtonStyle,
-	type Snowflake,
 	type ButtonInteraction,
-	type Message,
-	type PartialMessage,
 	type User,
 	ThreadAutoArchiveDuration,
 	ChannelType,
@@ -18,10 +15,9 @@ import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./mi
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { autoreactions } from "../auto/secrets.js";
+import { ignoredDeletions } from "../logging/messages.js";
 
 const EMPTY_TILE = "⬛";
-
-const deletedPings = new Set<Snowflake>();
 
 const instructionsButton = {
 	type: ComponentType.Button,
@@ -219,7 +215,7 @@ async function playGame(
 			if (!match || !bonusTurns) {
 				turn++;
 
-				deletedPings.add(turnInfo.ping.id);
+				ignoredDeletions.add(turnInfo.ping.id);
 				await turnInfo.ping.delete();
 				turnInfo = await setupNextTurn();
 			}
@@ -339,7 +335,7 @@ async function playGame(
 	async function endGame(content?: string, user?: GuildMember | User) {
 		CURRENTLY_PLAYING.delete(players[0].id);
 		CURRENTLY_PLAYING.delete(players[1].id);
-		deletedPings.add(turnInfo.ping.id);
+		ignoredDeletions.add(turnInfo.ping.id);
 		await turnInfo.ping.delete();
 
 		await message.edit({
@@ -439,9 +435,6 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	return chunks;
 }
 
-export function messageDelete(message: Message | PartialMessage) {
-	return !deletedPings.delete(message.id);
-}
 
 export function showMemoryInstructions(interaction: RepliableInteraction) {
 	return interaction.reply({
