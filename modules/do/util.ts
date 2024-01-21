@@ -27,7 +27,10 @@ export type CustomOperation = {
 	permissions?: unknown;
 	censored?: "channel" | false | undefined;
 	options?: ApplicationCommandOption[];
-	command(interaction: ChatInputCommandInteraction, options: Options): Awaitable<void>;
+	command(
+		interaction: ChatInputCommandInteraction<"cached" | "raw">,
+		options: Options,
+	): Awaitable<void>;
 };
 
 const directory = fileURLToPath(new URL("./operations", import.meta.url));
