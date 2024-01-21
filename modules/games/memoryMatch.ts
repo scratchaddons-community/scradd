@@ -435,7 +435,6 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	return chunks;
 }
 
-
 export function showMemoryInstructions(interaction: RepliableInteraction) {
 	return interaction.reply({
 		ephemeral: true,
