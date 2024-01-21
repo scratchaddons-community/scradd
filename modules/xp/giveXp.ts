@@ -188,7 +188,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 				footer: {
 					icon_url: config.guild.iconURL() ?? undefined,
 					text: `View your XP with /xp rank${
-						showButton ? "" : "\nToggle pings with /settings"
+						showButton ? "" : "\nToggle pings via /settings"
 					}`,
 				},
 			},

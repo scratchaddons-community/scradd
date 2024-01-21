@@ -4,17 +4,15 @@ import {
 	ComponentType,
 	GuildMember,
 	type Message,
-	chatInputApplicationCommandMention,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import addons from "@sa-community/addons-data" assert { type: "json" };
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents, mentionChatCommand } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
 import { escapeMessage } from "../../util/markdown.js";
 import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
-import { client } from "strife.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -368,12 +366,10 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 							.find(([id]) => id === addonProbabilities[0]?.[0])?.[1]
 							?.map(({ statement }) => `- ${statement}`)
 							.join("\n") ?? ""
-					}\n\n*Run the ${chatInputApplicationCommandMention(
+					}\n\n*Run ${await mentionChatCommand(
 						"addon",
-						(
-							await client.application.commands.fetch()
-						).find((command) => command.name === "addon")?.id ?? "0",
-					)} command for more information about this addon!*`,
+						interaction.guild ?? undefined,
+					)} for more information about this addon!*`,
 
 					author: {
 						icon_url: (interaction.member instanceof GuildMember

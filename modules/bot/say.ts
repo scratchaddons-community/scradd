@@ -1,7 +1,6 @@
 import {
 	type ChatInputCommandInteraction,
 	ComponentType,
-	chatInputApplicationCommandMention,
 	MessageFlags,
 	TextInputStyle,
 	type RepliableInteraction,
@@ -10,6 +9,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import { mentionChatCommand } from "../../util/discord.js";
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
@@ -76,10 +76,9 @@ export async function say(interaction: RepliableInteraction, content: string, re
 
 	if (message) {
 		await log(
-			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
+			`${LoggingEmojis.Bot} ${await mentionChatCommand(
 				"say",
-				(await interaction.guild?.commands.fetch())?.find(({ name }) => name === "say")
-					?.id ?? "0",
+				interaction.guild ?? undefined,
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,

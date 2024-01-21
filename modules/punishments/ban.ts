@@ -229,7 +229,7 @@ async function confirmBan(
 	await config.guild.bans.create(options.user, {
 		reason:
 			(options.reason ? options.reason + "\n" : "") +
-			`> Banned by ${interaction.user.tag} via /ban-user${
+			`> Banned by ${interaction.user.tag}${
 				options.unbanTime ? ` until ${options.unbanTime.toDateString()}` : ""
 			}`,
 		deleteMessageSeconds: deleteLength,
