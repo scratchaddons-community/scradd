@@ -64,7 +64,12 @@ export default function tryCensor(text: string, strikeShift = 0) {
 		words[index] ??= [];
 
 		return string.replaceAll(regexp, (word) => {
-			if ((/[\d!#*@|-]/gi.exec(word)?.length ?? 0) > word.length * 0.5 + 1) return word;
+			if (
+				(/[\d!#*@|-]/gi.exec(word)?.length ?? 0) > word.length * 0.5 + 1 ||
+				word.startsWith("-") ||
+				word.endsWith("-")
+			)
+				return word;
 
 			words[index]?.push(word);
 			return word.length < 4
