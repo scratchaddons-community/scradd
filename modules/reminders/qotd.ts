@@ -6,15 +6,14 @@ import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import constants from "../../common/constants.js";
 
-export const Question = mongoose.model("question", new mongoose.Schema({ question: String }));
-
+export const Question = mongoose.model("question", new mongoose.Schema({ question: String, emojis: Boolean }));
 export default async function sendQOTD() {
 	if (!config.channels.qotd) throw new ReferenceError("Could not find QOTD channel");
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
 			channel: config.channels.qotd.id,
-			date: Date.now() + 86_400_000,
+			date: Date.now() + 1, // 86_400_000
 			reminder: undefined,
 			id: SpecialReminders.QOTD,
 			user: client.user.id,
@@ -22,14 +21,24 @@ export default async function sendQOTD() {
 	];
 
 	const questions = await Question.find();
-	const question = questions[Math.floor(Math.random() * questions.length)]?.question;
+
+	const random = Math.floor(Math.random() * questions.length)
+	const question = questions[random]?.question;
+
 	if (!question) return;
 
-	await config.channels.qotd.threads.create({
+	const post = await config.channels.qotd.threads.create({
 		name: `Question of The Day ${new Date().toISOString().split("T")[0]}`,
 		message: { content: question },
 		reason: "For today’s QOTD",
 	});
+
+	if (questions[random]?.emojis) {
+		const message = await post.fetchStarterMessage();
+
+		message?.react('👍')
+		message?.react('👎')
+	}
 
 	await Question.findOneAndDelete({ question });
 }
@@ -49,6 +58,13 @@ export async function addQOTD(interaction: ChatInputCommandInteraction) {
 						required: true,
 						customId: "question",
 					},
+					{
+						type: ComponentType.TextInput,
+						style: TextInputStyle.Short,
+						label: "Add emojis?",
+						required: true,
+						customId: "type",
+					},
 				],
 			},
 		],
@@ -64,9 +80,19 @@ export async function addQOTD(interaction: ChatInputCommandInteraction) {
 	if (!modalInteraction) return;
 
 	const question = modalInteraction.fields.getTextInputValue("question");
-	await new Question({ question }).save();
+	const type = modalInteraction.fields.getTextInputValue("type")
 
-	await interaction.reply({
+	if (type != "true" && type != "false") {
+		modalInteraction.reply({
+			content: "Emojis must be true or false",
+			ephemeral: true,
+		})
+		return;
+	}
+
+	await new Question({ question, type }).save();
+
+	await modalInteraction.reply({
 		content: "Added question.",
 		embeds: [{ title: question }],
 		ephemeral: true,
@@ -74,6 +100,20 @@ export async function addQOTD(interaction: ChatInputCommandInteraction) {
 }
 
 export async function listQOTDs(interaction: ChatInputCommandInteraction) {
-	const questions = Question.find();
-	await paginate();
+	const questions = await Question.find();
+	await paginate(
+		questions,
+		async (question) =>
+		`${question.question}`,
+		(data) => interaction.reply(data),
+		{
+			title: "All QOTD's.",
+			singular: "question",
+			failMessage: "No QOTD's.",
+			user: interaction.user,
+			ephemeral: true,
+			perPage: 10,
+			totalCount: questions.length,
+		}
+	);
 }

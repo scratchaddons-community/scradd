@@ -235,7 +235,6 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				}
 				case SpecialReminders.QOTD: {
 					await sendQOTD();
-					continue;
 				}
 			}
 		}
