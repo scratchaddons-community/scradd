@@ -6,7 +6,10 @@ import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
 import constants from "../../common/constants.js";
 
-export const Question = mongoose.model("question", new mongoose.Schema({ question: String, emojis: Boolean }));
+export const Question = mongoose.model(
+	"question",
+	new mongoose.Schema({ question: String, emojis: Boolean }),
+);
 export default async function sendQOTD() {
 	if (!config.channels.qotd) throw new ReferenceError("Could not find QOTD channel");
 	remindersDatabase.data = [
@@ -22,7 +25,7 @@ export default async function sendQOTD() {
 
 	const questions = await Question.find();
 
-	const random = Math.floor(Math.random() * questions.length)
+	const random = Math.floor(Math.random() * questions.length);
 	const question = questions[random]?.question;
 
 	if (!question) return;
@@ -36,8 +39,8 @@ export default async function sendQOTD() {
 	if (questions[random]?.emojis) {
 		const message = await post.fetchStarterMessage();
 
-		message?.react('👍')
-		message?.react('👎')
+		message?.react("👍");
+		message?.react("👎");
 	}
 
 	await Question.findOneAndDelete({ question });
@@ -80,13 +83,13 @@ export async function addQOTD(interaction: ChatInputCommandInteraction) {
 	if (!modalInteraction) return;
 
 	const question = modalInteraction.fields.getTextInputValue("question");
-	const type = modalInteraction.fields.getTextInputValue("type")
+	const type = modalInteraction.fields.getTextInputValue("type");
 
 	if (type != "true" && type != "false") {
 		modalInteraction.reply({
 			content: "Emojis must be true or false",
 			ephemeral: true,
-		})
+		});
 		return;
 	}
 
@@ -103,8 +106,7 @@ export async function listQOTDs(interaction: ChatInputCommandInteraction) {
 	const questions = await Question.find();
 	await paginate(
 		questions,
-		async (question) =>
-		`${question.question}`,
+		async (question) => `${question.question}`,
 		(data) => interaction.reply(data),
 		{
 			title: "All QOTD's.",
@@ -114,6 +116,6 @@ export async function listQOTDs(interaction: ChatInputCommandInteraction) {
 			ephemeral: true,
 			perPage: 10,
 			totalCount: questions.length,
-		}
+		},
 	);
 }
