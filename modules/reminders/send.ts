@@ -176,10 +176,9 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				}
 				case SpecialReminders.Unban: {
 					if (typeof reminder.reminder == "string")
-						await config.guild.bans.remove(
-							reminder.reminder,
-							"Unbanned after set time period",
-						);
+						await config.guild.bans
+							.remove(reminder.reminder, "Unbanned after set time period")
+							.catch(() => void 0);
 					continue;
 				}
 				case SpecialReminders.BackupDatabases: {

@@ -15,6 +15,7 @@ import automodMessage from "./automod.js";
 import tryCensor, { badWordsAllowed } from "./misc.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
+import { ignoredDeletions } from "../logging/messages.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
@@ -204,8 +205,10 @@ defineEvent("autoModerationActionExecution", async (action) => {
 		const channel =
 			action.action.metadata.channelId &&
 			(await config.guild.channels.fetch(action.action.metadata.channelId));
-		if (channel && channel.isTextBased())
+		if (channel && channel.isTextBased()) {
+			ignoredDeletions.add(action.alertSystemMessageId);
 			await channel.messages.delete(action.alertSystemMessageId);
+		}
 	}
 });
 

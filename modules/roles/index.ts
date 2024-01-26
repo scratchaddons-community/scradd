@@ -5,7 +5,7 @@ import { persistedLeave, persistedRejoin } from "./persisted.js";
 import { createCustomRole, recheckMemberRole, recheckAllRoles, customRole } from "./custom.js";
 import mongoose from "mongoose";
 
-const Invite = mongoose.model(
+export const Invite = mongoose.model(
 	"Invite",
 	new mongoose.Schema({ code: String, member: String, uses: Number }),
 );
@@ -14,7 +14,10 @@ defineEvent("inviteDelete", async (invite) => {
 	if (!invite.uses) return;
 	await Invite.findOneAndUpdate(
 		{ code: invite.code },
-		{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+		{
+			uses: invite.uses,
+			...(invite.inviter && !invite.inviter.bot && { member: invite.inviter.id }),
+		},
 		{ upsert: true },
 	).exec();
 });
@@ -23,7 +26,10 @@ defineEvent("guildMemberAdd", async () => {
 		if (!invite.uses) continue;
 		await Invite.findOneAndUpdate(
 			{ code: invite.code },
-			{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+			{
+				uses: invite.uses,
+				...(invite.inviter && !invite.inviter.bot && { member: invite.inviter.id }),
+			},
 			{ upsert: true },
 		).exec();
 	}

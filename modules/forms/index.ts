@@ -1,4 +1,4 @@
-import { defineButton, defineChatCommand, defineModal } from "strife.js";
+import { defineButton, defineModal } from "strife.js";
 import confirmInterest, { fillInterest, submitIntrest } from "./modInterest.js";
 import {
 	confirmRejectAppeal,
@@ -7,10 +7,7 @@ import {
 	submitAcceptAppeal,
 } from "./appeals/appeals.js";
 
-defineChatCommand(
-	{ name: "mod-interest-form", description: "Fill out a moderator interest form" },
-	confirmInterest,
-);
+defineButton("confirmInterest", confirmInterest);
 defineButton("modInterestForm", fillInterest);
 defineModal("modInterestForm", submitIntrest);
 

@@ -121,7 +121,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 	const files = [];
 	const contentDiff = unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n"), {
 		lineterm: "",
-	}).join("\n");
+	})
+		.join("\n")
+		.replace(/^-{3} \n\+{3} \n/, "");
 	const extraDiff = unifiedDiff(
 		JSON.stringify({ ...oldJSON, content: undefined }).split("\n"),
 		JSON.stringify({ ...getMessageJSON(edited), content: undefined }).split("\n"),

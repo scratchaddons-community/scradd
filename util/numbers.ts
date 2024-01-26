@@ -82,8 +82,38 @@ export function parseTime(time: string): Date {
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 
+	const dateMatch =
+		/^(?<year>\d{4})-?(?<month>\d{1,2})-?(?<day>\d{1,2})(?:(?:\s+|T)(?<hour>\d{1,2}):(?<minute>\d{1,2})(?::?(?<second>\d{1,2}))?Z?)?$/.exec(
+			time,
+		);
+	if (dateMatch) {
+		const {
+			year = "",
+			month = "",
+			day = "",
+			hour = "",
+			minute = "",
+			second = "",
+		} = dateMatch.groups ?? {};
+		return new Date(
+			`${year.padStart(4, "0")}-${month.padStart(2, "0")}-${day.padStart(
+				2,
+				"0",
+			)}T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:${second.padStart(2, "0")}Z`,
+		);
+	}
+
 	const date = new Date();
 	const otherDate = new Date(date);
+
+	const timeMatch = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(time);
+	if (timeMatch) {
+		const [hours = 0, minutes = 0, seconds = 0] = timeMatch.slice(1).map(Number);
+		console.log({ hours, minutes, seconds });
+		otherDate.setUTCHours(hours, minutes, seconds || 0, 0);
+		if (date.getUTCHours() >= hours) otherDate.setUTCDate(date.getUTCDate() + 1);
+		return otherDate;
+	}
 
 	const {
 		years = 0,

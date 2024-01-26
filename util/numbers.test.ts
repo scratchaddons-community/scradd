@@ -78,8 +78,27 @@ await describe("nth", async () => {
 
 await describe("parseTime", async () => {
 	await it("should support UNIX timestamps", () => {
-		almostEqual(+parseTime("1713675600000"), 1_713_675_600_000);
-		almostEqual(+parseTime("1720242000"), 1_720_242_000_000);
+		strictEqual(+parseTime("1713675600000"), 1_713_675_600_000);
+		strictEqual(+parseTime("1720242000"), 1_720_242_000_000);
+	});
+	await it("should support yyyy-mm-dd", () => {
+		strictEqual(+parseTime("2024-01-01"), 1_704_067_200_000);
+	});
+	await it("should support yyyy-mm-dd h:mm", () => {
+		strictEqual(+parseTime("2024-01-01 5:00"), 1_704_132_000_000);
+	});
+	await it("should support yyyy-mm-dd hh:mm", () => {
+		strictEqual(+parseTime("2024-01-01 12:00"), 1_704_132_000_000);
+	});
+	await it("should support yyyy-mm-dd hh:mm:ss", () => {
+		strictEqual(+parseTime("2024-01-01 12:00:30"), 1_704_132_030_000);
+	});
+	await it("should support hh:mm:ss", () => {
+		const date = new Date();
+		strictEqual(
+			+parseTime("5:00"),
+			date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 5 ? 86_400_000 : 0),
+		);
 	});
 	await it("should support weeks", () => {
 		let now = Date.now();

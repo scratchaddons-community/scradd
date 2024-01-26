@@ -8,6 +8,7 @@ import {
 import { client } from "strife.js";
 import constants from "../../common/constants.js";
 import { generateError } from "../logging/errors.js";
+import { ignoredDeletions } from "../logging/messages.js";
 
 export default async function getCode(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
 	const { owner } = await client.application.fetch();
@@ -90,5 +91,7 @@ export async function run(interaction: ModalSubmitInteraction) {
 		});
 	}
 
-	await (await interaction.followUp(interaction.user.toString())).delete();
+	const pingMessage = await interaction.followUp(interaction.user.toString());
+	ignoredDeletions.add(pingMessage.id);
+	await pingMessage.delete();
 }

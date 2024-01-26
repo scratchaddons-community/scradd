@@ -1,7 +1,6 @@
 import {
 	type ButtonInteraction,
 	ButtonStyle,
-	type ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
 	type ModalSubmitInteraction,
@@ -54,9 +53,7 @@ const applications = Object.fromEntries(
 		),
 );
 
-export default async function confirmInterest(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
-) {
+export default async function confirmInterest(interaction: ButtonInteraction) {
 	await interaction.reply({
 		ephemeral: true,
 		content:

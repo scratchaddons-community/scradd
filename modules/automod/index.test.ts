@@ -13,6 +13,15 @@ await describe("tryCensor", async () => {
 			words: [[], ["automodmute"], []],
 		});
 	});
+	await it("should not catch words starting with dashes", () => {
+		strictEqual(tryCensor("-utomodmute"), false);
+	});
+	await it("should not catch words ending with dashes", () => {
+		strictEqual(tryCensor("automodmut-"), false);
+	});
+	await it("should not catch words surrounded with dashes", () => {
+		strictEqual(tryCensor("-utomodmute-"), false);
+	});
 });
 await describe("censor", async () => {
 	await it("should not censor fine words", () => {

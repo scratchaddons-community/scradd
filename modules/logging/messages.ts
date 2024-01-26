@@ -7,6 +7,7 @@ import {
 	type MessageReaction,
 	Colors,
 	messageLink,
+	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
 import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
@@ -14,8 +15,15 @@ import log, { LogSeverity, shouldLog, LoggingEmojis } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 import { databaseThread } from "../../common/database.js";
 
+export const ignoredDeletions = new Set<Snowflake>();
+
 export async function messageDelete(message: Message | PartialMessage) {
-	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
+	if (
+		!shouldLog(message.channel) ||
+		message.flags.has("Ephemeral") ||
+		ignoredDeletions.delete(message.id)
+	)
+		return;
 	const shush =
 		message.partial ||
 		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&

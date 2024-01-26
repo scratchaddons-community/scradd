@@ -35,7 +35,11 @@ export async function inviteCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Invi
 							? time(entry.target.expiresAt, TimestampStyles.LongDate)
 							: ""
 				  }${entry.target.expiresAt && entry.target.maxUses ? " or " : ""}${
-						entry.target.maxUses ? `after ${entry.target.maxUses} uses` : ""
+						entry.target.maxUses
+							? `after ${entry.target.maxUses} use${
+									entry.target.maxUses === 1 ? "" : "s"
+							  }`
+							: ""
 				  }`
 				: ""
 		}${entry.reason ? ` (${entry.reason})` : ""}`,

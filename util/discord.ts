@@ -32,10 +32,9 @@ import {
 	type ChatInputCommandInteraction,
 	InteractionResponse,
 	type ThreadChannel,
-	Collection,
-	type ApplicationCommand,
 	channelMention,
 	type APIEmbedField,
+	type Guild,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -432,27 +431,12 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 			if (!replies) return content;
 
 			const subcommandName = message.interaction?.commandName ?? "";
-			const [commandName] = subcommandName.split(" ");
-			return Promise.all([
-				...(message.guild ? [message.guild.commands.fetch()] : []),
-				client.application.commands.fetch(),
-			])
-				.then((commands) =>
-					// eslint-disable-next-line unicorn/prefer-spread
-					new Collection<string, ApplicationCommand>().concat(...commands),
-				)
-				.then((commands) => commands.find(({ name }) => name === commandName))
-				.then((command) =>
-					command
-						? chatInputApplicationCommandMention(subcommandName, command.id)
-						: bold(`/${subcommandName}`),
-				)
-				.then(
-					(formatted) =>
-						`*${
-							message.interaction?.user.toString() ?? ""
-						} used ${formatted}:*\n${content}`,
-				);
+			return mentionChatCommand(subcommandName, message.guild ?? undefined).then(
+				(formatted) =>
+					`*${
+						message.interaction?.user.toString() ?? ""
+					} used ${formatted}:*\n${content}`,
+			);
 		}
 
 		case MessageType.Call: {
@@ -629,6 +613,11 @@ export async function paginate<Item>(
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
 ): Promise<void> {
+	if (!array.length) {
+		await reply({ content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral: true });
+		return;
+	}
+
 	const previousId = generateHash("previous");
 	const nextId = generateHash("next");
 	const numberOfPages = Math.ceil(array.length / perPage);
@@ -642,10 +631,6 @@ export async function paginate<Item>(
 	 */
 	async function generateMessage() {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
-
-		if (!filtered.length) {
-			return { content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral: true };
-		}
 
 		const content = (
 			await Promise.all(
@@ -817,6 +802,14 @@ export function commandInteractionToString(interaction: ChatInputCommandInteract
 		);
 
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
+}
+export async function mentionChatCommand(fullCommand: string, guild?: Guild) {
+	const [commandName] = fullCommand.split(" ");
+	const id = (
+		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
+		(await client.application.commands.fetch()).find(({ name }) => name === commandName)
+	)?.id;
+	return id ? chatInputApplicationCommandMention(fullCommand, id) : bold(`/${fullCommand}`);
 }
 export function columns<Item extends { toString(): string }>(
 	array: Item[],

@@ -20,7 +20,6 @@ defineChatCommand(
 		name: "do",
 		description: "Make me do something…",
 		censored: false,
-		access: true,
 		options: {
 			operation: {
 				type: ApplicationCommandOptionType.String,

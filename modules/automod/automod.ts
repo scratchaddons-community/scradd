@@ -13,6 +13,7 @@ import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { stripMarkdown } from "../../util/markdown.js";
+import { joinWithAnd } from "../../util/text.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
@@ -28,9 +29,11 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 export default async function automodMessage(message: Message) {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
+	const pings = message.mentions.users.size
+		? ` (ghost pinged ${joinWithAnd(message.mentions.users.map((user) => user.toString()))})`
+		: "";
 
 	const animatedEmojis = message.content.match(GlobalAnimatedEmoji);
-
 	const badAnimatedEmojis =
 		animatedEmojis &&
 		animatedEmojis.length > 15 &&
@@ -46,11 +49,12 @@ export default async function automodMessage(message: Message) {
 			badAnimatedEmojis,
 			animatedEmojis?.join(""),
 		);
-		await message.channel.send(
-			`${
+		await message.channel.send({
+			content: `${
 				constants.emojis.statuses.no
-			} ${message.author.toString()}, less animated emojis please!`,
-		);
+			} ${message.author.toString()}, less animated emojis please!${pings}`,
+			allowedMentions: { users: [message.author.id] },
+		});
 	}
 
 	const links = message.content.match(InvitesPattern) ?? [];
@@ -88,11 +92,12 @@ export default async function automodMessage(message: Message) {
 					badInvites.length,
 					badInvites.join("\n"),
 				);
-				await message.channel.send(
-					`${
+				await message.channel.send({
+					content: `${
 						constants.emojis.statuses.no
-					} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!`,
-				);
+					} ${message.author.toString()}, only post invite links in ${config.channels.advertise.toString()}!${pings}`,
+					allowedMentions: { users: [message.author.id] },
+				});
 			}
 
 			const bots = [...new Set(message.content.match(GlobalBotInvitesPattern))];
@@ -104,11 +109,12 @@ export default async function automodMessage(message: Message) {
 					bots.length,
 					bots.join("\n"),
 				);
-				await message.channel.send(
-					`${
+				await message.channel.send({
+					content: `${
 						constants.emojis.statuses.no
-					} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!`,
-				);
+					} ${message.author.toString()}, bot invites go to ${config.channels.advertise.toString()}!${pings}`,
+					allowedMentions: { users: [message.author.id] },
+				});
 			}
 		}
 
@@ -169,11 +175,12 @@ export default async function automodMessage(message: Message) {
 			if (message.deletable) {
 				await message.delete();
 				if (badWords.strikes)
-					await message.channel.send(
-						`${constants.emojis.statuses.no} ${message.author.toString()}, ${
+					await message.channel.send({
+						content: `${constants.emojis.statuses.no} ${message.author.toString()}, ${
 							languageStrikes < 1 ? "that’s not appropriate" : "language"
-						}!`,
-					);
+						}!${pings}`,
+						allowedMentions: { users: [message.author.id] },
+					});
 			} else {
 				await log(
 					`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`,
