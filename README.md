@@ -8,7 +8,7 @@ Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](h
 
 The majority of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Thanks to everyone with the `@Scradd Contributor` role in the SA server for help as well!
 
-Pull requests are welcome if you would like to help contribute. However, before coding new features, please discuss it with cobalt, whether that be in an issue here or somewhere on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you’ll do it. Please also check the [Contributing Guidelines](/.github/CONTRIBUTING.md) before starting to code for more guidelines to follow.
+Pull requests are welcome if you would like to help contribute. Please read through the [Contributing Guidelines](/.github/CONTRIBUTING.md) if you are interested in helping out.
 
 ### Setup
 
@@ -49,6 +49,6 @@ When testing your code, it is recommended to run `npm run serve & npm run dev` t
 -   To start the bot after building the code, run `npm start`.
 -   To rebuild the code on every code change, run `npm run dev`.
 -   To restart the bot on every successful build, run `npm run serve`.
--   To format the code, run `npm run format`. This command must be run before your PR is merged. If you don’t run it, it is automatically run in the workflow.
--   To lint the code, run `npm run lint`. No lint errors may be present when your PR is merged. Warnings may be allowed depending on the context. Some lint errors may be fixed automatically with `npm run lint -- --fix`, but it is important to manually confirm it worked as intended. The workflow fails if warnings are present.
+-   To format the code, run `npm run format`.
+-   To lint the code, run `npm run lint`.
 -   To unit test the code, run `npm run test`. No tests may fail when your PR is merged. If you can, we would also very much appreciate any new tests you add. We use the Node.JS native test runner for tests.
