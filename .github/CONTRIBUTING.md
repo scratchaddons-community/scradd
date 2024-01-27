@@ -1,6 +1,9 @@
 # Contributing guidelines
 
-For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive the `@Scradd Contributor` role in the Scratch Addons Discord and access to the private Scradd Testing Discord.
+For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive one or more of the following:
+ - `@Scradd Contributor` role in the Scratch Addons server
+ - access to the private Scradd Testing server
+ - credit under `/info credits`
 
 ## General Guidelines
 
@@ -20,18 +23,19 @@ Please:
 
 -   Choose a relevant category.
 -   Mark comments that answer your question as to the answer.
--   Only use Discussions for questions, comments, and other related topics. Please don’t request new features or report bugs in Discussions; they may be closed and ignored.
+-   Only use Discussions for questions, comments, and other related topics. Please don’t request new features or report bugs in Discussions.
 
 ## Creating [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 
-Contributions are welcome! However, before coding new features, please discuss it with @RedGuy12 in an issue here, or the Scradd private/SA server on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you’ll do it.
+Contributions are welcome! However, before coding new features, please discuss it with cobalt, whether that be in an issue here or somewhere on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you’ll do it. 
 
 When you’re ready to contribute, you can create a pull request. Fork this repository, create a new branch from the `main` branch, and make your changes to the new branch. Now, create a pull request on the origin repository (scratchaddons-community/scradd). We will review your pull request.
 
 Please:
 
--   Minimize type errors (`npm run types`).
--   Run Prettier (`npm run format`) before pushing.
+-   Verify that your code successfully builds by running `npm run build`.
+-   Run Prettier using `npm run format` before pushing. If you don’t, it may be run automatically in the workflow.
+-   Lint your code using `npm run lint`. No lint errors may be present when your PR is merged. Warnings may be allowed depending on the context. Some lint errors may be fixed automatically with `npm run lint -- --fix`, but it is important to manually confirm it worked as intended. The workflow fails if any errors are present.
 -   Write meaningful commit messages, AKA more than one word long.
 
 ### Testing code
