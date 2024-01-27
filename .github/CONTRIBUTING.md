@@ -1,9 +1,10 @@
 # Contributing guidelines
 
 For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive one or more of the following:
- - `@Scradd Contributor` role in the Scratch Addons server
- - access to the private Scradd Testing server
- - credit under `/info credits`
+
+-   `@Scradd Contributor` role in the Scratch Addons server
+-   access to the private Scradd Testing server
+-   credit under `/info credits`
 
 ## General Guidelines
 
@@ -27,7 +28,7 @@ Please:
 
 ## Creating [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 
-Contributions are welcome! However, before coding new features, please discuss it with cobalt, whether that be in an issue here or somewhere on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you’ll do it. 
+Contributions are welcome! However, before coding new features, please discuss it with cobalt, whether that be in an issue here or somewhere on Discord. The [issues section](https://github.com/scratchaddons-community/scradd/issues?q=is%3Aissue+is%3Aopen) contains some things I want to happen that you may take up without asking -- just leave a comment saying you’ll do it.
 
 When you’re ready to contribute, you can create a pull request. Fork this repository, create a new branch from the `main` branch, and make your changes to the new branch. Now, create a pull request on the origin repository (scratchaddons-community/scradd). We will review your pull request.
 
