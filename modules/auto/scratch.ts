@@ -17,16 +17,19 @@ const EMBED_LENGTH = 750;
 export function getMatches(content: string) {
 	const scratchUrlRegex =
 		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
-	return [...new Set(content.match(scratchUrlRegex))].slice(0, 5);
+	return Array.from(new Set(content.match(scratchUrlRegex)), parseURL)
 }
 
-export async function handleMatch(match: string): Promise<APIEmbed | undefined> {
+export async function parseURL(match: string) {
 	if (match.startsWith("<") && match.endsWith(">")) return;
 
 	const start = match.startsWith("http") ? 0 : 1,
 		end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
 
-	const url = new URL(match.slice(start, end));
+	return new URL(match.slice(start, end));
+}
+
+export async function handleMatch(url: URL): Promise<APIEmbed | undefined> {
 	const urlParts = url.pathname.split("/");
 
 	switch (urlParts[1]) {
