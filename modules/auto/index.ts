@@ -142,6 +142,7 @@ async function handleMutatable(message: Message) {
 				embeds.push(embed);
 				if (notSet) embed.footer = { text: "Disable this using /settings" };
 			}
+			if (embeds.length >= 5) break;
 		}
 		if (embeds.length) return { content: "", files: [], embeds, components: [] };
 	}
