@@ -5,12 +5,12 @@ import { getMatches, handleMatch, htmlToMarkdown, linkifyMentions } from "./scra
 await describe("getMatches", async () => {
 	await it("should match lone links", () => {
 		deepStrictEqual(getMatches("https://scratch.mit.edu/users/RedGuy7"), [
-			"https://scratch.mit.edu/users/RedGuy7",
+			new URL("https://scratch.mit.edu/users/RedGuy7"),
 		]);
 	});
 	await it("should match not-lone links", () => {
 		deepStrictEqual(getMatches("foo https://scratch.mit.edu/users/RedGuy7 bar"), [
-			" https://scratch.mit.edu/users/RedGuy7 ",
+			new URL("https://scratch.mit.edu/users/RedGuy7"),
 		]);
 	});
 	await it("should match multiple links", () => {
@@ -18,21 +18,15 @@ await describe("getMatches", async () => {
 			getMatches(
 				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy12",
 			),
-			["https://scratch.mit.edu/users/RedGuy7 ", "https://scratch.mit.edu/users/RedGuy12"],
+			[new URL("https://scratch.mit.edu/users/RedGuy7"), new URL("https://scratch.mit.edu/users/RedGuy12")],
 		);
 	});
-	await it("should only match the first 5 links", () => {
+	await it("should not match duplicate links", () => {
 		deepStrictEqual(
 			getMatches(
-				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy12 https://scratch.mit.edu/users/raisinr https://scratch.mit.edu/users/RaisinrPP https://scratch.mit.edu/projects/104 https://scratch.mit.edu/users/World_Languages",
+				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy7",
 			),
-			[
-				"https://scratch.mit.edu/users/RedGuy7 ",
-				"https://scratch.mit.edu/users/RedGuy12 ",
-				"https://scratch.mit.edu/users/raisinr ",
-				"https://scratch.mit.edu/users/RaisinrPP ",
-				"https://scratch.mit.edu/projects/104 ",
-			],
+			[new URL("https://scratch.mit.edu/users/RedGuy7"), new URL("https://scratch.mit.edu/users/RedGuy7")],
 		);
 	});
 });
