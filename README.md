@@ -54,4 +54,3 @@ Scradd has a couple of dev commands to streamline your coding.
 -   `npm run format`: Format code with Prettier
 -   `npm run lint`: Lint code with ESLint
 -   `npm run test`: Run unit tests with the Node.js native test runner
-
