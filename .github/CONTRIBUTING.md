@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-For anyone who knows [Git](https://git-scm.com) and JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive one or more of the following:
+For anyone who knows [Git](https://git-scm.com) and TypeScript/JavaScript basics: feel free to contribute to this repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a meaningful pull request merged may also receive one or more of the following:
 
 -   `@Scradd Contributor` role in the Scratch Addons server
 -   access to the private Scradd Testing server
