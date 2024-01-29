@@ -32,28 +32,28 @@ await describe("getMatches", async () => {
 			[new URL("https://scratch.mit.edu/users/RedGuy7")],
 		);
 	});
-	await it("should ignore when surrounded in angles", async () => {
+	await it("should ignore when surrounded in angles", () => {
 		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7>"), [undefined]);
 	});
-	await it("should not ignore a user with one left angle", async () => {
+	await it("should not ignore a user with one left angle", () => {
 		deepStrictEqual(
 			getMatches("<https://scratch.mit.edu/users/RedGuy7|"),
 			new URL("https://scratch.mit.edu/users/RedGuy7"),
 		);
 	});
-	await it("should not ignore a studio with one right angle", async () => {
+	await it("should not ignore a studio with one right angle", () => {
 		deepStrictEqual(
 			getMatches("|https://scratch.mit.edu/studios/386359>"),
 			new URL("https://scratch.mit.edu/studios/386359"),
 		);
 	});
-	await it("should not ignore a discussion with no angles", async () => {
+	await it("should not ignore a discussion with no angles", () => {
 		deepStrictEqual(
 			getMatches("|https://scratch.mit.edu/discuss/topic/732678|"),
 			new URL("https://scratch.mit.edu/discuss/topic/732678"),
 		);
 	});
-	await it("should work for projects", async () => {
+	await it("should work for projects", () => {
 		deepStrictEqual(
 			getMatches("|https://scratch.mit.edu/projects/890809667|"),
 			new URL("https://scratch.mit.edu/projects/890809667"),
