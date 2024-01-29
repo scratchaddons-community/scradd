@@ -20,7 +20,7 @@ export function getMatches(content: string) {
 	return Array.from(new Set(content.match(scratchUrlRegex)), parseURL);
 }
 
-export async function parseURL(match: string) {
+export function parseURL(match: string) {
 	if (match.startsWith("<") && match.endsWith(">")) return;
 
 	const start = match.startsWith("http") ? 0 : 1,
