@@ -18,7 +18,10 @@ await describe("getMatches", async () => {
 			getMatches(
 				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy12",
 			),
-			[new URL("https://scratch.mit.edu/users/RedGuy7"), new URL("https://scratch.mit.edu/users/RedGuy12")],
+			[
+				new URL("https://scratch.mit.edu/users/RedGuy7"),
+				new URL("https://scratch.mit.edu/users/RedGuy12"),
+			],
 		);
 	});
 	await it("should not match duplicate links", () => {
@@ -26,7 +29,10 @@ await describe("getMatches", async () => {
 			getMatches(
 				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy7",
 			),
-			[new URL("https://scratch.mit.edu/users/RedGuy7"), new URL("https://scratch.mit.edu/users/RedGuy7")],
+			[
+				new URL("https://scratch.mit.edu/users/RedGuy7"),
+				new URL("https://scratch.mit.edu/users/RedGuy7"),
+			],
 		);
 	});
 });
