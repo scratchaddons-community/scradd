@@ -3,6 +3,18 @@ import type { MenuCommandContext } from "strife.js";
 
 declare global {
 	interface Array<T> {
+		includes(
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			fromIndex?: number,
+		): searchElement is T;
+		lastIndexOf(
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			fromIndex?: number,
+		): number;
+		indexOf(
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			fromIndex?: number,
+		): number;
 		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
 		map<U>(
 			callbackfn: (value: T, index: number, array: T[]) => U,
