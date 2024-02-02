@@ -236,7 +236,7 @@ async function recheckRole(role: Role, reason = "No longer qualifies") {
 	if (!role.members.size) return await role.delete("Unused role");
 
 	const anyQualify = await asyncFilter([...role.members.values()], qualifiesForRole).next();
-	if (!anyQualify.value) return await role.delete(reason);
+	if (!anyQualify.value) return await role.delete(reason).catch(() => void 0);
 
 	if (
 		config.guild.features.includes("ROLE_ICONS") &&
