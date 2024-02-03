@@ -1,16 +1,16 @@
-import { deepStrictEqual, notEqual, strictEqual } from "node:assert";
+import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-import { getMatches, handleMatch, htmlToMarkdown, linkifyMentions } from "./scratch.js";
+import { getMatches, htmlToMarkdown, linkifyMentions } from "./scratch.js";
 
 await describe("getMatches", async () => {
 	await it("should match lone links", () => {
 		deepStrictEqual(getMatches("https://scratch.mit.edu/users/RedGuy7"), [
-			"https://scratch.mit.edu/users/RedGuy7",
+			new URL("https://scratch.mit.edu/users/RedGuy7"),
 		]);
 	});
 	await it("should match not-lone links", () => {
 		deepStrictEqual(getMatches("foo https://scratch.mit.edu/users/RedGuy7 bar"), [
-			" https://scratch.mit.edu/users/RedGuy7 ",
+			new URL("https://scratch.mit.edu/users/RedGuy7"),
 		]);
 	});
 	await it("should match multiple links", () => {
@@ -18,39 +18,42 @@ await describe("getMatches", async () => {
 			getMatches(
 				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy12",
 			),
-			["https://scratch.mit.edu/users/RedGuy7 ", "https://scratch.mit.edu/users/RedGuy12"],
-		);
-	});
-	await it("should only match the first 5 links", () => {
-		deepStrictEqual(
-			getMatches(
-				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy12 https://scratch.mit.edu/users/raisinr https://scratch.mit.edu/users/RaisinrPP https://scratch.mit.edu/projects/104 https://scratch.mit.edu/users/World_Languages",
-			),
 			[
-				"https://scratch.mit.edu/users/RedGuy7 ",
-				"https://scratch.mit.edu/users/RedGuy12 ",
-				"https://scratch.mit.edu/users/raisinr ",
-				"https://scratch.mit.edu/users/RaisinrPP ",
-				"https://scratch.mit.edu/projects/104 ",
+				new URL("https://scratch.mit.edu/users/RedGuy7"),
+				new URL("https://scratch.mit.edu/users/RedGuy12"),
 			],
 		);
 	});
-});
-await describe("handleMatch", async () => {
-	await it("should ignore when surrounded in angles", async () => {
-		strictEqual(await handleMatch("<https://scratch.mit.edu/users/RedGuy7>"), undefined);
+	await it("should not match duplicate links", () => {
+		deepStrictEqual(
+			getMatches(
+				"https://scratch.mit.edu/users/RedGuy7 https://scratch.mit.edu/users/RedGuy7",
+			),
+			[new URL("https://scratch.mit.edu/users/RedGuy7")],
+		);
 	});
-	await it("should not ignore a user with one left angle", async () => {
-		notEqual(await handleMatch("<https://scratch.mit.edu/users/RedGuy7|"), undefined);
+	await it("should ignore when surrounded in angles", () => {
+		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7>"), [undefined]);
 	});
-	await it("should not ignore a studio with one right angle", async () => {
-		notEqual(await handleMatch("|https://scratch.mit.edu/studios/386359>"), undefined);
+	await it("should not ignore a user with one left angle", () => {
+		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7|"), [
+			new URL("https://scratch.mit.edu/users/RedGuy7"),
+		]);
 	});
-	await it("should not ignore a discussion with no angles", async () => {
-		notEqual(await handleMatch("|https://scratch.mit.edu/discuss/topic/732678|"), undefined);
+	await it("should not ignore a studio with one right angle", () => {
+		deepStrictEqual(getMatches("|https://scratch.mit.edu/studios/386359>"), [
+			new URL("https://scratch.mit.edu/studios/386359"),
+		]);
 	});
-	await it("should work for projects", async () => {
-		notEqual(await handleMatch("|https://scratch.mit.edu/projects/890809667|"), undefined);
+	await it("should not ignore a discussion with no angles", () => {
+		deepStrictEqual(getMatches("|https://scratch.mit.edu/discuss/topic/732678|"), [
+			new URL("https://scratch.mit.edu/discuss/topic/732678"),
+		]);
+	});
+	await it("should work for projects", () => {
+		deepStrictEqual(getMatches("|https://scratch.mit.edu/projects/890809667|"), [
+			new URL("https://scratch.mit.edu/projects/890809667"),
+		]);
 	});
 });
 await describe("htmlToMarkdown", async () => {

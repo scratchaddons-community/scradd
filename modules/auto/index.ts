@@ -139,10 +139,11 @@ async function handleMutatable(message: Message) {
 		const matches = getMatches(message.content);
 		const embeds: APIEmbed[] = [];
 		for (const match of matches) {
-			const embed = await handleMatch(match);
+			const embed = match && (await handleMatch(match));
 			if (embed) {
 				embeds.push(embed);
 			}
+			if (embeds.length >= 5) break;
 		}
 		if (embeds.length)
 			return {
