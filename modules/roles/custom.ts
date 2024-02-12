@@ -8,7 +8,6 @@ import {
 	type ChatInputCommandInteraction,
 	TextInputStyle,
 	type Snowflake,
-	ApplicationCommandPermissionType,
 	type Role,
 } from "discord.js";
 import constants from "../../common/constants.js";
@@ -19,6 +18,7 @@ import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
 import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
+import hasPermission from "../do/permissions.js";
 
 let command: ApplicationCommand | undefined;
 
@@ -253,11 +253,6 @@ export function getCustomRole(member: GuildMember) {
 	return member.roles.valueOf().find((role) => role.name.startsWith(CUSTOM_ROLE_PREFIX));
 }
 export async function qualifiesForRole(member: GuildMember) {
-	if (
-		member.roles.premiumSubscriberRole ||
-		(config.roles.staff && member.roles.resolve(config.roles.staff.id))
-	)
-		return true;
 	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(
@@ -271,12 +266,12 @@ export async function qualifiesForRole(member: GuildMember) {
 	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
 	command ??= (await config.guild.commands.fetch()).find(({ name }) => name === "custom-role");
-	const permissions =
-		command && (await config.guild.commands.permissions.fetch({ command }).catch(() => void 0));
-	return permissions?.some(
-		(permission) =>
-			permission.type === ApplicationCommandPermissionType.User &&
-			permission.id === member.user.id &&
-			permission.permission,
-	);
+	return command
+		? await hasPermission(
+				command,
+				member,
+				undefined,
+				config.roles.weeklyWinner && new Set(config.roles.weeklyWinner.id),
+		  )
+		: false;
 }

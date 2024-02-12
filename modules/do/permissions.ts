@@ -23,6 +23,7 @@ export default async function hasPermission(
 	schema: ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation,
 	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
 	channel?: TextBasedChannel,
+	ignoredRoles = new Set<Snowflake>(),
 ) {
 	if (!(schema instanceof ApplicationCommand)) return true; // TODO
 	if (user instanceof User) return schema.dmPermission ?? false;
@@ -57,6 +58,7 @@ export default async function hasPermission(
 	const rolePermissions = permissions.filter(
 		({ id, type }) =>
 			type === ApplicationCommandPermissionType.Role &&
+			!ignoredRoles.has(id) &&
 			(user instanceof GuildMember ? user.roles.resolve(id) : user.roles.includes(id)),
 	);
 	return rolePermissions.length
