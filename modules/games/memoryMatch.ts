@@ -411,7 +411,7 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
 	const guildEmojis = (await guild.emojis.fetch())
 		.filter((emoji) => emoji.available)
-		.map((emoji) => emoji.toString());
+		.map((emoji) => emoji.toString()); // TODO: we use _ for emoji names - what does djs do?
 	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
 
 	const selected = Array.from(
