@@ -3,10 +3,6 @@ import type { MenuCommandContext } from "strife.js";
 
 declare global {
 	interface Array<T> {
-		includes(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
-			fromIndex?: number,
-		): searchElement is T;
 		lastIndexOf(
 			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,
