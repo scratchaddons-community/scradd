@@ -54,10 +54,8 @@ async function userInfo(
 				member.voice.channel.toString() +
 				`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
 					member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
-				}${
-					member.voice.streaming || member.voice.selfVideo
-						? constants.emojis.discord.streaming
-						: ""
+				}${member.voice.streaming ? constants.emojis.discord.streaming + " " : ""}${
+					member.voice.selfVideo ? constants.emojis.discord.camera : ""
 				}`.trim(),
 			inline: true,
 		});
