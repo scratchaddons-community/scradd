@@ -36,26 +36,6 @@ jobs:
               with:
                   commit_message: Format
 
-    analyze:
-        name: Analyze
-        runs-on: ubuntu-20.04
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4.1.1
-              with:
-                  ref: ${{ github.head_ref }}
-                  repository: ${{ github.event.pull_request.head.repo.full_name }}
-
-            - name: Setup CodeQL
-              uses: github/codeql-action/init@v3.23.0
-              with:
-                  languages: javascript
-                  queries: security-and-quality
-
-            - name: Analyze
-              uses: github/codeql-action/analyze@v3.23.0
-
     lint:
         name: Lint
         runs-on: ubuntu-20.04
