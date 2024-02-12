@@ -215,10 +215,7 @@ function getConfig() {
 						typeof channel[1] !== "string",
 				)
 				.map((channel) => ({
-					name: `${channel[0]
-						.split("_")
-						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-						.join(" ")} ${
+					name: `${channel[0].replaceAll(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${
 						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
 					}`,
 
@@ -232,9 +229,9 @@ function getConfig() {
 
 			fields: Object.entries(config.roles).map((role) => ({
 				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
-					.split("_")
-					.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-					.join(" ")} role`,
+
+					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+					.toLowerCase()} role`,
 
 				value: role[1]?.toString() ?? "*None*",
 				inline: true,

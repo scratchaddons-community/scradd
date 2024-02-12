@@ -63,14 +63,14 @@ async function getConfig() {
 				getChannel("promo", ChannelType.GuildText, "partial"),
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
-			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
+			oldSuggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
 
 		roles: {
 			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
 			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) || mod,
-			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
 			booster: roles.find((role) => role.name.toLowerCase().includes("booster")),

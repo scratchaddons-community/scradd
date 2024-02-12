@@ -37,9 +37,7 @@ export async function getChatters() {
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
-	const ending =
-		weeklyWinners[formatted.length] &&
-		` ${weeklyWinners[formatted.length]?.xp.toLocaleString()} XP`;
+	const ending = ` ${(weeklyWinners[formatted.length]?.xp ?? 0).toLocaleString()} XP`;
 	const filtered = ending ? formatted.filter((line) => !line.endsWith(ending)) : formatted;
 
 	return {
@@ -118,7 +116,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
-	const role = config.roles.weekly_winner;
+	const role = config.roles.weeklyWinner;
 	if (role) {
 		for (const [, weeklyMember] of role.members) {
 			if (!ids.has(weeklyMember.id))
