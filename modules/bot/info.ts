@@ -133,13 +133,18 @@ async function credits(interaction: ChatInputCommandInteraction) {
 			if (version.startsWith("git+")) {
 				const segments = version.split("+")[1]?.split("#");
 				return segments
-					? ([`${name}@${segments[1]}`, segments[0]] as const)
+					? ([`${name}${segments[1] ? `@${segments[1]}` : ""}`, segments[0]] as const)
 					: ([name] as const);
 			}
 			if (version.startsWith("npm:")) {
 				const segments = version.split("@");
-				const reference = `${segments.length > 2 ? "@" : ""}${segments.at(-2)}`;
-				return [`${reference}@${segments.at(-1)}`, `https://npm.im/${reference}`] as const;
+				const reference = `${segments.length > 2 ? "@" : ""}${
+					segments.at(-2) ?? segments[0]
+				}`;
+				return [
+					`${reference}@${segments.at(-1) ?? segments[0]}`,
+					`https://npm.im/${reference}`,
+				] as const;
 			}
 
 			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
