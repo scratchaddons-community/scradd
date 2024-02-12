@@ -13,6 +13,7 @@ import {
 	type MessageActionRowComponent,
 } from "discord.js";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import constants from "../common/constants.js";
 
 // @ts-expect-error TS2675
 class ActionRow<T extends MessageActionRowComponent | TextInputComponent> extends _ActionRow<T> {
@@ -295,6 +296,8 @@ await describe("paginate", async () => {
 			(message) => messages.push(message),
 			{ title: "Pagination Test", singular: "item", user: false, failMessage: "fail" },
 		);
-		deepStrictEqual(messages, [{ content: "<:no:1016127863273037935> fail", ephemeral: true }]);
+		deepStrictEqual(messages, [
+			{ content: `${constants.emojis.statuses.no} fail`, ephemeral: true },
+		]);
 	});
 });
