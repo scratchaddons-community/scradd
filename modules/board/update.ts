@@ -12,7 +12,7 @@ const processing = new Set<Snowflake>();
  *
  * @param message - The board message to update.
  */
-export default async function updateBoard({ count, message }: { count: number; message: Message }) {
+export default async function updateBoard({ count, message }: { count: number; message: Message }): Promise<void> {
 	if (processing.has(message.id)) return;
 	processing.add(message.id);
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
@@ -100,7 +100,7 @@ function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
 	boardDatabase.data = data;
 }
 
-export async function syncRandomBoard() {
+export async function syncRandomBoard(): Promise<void> {
 	for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
 		if (info.onBoard) continue;
 

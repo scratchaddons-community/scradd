@@ -9,6 +9,7 @@ import {
 	TextInputStyle,
 	type Snowflake,
 	type Role,
+	type InteractionResponse,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -22,7 +23,9 @@ import hasPermission from "../do/permissions.js";
 
 let command: ApplicationCommand | undefined;
 
-export async function customRole(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export async function customRole(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+): Promise<InteractionResponse | undefined> {
 	command ??= interaction.command ?? undefined;
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember!");
@@ -89,7 +92,9 @@ export async function customRole(interaction: ChatInputCommandInteraction<"cache
 		],
 	});
 }
-export async function createCustomRole(interaction: ModalSubmitInteraction) {
+export async function createCustomRole(
+	interaction: ModalSubmitInteraction,
+): Promise<InteractionResponse | undefined> {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember!");
 
@@ -220,12 +225,15 @@ export async function createCustomRole(interaction: ModalSubmitInteraction) {
 	return await interaction.reply(`${constants.emojis.statuses.yes} Created your custom role!`);
 }
 
-export async function recheckMemberRole(_: GuildMember | PartialGuildMember, member: GuildMember) {
+export async function recheckMemberRole(
+	_: GuildMember | PartialGuildMember,
+	member: GuildMember,
+): Promise<void> {
 	const role = getCustomRole(member);
 	if (!role) return;
 	await recheckRole(role);
 }
-export async function recheckAllRoles() {
+export async function recheckAllRoles(): Promise<void> {
 	for (const [, role] of await config.guild.roles.fetch()) {
 		if (role.name.startsWith(CUSTOM_ROLE_PREFIX)) {
 			await recheckRole(role);
@@ -249,10 +257,10 @@ async function recheckRole(role: Role, reason = "No longer qualifies") {
 	}
 }
 
-export function getCustomRole(member: GuildMember) {
+export function getCustomRole(member: GuildMember): Role | undefined {
 	return member.roles.valueOf().find((role) => role.name.startsWith(CUSTOM_ROLE_PREFIX));
 }
-export async function qualifiesForRole(member: GuildMember) {
+export async function qualifiesForRole(member: GuildMember): Promise<boolean> {
 	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;
 	const lastWeekly = Object.entries(

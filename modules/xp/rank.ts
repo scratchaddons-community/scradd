@@ -6,6 +6,7 @@ import {
 	type ButtonInteraction,
 	type ChatInputCommandInteraction,
 	type GuildMember,
+	type InteractionResponse,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -15,7 +16,10 @@ import { getLevelForXp, getXpForLevel } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 import { getSettings, mentionUser } from "../settings.js";
 
-export default async function getUserRank(interaction: RepliableInteraction, user: User) {
+export default async function getUserRank(
+	interaction: RepliableInteraction,
+	user: User,
+): Promise<void> {
 	const allXp = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
@@ -135,7 +139,7 @@ async function makeCanvasFiles(progress: number) {
 export async function top(
 	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
 	user?: GuildMember | User,
-) {
+): Promise<InteractionResponse | undefined> {
 	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const index = user && leaderboard.findIndex(({ user: id }) => id === user.id);

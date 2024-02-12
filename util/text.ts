@@ -79,7 +79,7 @@ export function truncateText(text: string, maxLength: number, multiline = false)
  *
  * @returns The encoded text.
  */
-export function caesar(text: string, rot = 13) {
+export function caesar(text: string, rot = 13): string {
 	return text.replaceAll(/[a-z]/gi, (chr) => {
 		const start = chr <= "Z" ? 65 : 97;
 
@@ -94,7 +94,7 @@ export function caesar(text: string, rot = 13) {
  *
  * @returns The normalized string.
  */
-export function normalize(text: string) {
+export function normalize(text: string): string {
 	return text
 		.normalize("NFD")
 		.replaceAll(/[\p{Dia}\p{M}\p{Cf}\p{Sk}]+/gu, "")
@@ -113,7 +113,7 @@ export function trimPatchVersion(full: string): string {
 	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main ?? full;
 }
 
-export function getRequestUrl(request: IncomingMessage) {
+export function getRequestUrl(request: IncomingMessage): URL {
 	return new URL(
 		request.url ?? "",
 		`${

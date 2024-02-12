@@ -41,7 +41,10 @@ const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
 		content: await fileSystem.readFile("./modules/forms/appeals/notBanned.html", "utf8"),
 	});
 
-export default async function appealRequest(request: IncomingMessage, response: ServerResponse) {
+export default async function appealRequest(
+	request: IncomingMessage,
+	response: ServerResponse,
+): Promise<ServerResponse> {
 	if (!process.env.CLIENT_SECRET)
 		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 

@@ -76,6 +76,6 @@ export function getAnswer(
 	return { ...tag, index, position: index / (tags.length - 1) };
 }
 
-export function getAnswers(channel: ForumChannel) {
+export function getAnswers(channel: ForumChannel): [number, GuildForumTag][] {
 	return [...channel.availableTags.entries()].filter(([, tag]) => tag.moderated);
 }

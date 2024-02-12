@@ -18,7 +18,7 @@ import log, { LogSeverity, LoggingEmojis, type AuditLog } from "./misc.js";
 import { unifiedDiff } from "difflib";
 
 const createdInvites = new Set<string>();
-export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>) {
+export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {
 	if (createdInvites.has(entry.target.code)) return;
 	createdInvites.add(entry.target.code);
 
@@ -46,7 +46,7 @@ export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>) 
 	);
 }
 
-export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
+export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<void> {
 	if (newGuild.id !== config.guild.id) return;
 
 	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {
@@ -496,7 +496,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild) {
 			LogSeverity.ImportantUpdate,
 		);
 }
-export async function inviteDelete(invite: Invite) {
+export async function inviteDelete(invite: Invite): Promise<void> {
 	if (invite.guild?.id !== config.guild.id) return;
 	await log(
 		`${LoggingEmojis.Invite} Invite ${invite.code} deleted${

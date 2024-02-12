@@ -13,7 +13,7 @@ import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } fr
 
 export async function guildScheduledEventCreate(
 	entry: AuditLog<AuditLogEvent.GuildScheduledEventCreate>,
-) {
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 			entry.target.url
@@ -34,7 +34,7 @@ export async function guildScheduledEventUpdate(
 		| "scheduled_end_time"
 		| "scheduled_start_time"
 	>,
-) {
+): Promise<void> {
 	let imageChanged = false;
 	let timeChanged = false;
 	let locationChanged = false;
@@ -154,7 +154,7 @@ export async function guildScheduledEventUpdate(
 	}
 }
 
-export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
+export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
 	if (!newState.member || newState.guild.id !== config.guild.id) return;
 
 	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
@@ -241,7 +241,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 }
 export async function guildScheduledEventDelete(
 	event: GuildScheduledEvent | PartialGuildScheduledEvent,
-) {
+): Promise<void> {
 	if (event.guildId !== config.guild.id || event.partial) return;
 
 	await log(

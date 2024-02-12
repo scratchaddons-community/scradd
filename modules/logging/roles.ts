@@ -5,7 +5,7 @@ import config from "../../common/config.js";
 
 export async function memberRoleUpdate(
 	entry: AuditLog<AuditLogEvent.MemberRoleUpdate, "$add" | "$remove">,
-) {
+): Promise<void> {
 	if (!entry.target) return;
 
 	const addedRoles = entry.changes
@@ -41,7 +41,7 @@ export async function memberRoleUpdate(
 		);
 }
 
-export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>) {
+export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Role} ${roleMention(entry.target.id)} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
@@ -50,7 +50,7 @@ export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>) {
 
 export async function roleUpdate(
 	entry: AuditLog<AuditLogEvent.RoleUpdate, "icon_hash" | "unicode_emoji">,
-) {
+): Promise<void> {
 	let iconChanged = false;
 
 	for (const change of entry.changes) {
@@ -144,7 +144,7 @@ export async function roleUpdate(
 	);
 }
 
-export async function roleDelete(role: Role) {
+export async function roleDelete(role: Role): Promise<void> {
 	if (role.guild.id !== config.guild.id) return;
 	await log(
 		`${LoggingEmojis.Role} @${role.name} (ID: ${role.id}) deleted`,

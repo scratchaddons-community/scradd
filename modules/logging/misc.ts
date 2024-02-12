@@ -26,6 +26,8 @@ import {
 	type User,
 	type Webhook,
 	type NonThreadGuildBasedChannel,
+	type Message,
+	type ThreadChannel,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
@@ -116,7 +118,7 @@ export default async function log(
 			| { url: string }
 		))[];
 	} = {},
-) {
+): Promise<Message<true>> {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
 	const externalIndex =
@@ -172,7 +174,7 @@ export default async function log(
 	});
 }
 
-export async function getLoggingThread(group: LogSeverity) {
+export async function getLoggingThread(group: LogSeverity): Promise<TextChannel | ThreadChannel> {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
@@ -214,7 +216,10 @@ export enum LoggingEmojis {
 
 export const LoggingErrorEmoji = constants.emojis.statuses.no;
 
-export function extraAuditLogsInfo(entry: { executor?: User | null; reason?: string | null }) {
+export function extraAuditLogsInfo(entry: {
+	executor?: User | null;
+	reason?: string | null;
+}): string {
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
 		entry.reason
 			? entry.reason.includes("\n")

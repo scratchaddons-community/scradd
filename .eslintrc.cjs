@@ -66,7 +66,6 @@ module.exports = {
 			"error",
 			{ accessibility: "no-public", overrides: { parameterProperties: "explicit" } },
 		],
-		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/init-declarations": "off",
 		"@typescript-eslint/max-params": ["warn", { max: 4 }],
 		"@typescript-eslint/member-ordering": "off",

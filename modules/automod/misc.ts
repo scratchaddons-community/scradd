@@ -58,7 +58,10 @@ export const badWordRegexps = badWords.map(
 		),
 );
 
-export default function tryCensor(text: string, strikeShift = 0) {
+export default function tryCensor(
+	text: string,
+	strikeShift = 0,
+): false | { censored: string; strikes: number; words: string[][] } {
 	const words: string[][] = [];
 	const censored = badWordRegexps.reduce((string, regexp, index) => {
 		words[index] ??= [];
@@ -94,12 +97,12 @@ export default function tryCensor(text: string, strikeShift = 0) {
 	);
 }
 
-export function censor(text: string) {
+export function censor(text: string): string {
 	const censored = tryCensor(text);
 	return censored ? censored.censored : text;
 }
 
-export function badWordsAllowed(channel?: TextBasedChannel | null) {
+export function badWordsAllowed(channel?: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
 
 	return (
@@ -112,7 +115,7 @@ export function badWordsAllowed(channel?: TextBasedChannel | null) {
 	);
 }
 
-export function isPingable(name: string) {
+export function isPingable(name: string): boolean {
 	const normalized = name.normalize("NFD").replaceAll(/\p{Dia}/gu, "");
 	return /^[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-]$|(?:[\w`~!@#$%^&*()=+[\]\\{}|;':",./<>?-].?){2,}/u.test(
 		normalized,

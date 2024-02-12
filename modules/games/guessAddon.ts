@@ -16,7 +16,8 @@ import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" }
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
-export default async function guessAddon(interaction: ChatInputCommandInteraction) {
+
+export default async function guessAddon(interaction: ChatInputCommandInteraction): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	await reply();
 

@@ -9,7 +9,7 @@ export const threadsDatabase = new Database<{
 }>("threads");
 await threadsDatabase.init();
 
-export function getThreadConfig(thread: AnyThreadChannel) {
+export function getThreadConfig(thread: AnyThreadChannel): { roles: string[]; keepOpen: boolean } {
 	const found = threadsDatabase.data.find((found) => found.id === thread.id);
 
 	return found

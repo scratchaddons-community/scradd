@@ -14,7 +14,7 @@ import { formatAnyEmoji } from "../../util/markdown.js";
 export default async function top(
 	interaction: RepliableInteraction,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean },
-) {
+): Promise<void> {
 	const { suggestions } = config.channels;
 	const user = options.user instanceof GuildMember ? options.user.user : options.user;
 

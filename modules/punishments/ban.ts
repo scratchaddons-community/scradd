@@ -6,6 +6,7 @@ import {
 	TimestampStyles,
 	User,
 	type RepliableInteraction,
+type	InteractionResponse,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
@@ -25,7 +26,7 @@ export default async function ban(
 		"unban-in"?: string;
 		"delete-range"?: string;
 	},
-) {
+): Promise<InteractionResponse | undefined> {
 	const userToBan = options.user instanceof GuildMember ? options.user.user : options.user;
 	const unbanIn = options["unban-in"]?.toLowerCase();
 	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);

@@ -3,7 +3,7 @@ import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } fr
 import { unifiedDiff } from "difflib";
 import { formatAnyEmoji } from "../../util/markdown.js";
 
-export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>) {
+export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Expressions} ${formatAnyEmoji(entry.target)} created${extraAuditLogsInfo(
 			entry,
@@ -11,7 +11,7 @@ export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>) {
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>) {
+export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): Promise<void> {
 	for (const change of entry.changes) {
 		if (change.key !== "name") return;
 		await log(
@@ -26,7 +26,7 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>) {
 		);
 	}
 }
-export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>) {
+export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>): Promise<void> {
 	const oldName =
 		"name" in entry.target
 			? entry.target.name
@@ -42,7 +42,7 @@ export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>) {
 	);
 }
 
-export async function stickerCreate(entry: AuditLog<AuditLogEvent.StickerCreate>) {
+export async function stickerCreate(entry: AuditLog<AuditLogEvent.StickerCreate>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id
@@ -51,7 +51,7 @@ export async function stickerCreate(entry: AuditLog<AuditLogEvent.StickerCreate>
 		{ files: [entry.target.url] },
 	);
 }
-export async function stickerUpdate(entry: AuditLog<AuditLogEvent.StickerUpdate>) {
+export async function stickerUpdate(entry: AuditLog<AuditLogEvent.StickerUpdate>): Promise<void> {
 	for (const change of entry.changes) {
 		switch (change.key) {
 			case "name": {
@@ -104,7 +104,7 @@ export async function stickerUpdate(entry: AuditLog<AuditLogEvent.StickerUpdate>
 		}
 	}
 }
-export async function stickerDelete(entry: AuditLog<AuditLogEvent.StickerDelete>) {
+export async function stickerDelete(entry: AuditLog<AuditLogEvent.StickerDelete>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id

@@ -24,7 +24,7 @@ export default async function hasPermission(
 	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
 	channel?: TextBasedChannel,
 	ignoredRoles = new Set<Snowflake>(),
-) {
+): Promise<boolean> {
 	if (!(schema instanceof ApplicationCommand)) return true; // TODO
 	if (user instanceof User) return schema.dmPermission ?? false;
 
@@ -70,6 +70,6 @@ export default async function hasPermission(
 		  );
 }
 
-export function handleCommandPermissionUpdate(data: ApplicationCommandPermissionsUpdateData) {
+export function handleCommandPermissionUpdate(data: ApplicationCommandPermissionsUpdateData): void {
 	if (data.applicationId === client.user.id) permissionsCache[data.guildId] = {};
 }

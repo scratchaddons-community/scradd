@@ -5,7 +5,7 @@ import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { censor, isPingable } from "./misc.js";
 
-export default async function changeNickname(member: GuildMember) {
+export default async function changeNickname(member: GuildMember): Promise<void> {
 	const censored = tryCensor(member.displayName);
 	const newNick = findName(member);
 

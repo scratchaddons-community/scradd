@@ -14,7 +14,7 @@ import log, {
 	type AuditLog,
 } from "./misc.js";
 
-export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>) {
+export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>): Promise<void> {
 	if (!(entry.target instanceof ThreadChannel)) {
 		await log(
 			`${LoggingEmojis.Thread} Unknown thread ${channelMention(
@@ -31,7 +31,7 @@ export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>) 
 		);
 	}
 }
-export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>) {
+export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Thread} ${
 			entry.target instanceof ThreadChannel
@@ -43,7 +43,10 @@ export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>) 
 	);
 }
 
-export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyThreadChannel) {
+export async function threadUpdate(
+	oldThread: AnyThreadChannel,
+	newThread: AnyThreadChannel,
+): Promise<void> {
 	if (!shouldLog(newThread)) return;
 
 	if (oldThread.archived !== newThread.archived)

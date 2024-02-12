@@ -13,7 +13,7 @@ import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import constants from "../../common/constants.js";
 import { recheckMemberRole } from "../roles/custom.js";
 
-export async function getChatters() {
+export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();
 	const winnerId = weeklyWinners[0]?.user;
 	const winner =
@@ -56,10 +56,10 @@ export async function getChatters() {
 				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
-	} satisfies MessageCreateOptions;
+	};
 }
 
-export default async function getWeekly(nextWeeklyDate: Date) {
+export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 	if (config.channels.announcements) {
 		remindersDatabase.data = [
 			...remindersDatabase.data,

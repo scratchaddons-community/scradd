@@ -10,6 +10,7 @@ import {
 	InteractionType,
 	type RepliableInteraction,
 	channelMention,
+	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -43,7 +44,7 @@ export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
 	strikeId?: string,
-) {
+): Promise<InteractionResponse | undefined> {
 	const option = interaction.isAnySelectMenu() ? interaction.values[0] : category;
 
 	if (option === SA_CATEGORY) {
@@ -91,7 +92,7 @@ export async function showTicketModal(
 export default async function contactMods(
 	interaction: RepliableInteraction,
 	options: Category | GuildMember,
-) {
+): Promise<ThreadChannel> {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
@@ -184,7 +185,10 @@ export default async function contactMods(
 	return thread;
 }
 
-export async function contactUser(member: GuildMember, interaction: RepliableInteraction) {
+export async function contactUser(
+	member: GuildMember,
+	interaction: RepliableInteraction,
+): Promise<void> {
 	await interaction.deferReply({ ephemeral: true });
 	const existingThread = TICKETS_BY_MEMBER[member.id];
 

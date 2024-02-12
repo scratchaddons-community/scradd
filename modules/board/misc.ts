@@ -45,7 +45,7 @@ export function boardReactionCount(channel: { id: Snowflake }, time?: number): n
 export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
 	time = Date.now(),
-) {
+): number | undefined {
 	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);
 

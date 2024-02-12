@@ -26,7 +26,7 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 	undefined, // Invalid links
 ]);
 
-export default async function automodMessage(message: Message) {
+export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
 	const pings = message.mentions.users.size

@@ -19,7 +19,7 @@ import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
 
-export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>) {
+export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(
 		entry.target instanceof BaseChannel
 			? `${LoggingEmojis.Channel} ${
@@ -41,7 +41,7 @@ export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>) {
+export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} ${
 			"name" in entry.target ? `#${entry.target.name}` : "Unknown channel"
@@ -51,7 +51,7 @@ export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>
 }
 export async function channelOverwriteCreate(
 	entry: AuditLog<AuditLogEvent.ChannelOverwriteCreate>,
-) {
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -65,7 +65,7 @@ export async function channelOverwriteCreate(
 }
 export async function channelOverwriteUpdate(
 	entry: AuditLog<AuditLogEvent.ChannelOverwriteUpdate>,
-) {
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -79,7 +79,7 @@ export async function channelOverwriteUpdate(
 }
 export async function channelOverwriteDelete(
 	entry: AuditLog<AuditLogEvent.ChannelOverwriteDelete>,
-) {
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -95,7 +95,7 @@ export async function channelOverwriteDelete(
 export async function channelUpdate(
 	oldChannel: DMChannel | NonThreadGuildBasedChannel,
 	newChannel: DMChannel | NonThreadGuildBasedChannel,
-) {
+): Promise<void> {
 	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
 		return;
 

@@ -38,9 +38,11 @@ const robotopStrikes =
 		(await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(robotopUrl))) ||
 	[];
 
-const strikesCache: Record<string, { mod?: string; reason: string }> = {};
+const strikesCache: Record<string, { mod?: string; reason?: string }> = {};
 
-export default async function filterToStrike(filter: string) {
+export default async function filterToStrike(
+	filter: string,
+): Promise<(typeof strikeDatabase["data"][number] & typeof strikesCache[string]) | undefined> {
 	if (/^\d{1,4}$/.test(filter)) {
 		const details = robotopStrikes.find((strike) => strike.id.toString() === filter);
 		const strike = strikeDatabase.data.find((strike) => strike.id.toString() === filter);
@@ -96,7 +98,7 @@ export async function listStrikes(
 	) => Promise<InteractionResponse | Message>,
 	{ expired: showExpired = true, removed: showRemoved = false } = {},
 	commandUser: User | false = false,
-) {
+): Promise<void> {
 	const strikes = strikeDatabase.data
 		.filter(
 			(strike) =>

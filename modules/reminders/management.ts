@@ -7,6 +7,7 @@ import {
 	type ChatInputCommandInteraction,
 	type MessageComponentInteraction,
 	channelMention,
+	type InteractionResponse,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
@@ -20,7 +21,7 @@ import config from "../../common/config.js";
 import { disableComponents, paginate } from "../../util/discord.js";
 import queueReminders from "./send.js";
 
-export async function listReminders(interaction: ChatInputCommandInteraction) {
+export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {
 	const reminders = getUserReminders(interaction.user.id);
 
 	await paginate(
@@ -63,7 +64,7 @@ export async function listReminders(interaction: ChatInputCommandInteraction) {
 export async function createReminder(
 	interaction: ChatInputCommandInteraction,
 	options: { dms?: boolean; time: string; reminder: string },
-) {
+): Promise<InteractionResponse | undefined> {
 	const reminders = getUserReminders(interaction.user.id);
 	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
 
@@ -148,7 +149,10 @@ export async function createReminder(
 	});
 }
 
-export async function cancelReminder(interaction: MessageComponentInteraction, id: string) {
+export async function cancelReminder(
+	interaction: MessageComponentInteraction,
+	id: string,
+): Promise<boolean> {
 	if (
 		interaction.user.id !== interaction.message.interaction?.user.id &&
 		(!config.roles.mod ||

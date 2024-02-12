@@ -47,7 +47,9 @@ const commandSchemas = new Collection<
 	string,
 	(ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation)[]
 >();
-export async function getAllSchemas(guild: Guild | null) {
+export async function getAllSchemas(
+	guild: Guild | null,
+): Promise<(ApplicationCommand | CustomOperation)[]> {
 	const guildId = guild?.id ?? "@me";
 	if (commandSchemas.has(guildId)) return commandSchemas.get(guildId) ?? [];
 
@@ -65,7 +67,7 @@ export async function getAllSchemas(guild: Guild | null) {
 export default async function getSchemas(
 	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
 	channel?: TextBasedChannel,
-) {
+): Promise<Record<Lowercase<string>, ApplicationCommand | CustomOperation>> {
 	const allSchemas = await getAllSchemas(user instanceof GuildMember ? user.guild : null);
 
 	const schemas = [];

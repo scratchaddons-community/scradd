@@ -37,6 +37,7 @@ import {
 	messageLink,
 	MessageFlags,
 	hyperlink,
+	type MessageReaction,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -509,7 +510,10 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 	return content;
 }
 
-export async function messageToEmbed(message: Message, censor = (text: string) => text) {
+export async function messageToEmbed(
+	message: Message,
+	censor = (text: string) => text,
+): Promise<APIEmbed> {
 	const lines = (await messageToText(message)).split("\n");
 	const content =
 		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
@@ -557,7 +561,10 @@ export async function messageToEmbed(message: Message, censor = (text: string) =
  *
  * @returns The added reactions.
  */
-export async function reactAll(message: Message, reactions: Readonly<EmojiIdentifierResolvable[]>) {
+export async function reactAll(
+	message: Message,
+	reactions: Readonly<EmojiIdentifierResolvable[]>,
+): Promise<MessageReaction[]> {
 	const messageReactions = [];
 	for (const reaction of reactions) {
 		const messageReaction = await message.react(reaction).catch(() => void 0);
@@ -828,7 +835,9 @@ export const BotInvitesPattern = /discord(?:app)?\.com\/(?:api\/)?oauth2\/author
 /** A global regular expression variant of {@link BotInvitesPattern}. */
 export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, "g");
 
-export function commandInteractionToString(interaction: ChatInputCommandInteraction) {
+export function commandInteractionToString(
+	interaction: ChatInputCommandInteraction,
+): `</${string}:${string}>` {
 	const subcommandGroup = interaction.options.getSubcommandGroup(false);
 	const subcommand = interaction.options.getSubcommand(false);
 
@@ -849,7 +858,10 @@ export function commandInteractionToString(interaction: ChatInputCommandInteract
 
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
 }
-export async function mentionChatCommand(fullCommand: string, guild?: Guild) {
+export async function mentionChatCommand(
+	fullCommand: string,
+	guild?: Guild,
+): Promise<`**/${string}**` | `</${string}:${string}>`> {
 	const [commandName] = fullCommand.split(" ");
 	const id = (
 		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
@@ -874,7 +886,7 @@ export function columns(
 	title: string = constants.zws,
 	count: 1 | 2 | 3 = 2,
 	callback = (item: { toString(): string }) => item.toString(),
-) {
+): APIEmbedField[] {
 	const columnLength = Math.ceil(array.length / count);
 	return Array.from({ length: count }, (_, index) => {
 		const startIndex = index * columnLength;

@@ -16,7 +16,7 @@ const operationPrefixRegex = new RegExp(
 	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\s*`,
 );
 
-export function splitFirstArgument(argumentString: string) {
+export function splitFirstArgument(argumentString: string): readonly [Lowercase<string>, string] {
 	const [commandName, args = ""] = argumentString
 		.replace(operationPrefixRegex, "")
 		.split(/(?<=^\S+)\s+/);
@@ -33,7 +33,7 @@ export const UNSUPPORTED_OPTIONS = [
 	ApplicationCommandOptionType.Subcommand,
 	ApplicationCommandOptionType.SubcommandGroup,
 ] as const;
-export function schemaSupported(options: ApplicationCommandOption[]) {
+export function schemaSupported(options: ApplicationCommandOption[]): boolean {
 	const isSubcommands =
 		options.length &&
 		options.every(
@@ -172,7 +172,7 @@ export async function parseArgument(
 export function partitionArguments(
 	argumentString: string,
 	schema: readonly ApplicationCommandOption[],
-) {
+): string[] {
 	const words = argumentString.split(/\s+/g);
 	const whitespace = argumentString.split(/\S+/g);
 

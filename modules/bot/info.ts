@@ -29,7 +29,7 @@ const designers = "966174686142672917",
 export default async function info(
 	interaction: ChatInputCommandInteraction,
 	{ subcommand }: { subcommand: "config" | "credits" | "status" },
-) {
+): Promise<void> {
 	switch (subcommand) {
 		case "status": {
 			await status(interaction);
@@ -240,7 +240,7 @@ function getConfig() {
 	];
 }
 
-export async function syncConfigButton(interaction: ButtonInteraction) {
+export async function syncConfigButton(interaction: ButtonInteraction): Promise<void> {
 	if (
 		config.roles.staff &&
 		(interaction.member instanceof GuildMember

@@ -3,7 +3,7 @@ import { recentXpDatabase } from "./util.js";
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 
-export default async function graph(interaction: AnySelectMenuInteraction) {
+export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())
 		throw new TypeError("weeklyXpGraph SelectMenu not a UserSelectMenu!");
 

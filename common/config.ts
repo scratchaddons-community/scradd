@@ -5,6 +5,7 @@ import {
 	type Channel,
 	type ThreadManager,
 	Collection,
+	type AnyThreadChannel,
 } from "discord.js";
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
@@ -99,7 +100,7 @@ async function getConfig() {
 }
 
 const config = await getConfig();
-export async function syncConfig() {
+export async function syncConfig(): Promise<void> {
 	const newConfig = await getConfig();
 	config.roles = newConfig.roles;
 	config.channels = newConfig.channels;
@@ -107,6 +108,8 @@ export async function syncConfig() {
 export default config;
 
 const threads = (await guild?.channels.fetchActiveThreads())?.threads || new Collection();
-export function getInitialChannelThreads(channel: Extract<Channel, { threads: ThreadManager }>) {
+export function getInitialChannelThreads(
+	channel: Extract<Channel, { threads: ThreadManager }>,
+): Collection<string, AnyThreadChannel> {
 	return threads.filter(({ parent }) => parent?.id === channel.id);
 }

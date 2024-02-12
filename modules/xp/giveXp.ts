@@ -15,7 +15,7 @@ import { recentXpDatabase, xpDatabase } from "./util.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 
-export async function giveXpForMessage(message: Message) {
+export async function giveXpForMessage(message: Message): Promise<void> {
 	if (!latestMessages[message.channel.id]) {
 		const fetched = await message.channel.messages
 			.fetch({ limit: 100, before: message.id })
@@ -77,7 +77,11 @@ export async function giveXpForMessage(message: Message) {
  * @param url - A link to a message or other that gave them this XP.
  * @param amount - How much XP to give.
  */
-export default async function giveXp(to: GuildMember | User, url?: string, amount = DEFAULT_XP) {
+export default async function giveXp(
+	to: GuildMember | User,
+	url?: string,
+	amount = DEFAULT_XP,
+): Promise<void> {
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
 	const member =

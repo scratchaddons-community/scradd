@@ -41,7 +41,10 @@ const appeals = Object.fromEntries(
 );
 export default appeals;
 
-export async function confirmAcceptAppeal(interaction: ButtonInteraction, counts: string) {
+export async function confirmAcceptAppeal(
+	interaction: ButtonInteraction,
+	counts: string,
+): Promise<void> {
 	const value = interaction.message.embeds[1]?.fields.find(
 		(field) => field.name == "Accepted Note",
 	)?.value;
@@ -68,7 +71,10 @@ export async function confirmAcceptAppeal(interaction: ButtonInteraction, counts
 		title: "Accept Ban Appeal (user may see the reason)",
 	});
 }
-export async function confirmRejectAppeal(interaction: ButtonInteraction, counts: string) {
+export async function confirmRejectAppeal(
+	interaction: ButtonInteraction,
+	counts: string,
+): Promise<void> {
 	const value = interaction.message.embeds[1]?.fields.find(
 		(field) => field.name == "Rejected Note",
 	)?.value;
@@ -95,7 +101,10 @@ export async function confirmRejectAppeal(interaction: ButtonInteraction, counts
 		title: "Reject Ban Appeal (user may see the reason)",
 	});
 }
-export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, ids: string) {
+export async function submitAcceptAppeal(
+	interaction: ModalSubmitInteraction,
+	ids: string,
+): Promise<void> {
 	const users = parseIds(ids);
 	await interaction.reply({
 		content: `${
@@ -141,7 +150,10 @@ export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, id
 		);
 	}
 }
-export async function submitRejectAppeal(interaction: ModalSubmitInteraction, ids: string) {
+export async function submitRejectAppeal(
+	interaction: ModalSubmitInteraction,
+	ids: string,
+): Promise<void> {
 	const users = parseIds(ids);
 	await interaction.reply({
 		content: `${

@@ -64,7 +64,7 @@ const CONSONANTS = [
 	] as const;
 const CHARACTERS = [...CONSONANTS, ...VOWELS] as const;
 
-export default async function hangman(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function hangman(interaction: ChatInputCommandInteraction<"cached" | "raw">): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;

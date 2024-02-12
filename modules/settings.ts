@@ -9,6 +9,7 @@ import {
 	type RepliableInteraction,
 	hyperlink,
 	type Guild,
+	type UserMention,
 } from "discord.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
@@ -153,7 +154,7 @@ export async function updateSettings(
 		dmReminders?: boolean | "toggle";
 		scratchEmbeds?: boolean | "toggle";
 	},
-) {
+): Promise<InteractionReplyOptions> {
 	const old = await getSettings(user);
 	const updated = {
 		id: user.id,
@@ -235,7 +236,7 @@ export async function updateSettings(
 				],
 			},
 		],
-	} satisfies InteractionReplyOptions;
+	};
 }
 
 export async function getSettings(
@@ -246,7 +247,10 @@ export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
 ): Promise<typeof userSettingsDatabase.data[number]>;
-export async function getSettings(user: { id: Snowflake }, defaults = true) {
+export async function getSettings(
+	user: { id: Snowflake },
+	defaults = true,
+): Promise<typeof userSettingsDatabase.data[number]> {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
@@ -259,7 +263,9 @@ export async function getSettings(user: { id: Snowflake }, defaults = true) {
 	return settings;
 }
 
-export async function getDefaultSettings(user: { id: Snowflake }) {
+export async function getDefaultSettings(user: {
+	id: Snowflake;
+}): Promise<Required<Omit<typeof userSettingsDatabase.data[number], "id">>> {
 	return {
 		autoreactions: true,
 		dmReminders: true,
@@ -277,7 +283,7 @@ export async function mentionUser(
 	user: Snowflake | User,
 	interactor: { id: Snowflake },
 	guild: Guild,
-) {
+): Promise<UserMention | `[${string}](${string})`> {
 	const { useMentions } = await getSettings(interactor);
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);

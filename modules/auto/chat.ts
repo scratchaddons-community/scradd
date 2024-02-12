@@ -8,6 +8,7 @@ import {
 	type ButtonInteraction,
 	type MessageContextMenuCommandInteraction,
 	TextInputStyle,
+	type InteractionResponse,
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
@@ -35,7 +36,7 @@ const dictionary = (await Chat.find({}))
 			!!(chat.response && !tryCensor(chat.response)),
 	);
 
-export default function scraddChat(message: Message) {
+export default function scraddChat(message: Message): string | undefined {
 	if (
 		message.author.id === client.user.id ||
 		message.channel.id !== thread?.id ||
@@ -65,7 +66,7 @@ export default function scraddChat(message: Message) {
 }
 
 const previousMessages: Record<Snowflake, Message> = {};
-export async function learn(message: Message) {
+export async function learn(message: Message): Promise<void> {
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
 
@@ -151,7 +152,9 @@ async function getThread() {
 	await message.pin();
 	return createdThread;
 }
-export async function allowChat(interaction: ButtonInteraction) {
+export async function allowChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (settings.scraddChat) {
 		return await interaction.reply(
@@ -170,7 +173,9 @@ export async function allowChat(interaction: ButtonInteraction) {
 		}>).`,
 	);
 }
-export async function denyChat(interaction: ButtonInteraction) {
+export async function denyChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (!settings.scraddChat) {
 		return await interaction.reply(
@@ -189,7 +194,9 @@ export async function denyChat(interaction: ButtonInteraction) {
 }
 
 const removedResponses = new Set<string>();
-export async function removeResponse(interaction: MessageContextMenuCommandInteraction) {
+export async function removeResponse(
+	interaction: MessageContextMenuCommandInteraction,
+): Promise<InteractionResponse | undefined> {
 	await interaction.showModal({
 		title: "Confirm Permament Response Removal",
 		customId: interaction.id,

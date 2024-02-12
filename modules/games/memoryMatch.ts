@@ -9,6 +9,7 @@ import {
 	GuildMember,
 	type APIInteractionGuildMember,
 	Base,
+	type InteractionResponse,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -34,7 +35,7 @@ export default async function memoryMatch(
 		"bonus-turns"?: boolean;
 		"thread"?: boolean;
 	},
-) {
+): Promise<InteractionResponse | undefined> {
 	if (
 		!(options.opponent instanceof GuildMember) ||
 		options.opponent.user.bot ||
@@ -435,7 +436,9 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	return chunks;
 }
 
-export function showMemoryInstructions(interaction: RepliableInteraction) {
+export function showMemoryInstructions(
+	interaction: RepliableInteraction,
+): Promise<InteractionResponse> {
 	return interaction.reply({
 		ephemeral: true,
 		content:
