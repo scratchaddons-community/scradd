@@ -18,7 +18,13 @@ const EMBED_LENGTH = 750;
 export function getMatches(content: string) {
 	const scratchUrlRegex =
 		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
-	return Array.from(new Set(content.match(scratchUrlRegex)), parseURL);
+
+	const urls = new Map<string, URL>();
+	for (const match of content.match(scratchUrlRegex) ?? []) {
+		const url = parseURL(match);
+		if (url) urls.set(url.href, url);
+	}
+	return [...urls.values()];
 }
 
 export function parseURL(match: string) {

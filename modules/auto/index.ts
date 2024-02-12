@@ -137,7 +137,7 @@ async function handleMutatable(message: Message) {
 		const matches = getMatches(message.content);
 		const embeds: APIEmbed[] = [];
 		for (const match of matches) {
-			const embed = match && (await handleMatch(match));
+			const embed = await handleMatch(match);
 			if (embed) {
 				embeds.push(embed);
 				if (notSet) embed.footer = { text: "Disable this using /settings" };

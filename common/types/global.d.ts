@@ -12,10 +12,6 @@ declare global {
 			fromIndex?: number,
 		): number;
 		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
-		map<U>(
-			callbackfn: (value: T, index: number, array: T[]) => U,
-			thisArg?: unknown,
-		): { [K in keyof this]: U };
 	}
 	interface ReadonlyArray<T> {
 		includes(
