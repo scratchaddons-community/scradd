@@ -85,20 +85,13 @@ await describe("parseTime", async () => {
 		strictEqual(+parseTime("2024-01-01"), 1_704_067_200_000);
 	});
 	await it("should support yyyy-mm-dd h:mm", () => {
-		strictEqual(+parseTime("2024-01-01 5:00"), 1_704_132_000_000);
+		strictEqual(+parseTime("2024-01-01 5:00"), 1_704_085_200_000);
 	});
 	await it("should support yyyy-mm-dd hh:mm", () => {
-		strictEqual(+parseTime("2024-01-01 12:00"), 1_704_132_000_000);
+		strictEqual(+parseTime("2024-01-01 12:00"), 1_704_110_400_000);
 	});
 	await it("should support yyyy-mm-dd hh:mm:ss", () => {
-		strictEqual(+parseTime("2024-01-01 12:00:30"), 1_704_132_030_000);
-	});
-	await it("should support hh:mm:ss", () => {
-		const date = new Date();
-		strictEqual(
-			+parseTime("5:00"),
-			date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 5 ? 86_400_000 : 0),
-		);
+		strictEqual(+parseTime("2024-01-01 12:00:30"), 1_704_110_430_000);
 	});
 	await it("should support weeks", () => {
 		let now = Date.now();

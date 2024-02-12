@@ -106,15 +106,6 @@ export function parseTime(time: string): Date {
 	const date = new Date();
 	const otherDate = new Date(date);
 
-	const timeMatch = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(time);
-	if (timeMatch) {
-		const [hours = 0, minutes = 0, seconds = 0] = timeMatch.slice(1).map(Number);
-		console.log({ hours, minutes, seconds });
-		otherDate.setUTCHours(hours, minutes, seconds || 0, 0);
-		if (date.getUTCHours() >= hours) otherDate.setUTCDate(date.getUTCDate() + 1);
-		return otherDate;
-	}
-
 	const {
 		years = 0,
 		months = 0,
