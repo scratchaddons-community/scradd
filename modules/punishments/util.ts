@@ -67,11 +67,11 @@ export default async function filterToStrike(filter: string) {
 		message.type === MessageType.AutoModerationAction &&
 		message.embeds[0]
 	) {
+		const reason = message.embeds[0].fields.find((field) => field.name === "rule_name")?.value;
+		const context = message.embeds[0].description;
 		const data = {
 			mod: "AutoMod",
-			reason: `${
-				message.embeds[0].fields.find((field) => field.name === "rule_name")?.value
-			}\n>>> ${message.embeds[0].description}`,
+			reason: (reason ? `${reason}\n` : "") + (context ? `>>> ${context}` : ""),
 		};
 		strikesCache[strikeId] = data;
 		return { ...strike, ...data };

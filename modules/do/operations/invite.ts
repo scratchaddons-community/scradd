@@ -19,7 +19,9 @@ const data: CustomOperation = {
 			uses: invite.uses,
 			member: interaction.user.id,
 		}).save();
-		await interaction.reply(`${constants.emojis.statuses.yes} Created invite ${invite}`);
+		await interaction.reply(
+			`${constants.emojis.statuses.yes} Created invite ${invite.toString()}`,
+		);
 	},
 };
 

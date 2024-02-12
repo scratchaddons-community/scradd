@@ -50,7 +50,11 @@ export async function showTicketModal(
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${channelMention(
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${
+				config.channels.suggestions?.toString() ?? "#suggestions"
+			}, bug reports in ${
+				config.channels.bugs?.toString() ?? "#bugs"
+			}, and other questions, comments, concerns, or etcetera in ${channelMention(
 				config.channels.support,
 			)}.`,
 
@@ -71,7 +75,7 @@ export async function showTicketModal(
 	}
 
 	if (!option || !TICKET_CATEGORIES.includes(option))
-		throw new TypeError(`Unknown ticket category: ${option}`);
+		throw new TypeError(`Unknown ticket category: ${option ?? "undefined"}`);
 
 	const fields = allFields[option];
 

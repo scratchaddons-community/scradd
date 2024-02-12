@@ -233,9 +233,9 @@ export async function removeResponse(interaction: MessageContextMenuCommandInter
 		});
 	}
 	await log(
-		`${LoggingEmojis.Bot} ${
-			interaction.user
-		} permamently removed a response from Scradd Chat (${deletedCount} prompt${
+		`${
+			LoggingEmojis.Bot
+		} ${interaction.user.toString()} permamently removed a response from Scradd Chat (${deletedCount} prompt${
 			deletedCount === 1 ? "" : "s"
 		})`,
 		LogSeverity.ImportantUpdate,

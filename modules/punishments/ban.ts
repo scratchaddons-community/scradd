@@ -63,7 +63,7 @@ export default async function ban(
 			await interaction.reply(
 				`${
 					constants.emojis.statuses.yes
-				} ${userToBan} is already banned! I will unban them ${time(
+				} ${userToBan.toString()} is already banned! I will unban them ${time(
 					unbanTime,
 					TimestampStyles.RelativeTime,
 				)}.`,
@@ -82,7 +82,7 @@ export default async function ban(
 			await interaction.reply(
 				`${
 					constants.emojis.statuses.yes
-				} ${userToBan} is already banned, but I will no longer unban them ${time(
+				} ${userToBan.toString()} is already banned, but I will no longer unban them ${time(
 					Math.round(unbanTimer.date / 1000),
 					TimestampStyles.RelativeTime,
 				)}.`,
@@ -91,7 +91,9 @@ export default async function ban(
 		} else {
 			await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${userToBan} is already banned!${
+				content: `${
+					constants.emojis.statuses.no
+				} ${userToBan.toString()} is already banned!${
 					unbanTimer
 						? ` Explicitly set \`unban-in: never\` to prevent them from being unbanned ${time(
 								Math.round(unbanTimer.date / 1000),
@@ -107,7 +109,7 @@ export default async function ban(
 	if (!(options.user instanceof User) && !options.user.bannable) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} I can’t ban ${userToBan}!`,
+			content: `${constants.emojis.statuses.no} I can’t ban ${userToBan.toString()}!`,
 		});
 	}
 
@@ -216,7 +218,7 @@ async function confirmBan(
 							style: ButtonStyle.Link,
 							label: "Appeal Ban",
 							url:
-								(process.env.NODE_ENV === "production"
+								(process.env.NODE_ENV === "production" || !process.env.PORT
 									? "https://sa-discord.up.railway.app"
 									: `http://localhost:${process.env.PORT}`) + "/ban-appeal",
 						},
@@ -235,7 +237,7 @@ async function confirmBan(
 		deleteMessageSeconds: deleteLength,
 	});
 	await interaction.reply(
-		`${constants.emojis.statuses.yes} Banned ${options.user}!${
+		`${constants.emojis.statuses.yes} Banned ${options.user.toString()}!${
 			options.reason ? " " + options.reason : ""
 		}${
 			options.unbanTime

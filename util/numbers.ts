@@ -50,7 +50,7 @@ export function convertBase(
 
 	let output = "";
 	while (decValue > 0) {
-		output = `${range[Number(decValue % outBaseBig)]}${output}`;
+		output = `${range[Number(decValue % outBaseBig)] ?? ""}${output}`;
 		decValue = (decValue - (decValue % outBaseBig)) / outBaseBig;
 	}
 	return output || "0";

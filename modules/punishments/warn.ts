@@ -204,9 +204,9 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	)
 		await member.disableCommunicationUntil(Date.now(), "Strike removed");
 	await log(
-		`${LoggingEmojis.Punishment} Strike \`${id}\` removed from ${user.toString()} by ${
-			interaction.member
-		}`,
+		`${
+			LoggingEmojis.Punishment
+		} Strike \`${id}\` removed from ${user.toString()} by ${interaction.user.toString()}`,
 		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count * -1);
@@ -238,9 +238,9 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 		} Added ${user.toString()}’s strike \`${id}\` back!`,
 	});
 	await log(
-		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
-			interaction.member
-		}`,
+		`${
+			LoggingEmojis.Punishment
+		} Strike \`${id}\` was added back to ${user.toString()} by ${interaction.user.toString()}`,
 		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count);

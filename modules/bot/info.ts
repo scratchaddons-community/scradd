@@ -254,9 +254,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			content: `${constants.emojis.statuses.yes} Synced configuration!`,
 		});
 		await log(
-			`${
-				LoggingEmojis.ServerUpdate
-			} Configuration synced by ${interaction.member?.toString()}`,
+			`${LoggingEmojis.ServerUpdate} Configuration synced by ${interaction.user.toString()}`,
 			LogSeverity.ImportantUpdate,
 		);
 	} else

@@ -29,7 +29,7 @@ export async function listReminders(interaction: ChatInputCommandInteraction) {
 			`\`${reminder.id}\`) ${time(
 				new Date(reminder.date),
 				TimestampStyles.RelativeTime,
-			)}: ${channelMention(reminder.channel)} ${reminder.reminder}`,
+			)}: ${channelMention(reminder.channel)} ${reminder.reminder ?? ""}`,
 		(data) => interaction[interaction.replied ? "editReply" : "reply"](data),
 		{
 			title: "Your reminders",
@@ -50,7 +50,7 @@ export async function listReminders(interaction: ChatInputCommandInteraction) {
 						placeholder: "Cancel",
 						options: page.map((reminder) => ({
 							value: reminder.id + "",
-							description: `${reminder.reminder}`.slice(0, 100),
+							description: `${reminder.reminder ?? ""}`.slice(0, 100),
 							label: reminder.id + "",
 						})),
 					},

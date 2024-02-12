@@ -50,6 +50,6 @@ export function parseColor(
 	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
 
 	return color.length === 4
-		? `#${color[1]}${color.slice(1, 3)}${color.slice(2, 4)}${color[3]}`
+		? `#${color[1] ?? ""}${color.slice(1, 3)}${color.slice(2, 4)}${color[3] ?? ""}`
 		: color;
 }

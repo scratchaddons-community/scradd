@@ -134,6 +134,10 @@ async function userInfo(
 		)
 		.filter(({ length }) => length);
 
+	const banner =
+		user.bannerURL({ size: 1024 }) ??
+		(typeof user.accentColor === "number" &&
+			`https://singlecolorimage.com/get/${user.accentColor.toString(16)}/600x105`);
 	await interaction.reply({
 		ephemeral:
 			interaction.isButton() &&
@@ -142,13 +146,7 @@ async function userInfo(
 			{
 				description: user.toString(),
 				color: member?.displayColor,
-				image: {
-					url:
-						user.bannerURL({ size: 1024 }) ??
-						`https://singlecolorimage.com/get/${user.accentColor?.toString(
-							16,
-						)}/600x105`,
-				},
+				image: banner ? { url: banner } : undefined,
 				thumbnail: { url: (member ?? user).displayAvatarURL() },
 				fields,
 				author: {

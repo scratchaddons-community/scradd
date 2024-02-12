@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -254,8 +255,10 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 			return "\n";
 		}
 		case "a": {
-			const url = new URL(node.attrs?.href?.toString() ?? "", constants.urls.scratch);
-			return `[${content}](${url})`;
+			return `[${content}](${new URL(
+				node.attrs?.href?.toString() ?? "",
+				constants.urls.scratch,
+			).toString()})`;
 		}
 		case "span": {
 			const output =
@@ -273,7 +276,9 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 		}
 		case "img": {
 			const url = new URL(node.attrs?.src?.toString() ?? "", constants.urls.scratch);
-			return `[${content || node.attrs?.alt || url.pathname.split("/").at(-1)}](${url})`;
+			return `[${
+				content || node.attrs?.alt || url.pathname.split("/").at(-1)
+			}](${url.toString()})`;
 		}
 		case "blockquote": {
 			return `\n${content.trim().replaceAll(/^/gm, "> ")}\n`;

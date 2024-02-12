@@ -51,7 +51,7 @@ export default async function linkScratchRole(request: IncomingMessage, response
 		redirect_uri: redirectUri,
 		response_type: "code",
 		scope: OAuth2Scopes.Identify + " " + OAuth2Scopes.RoleConnectionsWrite,
-	})}`;
+	}).toString()}`;
 	const scratchUrl = `https://auth.itinerary.eu.org/auth/?name=${encodeURIComponent(
 		client.user.displayName,
 	)}&redirect=${Buffer.from(redirectUri).toString("base64")}`;

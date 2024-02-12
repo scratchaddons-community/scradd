@@ -64,7 +64,9 @@ defineChatCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Ping you when your messages get on #${config.channels.board?.name}`,
+				description: `Ping you when your messages get on ${
+					config.channels.board ? "#" + config.channels.board.name : "the board"
+				}`,
 			},
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -101,7 +103,9 @@ defineChatCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Pings you when your messages get on #${config.channels.board?.name} in the community server`,
+				description: `Pings you when your messages get on ${
+					config.channels.board ? "#" + config.channels.board.name : "the board"
+				} in the community server`,
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,

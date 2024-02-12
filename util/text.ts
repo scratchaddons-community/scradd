@@ -117,8 +117,8 @@ export function getRequestUrl(request: IncomingMessage) {
 	return new URL(
 		request.url ?? "",
 		`${
-			request.headers["x-forwarded-proto"] ||
+			request.headers["x-forwarded-proto"]?.toString() ||
 			`http${"encrypted" in request.socket ? "s" : ""}`
-		}://${request.headers["x-forwarded-host"] || request.headers.host}`,
+		}://${request.headers["x-forwarded-host"]?.toString() || request.headers.host || ""}`,
 	);
 }

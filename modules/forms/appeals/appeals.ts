@@ -32,7 +32,7 @@ const appeals = Object.fromEntries(
 				{
 					unbanned: decision === "Accepted",
 					note: message.embeds[1]?.fields.find(
-						(field) => field.name == `${decision} Note`,
+						(field) => field.name == `${decision ?? ""} Note`,
 					)?.value,
 					date: new Date(message.createdTimestamp + 691_200_000).toDateString(),
 				},
@@ -98,7 +98,9 @@ export async function confirmRejectAppeal(interaction: ButtonInteraction, counts
 export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, ids: string) {
 	const users = parseIds(ids);
 	await interaction.reply({
-		content: `${LoggingEmojis.Punishment} ${interaction.user} accepted the ban appeal.`,
+		content: `${
+			LoggingEmojis.Punishment
+		} ${interaction.user.toString()} accepted the ban appeal.`,
 		ephemeral: users.accepters.has(interaction.user.id),
 	});
 	users.accepters.add(interaction.user.id);
@@ -126,7 +128,8 @@ export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, id
 		const unbanned = await config.guild.bans
 			.remove(
 				MessageMentions.UsersPattern.exec(mention)?.[1] ?? "",
-				`Appealed ban - see ${interaction.message?.url} for context`,
+				`Appealed ban` +
+					(interaction.message ? ` - see ${interaction.message.url} for context` : ""),
 			)
 			.then(() => true)
 			.catch(() => false);
@@ -141,7 +144,9 @@ export async function submitAcceptAppeal(interaction: ModalSubmitInteraction, id
 export async function submitRejectAppeal(interaction: ModalSubmitInteraction, ids: string) {
 	const users = parseIds(ids);
 	await interaction.reply({
-		content: `${LoggingEmojis.Punishment} ${interaction.user} rejected the ban appeal.`,
+		content: `${
+			LoggingEmojis.Punishment
+		} ${interaction.user.toString()} rejected the ban appeal.`,
 		ephemeral: users.rejecters.has(interaction.user.id),
 	});
 	users.rejecters.add(interaction.user.id);

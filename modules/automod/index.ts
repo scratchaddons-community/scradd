@@ -25,13 +25,15 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	)
 		return true;
 
+	if (!interaction.command) throw new ReferenceError("Unknown command run");
+
 	const command =
-		commands[interaction.command?.name ?? ""]?.find(
+		commands[interaction.command.name]?.find(
 			(command) =>
 				typeof command.access === "boolean" ||
 				!![command.access].flat().includes(interaction.guild?.id),
-		) ?? commands[interaction.command?.name ?? ""]?.[0];
-	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+		) ?? commands[interaction.command.name]?.[0];
+	if (!command) throw new ReferenceError(`Command \`${interaction.command.name}\` not found`);
 
 	if (command.censored === "channel" ? badWordsAllowed(interaction.channel) : !command.censored)
 		return true;

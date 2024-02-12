@@ -186,7 +186,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?⁉",
 						lose: "You couldn’t guess their username right, so they died \\:(",
 						win: "Great job!",
-					}[reason]
+					}[reason] ?? "R.I.P."
 				}`,
 				files: image,
 				allowedMentions: { users: [] },

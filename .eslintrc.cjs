@@ -9,8 +9,8 @@ module.exports = {
 			.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
 			.filter(
 				([library]) =>
-					compilerOptions.types.includes(library) ||
-					(library.length === 4 && library.startsWith("es")),
+					(library.length === 4 && library.startsWith("es")) ||
+					compilerOptions.types.includes(library),
 			),
 	),
 	extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
@@ -130,7 +130,10 @@ module.exports = {
 		"@typescript-eslint/prefer-nullish-coalescing": "off",
 		"@typescript-eslint/prefer-readonly-parameter-types": "off",
 		"@typescript-eslint/promise-function-async": "off",
-		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/restrict-template-expressions": [
+			"error",
+			{ allowAny: false, allowBoolean: false, allowNullish: false, allowRegExp: false },
+		],
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": [

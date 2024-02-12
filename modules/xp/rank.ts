@@ -138,12 +138,12 @@ export async function top(
 ) {
 	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
-	const index = user ? leaderboard.findIndex(({ user: id }) => id === user.id) : undefined;
-	if (index === -1) {
+	const index = user && leaderboard.findIndex(({ user: id }) => id === user.id);
+	if (user && index === -1) {
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} ${user?.toString()} could not be found! Do they have any XP?`,
+			} ${user.toString()} could not be found! Do they have any XP?`,
 
 			ephemeral: true,
 		});
