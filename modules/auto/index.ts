@@ -108,7 +108,7 @@ defineEvent("messageCreate", async (message) => {
 		if (doReact) {
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
-			if (reactions > REACTION_CAP || !messageReactions) return;
+			if (reactions > REACTION_CAP || !messageReactions.length) return;
 		}
 	}
 });
