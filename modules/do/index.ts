@@ -12,6 +12,7 @@ import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
 import { getAllSchemas } from "./util.js";
+import { mentionChatCommand } from "../../util/discord.js";
 
 const fullPingRegex = new RegExp(`^${MessageMentions.UsersPattern.source}$`);
 
@@ -61,7 +62,10 @@ defineChatCommand(
 		if (options === true)
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} The \`${commandName}\` command is not supported as an operation!`, // todo mention it
+				content: `${constants.emojis.statuses.no} The \`${await mentionChatCommand(
+					commandName,
+					interaction.guild ?? undefined,
+				)}\` command is not supported as an operation!`,
 			});
 
 		const permission = await hasPermission(
