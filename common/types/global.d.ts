@@ -157,17 +157,6 @@ declare module "strife.js" {
 		inGuild: true;
 	}
 }
-declare module "discord.js" {
-	export interface BaseGuildTextChannel {
-		toString(): ChannelMention;
-	}
-	export interface BaseGuildVoiceChannel {
-		toString(): ChannelMention;
-	}
-	export interface ThreadOnlyChannel {
-		toString(): ChannelMention;
-	}
-}
 
 // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 type NonFalsy<T> = T extends "" | 0 | 0n | false | null | undefined | void ? never : T;
