@@ -99,6 +99,7 @@ export async function messageDeleteBulk(
 		...(unknownCount ? [`${unknownCount} unknown users`] : []),
 	];
 
+	const url = messages.first()?.url;
 	await log(
 		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
 			authors,
@@ -106,7 +107,7 @@ export async function messageDeleteBulk(
 		LogSeverity.ContentEdit,
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
-			buttons: [{ label: "Context", url: messages.first()?.url ?? "" }],
+			buttons: url ? [{ label: "Context", url }] : [],
 		},
 	);
 }

@@ -1,30 +1,44 @@
 import {
 	ChannelType,
 	type AuditLogEvent,
-	type GuildAuditLogsEntry,
 	type AnyThreadChannel,
 	ThreadAutoArchiveDuration,
 	channelMention,
 	ThreadChannel,
 } from "discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, shouldLog } from "./misc.js";
+import log, {
+	LogSeverity,
+	LoggingEmojis,
+	extraAuditLogsInfo,
+	shouldLog,
+	type AuditLog,
+} from "./misc.js";
 
-export async function threadCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadCreate>) {
-	if (entry.target.type !== ChannelType.PrivateThread) return;
-	await log(
-		`${LoggingEmojis.Thread} Private thread ${channelMention(
-			entry.target.id,
-		)} created${extraAuditLogsInfo(entry)}`,
-		LogSeverity.ServerChange,
-	);
+export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>) {
+	if (!(entry.target instanceof ThreadChannel)) {
+		await log(
+			`${LoggingEmojis.Thread} Unknown thread ${channelMention(
+				entry.target.id,
+			)} created${extraAuditLogsInfo(entry)}`,
+			LogSeverity.ServerChange,
+		);
+	} else if (entry.target.type === ChannelType.PrivateThread) {
+		await log(
+			`${
+				LoggingEmojis.Thread
+			} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+			LogSeverity.ServerChange,
+		);
+	}
 }
-export async function threadDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ThreadDelete>) {
+export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>) {
 	await log(
-		`${LoggingEmojis.Thread} Thread #${entry.target.name} ${
-			entry.target instanceof ThreadChannel && entry.target.parent
-				? `in ${entry.target.parent.toString()} `
-				: ""
-		}(ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Thread} ${
+			entry.target instanceof ThreadChannel
+				? `Thread #${entry.target.name}` +
+				  (entry.target.parent ? ` in ${entry.target.parent.toString()}` : "")
+				: "Unknown thread"
+		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
@@ -92,7 +106,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()} ${
 				newThread.flags.has("Pinned") ? "" : "un"
-			}pinned in ${newThread.parent?.toString()}!`,
+			}pinned${newThread.parent ? ` in ${newThread.parent.toString()}` : ""}`,
 			LogSeverity.ServerChange,
 		);
 	}
@@ -108,7 +122,7 @@ export async function threadUpdate(oldThread: AnyThreadChannel, newThread: AnyTh
 	if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()}’s slowmode was set to ${
-				newThread.rateLimitPerUser
+				newThread.rateLimitPerUser ?? 0
 			} second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 			LogSeverity.ContentEdit,
 		);

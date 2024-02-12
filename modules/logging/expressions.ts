@@ -1,47 +1,48 @@
-import {
-	Base,
-	type AuditLogEvent,
-	type GuildAuditLogsEntry,
-	type APISticker,
-	GuildEmoji,
-} from "discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import type { AuditLogEvent } from "discord.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { unifiedDiff } from "difflib";
+import { formatAnyEmoji } from "../../util/markdown.js";
 
-export async function emojiCreate(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiCreate>) {
-	if (!(entry.target instanceof Base)) return;
+export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>) {
 	await log(
-		`${LoggingEmojis.Expressions} ${entry.target.toString()} created${extraAuditLogsInfo(
+		`${LoggingEmojis.Expressions} ${formatAnyEmoji(entry.target)} created${extraAuditLogsInfo(
 			entry,
 		)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function emojiUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiUpdate>) {
-	if (!(entry.target instanceof GuildEmoji)) return;
+export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>) {
 	for (const change of entry.changes) {
 		if (change.key !== "name") return;
 		await log(
-			`${LoggingEmojis.Expressions} ${entry.target.toString()} (:${
-				change.old
-			}:) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
+			`${LoggingEmojis.Expressions} ${formatAnyEmoji(entry.target)} ${
+				change.old ? `(:${change.old}\\:) ` : ``
+			}renamed to :${
+				typeof change.new === "string"
+					? change.new
+					: ("name" in entry.target && entry.target.name) || "_"
+			}\\:${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
 	}
 }
-export async function emojiDelete(entry: GuildAuditLogsEntry<AuditLogEvent.EmojiDelete>) {
-	if (!entry.target) return;
+export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>) {
+	const oldName =
+		"name" in entry.target
+			? entry.target.name
+			: entry.changes.find(
+					(change): change is { key: "name"; old: string } =>
+						change.key === "name" && typeof change.old === "string",
+			  )?.old;
 	await log(
-		`${LoggingEmojis.Expressions} :${
-			"name" in entry.target
-				? entry.target.name
-				: entry.changes.find((change) => change.key === "name")?.old
-		}: (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Expressions} :${oldName ?? "_"}\\: (ID: ${
+			entry.target.id
+		}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
 
-export async function stickerCreate(entry: GuildAuditLogsEntry<AuditLogEvent.StickerCreate>) {
+export async function stickerCreate(entry: AuditLog<AuditLogEvent.StickerCreate>) {
 	await log(
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id
@@ -50,15 +51,14 @@ export async function stickerCreate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 		{ files: [entry.target.url] },
 	);
 }
-export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.StickerUpdate>) {
+export async function stickerUpdate(entry: AuditLog<AuditLogEvent.StickerUpdate>) {
 	for (const change of entry.changes) {
-		const key = change.key as Extract<typeof change.key, keyof APISticker>;
-		switch (key) {
+		switch (change.key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Expressions} Sticker ${change.old} (ID: ${
+					`${LoggingEmojis.Expressions} Sticker ${change.old ?? "_"} (ID: ${
 						entry.target.id
-					}) renamed to :${change.new}:${extraAuditLogsInfo(entry)}`,
+					}) renamed to ${change.new ?? entry.target.name}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 				);
 				break;
@@ -73,7 +73,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 						files: [
 							{
 								content: unifiedDiff(
-									(change.old as APISticker["description"])?.split("\n") ?? [],
+									change.old?.split("\n") ?? [],
 									entry.target.description?.split("\n") ?? [],
 									{ lineterm: "" },
 								)
@@ -91,8 +91,8 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 				await log(
 					`${LoggingEmojis.Expressions} Sticker ${
 						entry.target.name
-					}’s related emoji (ID: ${entry.target.id}) set to ${
-						change.new
+					}’s related emoji (ID: ${entry.target.id}) ${
+						change.new ? `set to ${change.new}` : "removed"
 					}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 				);
@@ -104,7 +104,7 @@ export async function stickerUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.Sti
 		}
 	}
 }
-export async function stickerDelete(entry: GuildAuditLogsEntry<AuditLogEvent.StickerDelete>) {
+export async function stickerDelete(entry: AuditLog<AuditLogEvent.StickerDelete>) {
 	await log(
 		`${LoggingEmojis.Expressions} Sticker ${entry.target.name} (ID: ${
 			entry.target.id

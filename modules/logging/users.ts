@@ -1,6 +1,5 @@
 import {
 	type AuditLogEvent,
-	type GuildAuditLogsEntry,
 	type GuildMember,
 	type PartialGuildMember,
 	type PartialUser,
@@ -8,16 +7,17 @@ import {
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
-export async function memberKick(entry: GuildAuditLogsEntry<AuditLogEvent.MemberKick>) {
-	if (!entry.target) return;
+export async function memberKick(entry: AuditLog<AuditLogEvent.MemberKick>) {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} kicked${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} kicked${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.MemberPrune>) {
+export async function memberPrune(entry: AuditLog<AuditLogEvent.MemberPrune>) {
 	await log(
 		`${LoggingEmojis.Punishment} ${entry.extra.removed} members who haven’t talked in ${
 			entry.extra.days
@@ -25,19 +25,19 @@ export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.Membe
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberBanAdd(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanAdd>) {
-	if (!entry.target) return;
+export async function memberBanAdd(entry: AuditLog<AuditLogEvent.MemberBanAdd>) {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} banned${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} banned${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberBanRemove(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanRemove>) {
-	if (!entry.target) return;
+export async function memberBanRemove(entry: AuditLog<AuditLogEvent.MemberBanRemove>) {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} unbanned${extraAuditLogsInfo(
-			entry,
-		)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} unbanned${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }

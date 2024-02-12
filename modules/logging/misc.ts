@@ -8,10 +8,29 @@ import {
 	type TextBasedChannel,
 	type TextChannel,
 	ThreadAutoArchiveDuration,
+	type AuditLogEvent,
+	type APIAuditLogChange,
+	type GuildEmoji,
+	type Snowflake,
+	type Base,
+	type AnyThreadChannel,
+	type ApplicationCommand,
+	type AutoModerationRule,
+	type Guild,
+	type GuildScheduledEvent,
+	type Integration,
+	type Invite,
+	type Role,
+	type StageInstance,
+	type Sticker,
+	type User,
+	type Webhook,
+	type NonThreadGuildBasedChannel,
 } from "discord.js";
 import { getBaseChannel } from "../../util/discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import type { actualPrimitives } from "mongoose";
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -118,7 +137,7 @@ export default async function log(
 						.map((file) =>
 							typeof file === "string"
 								? file
-								: `\`\`\`${file.extension}\n${file.content}\n\`\`\``,
+								: `\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``,
 						)
 						.join("\n")
 				: ""),
@@ -157,7 +176,7 @@ export async function getLoggingThread(group: LogSeverity) {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
-	const name = `${group}. ${LogSeverity[group]
+	const name = `${group}) ${LogSeverity[group]
 		.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
 		.toLowerCase()}s`;
 
@@ -195,7 +214,7 @@ export enum LoggingEmojis {
 
 export const LoggingErrorEmoji = constants.emojis.statuses.no;
 
-export function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
+export function extraAuditLogsInfo(entry: { executor?: User | null; reason?: string | null }) {
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
 		entry.reason
 			? entry.reason.includes("\n")
@@ -204,3 +223,116 @@ export function extraAuditLogsInfo(entry: GuildAuditLogsEntry) {
 			: ""
 	}`;
 }
+
+export type AuditLogTargets<Type extends AuditLogEvent> = Type extends
+	| AuditLogEvent.ThreadCreate
+	| AuditLogEvent.ThreadDelete
+	| AuditLogEvent.ThreadUpdate
+	? AnyThreadChannel | { id: Snowflake }
+	: Type extends AuditLogEvent.ApplicationCommandPermissionUpdate
+	? ApplicationCommand | { id: Snowflake }
+	: Type extends
+			| AuditLogEvent.AutoModerationBlockMessage
+			| AuditLogEvent.AutoModerationFlagToChannel
+			| AuditLogEvent.AutoModerationRuleCreate
+			| AuditLogEvent.AutoModerationRuleDelete
+			| AuditLogEvent.AutoModerationRuleUpdate
+			| AuditLogEvent.AutoModerationUserCommunicationDisabled
+	? AutoModerationRule
+	: Type extends
+			| AuditLogEvent.IntegrationCreate
+			| AuditLogEvent.IntegrationDelete
+			| AuditLogEvent.IntegrationUpdate
+	? Integration
+	: Type extends
+			| AuditLogEvent.InviteCreate
+			| AuditLogEvent.InviteDelete
+			| AuditLogEvent.InviteUpdate
+	? Invite
+	: Type extends AuditLogEvent.GuildUpdate
+	? Guild
+	: Type extends AuditLogEvent.MessageBulkDelete
+	? Guild | { id: Snowflake }
+	: Type extends AuditLogEvent.EmojiCreate | AuditLogEvent.EmojiDelete | AuditLogEvent.EmojiUpdate
+	? GuildEmoji | { id: Snowflake }
+	: Type extends
+			| AuditLogEvent.GuildScheduledEventCreate
+			| AuditLogEvent.GuildScheduledEventDelete
+			| AuditLogEvent.GuildScheduledEventUpdate
+	? GuildScheduledEvent
+	: Type extends
+			| AuditLogEvent.ChannelCreate
+			| AuditLogEvent.ChannelDelete
+			| AuditLogEvent.ChannelOverwriteCreate
+			| AuditLogEvent.ChannelOverwriteDelete
+			| AuditLogEvent.ChannelOverwriteUpdate
+			| AuditLogEvent.ChannelUpdate
+	? NonThreadGuildBasedChannel | { id: Snowflake }
+	: Type extends AuditLogEvent.RoleCreate | AuditLogEvent.RoleDelete | AuditLogEvent.RoleUpdate
+	? Role | { id: Snowflake }
+	: Type extends
+			| AuditLogEvent.StageInstanceCreate
+			| AuditLogEvent.StageInstanceDelete
+			| AuditLogEvent.StageInstanceUpdate
+	? StageInstance
+	: Type extends
+			| AuditLogEvent.StickerCreate
+			| AuditLogEvent.StickerDelete
+			| AuditLogEvent.StickerUpdate
+	? Sticker
+	: Type extends
+			| AuditLogEvent.MessageDelete
+			| AuditLogEvent.MessagePin
+			| AuditLogEvent.MessageUnpin
+	? User
+	: Type extends
+			| AuditLogEvent.BotAdd
+			| AuditLogEvent.MemberBanAdd
+			| AuditLogEvent.MemberBanRemove
+			| AuditLogEvent.MemberDisconnect
+			| AuditLogEvent.MemberKick
+			| AuditLogEvent.MemberMove
+			| AuditLogEvent.MemberPrune
+			| AuditLogEvent.MemberRoleUpdate
+			| AuditLogEvent.MemberUpdate
+	? User | null
+	: Type extends
+			| AuditLogEvent.WebhookCreate
+			| AuditLogEvent.WebhookDelete
+			| AuditLogEvent.WebhookUpdate
+	? Webhook
+	: { id: Snowflake } | null;
+export type AuditLog<
+	Event extends AuditLogEvent,
+	ExtraChangeKeys extends string = never,
+	Target = AuditLogTargets<Event>,
+	AllKeys extends string =
+		| ExtraChangeKeys
+		| Extract<
+				APIAuditLogChange["key"],
+				Extract<Target, Base> extends never ? string : keyof Extract<Target, Base>
+		  >,
+> = Omit<GuildAuditLogsEntry<Event>, "changes" | "target"> & {
+	target: Target;
+	changes: {
+		[Key in AllKeys]: {
+			key: Key;
+			old?: ChangeValue<Extract<Target, Base>, Key, "old">;
+			new?: ChangeValue<Extract<Target, Base>, Key, "new">;
+		};
+	}[AllKeys][];
+};
+
+type ChangeValue<
+	Target extends Base,
+	Key extends string,
+	Type extends "new" | "old",
+> = Key extends keyof Target
+	? Target[Key] extends actualPrimitives
+		? Target[Key] | undefined
+		: Change<Key>[`${Type}_value`] | Target[Key]
+	: Change<Key>[`${Type}_value`];
+
+type Change<Key extends string> = Extract<APIAuditLogChange, { key: Key }> extends never
+	? APIAuditLogChange
+	: Extract<APIAuditLogChange, { key: Key }>;

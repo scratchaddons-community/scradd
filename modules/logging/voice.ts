@@ -1,9 +1,7 @@
 import { unifiedDiff } from "difflib";
 import {
-	type APIGuildScheduledEvent,
 	type AuditLogEvent,
 	ChannelType,
-	type GuildAuditLogsEntry,
 	type GuildScheduledEvent,
 	type PartialGuildScheduledEvent,
 	type VoiceState,
@@ -11,53 +9,60 @@ import {
 	time,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
 export async function guildScheduledEventCreate(
-	entry: GuildAuditLogsEntry<AuditLogEvent.GuildScheduledEventCreate>,
+	entry: AuditLog<AuditLogEvent.GuildScheduledEventCreate>,
 ) {
 	await log(
-		`${LoggingEmojis.Event} Event scheduled${extraAuditLogsInfo(entry)}\n${
-			entry.reason?.includes("\n") ? "\n" : ""
-		}${entry.target.url}`,
+		`${LoggingEmojis.Event} [Event ${entry.target.name}](${
+			entry.target.url
+		}) scheduled${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ServerChange,
 	);
 }
 export async function guildScheduledEventUpdate(
-	entry: GuildAuditLogsEntry<AuditLogEvent.GuildScheduledEventUpdate>,
+	entry: AuditLog<
+		AuditLogEvent.GuildScheduledEventUpdate,
+		| "channel_id"
+		| "entity_id"
+		| "entity_metadata"
+		| "entity_type"
+		| "image_hash"
+		| "image"
+		| "location"
+		| "scheduled_end_time"
+		| "scheduled_start_time"
+	>,
 ) {
-	let locationChanged = false;
+	let imageChanged = false;
 	let timeChanged = false;
+	let locationChanged = false;
 
 	for (const change of entry.changes) {
-		const key = change.key as keyof APIGuildScheduledEvent | "image_hash" | "location";
-		switch (key) {
+		switch (change.key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Event} Event ${entry.target.name}’s topic changed to ${
-						change.new
-					} (${change.old})${extraAuditLogsInfo(entry)}\n${
-						entry.reason?.includes("\n") ? "\n" : ""
-					}${entry.target.url}`,
+					`${LoggingEmojis.Event} [Event ${entry.target.name}](${
+						entry.target.url
+					})’s topic changed to ${change.new ?? ""} (${
+						change.old ?? ""
+					})${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ServerChange,
 				);
 				break;
 			}
 			case "description": {
 				await log(
-					`${LoggingEmojis.Event} Event ${
-						entry.target.name
-					}’s description changed${extraAuditLogsInfo(entry)}\n${
-						entry.reason?.includes("\n") ? "\n" : ""
-					}${entry.target.url}`,
+					`${LoggingEmojis.Event} [Event ${entry.target.name}](${
+						entry.target.url
+					})’s description changed${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ServerChange,
 					{
 						files: [
 							{
 								content: unifiedDiff(
-									(change.old as APIGuildScheduledEvent["description"])?.split(
-										"\n",
-									) ?? [],
+									change.old?.split("\n") ?? [],
 									entry.target.description?.split("\n") ?? [],
 									{ lineterm: "" },
 								)
@@ -71,80 +76,78 @@ export async function guildScheduledEventUpdate(
 				);
 				break;
 			}
-			case "channel_id":
-			case "entity_type":
-			case "entity_metadata":
-			case "entity_id":
-			case "location": {
-				locationChanged ||= true;
-				break;
-			}
-			case "image":
-			case "image_hash": {
-				const url = entry.target.coverImageURL({ size: 128 });
-				await log(
-					`${LoggingEmojis.Event} Event ${entry.target.name}’s cover image ${
-						url ? "changed" : "removed"
-					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
-						entry.target.url
-					}`,
-					LogSeverity.ServerChange,
-					{ files: url ? [url] : [] },
-				);
-				break;
-			}
-			case "scheduled_end_time":
-			case "scheduled_start_time": {
-				timeChanged ||= true;
-				break;
-			}
 			case "status": {
 				await log(
-					`${LoggingEmojis.Event} Event ${entry.target.name} ${
+					`${LoggingEmojis.Event} [Event ${entry.target.name}](${entry.target.url}) ${
 						{
 							[GuildScheduledEventStatus.Active]: "started",
 							[GuildScheduledEventStatus.Canceled]: "canceled",
 							[GuildScheduledEventStatus.Completed]: "ended",
 							[GuildScheduledEventStatus.Scheduled]: "scheduled",
 						}[entry.target.status]
-					}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
-						entry.target.url
-					}`,
+					}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ServerChange,
 				);
 				break;
 			}
+			case "image":
+			case "image_hash": {
+				imageChanged = true;
+				break;
+			}
+			case "scheduled_end_time":
+			case "scheduled_start_time": {
+				timeChanged = true;
+				break;
+			}
+			case "channel_id":
+			case "entity_type":
+			case "entity_metadata":
+			case "entity_id":
+			case "location": {
+				locationChanged = true;
+				break;
+			}
 			default: {
 				break;
-				// todo: log privacy?
 			}
 		}
 
-		if (locationChanged) {
+		if (imageChanged) {
+			const url = entry.target.coverImageURL({ size: 128 });
 			await log(
-				`${LoggingEmojis.Event} Event ${entry.target.name} moved to ${
-					entry.target.channel?.toString() ??
-					entry.target.entityMetadata?.location ??
-					"an external location"
-				}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
+				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
-				}`,
+				})’s cover image ${url ? "changed" : "removed"}${extraAuditLogsInfo(entry)}`,
 				LogSeverity.ServerChange,
+				{ files: url ? [url] : [] },
 			);
 		}
 		if (timeChanged) {
 			const start = entry.target.scheduledStartAt;
 			const end = entry.target.scheduledEndAt;
 			await log(
-				`${LoggingEmojis.Event} Event ${entry.target.name} rescheduled${
+				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
+					entry.target.url
+				}) rescheduled${
 					start ?? end
 						? ` to ${time(start ?? end ?? new Date())}${
 								end && start ? `-${time(end)}` : ""
 						  }`
 						: ""
-				}${extraAuditLogsInfo(entry)}\n${entry.reason?.includes("\n") ? "\n" : ""}${
+				}${extraAuditLogsInfo(entry)}`,
+				LogSeverity.ServerChange,
+			);
+		}
+		if (locationChanged) {
+			await log(
+				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
-				}`,
+				}) moved to ${
+					entry.target.channel?.toString() ??
+					entry.target.entityMetadata?.location ??
+					"an external location"
+				}${extraAuditLogsInfo(entry)}`,
 				LogSeverity.ServerChange,
 			);
 		}

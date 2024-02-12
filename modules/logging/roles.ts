@@ -1,25 +1,22 @@
-import {
-	Base,
-	type AuditLogEvent,
-	type GuildAuditLogsEntry,
-	type APIRole,
-	roleMention,
-	Role,
-} from "discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import { type AuditLogEvent, roleMention, Role } from "discord.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { joinWithAnd } from "../../util/text.js";
 import config from "../../common/config.js";
 
-export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.MemberRoleUpdate>) {
+export async function memberRoleUpdate(
+	entry: AuditLog<AuditLogEvent.MemberRoleUpdate, "$add" | "$remove">,
+) {
 	if (!entry.target) return;
 
 	const addedRoles = entry.changes
-		.filter((change): change is { key: "$add"; new: APIRole[] } => change.key === "$add")
-		.flatMap((change) => change.new);
+		.map((change) => change.key === "$add" && change.new)
+		.filter(Boolean)
+		.flat();
 
 	const removedRoles = entry.changes
-		.filter((change): change is { key: "$remove"; new: APIRole[] } => change.key === "$remove")
-		.flatMap((change) => change.new);
+		.map((change) => change.key === "$remove" && change.new)
+		.filter(Boolean)
+		.flat();
 
 	if (addedRoles.length)
 		await log(
@@ -44,28 +41,29 @@ export async function memberRoleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.
 		);
 }
 
-export async function roleCreate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleCreate>) {
-	if (!(entry.target instanceof Base)) return;
+export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>) {
 	await log(
-		`${LoggingEmojis.Role} ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Role} ${roleMention(entry.target.id)} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
 
-export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUpdate>) {
-	if (!(entry.target instanceof Role)) return;
+export async function roleUpdate(
+	entry: AuditLog<AuditLogEvent.RoleUpdate, "icon_hash" | "unicode_emoji">,
+) {
 	let iconChanged = false;
 
 	for (const change of entry.changes) {
-		const key = change.key as
-			| Extract<typeof change.key, keyof APIRole | "icon_hash">
-			| "unicode_emoji";
-		switch (key) {
+		switch (change.key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} (@${
-						change.old
-					}) renamed to @${change.new}${extraAuditLogsInfo(entry)}`,
+					`${LoggingEmojis.Role} ${roleMention(entry.target.id)} ${
+						change.old ? `(@${change.old}) ` : ""
+					}renamed to @${
+						change.new ||
+						(entry.target instanceof Role && entry.target.name) ||
+						"deleted-role"
+					}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 				);
 				break;
@@ -108,12 +106,15 @@ export async function roleUpdate(entry: GuildAuditLogsEntry<AuditLogEvent.RoleUp
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 					{
-						buttons: [
-							{
-								label: "Permissions",
-								url: `https://discordlookup.com/permissions-calculator/${change.new}`,
-							},
-						],
+						buttons:
+							change.new === undefined
+								? []
+								: [
+										{
+											label: "New Permissions",
+											url: `https://discordlookup.com/permissions-calculator/${change.new.valueOf()}`,
+										},
+								  ],
 					},
 				);
 				break;
