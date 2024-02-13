@@ -63,6 +63,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 
 	async init(): Promise<void> {
+		if (this.message) return;
 		this.message = databases[this.name] ||= await databaseThread.send(
 			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
@@ -164,6 +165,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 					}
 
 					databases[this.name] = undefined;
+					this.message = undefined;
 					await this.init();
 					return await callback();
 				})
