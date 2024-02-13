@@ -16,26 +16,26 @@ if (guild && !guild.available) throw new ReferenceError("Main guild is unavailab
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getConfig() {
-	if (!guild) throw new ReferenceError("Can not get config in testing mode");
-
-	const channels = await guild.channels.fetch();
-	const roles = (await guild.roles.fetch()).filter(
+	const channels = (await guild?.channels.fetch()) ?? new Collection();
+	const roles = ((await guild?.roles.fetch()) ?? new Collection()).filter(
 		(role) => role.editable && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
 	);
 
-	const otherGuilds = await client.guilds.fetch();
-	otherGuilds.delete(guild.id);
+	const otherGuilds = guild && (await client.guilds.fetch());
+	if (otherGuilds) otherGuilds.delete(guild.id);
 
 	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	return {
-		guild: guild,
-		otherGuildIds: [...otherGuilds.keys()],
-		testingGuild: await client.guilds.fetch("938438560925761619").catch(() => void 0),
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		guild: guild!,
+		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
+		testingGuild:
+			guild && (await client.guilds.fetch("938438560925761619").catch(() => void 0)),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+				guild?.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
@@ -46,7 +46,8 @@ async function getConfig() {
 			welcome: getChannel("welcome", ChannelType.GuildText),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
-			modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
+			modlogs:
+				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
 			exec: getChannel("exec", ChannelType.GuildText, "start"),
 			admin: getChannel("admin", ChannelType.GuildText, "start"),
 
