@@ -42,11 +42,11 @@ const data: CustomOperation = {
 		const operation =
 			operationName &&
 			((subcommandName &&
-				(schemas[operationName]?.options?.find(
+				(schemas[operationName]?.options ?? []).find(
 					(option): option is ApplicationCommandSubCommand =>
 						option.type === ApplicationCommandOptionType.Subcommand &&
 						option.name === subcommandName,
-				) as ApplicationCommandSubCommand | undefined)) ||
+				)) ||
 				schemas[operationName]);
 
 		await interaction.editReply({
