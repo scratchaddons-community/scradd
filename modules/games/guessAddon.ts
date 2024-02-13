@@ -504,8 +504,7 @@ function getNextQuestions(
 		.flat(2);
 
 	for (const question of questions) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		frequencies[question.question] ??= 0;
+		frequencies[question.question] ||= 0;
 		frequencies[question.question]++;
 	}
 
