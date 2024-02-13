@@ -166,7 +166,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 		if (
 			badEmbedWords.strikes &&
-			!(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type)
+			!([...Constants.NonSystemMessageTypes] as const).includes(message.type)
 		)
 			needsDelete = true;
 
