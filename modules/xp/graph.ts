@@ -37,7 +37,7 @@ export default async function graph(interaction: AnySelectMenuInteraction): Prom
 		.toSorted((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0));
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d")
+	const context = canvas.getContext("2d");
 
 	const defaultColor = Chart.defaults.color;
 	Chart.defaults.color = "#fff";
