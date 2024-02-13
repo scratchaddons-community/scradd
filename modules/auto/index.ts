@@ -142,6 +142,7 @@ async function handleMutatable(message: Message) {
 			const embed = match && (await handleMatch(match));
 			if (embed) {
 				embeds.push(embed);
+				if (!notSet) embed.footer = { text: "Disable this using /settings" };
 			}
 			if (embeds.length >= 5) break;
 		}
