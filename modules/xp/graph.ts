@@ -1,6 +1,6 @@
 import type { AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./util.js";
-import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
+import { createCanvas } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
@@ -37,7 +37,7 @@ export default async function graph(interaction: AnySelectMenuInteraction): Prom
 		.toSorted((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0));
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d") as CanvasRenderingContext2D & SKRSContext2D;
+	const context = canvas.getContext("2d")
 
 	const defaultColor = Chart.defaults.color;
 	Chart.defaults.color = "#fff";

@@ -1,3 +1,10 @@
+import type { SKRSContext2D } from "@napi-rs/canvas";
+import type {
+	ChartConfiguration,
+	ChartConfigurationCustomTypesPerDataset,
+	ChartType,
+	DefaultDataPoint,
+} from "chart.js";
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
 
@@ -155,6 +162,21 @@ declare module "strife.js" {
 	}
 	export interface DefaultCommandAccess {
 		inGuild: true;
+	}
+}
+
+declare module "chart.js" {
+	export class Chart<
+		TType extends ChartType = ChartType,
+		TData = DefaultDataPoint<TType>,
+		TLabel = unknown,
+	> extends Chart {
+		constructor (
+			item: SKRSContext2D,
+			config:
+				| ChartConfiguration<TType, TData, TLabel>
+				| ChartConfigurationCustomTypesPerDataset<TType, TData, TLabel>,
+		)
 	}
 }
 
