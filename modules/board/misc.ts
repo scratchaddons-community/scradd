@@ -72,7 +72,7 @@ export function boardReactionCount(
 			COUNTS.default,
 	);
 
-	function shift(count: number) {
+	function shift(count: number): number {
 		const privateThread =
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
 				? 2 / 3
@@ -82,7 +82,7 @@ export function boardReactionCount(
 		return Math.max(2, Math.round(count * privateThread * timeShift));
 	}
 }
-function baseReactionCount(id: Snowflake) {
+function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
@@ -183,7 +183,7 @@ export async function generateBoardMessage(
 	return await messageToBoardData(message);
 }
 
-function formatChannel(channel: TextBasedChannel) {
+function formatChannel(channel: TextBasedChannel): string {
 	const thread = channel.isThread() && channel.parent?.toString();
 	const otherServer =
 		!channel.isDMBased() &&

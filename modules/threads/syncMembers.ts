@@ -89,7 +89,7 @@ export async function updateThreadMembers(
 	}
 }
 
-async function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
+async function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }): Promise<void> {
 	for (const [, member] of role.members) {
 		const baseChannel = getBaseChannel(thread);
 		if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))

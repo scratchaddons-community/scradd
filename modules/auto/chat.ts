@@ -9,6 +9,7 @@ import {
 	type MessageContextMenuCommandInteraction,
 	TextInputStyle,
 	type InteractionResponse,
+	type ThreadChannel,
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
@@ -114,7 +115,7 @@ export async function learn(message: Message): Promise<void> {
 }
 
 const thread = await getThread();
-async function getThread() {
+async function getThread(): Promise<ThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const intitialThread = getInitialChannelThreads(config.channels.bots).find(

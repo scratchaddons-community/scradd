@@ -122,7 +122,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.data = data;
 	}
 
-	#queueWrite() {
+	#queueWrite(): void {
 		if (!this.message) {
 			throw new ReferenceError(
 				"Must call `.init()` before reading or setting `.data` or `.extra`",
@@ -219,7 +219,7 @@ for (const [event, code] of [
 		if (called || (event === "message" && message !== "shutdown")) return;
 		called = true;
 
-		function doExit() {
+		function doExit(): void {
 			if (exited) return;
 			exited = true;
 

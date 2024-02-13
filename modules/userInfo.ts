@@ -20,7 +20,7 @@ import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 async function userInfo(
 	interaction: RepliableInteraction,
 	{ member, user }: { member?: GuildMember; user: User },
-) {
+): Promise<void> {
 	const isMod =
 		config.roles.mod &&
 		(interaction.member instanceof GuildMember

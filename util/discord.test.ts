@@ -5,7 +5,7 @@ import {
 	type ButtonComponent,
 	ButtonStyle,
 	ComponentType,
-	type BaseMessageOptions,
+	type InteractionReplyOptions,
 	type APIActionRowComponent,
 	type APIMessageActionRowComponent,
 	type APITextInputComponent,
@@ -135,7 +135,7 @@ await describe("disableComponents", async () => {
 
 await describe("paginate", async () => {
 	await it("should only respond once when `user` is `false` option", async () => {
-		const messages: BaseMessageOptions[] = [];
+		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[1, 2, 3],
 			(value) => value.toString(),
@@ -145,7 +145,7 @@ await describe("paginate", async () => {
 		strictEqual(messages.length, 1);
 	});
 	await it("should generate the proper first page", async () => {
-		const messages: BaseMessageOptions[] = [];
+		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 			(value) => value.toString(),
@@ -289,7 +289,7 @@ await describe("paginate", async () => {
 		);
 	});
 	await it("should respect the `failMessage` option", async () => {
-		const messages: (BaseMessageOptions & { ephemeral: boolean })[] = [];
+		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[],
 			(value) => value,

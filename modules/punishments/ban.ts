@@ -162,7 +162,7 @@ async function confirmBan(
 		"delete-range"?: string;
 		"unbanTime"?: Date | false;
 	},
-) {
+): Promise<void> {
 	const deleteRange = options["delete-range"]?.toLowerCase();
 	const deleteLength = Math.min(
 		604_800,

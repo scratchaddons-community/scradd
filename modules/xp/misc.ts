@@ -20,7 +20,7 @@ const INCREMENT_FREQUENCY = 10;
  *
  * @returns The increment.
  */
-function getIncrementForLevel(level: number) {
+function getIncrementForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 

@@ -45,7 +45,7 @@ async function settingsCommand(
 		"dm-reminders"?: boolean;
 		"scratch-embeds"?: boolean;
 	},
-) {
+): Promise<void> {
 	await interaction.reply(
 		await updateSettings(interaction.user, {
 			autoreactions: options.autoreactions,

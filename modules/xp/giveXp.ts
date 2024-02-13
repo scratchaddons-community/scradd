@@ -143,7 +143,7 @@ export default async function giveXp(
 	recentXpDatabase.data = weekly;
 }
 
-async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string) {
+async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string): Promise<void> {
 	const newLevel = getLevelForXp(newXp);
 	const nextLevelXp = getXpForLevel(newLevel + 1);
 	const showButton = (await getSettings(member, false)).levelUpPings === undefined;

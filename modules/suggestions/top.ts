@@ -63,12 +63,12 @@ export default async function top(
 	);
 }
 /** @todo - Strip full links, they can’t be escaped. */
-function padTitle(title: number | string) {
+function padTitle(title: number | string): string {
 	const left = countOccurrences(`${title}`, "[");
 	const right = countOccurrences(`${title}`, "]");
 	return title + "]".repeat(Math.max(0, left - right));
 }
 
-function countOccurrences(string: string, substring: string) {
+function countOccurrences(string: string, substring: string): number {
 	return string.split(substring).length - 1;
 }

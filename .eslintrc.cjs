@@ -61,7 +61,14 @@ module.exports = {
 			"error",
 			{ fixStyle: "inline-type-imports" },
 		],
-		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/explicit-function-return-type": [
+			"error",
+			{
+				allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+				allowExpressions: true,
+				allowIIFEs: true,
+			},
+		],
 		"@typescript-eslint/explicit-member-accessibility": [
 			"error",
 			{ accessibility: "no-public", overrides: { parameterProperties: "explicit" } },
@@ -143,7 +150,7 @@ module.exports = {
 		"capitalized-comments": "off",
 		"line-comment-position": "off",
 		"max-depth": "error",
-		//TODO: enable // "multiline-comment-style": ["error", "separate-lines"],
+		"multiline-comment-style": ["error", "separate-lines"],
 		"no-fallthrough": [
 			"error",
 			{ allowEmptyCase: true, commentPattern: /[Ff]alls?[ -]?through/.source },

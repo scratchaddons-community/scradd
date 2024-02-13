@@ -6,6 +6,7 @@ import {
 	TextInputStyle,
 	inlineCode,
 	type User,
+	type GuildMember,
 } from "discord.js";
 import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/util.js";
@@ -64,7 +65,9 @@ const CONSONANTS = [
 	] as const;
 const CHARACTERS = [...CONSONANTS, ...VOWELS] as const;
 
-export default async function hangman(interaction: ChatInputCommandInteraction<"cached" | "raw">): Promise<void> {
+export default async function hangman(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
@@ -202,7 +205,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 		},
 	});
 
-	async function tick() {
+	async function tick(): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",
 		).join("");
@@ -313,7 +316,7 @@ const ROLES = [
 	config.roles.booster?.id,
 	config.roles.active?.id,
 ];
-async function getMember(player: User) {
+async function getMember(player: User): Promise<GuildMember> {
 	const members = await config.guild.members.fetch();
 	const testers = await config.testingGuild?.members.fetch();
 	const xp = recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -339,7 +342,10 @@ async function getMember(player: User) {
 	return member;
 }
 
-async function makeCanvasFiles(url: string, win: boolean) {
+async function makeCanvasFiles(
+	url: string,
+	win: boolean,
+): Promise<{ attachment: Buffer; name: string }[]> {
 	if (process.env.CANVAS === "false") return [];
 
 	const { createCanvas, loadImage } = await import("@napi-rs/canvas");

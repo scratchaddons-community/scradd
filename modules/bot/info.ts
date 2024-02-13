@@ -10,6 +10,7 @@ import {
 	type ChatInputCommandInteraction,
 	type ButtonInteraction,
 	inlineCode,
+	type APIEmbed,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
@@ -69,7 +70,7 @@ export default async function info(
 	}
 }
 
-async function status(interaction: ChatInputCommandInteraction) {
+async function status(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
 	await interaction.editReply({
@@ -121,7 +122,7 @@ async function status(interaction: ChatInputCommandInteraction) {
 		],
 	});
 }
-async function credits(interaction: ChatInputCommandInteraction) {
+async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
 	const dependencies = Object.keys(pkg.dependencies)
 		.map((name) => {
 			const { version } = lockFile.dependencies[name];
@@ -199,7 +200,7 @@ async function credits(interaction: ChatInputCommandInteraction) {
 		);
 	}
 }
-function getConfig() {
+function getConfig(): APIEmbed[] {
 	return [
 		{
 			color: constants.themeColor,
@@ -229,7 +230,6 @@ function getConfig() {
 
 			fields: Object.entries(config.roles).map((role) => ({
 				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
-
 					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
 					.toLowerCase()} role`,
 

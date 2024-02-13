@@ -240,7 +240,7 @@ export async function recheckAllRoles(): Promise<void> {
 		}
 	}
 }
-async function recheckRole(role: Role, reason = "No longer qualifies") {
+async function recheckRole(role: Role, reason = "No longer qualifies"): Promise<Role | undefined> {
 	if (!role.members.size) return await role.delete("Unused role");
 
 	const anyQualify = await asyncFilter([...role.members.values()], qualifiesForRole).next();

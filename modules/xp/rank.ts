@@ -104,7 +104,7 @@ export default async function getUserRank(
 	});
 }
 
-async function makeCanvasFiles(progress: number) {
+async function makeCanvasFiles(progress: number): Promise<{ attachment: Buffer; name: string; }[]> {
 	if (process.env.CANVAS === "false") return [];
 
 	const { createCanvas } = await import("@napi-rs/canvas");

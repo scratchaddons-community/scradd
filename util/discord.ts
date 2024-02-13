@@ -11,7 +11,7 @@ import {
 	type APIEmbed,
 	type APIMessageActionRowComponent,
 	type Awaitable,
-	type BaseMessageOptions,
+	type InteractionReplyOptions,
 	type EmojiIdentifierResolvable,
 	type GuildTextBasedChannel,
 	type MessageActionRowComponent,
@@ -634,21 +634,19 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (
-		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<InteractionResponse | Message>,
+	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	options: PaginateOptions<Item, User>,
 ): Promise<void>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => unknown,
+	reply: (options: InteractionReplyOptions) => unknown,
 	options: PaginateOptions<Item, false>,
 ): Promise<void>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => Awaitable<unknown>,
+	reply: (options: InteractionReplyOptions) => Awaitable<unknown>,
 	{
 		title,
 		format,
@@ -682,7 +680,7 @@ export async function paginate<Item>(
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage() {
+	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		const content = (
@@ -760,7 +758,7 @@ export async function paginate<Item>(
 				},
 			],
 			ephemeral,
-		} satisfies BaseMessageOptions & { ephemeral: boolean };
+		};
 	}
 
 	let message = await reply(await generateMessage());
@@ -771,7 +769,7 @@ export async function paginate<Item>(
 	)
 		return;
 
-	const editReply = (data: BaseMessageOptions & { ephemeral: boolean }) =>
+	const editReply = (data: InteractionReplyOptions): unknown =>
 		ephemeral || !(message instanceof InteractionResponse) || !(message instanceof Message)
 			? reply(data)
 			: message.edit(data);

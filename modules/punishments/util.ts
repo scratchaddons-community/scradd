@@ -9,7 +9,7 @@ import {
 	ButtonStyle,
 	type InteractionResponse,
 	type Message,
-	type BaseMessageOptions,
+	type InteractionReplyOptions,
 } from "discord.js";
 import Database, { databaseThread } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
@@ -93,9 +93,7 @@ export default async function filterToStrike(
 
 export async function listStrikes(
 	member: GuildMember | User,
-	reply: (
-		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<InteractionResponse | Message>,
+	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	{ expired: showExpired = true, removed: showRemoved = false } = {},
 	commandUser: User | false = false,
 ): Promise<void> {

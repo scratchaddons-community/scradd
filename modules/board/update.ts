@@ -89,7 +89,7 @@ function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
 		? Pick<typeof boardDatabase.data[number], Keys> & { source: string }
 		: never,
 	oldData?: Omit<typeof boardDatabase.data[number], Keys | "source">,
-) {
+): void {
 	const data = [...boardDatabase.data];
 	const index = data.findIndex((suggestion) => suggestion.source === newData.source);
 	const found = data[index];

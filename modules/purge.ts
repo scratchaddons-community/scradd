@@ -8,6 +8,8 @@ import {
 	type User,
 	type GuildMember,
 	ApplicationCommandType,
+	type InteractionResponse,
+	type InteractionReplyOptions,
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
 import constants from "../common/constants.js";
@@ -18,7 +20,7 @@ const MAX_FETCH_COUNT = 100;
 async function purge(
 	interaction: RepliableInteraction<"cached" | "raw">,
 	options: { count: string; user?: GuildMember | User; message?: string },
-) {
+): Promise<InteractionResponse | undefined> {
 	const before = options.message?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ?? undefined;
 	const numberCount = Number(options.count);
 	const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
@@ -42,7 +44,7 @@ async function purge(
 
 	let end = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
 
-	async function generateMessage() {
+	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const sliced = filtered.slice(start, end);
 		if (!sliced[0] || start >= end) {
 			return {

@@ -5,7 +5,7 @@ import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import config from "../../common/config.js";
 
-function decodeRegexps(regexps: RegExp[]) {
+function decodeRegexps(regexps: RegExp[]): string {
 	return regexps
 		.map(({ source }) =>
 			caesar(source).replaceAll(

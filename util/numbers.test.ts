@@ -187,7 +187,7 @@ await describe("lerpColors", async () => {
 	});
 });
 
-function almostEqual(actual: number, expected: number, message?: string | undefined) {
+function almostEqual(actual: number, expected: number, message?: string | undefined): void {
 	const diff = Math.abs(actual - expected);
 	if (diff > 5) {
 		throw new AssertionError({

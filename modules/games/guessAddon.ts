@@ -299,7 +299,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 			| false
 			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string },
 		justAnswered: string,
-	) {
+	): Promise<void> {
 		const foundAddon = addons.find(({ addonId }) => addonId === addonProbabilities[0]?.[0]);
 
 		if (!foundAddon) {
