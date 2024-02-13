@@ -212,7 +212,7 @@ function getConfig(): APIEmbed[] {
 
 			fields: Object.entries(config.channels)
 				.filter(
-					(channel): channel is [typeof channel[0], Exclude<typeof channel[1], string>] =>
+					(channel): channel is [typeof channel[0], Exclude<typeof channel[1], Snowflake>] =>
 						typeof channel[1] !== "string",
 				)
 				.map((channel) => ({
