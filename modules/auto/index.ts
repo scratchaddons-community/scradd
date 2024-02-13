@@ -6,6 +6,8 @@ import {
 	ApplicationCommandType,
 	type Snowflake,
 	type APIEmbed,
+	ComponentType,
+	ButtonStyle,
 	type BaseMessageOptions,
 } from "discord.js";
 import { getSettings } from "../settings.js";
@@ -143,11 +145,31 @@ async function handleMutatable(
 			const embed = await handleMatch(match);
 			if (embed) {
 				embeds.push(embed);
-				if (notSet) embed.footer = { text: "Disable this using /settings" };
+				if (!notSet) embed.footer = { text: "Disable this using /settings" };
 			}
 			if (embeds.length >= 5) break;
 		}
-		if (embeds.length) return { content: "", files: [], embeds, components: [] };
+		if (embeds.length)
+			return {
+				content: "",
+				files: [],
+				embeds,
+				components: notSet
+					? [
+							{
+								components: [
+									{
+										customId: "scratchEmbeds_toggleSetting",
+										type: ComponentType.Button as const,
+										label: `Disable Scratch Embeds`,
+										style: ButtonStyle.Success as const,
+									},
+								],
+								type: ComponentType.ActionRow,
+							},
+					  ]
+					: [],
+			};
 	}
 
 	const ignored = ignoreTriggers.some((trigger) => message.content.match(trigger));
