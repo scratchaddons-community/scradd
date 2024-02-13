@@ -6,7 +6,7 @@ import {
 	TimestampStyles,
 	User,
 	type RepliableInteraction,
-type	InteractionResponse,
+	type InteractionResponse,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";

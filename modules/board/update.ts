@@ -12,7 +12,13 @@ const processing = new Set<Snowflake>();
  *
  * @param message - The board message to update.
  */
-export default async function updateBoard({ count, message }: { count: number; message: Message }): Promise<void> {
+export default async function updateBoard({
+	count,
+	message,
+}: {
+	count: number;
+	message: Message;
+}): Promise<void> {
 	if (processing.has(message.id)) return;
 	processing.add(message.id);
 	if (!config.channels.board) throw new ReferenceError("Could not find board channel");

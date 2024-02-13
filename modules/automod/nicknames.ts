@@ -81,7 +81,11 @@ export default async function changeNickname(member: GuildMember): Promise<void>
 	}
 }
 
-async function setNickname(member: GuildMember, newNickname: string, reason: string): Promise<void> {
+async function setNickname(
+	member: GuildMember,
+	newNickname: string,
+	reason: string,
+): Promise<void> {
 	await (member.moderatable
 		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
