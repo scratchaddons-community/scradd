@@ -1,7 +1,6 @@
 import {
 	type ApplicationCommand,
 	Collection,
-	type Snowflake,
 	type Guild,
 	GuildMember,
 	type APIInteractionGuildMember,
@@ -61,9 +60,9 @@ export async function getAllSchemas(
 }
 
 export default async function getSchemas(
-	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
+	user: APIInteractionGuildMember | GuildMember | User,
 	channel?: TextBasedChannel,
-): Promise<Record<Lowercase<string>, ApplicationCommand | CustomOperation>> {
+): Promise<Record<string, ApplicationCommand | CustomOperation>> {
 	const allSchemas = await getAllSchemas(user instanceof GuildMember ? user.guild : null);
 
 	const schemas = [];

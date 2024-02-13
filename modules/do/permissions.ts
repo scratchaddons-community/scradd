@@ -20,7 +20,7 @@ const permissionsCache: Record<
 > = {};
 export default async function hasPermission(
 	schema: ApplicationCommand | CustomOperation,
-	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
+	user: APIInteractionGuildMember | GuildMember | User,
 	channel?: TextBasedChannel,
 	ignoredRoles = new Set<Snowflake>(),
 ): Promise<boolean> {
@@ -50,7 +50,7 @@ export default async function hasPermission(
 
 	const userPermission =
 		permissions.find(
-			({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.id,
+			({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.user.id,
 		)?.permission ?? true;
 	if (!userPermission) return false;
 

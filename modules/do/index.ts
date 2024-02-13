@@ -3,6 +3,7 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	MessageMentions,
+	type ApplicationCommandSubCommand,
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
@@ -13,6 +14,11 @@ import warn from "../punishments/warn.js";
 import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
 import { getAllSchemas } from "./util.js";
 import { mentionChatCommand } from "../../util/discord.js";
+import {
+	getHelpForOperation,
+	getSchemasFromInteraction,
+	listOperations,
+} from "./operations/help.js";
 
 const fullPingRegex = new RegExp(`^${MessageMentions.UsersPattern.source}$`);
 
@@ -46,6 +52,7 @@ defineChatCommand(
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Could not find the \`${OPERATION_PREFIX}${commandName}\` operation!`,
+				embeds: [listOperations(await getSchemasFromInteraction(interaction))],
 			});
 		}
 
@@ -53,13 +60,7 @@ defineChatCommand(
 			("type" in schema ? schema.type : ApplicationCommandType.ChatInput) !==
 				ApplicationCommandType.ChatInput ||
 			(await parseArguments(args, schema.options ?? []));
-		if (options === false) {
-			return await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Invalid options!`, // todo show help
-			});
-		}
-		if (options === true)
+		if (options === true || (options && options.options === true))
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} The \`${await mentionChatCommand(
@@ -67,14 +68,34 @@ defineChatCommand(
 					interaction.guild ?? undefined,
 				)}\` command is not supported as an operation!`,
 			});
+		if (options === false) {
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} Invalid options!`,
+				embeds: [getHelpForOperation(schema, await getSchemasFromInteraction(interaction))],
+			});
+		}
+		if (options.options === false) {
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} Invalid options!`,
+				embeds: [
+					getHelpForOperation(
+						(schema.options ?? []).find(
+							(option): option is ApplicationCommandSubCommand =>
+								option.type == ApplicationCommandOptionType.Subcommand &&
+								option.name === options.subcommand,
+						) ?? schema,
+						await getSchemasFromInteraction(interaction),
+						schema.name,
+					),
+				],
+			});
+		}
 
 		const permission = await hasPermission(
 			schema,
-			interaction.inCachedGuild()
-				? interaction.member
-				: interaction.inRawGuild()
-				? { ...interaction.member, id: interaction.user.id }
-				: interaction.user,
+			interaction.member,
 			interaction.channel || undefined,
 		);
 		if (!permission) {
