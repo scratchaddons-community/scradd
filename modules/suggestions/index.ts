@@ -14,6 +14,7 @@ import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
 import { lerpColors } from "../../util/numbers.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
+import type { AuditLog } from "../logging/misc.js";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -50,9 +51,11 @@ defineEvent("threadUpdate", async (_, newThread) => {
 		{ author: newThread.ownerId ?? client.user.id },
 	);
 });
-defineEvent("guildAuditLogEntryCreate", async (entry) => {
+defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
+	if (rawEntry.action !== AuditLogEvent.ThreadUpdate) return;
+	const entry = rawEntry as AuditLog<AuditLogEvent.ThreadUpdate, "applied_tags">;
+
 	if (
-		entry.action !== AuditLogEvent.ThreadUpdate ||
 		!(entry.target instanceof ThreadChannel) ||
 		!(entry.target.parent instanceof ForumChannel) ||
 		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(
@@ -62,8 +65,8 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 		return;
 
 	const changes = entry.changes.filter(
-		(change): change is typeof change & { old: Snowflake[]; new: Snowflake[] } =>
-			(change.key as string) === "applied_tags",
+		(change): change is { key: "applied_tags"; old: Snowflake[]; new: Snowflake[] } =>
+			change.key === "applied_tags",
 	);
 	if (!changes.length) return;
 
@@ -72,8 +75,8 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 	if (oldAnswer.name === newAnswer.name) return;
 
 	const user =
-		(await config.guild.members.fetch(entry.executor?.id ?? "").catch(() => void 0)) ??
-		entry.executor;
+		entry.executor &&
+		(await config.guild.members.fetch(entry.executor.id).catch(() => entry.executor));
 
 	await entry.target.send({
 		embeds: [
