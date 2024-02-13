@@ -79,7 +79,7 @@ export default async function filterToStrike(
 		return { ...strike, ...data };
 	}
 
-	const { url } = message.attachments.first() || {};
+	const { url } = message.attachments.first() ?? {};
 	const data = {
 		mod: [...message.content.matchAll(GlobalUsersPattern)][1]?.groups?.id,
 

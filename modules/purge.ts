@@ -85,7 +85,7 @@ async function purge(
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "First Message",
-							url: (last || sliced[0]).url,
+							url: (last ?? sliced[0]).url,
 						},
 						{
 							type: ComponentType.Button,

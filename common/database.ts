@@ -20,7 +20,7 @@ const threadName = "databases";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
-	) ||
+	) ??
 	(await config.channels.modlogs.threads.create({
 		name: threadName,
 		reason: "For databases",

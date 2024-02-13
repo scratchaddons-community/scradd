@@ -41,7 +41,7 @@ export async function giveXpForMessage(message: Message): Promise<void> {
 	const bot = 1 + Number(Boolean(message.interaction));
 
 	await giveXp(
-		message.interaction?.user || message.author,
+		message.interaction?.user ?? message.author,
 		message.url,
 		spam === -1 && !newChannel
 			? 1

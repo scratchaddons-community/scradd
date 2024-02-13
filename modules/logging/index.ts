@@ -66,7 +66,7 @@ const events: {
 	async [AuditLogEvent.BotAdd](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${
-				entry.target?.toString() || "Bot"
+				entry.target?.toString() ?? "Bot"
 			} added${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);

@@ -9,7 +9,7 @@ module.exports = {
 			.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
 			.filter(
 				([library]) =>
-					(library.length === 4 && library.startsWith("es")) ||
+					(library.length === 6 && library.startsWith("es")) ||
 					compilerOptions.types.includes(library),
 			),
 	),
@@ -33,7 +33,10 @@ module.exports = {
 			rules: {
 				"@typescript-eslint/consistent-type-definitions": "off",
 				"@typescript-eslint/naming-convention": "off",
-				"@typescript-eslint/no-unused-vars": "off",
+				"@typescript-eslint/no-unused-vars": [
+					"error",
+					{ varsIgnorePattern: /^.*$/.source },
+				],
 			},
 		},
 		{
@@ -133,7 +136,14 @@ module.exports = {
 		"@typescript-eslint/no-use-before-define": "off",
 		"@typescript-eslint/parameter-properties": ["error", { prefer: "parameter-property" }],
 		"@typescript-eslint/prefer-enum-initializers": "off",
-		"@typescript-eslint/prefer-nullish-coalescing": "off",
+		"@typescript-eslint/prefer-nullish-coalescing": [
+			"error",
+			{
+				ignoreConditionalTests: true,
+				ignoreMixedLogicalExpressions: true,
+				ignorePrimitives: true,
+			},
+		],
 		"@typescript-eslint/prefer-readonly-parameter-types": "off",
 		"@typescript-eslint/promise-function-async": "off",
 		"@typescript-eslint/restrict-template-expressions": [
@@ -143,7 +153,7 @@ module.exports = {
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": [
-			"warn", // TODO: change to error after https://github.com/typescript-eslint/typescript-eslint/issues/6682 is fixed
+			"error",
 			{ allowDefaultCaseForExhaustiveSwitch: false },
 		],
 		"@typescript-eslint/typedef": "off",

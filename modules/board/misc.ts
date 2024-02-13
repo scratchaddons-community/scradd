@@ -129,14 +129,14 @@ export async function generateBoardMessage(
 				{
 					type: ComponentType.ActionRow,
 					components: [
-						...(extraButtons.pre || []),
+						...(extraButtons.pre ?? []),
 						{
 							label: "Message",
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							url: message.url,
 						},
-						...(extraButtons.post || []),
+						...(extraButtons.post ?? []),
 					],
 				},
 			],
@@ -158,8 +158,8 @@ export async function generateBoardMessage(
 		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
-				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]
-				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
+				? [...(extraButtons.pre ?? []), linkButton.toJSON(), ...(extraButtons.post ?? [])]
+				: [...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
 			allowedMentions: { users: [] },

@@ -35,7 +35,7 @@ async function getConfig() {
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild?.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+				guild?.systemChannel ?? getChannel("server", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
@@ -47,7 +47,7 @@ async function getConfig() {
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
 			modlogs:
-				guild?.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
+				guild?.publicUpdatesChannel ?? getChannel("logs", ChannelType.GuildText, "end"),
 			exec: getChannel("exec", ChannelType.GuildText, "start"),
 			admin: getChannel("admin", ChannelType.GuildText, "start"),
 
@@ -60,7 +60,7 @@ async function getConfig() {
 			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 			advertise:
-				getChannel("advertise", ChannelType.GuildText, "partial") ||
+				getChannel("advertise", ChannelType.GuildText, "partial") ??
 				getChannel("promo", ChannelType.GuildText, "partial"),
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
@@ -70,7 +70,7 @@ async function getConfig() {
 		roles: {
 			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) || mod,
+			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod,
 			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
@@ -107,7 +107,7 @@ export async function syncConfig(): Promise<void> {
 }
 export default config;
 
-const threads = (await guild?.channels.fetchActiveThreads())?.threads || new Collection();
+const threads = (await guild?.channels.fetchActiveThreads())?.threads ?? new Collection();
 export function getInitialChannelThreads(
 	channel: Extract<Channel, { threads: ThreadManager }>,
 ): Collection<string, AnyThreadChannel> {

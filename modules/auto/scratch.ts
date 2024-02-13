@@ -60,6 +60,9 @@ export async function handleMatch(url: URL): Promise<APIEmbed | undefined> {
 			if (embed) return embed;
 			break;
 		}
+		default: {
+			break;
+		}
 	}
 }
 export async function handleProject(urlParts: string[]): Promise<APIEmbed | undefined> {

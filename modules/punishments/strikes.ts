@@ -67,7 +67,7 @@ export async function getStrikeById(
 	}
 
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
+	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
@@ -109,7 +109,7 @@ export async function getStrikeById(
 				color: member?.displayColor,
 
 				author: nick
-					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
+					? { icon_url: (member ?? user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
 				title: `${

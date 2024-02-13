@@ -40,7 +40,7 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 	return Boolean(
 		baseChannel?.type !== ChannelType.DM &&
 			baseChannel?.guild.id === config.guild.id &&
-			baseChannel.permissionsFor(config.roles.staff || config.guild.id)?.has("ViewChannel"),
+			baseChannel.permissionsFor(config.roles.staff ?? config.guild.id)?.has("ViewChannel"),
 	);
 }
 
@@ -185,7 +185,7 @@ export async function getLoggingThread(group: LogSeverity): Promise<TextChannel 
 	return (
 		(await config.channels.modlogs.threads.fetch()).threads.find(
 			(thread) => thread.name === name,
-		) ||
+		) ??
 		(await config.channels.modlogs.threads.create({
 			name,
 			reason: "New logging thread",

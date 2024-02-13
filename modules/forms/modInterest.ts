@@ -21,7 +21,7 @@ if (!config.channels.admin) throw new ReferenceError("Could not find admin chann
 const thread =
 	getInitialChannelThreads(config.channels.admin).find(
 		(thread) => thread.name === "Moderator Interest Forms",
-	) ||
+	) ??
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
 		reason: "For moderator interest forms",

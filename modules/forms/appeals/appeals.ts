@@ -17,7 +17,7 @@ if (!config.channels.mod) throw new ReferenceError("Could not find mod channel")
 export const appealThread =
 	getInitialChannelThreads(config.channels.mod).find(
 		(thread) => thread.name === "Ban Appeal Forms",
-	) ||
+	) ??
 	(await config.channels.mod.threads.create({
 		name: "Ban Appeal Forms",
 		reason: "For ban appeal forms",

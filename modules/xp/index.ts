@@ -56,12 +56,16 @@ defineSubcommands(
 	},
 
 	async (interaction, options) => {
-		switch (options?.subcommand) {
+		const user =
+			(options?.options &&
+				"user" in options.options &&
+				(options.options.user instanceof GuildMember
+					? options.options.user.user
+					: options.options.user)) ||
+			interaction.user;
+
+		switch (options?.subcommand ?? "rank") {
 			case "rank": {
-				const user =
-					options.options.user instanceof GuildMember
-						? options.options.user.user
-						: options.options.user ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
 			}
@@ -83,7 +87,7 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await top(interaction, options.options.user);
+				await top(interaction, user);
 				break;
 			}
 		}

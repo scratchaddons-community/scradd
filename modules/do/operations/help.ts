@@ -17,7 +17,7 @@ export const getSchemasFromInteraction = async (
 		await import("../util.js")
 	).default(
 		interaction.inGuild() ? interaction.member : interaction.user,
-		interaction.channel || undefined,
+		interaction.channel ?? undefined,
 	);
 
 const data: CustomOperation = {
@@ -46,7 +46,7 @@ const data: CustomOperation = {
 					(option): option is ApplicationCommandSubCommand =>
 						option.type === ApplicationCommandOptionType.Subcommand &&
 						option.name === subcommandName,
-				)) ||
+				)) ??
 				schemas[operationName]);
 
 		await interaction.editReply({
