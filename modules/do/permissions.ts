@@ -4,7 +4,6 @@ import {
 	PermissionsBitField,
 	User,
 	ApplicationCommand,
-	type GuildResolvable,
 	type APIInteractionGuildMember,
 	type Snowflake,
 	type TextBasedChannel,
@@ -20,7 +19,7 @@ const permissionsCache: Record<
 	Record<ApplicationCommand["id"], ApplicationCommandPermissions[] | undefined> | undefined
 > = {};
 export default async function hasPermission(
-	schema: ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation,
+	schema: ApplicationCommand | CustomOperation,
 	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
 	channel?: TextBasedChannel,
 	ignoredRoles = new Set<Snowflake>(),

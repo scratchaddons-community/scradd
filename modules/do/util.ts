@@ -1,7 +1,6 @@
 import {
 	type ApplicationCommand,
 	Collection,
-	type GuildResolvable,
 	type Snowflake,
 	type Guild,
 	GuildMember,
@@ -38,15 +37,12 @@ const promises = (await fileSystem.readdir(directory)).map(async (file) => {
 	const resolved = path.join(directory, file);
 	if (path.extname(resolved) !== ".js") return;
 	return (await import(pathToFileURL(path.resolve(directory, resolved)).toString())).default as
-		| ApplicationCommand<{ guild: GuildResolvable | null }>
+		| ApplicationCommand
 		| CustomOperation;
 });
 const customOperations = (await Promise.all(promises)).filter(Boolean);
 
-const commandSchemas = new Collection<
-	string,
-	(ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation)[]
->();
+const commandSchemas = new Collection<string, (ApplicationCommand | CustomOperation)[]>();
 export async function getAllSchemas(
 	guild: Guild | null,
 ): Promise<(ApplicationCommand | CustomOperation)[]> {
