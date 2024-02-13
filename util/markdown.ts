@@ -23,7 +23,7 @@ export function formatAnyEmoji(
 		| { animated?: false | null; id?: null; name?: null }
 		| null
 		| undefined,
-) {
+): string {
 	return typeof options?.id === "string"
 		? formatEmoji({
 				...options,

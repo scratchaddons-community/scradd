@@ -9,8 +9,8 @@ module.exports = {
 			.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
 			.filter(
 				([library]) =>
-					compilerOptions.types.includes(library) ||
-					(library.length === 4 && library.startsWith("es")),
+					(library.length === 4 && library.startsWith("es")) ||
+					compilerOptions.types.includes(library),
 			),
 	),
 	extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
@@ -61,12 +61,18 @@ module.exports = {
 			"error",
 			{ fixStyle: "inline-type-imports" },
 		],
-		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/explicit-function-return-type": [
+			"error",
+			{
+				allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+				allowExpressions: true,
+				allowIIFEs: true,
+			},
+		],
 		"@typescript-eslint/explicit-member-accessibility": [
 			"error",
 			{ accessibility: "no-public", overrides: { parameterProperties: "explicit" } },
 		],
-		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/init-declarations": "off",
 		"@typescript-eslint/max-params": ["warn", { max: 4 }],
 		"@typescript-eslint/member-ordering": "off",
@@ -130,7 +136,10 @@ module.exports = {
 		"@typescript-eslint/prefer-nullish-coalescing": "off",
 		"@typescript-eslint/prefer-readonly-parameter-types": "off",
 		"@typescript-eslint/promise-function-async": "off",
-		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/restrict-template-expressions": [
+			"error",
+			{ allowAny: false, allowBoolean: false, allowNullish: false, allowRegExp: false },
+		],
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": [
@@ -141,7 +150,7 @@ module.exports = {
 		"capitalized-comments": "off",
 		"line-comment-position": "off",
 		"max-depth": "error",
-		//TODO: enable // "multiline-comment-style": ["error", "separate-lines"],
+		"multiline-comment-style": ["error", "separate-lines"],
 		"no-fallthrough": [
 			"error",
 			{ allowEmptyCase: true, commentPattern: /[Ff]alls?[ -]?through/.source },

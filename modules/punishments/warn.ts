@@ -7,6 +7,7 @@ import {
 	TimestampStyles,
 	User,
 	userMention,
+	type InteractionResponse,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -30,7 +31,7 @@ export default async function warn(
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
 	contextOrModerator: User | string = client.user,
-) {
+): Promise<boolean> {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -170,7 +171,10 @@ export default async function warn(
 
 	return true;
 }
-export async function removeStrike(interaction: ButtonInteraction, id: string) {
+export async function removeStrike(
+	interaction: ButtonInteraction,
+	id: string,
+): Promise<InteractionResponse | undefined> {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -204,14 +208,17 @@ export async function removeStrike(interaction: ButtonInteraction, id: string) {
 	)
 		await member.disableCommunicationUntil(Date.now(), "Strike removed");
 	await log(
-		`${LoggingEmojis.Punishment} Strike \`${id}\` removed from ${user.toString()} by ${
-			interaction.member
-		}`,
+		`${
+			LoggingEmojis.Punishment
+		} Strike \`${id}\` removed from ${user.toString()} by ${interaction.user.toString()}`,
 		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count * -1);
 }
-export async function addStrikeBack(interaction: ButtonInteraction, id: string) {
+export async function addStrikeBack(
+	interaction: ButtonInteraction,
+	id: string,
+): Promise<InteractionResponse | undefined> {
 	const strike = id && (await filterToStrike(id));
 	if (!strike) {
 		return await interaction.reply({
@@ -238,9 +245,9 @@ export async function addStrikeBack(interaction: ButtonInteraction, id: string) 
 		} Added ${user.toString()}’s strike \`${id}\` back!`,
 	});
 	await log(
-		`${LoggingEmojis.Punishment} Strike \`${id}\` was added back to ${user.toString()} by ${
-			interaction.member
-		}`,
+		`${
+			LoggingEmojis.Punishment
+		} Strike \`${id}\` was added back to ${user.toString()} by ${interaction.user.toString()}`,
 		LogSeverity.ImportantUpdate,
 	);
 	if (user instanceof User) await giveXp(user, logUrl, XP_PUNISHMENT * strike.count);

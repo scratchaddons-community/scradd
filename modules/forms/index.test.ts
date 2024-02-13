@@ -1,4 +1,4 @@
-import { deepStrictEqual, strictEqual } from "node:assert";
+import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 import generateAppeal, { getAppealComponents, parseIds } from "./appeals/generateAppeal.js";
 
@@ -22,23 +22,29 @@ await describe("generateAppeal", async () => {
 		);
 	});
 	await it("should generate accepted appeals", () => {
-		const [, embed] = generateAppeal(
-			{},
-			{ accepted: "Note for accept" },
-			{
-				accepters: new Set(["771422735486156811", "1084118992735719507"]),
-				rejecters: new Set(),
-			},
-		).embeds;
-		strictEqual(embed?.title, "Accepted");
+		const [, embed] =
+			generateAppeal(
+				{},
+				{ accepted: "Note for accept" },
+				{
+					accepters: new Set(["771422735486156811", "1084118992735719507"]),
+					rejecters: new Set(),
+				},
+			).embeds ?? [];
+		ok(embed);
+		ok("title" in embed);
+		strictEqual(embed.title, "Accepted");
 	});
 	await it("should generate rejected appeals", () => {
-		const [, embed] = generateAppeal(
-			{},
-			{ rejected: "Note for reject" },
-			{ accepters: new Set(), rejecters: new Set(["700822091649515530"]) },
-		).embeds;
-		strictEqual(embed?.title, "Rejected");
+		const [, embed] =
+			generateAppeal(
+				{},
+				{ rejected: "Note for reject" },
+				{ accepters: new Set(), rejecters: new Set(["700822091649515530"]) },
+			).embeds ?? [];
+		ok(embed);
+		ok("title" in embed);
+		strictEqual(embed.title, "Rejected");
 	});
 });
 
@@ -62,7 +68,7 @@ await describe("getAppealComponents", async () => {
 			getAppealComponents({
 				accepters: new Set(["914126244407296020", "700822091649515530"]),
 				rejecters: new Set(),
-			}).components[0]?.customId,
+			}).components[0].customId,
 			"J]gNVGAH0G+FKJqN9;Q36|_acceptAppeal",
 		);
 	});
@@ -72,15 +78,15 @@ await describe("getAppealComponents", async () => {
 			accepters: new Set(["771422735486156811", "914126244407296020"]),
 			rejecters: new Set(["914126244407296020"]),
 		});
-		strictEqual(resolved.components[0]?.disabled, true);
-		strictEqual(resolved.components[1]?.disabled, true);
+		strictEqual(resolved.components[0].disabled, true);
+		strictEqual(resolved.components[1].disabled, true);
 	});
 	await it("should not disable buttons when unresolved", () => {
 		const unresolved = getAppealComponents({
 			accepters: new Set(["700822091649515530"]),
 			rejecters: new Set([]),
 		});
-		strictEqual(unresolved.components[0]?.disabled, false);
-		strictEqual(unresolved.components[1]?.disabled, false);
+		strictEqual(unresolved.components[0].disabled, false);
+		strictEqual(unresolved.components[1].disabled, false);
 	});
 });

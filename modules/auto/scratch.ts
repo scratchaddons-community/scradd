@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -14,13 +15,19 @@ import { parser, type Node } from "posthtml-parser";
 
 const EMBED_LENGTH = 750;
 
-export function getMatches(content: string) {
+export function getMatches(content: string): URL[] {
 	const scratchUrlRegex =
 		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
-	return Array.from(new Set(content.match(scratchUrlRegex)), parseURL);
+
+	const urls = new Map<string, URL>();
+	for (const match of content.match(scratchUrlRegex) ?? []) {
+		const url = parseURL(match);
+		if (url) urls.set(url.href, url);
+	}
+	return [...urls.values()];
 }
 
-export function parseURL(match: string) {
+export function parseURL(match: string): URL | undefined {
 	if (match.startsWith("<") && match.endsWith(">")) return;
 
 	const start = match.startsWith("http") ? 0 : 1,
@@ -55,7 +62,7 @@ export async function handleMatch(url: URL): Promise<APIEmbed | undefined> {
 		}
 	}
 }
-export async function handleProject(urlParts: string[]) {
+export async function handleProject(urlParts: string[]): Promise<APIEmbed | undefined> {
 	const project = await gracefulFetch(`${constants.urls.scratchApi}/projects/${urlParts[2]}/`);
 	if (!project || project.code) return;
 
@@ -114,7 +121,7 @@ export async function handleProject(urlParts: string[]) {
 
 	return embed;
 }
-export async function handleUser(urlParts: string[]) {
+export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefined> {
 	const user = await gracefulFetch(`${constants.urls.scratchdb}/user/info/${urlParts[2]}/`);
 	if (!user || user.error) return;
 
@@ -166,7 +173,7 @@ export async function handleUser(urlParts: string[]) {
 
 	return embed;
 }
-export async function handleStudio(urlParts: string[]) {
+export async function handleStudio(urlParts: string[]): Promise<APIEmbed | undefined> {
 	const studio = await gracefulFetch(`${constants.urls.scratchApi}/studios/${urlParts[2]}/`);
 	if (!studio || studio.code) return;
 
@@ -198,7 +205,10 @@ export async function handleStudio(urlParts: string[]) {
 		timestamp: new Date(studio.history.created).toISOString(),
 	};
 }
-export async function handleForumPost(urlParts: string[], hash: string) {
+export async function handleForumPost(
+	urlParts: string[],
+	hash: string,
+): Promise<APIEmbed | undefined> {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
 	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
 
@@ -235,7 +245,7 @@ export async function handleForumPost(urlParts: string[], hash: string) {
 }
 
 type NodeOrNodes = Node | NodeOrNodes[];
-export function htmlToMarkdown(string: string) {
+export function htmlToMarkdown(string: string): string {
 	const nodes = parser(string, { decodeEntities: true, recognizeNoValueAttribute: true });
 	return nodesToText(nodes);
 }
@@ -254,8 +264,10 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 			return "\n";
 		}
 		case "a": {
-			const url = new URL(node.attrs?.href?.toString() ?? "", constants.urls.scratch);
-			return `[${content}](${url})`;
+			return `[${content}](${new URL(
+				node.attrs?.href?.toString() ?? "",
+				constants.urls.scratch,
+			).toString()})`;
 		}
 		case "span": {
 			const output =
@@ -273,7 +285,9 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 		}
 		case "img": {
 			const url = new URL(node.attrs?.src?.toString() ?? "", constants.urls.scratch);
-			return `[${content || node.attrs?.alt || url.pathname.split("/").at(-1)}](${url})`;
+			return `[${
+				content || node.attrs?.alt || url.pathname.split("/").at(-1)
+			}](${url.toString()})`;
 		}
 		case "blockquote": {
 			return `\n${content.trim().replaceAll(/^/gm, "> ")}\n`;
@@ -300,7 +314,7 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	return content;
 }
 
-export function linkifyMentions(string: string) {
+export function linkifyMentions(string: string): string {
 	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
 		name = name.replaceAll("\\", "");
 		return `[${name}](${constants.urls.scratch}/users/${name.slice(1)})`;

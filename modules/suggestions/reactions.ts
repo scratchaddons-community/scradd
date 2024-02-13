@@ -3,7 +3,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 
-export default async function updateReactions(reaction: MessageReaction) {
+export default async function updateReactions(reaction: MessageReaction): Promise<boolean> {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
 	if (
@@ -30,7 +30,7 @@ export default async function updateReactions(reaction: MessageReaction) {
 	return true;
 }
 
-export async function addToDatabase(thread: AnyThreadChannel) {
+export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	if (thread.parent?.id !== config.channels.suggestions?.id) return;
 
 	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;

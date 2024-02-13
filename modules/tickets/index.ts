@@ -199,7 +199,9 @@ defineMenuCommand(
 		const reason = modalInteraction.fields.getTextInputValue("reason");
 
 		await log(
-			`${LoggingEmojis.Punishment} ${interaction.user} reported a message by ${interaction.targetMessage.author} - ${interaction.targetMessage.url}\n${reason}`,
+			`${LoggingEmojis.Punishment} ${interaction.user.toString()} reported [a message](<${
+				interaction.targetMessage.url
+			}>) by ${interaction.targetMessage.author.toString()}\n${reason}`,
 			LogSeverity.Alert,
 			{
 				buttons: [

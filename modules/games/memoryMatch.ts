@@ -9,6 +9,10 @@ import {
 	GuildMember,
 	type APIInteractionGuildMember,
 	Base,
+	type InteractionResponse,
+	type Message,
+	type ActionRowData,
+	type InteractionButtonComponentData,
 } from "discord.js";
 import config from "../../common/config.js";
 import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
@@ -34,7 +38,7 @@ export default async function memoryMatch(
 		"bonus-turns"?: boolean;
 		"thread"?: boolean;
 	},
-) {
+): Promise<InteractionResponse | undefined> {
 	if (
 		!(options.opponent instanceof GuildMember) ||
 		options.opponent.user.bot ||
@@ -137,7 +141,7 @@ async function playGame(
 		useThread,
 		bonusTurns,
 	}: { players: [User, User]; easyMode: boolean; useThread: boolean; bonusTurns: boolean },
-) {
+): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) {
 		await interaction.message.edit({
 			components: disableComponents(interaction.message.components),
@@ -252,7 +256,11 @@ async function playGame(
 		},
 	});
 
-	async function setupNextTurn() {
+	async function setupNextTurn(): Promise<{
+		user: User;
+		ping: Message;
+		timeout?: NodeJS.Timeout;
+	}> {
 		const user = players[turn % 2] ?? players[0];
 		const content = `🎲 ${user.toString()}, your turn!`;
 		const gameLinkButton = {
@@ -295,7 +303,10 @@ async function playGame(
 		return { user, ping, timeout };
 	}
 
-	function getBoard(shown = new Set<string>()) {
+	function getBoard(shown = new Set<string>()): {
+		content: string;
+		components: ActionRowData<InteractionButtonComponentData>[];
+	} {
 		const firstTurn = turn % 2 ? "" : "__",
 			secondTurn = turn % 2 ? "__" : "";
 
@@ -332,7 +343,7 @@ async function playGame(
 		};
 	}
 
-	async function endGame(content?: string, user?: GuildMember | User) {
+	async function endGame(content?: string, user?: GuildMember | User): Promise<void> {
 		CURRENTLY_PLAYING.delete(players[0].id);
 		CURRENTLY_PLAYING.delete(players[1].id);
 		ignoredDeletions.add(turnInfo.ping.id);
@@ -382,7 +393,7 @@ async function playGame(
 	}
 }
 
-async function setupGame(difficulty: 2 | 4, guild = config.guild) {
+async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<string[][]> {
 	const twemojis = [
 		"🥔",
 		"⭐",
@@ -411,7 +422,7 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
 	const guildEmojis = (await guild.emojis.fetch())
 		.filter((emoji) => emoji.available)
-		.map((emoji) => emoji.toString());
+		.map((emoji) => emoji.toString()); // TODO: we use _ for emoji names - what does djs do?
 	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
 
 	const selected = Array.from(
@@ -435,7 +446,9 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild) {
 	return chunks;
 }
 
-export function showMemoryInstructions(interaction: RepliableInteraction) {
+export function showMemoryInstructions(
+	interaction: RepliableInteraction,
+): Promise<InteractionResponse> {
 	return interaction.reply({
 		ephemeral: true,
 		content:

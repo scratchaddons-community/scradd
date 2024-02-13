@@ -255,7 +255,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	return await queueReminders();
 }
 
-function getNextInterval() {
+function getNextInterval(): number | undefined {
 	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
 	if (!reminder) return;
 	return reminder.date - Date.now();

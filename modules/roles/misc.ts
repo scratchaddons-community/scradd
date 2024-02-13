@@ -8,15 +8,19 @@ const isTwemoji = new RegExp(`^${twemojiRegexp.default.source}$`);
 const isServerEmoji = new RegExp(`^${FormattingPatterns.Emoji.source}$`);
 const validContentTypes = ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp"];
 /** Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URI, string starting with https:// */
-export async function resolveIcon(icon: string) {
-	if (isTwemoji.test(icon)) return { unicodeEmoji: icon };
+export async function resolveIcon(
+	icon: string,
+): Promise<
+	{ icon: string; unicodeEmoji: null } | { unicodeEmoji: string; icon: null } | undefined
+> {
+	if (isTwemoji.test(icon)) return { unicodeEmoji: icon, icon: null };
 
 	const id = icon.match(isServerEmoji)?.groups?.id || (/^\d{17,20}$/.test(icon) && icon);
 	const url = id && config.guild.emojis.resolve(id)?.url;
-	if (url) return { icon: url };
+	if (url) return { icon: url, unicodeEmoji: null };
 
 	if (validContentTypes.some((contentType) => icon.startsWith(`data:${contentType};`)))
-		return { icon };
+		return { icon, unicodeEmoji: null };
 
 	if (!/^https?:\/\//.test(icon) || !URL.canParse(icon)) return;
 
@@ -29,7 +33,7 @@ export async function resolveIcon(icon: string) {
 	const contentType = response.headers.get("Content-Type");
 	if (!contentType || !validContentTypes.includes(contentType)) return;
 
-	return { icon };
+	return { icon, unicodeEmoji: null };
 }
 
 export const COLORS = Object.fromEntries(
@@ -50,6 +54,6 @@ export function parseColor(
 	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
 
 	return color.length === 4
-		? `#${color[1]}${color.slice(1, 3)}${color.slice(2, 4)}${color[3]}`
+		? `#${color[1] ?? ""}${color.slice(1, 3)}${color.slice(2, 4)}${color[3] ?? ""}`
 		: color;
 }

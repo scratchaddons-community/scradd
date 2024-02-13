@@ -25,13 +25,15 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	)
 		return true;
 
+	if (!interaction.command) throw new ReferenceError("Unknown command run");
+
 	const command =
-		commands[interaction.command?.name ?? ""]?.find(
+		commands[interaction.command.name]?.find(
 			(command) =>
 				typeof command.access === "boolean" ||
 				!![command.access].flat().includes(interaction.guild?.id),
-		) ?? commands[interaction.command?.name ?? ""]?.[0];
-	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+		) ?? commands[interaction.command.name]?.[0];
+	if (!command) throw new ReferenceError(`Command \`${interaction.command.name}\` not found`);
 
 	if (command.censored === "channel" ? badWordsAllowed(interaction.channel) : !command.censored)
 		return true;
@@ -170,8 +172,14 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		const result = tryCensor(options.text);
-		const words = result && result.words.flat();
-		const strikes = result && Math.trunc(result.strikes);
+		if (!result)
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.yes} No bad words found.`,
+			});
+
+		const words = result.words.flat();
+		const strikes = Math.trunc(result.strikes);
 
 		const isMod =
 			config.roles.staff &&
@@ -182,15 +190,14 @@ defineChatCommand(
 		await interaction.reply({
 			ephemeral: true,
 
-			content: words
-				? `## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
-				  (isMod
-						? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
-						: "") +
-				  `*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
-						underline(escapeMessage(word)),
-				  )}`
-				: `${constants.emojis.statuses.yes} No bad words found.`,
+			content:
+				`## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
+				(isMod
+					? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
+					: "") +
+				`*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
+					underline(escapeMessage(word)),
+				)}`,
 		});
 	},
 );

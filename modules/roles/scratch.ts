@@ -34,7 +34,10 @@ const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 
 const HASH = crypto.randomBytes(16);
 const sessions: Record<string, string> = {};
-export default async function linkScratchRole(request: IncomingMessage, response: ServerResponse) {
+export default async function linkScratchRole(
+	request: IncomingMessage,
+	response: ServerResponse,
+): Promise<ServerResponse> {
 	if (!process.env.CLIENT_SECRET)
 		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 
@@ -51,7 +54,7 @@ export default async function linkScratchRole(request: IncomingMessage, response
 		redirect_uri: redirectUri,
 		response_type: "code",
 		scope: OAuth2Scopes.Identify + " " + OAuth2Scopes.RoleConnectionsWrite,
-	})}`;
+	}).toString()}`;
 	const scratchUrl = `https://auth.itinerary.eu.org/auth/?name=${encodeURIComponent(
 		client.user.displayName,
 	)}&redirect=${Buffer.from(redirectUri).toString("base64")}`;

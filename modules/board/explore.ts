@@ -69,7 +69,7 @@ export default async function makeSlideshow(
 			boardReactionCount(channel?.isTextBased() ? channel : undefined) * 0.4,
 		),
 	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
-) {
+): Promise<void> {
 	const ephemeral =
 		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
 	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });

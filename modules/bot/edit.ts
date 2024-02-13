@@ -4,6 +4,7 @@ import {
 	type MessageContextMenuCommandInteraction,
 	type ModalSubmitInteraction,
 	TextInputStyle,
+	type InteractionResponse,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -11,7 +12,10 @@ import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
 import { databaseThread } from "../../common/database.js";
-export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
+
+export default async function editMessage(
+	interaction: MessageContextMenuCommandInteraction,
+): Promise<InteractionResponse | undefined> {
 	if (
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
@@ -64,7 +68,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 	});
 }
 
-export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
+export async function submitEdit(interaction: ModalSubmitInteraction, id: string): Promise<void> {
 	const text =
 		interaction.fields.getTextInputValue("jsonOne") +
 		interaction.fields.getTextInputValue("jsonTwo");

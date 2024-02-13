@@ -9,7 +9,7 @@ import {
 	ButtonStyle,
 	type InteractionResponse,
 	type Message,
-	type BaseMessageOptions,
+	type InteractionReplyOptions,
 } from "discord.js";
 import Database, { databaseThread } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
@@ -38,9 +38,11 @@ const robotopStrikes =
 		(await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(robotopUrl))) ||
 	[];
 
-const strikesCache: Record<string, { mod?: string; reason: string }> = {};
+const strikesCache: Record<string, { mod?: string; reason?: string }> = {};
 
-export default async function filterToStrike(filter: string) {
+export default async function filterToStrike(
+	filter: string,
+): Promise<(typeof strikeDatabase["data"][number] & typeof strikesCache[string]) | undefined> {
 	if (/^\d{1,4}$/.test(filter)) {
 		const details = robotopStrikes.find((strike) => strike.id.toString() === filter);
 		const strike = strikeDatabase.data.find((strike) => strike.id.toString() === filter);
@@ -67,11 +69,11 @@ export default async function filterToStrike(filter: string) {
 		message.type === MessageType.AutoModerationAction &&
 		message.embeds[0]
 	) {
+		const reason = message.embeds[0].fields.find((field) => field.name === "rule_name")?.value;
+		const context = message.embeds[0].description;
 		const data = {
 			mod: "AutoMod",
-			reason: `${
-				message.embeds[0].fields.find((field) => field.name === "rule_name")?.value
-			}\n>>> ${message.embeds[0].description}`,
+			reason: (reason ? `${reason}\n` : "") + (context ? `>>> ${context}` : ""),
 		};
 		strikesCache[strikeId] = data;
 		return { ...strike, ...data };
@@ -91,12 +93,10 @@ export default async function filterToStrike(filter: string) {
 
 export async function listStrikes(
 	member: GuildMember | User,
-	reply: (
-		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<InteractionResponse | Message>,
+	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	{ expired: showExpired = true, removed: showRemoved = false } = {},
 	commandUser: User | false = false,
-) {
+): Promise<void> {
 	const strikes = strikeDatabase.data
 		.filter(
 			(strike) =>

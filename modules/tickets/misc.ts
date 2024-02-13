@@ -16,12 +16,10 @@ export const TICKETS_BY_MEMBER = Object.fromEntries<
 		? getInitialChannelThreads(config.channels.tickets)
 				.map(
 					(thread) =>
-						[
-							getIdFromName(thread.name),
-							thread.type === ChannelType.PrivateThread && thread,
-						] as const,
+						thread.type === ChannelType.PrivateThread &&
+						([getIdFromName(thread.name) ?? "", thread] as const),
 				)
-				.filter((info): info is [Snowflake, PrivateThreadChannel] => info.every(Boolean))
+				.filter(Boolean)
 		: [],
 );
 
