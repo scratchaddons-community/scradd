@@ -1,6 +1,6 @@
 import type { AnySelectMenuInteraction } from "discord.js";
 import { recentXpDatabase } from "./util.js";
-import { createCanvas } from "@napi-rs/canvas";
+import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
@@ -41,7 +41,7 @@ export default async function graph(interaction: AnySelectMenuInteraction): Prom
 
 	const defaultColor = Chart.defaults.color;
 	Chart.defaults.color = "#fff";
-	new Chart(context, {
+	new Chart(context as CanvasRenderingContext2D & SKRSContext2D, {
 		options: {
 			parsing: false,
 			scales: {
