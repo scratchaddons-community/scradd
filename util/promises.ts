@@ -2,7 +2,7 @@
 export async function* asyncFilter<T, X>(
 	array: T[],
 	predicate: (value: T, index: number, array: T[]) => Promise<X | false>,
-) {
+): AsyncGenerator<Awaited<X>, void> {
 	const BATCH_SIZE = 50;
 
 	let currentIndex = 0;
@@ -33,7 +33,7 @@ export async function* asyncFilter<T, X>(
  * @returns Returns a promise that resolves to `true` as soon as any of the promises resolve with a truey value, or resolves to `false` if
  *   all of the promises resolve with a different value.
  */
-export async function anyPromise(promises: Promise<unknown>[]) {
+export async function anyPromise(promises: Promise<unknown>[]): Promise<boolean> {
 	const newPromises = promises.map(
 		async (promise) =>
 			await new Promise<boolean>((resolve, reject) => {

@@ -62,8 +62,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 		contructed.push(name);
 	}
 
-	async init() {
-		if (this.message) return;
+	async init(): Promise<void> {
 		this.message = databases[this.name] ||= await databaseThread.send(
 			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
@@ -90,21 +89,21 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.#extra = this.message.content.split("\n")[5];
 	}
 
-	get data() {
+	get data(): readonly Data[] {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
 		return this.#data;
 	}
-	set data(content) {
+	set data(content: readonly Data[]) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
 		this.#queueWrite();
 	}
 
-	get extra() {
+	get extra(): string | undefined {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.extra`");
 		return this.#extra;
 	}
-	set extra(content) {
+	set extra(content: string | undefined) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
 		this.#extra = content;
 		this.#queueWrite();
@@ -113,7 +112,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	updateById<Keys extends keyof Data>(
 		newData: Data["id"] extends string ? Pick<Data, Keys> & { id: string } : never,
 		oldData?: Omit<Data, Keys | "id">,
-	) {
+	): void {
 		const data = [...this.data];
 		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
 		const suggestion = data[index];
@@ -123,7 +122,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.data = data;
 	}
 
-	#queueWrite() {
+	#queueWrite(): void {
 		if (!this.message) {
 			throw new ReferenceError(
 				"Must call `.init()` before reading or setting `.data` or `.extra`",
@@ -193,7 +192,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 }
 
-export async function cleanDatabaseListeners() {
+export async function cleanDatabaseListeners(): Promise<void> {
 	const count = Object.values(timeouts).length;
 	console.log(
 		`Cleaning ${count} listener${count === 1 ? "" : "s"}: ${Object.keys(timeouts).join(",")}`,
@@ -220,7 +219,7 @@ for (const [event, code] of [
 		if (called || (event === "message" && message !== "shutdown")) return;
 		called = true;
 
-		function doExit() {
+		function doExit(): void {
 			if (exited) return;
 			exited = true;
 
@@ -239,7 +238,7 @@ for (const [event, code] of [
 	});
 }
 
-export async function backupDatabases(channel: TextBasedChannel) {
+export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
 	if (process.env.NODE_ENV !== "production") return;
 
 	const attachments = Object.values(databases)

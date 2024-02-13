@@ -10,6 +10,7 @@ import {
 	type ChatInputCommandInteraction,
 	type ButtonInteraction,
 	inlineCode,
+	type APIEmbed,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { syncConfig } from "../../common/config.js";
@@ -29,7 +30,7 @@ const designers = "966174686142672917",
 export default async function info(
 	interaction: ChatInputCommandInteraction,
 	{ subcommand }: { subcommand: "config" | "credits" | "status" },
-) {
+): Promise<void> {
 	switch (subcommand) {
 		case "status": {
 			await status(interaction);
@@ -69,7 +70,7 @@ export default async function info(
 	}
 }
 
-async function status(interaction: ChatInputCommandInteraction) {
+async function status(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
 
 	await interaction.editReply({
@@ -121,7 +122,7 @@ async function status(interaction: ChatInputCommandInteraction) {
 		],
 	});
 }
-async function credits(interaction: ChatInputCommandInteraction) {
+async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
 	const dependencies = Object.keys(pkg.dependencies)
 		.map((name) => {
 			const { version } = lockFile.dependencies[name];
@@ -133,13 +134,18 @@ async function credits(interaction: ChatInputCommandInteraction) {
 			if (version.startsWith("git+")) {
 				const segments = version.split("+")[1]?.split("#");
 				return segments
-					? ([`${name}@${segments[1]}`, segments[0]] as const)
+					? ([`${name}${segments[1] ? `@${segments[1]}` : ""}`, segments[0]] as const)
 					: ([name] as const);
 			}
 			if (version.startsWith("npm:")) {
 				const segments = version.split("@");
-				const reference = `${segments.length > 2 ? "@" : ""}${segments.at(-2)}`;
-				return [`${reference}@${segments.at(-1)}`, `https://npm.im/${reference}`] as const;
+				const reference = `${segments.length > 2 ? "@" : ""}${
+					segments.at(-2) ?? segments[0]
+				}`;
+				return [
+					`${reference}@${segments.at(-1) ?? segments[0]}`,
+					`https://npm.im/${reference}`,
+				] as const;
 			}
 
 			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
@@ -194,7 +200,7 @@ async function credits(interaction: ChatInputCommandInteraction) {
 		);
 	}
 }
-function getConfig() {
+function getConfig(): APIEmbed[] {
 	return [
 		{
 			color: constants.themeColor,
@@ -206,14 +212,13 @@ function getConfig() {
 
 			fields: Object.entries(config.channels)
 				.filter(
-					(channel): channel is [typeof channel[0], Exclude<typeof channel[1], string>] =>
+					(
+						channel,
+					): channel is [typeof channel[0], Exclude<typeof channel[1], Snowflake>] =>
 						typeof channel[1] !== "string",
 				)
 				.map((channel) => ({
-					name: `${channel[0]
-						.split("_")
-						.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-						.join(" ")} ${
+					name: `${channel[0].replaceAll(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${
 						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
 					}`,
 
@@ -227,9 +232,8 @@ function getConfig() {
 
 			fields: Object.entries(config.roles).map((role) => ({
 				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
-					.split("_")
-					.map((name) => (name[0] ?? "").toUpperCase() + name.slice(1))
-					.join(" ")} role`,
+					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+					.toLowerCase()} role`,
 
 				value: role[1]?.toString() ?? "*None*",
 				inline: true,
@@ -238,7 +242,7 @@ function getConfig() {
 	];
 }
 
-export async function syncConfigButton(interaction: ButtonInteraction) {
+export async function syncConfigButton(interaction: ButtonInteraction): Promise<void> {
 	if (
 		config.roles.staff &&
 		(interaction.member instanceof GuildMember
@@ -252,9 +256,7 @@ export async function syncConfigButton(interaction: ButtonInteraction) {
 			content: `${constants.emojis.statuses.yes} Synced configuration!`,
 		});
 		await log(
-			`${
-				LoggingEmojis.ServerUpdate
-			} Configuration synced by ${interaction.member?.toString()}`,
+			`${LoggingEmojis.ServerUpdate} Configuration synced by ${interaction.user.toString()}`,
 			LogSeverity.ImportantUpdate,
 		);
 	} else

@@ -22,7 +22,7 @@ export const RoleList = mongoose.model(
 	}),
 );
 
-export async function persistedLeave(member: GuildMember | PartialGuildMember) {
+export async function persistedLeave(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 
 	const roles = Object.fromEntries(
@@ -36,7 +36,7 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember) {
 	}).exec();
 }
 
-export async function persistedRejoin(member: GuildMember) {
+export async function persistedRejoin(member: GuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 
 	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();

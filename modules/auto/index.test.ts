@@ -33,7 +33,7 @@ await describe("getMatches", async () => {
 		);
 	});
 	await it("should ignore when surrounded in angles", () => {
-		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7>"), [undefined]);
+		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7>"), []);
 	});
 	await it("should not ignore a user with one left angle", () => {
 		deepStrictEqual(getMatches("<https://scratch.mit.edu/users/RedGuy7|"), [

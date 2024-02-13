@@ -21,8 +21,8 @@ export const suggestionsDatabase = new Database<{
 }>("suggestions");
 await suggestionsDatabase.init();
 
-export const oldSuggestions = config.channels.old_suggestions
-	? (await getAllMessages(config.channels.old_suggestions)).map((message) => {
+export const oldSuggestions = config.channels.oldSuggestions
+	? (await getAllMessages(config.channels.oldSuggestions)).map((message) => {
 			const [embed] = message.embeds;
 
 			const segments = message.thread?.name.split(" | ");
@@ -76,6 +76,6 @@ export function getAnswer(
 	return { ...tag, index, position: index / (tags.length - 1) };
 }
 
-export function getAnswers(channel: ForumChannel) {
+export function getAnswers(channel: ForumChannel): [number, GuildForumTag][] {
 	return [...channel.availableTags.entries()].filter(([, tag]) => tag.moderated);
 }

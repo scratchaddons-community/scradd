@@ -5,7 +5,7 @@ import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { censor, isPingable } from "./misc.js";
 
-export default async function changeNickname(member: GuildMember) {
+export default async function changeNickname(member: GuildMember): Promise<void> {
 	const censored = tryCensor(member.displayName);
 	const newNick = findName(member);
 
@@ -81,7 +81,11 @@ export default async function changeNickname(member: GuildMember) {
 	}
 }
 
-async function setNickname(member: GuildMember, newNickname: string, reason: string) {
+async function setNickname(
+	member: GuildMember,
+	newNickname: string,
+	reason: string,
+): Promise<void> {
 	await (member.moderatable
 		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
@@ -90,7 +94,7 @@ async function setNickname(member: GuildMember, newNickname: string, reason: str
 		  ));
 }
 
-function findName(member: GuildMember) {
+function findName(member: GuildMember): string {
 	const nick = censor(member.displayName);
 	if (isPingable(nick)) return nick;
 

@@ -93,7 +93,7 @@ defineSubcommands(
 					{
 						title: "Unjoined Threads",
 						singular: "thread",
-						failMessage: "You’ve joined all the threads here!",
+						failMessage: "You’ve joined all open threads here!",
 						user: interaction.user,
 						ephemeral: true,
 						totalCount: unjoined.length,

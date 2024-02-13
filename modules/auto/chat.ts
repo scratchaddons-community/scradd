@@ -8,6 +8,8 @@ import {
 	type ButtonInteraction,
 	type MessageContextMenuCommandInteraction,
 	TextInputStyle,
+	type InteractionResponse,
+	type ThreadChannel,
 } from "discord.js";
 import { normalize } from "../../util/text.js";
 import { stripMarkdown } from "../../util/markdown.js";
@@ -35,7 +37,7 @@ const dictionary = (await Chat.find({}))
 			!!(chat.response && !tryCensor(chat.response)),
 	);
 
-export default function scraddChat(message: Message) {
+export default function scraddChat(message: Message): string | undefined {
 	if (
 		message.author.id === client.user.id ||
 		message.channel.id !== thread?.id ||
@@ -65,7 +67,7 @@ export default function scraddChat(message: Message) {
 }
 
 const previousMessages: Record<Snowflake, Message> = {};
-export async function learn(message: Message) {
+export async function learn(message: Message): Promise<void> {
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
 
@@ -113,7 +115,7 @@ export async function learn(message: Message) {
 }
 
 const thread = await getThread();
-async function getThread() {
+async function getThread(): Promise<ThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const intitialThread = getInitialChannelThreads(config.channels.bots).find(
@@ -151,7 +153,9 @@ async function getThread() {
 	await message.pin();
 	return createdThread;
 }
-export async function allowChat(interaction: ButtonInteraction) {
+export async function allowChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (settings.scraddChat) {
 		return await interaction.reply(
@@ -170,7 +174,9 @@ export async function allowChat(interaction: ButtonInteraction) {
 		}>).`,
 	);
 }
-export async function denyChat(interaction: ButtonInteraction) {
+export async function denyChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (!settings.scraddChat) {
 		return await interaction.reply(
@@ -189,7 +195,9 @@ export async function denyChat(interaction: ButtonInteraction) {
 }
 
 const removedResponses = new Set<string>();
-export async function removeResponse(interaction: MessageContextMenuCommandInteraction) {
+export async function removeResponse(
+	interaction: MessageContextMenuCommandInteraction,
+): Promise<InteractionResponse | undefined> {
 	await interaction.showModal({
 		title: "Confirm Permament Response Removal",
 		customId: interaction.id,
@@ -233,9 +241,9 @@ export async function removeResponse(interaction: MessageContextMenuCommandInter
 		});
 	}
 	await log(
-		`${LoggingEmojis.Bot} ${
-			interaction.user
-		} permamently removed a response from Scradd Chat (${deletedCount} prompt${
+		`${
+			LoggingEmojis.Bot
+		} ${interaction.user.toString()} permamently removed a response from Scradd Chat (${deletedCount} prompt${
 			deletedCount === 1 ? "" : "s"
 		})`,
 		LogSeverity.ImportantUpdate,

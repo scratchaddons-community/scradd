@@ -16,7 +16,8 @@ import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" }
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
-export default async function guessAddon(interaction: ChatInputCommandInteraction) {
+
+export default async function guessAddon(interaction: ChatInputCommandInteraction): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	await reply();
 
@@ -298,7 +299,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 			| false
 			| { probabilities: Probabilities; askedQuestions: string[]; justAsked: string },
 		justAnswered: string,
-	) {
+	): Promise<void> {
 		const foundAddon = addons.find(({ addonId }) => addonId === addonProbabilities[0]?.[0]);
 
 		if (!foundAddon) {
@@ -503,8 +504,7 @@ function getNextQuestions(
 		.flat(2);
 
 	for (const question of questions) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		frequencies[question.question] ??= 0;
+		frequencies[question.question] ||= 0;
 		frequencies[question.question]++;
 	}
 

@@ -18,7 +18,7 @@ export function dad(
 
 	return (
 		customResponses[firstName] ||
-		`${greetings[Math.floor(Math.random() * greetings.length)]} ${
+		`${greetings[Math.floor(Math.random() * greetings.length)] ?? greetings[0]} ${
 			customNames[firstName] || name
 		}${customTriggers.includes(firstName) ? "!" : ","} ${
 			customComments[firstName] || "I’m Scradd!"

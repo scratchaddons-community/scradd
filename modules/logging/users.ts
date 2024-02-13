@@ -1,6 +1,5 @@
 import {
 	type AuditLogEvent,
-	type GuildAuditLogsEntry,
 	type GuildMember,
 	type PartialGuildMember,
 	type PartialUser,
@@ -8,16 +7,17 @@ import {
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
-export async function memberKick(entry: GuildAuditLogsEntry<AuditLogEvent.MemberKick>) {
-	if (!entry.target) return;
+export async function memberKick(entry: AuditLog<AuditLogEvent.MemberKick>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} kicked${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} kicked${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.MemberPrune>) {
+export async function memberPrune(entry: AuditLog<AuditLogEvent.MemberPrune>): Promise<void> {
 	await log(
 		`${LoggingEmojis.Punishment} ${entry.extra.removed} members who haven’t talked in ${
 			entry.extra.days
@@ -25,24 +25,26 @@ export async function memberPrune(entry: GuildAuditLogsEntry<AuditLogEvent.Membe
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberBanAdd(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanAdd>) {
-	if (!entry.target) return;
+export async function memberBanAdd(entry: AuditLog<AuditLogEvent.MemberBanAdd>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} banned${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} banned${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function memberBanRemove(entry: GuildAuditLogsEntry<AuditLogEvent.MemberBanRemove>) {
-	if (!entry.target) return;
+export async function memberBanRemove(
+	entry: AuditLog<AuditLogEvent.MemberBanRemove>,
+): Promise<void> {
 	await log(
-		`${LoggingEmojis.Punishment} ${entry.target.toString()} unbanned${extraAuditLogsInfo(
-			entry,
-		)}`,
+		`${LoggingEmojis.Punishment} ${
+			entry.target?.toString() ?? "User"
+		} unbanned${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
 
-export async function guildMemberAdd(member: GuildMember) {
+export async function guildMemberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, LogSeverity.Resource);
 
@@ -53,14 +55,14 @@ export async function guildMemberAdd(member: GuildMember) {
 		);
 	}
 }
-export async function guildMemberRemove(member: GuildMember | PartialGuildMember) {
+export async function guildMemberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} left`, LogSeverity.Resource);
 }
 export async function guildMemberUpdate(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
-) {
+): Promise<void> {
 	if (oldMember.avatar !== newMember.avatar) {
 		const url = newMember.avatarURL({ size: 128 });
 		await log(
@@ -129,7 +131,7 @@ export async function guildMemberUpdate(
 		);
 }
 
-export async function userUpdate(oldUser: PartialUser | User, newUser: User) {
+export async function userUpdate(oldUser: PartialUser | User, newUser: User): Promise<void> {
 	if (oldUser.partial) return;
 
 	if (oldUser.avatar !== newUser.avatar) {

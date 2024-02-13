@@ -17,7 +17,7 @@ import { databaseThread } from "../../common/database.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 
-export async function messageDelete(message: Message | PartialMessage) {
+export async function messageDelete(message: Message | PartialMessage): Promise<void> {
 	if (
 		!shouldLog(message.channel) ||
 		message.flags.has("Ephemeral") ||
@@ -66,7 +66,7 @@ export async function messageDelete(message: Message | PartialMessage) {
 export async function messageDeleteBulk(
 	messages: Collection<string, Message | PartialMessage>,
 	channel: GuildTextBasedChannel,
-) {
+): Promise<void> {
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
@@ -99,6 +99,7 @@ export async function messageDeleteBulk(
 		...(unknownCount ? [`${unknownCount} unknown users`] : []),
 	];
 
+	const url = messages.first()?.url;
 	await log(
 		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
 			authors,
@@ -106,14 +107,14 @@ export async function messageDeleteBulk(
 		LogSeverity.ContentEdit,
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
-			buttons: [{ label: "Context", url: messages.first()?.url ?? "" }],
+			buttons: url ? [{ label: "Context", url }] : [],
 		},
 	);
 }
 export async function messageReactionRemoveAll(
 	partialMessage: Message | PartialMessage,
 	reactions: Collection<string, MessageReaction>,
-) {
+): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
 	if (!shouldLog(message.channel)) return;
@@ -144,7 +145,7 @@ export async function messageReactionRemoveAll(
 export async function messageUpdate(
 	oldMessage: Message | PartialMessage,
 	newMessage: Message | PartialMessage,
-) {
+): Promise<void> {
 	if (newMessage.partial) return;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
 

@@ -14,7 +14,7 @@ import { formatAnyEmoji } from "../../util/markdown.js";
 export default async function top(
 	interaction: RepliableInteraction,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean },
-) {
+): Promise<void> {
 	const { suggestions } = config.channels;
 	const user = options.user instanceof GuildMember ? options.user.user : options.user;
 
@@ -63,12 +63,12 @@ export default async function top(
 	);
 }
 /** @todo - Strip full links, they can’t be escaped. */
-function padTitle(title: number | string) {
+function padTitle(title: number | string): string {
 	const left = countOccurrences(`${title}`, "[");
 	const right = countOccurrences(`${title}`, "]");
 	return title + "]".repeat(Math.max(0, left - right));
 }
 
-function countOccurrences(string: string, substring: string) {
+function countOccurrences(string: string, substring: string): number {
 	return string.split(substring).length - 1;
 }

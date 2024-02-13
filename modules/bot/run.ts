@@ -4,13 +4,16 @@ import {
 	type ModalSubmitInteraction,
 	TextInputStyle,
 	User,
+	type InteractionResponse,
 } from "discord.js";
 import { client } from "strife.js";
 import constants from "../../common/constants.js";
 import { generateError } from "../logging/errors.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
-export default async function getCode(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function getCode(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+): Promise<InteractionResponse | undefined> {
 	const { owner } = await client.application.fetch();
 	const owners =
 		owner instanceof User ? [owner.id] : owner?.members.map((member) => member.id) ?? [];
@@ -42,7 +45,7 @@ export default async function getCode(interaction: ChatInputCommandInteraction<"
 	});
 }
 
-export async function run(interaction: ModalSubmitInteraction) {
+export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 	await interaction.deferReply();
 	const code = interaction.fields.getTextInputValue("code").trim();
 	try {

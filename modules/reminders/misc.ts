@@ -30,7 +30,7 @@ export const BUMPING_THREAD = "881619501018394725",
 export const remindersDatabase = new Database<Reminder>("reminders");
 await remindersDatabase.init();
 
-export function getUserReminders(id: string) {
+export function getUserReminders(id: string): Reminder[] {
 	return remindersDatabase.data
 		.filter((reminder) => reminder.user === id)
 		.toSorted((one, two) => one.date - two.date);

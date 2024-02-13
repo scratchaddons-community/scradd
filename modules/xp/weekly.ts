@@ -13,7 +13,7 @@ import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import constants from "../../common/constants.js";
 import { recheckMemberRole } from "../roles/custom.js";
 
-export async function getChatters() {
+export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();
 	const winnerId = weeklyWinners[0]?.user;
 	const winner =
@@ -37,9 +37,7 @@ export async function getChatters() {
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
-	const ending =
-		weeklyWinners[formatted.length] &&
-		` ${weeklyWinners[formatted.length]?.xp.toLocaleString()} XP`;
+	const ending = ` ${(weeklyWinners[formatted.length]?.xp ?? 0).toLocaleString()} XP`;
 	const filtered = ending ? formatted.filter((line) => !line.endsWith(ending)) : formatted;
 
 	return {
@@ -58,10 +56,10 @@ export async function getChatters() {
 				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
-	} satisfies MessageCreateOptions;
+	};
 }
 
-export default async function getWeekly(nextWeeklyDate: Date) {
+export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 	if (config.channels.announcements) {
 		remindersDatabase.data = [
 			...remindersDatabase.data,
@@ -118,7 +116,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
-	const role = config.roles.weekly_winner;
+	const role = config.roles.weeklyWinner;
 	if (role) {
 		for (const [, weeklyMember] of role.members) {
 			if (!ids.has(weeklyMember.id))

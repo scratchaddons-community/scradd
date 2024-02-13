@@ -5,6 +5,8 @@ import {
 	ComponentType,
 	userMention,
 	ButtonStyle,
+	type InteractionButtonComponentData,
+	type MessageEditOptions,
 } from "discord.js";
 import constants from "../../../common/constants.js";
 import { convertBase } from "../../../util/numbers.js";
@@ -17,7 +19,7 @@ export default function generateAppeal(
 	data: { components?: ActionRowData<MessageActionRowComponent>; appeal?: Embed },
 	notes: { accepted?: string; rejected?: string },
 	users: { accepters: Set<string>; rejecters: Set<string> },
-) {
+): MessageEditOptions {
 	return {
 		components: [
 			getAppealComponents(users),
@@ -52,7 +54,7 @@ export default function generateAppeal(
 	};
 }
 
-export function parseIds(input: string) {
+export function parseIds(input: string): { accepters: Set<string>; rejecters: Set<string> } {
 	const users = input
 		.split("|")
 		.map((ids) => ids.split("+").map((id) => convertBase(id, convertBase.MAX_BASE, 10)));
@@ -66,7 +68,10 @@ export function parseIds(input: string) {
 export function getAppealComponents({
 	accepters = new Set<string>(),
 	rejecters = new Set<string>(),
-} = {}) {
+} = {}): {
+	type: ComponentType.ActionRow;
+	components: [InteractionButtonComponentData, InteractionButtonComponentData];
+} {
 	const counts = `${Array.from(accepters, (id) => convertBase(id, 10, convertBase.MAX_BASE)).join(
 		"+",
 	)}|${Array.from(rejecters, (id) => convertBase(id, 10, convertBase.MAX_BASE)).join("+")}`;

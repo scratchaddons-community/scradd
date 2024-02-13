@@ -1,6 +1,5 @@
 import { unifiedDiff } from "difflib";
 import {
-	type GuildAuditLogsEntry,
 	type AuditLogEvent,
 	Base,
 	ChannelType,
@@ -14,41 +13,45 @@ import {
 	SortOrderType,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
+	BaseChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
 
-export async function channelCreate(entry: GuildAuditLogsEntry<AuditLogEvent.ChannelCreate>) {
-	if (!(entry.target instanceof Base)) return;
+export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Channel} ${
-			{
-				[ChannelType.GuildText]: "Text",
-				[ChannelType.GuildVoice]: "Voice",
-				[ChannelType.GuildCategory]: "Category",
-				[ChannelType.GuildAnnouncement]: "Announcement",
-				[ChannelType.GuildStageVoice]: "Stage",
-				[ChannelType.GuildForum]: "Forum",
-				[ChannelType.GuildMedia]: "Media",
-			}[entry.target.type]
-		} channel ${entry.target.toString()} (#${entry.target.name}) created${
-			entry.target.parent ? ` under ${entry.target.parent}` : ""
-		}${extraAuditLogsInfo(entry)}`,
+		entry.target instanceof BaseChannel
+			? `${LoggingEmojis.Channel} ${
+					{
+						[ChannelType.GuildText]: "Text",
+						[ChannelType.GuildVoice]: "Voice",
+						[ChannelType.GuildCategory]: "Category",
+						[ChannelType.GuildAnnouncement]: "Announcement",
+						[ChannelType.GuildStageVoice]: "Stage",
+						[ChannelType.GuildForum]: "Forum",
+						[ChannelType.GuildMedia]: "Media",
+					}[entry.target.type]
+			  } channel ${entry.target.toString()} (#${entry.target.name}) created${
+					entry.target.parent ? ` under ${entry.target.parent.toString()}` : ""
+			  }${extraAuditLogsInfo(entry)}`
+			: `${LoggingEmojis.Channel} Unknown channel ${channelMention(
+					entry.target.id,
+			  )} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
-export async function channelDelete(entry: GuildAuditLogsEntry<AuditLogEvent.ChannelDelete>) {
+export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Channel} #${entry.target.name} (ID: ${
-			entry.target.id
-		}) deleted${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Channel} ${
+			"name" in entry.target ? `#${entry.target.name}` : "Unknown channel"
+		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
 export async function channelOverwriteCreate(
-	entry: GuildAuditLogsEntry<AuditLogEvent.ChannelOverwriteCreate>,
-) {
+	entry: AuditLog<AuditLogEvent.ChannelOverwriteCreate>,
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -61,8 +64,8 @@ export async function channelOverwriteCreate(
 	);
 }
 export async function channelOverwriteUpdate(
-	entry: GuildAuditLogsEntry<AuditLogEvent.ChannelOverwriteUpdate>,
-) {
+	entry: AuditLog<AuditLogEvent.ChannelOverwriteUpdate>,
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -75,8 +78,8 @@ export async function channelOverwriteUpdate(
 	);
 }
 export async function channelOverwriteDelete(
-	entry: GuildAuditLogsEntry<AuditLogEvent.ChannelOverwriteDelete>,
-) {
+	entry: AuditLog<AuditLogEvent.ChannelOverwriteDelete>,
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Channel} Permissions for ${
 			entry.extra instanceof Base
@@ -92,7 +95,7 @@ export async function channelOverwriteDelete(
 export async function channelUpdate(
 	oldChannel: DMChannel | NonThreadGuildBasedChannel,
 	newChannel: DMChannel | NonThreadGuildBasedChannel,
-) {
+): Promise<void> {
 	if (newChannel.isDMBased() || oldChannel.isDMBased() || newChannel.guild.id !== config.guild.id)
 		return;
 
@@ -142,9 +145,9 @@ export async function channelUpdate(
 	const tags = newChannel.flags.has("RequireTag");
 	if (oldChannel.flags.has("RequireTag") !== tags) {
 		await log(
-			`${LoggingEmojis.Channel} “Require people to select tags when posting” ${
-				tags ? "enabled" : "disabled"
-			} in ${newChannel.toString()}`,
+			`${LoggingEmojis.Channel} ${newChannel.toString()} set to ${
+				tags ? "" : "not "
+			}require people to select tags when posting`,
 			LogSeverity.ServerChange,
 		);
 	}
@@ -197,7 +200,7 @@ export async function channelUpdate(
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
 				newChannel.isThreadOnly() ? "post " : ""
-			}slowmode set to ${newChannel.rateLimitPerUser} seconds`,
+			}slowmode set to ${newChannel.rateLimitPerUser ?? 0} seconds`,
 			LogSeverity.ServerChange,
 		);
 
@@ -293,7 +296,7 @@ export async function channelUpdate(
 	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
-				newChannel.defaultThreadRateLimitPerUser
+				newChannel.defaultThreadRateLimitPerUser ?? 0
 			} seconds`,
 			LogSeverity.ServerChange,
 		);

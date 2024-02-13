@@ -8,6 +8,7 @@ import {
 	type APIEmbed,
 	ComponentType,
 	ButtonStyle,
+	type BaseMessageOptions,
 } from "discord.js";
 import { getSettings } from "../settings.js";
 import { BOARD_EMOJI } from "../board/misc.js";
@@ -110,7 +111,7 @@ defineEvent("messageCreate", async (message) => {
 		if (doReact) {
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
-			if (reactions > REACTION_CAP || !messageReactions) return;
+			if (reactions > REACTION_CAP || !messageReactions.length) return;
 		}
 	}
 });
@@ -128,7 +129,9 @@ defineEvent("messageUpdate", async (_, message) => {
 	else if (data) await message.reply(data);
 });
 
-async function handleMutatable(message: Message) {
+async function handleMutatable(
+	message: Message,
+): Promise<(BaseMessageOptions | number | string)[] | BaseMessageOptions | true | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
@@ -139,7 +142,7 @@ async function handleMutatable(message: Message) {
 		const matches = getMatches(message.content);
 		const embeds: APIEmbed[] = [];
 		for (const match of matches) {
-			const embed = match && (await handleMatch(match));
+			const embed = await handleMatch(match);
 			if (embed) {
 				embeds.push(embed);
 				if (!notSet) embed.footer = { text: "Disable this using /settings" };
@@ -221,7 +224,9 @@ defineEvent("messageDelete", async (message) => {
 });
 
 const autoResponses = new Map<Snowflake, Message>();
-async function getAutoResponse(message: Message | PartialMessage) {
+async function getAutoResponse(
+	message: Message | PartialMessage,
+): Promise<Message | false | undefined> {
 	const cached = autoResponses.get(message.id);
 	if (cached) return cached;
 
@@ -238,7 +243,7 @@ async function getAutoResponse(message: Message | PartialMessage) {
 	return found;
 }
 
-function canDoSecrets(message: Message, checkDads = false) {
+function canDoSecrets(message: Message, checkDads = false): boolean {
 	if (message.channel.isDMBased()) return false;
 	if (
 		message.mentions.has(client.user, {

@@ -4,7 +4,6 @@ import {
 	PermissionsBitField,
 	User,
 	ApplicationCommand,
-	type GuildResolvable,
 	type APIInteractionGuildMember,
 	type Snowflake,
 	type TextBasedChannel,
@@ -20,10 +19,11 @@ const permissionsCache: Record<
 	Record<ApplicationCommand["id"], ApplicationCommandPermissions[] | undefined> | undefined
 > = {};
 export default async function hasPermission(
-	schema: ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation,
-	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
+	schema: ApplicationCommand | CustomOperation,
+	user: APIInteractionGuildMember | GuildMember | User,
 	channel?: TextBasedChannel,
-) {
+	ignoredRoles = new Set<Snowflake>(),
+): Promise<boolean> {
 	if (!(schema instanceof ApplicationCommand)) return true; // TODO
 	if (user instanceof User) return schema.dmPermission ?? false;
 
@@ -50,13 +50,14 @@ export default async function hasPermission(
 
 	const userPermission =
 		permissions.find(
-			({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.id,
+			({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.user.id,
 		)?.permission ?? true;
 	if (!userPermission) return false;
 
 	const rolePermissions = permissions.filter(
 		({ id, type }) =>
 			type === ApplicationCommandPermissionType.Role &&
+			!ignoredRoles.has(id) &&
 			(user instanceof GuildMember ? user.roles.resolve(id) : user.roles.includes(id)),
 	);
 	return rolePermissions.length
@@ -68,6 +69,6 @@ export default async function hasPermission(
 		  );
 }
 
-export function handleCommandPermissionUpdate(data: ApplicationCommandPermissionsUpdateData) {
+export function handleCommandPermissionUpdate(data: ApplicationCommandPermissionsUpdateData): void {
 	if (data.applicationId === client.user.id) permissionsCache[data.guildId] = {};
 }
