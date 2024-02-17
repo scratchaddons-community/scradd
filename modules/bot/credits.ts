@@ -1,7 +1,5 @@
 import {
-	time,
 	type Snowflake,
-	TimestampStyles,
 	type User,
 	type ChatInputCommandInteraction,
 	inlineCode,
@@ -19,75 +17,7 @@ const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
 
-export default async function info(
-	interaction: ChatInputCommandInteraction,
-	{ subcommand }: { subcommand: "credits" | "status" },
-): Promise<void> {
-	switch (subcommand) {
-		case "status": {
-			await status(interaction);
-			break;
-		}
-		case "credits": {
-			await credits(interaction);
-			break;
-		}
-	}
-}
-
-async function status(interaction: ChatInputCommandInteraction): Promise<void> {
-	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
-
-	await interaction.editReply({
-		content: "",
-
-		embeds: [
-			{
-				title: "Status",
-				thumbnail: { url: client.user.displayAvatarURL() },
-				color: constants.themeColor,
-				description:
-					"I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
-
-				fields: [
-					{
-						name: "⚙️ Mode",
-						value: process.env.NODE_ENV === "production" ? "Production" : "Development",
-						inline: true,
-					},
-					{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },
-					{
-						name: "🔁 Last restarted",
-						value: time(client.readyAt, TimestampStyles.RelativeTime),
-						inline: true,
-					},
-					{
-						name: "🏓 Ping",
-						value: `${Math.abs(
-							message.createdTimestamp - interaction.createdTimestamp,
-						).toLocaleString()}ms`,
-						inline: true,
-					},
-					{
-						name: "↕️ WebSocket latency",
-						value: `${Math.abs(client.ws.ping).toLocaleString()}ms`,
-						inline: true,
-					},
-					{
-						name: "💾 RAM usage",
-						value:
-							(process.memoryUsage.rss() / 1_000_000).toLocaleString([], {
-								maximumFractionDigits: 2,
-								minimumFractionDigits: 2,
-							}) + " MB",
-						inline: true,
-					},
-				],
-			},
-		],
-	});
-}
-async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
+export default async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
 	const dependencies = Object.keys(pkg.dependencies)
 		.map((name) => {
 			const { version } = lockFile.dependencies[name];

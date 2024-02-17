@@ -4,7 +4,7 @@ For anyone who knows [Git](https://git-scm.com) and TypeScript/JavaScript basics
 
 -   `@Scradd Contributor` role in the Scratch Addons server
 -   access to the private Scradd Testing server
--   credit under `/info credits`
+-   credit under `/credits`
 
 ## General guidelines
 

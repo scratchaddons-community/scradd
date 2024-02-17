@@ -6,7 +6,7 @@ Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](h
 
 ## Contributors
 
-The majority of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Please run `/info credits` for more information -- thanks to everyone listed on there!
+The majority of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Please run `/credits` for more information -- thanks to everyone listed on there!
 
 Pull requests are welcome if you would like to help contribute. Please read through the [Contributing Guidelines](/.github/CONTRIBUTING.md) if you are interested in helping out.
 
