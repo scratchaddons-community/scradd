@@ -24,13 +24,13 @@ const fullPingRegex = new RegExp(`^${MessageMentions.UsersPattern.source}$`);
 
 defineChatCommand(
 	{
-		name: "do",
+		name: "execute",
 		description: "Make me do something…",
 		censored: false,
 		options: {
 			operation: {
 				type: ApplicationCommandOptionType.String,
-				description: "The operation to do",
+				description: "The operation to execute",
 				required: true,
 			},
 		},
@@ -101,7 +101,7 @@ defineChatCommand(
 		if (!permission) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You don’t have permission to do the \`${OPERATION_PREFIX}${commandName}\` operation!`,
+				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${OPERATION_PREFIX}${commandName}\` operation!`,
 			});
 		}
 

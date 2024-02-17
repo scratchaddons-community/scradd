@@ -19,7 +19,7 @@ import config from "../../common/config.js";
 import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
 import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
-import hasPermission from "../do/permissions.js";
+import hasPermission from "../execute/permissions.js";
 
 let command: ApplicationCommand | undefined;
 
