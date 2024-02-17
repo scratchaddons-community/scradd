@@ -7,7 +7,6 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import { nth } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
 import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import constants from "../../common/constants.js";

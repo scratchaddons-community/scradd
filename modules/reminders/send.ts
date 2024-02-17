@@ -7,7 +7,7 @@ import {
 	remindersDatabase,
 } from "./misc.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
-import { convertBase, nth } from "../../util/numbers.js";
+import { convertBase } from "../../util/numbers.js";
 import {
 	ChannelType,
 	MessageFlags,
