@@ -34,7 +34,7 @@ export async function syncMembers(
 		return await interaction.reply(
 			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
 				role.id,
-			)} to this thread! (note that *I* will not remove them)`,
+			)} to this thread!`,
 		);
 	}
 
