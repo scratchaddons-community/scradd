@@ -86,22 +86,10 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					const message = await channel.send(await getWeekly(nextWeeklyDate));
 					if (!chatters) continue;
 					const thread = await message.startThread({
-						name: `🏆 Weekly Winners week of ${
-							[
-								"January",
-								"February",
-								"March",
-								"April",
-								"May",
-								"June",
-								"July",
-								"August",
-								"September",
-								"October",
-								"November",
-								"December",
-							][date.getUTCMonth()] || ""
-						} ${nth(date.getUTCDate())}`,
+						name: `🏆 Weekly Winners week of ${new Date().toLocaleString([], {
+							month: "long",
+							day: "numeric",
+						})}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);

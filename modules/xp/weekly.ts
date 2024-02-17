@@ -137,22 +137,10 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 		if (member) await recheckMemberRole(member, member);
 	}
 
-	return `## 🏆 Weekly Winners week of ${
-		[
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		][date.getUTCMonth()] || ""
-	} ${nth(date.getUTCDate())}\n${
+	return `## 🏆 Weekly Winners week of ${new Date().toLocaleString([], {
+		month: "long",
+		day: "numeric",
+	})}\n${
 		weeklyWinners
 			.map(
 				(gain, index) =>
