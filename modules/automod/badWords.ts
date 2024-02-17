@@ -4,7 +4,7 @@
  * The second sub-array is for words that must be surrounded by a word boundary and the third is for words that must be preceded by a word
  * boundary.
  *
- * All words are ROT13-encoded.
+ * All RegExps are ROT13-encoded. Additionally, RegExp character classes are not supported here. Use capture groups instead.
  */
 const badWords: [RegExp[]?, RegExp[]?, RegExp[]?][] = [
 	[[], []],

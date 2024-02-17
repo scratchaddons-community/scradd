@@ -9,7 +9,7 @@ function decodeRegexps(regexps: RegExp[]): string {
 	return regexps
 		.map(({ source }) =>
 			caesar(source).replaceAll(
-				/[ a-z]/gi,
+				/(?<!\\)[ a-z]/gi,
 				(letter) =>
 					({
 						" ": /[ ^w]/giu.source,
