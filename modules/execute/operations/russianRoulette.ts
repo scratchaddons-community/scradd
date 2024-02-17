@@ -7,7 +7,7 @@ const data: CustomOperation = {
 	name: "russian-roulette",
 	description: "Gives a 1/6 change to mute you for an hour",
 	async command(interaction) {
-		await interaction.reply(`${constants.emojis.discord.typing} Spinning the cylinder…`);
+		await interaction.reply(`${constants.emojis.misc.loading} Spinning the cylinder…`);
 		await wait(2000);
 		if (
 			interaction.member instanceof GuildMember &&

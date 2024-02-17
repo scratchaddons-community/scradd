@@ -52,10 +52,10 @@ async function userInfo(
 			name: "🔊 Voice Channel",
 			value:
 				member.voice.channel.toString() +
-				`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
-					member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
-				}${member.voice.streaming ? constants.emojis.discord.streaming + " " : ""}${
-					member.voice.selfVideo ? constants.emojis.discord.camera : ""
+				`${member.voice.mute ? constants.emojis.vc.muted + " " : ""}${
+					member.voice.deaf ? constants.emojis.vc.deafened + " " : ""
+				}${member.voice.streaming ? constants.emojis.vc.streaming + " " : ""}${
+					member.voice.selfVideo ? constants.emojis.vc.camera : ""
 				}`.trim(),
 			inline: true,
 		});

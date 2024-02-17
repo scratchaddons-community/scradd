@@ -222,8 +222,8 @@ export async function messageToText(message: Message, replies?: true): Promise<s
 export function messageToText(message: Message, replies = true): Awaitable<string> {
 	const content = message.flags.has("Loading")
 		? (Date.now() - message.createdTimestamp) / 1000 / 60 > 15
-			? `${constants.emojis.discord.error} The application did not respond`
-			: `${constants.emojis.discord.typing} ${escapeMessage(
+			? `${constants.emojis.message.error} The application did not respond`
+			: `${constants.emojis.misc.loading} ${escapeMessage(
 					message.author.displayName,
 					// eslint-disable-next-line unicorn/string-content
 			  )} is thinking...`
@@ -235,24 +235,24 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.RecipientAdd: {
-			return `${constants.emojis.discord.add} ${message.author.toString()} added ${
+			return `${constants.emojis.message.add} ${message.author.toString()} added ${
 				message.mentions.users.first()?.toString() ?? "**Unknown User**"
 			} to the ${message.channel.isThread() ? "thread" : "group"}.`;
 		}
 
 		case MessageType.RecipientRemove: {
 			const ping = message.mentions.users.first();
-			return `${constants.emojis.discord.remove} ${message.author.toString()} ${
+			return `${constants.emojis.message.remove} ${message.author.toString()} ${
 				ping ? `removed ${ping.toString()} from` : "left"
 			} the ${message.channel.isThread() ? "thread" : "group"}.`;
 		}
 
 		case MessageType.Call: {
-			return `${constants.emojis.discord.call} ${message.author.toString()} started a call.`;
+			return `${constants.emojis.message.call} ${message.author.toString()} started a call.`;
 		}
 
 		case MessageType.ChannelNameChange: {
-			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
+			return `${constants.emojis.message.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() && message.channel.parent?.isThreadOnly()
 					? "post title"
 					: "channel name"
@@ -261,18 +261,18 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ChannelIconChange: {
 			return `${
-				constants.emojis.discord.edit
+				constants.emojis.message.edit
 			} ${message.author.toString()} changed the group icon.`;
 		}
 
 		case MessageType.ChannelPinnedMessage: {
 			if (!replies)
 				return `${
-					constants.emojis.discord.pin
+					constants.emojis.message.pin
 				} ${message.author.toString()} pinned **a message** to this channel. See all **pinned messages**.`;
 
 			return `${
-				constants.emojis.discord.pin
+				constants.emojis.message.pin
 			} ${message.author.toString()} pinned [a message](<${message.url.replace(
 				message.id,
 				message.reference?.messageId || message.id,
@@ -297,14 +297,14 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Yay you made it, ${message.author.toString()}!`,
 			] as const;
 
-			return `${constants.emojis.discord.add} ${
+			return `${constants.emojis.message.add} ${
 				formats[message.createdTimestamp % formats.length] ?? formats[0]
 			}`;
 		}
 
 		case MessageType.GuildBoost: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
 				content && ` **${escapeMessage(content)}** times`
 			}!`;
@@ -312,7 +312,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.GuildBoostTier1: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
 				content && ` **${escapeMessage(content)}** times`
 			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 1**!`;
@@ -320,7 +320,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.GuildBoostTier2: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
 				content && ` **${escapeMessage(content)}** times`
 			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 2**!`;
@@ -328,7 +328,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.GuildBoostTier3: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
 				content && ` **${escapeMessage(content)}** times`
 			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 3**!`;
@@ -336,7 +336,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ChannelFollowAdd: {
 			return `${
-				constants.emojis.discord.add
+				constants.emojis.message.add
 			} ${message.author.toString()} has added **${escapeMessage(
 				content,
 			)}** to this channel. Its most important updates will show up here.`;
@@ -344,27 +344,27 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.GuildDiscoveryDisqualified: {
 			return `${
-				constants.emojis.discord.fail
+				constants.emojis.message.fail
 			} This server has been removed from Server Discovery because it no longer passes all the requirements. Check [Server Settings](discord://-/guilds/${
 				message.guild?.id ?? "@me"
 			}/settings/discovery) for more details.`;
 		}
 
 		case MessageType.GuildDiscoveryRequalified: {
-			return `${constants.emojis.discord.success} This server is eligible for Server Discovery again and has been automatically relisted!`;
+			return `${constants.emojis.message.success} This server is eligible for Server Discovery again and has been automatically relisted!`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodInitialWarning: {
-			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
+			return `${constants.emojis.message.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodFinalWarning: {
-			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
+			return `${constants.emojis.message.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
 		}
 
 		case MessageType.ThreadCreated: {
 			return `${
-				constants.emojis.discord.thread
+				constants.emojis.message.thread
 			} ${message.author.toString()} started a thread: [${escapeMessage(
 				content,
 			)}](<${message.channel.url.replace(
@@ -384,7 +384,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					return `[*${
 						reply
 							? `Replying to ${reply.author.toString()}${cleanContent ? `:` : ""}`
-							: `${constants.emojis.discord.reply} Original message was deleted`
+							: `${constants.emojis.message.reply} Original message was deleted`
 					}*](${messageLink(
 						message.reference?.guildId ?? message.guild?.id ?? "@me",
 						message.reference?.channelId ?? message.channel.id,
@@ -409,7 +409,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ThreadStarterMessage: {
 			// eslint-disable-next-line unicorn/string-content
-			const failMessage = `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
+			const failMessage = `${constants.emojis.message.thread} Sorry, we couldn't load the first message in this thread`;
 			if (!message.reference) return failMessage;
 
 			if (!replies) break;
@@ -453,7 +453,7 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				tierName,
 			} = message.roleSubscriptionData;
 			return (
-				`${constants.emojis.discord.add} ${message.author.toString()} ${
+				`${constants.emojis.message.add} ${message.author.toString()} ${
 					isRenewal ? "renewed" : "joined"
 				} **${tierName}** ${months ? "and has been" : "as"} a subscriber of ` +
 				hyperlink(
@@ -470,37 +470,37 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.StageStart: {
 			return `${
-				constants.emojis.discord.live
+				constants.emojis.message.live
 			} ${message.author.toString()} started **${content}**`;
 		}
 
 		case MessageType.StageEnd: {
 			return `${
-				constants.emojis.discord.stage
+				constants.emojis.message.stage
 			} ${message.author.toString()} ended **${content}**`;
 		}
 
 		case MessageType.StageSpeaker: {
 			return `${
-				constants.emojis.discord.speaker
+				constants.emojis.message.speaker
 			} ${message.author.toString()} is now a speaker.`;
 		}
 
 		case MessageType.StageRaiseHand: {
 			return `${
-				constants.emojis.discord.raisedHand
+				constants.emojis.message.raisedHand
 			} ${message.author.toString()} requested to speak.`;
 		}
 
 		case MessageType.StageTopic: {
 			return `${
-				constants.emojis.discord.stage
+				constants.emojis.message.stage
 			} ${message.author.toString()} changed the Stage topic: **${content}**`;
 		}
 
 		case MessageType.GuildApplicationPremiumSubscription: {
 			return `${
-				constants.emojis.discord.subscription
+				constants.emojis.message.subscription
 			} ${message.author.toString()} upgraded ${
 				message.groupActivityApplication?.name ?? `a deleted application`
 			} to premium for this server! 🎉`;
