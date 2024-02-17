@@ -10,7 +10,8 @@ import {
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
-import info, { syncConfigButton } from "./info.js";
+import info from "./info.js";
+import { syncConfigButton } from "../execute/operations/config.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -81,7 +82,6 @@ defineSubcommands(
 		subcommands: {
 			status: { description: "See my current status", options: {} },
 			credits: { description: "List who and what allows me to work", options: {} },
-			config: { description: "View and (admins only) update my configuration", options: {} },
 		},
 	},
 	info,
