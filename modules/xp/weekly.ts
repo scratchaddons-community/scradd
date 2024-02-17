@@ -74,8 +74,10 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 
 	const weeklyWinners = getFullWeeklyData();
 
-	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
-	const activeMembers = [
+	const latestActiveMembers = weeklyWinners
+		.filter((item) => item.xp >= 300)
+		.map((item) => item.user);
+	const activeMembers = new Set([
 		...latestActiveMembers,
 		...Object.entries(
 			recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -83,19 +85,14 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 				return accumulator;
 			}, {}),
 		)
-			.map((entry) => ({ xp: entry[1], user: entry[0] }))
-			.filter((item) => item.xp >= 500),
-	];
+			.filter(([, xp]) => xp >= 500)
+			.map((entry) => entry[0]),
+	]);
 
 	if (config.roles.active) {
 		for (const [, member] of config.roles.active.members) {
-			if (!activeMembers.some((item) => item.user === member.id))
-				await member.roles.remove(config.roles.active, "Inactive");
-		}
-
-		for (const { user } of activeMembers) {
-			const member = await config.guild.members.fetch(user).catch(() => void 0);
-			await member?.roles.add(config.roles.active, "Active");
+			if (activeMembers.has(member.id)) continue;
+			await member.roles.remove(config.roles.active, "Inactive");
 		}
 	}
 

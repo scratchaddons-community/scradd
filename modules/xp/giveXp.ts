@@ -11,7 +11,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import { DEFAULT_XP, getLevelForXp, getXpForLevel } from "./misc.js";
-import { recentXpDatabase, xpDatabase } from "./util.js";
+import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 
@@ -84,10 +84,6 @@ export default async function giveXp(
 ): Promise<void> {
 	const user = to instanceof User ? to : to.user;
 	if (process.env.NODE_ENV === "production" && user.bot) return;
-	const member =
-		user instanceof GuildMember
-			? user
-			: await config.guild.members.fetch(user).catch(() => void 0);
 
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
@@ -99,31 +95,16 @@ export default async function giveXp(
 
 	xpDatabase.data = xp;
 
-	const oldLevel = getLevelForXp(oldXp);
-	const newLevel = getLevelForXp(newXp);
-	if (oldLevel < newLevel && member) await sendLevelUpMessage(member, newXp, url);
+	const member =
+		user instanceof GuildMember
+			? user
+			: await config.guild.members.fetch(user).catch(() => void 0);
+	if (member) {
+		const oldLevel = getLevelForXp(oldXp);
+		const newLevel = getLevelForXp(newXp);
+		if (oldLevel < newLevel) await sendLevelUpMessage(member, newXp, url);
 
-	const sorted = xp.toSorted((one, two) => two.xp - one.xp);
-
-	const guildMembers = await config.guild.members.fetch();
-	const serverRank = sorted
-		.filter((entry) => guildMembers.has(entry.user))
-		.findIndex((entry) => entry.user === user.id);
-
-	const rank = sorted.findIndex((info) => info.user === user.id);
-
-	if (
-		(config.guild.memberCount > 2000
-			? serverRank / config.guild.memberCount < 0.01
-			: rank < 20) &&
-		member &&
-		config.roles.epic &&
-		!member.roles.resolve(config.roles.epic.id)
-	) {
-		await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
-		await config.channels.general?.send(
-			`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${config.roles.epic.toString()}.`,
-		);
+		await checkXPRoles(member);
 	}
 
 	const weekly = [...recentXpDatabase.data];
@@ -198,4 +179,40 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 			},
 		],
 	});
+}
+
+export async function checkXPRoles(member: GuildMember): Promise<void> {
+	if (config.roles.active) {
+		const isActive =
+			getFullWeeklyData().find((item) => member.id == item.user && item.xp >= 300) ??
+			recentXpDatabase.data.reduce(
+				(accumulator, gain) =>
+					gain.user === member.id ? accumulator + gain.xp : accumulator,
+				0,
+			) >= 500;
+
+		if (isActive) await member.roles.add(config.roles.active, "Active");
+	}
+
+	if (config.roles.epic) {
+		const sorted = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
+		const rank = sorted.findIndex((info) => info.user === member.id);
+
+		const guildMembers = await config.guild.members.fetch();
+		const serverRank = sorted
+			.filter((entry) => guildMembers.has(entry.user))
+			.findIndex((entry) => entry.user === member.id);
+
+		if (
+			(config.guild.memberCount > 2000
+				? serverRank / config.guild.memberCount < 0.01
+				: rank < 20) &&
+			!member.roles.resolve(config.roles.epic.id)
+		) {
+			await member.roles.add(config.roles.epic, "Top 1% of the server’s XP");
+			await config.channels.general?.send(
+				`🎊 ${member.toString()} Congratulations on being in the top 1% of the server’s XP! You have earned ${config.roles.epic.toString()}.`,
+			);
+		}
+	}
 }

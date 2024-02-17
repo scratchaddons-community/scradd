@@ -1,6 +1,7 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import config from "../../common/config.js";
 import mongoose from "mongoose";
+import { checkXPRoles } from "../xp/giveXp.js";
 
 export const persistedRoles = {
 	designer: "916020774509375528",
@@ -44,4 +45,5 @@ export async function persistedRejoin(member: GuildMember): Promise<void> {
 		const [role] = [persistedRoles[roleName]].flat();
 		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
+	await checkXPRoles(member)
 }
