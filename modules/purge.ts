@@ -41,8 +41,9 @@ async function purge(
 	);
 
 	let start = 0;
-
-	let end = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
+	let end = useId
+		? filtered.findIndex(({ id }) => id === countId) + 1
+		: Math.min(filtered.length, numberCount);
 
 	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const sliced = filtered.slice(start, end);
