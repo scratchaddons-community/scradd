@@ -91,6 +91,7 @@ defineEvent("guildMemberRemove", async (member) => {
 					`**${member.user.displayName}** took the candy from the mods’ white van`,
 					`**${member.user.displayName}** went to the banlands`,
 					`The mods canceled **${member.user.displayName}**`,
+					`**${member.user.displayName}** got too silly`,
 			  ] as const)
 			: ([
 					`Welp… **${member.user.displayName}** decided to leave… what a shame…`,
