@@ -11,7 +11,7 @@ import {
 	type Message,
 	type InteractionReplyOptions,
 } from "discord.js";
-import Database, { databaseThread } from "../../common/database.js";
+import Database, { allDatabaseMessages } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { LogSeverity, getLoggingThread } from "../logging/misc.js";
@@ -29,8 +29,7 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-const databases = await databaseThread.messages.fetch({ limit: 100 });
-const robotopUrl = databases
+const robotopUrl = allDatabaseMessages
 	.find((message) => message.attachments.first()?.name === "robotop_warns.json")
 	?.attachments.first()?.url;
 const robotopStrikes =

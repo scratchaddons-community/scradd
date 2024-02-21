@@ -177,8 +177,6 @@ export function getMessageJSON(message: Message): {
 /**
  * Get all messages from a channel.
  *
- * @deprecated Too laggy.
- *
  * @param channel - The channel to fetch messages from.
  *
  * @returns The messages.
