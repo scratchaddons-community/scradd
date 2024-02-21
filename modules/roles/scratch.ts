@@ -17,7 +17,7 @@ import fileSystem from "node:fs/promises";
 import crypto from "node:crypto";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { gracefulFetch } from "../../util/promises.js";
+import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { handleUser } from "../auto/scratch.js";
@@ -112,18 +112,18 @@ export default async function linkScratchRole(
 	const { username } = await fetch(
 		`https://auth-api.itinerary.eu.org/auth/verifyToken/${encodeURI(scratchToken)}`,
 	).then((response) => response.json<{ username: string | null }>());
-	const scratch =
-		username &&
-		(await gracefulFetch<{ joined: string }>(
-			`${constants.urls.scratchdb}/user/info/${username}`,
-		));
+	const scratch = username && (await fetchUser(username));
 	if (!scratch) return response.writeHead(401, { "content-type": "text/html" }).end(scratchHtml);
 
 	(await client.rest.put(Routes.userApplicationRoleConnection(client.user.id), {
 		body: JSON.stringify({
 			platform_name: "Scratch",
 			platform_username: username,
-			metadata: { joined: scratch.joined.split("T")[0] },
+			metadata: {
+				joined: ("joined" in scratch ? scratch.joined : scratch.history.joined).split(
+					"T",
+				)[0],
+			},
 		} satisfies RESTPutAPICurrentUserApplicationRoleConnectionJSONBody),
 		passThroughBody: true,
 		headers: {
