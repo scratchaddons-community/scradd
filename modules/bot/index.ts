@@ -1,11 +1,6 @@
 import { ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import {
-	defineChatCommand,
-	defineButton,
-	defineModal,
-	defineMenuCommand,
-} from "strife.js";
+import { defineChatCommand, defineButton, defineModal, defineMenuCommand } from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";

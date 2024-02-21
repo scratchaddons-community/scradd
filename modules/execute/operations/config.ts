@@ -60,20 +60,25 @@ const data: CustomOperation = {
 				});
 				break;
 			}
-			case "static": {console.log(JSON.stringify([
-				{
-					title: "Emojis",
-					color: constants.themeColor,
-					fields: Object.entries(constants.emojis)
-						.map(([group, emojis]) => [group, Object.entries(emojis)] as const)
-						.sort(([, one], [, two]) => one.length - two.length)
-						.map(([group, emojis]) => ({
-							name: group,
-							inline: true,
-							value: emojis.map(([name, emoji]) => `${emoji} (${name})`).join("\n"),
-						})),
-				},
-			]));
+			case "static": {
+				console.log(
+					JSON.stringify([
+						{
+							title: "Emojis",
+							color: constants.themeColor,
+							fields: Object.entries(constants.emojis)
+								.map(([group, emojis]) => [group, Object.entries(emojis)] as const)
+								.sort(([, one], [, two]) => one.length - two.length)
+								.map(([group, emojis]) => ({
+									name: group,
+									inline: true,
+									value: emojis
+										.map(([name, emoji]) => `${emoji} (${name})`)
+										.join("\n"),
+								})),
+						},
+					]),
+				);
 				await interaction.reply({
 					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
 					embeds: [

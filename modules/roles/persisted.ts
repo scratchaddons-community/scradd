@@ -45,5 +45,5 @@ export async function persistedRejoin(member: GuildMember): Promise<void> {
 		const [role] = [persistedRoles[roleName]].flat();
 		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
-	await checkXPRoles(member)
+	await checkXPRoles(member);
 }
