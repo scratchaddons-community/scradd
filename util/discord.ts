@@ -38,6 +38,7 @@ import {
 	MessageFlags,
 	hyperlink,
 	type MessageReaction,
+	type Channel,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -798,22 +799,15 @@ export async function paginate<Item>(
 		});
 }
 
-/**
- * Get a non-thread text channel from any other text channel.
- *
- * @param channel - The channel to convert.
- *
- * @returns The non-thread text channel.
- */
-export function getBaseChannel<Channel extends TextBasedChannel | null | undefined>(
-	channel: Channel, // TODO: THREAD ONLY CHANNELS SHOOT
-): Channel extends null | undefined
+export function getBaseChannel<TChannel extends Channel | null | undefined>(
+	channel: TChannel,
+): TChannel extends null
 	? undefined
-	: Channel extends AnyThreadChannel
-	? Exclude<GuildTextBasedChannel, AnyThreadChannel> | undefined
-	: Channel {
-	// @ts-expect-error TS2322 -- This is the right type.
-	return channel ? (channel.isThread() ? channel.parent ?? undefined : channel) : undefined;
+	: TChannel extends AnyThreadChannel
+	? NonNullable<TChannel["parent"]> | undefined
+	: TChannel {
+	// @ts-expect-error TS2322
+	return (channel && (channel.isThread() ? channel.parent : channel)) || undefined;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
