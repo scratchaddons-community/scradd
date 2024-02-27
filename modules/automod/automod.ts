@@ -14,6 +14,30 @@ import warn from "../punishments/warn.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
+import { createWorker } from "tesseract.js";
+const worker = await createWorker("eng");
+async function getMessageImageText(message: Message): Promise<string> {
+	if (message.attachments.size === 0) {
+	  return ""; // No images
+	}
+  
+	const imageUrls: string[] = Array.from(message.attachments.values())
+	  .filter((attachment) => attachment.width && attachment.height)
+	  .map((attachment) => attachment.url);
+  
+	if (imageUrls.length === 0) {
+	  return "";
+	}
+  
+	const imageTextPromises: Promise<string>[] = imageUrls.map(async (url) => {
+	  const ret = await worker.recognize(url || "");
+	  return ret.data.text;
+	});
+  
+	const imageTextResults = await Promise.all(imageTextPromises);
+	return imageTextResults.join(" ");
+  }
+  
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
@@ -120,6 +144,7 @@ export default async function automodMessage(message: Message) {
 
 		const badWords = [
 			tryCensor(stripMarkdown(message.content)),
+			tryCensor(await getMessageImageText(message)),
 			...message.stickers.map(({ name }) => tryCensor(name)),
 			...invites.map(([, invite]) => !!invite?.guild && tryCensor(invite.guild.name)),
 		].reduce(

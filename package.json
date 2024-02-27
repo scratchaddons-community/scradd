@@ -36,7 +36,8 @@
 		"papaparse": "5.4.1",
 		"posthtml-parser": "0.12.0",
 		"serialize-error": "11.0.3",
-		"strife.js": "4.0.1"
+		"strife.js": "4.0.1",
+		"tesseract.js": "^5.0.5"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
