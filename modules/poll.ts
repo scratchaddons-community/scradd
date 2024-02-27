@@ -7,7 +7,7 @@ import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
 import warn from "./punishments/warn.js";
 import tryCensor from "./automod/misc.js";
 
-const DEFAULT_SHAPES = ["🔺", "🔶", "🟡", "🟩", "🔹", "💜", "🟤", "🏳️"];
+const DEFAULT_SHAPES = ["🔺", "♦️", "⭕", "🔶", "💛", "🟩", "💠", "🔹", "🟣", "🏴", "❕", "◽"];
 const bannedReactions = new Set(BOARD_EMOJI);
 
 defineChatCommand(
@@ -96,7 +96,10 @@ defineModal("poll", async (interaction, voteMode) => {
 			},
 			{ customReactions: [], options: [] },
 		);
-	if (options.length > DEFAULT_SHAPES.length)
+	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
+	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
+
+	if (options.length > 20 || reactions.includes(""))
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t have over ${
@@ -104,16 +107,13 @@ defineModal("poll", async (interaction, voteMode) => {
 			} option${DEFAULT_SHAPES.length === 1 ? "" : "s"}!`,
 		});
 
-	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
-	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
-
 	const message = await interaction.reply({
 		embeds: [
 			{
 				color: constants.themeColor,
 				title: interaction.fields.getTextInputValue("question"),
-				description: options
-					.map((option, index) => `${reactions[index]} ${option}`)
+				description: reactions
+					.map((reaction, index) => `${reaction} ${options[index] ?? ""}`)
 					.join("\n"),
 				footer:
 					voteMode === "1" ? { text: "You can only vote once on this poll." } : undefined,

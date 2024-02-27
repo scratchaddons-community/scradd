@@ -23,6 +23,7 @@ export default async function logError(
 	console.error(error);
 	try {
 		const name =
+			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
 		if (
 			"ExperimentalWarning" == name ||
@@ -37,9 +38,11 @@ export default async function logError(
 					: event.isChatInputCommand()
 					? commandInteractionToString(event)
 					: inlineCode(
-							event.isCommand()
-								? `/${event.command?.name}`
-								: `${event.constructor.name}: ${event.customId}`,
+							event.isCommand() && event.command
+								? `/${event.command.name}`
+								: `${event.constructor.name}${
+										event.isButton() ? `: ${event.customId}` : ""
+								  }`,
 					  )
 			}`,
 			LogSeverity.Alert,
@@ -85,7 +88,7 @@ export function generateError(error: unknown): object {
 		const object = {
 			name: "name" in error ? error.name : undefined,
 			message: "message" in error ? error.message : undefined,
-			// eslint-disable-next-line unicorn/error-message
+			// eslint-disable-next-line unicorn/error-message, @typescript-eslint/restrict-template-expressions
 			stack: sanitizePath(`${("stack" in error ? error : new Error()).stack}`)
 				.split("\n")
 				.slice(1),

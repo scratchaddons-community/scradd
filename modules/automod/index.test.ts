@@ -22,6 +22,9 @@ await describe("tryCensor", async () => {
 	await it("should not catch words surrounded with dashes", () => {
 		strictEqual(tryCensor("-utomodmute-"), false);
 	});
+	await it("should not censor fonts", () => {
+		strictEqual(tryCensor("𝐌𝐢𝐧𝐭 𝐝𝐚𝐲 𝐢𝐧𝐟𝐨"), false);
+	});
 });
 await describe("censor", async () => {
 	await it("should not censor fine words", () => {

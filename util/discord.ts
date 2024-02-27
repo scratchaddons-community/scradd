@@ -11,7 +11,7 @@ import {
 	type APIEmbed,
 	type APIMessageActionRowComponent,
 	type Awaitable,
-	type BaseMessageOptions,
+	type InteractionReplyOptions,
 	type EmojiIdentifierResolvable,
 	type GuildTextBasedChannel,
 	type MessageActionRowComponent,
@@ -24,7 +24,6 @@ import {
 	FormattingPatterns,
 	MessageMentions,
 	type AnyThreadChannel,
-	type MessageReaction,
 	chatInputApplicationCommandMention,
 	type DMChannel,
 	type PartialDMChannel,
@@ -35,6 +34,10 @@ import {
 	channelMention,
 	type APIEmbedField,
 	type Guild,
+	messageLink,
+	MessageFlags,
+	hyperlink,
+	type MessageReaction,
 } from "discord.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -62,27 +65,43 @@ export function extractMessageExtremities(
 				}),
 			),
 		...message.embeds
-			.filter((embed) => !embed.video)
+			.filter((embed) => !embed.video && !message.flags.has(MessageFlags.SuppressEmbeds))
 			.map(({ data }): APIEmbed => {
-				const newEmbed = { ...data };
+				const automodInfo = (data.fields ?? []).reduce(
+					(accumulator, field) => ({ ...accumulator, [field.name]: field.value }),
+					{
+						flagged_message_id: message.id,
+						channel_id: message.channel.id,
+						keyword: "",
+						rule_name: "",
+					},
+				);
 
-				if (message.type === MessageType.AutoModerationAction) {
-					newEmbed.author = {
-						icon_url: (message.member ?? message.author).displayAvatarURL(),
-						name: (message.member ?? message.author).displayName,
-					};
-					newEmbed.color = message.member?.displayColor;
-
-					newEmbed.footer = {
-						text: `Keyword: ${
-							newEmbed.fields?.find(({ name }) => name === "keyword")?.value
-						}${constants.footerSeperator}Rule: ${
-							newEmbed.fields?.find(({ name }) => name === "rule_name")?.value
-						}`,
-					};
-
-					newEmbed.fields = [];
-				}
+				const newEmbed =
+					message.type === MessageType.AutoModerationAction
+						? {
+								description: data.description ?? message.content,
+								color: message.member?.displayColor ?? data.color,
+								author: {
+									icon_url: (message.member ?? message.author).displayAvatarURL(),
+									name: (message.member ?? message.author).displayName,
+								},
+								url: messageLink(
+									message.guild?.id ?? "@me",
+									automodInfo.channel_id,
+									automodInfo.flagged_message_id,
+								),
+								footer: {
+									text: `${
+										automodInfo.keyword && `Keyword: ${automodInfo.keyword}`
+									}${
+										automodInfo.keyword &&
+										automodInfo.rule_name &&
+										constants.footerSeperator
+									}${automodInfo.rule_name && `Rule: ${automodInfo.rule_name}`}`,
+								},
+						  }
+						: { ...data };
 
 				if (!tryCensor) return newEmbed;
 
@@ -203,8 +222,8 @@ export async function messageToText(message: Message, replies?: true): Promise<s
 export function messageToText(message: Message, replies = true): Awaitable<string> {
 	const content = message.flags.has("Loading")
 		? (Date.now() - message.createdTimestamp) / 1000 / 60 > 15
-			? `${constants.emojis.discord.error} The application did not respond`
-			: `${constants.emojis.discord.typing} ${escapeMessage(
+			? `${constants.emojis.message.error} The application did not respond`
+			: `${constants.emojis.misc.loading} ${escapeMessage(
 					message.author.displayName,
 					// eslint-disable-next-line unicorn/string-content
 			  )} is thinking...`
@@ -212,23 +231,28 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 	switch (message.type) {
 		case MessageType.Default: {
-			return content;
+			break;
 		}
 
 		case MessageType.RecipientAdd: {
-			return `${constants.emojis.discord.add} ${message.author.toString()} added ${
-				message.mentions.users.first()?.toString() ?? ""
-			} to the ${message.inGuild() ? "thread" : "group"}.`;
+			return `${constants.emojis.message.add} ${message.author.toString()} added ${
+				message.mentions.users.first()?.toString() ?? "**Unknown User**"
+			} to the ${message.channel.isThread() ? "thread" : "group"}.`;
 		}
 
 		case MessageType.RecipientRemove: {
-			return `${constants.emojis.discord.remove} ${message.author.toString()} removed ${
-				message.mentions.users.first()?.toString() ?? ""
-			} from the ${message.inGuild() ? "thread" : "group"}.`;
+			const ping = message.mentions.users.first();
+			return `${constants.emojis.message.remove} ${message.author.toString()} ${
+				ping ? `removed ${ping.toString()} from` : "left"
+			} the ${message.channel.isThread() ? "thread" : "group"}.`;
+		}
+
+		case MessageType.Call: {
+			return `${constants.emojis.message.call} ${message.author.toString()} started a call.`;
 		}
 
 		case MessageType.ChannelNameChange: {
-			return `${constants.emojis.discord.edit} ${message.author.toString()} changed the ${
+			return `${constants.emojis.message.edit} ${message.author.toString()} changed the ${
 				message.channel.isThread() && message.channel.parent?.isThreadOnly()
 					? "post title"
 					: "channel name"
@@ -237,22 +261,22 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ChannelIconChange: {
 			return `${
-				constants.emojis.discord.edit
+				constants.emojis.message.edit
 			} ${message.author.toString()} changed the group icon.`;
 		}
 
 		case MessageType.ChannelPinnedMessage: {
 			if (!replies)
 				return `${
-					constants.emojis.discord.pin
+					constants.emojis.message.pin
 				} ${message.author.toString()} pinned **a message** to this channel. See all **pinned messages**.`;
 
 			return `${
-				constants.emojis.discord.pin
-			} ${message.author.toString()} pinned [a message](${message.url.replace(
+				constants.emojis.message.pin
+			} ${message.author.toString()} pinned [a message](<${message.url.replace(
 				message.id,
-				message.reference?.messageId || "",
-			)}) to this channel. See all [pinned messages](${message.channel.url}).`;
+				message.reference?.messageId || message.id,
+			)}>) to this channel. See all [pinned messages](<${message.channel.url}>).`;
 		}
 
 		case MessageType.UserJoin: {
@@ -271,101 +295,124 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				`Glad you're here, ${message.author.toString()}.`,
 				`Good to see you, ${message.author.toString()}.`,
 				`Yay you made it, ${message.author.toString()}!`,
-			];
+			] as const;
 
-			return `${constants.emojis.discord.add} ${
-				formats[message.createdTimestamp % formats.length]
+			return `${constants.emojis.message.add} ${
+				formats[message.createdTimestamp % formats.length] ?? formats[0]
 			}`;
 		}
 
 		case MessageType.GuildBoost: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
-				content ? ` **${content}** times` : ""
+				content && ` **${escapeMessage(content)}** times`
 			}!`;
 		}
 
 		case MessageType.GuildBoostTier1: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
-				content ? ` **${content}** times` : ""
-			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 1**!`;
+				content && ` **${escapeMessage(content)}** times`
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 1**!`;
 		}
 
 		case MessageType.GuildBoostTier2: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
-				content ? ` **${content}** times` : ""
-			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 2**!`;
+				content && ` **${escapeMessage(content)}** times`
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 2**!`;
 		}
 
 		case MessageType.GuildBoostTier3: {
 			return `${
-				constants.emojis.discord.boost
+				constants.emojis.message.boost
 			} ${message.author.toString()} just boosted the server${
-				content ? ` **${content}** times` : ""
-			}! **${escapeMessage(message.guild?.name ?? "")}** has achieved **Level 3**!`;
+				content && ` **${escapeMessage(content)}** times`
+			}! ${escapeMessage(message.guild?.name ?? "")} has achieved **Level 3**!`;
 		}
 
 		case MessageType.ChannelFollowAdd: {
 			return `${
-				constants.emojis.discord.add
+				constants.emojis.message.add
 			} ${message.author.toString()} has added **${escapeMessage(
 				content,
 			)}** to this channel. Its most important updates will show up here.`;
 		}
 
 		case MessageType.GuildDiscoveryDisqualified: {
-			return `${constants.emojis.discord.no} This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details.`;
+			return `${
+				constants.emojis.message.fail
+			} This server has been removed from Server Discovery because it no longer passes all the requirements. Check [Server Settings](discord://-/guilds/${
+				message.guild?.id ?? "@me"
+			}/settings/discovery) for more details.`;
 		}
 
 		case MessageType.GuildDiscoveryRequalified: {
-			return `${constants.emojis.discord.yes} This server is eligible for Server Discovery again and has been automatically relisted!`;
+			return `${constants.emojis.message.success} This server is eligible for Server Discovery again and has been automatically relisted!`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodInitialWarning: {
-			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
+			return `${constants.emojis.message.warning} This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery.`;
 		}
 
 		case MessageType.GuildDiscoveryGracePeriodFinalWarning: {
-			return `${constants.emojis.discord.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
+			return `${constants.emojis.message.warning} This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery.`;
 		}
 
 		case MessageType.ThreadCreated: {
 			return `${
-				constants.emojis.discord.thread
-			} ${message.author.toString()} started a thread: **${escapeMessage(
+				constants.emojis.message.thread
+			} ${message.author.toString()} started a thread: [${escapeMessage(
 				content,
-			)}** See all **threads**.`;
+			)}](<${message.channel.url.replace(
+				message.channel.id,
+				message.reference?.channelId ?? message.channel.id,
+			)}>) See all [threads](<${message.channel.url}>).`;
 		}
 
 		case MessageType.Reply: {
-			if (!replies) return content;
+			if (!replies) break;
 			return message
 				.fetchReference()
 				.catch(() => void 0)
 				.then((reply) => {
-					if (!reply)
-						return `*${constants.emojis.discord.reply} Original message was deleted*\n\n${content}`;
-
-					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
-					return `*[Replying to](${reply.url}) ${reply.author.toString()}${
-						cleanContent
-							? `:*\n> ${truncateText(stripMarkdown(cleanContent), 300)}`
-							: "*"
+					const cleanContent =
+						reply && messageToText(reply, false).replaceAll(/\s+/g, " ");
+					return `[*${
+						reply
+							? `Replying to ${reply.author.toString()}${cleanContent ? `:` : ""}`
+							: `${constants.emojis.message.reply} Original message was deleted`
+					}*](${messageLink(
+						message.reference?.guildId ?? message.guild?.id ?? "@me",
+						message.reference?.channelId ?? message.channel.id,
+						message.reference?.messageId ?? message.id,
+					)})${
+						cleanContent ? `\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : ""
 					}\n\n${content}`;
 				});
 		}
 
+		case MessageType.ChatInputCommand: {
+			if (!replies || !message.interaction) break;
+
+			const userPing = message.interaction.user.toString();
+			return mentionChatCommand(
+				message.interaction.commandName,
+				message.guild ?? undefined,
+			).then(
+				(formatted) => `*${userPing} used ${formatted}${content ? `:*\n${content}` : "*"}`,
+			);
+		}
+
 		case MessageType.ThreadStarterMessage: {
 			// eslint-disable-next-line unicorn/string-content
-			const failMessage = `${constants.emojis.discord.thread} Sorry, we couldn't load the first message in this thread`;
+			const failMessage = `${constants.emojis.message.thread} Sorry, we couldn't load the first message in this thread`;
 			if (!message.reference) return failMessage;
 
-			if (!replies) return content;
+			if (!replies) break;
 
 			return message
 				.fetchReference()
@@ -376,75 +423,18 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 		}
 
 		case MessageType.GuildInviteReminder: {
-			return "The best way to setup a server is with your buddies!";
-		}
-
-		case MessageType.RoleSubscriptionPurchase: {
-			// TODO: figure out how the message looks like for is_renewal: true
-			const totalMonths = message.roleSubscriptionData?.totalMonthsSubscribed;
-			const months = `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
-			return `${message.author.toString()} joined ${
-				message.roleSubscriptionData?.tierName
-			} and has been a subscriber of **${escapeMessage(
-				message.guild?.name ?? "",
-			)}** for ${months}!`;
-		}
-
-		case MessageType.StageStart: {
-			return `${
-				constants.emojis.discord.stageLive
-			} ${message.author.toString()} started **${content}**`;
-		}
-
-		case MessageType.StageEnd: {
-			return `${
-				constants.emojis.discord.stage
-			} ${message.author.toString()} ended **${content}**`;
-		}
-
-		case MessageType.StageSpeaker: {
-			return `${
-				constants.emojis.discord.speaker
-			} ${message.author.toString()} is now a speaker.`;
-		}
-
-		case MessageType.StageRaiseHand: {
-			return `${
-				constants.emojis.discord.raisedHand
-			} ${message.author.toString()} requested to speak.`;
-		}
-
-		case MessageType.StageTopic: {
-			return `${
-				constants.emojis.discord.stage
-			} ${message.author.toString()} changed Stage topic: **${content}**`;
+			return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!";
 		}
 
 		case MessageType.ContextMenuCommand: {
-			if (!replies) return content;
-			return `*${message.interaction?.user.toString() ?? ""} used **${escapeMessage(
-				message.interaction?.commandName ?? "",
-			)}**:*\n${content}`;
-		}
-
-		case MessageType.ChatInputCommand: {
-			if (!replies) return content;
-
-			const subcommandName = message.interaction?.commandName ?? "";
-			return mentionChatCommand(subcommandName, message.guild ?? undefined).then(
-				(formatted) =>
-					`*${
-						message.interaction?.user.toString() ?? ""
-					} used ${formatted}:*\n${content}`,
-			);
-		}
-
-		case MessageType.Call: {
-			return `${constants.emojis.discord.call} ${message.author.toString()} started a call.`;
+			if (!replies || !message.interaction) break;
+			return `*${message.interaction.user.toString()} used **${escapeMessage(
+				message.interaction.commandName,
+			)}**${content ? `:*\n${content}` : "*"}`;
 		}
 
 		case MessageType.AutoModerationAction: {
-			return `**AutoMod** has ${
+			return `**AutoMod** 🤖 has ${
 				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
 					? "flagged"
 					: "blocked"
@@ -453,21 +443,87 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					message.channel.id,
 			)}`;
 		}
+
+		case MessageType.RoleSubscriptionPurchase: {
+			if (!message.roleSubscriptionData) return "";
+
+			const {
+				totalMonthsSubscribed: months,
+				isRenewal,
+				tierName,
+			} = message.roleSubscriptionData;
+			return (
+				`${constants.emojis.message.add} ${message.author.toString()} ${
+					isRenewal ? "renewed" : "joined"
+				} **${tierName}** ${months ? "and has been" : "as"} a subscriber of ` +
+				hyperlink(
+					escapeMessage(message.guild?.name ?? ""),
+					`discord://-/channels/${message.guild?.id ?? "@me"}/role-subscriptions`,
+				) +
+				(months ? ` for ${months} month${months === 1 ? "" : "s"}!` : `!`)
+			);
+		}
+
+		case MessageType.InteractionPremiumUpsell: {
+			break;
+		}
+
+		case MessageType.StageStart: {
+			return `${
+				constants.emojis.message.live
+			} ${message.author.toString()} started **${content}**`;
+		}
+
+		case MessageType.StageEnd: {
+			return `${
+				constants.emojis.message.stage
+			} ${message.author.toString()} ended **${content}**`;
+		}
+
+		case MessageType.StageSpeaker: {
+			return `${
+				constants.emojis.message.speaker
+			} ${message.author.toString()} is now a speaker.`;
+		}
+
+		case MessageType.StageRaiseHand: {
+			return `${
+				constants.emojis.message.raisedHand
+			} ${message.author.toString()} requested to speak.`;
+		}
+
+		case MessageType.StageTopic: {
+			return `${
+				constants.emojis.message.stage
+			} ${message.author.toString()} changed the Stage topic: **${content}**`;
+		}
+
+		case MessageType.GuildApplicationPremiumSubscription: {
+			return `${
+				constants.emojis.message.subscription
+			} ${message.author.toString()} upgraded ${
+				message.groupActivityApplication?.name ?? `a deleted application`
+			} to premium for this server! 🎉`;
+		}
 	}
 
-	// Fallback for unknown message types
-	throw new TypeError(`Unknown message type: ${message.type}`);
+	return content;
 }
 
-export async function messageToEmbed(message: Message, censor?: (text: string) => string) {
-	const content = await messageToText(message),
-		author =
-			message.type === MessageType.AutoModerationAction
-				? "AutoMod 🤖"
-				: message.type === MessageType.GuildInviteReminder
-				? "Invite your friends 🤖"
-				: (message.member?.displayName ?? message.author.displayName) +
-				  (message.author.bot ? " 🤖" : "");
+export async function messageToEmbed(
+	message: Message,
+	censor = (text: string) => text,
+): Promise<APIEmbed> {
+	const lines = (await messageToText(message)).split("\n");
+	const content =
+		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
+	const author =
+		message.type === MessageType.AutoModerationAction
+			? content
+			: message.type === MessageType.GuildInviteReminder
+			? lines[0] + " 🤖"
+			: (message.member ?? message.author).displayName +
+			  (message.author.bot || message.webhookId ? " 🤖" : "");
 	return {
 		color:
 			message.type === MessageType.AutoModerationAction
@@ -475,7 +531,7 @@ export async function messageToEmbed(message: Message, censor?: (text: string) =
 				: message.type === MessageType.GuildInviteReminder
 				? undefined
 				: message.member?.displayColor,
-		description: censor ? censor(content) : content,
+		description: message.type === MessageType.AutoModerationAction ? "" : censor(content),
 
 		author: {
 			icon_url:
@@ -485,7 +541,7 @@ export async function messageToEmbed(message: Message, censor?: (text: string) =
 					? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 					: (message.member ?? message.author).displayAvatarURL(),
 
-			name: censor ? censor(author) : author,
+			name: censor(author),
 		},
 
 		timestamp:
@@ -508,15 +564,12 @@ export async function messageToEmbed(message: Message, censor?: (text: string) =
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
-): Promise<MessageReaction[] | undefined> {
+): Promise<MessageReaction[]> {
 	const messageReactions = [];
 	for (const reaction of reactions) {
-		try {
-			const messageReaction = await message.react(reaction);
-			messageReactions.push(messageReaction);
-		} catch {
-			return;
-		}
+		const messageReaction = await message.react(reaction).catch(() => void 0);
+		if (messageReaction) messageReactions.push(messageReaction);
+		else break;
 	}
 	return messageReactions;
 }
@@ -581,21 +634,19 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (
-		options: BaseMessageOptions & { ephemeral: boolean },
-	) => Promise<InteractionResponse | Message>,
+	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	options: PaginateOptions<Item, User>,
 ): Promise<void>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => unknown,
+	reply: (options: InteractionReplyOptions) => unknown,
 	options: PaginateOptions<Item, false>,
 ): Promise<void>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: BaseMessageOptions & { ephemeral: boolean }) => Awaitable<unknown>,
+	reply: (options: InteractionReplyOptions) => Awaitable<unknown>,
 	{
 		title,
 		format,
@@ -629,7 +680,7 @@ export async function paginate<Item>(
 	 *
 	 * @returns The next page.
 	 */
-	async function generateMessage() {
+	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
 
 		const content = (
@@ -707,7 +758,7 @@ export async function paginate<Item>(
 				},
 			],
 			ephemeral,
-		} satisfies BaseMessageOptions & { ephemeral: boolean };
+		};
 	}
 
 	let message = await reply(await generateMessage());
@@ -718,7 +769,7 @@ export async function paginate<Item>(
 	)
 		return;
 
-	const editReply = (data: BaseMessageOptions & { ephemeral: boolean }) =>
+	const editReply = (data: InteractionReplyOptions): unknown =>
 		ephemeral || !(message instanceof InteractionResponse) || !(message instanceof Message)
 			? reply(data)
 			: message.edit(data);
@@ -757,7 +808,7 @@ export async function paginate<Item>(
  * @returns The non-thread text channel.
  */
 export function getBaseChannel<Channel extends TextBasedChannel | null | undefined>(
-	channel: Channel,
+	channel: Channel, // TODO: THREAD ONLY CHANNELS SHOOT
 ): Channel extends null | undefined
 	? undefined
 	: Channel extends AnyThreadChannel
@@ -782,7 +833,9 @@ export const BotInvitesPattern = /discord(?:app)?\.com\/(?:api\/)?oauth2\/author
 /** A global regular expression variant of {@link BotInvitesPattern}. */
 export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, "g");
 
-export function commandInteractionToString(interaction: ChatInputCommandInteraction) {
+export function commandInteractionToString(
+	interaction: ChatInputCommandInteraction,
+): `</${string}:${string}>` {
 	const subcommandGroup = interaction.options.getSubcommandGroup(false);
 	const subcommand = interaction.options.getSubcommand(false);
 
@@ -803,7 +856,10 @@ export function commandInteractionToString(interaction: ChatInputCommandInteract
 
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
 }
-export async function mentionChatCommand(fullCommand: string, guild?: Guild) {
+export async function mentionChatCommand(
+	fullCommand: string,
+	guild?: Guild,
+): Promise<`**/${string}**` | `</${string}:${string}>`> {
 	const [commandName] = fullCommand.split(" ");
 	const id = (
 		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
@@ -828,7 +884,7 @@ export function columns(
 	title: string = constants.zws,
 	count: 1 | 2 | 3 = 2,
 	callback = (item: { toString(): string }) => item.toString(),
-) {
+): APIEmbedField[] {
 	const columnLength = Math.ceil(array.length / count);
 	return Array.from({ length: count }, (_, index) => {
 		const startIndex = index * columnLength;

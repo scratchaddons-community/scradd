@@ -3,6 +3,7 @@ import {
 	ApplicationCommandType,
 	ComponentType,
 	GuildMember,
+	time,
 } from "discord.js";
 import config from "../../common/config.js";
 import {
@@ -15,6 +16,7 @@ import {
 } from "strife.js";
 import getUserRank, { top } from "./rank.js";
 import { giveXpForMessage } from "./giveXp.js";
+import { recentXpDatabase } from "./util.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
@@ -56,17 +58,27 @@ defineSubcommands(
 	},
 
 	async (interaction, options) => {
-		switch (options?.subcommand) {
+		const user =
+			(options?.options &&
+				"user" in options.options &&
+				(options.options.user instanceof GuildMember
+					? options.options.user.user
+					: options.options.user)) ||
+			interaction.user;
+
+		switch (options?.subcommand ?? "rank") {
 			case "rank": {
-				const user =
-					options.options.user instanceof GuildMember
-						? options.options.user.user
-						: options.options.user ?? interaction.user;
 				await getUserRank(interaction, user);
 				return;
 			}
 			case "graph": {
+				const startData =
+					recentXpDatabase.data.toSorted((one, two) => one.time - two.time)[0]?.time ?? 0;
 				return await interaction.reply({
+					content: `Select up to 7 users. I will graph thier XP __last__ week (${time(
+						new Date(startData),
+						"d",
+					)} to ${time(new Date(startData + 604_800_000), "d")}).`,
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -83,7 +95,7 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await top(interaction, options.options.user);
+				await top(interaction, user);
 				break;
 			}
 		}

@@ -21,7 +21,7 @@ if (!config.channels.admin) throw new ReferenceError("Could not find admin chann
 const thread =
 	getInitialChannelThreads(config.channels.admin).find(
 		(thread) => thread.name === "Moderator Interest Forms",
-	) ||
+	) ??
 	(await config.channels.admin.threads.create({
 		name: "Moderator Interest Forms",
 		reason: "For moderator interest forms",
@@ -53,7 +53,7 @@ const applications = Object.fromEntries(
 		),
 );
 
-export default async function confirmInterest(interaction: ButtonInteraction) {
+export default async function confirmInterest(interaction: ButtonInteraction): Promise<void> {
 	await interaction.reply({
 		ephemeral: true,
 		content:
@@ -75,7 +75,7 @@ export default async function confirmInterest(interaction: ButtonInteraction) {
 	});
 }
 
-export async function fillInterest(interaction: ButtonInteraction) {
+export async function fillInterest(interaction: ButtonInteraction): Promise<void> {
 	const mention = interaction.user.toString();
 	await interaction.showModal({
 		customId: "_modInterestForm",
@@ -151,7 +151,7 @@ export async function fillInterest(interaction: ButtonInteraction) {
 	});
 }
 
-export async function submitIntrest(interaction: ModalSubmitInteraction) {
+export async function submitInterest(interaction: ModalSubmitInteraction): Promise<void> {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 

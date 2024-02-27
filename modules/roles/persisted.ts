@@ -1,6 +1,7 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import config from "../../common/config.js";
 import mongoose from "mongoose";
+import { checkXPRoles } from "../xp/giveXp.js";
 
 export const persistedRoles = {
 	designer: "916020774509375528",
@@ -22,7 +23,7 @@ export const RoleList = mongoose.model(
 	}),
 );
 
-export async function persistedLeave(member: GuildMember | PartialGuildMember) {
+export async function persistedLeave(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 
 	const roles = Object.fromEntries(
@@ -36,7 +37,7 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember) {
 	}).exec();
 }
 
-export async function persistedRejoin(member: GuildMember) {
+export async function persistedRejoin(member: GuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 
 	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();
@@ -44,4 +45,5 @@ export async function persistedRejoin(member: GuildMember) {
 		const [role] = [persistedRoles[roleName]].flat();
 		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
+	await checkXPRoles(member);
 }

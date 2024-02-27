@@ -45,7 +45,7 @@ export function boardReactionCount(channel: { id: Snowflake }, time?: number): n
 export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
 	time = Date.now(),
-) {
+): number | undefined {
 	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);
 
@@ -72,7 +72,7 @@ export function boardReactionCount(
 			COUNTS.default,
 	);
 
-	function shift(count: number) {
+	function shift(count: number): number {
 		const privateThread =
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
 				? 2 / 3
@@ -82,7 +82,7 @@ export function boardReactionCount(
 		return Math.max(2, Math.round(count * privateThread * timeShift));
 	}
 }
-function baseReactionCount(id: Snowflake) {
+function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
@@ -129,14 +129,14 @@ export async function generateBoardMessage(
 				{
 					type: ComponentType.ActionRow,
 					components: [
-						...(extraButtons.pre || []),
+						...(extraButtons.pre ?? []),
 						{
 							label: "Message",
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							url: message.url,
 						},
-						...(extraButtons.post || []),
+						...(extraButtons.post ?? []),
 					],
 				},
 			],
@@ -158,8 +158,8 @@ export async function generateBoardMessage(
 		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
-				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]
-				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
+				? [...(extraButtons.pre ?? []), linkButton.toJSON(), ...(extraButtons.post ?? [])]
+				: [...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
 			allowedMentions: { users: [] },
@@ -183,7 +183,7 @@ export async function generateBoardMessage(
 	return await messageToBoardData(message);
 }
 
-function formatChannel(channel: TextBasedChannel) {
+function formatChannel(channel: TextBasedChannel): string {
 	const thread = channel.isThread() && channel.parent?.toString();
 	const otherServer =
 		!channel.isDMBased() &&

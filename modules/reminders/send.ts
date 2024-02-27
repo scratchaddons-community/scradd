@@ -7,7 +7,7 @@ import {
 	remindersDatabase,
 } from "./misc.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
-import { convertBase, nth } from "../../util/numbers.js";
+import { convertBase } from "../../util/numbers.js";
 import {
 	ChannelType,
 	MessageFlags,
@@ -86,22 +86,10 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					const message = await channel.send(await getWeekly(nextWeeklyDate));
 					if (!chatters) continue;
 					const thread = await message.startThread({
-						name: `🏆 Weekly Winners week of ${
-							[
-								"January",
-								"February",
-								"March",
-								"April",
-								"May",
-								"June",
-								"July",
-								"August",
-								"September",
-								"October",
-								"November",
-								"December",
-							][date.getUTCMonth()] || ""
-						} ${nth(date.getUTCDate())}`,
+						name: `🏆 Weekly Winners week of ${new Date().toLocaleString([], {
+							month: "long",
+							day: "numeric",
+						})}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
@@ -255,7 +243,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	return await queueReminders();
 }
 
-function getNextInterval() {
+function getNextInterval(): number | undefined {
 	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
 	if (!reminder) return;
 	return reminder.date - Date.now();

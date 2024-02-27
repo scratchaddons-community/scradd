@@ -5,6 +5,7 @@ import {
 	type PartialGuildMember,
 	type ChatInputCommandInteraction,
 	roleMention,
+	type InteractionResponse,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
@@ -14,7 +15,7 @@ import { getBaseChannel } from "../../util/discord.js";
 export async function syncMembers(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 	{ role }: { role: Role },
-) {
+): Promise<InteractionResponse | undefined> {
 	if (!interaction.channel?.isThread())
 		return await interaction.reply({
 			ephemeral: true,
@@ -33,7 +34,7 @@ export async function syncMembers(
 		return await interaction.reply(
 			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
 				role.id,
-			)} to this thread! (note that *I* will not remove them)`,
+			)} to this thread!`,
 		);
 	}
 
@@ -51,7 +52,7 @@ export async function syncMembers(
 export async function updateMemberThreads(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
-) {
+): Promise<void> {
 	for (const options of threadsDatabase.data) {
 		const roles = options.roles?.split("|");
 		if (!roles?.length) continue;
@@ -76,7 +77,7 @@ export async function updateMemberThreads(
 export async function updateThreadMembers(
 	{ archived: wasArchived }: AnyThreadChannel,
 	thread: AnyThreadChannel,
-) {
+): Promise<void> {
 	if (thread.guild.id === config.guild.id && wasArchived && !thread.archived) {
 		const options = getThreadConfig(thread);
 		for (const roleId of options.roles) {
@@ -88,7 +89,13 @@ export async function updateThreadMembers(
 	}
 }
 
-async function addRoleToThread({ role, thread }: { role: Role; thread: AnyThreadChannel }) {
+async function addRoleToThread({
+	role,
+	thread,
+}: {
+	role: Role;
+	thread: AnyThreadChannel;
+}): Promise<void> {
 	for (const [, member] of role.members) {
 		const baseChannel = getBaseChannel(thread);
 		if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))

@@ -10,6 +10,7 @@ import {
 	InteractionType,
 	type RepliableInteraction,
 	channelMention,
+	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -43,14 +44,18 @@ export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
 	strikeId?: string,
-) {
+): Promise<InteractionResponse | undefined> {
 	const option = interaction.isAnySelectMenu() ? interaction.values[0] : category;
 
 	if (option === SA_CATEGORY) {
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${channelMention(
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${
+				config.channels.suggestions?.toString() ?? "#suggestions"
+			}, bug reports in ${
+				config.channels.bugs?.toString() ?? "#bugs"
+			}, and other questions, comments, concerns, or etcetera in ${channelMention(
 				config.channels.support,
 			)}.`,
 
@@ -71,7 +76,7 @@ export async function showTicketModal(
 	}
 
 	if (!option || !TICKET_CATEGORIES.includes(option))
-		throw new TypeError(`Unknown ticket category: ${option}`);
+		throw new TypeError(`Unknown ticket category: ${option ?? "undefined"}`);
 
 	const fields = allFields[option];
 
@@ -87,13 +92,13 @@ export async function showTicketModal(
 export default async function contactMods(
 	interaction: RepliableInteraction,
 	options: Category | GuildMember,
-) {
+): Promise<ThreadChannel> {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
 		options instanceof GuildMember
 			? options
-			: interaction.member || (await config.guild.members.fetch(interaction.user.id));
+			: interaction.member ?? (await config.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	if (!config.channels.tickets) throw new ReferenceError("Could not find tickets channel!");
@@ -168,6 +173,7 @@ export default async function contactMods(
 				(data) =>
 					thread.send({
 						...data,
+						flags: undefined,
 						embeds: [details, ...(data.embeds ?? [])],
 						content: ping,
 						allowedMentions: { parse: ["roles"] },
@@ -180,7 +186,10 @@ export default async function contactMods(
 	return thread;
 }
 
-export async function contactUser(member: GuildMember, interaction: RepliableInteraction) {
+export async function contactUser(
+	member: GuildMember,
+	interaction: RepliableInteraction,
+): Promise<void> {
 	await interaction.deferReply({ ephemeral: true });
 	const existingThread = TICKETS_BY_MEMBER[member.id];
 

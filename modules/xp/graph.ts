@@ -3,7 +3,7 @@ import { recentXpDatabase } from "./util.js";
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 
-export default async function graph(interaction: AnySelectMenuInteraction) {
+export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())
 		throw new TypeError("weeklyXpGraph SelectMenu not a UserSelectMenu!");
 
@@ -37,11 +37,11 @@ export default async function graph(interaction: AnySelectMenuInteraction) {
 		.toSorted((one, two) => (two.data.at(-1)?.y ?? 0) - (one.data.at(-1)?.y ?? 0));
 
 	const canvas = createCanvas(1000, 750);
-	const context = canvas.getContext("2d") as CanvasRenderingContext2D & SKRSContext2D;
+	const context = canvas.getContext("2d");
 
 	const defaultColor = Chart.defaults.color;
 	Chart.defaults.color = "#fff";
-	new Chart(context, {
+	new Chart(context as CanvasRenderingContext2D & SKRSContext2D, {
 		options: {
 			parsing: false,
 			scales: {

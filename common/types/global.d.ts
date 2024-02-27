@@ -3,11 +3,15 @@ import type { MenuCommandContext } from "strife.js";
 
 declare global {
 	interface Array<T> {
+		lastIndexOf(
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			fromIndex?: number,
+		): number;
+		indexOf(
+			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			fromIndex?: number,
+		): number;
 		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
-		map<U>(
-			callbackfn: (value: T, index: number, array: T[]) => U,
-			thisArg?: unknown,
-		): { [K in keyof this]: U };
 	}
 	interface ReadonlyArray<T> {
 		includes(
@@ -151,17 +155,6 @@ declare module "strife.js" {
 	}
 	export interface DefaultCommandAccess {
 		inGuild: true;
-	}
-}
-declare module "discord.js" {
-	export interface BaseGuildTextChannel {
-		toString(): ChannelMention;
-	}
-	export interface BaseGuildVoiceChannel {
-		toString(): ChannelMention;
-	}
-	export interface ThreadOnlyChannel {
-		toString(): ChannelMention;
 	}
 }
 

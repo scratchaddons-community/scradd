@@ -9,8 +9,8 @@ module.exports = {
 			.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
 			.filter(
 				([library]) =>
-					compilerOptions.types.includes(library) ||
-					(library.length === 4 && library.startsWith("es")),
+					(library.length === 6 && library.startsWith("es")) ||
+					compilerOptions.types.includes(library),
 			),
 	),
 	extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
@@ -33,7 +33,10 @@ module.exports = {
 			rules: {
 				"@typescript-eslint/consistent-type-definitions": "off",
 				"@typescript-eslint/naming-convention": "off",
-				"@typescript-eslint/no-unused-vars": "off",
+				"@typescript-eslint/no-unused-vars": [
+					"error",
+					{ varsIgnorePattern: /^.*$/.source },
+				],
 			},
 		},
 		{
@@ -61,12 +64,18 @@ module.exports = {
 			"error",
 			{ fixStyle: "inline-type-imports" },
 		],
-		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/explicit-function-return-type": [
+			"error",
+			{
+				allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+				allowExpressions: true,
+				allowIIFEs: true,
+			},
+		],
 		"@typescript-eslint/explicit-member-accessibility": [
 			"error",
 			{ accessibility: "no-public", overrides: { parameterProperties: "explicit" } },
 		],
-		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/init-declarations": "off",
 		"@typescript-eslint/max-params": ["warn", { max: 4 }],
 		"@typescript-eslint/member-ordering": "off",
@@ -127,21 +136,31 @@ module.exports = {
 		"@typescript-eslint/no-use-before-define": "off",
 		"@typescript-eslint/parameter-properties": ["error", { prefer: "parameter-property" }],
 		"@typescript-eslint/prefer-enum-initializers": "off",
-		"@typescript-eslint/prefer-nullish-coalescing": "off",
+		"@typescript-eslint/prefer-nullish-coalescing": [
+			"error",
+			{
+				ignoreConditionalTests: true,
+				ignoreMixedLogicalExpressions: true,
+				ignorePrimitives: true,
+			},
+		],
 		"@typescript-eslint/prefer-readonly-parameter-types": "off",
 		"@typescript-eslint/promise-function-async": "off",
-		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/restrict-template-expressions": [
+			"error",
+			{ allowAny: false, allowBoolean: false, allowNullish: false, allowRegExp: false },
+		],
 		"@typescript-eslint/return-await": ["error", "always"],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"@typescript-eslint/switch-exhaustiveness-check": [
-			"warn", // TODO: change to error after https://github.com/typescript-eslint/typescript-eslint/issues/6682 is fixed
+			"error",
 			{ allowDefaultCaseForExhaustiveSwitch: false },
 		],
 		"@typescript-eslint/typedef": "off",
 		"capitalized-comments": "off",
 		"line-comment-position": "off",
 		"max-depth": "error",
-		//TODO: enable // "multiline-comment-style": ["error", "separate-lines"],
+		"multiline-comment-style": ["error", "separate-lines"],
 		"no-fallthrough": [
 			"error",
 			{ allowEmptyCase: true, commentPattern: /[Ff]alls?[ -]?through/.source },

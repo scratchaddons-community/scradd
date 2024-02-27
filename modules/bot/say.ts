@@ -5,6 +5,7 @@ import {
 	TextInputStyle,
 	type RepliableInteraction,
 	type MessageContextMenuCommandInteraction,
+	type Message,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -14,7 +15,7 @@ import { mentionChatCommand } from "../../util/discord.js";
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
 	options: { message?: string; reply?: string },
-) {
+): Promise<void> {
 	if (options.message) {
 		await say(interaction, options.message, options.reply || undefined);
 		return;
@@ -50,7 +51,11 @@ export default async function sayCommand(
  * @param interaction - The interaction that triggered this mimic.
  * @param content - What to mimic.
  */
-export async function say(interaction: RepliableInteraction, content: string, reply?: string) {
+export async function say(
+	interaction: RepliableInteraction,
+	content: string,
+	reply?: string,
+): Promise<Message | undefined> {
 	await interaction.deferReply({ ephemeral: true });
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;

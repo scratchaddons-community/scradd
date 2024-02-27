@@ -4,11 +4,12 @@ import { describe, it } from "node:test";
 
 await describe("resolveIcon", async () => {
 	await it("should support Twemoji", async () => {
-		deepStrictEqual(await resolveIcon("😀"), { unicodeEmoji: "😀" });
+		deepStrictEqual(await resolveIcon("😀"), { unicodeEmoji: "😀", icon: null });
 	});
 	await it("should support data: URIs", async () => {
 		deepStrictEqual(await resolveIcon("data:image/png;base64,iVBORw0KGg"), {
 			icon: "data:image/png;base64,iVBORw0KGg",
+			unicodeEmoji: null,
 		});
 	});
 	await it("should support external images", async () => {
@@ -16,6 +17,7 @@ await describe("resolveIcon", async () => {
 			await resolveIcon("https://uploads.scratch.mit.edu/users/avatars/55742784.png"),
 			{
 				icon: "https://uploads.scratch.mit.edu/users/avatars/55742784.png",
+				unicodeEmoji: null,
 			},
 		);
 	});

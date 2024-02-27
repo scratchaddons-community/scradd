@@ -20,7 +20,7 @@ const INCREMENT_FREQUENCY = 10;
  *
  * @returns The increment.
  */
-function getIncrementForLevel(level: number) {
+function getIncrementForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 
@@ -58,7 +58,7 @@ export function getXpForLevel(level: number): number {
  *
  * @returns The corresponding level.
  */
-export function getLevelForXp(xp: number) {
+export function getLevelForXp(xp: number): number {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
 	if (foundLevel !== -2) return foundLevel;
 

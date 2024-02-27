@@ -1,4 +1,4 @@
-import { Constants, type MessageType, type Message } from "discord.js";
+import { Constants, type Message } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -49,7 +49,7 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 	undefined, // Invalid links
 ]);
 
-export default async function automodMessage(message: Message) {
+export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
 	const pings = message.mentions.users.size
@@ -190,7 +190,7 @@ export default async function automodMessage(message: Message) {
 
 		if (
 			badEmbedWords.strikes &&
-			!(Constants.NonSystemMessageTypes as MessageType[]).includes(message.type)
+			!([...Constants.NonSystemMessageTypes] as const).includes(message.type)
 		)
 			needsDelete = true;
 

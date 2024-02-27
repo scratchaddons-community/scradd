@@ -20,7 +20,7 @@ import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 async function userInfo(
 	interaction: RepliableInteraction,
 	{ member, user }: { member?: GuildMember; user: User },
-) {
+): Promise<void> {
 	const isMod =
 		config.roles.mod &&
 		(interaction.member instanceof GuildMember
@@ -52,12 +52,10 @@ async function userInfo(
 			name: "🔊 Voice Channel",
 			value:
 				member.voice.channel.toString() +
-				`${member.voice.mute ? constants.emojis.discord.muted + " " : ""}${
-					member.voice.deaf ? constants.emojis.discord.deafened + " " : ""
-				}${
-					member.voice.streaming || member.voice.selfVideo
-						? constants.emojis.discord.streaming
-						: ""
+				`${member.voice.mute ? constants.emojis.vc.muted + " " : ""}${
+					member.voice.deaf ? constants.emojis.vc.deafened + " " : ""
+				}${member.voice.streaming ? constants.emojis.vc.streaming + " " : ""}${
+					member.voice.selfVideo ? constants.emojis.vc.camera : ""
 				}`.trim(),
 			inline: true,
 		});
@@ -136,6 +134,10 @@ async function userInfo(
 		)
 		.filter(({ length }) => length);
 
+	const banner =
+		user.bannerURL({ size: 1024 }) ??
+		(typeof user.accentColor === "number" &&
+			`https://singlecolorimage.com/get/${user.accentColor.toString(16)}/600x105`);
 	await interaction.reply({
 		ephemeral:
 			interaction.isButton() &&
@@ -144,13 +146,7 @@ async function userInfo(
 			{
 				description: user.toString(),
 				color: member?.displayColor,
-				image: {
-					url:
-						user.bannerURL({ size: 1024 }) ??
-						`https://singlecolorimage.com/get/${user.accentColor?.toString(
-							16,
-						)}/600x105`,
-				},
+				image: banner ? { url: banner } : undefined,
 				thumbnail: { url: (member ?? user).displayAvatarURL() },
 				fields,
 				author: {

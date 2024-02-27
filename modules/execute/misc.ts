@@ -16,7 +16,7 @@ const operationPrefixRegex = new RegExp(
 	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\s*`,
 );
 
-export function splitFirstArgument(argumentString: string) {
+export function splitFirstArgument(argumentString: string): readonly [Lowercase<string>, string] {
 	const [commandName, args = ""] = argumentString
 		.replace(operationPrefixRegex, "")
 		.split(/(?<=^\S+)\s+/);
@@ -33,7 +33,7 @@ export const UNSUPPORTED_OPTIONS = [
 	ApplicationCommandOptionType.Subcommand,
 	ApplicationCommandOptionType.SubcommandGroup,
 ] as const;
-export function schemaSupported(options: ApplicationCommandOption[]) {
+export function schemaSupported(options: ApplicationCommandOption[]): boolean {
 	const isSubcommands =
 		options.length &&
 		options.every(
@@ -55,7 +55,7 @@ export async function parseArguments(
 	argumentString: string,
 	schema: readonly ApplicationCommandOption[],
 	allowSubcommands?: true,
-): Promise<Options | boolean | { subcommand: string; options: Options }>;
+): Promise<Options | boolean | { subcommand: string; options: Options | boolean }>;
 export async function parseArguments(
 	argumentString: string,
 	schema: readonly ApplicationCommandOption[],
@@ -65,7 +65,7 @@ export async function parseArguments(
 	argumentString: string,
 	schema: readonly ApplicationCommandOption[],
 	allowSubcommands = true,
-): Promise<Options | boolean | { subcommand: string; options: Options }> {
+): Promise<Options | boolean | { subcommand: string; options: Options | boolean }> {
 	const hasSubcommands =
 		schema.length &&
 		schema.every(
@@ -80,8 +80,6 @@ export async function parseArguments(
 		if (!subSchema) return false;
 
 		const parsed = await parseArguments(args, subSchema.options ?? [], false);
-		if (typeof parsed === "boolean") return parsed;
-
 		return { subcommand: subSchema.name, options: parsed };
 	}
 
@@ -104,6 +102,8 @@ export async function parseArgument(
 	argument: string | undefined,
 	schema: ApplicationCommandOption,
 ): Promise<Options[string] | { error: boolean }> {
+	if (schema.name === "option") return { error: true };
+
 	const required = "required" in schema ? schema.required ?? true : true;
 
 	if (argument) {
@@ -172,7 +172,7 @@ export async function parseArgument(
 export function partitionArguments(
 	argumentString: string,
 	schema: readonly ApplicationCommandOption[],
-) {
+): string[] {
 	const words = argumentString.split(/\s+/g);
 	const whitespace = argumentString.split(/\S+/g);
 

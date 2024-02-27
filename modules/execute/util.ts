@@ -1,8 +1,6 @@
 import {
 	type ApplicationCommand,
 	Collection,
-	type GuildResolvable,
-	type Snowflake,
 	type Guild,
 	GuildMember,
 	type APIInteractionGuildMember,
@@ -38,16 +36,15 @@ const promises = (await fileSystem.readdir(directory)).map(async (file) => {
 	const resolved = path.join(directory, file);
 	if (path.extname(resolved) !== ".js") return;
 	return (await import(pathToFileURL(path.resolve(directory, resolved)).toString())).default as
-		| ApplicationCommand<{ guild: GuildResolvable | null }>
+		| ApplicationCommand
 		| CustomOperation;
 });
 const customOperations = (await Promise.all(promises)).filter(Boolean);
 
-const commandSchemas = new Collection<
-	string,
-	(ApplicationCommand<{ guild?: GuildResolvable | null }> | CustomOperation)[]
->();
-export async function getAllSchemas(guild: Guild | null) {
+const commandSchemas = new Collection<string, (ApplicationCommand | CustomOperation)[]>();
+export async function getAllSchemas(
+	guild: Guild | null,
+): Promise<(ApplicationCommand | CustomOperation)[]> {
 	const guildId = guild?.id ?? "@me";
 	if (commandSchemas.has(guildId)) return commandSchemas.get(guildId) ?? [];
 
@@ -63,9 +60,9 @@ export async function getAllSchemas(guild: Guild | null) {
 }
 
 export default async function getSchemas(
-	user: GuildMember | User | (APIInteractionGuildMember & { id: Snowflake }),
+	user: APIInteractionGuildMember | GuildMember | User,
 	channel?: TextBasedChannel,
-) {
+): Promise<Record<string, ApplicationCommand | CustomOperation>> {
 	const allSchemas = await getAllSchemas(user instanceof GuildMember ? user.guild : null);
 
 	const schemas = [];

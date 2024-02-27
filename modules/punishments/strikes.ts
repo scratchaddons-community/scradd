@@ -4,6 +4,8 @@ import {
 	GuildMember,
 	type User,
 	type RepliableInteraction,
+	type Message,
+	type InteractionResponse,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -16,7 +18,7 @@ export async function getStrikes(
 	selected: GuildMember | User,
 	interaction: RepliableInteraction,
 	options?: { expired?: boolean; removed?: boolean },
-) {
+): Promise<InteractionResponse | undefined> {
 	if (
 		selected.id !== interaction.user.id &&
 		!(
@@ -44,7 +46,10 @@ export async function getStrikes(
 	);
 }
 
-export async function getStrikeById(interaction: RepliableInteraction, filter: string) {
+export async function getStrikeById(
+	interaction: RepliableInteraction,
+	filter: string,
+): Promise<Message> {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
@@ -62,7 +67,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 	}
 
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
+	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
@@ -104,7 +109,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 				color: member?.displayColor,
 
 				author: nick
-					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
+					? { icon_url: (member ?? user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
 				title: `${

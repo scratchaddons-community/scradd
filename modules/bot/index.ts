@@ -1,16 +1,12 @@
 import { ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import {
-	defineChatCommand,
-	defineButton,
-	defineModal,
-	defineMenuCommand,
-	defineSubcommands,
-} from "strife.js";
+import { defineChatCommand, defineButton, defineModal, defineMenuCommand } from "strife.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
-import info, { syncConfigButton } from "./info.js";
+import status from "./status.js";
+import credits from "./credits.js";
+import { syncConfigButton } from "../execute/operations/config.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -72,18 +68,36 @@ defineModal("say", async (interaction, reply) => {
 	await say(interaction, interaction.fields.getTextInputValue("message"), reply || undefined);
 });
 
-defineSubcommands(
+defineChatCommand(
 	{
-		name: "info",
-		description: "Learn about me",
-		access: true,
+		name: "status",
+		description: "See my current status information",
 
-		subcommands: {
-			status: { description: "See my current status", options: {} },
-			credits: { description: "List who and what allows me to work", options: {} },
-			config: { description: "View and (admins only) update my configuration", options: {} },
+		options: {
+			message: {
+				type: ApplicationCommandOptionType.String,
+				description: "Message to send",
+				maxLength: 2000,
+			},
 		},
+		access: true,
 	},
-	info,
+	status,
+);
+defineChatCommand(
+	{
+		name: "credits",
+		description: "List who and what allows me to work",
+
+		options: {
+			message: {
+				type: ApplicationCommandOptionType.String,
+				description: "Message to send",
+				maxLength: 2000,
+			},
+		},
+		access: true,
+	},
+	credits,
 );
 defineButton("syncConfig", syncConfigButton);

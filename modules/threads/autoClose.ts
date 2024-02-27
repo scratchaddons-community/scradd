@@ -8,6 +8,7 @@ import {
 	GuildMember,
 	type AnyThreadChannel,
 	type ChatInputCommandInteraction,
+	type InteractionResponse,
 } from "discord.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { parseTime } from "../../util/numbers.js";
@@ -21,7 +22,7 @@ import { disableComponents } from "../../util/discord.js";
 export async function setUpAutoClose(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 	options: { subcommand: "close-in" | "lock-in"; options: { time: string } },
-) {
+): Promise<InteractionResponse | undefined> {
 	if (!interaction.channel?.isThread())
 		return await interaction.reply({
 			ephemeral: true,
@@ -107,7 +108,10 @@ export async function setUpAutoClose(
 	});
 }
 
-export async function cancelThreadChange(interaction: ButtonInteraction, type: string) {
+export async function cancelThreadChange(
+	interaction: ButtonInteraction,
+	type: string,
+): Promise<InteractionResponse | undefined> {
 	if (
 		!config.roles.staff ||
 		!(interaction.member instanceof GuildMember
@@ -150,7 +154,10 @@ export async function cancelThreadChange(interaction: ButtonInteraction, type: s
 	}
 }
 
-export async function autoClose({ locked: wasLocked }: AnyThreadChannel, thread: AnyThreadChannel) {
+export async function autoClose(
+	{ locked: wasLocked }: AnyThreadChannel,
+	thread: AnyThreadChannel,
+): Promise<void> {
 	if (thread.guild.id !== config.guild.id) return;
 	const options = getThreadConfig(thread);
 	if (thread.archived && options.keepOpen) await thread.setArchived(false, "Keeping thread open");
