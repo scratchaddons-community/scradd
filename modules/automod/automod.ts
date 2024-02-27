@@ -18,26 +18,25 @@ import { createWorker } from "tesseract.js";
 const worker = await createWorker("eng");
 async function getMessageImageText(message: Message): Promise<string> {
 	if (message.attachments.size === 0) {
-	  return ""; // No images
+		return ""; // No images
 	}
-  
+
 	const imageUrls: string[] = Array.from(message.attachments.values())
-	  .filter((attachment) => attachment.width && attachment.height)
-	  .map((attachment) => attachment.url);
-  
+		.filter((attachment) => attachment.width && attachment.height)
+		.map((attachment) => attachment.url);
+
 	if (imageUrls.length === 0) {
-	  return "";
+		return "";
 	}
-  
+
 	const imageTextPromises: Promise<string>[] = imageUrls.map(async (url) => {
-	  const ret = await worker.recognize(url || "");
-	  return ret.data.text;
+		const ret = await worker.recognize(url || "");
+		return ret.data.text;
 	});
-  
+
 	const imageTextResults = await Promise.all(imageTextPromises);
 	return imageTextResults.join(" ");
-  }
-  
+}
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
