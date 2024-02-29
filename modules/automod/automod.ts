@@ -17,23 +17,21 @@ import { joinWithAnd } from "../../util/text.js";
 import { createWorker } from "tesseract.js";
 const worker = await createWorker("eng");
 async function getMessageImageText(message: Message): Promise<string[]> {
-	
-
 	const imageUrls: string[] = message.attachments
 		.filter((attachment) => attachment?.contentType?.match(/^image\/(bmp|jpeg|png|bpm|webp)$/i))
 		.map((attachment) => attachment.url);
 
-	
-
-	const imageTextPromises = imageUrls.map(async (url) => {
-		if(url) {
-		const ret = await worker.recognize(url);
-		return ret.data.text;
-		}
-	}).filter(item => item ?? true);
+	const imageTextPromises = imageUrls
+		.map(async (url) => {
+			if (url) {
+				const ret = await worker.recognize(url);
+				return ret.data.text;
+			}
+		})
+		.filter((item) => item ?? true);
 
 	const imageTextResults = await Promise.all(imageTextPromises);
-	return imageTextResults as string[]
+	return imageTextResults as string[];
 }
 
 const WHITELISTED_INVITE_GUILDS = new Set([
