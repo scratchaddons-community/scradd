@@ -16,26 +16,24 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { createWorker } from "tesseract.js";
 const worker = await createWorker("eng");
-async function getMessageImageText(message: Message): Promise<string> {
-	if (message.attachments.size === 0) {
-		return ""; // No images
-	}
+async function getMessageImageText(message: Message): Promise<string[]> {
+	
 
 	const imageUrls: string[] = Array.from(message.attachments.values())
 		.filter((attachment) => attachment.width && attachment.height)
 		.map((attachment) => attachment.url);
 
-	if (imageUrls.length === 0) {
-		return "";
-	}
+	
 
-	const imageTextPromises: Promise<string>[] = imageUrls.map(async (url) => {
-		const ret = await worker.recognize(url || "");
+	const imageTextPromises = imageUrls.map(async (url) => {
+		if(url) {
+		const ret = await worker.recognize(url);
 		return ret.data.text;
-	});
+		}
+	}).filter(item => item ?? true);
 
 	const imageTextResults = await Promise.all(imageTextPromises);
-	return imageTextResults.join(" ");
+	return imageTextResults as string[]
 }
 
 const WHITELISTED_INVITE_GUILDS = new Set([
@@ -143,7 +141,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 		const badWords = [
 			tryCensor(stripMarkdown(message.content)),
-			tryCensor(await getMessageImageText(message)),
+			...(await getMessageImageText(message)).map((text) => tryCensor(text)),
 			...message.stickers.map(({ name }) => tryCensor(name)),
 			...invites.map(([, invite]) => !!invite?.guild && tryCensor(invite.guild.name)),
 		].reduce(
