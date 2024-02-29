@@ -15,6 +15,7 @@ import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { createWorker } from "tesseract.js";
+
 const worker = await createWorker("eng");
 async function getMessageImageText(message: Message): Promise<string[]> {
 	const imageTextPromises = message.attachments
