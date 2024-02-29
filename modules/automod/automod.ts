@@ -19,7 +19,7 @@ const worker = await createWorker("eng");
 async function getMessageImageText(message: Message): Promise<string[]> {
 	
 
-	const imageUrls: string[] = Array.from(message.attachments.values())
+	const imageUrls: string[] = message.attachments
 		.filter((attachment) => attachment?.contentType?.match(/^image\/(bmp|jpeg|png|bpm|webp)$/i))
 		.map((attachment) => attachment.url);
 
