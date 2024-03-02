@@ -2,7 +2,7 @@ import type { AnyThreadChannel, MessageReaction, Snowflake } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import {stringSimilarity} from "string-similarity-js";
+import { stringSimilarity } from "string-similarity-js";
 
 export default async function updateReactions(reaction: MessageReaction): Promise<boolean> {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -37,51 +37,57 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
 	const message = await thread.fetchStarterMessage().catch(() => void 0);
 	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
-	const suggestionData = getSuggestionData(thread)
-	suggestionsDatabase.data = [
-		...suggestionsDatabase.data,
-		{ ...suggestionData, count },
-	];
-	const data =  suggestionsDatabase.data as {
+	const suggestionData = getSuggestionData(thread);
+	suggestionsDatabase.data = [...suggestionsDatabase.data, { ...suggestionData, count }];
+	const data = suggestionsDatabase.data as {
 		answer: typeof suggestionAnswers[number];
 		author: Snowflake;
 		count: number;
 		id: Snowflake;
 		title: number | string;
-	}[]
+	}[];
 
-	const dupes = await findDuplicates(suggestionData, data)
-	if (dupes.length == 0) return
-	const links = dupes.toSorted((a, b) => a.score - b.score).toReversed().map((dupe)=>{ return `<#${dupe.id}> ${dupe.answer}`})
+	const dupes = await findDuplicates(suggestionData, data);
+	if (dupes.length == 0) return;
+	const links = dupes
+		.toSorted((a, b) => a.score - b.score)
+		.toReversed()
+		.map((dupe) => {
+			return `<#${dupe.id}> ${dupe.answer}`;
+		});
 	thread.send(`
 	## Possible dupes found:\n${links.join("\n")}
-	`)
+	`);
 }
 
-export async function findDuplicates(newSuggestion: {
-    id: string;
-    title: string | number;
-}, database: {
-	id: Snowflake;
-	title: number | string;
-	answer: string
-}[]) {
-   let possibleDupes:{
-	id: Snowflake;
-	title: number | string;
-	answer: string;
-	score: number;
-}[] = []
-    for (const dbSuggestion of database) {
-        if (dbSuggestion.id == newSuggestion.id) continue
-        const similarityThreshold = 0.5;
-        const similarity = stringSimilarity(`${newSuggestion.title}`, `${dbSuggestion.title}`)
-        if (similarity > similarityThreshold) {
-            possibleDupes.push({...dbSuggestion, score:similarity})
-        }
-    }
+export async function findDuplicates(
+	newSuggestion: {
+		id: string;
+		title: string | number;
+	},
+	database: {
+		id: Snowflake;
+		title: number | string;
+		answer: string;
+	}[],
+) {
+	console.log(database);
+	let possibleDupes: {
+		id: Snowflake;
+		title: number | string;
+		answer: string;
+		score: number;
+	}[] = [];
+	for (const dbSuggestion of database) {
+		if (dbSuggestion.id == newSuggestion.id) continue;
+		const similarityThreshold = 0.5;
+		const similarity = stringSimilarity(`${newSuggestion.title}`, `${dbSuggestion.title}`);
+		if (similarity > similarityThreshold) {
+			possibleDupes.push({ ...dbSuggestion, score: similarity });
+		}
+	}
 
-    return possibleDupes
+	return possibleDupes;
 }
 
 export function getSuggestionData(
