@@ -38,7 +38,6 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	const message = await thread.fetchStarterMessage().catch(() => void 0);
 	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
 	const suggestionData = getSuggestionData(thread);
-	suggestionsDatabase.data = [...suggestionsDatabase.data, { ...suggestionData, count }];
 	const data = suggestionsDatabase.data as {
 		answer: typeof suggestionAnswers[number];
 		author: Snowflake;
@@ -46,16 +45,18 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 		id: Snowflake;
 		title: number | string;
 	}[];
-
 	const dupes = await findDuplicates(suggestionData, data);
-	 if (dupes.length == 0) return;
-	const links = dupes
-		.map((dupe) => {
-			return `<#${dupe.id}> ${dupe.answer}`;
-		});
-	thread.send(`
+	if (dupes.length == 0) return;
+	const links = dupes.map((dupe) => {
+		return `<#${dupe.id}> ${dupe.answer}`;
+	});
+	await thread.send(`
 	## Possible dupes found:\n${links.join("\n")}
 	`);
+	suggestionsDatabase.data = [...suggestionsDatabase.data, { ...suggestionData, count }];
+	
+
+	
 }
 
 export async function findDuplicates(
@@ -69,14 +70,12 @@ export async function findDuplicates(
 		answer: string;
 	}[],
 ) {
-	
-	return didYouMean(`${newSuggestion.title}`,database, {
+	return didYouMean(`${newSuggestion.title}`, database, {
 		matchPath: ["title"],
 		returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
 		threshold: 0.4,
-	})
-
+	});
 }
 
 export function getSuggestionData(
