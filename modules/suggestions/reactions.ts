@@ -48,11 +48,10 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	}[];
 
 	const dupes = await findDuplicates(suggestionData, data);
-	 if (dupes.length == 0) return;
-	const links = dupes
-		.map((dupe) => {
-			return `<#${dupe.id}> ${dupe.answer}`;
-		});
+	if (dupes.length == 0) return;
+	const links = dupes.map((dupe) => {
+		return `<#${dupe.id}> ${dupe.answer}`;
+	});
 	thread.send(`
 	## Possible dupes found:\n${links.join("\n")}
 	`);
@@ -69,14 +68,12 @@ export async function findDuplicates(
 		answer: string;
 	}[],
 ) {
-	
-	return didYouMean(`${newSuggestion.title}`,database, {
+	return didYouMean(`${newSuggestion.title}`, database, {
 		matchPath: ["title"],
 		returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
 		threshold: 0.4,
-	})
-
+	});
 }
 
 export function getSuggestionData(
