@@ -2,7 +2,7 @@ import type { AnyThreadChannel, MessageReaction, Snowflake } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import { stringSimilarity } from "string-similarity-js";
+import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 
 export default async function updateReactions(reaction: MessageReaction): Promise<boolean> {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
@@ -48,10 +48,8 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	}[];
 
 	const dupes = await findDuplicates(suggestionData, data);
-	if (dupes.length == 0) return;
+	 if (dupes.length == 0) return;
 	const links = dupes
-		.toSorted((a, b) => a.score - b.score)
-		.toReversed()
 		.map((dupe) => {
 			return `<#${dupe.id}> ${dupe.answer}`;
 		});
@@ -71,22 +69,14 @@ export async function findDuplicates(
 		answer: string;
 	}[],
 ) {
-	let possibleDupes: {
-		id: Snowflake;
-		title: number | string;
-		answer: string;
-		score: number;
-	}[] = [];
-	for (const dbSuggestion of database) {
-		if (dbSuggestion.id == newSuggestion.id) continue;
-		const similarityThreshold = 0.5;
-		const similarity = stringSimilarity(`${newSuggestion.title}`, `${dbSuggestion.title}`);
-		if (similarity > similarityThreshold) {
-			possibleDupes.push({ ...dbSuggestion, score: similarity });
-		}
-	}
+	
+	return didYouMean(`${newSuggestion.title}`,database, {
+		matchPath: ["title"],
+		returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+		thresholdType: ThresholdTypeEnums.SIMILARITY,
+		threshold: 0.4,
+	})
 
-	return possibleDupes;
 }
 
 export function getSuggestionData(
