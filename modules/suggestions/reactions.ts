@@ -66,7 +66,6 @@ export async function findDuplicates(newSuggestion: {
 	title: number | string;
 	answer: string
 }[]) {
-	console.log(database)
    let possibleDupes:{
 	id: Snowflake;
 	title: number | string;
