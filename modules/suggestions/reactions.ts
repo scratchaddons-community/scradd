@@ -54,9 +54,6 @@ export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	## Possible dupes found:\n${links.join("\n")}
 	`);
 	suggestionsDatabase.data = [...suggestionsDatabase.data, { ...suggestionData, count }];
-	
-
-	
 }
 
 export async function findDuplicates(
