@@ -71,7 +71,6 @@ export async function findDuplicates(
 		answer: string;
 	}[],
 ) {
-	console.log(database);
 	let possibleDupes: {
 		id: Snowflake;
 		title: number | string;
