@@ -23,9 +23,10 @@ const SORA_DIRECTORY = path.dirname(
 const server = http.createServer(async (request, response) => {
 	try {
 		const requestUrl = getRequestUrl(request);
-		const pathname = requestUrl.pathname.toLowerCase();
+		const pathname = (
+			requestUrl.pathname.endsWith("/") ? requestUrl.pathname : `${requestUrl.pathname}/`
+		).toLowerCase();
 		switch (pathname) {
-			case "/clean-database-listeners":
 			case "/clean-database-listeners/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					return response
@@ -38,18 +39,16 @@ const server = http.createServer(async (request, response) => {
 
 				return;
 			}
-			case "/ban-appeal":
 			case "/ban-appeal/": {
 				return await appealRequest(request, response);
 			}
-			case "/link-scratch":
 			case "/link-scratch/": {
 				return await linkScratchRole(request, response);
 			}
-			case "/style.css": {
+			case "/style.css/": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
 			}
-			case "/icon.png": {
+			case "/icon.png/": {
 				const options = { extension: "png", forceStatic: true, size: 128 } as const;
 				return response
 					.writeHead(301, {
@@ -58,7 +57,6 @@ const server = http.createServer(async (request, response) => {
 					})
 					.end();
 			}
-			case "":
 			case "/": {
 				return response
 					.writeHead(301, {
