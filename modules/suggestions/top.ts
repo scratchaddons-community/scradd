@@ -39,7 +39,7 @@ export default async function top(
 					: "👍"
 			} ${hyperlink(
 				padTitle(title),
-				"url" in reference ? reference.url : channelLink(config.guild.id, reference.id),
+				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
 			)}${
 				user
