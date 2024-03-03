@@ -220,12 +220,9 @@ export function extraAuditLogsInfo(entry: {
 	executor?: User | null;
 	reason?: string | null;
 }): string {
+	const reason = entry.reason?.trim();
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		entry.reason
-			? entry.reason.includes("\n")
-				? `:\n${entry.reason}`
-				: ` (${entry.reason})`
-			: ""
+		reason ? (reason.includes("\n") ? `:\n${reason}` : ` (${reason})`) : ""
 	}`;
 }
 
