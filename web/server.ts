@@ -76,8 +76,8 @@ const server = http.createServer(async (request, response) => {
 		}
 		response.writeHead(404, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 	} catch (error) {
+		await logError(error, request.url ?? "").catch(console.error);
 		response.writeHead(500).end("Internal Server Error");
-		await logError(error, request.url ?? "");
 	}
 });
 
