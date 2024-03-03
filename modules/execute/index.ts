@@ -20,8 +20,6 @@ import {
 	listOperations,
 } from "./operations/help.js";
 
-const fullPingRegex = new RegExp(`^${MessageMentions.UsersPattern.source}$`);
-
 defineChatCommand(
 	{
 		name: "execute",
@@ -37,7 +35,9 @@ defineChatCommand(
 	},
 	async (interaction, { operation }) => {
 		const [commandName, args] = splitFirstArgument(operation);
-		if (fullPingRegex.test(commandName)) {
+
+		const match = MessageMentions.UsersPattern.exec(commandName);
+		if (match?.index === 0) {
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} I said “some*thing*” not “some*one*”-`,

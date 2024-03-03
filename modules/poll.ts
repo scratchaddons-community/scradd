@@ -60,8 +60,6 @@ defineChatCommand(
 );
 
 defineModal("poll", async (interaction, voteMode) => {
-	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
-
 	const rawOptions = interaction.fields.getTextInputValue("options");
 	const censored = tryCensor(rawOptions);
 	if (censored) {
@@ -83,7 +81,8 @@ defineModal("poll", async (interaction, voteMode) => {
 		.split("\n")
 		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
-				const emoji = option.match(regexp)?.[0];
+				const match = twemojiRegexp.default.exec(option);
+				const emoji = match?.index === 0 && match[0];
 				return {
 					options: [...options, (emoji ? option.replace(emoji, "") : option).trim()],
 					customReactions: [
