@@ -281,16 +281,18 @@ export async function getDefaultSettings(user: {
 
 export async function mentionUser(
 	user: Snowflake | User,
-	interactor: { id: Snowflake },
-	guild: Guild,
+	interactor?: { id: Snowflake },
+	guild?: Guild,
 ): Promise<UserMention | `[${string}](${string})`> {
-	const { useMentions } = await getSettings(interactor);
+	const useMentions = interactor && (await getSettings(interactor)).useMentions;
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const presence = guild.presences.resolve(interactor.id);
+	const presence = interactor && guild?.presences.resolve(interactor.id);
 	const url = `<${
-		presence?.status === presence?.clientStatus?.desktop ? "discord://-" : "https://discord.com"
+		presence && presence.status === presence.clientStatus?.desktop
+			? "discord://-"
+			: "https://discord.com"
 	}/users/${id}>`;
 
 	const { displayName } =
