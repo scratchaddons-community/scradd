@@ -155,9 +155,7 @@ export const rules = {
 				content.includes("\u200D") ? content : content.replaceAll("\uFE0F", ""),
 			).join("-");
 			return htmlTag("img", "", {
-				src: SimpleMarkdown.default.sanitizeUrl(
-					`https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoints}.svg`,
-				),
+				src: `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoints}.svg`,
 				alt: content,
 				draggable: false,
 				class: "discord-custom-emoji",
@@ -174,11 +172,9 @@ export const rules = {
 		html: (node) => {
 			const name = `:${(typeof node.name === "string" && node.name) || "_"}:`;
 			return htmlTag("img", "", {
-				src: SimpleMarkdown.default.sanitizeUrl(
-					`https://cdn.discordapp.com/emojis/${
-						(typeof node.id === "string" && node.id) || "0"
-					}.${node.animated ? "gif" : "webp"}?size=96&quality=lossless`,
-				),
+				src: `https://cdn.discordapp.com/emojis/${
+					(typeof node.id === "string" && node.id) || "0"
+				}.${node.animated ? "gif" : "webp"}?size=96&quality=lossless`,
 				alt: name,
 				draggable: false,
 				class: "discord-custom-emoji",
