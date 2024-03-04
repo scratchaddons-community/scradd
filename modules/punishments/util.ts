@@ -132,7 +132,6 @@ export async function listStrikes(
 			format: member,
 			singular: "strike",
 
-			// @ts-expect-error TS2769
 			user: commandUser,
 			totalCount: totalStrikeCount,
 			ephemeral: true,

@@ -636,13 +636,13 @@ export async function paginate<Item>(
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	options: PaginateOptions<Item, User>,
-): Promise<void>;
+): Promise<undefined>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (options: InteractionReplyOptions) => unknown,
-	options: PaginateOptions<Item, false>,
-): Promise<void>;
+	options: PaginateOptions<Item>,
+): Promise<InteractionReplyOptions | undefined>;
 export async function paginate<Item>(
 	array: Item[],
 	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
@@ -664,10 +664,15 @@ export async function paginate<Item>(
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
-): Promise<void> {
+): Promise<InteractionReplyOptions | undefined> {
 	if (!array.length) {
-		await reply({ content: `${constants.emojis.statuses.no} ${failMessage}`, ephemeral: true });
-		return;
+		const messageOptions = {
+			content: `${constants.emojis.statuses.no} ${failMessage}`,
+			ephemeral: true,
+		};
+		await reply(messageOptions);
+		if (user) return;
+		return messageOptions;
 	}
 
 	const previousId = generateHash("previous");
@@ -760,13 +765,14 @@ export async function paginate<Item>(
 		};
 	}
 
-	let message = await reply(await generateMessage());
+	const firstReplyOptions = await generateMessage();
+	let message = await reply(firstReplyOptions);
 	if (
 		numberOfPages === 1 ||
 		!user ||
 		!(message instanceof InteractionResponse || message instanceof Message)
 	)
-		return;
+		return firstReplyOptions;
 
 	const editReply = (data: InteractionReplyOptions): unknown =>
 		ephemeral || !(message instanceof InteractionResponse) || !(message instanceof Message)
