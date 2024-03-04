@@ -22,13 +22,14 @@ export default async function top(
 		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				(suggestion) =>
-					(options.answer ? suggestion.answer === options.answer : true) &&
-					(user ? suggestion.author.valueOf() === user.id : true) &&
-					(options.all ||
-						!("old" in suggestion) ||
-						["Unanswered", "Good Idea", "In Development"].includes(
-							suggestion.answer,
-						)),
+					(options.answer
+						? suggestion.answer === options.answer
+						: options.all ||
+						  !("old" in suggestion) ||
+						  ["Unanswered", "Good Idea", "In Development"].includes(
+								suggestion.answer,
+						  )) &&
+					(options.user ? suggestion.author.valueOf() === options.user.id : true),
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 
