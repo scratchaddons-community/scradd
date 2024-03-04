@@ -158,7 +158,7 @@ await describe("paginate", async () => {
 				embeds: [
 					{
 						title: "Pagination Test",
-						description: "1) 1\n2) 2\n3) 3\n4) 4\n5) 5\n6) 6\n7) 7\n8) 8\n9) 9\n10) 10",
+						description: "1. 1\n2. 2\n3. 3\n4. 4\n5. 5\n6. 6\n7. 7\n8. 8\n9. 9\n10. 10",
 						footer: { text: `Page 1/1 • 10 items` },
 						author: undefined,
 						color: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
@@ -185,7 +185,7 @@ await describe("paginate", async () => {
 			(message) => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
-				strictEqual(embed.description, "1) 1\n2) 2\n3) 3");
+				strictEqual(embed.description, "1. 1\n2. 2\n3. 3");
 				strictEqual(embed.footer?.text, `Page 1/2 • 6 items`);
 			},
 			{ title: "Pagination Test", singular: "item", user: false, perPage: 3 },
@@ -201,7 +201,7 @@ await describe("paginate", async () => {
 			(message) => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
-				strictEqual(embed.description, "__21) 21__\n22) 22\n23) 23\n24) 24\n25) 25");
+				strictEqual(embed.description, "__21. 21__\n22. 22\n23. 23\n24. 24\n25. 25");
 				strictEqual(embed.footer?.text, `Page 2/2 • 25 items`);
 			},
 			{ title: "Pagination Test", singular: "item", user: false, rawOffset: 20 },

@@ -685,7 +685,7 @@ export async function paginate<Item>(
 		const content = (
 			await Promise.all(
 				filtered.map(async (current, index, all) => {
-					const line = `${totalCount ? "" : `${index + offset + 1}) `}${await toString(
+					const line = `${totalCount ? "" : `${index + offset + 1}. `}${await toString(
 						current,
 						index,
 						all,
