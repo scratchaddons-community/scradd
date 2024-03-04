@@ -811,19 +811,25 @@ export function getBaseChannel<TChannel extends Channel | null | undefined>(
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
-export const GlobalUsersPattern = new RegExp(MessageMentions.UsersPattern, "g");
+export const GlobalUsersPattern = new RegExp(
+	MessageMentions.UsersPattern,
+	`g${MessageMentions.UsersPattern.flags}`,
+);
 
 /** An enhanced variant of {@link Invite.InvitesPattern}. */
 export const InvitesPattern =
 	/discord(?:(?:(?:app)?\.com|:\/(?:\/-?)?)\/invite|\.gg(?:\/invite)?)\/(?<code>[\w-]{2,255})/gi;
 
 /** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
-export const GlobalAnimatedEmoji = new RegExp(FormattingPatterns.AnimatedEmoji, "g");
+export const GlobalAnimatedEmoji = new RegExp(
+	FormattingPatterns.AnimatedEmoji,
+	`g${FormattingPatterns.AnimatedEmoji.flags}`,
+);
 
 export const BotInvitesPattern = /discord(?:app)?\.com\/(?:api\/)?oauth2\/authorize/i;
 
 /** A global regular expression variant of {@link BotInvitesPattern}. */
-export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, "g");
+export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, `g${BotInvitesPattern.flags}`);
 
 export function commandInteractionToString(
 	interaction: ChatInputCommandInteraction,
