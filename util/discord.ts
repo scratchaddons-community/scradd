@@ -604,6 +604,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 
 	user: U;
 	rawOffset?: number;
+	highlightOffset?: boolean;
 	totalCount?: number;
 	ephemeral?: boolean;
 	perPage?: number;
@@ -655,6 +656,7 @@ export async function paginate<Item>(
 
 		user,
 		rawOffset,
+		highlightOffset = false,
 		totalCount,
 		ephemeral = false,
 		perPage = 20,
@@ -684,13 +686,11 @@ export async function paginate<Item>(
 
 		const content = (
 			await Promise.all(
-				filtered.map(async (current, index, all) => {
-					const line = `${totalCount ? "" : `${index + offset + 1}. `}${await toString(
-						current,
-						index,
-						all,
-					)}`;
-					return rawOffset === index + offset ? `__${line}__` : line;
+				filtered.map(async (current, index) => {
+					const line =
+						(totalCount ? "" : `${index + offset + 1}. `) +
+						(await toString(current, index, filtered));
+					return highlightOffset && rawOffset === index + offset ? `__${line}__` : line;
 				}),
 			)
 		).join("\n");
