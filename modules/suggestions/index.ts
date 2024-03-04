@@ -126,7 +126,7 @@ defineChatCommand(
 
 			all: {
 				description:
-					"Include denied suggestions from the archive alongside accepted ones (defaults to false)",
+					"Include denied and invalid suggestions from the archive alongside accepted ones (defaults to false)",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},

@@ -26,11 +26,12 @@ export default async function top(
 					(user ? suggestion.author.valueOf() === user.id : true) &&
 					(options.all ||
 						!("old" in suggestion) ||
-						["Unnswered", "Good Idea", "In Development", "Implemented"].includes(
+						["Unanswered", "Good Idea", "In Development"].includes(
 							suggestion.answer,
 						)),
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
+
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
 				!("old" in reference) &&
@@ -50,6 +51,7 @@ export default async function top(
 							interaction.guild ?? config.guild,
 					  )}`
 			}`,
+
 		(data) => interaction.reply(data),
 		{
 			title: `Top suggestions${user ? ` by ${user.displayName}` : ""}${
@@ -62,6 +64,7 @@ export default async function top(
 		},
 	);
 }
+
 /** @todo - Strip full links, they can’t be escaped. */
 function padTitle(title: number | string): string {
 	const left = countOccurrences(`${title}`, "[");
