@@ -25,15 +25,12 @@ export const oldSuggestions = config.channels.oldSuggestions
 	? (await getAllMessages(config.channels.oldSuggestions)).map((message) => {
 			const [embed] = message.embeds;
 
-			const segments = message.thread?.name.split(" | ");
+			const segments = message.thread?.name.toLowerCase().split(" | ");
 
 			return {
 				answer:
-					suggestionAnswers.find((answer) =>
-						[segments?.[0]?.toLowerCase(), segments?.at(-1)?.toLowerCase()].includes(
-							answer.toLowerCase(),
-						),
-					) ?? suggestionAnswers[0],
+					suggestionAnswers.find((answer) => segments?.includes(answer.toLowerCase())) ??
+					suggestionAnswers[0],
 
 				author:
 					(message.author.id === constants.users.robotop
