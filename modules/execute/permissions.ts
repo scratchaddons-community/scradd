@@ -24,7 +24,7 @@ export default async function hasPermission(
 	channel?: TextBasedChannel,
 	ignoredRoles = new Set<Snowflake>(),
 ): Promise<boolean> {
-	if (!(schema instanceof ApplicationCommand)) return true; // TODO
+	if (!(schema instanceof ApplicationCommand)) return true;
 	if (user instanceof User) return schema.dmPermission ?? false;
 
 	const memberPermissions =

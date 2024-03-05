@@ -107,7 +107,6 @@ export async function parseArgument(
 	const required = "required" in schema ? schema.required ?? true : true;
 
 	if (argument) {
-		// TODO: check other option restrictions
 		switch (schema.type) {
 			case ApplicationCommandOptionType.String: {
 				return argument;
