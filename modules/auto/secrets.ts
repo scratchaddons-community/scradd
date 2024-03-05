@@ -30,7 +30,7 @@ const greetings = ["Hi"] as const;
 const customResponses: Record<string, string> = {};
 const customNames: Record<string, string> = {};
 const customComments: Record<string, string> = {};
-const customTriggers: string[] = Object.keys({});
+const customTriggers: readonly string[] = Object.keys({});
 export const dadEasterEggCount =
 	Object.keys(customResponses).length +
 	Object.keys(customNames).length +

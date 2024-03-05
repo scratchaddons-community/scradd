@@ -191,7 +191,7 @@ export default async function appealRequest(
 					{
 						name: "Persisted Roles",
 						value:
-							Object.entries(persistedRoles)
+							[...Object.entries(persistedRoles)]
 								.map(([name, ids]) => persistant?.[name] && [ids].flat()[0])
 								.filter(Boolean)
 								.toSorted((one, two) =>

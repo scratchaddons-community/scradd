@@ -45,7 +45,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 
 			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
 		})
-		.sort(([one], [two]) => one.localeCompare(two));
+		.toSorted(([one], [two]) => one.localeCompare(two));
 
 	await interaction.reply({
 		embeds: [

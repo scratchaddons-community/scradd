@@ -106,7 +106,7 @@ export function listOperations(
 		color: constants.themeColor,
 		title: "Available Operations",
 		description: Object.values(schemas)
-			.sort(({ name: one }, { name: two }) => one.localeCompare(two))
+			.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 			.map((schema) => inlineCode(OPERATION_PREFIX + schema.name) + ": " + schema.description)
 			.join("\n"),
 	};
