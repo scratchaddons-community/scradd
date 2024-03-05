@@ -21,6 +21,7 @@ import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js"
 import { getMatches, handleMatch } from "./scratch.js";
 import constants from "../../common/constants.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
+import { setTimeout as wait } from "node:timers/promises";
 
 const REACTION_CAP = 3;
 
@@ -60,7 +61,7 @@ defineEvent("messageCreate", async (message) => {
 			const reply = await message.reply(response[0]);
 			for (const action of response.slice(1)) {
 				if (typeof action === "number") {
-					await new Promise((resolve) => setTimeout(resolve, action));
+					await wait(action);
 					continue;
 				}
 
