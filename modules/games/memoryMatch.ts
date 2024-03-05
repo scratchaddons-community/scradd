@@ -423,7 +423,9 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<strin
 	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
 	const guildEmojis = (await guild.emojis.fetch())
 		.filter((emoji) => emoji.available)
-		.map((emoji) => formatEmoji({ animated: emoji.animated, id: emoji.id, name: "_" }));
+		.map((emoji) =>
+			formatEmoji({ animated: emoji.animated ?? false, id: emoji.id, name: "_" }),
+		);
 	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
 
 	const selected = Array.from(
