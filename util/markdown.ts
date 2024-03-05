@@ -11,6 +11,7 @@ import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { toCodePoints } from "@twemoji/parser";
 import { client } from "strife.js";
 import config from "../common/config.js";
+import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
 
 export function escapeMessage(text: string): string {
 	return escapeMarkdown(text, {
@@ -53,8 +54,8 @@ const DATE_TYPE_FORMATS = {
 	f: { dateStyle: "long", timeStyle: "short" },
 	F: { dateStyle: "full", timeStyle: "short" },
 } as const;
-const { defaultRules, htmlTag } = SimpleMarkdown.default;
-type ASTNode = SimpleMarkdown.SingleASTNode | SimpleMarkdown.SingleASTNode[];
+
+const { default: markdown } = SimpleMarkdown;
 
 export const rules = {
 	...Object.fromEntries(
@@ -63,13 +64,13 @@ export const rules = {
 		).map((rule) => [
 			rule,
 			{
-				...defaultRules[rule],
-				match: (source) => defaultRules[rule].match.regex?.exec(source),
+				...markdown.defaultRules[rule],
+				match: (source) => markdown.defaultRules[rule].match.regex?.exec(source),
 			},
 		]),
 	),
 	blockQuote: {
-		...defaultRules.blockQuote,
+		...markdown.defaultRules.blockQuote,
 		match: (source, { inQuote }, previous) =>
 			inQuote || !/(?:^|(?:\n|\s*[*-])\s*)$/.test(previous)
 				? undefined
@@ -81,25 +82,27 @@ export const rules = {
 			),
 		}),
 	},
-	br: { ...defaultRules.br, match: (source) => /^\n(?!\n*$)/i.exec(source) },
+	br: { ...markdown.defaultRules.br, match: (source) => /^\n(?!\n*$)/i.exec(source) },
 	del: {
-		...defaultRules.del,
+		...markdown.defaultRules.del,
 		match: (source, { inline }) => (inline ? /^~~([^]+?)~~(?!_)/.exec(source) : undefined),
 	},
 	codeBlock: {
-		...defaultRules.codeBlock,
+		...markdown.defaultRules.codeBlock,
 		match: (source) => /^```(?:([\w-]+)\n)?\n*([^]+?)\n*```/i.exec(source),
 		parse: (capture) => ({ lang: capture[1] ?? "", content: capture[2] ?? "" }),
 	},
 	heading: {
-		...defaultRules.heading,
+		...markdown.defaultRules.heading,
 		match: (source, { inline }) =>
 			inline ? undefined : /^ *(#{1,3}) +(.+?)(?:\n\s*)+/.exec(source),
 	},
 	link: {
-		...defaultRules.link,
+		...markdown.defaultRules.link,
 		html(node, output, state) {
-			const href = SimpleMarkdown.default.sanitizeUrl(node.target as string);
+			const href = markdown.sanitizeUrl(
+				typeof node.target === "string" ? node.target : undefined,
+			);
 			const url = href && new URL(href);
 			if (url && ["discord.com", "ptb.discord.com", "discord.com"].includes(url.hostname)) {
 				url.hostname = "discord.com";
@@ -110,51 +113,51 @@ export const rules = {
 					parts[3] &&
 					parts.length === 4
 				) {
-					return htmlTag("a", output(node.content as ASTNode, state), {
+					return markdown.htmlTag("a", output(node.content as SingleASTNode[], state), {
 						href: `/suggestions/${parts[3]}`,
-						title: node.title as string,
+						title: typeof node.title === "string" ? node.title : "",
 					});
 				}
 			}
 
-			return htmlTag("a", output(node.content as ASTNode, state), {
+			return markdown.htmlTag("a", output(node.content as SingleASTNode[], state), {
 				href: href,
-				title: node.title as string,
+				title: typeof node.title === "string" ? node.title : "",
 				target: "_blank",
 				rel: "noreferrer",
 			});
 		},
 	},
 	list: {
-		...defaultRules.list,
+		...markdown.defaultRules.list,
 		match: (source) =>
 			/^( *)([*-]|\d+\.) .+(?:\n|$)(?: *(?:[*-]|\d+\.) .+(?:\n|$))*/.exec(source),
 	},
 	text: {
-		...defaultRules.text,
+		...markdown.defaultRules.text,
 		match: (source) => /^[^]+?(?=[^\s\w]|\n{1,2}|\w+:\S|$)/.exec(source),
 	},
 
 	emoticon: {
-		...defaultRules.text,
+		...markdown.defaultRules.text,
 		match(source) {
 			const emoticon = Object.values(Faces).find((emoticon) => source.startsWith(emoticon));
 			return emoticon && [emoticon];
 		},
 	},
 	twemoji: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = twemojiRegexp.default.exec(source);
 			return match?.index ? undefined : match;
 		},
 		parse: (capture) => ({ content: capture[0] }),
 		html(node) {
-			const content = node.content as string;
+			const content = typeof node.content === "string" ? node.content : "";
 			const codePoints = toCodePoints(
 				content.includes("\u200D") ? content : content.replaceAll("\uFE0F", ""),
 			).join("-");
-			return htmlTag("img", "", {
+			return markdown.htmlTag("img", "", {
 				src: `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoints}.svg`,
 				alt: content,
 				draggable: false,
@@ -163,7 +166,7 @@ export const rules = {
 		},
 	},
 	emoji: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = /<(?<animated>a)?:(?<name>\w{1,32}):(?<id>\d{17,20})>/.exec(source);
 			return match?.index ? undefined : match;
@@ -171,7 +174,7 @@ export const rules = {
 		parse: (capture) => ({ animated: capture[1] === "a", name: capture[2], id: capture[3] }),
 		html: (node) => {
 			const name = `:${(typeof node.name === "string" && node.name) || "_"}:`;
-			return htmlTag("img", "", {
+			return markdown.htmlTag("img", "", {
 				src: `https://cdn.discordapp.com/emojis/${
 					(typeof node.id === "string" && node.id) || "0"
 				}.${node.animated ? "gif" : "webp"}?size=96&quality=lossless`,
@@ -186,35 +189,32 @@ export const rules = {
 		match: (source) => /^\|\|([^]+?)\|\|/.exec(source),
 		parse: ([, capture = ""], parse, state) => ({ content: parse(capture, state) }),
 		html: (node, output, state) =>
-			htmlTag("span", output(node.content as SimpleMarkdown.SingleASTNode[], state), {
+			markdown.htmlTag("span", output(node.content as SingleASTNode[], state), {
 				class: "discord-spoiler",
 			}),
 	},
 	timestamp: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match: (source) => /^<t:(\d+)(?::([DFRTdft]))?>/.exec(source),
-		parse: (capture) => ({
-			timestamp: capture[1],
-			format: capture[2] && capture[2] in DATE_TYPE_FORMATS ? capture[2] : "f",
-		}),
-		html: (node, output, state) =>
-			htmlTag(
+		parse: (capture) => ({ timestamp: capture[1], format: capture[2] }),
+		html: (node, output, state) => {
+			const date = new Date(+(typeof node.timestamp === "string" && node.timestamp) * 1000);
+			const format =
+				typeof node.format === "string" &&
+				Object.keys(DATE_TYPE_FORMATS).includes(node.format)
+					? node.format
+					: "f";
+			const formatOptions = DATE_TYPE_FORMATS[format];
+
+			return markdown.htmlTag(
 				"span",
-				output(
-					{
-						type: "text",
-						content: new Date(+node.timestamp * 1000).toLocaleString(
-							[],
-							DATE_TYPE_FORMATS[node.format as keyof typeof DATE_TYPE_FORMATS],
-						),
-					},
-					state,
-				),
+				output({ type: "text", content: date.toLocaleString([], formatOptions) }, state),
 				{ class: "discord-time" },
-			),
+			);
+		},
 	},
 	channel: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = MessageMentions.ChannelsPattern.exec(source);
 			return match?.index ? undefined : match;
@@ -222,7 +222,7 @@ export const rules = {
 		parse: (capture) => ({ id: capture[1], content: capture[0] }),
 		html(node, output, state) {
 			const channel = typeof node.id === "string" && client.channels.cache.get(node.id);
-			return htmlTag(
+			return markdown.htmlTag(
 				"a",
 				output(
 					{
@@ -230,13 +230,19 @@ export const rules = {
 						content:
 							channel && !channel.isDMBased()
 								? `#${channel.name}`
-								: (node.content as string),
+								: typeof node.content === "string"
+								? node.content
+								: "",
 					},
 					state,
 				),
 				{
 					class: "discord-mention",
-					href: `/suggestions/${node.id as string}`,
+					href: channel
+						? !channel.isDMBased() && channel.guild.id === config.guild.id
+							? `/suggestions/${channel.id}`
+							: channel.url
+						: "",
 					target: "_blank",
 					rel: "noreferrer",
 				},
@@ -244,31 +250,41 @@ export const rules = {
 		},
 	},
 	command: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = FormattingPatterns.SlashCommand.exec(source);
 			return match?.index || !match?.groups?.fullName ? undefined : [match.groups.fullName];
 		},
 		parse: ([fullName]) => ({ fullName }),
 		html: ({ fullName }, output, state) =>
-			htmlTag("span", output({ type: "text", content: `/${fullName as string}` }, state), {
-				class: "discord-mention",
-			}),
+			markdown.htmlTag(
+				"span",
+				output(
+					{ type: "text", content: `/${typeof fullName === "string" ? fullName : ""}` },
+					state,
+				),
+				{ class: "discord-mention" },
+			),
 	},
 	massMention: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = MessageMentions.EveryonePattern.exec(source);
 			return match?.index ? undefined : match;
 		},
 		parse: (capture) => ({ content: capture[0] }),
 		html: (node, output, state) =>
-			htmlTag("span", output({ type: "text", content: node.content as string }, state), {
-				class: "discord-mention",
-			}),
+			markdown.htmlTag(
+				"span",
+				output(
+					{ type: "text", content: typeof node.content === "string" ? node.content : "" },
+					state,
+				),
+				{ class: "discord-mention" },
+			),
 	},
 	role: {
-		order: defaultRules.strong.order,
+		order: markdown.defaultRules.strong.order,
 		match(source) {
 			const match = MessageMentions.RolesPattern.exec(source);
 			return match?.index ? undefined : match;
@@ -276,31 +292,16 @@ export const rules = {
 		parse: (capture) => ({ id: capture[1], content: capture[0] }),
 		html(node, output, state) {
 			const role = typeof node.id === "string" && config.guild.roles.cache.get(node.id);
-			return htmlTag(
-				"span",
-				output(
-					{ type: "text", content: role ? `@${role.name}` : (node.content as string) },
-					state,
-				),
-				{ class: "discord-mention" },
-			);
-		},
-	},
-	user: {
-		order: defaultRules.strong.order,
-		match(source) {
-			const match = MessageMentions.UsersPattern.exec(source);
-			return match?.index ? undefined : match;
-		},
-		parse: (capture) => ({ id: capture[1], content: capture[0] }),
-		html(node, output, state) {
-			const user = typeof node.id === "string" && client.users.cache.get(node.id);
-			return htmlTag(
+			return markdown.htmlTag(
 				"span",
 				output(
 					{
 						type: "text",
-						content: user ? `@${user.displayName}` : (node.content as string),
+						content: role
+							? `@${role.name}`
+							: typeof node.content === "string"
+							? node.content
+							: "",
 					},
 					state,
 				),
@@ -308,13 +309,39 @@ export const rules = {
 			);
 		},
 	},
-} satisfies SimpleMarkdown.HtmlRules;
-const rawParser = SimpleMarkdown.default.parserFor(rules);
+	user: {
+		order: markdown.defaultRules.strong.order,
+		match(source) {
+			const match = MessageMentions.UsersPattern.exec(source);
+			return match?.index ? undefined : match;
+		},
+		parse: (capture) => ({ id: capture[1], content: capture[0] }),
+		html(node, output, state) {
+			const user = typeof node.id === "string" && client.users.cache.get(node.id);
+			return markdown.htmlTag(
+				"span",
+				output(
+					{
+						type: "text",
+						content: user
+							? `@${user.displayName}`
+							: typeof node.content === "string"
+							? node.content
+							: "",
+					},
+					state,
+				),
+				{ class: "discord-mention" },
+			);
+		},
+	},
+} satisfies Rules;
+const rawParser = markdown.parserFor(rules);
 
-export function parseMarkdown(source: string): SimpleMarkdown.SingleASTNode[] {
+export function parseMarkdown(source: string): SingleASTNode[] {
 	return rawParser(source.trim(), { inline: false });
 }
-const rawOutputter = SimpleMarkdown.default.outputFor(rules, "html");
+const rawOutputter = markdown.outputFor(rules, "html");
 export function markdownToHtml(source: string): string {
-	return rawOutputter(parseMarkdown(source)) as string;
+	return rawOutputter(parseMarkdown(source));
 }
