@@ -16,8 +16,7 @@ export async function resolveIcon(
 
 	const serverEmoji = FormattingPatterns.Emoji.exec(icon);
 	const id =
-		(serverEmoji?.[0] === icon && serverEmoji.groups?.id) ||
-		(/^\d{17,20}$/.test(icon) && icon);
+		(serverEmoji?.[0] === icon && serverEmoji.groups?.id) || (/^\d{17,20}$/.test(icon) && icon);
 	const url = id && config.guild.emojis.resolve(id)?.url;
 	if (url) return { icon: url, unicodeEmoji: null };
 
