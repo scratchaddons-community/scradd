@@ -26,7 +26,7 @@ declare module "@twemoji/parser/dist/lib/regex.js" {
 	export default regexp;
 }
 
-declare module "@khanacademy/simple-markdown/dist/index.js" {
+declare module "@khanacademy/simple-markdown/dist/es/index.js" {
 	export type UnTypedASTNode = Record<string, unknown>;
 	export type SingleASTNode = UnTypedASTNode & { type: string };
 	export type ASTNode = SingleASTNode | SingleASTNode[];
