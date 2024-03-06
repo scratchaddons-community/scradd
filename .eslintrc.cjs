@@ -40,6 +40,10 @@ module.exports = {
 			},
 		},
 		{
+			files: "common/typedefs/**",
+			rules: { "unicorn/filename-case": "off" },
+		},
+		{
 			files: [
 				"modules/_private/**",
 				"modules/auto/secrets.ts",

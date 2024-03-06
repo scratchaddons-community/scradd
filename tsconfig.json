@@ -26,10 +26,13 @@
 		"strict": true,
 		"stripInternal": true,
 		"target": "es2022",
+		"paths": {
+			"*": ["./common/typedefs/*.d.ts", "./node_modules/@types/*", "./node_modules/*"]
+		},
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["node_modules", ".git", "dist"],
+	"exclude": ["./node_modules", "./.git", "./dist"],
 	"typeAcquisition": { "enable": true },
-	"include": ["**/*", ".**/*", ".*"]
+	"include": ["./**/*", "./.*"]
 }

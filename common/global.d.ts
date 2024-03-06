@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
 
