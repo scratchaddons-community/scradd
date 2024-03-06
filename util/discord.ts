@@ -617,7 +617,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
  * Creates a paginated embed from an array.
  *
  * @param array - The array to be paginated.
- * @param toString - A function to convert each element of the array to a string.
+ * @param stringify - A function to convert each element of the array to a string.
  * @param reply - A function to send pages.
  * @param options - Additional options.
  * @param options.title - The title of the embed.
@@ -633,19 +633,19 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
  */
 export async function paginate<Item>(
 	array: Item[],
-	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
 	options: PaginateOptions<Item, User>,
 ): Promise<undefined>;
 export async function paginate<Item>(
 	array: Item[],
-	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (options: InteractionReplyOptions) => unknown,
 	options: PaginateOptions<Item>,
 ): Promise<InteractionReplyOptions | undefined>;
 export async function paginate<Item>(
 	array: Item[],
-	toString: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	reply: (options: InteractionReplyOptions) => Awaitable<unknown>,
 	{
 		title,
@@ -694,7 +694,7 @@ export async function paginate<Item>(
 				filtered.map(async (current, index) => {
 					const line =
 						(totalCount ? "" : `${index + offset + 1}. `) +
-						(await toString(current, index, filtered));
+						(await stringify(current, index, filtered));
 					return highlightOffset && rawOffset === index + offset ? `__${line}__` : line;
 				}),
 			)
@@ -871,34 +871,39 @@ export async function mentionChatCommand(
 	)?.id;
 	return id ? chatInputApplicationCommandMention(fullCommand, id) : bold(`/${fullCommand}`);
 }
-export function columns<Item extends { toString(): string }>(
+export async function columnize<Item extends { toString(): Awaitable<string> }>(
 	array: Item[],
 	title: string,
-	count: 1 | 2 | 3,
-	callback?: ((item: Item) => string) | undefined,
-): APIEmbedField[];
-export function columns<Item>(
+	stringify?: (item: Item, index: number, array: Item[]) => Awaitable<string>,
+	count?: 1 | 2 | 3,
+): Promise<APIEmbedField[]>;
+export async function columnize<Item>(
 	array: Item[],
 	title: string,
-	count: 1 | 2 | 3,
-	callback: (item: Item) => string,
-): APIEmbedField[];
-export function columns(
+	stringify: (item: Item, index: number, array: Item[]) => Awaitable<string>,
+	count?: 1 | 2 | 3,
+): Promise<APIEmbedField[]>;
+export async function columnize(
 	array: { toString(): string }[],
 	title: string = constants.zws,
+	stringify = (
+		item: { toString(): Awaitable<string> },
+		_: number,
+		__: { toString(): Awaitable<string> }[],
+	) => item.toString(),
 	count: 1 | 2 | 3 = 2,
-	callback = (item: { toString(): string }) => item.toString(),
-): APIEmbedField[] {
-	const columnLength = Math.ceil(array.length / count);
-	return Array.from({ length: count }, (_, index) => {
-		const startIndex = index * columnLength;
-		return {
-			name: index === 0 ? title : constants.zws,
-			value: array
-				.slice(startIndex, startIndex + columnLength)
-				.map(callback)
-				.join("\n"),
-			inline: true,
-		};
-	});
+): Promise<APIEmbedField[]> {
+	const size = Math.ceil(array.length / count);
+	return await Promise.all(
+		Array.from({ length: count }, async (_, index) => {
+			const start = index * size;
+			return {
+				name: index === 0 ? title : constants.zws,
+				value: (await Promise.all(array.slice(start, start + size).map(stringify))).join(
+					"\n",
+				),
+				inline: true,
+			};
+		}),
+	);
 }

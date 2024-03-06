@@ -11,7 +11,7 @@ import lockFile from "../../package-lock.json" assert { type: "json" };
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
 import constants from "../../common/constants.js";
-import { columns } from "../../util/discord.js";
+import { columnize } from "../../util/discord.js";
 
 const designers = "966174686142672917",
 	developers = "938439909742616616",
@@ -61,14 +61,13 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 						value: await getRole(testers),
 						inline: true,
 					},
-					...columns(
+					...(await columnize(
 						dependencies,
 						"🗄️ Third-party code libraries",
-						2,
 						([specifier, link]) =>
 							"- " +
 							(link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
-					),
+					)),
 				],
 
 				color: constants.themeColor,

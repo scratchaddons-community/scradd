@@ -95,7 +95,7 @@ module.exports = {
 			},
 			{
 				custom: { match: false, regex: /\d/.source },
-				filter: { match: false, regex: /^_$/.source },
+				filter: { match: false, regex: /^_+$/.source },
 				format: ["camelCase"],
 				selector: "parameter",
 			},
