@@ -14,7 +14,7 @@ import {
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import fileSystem from "node:fs/promises";
-import crypto from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { fetchUser } from "../../util/scratch.js";
@@ -33,7 +33,7 @@ await client.application.editRoleConnectionMetadataRecords([
 
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 
-const HASH = crypto.randomBytes(16);
+const HASH = randomBytes(16);
 const sessions: Record<string, string> = {};
 export default async function linkScratchRole(
 	request: IncomingMessage,
@@ -42,8 +42,7 @@ export default async function linkScratchRole(
 	if (!process.env.CLIENT_SECRET)
 		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 
-	const ipHash = crypto
-		.createHash("sha384")
+	const ipHash = createHash("sha384")
 		.update(request.socket.remoteAddress ?? "")
 		.update(HASH)
 		.digest("base64");
