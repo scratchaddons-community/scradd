@@ -608,6 +608,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	totalCount?: number;
 	ephemeral?: boolean;
 	perPage?: number;
+	columns?: number;
 
 	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";
@@ -656,10 +657,11 @@ export async function paginate<Item>(
 
 		user,
 		rawOffset,
-		highlightOffset = false,
+		highlightOffset = true,
 		totalCount,
 		ephemeral = false,
 		perPage = 20,
+		columns = 1,
 
 		generateComponents,
 		customComponentLocation = "above",
@@ -688,17 +690,12 @@ export async function paginate<Item>(
 	 */
 	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + perPage);
-
-		const content = (
-			await Promise.all(
-				filtered.map(async (current, index) => {
-					const line =
-						(totalCount ? "" : `${index + offset + 1}. `) +
-						(await stringify(current, index, filtered));
-					return highlightOffset && rawOffset === index + offset ? `__${line}__` : line;
-				}),
-			)
-		).join("\n");
+		async function formatLine(current: Item, index: number): Promise<string> {
+			const line =
+				(totalCount ? "" : `${index + offset + 1}. `) +
+				(await stringify(current, index, filtered));
+			return highlightOffset && rawOffset === index + offset ? `__${line}__` : line;
+		}
 
 		const components: ActionRowData<MessageActionRowComponentData>[] =
 			numberOfPages > 1 && user
@@ -742,7 +739,12 @@ export async function paginate<Item>(
 			embeds: [
 				{
 					title,
-					description: content,
+					description:
+						columns === 1
+							? (await Promise.all(filtered.map(formatLine))).join("\n")
+							: "",
+					fields:
+						columns === 1 ? [] : await columnize(filtered, constants.zws, formatLine),
 
 					footer: {
 						text: `Page ${offset / perPage + 1}/${numberOfPages}${

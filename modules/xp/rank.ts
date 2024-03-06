@@ -165,6 +165,8 @@ export async function top(
 		{
 			title: "XP Leaderboard",
 			singular: "user",
+			perPage: 30,
+			columns: 2,
 
 			user: interaction.user,
 			rawOffset: index,

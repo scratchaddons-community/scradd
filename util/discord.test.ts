@@ -159,6 +159,7 @@ await describe("paginate", async () => {
 					{
 						title: "Pagination Test",
 						description: "1. 1\n2. 2\n3. 3\n4. 4\n5. 5\n6. 6\n7. 7\n8. 8\n9. 9\n10. 10",
+						fields: [],
 						footer: { text: `Page 1/1 • 10 items` },
 						author: undefined,
 						color: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
