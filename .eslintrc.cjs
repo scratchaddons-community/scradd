@@ -175,7 +175,7 @@ module.exports = {
 		"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/] }],
 		"unicorn/consistent-destructuring": "off",
 		"unicorn/explicit-length-check": "off",
-		"unicorn/filename-case": ["error", { case: "camelCase" }],
+		"unicorn/filename-case": ["error", { case: "kebabCase" }],
 		"unicorn/no-array-callback-reference": "off",
 		"unicorn/no-array-reduce": "off",
 		"unicorn/no-await-expression-member": "off",

@@ -19,12 +19,12 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import fileSystem from "node:fs/promises";
 import { strikeDatabase } from "../../punishments/util.js";
 import constants from "../../../common/constants.js";
-import giveXp from "../../xp/giveXp.js";
+import giveXp from "../../xp/give-xp.js";
 import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
 import { RoleList, persistedRoles } from "../../roles/persisted.js";
 import Mustache from "mustache";
 import pkg from "../../../package.json" assert { type: "json" };
-import { getAppealComponents } from "./generateAppeal.js";
+import { getAppealComponents } from "./generate-appeal.js";
 import appeals, { appealThread } from "./appeals.js";
 import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
@@ -38,7 +38,7 @@ const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
 		content: await fileSystem.readFile("./modules/forms/appeals/index.html", "utf8"),
 	}),
 	NOT_BANNED_PAGE = Mustache.render(APPEAL_FRAME, {
-		content: await fileSystem.readFile("./modules/forms/appeals/notBanned.html", "utf8"),
+		content: await fileSystem.readFile("./modules/forms/appeals/not-banned.html", "utf8"),
 	});
 
 export default async function appealRequest(

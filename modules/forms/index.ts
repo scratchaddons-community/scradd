@@ -1,5 +1,5 @@
 import { defineButton, defineModal } from "strife.js";
-import confirmInterest, { fillInterest, submitInterest } from "./modInterest.js";
+import confirmInterest, { fillInterest, submitInterest } from "./mod-interest.js";
 import {
 	confirmRejectAppeal,
 	confirmAcceptAppeal,

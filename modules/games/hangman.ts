@@ -298,7 +298,10 @@ export default async function hangman(
 			files: [
 				{
 					attachment: await fileSystem.readFile(
-						`./modules/games/hangmanPhotos/${Math.min(wrongCount, MAX_WRONGS - 1)}.png`,
+						`./modules/games/hangman-photos/${Math.min(
+							wrongCount,
+							MAX_WRONGS - 1,
+						)}.png`,
 					),
 					name: "hangman.png",
 				},
@@ -352,7 +355,7 @@ async function makeCanvasFiles(
 	const canvas = createCanvas(200, 181);
 	const context = canvas.getContext("2d");
 	context.drawImage(
-		await loadImage(`./modules/games/hangmanPhotos/${win ? "win" : MAX_WRONGS - 1}.png`),
+		await loadImage(`./modules/games/hangman-photos/${win ? "win" : MAX_WRONGS - 1}.png`),
 		0,
 		0,
 		canvas.width,

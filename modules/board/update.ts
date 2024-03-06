@@ -1,7 +1,7 @@
 import { ChannelType, type Message, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
-import giveXp from "../xp/giveXp.js";
+import giveXp from "../xp/give-xp.js";
 import { BOARD_EMOJI, boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 import { client } from "strife.js";
 

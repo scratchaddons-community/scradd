@@ -10,7 +10,7 @@ import { LoggingEmojis } from "../../logging/misc.js";
 import { escapeMessage } from "../../../util/markdown.js";
 import { client } from "strife.js";
 import { getAllMessages } from "../../../util/discord.js";
-import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generateAppeal.js";
+import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
 import constants from "../../../common/constants.js";
 
 if (!config.channels.mod) throw new ReferenceError("Could not find mod channel");

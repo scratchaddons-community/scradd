@@ -14,7 +14,7 @@ import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 import { EXPIRY_LENGTH } from "../punishments/misc.js";
 import { strikeDatabase } from "../punishments/util.js";
 import constants from "../../common/constants.js";
-import giveXp from "../xp/giveXp.js";
+import giveXp from "../xp/give-xp.js";
 import { getAllMessages } from "../../util/discord.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");

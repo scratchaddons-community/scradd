@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import guessAddon from "./guessAddon.js";
-import memoryMatch, { showMemoryInstructions } from "./memoryMatch.js";
+import guessAddon from "./guess-addon.js";
+import memoryMatch, { showMemoryInstructions } from "./memory-match.js";
 import { defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
 import { CURRENTLY_PLAYING } from "./misc.js";
 import constants from "../../common/constants.js";

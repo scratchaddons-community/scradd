@@ -15,7 +15,7 @@ import {
 	defineMenuCommand,
 } from "strife.js";
 import getUserRank, { top } from "./rank.js";
-import { giveXpForMessage } from "./giveXp.js";
+import { giveXpForMessage } from "./give-xp.js";
 import { recentXpDatabase } from "./util.js";
 
 defineEvent("messageCreate", async (message) => {

@@ -1,7 +1,7 @@
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.js";
-import { syncMembers, updateMemberThreads, updateThreadMembers } from "./syncMembers.js";
-import { autoClose, cancelThreadChange, setUpAutoClose } from "./autoClose.js";
+import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
+import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
 import { getThreadConfig } from "./misc.js";
 import { paginate } from "../../util/discord.js";
 

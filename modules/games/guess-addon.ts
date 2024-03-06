@@ -10,7 +10,7 @@ import addons from "@sa-community/addons-data" assert { type: "json" };
 import { disableComponents, mentionChatCommand } from "../../util/discord.js";
 import { generateHash } from "../../util/text.js";
 import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addonQuestions.js";
+import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
 import { escapeMessage } from "../../util/markdown.js";
 import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 

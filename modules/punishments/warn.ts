@@ -14,7 +14,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
 import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
-import giveXp from "../xp/giveXp.js";
+import giveXp from "../xp/give-xp.js";
 import filterToStrike, { strikeDatabase } from "./util.js";
 import {
 	DEFAULT_STRIKES,

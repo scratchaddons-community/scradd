@@ -22,7 +22,7 @@ jobs:
                   cache: npm
 
             - name: Download bad words
-              run: curl ${{ secrets.BAD_WORDS }} --output modules/automod/badWords.ts
+              run: curl ${{ secrets.BAD_WORDS }} --output modules/automod/bad-words.ts
 
             - name: Download secrets
               run: curl ${{ secrets.SECRETS }} --output modules/auto/secrets.ts
