@@ -37,7 +37,8 @@ const promises = (await fileSystem.readdir(directory)).map(async (file) => {
 	if (path.extname(resolved) !== ".js") return;
 	return (await import(pathToFileURL(path.resolve(directory, resolved)).toString())).default as
 		| ApplicationCommand
-		| CustomOperation;
+		| CustomOperation
+		| undefined;
 });
 const customOperations = (await Promise.all(promises)).filter(Boolean);
 

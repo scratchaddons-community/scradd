@@ -46,7 +46,7 @@ const data: CustomOperation = {
 					(option): option is ApplicationCommandSubCommand =>
 						option.type === ApplicationCommandOptionType.Subcommand &&
 						option.name === subcommandName,
-				)) ??
+				)) ||
 				schemas[operationName]);
 
 		await interaction.editReply({
