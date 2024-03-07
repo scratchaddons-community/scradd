@@ -73,13 +73,13 @@ export function uwuify(text: string): string {
 	return output.join(" ");
 }
 function convertWord(word: string): string {
-	const uwuify = word
+	const uwuified = word
 		.toLowerCase()
 		.replaceAll(/[\p{Pi}\p{Pf}＂＇'"`՚’]/gu, "")
 		.replaceAll(/[lr]/g, "w")
 		.replaceAll(/n(?=[aeo])/g, "ny")
 		.replaceAll(/(?<![aeiouy])y+\b/g, ({ length }) => "i".repeat(length));
-	return uwuify[0] && Math.random() > 0.8 ? `${uwuify[0]}-${uwuify}` : uwuify;
+	return uwuified[0] && Math.random() > 0.8 ? `${uwuified[0]}-${uwuified}` : uwuified;
 }
 
 const data: CustomOperation = {
@@ -92,10 +92,25 @@ const data: CustomOperation = {
 			name: "text",
 			description: uwuify("The text to uwuify"),
 			required: true,
+			maxLength: 1000,
+		},
+		{
+			type: ApplicationCommandOptionType.String,
+			name: "ephemeral",
+			description: uwuify("Make the response only visible to you"),
+			required: false,
 		},
 	],
-	async command(interaction, { text }) {
-		await interaction.reply(uwuify(typeof text === "string" ? text : ""));
+	async command(interaction, { text, ephemeral }) {
+		await interaction.reply({
+			content: uwuify(
+				(typeof text === "string" ? text : "") +
+					(typeof ephemeral === "string" && !["true", "false"].includes(ephemeral)
+						? " " + ephemeral
+						: ""),
+			),
+			ephemeral: ephemeral === "true",
+		});
 	},
 };
 export default data;
