@@ -97,8 +97,8 @@ defineEvent("messageCreate", async (message) => {
 				const result = new RegExp(
 					type === "partial" || type === "raw"
 						? match
-						: `${type === "full" ? "^" : "\\b"}${match}${
-								type === "plural" ? "(?:e?s)?" : ""
+						: `${type === "full" ? "^" : "\\b"}(?:${match})${
+								type === "plural" ? /(?:e?s)?/.source : ""
 						  }${type === "full" ? "$" : "\\b"}`,
 					"iu",
 				).test(type === "raw" ? message.content : content);
