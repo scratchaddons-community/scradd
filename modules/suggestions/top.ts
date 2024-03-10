@@ -63,7 +63,7 @@ export default async function top(
 			format: options.user,
 			singular: "suggestion",
 			user: interaction?.user ?? false,
-			perPage: interaction ? 15 : 25,
+			pageLength: interaction ? 15 : 25,
 			rawOffset: (options.page ?? 0) * (interaction ? 15 : 25),
 			highlightOffset: false,
 		},
