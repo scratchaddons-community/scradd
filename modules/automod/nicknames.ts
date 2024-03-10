@@ -86,10 +86,10 @@ async function setNickname(
 	newNickname: string,
 	reason: string,
 ): Promise<void> {
-	await (member.moderatable
+	await (member.moderatable && newNickname.length <= 32
 		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
 		: log(
-				`${LoggingErrorEmoji} Missing permissions to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+				`${LoggingErrorEmoji} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 				LogSeverity.Alert,
 		  ));
 }

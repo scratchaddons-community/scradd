@@ -183,7 +183,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 					});
 			} else {
 				await log(
-					`${LoggingErrorEmoji} Missing permissions to delete ${message.url}`,
+					`${LoggingErrorEmoji} Unable to delete ${message.url}`,
 					LogSeverity.Alert,
 				);
 			}

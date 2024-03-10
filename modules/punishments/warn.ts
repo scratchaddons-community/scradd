@@ -31,7 +31,7 @@ export default async function warn(
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
 	contextOrModerator: User | string = client.user,
-): Promise<boolean|"no-dm"> {
+): Promise<boolean | "no-dm"> {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -128,10 +128,7 @@ export default async function warn(
 		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(
-					`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`,
-					LogSeverity.Alert,
-			  ));
+			: log(`${LoggingErrorEmoji} Unable to ban ${user.toString()}`, LogSeverity.Alert));
 		return true;
 	}
 
@@ -151,7 +148,7 @@ export default async function warn(
 					"Too many strikes",
 			  )
 			: log(
-					`${LoggingErrorEmoji} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+					`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,
 					LogSeverity.Alert,
@@ -169,7 +166,7 @@ export default async function warn(
 			.catch(() => void 0);
 	}
 
-	return dm?true:"no-dm";
+	return dm ? true : "no-dm";
 }
 export async function removeStrike(
 	interaction: ButtonInteraction,
