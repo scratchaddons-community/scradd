@@ -79,10 +79,14 @@ defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		await updateBoard({
-			count: interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0,
-			message: interaction.targetMessage,
-		});
-		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
+		const count = interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
+		await updateBoard({ count, message: interaction.targetMessage });
+		await interaction.editReply(
+			`${
+				constants.emojis.statuses.yes
+			} Synced ${reactionsName}! [That message by ${interaction.targetMessage.author.toString()}](<${
+				interaction.targetMessage.url
+			}>) has ${count || "no"} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
+		);
 	},
 );
