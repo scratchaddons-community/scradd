@@ -32,7 +32,15 @@ export const boardDatabase = new Database<{
 }>("board");
 await boardDatabase.init();
 
-const COUNTS = { admins: 2, mods: 3, private: 4, misc: 5, default: 6, memes: 8, info: 12 } as const;
+const COUNTS = {
+	admins: 2,
+	testing: 3,
+	private: 4,
+	misc: 5,
+	default: 6,
+	memes: 8,
+	info: 12,
+} as const;
 /**
  * Determines the board reaction count for a channel.
  *
@@ -58,7 +66,7 @@ export function boardReactionCount(
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
 	if (baseChannel.guild.id !== config.guild.id)
-		return shift(COUNTS[baseChannel.guild.id === config.testingGuild?.id ? "mods" : "misc"]);
+		return shift(COUNTS[baseChannel.guild.id === config.testingGuild?.id ? "testing" : "misc"]);
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
@@ -66,7 +74,7 @@ export function boardReactionCount(
 		baseReactionCount(baseChannel.id) ??
 			{
 				[config.channels.info?.id || ""]: COUNTS.info,
-				[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
+				[config.channels.modlogs?.parent?.id || ""]: COUNTS.misc,
 				"866028754962612294": COUNTS.misc, // #The Cache
 			}[baseChannel.parent?.id || ""] ??
 			COUNTS.default,
@@ -85,6 +93,7 @@ export function boardReactionCount(
 function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
+		[config.channels.exec?.id || ""]: COUNTS.private,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
 		[config.channels.devs?.id || ""]: COUNTS.private,
@@ -92,8 +101,8 @@ function baseReactionCount(id: Snowflake): number | undefined {
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
 		"806656240129671188": COUNTS.memes, // #showcase
 		[config.channels.advertise?.id || ""]: COUNTS.memes,
-		"939350305311715358": COUNTS.mods, // #modmail
-		"894314668317880321": COUNTS.mods, // #evil-secret-youtube-plans
+		"939350305311715358": COUNTS.testing, // #modmail
+		"894314668317880321": COUNTS.testing, // #evil-secret-youtube-plans
 	}[id];
 }
 

@@ -426,14 +426,12 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<strin
 		.map((emoji) =>
 			formatEmoji({ animated: emoji.animated ?? false, id: emoji.id, name: "_" }),
 		);
-	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])];
-
-	const selected = Array.from(
-		{ length: Math.min(24 / difficulty, allEmojis.length) },
-		() => allEmojis.splice(Math.floor(Math.random() * allEmojis.length), 1)[0] ?? "",
+	const allEmojis = [...new Set([...twemojis, ...guildEmojis, ...secretEmojis])].sort(
+		() => Math.random() - 0.5,
 	);
-	const emojis = Array.from<typeof selected>({ length: difficulty })
-		.fill(selected)
+
+	const selected = allEmojis.slice(0, 24 / difficulty);
+	const emojis = Array.from({ length: difficulty }, () => selected)
 		.flat()
 		.toSorted(() => Math.random() - 0.5);
 
