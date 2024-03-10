@@ -191,8 +191,8 @@ export async function updateSettings(
 		content: `${constants.emojis.statuses.yes} Updated your settings!`,
 
 		components: [
-			...((await config.guild.members.fetch(user.id).catch(() => void 0))
-				? [
+			...(await config.guild.members.fetch(user.id).then(
+				() => [
 						{
 							type: ComponentType.ActionRow,
 							components: [
@@ -210,8 +210,9 @@ export async function updateSettings(
 								} as const,
 							],
 						},
-				  ]
-				: []),
+				],
+				() => [],
+			)),
 			{
 				type: ComponentType.ActionRow,
 				components: [
@@ -232,6 +233,12 @@ export async function updateSettings(
 						type: ComponentType.Button,
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
+					},
+					{
+						customId: "useMentions_toggleSetting",
+						type: ComponentType.Button,
+						label: "Use Mentions",
+						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 				],
 			},
