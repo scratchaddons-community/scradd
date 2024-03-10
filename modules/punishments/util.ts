@@ -16,7 +16,7 @@ import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { gracefulFetch } from "../../util/promises.js";
-import { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT } from "./misc.js";
+import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{
 	/** The ID of the user who was warned. */
@@ -120,9 +120,7 @@ export async function listStrikes(
 			}\`${
 				strike.count === 1
 					? ""
-					: ` (${
-							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
-					  })`
+					: ` (${strike.count < 1 ? "verbal" : `\\*${Math.floor(strike.count)}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,

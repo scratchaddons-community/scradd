@@ -122,7 +122,11 @@ export async function getStrikeById(
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
+					{
+						name: "⚠️ Count",
+						value: strike.count < 1 ? "verbal" : Math.floor(strike.count).toString(),
+						inline: true,
+					},
 					...(moderator ? [{ name: "🛡 Moderator", value: moderator, inline: true }] : []),
 					...(user
 						? [
