@@ -137,7 +137,7 @@ async function userInfo(
 	const banner =
 		user.bannerURL({ size: 1024 }) ??
 		(typeof user.accentColor === "number" &&
-			`https://singlecolorimage.com/get/${user.accentColor.toString(16)}/600x105`);
+			`https://singlecolorimage.com/get/${user.accentColor.toString(16)}/680x240`);
 	await interaction.reply({
 		ephemeral:
 			interaction.isButton() &&
