@@ -184,15 +184,15 @@ export async function messageUpdate(
 		);
 	}
 
-	if (!oldMessage.partial && !newMessage.author.bot) {
+	if (!newMessage.author.bot) {
 		const files = [];
-		const contentDiff = unifiedDiff(
-			oldMessage.content.split("\n"),
-			newMessage.content.split("\n"),
-			{ lineterm: "" },
-		)
-			.join("\n")
-			.replace(/^-{3} \n\+{3} \n/, "");
+		const contentDiff =
+			!oldMessage.partial &&
+			unifiedDiff(oldMessage.content.split("\n"), newMessage.content.split("\n"), {
+				lineterm: "",
+			})
+				.join("\n")
+				.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
 		const changedFiles = new Set(newMessage.attachments.map((attachment) => attachment.url));
@@ -204,9 +204,9 @@ export async function messageUpdate(
 
 		if (files.length) {
 			await log(
-				`${
-					LoggingEmojis.MessageEdit
-				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
+				`${LoggingEmojis.MessageEdit} ${
+					oldMessage.partial ? "Unknown message" : "Message"
+				} by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 					newMessage.id
 				}) edited`,
 				LogSeverity.ContentEdit,
