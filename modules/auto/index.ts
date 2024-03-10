@@ -67,8 +67,7 @@ defineEvent("messageCreate", async (message) => {
 				const edited = await reply.edit(action).catch(() => void 0);
 				if (!edited) break;
 			}
-		}
-		else await message.reply(response);
+		} else await message.reply(response);
 		await learn(message);
 		return;
 	}
