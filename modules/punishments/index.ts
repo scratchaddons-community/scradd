@@ -130,7 +130,9 @@ defineChatCommand(
 			success
 				? `${constants.emojis.statuses.yes} ${
 						strikes ? "Warned" : "Verbally warned"
-				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
+						success === "no-dm" ? " I was not able to DM them." : ""
+				  } ${reason}`
 				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
@@ -184,7 +186,9 @@ defineModal("warn", async (interaction, id) => {
 		success
 			? `${constants.emojis.statuses.yes} ${
 					strikes < 1 ? "Warned" : "Verbally warned"
-			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
+					success === "no-dm" ? " I was not able to DM them." : ""
+			  } ${reason}`
 			: `${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
 	);
 });

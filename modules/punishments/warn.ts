@@ -31,7 +31,7 @@ export default async function warn(
 	reason: string,
 	strikes: number = DEFAULT_STRIKES,
 	contextOrModerator: User | string = client.user,
-): Promise<boolean> {
+): Promise<boolean|"no-dm"> {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -69,7 +69,7 @@ export default async function warn(
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
-	const { url } = await user
+	const dm = await user
 		.send({
 			embeds: [
 				{
@@ -111,9 +111,9 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => logMessage);
+		.catch(() => void 0);
 
-	await giveXp(user, url, XP_PUNISHMENT * strikes);
+	await giveXp(user, (dm ?? logMessage).url, XP_PUNISHMENT * strikes);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -169,7 +169,7 @@ export default async function warn(
 			.catch(() => void 0);
 	}
 
-	return true;
+	return dm?true:"no-dm";
 }
 export async function removeStrike(
 	interaction: ButtonInteraction,

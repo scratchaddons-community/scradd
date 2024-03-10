@@ -190,7 +190,7 @@ async function confirmBan(
 		];
 	}
 
-	await options.user
+	const dmed = await options.user
 		.send({
 			embeds: [
 				{
@@ -239,8 +239,8 @@ async function confirmBan(
 	});
 	await interaction.reply(
 		`${constants.emojis.statuses.yes} Banned ${options.user.toString()}!${
-			options.reason ? " " + options.reason : ""
-		}${
+			dmed ? "" : " I was not able to DM them."
+		}${options.reason ? " " + options.reason : ""}${
 			options.unbanTime
 				? `\nI will unban them ${time(options.unbanTime, TimestampStyles.RelativeTime)}.`
 				: ""
