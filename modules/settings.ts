@@ -193,23 +193,23 @@ export async function updateSettings(
 		components: [
 			...(await config.guild.members.fetch(user.id).then(
 				() => [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									customId: "levelUpPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Level Up Pings",
-									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
-								} as const,
-								{
-									customId: "boardPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Board Pings",
-									style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
-								} as const,
-							],
-						},
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Level Up Pings",
+								style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+							} as const,
+							{
+								customId: "boardPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Board Pings",
+								style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
+							} as const,
+						],
+					},
 				],
 				() => [],
 			)),
@@ -297,7 +297,7 @@ export async function mentionUser(
 
 	const presence = interactor && guild?.presences.resolve(interactor.id);
 	const url = `<${
-		presence && presence.status === presence.clientStatus?.desktop
+		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web
 			? "discord://-"
 			: "https://discord.com"
 	}/users/${id}>`;
