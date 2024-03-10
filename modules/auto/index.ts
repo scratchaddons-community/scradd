@@ -56,8 +56,7 @@ defineEvent("messageCreate", async (message) => {
 	if (response) {
 		if (response === true) return;
 		const isArray = Array.isArray(response);
-		if (!isArray) await message.reply(response);
-		else if (typeof response[0] === "object") {
+		if (isArray) {
 			const reply = await message.reply(response[0]);
 			for (const action of response.slice(1)) {
 				if (typeof action === "number") {
@@ -69,6 +68,7 @@ defineEvent("messageCreate", async (message) => {
 				if (!edited) break;
 			}
 		}
+		else await message.reply(response);
 		await learn(message);
 		return;
 	}
@@ -132,7 +132,7 @@ defineEvent("messageUpdate", async (_, message) => {
 
 async function handleMutatable(
 	message: Message,
-): Promise<(BaseMessageOptions | number | string)[] | BaseMessageOptions | true | undefined> {
+): Promise<BaseMessageOptions | true | [BaseMessageOptions, ...(number | string)[]] | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
@@ -195,7 +195,7 @@ async function handleMutatable(
 		if (name && message.member) {
 			const response = dad(name, message.member);
 			return Array.isArray(response)
-				? [
+				? ([
 						{
 							content: response[0],
 							files: [],
@@ -204,7 +204,7 @@ async function handleMutatable(
 							allowedMentions: { users: [], repliedUser: true },
 						},
 						...response.slice(1),
-				  ]
+				  ] as const)
 				: {
 						content: response,
 						files: [],

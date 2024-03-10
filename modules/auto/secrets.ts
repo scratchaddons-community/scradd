@@ -3,7 +3,7 @@ import type { GuildMember, Snowflake } from "discord.js";
 export function dad(
 	name: string,
 	_: GuildMember,
-): string | readonly [string, ...(number | string)[], string] {
+): string | readonly [string, ...(number | string)[]] {
 	const split = name.split(/\b/);
 	const firstName =
 		split.find(
