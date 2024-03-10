@@ -179,7 +179,7 @@ await describe("paginate", async () => {
 			{ title: "Pagination Test", singular: "item", user: false, ephemeral: true },
 		);
 	});
-	await it("should respect the `perPage` option", async () => {
+	await it("should respect the `pageLength` option", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6],
 			(value) => value.toString(),
@@ -189,7 +189,7 @@ await describe("paginate", async () => {
 				strictEqual(embed.description, "1. 1\n2. 2\n3. 3");
 				strictEqual(embed.footer?.text, `Page 1/2 • 6 items`);
 			},
-			{ title: "Pagination Test", singular: "item", user: false, perPage: 3 },
+			{ title: "Pagination Test", singular: "item", user: false, pageLength: 3 },
 		);
 	});
 	await it("should respect the `rawOffset` option", async () => {

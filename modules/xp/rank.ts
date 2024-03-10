@@ -156,17 +156,17 @@ export async function top(
 	await paginate(
 		leaderboard,
 		async (xp) =>
-			`**Level ${getLevelForXp(xp.xp)}** - ${await mentionUser(
+			`${await mentionUser(
 				xp.user,
 				interaction.user,
 				interaction.guild ?? config.guild,
-			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+			)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
 		(data) => interaction.reply(data),
 		{
 			title: "XP Leaderboard",
 			singular: "user",
-			perPage: 30,
-			columns: 2,
+			pageLength: 30,
+			columns: 3,
 
 			user: interaction.user,
 			rawOffset: index,

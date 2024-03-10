@@ -53,6 +53,7 @@ const STATUSES = [
 	"alan 👑",
 	"strawberries 😌",
 	"Farming dangos",
+	"Loosing braincells",
 ].toSorted(() => Math.random() - 0.5);
 
 async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
