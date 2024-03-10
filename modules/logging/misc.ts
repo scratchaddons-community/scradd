@@ -121,27 +121,33 @@ export default async function log(
 ): Promise<Message<true>> {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
-	const externalIndex =
-		extra.files?.findIndex((file) => {
-			if (typeof file === "string" || file.content.includes("```")) return true;
+	const { external, embedded } = extra.files?.reduce<{
+		external: (string | { extension?: string; content: string })[];
+		embedded: { extension?: string | undefined; content: string }[];
+	}>(
+		(accumulator, file) => {
+			if (typeof file === "string" || file.content.includes("```")) {
+				return {
+					embedded: accumulator.embedded,
+					external: [...accumulator.external, file],
+				};
+			}
 
 			const lines = file.content.split("\n");
-			return lines.length > 10 || lines.find((line) => line.length > 100);
-		}) ?? 0;
-	const embeddedFiles = extra.files?.splice(0, extra.files.length - externalIndex - 1);
+			return lines.length > 10 || lines.some((line) => line.length > 100)
+				? { embedded: accumulator.embedded, external: [...accumulator.external, file] }
+				: { embedded: [...accumulator.embedded, file], external: accumulator.external };
+		},
+		{ external: [], embedded: [] },
+	) ?? { external: [], embedded: [] };
 
 	return await thread.send({
 		content:
 			content +
-			(embeddedFiles?.length
-				? "\n" +
-				  embeddedFiles
-						.map((file) =>
-							typeof file === "string"
-								? file
-								: `\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``,
-						)
-						.join("\n")
+			(embedded.length
+				? embedded
+						.map((file) => `\n\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``)
+						.join("")
 				: ""),
 		allowedMentions: { users: [] },
 		embeds: extra.embeds?.filter(Boolean),
@@ -156,7 +162,7 @@ export default async function log(
 			},
 		],
 		files: await Promise.all(
-			extra.files?.map(async (file) => {
+			external.map(async (file) => {
 				if (typeof file === "string") {
 					const response = await fetch(file);
 					return {
@@ -169,7 +175,7 @@ export default async function log(
 					attachment: Buffer.from(file.content, "utf8"),
 					name: `file.${file.extension || "txt"}`,
 				};
-			}) ?? [],
+			}),
 		),
 	});
 }
