@@ -54,7 +54,7 @@ defineSubcommands(
 				},
 			},
 			"list-unjoined": {
-				description: "List active threads that you are not in",
+				description: "List public open threads that you are not in",
 				options: {},
 			},
 		},
@@ -69,7 +69,13 @@ defineSubcommands(
 				const fetched = await interaction.guild?.channels.fetchActiveThreads();
 				const threads = [];
 				for (const [, thread] of fetched?.threads ?? []) {
-					if (!thread.permissionsFor(interaction.user)?.has("ViewChannel")) continue;
+					const permissions = thread.permissionsFor(interaction.user);
+					if (
+						!permissions?.has("ViewChannel") ||
+						(thread.type === ChannelType.PrivateThread &&
+							!permissions.has("ManageThreads"))
+					)
+						continue;
 					try {
 						await thread.members.fetch(interaction.user.id);
 					} catch {
@@ -93,7 +99,7 @@ defineSubcommands(
 					{
 						title: "Unjoined Threads",
 						singular: "thread",
-						failMessage: "You’ve joined all open threads here!",
+						failMessage: "You’ve joined all public open threads here!",
 						user: interaction.user,
 						ephemeral: true,
 						totalCount: unjoined.length,
