@@ -23,13 +23,14 @@ import {
 	PARTIAL_STRIKE_COUNT,
 	XP_PUNISHMENT,
 	STRIKES_PER_MUTE,
+	MAX_STRIKES,
 } from "./misc.js";
 import { escapeMessage } from "../../util/markdown.js";
 
 export default async function warn(
 	user: GuildMember | User,
 	reason: string,
-	strikes: number = DEFAULT_STRIKES,
+	rawStrikes: number = DEFAULT_STRIKES,
 	contextOrModerator: User | string = client.user,
 ): Promise<boolean | "no-dm"> {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
@@ -48,7 +49,10 @@ export default async function warn(
 		0,
 	);
 
-	strikes = Math.max(Math.round(strikes * 4) / 4, PARTIAL_STRIKE_COUNT);
+	const strikes = Math.min(
+		MAX_STRIKES,
+		Math.max(Math.round(rawStrikes * 4) / 4, PARTIAL_STRIKE_COUNT),
+	);
 	const displayStrikes = Math.max(Math.trunc(strikes), 1);
 	const moderator = contextOrModerator instanceof User ? contextOrModerator : client.user;
 	const context = contextOrModerator instanceof User ? "" : contextOrModerator;
