@@ -6,7 +6,6 @@ import {
 	ComponentType,
 	GuildMember,
 	TextInputStyle,
-	channelLink,
 } from "discord.js";
 import {
 	client,
@@ -73,7 +72,7 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url: channelLink(config.channels.support, config.guild.id),
+							url: config.channels.support?.url || "",
 						},
 					],
 				},

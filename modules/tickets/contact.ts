@@ -55,9 +55,9 @@ export async function showTicketModal(
 				config.channels.suggestions?.toString() ?? "#suggestions"
 			}, bug reports in ${
 				config.channels.bugs?.toString() ?? "#bugs"
-			}, and other questions, comments, concerns, or etcetera in ${channelMention(
-				config.channels.support,
-			)}.`,
+			}, and other questions, comments, concerns, or etcetera in ${
+				config.channels.support?.toString() ?? "#support"
+			}.`,
 
 			ephemeral: true,
 		});
