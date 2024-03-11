@@ -22,16 +22,24 @@ jobs:
                   cache: npm
 
             - name: Download autos data
-              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/autos-data.ts" --output modules/automod/autos-data.ts
+              run:
+                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  }}/raw/autos-data.ts" --output modules/automod/autos-data.ts
 
             - name: Download bad words
-              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/bad-words.ts" --output modules/automod/bad-words.ts
+              run:
+                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  }}/raw/bad-words.ts" --output modules/automod/bad-words.ts
 
             - name: Download dad
-              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/dad.ts" --output modules/auto/dad.ts
+              run:
+                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/dad.ts"
+                  --output modules/auto/dad.ts
 
             - name: Download strings
-              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/strings.ts" --output common/strings.ts
+              run:
+                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  }}/raw/strings.ts" --output common/strings.ts
 
             - name: Install
               run: npm ci --force
