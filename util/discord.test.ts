@@ -166,6 +166,7 @@ await describe("paginate", async () => {
 					},
 				],
 				ephemeral: false,
+				fetchReply: true,
 			},
 		]);
 	});
