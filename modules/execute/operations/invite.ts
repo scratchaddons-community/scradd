@@ -1,7 +1,7 @@
-import type { CustomOperation } from "../util.js";
-import { Invite } from "../../roles/index.js";
 import config from "../../../common/config.js";
 import constants from "../../../common/constants.js";
+import { Invite } from "../../roles/index.js";
+import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "invite",

@@ -1,17 +1,17 @@
+import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
+import SimpleMarkdown from "@khanacademy/simple-markdown";
+import { toCodePoints } from "@twemoji/parser";
+import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import {
+	Faces,
+	FormattingPatterns,
+	MessageMentions,
 	escapeMarkdown,
 	formatEmoji,
 	type Snowflake,
-	Faces,
-	MessageMentions,
-	FormattingPatterns,
 } from "discord.js";
-import SimpleMarkdown from "@khanacademy/simple-markdown";
-import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
-import { toCodePoints } from "@twemoji/parser";
 import { client } from "strife.js";
 import config from "../common/config.js";
-import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
 
 export function escapeMessage(text: string): string {
 	return escapeMarkdown(text, {

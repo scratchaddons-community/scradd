@@ -2,22 +2,22 @@ import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
-	type Snowflake,
 	User,
-	userMention,
-	type RepliableInteraction,
 	hyperlink,
+	userMention,
 	type Guild,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type Snowflake,
 	type UserMention,
 } from "discord.js";
+import { client, defineButton, defineChatCommand } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { getWeeklyXp } from "./xp/util.js";
-import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
+import { getWeeklyXp } from "./xp/util.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */

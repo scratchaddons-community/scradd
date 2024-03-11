@@ -1,15 +1,15 @@
 import {
 	ApplicationCommandOptionType,
+	Base,
+	MessageMentions,
 	type ApplicationCommandOption,
 	type ApplicationCommandSubCommand,
-	MessageMentions,
+	type GuildBasedChannel,
 	type Role,
 	type User,
-	type GuildBasedChannel,
-	Base,
 } from "discord.js";
-import config from "../../common/config.js";
 import { client } from "strife.js";
+import config from "../../common/config.js";
 
 export const OPERATION_PREFIX = "~ ";
 const operationPrefixRegex = new RegExp(

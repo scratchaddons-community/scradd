@@ -1,18 +1,18 @@
+import addons from "@sa-community/addons-data" assert { type: "json" };
+import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 import {
 	ButtonStyle,
-	type ChatInputCommandInteraction,
 	ComponentType,
 	GuildMember,
+	type ChatInputCommandInteraction,
 	type Message,
 } from "discord.js";
 import constants from "../../common/constants.js";
-import addons from "@sa-community/addons-data" assert { type: "json" };
 import { disableComponents, mentionChatCommand } from "../../util/discord.js";
-import { generateHash } from "../../util/text.js";
-import { checkIfUserPlaying, GAME_COLLECTOR_TIME, CURRENTLY_PLAYING } from "./misc.js";
-import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
 import { escapeMessage } from "../../util/markdown.js";
-import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
+import { generateHash } from "../../util/text.js";
+import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
+import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];

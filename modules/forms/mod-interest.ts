@@ -1,21 +1,21 @@
 import {
-	type ButtonInteraction,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type ModalSubmitInteraction,
 	TextInputStyle,
 	time,
+	type ButtonInteraction,
+	type ModalSubmitInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
-import { getLevelForXp } from "../xp/misc.js";
-import { getWeeklyXp, xpDatabase } from "../xp/util.js";
+import constants from "../../common/constants.js";
+import { getAllMessages } from "../../util/discord.js";
 import { EXPIRY_LENGTH } from "../punishments/misc.js";
 import { strikeDatabase } from "../punishments/util.js";
-import constants from "../../common/constants.js";
 import giveXp from "../xp/give-xp.js";
-import { getAllMessages } from "../../util/discord.js";
+import { getLevelForXp } from "../xp/misc.js";
+import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 
 if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
 const thread =

@@ -1,22 +1,22 @@
 import {
-	type ApplicationCommand,
+	ApplicationCommandType,
 	Collection,
-	type Guild,
 	GuildMember,
 	type APIInteractionGuildMember,
-	type User,
-	type TextBasedChannel,
-	type ChatInputCommandInteraction,
-	type Awaitable,
+	type ApplicationCommand,
 	type ApplicationCommandOption,
-	ApplicationCommandType,
+	type Awaitable,
+	type ChatInputCommandInteraction,
+	type Guild,
+	type TextBasedChannel,
+	type User,
 } from "discord.js";
+import fileSystem from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { client } from "strife.js";
 import { asyncFilter } from "../../util/promises.js";
 import { schemaSupported, type Options } from "./misc.js";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import fileSystem from "node:fs/promises";
-import path from "node:path";
 import hasPermission from "./permissions.js";
 
 export type CustomOperation = {

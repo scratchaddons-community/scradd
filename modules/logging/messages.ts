@@ -1,19 +1,19 @@
 import { unifiedDiff } from "difflib";
 import {
-	type Message,
-	type PartialMessage,
-	type Collection,
-	type GuildTextBasedChannel,
-	type MessageReaction,
 	Colors,
 	messageLink,
+	type Collection,
+	type GuildTextBasedChannel,
+	type Message,
+	type MessageReaction,
+	type PartialMessage,
 	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
-import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
-import log, { LogSeverity, shouldLog, LoggingEmojis } from "./misc.js";
-import { joinWithAnd } from "../../util/text.js";
 import { databaseThread } from "../../common/database.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
+import { joinWithAnd } from "../../util/text.js";
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "./misc.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 

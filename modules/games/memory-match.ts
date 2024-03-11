@@ -1,26 +1,26 @@
 import {
-	ComponentType,
-	ButtonStyle,
-	type ButtonInteraction,
-	type User,
-	ThreadAutoArchiveDuration,
-	ChannelType,
-	type RepliableInteraction,
-	GuildMember,
-	type APIInteractionGuildMember,
 	Base,
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	GuildMember,
+	ThreadAutoArchiveDuration,
+	formatEmoji,
+	type APIInteractionGuildMember,
+	type ActionRowData,
+	type ButtonInteraction,
+	type InteractionButtonComponentData,
 	type InteractionResponse,
 	type Message,
-	type ActionRowData,
-	type InteractionButtonComponentData,
-	formatEmoji,
+	type RepliableInteraction,
+	type User,
 } from "discord.js";
 import config from "../../common/config.js";
-import { GAME_COLLECTOR_TIME, CURRENTLY_PLAYING, checkIfUserPlaying } from "./misc.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { autoreactions } from "../auto/secrets.js";
 import { ignoredDeletions } from "../logging/messages.js";
+import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
 const EMPTY_TILE = "⬛";
 

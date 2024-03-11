@@ -1,18 +1,18 @@
-import type { CustomOperation } from "../util.js";
-import constants from "../../../common/constants.js";
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
+	ChannelType,
 	ComponentType,
 	GuildMember,
 	type APIEmbed,
-	type Snowflake,
-	ChannelType,
 	type ButtonInteraction,
+	type Snowflake,
 } from "discord.js";
 import config, { syncConfig } from "../../../common/config.js";
+import constants from "../../../common/constants.js";
 import { autoreactions, dadEasterEggCount } from "../../auto/secrets.js";
 import log, { LogSeverity, LoggingEmojis } from "../../logging/misc.js";
+import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "config",

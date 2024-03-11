@@ -1,22 +1,22 @@
-import { client } from "strife.js";
-import { getRequestUrl } from "../../util/text.js";
-import { markdownToHtml } from "../../util/markdown.js";
-import { getAnswers, oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import {
-	type Snowflake,
-	Collection,
-	type MessageInteraction,
-	type Attachment,
-	type EmbedAssetData,
-	channelLink,
-	type DefaultReactionEmoji,
-} from "discord.js";
-import config from "../../common/config.js";
-import fileSystem from "node:fs/promises";
-import Mustache from "mustache";
-import top from "./top.js";
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { toCodePoints } from "@twemoji/parser";
+import {
+	Collection,
+	channelLink,
+	type Attachment,
+	type DefaultReactionEmoji,
+	type EmbedAssetData,
+	type MessageInteraction,
+	type Snowflake,
+} from "discord.js";
+import Mustache from "mustache";
+import fileSystem from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { client } from "strife.js";
+import config from "../../common/config.js";
+import { markdownToHtml } from "../../util/markdown.js";
+import { getRequestUrl } from "../../util/text.js";
+import { getAnswers, oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import top from "./top.js";
 
 const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8"),
 	SUGGESTION_PAGE = await fileSystem.readFile("./modules/suggestions/suggestion.html", "utf8");

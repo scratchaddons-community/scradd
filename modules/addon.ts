@@ -1,3 +1,5 @@
+import addons from "@sa-community/addons-data" assert { type: "json" };
+import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
@@ -6,12 +8,10 @@ import {
 	type AutocompleteInteraction,
 } from "discord.js";
 import { matchSorter } from "match-sorter";
-import constants from "../common/constants.js";
-import addons from "@sa-community/addons-data" assert { type: "json" };
 import { defineChatCommand } from "strife.js";
+import constants from "../common/constants.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 
 defineChatCommand(
 	{

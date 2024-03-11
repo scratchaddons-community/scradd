@@ -5,17 +5,17 @@ import {
 	GuildMember,
 	time,
 } from "discord.js";
-import config from "../../common/config.js";
 import {
 	client,
-	defineSubcommands,
-	defineEvent,
 	defineButton,
-	defineSelect,
+	defineEvent,
 	defineMenuCommand,
+	defineSelect,
+	defineSubcommands,
 } from "strife.js";
-import getUserRank, { top } from "./rank.js";
+import config from "../../common/config.js";
 import { giveXpForMessage } from "./give-xp.js";
+import getUserRank, { top } from "./rank.js";
 import { recentXpDatabase } from "./util.js";
 
 defineEvent("messageCreate", async (message) => {

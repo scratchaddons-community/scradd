@@ -1,7 +1,7 @@
+import { GuildMember } from "discord.js";
 import { setTimeout as wait } from "node:timers/promises";
 import constants from "../../../common/constants.js";
 import type { CustomOperation } from "../util.js";
-import { GuildMember } from "discord.js";
 
 const data: CustomOperation = {
 	name: "russian-roulette",

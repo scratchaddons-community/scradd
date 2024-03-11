@@ -1,17 +1,17 @@
-import { cleanDatabaseListeners } from "../common/database.js";
-import http from "node:http";
-import logError from "../modules/logging/errors.js";
 import { createReadStream, promises as fileSystem } from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { client } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
+import { cleanDatabaseListeners } from "../common/database.js";
 import appealRequest from "../modules/forms/appeals/show-appeal.js";
-import pkg from "../package.json" assert { type: "json" };
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import logError from "../modules/logging/errors.js";
 import linkScratchRole from "../modules/roles/scratch.js";
-import { getRequestUrl } from "../util/text.js";
 import suggestionsPage from "../modules/suggestions/web.js";
+import pkg from "../package.json" assert { type: "json" };
+import { getRequestUrl } from "../util/text.js";
 
 const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(

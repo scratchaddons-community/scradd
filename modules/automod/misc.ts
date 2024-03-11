@@ -1,9 +1,9 @@
 import { ChannelType, type TextBasedChannel } from "discord.js";
-import badWords from "./bad-words.js";
+import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
-import config from "../../common/config.js";
+import badWords from "./bad-words.js";
 
 function decodeRegexps(regexps: RegExp[]): string {
 	return regexps

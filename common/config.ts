@@ -1,10 +1,10 @@
 import {
 	ChannelType,
-	type NonThreadGuildBasedChannel,
-	type Channel,
-	type ThreadManager,
 	Collection,
 	type AnyThreadChannel,
+	type Channel,
+	type NonThreadGuildBasedChannel,
+	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";

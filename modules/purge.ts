@@ -1,15 +1,15 @@
 import {
-	type APIEmbed,
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
+	type APIEmbed,
 	type BaseMessageOptions,
+	type GuildMember,
+	type InteractionReplyOptions,
+	type InteractionResponse,
 	type RepliableInteraction,
 	type User,
-	type GuildMember,
-	ApplicationCommandType,
-	type InteractionResponse,
-	type InteractionReplyOptions,
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
 import constants from "../common/constants.js";

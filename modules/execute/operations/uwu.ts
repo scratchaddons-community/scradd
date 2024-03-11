@@ -1,6 +1,6 @@
+import { ApplicationCommandOptionType } from "discord.js";
 import { stripMarkdown } from "../../../util/markdown.js";
 import type { CustomOperation } from "../util.js";
-import { ApplicationCommandOptionType } from "discord.js";
 
 const replacements: Record<string, string> = {
 	cute: "kawaii",

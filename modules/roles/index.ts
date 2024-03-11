@@ -1,9 +1,9 @@
-import config from "../../common/config.js";
-import { defineChatCommand, defineEvent, defineModal } from "strife.js";
-import constants from "../../common/constants.js";
-import { persistedLeave, persistedRejoin } from "./persisted.js";
-import { createCustomRole, recheckMemberRole, recheckAllRoles, customRole } from "./custom.js";
 import mongoose from "mongoose";
+import { defineChatCommand, defineEvent, defineModal } from "strife.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { createCustomRole, customRole, recheckAllRoles, recheckMemberRole } from "./custom.js";
+import { persistedLeave, persistedRejoin } from "./persisted.js";
 
 export const Invite = mongoose.model(
 	"Invite",

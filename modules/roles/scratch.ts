@@ -1,26 +1,26 @@
 import {
 	ApplicationRoleConnectionMetadataType,
-	Routes,
-	type RESTPostOAuth2AccessTokenURLEncodedData,
-	type RESTPostOAuth2AccessTokenResult,
-	type RESTPostOAuth2RefreshTokenURLEncodedData,
-	type RESTPostOAuth2RefreshTokenResult,
 	OAuth2Scopes,
+	Routes,
+	userMention,
+	type RESTGetAPICurrentUserResult,
+	type RESTPostOAuth2AccessTokenResult,
+	type RESTPostOAuth2AccessTokenURLEncodedData,
+	type RESTPostOAuth2RefreshTokenResult,
+	type RESTPostOAuth2RefreshTokenURLEncodedData,
 	type RESTPutAPICurrentUserApplicationRoleConnectionJSONBody,
 	type RESTPutAPICurrentUserApplicationRoleConnectionResult,
-	type RESTGetAPICurrentUserResult,
-	userMention,
 } from "discord.js";
+import { createHash, randomBytes } from "node:crypto";
+import fileSystem from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
-import fileSystem from "node:fs/promises";
-import { createHash, randomBytes } from "node:crypto";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { handleUser } from "../auto/scratch.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{

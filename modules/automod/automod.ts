@@ -3,17 +3,17 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
-	getBaseChannel,
 	GlobalAnimatedEmoji,
 	GlobalBotInvitesPattern,
 	InvitesPattern,
+	getBaseChannel,
 } from "../../util/discord.js";
+import { stripMarkdown } from "../../util/markdown.js";
+import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
-import { stripMarkdown } from "../../util/markdown.js";
-import { joinWithAnd } from "../../util/text.js";
 
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,

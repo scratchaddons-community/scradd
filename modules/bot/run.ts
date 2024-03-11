@@ -1,10 +1,10 @@
 import {
-	type ChatInputCommandInteraction,
 	ComponentType,
-	type ModalSubmitInteraction,
 	TextInputStyle,
 	User,
+	type ChatInputCommandInteraction,
 	type InteractionResponse,
+	type ModalSubmitInteraction,
 } from "discord.js";
 import { client } from "strife.js";
 import constants from "../../common/constants.js";

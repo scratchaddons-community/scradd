@@ -4,20 +4,20 @@ import {
 	ComponentType,
 	TextInputStyle,
 } from "discord.js";
-import constants from "../../common/constants.js";
 import {
 	client,
-	defineChatCommand,
 	defineButton,
-	defineSelect,
-	defineSubcommands,
+	defineChatCommand,
 	defineMenuCommand,
 	defineModal,
+	defineSelect,
+	defineSubcommands,
 } from "strife.js";
+import constants from "../../common/constants.js";
+import ban from "./ban.js";
 import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
-import ban from "./ban.js";
 
 defineSubcommands(
 	{
@@ -182,7 +182,9 @@ defineModal("warn", async (interaction, id) => {
 	await interaction.deferReply();
 
 	const strikes =
-		Number.isNaN(rawStrikes) || rawStrikes < 0 ? 1 : Math.min(MAX_STRIKES, Math.floor(rawStrikes));
+		Number.isNaN(rawStrikes) || rawStrikes < 0
+			? 1
+			: Math.min(MAX_STRIKES, Math.floor(rawStrikes));
 	const success = await warn(user, reason, strikes, interaction.user);
 	await interaction.editReply(
 		success

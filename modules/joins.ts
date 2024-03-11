@@ -1,20 +1,8 @@
+import { AuditLogEvent } from "discord.js";
 import { defineEvent } from "strife.js";
-import { truncateText } from "../util/text.js";
-import { stripMarkdown } from "../util/markdown.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { nth } from "../util/numbers.js";
-import { AuditLogEvent } from "discord.js";
-
-defineEvent("messageCreate", async (message) => {
-	if (message.channel.id === config.channels.updates?.id) {
-		await message.startThread({
-			name: truncateText(stripMarkdown(message.cleanContent) || "New update!", 50),
-
-			reason: "New upcoming update",
-		});
-	}
-});
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;

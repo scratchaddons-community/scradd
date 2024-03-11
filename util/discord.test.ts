@@ -1,19 +1,19 @@
-import { describe, it } from "node:test";
-import { disableComponents, paginate } from "./discord.js";
 import {
-	ActionRow as _ActionRow,
-	type ButtonComponent,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
+	ActionRow as _ActionRow,
 	type APIActionRowComponent,
 	type APIMessageActionRowComponent,
 	type APITextInputComponent,
-	type TextInputComponent,
+	type ButtonComponent,
+	type InteractionReplyOptions,
 	type MessageActionRowComponent,
+	type TextInputComponent,
 } from "discord.js";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import { describe, it } from "node:test";
 import constants from "../common/constants.js";
+import { disableComponents, paginate } from "./discord.js";
 
 // @ts-expect-error TS2675
 class ActionRow<T extends MessageActionRowComponent | TextInputComponent> extends _ActionRow<T> {

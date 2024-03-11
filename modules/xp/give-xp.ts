@@ -2,9 +2,9 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type Message,
 	MessageType,
 	User,
+	type Message,
 	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";

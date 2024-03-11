@@ -1,6 +1,6 @@
-import { Colors, type ColorResolvable, FormattingPatterns } from "discord.js";
-import config from "../../common/config.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
+import { Colors, FormattingPatterns, type ColorResolvable } from "discord.js";
+import config from "../../common/config.js";
 
 export const CUSTOM_ROLE_PREFIX = "✨ ";
 

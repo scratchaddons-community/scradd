@@ -1,7 +1,7 @@
+import addons from "@sa-community/addons-data" assert { type: "json" };
 import { matchSorter } from "match-sorter";
 import { strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-import addons from "@sa-community/addons-data" assert { type: "json" };
 import constants from "./constants.js";
 
 await describe("addonSearchOptions", async () => {

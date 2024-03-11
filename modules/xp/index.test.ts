@@ -1,6 +1,6 @@
 import { strictEqual } from "node:assert";
-import { getXpForLevel, getLevelForXp } from "./misc.js";
 import { describe, it } from "node:test";
+import { getLevelForXp, getXpForLevel } from "./misc.js";
 
 await describe("getXpForLevel", async () => {
 	await it("should return the corresponding XP value for a given level", () => {

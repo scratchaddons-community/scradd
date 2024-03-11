@@ -1,21 +1,21 @@
 import {
 	ApplicationCommandOptionType,
+	AutoModerationActionType,
 	GuildMember,
 	MessageType,
-	type CommandInteractionOption,
-	AutoModerationActionType,
 	underline,
+	type CommandInteractionOption,
 } from "discord.js";
+import { commands, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
+import { ignoredDeletions } from "../logging/messages.js";
 import warn from "../punishments/warn.js";
-import changeNickname from "./nicknames.js";
 import automodMessage from "./automod.js";
 import tryCensor, { badWordsAllowed } from "./misc.js";
-import { commands, defineChatCommand, defineEvent } from "strife.js";
-import { escapeMessage } from "../../util/markdown.js";
-import { ignoredDeletions } from "../logging/messages.js";
+import changeNickname from "./nicknames.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (

@@ -1,12 +1,12 @@
 import { unifiedDiff } from "difflib";
 import {
-	type AuditLogEvent,
 	ChannelType,
+	GuildScheduledEventStatus,
+	time,
+	type AuditLogEvent,
 	type GuildScheduledEvent,
 	type PartialGuildScheduledEvent,
 	type VoiceState,
-	GuildScheduledEventStatus,
-	time,
 } from "discord.js";
 import config from "../../common/config.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";

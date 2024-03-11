@@ -2,13 +2,13 @@ import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	inlineCode,
-	type ApplicationCommandSubCommand,
 	type APIEmbed,
+	type ApplicationCommandSubCommand,
 	type ChatInputCommandInteraction,
 } from "discord.js";
-import type { CustomOperation } from "../util.js";
-import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
 import constants from "../../../common/constants.js";
+import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
+import type { CustomOperation } from "../util.js";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,

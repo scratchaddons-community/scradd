@@ -1,27 +1,27 @@
 import {
-	ChannelType,
-	MessageType,
-	type PartialMessage,
-	type Message,
 	ApplicationCommandType,
-	type Snowflake,
-	type APIEmbed,
-	ComponentType,
 	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	MessageType,
+	type APIEmbed,
 	type BaseMessageOptions,
+	type Message,
+	type PartialMessage,
+	type Snowflake,
 } from "discord.js";
-import { getSettings } from "../settings.js";
-import { BOARD_EMOJI } from "../board/misc.js";
+import { setTimeout as wait } from "node:timers/promises";
+import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
-import { autoreactions, dad } from "./secrets.js";
-import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
-import { getMatches, handleMatch } from "./scratch.js";
-import constants from "../../common/constants.js";
+import { BOARD_EMOJI } from "../board/misc.js";
+import { getSettings } from "../settings.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
-import { setTimeout as wait } from "node:timers/promises";
+import { getMatches, handleMatch } from "./scratch.js";
+import { autoreactions, dad } from "./secrets.js";
 
 const REACTION_CAP = 3;
 

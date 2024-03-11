@@ -1,10 +1,10 @@
 import {
-	type Message,
+	ChannelType,
 	RESTJSONErrorCodes,
+	ThreadAutoArchiveDuration,
+	type Message,
 	type Snowflake,
 	type TextBasedChannel,
-	ChannelType,
-	ThreadAutoArchiveDuration,
 } from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";

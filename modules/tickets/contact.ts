@@ -1,15 +1,15 @@
 import {
-	type AnySelectMenuInteraction,
-	type APIEmbedField,
-	type ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	GuildMember,
-	type InteractionResponse,
 	InteractionType,
-	type RepliableInteraction,
 	channelMention,
+	type APIEmbedField,
+	type AnySelectMenuInteraction,
+	type ButtonInteraction,
+	type InteractionResponse,
+	type RepliableInteraction,
 	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
@@ -18,14 +18,14 @@ import { disableComponents } from "../../util/discord.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { listStrikes } from "../punishments/util.js";
 import {
-	type Category,
+	MOD_CATEGORY,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	TICKET_CATEGORIES,
 	allFields,
 	categoryToDescription,
-	MOD_CATEGORY,
+	type Category,
 } from "./misc.js";
 
 export async function showTicketModal(

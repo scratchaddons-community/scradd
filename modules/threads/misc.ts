@@ -1,6 +1,6 @@
 import type { AnyThreadChannel, Snowflake } from "discord.js";
-import Database from "../../common/database.js";
 import config from "../../common/config.js";
+import Database from "../../common/database.js";
 
 export const threadsDatabase = new Database<{
 	id: Snowflake;

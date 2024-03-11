@@ -1,12 +1,12 @@
-import { ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
+import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { defineChatCommand, defineButton, defineModal, defineMenuCommand } from "strife.js";
+import { syncConfigButton } from "../execute/operations/config.js";
+import credits from "./credits.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
 import status from "./status.js";
-import credits from "./credits.js";
-import { syncConfigButton } from "../execute/operations/config.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },

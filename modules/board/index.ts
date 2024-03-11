@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
+import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
+import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
+import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();

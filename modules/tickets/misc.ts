@@ -1,11 +1,11 @@
 import {
+	ChannelType,
 	ComponentType,
 	TextInputStyle,
-	type TextInputComponentData,
-	type Snowflake,
-	ChannelType,
-	type ThreadChannel,
 	type PrivateThreadChannel,
+	type Snowflake,
+	type TextInputComponentData,
+	type ThreadChannel,
 } from "discord.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
 

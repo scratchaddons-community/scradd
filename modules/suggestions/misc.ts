@@ -1,9 +1,9 @@
-import { type ForumChannel, cleanContent, type Snowflake, type GuildForumTag } from "discord.js";
+import { cleanContent, type ForumChannel, type GuildForumTag, type Snowflake } from "discord.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 import { getAllMessages } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
-import constants from "../../common/constants.js";
 
 export const suggestionAnswers = [
 	"Unanswered",

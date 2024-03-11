@@ -1,21 +1,21 @@
+import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 import {
-	type Snowflake,
-	type Message,
-	MessageType,
+	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	ButtonStyle,
-	type ButtonInteraction,
-	type MessageContextMenuCommandInteraction,
+	MessageType,
 	TextInputStyle,
+	type ButtonInteraction,
 	type InteractionResponse,
+	type Message,
+	type MessageContextMenuCommandInteraction,
+	type Snowflake,
 	type ThreadChannel,
 } from "discord.js";
-import { normalize } from "../../util/text.js";
-import { stripMarkdown } from "../../util/markdown.js";
-import tryCensor, { censor } from "../automod/misc.js";
+import mongoose from "mongoose";
 import { client } from "strife.js";
-import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
+import config, { getInitialChannelThreads } from "../../common/config.js";
+import constants from "../../common/constants.js";
 import {
 	GlobalBotInvitesPattern,
 	GlobalUsersPattern,
@@ -23,11 +23,11 @@ import {
 	getBaseChannel,
 	messageToText,
 } from "../../util/discord.js";
-import { getSettings, userSettingsDatabase } from "../settings.js";
-import constants from "../../common/constants.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
-import mongoose from "mongoose";
+import { stripMarkdown } from "../../util/markdown.js";
+import { normalize } from "../../util/text.js";
+import tryCensor, { censor } from "../automod/misc.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import { getSettings, userSettingsDatabase } from "../settings.js";
 
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
 const dictionary = (await Chat.find({}))

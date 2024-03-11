@@ -6,19 +6,19 @@ import {
 	type ApplicationCommandSubCommand,
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
-import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
-import constants from "../../common/constants.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { mentionChatCommand } from "../../util/discord.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
-import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
-import { getAllSchemas } from "./util.js";
-import { mentionChatCommand } from "../../util/discord.js";
+import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
 import {
 	getHelpForOperation,
 	getSchemasFromInteraction,
 	listOperations,
 } from "./operations/help.js";
+import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
+import { getAllSchemas } from "./util.js";
 
 defineChatCommand(
 	{

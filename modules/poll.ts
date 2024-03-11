@@ -1,11 +1,11 @@
+import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { ApplicationCommandOptionType, ComponentType, TextInputStyle } from "discord.js";
+import { client, defineChatCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
-import { BOARD_EMOJI } from "./board/misc.js";
-import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
-import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
-import warn from "./punishments/warn.js";
 import tryCensor from "./automod/misc.js";
+import { BOARD_EMOJI } from "./board/misc.js";
+import warn from "./punishments/warn.js";
 
 const DEFAULT_SHAPES = ["🔺", "♦️", "⭕", "🔶", "💛", "🟩", "💠", "🔹", "🟣", "🏴", "❕", "◽"];
 const bannedReactions = new Set(BOARD_EMOJI);

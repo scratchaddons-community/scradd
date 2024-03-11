@@ -1,18 +1,18 @@
 import {
+	ApplicationCommand,
 	ApplicationCommandPermissionType,
 	GuildMember,
 	PermissionsBitField,
 	User,
-	ApplicationCommand,
 	type APIInteractionGuildMember,
-	type Snowflake,
-	type TextBasedChannel,
 	type ApplicationCommandPermissions,
 	type ApplicationCommandPermissionsUpdateData,
 	type Guild,
+	type Snowflake,
+	type TextBasedChannel,
 } from "discord.js";
-import type { CustomOperation } from "./util.js";
 import { client } from "strife.js";
+import type { CustomOperation } from "./util.js";
 
 const permissionsCache: Record<
 	Guild["id"],

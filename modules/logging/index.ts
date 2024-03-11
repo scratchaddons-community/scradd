@@ -5,50 +5,50 @@ import {
 	userMention,
 	type Awaitable,
 } from "discord.js";
-import config from "../../common/config.js";
 import { defineEvent } from "strife.js";
+import config from "../../common/config.js";
 import {
 	channelCreate,
 	channelDelete,
 	channelOverwriteCreate,
-	channelOverwriteUpdate,
 	channelOverwriteDelete,
+	channelOverwriteUpdate,
 	channelUpdate,
 } from "./channels.js";
 import {
-	memberKick,
-	memberPrune,
-	memberBanAdd,
-	memberBanRemove,
-	guildMemberRemove,
-	guildMemberAdd,
-	guildMemberUpdate,
-	userUpdate,
-} from "./users.js";
+	emojiCreate,
+	emojiDelete,
+	emojiUpdate,
+	stickerCreate,
+	stickerDelete,
+	stickerUpdate,
+} from "./expressions.js";
 import {
 	messageDelete,
 	messageDeleteBulk,
 	messageReactionRemoveAll,
 	messageUpdate,
 } from "./messages.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
+import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
+import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
+import {
+	guildMemberAdd,
+	guildMemberRemove,
+	guildMemberUpdate,
+	memberBanAdd,
+	memberBanRemove,
+	memberKick,
+	memberPrune,
+	userUpdate,
+} from "./users.js";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,
 	guildScheduledEventUpdate,
 	voiceStateUpdate,
 } from "./voice.js";
-import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
-import {
-	emojiCreate,
-	emojiUpdate,
-	emojiDelete,
-	stickerCreate,
-	stickerUpdate,
-	stickerDelete,
-} from "./expressions.js";
-import { memberRoleUpdate, roleCreate, roleUpdate, roleDelete } from "./roles.js";
-import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 
 const events: {
 	[Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void>;

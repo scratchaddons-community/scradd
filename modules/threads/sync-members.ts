@@ -1,16 +1,16 @@
 import {
 	Role,
-	type AnyThreadChannel,
-	type GuildMember,
-	type PartialGuildMember,
-	type ChatInputCommandInteraction,
 	roleMention,
+	type AnyThreadChannel,
+	type ChatInputCommandInteraction,
+	type GuildMember,
 	type InteractionResponse,
+	type PartialGuildMember,
 } from "discord.js";
-import constants from "../../common/constants.js";
-import { getThreadConfig, threadsDatabase } from "./misc.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getBaseChannel } from "../../util/discord.js";
+import { getThreadConfig, threadsDatabase } from "./misc.js";
 
 export async function syncMembers(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,

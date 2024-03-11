@@ -1,22 +1,22 @@
 import {
-	GuildMember,
-	ComponentType,
 	ButtonStyle,
-	time,
+	ComponentType,
+	GuildMember,
 	TimestampStyles,
 	User,
-	type RepliableInteraction,
+	time,
 	type InteractionResponse,
+	type RepliableInteraction,
 } from "discord.js";
-import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
-import { parseTime } from "../../util/numbers.js";
-import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import { escapeMessage } from "../../util/markdown.js";
-import queueReminders from "../reminders/send.js";
+import constants from "../../common/constants.js";
 import pkg from "../../package.json" assert { type: "json" };
+import { disableComponents } from "../../util/discord.js";
+import { escapeMessage } from "../../util/markdown.js";
+import { parseTime } from "../../util/numbers.js";
+import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
+import queueReminders from "../reminders/send.js";
 
 export default async function ban(
 	interaction: RepliableInteraction,

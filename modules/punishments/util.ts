@@ -1,21 +1,21 @@
 import {
-	type GuildMember,
-	MessageType,
-	type User,
-	type Snowflake,
-	time,
-	TimestampStyles,
-	ComponentType,
 	ButtonStyle,
+	ComponentType,
+	MessageType,
+	TimestampStyles,
+	time,
+	type GuildMember,
+	type InteractionReplyOptions,
 	type InteractionResponse,
 	type Message,
-	type InteractionReplyOptions,
+	type Snowflake,
+	type User,
 } from "discord.js";
 import Database, { allDatabaseMessages } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
-import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { gracefulFetch } from "../../util/promises.js";
+import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{

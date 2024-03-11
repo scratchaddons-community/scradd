@@ -2,23 +2,23 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	time,
 	TimestampStyles,
-	type ChatInputCommandInteraction,
-	type MessageComponentInteraction,
 	channelMention,
+	time,
+	type ChatInputCommandInteraction,
 	type InteractionResponse,
+	type MessageComponentInteraction,
 } from "discord.js";
+import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import tryCensor, { badWordsAllowed } from "../automod/misc.js";
+import { disableComponents, paginate } from "../../util/discord.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
-import { getSettings } from "../settings.js";
+import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
+import { getSettings } from "../settings.js";
 import { getLevelForXp } from "../xp/misc.js";
 import { xpDatabase } from "../xp/util.js";
 import { getUserReminders, remindersDatabase } from "./misc.js";
-import config from "../../common/config.js";
-import { disableComponents, paginate } from "../../util/discord.js";
 import queueReminders from "./send.js";
 
 export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {

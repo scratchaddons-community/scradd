@@ -1,33 +1,33 @@
 import {
-	Routes,
-	type RESTPostOAuth2AccessTokenResult,
-	type RESTGetAPICurrentUserResult,
-	type RESTPostOAuth2AccessTokenURLEncodedData,
-	type RESTPostOAuth2RefreshTokenURLEncodedData,
-	type RESTPostOAuth2RefreshTokenResult,
 	ButtonStyle,
 	ComponentType,
-	type GuildBan,
-	time,
-	roleMention,
-	userMention,
 	OAuth2Scopes,
+	Routes,
+	roleMention,
+	time,
+	userMention,
+	type GuildBan,
+	type RESTGetAPICurrentUserResult,
+	type RESTPostOAuth2AccessTokenResult,
+	type RESTPostOAuth2AccessTokenURLEncodedData,
+	type RESTPostOAuth2RefreshTokenResult,
+	type RESTPostOAuth2RefreshTokenURLEncodedData,
 } from "discord.js";
+import Mustache from "mustache";
+import fileSystem from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../../common/config.js";
-import type { IncomingMessage, ServerResponse } from "node:http";
-import fileSystem from "node:fs/promises";
-import { strikeDatabase } from "../../punishments/util.js";
 import constants from "../../../common/constants.js";
-import giveXp from "../../xp/give-xp.js";
-import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
-import { RoleList, persistedRoles } from "../../roles/persisted.js";
-import Mustache from "mustache";
 import pkg from "../../../package.json" assert { type: "json" };
-import { getAppealComponents } from "./generate-appeal.js";
-import appeals, { appealThread } from "./appeals.js";
 import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
+import { strikeDatabase } from "../../punishments/util.js";
+import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
+import { RoleList, persistedRoles } from "../../roles/persisted.js";
+import giveXp from "../../xp/give-xp.js";
+import appeals, { appealThread } from "./appeals.js";
+import { getAppealComponents } from "./generate-appeal.js";
 
 const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");

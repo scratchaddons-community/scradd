@@ -8,28 +8,28 @@ import {
 	TextInputStyle,
 	channelLink,
 } from "discord.js";
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import {
 	client,
+	defineButton,
 	defineChatCommand,
 	defineEvent,
-	defineButton,
+	defineMenuCommand,
 	defineModal,
 	defineSelect,
-	defineMenuCommand,
 } from "strife.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { disableComponents } from "../../util/discord.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
-	type Category,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	TICKET_CATEGORIES,
 	getIdFromName,
+	type Category,
 } from "./misc.js";
-import contactMods, { contactUser, showTicketModal } from "./contact.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { disableComponents } from "../../util/discord.js";
 
 const appealedStrikes = new Set<string>();
 const resourcesDmed = new Set<string>();

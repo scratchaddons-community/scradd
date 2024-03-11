@@ -1,9 +1,9 @@
 import {
+	time,
 	type AuditLogEvent,
 	type GuildMember,
 	type PartialGuildMember,
 	type PartialUser,
-	time,
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";

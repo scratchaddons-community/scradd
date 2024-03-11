@@ -1,38 +1,38 @@
 import {
-	type APIEmbed,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	type Embed,
-	type GuildAuditLogsEntry,
-	type TextBasedChannel,
-	type TextChannel,
 	ThreadAutoArchiveDuration,
-	type AuditLogEvent,
 	type APIAuditLogChange,
-	type GuildEmoji,
-	type Snowflake,
-	type Base,
+	type APIEmbed,
 	type AnyThreadChannel,
 	type ApplicationCommand,
+	type AuditLogEvent,
 	type AutoModerationRule,
+	type Base,
+	type Embed,
 	type Guild,
+	type GuildAuditLogsEntry,
+	type GuildEmoji,
 	type GuildScheduledEvent,
 	type Integration,
 	type Invite,
+	type Message,
+	type NonThreadGuildBasedChannel,
 	type Role,
+	type Snowflake,
 	type StageInstance,
 	type Sticker,
+	type TextBasedChannel,
+	type TextChannel,
+	type ThreadChannel,
 	type User,
 	type Webhook,
-	type NonThreadGuildBasedChannel,
-	type Message,
-	type ThreadChannel,
 } from "discord.js";
-import { getBaseChannel } from "../../util/discord.js";
+import type { actualPrimitives } from "mongoose";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import type { actualPrimitives } from "mongoose";
+import { getBaseChannel } from "../../util/discord.js";
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);

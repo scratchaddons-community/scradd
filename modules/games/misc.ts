@@ -1,8 +1,8 @@
 import {
 	ButtonStyle,
 	Collection,
-	type CommandInteraction,
 	ComponentType,
+	type CommandInteraction,
 	type MessageComponentInteraction,
 	type ModalSubmitInteraction,
 	type Snowflake,

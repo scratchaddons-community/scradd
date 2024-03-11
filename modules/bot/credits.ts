@@ -1,17 +1,17 @@
 import {
+	inlineCode,
+	type ChatInputCommandInteraction,
 	type Snowflake,
 	type User,
-	type ChatInputCommandInteraction,
-	inlineCode,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import pkg from "../../package.json" assert { type: "json" };
+import constants from "../../common/constants.js";
 import lockFile from "../../package-lock.json" assert { type: "json" };
+import pkg from "../../package.json" assert { type: "json" };
+import { columnize } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
-import constants from "../../common/constants.js";
-import { columnize } from "../../util/discord.js";
 
 const designers = "966174686142672917",
 	developers = "938439909742616616",

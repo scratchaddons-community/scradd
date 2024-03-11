@@ -1,7 +1,7 @@
-import type { AuditLogEvent } from "discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { unifiedDiff } from "difflib";
+import type { AuditLogEvent } from "discord.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
 export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>): Promise<void> {
 	await log(

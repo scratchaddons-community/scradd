@@ -1,31 +1,31 @@
 import {
-	type ButtonInteraction,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	time,
 	TimestampStyles,
 	User,
+	time,
 	userMention,
+	type ButtonInteraction,
 	type InteractionResponse,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import { escapeMessage } from "../../util/markdown.js";
 import { convertBase } from "../../util/numbers.js";
 import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
 import giveXp from "../xp/give-xp.js";
-import filterToStrike, { strikeDatabase } from "./util.js";
 import {
 	DEFAULT_STRIKES,
 	EXPIRY_LENGTH,
+	MAX_STRIKES,
 	MUTE_LENGTHS,
 	PARTIAL_STRIKE_COUNT,
-	XP_PUNISHMENT,
 	STRIKES_PER_MUTE,
-	MAX_STRIKES,
+	XP_PUNISHMENT,
 } from "./misc.js";
-import { escapeMessage } from "../../util/markdown.js";
+import filterToStrike, { strikeDatabase } from "./util.js";
 
 export default async function warn(
 	user: GuildMember | User,
