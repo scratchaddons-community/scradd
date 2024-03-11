@@ -21,11 +21,17 @@ jobs:
                   node-version: "20.6.0"
                   cache: npm
 
-            - name: Download bad words
-              run: curl ${{ secrets.BAD_WORDS }} --output modules/automod/bad-words.ts
+            - name: Download autos data
+              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/autos-data.ts" --output modules/automod/autos-data.ts
 
-            - name: Download secrets
-              run: curl ${{ secrets.SECRETS }} --output modules/auto/secrets.ts
+            - name: Download bad words
+              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/bad-words.ts" --output modules/automod/bad-words.ts
+
+            - name: Download dad
+              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/dad.ts" --output modules/auto/dad.ts
+
+            - name: Download strings
+              run: curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/strings.ts" --output common/strings.ts
 
             - name: Install
               run: npm ci --force

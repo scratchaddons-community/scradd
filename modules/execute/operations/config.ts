@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import config, { syncConfig } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
-import { autoreactions, dadEasterEggCount } from "../../auto/secrets.js";
+import autoreactions, { dadEasterEggCount } from "../../auto/autos-data.js";
 import log, { LogSeverity, LoggingEmojis } from "../../logging/misc.js";
 import type { CustomOperation } from "../util.js";
 

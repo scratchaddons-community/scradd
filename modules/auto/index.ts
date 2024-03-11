@@ -19,9 +19,10 @@ import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import { BOARD_EMOJI } from "../board/misc.js";
 import { getSettings } from "../settings.js";
+import autoreactions from "./autos-data.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
+import dad from "./dad.js";
 import { getMatches, handleMatch } from "./scratch.js";
-import { autoreactions, dad } from "./secrets.js";
 
 const REACTION_CAP = 3;
 

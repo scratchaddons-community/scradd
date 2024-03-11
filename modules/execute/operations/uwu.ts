@@ -1,64 +1,7 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { uwuEndings, uwuReplacements } from "../../../common/strings.js";
 import { stripMarkdown } from "../../../util/markdown.js";
 import type { CustomOperation } from "../util.js";
-
-const replacements: Record<string, string> = {
-	cute: "kawaii",
-	fluff: "floof",
-	fool: "baka",
-	idiot: "baka",
-	love: "luv",
-	meow: "nya",
-	no: "nu",
-	small: "smol",
-	stupid: "baka",
-	what: "nani",
-	you: "yu",
-};
-const endings = [
-	"-.-",
-	":3",
-	":3",
-	":3",
-	"( ͡o ω ͡o )",
-	"(///ˬ///✿)",
-	"(˘ω˘)",
-	"(ˆ ﻌ ˆ)♡",
-	"(⑅˘꒳˘)",
-	"(✿oωo)",
-	"(U ﹏ U)",
-	"(U ᵕ U❁)",
-	"(ꈍᴗꈍ)",
-	"*blushes*",
-	"/(^•ω•^)",
-	"^•ﻌ•^",
-	"^^;;",
-	"^^",
-	"<:_:898310317833076847>",
-	">_<",
-	">w<",
-	"♡",
-	"✨",
-	"🥺 👉👈",
-	"🥺",
-	"😳",
-	"😳😳😳",
-	"daddi",
-	"mya",
-	"nya!",
-	"nyaa~~",
-	"o.O",
-	"owo",
-	"OwO",
-	"òωó",
-	"rawr x3",
-	"rawr",
-	"uwu",
-	"UwU",
-	"XD",
-	"ʘwʘ",
-	"σωσ",
-] as const;
 
 export function uwuify(text: string): string {
 	const output = stripMarkdown(text)
@@ -66,10 +9,10 @@ export function uwuify(text: string): string {
 		.map((word) =>
 			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word)
 				? word
-				: replacements[word.toLowerCase()] ?? convertWord(word),
+				: uwuReplacements[word.toLowerCase()] ?? convertWord(word),
 		);
 
-	output.push(endings[Math.floor(Math.random() * endings.length)] ?? endings[0]);
+	output.push(uwuEndings[Math.floor(Math.random() * uwuEndings.length)] ?? uwuEndings[0]);
 	return output.join(" ");
 }
 function convertWord(word: string): string {
