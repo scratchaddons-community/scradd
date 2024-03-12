@@ -77,7 +77,7 @@ let introTemplate =
 				title: "Introduction Template",
 				color: constants.themeColor,
 				description:
-					"```md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch username: \n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n```",
+					"```md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: https://scratch.mit.edu/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n```",
 			},
 		],
 	}));

@@ -18,7 +18,7 @@ const EMBED_LENGTH = 750;
 
 export function getMatches(content: string): URL[] {
 	const scratchUrlRegex =
-		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
 
 	const urls = new Map<string, URL>();
 	for (const match of content.match(scratchUrlRegex) ?? []) {
@@ -78,7 +78,7 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 		title: project.title,
 		color: constants.scratchColor,
 
-		fields: [
+			fields: [
 			{
 				name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
 					constants.emojis.scratch.favorite
