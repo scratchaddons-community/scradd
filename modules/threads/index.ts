@@ -2,17 +2,22 @@ import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import { paginate } from "../../util/discord.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
-import { getThreadConfig } from "./misc.js";
+import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
-	const { roles } = getThreadConfig(thread);
-	if (roles.length)
+	const threadConfig = getThreadConfig(thread);
+	if (threadConfig.roles.length)
 		await thread.send({
-			content: roles.map(roleMention).join(""),
+			content: threadConfig.roles.map(roleMention).join(""),
 			allowedMentions: { parse: ["roles"] },
 		});
+
+	threadsDatabase.updateById(
+		{ id: thread.id, keepOpen: threadConfig.keepOpen },
+		{ roles: threadConfig.roles.join("|") },
+	);
 });
 
 defineSubcommands(
