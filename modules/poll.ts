@@ -78,12 +78,12 @@ defineModal("poll", async (interaction, voteMode) => {
 	}
 
 	const { customReactions, options } = rawOptions
-		.split("\n")
+		.split(/\s*\n\s*/g)
 		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
 				// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
 				const match = option.match(twemojiRegexp.default);
-				const emoji = match?.index === 0 && match[0];
+				const emoji = match && option.startsWith(match[0]) && match[0];
 				return {
 					options: [...options, (emoji ? option.replace(emoji, "") : option).trim()],
 					customReactions: [
