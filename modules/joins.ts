@@ -1,10 +1,11 @@
 import { AuditLogEvent } from "discord.js";
 import Mustache from "mustache";
-import { defineEvent } from "strife.js";
+import { client, defineEvent } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
+import { getMessageJSON } from "../util/discord.js";
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -61,4 +62,32 @@ defineEvent("guildMemberAdd", async (member) => {
 		})} members`,
 		`${member.user.tag} joined the server`,
 	);
+});
+
+let introCount = 0;
+let introTemplate =
+	(await config.channels.intros?.messages.fetch())?.find(
+		(message) =>
+			message.author.id === client.user.id &&
+			message.embeds[0]?.title === "Introduction Template",
+	) ??
+	(await config.channels.intros?.send({
+		embeds: [
+			{
+				title: "Introduction Template",
+				color: constants.themeColor,
+				description:
+					"```md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch username: \n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n```",
+			},
+		],
+	}));
+defineEvent("messageCreate", async (message) => {
+	if (message.channel.id !== config.channels.intros?.id) return;
+
+	introCount++;
+	if (introCount % 5) return;
+
+	const newTemplate = await introTemplate?.reply(getMessageJSON(introTemplate));
+	await introTemplate?.delete();
+	introTemplate = newTemplate;
 });
