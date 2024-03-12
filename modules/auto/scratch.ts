@@ -78,7 +78,7 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 		title: project.title,
 		color: constants.scratchColor,
 
-			fields: [
+		fields: [
 			{
 				name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
 					constants.emojis.scratch.favorite

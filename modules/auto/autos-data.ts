@@ -33,4 +33,4 @@ const autoreactions: [
 		| [Snowflake, "ping"]
 	)[],
 ][] = [];
-export default autoreactions
+export default autoreactions;
