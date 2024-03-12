@@ -6,6 +6,7 @@ import {
 	GlobalAnimatedEmoji,
 	GlobalBotInvitesPattern,
 	InvitesPattern,
+	getAllMessages,
 	getBaseChannel,
 } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
@@ -15,14 +16,26 @@ import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 
+const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
+const whitelistedLinks = await Promise.all(
+	threads?.map(async (thread) =>
+		(
+			await getAllMessages(thread)
+		).flatMap(
+			({ content }) =>
+				content.match(InvitesPattern)?.map((link) => link.split("/").at(-1) ?? link) ?? [],
+		),
+	) ?? [],
+);
+
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
 	...config.otherGuildIds,
-	"898383289059016704", // Scratch Addons SMP Archive
-	"837024174865776680", // TurboWarp
-	"945340853189247016", // ScratchTools
-	"461575285364752384", // 9th Tail Bot Hub
-	"333355888058302465", // DISBOARD
+	...(await Promise.all(
+		whitelistedLinks
+			.flat()
+			.map(async (link) => (await client.fetchInvite(link).catch(() => void 0))?.guild?.id),
+	)),
 	undefined, // Invalid links
 ]);
 
@@ -70,7 +83,6 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 	if (!allowBadWords) {
 		if (
-			!message.author.bot &&
 			config.channels.advertise &&
 			(config.channels.advertise.id !== baseChannel?.id ||
 				(!baseChannel.isDMBased() &&
