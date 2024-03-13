@@ -1,38 +1,38 @@
 import {
-	type APIEmbed,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	type Embed,
-	type GuildAuditLogsEntry,
-	type TextBasedChannel,
-	type TextChannel,
 	ThreadAutoArchiveDuration,
-	type AuditLogEvent,
 	type APIAuditLogChange,
-	type GuildEmoji,
-	type Snowflake,
-	type Base,
+	type APIEmbed,
 	type AnyThreadChannel,
 	type ApplicationCommand,
+	type AuditLogEvent,
 	type AutoModerationRule,
+	type Base,
+	type Embed,
 	type Guild,
+	type GuildAuditLogsEntry,
+	type GuildEmoji,
 	type GuildScheduledEvent,
 	type Integration,
 	type Invite,
+	type Message,
+	type NonThreadGuildBasedChannel,
 	type Role,
+	type Snowflake,
 	type StageInstance,
 	type Sticker,
+	type TextBasedChannel,
+	type TextChannel,
+	type ThreadChannel,
 	type User,
 	type Webhook,
-	type NonThreadGuildBasedChannel,
-	type Message,
-	type ThreadChannel,
 } from "discord.js";
-import { getBaseChannel } from "../../util/discord.js";
+import type { actualPrimitives } from "mongoose";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import type { actualPrimitives } from "mongoose";
+import { getBaseChannel } from "../../util/discord.js";
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -121,27 +121,33 @@ export default async function log(
 ): Promise<Message<true>> {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
 
-	const externalIndex =
-		extra.files?.findIndex((file) => {
-			if (typeof file === "string" || file.content.includes("```")) return true;
+	const { external, embedded } = extra.files?.reduce<{
+		external: (string | { extension?: string; content: string })[];
+		embedded: { extension?: string | undefined; content: string }[];
+	}>(
+		(accumulator, file) => {
+			if (typeof file === "string" || file.content.includes("```")) {
+				return {
+					embedded: accumulator.embedded,
+					external: [...accumulator.external, file],
+				};
+			}
 
 			const lines = file.content.split("\n");
-			return lines.length > 10 || lines.find((line) => line.length > 100);
-		}) ?? 0;
-	const embeddedFiles = extra.files?.splice(0, extra.files.length - externalIndex - 1);
+			return lines.length > 10 || lines.some((line) => line.length > 100)
+				? { embedded: accumulator.embedded, external: [...accumulator.external, file] }
+				: { embedded: [...accumulator.embedded, file], external: accumulator.external };
+		},
+		{ external: [], embedded: [] },
+	) ?? { external: [], embedded: [] };
 
 	return await thread.send({
 		content:
 			content +
-			(embeddedFiles?.length
-				? "\n" +
-				  embeddedFiles
-						.map((file) =>
-							typeof file === "string"
-								? file
-								: `\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``,
-						)
-						.join("\n")
+			(embedded.length
+				? embedded
+						.map((file) => `\n\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``)
+						.join("")
 				: ""),
 		allowedMentions: { users: [] },
 		embeds: extra.embeds?.filter(Boolean),
@@ -156,7 +162,7 @@ export default async function log(
 			},
 		],
 		files: await Promise.all(
-			extra.files?.map(async (file) => {
+			external.map(async (file) => {
 				if (typeof file === "string") {
 					const response = await fetch(file);
 					return {
@@ -169,7 +175,7 @@ export default async function log(
 					attachment: Buffer.from(file.content, "utf8"),
 					name: `file.${file.extension || "txt"}`,
 				};
-			}) ?? [],
+			}),
 		),
 	});
 }
@@ -220,12 +226,9 @@ export function extraAuditLogsInfo(entry: {
 	executor?: User | null;
 	reason?: string | null;
 }): string {
+	const reason = entry.reason?.trim();
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		entry.reason
-			? entry.reason.includes("\n")
-				? `:\n${entry.reason}`
-				: ` (${entry.reason})`
-			: ""
+		reason ? (reason.includes("\n") ? `:\n${reason}` : ` (${reason})`) : ""
 	}`;
 }
 

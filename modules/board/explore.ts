@@ -1,20 +1,20 @@
 import {
-	ChannelType,
 	ButtonStyle,
-	type GuildBasedChannel,
-	type Snowflake,
+	ChannelType,
 	ComponentType,
+	type GuildBasedChannel,
 	type InteractionReplyOptions,
 	type MessageEditOptions,
 	type RepliableInteraction,
+	type Snowflake,
 } from "discord.js";
-import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { asyncFilter, anyPromise } from "../../util/promises.js";
+import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
+import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 
 export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);

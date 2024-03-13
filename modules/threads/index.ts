@@ -1,18 +1,23 @@
+import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
-import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.js";
-import { syncMembers, updateMemberThreads, updateThreadMembers } from "./syncMembers.js";
-import { autoClose, cancelThreadChange, setUpAutoClose } from "./autoClose.js";
-import { getThreadConfig } from "./misc.js";
 import { paginate } from "../../util/discord.js";
+import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
+import { getThreadConfig, threadsDatabase } from "./misc.js";
+import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
-	const { roles } = getThreadConfig(thread);
-	if (roles.length)
+	const threadConfig = getThreadConfig(thread);
+	if (threadConfig.roles.length)
 		await thread.send({
-			content: roles.map(roleMention).join(""),
+			content: threadConfig.roles.map(roleMention).join(""),
 			allowedMentions: { parse: ["roles"] },
 		});
+
+	threadsDatabase.updateById(
+		{ id: thread.id, keepOpen: threadConfig.keepOpen },
+		{ roles: threadConfig.roles.join("|") },
+	);
 });
 
 defineSubcommands(
@@ -54,7 +59,7 @@ defineSubcommands(
 				},
 			},
 			"list-unjoined": {
-				description: "List active threads that you are not in",
+				description: "List public open threads that you are not in",
 				options: {},
 			},
 		},
@@ -69,7 +74,13 @@ defineSubcommands(
 				const fetched = await interaction.guild?.channels.fetchActiveThreads();
 				const threads = [];
 				for (const [, thread] of fetched?.threads ?? []) {
-					if (!thread.permissionsFor(interaction.user)?.has("ViewChannel")) continue;
+					const permissions = thread.permissionsFor(interaction.user);
+					if (
+						!permissions?.has("ViewChannel") ||
+						(thread.type === ChannelType.PrivateThread &&
+							!permissions.has("ManageThreads"))
+					)
+						continue;
 					try {
 						await thread.members.fetch(interaction.user.id);
 					} catch {
@@ -93,7 +104,7 @@ defineSubcommands(
 					{
 						title: "Unjoined Threads",
 						singular: "thread",
-						failMessage: "You’ve joined all open threads here!",
+						failMessage: "You’ve joined all public open threads here!",
 						user: interaction.user,
 						ephemeral: true,
 						totalCount: unjoined.length,

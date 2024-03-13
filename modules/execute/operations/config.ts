@@ -1,18 +1,18 @@
-import type { CustomOperation } from "../util.js";
-import constants from "../../../common/constants.js";
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
+	ChannelType,
 	ComponentType,
 	GuildMember,
 	type APIEmbed,
-	type Snowflake,
-	ChannelType,
 	type ButtonInteraction,
+	type Snowflake,
 } from "discord.js";
 import config, { syncConfig } from "../../../common/config.js";
-import { autoreactions, dadEasterEggCount } from "../../auto/secrets.js";
+import constants from "../../../common/constants.js";
+import autoreactions, { dadEasterEggCount } from "../../auto/autos-data.js";
 import log, { LogSeverity, LoggingEmojis } from "../../logging/misc.js";
+import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "config",
@@ -68,7 +68,7 @@ const data: CustomOperation = {
 							color: constants.themeColor,
 							fields: Object.entries(constants.emojis)
 								.map(([group, emojis]) => [group, Object.entries(emojis)] as const)
-								.sort(([, one], [, two]) => one.length - two.length)
+								.toSorted(([, one], [, two]) => one.length - two.length)
 								.map(([group, emojis]) => ({
 									name: group,
 									inline: true,
@@ -87,7 +87,7 @@ const data: CustomOperation = {
 							color: constants.themeColor,
 							fields: Object.entries(constants.emojis)
 								.map(([group, emojis]) => [group, Object.entries(emojis)] as const)
-								.sort(([, one], [, two]) => one.length - two.length)
+								.toSorted(([, one], [, two]) => one.length - two.length)
 								.map(([group, emojis]) => ({
 									name: group,
 									inline: true,
@@ -135,7 +135,7 @@ function getDynamicConfig(): APIEmbed[] {
 			title: "Roles",
 			color: constants.themeColor,
 
-			fields: Object.entries(config.roles).map((role) => ({
+			fields: [...Object.entries(config.roles)].map((role) => ({
 				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
 					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
 					.toLowerCase()} role`,

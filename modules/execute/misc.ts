@@ -1,15 +1,15 @@
 import {
 	ApplicationCommandOptionType,
+	Base,
+	MessageMentions,
 	type ApplicationCommandOption,
 	type ApplicationCommandSubCommand,
-	MessageMentions,
+	type GuildBasedChannel,
 	type Role,
 	type User,
-	type GuildBasedChannel,
-	Base,
 } from "discord.js";
-import config from "../../common/config.js";
 import { client } from "strife.js";
+import config from "../../common/config.js";
 
 export const OPERATION_PREFIX = "~ ";
 const operationPrefixRegex = new RegExp(
@@ -107,15 +107,25 @@ export async function parseArgument(
 	const required = "required" in schema ? schema.required ?? true : true;
 
 	if (argument) {
-		// TODO: check other option restrictions
 		switch (schema.type) {
 			case ApplicationCommandOptionType.String: {
+				if (
+					argument.length > (schema.maxLength ?? argument.length) ||
+					argument.length < (schema.minLength ?? argument.length)
+				)
+					break;
+				if (
+					"choices" in schema &&
+					schema.choices &&
+					!schema.choices.some((choice) => choice.value === argument)
+				)
+					break;
 				return argument;
 			}
 			case ApplicationCommandOptionType.Boolean: {
 				const option = { true: true, false: false }[argument];
-				if (option !== undefined) return option;
-				break;
+				if (option === undefined) break;
+				return option;
 			}
 			case ApplicationCommandOptionType.Integer:
 			case ApplicationCommandOptionType.Number: {
@@ -126,16 +136,32 @@ export async function parseArgument(
 							: "parseFloat"
 					](argument);
 
-				if (!Number.isNaN(parsed)) return parsed;
-				break;
+				if (
+					Number.isNaN(parsed) ||
+					parsed > (schema.maxValue ?? parsed) ||
+					parsed < (schema.minValue ?? parsed)
+				)
+					break;
+				if (
+					"choices" in schema &&
+					schema.choices &&
+					!schema.choices.some((choice) => choice.value === parsed)
+				)
+					break;
+				return parsed;
 			}
 			case ApplicationCommandOptionType.Channel: {
 				const parsed =
 					MessageMentions.ChannelsPattern.exec(argument)?.groups?.id || argument;
 				const fetched = parsed && (await client.channels.fetch(parsed).catch(() => void 0));
 
-				if (fetched && !fetched.isDMBased()) return fetched;
-				break;
+				if (
+					!fetched ||
+					fetched.isDMBased() ||
+					(schema.channelTypes && !schema.channelTypes.includes(fetched.type))
+				)
+					break;
+				return fetched;
 			}
 			case ApplicationCommandOptionType.User:
 			case ApplicationCommandOptionType.Mentionable: {

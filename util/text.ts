@@ -21,33 +21,37 @@ export function generateHash(prefix = ""): string {
  * Joins an array using (Oxford) comma rules and the word "and".
  *
  * @param array - The array to join.
- * @param callback - A function to convert each item to a string.
+ * @param stringify - A function to convert each item to a string.
  *
  * @returns The joined string.
  */
 export function joinWithAnd<Item extends { toString(): string }>(
 	array: Item[],
-	callback?: ((item: Item) => string) | undefined,
+	stringify?: ((item: Item, index: number, array: Item[]) => string) | undefined,
 ): string;
-export function joinWithAnd<Item>(array: Item[], callback: (item: Item) => string): string;
+export function joinWithAnd<Item>(
+	array: Item[],
+	stringify: (item: Item, index: number, array: Item[]) => string,
+): string;
 export function joinWithAnd(
 	array: { toString(): string }[],
-	callback = (item: { toString(): string }) => item.toString(),
+	stringify = (item: { toString(): string }, _: number, __: { toString(): string }[]) =>
+		item.toString(),
 ): string {
 	const last = array.at(-1);
 
 	if (last === undefined) return "";
 
-	if (array.length === 1) return callback(last);
+	if (array.length === 1) return stringify(last, 0, array);
 
 	return `${
 		array.length === 2
-			? `${array[0] ? callback(array[0]) : ""} `
+			? `${array[0] ? stringify(array[0], 0, array) : ""} `
 			: array
 					.slice(0, -1)
-					.map((item) => `${callback(item)}, `)
+					.map((item, index) => `${stringify(item, index, array)}, `)
 					.join("")
-	}and ${callback(last)}`;
+	}and ${stringify(last, 0, array)}`;
 }
 
 /**

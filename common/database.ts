@@ -1,14 +1,14 @@
 import {
-	type Message,
+	ChannelType,
 	RESTJSONErrorCodes,
+	ThreadAutoArchiveDuration,
+	type Message,
 	type Snowflake,
 	type TextBasedChannel,
-	ChannelType,
-	ThreadAutoArchiveDuration,
 } from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
-import { extractMessageExtremities } from "../util/discord.js";
+import { extractMessageExtremities, getAllMessages } from "../util/discord.js";
 import config from "./config.js";
 let timeouts: Record<
 	Snowflake,
@@ -30,8 +30,8 @@ export const databaseThread =
 	}));
 
 const databases: Record<string, Message<true> | undefined> = {};
-
-for (const message of (await databaseThread.messages.fetch({ limit: 100 })).values()) {
+export const allDatabaseMessages = await getAllMessages(databaseThread);
+for (const message of allDatabaseMessages) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =

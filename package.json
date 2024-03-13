@@ -22,8 +22,9 @@
 	],
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@fontsource-variable/sora": "5.0.16",
-		"@napi-rs/canvas": "0.1.50",
+		"@fontsource-variable/sora": "5.0.17",
+		"@khanacademy/simple-markdown": "0.11.3",
+		"@napi-rs/canvas": "0.1.51",
 		"@sa-community/addons-data": "1.35.1-1",
 		"@twemoji/parser": "15.0.0",
 		"chart.js": "4.4.2",
@@ -46,12 +47,12 @@
 		"@types/node": "<=20.10",
 		"@types/papaparse": "<=5.4",
 		"@typescript-eslint/eslint-plugin": "7.0.2",
-		"@typescript-eslint/parser": "7.1.0",
+		"@typescript-eslint/parser": "7.2.0",
 		"eslint": "8.57.0",
 		"eslint-plugin-unicorn": "51.0.1",
 		"nodemon": "3.1.0",
 		"prettier": "2.8.0",
-		"typescript": "5.3.3"
+		"typescript": "5.4.2"
 	},
 	"engines": {
 		"node": ">=20.10.0",

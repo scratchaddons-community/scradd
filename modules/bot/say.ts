@@ -1,16 +1,16 @@
 import {
-	type ChatInputCommandInteraction,
 	ComponentType,
 	MessageFlags,
 	TextInputStyle,
-	type RepliableInteraction,
-	type MessageContextMenuCommandInteraction,
+	type ChatInputCommandInteraction,
 	type Message,
+	type MessageContextMenuCommandInteraction,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { mentionChatCommand } from "../../util/discord.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,

@@ -5,19 +5,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
 
-import constants from "../../common/constants.js";
-import { truncateText } from "../../util/text.js";
-import { nth } from "../../util/numbers.js";
-import { time, type APIEmbed, TimestampStyles, cleanCodeBlockContent } from "discord.js";
-import { gracefulFetch } from "../../util/promises.js";
-import { escapeMessage } from "../../util/markdown.js";
+import { TimestampStyles, cleanCodeBlockContent, time, type APIEmbed } from "discord.js";
 import { parser, type Node } from "posthtml-parser";
+import constants from "../../common/constants.js";
+import { escapeMessage } from "../../util/markdown.js";
+import { nth } from "../../util/numbers.js";
+import { gracefulFetch } from "../../util/promises.js";
+import { fetchUser } from "../../util/scratch.js";
+import { truncateText } from "../../util/text.js";
 
 const EMBED_LENGTH = 750;
 
 export function getMatches(content: string): URL[] {
 	const scratchUrlRegex =
-		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
 
 	const urls = new Map<string, URL>();
 	for (const match of content.match(scratchUrlRegex) ?? []) {
@@ -125,51 +126,66 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 	return embed;
 }
 export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefined> {
-	const user = await gracefulFetch(`${constants.urls.scratchdb}/user/info/${urlParts[2]}/`);
-	if (!user || user.error) return;
+	const user = urlParts[2] && (await fetchUser(urlParts[2]));
+	if (!user) return;
 
 	const embed = {
-		title: `${user.username}${user.status == "Scratch Team" ? "*" : ""}`,
+		title: `${user.username}${
+			("status" in user ? user.status == "Scratch Team" : user.scratchteam) ? "*" : ""
+		}`,
 		color: constants.scratchColor,
 
-		fields: user.statistics
-			? [
-					{
-						name: `${constants.emojis.scratch.followers} Followers`,
-						value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
-							user.statistics.ranks.followers,
-						)})`,
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.scratch.following} Following`,
-						value: user.statistics.following.toLocaleString(),
-						inline: true,
-					},
-			  ]
-			: [],
-		thumbnail: { url: `https://cdn2.scratch.mit.edu/get_image/user/${user.id}_90x90.png` },
+		fields:
+			"statistics" in user && user.statistics
+				? [
+						{
+							name: `${constants.emojis.scratch.followers} Followers`,
+							value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
+								user.statistics.ranks.followers,
+							)})`,
+							inline: true,
+						},
+						{
+							name: `${constants.emojis.scratch.following} Following`,
+							value: user.statistics.following.toLocaleString(),
+							inline: true,
+						},
+				  ]
+				: [],
+		thumbnail: { url: `https://uploads.scratch.mit.edu/get_image/user/${user.id}_90x90.png` },
 		author: {
-			name: `${user.country}${
-				user.status == "New Scratcher" ? `${constants.footerSeperator}${user.status}` : ""
+			name: `${"country" in user ? user.country : user.profile.country}${
+				"status" in user && user.status == "New Scratcher"
+					? `${constants.footerSeperator}${user.status}`
+					: ""
 			}`,
 		},
-		url: `${constants.urls.scratch}/users/${urlParts[2]}`,
-		timestamp: new Date(user.joined).toISOString(),
+		url: `${constants.urls.scratch}/users/${user.username}`,
+		timestamp: new Date("joined" in user ? user.joined : user.history.joined).toISOString(),
 	};
 
-	if (user.work) {
+	if ("profile" in user ? user.profile.status : user.work) {
 		embed.fields.unshift({
 			// eslint-disable-next-line unicorn/string-content
 			name: "🛠️ What I'm working on",
-			value: truncateText(htmlToMarkdown(user.work), EMBED_LENGTH / 2, true),
+			value: truncateText(
+				"profile" in user
+					? linkifyMentions(user.profile.status)
+					: htmlToMarkdown(user.work),
+				EMBED_LENGTH / 2,
+				true,
+			),
 			inline: false,
 		});
 	}
-	if (user.bio) {
+	if ("profile" in user ? user.profile.bio : user.bio) {
 		embed.fields.unshift({
 			name: "👋 About me",
-			value: truncateText(htmlToMarkdown(user.bio), EMBED_LENGTH / 2, true),
+			value: truncateText(
+				"profile" in user ? linkifyMentions(user.profile.bio) : htmlToMarkdown(user.bio),
+				EMBED_LENGTH / 2,
+				true,
+			),
 			inline: false,
 		});
 	}

@@ -1,10 +1,10 @@
 import {
 	ChannelType,
-	type NonThreadGuildBasedChannel,
-	type Channel,
-	type ThreadManager,
 	Collection,
 	type AnyThreadChannel,
+	type Channel,
+	type NonThreadGuildBasedChannel,
+	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
@@ -41,9 +41,11 @@ async function getConfig() {
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
+			servers: getChannel("servers", ChannelType.GuildText, "end"),
 			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
+			intros: getChannel("intro", ChannelType.GuildText, "partial"),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
 			modlogs:
@@ -53,7 +55,7 @@ async function getConfig() {
 
 			general: getChannel("general", ChannelType.GuildText),
 
-			support: "826250884279173162",
+			support: getChannel("support", ChannelType.GuildText, "partial"),
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),

@@ -1,25 +1,25 @@
 import {
-	GuildMember,
-	type ModalSubmitInteraction,
-	type PartialGuildMember,
-	ComponentType,
 	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	TextInputStyle,
 	type ApplicationCommand,
 	type ChatInputCommandInteraction,
-	TextInputStyle,
-	type Snowflake,
-	type Role,
 	type InteractionResponse,
+	type ModalSubmitInteraction,
+	type PartialGuildMember,
+	type Role,
+	type Snowflake,
 } from "discord.js";
+import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import tryCensor from "../automod/misc.js";
-import warn from "../punishments/warn.js";
-import config from "../../common/config.js";
-import { recentXpDatabase } from "../xp/util.js";
 import { asyncFilter } from "../../util/promises.js";
-import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
+import tryCensor from "../automod/misc.js";
 import hasPermission from "../execute/permissions.js";
+import warn from "../punishments/warn.js";
+import { recentXpDatabase } from "../xp/util.js";
+import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
 
 let command: ApplicationCommand | undefined;
 

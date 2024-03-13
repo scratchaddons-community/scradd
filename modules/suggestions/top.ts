@@ -1,36 +1,40 @@
 import {
 	GuildMember,
-	hyperlink,
-	type User,
-	type RepliableInteraction,
 	channelLink,
+	hyperlink,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type User,
 } from "discord.js";
 import config from "../../common/config.js";
 import { paginate } from "../../util/discord.js";
+import { formatAnyEmoji } from "../../util/markdown.js";
 import { mentionUser } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
 
 export default async function top(
-	interaction: RepliableInteraction,
-	options: { user?: GuildMember | User; answer?: string; all?: boolean },
-): Promise<void> {
+	interaction?: RepliableInteraction,
+	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
+): Promise<InteractionReplyOptions | undefined> {
 	const { suggestions } = config.channels;
-	const user = options.user instanceof GuildMember ? options.user.user : options.user;
+	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
+		?.displayName;
 
-	await paginate(
+	return await paginate(
 		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				(suggestion) =>
-					(options.answer ? suggestion.answer === options.answer : true) &&
-					(user ? suggestion.author.valueOf() === user.id : true) &&
-					(options.all ||
-						!("old" in suggestion) ||
-						["Unnswered", "Good Idea", "In Development", "Implemented"].includes(
-							suggestion.answer,
-						)),
+					(options.answer
+						? suggestion.answer === options.answer
+						: options.all ||
+						  !("old" in suggestion) ||
+						  ["Unanswered", "Good Idea", "In Development"].includes(
+								suggestion.answer,
+						  )) &&
+					(options.user ? suggestion.author.valueOf() === options.user.id : true),
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
+
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
 				!("old" in reference) &&
@@ -39,29 +43,33 @@ export default async function top(
 					: "👍"
 			} ${hyperlink(
 				padTitle(title),
-				"url" in reference ? reference.url : channelLink(config.guild.id, reference.id),
+				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
 			)}${
-				user
+				options.user
 					? ""
 					: ` by ${await mentionUser(
 							author,
-							interaction.user,
-							interaction.guild ?? config.guild,
+							interaction?.user,
+							interaction?.guild ?? config.guild,
 					  )}`
 			}`,
-		(data) => interaction.reply(data),
+
+		(data) => interaction?.reply(data),
 		{
-			title: `Top suggestions${user ? ` by ${user.displayName}` : ""}${
-				options.answer && user ? " and" : ""
+			title: `Top suggestions${displayName ? ` by ${displayName}` : ""}${
+				options.answer && options.user ? " and" : ""
 			}${options.answer ? ` answered with ${options.answer}` : ""}`,
-			format: user,
+			format: options.user,
 			singular: "suggestion",
-			user: interaction.user,
-			perPage: 15,
+			user: interaction?.user ?? false,
+			pageLength: interaction ? 15 : 25,
+			rawOffset: (options.page ?? 0) * (interaction ? 15 : 25),
+			highlightOffset: false,
 		},
 	);
 }
+
 /** @todo - Strip full links, they can’t be escaped. */
 function padTitle(title: number | string): string {
 	const left = countOccurrences(`${title}`, "[");

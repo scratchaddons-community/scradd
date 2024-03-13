@@ -1,7 +1,7 @@
-import { strictEqual, deepStrictEqual } from "node:assert";
-import { parseArgument, parseArguments, partitionArguments, splitFirstArgument } from "./misc.js";
-import { describe, it } from "node:test";
 import { ApplicationCommandOptionType, type ApplicationCommandOption } from "discord.js";
+import { deepStrictEqual, strictEqual } from "node:assert";
+import { describe, it } from "node:test";
+import { parseArgument, parseArguments, partitionArguments, splitFirstArgument } from "./misc.js";
 
 await describe("splitFirstArgument", async () => {
 	await it("should remove the first argument", () => {

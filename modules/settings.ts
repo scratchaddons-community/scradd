@@ -2,22 +2,22 @@ import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
-	type Snowflake,
 	User,
-	userMention,
-	type RepliableInteraction,
 	hyperlink,
+	userMention,
 	type Guild,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type Snowflake,
 	type UserMention,
 } from "discord.js";
+import { client, defineButton, defineChatCommand } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { getWeeklyXp } from "./xp/util.js";
-import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
+import { getWeeklyXp } from "./xp/util.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -191,27 +191,28 @@ export async function updateSettings(
 		content: `${constants.emojis.statuses.yes} Updated your settings!`,
 
 		components: [
-			...((await config.guild.members.fetch(user.id).catch(() => void 0))
-				? [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									customId: "levelUpPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Level Up Pings",
-									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
-								} as const,
-								{
-									customId: "boardPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Board Pings",
-									style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
-								} as const,
-							],
-						},
-				  ]
-				: []),
+			...(await config.guild.members.fetch(user.id).then(
+				() => [
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Level Up Pings",
+								style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+							} as const,
+							{
+								customId: "boardPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Board Pings",
+								style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
+							} as const,
+						],
+					},
+				],
+				() => [],
+			)),
 			{
 				type: ComponentType.ActionRow,
 				components: [
@@ -232,6 +233,12 @@ export async function updateSettings(
 						type: ComponentType.Button,
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
+					},
+					{
+						customId: "useMentions_toggleSetting",
+						type: ComponentType.Button,
+						label: "Use Mentions",
+						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
 					},
 				],
 			},
@@ -281,16 +288,18 @@ export async function getDefaultSettings(user: {
 
 export async function mentionUser(
 	user: Snowflake | User,
-	interactor: { id: Snowflake },
-	guild: Guild,
+	interactor?: { id: Snowflake },
+	guild?: Guild,
 ): Promise<UserMention | `[${string}](${string})`> {
-	const { useMentions } = await getSettings(interactor);
+	const useMentions = interactor && (await getSettings(interactor)).useMentions;
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const presence = guild.presences.resolve(interactor.id);
+	const presence = interactor && guild?.presences.resolve(interactor.id);
 	const url = `<${
-		presence?.status === presence?.clientStatus?.desktop ? "discord://-" : "https://discord.com"
+		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web
+			? "discord://-"
+			: "https://discord.com"
 	}/users/${id}>`;
 
 	const { displayName } =

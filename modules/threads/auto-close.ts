@@ -1,23 +1,23 @@
 import {
-	ChannelType,
-	type ButtonInteraction,
-	TimestampStyles,
-	ComponentType,
 	ButtonStyle,
-	time,
+	ChannelType,
+	ComponentType,
 	GuildMember,
+	TimestampStyles,
+	time,
 	type AnyThreadChannel,
+	type ButtonInteraction,
 	type ChatInputCommandInteraction,
 	type InteractionResponse,
 } from "discord.js";
-import { getThreadConfig, threadsDatabase } from "./misc.js";
+import { client } from "strife.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { disableComponents } from "../../util/discord.js";
 import { parseTime } from "../../util/numbers.js";
 import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";
-import config from "../../common/config.js";
-import { client } from "strife.js";
-import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import { getThreadConfig, threadsDatabase } from "./misc.js";
 
 export async function setUpAutoClose(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,

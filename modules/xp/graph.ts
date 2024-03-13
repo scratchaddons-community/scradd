@@ -1,7 +1,7 @@
-import type { AnySelectMenuInteraction } from "discord.js";
-import { recentXpDatabase } from "./util.js";
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
+import type { AnySelectMenuInteraction } from "discord.js";
+import { recentXpDatabase } from "./util.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())

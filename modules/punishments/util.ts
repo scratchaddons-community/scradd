@@ -1,22 +1,22 @@
 import {
-	type GuildMember,
-	MessageType,
-	type User,
-	type Snowflake,
-	time,
-	TimestampStyles,
-	ComponentType,
 	ButtonStyle,
+	ComponentType,
+	MessageType,
+	TimestampStyles,
+	time,
+	type GuildMember,
+	type InteractionReplyOptions,
 	type InteractionResponse,
 	type Message,
-	type InteractionReplyOptions,
+	type Snowflake,
+	type User,
 } from "discord.js";
-import Database, { databaseThread } from "../../common/database.js";
+import Database, { allDatabaseMessages } from "../../common/database.js";
 import { GlobalUsersPattern, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
-import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { gracefulFetch } from "../../util/promises.js";
-import { EXPIRY_LENGTH, PARTIAL_STRIKE_COUNT } from "./misc.js";
+import { LogSeverity, getLoggingThread } from "../logging/misc.js";
+import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{
 	/** The ID of the user who was warned. */
@@ -29,8 +29,7 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-const databases = await databaseThread.messages.fetch({ limit: 100 });
-const robotopUrl = databases
+const robotopUrl = allDatabaseMessages
 	.find((message) => message.attachments.first()?.name === "robotop_warns.json")
 	?.attachments.first()?.url;
 const robotopStrikes =
@@ -121,9 +120,7 @@ export async function listStrikes(
 			}\`${
 				strike.count === 1
 					? ""
-					: ` (${
-							strike.count === PARTIAL_STRIKE_COUNT ? "verbal" : `\\*${strike.count}`
-					  })`
+					: ` (${strike.count < 1 ? "verbal" : `\\*${Math.floor(strike.count)}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
 			}`,
@@ -133,7 +130,6 @@ export async function listStrikes(
 			format: member,
 			singular: "strike",
 
-			// @ts-expect-error TS2769
 			user: commandUser,
 			totalCount: totalStrikeCount,
 			ephemeral: true,

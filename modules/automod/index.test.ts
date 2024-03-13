@@ -1,4 +1,4 @@
-import { deepStrictEqual, strictEqual } from "node:assert";
+import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 import tryCensor, { censor, isPingable } from "./misc.js";
 
@@ -24,6 +24,10 @@ await describe("tryCensor", async () => {
 	});
 	await it("should not censor fonts", () => {
 		strictEqual(tryCensor("𝐌𝐢𝐧𝐭 𝐝𝐚𝐲 𝐢𝐧𝐟𝐨"), false);
+	});
+	await it("should censor emojis", () => {
+		ok(tryCensor("🅰🇺✝🅾🇲⭕🇩Ⓜ🇺✝📧"));
+		ok(tryCensor("🇦🇺🇹🇴🇲🇴🇩🇲🇺🇹🇪"));
 	});
 });
 await describe("censor", async () => {

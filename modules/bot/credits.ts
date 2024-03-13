@@ -1,17 +1,17 @@
 import {
+	inlineCode,
+	type ChatInputCommandInteraction,
 	type Snowflake,
 	type User,
-	type ChatInputCommandInteraction,
-	inlineCode,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import pkg from "../../package.json" assert { type: "json" };
+import constants from "../../common/constants.js";
 import lockFile from "../../package-lock.json" assert { type: "json" };
+import pkg from "../../package.json" assert { type: "json" };
+import { columnize } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
-import constants from "../../common/constants.js";
-import { columns } from "../../util/discord.js";
 
 const designers = "966174686142672917",
 	developers = "938439909742616616",
@@ -45,7 +45,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 
 			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
 		})
-		.sort(([one], [two]) => one.localeCompare(two));
+		.toSorted(([one], [two]) => one.localeCompare(two));
 
 	await interaction.reply({
 		embeds: [
@@ -61,14 +61,13 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 						value: await getRole(testers),
 						inline: true,
 					},
-					...columns(
+					...(await columnize(
 						dependencies,
 						"🗄️ Third-party code libraries",
-						2,
 						([specifier, link]) =>
 							"- " +
 							(link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
-					),
+					)),
 				],
 
 				color: constants.themeColor,

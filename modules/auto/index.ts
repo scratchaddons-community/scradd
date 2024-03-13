@@ -1,26 +1,28 @@
 import {
-	ChannelType,
-	MessageType,
-	type PartialMessage,
-	type Message,
 	ApplicationCommandType,
-	type Snowflake,
-	type APIEmbed,
-	ComponentType,
 	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	MessageType,
+	type APIEmbed,
 	type BaseMessageOptions,
+	type Message,
+	type PartialMessage,
+	type Snowflake,
 } from "discord.js";
-import { getSettings } from "../settings.js";
-import { BOARD_EMOJI } from "../board/misc.js";
+import { setTimeout as wait } from "node:timers/promises";
+import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
-import { autoreactions, dad } from "./secrets.js";
-import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
-import { getMatches, handleMatch } from "./scratch.js";
-import constants from "../../common/constants.js";
+import { BOARD_EMOJI } from "../board/misc.js";
+import { getSettings } from "../settings.js";
+import autoreactions from "./autos-data.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
+import dad from "./dad.js";
+import { getMatches, handleMatch } from "./scratch.js";
 
 const REACTION_CAP = 3;
 
@@ -55,19 +57,18 @@ defineEvent("messageCreate", async (message) => {
 	if (response) {
 		if (response === true) return;
 		const isArray = Array.isArray(response);
-		if (!isArray) await message.reply(response);
-		else if (typeof response[0] === "object") {
+		if (isArray) {
 			const reply = await message.reply(response[0]);
 			for (const action of response.slice(1)) {
 				if (typeof action === "number") {
-					await new Promise((resolve) => setTimeout(resolve, action));
+					await wait(action);
 					continue;
 				}
 
 				const edited = await reply.edit(action).catch(() => void 0);
 				if (!edited) break;
 			}
-		}
+		} else await message.reply(response);
 		await learn(message);
 		return;
 	}
@@ -96,8 +97,8 @@ defineEvent("messageCreate", async (message) => {
 				const result = new RegExp(
 					type === "partial" || type === "raw"
 						? match
-						: `${type === "full" ? "^" : "\\b"}${match}${
-								type === "plural" ? "(?:e?s)?" : ""
+						: `${type === "full" ? "^" : "\\b"}(?:${match})${
+								type === "plural" ? /(?:e?s)?/.source : ""
 						  }${type === "full" ? "$" : "\\b"}`,
 					"iu",
 				).test(type === "raw" ? message.content : content);
@@ -131,7 +132,7 @@ defineEvent("messageUpdate", async (_, message) => {
 
 async function handleMutatable(
 	message: Message,
-): Promise<(BaseMessageOptions | number | string)[] | BaseMessageOptions | true | undefined> {
+): Promise<BaseMessageOptions | true | [BaseMessageOptions, ...(number | string)[]] | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
@@ -194,7 +195,7 @@ async function handleMutatable(
 		if (name && message.member) {
 			const response = dad(name, message.member);
 			return Array.isArray(response)
-				? [
+				? ([
 						{
 							content: response[0],
 							files: [],
@@ -203,7 +204,7 @@ async function handleMutatable(
 							allowedMentions: { users: [], repliedUser: true },
 						},
 						...response.slice(1),
-				  ]
+				  ] as const)
 				: {
 						content: response,
 						files: [],

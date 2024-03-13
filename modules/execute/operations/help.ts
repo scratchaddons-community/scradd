@@ -2,13 +2,13 @@ import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	inlineCode,
-	type ApplicationCommandSubCommand,
 	type APIEmbed,
+	type ApplicationCommandSubCommand,
 	type ChatInputCommandInteraction,
 } from "discord.js";
-import type { CustomOperation } from "../util.js";
-import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
 import constants from "../../../common/constants.js";
+import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
+import type { CustomOperation } from "../util.js";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,
@@ -46,7 +46,7 @@ const data: CustomOperation = {
 					(option): option is ApplicationCommandSubCommand =>
 						option.type === ApplicationCommandOptionType.Subcommand &&
 						option.name === subcommandName,
-				)) ??
+				)) ||
 				schemas[operationName]);
 
 		await interaction.editReply({
@@ -106,7 +106,7 @@ export function listOperations(
 		color: constants.themeColor,
 		title: "Available Operations",
 		description: Object.values(schemas)
-			.sort(({ name: one }, { name: two }) => one.localeCompare(two))
+			.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 			.map((schema) => inlineCode(OPERATION_PREFIX + schema.name) + ": " + schema.description)
 			.join("\n"),
 	};

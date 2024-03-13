@@ -1,7 +1,7 @@
 import type { Snowflake } from "discord.js";
-import Database from "../../common/database.js";
-import config from "../../common/config.js";
 import { client } from "strife.js";
+import config from "../../common/config.js";
+import Database from "../../common/database.js";
 
 export enum SpecialReminders {
 	Weekly,

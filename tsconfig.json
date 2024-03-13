@@ -8,6 +8,7 @@
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
 		"lib": ["es2023"],
@@ -25,10 +26,13 @@
 		"strict": true,
 		"stripInternal": true,
 		"target": "es2022",
-		"verbatimModuleSyntax": true,
-		"types": ["node"]
+		"paths": {
+			"*": ["./common/typedefs/*.d.ts", "./node_modules/@types/*", "./node_modules/*"]
+		},
+		"types": ["node"],
+		"verbatimModuleSyntax": true
 	},
-	"exclude": ["node_modules", ".git", "dist"],
+	"exclude": ["./node_modules", "./.git", "./dist"],
 	"typeAcquisition": { "enable": true },
-	"include": ["**/*", ".**/*", ".*"]
+	"include": ["./**/*", "./.*"]
 }

@@ -1,17 +1,19 @@
-import { cleanDatabaseListeners } from "../common/database.js";
-import http from "node:http";
-import logError from "../modules/logging/errors.js";
 import { createReadStream, promises as fileSystem } from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { client } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import appealRequest from "../modules/forms/appeals/showAppeal.js";
-import pkg from "../package.json" assert { type: "json" };
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { cleanDatabaseListeners } from "../common/database.js";
+import appealRequest from "../modules/forms/appeals/show-appeal.js";
+import logError from "../modules/logging/errors.js";
 import linkScratchRole from "../modules/roles/scratch.js";
+import suggestionsPage from "../modules/suggestions/web.js";
+import pkg from "../package.json" assert { type: "json" };
 import { getRequestUrl } from "../util/text.js";
 
+const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
 	"#" + constants.themeColor.toString(16),
@@ -23,9 +25,10 @@ const SORA_DIRECTORY = path.dirname(
 const server = http.createServer(async (request, response) => {
 	try {
 		const requestUrl = getRequestUrl(request);
-		const pathname = requestUrl.pathname.toLowerCase();
+		const pathname = (
+			requestUrl.pathname.endsWith("/") ? requestUrl.pathname : `${requestUrl.pathname}/`
+		).toLowerCase();
 		switch (pathname) {
-			case "/clean-database-listeners":
 			case "/clean-database-listeners/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					return response
@@ -38,18 +41,21 @@ const server = http.createServer(async (request, response) => {
 
 				return;
 			}
-			case "/ban-appeal":
 			case "/ban-appeal/": {
 				return await appealRequest(request, response);
 			}
-			case "/link-scratch":
 			case "/link-scratch/": {
 				return await linkScratchRole(request, response);
 			}
-			case "/style.css": {
+			case "/style.css/": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
 			}
-			case "/icon.png": {
+			case "/discord.css/": {
+				return response
+					.writeHead(200, { "content-type": "text/css" })
+					.end(DISCORD_CSS_FILE);
+			}
+			case "/icon.png/": {
 				const options = { extension: "png", forceStatic: true, size: 128 } as const;
 				return response
 					.writeHead(301, {
@@ -58,7 +64,6 @@ const server = http.createServer(async (request, response) => {
 					})
 					.end();
 			}
-			case "":
 			case "/": {
 				return response
 					.writeHead(301, {
@@ -71,15 +76,23 @@ const server = http.createServer(async (request, response) => {
 		}
 
 		const segments = pathname.split("/");
-		if (segments[1] === "sora") {
-			const filePath = path.join(SORA_DIRECTORY, segments.slice(2).join("/"));
-			if (!(await fileSystem.access(filePath).catch(() => true)))
+		switch (segments[1]) {
+			case "sora": {
+				const filePath = path.join(SORA_DIRECTORY, segments.slice(2).join("/"));
+				if (await fileSystem.access(filePath).catch(() => true)) break;
 				return createReadStream(filePath).pipe(response);
+			}
+			case "suggestions": {
+				return await suggestionsPage(request, response, segments[2]);
+			}
+			default: {
+				break;
+			}
 		}
 		response.writeHead(404, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
 	} catch (error) {
+		await logError(error, request.url ?? "").catch(console.error);
 		response.writeHead(500).end("Internal Server Error");
-		await logError(error, request.url ?? "");
 	}
 });
 

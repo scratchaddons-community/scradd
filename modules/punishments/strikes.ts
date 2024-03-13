@@ -2,17 +2,17 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type User,
-	type RepliableInteraction,
-	type Message,
 	type InteractionResponse,
+	type Message,
+	type RepliableInteraction,
+	type User,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { mentionUser } from "../settings.js";
-import filterToStrike, { listStrikes } from "./util.js";
 import { EXPIRY_LENGTH } from "./misc.js";
+import filterToStrike, { listStrikes } from "./util.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
@@ -122,7 +122,11 @@ export async function getStrikeById(
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
+					{
+						name: "⚠️ Count",
+						value: strike.count < 1 ? "verbal" : Math.floor(strike.count).toString(),
+						inline: true,
+					},
 					...(moderator ? [{ name: "🛡 Moderator", value: moderator, inline: true }] : []),
 					...(user
 						? [

@@ -40,6 +40,10 @@ module.exports = {
 			},
 		},
 		{
+			files: "common/typedefs/**",
+			rules: { "unicorn/filename-case": "off" },
+		},
+		{
 			files: [
 				"modules/_private/**",
 				"modules/auto/secrets.ts",
@@ -60,10 +64,6 @@ module.exports = {
 	root: true,
 	rules: {
 		"@typescript-eslint/consistent-type-definitions": ["error", "type"],
-		"@typescript-eslint/consistent-type-imports": [
-			"error",
-			{ fixStyle: "inline-type-imports" },
-		],
 		"@typescript-eslint/explicit-function-return-type": [
 			"error",
 			{
@@ -95,7 +95,7 @@ module.exports = {
 			},
 			{
 				custom: { match: false, regex: /\d/.source },
-				filter: { match: false, regex: /^_$/.source },
+				filter: { match: false, regex: /^_+$/.source },
 				format: ["camelCase"],
 				selector: "parameter",
 			},
@@ -179,7 +179,7 @@ module.exports = {
 		"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/] }],
 		"unicorn/consistent-destructuring": "off",
 		"unicorn/explicit-length-check": "off",
-		"unicorn/filename-case": ["error", { case: "camelCase" }],
+		"unicorn/filename-case": ["error", { case: "kebabCase" }],
 		"unicorn/no-array-callback-reference": "off",
 		"unicorn/no-array-reduce": "off",
 		"unicorn/no-await-expression-member": "off",

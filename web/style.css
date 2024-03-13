@@ -7,8 +7,6 @@
 }
 
 html {
-	height: 100%;
-	width: 100%;
 	padding: 0;
 	margin: 0;
 }
@@ -19,7 +17,7 @@ body {
 	margin: auto;
 }
 
-.nav {
+nav {
 	background-color: var(--theme-color);
 	height: 4rem;
 	color: white;
@@ -32,9 +30,24 @@ body {
 	padding: 0 10%;
 	align-items: center;
 	display: flex;
+	z-index: 1;
 }
 
 a {
+	text-decoration: none;
+	color: var(--theme-color);
+}
+
+a:hover {
+	text-decoration: solid;
+}
+
+nav a,
+h1 a {
+	color: inherit;
+}
+
+h1 a:hover {
 	color: var(--theme-color);
 	text-decoration: none;
 }
@@ -43,7 +56,7 @@ a {
 	margin-top: 3rem;
 }
 
-.scradd-nav {
+.nav-logo {
 	height: 3rem;
 	margin-right: 0.5rem;
 }

@@ -1,7 +1,7 @@
-import { time, TimestampStyles, type ChatInputCommandInteraction } from "discord.js";
+import { TimestampStyles, time, type ChatInputCommandInteraction } from "discord.js";
 import { client } from "strife.js";
-import pkg from "../../package.json" assert { type: "json" };
 import constants from "../../common/constants.js";
+import pkg from "../../package.json" assert { type: "json" };
 
 export default async function status(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });

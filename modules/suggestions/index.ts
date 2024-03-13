@@ -2,19 +2,23 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AuditLogEvent,
+	Colors,
+	ForumChannel,
+	MessageType,
 	ThreadChannel,
 	type Snowflake,
-	ForumChannel,
-	Colors,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
-import top from "./top.js";
+import constants from "../../common/constants.js";
+import { formatAnyEmoji, stripMarkdown } from "../../util/markdown.js";
+import { lerpColors } from "../../util/numbers.js";
+import { truncateText } from "../../util/text.js";
+import { ignoredDeletions } from "../logging/messages.js";
+import type { AuditLog } from "../logging/misc.js";
 import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import updateReactions, { addToDatabase } from "./reactions.js";
-import { lerpColors } from "../../util/numbers.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
-import type { AuditLog } from "../logging/misc.js";
+import top from "./top.js";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -126,7 +130,7 @@ defineChatCommand(
 
 			all: {
 				description:
-					"Include denied suggestions from the archive alongside accepted ones (defaults to false)",
+					"Include denied and invalid suggestions from the archive alongside accepted ones (defaults to false)",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
@@ -141,4 +145,48 @@ defineMenuCommand(
 );
 defineButton("suggestions", async (interaction, userId) => {
 	await top(interaction, { user: await client.users.fetch(userId) });
+});
+
+const pinnedMessages = new Set<Snowflake>();
+defineMenuCommand(
+	{ name: "Pin Message", type: ApplicationCommandType.Message, restricted: true },
+	async (interaction) => {
+		if (!interaction.targetMessage.pinnable)
+			return await interaction.reply(
+				`${constants.emojis.statuses.no} That message can’t be pinned!`,
+			);
+
+		if (interaction.targetMessage.pinned) {
+			await interaction.targetMessage.unpin(`Unpinned by ${interaction.user.toString()}`);
+			await interaction.reply(
+				`${constants.emojis.statuses.yes} Unpinned [message](<${interaction.targetMessage.url}>)!`,
+			);
+		} else {
+			await interaction.targetMessage.pin(`Pinned by ${interaction.user.toString()}`);
+			await interaction.reply(
+				`${constants.emojis.statuses.yes} Pinned [message](<${interaction.targetMessage.url}>)!`,
+			);
+			pinnedMessages.add(interaction.targetMessage.id);
+		}
+	},
+);
+defineEvent("messageCreate", async (message) => {
+	if (
+		message.type === MessageType.ChannelPinnedMessage &&
+		message.reference?.messageId &&
+		pinnedMessages.has(message.reference.messageId)
+	) {
+		ignoredDeletions.add(message.id);
+		await message.delete();
+	}
+});
+
+defineEvent("messageCreate", async (message) => {
+	if (message.channel.id === config.channels.updates?.id) {
+		await message.startThread({
+			name: truncateText(stripMarkdown(message.cleanContent) || "New update!", 50),
+
+			reason: "New upcoming update",
+		});
+	}
 });

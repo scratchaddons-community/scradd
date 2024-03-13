@@ -1,12 +1,12 @@
-import { ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
+import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
-import { defineChatCommand, defineButton, defineModal, defineMenuCommand } from "strife.js";
+import { syncConfigButton } from "../execute/operations/config.js";
+import credits from "./credits.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
 import status from "./status.js";
-import credits from "./credits.js";
-import { syncConfigButton } from "../execute/operations/config.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -21,9 +21,9 @@ if (process.env.NODE_ENV === "production") {
 	defineChatCommand(
 		{ name: "restart", description: "Restart the bot", restricted: true },
 		async (interaction) => {
-			await cleanDatabaseListeners();
-			await interaction.reply("Restarts bot…");
 			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
+			await interaction.reply("Restarts bot…");
+			await cleanDatabaseListeners();
 			process.exit(1);
 		},
 	);
@@ -31,9 +31,9 @@ if (process.env.NODE_ENV === "production") {
 	defineChatCommand(
 		{ name: "kill", description: "Kill the bot", restricted: true },
 		async (interaction) => {
-			await cleanDatabaseListeners();
-			await interaction.reply("Killing bot…");
 			process.emitWarning(`${interaction.user.tag} is killing the bot`);
+			await interaction.reply("Killing bot…");
+			await cleanDatabaseListeners();
 			process.exit(1);
 		},
 	);
@@ -69,35 +69,11 @@ defineModal("say", async (interaction, reply) => {
 });
 
 defineChatCommand(
-	{
-		name: "status",
-		description: "See my current status information",
-
-		options: {
-			message: {
-				type: ApplicationCommandOptionType.String,
-				description: "Message to send",
-				maxLength: 2000,
-			},
-		},
-		access: true,
-	},
+	{ name: "status", description: "See my current status information", access: true },
 	status,
 );
 defineChatCommand(
-	{
-		name: "credits",
-		description: "List who and what allows me to work",
-
-		options: {
-			message: {
-				type: ApplicationCommandOptionType.String,
-				description: "Message to send",
-				maxLength: 2000,
-			},
-		},
-		access: true,
-	},
+	{ name: "credits", description: "List who and what allows me to work", access: true },
 	credits,
 );
 defineButton("syncConfig", syncConfigButton);

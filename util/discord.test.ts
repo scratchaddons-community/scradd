@@ -1,19 +1,19 @@
-import { describe, it } from "node:test";
-import { disableComponents, paginate } from "./discord.js";
 import {
-	ActionRow as _ActionRow,
-	type ButtonComponent,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
+	ActionRow as _ActionRow,
 	type APIActionRowComponent,
 	type APIMessageActionRowComponent,
 	type APITextInputComponent,
-	type TextInputComponent,
+	type ButtonComponent,
+	type InteractionReplyOptions,
 	type MessageActionRowComponent,
+	type TextInputComponent,
 } from "discord.js";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import { describe, it } from "node:test";
 import constants from "../common/constants.js";
+import { disableComponents, paginate } from "./discord.js";
 
 // @ts-expect-error TS2675
 class ActionRow<T extends MessageActionRowComponent | TextInputComponent> extends _ActionRow<T> {
@@ -158,13 +158,15 @@ await describe("paginate", async () => {
 				embeds: [
 					{
 						title: "Pagination Test",
-						description: "1) 1\n2) 2\n3) 3\n4) 4\n5) 5\n6) 6\n7) 7\n8) 8\n9) 9\n10) 10",
+						description: "1. 1\n2. 2\n3. 3\n4. 4\n5. 5\n6. 6\n7. 7\n8. 8\n9. 9\n10. 10",
+						fields: [],
 						footer: { text: `Page 1/1 • 10 items` },
 						author: undefined,
 						color: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 					},
 				],
 				ephemeral: false,
+				fetchReply: true,
 			},
 		]);
 	});
@@ -178,17 +180,17 @@ await describe("paginate", async () => {
 			{ title: "Pagination Test", singular: "item", user: false, ephemeral: true },
 		);
 	});
-	await it("should respect the `perPage` option", async () => {
+	await it("should respect the `pageLength` option", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6],
 			(value) => value.toString(),
 			(message) => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
-				strictEqual(embed.description, "1) 1\n2) 2\n3) 3");
+				strictEqual(embed.description, "1. 1\n2. 2\n3. 3");
 				strictEqual(embed.footer?.text, `Page 1/2 • 6 items`);
 			},
-			{ title: "Pagination Test", singular: "item", user: false, perPage: 3 },
+			{ title: "Pagination Test", singular: "item", user: false, pageLength: 3 },
 		);
 	});
 	await it("should respect the `rawOffset` option", async () => {
@@ -201,7 +203,7 @@ await describe("paginate", async () => {
 			(message) => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
-				strictEqual(embed.description, "__21) 21__\n22) 22\n23) 23\n24) 24\n25) 25");
+				strictEqual(embed.description, "__21. 21__\n22. 22\n23. 23\n24. 24\n25. 25");
 				strictEqual(embed.footer?.text, `Page 2/2 • 25 items`);
 			},
 			{ title: "Pagination Test", singular: "item", user: false, rawOffset: 20 },

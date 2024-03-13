@@ -1,37 +1,38 @@
 import {
-	type ButtonInteraction,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	time,
 	TimestampStyles,
 	User,
+	time,
 	userMention,
+	type ButtonInteraction,
 	type InteractionResponse,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import { escapeMessage } from "../../util/markdown.js";
 import { convertBase } from "../../util/numbers.js";
 import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
-import giveXp from "../xp/giveXp.js";
-import filterToStrike, { strikeDatabase } from "./util.js";
+import giveXp from "../xp/give-xp.js";
 import {
 	DEFAULT_STRIKES,
 	EXPIRY_LENGTH,
+	MAX_STRIKES,
 	MUTE_LENGTHS,
 	PARTIAL_STRIKE_COUNT,
-	XP_PUNISHMENT,
 	STRIKES_PER_MUTE,
+	XP_PUNISHMENT,
 } from "./misc.js";
-import { escapeMessage } from "../../util/markdown.js";
+import filterToStrike, { strikeDatabase } from "./util.js";
 
 export default async function warn(
 	user: GuildMember | User,
 	reason: string,
-	strikes: number = DEFAULT_STRIKES,
+	rawStrikes: number = DEFAULT_STRIKES,
 	contextOrModerator: User | string = client.user,
-): Promise<boolean> {
+): Promise<boolean | "no-dm"> {
 	if ((user instanceof GuildMember ? user.user : user).bot) return false;
 	const allUserStrikes = strikeDatabase.data.filter(
 		(strike) =>
@@ -48,7 +49,10 @@ export default async function warn(
 		0,
 	);
 
-	strikes = Math.max(Math.round(strikes * 4) / 4, PARTIAL_STRIKE_COUNT);
+	const strikes = Math.min(
+		MAX_STRIKES,
+		Math.max(Math.round(rawStrikes * 4) / 4, PARTIAL_STRIKE_COUNT),
+	);
 	const displayStrikes = Math.max(Math.trunc(strikes), 1);
 	const moderator = contextOrModerator instanceof User ? contextOrModerator : client.user;
 	const context = contextOrModerator instanceof User ? "" : contextOrModerator;
@@ -69,7 +73,7 @@ export default async function warn(
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
-	const { url } = await user
+	const dm = await user
 		.send({
 			embeds: [
 				{
@@ -111,9 +115,9 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => logMessage);
+		.catch(() => void 0);
 
-	await giveXp(user, url, XP_PUNISHMENT * strikes);
+	await giveXp(user, (dm ?? logMessage).url, XP_PUNISHMENT * strikes);
 
 	strikeDatabase.data = [
 		...strikeDatabase.data,
@@ -128,10 +132,7 @@ export default async function warn(
 		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
 		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 			? member.ban({ reason: "Too many strikes" })
-			: log(
-					`${LoggingErrorEmoji} Missing permissions to ban ${user.toString()}`,
-					LogSeverity.Alert,
-			  ));
+			: log(`${LoggingErrorEmoji} Unable to ban ${user.toString()}`, LogSeverity.Alert));
 		return true;
 	}
 
@@ -151,7 +152,7 @@ export default async function warn(
 					"Too many strikes",
 			  )
 			: log(
-					`${LoggingErrorEmoji} Missing permissions to mute ${user.toString()} for ${addedMuteLength} ${
+					`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
 						process.env.NODE_ENV === "production" ? "hour" : "minute"
 					}${addedMuteLength === 1 ? "" : "s"}`,
 					LogSeverity.Alert,
@@ -169,7 +170,7 @@ export default async function warn(
 			.catch(() => void 0);
 	}
 
-	return true;
+	return dm ? true : "no-dm";
 }
 export async function removeStrike(
 	interaction: ButtonInteraction,

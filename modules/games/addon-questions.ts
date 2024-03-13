@@ -1,8 +1,8 @@
-import { escapeMessage } from "../../util/markdown.js";
-import constants from "../../common/constants.js";
 import addons from "@sa-community/addons-data" assert { type: "json" };
-import { trimPatchVersion } from "../../util/text.js";
 import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
+import constants from "../../common/constants.js";
+import { escapeMessage } from "../../util/markdown.js";
+import { trimPatchVersion } from "../../util/text.js";
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
 export type GroupName = typeof GROUP_NAMES[number];

@@ -1,11 +1,9 @@
-import { Colors, type ColorResolvable, FormattingPatterns } from "discord.js";
-import config from "../../common/config.js";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
+import { Colors, FormattingPatterns, type ColorResolvable } from "discord.js";
+import config from "../../common/config.js";
 
 export const CUSTOM_ROLE_PREFIX = "✨ ";
 
-const isTwemoji = new RegExp(`^${twemojiRegexp.default.source}$`);
-const isServerEmoji = new RegExp(`^${FormattingPatterns.Emoji.source}$`);
 const validContentTypes = ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp"];
 /** Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URI, string starting with https:// */
 export async function resolveIcon(
@@ -13,9 +11,13 @@ export async function resolveIcon(
 ): Promise<
 	{ icon: string; unicodeEmoji: null } | { unicodeEmoji: string; icon: null } | undefined
 > {
-	if (isTwemoji.test(icon)) return { unicodeEmoji: icon, icon: null };
+	// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
+	const twemoji = icon.match(twemojiRegexp.default);
+	if (twemoji?.[0] === icon) return { unicodeEmoji: icon, icon: null };
 
-	const id = icon.match(isServerEmoji)?.groups?.id || (/^\d{17,20}$/.test(icon) && icon);
+	const serverEmoji = FormattingPatterns.Emoji.exec(icon);
+	const id =
+		(serverEmoji?.[0] === icon && serverEmoji.groups?.id) || (/^\d{17,20}$/.test(icon) && icon);
 	const url = id && config.guild.emojis.resolve(id)?.url;
 	if (url) return { icon: url, unicodeEmoji: null };
 

@@ -1,22 +1,22 @@
 import {
-	ComponentType,
-	type ChatInputCommandInteraction,
-	type Snowflake,
 	ButtonStyle,
+	ComponentType,
 	TextInputStyle,
 	inlineCode,
-	type User,
+	type ChatInputCommandInteraction,
 	type GuildMember,
+	type Snowflake,
+	type User,
 } from "discord.js";
+import fileSystem from "node:fs/promises";
 import config from "../../common/config.js";
-import { recentXpDatabase } from "../xp/util.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
+import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
-import constants from "../../common/constants.js";
-import fileSystem from "node:fs/promises";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
+import { recentXpDatabase } from "../xp/util.js";
+import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -298,7 +298,10 @@ export default async function hangman(
 			files: [
 				{
 					attachment: await fileSystem.readFile(
-						`./modules/games/hangmanPhotos/${Math.min(wrongCount, MAX_WRONGS - 1)}.png`,
+						`./modules/games/hangman-photos/${Math.min(
+							wrongCount,
+							MAX_WRONGS - 1,
+						)}.png`,
 					),
 					name: "hangman.png",
 				},
@@ -352,7 +355,7 @@ async function makeCanvasFiles(
 	const canvas = createCanvas(200, 181);
 	const context = canvas.getContext("2d");
 	context.drawImage(
-		await loadImage(`./modules/games/hangmanPhotos/${win ? "win" : MAX_WRONGS - 1}.png`),
+		await loadImage(`./modules/games/hangman-photos/${win ? "win" : MAX_WRONGS - 1}.png`),
 		0,
 		0,
 		canvas.width,

@@ -1,27 +1,28 @@
-import { client } from "strife.js";
 import {
-	BUMPING_THREAD,
-	COMMAND_ID,
-	type Reminder,
-	SpecialReminders,
-	remindersDatabase,
-} from "./misc.js";
-import getWeekly, { getChatters } from "../xp/weekly.js";
-import { convertBase } from "../../util/numbers.js";
-import {
+	ActivityType,
 	ChannelType,
 	MessageFlags,
 	TimestampStyles,
 	chatInputApplicationCommandMention,
 	time,
 	userMention,
-	ActivityType,
 } from "discord.js";
+import { client } from "strife.js";
+import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
-import config from "../../common/config.js";
+import { statuses } from "../../common/strings.js";
+import { convertBase } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
+import getWeekly, { getChatters } from "../xp/weekly.js";
+import {
+	BUMPING_THREAD,
+	COMMAND_ID,
+	SpecialReminders,
+	remindersDatabase,
+	type Reminder,
+} from "./misc.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -37,23 +38,6 @@ export default async function queueReminders(): Promise<NodeJS.Timeout | undefin
 		return nextReminder;
 	}
 }
-
-const STATUSES = [
-	"Watching the SA server!",
-	"Hope for no bugs…",
-	"Dating Callum",
-	"e",
-	"Moderating Scratch Addons",
-	"Hi, I’m Scradd!",
-	"Rico, status",
-	"Scanning potatoes",
-	"Try /addon!",
-	"beep boop beep",
-	"ims scradd",
-	"alan 👑",
-	"strawberries 😌",
-	"Farming dangos",
-].toSorted(() => Math.random() - 0.5);
 
 async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
@@ -201,7 +185,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.ChangeStatus: {
-					const next = (Number(reminder.reminder) + 1) % STATUSES.length;
+					const next = (Number(reminder.reminder) + 1) % statuses.length;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -217,7 +201,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: STATUSES[next],
+						state: statuses[next],
 					});
 					continue;
 				}

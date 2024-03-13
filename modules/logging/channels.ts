@@ -1,23 +1,25 @@
 import { unifiedDiff } from "difflib";
 import {
-	type AuditLogEvent,
-	Base,
-	ChannelType,
 	AuditLogOptionsType,
-	userMention,
-	roleMention,
-	channelMention,
-	type DMChannel,
+	Base,
+	BaseChannel,
+	ChannelType,
 	ForumLayoutType,
-	type NonThreadGuildBasedChannel,
 	SortOrderType,
+	TextChannel,
 	ThreadAutoArchiveDuration,
 	VideoQualityMode,
-	BaseChannel,
+	channelMention,
+	roleMention,
+	userMention,
+	type AuditLogEvent,
+	type DMChannel,
+	type NonThreadGuildBasedChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
+import { messageDeleteBulk } from "./messages.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
 export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(
@@ -42,6 +44,9 @@ export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>
 	);
 }
 export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>): Promise<void> {
+	if (entry.target instanceof TextChannel)
+		await messageDeleteBulk(entry.target.messages.cache, entry.target);
+
 	await log(
 		`${LoggingEmojis.Channel} ${
 			"name" in entry.target ? `#${entry.target.name}` : "Unknown channel"

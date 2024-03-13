@@ -1,17 +1,17 @@
 import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
-	type MessageContextMenuCommandInteraction,
-	type ModalSubmitInteraction,
 	TextInputStyle,
 	type InteractionResponse,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
+import { databaseThread } from "../../common/database.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
-import { databaseThread } from "../../common/database.js";
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
 
 export default async function editMessage(
 	interaction: MessageContextMenuCommandInteraction,
@@ -129,8 +129,10 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 		.join("\n")
 		.replace(/^-{3} \n\+{3} \n/, "");
 	const extraDiff = unifiedDiff(
-		JSON.stringify({ ...oldJSON, content: undefined }).split("\n"),
-		JSON.stringify({ ...getMessageJSON(edited), content: undefined }).split("\n"),
+		JSON.stringify({ ...oldJSON, content: undefined }, undefined, "  ").split("\n"),
+		JSON.stringify({ ...getMessageJSON(edited), content: undefined }, undefined, "  ").split(
+			"\n",
+		),
 		{ lineterm: "" },
 	)
 		.join("\n")
