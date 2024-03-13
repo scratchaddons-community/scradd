@@ -21,6 +21,7 @@ import { disableComponents } from "../../util/discord.js";
 import autoreactions from "../auto/autos-data.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
+import { CUSTOM_ROLE_PREFIX } from "../roles/misc.js";
 
 const EMPTY_TILE = "⬛";
 
@@ -396,29 +397,47 @@ async function playGame(
 
 async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<string[][]> {
 	const twemojis = [
-		"🥔",
+		"‼",
+		"⁉",
+		"⚠",
+		"🇱",
+		CUSTOM_ROLE_PREFIX.trim(),
 		"⭐",
 		"🍀",
-		"😏",
-		"😭",
-		"🗿",
+		"🍢",
+		"🎶",
+		"🏅",
+		"🏆",
+		"🏓",
+		"🐢",
+		"🐴",
 		"👀",
-		"🧐",
-		"🤨",
-		"🥶",
+		"👈",
+		"👉",
 		"💀",
 		"💩",
-		"🍢",
-		"🐴",
+		"🗿",
+		"🤨",
+		"🥔",
+		"🥶",
+		"🥺",
+		"🧐",
+		"🧪",
 		"🪀",
+		"🫂",
+		"😀",
+		"😉",
+		"😌",
+		"😎",
+		"😏",
+		"😚",
 		"😡",
-		"🎶",
+		"😭",
+		"😮",
+		"😳",
 		"😶",
 		"🙄",
-		"😎",
-		"🥺",
-		"👉",
-		"👈",
+		"🛡",
 	];
 	const secretEmojis = autoreactions.flatMap(([emoji]) => emoji);
 	const guildEmojis = (await guild.emojis.fetch())
