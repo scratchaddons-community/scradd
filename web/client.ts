@@ -1,6 +1,6 @@
-/** eslint-env browser */
+/** Eslint-env browser. */
 
-const spoilers = [ ...document.querySelectorAll(".discord-spoiler") ];
+const spoilers = [...document.querySelectorAll(".discord-spoiler")];
 for (const spoiler of spoilers) {
 	spoiler.addEventListener("click", () => {
 		if (spoiler.classList.contains("discord-spoiler")) {
