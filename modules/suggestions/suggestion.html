@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{{suggestion.title}} | Scratch Addons Suggestion</title>
 		<link rel="stylesheet" href="/style.css" />
+		<script type="module" src="/client.js"></script>
 		<link rel="stylesheet" href="/discord.css" />
 		<link rel="shortcut icon" href="/icon.png" />
 	</head>
@@ -114,17 +115,5 @@
 			</div>
 			{{/messages}}
 		</div>
-
-		<script>
-			const spoilers = document.querySelectorAll(".discord-spoiler");
-			for (const spoiler of spoilers) {
-				spoiler.addEventListener("click", () => {
-					if (spoiler.classList.contains("discord-spoiler")) {
-						spoiler.classList.remove("discord-spoiler");
-						spoiler.classList.add("discord-spoiler--revealed");
-					}
-				});
-			}
-		</script>
 	</body>
 </html>

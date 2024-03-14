@@ -1,4 +1,5 @@
 /// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
 
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";

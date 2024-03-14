@@ -17,6 +17,7 @@ const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceA
 	"#000",
 	"#" + constants.themeColor.toString(16),
 );
+const CLIENT_JS_FILE = await fileSystem.readFile("./dist/web/client.js", "utf8");
 const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const SORA_DIRECTORY = path.dirname(
 	fileURLToPath(import.meta.resolve("@fontsource-variable/sora")),
@@ -48,6 +49,11 @@ const server = http.createServer(async (request, response) => {
 			}
 			case "/style.css/": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
+			}
+			case "/client.js/": {
+				return response
+					.writeHead(200, { "content-type": "text/javascript" })
+					.end(CLIENT_JS_FILE);
 			}
 			case "/discord.css/": {
 				return response
