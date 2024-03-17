@@ -1,4 +1,9 @@
-import { cleanContent, type ForumChannel, type GuildForumTag, type Snowflake } from "discord.js";
+import {
+	cleanContent,
+	type AnyThreadChannel,
+	type GuildForumTag,
+	type Snowflake,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
@@ -7,13 +12,14 @@ import { truncateText } from "../../util/text.js";
 
 export const suggestionAnswers = [
 	"Unanswered",
-	...(config.channels.suggestions
-		? getAnswers(config.channels.suggestions).map(([, tag]) => tag.name)
-		: []),
+	...(config.channels.suggestions?.availableTags
+		.filter((tag) => tag.moderated)
+		.map((tag) => tag.name) ?? []),
 ] as const;
 
 export const suggestionsDatabase = new Database<{
 	answer: typeof suggestionAnswers[number];
+	category: string;
 	author: Snowflake;
 	count: number;
 	id: Snowflake;
@@ -55,24 +61,65 @@ export const oldSuggestions = config.channels.oldSuggestions
 	  })
 	: [];
 
-export function getAnswer(
-	appliedTags: Snowflake[],
-	channel: ForumChannel,
-): Omit<GuildForumTag, "id"> & { index: number; position: number; id?: GuildForumTag["id"] } {
-	const tags = getAnswers(channel);
-	const [index, tag] = tags.find(([, tag]) => appliedTags.includes(tag.id)) ?? [
-		-1,
-		{
-			name: channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
-			emoji: { name: "❓", id: null },
-			moderated: true,
-			id: undefined,
-		},
-	];
-
-	return { ...tag, index, position: index / (tags.length - 1) };
+export function getSuggestionData(thread: AnyThreadChannel):
+	| {
+			answer: string;
+			category: string;
+			id: Snowflake;
+			title: string;
+	  }
+	| {
+			author: Snowflake;
+			answer: string;
+			category: string;
+			id: Snowflake;
+			title: string;
+	  } {
+	const { answer, category } = parseSuggestionTags(
+		thread.appliedTags,
+		config.channels.suggestions?.availableTags ?? [],
+		suggestionAnswers[0],
+	);
+	return {
+		answer: answer.name,
+		category,
+		id: thread.id,
+		title: thread.name,
+		...(thread.ownerId && { author: thread.ownerId }),
+	};
 }
 
-export function getAnswers(channel: ForumChannel): [number, GuildForumTag][] {
-	return [...channel.availableTags.entries()].filter(([, tag]) => tag.moderated);
+export function parseSuggestionTags(
+	appliedTags: Snowflake[],
+	availableTags: GuildForumTag[],
+	defaultAnswer: string,
+): {
+	answer: Omit<GuildForumTag, "id"> & {
+		index: number;
+		position: number;
+		id?: GuildForumTag["id"];
+	};
+	category: string;
+} {
+	const { answer, categories } = availableTags.reduce<{
+		answer: Omit<GuildForumTag, "id"> & { id?: GuildForumTag["id"] };
+		categories: string[];
+	}>(
+		({ answer, categories }, tag) =>
+			tag.name !== "Other" && appliedTags.includes(tag.id)
+				? suggestionAnswers.includes(tag.name)
+					? { answer: tag, categories }
+					: { answer, categories: [...categories, tag.name] }
+				: { answer, categories },
+		{
+			answer: { name: defaultAnswer, emoji: { name: "❓", id: null }, moderated: true },
+			categories: [],
+		},
+	);
+	const answers = availableTags.filter((tag) => tag.moderated);
+	const index = answers.findIndex((tag) => answer.id === tag.name);
+	return {
+		answer: { ...answer, index, position: index / (answers.length - 1) },
+		category: (categories.length === 1 && categories[0]) || "Other",
+	};
 }
