@@ -1,21 +1,29 @@
 import { unifiedDiff } from "difflib";
 import {
-	type Message,
-	type PartialMessage,
-	type Collection,
-	type GuildTextBasedChannel,
-	type MessageReaction,
 	Colors,
 	messageLink,
+	type Collection,
+	type GuildTextBasedChannel,
+	type Message,
+	type MessageReaction,
+	type PartialMessage,
+	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
-import { getBaseChannel, messageToText, extractMessageExtremities } from "../../util/discord.js";
-import log, { LogSeverity, shouldLog, LoggingEmojis } from "./misc.js";
-import { joinWithAnd } from "../../util/text.js";
 import { databaseThread } from "../../common/database.js";
+import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
+import { joinWithAnd } from "../../util/text.js";
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "./misc.js";
 
-export async function messageDelete(message: Message | PartialMessage) {
-	if (!shouldLog(message.channel) || message.flags.has("Ephemeral")) return;
+export const ignoredDeletions = new Set<Snowflake>();
+
+export async function messageDelete(message: Message | PartialMessage): Promise<void> {
+	if (
+		!shouldLog(message.channel) ||
+		message.flags.has("Ephemeral") ||
+		ignoredDeletions.delete(message.id)
+	)
+		return;
 	const shush =
 		message.partial ||
 		(config.channels.modlogs?.id === getBaseChannel(message.channel)?.id &&
@@ -58,7 +66,7 @@ export async function messageDelete(message: Message | PartialMessage) {
 export async function messageDeleteBulk(
 	messages: Collection<string, Message | PartialMessage>,
 	channel: GuildTextBasedChannel,
-) {
+): Promise<void> {
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
@@ -91,6 +99,7 @@ export async function messageDeleteBulk(
 		...(unknownCount ? [`${unknownCount} unknown users`] : []),
 	];
 
+	const url = messages.first()?.url;
 	await log(
 		`${LoggingEmojis.MessageDelete} ${messages.size} messages by ${joinWithAnd(
 			authors,
@@ -98,14 +107,14 @@ export async function messageDeleteBulk(
 		LogSeverity.ContentEdit,
 		{
 			files: [{ content: messagesInfo, extension: "md" }],
-			buttons: [{ label: "Context", url: messages.first()?.url ?? "" }],
+			buttons: url ? [{ label: "Context", url }] : [],
 		},
 	);
 }
 export async function messageReactionRemoveAll(
 	partialMessage: Message | PartialMessage,
 	reactions: Collection<string, MessageReaction>,
-) {
+): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
 	if (!shouldLog(message.channel)) return;
@@ -136,7 +145,7 @@ export async function messageReactionRemoveAll(
 export async function messageUpdate(
 	oldMessage: Message | PartialMessage,
 	newMessage: Message | PartialMessage,
-) {
+): Promise<void> {
 	if (newMessage.partial) return;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
 
@@ -175,15 +184,15 @@ export async function messageUpdate(
 		);
 	}
 
-	if (!oldMessage.partial && !newMessage.author.bot) {
+	if (!newMessage.author.bot) {
 		const files = [];
-		const contentDiff = unifiedDiff(
-			oldMessage.content.split("\n"),
-			newMessage.content.split("\n"),
-			{ lineterm: "" },
-		)
-			.join("\n")
-			.replace(/^-{3} \n\+{3} \n/, "");
+		const contentDiff =
+			!oldMessage.partial &&
+			unifiedDiff(oldMessage.content.split("\n"), newMessage.content.split("\n"), {
+				lineterm: "",
+			})
+				.join("\n")
+				.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
 		const changedFiles = new Set(newMessage.attachments.map((attachment) => attachment.url));
@@ -195,9 +204,9 @@ export async function messageUpdate(
 
 		if (files.length) {
 			await log(
-				`${
-					LoggingEmojis.MessageEdit
-				} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
+				`${LoggingEmojis.MessageEdit} ${
+					oldMessage.partial ? "Unknown message" : "Message"
+				} by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 					newMessage.id
 				}) edited`,
 				LogSeverity.ContentEdit,

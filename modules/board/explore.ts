@@ -1,20 +1,20 @@
 import {
-	ChannelType,
 	ButtonStyle,
-	type GuildBasedChannel,
-	type Snowflake,
+	ChannelType,
 	ComponentType,
+	type GuildBasedChannel,
 	type InteractionReplyOptions,
 	type MessageEditOptions,
 	type RepliableInteraction,
+	type Snowflake,
 } from "discord.js";
-import { boardDatabase, generateBoardMessage, boardReactionCount } from "./misc.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { asyncFilter, firstTrueyPromise } from "../../util/promises.js";
+import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
+import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
 
 export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
@@ -36,7 +36,7 @@ async function textChannelMatches(
 
 	switch (channelWanted.type) {
 		case ChannelType.GuildCategory: {
-			return await firstTrueyPromise(
+			return await anyPromise(
 				channelWanted.children
 					.valueOf()
 					.map(async (child) => await textChannelMatches(child, channelFound, guild)),
@@ -69,7 +69,7 @@ export default async function makeSlideshow(
 			boardReactionCount(channel?.isTextBased() ? channel : undefined) * 0.4,
 		),
 	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
-) {
+): Promise<void> {
 	const ephemeral =
 		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
 	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });

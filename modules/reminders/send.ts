@@ -1,27 +1,28 @@
-import { client } from "strife.js";
 import {
-	BUMPING_THREAD,
-	COMMAND_ID,
-	type Reminder,
-	SpecialReminders,
-	remindersDatabase,
-} from "./misc.js";
-import getWeekly, { getChatters } from "../xp/weekly.js";
-import { convertBase, nth } from "../../util/numbers.js";
-import {
+	ActivityType,
 	ChannelType,
 	MessageFlags,
 	TimestampStyles,
 	chatInputApplicationCommandMention,
 	time,
 	userMention,
-	ActivityType,
 } from "discord.js";
+import { client } from "strife.js";
+import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
-import config from "../../common/config.js";
+import { statuses } from "../../common/strings.js";
+import { convertBase } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
+import getWeekly, { getChatters } from "../xp/weekly.js";
+import {
+	BUMPING_THREAD,
+	COMMAND_ID,
+	SpecialReminders,
+	remindersDatabase,
+	type Reminder,
+} from "./misc.js";
 import sendQOTD from "./qotd.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
@@ -38,22 +39,6 @@ export default async function queueReminders(): Promise<NodeJS.Timeout | undefin
 		return nextReminder;
 	}
 }
-
-const STATUSES = [
-	"Watching the SA server!",
-	"Hope for no bugs…",
-	"Dating Callum",
-	"e",
-	"Moderating Scratch Addons",
-	"Hi, I’m Scradd!",
-	"Rico, status",
-	"Scanning potatoes",
-	"Try /addon!",
-	"beep boop beep",
-	"ims scradd",
-	"alan 👑",
-	"strawberries 😌",
-].toSorted(() => Math.random() - 0.5);
 
 async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	if (nextReminder) clearTimeout(nextReminder);
@@ -86,22 +71,10 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					const message = await channel.send(await getWeekly(nextWeeklyDate));
 					if (!chatters) continue;
 					const thread = await message.startThread({
-						name: `🏆 Weekly Winners week of ${
-							[
-								"January",
-								"February",
-								"March",
-								"April",
-								"May",
-								"June",
-								"July",
-								"August",
-								"September",
-								"October",
-								"November",
-								"December",
-							][date.getUTCMonth()] || ""
-						} ${nth(date.getUTCDate())}`,
+						name: `🏆 Weekly Winners week of ${new Date().toLocaleString([], {
+							month: "long",
+							day: "numeric",
+						})}`,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
@@ -127,7 +100,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					if (!count) continue;
 
 					await channel.setName(
-						`Scratch Addons - ${count.count.toLocaleString("en-us", {
+						`Scratch Addons - ${count.count.toLocaleString([], {
 							compactDisplay: "short",
 							maximumFractionDigits: 1,
 							minimumFractionDigits: +(count.count > 999),
@@ -164,6 +137,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					await cleanDatabaseListeners();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
 					process.exit(1);
+					// Fake “fall-through” since ESLint doesn’t realize this is unreacahble
 				}
 				case SpecialReminders.CloseThread: {
 					if (channel?.isThread()) await channel.setArchived(true, "Close requested");
@@ -175,10 +149,9 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				}
 				case SpecialReminders.Unban: {
 					if (typeof reminder.reminder == "string")
-						await config.guild.bans.remove(
-							reminder.reminder,
-							"Unbanned after set time period",
-						);
+						await config.guild.bans
+							.remove(reminder.reminder, "Unbanned after set time period")
+							.catch(() => void 0);
 					continue;
 				}
 				case SpecialReminders.BackupDatabases: {
@@ -213,7 +186,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.ChangeStatus: {
-					const next = (Number(reminder.reminder) + 1) % STATUSES.length;
+					const next = (Number(reminder.reminder) + 1) % statuses.length;
 
 					remindersDatabase.data = [
 						...remindersDatabase.data,
@@ -229,7 +202,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					client.user.setActivity({
 						type: ActivityType.Custom,
 						name: "status",
-						state: STATUSES[next],
+						state: statuses[next],
 					});
 					continue;
 				}
@@ -258,7 +231,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	return await queueReminders();
 }
 
-function getNextInterval() {
+function getNextInterval(): number | undefined {
 	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
 	if (!reminder) return;
 	return reminder.date - Date.now();

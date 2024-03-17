@@ -1,31 +1,31 @@
 import {
-	type AnySelectMenuInteraction,
-	type APIEmbedField,
-	type ButtonInteraction,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	GuildMember,
-	type InteractionResponse,
 	InteractionType,
-	type PrivateThreadChannel,
-	type RepliableInteraction,
 	channelMention,
+	type APIEmbedField,
+	type AnySelectMenuInteraction,
+	type ButtonInteraction,
+	type InteractionResponse,
+	type RepliableInteraction,
+	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { listStrikes } from "../punishments/misc.js";
+import { listStrikes } from "../punishments/util.js";
 import {
-	type Category,
+	MOD_CATEGORY,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	TICKET_CATEGORIES,
 	allFields,
 	categoryToDescription,
-	MOD_CATEGORY,
+	type Category,
 } from "./misc.js";
 
 export async function showTicketModal(
@@ -44,16 +44,20 @@ export async function showTicketModal(
 	interaction: AnySelectMenuInteraction | ButtonInteraction,
 	category?: Category,
 	strikeId?: string,
-) {
+): Promise<InteractionResponse | undefined> {
 	const option = interaction.isAnySelectMenu() ? interaction.values[0] : category;
 
 	if (option === SA_CATEGORY) {
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for SA help. Instead, put your suggestions in ${config.channels.suggestions?.toString()}, bug reports in ${config.channels.bugs?.toString()}, and other questions, comments, concerns, or etcetera in ${channelMention(
-				config.channels.support,
-			)}.`,
+			} Please don’t contact mods for SA help. Instead, put your suggestions in ${
+				config.channels.suggestions?.toString() ?? "#suggestions"
+			}, bug reports in ${
+				config.channels.bugs?.toString() ?? "#bugs"
+			}, and other questions, comments, concerns, or etcetera in ${
+				config.channels.support?.toString() ?? "#support"
+			}.`,
 
 			ephemeral: true,
 		});
@@ -72,7 +76,7 @@ export async function showTicketModal(
 	}
 
 	if (!option || !TICKET_CATEGORIES.includes(option))
-		throw new TypeError(`Unknown ticket category: ${option}`);
+		throw new TypeError(`Unknown ticket category: ${option ?? "undefined"}`);
 
 	const fields = allFields[option];
 
@@ -88,13 +92,13 @@ export async function showTicketModal(
 export default async function contactMods(
 	interaction: RepliableInteraction,
 	options: Category | GuildMember,
-) {
+): Promise<ThreadChannel> {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
 		options instanceof GuildMember
 			? options
-			: interaction.member || (await config.guild.members.fetch(interaction.user.id));
+			: interaction.member ?? (await config.guild.members.fetch(interaction.user.id));
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	if (!config.channels.tickets) throw new ReferenceError("Could not find tickets channel!");
@@ -143,14 +147,14 @@ export default async function contactMods(
 		return oldThread;
 	}
 
-	const thread = (await config.channels.tickets.threads.create({
+	const thread = await config.channels.tickets.threads.create({
 		name: `${member.user.displayName} (${member.id})`,
 		reason: `${interaction.user.tag} contacted ${
 			category === MOD_CATEGORY ? member.user.tag : "mods"
 		}`,
 		type: ChannelType.PrivateThread,
 		invitable: false,
-	})) as PrivateThreadChannel;
+	});
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${
@@ -169,6 +173,7 @@ export default async function contactMods(
 				(data) =>
 					thread.send({
 						...data,
+						flags: undefined,
 						embeds: [details, ...(data.embeds ?? [])],
 						content: ping,
 						allowedMentions: { parse: ["roles"] },
@@ -181,7 +186,10 @@ export default async function contactMods(
 	return thread;
 }
 
-export async function contactUser(member: GuildMember, interaction: RepliableInteraction) {
+export async function contactUser(
+	member: GuildMember,
+	interaction: RepliableInteraction,
+): Promise<void> {
 	await interaction.deferReply({ ephemeral: true });
 	const existingThread = TICKETS_BY_MEMBER[member.id];
 

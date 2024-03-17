@@ -1,23 +1,37 @@
-import { ComponentType, type User, ButtonStyle, type RepliableInteraction } from "discord.js";
+import {
+	ButtonStyle,
+	ComponentType,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+	type InteractionResponse,
+	type RepliableInteraction,
+	type User,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import { paginate } from "../../util/discord.js";
 import { nth } from "../../util/numbers.js";
-import { getLevelForXp, getXpForLevel, getFullWeeklyData, xpDatabase } from "./misc.js";
+import { getSettings, mentionUser } from "../settings.js";
+import { getLevelForXp, getXpForLevel } from "./misc.js";
+import { getFullWeeklyData, xpDatabase } from "./util.js";
 
-export default async function getUserRank(interaction: RepliableInteraction, user: User) {
-	const allXp = xpDatabase.data;
-	const top = allXp.toSorted((one, two) => Math.abs(two.xp) - Math.abs(one.xp));
+export default async function getUserRank(
+	interaction: RepliableInteraction,
+	user: User,
+): Promise<void> {
+	const allXp = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
 	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
-	const level = getLevelForXp(Math.abs(xp));
-	const xpForNextLevel = getXpForLevel(level + 1) * (Math.sign(xp) || 1);
-	const xpForPreviousLevel = getXpForLevel(level) * (Math.sign(xp) || 1);
+	const level = getLevelForXp(xp);
+	const xpForNextLevel = getXpForLevel(level + 1);
+	const xpForPreviousLevel = getXpForLevel(level);
 	const increment = xpForNextLevel - xpForPreviousLevel;
 	const xpGained = xp - xpForPreviousLevel;
 	const progress = xpGained / increment;
-	const rank = top.findIndex((info) => info.user === user.id) + 1;
+	const rank = allXp.findIndex((info) => info.user === user.id) + 1;
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
@@ -25,15 +39,12 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 	const serverRank =
 		allXp
 			.filter((entry) => guildMembers.has(entry.user))
-			.toSorted((one, two) => two.xp - one.xp)
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const rankInfo =
 		rank &&
-		`Ranked ${rank.toLocaleString("en-us")}/${top.length.toLocaleString("en-us")}${
+		`Ranked ${rank.toLocaleString()}/${allXp.length.toLocaleString()}${
 			serverRank
-				? ` (${serverRank.toLocaleString("en-us")}/${guildMembers.size.toLocaleString(
-						"en-us",
-				  )} in the server)`
+				? ` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
 				: ""
 		}`;
 
@@ -46,12 +57,8 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 				},
 
 				fields: [
-					{
-						name: "📊 Level",
-						value: (level * Math.sign(xp)).toLocaleString("en-us"),
-						inline: true,
-					},
-					{ name: "✨ XP", value: xp.toLocaleString("en-us"), inline: true },
+					{ name: "📊 Level", value: level.toLocaleString(), inline: true },
+					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
 					{
 						name: "⏳ Weekly rank",
 
@@ -65,9 +72,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 					},
 					{
 						name: constants.zws,
-						value: `**${
-							Math.sign(xp) === -1 ? "⬇ Previous" : "⬆️ Next"
-						} level progress** ${xpForNextLevel.toLocaleString("en-us")} XP needed`,
+						value: `**⬆️ Next level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 					},
 				],
 
@@ -99,7 +104,7 @@ export default async function getUserRank(interaction: RepliableInteraction, use
 	});
 }
 
-async function makeCanvasFiles(progress: number) {
+async function makeCanvasFiles(progress: number): Promise<{ attachment: Buffer; name: string }[]> {
 	if (process.env.CANVAS === "false") return [];
 
 	const { createCanvas } = await import("@napi-rs/canvas");
@@ -116,17 +121,72 @@ async function makeCanvasFiles(progress: number) {
 		context.fillStyle = "#666";
 		context.textAlign = "end";
 		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			canvas.width - paddingPixels,
 			canvas.height - paddingPixels,
 		);
 	} else {
 		context.fillStyle = "#0009";
 		context.fillText(
-			progress.toLocaleString("en-us", { maximumFractionDigits: 1, style: "percent" }),
+			progress.toLocaleString([], { maximumFractionDigits: 1, style: "percent" }),
 			paddingPixels,
 			canvas.height - paddingPixels,
 		);
 	}
 	return [{ attachment: canvas.toBuffer("image/png"), name: "progress.png" }];
+}
+
+export async function top(
+	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
+	user?: GuildMember | User,
+): Promise<InteractionResponse | undefined> {
+	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
+
+	const index = user && leaderboard.findIndex(({ user: id }) => id === user.id);
+	if (user && index === -1) {
+		return await interaction.reply({
+			content: `${
+				constants.emojis.statuses.no
+			} ${user.toString()} could not be found! Do they have any XP?`,
+
+			ephemeral: true,
+		});
+	}
+
+	await paginate(
+		leaderboard,
+		async (xp) =>
+			`${await mentionUser(
+				xp.user,
+				interaction.user,
+				interaction.guild ?? config.guild,
+			)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+		(data) => interaction.reply(data),
+		{
+			title: "XP Leaderboard",
+			singular: "user",
+			pageLength: 30,
+			columns: 3,
+
+			user: interaction.user,
+			rawOffset: index,
+			ephemeral:
+				interaction.isButton() &&
+				interaction.message.interaction?.user.id !== interaction.user.id,
+
+			async generateComponents() {
+				return (await getSettings(interaction.user, false)).useMentions === undefined
+					? [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Toggle Mentions",
+								style: ButtonStyle.Success,
+							},
+					  ]
+					: undefined;
+			},
+			customComponentLocation: "below",
+		},
+	);
 }

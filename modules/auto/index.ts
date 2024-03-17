@@ -1,21 +1,28 @@
 import {
+	ApplicationCommandType,
+	ButtonStyle,
 	ChannelType,
+	ComponentType,
 	MessageType,
+	type APIEmbed,
 	type BaseMessageOptions,
 	type Message,
-	ApplicationCommandType,
+	type PartialMessage,
+	type Snowflake,
 } from "discord.js";
-import { getSettings } from "../settings.js";
-import { BOARD_EMOJI } from "../board/misc.js";
+import { setTimeout as wait } from "node:timers/promises";
+import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getBaseChannel, reactAll } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
-import { autoreactions, dad } from "./secrets.js";
-import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
-import scratch from "./scratch.js";
-import constants from "../../common/constants.js";
+import { BOARD_EMOJI } from "../board/misc.js";
+import { getSettings } from "../settings.js";
+import autoreactions from "./autos-data.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
+import dad from "./dad.js";
+import { getMatches, handleMatch } from "./scratch.js";
 
 const REACTION_CAP = 3;
 
@@ -27,6 +34,7 @@ const ignoreTriggers = [
 	/\bsick/i,
 	/\babus/i,
 	/\bkms/i,
+	/\bkys/i,
 	/\bbleed/i,
 ];
 
@@ -45,12 +53,29 @@ defineEvent("messageCreate", async (message) => {
 		reactions++;
 	}
 
-	if (await handleMutatable(message)) {
+	const response = await handleMutatable(message);
+	if (response) {
+		if (response === true) return;
+		const isArray = Array.isArray(response);
+		if (isArray) {
+			const reply = await message.reply(response[0]);
+			for (const action of response.slice(1)) {
+				if (typeof action === "number") {
+					await wait(action);
+					continue;
+				}
+
+				const edited = await reply.edit(action).catch(() => void 0);
+				if (!edited) break;
+			}
+		} else await message.reply(response);
 		await learn(message);
 		return;
 	}
 	await learn(message);
 
+	const settings = await getSettings(message.author);
+	if (!settings.autoreactions || !canDoSecrets(message)) return;
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
 		let doReact = false;
@@ -64,7 +89,6 @@ defineEvent("messageCreate", async (message) => {
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type[1] === "ping") {
-				// todo: this triggers on raw id too?
 				doReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRoles: true,
@@ -73,10 +97,10 @@ defineEvent("messageCreate", async (message) => {
 				const result = new RegExp(
 					type === "partial" || type === "raw"
 						? match
-						: `${type === "full" ? "^" : "\\b"}${match}${
-								type === "plural" ? "(?:e?s)?" : ""
+						: `${type === "full" ? "^" : "\\b"}(?:${match})${
+								type === "plural" ? /(?:e?s)?/.source : ""
 						  }${type === "full" ? "$" : "\\b"}`,
-					"i",
+					"iu",
 				).test(type === "raw" ? message.content : content);
 
 				if (type === "negative" && result) continue reactionLoop;
@@ -88,7 +112,7 @@ defineEvent("messageCreate", async (message) => {
 		if (doReact) {
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
-			if (reactions > REACTION_CAP || !messageReactions) return;
+			if (reactions > REACTION_CAP || !messageReactions.length) return;
 		}
 	}
 });
@@ -96,71 +120,66 @@ defineEvent("messageCreate", async (message) => {
 defineEvent("messageUpdate", async (_, message) => {
 	if (message.partial) return;
 
-	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
-	const found = fetched.find(
-		(found) =>
-			found.reference?.messageId === message.id &&
-			found.author.id === client.user.id &&
-			+found.createdAt - +message.createdAt < 1000,
-	);
+	const found = await getAutoResponse(message);
+	if (found === false) return;
 
-	if (fetched.size && !found) return;
-
-	if (
-		!(await handleMutatable(
-			message,
-			found ? (data: BaseMessageOptions) => found.edit(data) : undefined,
-		))
-	)
-		await found?.edit({
-			content: constants.zws,
-			attachments: [],
-			components: [],
-			embeds: [],
-			files: [],
-		});
+	const response = await handleMutatable(message);
+	const data = typeof response === "object" && !Array.isArray(response) && response;
+	if (found)
+		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
+	else if (data) await message.reply(data);
 });
 
 async function handleMutatable(
 	message: Message,
-	send = (data: BaseMessageOptions) => message.reply(data),
-) {
-	const chatResponse = scraddChat(message);
-	if (chatResponse) {
-		await send({ content: chatResponse });
-		return true;
-	}
-
+): Promise<BaseMessageOptions | true | [BaseMessageOptions, ...(number | string)[]] | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
-	if (config.channels.modlogs?.id === baseChannel?.id) return false;
+	if (config.channels.modlogs?.id === baseChannel?.id) return;
 
-	const scratchData = await scratch(message);
-	if (scratchData) {
-		await send({ embeds: scratchData });
-		return true;
+	const settings = await getSettings(message.author);
+	if (settings.scratchEmbeds) {
+		const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
+
+		const matches = getMatches(message.content);
+		const embeds: APIEmbed[] = [];
+		for (const match of matches) {
+			const embed = await handleMatch(match);
+			if (embed) {
+				embeds.push(embed);
+				if (!notSet) embed.footer = { text: "Disable this using /settings" };
+			}
+			if (embeds.length >= 5) break;
+		}
+		if (embeds.length)
+			return {
+				content: "",
+				files: [],
+				embeds,
+				components: notSet
+					? [
+							{
+								components: [
+									{
+										customId: "scratchEmbeds_toggleSetting",
+										type: ComponentType.Button as const,
+										label: `Disable Scratch Embeds`,
+										style: ButtonStyle.Success as const,
+									},
+								],
+								type: ComponentType.ActionRow,
+							},
+					  ]
+					: [],
+			};
 	}
 
-	if (
-		message.channel.id === message.id ||
-		message.channel.isDMBased() ||
-		ignoreTriggers.some((trigger) => message.content.match(trigger))
-	)
-		return false;
+	const ignored = ignoreTriggers.some((trigger) => message.content.match(trigger));
+	if (ignored) return true;
 
-	const pingsScradd = message.mentions.has(client.user, {
-		ignoreEveryone: true,
-		ignoreRepliedUser: true,
-		ignoreRoles: true,
-	});
-	if (
-		!pingsScradd &&
-		(config.channels.info?.id === baseChannel?.id ||
-			(message.guild?.id !== config.guild.id &&
-				baseChannel?.type !== ChannelType.DM &&
-				!baseChannel?.name.match(/\bbots?\b/i)) ||
-			!(await getSettings(message.author)).autoreactions)
-	)
-		return false;
+	const chatResponse = scraddChat(message);
+	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
+
+	if (!canDoSecrets(message, true)) return;
 
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
@@ -168,63 +187,91 @@ async function handleMutatable(
 			.split(
 				/[\p{Ps}\p{Pe}\p{Pi}\p{Pf}𞥞𞥟𑜽،܀۔؛⁌᭟＂‽՜؟𑜼՝𑿿։꛴⁍፨"⸘‼՞᨟꛵꛳꛶•⸐!꛷𑅀,𖫵:⁃჻⁉𑅃፠⹉᙮𒑲‣⸏！⳺𐡗፣⳾𒑴⹍¡⳻𑂿，⳹𒑳〽᥄⁇𑂾､𛲟𒑱⸑𖺚፧𑽆、።፥𑇈⹓？𑽅꓾.፦𑗅߹;𑈼𖺗．፤𑗄︕¿𑈻⹌｡：𝪋⁈᥅𑅵᠂。；⵰﹗⹔𑻸᠈꓿᠄︖𑊩𑑍𖺘︓?၊𑑚᠃︔⸮။߸᠉⁏﹖𐮙︐︒;꘏𐮚︑𝪈𝪊꥟⸴﹒𝪉§⹁⸼﹕𑇞𝪇܂﹔𑇟﹐܁܆𑗏﹑꘎܇𑗐⸲܅𑗗꘍܄𑗕܉𑗖܃𑗑܈𑗓⁝𑗌⸵𑗍𑗎𑗔𑗋𑗊𑗒⸹؝𑥆𑗉…᠁︙․‥\n]+/gmu,
 			)[0]
-			?.split(/\s/g)
+			.split(/\s/g)
 			.slice(1)
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
 
-		if (
-			name &&
-			message.member &&
-			(pingsScradd ||
-				message.guild?.id !== config.guild.id ||
-				config.channels.bots?.id === baseChannel?.id)
-		) {
+		if (name && message.member) {
 			const response = dad(name, message.member);
-
-			if (!Array.isArray(response)) {
-				await send({
-					content: response,
-					allowedMentions: { users: [], repliedUser: true },
-				});
-				return true;
-			}
-
-			const reply = await send({
-				content: response[0],
-				allowedMentions: { users: [], repliedUser: true },
-			});
-			for (const action of response.slice(1)) {
-				if (typeof action === "number") {
-					await new Promise((resolve) => setTimeout(resolve, action));
-					continue;
-				}
-
-				const edited = await reply.edit(action).catch(() => void 0);
-				if (!edited) break;
-			}
-			return true;
+			return Array.isArray(response)
+				? ([
+						{
+							content: response[0],
+							files: [],
+							embeds: [],
+							components: [],
+							allowedMentions: { users: [], repliedUser: true },
+						},
+						...response.slice(1),
+				  ] as const)
+				: {
+						content: response,
+						files: [],
+						embeds: [],
+						components: [],
+						allowedMentions: { users: [], repliedUser: true },
+				  };
 		}
 	}
-
-	return false;
 }
 
 defineEvent("messageDelete", async (message) => {
-	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
-	await fetched
-		.find(
-			(found) =>
-				found.reference?.messageId === message.id &&
-				found.author.id === client.user.id &&
-				+found.createdAt - +message.createdAt < 1000,
-		)
-		?.delete();
+	const found = await getAutoResponse(message);
+	if (!found) return;
+
+	await found.delete();
+	autoResponses.delete(found.id);
 });
+
+const autoResponses = new Map<Snowflake, Message>();
+async function getAutoResponse(
+	message: Message | PartialMessage,
+): Promise<Message | false | undefined> {
+	const cached = autoResponses.get(message.id);
+	if (cached) return cached;
+
+	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
+	const found = fetched.find(
+		(found) =>
+			found.reference?.messageId === message.id &&
+			found.author.id === client.user.id &&
+			found.createdTimestamp - message.createdTimestamp < 1000,
+	);
+
+	if (found) autoResponses.set(message.id, found);
+	if (fetched.size && !found) return false;
+	return found;
+}
+
+function canDoSecrets(message: Message, checkDads = false): boolean {
+	if (message.channel.isDMBased()) return false;
+	if (
+		message.mentions.has(client.user, {
+			ignoreEveryone: true,
+			ignoreRepliedUser: true,
+			ignoreRoles: true,
+		})
+	)
+		return true;
+
+	if (checkDads) {
+		const baseChannel = getBaseChannel(message.channel);
+		if (
+			(message.guild?.id === config.testingGuild?.id &&
+				message.guild?.id !== config.guild.id) ||
+			!baseChannel ||
+			baseChannel.type !== ChannelType.GuildText ||
+			!/\bbots?\b/i.test(baseChannel.name)
+		)
+			return false;
+	}
+
+	return message.channel.id !== message.id && !message.author.bot;
+}
 
 defineButton("allowChat", allowChat);
 defineButton("denyChat", denyChat);
-
 defineMenuCommand(
 	{ name: "Remove Scradd Chat Response", type: ApplicationCommandType.Message, restricted: true },
 	removeResponse,

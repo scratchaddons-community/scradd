@@ -4,25 +4,25 @@ import {
 	ComponentType,
 	TextInputStyle,
 } from "discord.js";
-import constants from "../../common/constants.js";
 import {
 	client,
-	defineChatCommand,
 	defineButton,
-	defineSelect,
-	defineSubcommands,
+	defineChatCommand,
 	defineMenuCommand,
 	defineModal,
+	defineSelect,
+	defineSubcommands,
 } from "strife.js";
-import { DEFAULT_STRIKES, MUTE_LENGTHS, STRIKES_PER_MUTE } from "./misc.js";
+import constants from "../../common/constants.js";
+import ban from "./ban.js";
+import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.js";
 import { getStrikeById, getStrikes } from "./strikes.js";
 import warn, { addStrikeBack, removeStrike } from "./warn.js";
-import ban from "./ban.js";
 
 defineSubcommands(
 	{
 		name: "strikes",
-		description: "Commands to view strike information",
+		description: "View strike information",
 
 		subcommands: {
 			id: {
@@ -38,12 +38,12 @@ defineSubcommands(
 			},
 
 			user: {
-				description: "View your or (mod only) someone else’s strikes",
+				description: "View your or (mods only) someone else’s strikes",
 
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
-						description: "(Mod only) The user to see strikes for",
+						description: "(Mods only) The user to see strikes for",
 					},
 					expired: {
 						type: ApplicationCommandOptionType.Boolean,
@@ -68,6 +68,7 @@ defineSubcommands(
 			}
 			case "id": {
 				await getStrikeById(interaction, options.options.id);
+				break;
 			}
 		}
 	},
@@ -92,7 +93,7 @@ defineSelect("selectStrike", async (interaction) => {
 defineChatCommand(
 	{
 		name: "warn",
-		description: "(Mod only) Warns a user",
+		description: "Warn a user",
 		restricted: true,
 
 		options: {
@@ -112,8 +113,8 @@ defineChatCommand(
 
 			strikes: {
 				type: ApplicationCommandOptionType.Integer,
-				description: `How many strikes to add (defaults to ${DEFAULT_STRIKES})`,
-				maxValue: STRIKES_PER_MUTE * MUTE_LENGTHS.length + 1,
+				description: `How many times to warn them (defaults to ${DEFAULT_STRIKES})`,
+				maxValue: MAX_STRIKES,
 				minValue: 0,
 			},
 		},
@@ -129,7 +130,9 @@ defineChatCommand(
 			success
 				? `${constants.emojis.statuses.yes} ${
 						strikes ? "Warned" : "Verbally warned"
-				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
+						success === "no-dm" ? " I was not able to DM them." : ""
+				  } ${reason}`
 				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
@@ -175,15 +178,21 @@ defineMenuCommand(
 defineModal("warn", async (interaction, id) => {
 	const user = await client.users.fetch(id);
 	const reason = interaction.fields.getTextInputValue("reason");
-	const strikes = +interaction.fields.getTextInputValue("strikes");
+	const rawStrikes = +interaction.fields.getTextInputValue("strikes");
 	await interaction.deferReply();
 
-	const success = await warn(user, reason, Number.isNaN(strikes) ? 1 : strikes, interaction.user);
+	const strikes =
+		Number.isNaN(rawStrikes) || rawStrikes < 0
+			? 1
+			: Math.min(MAX_STRIKES, Math.floor(rawStrikes));
+	const success = await warn(user, reason, strikes, interaction.user);
 	await interaction.editReply(
 		success
 			? `${constants.emojis.statuses.yes} ${
 					strikes < 1 ? "Warned" : "Verbally warned"
-			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}. ${reason}`
+			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
+					success === "no-dm" ? " I was not able to DM them." : ""
+			  } ${reason}`
 			: `${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
 	);
 });
@@ -193,13 +202,13 @@ defineButton("addStrikeBack", addStrikeBack);
 defineChatCommand(
 	{
 		name: "ban-user",
-		description: "(Mod only) Bans a user",
+		description: "Ban a member",
 		restricted: true,
 
 		options: {
 			"user": {
 				type: ApplicationCommandOptionType.User,
-				description: "The user to ban",
+				description: "The member to ban",
 				required: true,
 			},
 

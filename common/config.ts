@@ -1,74 +1,84 @@
 import {
 	ChannelType,
-	type NonThreadGuildBasedChannel,
+	Collection,
+	type AnyThreadChannel,
 	type Channel,
+	type NonThreadGuildBasedChannel,
 	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
+import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 
-const guild = await client.guilds.fetch(process.env.GUILD_ID);
-if (!guild.available) throw new ReferenceError("Main guild is unavailable!");
-const guilds = await client.guilds.fetch();
-guilds.delete(guild.id);
+const IS_TESTING = process.argv.some((file) => file.endsWith(".test.js"));
 
+const guild = IS_TESTING ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
+if (guild && !guild.available) throw new ReferenceError("Main guild is unavailable!");
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getConfig() {
-	const channels = await guild.channels.fetch();
-	const roles = await guild.roles.fetch();
+	const channels = (await guild?.channels.fetch()) ?? new Collection();
+	const roles = ((await guild?.roles.fetch()) ?? new Collection()).filter(
+		(role) => role.editable && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
+	);
 
-	const mod = roles.find((role) => role.editable && role.name.toLowerCase().includes("mod"));
+	const otherGuilds = guild && (await client.guilds.fetch());
+	if (otherGuilds) otherGuilds.delete(guild.id);
+
+	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	return {
-		guild,
-		otherGuildIds: [...guilds.keys()],
-		testingGuild: await client.guilds.fetch("938438560925761619").catch(() => void 0),
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		guild: guild!,
+		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
+		testingGuild:
+			guild && (await client.guilds.fetch("938438560925761619").catch(() => void 0)),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
 			announcements:
-				guild.systemChannel || getChannel("server", ChannelType.GuildText, "start"),
+				guild?.systemChannel ?? getChannel("server", ChannelType.GuildText, "start"),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
+			servers: getChannel("servers", ChannelType.GuildText, "end"),
 			tickets: getChannel("contact", ChannelType.GuildText, "start"),
 			server: "1138116320249000077",
 			welcome: getChannel("welcome", ChannelType.GuildText),
+			intros: getChannel("intro", ChannelType.GuildText, "partial"),
 
 			mod: getChannel("mod-talk", ChannelType.GuildText),
-			modlogs: guild.publicUpdatesChannel || getChannel("logs", ChannelType.GuildText, "end"),
+			modlogs:
+				guild?.publicUpdatesChannel ?? getChannel("logs", ChannelType.GuildText, "end"),
 			exec: getChannel("exec", ChannelType.GuildText, "start"),
 			admin: getChannel("admin", ChannelType.GuildText, "start"),
 
 			general: getChannel("general", ChannelType.GuildText),
 
-			support: "826250884279173162",
+			support: getChannel("support", ChannelType.GuildText, "partial"),
 			updates: getChannel("updates", ChannelType.GuildText, "partial"),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
 			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
+			qotd: getChannel("qotd", ChannelType.GuildForum),
 			advertise:
-				getChannel("advertise", ChannelType.GuildText, "partial") ||
+				getChannel("advertise", ChannelType.GuildText, "partial") ??
 				getChannel("promo", ChannelType.GuildText, "partial"),
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
-			old_suggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
-			qotd: getChannel("qotd", ChannelType.GuildForum),
+			oldSuggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
 		},
 
 		roles: {
 			mod,
 			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff: roles.find((role) => role.name.toLowerCase().includes("staff")) || mod,
-			weekly_winner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
+			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod,
+			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
-			booster: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("booster"),
-			),
-			active: roles.find(
-				(role) => role.editable && role.name.toLowerCase().includes("active"),
-			),
+			booster: roles.find((role) => role.name.toLowerCase().includes("booster")),
+			active: roles.find((role) => role.name.toLowerCase().includes("active")),
 		},
 	};
 
@@ -93,14 +103,16 @@ async function getConfig() {
 }
 
 const config = await getConfig();
-export async function syncConfig() {
+export async function syncConfig(): Promise<void> {
 	const newConfig = await getConfig();
 	config.roles = newConfig.roles;
 	config.channels = newConfig.channels;
 }
 export default config;
 
-const threads = await config.guild.channels.fetchActiveThreads();
-export function getInitialChannelThreads(channel: Extract<Channel, { threads: ThreadManager }>) {
-	return threads.threads.filter(({ parent }) => parent?.id === channel.id);
+const threads = (await guild?.channels.fetchActiveThreads())?.threads ?? new Collection();
+export function getInitialChannelThreads(
+	channel: Extract<Channel, { threads: ThreadManager }>,
+): Collection<string, AnyThreadChannel> {
+	return threads.filter(({ parent }) => parent?.id === channel.id);
 }

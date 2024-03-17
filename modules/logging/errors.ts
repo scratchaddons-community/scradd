@@ -1,8 +1,8 @@
 import { inlineCode, type Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
-import log, { LogSeverity, LoggingErrorEmoji } from "./misc.js";
 import { cleanDatabaseListeners } from "../../common/database.js";
 import { commandInteractionToString } from "../../util/discord.js";
+import log, { LogSeverity, LoggingErrorEmoji } from "./misc.js";
 
 process
 	.on("uncaughtException", (error, origin) => logError(error, origin))
@@ -20,10 +20,10 @@ export default async function logError(
 	error: unknown,
 	event: RepliableInteraction | string,
 ): Promise<Message<true> | undefined> {
+	console.error(error);
 	try {
-		console.error(error);
-
 		const name =
+			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
 		if (
 			"ExperimentalWarning" == name ||
@@ -38,9 +38,11 @@ export default async function logError(
 					: event.isChatInputCommand()
 					? commandInteractionToString(event)
 					: inlineCode(
-							event.isCommand()
-								? `/${event.command?.name}`
-								: `${event.constructor.name}: ${event.customId}`,
+							event.isCommand() && event.command
+								? `/${event.command.name}`
+								: `${event.constructor.name}${
+										event.isButton() ? `: ${event.customId}` : ""
+								  }`,
 					  )
 			}`,
 			LogSeverity.Alert,
@@ -53,8 +55,8 @@ export default async function logError(
 				],
 			},
 		);
-	} catch (errorError) {
-		console.error(errorError);
+	} catch (loggingError) {
+		console.error(loggingError);
 		await cleanDatabaseListeners().catch(console.error);
 		process.exit(1);
 	}
@@ -86,12 +88,17 @@ export function generateError(error: unknown): object {
 		const object = {
 			name: "name" in error ? error.name : undefined,
 			message: "message" in error ? error.message : undefined,
-			// eslint-disable-next-line unicorn/error-message
+			// eslint-disable-next-line unicorn/error-message, @typescript-eslint/restrict-template-expressions
 			stack: sanitizePath(`${("stack" in error ? error : new Error()).stack}`)
 				.split("\n")
 				.slice(1),
 			errors: subErrors?.map((sub) => generateError(sub)),
-			cause: "cause" in error ? generateError(error.cause) : undefined,
+			cause:
+				"cause" in error
+					? error.cause instanceof Error
+						? generateError(error.cause)
+						: error.cause
+					: undefined,
 			error: "error" in error ? generateError(error.error) : undefined,
 			surpressed: "surpressed" in error ? generateError(error.surpressed) : undefined,
 			reason: "reason" in error ? generateError(error.reason) : undefined,

@@ -1,14 +1,14 @@
 import {
-	type Message,
+	ChannelType,
 	RESTJSONErrorCodes,
+	ThreadAutoArchiveDuration,
+	type Message,
 	type Snowflake,
 	type TextBasedChannel,
-	ChannelType,
-	ThreadAutoArchiveDuration,
 } from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
-import { extractMessageExtremities } from "../util/discord.js";
+import { extractMessageExtremities, getAllMessages } from "../util/discord.js";
 import config from "./config.js";
 let timeouts: Record<
 	Snowflake,
@@ -20,7 +20,7 @@ const threadName = "databases";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
-	) ||
+	) ??
 	(await config.channels.modlogs.threads.create({
 		name: threadName,
 		reason: "For databases",
@@ -30,8 +30,8 @@ export const databaseThread =
 	}));
 
 const databases: Record<string, Message<true> | undefined> = {};
-
-for (const message of (await databaseThread.messages.fetch({ limit: 100 })).values()) {
+export const allDatabaseMessages = await getAllMessages(databaseThread);
+for (const message of allDatabaseMessages) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =
@@ -62,7 +62,8 @@ export default class Database<Data extends Record<string, boolean | number | str
 		contructed.push(name);
 	}
 
-	async init() {
+	async init(): Promise<void> {
+		if (this.message) return;
 		this.message = databases[this.name] ||= await databaseThread.send(
 			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
 				"_",
@@ -89,42 +90,52 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.#extra = this.message.content.split("\n")[5];
 	}
 
-	get data() {
+	get data(): readonly Data[] {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
 		return this.#data;
 	}
-	set data(content) {
+	set data(content: readonly Data[]) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
 		this.#queueWrite();
 	}
 
-	get extra() {
+	get extra(): string | undefined {
 		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.extra`");
 		return this.#extra;
 	}
-	set extra(content) {
+	set extra(content: string | undefined) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
 		this.#extra = content;
 		this.#queueWrite();
 	}
 
-	updateById<Keys extends keyof Data>(
-		newData: Data["id"] extends string ? Pick<Data, Keys> & { id: string } : never,
-		oldData?: Omit<Data, Keys | "id">,
-	) {
+	updateById<
+		Overritten extends Partial<Data>,
+		DefaultKeys extends Extract<
+			{
+				[P in keyof Data]: Data[P] extends undefined
+					? never
+					: Overritten[P] extends Data[P]
+					? never
+					: P;
+			}[keyof Data],
+			keyof Data
+		>,
+	>(
+		newData: Data["id"] extends string ? Overritten : never,
+		oldData?: NoInfer<Partial<Data> & { [P in DefaultKeys]: Data[P] }>,
+	): void {
 		const data = [...this.data];
 		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
 		const suggestion = data[index];
-		if (suggestion) {
-			data[index] = { ...suggestion, ...newData };
-		} else if (oldData) {
-			data.push({ ...oldData, ...newData } as unknown as Data);
-		}
+		if (suggestion) data[index] = { ...suggestion, ...newData };
+		else if (oldData) data.push({ ...oldData, ...newData } as unknown as Data);
+
 		this.data = data;
 	}
 
-	#queueWrite() {
+	#queueWrite(): void {
 		if (!this.message) {
 			throw new ReferenceError(
 				"Must call `.init()` before reading or setting `.data` or `.extra`",
@@ -156,9 +167,9 @@ export default class Database<Data extends Record<string, boolean | number | str
 				.edit({ content, files })
 				.catch(async (error) => {
 					if (error.code !== RESTJSONErrorCodes.UnknownMessage) {
-						return await message.edit({ content, files }).catch((error2) => {
+						return await message.edit({ content, files }).catch((retryError) => {
 							throw new AggregateError(
-								[error, error2],
+								[error, retryError],
 								"Failed to write to database!",
 								{ cause: { data, database: this.name } },
 							);
@@ -166,6 +177,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 					}
 
 					databases[this.name] = undefined;
+					this.message = undefined;
 					await this.init();
 					return await callback();
 				})
@@ -194,7 +206,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 }
 
-export async function cleanDatabaseListeners() {
+export async function cleanDatabaseListeners(): Promise<void> {
 	const count = Object.values(timeouts).length;
 	console.log(
 		`Cleaning ${count} listener${count === 1 ? "" : "s"}: ${Object.keys(timeouts).join(",")}`,
@@ -221,7 +233,7 @@ for (const [event, code] of [
 		if (called || (event === "message" && message !== "shutdown")) return;
 		called = true;
 
-		function doExit() {
+		function doExit(): void {
 			if (exited) return;
 			exited = true;
 
@@ -240,7 +252,7 @@ for (const [event, code] of [
 	});
 }
 
-export async function backupDatabases(channel: TextBasedChannel) {
+export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
 	if (process.env.NODE_ENV !== "production") return;
 
 	const attachments = Object.values(databases)

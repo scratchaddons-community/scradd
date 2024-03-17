@@ -6,30 +6,31 @@ import {
 	ComponentType,
 	GuildMember,
 	TextInputStyle,
-	channelLink,
 } from "discord.js";
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import {
 	client,
+	defineButton,
 	defineChatCommand,
 	defineEvent,
-	defineButton,
+	defineMenuCommand,
 	defineModal,
 	defineSelect,
-	defineMenuCommand,
 } from "strife.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { disableComponents } from "../../util/discord.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
-	type Category,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	TICKET_CATEGORIES,
 	getIdFromName,
+	type Category,
 } from "./misc.js";
-import contactMods, { contactUser, showTicketModal } from "./contact.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
+const appealedStrikes = new Set<string>();
 const resourcesDmed = new Set<string>();
 
 defineEvent("messageCreate", async (message) => {
@@ -47,7 +48,9 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "Server Rules",
-							url: config.guild.rulesChannel?.url || "",
+							url:
+								config.guild.rulesChannel?.url ??
+								`https://discord.com/channels/${config.guild.id}`,
 						},
 						// {
 						// 	type: ComponentType.Button,
@@ -71,7 +74,9 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url: channelLink(config.guild.id, config.channels.support),
+							url:
+								config.channels.support?.url ??
+								`https://discord.com/channels/${config.guild.id}`,
 						},
 					],
 				},
@@ -90,19 +95,19 @@ defineButton("contactMods", async (interaction) => {
 					{
 						type: ComponentType.StringSelect,
 						customId: "_contactMods",
-						options: Object.entries({
-							appeal: "Appeal a strike",
-							report: "Report a user",
-							role: "Request a contributor role",
-							bug: "Report a Scradd bug",
-							[SERVER_CATEGORY]: "Suggest a server change",
-							rules: "Get clarification on a rule",
-							[SA_CATEGORY]: "Get help with Scratch Addons",
-							server: "Add your server to Other Scratch Servers",
-							other: "Other",
-						} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>).map(
-							([value, label]) => ({ value, label }),
-						),
+						options: [
+							...Object.entries({
+								appeal: "Appeal a strike",
+								report: "Report a user",
+								role: "Request a contributor role",
+								bug: "Report a Scradd bug",
+								[SERVER_CATEGORY]: "Suggest a server change",
+								rules: "Get clarification on a rule",
+								[SA_CATEGORY]: "Get help with Scratch Addons",
+								server: "Add your server to Other Scratch Servers",
+								other: "Other",
+							} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>),
+						].map(([value, label]) => ({ value, label })),
 						placeholder: "What do you need help with?",
 					},
 				],
@@ -136,10 +141,23 @@ defineButton("confirmStrikeAppeal", async (interaction, id) => {
 	});
 });
 defineButton("appealStrike", async (interaction, id) => {
+	if (appealedStrikes.has(id)) {
+		return await interaction.reply({
+			content: `${constants.emojis.statuses.no} You have already appealed this strike.`,
+			ephemeral: true,
+		});
+	}
+	appealedStrikes.add(id);
 	return await showTicketModal(interaction, "appeal", id);
 });
 defineModal("contactMods", async (interaction, id) => {
 	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
+
+	if (!interaction.inGuild()) {
+		const reply =
+			interaction.message?.reference && (await interaction.message.fetchReference());
+		await reply?.edit({ components: disableComponents(reply.components) });
+	}
 
 	await interaction.deferReply({ ephemeral: true });
 	const thread = await contactMods(interaction, id);
@@ -162,7 +180,7 @@ defineMenuCommand(
 						{
 							type: ComponentType.TextInput,
 							style: TextInputStyle.Paragraph,
-							label: "Concisely explain how this message breaks the rules",
+							label: "Please explain how this message breaks rules",
 							required: true,
 							customId: "reason",
 							minLength: 10,
@@ -184,7 +202,9 @@ defineMenuCommand(
 		const reason = modalInteraction.fields.getTextInputValue("reason");
 
 		await log(
-			`${LoggingEmojis.Punishment} ${interaction.user} reported a message by ${interaction.targetMessage.author} - ${interaction.targetMessage.url}\n${reason}`,
+			`${LoggingEmojis.Punishment} ${interaction.user.toString()} reported [a message](<${
+				interaction.targetMessage.url
+			}>) by ${interaction.targetMessage.author.toString()}\n${reason}`,
 			LogSeverity.Alert,
 			{
 				buttons: [
@@ -211,14 +231,14 @@ defineMenuCommand(
 defineChatCommand(
 	{
 		name: "contact-user",
-		description: "(Mod only) Start a private ticket with a user",
+		description: "Start a private mod ticket with a member",
 		restricted: true,
 
 		options: {
 			user: {
 				required: true,
 				type: ApplicationCommandOptionType.User,
-				description: "The user to contact",
+				description: "The member to contact",
 			},
 		},
 	},

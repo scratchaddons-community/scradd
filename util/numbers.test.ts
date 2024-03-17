@@ -1,6 +1,6 @@
 import { AssertionError, strictEqual } from "node:assert";
-import { bigIntPower, convertBase, nth, parseTime } from "./numbers.js";
 import { describe, it } from "node:test";
+import { bigIntPower, convertBase, lerpColors, nth, parseTime } from "./numbers.js";
 
 await describe("bigintPow", async () => {
 	await it("should correctly calculate the power of a bigint when exponent is 0", () => {
@@ -78,60 +78,118 @@ await describe("nth", async () => {
 
 await describe("parseTime", async () => {
 	await it("should support UNIX timestamps", () => {
-		almostEqual(+parseTime("1713675600000"), 1_713_675_600_000);
-		almostEqual(+parseTime("1720242000"), 1_720_242_000_000);
+		strictEqual(+parseTime("1713675600000"), 1_713_675_600_000);
+		strictEqual(+parseTime("1720242000"), 1_720_242_000_000);
+	});
+	await it("should support yyyy-mm-dd", () => {
+		strictEqual(+parseTime("2024-01-01"), 1_704_067_200_000);
+	});
+	await it("should support yyyy-mm-dd h:mm", () => {
+		strictEqual(+parseTime("2024-01-01 5:00"), 1_704_085_200_000);
+	});
+	await it("should support yyyy-mm-dd hh:mm", () => {
+		strictEqual(+parseTime("2024-01-01 12:00"), 1_704_110_400_000);
+	});
+	await it("should support yyyy-mm-dd hh:mm:ss", () => {
+		strictEqual(+parseTime("2024-01-01 12:00:30"), 1_704_110_430_000);
 	});
 	await it("should support weeks", () => {
-		almostEqual(+parseTime("1 week"), Date.now() + 604_800_000);
-		almostEqual(+parseTime("1weeks"), Date.now() + 604_800_000);
-		almostEqual(+parseTime("1wk"), Date.now() + 604_800_000);
-		almostEqual(+parseTime("1wks"), Date.now() + 604_800_000);
-		almostEqual(+parseTime("1w"), Date.now() + 604_800_000);
+		let now = Date.now();
+		almostEqual(+parseTime("1 week"), now + 604_800_000);
+		now = Date.now();
+		almostEqual(+parseTime("1weeks"), now + 604_800_000);
+		now = Date.now();
+		almostEqual(+parseTime("1wk"), now + 604_800_000);
+		now = Date.now();
+		almostEqual(+parseTime("1wks"), now + 604_800_000);
+		now = Date.now();
+		almostEqual(+parseTime("1w"), now + 604_800_000);
 	});
 	await it("should support days", () => {
-		almostEqual(+parseTime("1 day"), Date.now() + 86_400_000);
-		almostEqual(+parseTime("1days"), Date.now() + 86_400_000);
-		almostEqual(+parseTime("1d"), Date.now() + 86_400_000);
+		let now = Date.now();
+		almostEqual(+parseTime("1 day"), now + 86_400_000);
+		now = Date.now();
+		almostEqual(+parseTime("1days"), now + 86_400_000);
+		now = Date.now();
+		almostEqual(+parseTime("1d"), now + 86_400_000);
 	});
 	await it("should support hours", () => {
-		almostEqual(+parseTime("1"), Date.now() + 3_600_000);
-		almostEqual(+parseTime("1hour"), Date.now() + 3_600_000);
-		almostEqual(+parseTime("1hours"), Date.now() + 3_600_000);
-		almostEqual(+parseTime("1hr"), Date.now() + 3_600_000);
-		almostEqual(+parseTime("1hrs"), Date.now() + 3_600_000);
-		almostEqual(+parseTime("1h"), Date.now() + 3_600_000);
+		let now = Date.now();
+		almostEqual(+parseTime("1"), now + 3_600_000);
+		now = Date.now();
+		almostEqual(+parseTime("1hour"), now + 3_600_000);
+		now = Date.now();
+		almostEqual(+parseTime("1hours"), now + 3_600_000);
+		now = Date.now();
+		almostEqual(+parseTime("1hr"), now + 3_600_000);
+		now = Date.now();
+		almostEqual(+parseTime("1hrs"), now + 3_600_000);
+		now = Date.now();
+		almostEqual(+parseTime("1h"), now + 3_600_000);
 	});
 	await it("should support minutes", () => {
-		almostEqual(+parseTime("1 minute"), Date.now() + 60_000);
-		almostEqual(+parseTime("1minutes"), Date.now() + 60_000);
-		almostEqual(+parseTime("1min"), Date.now() + 60_000);
-		almostEqual(+parseTime("1mins"), Date.now() + 60_000);
-		almostEqual(+parseTime("1m"), Date.now() + 60_000);
+		let now = Date.now();
+		almostEqual(+parseTime("1 minute"), now + 60_000);
+		now = Date.now();
+		almostEqual(+parseTime("1minutes"), now + 60_000);
+		now = Date.now();
+		almostEqual(+parseTime("1min"), now + 60_000);
+		now = Date.now();
+		almostEqual(+parseTime("1mins"), now + 60_000);
+		now = Date.now();
+		almostEqual(+parseTime("1m"), now + 60_000);
 	});
 	await it("should support seconds", () => {
-		almostEqual(+parseTime("1 second"), Date.now() + 1000);
-		almostEqual(+parseTime("1seconds"), Date.now() + 1000);
-		almostEqual(+parseTime("1sec"), Date.now() + 1000);
-		almostEqual(+parseTime("1secs"), Date.now() + 1000);
-		almostEqual(+parseTime("1s"), Date.now() + 1000);
+		let now = Date.now();
+		almostEqual(+parseTime("1 second"), now + 1000);
+		now = Date.now();
+		almostEqual(+parseTime("1seconds"), now + 1000);
+		now = Date.now();
+		almostEqual(+parseTime("1sec"), now + 1000);
+		now = Date.now();
+		almostEqual(+parseTime("1secs"), now + 1000);
+		now = Date.now();
+		almostEqual(+parseTime("1s"), now + 1000);
 	});
 	await it("should support leading 0", () => {
-		almostEqual(+parseTime("01m"), Date.now() + 60_000);
+		const now = Date.now();
+		almostEqual(+parseTime("01m"), now + 60_000);
 	});
 	await it("should support decimals", () => {
-		almostEqual(+parseTime("1.5m"), Date.now() + 90_000);
+		const now = Date.now();
+		almostEqual(+parseTime("1.5m"), now + 90_000);
 	});
 	await it("should support combinations", () => {
-		almostEqual(+parseTime("1w1h"), Date.now() + 604_800_000 + 3_600_000);
+		const now = Date.now();
+		almostEqual(+parseTime("1w1h"), now + 604_800_000 + 3_600_000);
 	});
 	await it("should return the current time on an invalid value", () => {
-		almostEqual(+parseTime("a"), Date.now());
+		const now = Date.now();
+		almostEqual(+parseTime("a"), now);
 	});
 });
 
-function almostEqual(actual: number, expected: number, message?: string | undefined) {
+await describe("lerpColors", async () => {
+	await it("should interpolate three colors correctly", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00, 0x00_00_ff], 0.25), 0x7f_7f_00);
+	});
+	await it("should interpolate two colors correctly", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_00_ff], 0.75), 0x3f_00_bf);
+	});
+	await it("should handle single colors", () => {
+		strictEqual(lerpColors([0xff_00_00], 0.5), 0xff_00_00);
+	});
+	await it("should handle a percent of 1", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00], 1), 0x00_ff_00);
+	});
+	await it("should handle a percent of 0", () => {
+		strictEqual(lerpColors([0xff_00_00, 0x00_ff_00], 0), 0xff_00_00);
+	});
+});
+
+function almostEqual(actual: number, expected: number, message?: string | undefined): void {
 	const diff = Math.abs(actual - expected);
-	if (diff > 10) {
+	if (diff > 5) {
 		throw new AssertionError({
 			message: message || `${actual} is not almost equal to ${expected}`,
 			actual,

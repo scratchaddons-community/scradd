@@ -1,28 +1,22 @@
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type User,
-	type ChatInputCommandInteraction,
-	type ButtonInteraction,
+	time,
 } from "discord.js";
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getLevelForXp, xpDatabase } from "./misc.js";
-import { paginate } from "../../util/discord.js";
-import { getSettings, mentionUser } from "../settings.js";
 import {
 	client,
-	defineSubcommands,
-	defineEvent,
 	defineButton,
-	defineSelect,
+	defineEvent,
 	defineMenuCommand,
+	defineSelect,
+	defineSubcommands,
 } from "strife.js";
-import getUserRank from "./rank.js";
-import { giveXpForMessage } from "./giveXp.js";
+import config from "../../common/config.js";
+import { giveXpForMessage } from "./give-xp.js";
+import getUserRank, { top } from "./rank.js";
+import { recentXpDatabase } from "./util.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
@@ -33,7 +27,7 @@ defineEvent("messageCreate", async (message) => {
 defineSubcommands(
 	{
 		name: "xp",
-		description: "Commands to view users’ XP amounts",
+		description: "View users’ XP amounts",
 
 		subcommands: {
 			rank: {
@@ -64,17 +58,26 @@ defineSubcommands(
 	},
 
 	async (interaction, options) => {
-		switch (options?.subcommand) {
+		const user =
+			options?.options &&
+			"user" in options.options &&
+			(options.options.user instanceof GuildMember
+				? options.options.user.user
+				: options.options.user);
+
+		switch (options?.subcommand ?? "rank") {
 			case "rank": {
-				const user =
-					options.options.user instanceof GuildMember
-						? options.options.user.user
-						: options.options.user ?? interaction.user;
-				await getUserRank(interaction, user);
+				await getUserRank(interaction, user || interaction.user);
 				return;
 			}
 			case "graph": {
+				const startData =
+					recentXpDatabase.data.toSorted((one, two) => one.time - two.time)[0]?.time ?? 0;
 				return await interaction.reply({
+					content: `Select up to 7 users. I will graph thier XP __last__ week (${time(
+						new Date(startData),
+						"d",
+					)} to ${time(new Date(startData + 604_800_000), "d")}).`,
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -91,7 +94,8 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await top(interaction, options.options.user);
+				await top(interaction, user || undefined);
+				break;
 			}
 		}
 	},
@@ -109,58 +113,6 @@ if (process.env.CANVAS !== "false") {
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
 
-export async function top(
-	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
-	user?: GuildMember | User,
-) {
-	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
-
-	const index = user ? leaderboard.findIndex(({ user: id }) => id === user.id) : undefined;
-	if (index === -1) {
-		return await interaction.reply({
-			content: `${
-				constants.emojis.statuses.no
-			} ${user?.toString()} could not be found! Do they have any XP?`,
-
-			ephemeral: true,
-		});
-	}
-
-	await paginate(
-		leaderboard,
-		async (xp) =>
-			`**Level ${getLevelForXp(Math.abs(xp.xp)) * Math.sign(xp.xp)}** - ${await mentionUser(
-				xp.user,
-				interaction.user,
-				interaction.guild ?? config.guild,
-			)} (${Math.floor(xp.xp).toLocaleString("en-us")} XP)`,
-		(data) => interaction.reply(data),
-		{
-			title: "XP Leaderboard",
-			singular: "user",
-
-			user: interaction.user,
-			rawOffset: index,
-			ephemeral:
-				interaction.isButton() &&
-				interaction.message.interaction?.user.id !== interaction.user.id,
-
-			async generateComponents() {
-				return (await getSettings(interaction.user, false)).useMentions === undefined
-					? [
-							{
-								customId: "levelUpPings_toggleSetting",
-								type: ComponentType.Button,
-								label: "Toggle Mentions",
-								style: ButtonStyle.Success,
-							},
-					  ]
-					: undefined;
-			},
-			customComponentLocation: "below",
-		},
-	);
-}
 defineMenuCommand({ name: "XP Rank", type: ApplicationCommandType.User }, async (interaction) => {
 	await getUserRank(interaction, interaction.targetUser);
 });

@@ -1,19 +1,18 @@
 import {
-	type MessageCreateOptions,
-	time as timestamp,
 	TimestampStyles,
-	type Snowflake,
+	time,
 	userMention,
+	type MessageCreateOptions,
+	type Snowflake,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import { nth } from "../../util/numbers.js";
-import { remindersDatabase, SpecialReminders } from "../reminders/misc.js";
-import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./misc.js";
 import constants from "../../common/constants.js";
+import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import { recheckMemberRole } from "../roles/custom.js";
+import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 
-export async function getChatters() {
+export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();
 	const winnerId = weeklyWinners[0]?.user;
 	const winner =
@@ -33,13 +32,11 @@ export async function getChatters() {
 		(user) =>
 			`${weeklyWinners.findIndex((found) => found.xp === user.xp) + 6}) ${userMention(
 				user.user,
-			)} - ${Math.floor(user.xp).toLocaleString("en-us")} XP`,
+			)} - ${Math.floor(user.xp).toLocaleString()} XP`,
 	);
 
 	while (formatted.join("\n").length > 4096) formatted.pop();
-	const ending =
-		weeklyWinners[formatted.length] &&
-		` ${weeklyWinners[formatted.length]?.xp.toLocaleString("en-us")} XP`;
+	const ending = ` ${(weeklyWinners[formatted.length]?.xp ?? 0).toLocaleString()} XP`;
 	const filtered = ending ? formatted.filter((line) => !line.endsWith(ending)) : formatted;
 
 	return {
@@ -58,10 +55,10 @@ export async function getChatters() {
 				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},
 		],
-	} satisfies MessageCreateOptions;
+	};
 }
 
-export default async function getWeekly(nextWeeklyDate: Date) {
+export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 	if (config.channels.announcements) {
 		remindersDatabase.data = [
 			...remindersDatabase.data,
@@ -77,8 +74,10 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 
 	const weeklyWinners = getFullWeeklyData();
 
-	const latestActiveMembers = weeklyWinners.filter((item) => item.xp >= 300);
-	const activeMembers = [
+	const latestActiveMembers = weeklyWinners
+		.filter((item) => item.xp >= 300)
+		.map((item) => item.user);
+	const activeMembers = new Set([
 		...latestActiveMembers,
 		...Object.entries(
 			recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -86,24 +85,19 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 				return accumulator;
 			}, {}),
 		)
-			.map((entry) => ({ xp: entry[1], user: entry[0] }))
-			.filter((item) => item.xp >= 500),
-	];
+			.filter(([, xp]) => xp >= 500)
+			.map((entry) => entry[0]),
+	]);
 
 	if (config.roles.active) {
 		for (const [, member] of config.roles.active.members) {
-			if (!activeMembers.some((item) => item.user === member.id))
-				await member.roles.remove(config.roles.active, "Inactive");
-		}
-
-		for (const { user } of activeMembers) {
-			const member = await config.guild.members.fetch(user).catch(() => void 0);
-			await member?.roles.add(config.roles.active, "Active");
+			if (activeMembers.has(member.id)) continue;
+			await member.roles.remove(config.roles.active, "Inactive");
 		}
 	}
 
 	recentXpDatabase.data = recentXpDatabase.data.filter(
-		({ time }) => time + 604_800_000 > Date.now(),
+		(entry) => entry.time + 604_800_000 > Date.now(),
 	);
 
 	const date = new Date();
@@ -118,7 +112,7 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 	);
 	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
-	const role = config.roles.weekly_winner;
+	const role = config.roles.weeklyWinner;
 	if (role) {
 		for (const [, weeklyMember] of role.members) {
 			if (!ids.has(weeklyMember.id))
@@ -139,40 +133,19 @@ export default async function getWeekly(nextWeeklyDate: Date) {
 		if (member) await recheckMemberRole(member, member);
 	}
 
-	return `## 🏆 Weekly Winners week of ${
-		[
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		][date.getUTCMonth()] || ""
-	} ${nth(date.getUTCDate())}\n${
+	return `## 🏆 Weekly Winners week of ${new Date().toLocaleString([], {
+		month: "long",
+		day: "numeric",
+	})}\n${
 		weeklyWinners
 			.map(
 				(gain, index) =>
 					`${["🥇", "🥈", "🥉"][index] || "🏅"} ${userMention(gain.user)} - ${Math.floor(
-						gain.xp *
-							Math.sign(
-								xpDatabase.data.find(({ user }) => user === gain.user)?.xp || 1,
-							),
-					).toLocaleString("en-us")} XP`,
+						gain.xp,
+					).toLocaleString()} XP`,
 			)
 			.join("\n") || "*Nobody got any XP this week!*"
-	}\n\n*This week, ${chatters.toLocaleString(
-		"en-us",
-	)} people chatted, and ${latestActiveMembers.length.toLocaleString(
-		"en-us",
-	)} people were active. Altogether, people gained ${allXp.toLocaleString(
-		"en-us",
-	)} XP this week.*\n### Next week’s weekly winners will be posted ${timestamp(
+	}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n### Next week’s weekly winners will be posted ${time(
 		nextWeeklyDate,
 		TimestampStyles.RelativeTime,
 	)}.`;

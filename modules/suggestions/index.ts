@@ -2,18 +2,28 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AuditLogEvent,
+	Colors,
+	ForumChannel,
+	MessageType,
 	ThreadChannel,
 	type Snowflake,
-	ForumChannel,
-	Colors,
-	formatEmoji,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
-import top from "./top.js";
-import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import updateReactions, { addToDatabase } from "./reactions.js";
+import constants from "../../common/constants.js";
+import { formatAnyEmoji, stripMarkdown } from "../../util/markdown.js";
 import { lerpColors } from "../../util/numbers.js";
+import { truncateText } from "../../util/text.js";
+import { ignoredDeletions } from "../logging/messages.js";
+import type { AuditLog } from "../logging/misc.js";
+import {
+	getSuggestionData,
+	parseSuggestionTags,
+	suggestionAnswers,
+	suggestionsDatabase,
+} from "./misc.js";
+import updateReactions, { addToDatabase } from "./update.js";
+import top from "./top.js";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -41,39 +51,43 @@ defineEvent("threadUpdate", async (_, newThread) => {
 	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
 
 	suggestionsDatabase.updateById(
-		{
-			id: newThread.id,
-			title: newThread.name,
-			answer: getAnswer(newThread.appliedTags, config.channels.suggestions).name,
-			count,
-		},
+		{ count, ...getSuggestionData(newThread) },
 		{ author: newThread.ownerId ?? client.user.id },
 	);
 });
-defineEvent("guildAuditLogEntryCreate", async (entry) => {
+defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
+	if (rawEntry.action !== AuditLogEvent.ThreadUpdate) return;
+	const entry = rawEntry as AuditLog<AuditLogEvent.ThreadUpdate, "applied_tags">;
+
+	if (!(entry.target instanceof ThreadChannel)) return;
+	const channel = entry.target.parent;
 	if (
-		entry.action !== AuditLogEvent.ThreadUpdate ||
-		!(entry.target instanceof ThreadChannel) ||
-		!(entry.target.parent instanceof ForumChannel) ||
-		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(
-			entry.target.parent.id,
-		)
+		!(channel instanceof ForumChannel) ||
+		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(channel.id)
 	)
 		return;
 
 	const changes = entry.changes.filter(
-		(change): change is typeof change & { old: Snowflake[]; new: Snowflake[] } =>
-			(change.key as string) === "applied_tags",
+		(change): change is { key: "applied_tags"; old: Snowflake[]; new: Snowflake[] } =>
+			change.key === "applied_tags",
 	);
 	if (!changes.length) return;
 
-	const oldAnswer = getAnswer(changes[0]?.old ?? [], entry.target.parent);
-	const newAnswer = getAnswer(changes.at(-1)?.new ?? [], entry.target.parent);
+	const oldAnswer = parseSuggestionTags(
+		changes[0]?.old ?? [],
+		channel.availableTags,
+		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+	).answer;
+	const newAnswer = parseSuggestionTags(
+		changes.at(-1)?.new ?? [],
+		channel.availableTags,
+		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+	).answer;
 	if (oldAnswer.name === newAnswer.name) return;
 
 	const user =
-		(await config.guild.members.fetch(entry.executor?.id ?? "").catch(() => void 0)) ??
-		entry.executor;
+		entry.executor &&
+		(await config.guild.members.fetch(entry.executor.id).catch(() => entry.executor));
 
 	await entry.target.send({
 		embeds: [
@@ -89,14 +103,8 @@ defineEvent("guildAuditLogEntryCreate", async (entry) => {
 								newAnswer.position,
 						  ),
 				title:
-					(newAnswer.emoji
-						? (newAnswer.emoji.id
-								? formatEmoji(newAnswer.emoji.id)
-								: newAnswer.emoji.name) + " "
-						: "") + newAnswer.name,
-				description: entry.target.parent.topic
-					?.split(`\n- **${newAnswer.name}**: `)[1]
-					?.split("\n")[0],
+					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
+				description: channel.topic?.split(`\n- **${newAnswer.name}**: `)[1]?.split("\n")[0],
 				footer: { text: `Was previously ${oldAnswer.name}` },
 			},
 		],
@@ -116,18 +124,18 @@ defineChatCommand(
 		options: {
 			answer: {
 				choices: Object.fromEntries(suggestionAnswers.map((answer) => [answer, answer])),
-				description: "Filter suggestions to only get those with a certain answer",
+				description: "Only get suggestions with this answer",
 				type: ApplicationCommandOptionType.String,
 			},
 
 			user: {
-				description: "Filter suggestions to only get those by a certain user",
+				description: "Only get suggestions posted by this user",
 				type: ApplicationCommandOptionType.User,
 			},
 
 			all: {
 				description:
-					"Include denied suggestions from the archive alongside accepted ones (defaults to false)",
+					"Include denied and invalid suggestions from the archive alongside accepted ones (defaults to false)",
 				type: ApplicationCommandOptionType.Boolean,
 			},
 		},
@@ -142,4 +150,48 @@ defineMenuCommand(
 );
 defineButton("suggestions", async (interaction, userId) => {
 	await top(interaction, { user: await client.users.fetch(userId) });
+});
+
+const pinnedMessages = new Set<Snowflake>();
+defineMenuCommand(
+	{ name: "Pin Message", type: ApplicationCommandType.Message, restricted: true },
+	async (interaction) => {
+		if (!interaction.targetMessage.pinnable)
+			return await interaction.reply(
+				`${constants.emojis.statuses.no} That message can’t be pinned!`,
+			);
+
+		if (interaction.targetMessage.pinned) {
+			await interaction.targetMessage.unpin(`Unpinned by ${interaction.user.toString()}`);
+			await interaction.reply(
+				`${constants.emojis.statuses.yes} Unpinned [message](<${interaction.targetMessage.url}>)!`,
+			);
+		} else {
+			await interaction.targetMessage.pin(`Pinned by ${interaction.user.toString()}`);
+			await interaction.reply(
+				`${constants.emojis.statuses.yes} Pinned [message](<${interaction.targetMessage.url}>)!`,
+			);
+			pinnedMessages.add(interaction.targetMessage.id);
+		}
+	},
+);
+defineEvent("messageCreate", async (message) => {
+	if (
+		message.type === MessageType.ChannelPinnedMessage &&
+		message.reference?.messageId &&
+		pinnedMessages.has(message.reference.messageId)
+	) {
+		ignoredDeletions.add(message.id);
+		await message.delete();
+	}
+});
+
+defineEvent("messageCreate", async (message) => {
+	if (message.channel.id === config.channels.updates?.id) {
+		await message.startThread({
+			name: truncateText(stripMarkdown(message.cleanContent) || "New update!", 50),
+
+			reason: "New upcoming update",
+		});
+	}
 });

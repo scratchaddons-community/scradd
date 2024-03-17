@@ -1,11 +1,11 @@
-import config from "../../common/config.js";
-import { defineChatCommand, defineEvent, defineModal } from "strife.js";
-import constants from "../../common/constants.js";
-import { persistedLeave, persistedRejoin } from "./persisted.js";
-import { createCustomRole, recheckMemberRole, recheckAllRoles, customRole } from "./custom.js";
 import mongoose from "mongoose";
+import { defineChatCommand, defineEvent, defineModal } from "strife.js";
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { createCustomRole, customRole, recheckAllRoles, recheckMemberRole } from "./custom.js";
+import { persistedLeave, persistedRejoin } from "./persisted.js";
 
-const Invite = mongoose.model(
+export const Invite = mongoose.model(
 	"Invite",
 	new mongoose.Schema({ code: String, member: String, uses: Number }),
 );
@@ -14,7 +14,10 @@ defineEvent("inviteDelete", async (invite) => {
 	if (!invite.uses) return;
 	await Invite.findOneAndUpdate(
 		{ code: invite.code },
-		{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+		{
+			uses: invite.uses,
+			...(invite.inviter && !invite.inviter.bot && { member: invite.inviter.id }),
+		},
 		{ upsert: true },
 	).exec();
 });
@@ -23,7 +26,10 @@ defineEvent("guildMemberAdd", async () => {
 		if (!invite.uses) continue;
 		await Invite.findOneAndUpdate(
 			{ code: invite.code },
-			{ uses: invite.uses, ...(invite.inviter && { member: invite.inviter.id }) },
+			{
+				uses: invite.uses,
+				...(invite.inviter && !invite.inviter.bot && { member: invite.inviter.id }),
+			},
 			{ upsert: true },
 		).exec();
 	}

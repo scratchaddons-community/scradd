@@ -1,11 +1,13 @@
+import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { ApplicationCommandOptionType, ComponentType, TextInputStyle } from "discord.js";
+import { client, defineChatCommand, defineEvent, defineModal } from "strife.js";
 import constants from "../common/constants.js";
 import { reactAll } from "../util/discord.js";
+import tryCensor from "./automod/misc.js";
 import { BOARD_EMOJI } from "./board/misc.js";
-import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
-import { defineChatCommand, defineEvent, client, defineModal } from "strife.js";
+import warn from "./punishments/warn.js";
 
-const DEFAULT_SHAPES = ["🔺", "🔶", "🟡", "🟩", "🔹", "💜", "🟤", "🏳️"];
+const DEFAULT_SHAPES = ["🔺", "♦️", "⭕", "🔶", "💛", "🟩", "💠", "🔹", "🟣", "🏴", "❕", "◽"];
 const bannedReactions = new Set(BOARD_EMOJI);
 
 defineChatCommand(
@@ -58,14 +60,30 @@ defineChatCommand(
 );
 
 defineModal("poll", async (interaction, voteMode) => {
-	const regexp = new RegExp(`^${twemojiRegexp.default.source}`);
+	const rawOptions = interaction.fields.getTextInputValue("options");
+	const censored = tryCensor(rawOptions);
+	if (censored) {
+		await warn(
+			interaction.user,
+			"Please watch your language!",
+			censored.strikes,
+			`Attempted to create poll with options:\n>>> ${rawOptions}`,
+		);
+		return await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} ${
+				censored.strikes < 1 ? "That’s not appropriate" : "Language"
+			}!`,
+		});
+	}
 
-	const { customReactions, options } = interaction.fields
-		.getTextInputValue("options")
-		.split("\n")
+	const { customReactions, options } = rawOptions
+		.split(/\s*\n\s*/g)
 		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
-				const emoji = option.match(regexp)?.[0];
+				// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
+				const match = option.match(twemojiRegexp.default);
+				const emoji = match && option.startsWith(match[0]) && match[0];
 				return {
 					options: [...options, (emoji ? option.replace(emoji, "") : option).trim()],
 					customReactions: [
@@ -77,8 +95,11 @@ defineModal("poll", async (interaction, voteMode) => {
 				};
 			},
 			{ customReactions: [], options: [] },
-		); // TODO: censor it
-	if (options.length > DEFAULT_SHAPES.length)
+		);
+	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
+	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
+
+	if (options.length > 20 || reactions.includes(""))
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t have over ${
@@ -86,16 +107,13 @@ defineModal("poll", async (interaction, voteMode) => {
 			} option${DEFAULT_SHAPES.length === 1 ? "" : "s"}!`,
 		});
 
-	const shapes = DEFAULT_SHAPES.filter((emoji) => !customReactions.includes(emoji));
-	const reactions = customReactions.map((emoji) => emoji ?? shapes.shift() ?? "");
-
 	const message = await interaction.reply({
 		embeds: [
 			{
 				color: constants.themeColor,
 				title: interaction.fields.getTextInputValue("question"),
-				description: options
-					.map((option, index) => `${reactions[index]} ${option}`)
+				description: reactions
+					.map((reaction, index) => `${reaction} ${options[index] ?? ""}`)
 					.join("\n"),
 				footer:
 					voteMode === "1" ? { text: "You can only vote once on this poll." } : undefined,

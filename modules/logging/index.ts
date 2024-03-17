@@ -1,58 +1,57 @@
 import {
 	AuditLogEvent,
 	AutoModerationRuleTriggerType,
-	type GuildAuditLogsEntry,
 	WebhookType,
 	userMention,
 	type Awaitable,
 } from "discord.js";
-import config from "../../common/config.js";
 import { defineEvent } from "strife.js";
+import config from "../../common/config.js";
 import {
 	channelCreate,
 	channelDelete,
 	channelOverwriteCreate,
-	channelOverwriteUpdate,
 	channelOverwriteDelete,
+	channelOverwriteUpdate,
 	channelUpdate,
 } from "./channels.js";
 import {
-	memberKick,
-	memberPrune,
-	memberBanAdd,
-	memberBanRemove,
-	guildMemberRemove,
-	guildMemberAdd,
-	guildMemberUpdate,
-	userUpdate,
-} from "./users.js";
+	emojiCreate,
+	emojiDelete,
+	emojiUpdate,
+	stickerCreate,
+	stickerDelete,
+	stickerUpdate,
+} from "./expressions.js";
 import {
 	messageDelete,
 	messageDeleteBulk,
 	messageReactionRemoveAll,
 	messageUpdate,
 } from "./messages.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
+import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
+import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
+import {
+	guildMemberAdd,
+	guildMemberRemove,
+	guildMemberUpdate,
+	memberBanAdd,
+	memberBanRemove,
+	memberKick,
+	memberPrune,
+	userUpdate,
+} from "./users.js";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,
 	guildScheduledEventUpdate,
 	voiceStateUpdate,
 } from "./voice.js";
-import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "./misc.js";
-import {
-	emojiCreate,
-	emojiUpdate,
-	emojiDelete,
-	stickerCreate,
-	stickerUpdate,
-	stickerDelete,
-} from "./expressions.js";
-import { memberRoleUpdate, roleCreate, roleUpdate, roleDelete } from "./roles.js";
-import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 
 const events: {
-	[event in AuditLogEvent]?: (entry: GuildAuditLogsEntry<event>) => Awaitable<void>;
+	[Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void>;
 } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,
 	[AuditLogEvent.ChannelDelete]: channelDelete,
@@ -65,11 +64,10 @@ const events: {
 	[AuditLogEvent.MemberBanRemove]: memberBanRemove,
 	[AuditLogEvent.MemberRoleUpdate]: memberRoleUpdate,
 	async [AuditLogEvent.BotAdd](entry) {
-		if (!entry.target) return;
 		await log(
-			`${LoggingEmojis.Integration} ${entry.target.toString()} added${extraAuditLogsInfo(
-				entry,
-			)}`,
+			`${LoggingEmojis.Integration} ${
+				entry.target?.toString() ?? "Bot"
+			} added${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
 	},
@@ -85,7 +83,6 @@ const events: {
 			LogSeverity.ImportantUpdate,
 		);
 	},
-	// async [AuditLogEvent.WebhookUpdate](entry) {},
 	async [AuditLogEvent.WebhookDelete](entry) {
 		await log(
 			`${LoggingEmojis.Integration} Webhook ${entry.target.name} deleted${extraAuditLogsInfo(
@@ -130,16 +127,16 @@ const events: {
 	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
 		await log(
-			`${LoggingEmojis.Integration} AutoMod “${
+			`${LoggingEmojis.Integration} ${
 				{
 					[AutoModerationRuleTriggerType.Keyword]: "Block Custom Words",
 					[AutoModerationRuleTriggerType.Spam]: "Block Suspected Spam Content",
 					[AutoModerationRuleTriggerType.KeywordPreset]: "Block Commonly Flagged Words",
 					[AutoModerationRuleTriggerType.MentionSpam]: "Block Mention Spam",
 				}[entry.target.triggerType]
-			}” Rule ${entry.target.name} (ID: ${entry.target.id}) created${extraAuditLogsInfo(
-				entry,
-			)}`,
+			} AutoMod Rule ${entry.target.name} (ID: ${
+				entry.target.id
+			}) created${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
 	},

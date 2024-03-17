@@ -2,21 +2,22 @@ import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	type InteractionReplyOptions,
-	type Snowflake,
 	User,
-	userMention,
-	type RepliableInteraction,
 	hyperlink,
+	userMention,
 	type Guild,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type Snowflake,
+	type UserMention,
 } from "discord.js";
+import { client, defineButton, defineChatCommand } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { getWeeklyXp } from "./xp/misc.js";
-import { client, defineButton, defineChatCommand } from "strife.js";
 import { disableComponents } from "../util/discord.js";
-import { censor } from "./automod/language.js";
+import { censor } from "./automod/misc.js";
+import { getWeeklyXp } from "./xp/util.js";
 
 export const userSettingsDatabase = new Database<{
 	/** The ID of the user. */
@@ -44,7 +45,7 @@ async function settingsCommand(
 		"dm-reminders"?: boolean;
 		"scratch-embeds"?: boolean;
 	},
-) {
+): Promise<void> {
 	await interaction.reply(
 		await updateSettings(interaction.user, {
 			autoreactions: options.autoreactions,
@@ -59,12 +60,14 @@ async function settingsCommand(
 defineChatCommand(
 	{
 		name: "settings",
-		description: "Customize personal settings",
+		description: "Customize your personal settings",
 
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Ping you when your messages get on #${config.channels.board?.name}`,
+				description: `Ping you when your messages get on ${
+					config.channels.board ? "#" + config.channels.board.name : "the board"
+				}`,
 			},
 			"level-up-pings": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -101,7 +104,9 @@ defineChatCommand(
 		options: {
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: `Pings you when your messages get on #${config.channels.board?.name} in the community server`,
+				description: `Pings you when your messages get on ${
+					config.channels.board ? "#" + config.channels.board.name : "the board"
+				} in the community server`,
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -149,7 +154,7 @@ export async function updateSettings(
 		dmReminders?: boolean | "toggle";
 		scratchEmbeds?: boolean | "toggle";
 	},
-) {
+): Promise<InteractionReplyOptions> {
 	const old = await getSettings(user);
 	const updated = {
 		id: user.id,
@@ -179,34 +184,35 @@ export async function updateSettings(
 				: settings.scratchEmbeds ?? old.scratchEmbeds,
 	};
 
-	userSettingsDatabase.updateById(updated, {});
+	userSettingsDatabase.updateById(updated, old);
 
 	return {
 		ephemeral: true,
 		content: `${constants.emojis.statuses.yes} Updated your settings!`,
 
 		components: [
-			...((await config.guild.members.fetch(user.id).catch(() => void 0))
-				? [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									customId: "levelUpPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Level Up Pings",
-									style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
-								} as const,
-								{
-									customId: "boardPings_toggleSetting",
-									type: ComponentType.Button,
-									label: "Board Pings",
-									style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
-								} as const,
-							],
-						},
-				  ]
-				: []),
+			...(await config.guild.members.fetch(user.id).then(
+				() => [
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								customId: "levelUpPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Level Up Pings",
+								style: ButtonStyle[updated.levelUpPings ? "Success" : "Danger"],
+							} as const,
+							{
+								customId: "boardPings_toggleSetting",
+								type: ComponentType.Button,
+								label: "Board Pings",
+								style: ButtonStyle[updated.boardPings ? "Success" : "Danger"],
+							} as const,
+						],
+					},
+				],
+				() => [],
+			)),
 			{
 				type: ComponentType.ActionRow,
 				components: [
@@ -228,10 +234,16 @@ export async function updateSettings(
 						label: "Autoreactions",
 						style: ButtonStyle[updated.autoreactions ? "Success" : "Danger"],
 					},
+					{
+						customId: "useMentions_toggleSetting",
+						type: ComponentType.Button,
+						label: "Use Mentions",
+						style: ButtonStyle[updated.useMentions ? "Success" : "Danger"],
+					},
 				],
 			},
 		],
-	} satisfies InteractionReplyOptions;
+	};
 }
 
 export async function getSettings(
@@ -242,7 +254,10 @@ export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
 ): Promise<typeof userSettingsDatabase.data[number]>;
-export async function getSettings(user: { id: Snowflake }, defaults = true) {
+export async function getSettings(
+	user: { id: Snowflake },
+	defaults = true,
+): Promise<typeof userSettingsDatabase.data[number]> {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
@@ -255,7 +270,9 @@ export async function getSettings(user: { id: Snowflake }, defaults = true) {
 	return settings;
 }
 
-export async function getDefaultSettings(user: { id: Snowflake }) {
+export async function getDefaultSettings(user: {
+	id: Snowflake;
+}): Promise<Required<Omit<typeof userSettingsDatabase.data[number], "id">>> {
 	return {
 		autoreactions: true,
 		dmReminders: true,
@@ -271,16 +288,18 @@ export async function getDefaultSettings(user: { id: Snowflake }) {
 
 export async function mentionUser(
 	user: Snowflake | User,
-	interactor: { id: Snowflake },
-	guild: Guild,
-) {
-	const { useMentions } = await getSettings(interactor);
+	interactor?: { id: Snowflake },
+	guild?: Guild,
+): Promise<UserMention | `[${string}](${string})`> {
+	const useMentions = interactor && (await getSettings(interactor)).useMentions;
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const presence = guild.presences.resolve(interactor.id);
+	const presence = interactor && guild?.presences.resolve(interactor.id);
 	const url = `<${
-		presence?.status === presence?.clientStatus?.desktop ? "discord://-" : "https://discord.com"
+		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web
+			? "discord://-"
+			: "https://discord.com"
 	}/users/${id}>`;
 
 	const { displayName } =

@@ -1,19 +1,22 @@
 import {
-	ComponentType,
-	type ChatInputCommandInteraction,
-	type Snowflake,
 	ButtonStyle,
+	ComponentType,
 	TextInputStyle,
 	inlineCode,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+	type Snowflake,
 	type User,
 } from "discord.js";
+import fileSystem from "node:fs/promises";
 import config from "../../common/config.js";
-import { recentXpDatabase } from "../xp/misc.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
+import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
-import constants from "../../common/constants.js";
-import fileSystem from "node:fs/promises";
+import tryCensor from "../automod/misc.js";
+import warn from "../punishments/warn.js";
+import { recentXpDatabase } from "../xp/util.js";
+import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -62,7 +65,9 @@ const CONSONANTS = [
 	] as const;
 const CHARACTERS = [...CONSONANTS, ...VOWELS] as const;
 
-export default async function hangman(interaction: ChatInputCommandInteraction<"cached" | "raw">) {
+export default async function hangman(
+	interaction: ChatInputCommandInteraction<"cached" | "raw">,
+): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
@@ -148,6 +153,23 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 				if (!modalInteraction) return;
 				await modalInteraction.deferUpdate();
 				const guess = modalInteraction.fields.getTextInputValue("username").toUpperCase();
+
+				const censored = tryCensor(guess);
+				if (censored) {
+					await warn(
+						interaction.user,
+						"Please watch your language!",
+						censored.strikes,
+						`Guessed ${guess} on Hangman`,
+					);
+					return await interaction.reply({
+						ephemeral: true,
+						content: `${constants.emojis.statuses.no} ${
+							censored.strikes < 1 ? "That’s not appropriate" : "Language"
+						}!`,
+					});
+				}
+
 				if (/^[\d.A-Z_]+$/.test(guess))
 					if (guess.toLowerCase() === user.username) collector.stop("win");
 					else guesses.push(CHARACTERS.includes(guess) ? guess : guess.toLowerCase());
@@ -167,7 +189,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?⁉",
 						lose: "You couldn’t guess their username right, so they died \\:(",
 						win: "Great job!",
-					}[reason]
+					}[reason] ?? "R.I.P."
 				}`,
 				files: image,
 				allowedMentions: { users: [] },
@@ -183,7 +205,7 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 		},
 	});
 
-	async function tick() {
+	async function tick(): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",
 		).join("");
@@ -276,7 +298,10 @@ export default async function hangman(interaction: ChatInputCommandInteraction<"
 			files: [
 				{
 					attachment: await fileSystem.readFile(
-						`./modules/games/hangmanPhotos/${Math.min(wrongCount, MAX_WRONGS - 1)}.png`,
+						`./modules/games/hangman-photos/${Math.min(
+							wrongCount,
+							MAX_WRONGS - 1,
+						)}.png`,
 					),
 					name: "hangman.png",
 				},
@@ -294,7 +319,7 @@ const ROLES = [
 	config.roles.booster?.id,
 	config.roles.active?.id,
 ];
-async function getMember(player: User) {
+async function getMember(player: User): Promise<GuildMember> {
 	const members = await config.guild.members.fetch();
 	const testers = await config.testingGuild?.members.fetch();
 	const xp = recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
@@ -308,7 +333,9 @@ async function getMember(player: User) {
 				member.user.discriminator === "0" &&
 				member.user.username.length > 5 &&
 				member.id !== player.id &&
-				((xp[member.id] ?? 0) >= 250 ||
+				!tryCensor(member.user.username) &&
+				(process.env.NODE_ENV !== "production" ||
+					(xp[member.id] ?? 0) >= 250 ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)
@@ -318,14 +345,17 @@ async function getMember(player: User) {
 	return member;
 }
 
-async function makeCanvasFiles(url: string, win: boolean) {
+async function makeCanvasFiles(
+	url: string,
+	win: boolean,
+): Promise<{ attachment: Buffer; name: string }[]> {
 	if (process.env.CANVAS === "false") return [];
 
 	const { createCanvas, loadImage } = await import("@napi-rs/canvas");
 	const canvas = createCanvas(200, 181);
 	const context = canvas.getContext("2d");
 	context.drawImage(
-		await loadImage(`./modules/games/hangmanPhotos/${win ? "win" : MAX_WRONGS - 1}.png`),
+		await loadImage(`./modules/games/hangman-photos/${win ? "win" : MAX_WRONGS - 1}.png`),
 		0,
 		0,
 		canvas.width,

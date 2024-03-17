@@ -33,7 +33,7 @@ await describe("joinWithAnd", async () => {
 			"item1",
 		);
 	});
-	await it("shouldn’t change the original array", () => {
+	await it("should not change the original array", () => {
 		const array = ["foo", "bar", "baz"];
 		joinWithAnd(array);
 		deepStrictEqual(array, ["foo", "bar", "baz"]);
@@ -41,7 +41,7 @@ await describe("joinWithAnd", async () => {
 });
 
 await describe("truncateText", async () => {
-	await it("shouldn’t have trailing spaces", () => {
+	await it("should not have trailing spaces", () => {
 		strictEqual(
 			truncateText("This is a very long text that needs to be truncated.", 20),
 			"This is a very long…",
@@ -56,7 +56,7 @@ await describe("truncateText", async () => {
 	await it("should split at newlines", () => {
 		strictEqual(truncateText("First line\nSecond line", 25), "First line…");
 	});
-	await it("shouldn’t split at newlines with multiline on", () => {
+	await it("should not split at newlines with multiline on", () => {
 		strictEqual(truncateText("First line\nSecond line", 25, true), "First line\nSecond line");
 	});
 	await it("should count the …", () => {

@@ -1,17 +1,17 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { client, defineButton, defineEvent, defineSelect, defineSubcommands } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import { defineButton, defineSelect, client, defineEvent, defineSubcommands } from "strife.js";
-import queueReminders from "./send.js";
-import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
+import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
 import { addQOTD, listQOTDs } from "./qotd.js";
+import queueReminders from "./send.js";
 
 defineSubcommands(
 	{
 		name: "reminders",
-		description: "Commands to manage reminders",
+		description: "Manage your reminders",
 		censored: false,
 		access: true,
 		subcommands: {

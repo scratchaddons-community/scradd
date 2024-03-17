@@ -1,17 +1,21 @@
 import { unifiedDiff } from "difflib";
 import {
 	ComponentType,
+	TextInputStyle,
+	type InteractionResponse,
 	type MessageContextMenuCommandInteraction,
 	type ModalSubmitInteraction,
-	TextInputStyle,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
+import { databaseThread } from "../../common/database.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
-import { databaseThread } from "../../common/database.js";
-export default async function editMessage(interaction: MessageContextMenuCommandInteraction) {
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
+
+export default async function editMessage(
+	interaction: MessageContextMenuCommandInteraction,
+): Promise<InteractionResponse | undefined> {
 	if (
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
@@ -64,7 +68,7 @@ export default async function editMessage(interaction: MessageContextMenuCommand
 	});
 }
 
-export async function submitEdit(interaction: ModalSubmitInteraction, id: string) {
+export async function submitEdit(interaction: ModalSubmitInteraction, id: string): Promise<void> {
 	const text =
 		interaction.fields.getTextInputValue("jsonOne") +
 		interaction.fields.getTextInputValue("jsonTwo");
@@ -121,10 +125,14 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 	const files = [];
 	const contentDiff = unifiedDiff(oldJSON.content.split("\n"), edited.content.split("\n"), {
 		lineterm: "",
-	}).join("\n");
+	})
+		.join("\n")
+		.replace(/^-{3} \n\+{3} \n/, "");
 	const extraDiff = unifiedDiff(
-		JSON.stringify({ ...oldJSON, content: undefined }).split("\n"),
-		JSON.stringify({ ...getMessageJSON(edited), content: undefined }).split("\n"),
+		JSON.stringify({ ...oldJSON, content: undefined }, undefined, "  ").split("\n"),
+		JSON.stringify({ ...getMessageJSON(edited), content: undefined }, undefined, "  ").split(
+			"\n",
+		),
 		{ lineterm: "" },
 	)
 		.join("\n")

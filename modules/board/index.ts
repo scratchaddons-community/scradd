@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
-import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
+import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { client, defineChatCommand, defineEvent, defineButton, defineMenuCommand } from "strife.js";
+import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
+import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
 import updateBoard from "./update.js";
 
 const reactionsName = REACTIONS_NAME.toLowerCase();
@@ -35,23 +35,23 @@ defineEvent("messageReactionRemove", async ({ message: partialMessage }) => {
 defineChatCommand(
 	{
 		name: `explore-${reactionsName}`,
-		description: `Replies with a random message that has ${BOARD_EMOJI} reactions`,
+		description: `Find random messages with ${BOARD_EMOJI} reactions`,
 		access: true,
 
 		options: {
 			"channel": {
-				description: "Filter messages to only get those in a certain channel",
+				description: "Only get messages from this channel",
 				type: ApplicationCommandOptionType.Channel,
 			},
 
 			"minimum-reactions": {
-				description: `Filter messages to only get those with at least this many reactions (defaults to ${defaultMinReactions})`,
+				description: `Only get messages with at least this many reactions (defaults to ${defaultMinReactions})`,
 				minValue: 1,
 				type: ApplicationCommandOptionType.Integer,
 			},
 
 			"user": {
-				description: "Filter messages to only get those by a certain user",
+				description: "Only get messages sent by this user",
 				type: ApplicationCommandOptionType.User,
 			},
 		},
@@ -79,10 +79,14 @@ defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		await updateBoard({
-			count: interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0,
-			message: interaction.targetMessage,
-		});
-		await interaction.editReply(`${constants.emojis.statuses.yes} Synced ${reactionsName}!`);
+		const count = interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
+		await updateBoard({ count, message: interaction.targetMessage });
+		await interaction.editReply(
+			`${
+				constants.emojis.statuses.yes
+			} Synced ${reactionsName}! [That message by ${interaction.targetMessage.author.toString()}](<${
+				interaction.targetMessage.url
+			}>) has ${count || "no"} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
+		);
 	},
 );

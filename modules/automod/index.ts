@@ -1,20 +1,21 @@
 import {
 	ApplicationCommandOptionType,
+	AutoModerationActionType,
 	GuildMember,
 	MessageType,
-	type CommandInteractionOption,
-	AutoModerationActionType,
 	underline,
+	type CommandInteractionOption,
 } from "discord.js";
+import { commands, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { joinWithAnd } from "../../util/text.js";
-import warn from "../punishments/warn.js";
-import changeNickname from "./nicknames.js";
-import automodMessage from "./automod.js";
-import tryCensor, { badWordsAllowed } from "./language.js";
-import { commands, defineChatCommand, defineEvent } from "strife.js";
 import { escapeMessage } from "../../util/markdown.js";
+import { joinWithAnd } from "../../util/text.js";
+import { ignoredDeletions } from "../logging/messages.js";
+import warn from "../punishments/warn.js";
+import automodMessage from "./automod.js";
+import tryCensor, { badWordsAllowed } from "./misc.js";
+import changeNickname from "./nicknames.js";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
@@ -24,36 +25,35 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	)
 		return true;
 
+	if (!interaction.command) throw new ReferenceError("Unknown command run");
+
 	const command =
-		commands[interaction.command?.name ?? ""]?.find(
+		commands[interaction.command.name]?.find(
 			(command) =>
 				typeof command.access === "boolean" ||
 				!![command.access].flat().includes(interaction.guild?.id),
-		) ?? commands[interaction.command?.name ?? ""]?.[0];
-	if (!command) throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+		) ?? commands[interaction.command.name]?.[0];
+	if (!command) throw new ReferenceError(`Command \`${interaction.command.name}\` not found`);
 
-	if (
-		command.censored === "channel"
-			? !badWordsAllowed(interaction.channel)
-			: command.censored ?? true
-	) {
-		const censored = censorOptions(interaction.options.data);
+	if (command.censored === "channel" ? badWordsAllowed(interaction.channel) : !command.censored)
+		return true;
 
-		if (censored.strikes) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That’s not appropriate" : "Language"
-				}!`,
-			});
-			await warn(
-				interaction.user,
-				"Please watch your language!",
-				censored.strikes,
-				`Used command \`${interaction.toString()}\``,
-			);
-			return false;
-		}
+	const censored = censorOptions(interaction.options.data);
+
+	if (censored.strikes) {
+		await interaction.reply({
+			ephemeral: true,
+			content: `${constants.emojis.statuses.no} ${
+				censored.strikes < 1 ? "That’s not appropriate" : "Language"
+			}!`,
+		});
+		await warn(
+			interaction.user,
+			"Please watch your language!",
+			censored.strikes,
+			`Used command \`${interaction.toString()}\``,
+		);
+		return false;
 	}
 
 	return true;
@@ -157,7 +157,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 defineChatCommand(
 	{
 		name: "is-bad-word",
-		description: "Checks text for language",
+		description: "Check text for banned language",
 
 		options: {
 			text: {
@@ -172,8 +172,14 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		const result = tryCensor(options.text);
-		const words = result && result.words.flat();
-		const strikes = result && Math.trunc(result.strikes);
+		if (!result)
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.yes} No bad words found.`,
+			});
+
+		const words = result.words.flat();
+		const strikes = Math.trunc(result.strikes);
 
 		const isMod =
 			config.roles.staff &&
@@ -184,15 +190,14 @@ defineChatCommand(
 		await interaction.reply({
 			ephemeral: true,
 
-			content: words
-				? `## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
-				  (isMod
-						? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
-						: "") +
-				  `*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
-						underline(escapeMessage(word)),
-				  )}`
-				: `${constants.emojis.statuses.yes} No bad words found.`,
+			content:
+				`## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
+				(isMod
+					? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
+					: "") +
+				`*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
+					underline(escapeMessage(word)),
+				)}`,
 		});
 	},
 );
@@ -207,8 +212,10 @@ defineEvent("autoModerationActionExecution", async (action) => {
 		const channel =
 			action.action.metadata.channelId &&
 			(await config.guild.channels.fetch(action.action.metadata.channelId));
-		if (channel && channel.isTextBased())
+		if (channel && channel.isTextBased()) {
+			ignoredDeletions.add(action.alertSystemMessageId);
 			await channel.messages.delete(action.alertSystemMessageId);
+		}
 	}
 });
 
@@ -220,7 +227,8 @@ function censorOptions(options: readonly CommandInteractionOption[]): {
 	const words: string[] = [];
 
 	for (const option of options) {
-		const censoredValue = (option.value === "string" && tryCensor(option.value)) || undefined;
+		const censoredValue =
+			(typeof option.value === "string" && tryCensor(option.value)) || undefined;
 		const censoredOptions = option.options && censorOptions(option.options);
 
 		strikes += (censoredValue?.strikes ?? 0) + (censoredOptions?.strikes ?? 0);

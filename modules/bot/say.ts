@@ -1,21 +1,22 @@
 import {
-	type ChatInputCommandInteraction,
 	ComponentType,
-	chatInputApplicationCommandMention,
 	MessageFlags,
 	TextInputStyle,
-	type RepliableInteraction,
+	type ChatInputCommandInteraction,
+	type Message,
 	type MessageContextMenuCommandInteraction,
+	type RepliableInteraction,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import { mentionChatCommand } from "../../util/discord.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 
 export default async function sayCommand(
 	interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
-	options: { message: string; reply?: string },
-) {
-	if (options.message !== "-") {
+	options: { message?: string; reply?: string },
+): Promise<void> {
+	if (options.message) {
 		await say(interaction, options.message, options.reply || undefined);
 		return;
 	}
@@ -50,7 +51,11 @@ export default async function sayCommand(
  * @param interaction - The interaction that triggered this mimic.
  * @param content - What to mimic.
  */
-export async function say(interaction: RepliableInteraction, content: string, reply?: string) {
+export async function say(
+	interaction: RepliableInteraction,
+	content: string,
+	reply?: string,
+): Promise<Message | undefined> {
 	await interaction.deferReply({ ephemeral: true });
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;
@@ -63,7 +68,6 @@ export async function say(interaction: RepliableInteraction, content: string, re
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
 
-	// todo: censor it
 	const message = await (oldMessage
 		? oldMessage.reply({
 				content,
@@ -77,10 +81,9 @@ export async function say(interaction: RepliableInteraction, content: string, re
 
 	if (message) {
 		await log(
-			`${LoggingEmojis.Bot} ${chatInputApplicationCommandMention(
+			`${LoggingEmojis.Bot} ${await mentionChatCommand(
 				"say",
-				(await interaction.guild?.commands.fetch())?.find(({ name }) => name === "say")
-					?.id ?? "0",
+				interaction.guild ?? undefined,
 			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
 				message.id
 			})`,

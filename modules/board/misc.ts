@@ -1,19 +1,19 @@
 import {
-	type APIButtonComponent,
-	type BaseMessageOptions,
+	BaseChannel,
 	ButtonStyle,
+	ChannelType,
 	ComponentType,
 	Message,
+	type APIButtonComponent,
+	type BaseMessageOptions,
 	type Snowflake,
 	type TextBasedChannel,
-	BaseChannel,
-	ChannelType,
 } from "discord.js";
+import { client } from "strife.js";
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 import { extractMessageExtremities, getBaseChannel, messageToEmbed } from "../../util/discord.js";
-import tryCensor, { censor } from "../automod/language.js";
-import { client } from "strife.js";
+import tryCensor, { censor } from "../automod/misc.js";
 
 export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
 	REACTIONS_NAME = process.env.NODE_ENV === "production" ? "Potatoes" : "Stars";
@@ -32,7 +32,15 @@ export const boardDatabase = new Database<{
 }>("board");
 await boardDatabase.init();
 
-const COUNTS = { admins: 2, mods: 3, private: 4, misc: 5, default: 6, memes: 8, info: 12 } as const;
+const COUNTS = {
+	admins: 2,
+	testing: 3,
+	private: 4,
+	misc: 5,
+	default: 6,
+	memes: 8,
+	info: 12,
+} as const;
 /**
  * Determines the board reaction count for a channel.
  *
@@ -40,12 +48,12 @@ const COUNTS = { admins: 2, mods: 3, private: 4, misc: 5, default: 6, memes: 8, 
  *
  * @returns The reaction count.
  */
-export function boardReactionCount(channel?: TextBasedChannel, time?: Date): number;
-export function boardReactionCount(channel: { id: Snowflake }, time?: Date): number | undefined;
+export function boardReactionCount(channel?: TextBasedChannel, time?: number): number;
+export function boardReactionCount(channel: { id: Snowflake }, time?: number): number | undefined;
 export function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
-	time = new Date(),
-) {
+	time = Date.now(),
+): number | undefined {
 	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);
 
@@ -58,7 +66,7 @@ export function boardReactionCount(
 	const baseChannel = getBaseChannel(channel);
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
 	if (baseChannel.guild.id !== config.guild.id)
-		return shift(COUNTS[baseChannel.guild.id === config.testingGuild?.id ? "mods" : "misc"]);
+		return shift(COUNTS[baseChannel.guild.id === config.testingGuild?.id ? "testing" : "misc"]);
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
 
@@ -66,13 +74,13 @@ export function boardReactionCount(
 		baseReactionCount(baseChannel.id) ??
 			{
 				[config.channels.info?.id || ""]: COUNTS.info,
-				[config.channels.modlogs?.parent?.id || ""]: COUNTS.private,
+				[config.channels.modlogs?.parent?.id || ""]: COUNTS.misc,
 				"866028754962612294": COUNTS.misc, // #The Cache
 			}[baseChannel.parent?.id || ""] ??
 			COUNTS.default,
 	);
 
-	function shift(count: number) {
+	function shift(count: number): number {
 		const privateThread =
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
 				? 2 / 3
@@ -82,9 +90,10 @@ export function boardReactionCount(
 		return Math.max(2, Math.round(count * privateThread * timeShift));
 	}
 }
-function baseReactionCount(id: Snowflake) {
+function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
+		[config.channels.exec?.id || ""]: COUNTS.private,
 		[config.channels.admin?.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
 		[config.channels.devs?.id || ""]: COUNTS.private,
@@ -92,8 +101,8 @@ function baseReactionCount(id: Snowflake) {
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
 		"806656240129671188": COUNTS.memes, // #showcase
 		[config.channels.advertise?.id || ""]: COUNTS.memes,
-		"939350305311715358": COUNTS.mods, // #modmail
-		"894314668317880321": COUNTS.mods, // #evil-secret-youtube-plans
+		"939350305311715358": COUNTS.testing, // #modmail
+		"894314668317880321": COUNTS.testing, // #evil-secret-youtube-plans
 	}[id];
 }
 
@@ -129,14 +138,14 @@ export async function generateBoardMessage(
 				{
 					type: ComponentType.ActionRow,
 					components: [
-						...(extraButtons.pre || []),
+						...(extraButtons.pre ?? []),
 						{
 							label: "Message",
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							url: message.url,
 						},
-						...(extraButtons.post || []),
+						...(extraButtons.post ?? []),
 					],
 				},
 			],
@@ -158,8 +167,8 @@ export async function generateBoardMessage(
 		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
 			linkButton?.type === ComponentType.Button
-				? [...(extraButtons.pre || []), linkButton.toJSON(), ...(extraButtons.post || [])]
-				: [...(extraButtons.pre || []), ...(extraButtons.post || [])];
+				? [...(extraButtons.pre ?? []), linkButton.toJSON(), ...(extraButtons.post ?? [])]
+				: [...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
 			allowedMentions: { users: [] },
@@ -183,7 +192,7 @@ export async function generateBoardMessage(
 	return await messageToBoardData(message);
 }
 
-function formatChannel(channel: TextBasedChannel) {
+function formatChannel(channel: TextBasedChannel): string {
 	const thread = channel.isThread() && channel.parent?.toString();
 	const otherServer =
 		!channel.isDMBased() &&

@@ -1,23 +1,3 @@
-import type { Snowflake } from "discord.js";
-import Database from "../../common/database.js";
-
-export const xpDatabase = new Database<{
-	/** The ID of the user. */
-	user: Snowflake;
-	/** How much XP they have. */
-	xp: number;
-}>("xp");
-export const recentXpDatabase = new Database<{
-	/** The ID of the user. */
-	user: Snowflake;
-	/** How much XP they gained. */
-	xp: number;
-	time: number;
-}>("recent_xp");
-
-await xpDatabase.init();
-await recentXpDatabase.init();
-
 export const DEFAULT_XP = 5;
 
 const XP_PER_LEVEL = [
@@ -40,7 +20,7 @@ const INCREMENT_FREQUENCY = 10;
  *
  * @returns The increment.
  */
-function getIncrementForLevel(level: number) {
+function getIncrementForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
 	const xpForPreviousLevel = XP_PER_LEVEL[level - 1];
 
@@ -66,7 +46,6 @@ function getIncrementForLevel(level: number) {
  */
 export function getXpForLevel(level: number): number {
 	const xpForLevel = XP_PER_LEVEL[level];
-
 	if (xpForLevel !== undefined) return xpForLevel;
 
 	return getXpForLevel(level - 1) + getIncrementForLevel(level);
@@ -79,36 +58,11 @@ export function getXpForLevel(level: number): number {
  *
  * @returns The corresponding level.
  */
-export function getLevelForXp(xp: number) {
+export function getLevelForXp(xp: number): number {
 	const foundLevel = XP_PER_LEVEL.findIndex((found) => found > xp) - 1;
-
 	if (foundLevel !== -2) return foundLevel;
 
 	let level = XP_PER_LEVEL.length;
-
-	while (getXpForLevel(level) < xp) level++;
-
+	while (getXpForLevel(level) <= xp) level++;
 	return level - 1;
-}
-
-export function getWeeklyXp(user: Snowflake) {
-	return recentXpDatabase.data.reduce((accumulator, gain) => {
-		if (gain.user !== user || gain.time + 604_800_000 < Date.now()) return accumulator;
-		accumulator += gain.xp;
-		return accumulator;
-	}, 0);
-}
-
-export function getFullWeeklyData() {
-	return Object.entries(
-		recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
-			if (gain.time + 604_800_000 < Date.now()) return accumulator;
-
-			accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
-			return accumulator;
-		}, {}),
-	)
-		.map((entry) => ({ xp: entry[1], user: entry[0] }))
-		.filter((entry) => entry.xp > 0)
-		.toSorted((one, two) => two.xp - one.xp);
 }

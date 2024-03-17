@@ -1,19 +1,21 @@
+import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 import {
-	type Snowflake,
-	type Message,
-	MessageType,
+	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	ButtonStyle,
-	type ButtonInteraction,
-	type MessageContextMenuCommandInteraction,
+	MessageType,
 	TextInputStyle,
+	type ButtonInteraction,
+	type InteractionResponse,
+	type Message,
+	type MessageContextMenuCommandInteraction,
+	type Snowflake,
+	type ThreadChannel,
 } from "discord.js";
-import { normalize } from "../../util/text.js";
-import { stripMarkdown } from "../../util/markdown.js";
-import tryCensor from "../automod/language.js";
+import mongoose from "mongoose";
 import { client } from "strife.js";
-import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
+import config, { getInitialChannelThreads } from "../../common/config.js";
+import constants from "../../common/constants.js";
 import {
 	GlobalBotInvitesPattern,
 	GlobalUsersPattern,
@@ -21,43 +23,51 @@ import {
 	getBaseChannel,
 	messageToText,
 } from "../../util/discord.js";
-import { getSettings, userSettingsDatabase } from "../settings.js";
-import constants from "../../common/constants.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
-import mongoose from "mongoose";
+import { stripMarkdown } from "../../util/markdown.js";
+import { normalize } from "../../util/text.js";
+import tryCensor, { censor } from "../automod/misc.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import { getSettings, userSettingsDatabase } from "../settings.js";
 
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
 const dictionary = (await Chat.find({}))
-	.map((chat) => ({ response: chat.response, prompt: chat.prompt }))
+	.map((chat) => ({ response: chat.response, prompt: chat.prompt ?? "" }))
 	.filter(
-		(chat): chat is { response: string; prompt: string | undefined } =>
+		(chat): chat is { response: string; prompt: string } =>
 			!!(chat.response && !tryCensor(chat.response)),
 	);
 
-export default function scraddChat(message: Message) {
+export default function scraddChat(message: Message): string | undefined {
 	if (
 		message.author.id === client.user.id ||
 		message.channel.id !== thread?.id ||
-		(message.mentions.users.size > 0 && !message.mentions.has(client.user))
+		(message.mentions.users.size > +message.mentions.has(message.author) &&
+			!message.mentions.has(client.user))
 	)
 		return;
 	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
 
-	const response = didYouMean(prompt, dictionary, {
+	const responses = didYouMean(prompt, dictionary, {
 		matchPath: ["prompt"],
 		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
-		threshold: 0.7,
+		threshold: 0.6,
 	})
 		.toSorted(() => Math.random() - 0.5)
-		.find(({ response }) => response && response !== prompt && !removedResponses.has(response))
-		?.response.replaceAll(client.user.toString(), message.author.toString());
+		.filter(
+			({ response }) => response && response !== prompt && !removedResponses.has(response),
+		);
+	const response = (
+		responses.find(({ response }) => !tryCensor(response))?.response ||
+		(responses[0] && censor(responses[0].response))
+	)
+		?.replaceAll(client.user.toString(), message.author.toString())
+		.replaceAll("<@0>", client.user.toString());
 	if (response) return response;
 }
 
 const previousMessages: Record<Snowflake, Message> = {};
-export async function learn(message: Message) {
+export async function learn(message: Message): Promise<void> {
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
 
@@ -75,10 +85,9 @@ export async function learn(message: Message) {
 	)
 		return;
 
-	const response = messageToText(message, false).replaceAll(
-		GlobalUsersPattern,
-		client.user.toString(),
-	);
+	const response = messageToText(message, false)
+		.replaceAll(message.author.toString(), "<@0>")
+		.replaceAll(GlobalUsersPattern, client.user.toString());
 	if (
 		!response ||
 		response.length > 500 ||
@@ -106,7 +115,7 @@ export async function learn(message: Message) {
 }
 
 const thread = await getThread();
-async function getThread() {
+async function getThread(): Promise<ThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const intitialThread = getInitialChannelThreads(config.channels.bots).find(
@@ -144,7 +153,9 @@ async function getThread() {
 	await message.pin();
 	return createdThread;
 }
-export async function allowChat(interaction: ButtonInteraction) {
+export async function allowChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (settings.scraddChat) {
 		return await interaction.reply(
@@ -163,7 +174,9 @@ export async function allowChat(interaction: ButtonInteraction) {
 		}>).`,
 	);
 }
-export async function denyChat(interaction: ButtonInteraction) {
+export async function denyChat(
+	interaction: ButtonInteraction,
+): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
 	if (!settings.scraddChat) {
 		return await interaction.reply(
@@ -182,7 +195,9 @@ export async function denyChat(interaction: ButtonInteraction) {
 }
 
 const removedResponses = new Set<string>();
-export async function removeResponse(interaction: MessageContextMenuCommandInteraction) {
+export async function removeResponse(
+	interaction: MessageContextMenuCommandInteraction,
+): Promise<InteractionResponse | undefined> {
 	await interaction.showModal({
 		title: "Confirm Permament Response Removal",
 		customId: interaction.id,
@@ -212,10 +227,9 @@ export async function removeResponse(interaction: MessageContextMenuCommandInter
 
 	if (!modalInteraction) return;
 
-	const response = interaction.targetMessage.content.replaceAll(
-		interaction.targetMessage.author.toString(),
-		client.user.toString(),
-	);
+	const response = interaction.targetMessage.content
+		.replaceAll(client.user.toString(), "<@0>")
+		.replaceAll(interaction.targetMessage.author.toString(), client.user.toString());
 
 	removedResponses.add(response);
 	const { deletedCount } = await Chat.deleteMany({ response }).exec();
@@ -227,9 +241,9 @@ export async function removeResponse(interaction: MessageContextMenuCommandInter
 		});
 	}
 	await log(
-		`${LoggingEmojis.Bot} ${
-			interaction.user
-		} permamently removed a response from Scradd Chat (${deletedCount} prompt${
+		`${
+			LoggingEmojis.Bot
+		} ${interaction.user.toString()} permamently removed a response from Scradd Chat (${deletedCount} prompt${
 			deletedCount === 1 ? "" : "s"
 		})`,
 		LogSeverity.ImportantUpdate,

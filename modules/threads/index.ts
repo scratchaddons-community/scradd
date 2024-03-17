@@ -1,24 +1,29 @@
+import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
-import { ApplicationCommandOptionType, roleMention, ChannelType } from "discord.js";
-import { syncMembers, updateMemberThreads, updateThreadMembers } from "../threads/syncMembers.js";
-import { autoClose, cancelThreadChange, setUpAutoClose } from "../threads/autoClose.js";
-import { getThreadConfig } from "./misc.js";
 import { paginate } from "../../util/discord.js";
+import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
+import { getThreadConfig, threadsDatabase } from "./misc.js";
+import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
-	const { roles } = getThreadConfig(thread);
-	if (roles.length)
+	const threadConfig = getThreadConfig(thread);
+	if (threadConfig.roles.length)
 		await thread.send({
-			content: roles.map(roleMention).join(""),
+			content: threadConfig.roles.map(roleMention).join(""),
 			allowedMentions: { parse: ["roles"] },
 		});
+
+	threadsDatabase.updateById(
+		{ id: thread.id, keepOpen: threadConfig.keepOpen },
+		{ roles: threadConfig.roles.join("|") },
+	);
 });
 
 defineSubcommands(
 	{
 		name: "thread",
-		description: "Commands to manage threads",
+		description: "Manage threads",
 		restricted: true,
 		subcommands: {
 			"close-in": {
@@ -54,7 +59,7 @@ defineSubcommands(
 				},
 			},
 			"list-unjoined": {
-				description: "List active threads that you are not in",
+				description: "List public open threads that you are not in",
 				options: {},
 			},
 		},
@@ -67,33 +72,39 @@ defineSubcommands(
 			case "list-unjoined": {
 				await interaction.deferReply({ ephemeral: true });
 				const fetched = await interaction.guild?.channels.fetchActiveThreads();
-				const threads = await Promise.all(
-					fetched?.threads.map(
-						async (thread) =>
-							[
-								thread,
-								await thread.members.fetch(interaction.user.id).catch(() => void 0),
-							] as const,
-					) ?? [],
-				);
-				const unjoined = threads
-					.filter(
-						([thread, joined]) =>
-							!joined && thread.permissionsFor(interaction.user)?.has("ViewChannel"),
+				const threads = [];
+				for (const [, thread] of fetched?.threads ?? []) {
+					const permissions = thread.permissionsFor(interaction.user);
+					if (
+						!permissions?.has("ViewChannel") ||
+						(thread.type === ChannelType.PrivateThread &&
+							!permissions.has("ManageThreads"))
 					)
-					.toSorted(
-						([one], [two]) =>
-							(one.parent?.rawPosition ?? 0) - (two.parent?.rawPosition ?? 0) ||
-							(one.parent?.position ?? 0) - (two.parent?.position ?? 0),
-					);
+						continue;
+					try {
+						await thread.members.fetch(interaction.user.id);
+					} catch {
+						threads.push(thread);
+					}
+				}
+
+				const unjoined = threads.toSorted(
+					(one, two) =>
+						(one.parent &&
+							two.parent &&
+							(one.parent.rawPosition - two.parent.rawPosition ||
+								one.parent.position - two.parent.position ||
+								one.parent.name.localeCompare(two.parent.name))) ||
+						one.name.localeCompare(two.name),
+				);
 				await paginate(
 					unjoined,
-					([thread]) => thread.parent?.toString() + " > " + thread.toString(),
+					(thread) => thread.parent?.toString() + " > " + thread.toString(),
 					(data) => interaction.editReply(data),
 					{
 						title: "Unjoined Threads",
 						singular: "thread",
-						failMessage: "You’ve joined all the threads here!",
+						failMessage: "You’ve joined all public open threads here!",
 						user: interaction.user,
 						ephemeral: true,
 						totalCount: unjoined.length,
@@ -104,6 +115,7 @@ defineSubcommands(
 			case "close-in":
 			case "lock-in": {
 				await setUpAutoClose(interaction, options);
+				break;
 			}
 		}
 	},

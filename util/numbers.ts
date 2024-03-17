@@ -30,7 +30,7 @@ export function convertBase(
 	sourceBase: number,
 	outBase: number,
 	chars = convertBase.defaultChars,
-) {
+): string {
 	const range = [...chars];
 	if (sourceBase < 2 || sourceBase > range.length)
 		throw new RangeError(`sourceBase must be between 2 and ${range.length}`);
@@ -50,7 +50,7 @@ export function convertBase(
 
 	let output = "";
 	while (decValue > 0) {
-		output = `${range[Number(decValue % outBaseBig)]}${output}`;
+		output = `${range[Number(decValue % outBaseBig)] ?? ""}${output}`;
 		decValue = (decValue - (decValue % outBaseBig)) / outBaseBig;
 	}
 	return output || "0";
@@ -66,9 +66,9 @@ convertBase.MAX_BASE = convertBase.defaultChars.length;
  *
  * @param number - The number to suffix.
  */
-export function nth(number: number) {
+export function nth(number: number): string {
 	return (
-		number.toLocaleString("en-us") +
+		number.toLocaleString() +
 		([undefined, "st", "nd", "rd"][(((number + 90) % 100) - 10) % 10] ?? "th")
 	);
 }
@@ -82,6 +82,30 @@ export function parseTime(time: string): Date {
 		else return new Date(Date.now() + number * 3_600_000);
 	}
 
+	const dateMatch =
+		/^(?<year>\d{4})-?(?<month>\d{1,2})-?(?<day>\d{1,2})(?:(?:\s+|T)(?<hour>\d{1,2}):(?<minute>\d{1,2})(?::?(?<second>\d{1,2}))?Z?)?$/.exec(
+			time,
+		);
+	if (dateMatch) {
+		const {
+			year = "",
+			month = "",
+			day = "",
+			hour = "",
+			minute = "",
+			second = "",
+		} = dateMatch.groups ?? {};
+		return new Date(
+			`${year.padStart(4, "0")}-${month.padStart(2, "0")}-${day.padStart(
+				2,
+				"0",
+			)}T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:${second.padStart(2, "0")}Z`,
+		);
+	}
+
+	const date = new Date();
+	const otherDate = new Date(date);
+
 	const {
 		years = 0,
 		months = 0,
@@ -92,7 +116,7 @@ export function parseTime(time: string): Date {
 		seconds = 0,
 	} = new RegExp(
 		/^\s*(?:(?<years>.\d+|\d+(?:.\d+)?)\s*y(?:(?:ea)?rs?)?\s*)?\s*/.source +
-			/(?:(?<months>.\d+|\d+(?:.\d+)?)\s*mo?n?ths?\s*)?\s*/.source +
+			/(?:(?<months>.\d+|\d+(?:.\d+)?)\s*m(?:o?n?th|o)s?\s*)?\s*/.source +
 			/(?:(?<weeks>.\d+|\d+(?:.\d+)?)\s*w(?:(?:ee)?ks?)?\s*)?\s*/.source +
 			/(?:(?<days>.\d+|\d+(?:.\d+)?)\s*d(?:ays?)?\s*)?\s*/.source +
 			/(?:(?<hours>.\d+|\d+(?:.\d+)?)\s*h(?:(?:ou)?rs?)?\s*)?\s*/.source +
@@ -100,9 +124,6 @@ export function parseTime(time: string): Date {
 			/(?:(?<seconds>.\d+|\d+(?:.\d+)?)\s*s(?:ec(?:ond)?s?)?)?\s*$/.source,
 		"i",
 	).exec(time)?.groups ?? {};
-
-	const date = new Date();
-	const otherDate = new Date(date);
 
 	date.setUTCFullYear(date.getUTCFullYear() + +years);
 	otherDate.setUTCFullYear(otherDate.getUTCFullYear() + Math.ceil(+years));
@@ -120,10 +141,8 @@ export function parseTime(time: string): Date {
 	return new Date(+date + fractionalYears + fractionalMonths + totalSeconds * 1000);
 }
 
-// TODO: magic numbers
 const COLOR_CHANNELS = ["red", "green", "blue"] as const;
-export function lerpColors(allColors: number[], percent: number) {
-	if (allColors.length === 0) throw new RangeError("Color array must not be empty.");
+export function lerpColors(allColors: [number, ...number[]], percent: number): number {
 	if (allColors.length === 1) return allColors[0];
 
 	const count = allColors.length - 1;

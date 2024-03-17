@@ -2,20 +2,23 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	type User,
+	type InteractionResponse,
+	type Message,
 	type RepliableInteraction,
+	type User,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { mentionUser } from "../settings.js";
-import filterToStrike, { EXPIRY_LENGTH, listStrikes } from "./misc.js";
+import { EXPIRY_LENGTH } from "./misc.js";
+import filterToStrike, { listStrikes } from "./util.js";
 
 export async function getStrikes(
 	selected: GuildMember | User,
 	interaction: RepliableInteraction,
 	options?: { expired?: boolean; removed?: boolean },
-) {
+): Promise<InteractionResponse | undefined> {
 	if (
 		selected.id !== interaction.user.id &&
 		!(
@@ -43,7 +46,10 @@ export async function getStrikes(
 	);
 }
 
-export async function getStrikeById(interaction: RepliableInteraction, filter: string) {
+export async function getStrikeById(
+	interaction: RepliableInteraction,
+	filter: string,
+): Promise<Message> {
 	if (!(interaction.member instanceof GuildMember))
 		throw new TypeError("interaction.member is not a GuildMember");
 
@@ -61,7 +67,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 	}
 
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
-	const user = member?.user || (await client.users.fetch(strike.user).catch(() => void 0));
+	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
 		isModerator && strike.mod === "AutoMod"
@@ -103,7 +109,7 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 				color: member?.displayColor,
 
 				author: nick
-					? { icon_url: (member || user)?.displayAvatarURL(), name: nick }
+					? { icon_url: (member ?? user)?.displayAvatarURL(), name: nick }
 					: undefined,
 
 				title: `${
@@ -116,7 +122,11 @@ export async function getStrikeById(interaction: RepliableInteraction, filter: s
 				timestamp: new Date(strike.date).toISOString(),
 
 				fields: [
-					{ name: "⚠️ Count", value: strike.count.toString(), inline: true },
+					{
+						name: "⚠️ Count",
+						value: strike.count < 1 ? "verbal" : Math.floor(strike.count).toString(),
+						inline: true,
+					},
 					...(moderator ? [{ name: "🛡 Moderator", value: moderator, inline: true }] : []),
 					...(user
 						? [

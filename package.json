@@ -12,7 +12,7 @@
 		"lint": "eslint .",
 		"serve": "nodemon --env-file=.env --enable-source-maps . --ext js,json,html,css,png",
 		"start": "node --env-file=.env --enable-source-maps .",
-		"test": "npm run build && node --test"
+		"test": "npm run build && node --enable-source-maps --test"
 	},
 	"browserslist": [
 		"chrome 80",
@@ -22,17 +22,16 @@
 	],
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@fontsource-variable/sora": "5.0.16",
-		"@napi-rs/canvas": "0.1.44",
+		"@fontsource-variable/sora": "5.0.17",
+		"@khanacademy/simple-markdown": "0.11.3",
+		"@napi-rs/canvas": "0.1.51",
 		"@sa-community/addons-data": "1.35.1-1",
 		"@twemoji/parser": "15.0.0",
-		"chart.js": "4.4.1",
-		"chartjs-adapter-date-fns": "3.0.0",
-		"date-fns": "2.30.0",
+		"chart.js": "4.4.2",
 		"didyoumean2": "6.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
-		"match-sorter": "6.3.1",
+		"match-sorter": "6.3.4",
 		"mongoose": "7.6.3",
 		"mustache": "4.2.0",
 		"papaparse": "5.4.1",
@@ -47,13 +46,13 @@
 		"@types/mustache": "<=4.2",
 		"@types/node": "<=20.10",
 		"@types/papaparse": "<=5.4",
-		"@typescript-eslint/eslint-plugin": "6.16.0",
-		"@typescript-eslint/parser": "6.16.0",
-		"eslint": "8.56.0",
-		"eslint-plugin-unicorn": "50.0.1",
-		"nodemon": "3.0.2",
+		"@typescript-eslint/eslint-plugin": "7.0.2",
+		"@typescript-eslint/parser": "7.2.0",
+		"eslint": "8.57.0",
+		"eslint-plugin-unicorn": "51.0.1",
+		"nodemon": "3.1.0",
 		"prettier": "2.8.0",
-		"typescript": "5.3.3"
+		"typescript": "5.4.2"
 	},
 	"engines": {
 		"node": ">=20.10.0",

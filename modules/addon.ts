@@ -1,3 +1,5 @@
+import addons from "@sa-community/addons-data" assert { type: "json" };
+import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
@@ -6,18 +8,16 @@ import {
 	type AutocompleteInteraction,
 } from "discord.js";
 import { matchSorter } from "match-sorter";
-import constants from "../common/constants.js";
-import addons from "@sa-community/addons-data" assert { type: "json" };
 import { defineChatCommand } from "strife.js";
+import constants from "../common/constants.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
-import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 
 defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Replies with information about a specific addon available in v${sa.version_name}`,
+		description: `Get information about an addon as of v${sa.version_name}`,
 
 		options: {
 			addon: {
@@ -28,7 +28,7 @@ defineChatCommand(
 						constants.addonSearchOptions,
 					).map((addon) => ({ name: addon.manifest.name, value: addon.addonId }));
 				},
-				description: "The name of the addon",
+				description: "The addon to show",
 				required: true,
 				type: ApplicationCommandOptionType.String,
 			},

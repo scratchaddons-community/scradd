@@ -1,13 +1,15 @@
 import {
-	type APIEmbed,
 	ApplicationCommandOptionType,
+	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
+	type APIEmbed,
 	type BaseMessageOptions,
+	type GuildMember,
+	type InteractionReplyOptions,
+	type InteractionResponse,
 	type RepliableInteraction,
 	type User,
-	type GuildMember,
-	ApplicationCommandType,
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand } from "strife.js";
 import constants from "../common/constants.js";
@@ -18,13 +20,15 @@ const MAX_FETCH_COUNT = 100;
 async function purge(
 	interaction: RepliableInteraction<"cached" | "raw">,
 	options: { count: string; user?: GuildMember | User; message?: string },
-) {
+): Promise<InteractionResponse | undefined> {
 	const before = options.message?.match(/^(?:\d+-)?(?<id>\d+)$/)?.groups?.id ?? undefined;
 	const numberCount = Number(options.count);
 	const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
 	const { channel: channelId, id: countId } = (useId &&
 		/^(?:(?<channel>\d+)-)?(?<id>\d+)$/.exec(options.count)?.groups) || { id: options.count };
-	const channel = channelId ? await client.channels.fetch(channelId) : interaction.channel;
+	const channel = channelId
+		? await client.channels.fetch(channelId).catch(() => void 0)
+		: interaction.channel;
 	if (!channel?.isTextBased() || channel.isDMBased())
 		return await interaction.reply(
 			`${constants.emojis.statuses.no} Could not find that channel!`,
@@ -37,18 +41,19 @@ async function purge(
 	);
 
 	let start = 0;
+	let end = useId
+		? filtered.findIndex(({ id }) => id === countId) + 1
+		: Math.min(filtered.length, numberCount);
 
-	let end = useId ? filtered.findIndex(({ id }) => id === countId) + 1 : numberCount;
-
-	async function generateMessage() {
+	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const sliced = filtered.slice(start, end);
 		if (!sliced[0] || start >= end) {
 			return {
 				content: `${
 					constants.emojis.statuses.no
 				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
-					before
-						? `before [this message](<${channel?.url}/${before}>). Try searching from an older message.`
+					before && channel
+						? `before [this message](<${channel.url}/${before}>). Try searching from an older message.`
 						: "ago. Use the `message` option to search backwards from a certain point."
 				} Also, I can’t purge any messages more than 2 weeks old.`,
 			};
@@ -69,8 +74,8 @@ async function purge(
 		embeds.push(await messageToEmbed(sliced[0]));
 
 		return {
-			content: `Are you sure you want to purge th${
-				sliced.length === 1 ? "is message" : `ese ${sliced.length} messages`
+			content: `Are you sure you want to purge ${
+				sliced.length === 1 ? "this message" : `these ${sliced.length} messages`
 			}?`,
 			embeds,
 			components: [
@@ -81,7 +86,7 @@ async function purge(
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "First Message",
-							url: (last || sliced[0]).url,
+							url: (last ?? sliced[0]).url,
 						},
 						{
 							type: ComponentType.Button,
@@ -173,6 +178,7 @@ async function purge(
 				case "last": {
 					if (split[1] === "remove") start++;
 					else start--;
+					break;
 				}
 			}
 
@@ -191,7 +197,7 @@ async function purge(
 defineChatCommand(
 	{
 		name: "purge",
-		description: "(Mod only) Bulk deletes a specified amount of messages",
+		description: "Bulk delete a specified amount of messages",
 		access: false,
 
 		options: {
