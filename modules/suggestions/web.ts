@@ -15,7 +15,7 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 import { markdownToHtml } from "../../util/markdown.js";
 import { getRequestUrl } from "../../util/text.js";
-import { getAnswers, oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import { oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import top from "./top.js";
 
 const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8"),
@@ -123,10 +123,9 @@ export default async function suggestionsPage(
 		"👍",
 	);
 
-	const answer = (config.channels.suggestions &&
-		getAnswers(config.channels.suggestions).find(
-			([, tag]) => tag.name === suggestion.answer,
-		)?.[1]) ?? { name: suggestionAnswers[0], emoji: undefined };
+	const answer = config.channels.suggestions?.availableTags.find(
+		(tag) => tag.moderated && tag.name === suggestion.answer,
+	) ?? { name: suggestionAnswers[0], emoji: undefined };
 
 	const rendered = Mustache.render(SUGGESTION_PAGE, {
 		messages,

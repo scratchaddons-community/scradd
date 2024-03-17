@@ -16,8 +16,13 @@ import { lerpColors } from "../../util/numbers.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import type { AuditLog } from "../logging/misc.js";
-import { getAnswer, suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import updateReactions, { addToDatabase } from "./reactions.js";
+import {
+	getSuggestionData,
+	parseSuggestionTags,
+	suggestionAnswers,
+	suggestionsDatabase,
+} from "./misc.js";
+import updateReactions, { addToDatabase } from "./update.js";
 import top from "./top.js";
 
 defineEvent("threadCreate", addToDatabase);
@@ -46,12 +51,7 @@ defineEvent("threadUpdate", async (_, newThread) => {
 	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
 
 	suggestionsDatabase.updateById(
-		{
-			id: newThread.id,
-			title: newThread.name,
-			answer: getAnswer(newThread.appliedTags, config.channels.suggestions).name,
-			count,
-		},
+		{ count, ...getSuggestionData(newThread) },
 		{ author: newThread.ownerId ?? client.user.id },
 	);
 });
@@ -59,12 +59,11 @@ defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
 	if (rawEntry.action !== AuditLogEvent.ThreadUpdate) return;
 	const entry = rawEntry as AuditLog<AuditLogEvent.ThreadUpdate, "applied_tags">;
 
+	if (!(entry.target instanceof ThreadChannel)) return;
+	const channel = entry.target.parent;
 	if (
-		!(entry.target instanceof ThreadChannel) ||
-		!(entry.target.parent instanceof ForumChannel) ||
-		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(
-			entry.target.parent.id,
-		)
+		!(channel instanceof ForumChannel) ||
+		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(channel.id)
 	)
 		return;
 
@@ -74,8 +73,16 @@ defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
 	);
 	if (!changes.length) return;
 
-	const oldAnswer = getAnswer(changes[0]?.old ?? [], entry.target.parent);
-	const newAnswer = getAnswer(changes.at(-1)?.new ?? [], entry.target.parent);
+	const oldAnswer = parseSuggestionTags(
+		changes[0]?.old ?? [],
+		channel.availableTags,
+		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+	).answer;
+	const newAnswer = parseSuggestionTags(
+		changes.at(-1)?.new ?? [],
+		channel.availableTags,
+		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+	).answer;
 	if (oldAnswer.name === newAnswer.name) return;
 
 	const user =
@@ -97,9 +104,7 @@ defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
 						  ),
 				title:
 					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
-				description: entry.target.parent.topic
-					?.split(`\n- **${newAnswer.name}**: `)[1]
-					?.split("\n")[0],
+				description: channel.topic?.split(`\n- **${newAnswer.name}**: `)[1]?.split("\n")[0],
 				footer: { text: `Was previously ${oldAnswer.name}` },
 			},
 		],
