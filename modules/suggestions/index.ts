@@ -16,7 +16,12 @@ import { lerpColors } from "../../util/numbers.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import type { AuditLog } from "../logging/misc.js";
-import { getSuggestionData, parseSuggestionTags, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import {
+	getSuggestionData,
+	parseSuggestionTags,
+	suggestionAnswers,
+	suggestionsDatabase,
+} from "./misc.js";
 import updateReactions, { addToDatabase } from "./update.js";
 import top from "./top.js";
 
