@@ -110,9 +110,21 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.#queueWrite();
 	}
 
-	updateById<Keys extends keyof Data>(
-		newData: Data["id"] extends string ? Pick<Data, Keys> & { id: string } : never,
-		oldData?: Omit<Data, Keys | "id">,
+	updateById<
+		Overritten extends Partial<Data>,
+		DefaultKeys extends Extract<
+			{
+				[P in keyof Data]: Data[P] extends undefined
+					? never
+					: Overritten[P] extends Data[P]
+					? never
+					: P;
+			}[keyof Data],
+			keyof Data
+		>,
+	>(
+		newData: Data["id"] extends string ? Overritten : never,
+		oldData?: NoInfer<Partial<Data> & { [P in DefaultKeys]: Data[P] }>,
 	): void {
 		const data = [...this.data];
 		const index = data.findIndex((suggestion) => suggestion.id === newData.id);

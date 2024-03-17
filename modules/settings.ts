@@ -184,7 +184,7 @@ export async function updateSettings(
 				: settings.scratchEmbeds ?? old.scratchEmbeds,
 	};
 
-	userSettingsDatabase.updateById(updated, {});
+	userSettingsDatabase.updateById(updated, old);
 
 	return {
 		ephemeral: true,
