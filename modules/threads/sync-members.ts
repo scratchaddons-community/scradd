@@ -29,7 +29,7 @@ export async function syncMembers(
 				id: interaction.channel.id,
 				roles: threadConfig.roles.filter((found) => found !== role.id).join("|"),
 			},
-			threadConfig,
+			{ keepOpen: threadConfig.keepOpen },
 		);
 		return await interaction.reply(
 			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
@@ -40,7 +40,7 @@ export async function syncMembers(
 
 	threadsDatabase.updateById(
 		{ id: interaction.channel.id, roles: [...threadConfig.roles, role.id].join("|") },
-		threadConfig,
+		{ keepOpen: threadConfig.keepOpen },
 	);
 	await interaction.reply(
 		`${constants.emojis.statuses.yes} I will add all ${roleMention(role.id)} to this thread!`,

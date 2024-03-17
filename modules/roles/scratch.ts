@@ -12,7 +12,6 @@ import {
 	type RESTPutAPICurrentUserApplicationRoleConnectionResult,
 } from "discord.js";
 import { createHash, randomBytes } from "node:crypto";
-import fileSystem from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -31,8 +30,6 @@ await client.application.editRoleConnectionMetadataRecords([
 	},
 ]);
 
-const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
-
 const HASH = randomBytes(16);
 const sessions: Record<string, string> = {};
 export default async function linkScratchRole(
@@ -40,7 +37,7 @@ export default async function linkScratchRole(
 	response: ServerResponse,
 ): Promise<ServerResponse> {
 	if (!process.env.CLIENT_SECRET)
-		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
+		return response.writeHead(501, { "content-type": "text/plain" }).end("501 Not Implemented");
 
 	const ipHash = createHash("sha384")
 		.update(request.socket.remoteAddress ?? "")

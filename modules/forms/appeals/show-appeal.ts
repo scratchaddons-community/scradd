@@ -29,7 +29,6 @@ import giveXp from "../../xp/give-xp.js";
 import appeals, { appealThread } from "./appeals.js";
 import { getAppealComponents } from "./generate-appeal.js";
 
-const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
 		content: await fileSystem.readFile("./modules/forms/appeals/answer.html", "utf8"),
@@ -46,7 +45,7 @@ export default async function appealRequest(
 	response: ServerResponse,
 ): Promise<ServerResponse> {
 	if (!process.env.CLIENT_SECRET)
-		return response.writeHead(503, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
+		return response.writeHead(501, { "content-type": "text/plain" }).end("501 Not Implemented");
 
 	const requestUrl = getRequestUrl(request);
 	const redirectUri = requestUrl.origin + requestUrl.pathname;

@@ -13,12 +13,12 @@ import suggestionsPage from "../modules/suggestions/web.js";
 import pkg from "../package.json" assert { type: "json" };
 import { getRequestUrl } from "../util/text.js";
 
-const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
 	"#" + constants.themeColor.toString(16),
 );
-const NOT_FOUND_PAGE = await fileSystem.readFile("./web/404.html", "utf8");
+const CLIENT_JS_FILE = await fileSystem.readFile("./dist/web/client.js", "utf8");
+const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const SORA_DIRECTORY = path.dirname(
 	fileURLToPath(import.meta.resolve("@fontsource-variable/sora")),
 );
@@ -33,11 +33,11 @@ const server = http.createServer(async (request, response) => {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					return response
 						.writeHead(403, { "content-type": "text/plain" })
-						.end("Forbidden");
+						.end("403 Forbidden");
 
 				await cleanDatabaseListeners();
 				process.emitWarning("cleanDatabaseListeners ran");
-				response.writeHead(200, { "content-type": "text/plain" }).end("Success");
+				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
 
 				return;
 			}
@@ -50,6 +50,11 @@ const server = http.createServer(async (request, response) => {
 			case "/style.css/": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
 			}
+			case "/client.js/": {
+				return response
+					.writeHead(200, { "content-type": "text/javascript" })
+					.end(CLIENT_JS_FILE);
+			}
 			case "/discord.css/": {
 				return response
 					.writeHead(200, { "content-type": "text/css" })
@@ -61,15 +66,6 @@ const server = http.createServer(async (request, response) => {
 					.writeHead(301, {
 						location:
 							config.guild.iconURL(options) ?? client.user.displayAvatarURL(options),
-					})
-					.end();
-			}
-			case "/": {
-				return response
-					.writeHead(301, {
-						location: config.guild.features.includes("DISCOVERABLE")
-							? `https://discord.com/servers/${config.guild.id}`
-							: pkg.homepage,
 					})
 					.end();
 			}
@@ -89,10 +85,17 @@ const server = http.createServer(async (request, response) => {
 				break;
 			}
 		}
-		response.writeHead(404, { "content-type": "text/html" }).end(NOT_FOUND_PAGE);
+
+		response
+			.writeHead(301, {
+				location: config.guild.features.includes("DISCOVERABLE")
+					? `https://discord.com/servers/${config.guild.id}`
+					: pkg.homepage,
+			})
+			.end();
 	} catch (error) {
 		await logError(error, request.url ?? "").catch(console.error);
-		response.writeHead(500).end("Internal Server Error");
+		response.writeHead(500, { "content-type": "text/plain" }).end("500 Internal Server Error");
 	}
 });
 
