@@ -48,7 +48,9 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "Server Rules",
-							url: config.guild.rulesChannel?.url || "",
+							url:
+								config.guild.rulesChannel?.url ??
+								`https://discord.com/channels/${config.guild.id}`,
 						},
 						// {
 						// 	type: ComponentType.Button,
@@ -72,7 +74,9 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url: config.channels.support?.url || "",
+							url:
+								config.channels.support?.url ??
+								`https://discord.com/channels/${config.guild.id}`,
 						},
 					],
 				},
