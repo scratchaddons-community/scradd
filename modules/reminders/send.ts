@@ -208,7 +208,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				}
 				case SpecialReminders.QOTD: {
 					await sendQOTD();
-				}
+continue; }
 			}
 		}
 		if (!channel?.isTextBased() || typeof reminder.reminder !== "string") continue;
