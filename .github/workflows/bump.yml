@@ -23,6 +23,7 @@ jobs:
               id: commit
               uses: peter-evans/create-pull-request@v6.0.2
               with:
+                  token: ${{ secrets.PAT }}
                   commit-message: Bump dependencies
                   branch: ci-bump-dependencies
                   delete-branch: true
