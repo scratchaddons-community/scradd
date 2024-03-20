@@ -24,6 +24,7 @@ jobs:
               uses: peter-evans/create-pull-request@v6.0.2
               with:
                   token: ${{ secrets.TOKEN }}
+                  push-to-fork: RedGuy13/scradd
                   commit-message: Bump dependencies
                   branch: ci-bump-dependencies
                   delete-branch: true
