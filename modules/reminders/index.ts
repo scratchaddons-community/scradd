@@ -5,7 +5,6 @@ import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
 import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
-import { addQOTD, listQOTDs } from "./qotd.js";
 import queueReminders from "./send.js";
 
 defineSubcommands(
@@ -101,30 +100,3 @@ defineEvent("messageCreate", async (message) => {
 		await queueReminders();
 	}
 });
-
-defineSubcommands(
-	{
-		name: "qotd",
-		description: "question of the day",
-
-		subcommands: {
-			add: { description: "Add a question" },
-			list: { description: "Lists questions" },
-		},
-
-		restricted: true,
-		access: false,
-	},
-	async (interaction, { subcommand }) => {
-		switch (subcommand) {
-			case "add": {
-				await addQOTD(interaction);
-				break;
-			}
-			case "list": {
-				await listQOTDs(interaction);
-				break;
-			}
-		}
-	},
-);
