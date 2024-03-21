@@ -31,8 +31,7 @@ jobs:
                   token: ${{ secrets.TOKEN }}
                   push-to-fork: RedGuy13/scradd
                   author:
-                      github-actions[bot]
-                      <41898282+github-actions[bot]@users.noreply.github.com>
+                      github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
                   commit-message: Bump dependencies
                   branch: ci-bump-dependencies
                   delete-branch: true
