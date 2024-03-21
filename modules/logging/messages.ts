@@ -2,7 +2,7 @@ import { unifiedDiff } from "difflib";
 import {
 	Colors,
 	messageLink,
-	type Collection,
+	type ReadonlyCollection,
 	type GuildTextBasedChannel,
 	type Message,
 	type MessageReaction,
@@ -64,7 +64,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 	);
 }
 export async function messageDeleteBulk(
-	messages: Collection<string, Message | PartialMessage>,
+	messages: ReadonlyCollection<string, Message | PartialMessage>,
 	channel: GuildTextBasedChannel,
 ): Promise<void> {
 	if (!shouldLog(channel)) return;
@@ -113,7 +113,7 @@ export async function messageDeleteBulk(
 }
 export async function messageReactionRemoveAll(
 	partialMessage: Message | PartialMessage,
-	reactions: Collection<string, MessageReaction>,
+	reactions: ReadonlyCollection<string, MessageReaction>,
 ): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
