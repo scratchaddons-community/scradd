@@ -52,7 +52,7 @@
 		"eslint-plugin-unicorn": "51.0.1",
 		"nodemon": "3.1.0",
 		"prettier": "2.8.0",
-		"typescript": "5.4.2"
+		"typescript": "5.4.3"
 	},
 	"engines": {
 		"node": ">=20.10.0",
