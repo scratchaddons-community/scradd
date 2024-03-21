@@ -12,7 +12,7 @@ export const suggestionAnswers = [
 ] as const;
 
 export const suggestionsDatabase = new Database<{
-	answer: typeof suggestionAnswers[number];
+	answer: (typeof suggestionAnswers)[number];
 	author: Snowflake;
 	count: number;
 	id: Snowflake;

@@ -74,7 +74,7 @@ export async function sayAutocomplete(interaction: AutocompleteInteraction<"cach
 			].flat(4);
 		},
 	}).map(getMessageInfo);
-	function getMessageInfo(message: typeof messages[number]) {
+	function getMessageInfo(message: (typeof messages)[number]) {
 		const component = message.components[0]?.components[0];
 		return {
 			name: `${truncateText(

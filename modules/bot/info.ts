@@ -231,7 +231,7 @@ function getConfig() {
 			fields: [
 				...Object.entries(config.roles)
 					.filter(
-						(role): role is [typeof role[0], Role | undefined] =>
+						(role): role is [(typeof role)[0], Role | undefined] =>
 							typeof role[1] !== "string",
 					)
 					.map((role) => ({

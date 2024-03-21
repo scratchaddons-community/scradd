@@ -5,7 +5,7 @@ import { manifest, addons } from "../../common/extension.js";
 import { trimPatchVersion } from "../../util/text.js";
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
-export type GroupName = typeof GROUP_NAMES[number];
+export type GroupName = (typeof GROUP_NAMES)[number];
 
 export type Dependencies = { [key: string]: boolean | undefined };
 export type AddonQuestion = {

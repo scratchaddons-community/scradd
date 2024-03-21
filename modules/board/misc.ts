@@ -90,7 +90,7 @@ export function boardReactionCount(channel?: TextBasedChannel): number {
  * @returns The representation of the message.
  */
 export async function generateBoardMessage(
-	info: typeof boardDatabase.data[number] | Message,
+	info: (typeof boardDatabase.data)[number] | Message,
 	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
 ): Promise<BaseMessageOptions | undefined> {
 	const count =

@@ -17,7 +17,7 @@ import type { DATABASE_THREAD } from "../../common/database.js";
 import constants from "../../common/constants.js";
 
 export const LOG_GROUPS = ["server", "messages", "channels", "members", "voice"] as const;
-export type LogGroup = typeof LOG_GROUPS[number];
+export type LogGroup = (typeof LOG_GROUPS)[number];
 
 export function shouldLog(channel: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);

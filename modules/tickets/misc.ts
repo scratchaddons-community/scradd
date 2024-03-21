@@ -48,6 +48,6 @@ export const TICKET_CATEGORIES = [
 	"server",
 	"other",
 ] as const;
-export type Category = typeof TICKET_CATEGORIES[number];
+export type Category = (typeof TICKET_CATEGORIES)[number];
 export const SA_CATEGORY = "sa";
 export const SERVER_CATEGORY = "update";

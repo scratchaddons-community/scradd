@@ -39,7 +39,7 @@ export function addToDatabase(thread: AnyThreadChannel<boolean>) {
 
 export function getSuggestionData(
 	thread: AnyThreadChannel<boolean>,
-): Omit<typeof suggestionsDatabase.data[number], "count"> {
+): Omit<(typeof suggestionsDatabase.data)[number], "count"> {
 	return {
 		answer:
 			config.channels.suggestions?.availableTags.find(

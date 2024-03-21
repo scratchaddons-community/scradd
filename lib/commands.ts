@@ -32,7 +32,7 @@ type Option = { description: string; required?: boolean } & (
 			autocomplete?: never;
 	  }
 	| {
-			type: typeof ApplicationCommandOptionType[
+			type: (typeof ApplicationCommandOptionType)[
 				| "Attachment"
 				| "Boolean"
 				| "Mentionable"
@@ -47,7 +47,7 @@ type Option = { description: string; required?: boolean } & (
 			autocomplete?: never;
 	  }
 	| {
-			type: typeof ApplicationCommandOptionType["Integer" | "Number"];
+			type: (typeof ApplicationCommandOptionType)["Integer" | "Number"];
 			minValue?: number;
 			maxValue?: number;
 			choices?: never;
@@ -108,7 +108,7 @@ interface ChatInputSubcommandData<O extends { [key: string]: { [key: string]: Op
 		};
 	};
 }
-interface ContextMenuCommandData<T extends typeof ApplicationCommandType["Message" | "User"]>
+interface ContextMenuCommandData<T extends (typeof ApplicationCommandType)["Message" | "User"]>
 	extends BaseCommandData {
 	description?: never;
 	type: T;
@@ -120,7 +120,7 @@ interface ContextMenuCommandData<T extends typeof ApplicationCommandType["Messag
 type CommandData =
 	| ChatInputCommandData
 	| ChatInputSubcommandData<{ [key: string]: { [key: string]: Option } }>
-	| ContextMenuCommandData<typeof ApplicationCommandType["Message" | "User"]>;
+	| ContextMenuCommandData<(typeof ApplicationCommandType)["Message" | "User"]>;
 type Command =
 	| ((interaction: ChatInputCommandInteraction<"cached" | "raw">) => any)
 	| ((interaction: MessageContextMenuCommandInteraction) => any)
@@ -164,7 +164,9 @@ export default function defineCommand<O extends { [key: string]: { [key: string]
 		// }[keyof O],
 	) => any,
 ): void;
-export default function defineCommand<T extends typeof ApplicationCommandType["Message" | "User"]>(
+export default function defineCommand<
+	T extends (typeof ApplicationCommandType)["Message" | "User"],
+>(
 	data: ContextMenuCommandData<T>,
 	command: (
 		interaction: {
