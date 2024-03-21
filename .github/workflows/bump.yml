@@ -3,6 +3,11 @@ on:
     workflow_dispatch:
     schedule:
         - cron: 45 11 * * * # 60 min before Dependabot
+    push:
+        paths:
+            - package.json
+            - package-lock.json
+            - bump.yml
 
 permissions: write-all
 
