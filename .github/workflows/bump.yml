@@ -8,6 +8,8 @@ on:
             - package.json
             - package-lock.json
             - .github/workflows/bump.yml
+        branches:
+            - main
 
 permissions: write-all
 
