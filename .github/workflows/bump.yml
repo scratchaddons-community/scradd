@@ -7,7 +7,7 @@ on:
         paths:
             - package.json
             - package-lock.json
-            - bump.yml
+            - .github/workflows/bump.yml
 
 permissions: write-all
 
