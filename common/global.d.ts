@@ -14,7 +14,14 @@ declare global {
 			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
 			fromIndex?: number,
 		): number;
-		filter(predicate: BooleanConstructor, thisArg?: unknown): NonFalsy<T>[];
+		filter<S extends T>(
+			predicate: (value: T, index: number, array: readonly T[]) => value is S,
+			thisArg?: undefined,
+		): S[];
+		filter<P extends (value: T, index: number, array: T[]) => unknown>(
+			predicate: P,
+			thisArg?: unknown,
+		): (P extends BooleanConstructor ? NonFalsy<T> : T)[];
 	}
 	interface ReadonlyArray<T> {
 		includes(
@@ -33,6 +40,14 @@ declare global {
 			callbackfn: (value: T, index: number, array: readonly T[]) => U,
 			thisArg?: unknown,
 		): { readonly [K in keyof this]: U };
+		filter<S extends T>(
+			predicate: (value: T, index: number, array: readonly T[]) => value is S,
+			thisArg?: undefined,
+		): S[];
+		filter<P extends (value: T, index: number, array: T[]) => unknown>(
+			predicate: P,
+			thisArg?: unknown,
+		): P extends BooleanConstructor ? FilterNonFalsy<this> : T[];
 	}
 	interface ArrayConstructor {
 		isArray(arg: unknown): arg is unknown[] | readonly unknown[];
@@ -163,8 +178,14 @@ declare module "strife.js" {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-type NonFalsy<T> = T extends "" | 0 | 0n | false | null | undefined | void ? never : T;
+type Falsy = "" | 0 | 0n | false | null | undefined;
+type NonFalsy<T> = T extends Falsy ? never : T;
+
+type FilterNonFalsy<T> = T extends readonly [infer F, ...infer R]
+	? F extends Falsy
+		? FilterNonFalsy<R>
+		: [F, ...FilterNonFalsy<R>]
+	: [];
 type WidenLiteral<T> = T extends string
 	? string
 	: T extends number
