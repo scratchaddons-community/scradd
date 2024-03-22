@@ -14,6 +14,7 @@ export enum SpecialReminders {
 	BackupDatabases,
 	SyncRandomBoard,
 	ChangeStatus,
+	QOTD,
 }
 export type Reminder = {
 	channel: Snowflake;
@@ -36,6 +37,8 @@ export function getUserReminders(id: string): Reminder[] {
 		.toSorted((one, two) => one.date - two.date);
 }
 
+const date = new Date();
+
 if (
 	config.channels.announcements &&
 	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Weekly)
@@ -44,7 +47,12 @@ if (
 		...remindersDatabase.data,
 		{
 			channel: config.channels.announcements.id,
-			date: Date.now() + 302_400_000,
+			date: +new Date(+date + ((7 - date.getUTCDay()) % 7) * 86_400_000).setUTCHours(
+				0,
+				0,
+				0,
+				0,
+			),
 			reminder: undefined,
 			id: SpecialReminders.Weekly,
 			user: client.user.id,
@@ -60,7 +68,7 @@ if (
 		...remindersDatabase.data,
 		{
 			channel: config.channels.suggestions.parent.id,
-			date: Date.now(),
+			date: +date,
 			reminder: undefined,
 			id: SpecialReminders.UpdateSACategory,
 			user: client.user.id,
@@ -76,7 +84,7 @@ if (
 		...remindersDatabase.data,
 		{
 			channel: BUMPING_THREAD,
-			date: Date.now() + 3_600_000,
+			date: +date + 3_600_000,
 			reminder: undefined,
 			id: SpecialReminders.Bump,
 			user: client.user.id,
@@ -92,7 +100,7 @@ if (
 		...remindersDatabase.data,
 		{
 			channel: BACKUPS_THREAD,
-			date: Date.now(),
+			date: +date,
 			reminder: undefined,
 			id: SpecialReminders.BackupDatabases,
 			user: client.user.id,
@@ -108,7 +116,7 @@ if (
 		...remindersDatabase.data,
 		{
 			channel: config.channels.board.id,
-			date: Date.now(),
+			date: +date,
 			id: SpecialReminders.SyncRandomBoard,
 			user: client.user.id,
 		},
@@ -123,9 +131,25 @@ remindersDatabase.data = [
 	...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.ChangeStatus),
 	{
 		channel: "0",
-		date: Date.now(),
+		date: +date,
 		reminder: +(nextChange?.reminder ?? 0),
 		id: SpecialReminders.ChangeStatus,
 		user: client.user.id,
 	},
 ];
+
+if (
+	config.channels.qotd &&
+	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.QOTD)
+) {
+	remindersDatabase.data = [
+		...remindersDatabase.data,
+		{
+			channel: config.channels.qotd.id,
+			date: date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 12 ? 86_400_000 : 0),
+			reminder: undefined,
+			id: SpecialReminders.QOTD,
+			user: client.user.id,
+		},
+	];
+}

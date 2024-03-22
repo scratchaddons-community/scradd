@@ -23,6 +23,7 @@ import {
 	remindersDatabase,
 	type Reminder,
 } from "./misc.js";
+import sendQuestion from "../polls/qotd.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -61,8 +62,6 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				case SpecialReminders.Weekly: {
 					if (!channel?.isTextBased()) continue;
 
-					const date = new Date();
-					date.setUTCDate(date.getUTCDate() - 7);
 					const nextWeeklyDate = new Date(reminder.date);
 					nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
 
@@ -203,6 +202,21 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						name: "status",
 						state: statuses[next],
 					});
+					continue;
+				}
+				case SpecialReminders.QOTD: {
+					if (!channel?.isThreadOnly()) continue;
+					remindersDatabase.data = [
+						...remindersDatabase.data,
+						{
+							channel: channel.id,
+							date: reminder.date + 86_400_000,
+							reminder: undefined,
+							id: SpecialReminders.QOTD,
+							user: client.user.id,
+						},
+					];
+					await sendQuestion(channel);
 					continue;
 				}
 			}
