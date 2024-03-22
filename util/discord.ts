@@ -614,25 +614,6 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";
 };
-
-/**
- * Creates a paginated embed from an array.
- *
- * @param array - The array to be paginated.
- * @param stringify - A function to convert each element of the array to a string.
- * @param reply - A function to send pages.
- * @param options - Additional options.
- * @param options.title - The title of the embed.
- * @param options.format - A user to format the embed against.
- * @param options.singular - A noun that describes a item of the array.
- * @param options.plural - `singular` pluralized. Defaults to just adding an `s` to the end.
- * @param options.failMessage - A message to show when `array` is empty.
- * @param options.user - The user who ran the command. Only they will be able to switch pages. Set to `false` to only show the first page.
- * @param options.rawOffset - The index of an item to jump to.
- * @param options.totalCount - Whether to show the index of each item.
- * @param options.generateComponents - A function to generate custom action rows below the pagination buttons on a per-page basis.
- * @param options.disableCustomComponents - Whether to disable the custom components when the pagination buttons go inactive.
- */
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
@@ -706,9 +687,9 @@ export async function paginate<Item>(
 		async function formatLine(current: Item, rawIndex: number): Promise<string> {
 			const index = rawIndex + offset;
 			const stringified = await stringify(current, index, filtered);
-			const line =
-				(totalCount ? "" : `${index + 1}. `) +
-				(condensed ? stringified.replaceAll(/\n\s+/g, " - ") : stringified);
+			const line = `${totalCount ? "-" : `${index + 1}.`} ${
+				condensed ? stringified.replaceAll(/\n\s+/g, " - ") : stringified
+			}`;
 
 			return highlightOffset && rawOffset === rawIndex + offset ? `__${line}__` : line;
 		}
