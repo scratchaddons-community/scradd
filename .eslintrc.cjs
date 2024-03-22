@@ -2,8 +2,7 @@
 
 const { compilerOptions } = require("./tsconfig.json");
 
-/** @type {import("eslint").ESLint.ConfigData} */
-module.exports = {
+module.exports = /** @satisfies {import("eslint").ESLint.ConfigData} @type {const} */ ({
 	env: Object.fromEntries(
 		[...compilerOptions.lib, ...compilerOptions.types, compilerOptions.target]
 			.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
@@ -231,7 +230,7 @@ module.exports = {
 			},
 		],
 	},
-};
+});
 
 // todo: [..] over toJSON?
 // todo: stop nesting why tf are there 14-level nesting places
