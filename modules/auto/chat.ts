@@ -5,12 +5,12 @@ import {
 	ComponentType,
 	MessageType,
 	TextInputStyle,
+	type AnyThreadChannel,
 	type ButtonInteraction,
 	type InteractionResponse,
 	type Message,
 	type MessageContextMenuCommandInteraction,
 	type Snowflake,
-	type ThreadChannel,
 } from "discord.js";
 import mongoose from "mongoose";
 import { client } from "strife.js";
@@ -115,7 +115,7 @@ export async function learn(message: Message): Promise<void> {
 }
 
 const thread = await getThread();
-async function getThread(): Promise<ThreadChannel | undefined> {
+async function getThread(): Promise<AnyThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const intitialThread = getInitialChannelThreads(config.channels.bots).find(
