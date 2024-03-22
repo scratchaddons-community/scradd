@@ -25,6 +25,7 @@ async function getConfig() {
 	if (otherGuilds) otherGuilds.delete(guild.id);
 
 	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
+	const staff = roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod;
 	return {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		guild: guild!,
@@ -61,7 +62,7 @@ async function getConfig() {
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
 			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
-			qotd: getChannel("qotd", ChannelType.GuildForum),
+			qotd: getChannel("question", ChannelType.GuildForum, "partial"),
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ??
 				getChannel("promo", ChannelType.GuildText, "partial"),
@@ -72,8 +73,8 @@ async function getConfig() {
 
 		roles: {
 			mod,
-			exec: roles.find((role) => role.name.toLowerCase().includes("exec")),
-			staff: roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod,
+			exec: roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staff,
+			staff,
 			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),
 			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
