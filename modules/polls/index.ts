@@ -1,8 +1,22 @@
-import { ApplicationCommandOptionType, ComponentType, TextInputStyle } from "discord.js";
-import { client, defineChatCommand, defineEvent, defineModal, defineSubcommands } from "strife.js";
+import {
+	ApplicationCommandOptionType,
+	ChannelType,
+	ComponentType,
+	TextInputStyle,
+} from "discord.js";
+import {
+	client,
+	defineButton,
+	defineChatCommand,
+	defineEvent,
+	defineModal,
+	defineSelect,
+	defineSubcommands,
+} from "strife.js";
 import poll from "./poll.js";
-import { addQuestion, listQuestions } from "./qotd.js";
+import { addQuestion, listQuestions, removeQuestion, viewQuestion } from "./qotd.js";
 import { DEFAULT_SHAPES } from "./misc.js";
+import config from "../../common/config.js";
 
 defineChatCommand(
 	{
@@ -29,7 +43,8 @@ defineChatCommand(
 							customId: "question",
 							label: "The question to ask",
 							required: true,
-							style: TextInputStyle.Paragraph,
+							style: TextInputStyle.Short,
+							maxLength: 256,
 						},
 					],
 				},
@@ -59,26 +74,23 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
 
-	const { emoji } = reaction;
-
+	if (message.author.id !== client.user.id || user.id === client.user.id) return;
 	if (
-		message.author.id === client.user.id &&
-		message.interaction?.commandName === "poll" &&
-		// TODO: enforce on QOTDs
-		message.embeds[0]?.footer?.text &&
-		user.id !== client.user.id
-	) {
-		const emojis = message.embeds[0].description?.match(/^\S+/gm);
-		const isPollEmoji = emojis?.includes(emoji.name || "");
-		if (isPollEmoji) {
-			for (const [, otherReaction] of message.reactions.valueOf()) {
-				if (
-					emoji.name !== otherReaction.emoji.name &&
-					emojis?.includes(otherReaction.emoji.name || "")
-				)
-					await otherReaction.users.remove(user);
-			}
-		}
+		(message.interaction?.commandName !== "poll" || !message.embeds[0]?.footer?.text) &&
+		(message.channel.type !== ChannelType.PublicThread ||
+			message.channel.parent?.id !== config.channels.qotd)
+	)
+		return;
+
+	const emojis = (message.embeds[0]?.description ?? message.content).match(/^\S+/gm);
+	if (!reaction.emoji.name || !emojis?.includes(reaction.emoji.name)) return;
+
+	for (const [, other] of message.reactions
+		.valueOf()
+		.filter(
+			({ emoji }) => emoji.name !== reaction.emoji.name && emojis.includes(emoji.name || "_"),
+		)) {
+		await other.users.remove(user);
 	}
 });
 
@@ -93,7 +105,6 @@ defineSubcommands(
 		},
 
 		restricted: true,
-		access: false,
 	},
 	async (interaction, { subcommand }) => {
 		switch (subcommand) {
@@ -108,3 +119,6 @@ defineSubcommands(
 		}
 	},
 );
+
+defineSelect("viewQuestion", viewQuestion);
+defineButton("removeQuestion", removeQuestion);
