@@ -12,7 +12,7 @@ export default async function changeNickname(member: GuildMember): Promise<void>
 	if (censored && member.nickname)
 		await warn(
 			member,
-			"Please watch your language!",
+			censored.words.length === 1 ? "Used a banned word" : "Used banned words",
 			censored.strikes,
 			"Set nickname to " + member.displayName,
 		);

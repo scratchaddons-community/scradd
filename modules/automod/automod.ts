@@ -239,7 +239,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		const words = [...badWords.words.flat(), ...badEmbedWords.words.flat()];
 		await warn(
 			message.interaction?.user ?? message.author,
-			words.length === 1 ? "Sent a banned word" : "Sent banned words",
+			words.length === 1 ? "Used a banned word" : "Used banned words",
 			languageStrikes,
 			words.join(", "),
 		);

@@ -114,13 +114,13 @@ defineChatCommand(
 		if (censoredOptions && censoredOptions.strikes) {
 			await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${
-					censoredOptions.strikes < 1 ? "That’s not appropriate" : "Language"
+				content: `${constants.emojis.statuses.no} Please ${
+					censoredOptions.strikes < 1 ? "don’t say that here" : "watch your language"
 				}!`,
 			});
 			await warn(
 				interaction.user,
-				"Please watch your language!",
+				censoredOptions.words.length === 1 ? "Used a banned word" : "Used banned words",
 				censoredOptions.strikes,
 				`Used command \`${interaction.toString()}\``,
 			);

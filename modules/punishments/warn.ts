@@ -115,7 +115,9 @@ export default async function warn(
 				  ]
 				: [],
 		})
-		.catch(() => void 0);
+		.catch(async (): Promise<undefined> => {
+			await logMessage.edit(logMessage.content + " (could not send DM)");
+		});
 
 	await giveXp(user, (dm ?? logMessage).url, XP_PUNISHMENT * strikes);
 

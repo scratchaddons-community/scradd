@@ -129,7 +129,7 @@ defineChatCommand(
 		await interaction.editReply(
 			success
 				? `${constants.emojis.statuses.yes} ${
-						strikes ? "Warned" : "Verbally warned"
+						strikes < 1 ? "Warned" : "Verbally warned"
 				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
 						success === "no-dm" ? " I was not able to DM them." : ""
 				  } ${reason}`

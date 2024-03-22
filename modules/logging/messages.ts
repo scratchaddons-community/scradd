@@ -96,7 +96,9 @@ export async function messageDeleteBulk(
 	const unknownCount = allAuthors.filter((author) => !author).length;
 	const authors = [
 		...new Set(allAuthors.filter(Boolean)),
-		...(unknownCount ? [`${unknownCount} unknown users`] : []),
+		...(unknownCount
+			? [`at least ${unknownCount} unknown user${unknownCount === 1 ? "" : "s"}`]
+			: []),
 	];
 
 	const url = messages.first()?.url;

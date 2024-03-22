@@ -43,13 +43,13 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	if (censored.strikes) {
 		await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} ${
-				censored.strikes < 1 ? "That’s not appropriate" : "Language"
+			content: `${constants.emojis.statuses.no} Please ${
+				censored.strikes < 1 ? "don’t say that here" : "watch your language"
 			}!`,
 		});
 		await warn(
 			interaction.user,
-			"Please watch your language!",
+			censored.words.length === 1 ? "Used a banned word" : "Used banned words",
 			censored.strikes,
 			`Used command \`${interaction.toString()}\``,
 		);
@@ -85,9 +85,9 @@ defineEvent.pre("messageReactionAdd", async (partialReaction, partialUser) => {
 		if (censored) {
 			await warn(
 				partialUser.partial ? await partialUser.fetch() : partialUser,
-				"Please watch your language!",
+				"Reacted with a banned emoji",
 				censored.strikes,
-				`Reacted with :${reaction.emoji.name}:`,
+				`:${reaction.emoji.name}:`,
 			);
 			await reaction.remove();
 			return false;
@@ -147,7 +147,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 	) {
 		await warn(
 			newPresence.member,
-			"As server representatives, staff members are not allowed to have bad words in their statuses. Please change yours now to avoid another warn.",
+			"As server representatives, staff members are not allowed to have bad words in their statuses. Please change yours now to avoid another strike.",
 			censored.strikes,
 			"Set status to " + status,
 		);

@@ -74,13 +74,13 @@ export async function createReminder(
 		if (censored) {
 			await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} ${
-					censored.strikes < 1 ? "That’s not appropriate" : "Language"
+				content: `${constants.emojis.statuses.no} Please ${
+					censored.strikes < 1 ? "don’t say that here" : "watch your language"
 				}!`,
 			});
 			await warn(
 				interaction.user,
-				"Please watch your language!",
+				censored.words.length === 1 ? "Used a banned word" : "Used banned words",
 				censored.strikes,
 				`Used command ${interaction.toString()}`,
 			);
