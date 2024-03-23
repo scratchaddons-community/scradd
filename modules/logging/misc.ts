@@ -179,7 +179,9 @@ export default async function log(
 	});
 }
 
-export async function getLoggingThread(group: LogSeverity): Promise<AnyThreadChannel | TextChannel> {
+export async function getLoggingThread(
+	group: LogSeverity,
+): Promise<AnyThreadChannel | TextChannel> {
 	if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
