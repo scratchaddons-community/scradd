@@ -172,7 +172,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 					`Posted blacklisted link${
 						links.length === 1 ? "" : "s"
 					} in ${message.channel.toString()} while at level ${level}`,
-					links.length * 0.25,
+					links.length * PARTIAL_STRIKE_COUNT,
 					links.join(" "),
 				);
 				deletionMessage += ` Sorry, but you need level 5 to post ${
