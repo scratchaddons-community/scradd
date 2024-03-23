@@ -56,7 +56,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	constructor(public name: string) {
 		if (contructed.includes(name)) {
 			throw new RangeError(
-				`Cannot create a 2nd database for ${name}, they will have conflicting data`,
+				`Cannot create a second database for ${name}, they will have conflicting data`,
 			);
 		}
 		contructed.push(name);
@@ -219,17 +219,17 @@ export async function cleanDatabaseListeners(): Promise<void> {
 
 let called = false,
 	exited = false;
-for (const [event, code] of [
-	["exit"],
-	["beforeExit", 0],
-	["SIGHUP", 12],
-	["SIGINT", 130],
-	["SIGTERM", 143],
-	["SIGBREAK", 149],
-	["message", 0],
-] as const) {
+for (const [event, code] of Object.entries({
+	exit: undefined,
+	beforeExit: 0,
+	SIGHUP: 12,
+	SIGINT: 130,
+	SIGTERM: 143,
+	SIGBREAK: 149,
+	message: 0,
+} as const)) {
 	// eslint-disable-next-line @typescript-eslint/no-loop-func
-	process.on(event, function (message) {
+	process.on(event, (message) => {
 		if (called || (event === "message" && message !== "shutdown")) return;
 		called = true;
 
@@ -240,11 +240,11 @@ for (const [event, code] of [
 			if (event !== "exit") process.nextTick(() => process.exit(code));
 		}
 
-		if (event !== "exit" && cleanDatabaseListeners.length) {
+		if (event !== "exit" && Object.values(timeouts).length) {
 			void cleanDatabaseListeners().then(() => {
 				process.nextTick(doExit);
 			});
-			setTimeout(doExit, 10_000);
+			setTimeout(doExit, 30_000);
 		} else {
 			void cleanDatabaseListeners();
 			doExit();
