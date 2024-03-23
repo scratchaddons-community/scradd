@@ -172,7 +172,7 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 				"profile" in user
 					? linkifyMentions(user.profile.status)
 					: htmlToMarkdown(user.work),
-				EMBED_LENGTH / 2,
+				EMBED_LENGTH / 2, // TODO: partition instead of just half and half
 				true,
 			),
 			inline: false,

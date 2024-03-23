@@ -88,7 +88,7 @@ defineEvent("messageCreate", async (message) => {
 				: [requirement];
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
-			if (type[1] === "ping") {
+			if (type === "ping") {
 				doReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRoles: true,

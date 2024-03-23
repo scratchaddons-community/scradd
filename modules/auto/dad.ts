@@ -24,7 +24,7 @@ export default function dad(
 		name;
 
 	const greeting = greetings[Math.floor(Math.random() * greetings.length)] ?? greetings[0];
-	const customName = customNames[firstName] || (name.length > 50 ? firstName : name);
+	const customName = customNames[firstName] || firstName;
 	const comment = customComments[firstName] || "I’m Scradd!";
 
 	return (
