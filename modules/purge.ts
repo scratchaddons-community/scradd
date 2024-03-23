@@ -67,7 +67,7 @@ async function purge(
 		if (sliced.length > 2)
 			embeds.push({
 				description: `*${sliced.length - 2} more message${
-					sliced.length - 2 === 1 ? "" : "s"
+					sliced.length === 3 ? "" : "s"
 				}…*`,
 			});
 

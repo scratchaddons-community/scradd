@@ -110,15 +110,16 @@ module.exports = /** @satisfies {import("eslint").ESLint.ConfigData} @type {cons
 			},
 		],
 		"@typescript-eslint/no-magic-numbers": [
-			"off", // TODO: enable
+			"off", // TODO
 			{
-				ignore: [-2, -1, 0, 0.5, 1, 2, 3, 4, 5, 10, 100],
+				enforceConst: true,
+				ignore: [-1, 0, 0.5, 1, 2, 3, 5, 10, 16, 100, 1000, 1005, 1024],
 				ignoreArrayIndexes: true,
-				ignoreClassFieldInitialValues: true,
-				ignoreDefaultValues: true,
-				ignoreEnums: true,
+				// ignoreClassFieldInitialValues: true,
+				// ignoreDefaultValues: true,
+				// ignoreEnums: true,
 				ignoreNumericLiteralTypes: true,
-				ignoreReadonlyClassProperties: true,
+				// ignoreReadonlyClassProperties: true,
 				ignoreTypeIndexes: true,
 			},
 		],
