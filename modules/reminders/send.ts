@@ -18,7 +18,7 @@ import { syncRandomBoard } from "../board/update.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
 import {
 	BUMPING_THREAD,
-	COMMAND_ID,
+	BUMP_COMMAND_ID,
 	SpecialReminders,
 	remindersDatabase,
 	type Reminder,
@@ -125,7 +125,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					await channel.send({
 						content: `🔔 @here ${chatInputApplicationCommandMention(
 							"bump",
-							COMMAND_ID,
+							BUMP_COMMAND_ID,
 						)} the server!`,
 						allowedMentions: { parse: ["everyone"] },
 					});

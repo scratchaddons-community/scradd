@@ -26,7 +26,7 @@ export type Reminder = {
 
 export const BUMPING_THREAD = "881619501018394725",
 	BACKUPS_THREAD = "1138197530501460030",
-	COMMAND_ID = "947088344167366698";
+	BUMP_COMMAND_ID = "947088344167366698";
 
 export const remindersDatabase = new Database<Reminder>("reminders");
 await remindersDatabase.init();
