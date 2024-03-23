@@ -13,7 +13,7 @@ const data: CustomOperation = {
 		const uses =
 			(
 				await Invite.aggregate<{ _id: null; totalUses: number }>([
-					{ $match: { member: "771422735486156811" } },
+					{ $match: { member: interaction.user.id } },
 					{ $group: { _id: null, totalUses: { $sum: "$uses" } } },
 				]).exec()
 			)[0]?.totalUses ?? 0;
