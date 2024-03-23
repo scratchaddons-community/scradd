@@ -56,7 +56,7 @@ defineEvent("messageCreate", async (message) => {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "FAQ",
-						// 	url: `https://discord.com/channels/${config.guild.id}/1099457798452035646`,
+						// 	url: `https://discord.com/channels/${config.guild.id}/TODO`,
 						// },
 						...(config.channels.tickets
 							?.permissionsFor(message.author)
