@@ -51,7 +51,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 		embeds: [
 			{
 				title: "Credits",
-				description: `Scradd is hosted on [Fly.io](https://fly.io/) using Node.JS ${process.version}.`,
+				description: `Scradd is hosted on [Railway](https://railway.app?referralCode=RedGuy14) using Node.JS ${process.version}.`,
 
 				fields: [
 					{ name: "🧑‍💻 Developers", value: await getRole(developers), inline: true },
