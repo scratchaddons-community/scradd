@@ -6,7 +6,7 @@
  *
  * All RegExps are ROT13-encoded. Additionally, RegExp character classes are not supported here. Use capture groups instead.
  */
-const badWords: [RegExp[],RegExp[],RegExp[],][] = [
+const badWords: [RegExp[], RegExp[], RegExp[]][] = [
 	[[], [], []],
 	[[], [], []],
 	[[], [], []],
