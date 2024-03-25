@@ -23,7 +23,7 @@ const data: CustomOperation = {
 
 	async command(interaction, { string }) {
 		assert(typeof string === "string");
-		
+
 		if (
 			config.roles.staff &&
 			!(interaction.member instanceof GuildMember
