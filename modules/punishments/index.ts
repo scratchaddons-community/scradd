@@ -131,9 +131,9 @@ defineChatCommand(
 			success
 				? `${constants.emojis.statuses.yes} ${
 						strikes < 1 ? "Verbally warned" : "Warned"
-				  } ${options.user.toString()}${displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""}.${
-						success === "no-dm" ? " I was not able to DM them." : ""
-				  } ${reason}`
+				  } ${options.user.toString()}${
+						displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""
+				  }.${success === "no-dm" ? " I was not able to DM them." : ""} ${reason}`
 				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
