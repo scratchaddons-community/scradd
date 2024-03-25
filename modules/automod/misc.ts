@@ -5,48 +5,7 @@ import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import badWords from "./bad-words.js";
 
-function decodeRegexps(regexps: RegExp[]): string {
-	return regexps
-		.map(({ source }) =>
-			caesar(source).replaceAll(
-				/(?<!\\)[ a-z]/gi,
-				(letter) =>
-					({
-						" ": /[ ^w]/giu.source,
-						"a": /[a⒜@*#⍺₳4aａⓐAＡᵃₐᴬåǟÃąẚᴀɐɑɒαΑΔΛаАคภᎪᗅᗩꓮ🅰🇦-]/giu.source,
-						"b": /[b⒝฿8bｂⓑℬʙɓꞵƅβвьҍⴆცꮟᏸᏼᑲᖯᗷꓐ🇧]/giu.source,
-						"c": /[c⒞¢₵cｃⅽⓒℂℭᶜᴄƈϲⲥсꮯᐸᑕᑢᑦꓚ匚🇨]/giu.source,
-						"d": /[d⒟🅱ɒdｄⅾⅆⓓⅅđðᴅɖԁԃժꭰꮷᑯᗞᗪꓒꓓ𝐃🇩]/giu.source,
-						"e": /[e⒠*#📧℮⋿£3ɐeｅⅇℯⓔℰₑᴇꬲɛεеєҽⴹꭼꮛꓰ𝐄🇪-]/giu.source,
-						"f": /[f⒡⸁₣fｆⓕℱᶠꜰꬵꞙƒʄſẝϝғքᖴꓝ𝐅🇫]/giu.source,
-						"g": /[g⒢₲gｇℊⓖɡɢᶃɠƍ🇬ԍցꮆꮐ🇬ᏻꓖ𝐆]/giu.source,
-						"h": /[h⒣#hｈℎⓗℍℌℋₕħʜɦⱨɧℜηⲏнԋһհ🇭ክዘዪꮋꮒᕼんꓧ卄🇭𝐇]/giu.source,
-						"i": /[i!¡⑴⒤ℹ🇮*#׀⇂|∣⍳❕❗⥜1１❶①⓵¹₁iｉⅰⅈℹⓘℐℑⁱıɪᶦᴉɩjlｌⅼℓǀιⲓіꙇӏוןاﺎﺍߊⵏꭵᛁꓲ-]/giu
-							.source,
-						"j": /[j⒥ℑjｊⅉⓙⱼᴊʝɟʄϳ🇯јյꭻᒍᒚꓙ𝐉]/giu.source,
-						"k": /[k⒦₭kｋⓚₖᴋƙʞκ🇰ⲕкӄҟҝꮶᛕꓗ𝐊]/giu.source,
-						"l": /[l⒧׀|∣1iｉⅰℐℑɩlｌⅼℓⓛ🇱ℒₗʟⱡɭɮꞁǀιⲓⳑіӏוןاﺎﺍߊⵏꮭꮮᒪᛁﾚㄥꓡꓲ]/giu.source,
-						"m": /[m⒨♍₥๓mｍⅿⓜⓂⓂℳₘᴍɱ🇲ꭑʍμϻⲙмጠꮇᗰᘻᛖﾶꓟ爪𝐌]/giu.source,
-						"n": /[n⒩♑₦nｎⓝ🇳ℕⁿₙɴᴎɲɳŋηνⲛђипղոռሸꮑᑎᘉꓠ刀𝐍]/giu.source,
-						"o": /[o⒪*#°⊘⍥🇴🅾○⭕¤၀๐໐߀〇০୦0०੦૦௦౦೦൦０⓪⓿⁰₀٥۵oｏℴⓞºₒᴏᴑꬽθοσⲟофჿօסⵔዐዕଠഠဝꓳ-]/giu
-							.source,
-						"p": /[p⒫⍴p🇵ｐⓟℙₚᴘρϱ🅿ⲣрየꮲᑭꓑ𝐏]/giu.source,
-						"q": /[q⒬۹9o🇶qｑⓠℚϙϱԛфգզⵕᑫ𝐐]/giu.source,
-						"r": /[r⒭rｒⓡℝℛℜ🇷ʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑]/giu.source,
-						"s": /[s⒮🇸§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒]/giu.source,
-						"t": /[t⒯⊤⟙✝ℑ🇹tｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千]/giu.source,
-						"u": /[u⒰*#∪🇺⋃uｕⓤꞟᴜꭎꭒɥvʋυսሀሁᑌꓴ𝐔-]/giu.source,
-						"v": /[v⒱℣√∨⋁☑🇻✅✔۷٧uvｖⅴⓥⱽᴠνѵⴸꮙꮩᐯᐺꓦ𝐕]/giu.source,
-						"w": /[w⒲ɯw🇼ｗⓦᴡʍѡԝաሠꮃꮤꓪ]/giu.source,
-						"x": /[x᙮⒳᙭×⌧🇽╳⤫⤬⨯xｘⅹⓧₓꭓχⲭжхӽӿҳאⵝᕁᕽᚷﾒꓫ乂𝐗]/giu.source,
-						"y": /[y⒴५ɣvᶌyｙⓨ🇾ʏỿꭚγℽυϒⲩуүყሃꭹꮍꓬ𝐘*#-]/giu.source,
-						"z": /[z⒵zｚⓩℤ🇿ℨᶻᴢƶȥʐʑⱬƹƨζչꮓᙆえꓜ乙𝐙]/giu.source,
-					}[letter] || letter),
-			),
-		)
-		.join("|");
-}
-
+export const regexpFlags = "giu";
 export const badWordRegexps = badWords.map(
 	([strings = [], words = [], prefixes = []]) =>
 		new RegExp(
@@ -54,9 +13,49 @@ export const badWordRegexps = badWords.map(
 				`\\b(?:${words.length ? `(?:${decodeRegexps(words)})\\b` : "(?!x)x"}${
 					prefixes.length ? `|${decodeRegexps(prefixes)}` : "(?!x)x"
 				})`,
-			"giu",
+			regexpFlags,
 		),
 );
+function decodeRegexps(regexps: RegExp[]): string {
+	return regexps.map(decodeRegexp).join("|");
+}
+export function decodeRegexp({ source }: RegExp): string {
+	return caesar(source).replaceAll(
+		/(?<!\\)[ a-z]/gi,
+		(letter) =>
+			({
+				" ": /[ ^w]/giu.source,
+				"a": /[a⒜@*#⍺₳4aａⓐAＡᵃₐᴬåǟÃąẚᴀɐɑɒαΑΔΛаАคภᎪᗅᗩꓮ🅰🇦-]/giu.source,
+				"b": /[b⒝฿8bｂⓑℬʙɓꞵƅβвьҍⴆცꮟᏸᏼᑲᖯᗷꓐ🇧]/giu.source,
+				"c": /[c⒞¢₵cｃⅽⓒℂℭᶜᴄƈϲⲥсꮯᐸᑕᑢᑦꓚ匚🇨]/giu.source,
+				"d": /[d⒟🅱ɒdｄⅾⅆⓓⅅđðᴅɖԁԃժꭰꮷᑯᗞᗪꓒꓓ𝐃🇩]/giu.source,
+				"e": /[e⒠*#📧℮⋿£3ɐeｅⅇℯⓔℰₑᴇꬲɛεеєҽⴹꭼꮛꓰ𝐄🇪-]/giu.source,
+				"f": /[f⒡⸁₣fｆⓕℱᶠꜰꬵꞙƒʄẝϝғքᖴꓝ𝐅🇫]/giu.source,
+				"g": /[g⒢₲gｇℊⓖɡɢᶃɠƍ🇬ԍցꮆꮐ🇬ᏻꓖ𝐆]/giu.source,
+				"h": /[h⒣#hｈℎⓗℍℌℋₕħʜɦⱨɧℜηⲏнԋһհ🇭ክዘዪꮋꮒᕼんꓧ卄🇭𝐇]/giu.source,
+				"i": /[i!¡⑴⒤ℹ🇮*#׀⇂|∣⍳❕❗⥜1１❶①⓵¹₁iｉⅰⅈℹⓘℐℑⁱıɪᶦᴉɩjlｌⅼℓǀιⲓіꙇӏוןاﺎﺍߊⵏꭵᛁꓲ-]/giu
+					.source,
+				"j": /[j⒥ℑjｊⅉⓙⱼᴊʝɟʄϳ🇯јյꭻᒍᒚꓙ𝐉]/giu.source,
+				"k": /[k⒦₭kｋⓚₖᴋƙʞκ🇰ⲕкӄҟҝꮶᛕꓗ𝐊]/giu.source,
+				"l": /[l⒧׀|∣1iｉⅰℐℑɩlｌⅼℓⓛ🇱ℒₗʟⱡɭɮꞁǀιⲓⳑіӏוןاﺎﺍߊⵏꮭꮮᒪᛁﾚㄥꓡꓲ]/giu.source,
+				"m": /[m⒨♍₥๓mｍⅿⓜⓂⓂℳₘᴍɱ🇲ꭑʍμϻⲙмጠꮇᗰᘻᛖﾶꓟ爪𝐌]/giu.source,
+				"n": /[n⒩♑₦nｎⓝ🇳ℕⁿₙɴᴎɲɳŋηνⲛђипղոռሸꮑᑎᘉꓠ刀𝐍]/giu.source,
+				"o": /[o⒪*#°⊘⍥🇴🅾○⭕¤၀๐໐߀〇০୦0०੦૦௦౦೦൦０⓪⓿⁰₀٥۵oｏℴⓞºₒᴏᴑꬽθοσⲟофჿօסⵔዐዕଠഠဝꓳ-]/giu
+					.source,
+				"p": /[p⒫⍴p🇵ｐⓟℙₚᴘρϱ🅿ⲣрየꮲᑭꓑ𝐏]/giu.source,
+				"q": /[q⒬۹9o🇶qｑⓠℚϙϱԛфգզⵕᑫ𝐐]/giu.source,
+				"r": /[r⒭rｒⓡℝℛℜ🇷ʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑]/giu.source,
+				"s": /[s⒮🇸§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒]/giu.source,
+				"t": /[t⒯⊤⟙✝ℑ🇹tｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千]/giu.source,
+				"u": /[u⒰*#∪🇺⋃uｕⓤꞟᴜꭎꭒɥvʋυսሀሁᑌꓴ𝐔-]/giu.source,
+				"v": /[v⒱℣√∨⋁☑🇻✅✔۷٧uvｖⅴⓥⱽᴠνѵⴸꮙꮩᐯᐺꓦ𝐕]/giu.source,
+				"w": /[w⒲ɯw🇼ｗⓦᴡʍѡԝաሠꮃꮤꓪ]/giu.source,
+				"x": /[x᙮⒳᙭×⌧🇽╳⤫⤬⨯xｘⅹⓧₓꭓχⲭжхӽӿҳאⵝᕁᕽᚷﾒꓫ乂𝐗]/giu.source,
+				"y": /[y⒴५ɣvᶌyｙⓨ🇾ʏỿꭚγℽυϒⲩуүყሃꭹꮍꓬ𝐘*#-]/giu.source,
+				"z": /[z⒵zｚⓩℤ🇿ℨᶻᴢƶȥʐʑⱬƹƨζչꮓᙆえꓜ乙𝐙]/giu.source,
+			}[letter] || letter),
+	);
+}
 
 export default function tryCensor(
 	text: string,
