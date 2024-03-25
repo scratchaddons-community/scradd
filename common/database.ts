@@ -212,9 +212,10 @@ export async function cleanDatabaseListeners(): Promise<void> {
 		`Cleaning ${count} listener${count === 1 ? "" : "s"}: ${Object.keys(timeouts).join(",")}`,
 	);
 	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
-	timeouts = {};
 	console.log("Listeners cleaned");
-	client.user.setPresence({ status: "dnd" });
+	timeouts = {};
+	client.user.setStatus("dnd");
+	await client.destroy();
 }
 
 let called = false,
