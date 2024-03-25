@@ -37,7 +37,6 @@ import {
 	type PartialDMChannel,
 	type Snowflake,
 	type TextBasedChannel,
-	type ThreadChannel,
 	type User,
 } from "discord.js";
 import { client } from "strife.js";
@@ -183,15 +182,11 @@ export function getMessageJSON(message: Message): {
  *
  * @returns The messages.
  */
-export async function getAllMessages(
-	channel: GuildTextBasedChannel | ThreadChannel,
-): Promise<Message<true>[]>;
+export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]>;
 export async function getAllMessages(
 	channel: DMChannel | PartialDMChannel,
 ): Promise<Message<false>[]>;
-export async function getAllMessages(
-	channel: TextBasedChannel | ThreadChannel,
-): Promise<Message[]> {
+export async function getAllMessages(channel: TextBasedChannel): Promise<Message[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;

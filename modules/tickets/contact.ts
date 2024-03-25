@@ -7,10 +7,10 @@ import {
 	channelMention,
 	type APIEmbedField,
 	type AnySelectMenuInteraction,
+	type AnyThreadChannel,
 	type ButtonInteraction,
 	type InteractionResponse,
 	type RepliableInteraction,
-	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -92,7 +92,7 @@ export async function showTicketModal(
 export default async function contactMods(
 	interaction: RepliableInteraction,
 	options: Category | GuildMember,
-): Promise<ThreadChannel> {
+): Promise<AnyThreadChannel> {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =

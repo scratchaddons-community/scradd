@@ -2,24 +2,19 @@ import {
 	ChannelType,
 	ComponentType,
 	TextInputStyle,
-	type PrivateThreadChannel,
 	type Snowflake,
 	type TextInputComponentData,
-	type ThreadChannel,
 } from "discord.js";
 import config, { getInitialChannelThreads } from "../../common/config.js";
 
-export const TICKETS_BY_MEMBER = Object.fromEntries<
-	PrivateThreadChannel | ThreadChannel | undefined
->(
+export const TICKETS_BY_MEMBER = Object.fromEntries(
 	config.channels.tickets
 		? getInitialChannelThreads(config.channels.tickets)
-				.map(
-					(thread) =>
-						thread.type === ChannelType.PrivateThread &&
-						([getIdFromName(thread.name) ?? "", thread] as const),
-				)
-				.filter(Boolean)
+				.filter((thread) => thread.type === ChannelType.PrivateThread)
+				.map((thread) => {
+					const id = getIdFromName(thread.name);
+					return [id ?? "", id ? thread : undefined] as const;
+				})
 		: [],
 );
 
