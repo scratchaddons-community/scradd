@@ -39,6 +39,8 @@ const ignoreTriggers = [
 ];
 
 defineEvent("messageCreate", async (message) => {
+	await learn(message);
+
 	let reactions = 0;
 
 	if (
@@ -69,10 +71,7 @@ defineEvent("messageCreate", async (message) => {
 				if (!edited) break;
 			}
 		} else await message.reply(response);
-		await learn(message);
-		return;
 	}
-	await learn(message);
 
 	const settings = await getSettings(message.author);
 	if (!settings.autoreactions || !canDoSecrets(message)) return;
