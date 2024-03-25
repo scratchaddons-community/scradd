@@ -282,7 +282,15 @@ export async function channelUpdate(
 		);
 	}
 
-	if (!oldChannel.isThreadOnly() || oldChannel.type !== newChannel.type) return;
+	if (oldChannel.defaultThreadRateLimitPerUser !== newChannel.defaultThreadRateLimitPerUser)
+		await log(
+			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
+				newChannel.defaultThreadRateLimitPerUser ?? 0
+			} seconds`,
+			LogSeverity.ServerChange,
+		);
+
+	if (!oldChannel.isThreadOnly() || !newChannel.isThreadOnly()) return;
 
 	if (
 		oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
@@ -297,14 +305,6 @@ export async function channelUpdate(
 			LogSeverity.ServerChange,
 		);
 	}
-
-	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
-				newChannel.defaultThreadRateLimitPerUser ?? 0
-			} seconds`,
-			LogSeverity.ServerChange,
-		);
 
 	if (oldChannel.defaultSortOrder !== newChannel.defaultSortOrder)
 		await log(
