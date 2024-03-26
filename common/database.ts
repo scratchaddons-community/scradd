@@ -206,7 +206,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 }
 
-export async function cleanDatabaseListeners(): Promise<void> {
+export async function cleanListeners(): Promise<void> {
 	const count = Object.values(timeouts).length;
 	console.log(
 		`Cleaning ${count} listener${count === 1 ? "" : "s"}: ${Object.keys(timeouts).join(",")}`,
@@ -214,6 +214,9 @@ export async function cleanDatabaseListeners(): Promise<void> {
 	await Promise.all(Object.values(timeouts).map((info) => info?.callback()));
 	console.log("Listeners cleaned");
 	timeouts = {};
+}
+export async function prepareExit(): Promise<void> {
+	await cleanListeners();
 	client.user.setStatus("dnd");
 	await client.destroy();
 }
@@ -242,12 +245,12 @@ for (const [event, code] of Object.entries({
 		}
 
 		if (event !== "exit" && Object.values(timeouts).length) {
-			void cleanDatabaseListeners().then(() => {
+			void prepareExit().then(() => {
 				process.nextTick(doExit);
 			});
 			setTimeout(doExit, 30_000);
 		} else {
-			void cleanDatabaseListeners();
+			void prepareExit();
 			doExit();
 		}
 	});

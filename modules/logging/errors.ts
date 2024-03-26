@@ -1,6 +1,6 @@
 import { inlineCode, type Message, type RepliableInteraction } from "discord.js";
 import { serializeError } from "serialize-error";
-import { cleanDatabaseListeners } from "../../common/database.js";
+import { prepareExit } from "../../common/database.js";
 import { commandInteractionToString } from "../../util/discord.js";
 import log, { LogSeverity, LoggingErrorEmoji } from "./misc.js";
 
@@ -57,7 +57,7 @@ export default async function logError(
 		);
 	} catch (loggingError) {
 		console.error(loggingError);
-		await cleanDatabaseListeners().catch(console.error);
+		await prepareExit().catch(console.error);
 		process.exit(1);
 	}
 }

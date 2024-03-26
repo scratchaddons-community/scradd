@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
-import { cleanDatabaseListeners } from "../../common/database.js";
+import { prepareExit } from "../../common/database.js";
 import { syncConfigButton } from "../execute/operations/config.js";
 import credits from "./credits.js";
 import editMessage, { submitEdit } from "./edit.js";
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "production") {
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
 			await interaction.reply("Restarts bot…");
-			await cleanDatabaseListeners();
+			await prepareExit();
 			process.exit(1);
 		},
 	);
@@ -33,7 +33,7 @@ if (process.env.NODE_ENV === "production") {
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is killing the bot`);
 			await interaction.reply("Killing bot…");
-			await cleanDatabaseListeners();
+			await prepareExit();
 			process.exit(1);
 		},
 	);

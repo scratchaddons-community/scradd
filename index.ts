@@ -100,4 +100,6 @@ if (process.env.NODE_ENV === "production") {
 	);
 }
 
+const { cleanListeners } = await import("./common/database.js");
+await cleanListeners();
 client.user.setStatus("online");

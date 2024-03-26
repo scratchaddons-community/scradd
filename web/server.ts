@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { client } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import { cleanDatabaseListeners } from "../common/database.js";
+import { prepareExit } from "../common/database.js";
 import appealRequest from "../modules/forms/appeals/show-appeal.js";
 import logError from "../modules/logging/errors.js";
 import linkScratchRole from "../modules/roles/scratch.js";
@@ -30,13 +30,13 @@ const server = http.createServer(async (request, response) => {
 			requestUrl.pathname.endsWith("/") ? requestUrl.pathname : `${requestUrl.pathname}/`
 		).toLowerCase();
 		switch (pathname) {
-			case "/clean-database-listeners/": {
+			case "/prepare-exit/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
 					return response
 						.writeHead(403, { "content-type": "text/plain" })
 						.end("403 Forbidden");
 
-				await cleanDatabaseListeners();
+				await prepareExit();
 				process.emitWarning("cleanDatabaseListeners ran");
 				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
 
@@ -78,7 +78,7 @@ const server = http.createServer(async (request, response) => {
 			if (await fileSystem.access(filePath).then(() => true))
 				return createReadStream(filePath).pipe(response);
 		} else if (segments[1] === "suggestions") {
-				return await suggestionsPage(request, response, segments[2]);
+			return await suggestionsPage(request, response, segments[2]);
 		}
 
 		response

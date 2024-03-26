@@ -10,7 +10,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { backupDatabases, cleanDatabaseListeners } from "../../common/database.js";
+import { backupDatabases, prepareExit } from "../../common/database.js";
 import { statuses } from "../../common/strings.js";
 import { convertBase } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
@@ -132,7 +132,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.RebootBot: {
-					await cleanDatabaseListeners();
+					await prepareExit();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
 					process.exit(1);
 					// Fake “fall-through” since ESLint doesn’t realize this is unreacahble
