@@ -125,14 +125,15 @@ defineChatCommand(
 		const strikes = options.strikes ?? DEFAULT_STRIKES;
 		await interaction.deferReply();
 		const success = await warn(options.user, reason, strikes, interaction.user);
+		const displayedStrikes = Math.round(strikes);
 
 		await interaction.editReply(
 			success
 				? `${constants.emojis.statuses.yes} ${
-						strikes < 1 ? "Warned" : "Verbally warned"
-				  } ${options.user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
-						success === "no-dm" ? " I was not able to DM them." : ""
-				  } ${reason}`
+						strikes < 1 ? "Verbally warned" : "Warned"
+				  } ${options.user.toString()}${
+						displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""
+				  }.${success === "no-dm" ? " I was not able to DM them." : ""} ${reason}`
 				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},

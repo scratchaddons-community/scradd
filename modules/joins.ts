@@ -95,7 +95,7 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${constants.emojis.welcome.join} ${Mustache.render(greeting, {
 			MEMBER: member.toString(),
 			COUNT: memberCount,
-			RAW_COUNT: config.guild.memberCount.toString(),
+			RAW_COUNT: countString,
 			RAW_JOKES: jokes,
 		})}`,
 	);
