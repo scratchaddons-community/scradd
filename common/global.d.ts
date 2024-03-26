@@ -164,8 +164,8 @@ declare global {
 declare module "strife.js" {
 	export interface AugmentedChatCommandData<_InGuild extends boolean> {
 		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel
-		 * allows bad words.
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the
+		 * channel allows bad words.
 		 *
 		 * @default true
 		 */
