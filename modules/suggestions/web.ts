@@ -36,21 +36,18 @@ export default async function suggestionsPage(
 		const pageInfo = embed && "footer" in embed && embed.footer?.text;
 
 		const member = await config.guild.members.fetchMe();
-		return response
-			.writeHead(200, { "content-type": "text/html" })
-			.end(
-				Mustache.render(TOP_PAGE, {
-					member,
-					avatar: member.user.displayAvatarURL({ size: 64 }),
-					icon: member.roles.icon?.iconURL(),
-					content: markdownToHtml(suggestions || ""),
-					all: all ? "&all" : "",
-					pageInfo,
-					previousPage: currentPage - 1,
-					nextPage:
-						pageInfo && pageInfo.includes(`/${currentPage}`) ? 0 : currentPage + 1,
-				}),
-			);
+		return response.writeHead(200, { "content-type": "text/html" }).end(
+			Mustache.render(TOP_PAGE, {
+				member,
+				avatar: member.user.displayAvatarURL({ size: 64 }),
+				icon: member.roles.icon?.iconURL(),
+				content: markdownToHtml(suggestions || ""),
+				all: all ? "&all" : "",
+				pageInfo,
+				previousPage: currentPage - 1,
+				nextPage: pageInfo && pageInfo.includes(`/${currentPage}`) ? 0 : currentPage + 1,
+			}),
+		);
 	}
 
 	const thread = await config.guild.channels.fetch(threadId).catch(() => void 0);
@@ -74,15 +71,13 @@ export default async function suggestionsPage(
 
 	const member =
 		config.channels.oldSuggestions?.id === thread.parentId ?
-			await config.guild.members
-				.fetch(suggestion.author.valueOf())
-				.catch(() => ({
-					displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
-						.toString(16)
-						.padStart(6, "0")}`,
-					user: undefined,
-					roles: undefined,
-				}))
+			await config.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
+				displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
+					.toString(16)
+					.padStart(6, "0")}`,
+				user: undefined,
+				roles: undefined,
+			}))
 		:	undefined;
 	const messages = [
 		!starterMessage || config.channels.oldSuggestions?.id === thread.parentId ?

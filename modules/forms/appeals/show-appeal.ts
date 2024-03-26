@@ -86,38 +86,32 @@ export default async function appealRequest(
 
 		const appeal = appeals[userMention(user.id)];
 		if (appeal)
-			return response
-				.writeHead(200, { "content-type": "text/html" })
-				.end(
-					Mustache.render(ANSWER_PAGE, {
-						note: appeal.note && stripMarkdown(appeal.note),
-						unbanned: appeal.unbanned,
-						id: user.id,
-						username: user.global_name ?? user.username,
-						invite: pkg.homepage,
-						date: appeal.date,
-					}),
-				);
-		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
-			return response
-				.writeHead(403, { "content-type": "text/html" })
-				.end(
-					Mustache.render(NOT_BANNED_PAGE, {
-						username: user.global_name ?? user.username,
-						invite: pkg.homepage,
-						id: user.id,
-					}),
-				);
-
-		return response
-			.writeHead(200, { "content-type": "text/html" })
-			.end(
-				Mustache.render(APPEAL_PAGE, {
+			return response.writeHead(200, { "content-type": "text/html" }).end(
+				Mustache.render(ANSWER_PAGE, {
+					note: appeal.note && stripMarkdown(appeal.note),
+					unbanned: appeal.unbanned,
+					id: user.id,
 					username: user.global_name ?? user.username,
-					token: tokenData.refresh_token,
+					invite: pkg.homepage,
+					date: appeal.date,
+				}),
+			);
+		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
+			return response.writeHead(403, { "content-type": "text/html" }).end(
+				Mustache.render(NOT_BANNED_PAGE, {
+					username: user.global_name ?? user.username,
+					invite: pkg.homepage,
 					id: user.id,
 				}),
 			);
+
+		return response.writeHead(200, { "content-type": "text/html" }).end(
+			Mustache.render(APPEAL_PAGE, {
+				username: user.global_name ?? user.username,
+				token: tokenData.refresh_token,
+				id: user.id,
+			}),
+		);
 	}
 
 	const chunks: Buffer[] = [];
@@ -152,15 +146,13 @@ export default async function appealRequest(
 		.fetch(rawUser.id)
 		.catch((): Partial<GuildBan> => ({}));
 	if (!user)
-		return response
-			.writeHead(403, { "content-type": "text/html" })
-			.end(
-				Mustache.render(NOT_BANNED_PAGE, {
-					username: rawUser.global_name ?? rawUser.username,
-					invite: pkg.homepage,
-					id: rawUser.id,
-				}),
-			);
+		return response.writeHead(403, { "content-type": "text/html" }).end(
+			Mustache.render(NOT_BANNED_PAGE, {
+				username: rawUser.global_name ?? rawUser.username,
+				invite: pkg.homepage,
+				id: rawUser.id,
+			}),
+		);
 
 	const strikes = strikeDatabase.data.filter((strike) => strike.user === user.id);
 	const totalStrikeCount = strikes.reduce(
@@ -182,15 +174,13 @@ export default async function appealRequest(
 		misc: body.get("misc")?.trim(),
 	};
 	if (!fields.ban || !fields.unban)
-		return response
-			.writeHead(400, { "content-type": "text/html" })
-			.end(
-				Mustache.render(APPEAL_PAGE, {
-					username: user.displayName,
-					token: tokenData.refresh_token,
-					id: user.id,
-				}),
-			);
+		return response.writeHead(400, { "content-type": "text/html" }).end(
+			Mustache.render(APPEAL_PAGE, {
+				username: user.displayName,
+				token: tokenData.refresh_token,
+				id: user.id,
+			}),
+		);
 
 	const message = await appealThread.send({
 		embeds: [
