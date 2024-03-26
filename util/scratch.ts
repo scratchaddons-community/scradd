@@ -52,7 +52,7 @@ export async function fetchUser(username: string) {
 				};
 		  }
 		| { error: "UserNotFoundError" | "UserNotValidError" }
-	>(`${constants.urls.scratchdb}/user/info/${username}/`);
+	>(`${constants.domains.scratchdb}/user/info/${username}/`);
 	const scratchUser =
 		!user || "error" in user || !user.id
 			? await gracefulFetch<
@@ -77,7 +77,7 @@ export async function fetchUser(username: string) {
 							};
 					  }
 					| { code: string; message: string }
-			  >(`${constants.urls.scratchApi}/users/${username}/`)
+			  >(`${constants.domains.scratchApi}/users/${username}/`)
 			: user;
 	return !scratchUser || "code" in scratchUser || !scratchUser.id ? undefined : scratchUser;
 }

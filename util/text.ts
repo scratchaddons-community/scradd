@@ -1,4 +1,5 @@
 import type { IncomingMessage } from "node:http";
+import constants from "../common/constants.js";
 
 /**
  * Generate a short, random string based off the date. Note that the length is not fixed.
@@ -121,8 +122,14 @@ export function getRequestUrl(request: IncomingMessage): URL {
 	return new URL(
 		request.url ?? "",
 		`${
-			request.headers["x-forwarded-proto"]?.toString() ||
+			(process.env.NODE_ENV !== "production" &&
+				request.headers["x-forwarded-proto"]?.toString()) ||
 			`http${"encrypted" in request.socket ? "s" : ""}`
-		}://${request.headers["x-forwarded-host"]?.toString() || request.headers.host || ""}`,
+		}://${
+			(process.env.NODE_ENV !== "production" &&
+				request.headers["x-forwarded-host"]?.toString()) ||
+			request.headers.host ||
+			constants.domains.scradd
+		}`,
 	);
 }

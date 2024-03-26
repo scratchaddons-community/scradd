@@ -19,9 +19,10 @@ const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceA
 );
 const CLIENT_JS_FILE = await fileSystem.readFile("./dist/web/client.js", "utf8");
 const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
-const SORA_DIRECTORY = path.dirname(
-	fileURLToPath(import.meta.resolve("@fontsource-variable/sora")),
-);
+const DIRECTORIES = {
+	images: path.resolve("./scripts/images"),
+	sora: path.dirname(fileURLToPath(import.meta.resolve("@fontsource-variable/sora"))),
+};
 const server = http.createServer(async (request, response) => {
 	try {
 		const requestUrl = getRequestUrl(request);
@@ -72,18 +73,12 @@ const server = http.createServer(async (request, response) => {
 		}
 
 		const segments = pathname.split("/");
-		switch (segments[1]) {
-			case "sora": {
-				const filePath = path.join(SORA_DIRECTORY, segments.slice(2).join("/"));
-				if (await fileSystem.access(filePath).catch(() => true)) break;
+		if (segments[1] && Object.keys(DIRECTORIES).includes(segments[1])) {
+			const filePath = path.join(DIRECTORIES[segments[1]], segments.slice(2).join("/"));
+			if (await fileSystem.access(filePath).then(() => true))
 				return createReadStream(filePath).pipe(response);
-			}
-			case "suggestions": {
+		} else if (segments[1] === "suggestions") {
 				return await suggestionsPage(request, response, segments[2]);
-			}
-			default: {
-				break;
-			}
 		}
 
 		response

@@ -213,6 +213,7 @@ module.exports = /** @satisfies {import("eslint").ESLint.ConfigData} @type {cons
 					pkg: false,
 					prod: false,
 					res: false,
+					sa: { scratchAddons: true },
 					usr: { user: true },
 				},
 			},
@@ -226,6 +227,10 @@ module.exports = /** @satisfies {import("eslint").ESLint.ConfigData} @type {cons
 					[/"/.source]: { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
 					[/'/.source]: "’",
 					[/->/.source]: "→",
+					[/\${/.source]: {
+						message: "Did you mean to use a template literal?",
+						suggest: "${",
+					},
 					[/!\?/.source]: "⁉",
 				},
 			},

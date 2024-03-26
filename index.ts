@@ -39,7 +39,7 @@ if (process.env.CANVAS !== "false") {
 
 	/**
 	 * @author Parts Of this code were taken from
-	 *   [org.jgrapes.webconsole.provider.chartjs](https://github.com/mnlipp/jgrapes-webconsole/blob/4959d2e/org.jgrapes.webconsole.provider.chartjs/resources/org/jgrapes/webconsole/provider/chartjs/chart.js/adapters/chartjs-adapter-simple.js)
+	 *   [org.jgrapes.webconsole.provider.chartjs](https://github.com/mnlipp/jgrapes-webconsole/blob/9381b2c/org.jgrapes.webconsole.provider.chartjs/resources/org/jgrapes/webconsole/provider/chartjs/chart.js/adapters/chartjs-adapter-simple.js)
 	 *   and [chartjs-adapter-date-std](https://github.com/gcollin/chartjs-adapter-date-std/blob/c806f2b/src/index.ts)
 	 */
 	_adapters._date.override({

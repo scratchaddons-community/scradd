@@ -1,5 +1,17 @@
 import addons from "@sa-community/addons-data" assert { type: "json" };
 
+const domains = {
+	npm: "https://npm.im",
+	scradd:
+		process.env.NODE_ENV === "production" || !process.env.PORT
+			? "https://sa-discord.up.railway.app"
+			: `http://localhost:${process.env.PORT}` as const,
+	scratch: "https://scratch.mit.edu",
+	scratchAddons: "https://scratchaddons.com",
+	scratchApi: "https://api.scratch.mit.edu",
+	scratchdb: "https://scratchdb.lefty.one/v3",
+} as const;
+
 export default {
 	addonSearchOptions: {
 		keys: [
@@ -16,6 +28,7 @@ export default {
 
 	collectorTime: 45_000,
 	defaultPunishment: "No reason given.",
+	domains,
 
 	emojis: {
 		message: {
@@ -74,17 +87,21 @@ export default {
 
 	fonts: "Sora, SoraExt, sans-serif",
 	footerSeperator: " • ",
+
+	repos: {
+		scradd: "scratchaddons-community/scradd",
+		scratchAddons: "ScratchAddons/ScratchAddons",
+	},
+
 	scratchColor: 0x88_5c_d4,
 	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
-		addonImageRoot: "https://scratchaddons.com/assets/img/addons",
-		saRepo: "ScratchAddons/ScratchAddons",
-		scratch: "https://scratch.mit.edu",
-		scratchApi: "https://api.scratch.mit.edu",
-		scratchdb: "https://scratchdb.lefty.one/v3",
-		settingsPage: "https://scratch.mit.edu/scratch-addons-extension/settings",
-		usercountJson: "https://scratchaddons.com/usercount.json",
+		addonImages: `${domains.scratchAddons}/assets/img/addons`,
+		permissions: "https://discordlookup.com/permissions-calculator",
+		railway: "https://railway.app?referralCode=RedGuy14",
+		settings: `${domains.scratch}/scratch-addons-extension/settings`,
+		usercount: `${domains.scratchAddons}/usercount.json`,
 	},
 
 	users: {

@@ -2,6 +2,7 @@ import { Role, roleMention, type AuditLogEvent } from "discord.js";
 import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import constants from "../../common/constants.js";
 
 export async function memberRoleUpdate(
 	entry: AuditLog<AuditLogEvent.MemberRoleUpdate, "$add" | "$remove">,
@@ -105,17 +106,18 @@ export async function roleUpdate(
 						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
-					{
-						buttons:
-							change.new === undefined
-								? []
-								: [
-										{
-											label: "New Permissions",
-											url: `https://discordlookup.com/permissions-calculator/${change.new.valueOf()}`,
-										},
-								  ],
-					},
+					change.new === undefined
+						? {}
+						: {
+								buttons: [
+									{
+										label: "New Permissions",
+										url: `${
+											constants.urls.permissions
+										}/${change.new.valueOf()}`,
+									},
+								],
+						  },
 				);
 				break;
 			}

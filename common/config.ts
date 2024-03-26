@@ -26,6 +26,7 @@ async function getConfig() {
 
 	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	const staff = roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod;
+	const exec = roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staff;
 	return {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		guild: guild!,
@@ -74,7 +75,7 @@ async function getConfig() {
 
 		roles: {
 			mod,
-			exec: roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staff,
+			exec,
 			staff,
 			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("contributor")),

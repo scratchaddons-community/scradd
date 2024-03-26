@@ -1,5 +1,5 @@
 import addons from "@sa-community/addons-data" assert { type: "json" };
-import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
+import scratchAddons from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 import {
 	ButtonStyle,
 	ComponentType,
@@ -79,7 +79,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
-				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${sa.version_name})`,
+				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${scratchAddons.version_name})`,
 			);
 
 			CURRENTLY_PLAYING.delete(interaction.user.id);
@@ -387,10 +387,10 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					color: constants.themeColor,
 
 					thumbnail: {
-						url: `${constants.urls.addonImageRoot}/${foundAddon.addonId}.png`,
+						url: `${constants.urls.addonImages}/${foundAddon.addonId}.png`,
 					},
 
-					url: `${constants.urls.settingsPage}#addon-${foundAddon.addonId}`,
+					url: `${constants.urls.settings}#addon-${foundAddon.addonId}`,
 
 					footer: {
 						text: `Guessed after ${askedCount} questions.${

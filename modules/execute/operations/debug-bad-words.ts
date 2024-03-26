@@ -23,7 +23,7 @@ const data: CustomOperation = {
 
 	async command(interaction, { string }) {
 		assert(typeof string === "string");
-		
+
 		if (
 			config.roles.staff &&
 			!(interaction.member instanceof GuildMember
@@ -39,9 +39,9 @@ const data: CustomOperation = {
 			.flat(2)
 			.map((regex) => {
 				if (new RegExp(caesar(regex.source), regexpFlags).test(string))
-					return { regex: `/${regex.source}/`, raw: true };
+					return { regex: regex.source, raw: true };
 				if (new RegExp(decodeRegexp(regex), regexpFlags).test(string))
-					return { regex: `/${regex.source}/`, raw: false };
+					return { regex: regex.source, raw: false };
 			})
 			.filter(Boolean)
 			.sort((a, b) => +b.raw - +a.raw || a.regex.localeCompare(b.regex));
@@ -58,7 +58,11 @@ const data: CustomOperation = {
 			content: `${
 				constants.emojis.statuses.yes
 			} \`${string}\` matches the following regular expressions:\n${matches
-				.map((match) => `- \`${match.regex}\`${match.raw ? "" : "*"}`)
+				.map((match) =>
+					match.raw
+						? `- [\`/${match.regex}/\`](<https://regex101.com/?flavor=javascript&regex=${match.regex}&testString=${string}&delimiter=/&flags=${regexpFlags}>)`
+						: `- \`/${match.regex}/\`*`,
+				)
 				.join("\n")}${
 				matches.some((match) => !match.raw)
 					? "\n\n*\\*Only matches after evasion restrictions are applied*"
@@ -70,4 +74,4 @@ const data: CustomOperation = {
 };
 
 export default data;
-//https://regex101.com/?flavor=javascript&regex=aaa&testString=aa&delimiter=/&flags=gui
+

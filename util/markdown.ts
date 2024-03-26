@@ -154,11 +154,8 @@ export const rules = {
 		parse: (capture) => ({ content: capture[0] }),
 		html(node) {
 			const content = typeof node.content === "string" ? node.content : "";
-			const codePoints = toCodePoints(
-				content.includes("\u200D") ? content : content.replaceAll("\uFE0F", ""),
-			).join("-");
 			return markdown.htmlTag("img", "", {
-				src: `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoints}.svg`,
+				src: getTwemojiUrl(content),
 				alt: content,
 				draggable: false,
 				class: "discord-custom-emoji",
@@ -175,9 +172,10 @@ export const rules = {
 		html: (node) => {
 			const name = `:${(typeof node.name === "string" && node.name) || "_"}:`;
 			return markdown.htmlTag("img", "", {
-				src: `https://cdn.discordapp.com/emojis/${
-					(typeof node.id === "string" && node.id) || "0"
-				}.${node.animated ? "gif" : "webp"}?size=96&quality=lossless`,
+				src: client.rest.cdn.emoji(typeof node.id === "string" ? node.id : "0", {
+					size: 128,
+					extension: node.animated ? "gif" : "webp",
+				}),
 				alt: name,
 				draggable: false,
 				class: "discord-custom-emoji",
@@ -345,3 +343,8 @@ const rawOutputter = markdown.outputFor(rules, "html");
 export function markdownToHtml(source: string): string {
 	return rawOutputter(parseMarkdown(source));
 }
+
+export const getTwemojiUrl = (emoji: string) =>
+	`https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${toCodePoints(
+		emoji.includes("\u200D") ? emoji : emoji.replaceAll("\uFE0F", ""),
+	).join("-")}.svg` as const;

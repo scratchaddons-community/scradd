@@ -93,7 +93,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					];
 
 					const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
-						`${constants.urls.usercountJson}?date=${Date.now()}`,
+						`${constants.urls.usercount}?date=${Date.now()}`,
 					);
 					if (!count) continue;
 

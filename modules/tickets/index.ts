@@ -6,6 +6,7 @@ import {
 	ComponentType,
 	GuildMember,
 	TextInputStyle,
+	channelLink,
 } from "discord.js";
 import {
 	client,
@@ -48,15 +49,13 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "Server Rules",
-							url:
-								config.guild.rulesChannel?.url ??
-								`https://discord.com/channels/${config.guild.id}`,
+							url: config.guild.rulesChannel?.url ?? channelLink("", config.guild.id),
 						},
 						// {
 						// 	type: ComponentType.Button,
 						// 	style: ButtonStyle.Link,
 						// 	label: "FAQ",
-						// 	url: `https://discord.com/channels/${config.guild.id}/TODO`,
+						// 	url: channelLink("TODO", config.guild.id),
 						// },
 						...(config.channels.tickets
 							?.permissionsFor(message.author)
@@ -74,9 +73,7 @@ defineEvent("messageCreate", async (message) => {
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "SA Support",
-							url:
-								config.channels.support?.url ??
-								`https://discord.com/channels/${config.guild.id}`,
+							url: config.channels.support?.url ?? channelLink("", config.guild.id),
 						},
 					],
 				},

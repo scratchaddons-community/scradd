@@ -136,7 +136,7 @@ export default async function linkScratchRole(
 	await log(
 		`${LoggingEmojis.Integration} ${userMention(
 			user.id,
-		)} linked their Scratch account [${username}](${constants.urls.scratch}/users/${username})`,
+		)} linked their Scratch account [${username}](${constants.domains.scratch}/users/${username})`,
 		LogSeverity.ServerChange,
 		{ embeds: [await handleUser(["", "", username])] },
 	);

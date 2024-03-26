@@ -39,11 +39,11 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 				}`;
 				return [
 					`${reference}@${segments.at(-1) ?? segments[0]}`,
-					`https://npm.im/${reference}`,
+					`${constants.domains.npm}/${reference}`,
 				] as const;
 			}
 
-			return [`${name}@${version}`, `https://npm.im/${name}`] as const;
+			return [`${name}@${version}`, `${constants.domains.npm}/${name}`] as const;
 		})
 		.toSorted(([one], [two]) => one.localeCompare(two));
 
@@ -51,7 +51,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 		embeds: [
 			{
 				title: "Credits",
-				description: `Scradd is hosted on [Railway](https://railway.app?referralCode=RedGuy14) using Node.JS ${process.version}.`,
+				description: `Scradd is hosted on [Railway](${constants.urls.railway}) using Node.JS ${process.version}.`,
 
 				fields: [
 					{ name: "🧑‍💻 Developers", value: await getRole(developers), inline: true },

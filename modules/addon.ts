@@ -1,5 +1,5 @@
 import addons from "@sa-community/addons-data" assert { type: "json" };
-import sa from "@sa-community/addons-data/manifest.json" assert { type: "json" };
+import scratchAddons from "@sa-community/addons-data/manifest.json" assert { type: "json" };
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
@@ -17,7 +17,7 @@ defineChatCommand(
 	{
 		name: "addon",
 		censored: "channel",
-		description: `Get information about an addon as of v${sa.version_name}`,
+		description: `Get information about an addon as of v${scratchAddons.version_name}`,
 
 		options: {
 			addon: {
@@ -115,9 +115,9 @@ defineChatCommand(
 
 					color: constants.themeColor,
 					footer: { text: addonId },
-					thumbnail: { url: `${constants.urls.addonImageRoot}/${addonId}.png` },
+					thumbnail: { url: `${constants.urls.addonImages}/${addonId}.png` },
 					title: addon.name,
-					url: `https://github.com/${constants.urls.saRepo}/tree/v${sa.version}/addons/${addonId}/`,
+					url: `https://github.com/${constants.repos.scratchAddons}/tree/v${scratchAddons.version}/addons/${addonId}/`,
 				},
 			],
 
@@ -128,7 +128,7 @@ defineChatCommand(
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
-							url: `${constants.urls.settingsPage}#addon-${addonId}`,
+							url: `${constants.urls.settings}#addon-${addonId}`,
 							label: "Enable Addon",
 						},
 					],

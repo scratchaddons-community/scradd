@@ -218,10 +218,7 @@ async function confirmBan(
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
 							label: "Appeal Ban",
-							url:
-								(process.env.NODE_ENV === "production" || !process.env.PORT
-									? "https://sa-discord.up.railway.app"
-									: `http://localhost:${process.env.PORT}`) + "/ban-appeal",
+							url: constants.domains.scradd + "/ban-appeal",
 						},
 					],
 				},

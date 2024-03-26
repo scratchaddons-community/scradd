@@ -153,7 +153,7 @@ async function userInfo(
 					name: user.tag + (user.bot ? " 🤖" : ""),
 					url:
 						member &&
-						`https://discordlookup.com/permissions-calculator/${
+						`${constants.urls.permissions}/${
 							(interaction.channel && interaction.inGuild()
 								? member.permissionsIn(interaction.channel)
 								: member.permissions

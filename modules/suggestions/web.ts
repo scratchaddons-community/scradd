@@ -1,4 +1,3 @@
-import { toCodePoints } from "@twemoji/parser";
 import {
 	Collection,
 	channelLink,
@@ -13,7 +12,7 @@ import fileSystem from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../common/config.js";
-import { markdownToHtml } from "../../util/markdown.js";
+import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.js";
 import { getRequestUrl } from "../../util/text.js";
 import { oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import top from "./top.js";
@@ -172,18 +171,10 @@ function prepareEmoji(
 	if (emoji && emoji.id) {
 		return {
 			name: `:${emoji.name ?? "_"}:`,
-			url: `https://cdn.discordapp.com/emojis/${emoji.id}.webp?size=96&quality=lossless`,
+			url: client.rest.cdn.emoji(emoji.id, { size: 32 }),
 		};
 	} else {
 		const name = (emoji && emoji.name) || defaultTwemoji;
-		const codePoints = toCodePoints(
-			name.includes("\u200D") ? name : name.replaceAll("\uFE0F", ""),
-		);
-		return {
-			name: name,
-			url: `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoints.join(
-				"-",
-			)}.svg`,
-		};
+		return { name: name, url: getTwemojiUrl(name) };
 	}
 }
