@@ -74,4 +74,3 @@ const data: CustomOperation = {
 };
 
 export default data;
-

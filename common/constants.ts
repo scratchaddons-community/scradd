@@ -5,7 +5,7 @@ const domains = {
 	scradd:
 		process.env.NODE_ENV === "production" || !process.env.PORT
 			? "https://sa-discord.up.railway.app"
-			: `http://localhost:${process.env.PORT}` as const,
+			: (`http://localhost:${process.env.PORT}` as const),
 	scratch: "https://scratch.mit.edu",
 	scratchAddons: "https://scratchaddons.com",
 	scratchApi: "https://api.scratch.mit.edu",
