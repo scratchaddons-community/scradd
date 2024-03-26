@@ -64,7 +64,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 		);
 
 	if (oldGuild.banner !== newGuild.banner) {
-		const url = newGuild.bannerURL({ size: 128 });
+		const url = newGuild.bannerURL({ size: 512 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server banner background was ${
 				url ? "changed" : "removed"
@@ -105,7 +105,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 		);
 	}
 	if (oldGuild.discoverySplash !== newGuild.discoverySplash) {
-		const url = newGuild.discoverySplashURL({ size: 128 });
+		const url = newGuild.discoverySplashURL({ size: 512 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server discovery listing cover image ${
 				url ? "changed" : "removed"
@@ -243,7 +243,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 		);
 
 	if (oldGuild.icon !== newGuild.icon) {
-		const url = newGuild.iconURL({ size: 128 });
+		const url = newGuild.iconURL({ size: 512 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server icon ${url ? "changed" : "removed"}`,
 			LogSeverity.ImportantUpdate,
@@ -370,7 +370,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 		);
 	}
 	if (oldGuild.splash !== newGuild.splash) {
-		const url = newGuild.splashURL({ size: 128 });
+		const url = newGuild.splashURL({ size: 512 });
 		await log(
 			`${LoggingEmojis.SettingChange} Server invite background ${
 				url ? "changed" : "removed"

@@ -142,7 +142,7 @@ export async function roleUpdate(
 				: "removed"
 		}${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
-		{ files: entry.target.icon ? [entry.target.iconURL({ size: 128 }) ?? ""] : [] },
+		{ files: entry.target.icon ? [entry.target.iconURL({ size: 64 }) ?? ""] : [] },
 	);
 }
 

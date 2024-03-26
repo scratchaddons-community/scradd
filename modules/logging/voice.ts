@@ -114,7 +114,7 @@ export async function guildScheduledEventUpdate(
 		}
 
 		if (imageChanged) {
-			const url = entry.target.coverImageURL({ size: 128 });
+			const url = entry.target.coverImageURL({ size: 256 });
 			await log(
 				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url

@@ -64,7 +64,7 @@ export async function guildMemberUpdate(
 	newMember: GuildMember,
 ): Promise<void> {
 	if (oldMember.avatar !== newMember.avatar) {
-		const url = newMember.avatarURL({ size: 128 });
+		const url = newMember.avatarURL({ size: 256 });
 		await log(
 			`${LoggingEmojis.User} ${newMember.toString()} ${
 				url ? "changed" : "removed"
