@@ -30,27 +30,27 @@ export default async function suggestionsPage(
 	if (!threadId) {
 		const all = url.searchParams.has("all");
 		const currentPage = Math.max(1, +(url.searchParams.get("page") ?? 1));
-		const suggestionsData = await top(undefined, {
-			all,
-			page: currentPage - 1,
-		});
+		const suggestionsData = await top(undefined, { all, page: currentPage - 1 });
 		const embed = suggestionsData?.embeds?.[0];
 		const suggestions = embed && "description" in embed && embed.description;
 		const pageInfo = embed && "footer" in embed && embed.footer?.text;
 
 		const member = await config.guild.members.fetchMe();
-		return response.writeHead(200, { "content-type": "text/html" }).end(
-			Mustache.render(TOP_PAGE, {
-				member,
-				avatar: member.user.displayAvatarURL({ size: 64 }),
-				icon: member.roles.icon?.iconURL(),
-				content: markdownToHtml(suggestions || ""),
-				all: all ? "&all" : "",
-				pageInfo,
-				previousPage: currentPage - 1,
-				nextPage: pageInfo && pageInfo.includes(`/${currentPage}`) ? 0 : currentPage + 1,
-			}),
-		);
+		return response
+			.writeHead(200, { "content-type": "text/html" })
+			.end(
+				Mustache.render(TOP_PAGE, {
+					member,
+					avatar: member.user.displayAvatarURL({ size: 64 }),
+					icon: member.roles.icon?.iconURL(),
+					content: markdownToHtml(suggestions || ""),
+					all: all ? "&all" : "",
+					pageInfo,
+					previousPage: currentPage - 1,
+					nextPage:
+						pageInfo && pageInfo.includes(`/${currentPage}`) ? 0 : currentPage + 1,
+				}),
+			);
 	}
 
 	const thread = await config.guild.channels.fetch(threadId).catch(() => void 0);
@@ -73,39 +73,42 @@ export default async function suggestionsPage(
 	const starterMessage = await thread.fetchStarterMessage().catch(() => void 0);
 
 	const member =
-		config.channels.oldSuggestions?.id === thread.parentId
-			? await config.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
+		config.channels.oldSuggestions?.id === thread.parentId ?
+			await config.guild.members
+				.fetch(suggestion.author.valueOf())
+				.catch(() => ({
 					displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
 						.toString(16)
 						.padStart(6, "0")}`,
 					user: undefined,
 					roles: undefined,
-			  }))
-			: undefined;
+				}))
+		:	undefined;
 	const messages = [
-		!starterMessage || config.channels.oldSuggestions?.id === thread.parentId
-			? {
-					interaction: starterMessage?.interaction,
-					createdAt: (starterMessage ?? thread).createdAt,
-					id: (starterMessage ?? thread).id,
-					attachments: starterMessage?.embeds[0]?.image
-						? new Collection<Snowflake, Attachment | EmbedAssetData>([
-								...starterMessage.attachments,
-								["0", starterMessage.embeds[0].image],
-						  ])
-						: starterMessage?.attachments,
-					content:
-						starterMessage?.content ||
-						starterMessage?.embeds[0]?.description ||
-						(starterMessage?.attachments.size ? "" : `${suggestion.title}`),
-					member,
-					author:
-						member?.user ??
-						(typeof suggestion.author === "string"
-							? await client.users.fetch(suggestion.author)
-							: suggestion.author),
-			  }
-			: starterMessage,
+		!starterMessage || config.channels.oldSuggestions?.id === thread.parentId ?
+			{
+				interaction: starterMessage?.interaction,
+				createdAt: (starterMessage ?? thread).createdAt,
+				id: (starterMessage ?? thread).id,
+				attachments:
+					starterMessage?.embeds[0]?.image ?
+						new Collection<Snowflake, Attachment | EmbedAssetData>([
+							...starterMessage.attachments,
+							["0", starterMessage.embeds[0].image],
+						])
+					:	starterMessage?.attachments,
+				content:
+					starterMessage?.content ||
+					starterMessage?.embeds[0]?.description ||
+					(starterMessage?.attachments.size ? "" : `${suggestion.title}`),
+				member,
+				author:
+					member?.user ??
+					(typeof suggestion.author === "string" ?
+						await client.users.fetch(suggestion.author)
+					:	suggestion.author),
+			}
+		:	starterMessage,
 
 		...(await thread.messages.fetchPinned())
 			.filter(
@@ -137,16 +140,16 @@ export default async function suggestionsPage(
 		interactionAvatar(this: MessageInteraction | null | undefined) {
 			return this?.user.displayAvatarURL({ size: 64 });
 		},
-		userAvatar(this: typeof messages[number]) {
+		userAvatar(this: (typeof messages)[number]) {
 			return this.author.displayAvatarURL({ size: 64 });
 		},
-		userIcon(this: typeof messages[number]) {
+		userIcon(this: (typeof messages)[number]) {
 			return this.member?.roles?.icon?.iconURL();
 		},
-		createdDate(this: typeof messages[number]) {
+		createdDate(this: (typeof messages)[number]) {
 			return this.createdAt?.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
 		},
-		attachmentArray(this: typeof messages[number]) {
+		attachmentArray(this: (typeof messages)[number]) {
 			return Array.from(this.attachments?.values() ?? [], (attachment) => ({
 				name: "name" in attachment ? attachment.name : "",
 				url: attachment.proxyURL ?? attachment.url,
@@ -157,7 +160,7 @@ export default async function suggestionsPage(
 				isAudio: "id" in attachment && attachment.contentType?.startsWith("audio/"),
 			}));
 		},
-		messageContent(this: typeof messages[number]) {
+		messageContent(this: (typeof messages)[number]) {
 			return markdownToHtml(this.content);
 		},
 	});

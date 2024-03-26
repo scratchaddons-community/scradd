@@ -46,7 +46,8 @@ export function shouldLog(channel: TextBasedChannel | null): boolean {
 
 export enum LogSeverity {
 	/**
-	 * Critical alerts that require actions in response. All mods should read this channel, preferably with notifications on.
+	 * Critical alerts that require actions in response. All mods should read this channel, preferably with
+	 * notifications on.
 	 *
 	 * - Failed actions.
 	 * - Bot errors.
@@ -134,9 +135,9 @@ export default async function log(
 			}
 
 			const lines = file.content.split("\n");
-			return lines.length > 10 || lines.some((line) => line.length > 100)
-				? { embedded: accumulator.embedded, external: [...accumulator.external, file] }
-				: { embedded: [...accumulator.embedded, file], external: accumulator.external };
+			return lines.length > 10 || lines.some((line) => line.length > 100) ?
+					{ embedded: accumulator.embedded, external: [...accumulator.external, file] }
+				:	{ embedded: [...accumulator.embedded, file], external: accumulator.external };
 		},
 		{ external: [], embedded: [] },
 	) ?? { external: [], embedded: [] };
@@ -144,11 +145,11 @@ export default async function log(
 	return await thread.send({
 		content:
 			content +
-			(embedded.length
-				? embedded
-						.map((file) => `\n\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``)
-						.join("")
-				: ""),
+			(embedded.length ?
+				embedded
+					.map((file) => `\n\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``)
+					.join("")
+			:	""),
 		allowedMentions: { users: [] },
 		embeds: extra.embeds?.filter(Boolean),
 		components: extra.buttons && [
@@ -228,88 +229,94 @@ export function extraAuditLogsInfo(entry: {
 }): string {
 	const reason = entry.reason?.trim();
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		reason ? (reason.includes("\n") ? `:\n${reason}` : ` (${reason})`) : ""
+		reason ?
+			reason.includes("\n") ?
+				`:\n${reason}`
+			:	` (${reason})`
+		:	""
 	}`;
 }
 
-export type AuditLogTargets<Type extends AuditLogEvent> = Type extends
-	| AuditLogEvent.ThreadCreate
-	| AuditLogEvent.ThreadDelete
-	| AuditLogEvent.ThreadUpdate
-	? AnyThreadChannel | { id: Snowflake }
-	: Type extends AuditLogEvent.ApplicationCommandPermissionUpdate
-	? ApplicationCommand | { id: Snowflake }
-	: Type extends
-			| AuditLogEvent.AutoModerationBlockMessage
-			| AuditLogEvent.AutoModerationFlagToChannel
-			| AuditLogEvent.AutoModerationRuleCreate
-			| AuditLogEvent.AutoModerationRuleDelete
-			| AuditLogEvent.AutoModerationRuleUpdate
-			| AuditLogEvent.AutoModerationUserCommunicationDisabled
-	? AutoModerationRule
-	: Type extends
-			| AuditLogEvent.IntegrationCreate
-			| AuditLogEvent.IntegrationDelete
-			| AuditLogEvent.IntegrationUpdate
-	? Integration
-	: Type extends
-			| AuditLogEvent.InviteCreate
-			| AuditLogEvent.InviteDelete
-			| AuditLogEvent.InviteUpdate
-	? Invite
-	: Type extends AuditLogEvent.GuildUpdate
-	? Guild
-	: Type extends AuditLogEvent.MessageBulkDelete
-	? Guild | { id: Snowflake }
-	: Type extends AuditLogEvent.EmojiCreate | AuditLogEvent.EmojiDelete | AuditLogEvent.EmojiUpdate
-	? GuildEmoji | { id: Snowflake }
-	: Type extends
-			| AuditLogEvent.GuildScheduledEventCreate
-			| AuditLogEvent.GuildScheduledEventDelete
-			| AuditLogEvent.GuildScheduledEventUpdate
-	? GuildScheduledEvent
-	: Type extends
-			| AuditLogEvent.ChannelCreate
-			| AuditLogEvent.ChannelDelete
-			| AuditLogEvent.ChannelOverwriteCreate
-			| AuditLogEvent.ChannelOverwriteDelete
-			| AuditLogEvent.ChannelOverwriteUpdate
-			| AuditLogEvent.ChannelUpdate
-	? NonThreadGuildBasedChannel | { id: Snowflake }
-	: Type extends AuditLogEvent.RoleCreate | AuditLogEvent.RoleDelete | AuditLogEvent.RoleUpdate
-	? Role | { id: Snowflake }
-	: Type extends
-			| AuditLogEvent.StageInstanceCreate
-			| AuditLogEvent.StageInstanceDelete
-			| AuditLogEvent.StageInstanceUpdate
-	? StageInstance
-	: Type extends
-			| AuditLogEvent.StickerCreate
-			| AuditLogEvent.StickerDelete
-			| AuditLogEvent.StickerUpdate
-	? Sticker
-	: Type extends
-			| AuditLogEvent.MessageDelete
-			| AuditLogEvent.MessagePin
-			| AuditLogEvent.MessageUnpin
-	? User
-	: Type extends
-			| AuditLogEvent.BotAdd
-			| AuditLogEvent.MemberBanAdd
-			| AuditLogEvent.MemberBanRemove
-			| AuditLogEvent.MemberDisconnect
-			| AuditLogEvent.MemberKick
-			| AuditLogEvent.MemberMove
-			| AuditLogEvent.MemberPrune
-			| AuditLogEvent.MemberRoleUpdate
-			| AuditLogEvent.MemberUpdate
-	? User | null
-	: Type extends
-			| AuditLogEvent.WebhookCreate
-			| AuditLogEvent.WebhookDelete
-			| AuditLogEvent.WebhookUpdate
-	? Webhook
-	: { id: Snowflake } | null;
+export type AuditLogTargets<Type extends AuditLogEvent> =
+	Type extends (
+		AuditLogEvent.ThreadCreate | AuditLogEvent.ThreadDelete | AuditLogEvent.ThreadUpdate
+	) ?
+		AnyThreadChannel | { id: Snowflake }
+	: Type extends AuditLogEvent.ApplicationCommandPermissionUpdate ?
+		ApplicationCommand | { id: Snowflake }
+	: Type extends (
+		| AuditLogEvent.AutoModerationBlockMessage
+		| AuditLogEvent.AutoModerationFlagToChannel
+		| AuditLogEvent.AutoModerationRuleCreate
+		| AuditLogEvent.AutoModerationRuleDelete
+		| AuditLogEvent.AutoModerationRuleUpdate
+		| AuditLogEvent.AutoModerationUserCommunicationDisabled
+	) ?
+		AutoModerationRule
+	: Type extends (
+		| AuditLogEvent.IntegrationCreate
+		| AuditLogEvent.IntegrationDelete
+		| AuditLogEvent.IntegrationUpdate
+	) ?
+		Integration
+	: Type extends (
+		AuditLogEvent.InviteCreate | AuditLogEvent.InviteDelete | AuditLogEvent.InviteUpdate
+	) ?
+		Invite
+	: Type extends AuditLogEvent.GuildUpdate ? Guild
+	: Type extends AuditLogEvent.MessageBulkDelete ? Guild | { id: Snowflake }
+	: Type extends (
+		AuditLogEvent.EmojiCreate | AuditLogEvent.EmojiDelete | AuditLogEvent.EmojiUpdate
+	) ?
+		GuildEmoji | { id: Snowflake }
+	: Type extends (
+		| AuditLogEvent.GuildScheduledEventCreate
+		| AuditLogEvent.GuildScheduledEventDelete
+		| AuditLogEvent.GuildScheduledEventUpdate
+	) ?
+		GuildScheduledEvent
+	: Type extends (
+		| AuditLogEvent.ChannelCreate
+		| AuditLogEvent.ChannelDelete
+		| AuditLogEvent.ChannelOverwriteCreate
+		| AuditLogEvent.ChannelOverwriteDelete
+		| AuditLogEvent.ChannelOverwriteUpdate
+		| AuditLogEvent.ChannelUpdate
+	) ?
+		NonThreadGuildBasedChannel | { id: Snowflake }
+	: Type extends AuditLogEvent.RoleCreate | AuditLogEvent.RoleDelete | AuditLogEvent.RoleUpdate ?
+		Role | { id: Snowflake }
+	: Type extends (
+		| AuditLogEvent.StageInstanceCreate
+		| AuditLogEvent.StageInstanceDelete
+		| AuditLogEvent.StageInstanceUpdate
+	) ?
+		StageInstance
+	: Type extends (
+		AuditLogEvent.StickerCreate | AuditLogEvent.StickerDelete | AuditLogEvent.StickerUpdate
+	) ?
+		Sticker
+	: Type extends (
+		AuditLogEvent.MessageDelete | AuditLogEvent.MessagePin | AuditLogEvent.MessageUnpin
+	) ?
+		User
+	: Type extends (
+		| AuditLogEvent.BotAdd
+		| AuditLogEvent.MemberBanAdd
+		| AuditLogEvent.MemberBanRemove
+		| AuditLogEvent.MemberDisconnect
+		| AuditLogEvent.MemberKick
+		| AuditLogEvent.MemberMove
+		| AuditLogEvent.MemberPrune
+		| AuditLogEvent.MemberRoleUpdate
+		| AuditLogEvent.MemberUpdate
+	) ?
+		User | null
+	: Type extends (
+		AuditLogEvent.WebhookCreate | AuditLogEvent.WebhookDelete | AuditLogEvent.WebhookUpdate
+	) ?
+		Webhook
+	:	{ id: Snowflake } | null;
 export type AuditLog<
 	Event extends AuditLogEvent,
 	ExtraChangeKeys extends string = never,
@@ -331,16 +338,13 @@ export type AuditLog<
 	}[AllKeys][];
 };
 
-type ChangeValue<
-	Target extends Base,
-	Key extends string,
-	Type extends "new" | "old",
-> = Key extends keyof Target
-	? Target[Key] extends actualPrimitives
-		? Target[Key] | undefined
-		: Change<Key>[`${Type}_value`] | Target[Key]
-	: Change<Key>[`${Type}_value`];
+type ChangeValue<Target extends Base, Key extends string, Type extends "new" | "old"> =
+	Key extends keyof Target ?
+		Target[Key] extends actualPrimitives ?
+			Target[Key] | undefined
+		:	Change<Key>[`${Type}_value`] | Target[Key]
+	:	Change<Key>[`${Type}_value`];
 
-type Change<Key extends string> = Extract<APIAuditLogChange, { key: Key }> extends never
-	? APIAuditLogChange
-	: Extract<APIAuditLogChange, { key: Key }>;
+type Change<Key extends string> =
+	Extract<APIAuditLogChange, { key: Key }> extends never ? APIAuditLogChange
+	:	Extract<APIAuditLogChange, { key: Key }>;

@@ -23,9 +23,9 @@ async function userInfo(
 ): Promise<void> {
 	const isMod =
 		config.roles.mod &&
-		(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.mod.id)
-			: interaction.member?.roles.includes(config.roles.mod.id));
+		(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.mod.id)
+		:	interaction.member?.roles.includes(config.roles.mod.id));
 
 	const fields = [
 		{ name: "🏷️ ID", value: user.id, inline: true },
@@ -34,9 +34,9 @@ async function userInfo(
 			value: time(user.createdAt, TimestampStyles.RelativeTime),
 			inline: true,
 		},
-		user.globalName
-			? { name: "🪪 Display Name", value: user.globalName, inline: true }
-			: { name: constants.zws, value: constants.zws, inline: true },
+		user.globalName ?
+			{ name: "🪪 Display Name", value: user.globalName, inline: true }
+		:	{ name: constants.zws, value: constants.zws, inline: true },
 	];
 
 	if (member?.joinedAt)
@@ -79,13 +79,13 @@ async function userInfo(
 		(await config.guild.bans.fetch(user.id).catch(() => void 0));
 	if (banned)
 		fields.push(
-			isMod
-				? {
-						name: "🔨 Ban Reason",
-						value: banned.reason ?? constants.defaultPunishment,
-						inline: true,
-				  }
-				: { name: "🔨 Banned", value: "Yes", inline: true },
+			isMod ?
+				{
+					name: "🔨 Ban Reason",
+					value: banned.reason ?? constants.defaultPunishment,
+					inline: true,
+				}
+			:	{ name: "🔨 Banned", value: "Yes", inline: true },
 		);
 
 	const hasSuggestions = [...oldSuggestions, ...suggestionsDatabase.data].some(
@@ -123,14 +123,16 @@ async function userInfo(
 	];
 	const rows = buttonData
 		.map((row) =>
-			row.filter(Boolean).map(
-				(button) =>
-					({
-						...button,
-						style: ButtonStyle.Secondary,
-						type: ComponentType.Button,
-					} as const),
-			),
+			row
+				.filter(Boolean)
+				.map(
+					(button) =>
+						({
+							...button,
+							style: ButtonStyle.Secondary,
+							type: ComponentType.Button,
+						}) as const,
+				),
 		)
 		.filter(({ length }) => length);
 
@@ -154,18 +156,19 @@ async function userInfo(
 					url:
 						member &&
 						`${constants.urls.permissions}/${
-							(interaction.channel && interaction.inGuild()
-								? member.permissionsIn(interaction.channel)
-								: member.permissions
+							(interaction.channel && interaction.inGuild() ?
+								member.permissionsIn(interaction.channel)
+							:	member.permissions
 							).bitfield
 						}`,
 					icon_url: member?.avatar ? user.displayAvatarURL() : undefined,
 				},
 			},
 		],
-		components: rows.length
-			? rows.map((components) => ({ type: ComponentType.ActionRow, components } as const))
-			: undefined,
+		components:
+			rows.length ?
+				rows.map((components) => ({ type: ComponentType.ActionRow, components }) as const)
+			:	undefined,
 	});
 }
 
@@ -188,9 +191,10 @@ defineChatCommand(
 			(options.user instanceof GuildMember ? options.user.user : options.user) ??
 			interaction.user
 		).fetch();
-		const member = options.user
-			? options.user instanceof GuildMember && options.user
-			: interaction.member instanceof GuildMember && interaction.member;
+		const member =
+			options.user ?
+				options.user instanceof GuildMember && options.user
+			:	interaction.member instanceof GuildMember && interaction.member;
 		await userInfo(interaction, { user, member: member || undefined });
 	},
 );

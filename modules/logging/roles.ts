@@ -72,9 +72,9 @@ export async function roleUpdate(
 			case "color": {
 				await log(
 					`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role color ${
-						typeof change.new === "number" && change.new
-							? `set to \`#${change.new.toString(16).padStart(6, "0")}\``
-							: "reset"
+						typeof change.new === "number" && change.new ?
+							`set to \`#${change.new.toString(16).padStart(6, "0")}\``
+						:	"reset"
 					}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
 				);
@@ -106,18 +106,16 @@ export async function roleUpdate(
 						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,
-					change.new === undefined
-						? {}
-						: {
-								buttons: [
-									{
-										label: "New Permissions",
-										url: `${
-											constants.urls.permissions
-										}/${change.new.valueOf()}`,
-									},
-								],
-						  },
+					change.new === undefined ?
+						{}
+					:	{
+							buttons: [
+								{
+									label: "New Permissions",
+									url: `${constants.urls.permissions}/${change.new.valueOf()}`,
+								},
+							],
+						},
 				);
 				break;
 			}
@@ -135,11 +133,9 @@ export async function roleUpdate(
 	if (!iconChanged || !(entry.target instanceof Role)) return;
 	await log(
 		`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role icon ${
-			entry.target.unicodeEmoji
-				? `set to ${entry.target.unicodeEmoji}`
-				: entry.target.icon
-				? "changed"
-				: "removed"
+			entry.target.unicodeEmoji ? `set to ${entry.target.unicodeEmoji}`
+			: entry.target.icon ? "changed"
+			: "removed"
 		}${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 		{ files: entry.target.icon ? [entry.target.iconURL({ size: 64 }) ?? ""] : [] },

@@ -23,9 +23,9 @@ export async function getStrikes(
 		selected.id !== interaction.user.id &&
 		!(
 			config.roles.mod &&
-			(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(config.roles.mod.id)
-				: interaction.member?.roles.includes(config.roles.mod.id))
+			(interaction.member instanceof GuildMember ?
+				interaction.member.roles.resolve(config.roles.mod.id)
+			:	interaction.member?.roles.includes(config.roles.mod.id))
 		)
 	) {
 		return await interaction.reply({
@@ -35,9 +35,9 @@ export async function getStrikes(
 	}
 
 	const member =
-		selected instanceof GuildMember
-			? selected
-			: await config.guild.members.fetch(selected.id).catch(() => selected);
+		selected instanceof GuildMember ? selected : (
+			await config.guild.members.fetch(selected.id).catch(() => selected)
+		);
 	await listStrikes(
 		member,
 		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
@@ -70,52 +70,54 @@ export async function getStrikeById(
 	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
-		isModerator && strike.mod === "AutoMod"
-			? strike.mod
-			: strike.mod &&
-			  (await mentionUser(
-					strike.mod,
-					interaction.member,
-					interaction.guild ?? config.guild,
-			  ));
+		isModerator && strike.mod === "AutoMod" ?
+			strike.mod
+		:	strike.mod &&
+			(await mentionUser(strike.mod, interaction.member, interaction.guild ?? config.guild));
 	const nick = (member ?? user)?.displayName;
 	return await interaction.editReply({
-		components: isModerator
-			? [
+		components:
+			isModerator ?
+				[
 					{
 						type: ComponentType.ActionRow,
 
 						components: [
-							strike.removed
-								? {
-										type: ComponentType.Button,
-										customId: `${strike.id}_addStrikeBack`,
-										label: "Add back",
-										style: ButtonStyle.Primary,
-								  }
-								: {
-										type: ComponentType.Button,
-										customId: `${strike.id}_removeStrike`,
-										label: "Remove",
-										style: ButtonStyle.Danger,
-								  },
+							strike.removed ?
+								{
+									type: ComponentType.Button,
+									customId: `${strike.id}_addStrikeBack`,
+									label: "Add back",
+									style: ButtonStyle.Primary,
+								}
+							:	{
+									type: ComponentType.Button,
+									customId: `${strike.id}_removeStrike`,
+									label: "Remove",
+									style: ButtonStyle.Danger,
+								},
 						],
 					},
-			  ]
-			: [],
+				]
+			:	[],
 
 		embeds: [
 			{
 				color: member?.displayColor,
 
-				author: nick
-					? { icon_url: (member ?? user)?.displayAvatarURL(), name: nick }
-					: undefined,
+				author:
+					nick ?
+						{ icon_url: (member ?? user)?.displayAvatarURL(), name: nick }
+					:	undefined,
 
 				title: `${
-					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+					strike.removed ? "~~"
+					: strike.date + EXPIRY_LENGTH > Date.now() ? ""
+					: "*"
 				}Strike \`${strike.id}\`${
-					strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+					strike.removed ? "~~"
+					: strike.date + EXPIRY_LENGTH > Date.now() ? ""
+					: "*"
 				}`,
 
 				description: strike.reason,
@@ -127,20 +129,22 @@ export async function getStrikeById(
 						value: strike.count < 1 ? "verbal" : Math.floor(strike.count).toString(),
 						inline: true,
 					},
-					...(moderator ? [{ name: "🛡 Moderator", value: moderator, inline: true }] : []),
-					...(user
-						? [
-								{
-									name: "👤 Target user",
-									value: await mentionUser(
-										user,
-										interaction.member,
-										interaction.guild ?? config.guild,
-									),
-									inline: true,
-								},
-						  ]
-						: []),
+					...(moderator ?
+						[{ name: "🛡 Moderator", value: moderator, inline: true }]
+					:	[]),
+					...(user ?
+						[
+							{
+								name: "👤 Target user",
+								value: await mentionUser(
+									user,
+									interaction.member,
+									interaction.guild ?? config.guild,
+								),
+								inline: true,
+							},
+						]
+					:	[]),
 				],
 			},
 		],

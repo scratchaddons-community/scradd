@@ -41,16 +41,15 @@ const strikesCache: Record<string, { mod?: string; reason?: string }> = {};
 
 export default async function filterToStrike(
 	filter: string,
-): Promise<(typeof strikeDatabase["data"][number] & typeof strikesCache[string]) | undefined> {
+): Promise<((typeof strikeDatabase)["data"][number] & (typeof strikesCache)[string]) | undefined> {
 	if (/^\d{1,4}$/.test(filter)) {
 		const details = robotopStrikes.find((strike) => strike.id.toString() === filter);
 		const strike = strikeDatabase.data.find((strike) => strike.id.toString() === filter);
 		if (strike && details) return { ...details, ...strike, id: details.id.toString() };
 	}
 
-	const strikeId = /^\d{17,20}$/.test(filter)
-		? convertBase(filter, 10, convertBase.MAX_BASE)
-		: filter;
+	const strikeId =
+		/^\d{17,20}$/.test(filter) ? convertBase(filter, 10, convertBase.MAX_BASE) : filter;
 	const strike = strikeDatabase.data.find((strike) => strike.id.toString() === strikeId);
 	if (!strike) return;
 	if (strikesCache[strikeId]) return { ...strike, ...strikesCache[strikeId] };
@@ -82,9 +81,10 @@ export default async function filterToStrike(
 	const data = {
 		mod: [...message.content.matchAll(GlobalUsersPattern)][1]?.groups?.id,
 
-		reason: url
-			? await fetch(url).then(async (response) => await response.text())
-			: /```.*\n([^]+)\n```$/.exec(message.content)?.[1] ?? message.content,
+		reason:
+			url ?
+				await fetch(url).then(async (response) => await response.text())
+			:	/```.*\n([^]+)\n```$/.exec(message.content)?.[1] ?? message.content,
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
@@ -115,14 +115,18 @@ export async function listStrikes(
 	await paginate(
 		strikes,
 		(strike) =>
-			`${strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"}\`${
-				strike.id
-			}\`${
-				strike.count === 1
-					? ""
-					: ` (${strike.count < 1 ? "verbal" : `\\*${Math.floor(strike.count)}`})`
+			`${
+				strike.removed ? "~~"
+				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
+				: "*"
+			}\`${strike.id}\`${
+				strike.count === 1 ?
+					""
+				:	` (${strike.count < 1 ? "verbal" : `\\*${Math.floor(strike.count)}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
-				strike.removed ? "~~" : strike.date + EXPIRY_LENGTH > Date.now() ? "" : "*"
+				strike.removed ? "~~"
+				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
+				: "*"
 			}`,
 		reply,
 		{

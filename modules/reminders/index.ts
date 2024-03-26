@@ -40,9 +40,15 @@ defineSubcommands(
 		},
 	},
 	async (interaction, options) => {
-		await (options.subcommand === "list"
-			? listReminders(interaction)
-			: createReminder(interaction, options.options));
+		switch (options.subcommand) {
+			case "list": {
+				await listReminders(interaction);
+				break;
+			}
+			case "add": {
+				await createReminder(interaction, options.options);
+			}
+		}
 	},
 );
 

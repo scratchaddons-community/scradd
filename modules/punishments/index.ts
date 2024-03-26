@@ -128,13 +128,13 @@ defineChatCommand(
 		const displayedStrikes = Math.round(strikes);
 
 		await interaction.editReply(
-			success
-				? `${constants.emojis.statuses.yes} ${
-						strikes < 1 ? "Verbally warned" : "Warned"
-				  } ${options.user.toString()}${
-						displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""
-				  }.${success === "no-dm" ? " I was not able to DM them." : ""} ${reason}`
-				: `${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
+			success ?
+				`${constants.emojis.statuses.yes} ${
+					strikes < 1 ? "Verbally warned" : "Warned"
+				} ${options.user.toString()}${
+					displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""
+				}.${success === "no-dm" ? " I was not able to DM them." : ""} ${reason}`
+			:	`${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
 		);
 	},
 );
@@ -154,9 +154,9 @@ defineMenuCommand(
 							style: TextInputStyle.Paragraph,
 							customId: "reason",
 							value:
-								process.env.NODE_ENV === "production"
-									? undefined
-									: constants.defaultPunishment,
+								process.env.NODE_ENV === "production" ?
+									undefined
+								:	constants.defaultPunishment,
 						},
 					],
 				},
@@ -183,18 +183,18 @@ defineModal("warn", async (interaction, id) => {
 	await interaction.deferReply();
 
 	const strikes =
-		Number.isNaN(rawStrikes) || rawStrikes < 0
-			? 1
-			: Math.min(MAX_STRIKES, Math.floor(rawStrikes));
+		Number.isNaN(rawStrikes) || rawStrikes < 0 ?
+			1
+		:	Math.min(MAX_STRIKES, Math.floor(rawStrikes));
 	const success = await warn(user, reason, strikes, interaction.user);
 	await interaction.editReply(
-		success
-			? `${constants.emojis.statuses.yes} ${
-					strikes < 1 ? "Warned" : "Verbally warned"
-			  } ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
-					success === "no-dm" ? " I was not able to DM them." : ""
-			  } ${reason}`
-			: `${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
+		success ?
+			`${constants.emojis.statuses.yes} ${
+				strikes < 1 ? "Warned" : "Verbally warned"
+			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
+				success === "no-dm" ? " I was not able to DM them." : ""
+			} ${reason}`
+		:	`${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
 	);
 });
 defineButton("removeStrike", removeStrike);
@@ -251,9 +251,9 @@ defineMenuCommand(
 							style: TextInputStyle.Paragraph,
 							customId: "reason",
 							value:
-								process.env.NODE_ENV === "production"
-									? undefined
-									: constants.defaultPunishment,
+								process.env.NODE_ENV === "production" ?
+									undefined
+								:	constants.defaultPunishment,
 						},
 					],
 				},

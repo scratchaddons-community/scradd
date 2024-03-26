@@ -50,9 +50,7 @@ import {
 	voiceStateUpdate,
 } from "./voice.js";
 
-const events: {
-	[Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void>;
-} = {
+const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void> } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,
 	[AuditLogEvent.ChannelDelete]: channelDelete,
 	[AuditLogEvent.ChannelOverwriteCreate]: channelOverwriteCreate,

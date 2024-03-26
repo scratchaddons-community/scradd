@@ -27,8 +27,9 @@ const server = http.createServer(async (request, response) => {
 	try {
 		const requestUrl = getRequestUrl(request);
 		const pathname = (
-			requestUrl.pathname.endsWith("/") ? requestUrl.pathname : `${requestUrl.pathname}/`
-		).toLowerCase();
+			requestUrl.pathname.endsWith("/") ?
+				requestUrl.pathname
+			:	`${requestUrl.pathname}/`).toLowerCase();
 		switch (pathname) {
 			case "/prepare-exit/": {
 				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
@@ -83,9 +84,10 @@ const server = http.createServer(async (request, response) => {
 
 		response
 			.writeHead(301, {
-				location: config.guild.features.includes("DISCOVERABLE")
-					? `https://discord.com/servers/${config.guild.id}`
-					: pkg.homepage,
+				location:
+					config.guild.features.includes("DISCOVERABLE") ?
+						`https://discord.com/servers/${config.guild.id}`
+					:	pkg.homepage,
 			})
 			.end();
 	} catch (error) {

@@ -5,7 +5,10 @@ import config from "../../common/config.js";
 export const CUSTOM_ROLE_PREFIX = "✨ ";
 
 const validContentTypes = ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp"];
-/** Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URI, string starting with https:// */
+/**
+ * Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URI, string starting with
+ * https://
+ */
 export async function resolveIcon(
 	icon: string,
 ): Promise<
@@ -55,7 +58,7 @@ export function parseColor(
 	const color = (rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const)).toLowerCase();
 	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
 
-	return color.length === 4
-		? `#${color[1] ?? ""}${color.slice(1, 3)}${color.slice(2, 4)}${color[3] ?? ""}`
-		: color;
+	return color.length === 4 ?
+			`#${color[1] ?? ""}${color.slice(1, 3)}${color.slice(2, 4)}${color[3] ?? ""}`
+		:	color;
 }

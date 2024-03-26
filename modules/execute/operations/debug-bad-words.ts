@@ -26,9 +26,9 @@ const data: CustomOperation = {
 
 		if (
 			config.roles.staff &&
-			!(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(config.roles.staff.id)
-				: interaction.member.roles.includes(config.roles.staff.id))
+			!(interaction.member instanceof GuildMember ?
+				interaction.member.roles.resolve(config.roles.staff.id)
+			:	interaction.member.roles.includes(config.roles.staff.id))
 		)
 			await interaction.reply({
 				ephemeral: true,
@@ -59,14 +59,14 @@ const data: CustomOperation = {
 				constants.emojis.statuses.yes
 			} \`${string}\` matches the following regular expressions:\n${matches
 				.map((match) =>
-					match.raw
-						? `- [\`/${match.regex}/\`](<https://regex101.com/?flavor=javascript&regex=${match.regex}&testString=${string}&delimiter=/&flags=${regexpFlags}>)`
-						: `- \`/${match.regex}/\`*`,
+					match.raw ?
+						`- [\`/${match.regex}/\`](<https://regex101.com/?flavor=javascript&regex=${match.regex}&testString=${string}&delimiter=/&flags=${regexpFlags}>)`
+					:	`- \`/${match.regex}/\`*`,
 				)
 				.join("\n")}${
-				matches.some((match) => !match.raw)
-					? "\n\n*\\*Only matches after evasion restrictions are applied*"
-					: ""
+				matches.some((match) => !match.raw) ?
+					"\n\n*\\*Only matches after evasion restrictions are applied*"
+				:	""
 			}`,
 			ephemeral: true,
 		});

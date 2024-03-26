@@ -28,9 +28,9 @@ export default async function hasPermission(
 	if (user instanceof User) return schema.dmPermission ?? false;
 
 	const memberPermissions =
-		user instanceof GuildMember
-			? user.permissions
-			: new PermissionsBitField(BigInt(user.permissions));
+		user instanceof GuildMember ?
+			user.permissions
+		:	new PermissionsBitField(BigInt(user.permissions));
 	if (memberPermissions.has("Administrator")) return true;
 
 	const guild = user instanceof GuildMember ? user.guild : undefined;
@@ -60,13 +60,13 @@ export default async function hasPermission(
 			!ignoredRoles.has(id) &&
 			(user instanceof GuildMember ? user.roles.resolve(id) : user.roles.includes(id)),
 	);
-	return rolePermissions.length
-		? rolePermissions.some(({ permission }) => permission)
-		: memberPermissions.has(
-				schema.defaultMemberPermissions?.equals(0n)
-					? "Administrator"
-					: schema.defaultMemberPermissions ?? 0n,
-		  );
+	return rolePermissions.length ?
+			rolePermissions.some(({ permission }) => permission)
+		:	memberPermissions.has(
+				schema.defaultMemberPermissions?.equals(0n) ?
+					"Administrator"
+				:	schema.defaultMemberPermissions ?? 0n,
+			);
 }
 
 export function handleCommandPermissionUpdate(data: ApplicationCommandPermissionsUpdateData): void {

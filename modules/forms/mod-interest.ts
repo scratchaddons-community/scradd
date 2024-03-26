@@ -255,28 +255,30 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 						customId: `${interaction.user.id}_xp`,
 						label: "XP",
 					} as const,
-					...(totalStrikeCount === "0"
-						? []
-						: ([
-								{
-									style: ButtonStyle.Secondary,
-									type: ComponentType.Button,
-									customId: `${interaction.user.id}_viewStrikes`,
-									label: "Strikes",
-								},
-						  ] as const)),
-					...(config.channels.tickets
-						?.permissionsFor(interaction.member)
-						?.has("ViewChannel")
-						? ([
-								{
-									style: ButtonStyle.Secondary,
-									type: ComponentType.Button,
-									customId: `${interaction.user.id}_contactUser`,
-									label: "Contact User",
-								},
-						  ] as const)
-						: []),
+					...(totalStrikeCount === "0" ?
+						[]
+					:	([
+							{
+								style: ButtonStyle.Secondary,
+								type: ComponentType.Button,
+								customId: `${interaction.user.id}_viewStrikes`,
+								label: "Strikes",
+							},
+						] as const)),
+					...((
+						config.channels.tickets
+							?.permissionsFor(interaction.member)
+							?.has("ViewChannel")
+					) ?
+						([
+							{
+								style: ButtonStyle.Secondary,
+								type: ComponentType.Button,
+								customId: `${interaction.user.id}_contactUser`,
+								label: "Contact User",
+							},
+						] as const)
+					:	[]),
 				],
 			},
 		],

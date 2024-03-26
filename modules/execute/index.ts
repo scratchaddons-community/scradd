@@ -107,9 +107,9 @@ defineChatCommand(
 
 		const shouldCensor =
 			interaction.guild?.id === config.guild.id &&
-			(command.censored === "channel"
-				? !badWordsAllowed(interaction.channel)
-				: command.censored ?? true);
+			(command.censored === "channel" ?
+				!badWordsAllowed(interaction.channel)
+			:	command.censored ?? true);
 		const censoredOptions = shouldCensor && tryCensor(operation);
 		if (censoredOptions && censoredOptions.strikes) {
 			await interaction.reply({

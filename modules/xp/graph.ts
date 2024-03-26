@@ -44,10 +44,7 @@ export default async function graph(interaction: AnySelectMenuInteraction): Prom
 	new Chart(context as CanvasRenderingContext2D & SKRSContext2D, {
 		options: {
 			parsing: false,
-			scales: {
-				x: { type: "time", grid: { display: false } },
-				y: { min: 0 },
-			},
+			scales: { x: { type: "time", grid: { display: false } }, y: { min: 0 } },
 			elements: { point: { radius: 0 } },
 		},
 		plugins: [

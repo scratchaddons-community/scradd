@@ -1,4 +1,7 @@
-/** Returns a generator that only gives the elements of an array that meet the condition specified in a callback function. */
+/**
+ * Returns a generator that only gives the elements of an array that meet the condition specified in a callback
+ * function.
+ */
 export async function* asyncFilter<T, X>(
 	array: T[],
 	predicate: (value: T, index: number, array: T[]) => Promise<X | false>,
@@ -29,9 +32,8 @@ export async function* asyncFilter<T, X>(
  * Resolves a promise when any of the promises resolve with a truey value.
  *
  * @author jaboja [`firstTrue`](https://stackoverflow.com/a/51160727/11866686)
- *
- * @returns Returns a promise that resolves to `true` as soon as any of the promises resolve with a truey value, or resolves to `false` if
- *   all of the promises resolve with a different value.
+ * @returns Returns a promise that resolves to `true` as soon as any of the promises resolve with a truey value, or
+ *   resolves to `false` if all of the promises resolve with a different value.
  */
 export async function anyPromise(promises: Promise<unknown>[]): Promise<boolean> {
 	const newPromises = promises.map(

@@ -123,9 +123,9 @@ export async function guildMemberUpdate(
 	if (oldMember.nickname !== newMember.nickname)
 		await log(
 			`${LoggingEmojis.User} ${newMember.toString()}${
-				newMember.nickname
-					? ` was nicknamed ${newMember.nickname}`
-					: "’s nickname was removed"
+				newMember.nickname ?
+					` was nicknamed ${newMember.nickname}`
+				:	"’s nickname was removed"
 			}`,
 			LogSeverity.ServerChange,
 		);
@@ -145,11 +145,11 @@ export async function userUpdate(oldUser: PartialUser | User, newUser: User): Pr
 	if (oldUser.globalName !== newUser.globalName)
 		await log(
 			`${LoggingEmojis.User} ${newUser.toString()}${
-				newUser.globalName
-					? oldUser.globalName
-						? ` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
-						: ` set their display name to ${newUser.globalName}`
-					: "’s display name was removed"
+				newUser.globalName ?
+					oldUser.globalName ?
+						` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
+					:	` set their display name to ${newUser.globalName}`
+				:	"’s display name was removed"
 			}`,
 			LogSeverity.Resource,
 		);

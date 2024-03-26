@@ -29,7 +29,6 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 	 * @param askedCount - Count of messages that have already been asked.
 	 * @param backInfo - Information about the previous question.
 	 * @param justAnswered - The response to the previous question.
-	 *
 	 * @returns Sent message.
 	 */
 	async function reply(
@@ -45,9 +44,9 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 		justAnswered = "",
 	): Promise<Message | undefined> {
 		const questions =
-			typeof backInfo === "string"
-				? [backInfo]
-				: getNextQuestions(addonProbabilities, askedQuestions);
+			typeof backInfo === "string" ?
+				[backInfo]
+			:	getNextQuestions(addonProbabilities, askedQuestions);
 
 		const oldMessage = interaction.replied ? await interaction.fetchReply() : undefined;
 
@@ -150,23 +149,23 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					color: constants.themeColor,
 
 					author: {
-						icon_url: (interaction.member instanceof GuildMember
-							? interaction.member
-							: interaction.user
+						icon_url: (interaction.member instanceof GuildMember ?
+							interaction.member
+						:	interaction.user
 						).displayAvatarURL(),
 
-						name: (interaction.member instanceof GuildMember
-							? interaction.member
-							: interaction.user
+						name: (interaction.member instanceof GuildMember ?
+							interaction.member
+						:	interaction.user
 						).displayName,
 					},
 
 					title: "🤔 Think of an addon…",
 
 					description: `${
-						oldMessage?.embeds[0]?.description
-							? `${oldMessage.embeds[0].description} **${justAnswered}**\n`
-							: ""
+						oldMessage?.embeds[0]?.description ?
+							`${oldMessage.embeds[0].description} **${justAnswered}**\n`
+						:	""
 					}- ${questions[0]}`,
 
 					footer: {
@@ -231,14 +230,11 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					return;
 				}
 
-				const probabilityShift = buttonInteraction.customId.startsWith("yes.")
-					? 2
-					: buttonInteraction.customId.startsWith("probably.")
-					? 1
-					: buttonInteraction.customId.startsWith("not.")
-					? -1
-					: buttonInteraction.customId.startsWith("no.")
-					? -2
+				const probabilityShift =
+					buttonInteraction.customId.startsWith("yes.") ? 2
+					: buttonInteraction.customId.startsWith("probably.") ? 1
+					: buttonInteraction.customId.startsWith("not.") ? -1
+					: buttonInteraction.customId.startsWith("no.") ? -2
 					: 0;
 
 				const previouslyAsked = [...askedQuestions];
@@ -323,9 +319,9 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					...oldMessage.embeds[0]?.toJSON(),
 
 					description: `${
-						oldMessage.embeds[0]?.description
-							? `${oldMessage.embeds[0]?.description ?? ""} **${justAnswered}**\n`
-							: ""
+						oldMessage.embeds[0]?.description ?
+							`${oldMessage.embeds[0]?.description ?? ""} **${justAnswered}**\n`
+						:	""
 					}- Is it the **${foundAddon.manifest.name}** addon?`,
 				},
 			],
@@ -373,30 +369,28 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					)} for more information about this addon!*`,
 
 					author: {
-						icon_url: (interaction.member instanceof GuildMember
-							? interaction.member
-							: interaction.user
+						icon_url: (interaction.member instanceof GuildMember ?
+							interaction.member
+						:	interaction.user
 						).displayAvatarURL(),
 
-						name: (interaction.member instanceof GuildMember
-							? interaction.member
-							: interaction.user
+						name: (interaction.member instanceof GuildMember ?
+							interaction.member
+						:	interaction.user
 						).displayName,
 					},
 
 					color: constants.themeColor,
 
-					thumbnail: {
-						url: `${constants.urls.addonImages}/${foundAddon.addonId}.png`,
-					},
+					thumbnail: { url: `${constants.urls.addonImages}/${foundAddon.addonId}.png` },
 
 					url: `${constants.urls.settings}#addon-${foundAddon.addonId}`,
 
 					footer: {
 						text: `Guessed after ${askedCount} questions.${
-							nextChoice
-								? `${constants.footerSeperator}Next choice: ${nextChoice}`
-								: ""
+							nextChoice ?
+								`${constants.footerSeperator}Next choice: ${nextChoice}`
+							:	""
 						}`,
 					},
 				},
@@ -437,23 +431,24 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 					ephemeral: true,
 				});
 
-				const nextMessage = buttonInteraction.customId.startsWith("back.")
-					? typeof backInfo === "object"
-						? await reply(
+				const nextMessage =
+					buttonInteraction.customId.startsWith("back.") ?
+						typeof backInfo === "object" ?
+							await reply(
 								backInfo.askedQuestions,
 								backInfo.probabilities,
 								askedCount - 1,
 								backInfo.justAsked,
 								buttonInteraction.component.label ?? undefined,
-						  )
-						: new TypeError("backInfo must be an object to go back")
-					: await reply(
+							)
+						:	new TypeError("backInfo must be an object to go back")
+					:	await reply(
 							askedQuestions,
 							addonProbabilities.slice(1),
 							askedCount + 1,
 							false,
 							"No",
-					  );
+						);
 
 				if (nextMessage) {
 					if (nextMessage instanceof TypeError) throw nextMessage;
@@ -480,7 +475,6 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
  *
  * @param addonProbabilities - The probabilities of each addon being the answer.
  * @param askedQuestions - Questions to ignore.
- *
  * @returns A new question to ask.
  */
 function getNextQuestions(
@@ -515,13 +509,14 @@ function getNextQuestions(
 			const currentDistance = Math.abs(current[1] / length - 0.5);
 			const previousDistance = Math.abs((previous[0]?.[1] ?? 0) / length - 0.5);
 
-			return currentDistance < previousDistance
-				? current[1] < Math.round(length / 9)
-					? []
-					: [current]
-				: currentDistance > previousDistance
-				? previous
-				: [...previous, current];
+			return (
+				currentDistance < previousDistance ?
+					current[1] < Math.round(length / 9) ?
+						[]
+					:	[current]
+				: currentDistance > previousDistance ? previous
+				: [...previous, current]
+			);
 		}, [])
 		.map(([question]) => question)
 		.toSorted(() => Math.random() - 0.5);
@@ -534,7 +529,6 @@ function getNextQuestions(
  * @param probabilityShift - How much to care.
  * @param probabilitiesBefore - The probabilities of addons before this question.
  * @param askedQuestions - Questions that were already asked. This function will be modify this array.
- *
  * @returns The new probabilities.
  */
 function answerQuestion(
@@ -586,14 +580,14 @@ function answerQuestion(
 	const result = Object.entries(dependencies)
 		.reduce(
 			(accumulated, current) =>
-				askedQuestions.includes(current[0])
-					? accumulated
-					: answerQuestion(
-							current[0],
-							(current[1] ? 1 : -1) * probabilityShift,
-							accumulated.toSorted((one, two) => two[1] - one[1]),
-							askedQuestions,
-					  ),
+				askedQuestions.includes(current[0]) ? accumulated : (
+					answerQuestion(
+						current[0],
+						(current[1] ? 1 : -1) * probabilityShift,
+						accumulated.toSorted((one, two) => two[1] - one[1]),
+						askedQuestions,
+					)
+				),
 			initialUpdated,
 		)
 		.toSorted((one, two) => two[1] - one[1]);

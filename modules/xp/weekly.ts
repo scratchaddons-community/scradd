@@ -43,14 +43,15 @@ export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 		embeds: [
 			{
 				description: filtered.join("\n"),
-				footer: ending
-					? {
+				footer:
+					ending ?
+						{
 							icon_url: config.guild.iconURL() ?? undefined,
 							text: `${
 								weeklyWinners.length - filtered.length
 							} more users with <=${ending}`,
-					  }
-					: undefined,
+						}
+					:	undefined,
 				color: constants.themeColor,
 				thumbnail: winner ? { url: winner.displayAvatarURL() } : undefined,
 			},

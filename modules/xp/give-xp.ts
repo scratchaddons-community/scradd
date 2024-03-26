@@ -43,30 +43,30 @@ export async function giveXpForMessage(message: Message): Promise<void> {
 	await giveXp(
 		message.interaction?.user ?? message.author,
 		message.url,
-		spam === -1 && !newChannel
-			? 1
-			: Math.max(
-					1,
-					Math.round(
-						(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
-							bot /
-							(1 +
-								Number(
-									![
-										MessageType.Default,
-										MessageType.GuildBoost,
-										MessageType.GuildBoostTier1,
-										MessageType.GuildBoostTier2,
-										MessageType.GuildBoostTier3,
-										MessageType.Reply,
-										MessageType.ChatInputCommand,
-										MessageType.ContextMenuCommand,
-										MessageType.RoleSubscriptionPurchase,
-										MessageType.GuildApplicationPremiumSubscription,
-									].includes(message.type),
-								)),
-					),
-			  ),
+		spam === -1 && !newChannel ?
+			1
+		:	Math.max(
+				1,
+				Math.round(
+					(DEFAULT_XP - (newChannel ? lastInChannel.length - 1 : spam)) /
+						bot /
+						(1 +
+							Number(
+								![
+									MessageType.Default,
+									MessageType.GuildBoost,
+									MessageType.GuildBoostTier1,
+									MessageType.GuildBoostTier2,
+									MessageType.GuildBoostTier3,
+									MessageType.Reply,
+									MessageType.ChatInputCommand,
+									MessageType.ContextMenuCommand,
+									MessageType.RoleSubscriptionPurchase,
+									MessageType.GuildApplicationPremiumSubscription,
+								].includes(message.type),
+							)),
+				),
+			),
 	);
 }
 
@@ -96,9 +96,9 @@ export default async function giveXp(
 	xpDatabase.data = xp;
 
 	const member =
-		user instanceof GuildMember
-			? user
-			: await config.guild.members.fetch(user).catch(() => void 0);
+		user instanceof GuildMember ? user : (
+			await config.guild.members.fetch(user).catch(() => void 0)
+		);
 	if (member) {
 		const oldLevel = getLevelForXp(oldXp);
 		const newLevel = getLevelForXp(newXp);
@@ -133,8 +133,9 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 	await config.channels.bots?.send({
 		allowedMentions: (await getSettings(member)).levelUpPings ? undefined : { users: [] },
 		content: `🎉 ${member.toString()}`,
-		components: showButton
-			? [
+		components:
+			showButton ?
+				[
 					{
 						components: [
 							{
@@ -146,8 +147,8 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 						],
 						type: ComponentType.ActionRow,
 					},
-			  ]
-			: [],
+				]
+			:	[],
 
 		embeds: [
 			{

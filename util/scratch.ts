@@ -54,30 +54,30 @@ export async function fetchUser(username: string) {
 		| { error: "UserNotFoundError" | "UserNotValidError" }
 	>(`${constants.domains.scratchdb}/user/info/${username}/`);
 	const scratchUser =
-		!user || "error" in user || !user.id
-			? await gracefulFetch<
-					| {
+		!user || "error" in user || !user.id ?
+			await gracefulFetch<
+				| {
+						id: number;
+						username: string;
+						scratchteam: boolean;
+						history: { joined: string; login?: string };
+						profile: {
 							id: number;
-							username: string;
-							scratchteam: boolean;
-							history: { joined: string; login?: string };
-							profile: {
-								id: number;
-								avatar?: string;
-								images: {
-									"90x90": string;
-									"60x60": string;
-									"55x55": string;
-									"50x50": string;
-									"32x32": string;
-								};
-								status: string;
-								bio: string;
-								country: string;
+							avatar?: string;
+							images: {
+								"90x90": string;
+								"60x60": string;
+								"55x55": string;
+								"50x50": string;
+								"32x32": string;
 							};
-					  }
-					| { code: string; message: string }
-			  >(`${constants.domains.scratchApi}/users/${username}/`)
-			: user;
+							status: string;
+							bio: string;
+							country: string;
+						};
+				  }
+				| { code: string; message: string }
+			>(`${constants.domains.scratchApi}/users/${username}/`)
+		:	user;
 	return !scratchUser || "code" in scratchUser || !scratchUser.id ? undefined : scratchUser;
 }

@@ -130,11 +130,11 @@ export async function guildScheduledEventUpdate(
 				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
 				}) rescheduled${
-					start ?? end
-						? ` to ${time(start ?? end ?? new Date())}${
-								end && start ? `-${time(end)}` : ""
-						  }`
-						: ""
+					start ?? end ?
+						` to ${time(start ?? end ?? new Date())}${
+							end && start ? `-${time(end)}` : ""
+						}`
+					:	""
 				}${extraAuditLogsInfo(entry)}`,
 				LogSeverity.ServerChange,
 			);

@@ -3,9 +3,9 @@ import addons from "@sa-community/addons-data" assert { type: "json" };
 const domains = {
 	npm: "https://npm.im",
 	scradd:
-		process.env.NODE_ENV === "production" || !process.env.PORT
-			? "https://sa-discord.up.railway.app"
-			: (`http://localhost:${process.env.PORT}` as const),
+		process.env.NODE_ENV === "production" || !process.env.PORT ?
+			"https://sa-discord.up.railway.app"
+		:	(`http://localhost:${process.env.PORT}` as const),
 	scratch: "https://scratch.mit.edu",
 	scratchAddons: "https://scratchaddons.com",
 	scratchApi: "https://api.scratch.mit.edu",
@@ -15,7 +15,7 @@ const domains = {
 export default {
 	addonSearchOptions: {
 		keys: [
-			({ addonId }: typeof addons[number]) => addonId.replaceAll("-", " "),
+			({ addonId }: (typeof addons)[number]) => addonId.replaceAll("-", " "),
 			"addonId",
 			"manifest.name",
 			"manifest.description",

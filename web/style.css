@@ -140,5 +140,7 @@ label {
 	user-select: none;
 	width: 2em;
 	z-index: 10;
-	transition: 16ms opacity, 16ms transform;
+	transition:
+		16ms opacity,
+		16ms transform;
 }

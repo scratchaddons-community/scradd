@@ -96,33 +96,33 @@ export default async function contactMods(
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
-		options instanceof GuildMember
-			? options
-			: interaction.member ?? (await config.guild.members.fetch(interaction.user.id));
+		options instanceof GuildMember ? options : (
+			interaction.member ?? (await config.guild.members.fetch(interaction.user.id))
+		);
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 
 	if (!config.channels.tickets) throw new ReferenceError("Could not find tickets channel!");
 
 	const fields =
-		interaction.type === InteractionType.ModalSubmit
-			? Object.entries(
-					{
-						appeal: { "🔨 Strike ID": "strike" },
-						report: { "👤 Reported User": "user" },
-						role: { "🗄️ Role(s)": "role", "👥 Account(s)": "account" },
-						bug: {},
-						update: {},
-						rules: { "📜 Rule": "rule" },
-						server: {},
-						other: {},
-						[MOD_CATEGORY]: {},
-					}[category],
-			  ).map<APIEmbedField>(([name, key]) => ({
-					name,
-					value: interaction.fields.getTextInputValue(key),
-					inline: true,
-			  }))
-			: [];
+		interaction.type === InteractionType.ModalSubmit ?
+			Object.entries(
+				{
+					appeal: { "🔨 Strike ID": "strike" },
+					report: { "👤 Reported User": "user" },
+					role: { "🗄️ Role(s)": "role", "👥 Account(s)": "account" },
+					bug: {},
+					update: {},
+					rules: { "📜 Rule": "rule" },
+					server: {},
+					other: {},
+					[MOD_CATEGORY]: {},
+				}[category],
+			).map<APIEmbedField>(([name, key]) => ({
+				name,
+				value: interaction.fields.getTextInputValue(key),
+				inline: true,
+			}))
+		:	[];
 	const body =
 		category !== "role" &&
 		interaction.type === InteractionType.ModalSubmit &&
@@ -133,11 +133,11 @@ export default async function contactMods(
 		color: member.displayColor,
 
 		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
-		...(body
-			? fields.length
-				? { fields: [...fields, { name: constants.zws, value: body }] }
-				: { description: body }
-			: { fields }),
+		...(body ?
+			fields.length ?
+				{ fields: [...fields, { name: constants.zws, value: body }] }
+			:	{ description: body }
+		:	{ fields }),
 	};
 
 	const oldThread = TICKETS_BY_MEMBER[member.id];
@@ -164,23 +164,23 @@ export default async function contactMods(
 	);
 
 	const ping =
-		category === MOD_CATEGORY || process.env.NODE_ENV !== "production"
-			? ""
-			: config.roles.mod?.toString();
-	await (["appeal", "report", "other", MOD_CATEGORY].includes(category)
-		? listStrikes(
-				member,
-				(data) =>
-					thread.send({
-						...data,
-						flags: undefined,
-						embeds: [details, ...(data.embeds ?? [])],
-						content: ping,
-						allowedMentions: { parse: ["roles"] },
-					}),
-				{ removed: true },
-		  )
-		: thread.send({ embeds: [details], content: ping, allowedMentions: { parse: ["roles"] } }));
+		category === MOD_CATEGORY || process.env.NODE_ENV !== "production" ?
+			""
+		:	config.roles.mod?.toString();
+	await (["appeal", "report", "other", MOD_CATEGORY].includes(category) ?
+		listStrikes(
+			member,
+			(data) =>
+				thread.send({
+					...data,
+					flags: undefined,
+					embeds: [details, ...(data.embeds ?? [])],
+					content: ping,
+					allowedMentions: { parse: ["roles"] },
+				}),
+			{ removed: true },
+		)
+	:	thread.send({ embeds: [details], content: ping, allowedMentions: { parse: ["roles"] } }));
 
 	await thread.members.add(member, "Thread created");
 	return thread;

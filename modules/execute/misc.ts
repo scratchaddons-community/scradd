@@ -131,9 +131,9 @@ export async function parseArgument(
 			case ApplicationCommandOptionType.Number: {
 				const parsed =
 					Number[
-						schema.type === ApplicationCommandOptionType.Integer
-							? "parseInt"
-							: "parseFloat"
+						schema.type === ApplicationCommandOptionType.Integer ?
+							"parseInt"
+						:	"parseFloat"
 					](argument);
 
 				if (
@@ -188,11 +188,11 @@ export async function parseArgument(
 		}
 	}
 
-	return UNSUPPORTED_OPTIONS.includes(schema.type)
-		? { error: true }
-		: required
-		? { error: false }
-		: undefined;
+	return (
+		UNSUPPORTED_OPTIONS.includes(schema.type) ? { error: true }
+		: required ? { error: false }
+		: undefined
+	);
 }
 
 export function partitionArguments(
@@ -207,8 +207,8 @@ export function partitionArguments(
 	);
 	const stringEnd = words.length - schema.length + stringIndex + 1;
 
-	return stringIndex > -1
-		? [
+	return stringIndex > -1 ?
+			[
 				...words.slice(0, stringIndex),
 				words
 					.slice(stringIndex, stringEnd)
@@ -219,6 +219,6 @@ export function partitionArguments(
 						"",
 					),
 				...words.slice(stringEnd),
-		  ]
-		: words;
+			]
+		:	words;
 }

@@ -12,15 +12,15 @@ import config, { getInitialChannelThreads } from "../../common/config.js";
 export const TICKETS_BY_MEMBER = Object.fromEntries<
 	PrivateThreadChannel | ThreadChannel | undefined
 >(
-	config.channels.tickets
-		? getInitialChannelThreads(config.channels.tickets)
-				.map(
-					(thread) =>
-						thread.type === ChannelType.PrivateThread &&
-						([getIdFromName(thread.name) ?? "", thread] as const),
-				)
-				.filter(Boolean)
-		: [],
+	config.channels.tickets ?
+		getInitialChannelThreads(config.channels.tickets)
+			.map(
+				(thread) =>
+					thread.type === ChannelType.PrivateThread &&
+					([getIdFromName(thread.name) ?? "", thread] as const),
+			)
+			.filter(Boolean)
+	:	[],
 );
 
 export const TICKET_CATEGORIES = [
@@ -32,7 +32,7 @@ export const TICKET_CATEGORIES = [
 	"server",
 	"other",
 ] as const;
-export type Category = typeof TICKET_CATEGORIES[number];
+export type Category = (typeof TICKET_CATEGORIES)[number];
 export const SA_CATEGORY = "sa";
 export const SERVER_CATEGORY = "update";
 export const MOD_CATEGORY = "mod";

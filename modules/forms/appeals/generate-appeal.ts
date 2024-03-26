@@ -29,11 +29,9 @@ export default function generateAppeal(
 			data.appeal ?? {},
 			{
 				title:
-					users.accepters.size === NEEDED_ACCEPT
-						? "Accepted"
-						: users.rejecters.size === NEEDED_REJECT
-						? "Rejected"
-						: "Pending",
+					users.accepters.size === NEEDED_ACCEPT ? "Accepted"
+					: users.rejecters.size === NEEDED_REJECT ? "Rejected"
+					: "Pending",
 				fields: [
 					{
 						name: "Accepters",

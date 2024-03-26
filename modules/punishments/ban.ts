@@ -95,12 +95,12 @@ export default async function ban(
 				content: `${
 					constants.emojis.statuses.no
 				} ${userToBan.toString()} is already banned!${
-					unbanTimer
-						? ` Explicitly set \`unban-in: never\` to prevent them from being unbanned ${time(
-								Math.round(unbanTimer.date / 1000),
-								TimestampStyles.RelativeTime,
-						  )}.`
-						: ""
+					unbanTimer ?
+						` Explicitly set \`unban-in: never\` to prevent them from being unbanned ${time(
+							Math.round(unbanTimer.date / 1000),
+							TimestampStyles.RelativeTime,
+						)}.`
+					:	""
 				}`,
 			});
 		}
@@ -197,17 +197,16 @@ async function confirmBan(
 					title: `You were banned from ${escapeMessage(config.guild.name)}!`,
 					description:
 						(options.reason || "") +
-						(options.unbanTime
-							? `\n> You will be [automatically unbanned](${pkg.homepage}) ${time(
-									options.unbanTime,
-									TimestampStyles.RelativeTime,
-							  )}`
-							: ""),
+						(options.unbanTime ?
+							`\n> You will be [automatically unbanned](${pkg.homepage}) ${time(
+								options.unbanTime,
+								TimestampStyles.RelativeTime,
+							)}`
+						:	""),
 					color:
 						options.user instanceof GuildMember ? options.user.displayColor : undefined,
-					thumbnail: config.guild.icon
-						? { url: config.guild.iconURL() || "" }
-						: undefined,
+					thumbnail:
+						config.guild.icon ? { url: config.guild.iconURL() || "" } : undefined,
 				},
 			],
 			components: [
@@ -238,9 +237,9 @@ async function confirmBan(
 		`${constants.emojis.statuses.yes} Banned ${options.user.toString()}!${
 			dmed ? "" : " I was not able to DM them."
 		}${options.reason ? " " + options.reason : ""}${
-			options.unbanTime
-				? `\nI will unban them ${time(options.unbanTime, TimestampStyles.RelativeTime)}.`
-				: ""
+			options.unbanTime ?
+				`\nI will unban them ${time(options.unbanTime, TimestampStyles.RelativeTime)}.`
+			:	""
 		}`,
 	);
 	await queueReminders();

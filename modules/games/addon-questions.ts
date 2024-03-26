@@ -5,7 +5,7 @@ import { escapeMessage } from "../../util/markdown.js";
 import { trimPatchVersion } from "../../util/text.js";
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
-export type GroupName = typeof GROUP_NAMES[number];
+export type GroupName = (typeof GROUP_NAMES)[number];
 
 export type Dependencies = Record<string, boolean | undefined>;
 export type AddonQuestion = {
@@ -98,14 +98,11 @@ export default Object.fromEntries(
 			},
 		);
 
-		const category = addon.tags.includes("popup")
-			? "popup"
-			: addon.tags.includes("easterEgg")
-			? "easterEgg"
-			: addon.tags.includes("theme")
-			? "theme"
-			: addon.tags.includes("community")
-			? "community"
+		const category =
+			addon.tags.includes("popup") ? "popup"
+			: addon.tags.includes("easterEgg") ? "easterEgg"
+			: addon.tags.includes("theme") ? "theme"
+			: addon.tags.includes("community") ? "community"
 			: "editor";
 
 		switch (category) {
@@ -122,57 +119,57 @@ export default Object.fromEntries(
 						question: questionStrings.editorCategory,
 						statement: "This addon is listed under **Scratch Editor Features**!",
 					},
-					addon.tags.includes("codeEditor")
-						? {
-								dependencies: {
-									[questionStrings.editorCategory]: true,
-									[questionStrings.otherEditorCategory]: false,
-									[questionStrings.costumeEditorCategory]: false,
-									[questionStrings.playerEditorCategory]: false,
-								},
+					addon.tags.includes("codeEditor") ?
+						{
+							dependencies: {
+								[questionStrings.editorCategory]: true,
+								[questionStrings.otherEditorCategory]: false,
+								[questionStrings.costumeEditorCategory]: false,
+								[questionStrings.playerEditorCategory]: false,
+							},
 
-								question: questionStrings.codeEditorCategory,
-								statement:
-									"This addon is listed under **Scratch Editor Features** → **Code Editor**!",
-						  }
-						: addon.tags.includes("costumeEditor")
-						? {
-								dependencies: {
-									[questionStrings.editorCategory]: true,
-									[questionStrings.codeEditorCategory]: false,
-									[questionStrings.otherEditorCategory]: false,
-									[questionStrings.playerEditorCategory]: false,
-								},
+							question: questionStrings.codeEditorCategory,
+							statement:
+								"This addon is listed under **Scratch Editor Features** → **Code Editor**!",
+						}
+					: addon.tags.includes("costumeEditor") ?
+						{
+							dependencies: {
+								[questionStrings.editorCategory]: true,
+								[questionStrings.codeEditorCategory]: false,
+								[questionStrings.otherEditorCategory]: false,
+								[questionStrings.playerEditorCategory]: false,
+							},
 
-								question: questionStrings.costumeEditorCategory,
-								statement:
-									"This addon is listed under **Scratch Editor Features** → **Costume Editor**!",
-						  }
-						: addon.tags.includes("projectPlayer")
-						? {
-								dependencies: {
-									[questionStrings.editorCategory]: true,
-									[questionStrings.codeEditorCategory]: false,
-									[questionStrings.costumeEditorCategory]: false,
-									[questionStrings.otherEditorCategory]: false,
-								},
+							question: questionStrings.costumeEditorCategory,
+							statement:
+								"This addon is listed under **Scratch Editor Features** → **Costume Editor**!",
+						}
+					: addon.tags.includes("projectPlayer") ?
+						{
+							dependencies: {
+								[questionStrings.editorCategory]: true,
+								[questionStrings.codeEditorCategory]: false,
+								[questionStrings.costumeEditorCategory]: false,
+								[questionStrings.otherEditorCategory]: false,
+							},
 
-								question: questionStrings.playerEditorCategory,
-								statement:
-									"This addon is listed under **Scratch Editor Features** → **Project Player**!",
-						  }
-						: {
-								dependencies: {
-									[questionStrings.editorCategory]: true,
-									[questionStrings.codeEditorCategory]: false,
-									[questionStrings.costumeEditorCategory]: false,
-									[questionStrings.playerEditorCategory]: false,
-								},
+							question: questionStrings.playerEditorCategory,
+							statement:
+								"This addon is listed under **Scratch Editor Features** → **Project Player**!",
+						}
+					:	{
+							dependencies: {
+								[questionStrings.editorCategory]: true,
+								[questionStrings.codeEditorCategory]: false,
+								[questionStrings.costumeEditorCategory]: false,
+								[questionStrings.playerEditorCategory]: false,
+							},
 
-								question: questionStrings.otherEditorCategory,
-								statement:
-									"This addon is listed under **Scratch Editor Features** → **Others**!",
-						  },
+							question: questionStrings.otherEditorCategory,
+							statement:
+								"This addon is listed under **Scratch Editor Features** → **Others**!",
+						},
 				);
 
 				break;
@@ -189,57 +186,57 @@ export default Object.fromEntries(
 						question: questionStrings.websiteCategory,
 						statement: "This addon is listed under **Scratch Website Features**!",
 					},
-					addon.tags.includes("profiles")
-						? {
-								dependencies: {
-									[questionStrings.websiteCategory]: true,
-									[questionStrings.otherWebsiteCategory]: false,
-									[questionStrings.projectPagesCategory]: false,
-									[questionStrings.forumsCategory]: false,
-								},
+					addon.tags.includes("profiles") ?
+						{
+							dependencies: {
+								[questionStrings.websiteCategory]: true,
+								[questionStrings.otherWebsiteCategory]: false,
+								[questionStrings.projectPagesCategory]: false,
+								[questionStrings.forumsCategory]: false,
+							},
 
-								question: questionStrings.profilesCategory,
-								statement:
-									"This addon is listed under **Scratch Website Features** → **Profiles**!",
-						  }
-						: addon.tags.includes("projectPage")
-						? {
-								dependencies: {
-									[questionStrings.websiteCategory]: true,
-									[questionStrings.profilesCategory]: false,
-									[questionStrings.otherWebsiteCategory]: false,
-									[questionStrings.forumsCategory]: false,
-								},
+							question: questionStrings.profilesCategory,
+							statement:
+								"This addon is listed under **Scratch Website Features** → **Profiles**!",
+						}
+					: addon.tags.includes("projectPage") ?
+						{
+							dependencies: {
+								[questionStrings.websiteCategory]: true,
+								[questionStrings.profilesCategory]: false,
+								[questionStrings.otherWebsiteCategory]: false,
+								[questionStrings.forumsCategory]: false,
+							},
 
-								question: questionStrings.projectPagesCategory,
-								statement:
-									"This addon is listed under **Scratch Website Features** → **Project Pages**!",
-						  }
-						: addon.tags.includes("forums")
-						? {
-								dependencies: {
-									[questionStrings.websiteCategory]: true,
-									[questionStrings.profilesCategory]: false,
-									[questionStrings.projectPagesCategory]: false,
-									[questionStrings.otherWebsiteCategory]: false,
-								},
+							question: questionStrings.projectPagesCategory,
+							statement:
+								"This addon is listed under **Scratch Website Features** → **Project Pages**!",
+						}
+					: addon.tags.includes("forums") ?
+						{
+							dependencies: {
+								[questionStrings.websiteCategory]: true,
+								[questionStrings.profilesCategory]: false,
+								[questionStrings.projectPagesCategory]: false,
+								[questionStrings.otherWebsiteCategory]: false,
+							},
 
-								question: questionStrings.forumsCategory,
-								statement:
-									"This addon is listed under **Scratch Website Features** → **Forums**!",
-						  }
-						: {
-								dependencies: {
-									[questionStrings.websiteCategory]: true,
-									[questionStrings.profilesCategory]: false,
-									[questionStrings.projectPagesCategory]: false,
-									[questionStrings.forumsCategory]: false,
-								},
+							question: questionStrings.forumsCategory,
+							statement:
+								"This addon is listed under **Scratch Website Features** → **Forums**!",
+						}
+					:	{
+							dependencies: {
+								[questionStrings.websiteCategory]: true,
+								[questionStrings.profilesCategory]: false,
+								[questionStrings.projectPagesCategory]: false,
+								[questionStrings.forumsCategory]: false,
+							},
 
-								question: questionStrings.otherWebsiteCategory,
-								statement:
-									"This addon is listed under **Scratch Website Features** → **Others**!",
-						  },
+							question: questionStrings.otherWebsiteCategory,
+							statement:
+								"This addon is listed under **Scratch Website Features** → **Others**!",
+						},
 				);
 
 				break;
@@ -314,63 +311,63 @@ export default Object.fromEntries(
 		}
 
 		result.push(
-			addon.tags.includes("recommended")
-				? {
-						dependencies: {
-							[questionStrings.featuredGroup]: false,
-							[questionStrings.betaGroup]: false,
-							[questionStrings.otherGroup]: false,
-						},
+			addon.tags.includes("recommended") ?
+				{
+					dependencies: {
+						[questionStrings.featuredGroup]: false,
+						[questionStrings.betaGroup]: false,
+						[questionStrings.otherGroup]: false,
+					},
 
-						question: questionStrings.recommendedTag,
-						statement: "This addon has the **Recommended** tag!",
-				  }
-				: addon.tags.includes("featured")
-				? {
-						dependencies: {
-							[questionStrings.betaGroup]: false,
-							[questionStrings.forumsGroup]: false,
-							[questionStrings.otherGroup]: false,
-							[questionStrings.recommendedTag]: false,
-						},
+					question: questionStrings.recommendedTag,
+					statement: "This addon has the **Recommended** tag!",
+				}
+			: addon.tags.includes("featured") ?
+				{
+					dependencies: {
+						[questionStrings.betaGroup]: false,
+						[questionStrings.forumsGroup]: false,
+						[questionStrings.otherGroup]: false,
+						[questionStrings.recommendedTag]: false,
+					},
 
-						question: questionStrings.featuredGroup,
-						statement: "This addon is found under **Featured** when disabled!",
-				  }
-				: addon.tags.includes("beta") || addon.tags.includes("danger")
-				? {
-						dependencies: {
-							[questionStrings.featuredGroup]: false,
-							[questionStrings.forumsGroup]: false,
-							[questionStrings.otherGroup]: false,
-						},
+					question: questionStrings.featuredGroup,
+					statement: "This addon is found under **Featured** when disabled!",
+				}
+			: addon.tags.includes("beta") || addon.tags.includes("danger") ?
+				{
+					dependencies: {
+						[questionStrings.featuredGroup]: false,
+						[questionStrings.forumsGroup]: false,
+						[questionStrings.otherGroup]: false,
+					},
 
-						question: questionStrings.betaGroup,
-						statement: "This addon is found under **Beta** when disabled!",
-				  }
-				: addon.tags.includes("forums")
-				? {
-						dependencies: {
-							[questionStrings.featuredGroup]: false,
-							[questionStrings.betaGroup]: false,
-							[questionStrings.forumsTag]: true,
-							[questionStrings.otherGroup]: false,
-						},
+					question: questionStrings.betaGroup,
+					statement: "This addon is found under **Beta** when disabled!",
+				}
+			: addon.tags.includes("forums") ?
+				{
+					dependencies: {
+						[questionStrings.featuredGroup]: false,
+						[questionStrings.betaGroup]: false,
+						[questionStrings.forumsTag]: true,
+						[questionStrings.otherGroup]: false,
+					},
 
-						question: questionStrings.forumsGroup,
-						statement: "This addon is found under **Forums** when disabled!",
-				  }
-				: {
-						dependencies: {
-							[questionStrings.featuredGroup]: false,
-							[questionStrings.betaGroup]: false,
-							[questionStrings.forumsGroup]: false,
-							[questionStrings.forumsTag]: false,
-						},
+					question: questionStrings.forumsGroup,
+					statement: "This addon is found under **Forums** when disabled!",
+				}
+			:	{
+					dependencies: {
+						[questionStrings.featuredGroup]: false,
+						[questionStrings.betaGroup]: false,
+						[questionStrings.forumsGroup]: false,
+						[questionStrings.forumsTag]: false,
+					},
 
-						question: questionStrings.otherGroup,
-						statement: "This addon is found under **Others** when disabled!",
-				  },
+					question: questionStrings.otherGroup,
+					statement: "This addon is found under **Others** when disabled!",
+				},
 		);
 
 		if (addon.tags.includes("forums")) {
@@ -426,9 +423,8 @@ export default Object.fromEntries(
 			}
 
 			if (addon.latestUpdate && updated) {
-				const newTag = addon.latestUpdate.newSettings?.length
-					? "New features"
-					: "New settings";
+				const newTag =
+					addon.latestUpdate.newSettings?.length ? "New features" : "New settings";
 
 				result.push(
 					{
@@ -439,9 +435,9 @@ export default Object.fromEntries(
 						dependencies: {
 							[questionStrings.updated]: true,
 							[`Does your addon have the **${
-								addon.latestUpdate.newSettings?.length
-									? "New settings"
-									: "New features"
+								addon.latestUpdate.newSettings?.length ?
+									"New settings"
+								:	"New features"
 							}** tag?`]: false,
 						},
 
@@ -464,7 +460,7 @@ export default Object.fromEntries(
 							dependencies: { [questionStrings.credits]: true },
 							question: `Did **${escapeMessage(name)}** contribute to your addon?`,
 							statement: `**${escapeMessage(name)}** contributed to this addon!`,
-						} as const),
+						}) as const,
 				),
 			);
 		}

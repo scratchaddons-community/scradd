@@ -183,18 +183,18 @@ defineChatCommand(
 
 		const isMod =
 			config.roles.staff &&
-			(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(config.roles.staff.id)
-				: interaction.member.roles.includes(config.roles.staff.id));
+			(interaction.member instanceof GuildMember ?
+				interaction.member.roles.resolve(config.roles.staff.id)
+			:	interaction.member.roles.includes(config.roles.staff.id));
 
 		await interaction.reply({
 			ephemeral: true,
 
 			content:
 				`## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
-				(isMod
-					? `That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
-					: "") +
+				(isMod ?
+					`That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
+				:	"") +
 				`*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
 					underline(escapeMessage(word)),
 				)}`,
