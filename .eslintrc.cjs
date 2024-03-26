@@ -223,15 +223,15 @@ module.exports = /** @satisfies {import("eslint").ESLint.ConfigData} @type {cons
 			"warn",
 			{
 				patterns: {
-					[/\.{3}/.source]: "…",
-					[/"/.source]: { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
-					[/'/.source]: "’",
-					[/->/.source]: "→",
-					[/\${/.source]: {
+					[/\.{3}/gu.source]: "…",
+					[/"/gu.source]: { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
+					[/'/gu.source]: "’",
+					[/->/gu.source]: "→",
+					[/\$\{/gu.source]: {
 						message: "Did you mean to use a template literal?",
 						suggest: "${",
 					},
-					[/!\?/.source]: "⁉",
+					[/!\?/gu.source]: "⁉",
 				},
 			},
 		],
