@@ -25,7 +25,6 @@ const data: CustomOperation = {
 		assert(typeof string === "string");
 
 		if (
-			config.roles.staff &&
 			!(interaction.member instanceof GuildMember ?
 				interaction.member.roles.resolve(config.roles.staff.id)
 			:	interaction.member.roles.includes(config.roles.staff.id))

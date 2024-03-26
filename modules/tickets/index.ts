@@ -276,7 +276,6 @@ defineMenuCommand(
 
 defineButton("contactUser", async (interaction, userId = "") => {
 	if (
-		!config.roles.mod ||
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.mod.id)
 		:	interaction.member?.roles.includes(config.roles.mod.id))

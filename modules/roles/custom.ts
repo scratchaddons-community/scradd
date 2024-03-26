@@ -72,7 +72,6 @@ export async function customRole(
 			},
 			...((
 				config.guild.features.includes("ROLE_ICONS") &&
-				config.roles.staff &&
 				interaction.member.roles.resolve(config.roles.staff.id)
 			) ?
 				[
@@ -182,7 +181,7 @@ export async function createCustomRole(
 		/\b(?:mod(?:erat(?:or|ion))?|admin(?:istrat(?:or|ion))?|owner|exec(?:utive)?|manager?|scradd)\b/i.test(
 			name,
 		) &&
-		!(config.roles.staff && interaction.member.roles.resolve(config.roles.staff.id))
+		!interaction.member.roles.resolve(config.roles.staff.id)
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -220,7 +219,7 @@ export async function createCustomRole(
 		color,
 		name: CUSTOM_ROLE_PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
-		position: (config.roles.staff?.position ?? 0) + 1,
+		position: config.roles.staff.position + 1,
 		...iconData,
 	});
 	await interaction.member.roles.add(role, "Custom role created");
@@ -250,9 +249,7 @@ async function recheckRole(role: Role, reason = "No longer qualifies"): Promise<
 
 	if (
 		config.guild.features.includes("ROLE_ICONS") &&
-		!role.members.some(
-			(member) => config.roles.staff && member.roles.resolve(config.roles.staff.id),
-		)
+		!role.members.some((member) => member.roles.resolve(config.roles.staff.id))
 	) {
 		await role.setUnicodeEmoji(null, reason);
 		await role.setIcon(null, reason);

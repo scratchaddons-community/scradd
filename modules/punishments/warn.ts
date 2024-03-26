@@ -133,7 +133,7 @@ export default async function warn(
 		await ((
 			member?.bannable &&
 			!member.roles.premiumSubscriberRole &&
-			(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
+			!member.roles.resolve(config.roles.staff.id) &&
 			(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 		) ?
 			member.ban({ reason: "Too many strikes" })

@@ -154,10 +154,9 @@ export async function cancelReminder(
 ): Promise<boolean> {
 	if (
 		interaction.user.id !== interaction.message.interaction?.user.id &&
-		(!config.roles.mod ||
-			!(interaction.member instanceof GuildMember ?
-				interaction.member.roles.resolve(config.roles.mod.id)
-			:	interaction.member?.roles.includes(config.roles.mod.id)))
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.mod.id)
+		:	interaction.member?.roles.includes(config.roles.mod.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,

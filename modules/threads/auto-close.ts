@@ -2,7 +2,6 @@ import {
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	GuildMember,
 	TimestampStyles,
 	time,
 	type AnyThreadChannel,
@@ -114,10 +113,8 @@ export async function cancelThreadChange(
 	type: string,
 ): Promise<InteractionResponse | undefined> {
 	if (
-		!config.roles.staff ||
-		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.staff.id)
-		:	interaction.member?.roles.includes(config.roles.staff.id))
+		interaction.inGuild() &&
+		interaction.channel?.permissionsFor(interaction.user)?.has("ManageThreads")
 	) {
 		return await interaction.reply({
 			ephemeral: true,

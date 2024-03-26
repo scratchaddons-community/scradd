@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import {
 	ChannelType,
 	Collection,
@@ -26,6 +27,7 @@ async function getConfig() {
 
 	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	const staff = roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod;
+	assert(staff);
 	const exec = roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staff;
 	return {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -74,7 +76,7 @@ async function getConfig() {
 		},
 
 		roles: {
-			mod,
+			mod: mod ?? staff,
 			exec,
 			staff,
 			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),

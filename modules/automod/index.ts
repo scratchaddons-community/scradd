@@ -140,11 +140,7 @@ defineEvent("presenceUpdate", async (_, newPresence) => {
 		" " +
 		(presence.state ?? newPresence.activities.find((activity) => activity.name)?.name ?? "");
 	const censored = tryCensor(status, 1);
-	if (
-		censored &&
-		config.roles.staff &&
-		newPresence.member?.roles.resolve(config.roles.staff.id)
-	) {
+	if (censored && newPresence.member?.roles.resolve(config.roles.staff.id)) {
 		await warn(
 			newPresence.member,
 			"As server representatives, staff members are not allowed to have bad words in their statuses. Please change yours now to avoid another strike.",
@@ -182,10 +178,9 @@ defineChatCommand(
 		const strikes = Math.trunc(result.strikes);
 
 		const isMod =
-			config.roles.staff &&
-			(interaction.member instanceof GuildMember ?
-				interaction.member.roles.resolve(config.roles.staff.id)
-			:	interaction.member.roles.includes(config.roles.staff.id));
+			interaction.member instanceof GuildMember ?
+				interaction.member.roles.resolve(config.roles.mod.id)
+			:	interaction.member.roles.includes(config.roles.mod.id);
 
 		await interaction.reply({
 			ephemeral: true,

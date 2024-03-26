@@ -22,10 +22,9 @@ async function userInfo(
 	{ member, user }: { member?: GuildMember; user: User },
 ): Promise<void> {
 	const isMod =
-		config.roles.mod &&
-		(interaction.member instanceof GuildMember ?
+		interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.mod.id)
-		:	interaction.member?.roles.includes(config.roles.mod.id));
+		:	interaction.member?.roles.includes(config.roles.mod.id);
 
 	const fields = [
 		{ name: "🏷️ ID", value: user.id, inline: true },

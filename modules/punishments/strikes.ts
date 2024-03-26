@@ -21,12 +21,9 @@ export async function getStrikes(
 ): Promise<InteractionResponse | undefined> {
 	if (
 		selected.id !== interaction.user.id &&
-		!(
-			config.roles.mod &&
-			(interaction.member instanceof GuildMember ?
-				interaction.member.roles.resolve(config.roles.mod.id)
-			:	interaction.member?.roles.includes(config.roles.mod.id))
-		)
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.mod.id)
+		:	interaction.member?.roles.includes(config.roles.mod.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,
@@ -59,7 +56,7 @@ export async function getStrikeById(
 	if (!strike)
 		return await interaction.editReply(`${constants.emojis.statuses.no} Invalid strike ID!`);
 
-	const isModerator = config.roles.mod && interaction.member.roles.resolve(config.roles.mod.id);
+	const isModerator = interaction.member.roles.resolve(config.roles.mod.id);
 	if (strike.user !== interaction.member.id && !isModerator) {
 		return await interaction.editReply(
 			`${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,

@@ -223,7 +223,6 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 
 export async function viewQuestion(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (
-		!config.roles.exec ||
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.exec.id)
 		:	interaction.member?.roles.includes(config.roles.exec.id))
@@ -272,7 +271,6 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 
 export async function removeQuestion(interaction: ButtonInteraction, id = ""): Promise<void> {
 	if (
-		!config.roles.exec ||
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.exec.id)
 		:	interaction.member?.roles.includes(config.roles.exec.id))
