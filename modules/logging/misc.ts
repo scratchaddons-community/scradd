@@ -210,8 +210,9 @@ export enum LoggingEmojis {
 	Thread = "📂",
 	ServerUpdate = "✨",
 	Voice = "🔊",
-	Expressions = "😳",
+	Expression = "😳",
 	User = "👤",
+	// eslint-disable-next-line @typescript-eslint/no-shadow
 	Event = "🗓",
 	Invite = "👋",
 	MessageUpdate = "🌐",

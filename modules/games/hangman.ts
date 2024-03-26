@@ -72,7 +72,7 @@ export default async function hangman(
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
 
-	const guesses: (Lowercase<string> | (typeof CHARACTERS)[number])[] = [];
+	const guesses: ((typeof CHARACTERS)[number] | Lowercase<string>)[] = [];
 	const message = await interaction.reply({ embeds: [{ title: "Hangman" }], fetchReply: true });
 	await tick();
 

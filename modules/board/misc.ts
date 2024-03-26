@@ -113,7 +113,7 @@ function baseReactionCount(id: Snowflake): number | undefined {
  * @returns The representation of the message.
  */
 export async function generateBoardMessage(
-	info: Message | (typeof boardDatabase.data)[number],
+	info: (typeof boardDatabase.data)[number] | Message,
 	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
 ): Promise<BaseMessageOptions | undefined> {
 	const count =

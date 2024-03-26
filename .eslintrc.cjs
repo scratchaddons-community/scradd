@@ -124,7 +124,7 @@ module.exports =
 			],
 			"@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 			"@typescript-eslint/no-shadow": [
-				"warn",
+				"error",
 				{ builtinGlobals: true, ignoreOnInitialization: true },
 			],
 			"@typescript-eslint/no-unsafe-member-access": "off",

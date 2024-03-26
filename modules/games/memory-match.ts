@@ -308,7 +308,7 @@ async function playGame(
 		return { user, ping, timeout };
 	}
 
-	function getBoard(shown = new Set<string>()): {
+	function getBoard(toShow = new Set<string>()): {
 		content: string;
 		components: ActionRowData<InteractionButtonComponentData>[];
 	} {
@@ -328,7 +328,7 @@ async function playGame(
 				type: ComponentType.ActionRow as const,
 				components: chunk.map((emoji, index) => {
 					const id = rowIndex.toString() + index.toString();
-					const discovered = [...shown, ...scores.flat()].includes(id);
+					const discovered = [...toShow, ...scores.flat()].includes(id);
 
 					return {
 						type: ComponentType.Button,

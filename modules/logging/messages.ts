@@ -124,7 +124,7 @@ export async function messageReactionRemoveAll(
 
 	await log(
 		`${
-			LoggingEmojis.Expressions
+			LoggingEmojis.Expression
 		} Reactions purged on message by ${message.author.toString()} in ${message.channel.toString()} (ID: ${
 			message.id
 		})`,
