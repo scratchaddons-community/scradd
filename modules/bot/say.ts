@@ -68,16 +68,16 @@ export async function say(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
 
-	const message = await (oldMessage
-		? oldMessage.reply({
-				content,
-				flags: silent ? MessageFlags.SuppressNotifications : undefined,
-				allowedMentions: { repliedUser: !noPing },
-		  })
-		: interaction.channel?.send({
-				content,
-				flags: silent ? MessageFlags.SuppressNotifications : undefined,
-		  }));
+	const message = await (oldMessage ?
+		oldMessage.reply({
+			content,
+			flags: silent ? MessageFlags.SuppressNotifications : undefined,
+			allowedMentions: { repliedUser: !noPing },
+		})
+	:	interaction.channel?.send({
+			content,
+			flags: silent ? MessageFlags.SuppressNotifications : undefined,
+		}));
 
 	if (message) {
 		await log(

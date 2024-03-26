@@ -18,7 +18,7 @@ export const suggestionAnswers = [
 ] as const;
 
 export const suggestionsDatabase = new Database<{
-	answer: typeof suggestionAnswers[number];
+	answer: (typeof suggestionAnswers)[number];
 	category: string;
 	author: Snowflake;
 	count: number;
@@ -27,8 +27,9 @@ export const suggestionsDatabase = new Database<{
 }>("suggestions");
 await suggestionsDatabase.init();
 
-export const oldSuggestions = config.channels.oldSuggestions
-	? (await getAllMessages(config.channels.oldSuggestions)).map((message) => {
+export const oldSuggestions =
+	config.channels.oldSuggestions ?
+		(await getAllMessages(config.channels.oldSuggestions)).map((message) => {
 			const [embed] = message.embeds;
 
 			const segments = message.thread?.name.toLowerCase().split(" | ");
@@ -39,10 +40,10 @@ export const oldSuggestions = config.channels.oldSuggestions
 					suggestionAnswers[0],
 
 				author:
-					(message.author.id === constants.users.robotop
-						? message.embeds[0]?.footer?.text.split(": ")[1]
-						: /\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")
-								?.groups?.userId) ?? message.author,
+					(message.author.id === constants.users.robotop ?
+						message.embeds[0]?.footer?.text.split(": ")[1]
+					:	/\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups
+							?.userId) ?? message.author,
 
 				count:
 					(message.reactions.valueOf().first()?.count ?? 0) -
@@ -58,23 +59,14 @@ export const oldSuggestions = config.channels.oldSuggestions
 				old: true,
 				...(message.thread ? { id: message.thread.id } : { url: message.url }),
 			} as const;
-	  })
-	: [];
+		})
+	:	[];
 
-export function getSuggestionData(thread: AnyThreadChannel):
-	| {
-			answer: string;
-			category: string;
-			id: Snowflake;
-			title: string;
-	  }
-	| {
-			author: Snowflake;
-			answer: string;
-			category: string;
-			id: Snowflake;
-			title: string;
-	  } {
+export function getSuggestionData(
+	thread: AnyThreadChannel,
+):
+	| { answer: string; category: string; id: Snowflake; title: string }
+	| { author: Snowflake; answer: string; category: string; id: Snowflake; title: string } {
 	const { answer, category } = parseSuggestionTags(
 		thread.appliedTags,
 		config.channels.suggestions?.availableTags ?? [],
@@ -106,11 +98,11 @@ export function parseSuggestionTags(
 		categories: string[];
 	}>(
 		({ answer, categories }, tag) =>
-			tag.name !== "Other" && appliedTags.includes(tag.id)
-				? suggestionAnswers.includes(tag.name)
-					? { answer: tag, categories }
-					: { answer, categories: [...categories, tag.name] }
-				: { answer, categories },
+			tag.name !== "Other" && appliedTags.includes(tag.id) ?
+				suggestionAnswers.includes(tag.name) ?
+					{ answer: tag, categories }
+				:	{ answer, categories: [...categories, tag.name] }
+			:	{ answer, categories },
 		{
 			answer: { name: defaultAnswer, emoji: { name: "❓", id: null }, moderated: true },
 			categories: [],

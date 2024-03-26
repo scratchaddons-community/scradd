@@ -28,19 +28,17 @@ export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>):
 		}${entry.target.channel ? ` for ${entry.target.channel.toString()}` : ""} created${
 			entry.executor ? ` by ${entry.executor.toString()}` : ""
 		}${
-			entry.target.expiresAt || entry.target.maxUses
-				? `, expiring ${
-						entry.target.expiresAt
-							? time(entry.target.expiresAt, TimestampStyles.LongDate)
-							: ""
-				  }${entry.target.expiresAt && entry.target.maxUses ? " or " : ""}${
-						entry.target.maxUses
-							? `after ${entry.target.maxUses} use${
-									entry.target.maxUses === 1 ? "" : "s"
-							  }`
-							: ""
-				  }`
-				: ""
+			entry.target.expiresAt || entry.target.maxUses ?
+				`, expiring ${
+					entry.target.expiresAt ?
+						time(entry.target.expiresAt, TimestampStyles.LongDate)
+					:	""
+				}${entry.target.expiresAt && entry.target.maxUses ? " or " : ""}${
+					entry.target.maxUses ?
+						`after ${entry.target.maxUses} use${entry.target.maxUses === 1 ? "" : "s"}`
+					:	""
+				}`
+			:	""
 		}${entry.reason ? ` (${entry.reason})` : ""}`,
 		LogSeverity.Resource,
 	);
@@ -132,9 +130,9 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 		if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id) {
 			await log(
 				`${LoggingEmojis.SettingChange} Community updates channel ${
-					newGuild.publicUpdatesChannel
-						? `set to ${newGuild.publicUpdatesChannel.toString()}`
-						: "unset"
+					newGuild.publicUpdatesChannel ?
+						`set to ${newGuild.publicUpdatesChannel.toString()}`
+					:	"unset"
 				}`,
 				LogSeverity.ServerChange,
 			);
@@ -253,9 +251,9 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 	if (oldGuild.maximumMembers !== newGuild.maximumMembers) {
 		await log(
 			`${LoggingEmojis.ServerUpdate} Maximum members ${
-				typeof newGuild.maximumMembers === "number"
-					? `set to ${newGuild.maximumMembers}`
-					: "reset"
+				typeof newGuild.maximumMembers === "number" ?
+					`set to ${newGuild.maximumMembers}`
+				:	"reset"
 			}`,
 			LogSeverity.ServerChange,
 		);
@@ -263,9 +261,9 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
 		await log(
 			`${LoggingEmojis.ServerUpdate} Maximum members in a video channel ${
-				typeof newGuild.maxVideoChannelUsers === "number"
-					? `set to ${newGuild.maxVideoChannelUsers}`
-					: "reset"
+				typeof newGuild.maxVideoChannelUsers === "number" ?
+					`set to ${newGuild.maxVideoChannelUsers}`
+				:	"reset"
 			}`,
 			LogSeverity.ServerChange,
 		);
@@ -362,9 +360,9 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 	if (oldGuild.safetyAlertsChannel?.id !== newGuild.safetyAlertsChannel?.id) {
 		await log(
 			`${LoggingEmojis.SettingChange} Safety notifications channel ${
-				newGuild.safetyAlertsChannel
-					? `set to ${newGuild.safetyAlertsChannel.toString()}`
-					: "unset"
+				newGuild.safetyAlertsChannel ?
+					`set to ${newGuild.safetyAlertsChannel.toString()}`
+				:	"unset"
 			}`,
 			LogSeverity.ServerChange,
 		);

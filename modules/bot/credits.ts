@@ -28,9 +28,9 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 
 			if (version.startsWith("git+")) {
 				const segments = version.split("+")[1]?.split("#");
-				return segments
-					? ([`${name}${segments[1] ? `@${segments[1]}` : ""}`, segments[0]] as const)
-					: ([name] as const);
+				return segments ?
+						([`${name}${segments[1] ? `@${segments[1]}` : ""}`, segments[0]] as const)
+					:	([name] as const);
 			}
 			if (version.startsWith("npm:")) {
 				const segments = version.split("@");

@@ -17,7 +17,6 @@ export const CURRENTLY_PLAYING = new Collection<Snowflake, { url: string; end?()
  * Reply to the interaction if the interaction user is already playing a game.
  *
  * @param interaction - The interaction to analyze.
- *
  * @returns Whether or not the user is already playing.
  */
 export async function checkIfUserPlaying(
@@ -39,16 +38,16 @@ export async function checkIfUserPlaying(
 						type: ComponentType.Button,
 						url: current.url,
 					},
-					...(current.end
-						? [
-								{
-									label: "End",
-									style: ButtonStyle.Danger,
-									type: ComponentType.Button,
-									customId: `${interaction.user.id}_endGame`,
-								} as const,
-						  ]
-						: []),
+					...(current.end ?
+						[
+							{
+								label: "End",
+								style: ButtonStyle.Danger,
+								type: ComponentType.Button,
+								customId: `${interaction.user.id}_endGame`,
+							} as const,
+						]
+					:	[]),
 				],
 			},
 		],

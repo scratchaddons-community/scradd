@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "rm -rf dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
-		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown",
+		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache",
 		"lint": "eslint .",
 		"serve": "nodemon --env-file=.env --enable-source-maps . --ext js,json,html,css,png",
 		"start": "node --env-file=.env --enable-source-maps .",
@@ -40,7 +40,7 @@
 		"strife.js": "4.0.1"
 	},
 	"devDependencies": {
-		"@redguy12/prettier-config": "2.0.2",
+		"@redguy12/prettier-config": "3.0.1",
 		"@types/difflib": "<=0.2",
 		"@types/eslint": "<=8.57",
 		"@types/mustache": "<=4.2",
@@ -67,6 +67,7 @@
 		"@discordjs/formatters": "dev",
 		"@discordjs/rest": "dev",
 		"@discordjs/util": "dev",
-		"@discordjs/ws": "dev"
+		"@discordjs/ws": "dev",
+		"@sapphire/snowflake": "next"
 	}
 }

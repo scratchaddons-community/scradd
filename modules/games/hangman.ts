@@ -72,7 +72,7 @@ export default async function hangman(
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
 
-	const guesses: (Lowercase<string> | typeof CHARACTERS[number])[] = [];
+	const guesses: (Lowercase<string> | (typeof CHARACTERS)[number])[] = [];
 	const message = await interaction.reply({ embeds: [{ title: "Hangman" }], fetchReply: true });
 	await tick();
 
@@ -228,45 +228,45 @@ export default async function hangman(
 					author: { name: "Hangman" },
 					title: "Use the select menus below to guess a prominent server member’s username",
 					description: `**(not display name!)**\n\n${
-						wrongs.length
-							? `Incorrect guesses: ${joinWithAnd(wrongs, inlineCode)}\n`
-							: ""
+						wrongs.length ?
+							`Incorrect guesses: ${joinWithAnd(wrongs, inlineCode)}\n`
+						:	""
 					}## \`${word.toLowerCase()}\``,
 					footer: { text: `${wrongCount}/${MAX_WRONGS} incorrect answers` },
 					image: { url: "attachment://hangman.png" },
 				},
 			],
 			components: [
-				...(consonants?.length
-					? [
-							{
-								type: ComponentType.ActionRow,
-								components: [
-									{
-										type: ComponentType.StringSelect,
-										customId: "consonants",
-										placeholder: "Consonants",
-										options: consonants,
-									} as const,
-								],
-							},
-					  ]
-					: []),
-				...(vowels?.length
-					? [
-							{
-								type: ComponentType.ActionRow,
-								components: [
-									{
-										type: ComponentType.StringSelect,
-										customId: "vowels",
-										placeholder: "Vowels/Numbers/Symbols",
-										options: vowels,
-									} as const,
-								],
-							},
-					  ]
-					: []),
+				...(consonants?.length ?
+					[
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.StringSelect,
+									customId: "consonants",
+									placeholder: "Consonants",
+									options: consonants,
+								} as const,
+							],
+						},
+					]
+				:	[]),
+				...(vowels?.length ?
+					[
+						{
+							type: ComponentType.ActionRow,
+							components: [
+								{
+									type: ComponentType.StringSelect,
+									customId: "vowels",
+									placeholder: "Vowels/Numbers/Symbols",
+									options: vowels,
+								} as const,
+							],
+						},
+					]
+				:	[]),
 				{
 					type: ComponentType.ActionRow,
 					components: [
@@ -276,16 +276,16 @@ export default async function hangman(
 							type: ComponentType.Button,
 							customId: "guess",
 						},
-						...(color === undefined && wrongCount < MAX_WRONGS - HINT_PENALTY
-							? [
-									{
-										label: "Hint",
-										style: ButtonStyle.Primary,
-										type: ComponentType.Button,
-										customId: "hint",
-									} as const,
-							  ]
-							: []),
+						...(color === undefined && wrongCount < MAX_WRONGS - HINT_PENALTY ?
+							[
+								{
+									label: "Hint",
+									style: ButtonStyle.Primary,
+									type: ComponentType.Button,
+									customId: "hint",
+								} as const,
+							]
+						:	[]),
 						{
 							label: "End",
 							style: ButtonStyle.Danger,
@@ -298,10 +298,7 @@ export default async function hangman(
 			files: [
 				{
 					attachment: await fileSystem.readFile(
-						`./modules/games/hangman-photos/${Math.min(
-							wrongCount,
-							MAX_WRONGS - 1,
-						)}.png`,
+						`./modules/games/hangman-photos/${Math.min(wrongCount, MAX_WRONGS - 1)}.png`,
 					),
 					name: "hangman.png",
 				},

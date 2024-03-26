@@ -26,9 +26,10 @@ async function purge(
 	const useId = Number.isNaN(numberCount) || numberCount > MAX_FETCH_COUNT;
 	const { channel: channelId, id: countId } = (useId &&
 		/^(?:(?<channel>\d+)-)?(?<id>\d+)$/.exec(options.count)?.groups) || { id: options.count };
-	const channel = channelId
-		? await client.channels.fetch(channelId).catch(() => void 0)
-		: interaction.channel;
+	const channel =
+		channelId ?
+			await client.channels.fetch(channelId).catch(() => void 0)
+		:	interaction.channel;
 	if (!channel?.isTextBased() || channel.isDMBased())
 		return await interaction.reply(
 			`${constants.emojis.statuses.no} Could not find that channel!`,
@@ -41,9 +42,10 @@ async function purge(
 	);
 
 	let start = 0;
-	let end = useId
-		? filtered.findIndex(({ id }) => id === countId) + 1
-		: Math.min(filtered.length, numberCount);
+	let end =
+		useId ?
+			filtered.findIndex(({ id }) => id === countId) + 1
+		:	Math.min(filtered.length, numberCount);
 
 	async function generateMessage(): Promise<InteractionReplyOptions> {
 		const sliced = filtered.slice(start, end);
@@ -52,9 +54,9 @@ async function purge(
 				content: `${
 					constants.emojis.statuses.no
 				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
-					before && channel
-						? `before [this message](<${channel.url}/${before}>). Try searching from an older message.`
-						: "ago. Use the `message` option to search backwards from a certain point."
+					before && channel ?
+						`before [this message](<${channel.url}/${before}>). Try searching from an older message.`
+					:	"ago. Use the `message` option to search backwards from a certain point."
 				} Also, I can’t purge any messages more than 2 weeks old.`,
 			};
 		}

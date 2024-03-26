@@ -224,9 +224,9 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 export async function viewQuestion(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (
 		!config.roles.exec ||
-		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.exec.id)
-			: interaction.member?.roles.includes(config.roles.exec.id))
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.exec.id)
+		:	interaction.member?.roles.includes(config.roles.exec.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,
@@ -238,44 +238,44 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 	const [id] = interaction.values;
 	const question = await Question.findById(id).exec();
 	await interaction.reply(
-		question
-			? {
-					ephemeral: true,
-					embeds: [
-						{
-							color: constants.themeColor,
-							title: question.question,
-							description: question.description,
-						},
-					],
-					components: [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									customId: question.id + "_removeQuestion",
-									type: ComponentType.Button,
-									label: "Remove",
-									style: ButtonStyle.Danger,
-								},
-								// TODO: edit?
-							],
-						},
-					],
-			  }
-			: {
-					ephemeral: true,
-					content: `${constants.emojis.statuses.no} Could not find that QOTD! Was it deleted?`,
-			  },
+		question ?
+			{
+				ephemeral: true,
+				embeds: [
+					{
+						color: constants.themeColor,
+						title: question.question,
+						description: question.description,
+					},
+				],
+				components: [
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								customId: question.id + "_removeQuestion",
+								type: ComponentType.Button,
+								label: "Remove",
+								style: ButtonStyle.Danger,
+							},
+							// TODO: edit?
+						],
+					},
+				],
+			}
+		:	{
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} Could not find that QOTD! Was it deleted?`,
+			},
 	);
 }
 
 export async function removeQuestion(interaction: ButtonInteraction, id = ""): Promise<void> {
 	if (
 		!config.roles.exec ||
-		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.exec.id)
-			: interaction.member?.roles.includes(config.roles.exec.id))
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.exec.id)
+		:	interaction.member?.roles.includes(config.roles.exec.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,

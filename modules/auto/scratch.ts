@@ -131,33 +131,37 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 
 	const embed = {
 		title: `${user.username}${
-			("status" in user ? user.status == "Scratch Team" : user.scratchteam) ? "*" : ""
+			(
+				"status" in user ? user.status == "Scratch Team" : user.scratchteam
+			) ?
+				"*"
+			:	""
 		}`,
 		color: constants.scratchColor,
 
 		fields:
-			"statistics" in user && user.statistics
-				? [
-						{
-							name: `${constants.emojis.scratch.followers} Followers`,
-							value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
-								user.statistics.ranks.followers,
-							)})`,
-							inline: true,
-						},
-						{
-							name: `${constants.emojis.scratch.following} Following`,
-							value: user.statistics.following.toLocaleString(),
-							inline: true,
-						},
-				  ]
-				: [],
+			"statistics" in user && user.statistics ?
+				[
+					{
+						name: `${constants.emojis.scratch.followers} Followers`,
+						value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
+							user.statistics.ranks.followers,
+						)})`,
+						inline: true,
+					},
+					{
+						name: `${constants.emojis.scratch.following} Following`,
+						value: user.statistics.following.toLocaleString(),
+						inline: true,
+					},
+				]
+			:	[],
 		thumbnail: { url: `https://uploads.scratch.mit.edu/get_image/user/${user.id}_90x90.png` },
 		author: {
 			name: `${"country" in user ? user.country : user.profile.country}${
-				"status" in user && user.status == "New Scratcher"
-					? `${constants.footerSeperator}${user.status}`
-					: ""
+				"status" in user && user.status == "New Scratcher" ?
+					`${constants.footerSeperator}${user.status}`
+				:	""
 			}`,
 		},
 		url: `${constants.domains.scratch}/users/${user.username}`,
@@ -169,9 +173,9 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 			// eslint-disable-next-line unicorn/string-content
 			name: "🛠️ What I'm working on",
 			value: truncateText(
-				"profile" in user
-					? linkifyMentions(user.profile.status)
-					: htmlToMarkdown(user.work),
+				"profile" in user ?
+					linkifyMentions(user.profile.status)
+				:	htmlToMarkdown(user.work),
 				EMBED_LENGTH / 2, // TODO: partition instead of just half and half
 				true,
 			),
@@ -232,20 +236,21 @@ export async function handleForumPost(
 	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
 
 	const post =
-		type === "post"
-			? await gracefulFetch(`${constants.domains.scratchdb}/forum/post/info/${id}/`)
-			: type === "topic" &&
-			  (await gracefulFetch(
-					`${constants.domains.scratchdb}/forum/topic/posts/${id}?o=oldest`,
-			  ).then(([post]) => post));
+		type === "post" ?
+			await gracefulFetch(`${constants.domains.scratchdb}/forum/post/info/${id}/`)
+		:	type === "topic" &&
+			(await gracefulFetch(
+				`${constants.domains.scratchdb}/forum/topic/posts/${id}?o=oldest`,
+			).then(([post]) => post));
 	if (!post || post.error || post.deleted) return;
 
-	const editedString = post.editor
-		? `\n\n*Last edited by ${post.editor} (${time(
+	const editedString =
+		post.editor ?
+			`\n\n*Last edited by ${post.editor} (${time(
 				new Date(post.time.edited),
 				TimestampStyles.ShortDateTime,
-		  )})*`
-		: "";
+			)})*`
+		:	"";
 
 	return {
 		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${constants.footerSeperator}${

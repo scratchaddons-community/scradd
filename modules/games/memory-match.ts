@@ -58,11 +58,11 @@ export default async function memoryMatch(
 	const message = await interaction.reply({
 		fetchReply: true,
 		content: `💪 **${opponent.toString()}, you are challenged to a game of Memory Match${
-			easyMode || !bonusTurns
-				? ` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
-						bonusTurns ? "" : "no bonus turns"
-				  })`
-				: ""
+			easyMode || !bonusTurns ?
+				` (${easyMode ? "easy mode" : ""}${easyMode && !bonusTurns ? "; " : ""}${
+					bonusTurns ? "" : "no bonus turns"
+				})`
+			:	""
 		} by ${interaction.user.toString()}!** Do you accept?`,
 		components: [
 			{
@@ -111,9 +111,9 @@ export default async function memoryMatch(
 
 			const playerPresence = interaction.guild?.presences.resolve(interaction.user.id);
 			const opponentPresence =
-				options.opponent instanceof Base
-					? interaction.guild?.presences.resolve(options.opponent.id)
-					: undefined;
+				options.opponent instanceof Base ?
+					interaction.guild?.presences.resolve(options.opponent.id)
+				:	undefined;
 
 			const presenceCheck =
 				playerPresence?.status !== playerPresence?.clientStatus?.mobile ||
@@ -121,9 +121,9 @@ export default async function memoryMatch(
 
 			await playGame(buttonInteraction, {
 				players:
-					Math.random() > 0.5
-						? [interaction.user, opponent.user]
-						: [opponent.user, interaction.user],
+					Math.random() > 0.5 ?
+						[interaction.user, opponent.user]
+					:	[opponent.user, interaction.user],
 				easyMode,
 				bonusTurns,
 				useThread: options.thread ?? presenceCheck,
@@ -176,15 +176,17 @@ async function playGame(
 	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
 	const message = await interaction.message.edit(getBoard());
 	const thread =
-		useThread &&
-		(message.channel.type === ChannelType.GuildAnnouncement ||
-			message.channel.type === ChannelType.GuildText)
-			? await message.startThread({
-					name: `Memory Match: ${players[0].displayName} versus ${players[1].displayName}`,
-					reason: "To play the game",
-					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
-			  })
-			: undefined;
+		(
+			useThread &&
+			(message.channel.type === ChannelType.GuildAnnouncement ||
+				message.channel.type === ChannelType.GuildText)
+		) ?
+			await message.startThread({
+				name: `Memory Match: ${players[0].displayName} versus ${players[1].displayName}`,
+				reason: "To play the game",
+				autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
+			})
+		:	undefined;
 
 	const collector = message
 		.createMessageComponentCollector({
@@ -278,29 +280,30 @@ async function playGame(
 			customId: `${players.map((player) => player.id).join("-")}_endGame`,
 		} as const;
 
-		const ping = await (thread
-			? thread.send({
-					content,
-					components: [
-						{
-							type: ComponentType.ActionRow,
-							components: [gameLinkButton, endGameButton, instructionsButton],
-						},
-					],
-			  })
-			: message.reply({
-					content,
-					components: [
-						{
-							type: ComponentType.ActionRow,
-							components: [endGameButton, instructionsButton],
-						},
-					],
-			  }));
+		const ping = await (thread ?
+			thread.send({
+				content,
+				components: [
+					{
+						type: ComponentType.ActionRow,
+						components: [gameLinkButton, endGameButton, instructionsButton],
+					},
+				],
+			})
+		:	message.reply({
+				content,
+				components: [
+					{
+						type: ComponentType.ActionRow,
+						components: [endGameButton, instructionsButton],
+					},
+				],
+			}));
 
-		const timeout = turn
-			? setTimeout(() => interaction.message.edit(getBoard()), GAME_COLLECTOR_TIME / 60)
-			: undefined;
+		const timeout =
+			turn ?
+				setTimeout(() => interaction.message.edit(getBoard()), GAME_COLLECTOR_TIME / 60)
+			:	undefined;
 
 		return { user, ping, timeout };
 	}
@@ -332,11 +335,9 @@ async function playGame(
 						emoji: discovered ? emoji : EMPTY_TILE,
 						customId: id,
 						style: ButtonStyle[
-							scores[0].includes(id)
-								? "Primary"
-								: scores[1].includes(id)
-								? "Success"
-								: "Secondary"
+							scores[0].includes(id) ? "Primary"
+							: scores[1].includes(id) ? "Success"
+							: "Secondary"
 						],
 						disabled: discovered,
 					} as const;
@@ -377,9 +378,9 @@ async function playGame(
 			embeds: [
 				{
 					description: `👑 ${secondWon ? secondUser : firstUser}\n${
-						secondWon
-							? `${constants.emojis.misc.blue} ${firstUser}`
-							: `${constants.emojis.misc.green} ${secondUser}`
+						secondWon ?
+							`${constants.emojis.misc.blue} ${firstUser}`
+						:	`${constants.emojis.misc.green} ${secondUser}`
 					}`,
 					title: "Memory Match Results",
 					color: winner?.displayColor,
@@ -467,9 +468,9 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<strin
 	const chunks = [];
 	while (emojis.length) {
 		chunks.push(
-			chunks.length === 2
-				? [...emojis.splice(0, 2), EMPTY_TILE, ...emojis.splice(0, 2)]
-				: emojis.splice(0, 5),
+			chunks.length === 2 ?
+				[...emojis.splice(0, 2), EMPTY_TILE, ...emojis.splice(0, 2)]
+			:	emojis.splice(0, 5),
 		);
 	}
 

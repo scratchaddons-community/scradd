@@ -60,21 +60,19 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 				{
 					attachment: Buffer.from(
-						typeof output === "bigint" || typeof output === "symbol"
-							? // eslint-disable-next-line unicorn/string-content
-							  `"${output.toString().replaceAll('"', '\\"')}"`
-							: output === undefined || typeof output === "object"
-							? JSON.stringify(output, undefined, "  ") ?? "undefined"
-							: // eslint-disable-next-line @typescript-eslint/no-base-to-string
-							  output.toString(),
+						typeof output === "bigint" || typeof output === "symbol" ?
+							// eslint-disable-next-line unicorn/string-content
+							`"${output.toString().replaceAll('"', '\\"')}"`
+						: output === undefined || typeof output === "object" ?
+							JSON.stringify(output, undefined, "  ") ?? "undefined"
+							// eslint-disable-next-line @typescript-eslint/no-base-to-string
+						:	output.toString(),
 						"utf8",
 					),
 					name: `output.${
-						"string" === typeof output
-							? "txt"
-							: "function" === typeof output
-							? "js"
-							: "json"
+						"string" === typeof output ? "txt"
+						: "function" === typeof output ? "js"
+						: "json"
 					}`,
 				},
 			],

@@ -98,9 +98,9 @@ export async function learn(message: Message): Promise<void> {
 		return;
 
 	const reference =
-		message.type === MessageType.Reply
-			? await message.fetchReference().catch(() => void 0)
-			: previous;
+		message.type === MessageType.Reply ?
+			await message.fetchReference().catch(() => void 0)
+		:	previous;
 	const prompt =
 		reference &&
 		stripMarkdown(normalize(messageToText(reference, false).toLowerCase())).replaceAll(

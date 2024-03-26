@@ -86,12 +86,18 @@ async function setNickname(
 	newNickname: string,
 	reason: string,
 ): Promise<void> {
-	await (member.moderatable && newNickname.length <= 32
-		? member.setNickname(member.user.displayName === newNickname ? null : newNickname, reason)
-		: log(
-				`${LoggingErrorEmoji} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
-				LogSeverity.Alert,
-		  ));
+	if (member.moderatable && newNickname.length <= 32) {
+		await member.setNickname(
+			member.user.displayName === newNickname ? null : newNickname,
+			reason,
+		);
+		return;
+	}
+
+	await log(
+		`${LoggingErrorEmoji} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+		LogSeverity.Alert,
+	);
 }
 
 function findName(member: GuildMember): string {

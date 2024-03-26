@@ -80,30 +80,28 @@ export function extractMessageExtremities(
 				);
 
 				const newEmbed =
-					message.type === MessageType.AutoModerationAction
-						? {
-								description: data.description ?? message.content,
-								color: message.member?.displayColor ?? data.color,
-								author: {
-									icon_url: (message.member ?? message.author).displayAvatarURL(),
-									name: (message.member ?? message.author).displayName,
-								},
-								url: messageLink(
-									message.guild?.id ?? "@me",
-									automodInfo.channel_id,
-									automodInfo.flagged_message_id,
-								),
-								footer: {
-									text: `${
-										automodInfo.keyword && `Keyword: ${automodInfo.keyword}`
-									}${
-										automodInfo.keyword &&
-										automodInfo.rule_name &&
-										constants.footerSeperator
-									}${automodInfo.rule_name && `Rule: ${automodInfo.rule_name}`}`,
-								},
-						  }
-						: { ...data };
+					message.type === MessageType.AutoModerationAction ?
+						{
+							description: data.description ?? message.content,
+							color: message.member?.displayColor ?? data.color,
+							author: {
+								icon_url: (message.member ?? message.author).displayAvatarURL(),
+								name: (message.member ?? message.author).displayName,
+							},
+							url: messageLink(
+								message.guild?.id ?? "@me",
+								automodInfo.channel_id,
+								automodInfo.flagged_message_id,
+							),
+							footer: {
+								text: `${automodInfo.keyword && `Keyword: ${automodInfo.keyword}`}${
+									automodInfo.keyword &&
+									automodInfo.rule_name &&
+									constants.footerSeperator
+								}${automodInfo.rule_name && `Rule: ${automodInfo.rule_name}`}`,
+							},
+						}
+					:	{ ...data };
 
 				if (!tryCensor) return newEmbed;
 
@@ -159,7 +157,6 @@ export function extractMessageExtremities(
  * Converts a message to a JSON object describing it.
  *
  * @param message - The message to convert.
- *
  * @returns The JSON.
  */
 export function getMessageJSON(message: Message): {
@@ -180,7 +177,6 @@ export function getMessageJSON(message: Message): {
  * Get all messages from a channel.
  *
  * @param channel - The channel to fetch messages from.
- *
  * @returns The messages.
  */
 export async function getAllMessages(
@@ -207,27 +203,28 @@ export async function getAllMessages(
 }
 
 /**
- * A property that returns the content that is rendered regardless of the {@link Message.type}. In some cases, this just returns the regular
- * {@link Message.content}. Otherwise this returns an English message denoting the contents of the system message.
+ * A property that returns the content that is rendered regardless of the {@link Message.type}. In some cases, this just
+ * returns the regular {@link Message.content}. Otherwise this returns an English message denoting the contents of the
+ * system message.
  *
  * @author Based Off of [Rapptz/discord.py’s
  *   `system_content`](https://github.com/Rapptz/discord.py/blob/08ef42f/discord/message.py#L2080-L2234)
  * @param message - Message to convert.
  * @param replies - Whether to quote replies.
- *
  * @returns Text representation of the message.
  */
 export function messageToText(message: Message, replies: false): string;
 export async function messageToText(message: Message, replies?: true): Promise<string>;
 export function messageToText(message: Message, replies = true): Awaitable<string> {
-	const content = message.flags.has("Loading")
-		? (Date.now() - message.createdTimestamp) / 1000 / 60 > 15
-			? `${constants.emojis.message.error} The application did not respond`
-			: `${constants.emojis.misc.loading} ${escapeMessage(
+	const content =
+		message.flags.has("Loading") ?
+			(Date.now() - message.createdTimestamp) / 1000 / 60 > 15 ?
+				`${constants.emojis.message.error} The application did not respond`
+			:	`${constants.emojis.misc.loading} ${escapeMessage(
 					message.author.displayName,
 					// eslint-disable-next-line unicorn/string-content
-			  )} is thinking...`
-		: message.content;
+				)} is thinking...`
+		:	message.content;
 
 	switch (message.type) {
 		case MessageType.Default: {
@@ -253,9 +250,9 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.message.edit} ${message.author.toString()} changed the ${
-				message.channel.isThread() && message.channel.parent?.isThreadOnly()
-					? "post title"
-					: "channel name"
+				message.channel.isThread() && message.channel.parent?.isThreadOnly() ?
+					"post title"
+				:	"channel name"
 			}: **${escapeMessage(content)}**`;
 		}
 
@@ -382,9 +379,9 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 					const cleanContent =
 						reply && messageToText(reply, false).replaceAll(/\s+/g, " ");
 					return `[*${
-						reply
-							? `Replying to ${reply.author.toString()}${cleanContent ? `:` : ""}`
-							: `${constants.emojis.message.reply} Original message was deleted`
+						reply ?
+							`Replying to ${reply.author.toString()}${cleanContent ? `:` : ""}`
+						:	`${constants.emojis.message.reply} Original message was deleted`
 					}*](${messageLink(
 						message.reference?.guildId ?? message.guild?.id ?? "@me",
 						message.reference?.channelId ?? message.channel.id,
@@ -435,9 +432,9 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.AutoModerationAction: {
 			return `**AutoMod** 🤖 has ${
-				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id")
-					? "flagged"
-					: "blocked"
+				message.embeds[0]?.fields.find(({ name }) => name === "flagged_message_id") ?
+					"flagged"
+				:	"blocked"
 			} a message in ${channelMention(
 				message.embeds[0]?.fields.find(({ name }) => name === "channel_id")?.value ??
 					message.channel.id,
@@ -518,36 +515,32 @@ export async function messageToEmbed(
 	const content =
 		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
 	const author =
-		message.type === MessageType.AutoModerationAction
-			? content
-			: message.type === MessageType.GuildInviteReminder
-			? lines[0] + " 🤖"
-			: (message.member ?? message.author).displayName +
-			  (message.author.bot || message.webhookId ? " 🤖" : "");
+		message.type === MessageType.AutoModerationAction ? content
+		: message.type === MessageType.GuildInviteReminder ? lines[0] + " 🤖"
+		: (message.member ?? message.author).displayName +
+			(message.author.bot || message.webhookId ? " 🤖" : "");
 	return {
 		color:
-			message.type === MessageType.AutoModerationAction
-				? 0x99_a1_f2
-				: message.type === MessageType.GuildInviteReminder
-				? undefined
-				: message.member?.displayColor,
+			message.type === MessageType.AutoModerationAction ? 0x99_a1_f2
+			: message.type === MessageType.GuildInviteReminder ? undefined
+			: message.member?.displayColor,
 		description: message.type === MessageType.AutoModerationAction ? "" : censor(content),
 
 		author: {
 			icon_url:
-				message.type === MessageType.AutoModerationAction
-					? "https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
-					: message.type === MessageType.GuildInviteReminder
-					? "https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
-					: (message.member ?? message.author).displayAvatarURL(),
+				message.type === MessageType.AutoModerationAction ?
+					"https://discord.com/assets/e7af5fc8fa27c595d963c1b366dc91fa.gif"
+				: message.type === MessageType.GuildInviteReminder ?
+					"https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
+				:	(message.member ?? message.author).displayAvatarURL(),
 
 			name: censor(author),
 		},
 
 		timestamp:
-			message.type === MessageType.GuildInviteReminder
-				? undefined
-				: message.createdAt.toISOString(),
+			message.type === MessageType.GuildInviteReminder ?
+				undefined
+			:	message.createdAt.toISOString(),
 
 		footer: message.editedAt ? { text: "Edited" } : undefined,
 	};
@@ -558,7 +551,6 @@ export async function messageToEmbed(
  *
  * @param message - The message to react to.
  * @param reactions - The reactions to add.
- *
  * @returns The added reactions.
  */
 export async function reactAll(
@@ -578,7 +570,6 @@ export async function reactAll(
  * Disables components on passed action rows. Ignores buttons with a link.
  *
  * @param rows - The action rows to disable components on.
- *
  * @returns The action rows with disabled components.
  */
 export function disableComponents(
@@ -695,30 +686,30 @@ export async function paginate<Item>(
 		}
 
 		const components: ActionRowData<MessageActionRowComponentData>[] =
-			pages > 1 && user
-				? [
-						{
-							type: ComponentType.ActionRow,
+			pages > 1 && user ?
+				[
+					{
+						type: ComponentType.ActionRow,
 
-							components: [
-								{
-									type: ComponentType.Button,
-									label: "<< Previous",
-									style: ButtonStyle.Primary,
-									disabled: last || offset < 1,
-									customId: "previous",
-								},
-								{
-									type: ComponentType.Button,
-									label: "Next >>",
-									style: ButtonStyle.Primary,
-									disabled: last || offset + length >= array.length,
-									customId: "next",
-								},
-							],
-						},
-				  ]
-				: [];
+						components: [
+							{
+								type: ComponentType.Button,
+								label: "<< Previous",
+								style: ButtonStyle.Primary,
+								disabled: last || offset < 1,
+								customId: "previous",
+							},
+							{
+								type: ComponentType.Button,
+								label: "Next >>",
+								style: ButtonStyle.Primary,
+								disabled: last || offset + length >= array.length,
+								customId: "next",
+							},
+						],
+					},
+				]
+			:	[];
 
 		if (generateComponents) {
 			const extraComponents = await generateComponents(filtered);
@@ -735,13 +726,13 @@ export async function paginate<Item>(
 				{
 					title,
 					description:
-						condensed || columns === 1
-							? (await Promise.all(filtered.map(formatLine))).join("\n")
-							: "",
+						condensed || columns === 1 ?
+							(await Promise.all(filtered.map(formatLine))).join("\n")
+						:	"",
 					fields:
-						condensed || columns === 1
-							? []
-							: await columnize(filtered, constants.zws, formatLine, columns),
+						condensed || columns === 1 ?
+							[]
+						:	await columnize(filtered, constants.zws, formatLine, columns),
 
 					footer: {
 						text: `Page ${offset / length + 1}/${pages}${
@@ -749,15 +740,17 @@ export async function paginate<Item>(
 						}${itemCount.toLocaleString()} ${itemCount === 1 ? singular : plural}`,
 					},
 
-					author: format
-						? { icon_url: format.displayAvatarURL(), name: format.displayName }
-						: undefined,
+					author:
+						format ?
+							{ icon_url: format.displayAvatarURL(), name: format.displayName }
+						:	undefined,
 
-					color: format
-						? format instanceof GuildMember
-							? format.displayColor
-							: undefined
-						: constants.themeColor,
+					color:
+						format ?
+							format instanceof GuildMember ?
+								format.displayColor
+							:	undefined
+						:	constants.themeColor,
 				},
 			],
 			ephemeral,
@@ -776,9 +769,9 @@ export async function paginate<Item>(
 	const messageId = message.id;
 
 	const editReply = (data: InteractionReplyOptions & MessageEditOptions): unknown =>
-		ephemeral || !(message instanceof InteractionResponse || message instanceof Message)
-			? reply(data)
-			: message.edit(data);
+		ephemeral || !(message instanceof InteractionResponse || message instanceof Message) ?
+			reply(data)
+		:	message.edit(data);
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
@@ -805,11 +798,9 @@ export async function paginate<Item>(
 
 export function getBaseChannel<TChannel extends Channel | null | undefined>(
 	channel: TChannel,
-): TChannel extends null
-	? undefined
-	: TChannel extends AnyThreadChannel
-	? NonNullable<TChannel["parent"]> | undefined
-	: TChannel {
+): TChannel extends null ? undefined
+: TChannel extends AnyThreadChannel ? NonNullable<TChannel["parent"]> | undefined
+: TChannel {
 	// @ts-expect-error TS2322
 	return (channel && (channel.isThread() ? channel.parent : channel)) || undefined;
 }

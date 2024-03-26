@@ -35,14 +35,13 @@ for (const message of allDatabaseMessages) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
 	if (name) {
 		databases[name] =
-			message.author.id === client.user.id
-				? message
-				: message.attachments.size
-				? await databaseThread.send({
-						...extractMessageExtremities(message),
-						content: message.content,
-				  })
-				: undefined;
+			message.author.id === client.user.id ? message
+			: message.attachments.size ?
+				await databaseThread.send({
+					...extractMessageExtremities(message),
+					content: message.content,
+				})
+			:	undefined;
 	}
 }
 
@@ -73,8 +72,9 @@ export default class Database<Data extends Record<string, boolean | number | str
 
 		const attachment = this.message.attachments.first()?.url;
 
-		this.#data = attachment
-			? await fetch(attachment)
+		this.#data =
+			attachment ?
+				await fetch(attachment)
 					.then(async (res) => await res.text())
 					.then(
 						(csv) =>
@@ -84,7 +84,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 								delimiter: ",",
 							}).data,
 					)
-			: [];
+			:	[];
 
 		// eslint-disable-next-line @typescript-eslint/prefer-destructuring
 		this.#extra = this.message.content.split("\n")[5];
@@ -111,19 +111,17 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 
 	updateById<
-		Overritten extends Partial<Data>,
+		Overwritten extends Partial<Data>,
 		DefaultKeys extends Extract<
 			{
-				[P in keyof Data]: Data[P] extends undefined
-					? never
-					: Overritten[P] extends Data[P]
-					? never
-					: P;
+				[P in keyof Data]: Data[P] extends undefined ? never
+				: Overwritten[P] extends Data[P] ? never
+				: P;
 			}[keyof Data],
 			keyof Data
 		>,
 	>(
-		newData: Data["id"] extends string ? Overritten : never,
+		newData: Data["id"] extends string ? Overwritten : never,
 		oldData?: NoInfer<Partial<Data> & { [P in DefaultKeys]: Data[P] }>,
 	): void {
 		const data = [...this.data];
@@ -154,9 +152,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 
 			const data = this.#data?.length && papaparse.unparse([...this.#data]).trim();
 
-			const files = data
-				? [{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
-				: [];
+			const files =
+				data ?
+					[{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
+				:	[];
 			const messageContent = message.content.split("\n");
 			messageContent[3] = "";
 			messageContent[4] = this.#extra ? "Extra misc info:" : "";

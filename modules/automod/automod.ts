@@ -21,9 +21,7 @@ import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
 const whitelistedLinks = await Promise.all(
 	threads?.map(async (thread) =>
-		(
-			await getAllMessages(thread)
-		).flatMap(
+		(await getAllMessages(thread)).flatMap(
 			({ content }) =>
 				content.match(InvitesPattern)?.map((link) => link.split("/").at(-1) ?? link) ?? [],
 		),
@@ -44,9 +42,10 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
-	const pings = message.mentions.users.size
-		? ` (ghost pinged ${joinWithAnd(message.mentions.users.map((user) => user.toString()))})`
-		: "";
+	const pings =
+		message.mentions.users.size ?
+			` (ghost pinged ${joinWithAnd(message.mentions.users.map((user) => user.toString()))})`
+		:	"";
 
 	let needsDelete = false;
 	let deletionMessage = "";
@@ -188,15 +187,15 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		...invites.map(([, invite]) => !!invite?.guild && tryCensor(invite.guild.name)),
 	].reduce(
 		(bad, censored) =>
-			typeof censored === "boolean"
-				? bad
-				: {
-						strikes: bad.strikes + censored.strikes,
-						words: bad.words.map((words, index) => [
-							...words,
-							...(censored.words[index] ?? []),
-						]),
-				  },
+			typeof censored === "boolean" ? bad : (
+				{
+					strikes: bad.strikes + censored.strikes,
+					words: bad.words.map((words, index) => [
+						...words,
+						...(censored.words[index] ?? []),
+					]),
+				}
+			),
 		{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 	);
 	if (badWords.strikes) needsDelete = true;
@@ -212,20 +211,17 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		.reduce(
 			(bad, current) => {
 				const censored = tryCensor(current || "", 1);
-				return censored
-					? {
+				return censored ?
+						{
 							strikes: bad.strikes + censored.strikes,
 							words: bad.words.map((words, index) => [
 								...words,
 								...(censored.words[index] ?? []),
 							]),
-					  }
-					: bad;
+						}
+					:	bad;
 			},
-			{
-				strikes: 0,
-				words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]),
-			},
+			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 		);
 
 	if (

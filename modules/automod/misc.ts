@@ -53,7 +53,7 @@ export function decodeRegexp({ source }: RegExp): string {
 				"x": /[x᙮⒳᙭×⌧🇽╳⤫⤬⨯xｘⅹⓧₓꭓχⲭжхӽӿҳאⵝᕁᕽᚷﾒꓫ乂𝐗]/giu.source,
 				"y": /[y⒴५ɣvᶌyｙⓨ🇾ʏỿꭚγℽυϒⲩуүყሃꭹꮍꓬ𝐘*#-]/giu.source,
 				"z": /[z⒵zｚⓩℤ🇿ℨᶻᴢƶȥʐʑⱬƹƨζչꮓᙆえꓜ乙𝐙]/giu.source,
-			}[letter] || letter),
+			})[letter] || letter,
 	);
 }
 
@@ -75,9 +75,9 @@ export default function tryCensor(
 				return word;
 
 			words[index]?.push(word);
-			return word.length < 4
-				? "#".repeat(word.length)
-				: word[0] + "#".repeat(word.length - 1);
+			return word.length < 4 ?
+					"#".repeat(word.length)
+				:	word[0] + "#".repeat(word.length - 1);
 		});
 	}, normalize(text));
 

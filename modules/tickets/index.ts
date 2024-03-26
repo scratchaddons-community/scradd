@@ -57,18 +57,20 @@ defineEvent("messageCreate", async (message) => {
 						// 	label: "FAQ",
 						// 	url: channelLink("TODO", config.guild.id),
 						// },
-						...(config.channels.tickets
-							?.permissionsFor(message.author)
-							?.has("ViewChannel")
-							? [
-									{
-										type: ComponentType.Button,
-										style: ButtonStyle.Secondary,
-										label: "Contact Mods",
-										custom_id: "_contactMods",
-									} as const,
-							  ]
-							: []),
+						...((
+							config.channels.tickets
+								?.permissionsFor(message.author)
+								?.has("ViewChannel")
+						) ?
+							[
+								{
+									type: ComponentType.Button,
+									style: ButtonStyle.Secondary,
+									label: "Contact Mods",
+									custom_id: "_contactMods",
+								} as const,
+							]
+						:	[]),
 						{
 							type: ComponentType.Button,
 							style: ButtonStyle.Link,
@@ -103,7 +105,10 @@ defineButton("contactMods", async (interaction) => {
 								[SA_CATEGORY]: "Get help with Scratch Addons",
 								server: "Add your server to Other Scratch Servers",
 								other: "Other",
-							} satisfies Record<Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY, string>),
+							} satisfies Record<
+								Category | typeof SA_CATEGORY | typeof SERVER_CATEGORY,
+								string
+							>),
 						].map(([value, label]) => ({ value, label })),
 						placeholder: "What do you need help with?",
 					},
@@ -272,9 +277,9 @@ defineMenuCommand(
 defineButton("contactUser", async (interaction, userId = "") => {
 	if (
 		!config.roles.mod ||
-		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.mod.id)
-			: interaction.member?.roles.includes(config.roles.mod.id))
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.mod.id)
+		:	interaction.member?.roles.includes(config.roles.mod.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,

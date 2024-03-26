@@ -43,9 +43,9 @@ export default async function getUserRank(
 	const rankInfo =
 		rank &&
 		`Ranked ${rank.toLocaleString()}/${allXp.length.toLocaleString()}${
-			serverRank
-				? ` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
-				: ""
+			serverRank ?
+				` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
+			:	""
 		}`;
 
 	await interaction.reply({
@@ -62,11 +62,12 @@ export default async function getUserRank(
 					{
 						name: "⏳ Weekly rank",
 
-						value: weeklyRank
-							? approximateWeeklyRank === 10
-								? "Top 10"
-								: `About ${nth(Math.max(0, approximateWeeklyRank - 5))}`
-							: "Inactive this week",
+						value:
+							weeklyRank ?
+								approximateWeeklyRank === 10 ?
+									"Top 10"
+								:	`About ${nth(Math.max(0, approximateWeeklyRank - 5))}`
+							:	"Inactive this week",
 
 						inline: true,
 					},
@@ -175,16 +176,16 @@ export async function top(
 				interaction.message.interaction?.user.id !== interaction.user.id,
 
 			async generateComponents() {
-				return (await getSettings(interaction.user, false)).useMentions === undefined
-					? [
+				return (await getSettings(interaction.user, false)).useMentions === undefined ?
+						[
 							{
 								customId: "levelUpPings_toggleSetting",
 								type: ComponentType.Button,
 								label: "Toggle Mentions",
 								style: ButtonStyle.Success,
 							},
-					  ]
-					: undefined;
+						]
+					:	undefined;
 			},
 			customComponentLocation: "below",
 		},

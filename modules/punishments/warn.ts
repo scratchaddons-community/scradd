@@ -58,18 +58,18 @@ export default async function warn(
 	const context = contextOrModerator instanceof User ? "" : contextOrModerator;
 	const logMessage = await log(
 		`${LoggingEmojis.Punishment} ${user.toString()} ${
-			strikes > 0.5
-				? `warned ${displayStrikes} time${displayStrikes === 1 ? "" : "s"}`
-				: "verbally warned"
+			strikes > 0.5 ?
+				`warned ${displayStrikes} time${displayStrikes === 1 ? "" : "s"}`
+			:	"verbally warned"
 		} by ${moderator.toString()}`,
 		LogSeverity.ImportantUpdate,
 		{ files: [{ content: reason + (context && `\n>>> ${context}`), extension: "md" }] },
 	);
 
 	const member =
-		user instanceof GuildMember
-			? user
-			: await config.guild.members.fetch(user.id).catch(() => void 0);
+		user instanceof GuildMember ? user : (
+			await config.guild.members.fetch(user.id).catch(() => void 0)
+		);
 
 	const id = convertBase(logMessage.id, 10, convertBase.MAX_BASE);
 
@@ -78,9 +78,9 @@ export default async function warn(
 			embeds: [
 				{
 					title: `You were ${
-						strikes > 0.5
-							? `warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
-							: "verbally warned"
+						strikes > 0.5 ?
+							`warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
+						:	"verbally warned"
 					} in ${escapeMessage(config.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
@@ -90,17 +90,18 @@ export default async function warn(
 						icon_url: config.guild.iconURL() ?? undefined,
 
 						text: `Strike ${id}${
-							displayStrikes
-								? `${constants.footerSeperator}Expiring in 21 ${
-										process.env.NODE_ENV === "production" ? "day" : "minute"
-								  }s`
-								: ""
+							displayStrikes ?
+								`${constants.footerSeperator}Expiring in 21 ${
+									process.env.NODE_ENV === "production" ? "day" : "minute"
+								}s`
+							:	""
 						}`,
 					},
 				},
 			],
-			components: config.channels.tickets?.permissionsFor(user)?.has("ViewChannel")
-				? [
+			components:
+				config.channels.tickets?.permissionsFor(user)?.has("ViewChannel") ?
+					[
 						{
 							type: ComponentType.ActionRow,
 							components: [
@@ -112,8 +113,8 @@ export default async function warn(
 								},
 							],
 						},
-				  ]
-				: [],
+					]
+				:	[],
 		})
 		.catch(async (): Promise<undefined> => {
 			await logMessage.edit(logMessage.content + " (could not send DM)");
@@ -129,12 +130,14 @@ export default async function warn(
 	const totalStrikeCount = oldStrikeCount + strikes;
 
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE + 1) {
-		await (member?.bannable &&
-		!member.roles.premiumSubscriberRole &&
-		(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
-		(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
-			? member.ban({ reason: "Too many strikes" })
-			: log(`${LoggingErrorEmoji} Unable to ban ${user.toString()}`, LogSeverity.Alert));
+		await ((
+			member?.bannable &&
+			!member.roles.premiumSubscriberRole &&
+			(!config.roles.staff || !member.roles.resolve(config.roles.staff.id)) &&
+			(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
+		) ?
+			member.ban({ reason: "Too many strikes" })
+		:	log(`${LoggingErrorEmoji} Unable to ban ${user.toString()}`, LogSeverity.Alert));
 		return true;
 	}
 
@@ -147,18 +150,18 @@ export default async function warn(
 	const addedMuteLength = totalMuteLength - oldMuteLength;
 
 	if (addedMuteLength) {
-		await (member?.moderatable
-			? member.disableCommunicationUntil(
-					addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
-						Date.now(),
-					"Too many strikes",
-			  )
-			: log(
-					`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
-						process.env.NODE_ENV === "production" ? "hour" : "minute"
-					}${addedMuteLength === 1 ? "" : "s"}`,
-					LogSeverity.Alert,
-			  ));
+		await (member?.moderatable ?
+			member.disableCommunicationUntil(
+				addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+					Date.now(),
+				"Too many strikes",
+			)
+		:	log(
+				`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
+					process.env.NODE_ENV === "production" ? "hour" : "minute"
+				}${addedMuteLength === 1 ? "" : "s"}`,
+				LogSeverity.Alert,
+			));
 	}
 
 	if (Math.trunc(totalStrikeCount) > MUTE_LENGTHS.length * STRIKES_PER_MUTE) {

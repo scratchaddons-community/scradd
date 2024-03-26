@@ -70,25 +70,27 @@ export async function customRole(
 					},
 				],
 			},
-			...(config.guild.features.includes("ROLE_ICONS") &&
-			config.roles.staff &&
-			interaction.member.roles.resolve(config.roles.staff.id)
-				? [
-						{
-							type: ComponentType.ActionRow,
-							components: [
-								{
-									customId: "icon",
-									label: "A unicode emoji, emoji ID, or URL",
-									style: TextInputStyle.Short,
-									type: ComponentType.TextInput,
-									required: false,
-									value: existingRole?.iconURL() ?? undefined,
-								} as const,
-							],
-						},
-				  ]
-				: []),
+			...((
+				config.guild.features.includes("ROLE_ICONS") &&
+				config.roles.staff &&
+				interaction.member.roles.resolve(config.roles.staff.id)
+			) ?
+				[
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{
+								customId: "icon",
+								label: "A unicode emoji, emoji ID, or URL",
+								style: TextInputStyle.Short,
+								type: ComponentType.TextInput,
+								required: false,
+								value: existingRole?.iconURL() ?? undefined,
+							} as const,
+						],
+					},
+				]
+			:	[]),
 		],
 	});
 }
@@ -274,12 +276,12 @@ export async function qualifiesForRole(member: GuildMember): Promise<boolean> {
 	if (lastWeekly[0]?.[0] === member.user.id) return true;
 
 	command ??= (await config.guild.commands.fetch()).find(({ name }) => name === "custom-role");
-	return command
-		? await hasPermission(
+	return command ?
+			await hasPermission(
 				command,
 				member,
 				undefined,
 				config.roles.weeklyWinner && new Set(config.roles.weeklyWinner.id),
-		  )
-		: false;
+			)
+		:	false;
 }

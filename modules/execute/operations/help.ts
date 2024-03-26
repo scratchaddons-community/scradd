@@ -13,11 +13,8 @@ import type { CustomOperation } from "../util.js";
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,
 ): Promise<Record<string, ApplicationCommand | CustomOperation>> =>
-	await (
-		await import("../util.js")
-	).default(
-		interaction.inGuild() ? interaction.member : interaction.user,
-		interaction.channel ?? undefined,
+	await import("../util.js").then(({ default: getSchemas }) =>
+		getSchemas(interaction.member ?? interaction.user, interaction.channel ?? undefined),
 	);
 
 const data: CustomOperation = {
@@ -51,9 +48,9 @@ const data: CustomOperation = {
 
 		await interaction.editReply({
 			embeds: [
-				operation
-					? getHelpForOperation(operation, schemas, operationName)
-					: listOperations(schemas),
+				operation ?
+					getHelpForOperation(operation, schemas, operationName)
+				:	listOperations(schemas),
 			],
 		});
 	},
@@ -69,33 +66,35 @@ export function getHelpForOperation(
 	return {
 		color: constants.themeColor,
 		title: `\`${OPERATION_PREFIX}${
-			!(operation instanceof ApplicationCommand) && "type" in operation
-				? operationName + " "
-				: ""
+			!(operation instanceof ApplicationCommand) && "type" in operation ?
+				operationName + " "
+			:	""
 		}${operation.name}\``,
 		description: operation.description,
 		fields: [...(operation.options ?? [])].map((option) => ({
 			name:
 				inlineCode(
-					"required" in option && option.required === false
-						? `[${option.name}]`
-						: option.name,
+					"required" in option && option.required === false ?
+						`[${option.name}]`
+					:	option.name,
 				) +
-				([
-					ApplicationCommandOptionType.Subcommand,
-					ApplicationCommandOptionType.SubcommandGroup,
-				].includes(option.type)
-					? ""
-					: ` (${ApplicationCommandOptionType[option.type]
-							.toLowerCase()
-							.replace(/^mentionable$/, "user or role")})`),
+				((
+					[
+						ApplicationCommandOptionType.Subcommand,
+						ApplicationCommandOptionType.SubcommandGroup,
+					].includes(option.type)
+				) ?
+					""
+				:	` (${ApplicationCommandOptionType[option.type]
+						.toLowerCase()
+						.replace(/^mentionable$/, "user or role")})`),
 			value: option.description,
 			inline: true,
 		})),
 		footer:
-			schemas[operationName] instanceof ApplicationCommand
-				? { text: "Also available as a slash command" }
-				: undefined,
+			schemas[operationName] instanceof ApplicationCommand ?
+				{ text: "Also available as a slash command" }
+			:	undefined,
 	};
 }
 

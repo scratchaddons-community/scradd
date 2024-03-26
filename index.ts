@@ -53,11 +53,7 @@ if (process.env.CANVAS !== "false") {
 		add: (time: number, amount: number) =>
 			time + Math[amount < 0 ? "ceil" : "floor"](amount) * 86_400_000,
 		format: (time: number) =>
-			new Date(time).toLocaleString([], {
-				weekday: "short",
-				day: "numeric",
-				month: "short",
-			}),
+			new Date(time).toLocaleString([], { weekday: "short", day: "numeric", month: "short" }),
 	});
 }
 

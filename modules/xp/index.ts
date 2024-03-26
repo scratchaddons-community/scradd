@@ -61,9 +61,9 @@ defineSubcommands(
 		const user =
 			options?.options &&
 			"user" in options.options &&
-			(options.options.user instanceof GuildMember
-				? options.options.user.user
-				: options.options.user);
+			(options.options.user instanceof GuildMember ?
+				options.options.user.user
+			:	options.options.user);
 
 		switch (options?.subcommand ?? "rank") {
 			case "rank": {

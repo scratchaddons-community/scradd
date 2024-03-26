@@ -154,9 +154,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			{
 				buttons: [{ label: "Message", url: edited.url }],
 				files:
-					interaction.guild?.id !== config.guild.id || shouldLog(edited.channel)
-						? files
-						: [],
+					interaction.guild?.id !== config.guild.id || shouldLog(edited.channel) ?
+						files
+					:	[],
 			},
 		);
 	}

@@ -159,29 +159,29 @@ export async function updateSettings(
 	const updated = {
 		id: user.id,
 		boardPings:
-			settings.boardPings === "toggle"
-				? !old.boardPings
-				: settings.boardPings ?? old.boardPings,
+			settings.boardPings === "toggle" ?
+				!old.boardPings
+			:	settings.boardPings ?? old.boardPings,
 		levelUpPings:
-			settings.levelUpPings === "toggle"
-				? !old.levelUpPings
-				: settings.levelUpPings ?? old.levelUpPings,
+			settings.levelUpPings === "toggle" ?
+				!old.levelUpPings
+			:	settings.levelUpPings ?? old.levelUpPings,
 		autoreactions:
-			settings.autoreactions === "toggle"
-				? !old.autoreactions
-				: settings.autoreactions ?? old.autoreactions,
+			settings.autoreactions === "toggle" ?
+				!old.autoreactions
+			:	settings.autoreactions ?? old.autoreactions,
 		useMentions:
-			settings.useMentions === "toggle"
-				? !old.useMentions
-				: settings.useMentions ?? old.useMentions,
+			settings.useMentions === "toggle" ?
+				!old.useMentions
+			:	settings.useMentions ?? old.useMentions,
 		dmReminders:
-			settings.dmReminders === "toggle"
-				? !old.dmReminders
-				: settings.dmReminders ?? old.dmReminders,
+			settings.dmReminders === "toggle" ?
+				!old.dmReminders
+			:	settings.dmReminders ?? old.dmReminders,
 		scratchEmbeds:
-			settings.scratchEmbeds === "toggle"
-				? !old.scratchEmbeds
-				: settings.scratchEmbeds ?? old.scratchEmbeds,
+			settings.scratchEmbeds === "toggle" ?
+				!old.scratchEmbeds
+			:	settings.scratchEmbeds ?? old.scratchEmbeds,
 	};
 
 	userSettingsDatabase.updateById(updated, old);
@@ -249,15 +249,15 @@ export async function updateSettings(
 export async function getSettings(
 	user: { id: Snowflake },
 	defaults?: true,
-): Promise<Required<typeof userSettingsDatabase.data[number]>>;
+): Promise<Required<(typeof userSettingsDatabase.data)[number]>>;
 export async function getSettings(
 	user: { id: Snowflake },
 	defaults: false,
-): Promise<typeof userSettingsDatabase.data[number]>;
+): Promise<(typeof userSettingsDatabase.data)[number]>;
 export async function getSettings(
 	user: { id: Snowflake },
 	defaults = true,
-): Promise<typeof userSettingsDatabase.data[number]> {
+): Promise<(typeof userSettingsDatabase.data)[number]> {
 	const settings = userSettingsDatabase.data.find((settings) => settings.id === user.id) ?? {
 		id: user.id,
 	};
@@ -272,7 +272,7 @@ export async function getSettings(
 
 export async function getDefaultSettings(user: {
 	id: Snowflake;
-}): Promise<Required<Omit<typeof userSettingsDatabase.data[number], "id">>> {
+}): Promise<Required<Omit<(typeof userSettingsDatabase.data)[number], "id">>> {
 	return {
 		autoreactions: true,
 		dmReminders: true,
@@ -297,9 +297,9 @@ export async function mentionUser(
 
 	const presence = interactor && guild?.presences.resolve(interactor.id);
 	const url = `<${
-		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web
-			? "discord://-"
-			: "https://discord.com"
+		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web ?
+			"discord://-"
+		:	"https://discord.com"
 	}/users/${id}>`;
 
 	const { displayName } =

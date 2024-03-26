@@ -45,7 +45,6 @@ const COUNTS = {
  * Determines the board reaction count for a channel.
  *
  * @param channel - The channel to determine reaction count for.
- *
  * @returns The reaction count.
  */
 export function boardReactionCount(channel?: TextBasedChannel, time?: number): number;
@@ -82,9 +81,9 @@ export function boardReactionCount(
 
 	function shift(count: number): number {
 		const privateThread =
-			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread
-				? 2 / 3
-				: 1;
+			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread ?
+				2 / 3
+			:	1;
 		/** 500 = number of days for required potato count to double. */
 		const timeShift = (Date.now() - +time) / 86_400_000 / 500 + 1;
 		return Math.max(2, Math.round(count * privateThread * timeShift));
@@ -111,11 +110,10 @@ function baseReactionCount(id: Snowflake): number | undefined {
  *
  * @param info - Info to generate a message from.
  * @param extraButtons - Extra custom buttons to show.
- *
  * @returns The representation of the message.
  */
 export async function generateBoardMessage(
-	info: Message | typeof boardDatabase.data[number],
+	info: Message | (typeof boardDatabase.data)[number],
 	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
 ): Promise<BaseMessageOptions | undefined> {
 	const count =
@@ -125,7 +123,6 @@ export async function generateBoardMessage(
 	 * Convert a message to an embed and button representation.
 	 *
 	 * @param message - The message to convert.
-	 *
 	 * @returns The converted message.
 	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
@@ -166,16 +163,15 @@ export async function generateBoardMessage(
 	if (onBoard) {
 		const linkButton = onBoard.components[0]?.components?.[0];
 		const buttons =
-			linkButton?.type === ComponentType.Button
-				? [...(extraButtons.pre ?? []), linkButton.toJSON(), ...(extraButtons.post ?? [])]
-				: [...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
+			linkButton?.type === ComponentType.Button ?
+				[...(extraButtons.pre ?? []), linkButton.toJSON(), ...(extraButtons.post ?? [])]
+			:	[...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
 			allowedMentions: { users: [] },
 
-			components: buttons.length
-				? [{ type: ComponentType.ActionRow, components: buttons }]
-				: [],
+			components:
+				buttons.length ? [{ type: ComponentType.ActionRow, components: buttons }] : [],
 
 			content: onBoard.content,
 			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),

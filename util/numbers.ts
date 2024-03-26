@@ -2,10 +2,8 @@
  * `x**y`
  *
  * @author ryasmi [`bigIntPow`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L19)
- *
  * @param one `x`.
  * @param two `y`.
- *
  * @returns Return value.
  */
 export function bigIntPower(one: bigint, two: bigint): bigint {
@@ -19,7 +17,6 @@ export function bigIntPower(one: bigint, two: bigint): bigint {
  * Convert a number between bases.
  *
  * @author ryasmi [`convertBase`](https://github.com/ryasmi/baseroo/blob/4722145/src/baseroo.ts#L79)
- *
  * @param value - The number to convert.
  * @param sourceBase - The base of the input number.
  * @param outBase - The base of the output number.
@@ -149,7 +146,10 @@ export function lerpColors(allColors: [number, ...number[]], percent: number): n
 	const index = Math.floor(count * percent);
 
 	const distance = count === 1 ? percent : (percent - index / count) * count;
-	const colors = allColors.slice(index, index + 2) as [typeof allColors[0], typeof allColors[1]];
+	const colors = allColors.slice(index, index + 2) as [
+		(typeof allColors)[0],
+		(typeof allColors)[1],
+	];
 
 	const channelsByColor = colors.map((color) => ({
 		red: (color >> 16) & 0xff,

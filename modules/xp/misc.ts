@@ -17,7 +17,6 @@ const INCREMENT_FREQUENCY = 10;
  * Get the difference between the XP required for a level and its predecessor.
  *
  * @param level - The level to get the increment for.
- *
  * @returns The increment.
  */
 function getIncrementForLevel(level: number): number {
@@ -41,7 +40,6 @@ function getIncrementForLevel(level: number): number {
  * Get the needed amount of XP to reach the given level.
  *
  * @param level - The level.
- *
  * @returns The needed XP.
  */
 export function getXpForLevel(level: number): number {
@@ -55,7 +53,6 @@ export function getXpForLevel(level: number): number {
  * Get the corresponding level of an XP value.
  *
  * @param xp - The XP value.
- *
  * @returns The corresponding level.
  */
 export function getLevelForXp(xp: number): number {

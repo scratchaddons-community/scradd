@@ -2,10 +2,7 @@ export type UnTypedASTNode = Record<string, unknown>;
 export type SingleASTNode = UnTypedASTNode & { type: string };
 export type ASTNode = SingleASTNode | SingleASTNode[];
 export type Output = (node: ASTNode, state?: State | null) => string;
-export type State = Record<string, unknown> & {
-	key?: number | string;
-	inline?: boolean | null;
-};
+export type State = Record<string, unknown> & { key?: number | string; inline?: boolean | null };
 
 export type Parser = (source: string, state?: State | null) => SingleASTNode[];
 export type HtmlNodeOutput = (node: SingleASTNode, output: Output, state: State) => string;

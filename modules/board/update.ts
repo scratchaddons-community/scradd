@@ -90,18 +90,18 @@ export default async function updateBoard({
 	processing.delete(message.id);
 }
 
-function updateById<Keys extends keyof typeof boardDatabase.data[number]>(
-	newData: typeof boardDatabase.data[number]["source"] extends string
-		? Pick<typeof boardDatabase.data[number], Keys> & { source: string }
-		: never,
-	oldData?: Omit<typeof boardDatabase.data[number], Keys | "source">,
+function updateById<Keys extends keyof (typeof boardDatabase.data)[number]>(
+	newData: (typeof boardDatabase.data)[number]["source"] extends string ?
+		Pick<(typeof boardDatabase.data)[number], Keys> & { source: string }
+	:	never,
+	oldData?: Omit<(typeof boardDatabase.data)[number], Keys | "source">,
 ): void {
 	const data = [...boardDatabase.data];
 	const index = data.findIndex((suggestion) => suggestion.source === newData.source);
 	const found = data[index];
 	if (found) data[index] = { ...found, ...newData };
 	else if (oldData)
-		data.push({ ...oldData, ...newData } as unknown as typeof boardDatabase.data[number]);
+		data.push({ ...oldData, ...newData } as unknown as (typeof boardDatabase.data)[number]);
 
 	boardDatabase.data = data;
 }

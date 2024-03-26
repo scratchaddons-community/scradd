@@ -92,16 +92,20 @@ defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
 	await entry.target.send({
 		embeds: [
 			{
-				author: user
-					? { icon_url: user.displayAvatarURL(), name: "Answered by " + user.displayName }
-					: undefined,
+				author:
+					user ?
+						{
+							icon_url: user.displayAvatarURL(),
+							name: "Answered by " + user.displayName,
+						}
+					:	undefined,
 				color:
-					newAnswer.position < 0
-						? undefined
-						: lerpColors(
-								[Colors.Green, Colors.Blue, Colors.Yellow, Colors.Red],
-								newAnswer.position,
-						  ),
+					newAnswer.position < 0 ?
+						undefined
+					:	lerpColors(
+							[Colors.Green, Colors.Blue, Colors.Yellow, Colors.Red],
+							newAnswer.position,
+						),
 				title:
 					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
 				description: channel.topic?.split(`\n- **${newAnswer.name}**: `)[1]?.split("\n")[0],

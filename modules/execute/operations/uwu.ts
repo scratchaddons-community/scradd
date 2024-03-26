@@ -7,9 +7,9 @@ export function uwuify(text: string): string {
 	const output = stripMarkdown(text)
 		.split(/\s+/)
 		.map((word) =>
-			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word)
-				? word
-				: uwuReplacements[word.toLowerCase()] ?? convertWord(word),
+			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word) ? word : (
+				uwuReplacements[word.toLowerCase()] ?? convertWord(word)
+			),
 		);
 
 	output.push(uwuEndings[Math.floor(Math.random() * uwuEndings.length)] ?? uwuEndings[0]);
@@ -48,9 +48,9 @@ const data: CustomOperation = {
 		await interaction.reply({
 			content: uwuify(
 				(typeof text === "string" ? text : "") +
-					(typeof ephemeral === "string" && !["true", "false"].includes(ephemeral)
-						? " " + ephemeral
-						: ""),
+					(typeof ephemeral === "string" && !["true", "false"].includes(ephemeral) ?
+						" " + ephemeral
+					:	""),
 			),
 			ephemeral: ephemeral === "true",
 		});

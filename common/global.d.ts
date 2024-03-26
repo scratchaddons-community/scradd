@@ -74,7 +74,9 @@ declare global {
 			value: T,
 			replacer?: (number | string)[] | null | undefined,
 			space?: number | string | undefined,
-		): T extends UndefinedDomain ? undefined : UndefinedDomain extends T ? undefined : string;
+		): T extends UndefinedDomain ? undefined
+		: UndefinedDomain extends T ? undefined
+		: string;
 		stringify<T>(
 			value: T,
 			replacer: (this: unknown, key: string, value: ToJSON<T>) => unknown,
@@ -104,7 +106,9 @@ declare global {
 		split<Separator extends RegExp | string, Limit extends number>(
 			separator: Separator,
 			limit?: Limit,
-		): Limit extends 0 ? [] : Separator extends "" ? string[] : [string, ...string[]];
+		): Limit extends 0 ? []
+		: Separator extends "" ? string[]
+		: [string, ...string[]];
 		startsWith<P extends string>(searchString: P, position?: 0): this is `${P}${string}`;
 		endsWith<P extends string>(
 			searchString: P,
@@ -141,8 +145,8 @@ declare global {
 			 */
 			NODE_ENV?: "development" | "production";
 			/**
-			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. For consistency, always
-			 * compare against `"false"` in code.
+			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. For
+			 * consistency, always compare against `"false"` in code.
 			 *
 			 * @default true
 			 */
@@ -160,8 +164,8 @@ declare global {
 declare module "strife.js" {
 	export interface AugmentedChatCommandData<_InGuild extends boolean> {
 		/**
-		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
-		 * words.
+		 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel
+		 * allows bad words.
 		 *
 		 * @default true
 		 */
@@ -181,21 +185,18 @@ declare module "strife.js" {
 type Falsy = "" | 0 | 0n | false | null | undefined;
 type NonFalsy<T> = T extends Falsy ? never : T;
 
-type FilterNonFalsy<T> = T extends readonly [infer F, ...infer R]
-	? F extends Falsy
-		? FilterNonFalsy<R>
-		: [F, ...FilterNonFalsy<R>]
-	: [];
-type WidenLiteral<T> = T extends string
-	? string
-	: T extends number
-	? number
-	: T extends boolean
-	? boolean
-	: T extends bigint
-	? bigint
-	: T extends symbol
-	? symbol
+type FilterNonFalsy<T> =
+	T extends readonly [infer F, ...infer R] ?
+		F extends Falsy ?
+			FilterNonFalsy<R>
+		:	[F, ...FilterNonFalsy<R>]
+	:	[];
+type WidenLiteral<T> =
+	T extends string ? string
+	: T extends number ? number
+	: T extends boolean ? boolean
+	: T extends bigint ? bigint
+	: T extends symbol ? symbol
 	: T;
 
 type UndefinedDomain =

@@ -24,7 +24,6 @@ export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
  *
  * @param channelWanted - Guild based channel.
  * @param channelFound - Text based channel.
- *
  * @returns Whether the channel is a match.
  */
 async function textChannelMatches(
@@ -105,8 +104,9 @@ export default async function makeSlideshow(
 	async function getNextMessage(): Promise<MessageEditOptions> {
 		const info = (await fetchedMessages.next()).value;
 
-		const message = info
-			? await generateBoardMessage(info, {
+		const message =
+			info ?
+				await generateBoardMessage(info, {
 					pre: [
 						{
 							custom_id: previousId,
@@ -124,8 +124,8 @@ export default async function makeSlideshow(
 							type: ComponentType.Button,
 						},
 					],
-			  })
-			: ({
+				})
+			:	({
 					components: [
 						{
 							components: [
@@ -145,7 +145,7 @@ export default async function makeSlideshow(
 					content: `${constants.emojis.statuses.no} ${NO_BOARDS_MESSAGE}`,
 					embeds: [],
 					files: [],
-			  } satisfies InteractionReplyOptions);
+				} satisfies InteractionReplyOptions);
 
 		if (!message) {
 			boardDatabase.data = boardDatabase.data.filter(({ source }) => source !== info?.source);

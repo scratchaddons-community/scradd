@@ -30,9 +30,8 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 			databaseThread.id !== message.channel.id);
 
 	const content = !shush && messageToText(message, false);
-	const { embeds, files } = shush
-		? { embeds: [], files: [] }
-		: extractMessageExtremities(message);
+	const { embeds, files } =
+		shush ? { embeds: [], files: [] } : extractMessageExtremities(message);
 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
@@ -43,23 +42,24 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 			embeds,
 			buttons: [
 				{ label: "Context", url: message.url },
-				...(message.reference?.messageId
-					? [
-							{
-								label: "Reference",
-								url: messageLink(
-									message.reference.guildId ?? "@me",
-									message.reference.channelId,
-									message.reference.messageId,
-								),
-							},
-					  ]
-					: []),
+				...(message.reference?.messageId ?
+					[
+						{
+							label: "Reference",
+							url: messageLink(
+								message.reference.guildId ?? "@me",
+								message.reference.channelId,
+								message.reference.messageId,
+							),
+						},
+					]
+				:	[]),
 			],
 
-			files: content
-				? [{ content, extension: "md" }, ...files.map((file) => file.url)]
-				: files.map((file) => file.url),
+			files:
+				content ?
+					[{ content, extension: "md" }, ...files.map((file) => file.url)]
+				:	files.map((file) => file.url),
 		},
 	);
 }
@@ -78,13 +78,14 @@ export async function messageDeleteBulk(
 					message.attachments.size ? `${message.attachments.size} attachment` : ""
 				}${message.attachments.size > 1 ? "s" : ""}`;
 				const extremities =
-					message.embeds.length || message.attachments.size
-						? ` (${embeds}${embeds && attachments && ", "}${attachments})`
-						: "";
+					message.embeds.length || message.attachments.size ?
+						` (${embeds}${embeds && attachments && ", "}${attachments})`
+					:	"";
 
-				const author = message.author
-					? `${message.author.tag} - ${message.author.id}`
-					: "[unknown author]";
+				const author =
+					message.author ?
+						`${message.author.tag} - ${message.author.id}`
+					:	"[unknown author]";
 				const content = !message.partial && (await messageToText(message));
 
 				return `${author}${extremities}${content ? `:\n${content}` : ""}`;
@@ -96,9 +97,9 @@ export async function messageDeleteBulk(
 	const unknownCount = allAuthors.filter((author) => !author).length;
 	const authors = [
 		...new Set(allAuthors.filter(Boolean)),
-		...(unknownCount
-			? [`at least ${unknownCount} unknown user${unknownCount === 1 ? "" : "s"}`]
-			: []),
+		...(unknownCount ?
+			[`at least ${unknownCount} unknown user${unknownCount === 1 ? "" : "s"}`]
+		:	[]),
 	];
 
 	const url = messages.first()?.url;

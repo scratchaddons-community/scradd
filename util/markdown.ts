@@ -37,13 +37,13 @@ export function formatAnyEmoji(
 		| null
 		| undefined,
 ): string {
-	return typeof options?.id === "string"
-		? formatEmoji({
+	return typeof options?.id === "string" ?
+			formatEmoji({
 				...options,
 				animated: options.animated ?? false,
 				name: options.name ?? undefined,
-		  })
-		: options?.name ?? "_";
+			})
+		:	options?.name ?? "_";
 }
 
 const DATE_TYPE_FORMATS = {
@@ -72,9 +72,9 @@ export const rules = {
 	blockQuote: {
 		...markdown.defaultRules.blockQuote,
 		match: (source, { inQuote }, previous) =>
-			inQuote || !/(?:^|(?:\n|\s*[*-])\s*)$/.test(previous)
-				? undefined
-				: /^ *(?:>>> [^]*|> .*(?:\n *> .*)*\n?)/.exec(source),
+			inQuote || !/(?:^|(?:\n|\s*[*-])\s*)$/.test(previous) ?
+				undefined
+			:	/^ *(?:>>> [^]*|> .*(?:\n *> .*)*\n?)/.exec(source),
 		parse: ([capture = ""], parse, state) => ({
 			content: parse(
 				capture.replace(capture.trim().startsWith(">>>") ? /^ *>>> ?/ : /^ *> ?/gm, ""),
@@ -198,10 +198,12 @@ export const rules = {
 		html: (node, output, state) => {
 			const date = new Date(+(typeof node.timestamp === "string" && node.timestamp) * 1000);
 			const format =
-				typeof node.format === "string" &&
-				Object.keys(DATE_TYPE_FORMATS).includes(node.format)
-					? node.format
-					: "f";
+				(
+					typeof node.format === "string" &&
+					Object.keys(DATE_TYPE_FORMATS).includes(node.format)
+				) ?
+					node.format
+				:	"f";
 			const formatOptions = DATE_TYPE_FORMATS[format];
 
 			return markdown.htmlTag(
@@ -226,21 +228,20 @@ export const rules = {
 					{
 						type: "text",
 						content:
-							channel && !channel.isDMBased()
-								? `#${channel.name}`
-								: typeof node.content === "string"
-								? node.content
-								: "",
+							channel && !channel.isDMBased() ? `#${channel.name}`
+							: typeof node.content === "string" ? node.content
+							: "",
 					},
 					state,
 				),
 				{
 					class: "discord-mention",
-					href: channel
-						? !channel.isDMBased() && channel.guild.id === config.guild.id
-							? `/suggestions/${channel.id}`
-							: channel.url
-						: "",
+					href:
+						channel ?
+							!channel.isDMBased() && channel.guild.id === config.guild.id ?
+								`/suggestions/${channel.id}`
+							:	channel.url
+						:	"",
 					target: "_blank",
 					rel: "noreferrer",
 				},
@@ -295,10 +296,9 @@ export const rules = {
 				output(
 					{
 						type: "text",
-						content: role
-							? `@${role.name}`
-							: typeof node.content === "string"
-							? node.content
+						content:
+							role ? `@${role.name}`
+							: typeof node.content === "string" ? node.content
 							: "",
 					},
 					state,
@@ -321,10 +321,9 @@ export const rules = {
 				output(
 					{
 						type: "text",
-						content: user
-							? `@${user.displayName}`
-							: typeof node.content === "string"
-							? node.content
+						content:
+							user ? `@${user.displayName}`
+							: typeof node.content === "string" ? node.content
 							: "",
 					},
 					state,

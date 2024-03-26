@@ -82,9 +82,8 @@ defineEvent("messageCreate", async (message) => {
 		if (emojis.some((emoji) => content.includes(emoji))) continue;
 
 		for (const requirement of requirements) {
-			const [rawMatch, type = "word"] = Array.isArray(requirement)
-				? requirement
-				: [requirement];
+			const [rawMatch, type = "word"] =
+				Array.isArray(requirement) ? requirement : [requirement];
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type === "ping") {
@@ -94,11 +93,11 @@ defineEvent("messageCreate", async (message) => {
 				});
 			} else {
 				const result = new RegExp(
-					type === "partial" || type === "raw"
-						? match
-						: `${type === "full" ? "^" : "\\b"}(?:${match})${
-								type === "plural" ? /(?:e?s)?/.source : ""
-						  }${type === "full" ? "$" : "\\b"}`,
+					type === "partial" || type === "raw" ?
+						match
+					:	`${type === "full" ? "^" : "\\b"}(?:${match})${
+							type === "plural" ? /(?:e?s)?/.source : ""
+						}${type === "full" ? "$" : "\\b"}`,
 					"iu",
 				).test(type === "raw" ? message.content : content);
 
@@ -154,8 +153,9 @@ async function handleMutatable(
 				content: "",
 				files: [],
 				embeds,
-				components: notSet
-					? [
+				components:
+					notSet ?
+						[
 							{
 								components: [
 									{
@@ -167,8 +167,8 @@ async function handleMutatable(
 								],
 								type: ComponentType.ActionRow,
 							},
-					  ]
-					: [],
+						]
+					:	[],
 			};
 	}
 
@@ -193,8 +193,8 @@ async function handleMutatable(
 
 		if (name && message.member) {
 			const response = dad(name, message.member);
-			return Array.isArray(response)
-				? ([
+			return Array.isArray(response) ?
+					([
 						{
 							content: response[0],
 							files: [],
@@ -203,14 +203,14 @@ async function handleMutatable(
 							allowedMentions: { users: [], repliedUser: true },
 						},
 						...response.slice(1),
-				  ] as const)
-				: {
+					] as const)
+				:	{
 						content: response,
 						files: [],
 						embeds: [],
 						components: [],
 						allowedMentions: { users: [], repliedUser: true },
-				  };
+					};
 		}
 	}
 }

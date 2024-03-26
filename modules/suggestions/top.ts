@@ -24,35 +24,38 @@ export default async function top(
 		[...oldSuggestions, ...suggestionsDatabase.data]
 			.filter(
 				(suggestion) =>
-					(options.answer
-						? suggestion.answer === options.answer
-						: options.all ||
-						  !("old" in suggestion) ||
-						  ["Unanswered", "Good Idea", "In Development"].includes(
-								suggestion.answer,
-						  )) &&
+					(options.answer ?
+						suggestion.answer === options.answer
+					:	options.all ||
+						!("old" in suggestion) ||
+						["Unanswered", "Good Idea", "In Development"].includes(
+							suggestion.answer,
+						)) &&
 					(options.user ? suggestion.author.valueOf() === options.user.id : true),
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 
 		async ({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				!("old" in reference) &&
-				(suggestions?.defaultReactionEmoji?.name || suggestions?.defaultReactionEmoji?.id)
-					? formatAnyEmoji(suggestions.defaultReactionEmoji)
-					: "👍"
+				(
+					!("old" in reference) &&
+					(suggestions?.defaultReactionEmoji?.name ||
+						suggestions?.defaultReactionEmoji?.id)
+				) ?
+					formatAnyEmoji(suggestions.defaultReactionEmoji)
+				:	"👍"
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
 			)}${
-				options.user
-					? ""
-					: ` by ${await mentionUser(
-							author,
-							interaction?.user,
-							interaction?.guild ?? config.guild,
-					  )}`
+				options.user ? "" : (
+					` by ${await mentionUser(
+						author,
+						interaction?.user,
+						interaction?.guild ?? config.guild,
+					)}`
+				)
 			}`,
 
 		(data) => interaction?.reply(data),

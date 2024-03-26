@@ -45,9 +45,9 @@ export default async function updateReactions(reaction: MessageReaction): Promis
 
 	const defaultEmoji = config.channels.suggestions?.defaultReactionEmoji;
 	if (
-		(defaultEmoji?.id
-			? defaultEmoji.id !== reaction.emoji.id
-			: defaultEmoji?.name !== reaction.emoji.name) ||
+		(defaultEmoji?.id ?
+			defaultEmoji.id !== reaction.emoji.id
+		:	defaultEmoji?.name !== reaction.emoji.name) ||
 		message.channel.locked
 	)
 		return false;
@@ -65,17 +65,19 @@ async function findDuplicates(newSuggestion: {
 	category: string;
 }): Promise<BaseMessageOptions | undefined> {
 	const data = suggestionsDatabase.data.reduce<
-		(typeof suggestionsDatabase["data"][number] & { originalTitle: string })[]
+		((typeof suggestionsDatabase)["data"][number] & { originalTitle: string })[]
 	>(
 		(suggestions, { title, ...suggestion }) =>
-			suggestion.category === "Other" ||
-			newSuggestion.category === "Other" ||
-			suggestion.category === newSuggestion.category
-				? [
-						...suggestions,
-						{ ...suggestion, title: shortenTitle(title), originalTitle: `${title}` },
-				  ]
-				: suggestions,
+			(
+				suggestion.category === "Other" ||
+				newSuggestion.category === "Other" ||
+				suggestion.category === newSuggestion.category
+			) ?
+				[
+					...suggestions,
+					{ ...suggestion, title: shortenTitle(title), originalTitle: `${title}` },
+				]
+			:	suggestions,
 		[],
 	);
 
@@ -96,9 +98,9 @@ async function findDuplicates(newSuggestion: {
 			answer: suggestion.answer,
 
 			markdown: `**${suggestion.count} ${
-				config.channels.suggestions?.defaultReactionEmoji?.id
-					? formatAnyEmoji(config.channels.suggestions.defaultReactionEmoji)
-					: config.channels.suggestions?.defaultReactionEmoji?.name || "👍"
+				config.channels.suggestions?.defaultReactionEmoji?.id ?
+					formatAnyEmoji(config.channels.suggestions.defaultReactionEmoji)
+				:	config.channels.suggestions?.defaultReactionEmoji?.name || "👍"
 			}** ${hyperlink(
 				suggestion.originalTitle,
 				channelLink(suggestion.id, config.guild.id),

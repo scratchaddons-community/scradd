@@ -18,9 +18,9 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): P
 			`${LoggingEmojis.Expressions} ${formatAnyEmoji(entry.target)} ${
 				change.old ? `(:${change.old}\\:) ` : ``
 			}renamed to :${
-				typeof change.new === "string"
-					? change.new
-					: ("name" in entry.target && entry.target.name) || "_"
+				typeof change.new === "string" ?
+					change.new
+				:	("name" in entry.target && entry.target.name) || "_"
 			}\\:${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
@@ -28,12 +28,12 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): P
 }
 export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>): Promise<void> {
 	const oldName =
-		"name" in entry.target
-			? entry.target.name
-			: entry.changes.find(
-					(change): change is { key: "name"; old: string } =>
-						change.key === "name" && typeof change.old === "string",
-			  )?.old;
+		"name" in entry.target ?
+			entry.target.name
+		:	entry.changes.find(
+				(change): change is { key: "name"; old: string } =>
+					change.key === "name" && typeof change.old === "string",
+			)?.old;
 	await log(
 		`${LoggingEmojis.Expressions} :${oldName ?? "_"}\\: (ID: ${
 			entry.target.id

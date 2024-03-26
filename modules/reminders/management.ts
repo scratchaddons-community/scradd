@@ -111,9 +111,8 @@ export async function createReminder(
 		});
 	}
 
-	const channel = dms
-		? (await interaction.user.createDM().catch(() => void 0))?.id
-		: interaction.channel?.id;
+	const channel =
+		dms ? (await interaction.user.createDM().catch(() => void 0))?.id : interaction.channel?.id;
 	if (!channel)
 		return await interaction.reply({
 			ephemeral: true,
@@ -156,9 +155,9 @@ export async function cancelReminder(
 	if (
 		interaction.user.id !== interaction.message.interaction?.user.id &&
 		(!config.roles.mod ||
-			!(interaction.member instanceof GuildMember
-				? interaction.member.roles.resolve(config.roles.mod.id)
-				: interaction.member?.roles.includes(config.roles.mod.id)))
+			!(interaction.member instanceof GuildMember ?
+				interaction.member.roles.resolve(config.roles.mod.id)
+			:	interaction.member?.roles.includes(config.roles.mod.id)))
 	) {
 		await interaction.reply({
 			ephemeral: true,

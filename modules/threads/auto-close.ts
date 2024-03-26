@@ -48,9 +48,10 @@ export async function setUpAutoClose(
 				threadConfig.keepOpen ? "not " : ""
 			}be prevented from closing!`,
 
-			components: threadConfig.keepOpen
-				? []
-				: [
+			components:
+				threadConfig.keepOpen ?
+					[]
+				:	[
 						{
 							type: ComponentType.ActionRow,
 							components: [
@@ -62,7 +63,7 @@ export async function setUpAutoClose(
 								},
 							],
 						},
-				  ],
+					],
 		});
 	}
 
@@ -114,9 +115,9 @@ export async function cancelThreadChange(
 ): Promise<InteractionResponse | undefined> {
 	if (
 		!config.roles.staff ||
-		!(interaction.member instanceof GuildMember
-			? interaction.member.roles.resolve(config.roles.staff.id)
-			: interaction.member?.roles.includes(config.roles.staff.id))
+		!(interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,
