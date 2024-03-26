@@ -11,8 +11,8 @@ module.exports =
 				.filter(
 					([library]) =>
 						(library.length === 6 && library.startsWith("es")) ||
-						compilerOptions.types.includes(library)
-				)
+						compilerOptions.types.includes(library),
+				),
 		),
 		extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
 		ignorePatterns: "dist",
