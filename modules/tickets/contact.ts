@@ -142,7 +142,7 @@ export default async function contactMods(
 
 	const oldThread = TICKETS_BY_MEMBER[member.id];
 	if (oldThread) {
-		await oldThread.setLocked(false);
+		await oldThread.setLocked(false, "Unlocking due to new ticket sent");
 		await oldThread.send({ embeds: [details] });
 		return oldThread;
 	}

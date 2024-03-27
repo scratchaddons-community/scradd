@@ -150,7 +150,7 @@ async function getThread(): Promise<ThreadChannel | undefined> {
 			},
 		],
 	});
-	await message.pin();
+	await message.pin("Pinned Scradd Chat consent message for easy access");
 	return createdThread;
 }
 export async function allowChat(
