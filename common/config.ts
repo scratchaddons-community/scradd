@@ -9,11 +9,17 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
+import type { NonFalsy } from "./misc.js";
 
 const IS_TESTING = process.argv.some((file) => file.endsWith(".test.js"));
 
 const guild = IS_TESTING ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
 if (guild && !guild.available) throw new ReferenceError("Main guild is unavailable!");
+
+function assertInProd<T>(value: T): NonFalsy<T> {
+	if (!IS_TESTING) assert(value);
+	return value as NonFalsy<T>;
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getConfig() {
@@ -27,15 +33,16 @@ async function getConfig() {
 
 	const mod = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	const staff = roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? mod;
-	assert(staff);
+	assertInProd(staff);
 	const exec = roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staff;
 	return {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		guild: guild!,
+		guild: assertInProd(guild),
 		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
-		testingGuild:
-			guild && (await client.guilds.fetch("938438560925761619").catch(() => void 0)),
-		saDevGuildId: "751206349614088204",
+		guilds: {
+			testing: guild && (await client.guilds.fetch("938438560925761619").catch(() => void 0)),
+			development:
+				guild && (await client.guilds.fetch("751206349614088204").catch(() => void 0)),
+		},
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),
