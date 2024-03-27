@@ -61,6 +61,7 @@ defineEvent("messageCreate", async (message) => {
 		const isArray = Array.isArray(response);
 		if (isArray) {
 			const reply = await message.reply(response[0]);
+			autoResponses.set(message.id, reply);
 			for (const action of response.slice(1)) {
 				if (typeof action === "number") {
 					await wait(action);
@@ -70,7 +71,7 @@ defineEvent("messageCreate", async (message) => {
 				const edited = await reply.edit(action).catch(() => void 0);
 				if (!edited) break;
 			}
-		} else await message.reply(response);
+		} else autoResponses.set(message.id, await message.reply(response));
 	}
 
 	const settings = await getSettings(message.author);
@@ -125,7 +126,7 @@ defineEvent("messageUpdate", async (_, message) => {
 	const data = typeof response === "object" && !Array.isArray(response) && response;
 	if (found)
 		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
-	else if (data) await message.reply(data);
+	else if (data) autoResponses.set(message.id, await message.reply(data));
 });
 
 async function handleMutatable(
@@ -228,19 +229,7 @@ async function getAutoResponse(
 	message: Message | PartialMessage,
 ): Promise<Message | false | undefined> {
 	const cached = autoResponses.get(message.id);
-	if (cached) return cached;
-
-	const fetched = await message.channel.messages.fetch({ limit: 2, after: message.id });
-	const found = fetched.find(
-		(found) =>
-			found.reference?.messageId === message.id &&
-			found.author.id === client.user.id &&
-			found.createdTimestamp - message.createdTimestamp < 1000,
-	);
-
-	if (found) autoResponses.set(message.id, found);
-	if (fetched.size && !found) return false;
-	return found;
+	return cached ? cached : false;
 }
 
 function canDoSecrets(message: Message, checkDads = false): boolean {
