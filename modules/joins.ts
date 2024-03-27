@@ -27,7 +27,7 @@ defineEvent("guildMemberAdd", async (member) => {
 					},
 					{
 						name: "**We are not the Scratch Team.**",
-						value: "Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you! If you wish to contact the ST, please use [Contact Us](<${constants.domains.scratch}/contact-us>). **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
+						value: `Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you! If you wish to contact the ST, please use [Contact Us](<${constants.domains.scratch}/contact-us>). **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.`,
 					},
 				],
 				footer: {
