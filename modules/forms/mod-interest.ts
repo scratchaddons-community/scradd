@@ -17,7 +17,6 @@ import giveXp from "../xp/give-xp.js";
 import { getLevelForXp } from "../xp/misc.js";
 import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 
-if (!config.channels.admin) throw new ReferenceError("Could not find admin channel");
 const thread =
 	getInitialChannelThreads(config.channels.admin).find(
 		(thread) => thread.name === "Moderator Interest Forms",

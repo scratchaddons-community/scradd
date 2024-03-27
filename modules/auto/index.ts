@@ -132,7 +132,7 @@ async function handleMutatable(
 	message: Message,
 ): Promise<BaseMessageOptions | true | [BaseMessageOptions, ...(number | string)[]] | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
-	if (config.channels.modlogs?.id === baseChannel?.id) return;
+	if (config.channels.modlogs.id === baseChannel?.id) return;
 
 	const settings = await getSettings(message.author);
 	if (settings.scratchEmbeds) {

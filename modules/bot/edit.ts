@@ -19,7 +19,7 @@ export default async function editMessage(
 	if (
 		!interaction.targetMessage.editable ||
 		config.channels.board?.id === interaction.channel?.id ||
-		(config.channels.modlogs?.id === getBaseChannel(interaction.channel)?.id &&
+		(config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id &&
 			databaseThread.id !== interaction.channel?.id)
 	) {
 		return await interaction.reply({

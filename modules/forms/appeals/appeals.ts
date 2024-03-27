@@ -13,7 +13,6 @@ import { escapeMessage } from "../../../util/markdown.js";
 import { LoggingEmojis } from "../../logging/misc.js";
 import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
 
-if (!config.channels.mod) throw new ReferenceError("Could not find mod channel");
 export const appealThread =
 	getInitialChannelThreads(config.channels.mod).find(
 		(thread) => thread.name === "Ban Appeal Forms",

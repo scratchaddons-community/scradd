@@ -5,7 +5,7 @@ import { recentXpDatabase } from "./util.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())
-		throw new TypeError("weeklyXpGraph SelectMenu not a UserSelectMenu!");
+		throw new TypeError("weeklyXpGraph is not a UserSelectMenu!");
 
 	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
 

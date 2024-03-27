@@ -15,7 +15,6 @@ let timeouts: Record<
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
 > = {};
 
-if (!config.channels.modlogs) throw new ReferenceError("Cannot find logs channel");
 const threadName = "databases";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(

@@ -75,7 +75,7 @@ export function boardReactionCount(
 		baseReactionCount(baseChannel.id) ??
 			{
 				[config.channels.info?.id || ""]: COUNTS.info,
-				[config.channels.modlogs?.parent?.id || ""]: COUNTS.misc,
+				[config.channels.modlogs.parent?.id || ""]: COUNTS.misc,
 				"866028754962612294": COUNTS.misc, // #The Cache
 			}[baseChannel.parent?.id || ""] ??
 			COUNTS.default,
@@ -95,7 +95,7 @@ function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: COUNTS.default,
 		[config.channels.exec?.id || ""]: COUNTS.private,
-		[config.channels.admin?.id || ""]: COUNTS.admins,
+		[config.channels.admin.id || ""]: COUNTS.admins,
 		"853256939089559583": COUNTS.private, // #ba-doosters
 		[config.channels.devs?.id || ""]: COUNTS.private,
 		"811065897057255424": COUNTS.memes, // #memes
