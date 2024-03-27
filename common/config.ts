@@ -4,7 +4,9 @@ import {
 	Collection,
 	type AnyThreadChannel,
 	type Channel,
+	type Guild,
 	type NonThreadGuildBasedChannel,
+	type Snowflake,
 	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
@@ -20,6 +22,11 @@ function assertOutsideTests<T>(value: T): NonFalsy<T> {
 	if (!IS_TESTING) assert(value);
 	return value as NonFalsy<T>;
 }
+
+const guildIds = {
+	testing: "938438560925761619",
+	development: "751206349614088204",
+} as const;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getConfig() {
@@ -45,11 +52,17 @@ async function getConfig() {
 	return {
 		guild: assertOutsideTests(guild),
 		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
-		guilds: {
-			testing: guild && (await client.guilds.fetch("938438560925761619").catch(() => void 0)),
-			development:
-				guild && (await client.guilds.fetch("751206349614088204").catch(() => void 0)),
-		},
+		guilds: Object.fromEntries(
+			await Promise.all(
+				Object.entries(guildIds).map(async ([key, id]) => {
+					const basic: Partial<Guild> & { id: Snowflake } = { id, valueOf: () => id };
+					return [
+						key,
+						guild ? await client.guilds.fetch(id).catch(() => basic) : basic,
+					] as const;
+				}),
+			),
+		),
 
 		channels: {
 			info: getChannel("Info", ChannelType.GuildCategory, "start"),

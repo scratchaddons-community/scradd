@@ -33,6 +33,7 @@ const SETTINGS = {
 	autoreactions: "Autoreactions",
 	boardPings: "Board Pings",
 	dmReminders: "DM Reminders",
+	github: "GitHub Reference Links",
 	levelUpPings: "Level Up Pings",
 	scratchEmbeds: "Scratch Link Embeds",
 	useMentions: "Use Mentions",
@@ -42,7 +43,7 @@ export async function getDefaultSettings(user: {
 }): Promise<Required<Omit<(typeof userSettingsDatabase.data)[number], "id">>> {
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 	const isDev =
-		(await config.guilds.development?.members.fetch(user.id).then(
+		(await config.guilds.development.members?.fetch(user.id).then(
 			() => true,
 			() => false,
 		)) ?? !member;
@@ -50,6 +51,7 @@ export async function getDefaultSettings(user: {
 		autoreactions: true,
 		boardPings: process.env.NODE_ENV === "production",
 		dmReminders: true,
+		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
 		levelUpPings: process.env.NODE_ENV === "production",
 		scraddChat: false,
 		scratchEmbeds: true,
@@ -83,7 +85,7 @@ defineChatCommand(
 			},
 			"scratch-embeds": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Send information about Scratch links you send",
+				description: "Show information about Scratch links you send",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -111,9 +113,13 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
+			"github": {
+				type: ApplicationCommandOptionType.Boolean,
+				description: "Link GitHub issues, PRs, and discussions when you send references",
+			},
 			"scratch-embeds": {
 				type: ApplicationCommandOptionType.Boolean,
-				description: "Send information about Scratch links you send",
+				description: "Show information about Scratch links you send",
 			},
 			"use-mentions": {
 				type: ApplicationCommandOptionType.Boolean,
@@ -178,7 +184,15 @@ export async function updateSettings(
 				type: ComponentType.ActionRow,
 			},
 			{
-				components: [buttons.useMentions, buttons.autoreactions, buttons.scratchEmbeds],
+				components: [
+					buttons.useMentions,
+					buttons.autoreactions,
+					buttons.scratchEmbeds,
+					...((await config.guilds.development.members?.fetch(user.id).then(
+						() => [buttons.github],
+						() => [],
+					)) ?? [buttons.github]),
+				],
 				type: ComponentType.ActionRow,
 			},
 		],

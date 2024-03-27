@@ -66,7 +66,7 @@ export function boardReactionCount(
 	if (!baseChannel || baseChannel.isDMBased()) return shift(COUNTS.default);
 	if (baseChannel.guild.id !== config.guild.id)
 		return shift(
-			COUNTS[baseChannel.guild.id === config.guilds.testing?.id ? "testing" : "misc"],
+			COUNTS[baseChannel.guild.id === config.guilds.testing.id ? "testing" : "misc"],
 		);
 	if (!baseChannel.isTextBased()) return shift(COUNTS.default);
 	if (baseChannel.isVoiceBased()) return shift(COUNTS.misc);
@@ -195,7 +195,7 @@ function formatChannel(channel: TextBasedChannel): string {
 	const otherServer =
 		!channel.isDMBased() &&
 		channel.guild.id !== config.guild.id &&
-		(channel.guild.id === config.guilds.development?.id ? "SA Dev" : config.guild.name);
+		(channel.guild.id === config.guilds.development.id ? "SA Dev" : config.guild.name);
 
 	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
 	if (thread) return `${channel.toString()} (${thread})`;

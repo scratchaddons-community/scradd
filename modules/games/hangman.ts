@@ -318,7 +318,7 @@ const ROLES = [
 ];
 async function getMember(player: User): Promise<GuildMember> {
 	const members = await config.guild.members.fetch();
-	const testers = await config.guilds.testing?.members.fetch();
+	const testers = await config.guilds.testing.members?.fetch();
 	const xp = recentXpDatabase.data.reduce<Record<Snowflake, number>>((accumulator, gain) => {
 		accumulator[gain.user] = (accumulator[gain.user] ?? 0) + gain.xp;
 		return accumulator;

@@ -76,7 +76,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 	});
 
 	async function getRole(roleId: Snowflake): Promise<string> {
-		const role = await config.guilds.testing?.roles.fetch(roleId);
+		const role = await config.guilds.testing.roles?.fetch(roleId);
 		const members: { user: User }[] = [...(role?.members.values() ?? [])];
 		if (roleId === designers)
 			members.push({ user: await client.users.fetch(constants.users.weirdo) });

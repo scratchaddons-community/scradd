@@ -7,7 +7,6 @@ import {
 	type APIEmbed,
 	type BaseMessageOptions,
 	type Message,
-	type PartialMessage,
 	type Snowflake,
 } from "discord.js";
 import { setTimeout as wait } from "node:timers/promises";
@@ -23,6 +22,7 @@ import autoreactions from "./autos-data.js";
 import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
 import dad from "./dad.js";
 import { getMatches, handleMatch } from "./scratch.js";
+import github from "./github.js";
 
 const REACTION_CAP = 3;
 
@@ -119,8 +119,8 @@ defineEvent("messageCreate", async (message) => {
 defineEvent("messageUpdate", async (_, message) => {
 	if (message.partial) return;
 
-	const found = await getAutoResponse(message);
-	if (found === false) return;
+	const found = autoResponses.get(message.id);
+	if (!found && 1 > +"0" /* TODO: only return if there's new messages */) return;
 
 	const response = await handleMutatable(message);
 	const data = typeof response === "object" && !Array.isArray(response) && response;
@@ -136,6 +136,29 @@ async function handleMutatable(
 	if (config.channels.modlogs.id === baseChannel?.id) return;
 
 	const settings = await getSettings(message.author);
+
+	const links = settings.github && github(message.content, message.guild?.id);
+	if (links)
+		return {
+			content: links,
+			components:
+				(await getSettings(message.author, false)).github === undefined ?
+					[
+						{
+							components: [
+								{
+									customId: "scratchEmbeds_toggleSetting",
+									type: ComponentType.Button as const,
+									label: `Disable GitHub Links`,
+									style: ButtonStyle.Success as const,
+								},
+							],
+							type: ComponentType.ActionRow,
+						},
+					]
+				:	[],
+		};
+
 	if (settings.scratchEmbeds) {
 		const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
 
@@ -217,7 +240,7 @@ async function handleMutatable(
 }
 
 defineEvent("messageDelete", async (message) => {
-	const found = await getAutoResponse(message);
+	const found = autoResponses.get(message.id);
 	if (!found) return;
 
 	await found.delete();
@@ -225,12 +248,6 @@ defineEvent("messageDelete", async (message) => {
 });
 
 const autoResponses = new Map<Snowflake, Message>();
-async function getAutoResponse(
-	message: Message | PartialMessage,
-): Promise<Message | false | undefined> {
-	const cached = autoResponses.get(message.id);
-	return cached ? cached : false;
-}
 
 function canDoSecrets(message: Message, checkDads = false): boolean {
 	if (message.channel.isDMBased()) return false;
@@ -246,8 +263,8 @@ function canDoSecrets(message: Message, checkDads = false): boolean {
 	if (checkDads) {
 		const baseChannel = getBaseChannel(message.channel);
 		if (
-			(message.guild?.id === config.guilds.testing?.id &&
-				message.guild?.id !== config.guild.id) ||
+			(message.guild?.id === config.guilds.testing.id &&
+				message.guild.id !== config.guild.id) ||
 			!baseChannel ||
 			baseChannel.type !== ChannelType.GuildText ||
 			!/\bbots?\b/i.test(baseChannel.name)
