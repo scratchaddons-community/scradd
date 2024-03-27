@@ -21,3 +21,10 @@ export type UndefinedDomain =
 	| (new (...args: unknown[]) => unknown)
 	| undefined;
 export type ToJSON<A> = A extends { toJSON(...args: unknown[]): infer T } ? T : A;
+
+export type CamelToKebab<S extends string> =
+	S extends `${infer T}${infer U}` ?
+		U extends Uncapitalize<U> ?
+			`${Lowercase<T>}${CamelToKebab<U>}`
+		:	`${Lowercase<T>}-${CamelToKebab<U>}`
+	:	"";
