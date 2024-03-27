@@ -1,4 +1,4 @@
-import { AuditLogEvent, ButtonStyle, ComponentType } from "discord.js";
+import { AuditLogEvent, ButtonStyle, ComponentType, channelLink } from "discord.js";
 import Mustache from "mustache";
 import { client, defineEvent } from "strife.js";
 import config from "../common/config.js";
@@ -6,6 +6,9 @@ import constants from "../common/constants.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
 import { getMessageJSON } from "../util/discord.js";
+
+const directoryUrl =
+	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -19,15 +22,25 @@ defineEvent("guildMemberAdd", async (member) => {
 				fields: [
 					{
 						name: "**What is this server?**",
-						value: `This is *the largest [Scratch](${constants.domains.scratch}) server*! Check out some of our funniest and most memorable moments on the <#938809898660155453> and introduce yourself in <#1109345462609252362>. You can also check out our [server directory](<https://discord.com/channels/806602307750985799/874743757210275860/1211864187458814024>) for other large Scratch servers to chat in.`,
+						value:
+							`This is *the largest [Scratch](${constants.domains.scratch}) server*!` +
+							` Check out some of our funniest and most memorable moments${config.channels.board ? ` on the ${config.channels.board.toString()}` : ""} and introduce yourself${config.channels.intros ? ` in ${config.channels.intros.toString()}` : ""}.` +
+							(directoryUrl &&
+								` You can also check out our [server directory](<${directoryUrl}>) for other large Scratch servers to chat in.`),
 					},
 					{
 						name: "**What is Scratch Addons?**",
-						value: `This server focuses specifically on *the Scratch Addons browser extension*, the all-in-one browser extension for Scratch. Scratch Addons combines new and existing features and themes for the Scratch website and project editor into one __easy-to-access and configurable__ browser extension. For more information about us, **visit [ScratchAddons.com](${constants.domains.scratchAddons})**.`,
+						value:
+							"This server focuses specifically on *the Scratch Addons browser extension*, the all-in-one browser extension for Scratch." +
+							" Scratch Addons combines new and existing features and themes for the Scratch website and project editor into one __easy-to-access and configurable__ browser extension." +
+							` For more information about us, **visit [ScratchAddons.com](${constants.domains.scratchAddons})**.`,
 					},
 					{
 						name: "**We are not the Scratch Team.**",
-						value: `Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you! If you wish to contact the ST, please use [Contact Us](<${constants.domains.scratch}/contact-us>). **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.`,
+						value:
+							"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
+							` If you wish to contact the ST, please use [Contact Us](<${constants.domains.scratch}/contact-us>).` +
+							" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
 					},
 				],
 				footer: {
@@ -60,13 +73,13 @@ defineEvent("guildMemberAdd", async (member) => {
 						label: "Get Scratch Addons",
 					},
 					{
-						url: "https://discord.com/channels/806602307750985799/806603924613627914",
+						url: config.guild.rulesChannel?.url ?? channelLink("", config.guild.id),
 						style: ButtonStyle.Link,
 						type: ComponentType.Button,
 						label: "Server Rules",
 					},
 					{
-						url: "https://discord.com/channels/806602307750985799/874743757210275860/1211864187458814024",
+						url: directoryUrl || channelLink("", config.guild.id),
 						style: ButtonStyle.Link,
 						type: ComponentType.Button,
 						label: "Other Scratch Servers",
