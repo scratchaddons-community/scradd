@@ -3,6 +3,7 @@
 
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
+import type { FilterNonFalsy, NonFalsy, ToJSON, UndefinedDomain, WidenLiteral } from "./misc.js";
 
 declare global {
 	interface Array<T> {
@@ -181,27 +182,3 @@ declare module "strife.js" {
 		inGuild: true;
 	}
 }
-
-type Falsy = "" | 0 | 0n | false | null | undefined;
-type NonFalsy<T> = T extends Falsy ? never : T;
-
-type FilterNonFalsy<T> =
-	T extends readonly [infer F, ...infer R] ?
-		F extends Falsy ?
-			FilterNonFalsy<R>
-		:	[F, ...FilterNonFalsy<R>]
-	:	[];
-type WidenLiteral<T> =
-	T extends string ? string
-	: T extends number ? number
-	: T extends boolean ? boolean
-	: T extends bigint ? bigint
-	: T extends symbol ? symbol
-	: T;
-
-type UndefinedDomain =
-	| symbol
-	| ((...args: unknown[]) => unknown)
-	| (new (...args: unknown[]) => unknown)
-	| undefined;
-type ToJSON<A> = A extends { toJSON(...args: unknown[]): infer T } ? T : A;
