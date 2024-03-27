@@ -99,9 +99,9 @@ export default async function automodMessage(message: Message): Promise<boolean>
 	);
 
 	if (
-		config.channels.advertise &&
+		config.channels.share &&
 		baseChannel &&
-		config.channels.advertise.id !== baseChannel.id &&
+		[config.channels.advertise?.id, config.channels.share.id].includes(baseChannel.id) &&
 		!baseChannel.isDMBased() &&
 		baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")
 	) {
@@ -121,7 +121,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				badInvites.length,
 				badInvites.join("\n"),
 			);
-			deletionMessage += ` Please keep server invites in ${config.channels.advertise.toString()}!`;
+			deletionMessage += ` Please keep server invites in ${config.channels.share.toString()}!`;
 		}
 
 		const bots = [...new Set(message.content.match(GlobalBotInvitesPattern))];
@@ -133,7 +133,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				bots.length,
 				bots.join("\n"),
 			);
-			deletionMessage += ` Please don’t post bot invites outside of ${config.channels.advertise.toString()}!`;
+			deletionMessage += ` Please don’t post bot invites outside of ${config.channels.share.toString()}!`;
 		}
 
 		if (baseChannel.name.includes("general") || baseChannel.name.includes("showcase")) {
@@ -176,7 +176,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				);
 				deletionMessage += ` Sorry, but you need level 5 to post ${
 					links.length === 1 ? "that link" : "those links"
-				} outside a channel like ${config.channels.advertise.toString()}!`;
+				} outside a channel like ${config.channels.share.toString()}!`;
 			}
 		}
 	}

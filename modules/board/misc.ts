@@ -100,7 +100,6 @@ function baseReactionCount(id: Snowflake): number | undefined {
 		[config.channels.devs?.id || ""]: COUNTS.private,
 		"811065897057255424": COUNTS.memes, // #memes
 		"806609527281549312": COUNTS.memes, // #collabs-and-ideas
-		"806656240129671188": COUNTS.memes, // #showcase
 		[config.channels.advertise?.id || ""]: COUNTS.memes,
 		"939350305311715358": COUNTS.testing, // #modmail
 		"894314668317880321": COUNTS.testing, // #evil-secret-youtube-plans

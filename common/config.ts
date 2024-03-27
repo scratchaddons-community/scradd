@@ -93,6 +93,7 @@ async function getConfig() {
 			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
 			qotd: getChannel("question", ChannelType.GuildForum, "partial"),
+			share: getChannel("share", ChannelType.GuildForum),
 			advertise:
 				getChannel("advertise", ChannelType.GuildText, "partial") ??
 				getChannel("promo", ChannelType.GuildText, "partial"),
