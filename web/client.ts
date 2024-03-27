@@ -1,4 +1,4 @@
-/** Eslint-env browser. */
+/* eslint-env browser */
 
 const spoilers = [...document.querySelectorAll(".discord-spoiler")];
 for (const spoiler of spoilers) {
@@ -98,8 +98,8 @@ function emojisplosions(): void {
 		setTimeout(blastAndSchedule, Math.floor(Math.random() * 1401) + 700);
 	}
 
-	container.addEventListener("click", (event) => {
-		const actor = event.target && domNodesToActors.get(event.target);
+	container.addEventListener("click", ({ target }) => {
+		const actor = target && domNodesToActors.get(target);
 		if (!actor) return;
 
 		actor.opacity = 1;
