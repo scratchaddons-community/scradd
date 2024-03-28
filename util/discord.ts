@@ -732,7 +732,7 @@ export async function paginate<Item>(
 					fields:
 						condensed || columns === 1 ?
 							[]
-						:	await columnize(filtered, constants.zws, formatLine, columns),
+						:	await columnize(filtered, formatLine, constants.zws, columns),
 
 					footer: {
 						text: `Page ${offset / length + 1}/${pages}${
@@ -869,24 +869,24 @@ export async function mentionChatCommand(
 }
 export async function columnize<Item extends { toString(): Awaitable<string> }>(
 	array: Item[],
-	title: string,
 	stringify?: (item: Item, index: number, array: Item[]) => Awaitable<string>,
+	title?: string,
 	count?: 1 | 2 | 3,
 ): Promise<APIEmbedField[]>;
 export async function columnize<Item>(
 	array: Item[],
-	title: string,
 	stringify: (item: Item, index: number, array: Item[]) => Awaitable<string>,
+	title: string,
 	count?: 1 | 2 | 3,
 ): Promise<APIEmbedField[]>;
 export async function columnize(
 	array: { toString(): string }[],
-	title: string = constants.zws,
 	stringify = (
 		item: { toString(): Awaitable<string> },
 		_: number,
 		__: { toString(): Awaitable<string> }[],
 	) => item.toString(),
+	title: string = constants.zws,
 	count: 1 | 2 | 3 = 2,
 ): Promise<APIEmbedField[]> {
 	const size = Math.ceil(array.length / count);

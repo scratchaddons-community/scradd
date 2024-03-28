@@ -63,10 +63,10 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 					},
 					...(await columnize(
 						dependencies,
-						"🗄️ Third-party code libraries",
 						([specifier, link]) =>
 							"- " +
 							(link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
+						"🗄️ Third-party code libraries",
 					)),
 				],
 
