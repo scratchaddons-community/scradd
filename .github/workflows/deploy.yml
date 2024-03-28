@@ -41,6 +41,9 @@ jobs:
                   curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
                   }}/raw/strings.ts" --output common/strings.ts
 
+            - name: Checkout images
+              run: git clone https://gist.github.com/{{ secrets.IMAGES_GIST }}.git scripts/images
+
             - name: Install
               run: npm ci --force
 
