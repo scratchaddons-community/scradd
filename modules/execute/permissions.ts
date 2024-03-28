@@ -13,6 +13,7 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import type { CustomOperation } from "./util.js";
+import { getSettings } from "../settings.js";
 
 const permissionsCache: Record<
 	Guild["id"],
@@ -24,7 +25,11 @@ export default async function hasPermission(
 	channel?: TextBasedChannel,
 	ignoredRoles = new Set<Snowflake>(),
 ): Promise<boolean> {
-	if (!(schema instanceof ApplicationCommand)) return true;
+	if (!(schema instanceof ApplicationCommand))
+		return (
+			schema.permissions?.(user, channel) ??
+			(await getSettings("user" in user ? user.user : user)).execute
+		);
 	if (user instanceof User) return schema.dmPermission ?? false;
 
 	const memberPermissions =

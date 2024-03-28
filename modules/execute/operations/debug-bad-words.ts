@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, GuildMember } from "discord.js";
+import { ApplicationCommandOptionType, GuildMember, User } from "discord.js";
 import type { CustomOperation } from "../util.js";
 import badWords from "../../automod/bad-words.js";
 import { caesar } from "../../../util/text.js";
@@ -19,20 +19,14 @@ const data: CustomOperation = {
 			required: true,
 		},
 	],
-	permissions: [],
+	permissions: (user) =>
+		!(user instanceof User) &&
+		!!(user instanceof GuildMember ?
+			user.roles.resolve(config.roles.staff.id)
+		:	user.roles.includes(config.roles.staff.id)),
 
 	async command(interaction, { string }) {
 		assert(typeof string === "string");
-
-		if (
-			!(interaction.member instanceof GuildMember ?
-				interaction.member.roles.resolve(config.roles.staff.id)
-			:	interaction.member.roles.includes(config.roles.staff.id))
-		)
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You don’t have permission to execute this operation!`,
-			});
 
 		const matches = badWords
 			.flat(2)

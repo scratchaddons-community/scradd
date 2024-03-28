@@ -29,6 +29,7 @@ const data: CustomOperation = {
 			required: false,
 		},
 	],
+	permissions: () => true,
 	async command(interaction, { operation: rawOperation } = {}) {
 		await interaction.deferReply();
 
@@ -107,7 +108,7 @@ export async function listOperations(
 		title: "Available Operations",
 		fields: await columnize(
 			Object.values(schemas)
-			.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
+				.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 				.map(
 					(schema) =>
 						inlineCode(OPERATION_PREFIX + schema.name) + ": " + schema.description,

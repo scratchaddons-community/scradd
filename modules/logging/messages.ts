@@ -114,13 +114,14 @@ export async function messageDeleteBulk(
 		},
 	);
 }
+export const ignoredReactionPurges = new Set<Snowflake>();
 export async function messageReactionRemoveAll(
 	partialMessage: Message | PartialMessage,
 	reactions: ReadonlyCollection<string, MessageReaction>,
 ): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
-	if (!shouldLog(message.channel)) return;
+	if (!shouldLog(message.channel) || ignoredReactionPurges.has(message.id)) return;
 
 	await log(
 		`${

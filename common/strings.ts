@@ -6,3 +6,15 @@ export const statuses = ["Watching the SA server!"] as const;
 
 export const uwuReplacements: Record<string, string> = {};
 export const uwuEndings = [":3"] as const;
+
+export const executeMessages = ["gay"] as const;
+export const executeEmojis = [
+	["🩷"],
+	["❤️"],
+	["🧡"],
+	["💛"],
+	["💚"],
+	["🩵"],
+	["💙"],
+	["💜"],
+] as const;

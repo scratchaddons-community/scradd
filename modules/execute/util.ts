@@ -22,7 +22,10 @@ import hasPermission from "./permissions.js";
 export type CustomOperation = {
 	name: string;
 	description: string;
-	permissions?: unknown;
+	permissions?(
+		user: APIInteractionGuildMember | GuildMember | User,
+		channel?: TextBasedChannel,
+	): boolean | undefined;
 	censored?: "channel" | false | undefined;
 	options?: ApplicationCommandOption[];
 	command(

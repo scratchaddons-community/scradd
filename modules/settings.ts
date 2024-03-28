@@ -51,8 +51,10 @@ export async function getDefaultSettings(user: {
 		autoreactions: true,
 		boardPings: process.env.NODE_ENV === "production",
 		dmReminders: true,
+		execute: false,
 		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
 		levelUpPings: process.env.NODE_ENV === "production",
+		preDango: false,
 		scraddChat: false,
 		scratchEmbeds: true,
 		useMentions: getWeeklyXp(user.id) > 100 || isDev,
@@ -222,7 +224,12 @@ defineButton("toggleSetting", async (interaction, setting = "") => {
 });
 
 export const userSettingsDatabase = new Database<
-	{ [key in keyof typeof SETTINGS]?: boolean } & { id: Snowflake; scraddChat?: boolean }
+	{
+		id: Snowflake;
+		execute?: boolean;
+		preDango?: boolean;
+		scraddChat?: boolean;
+	} & { [key in keyof typeof SETTINGS]?: boolean }
 >("user_settings");
 await userSettingsDatabase.init();
 export async function getSettings(
