@@ -22,6 +22,17 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.2
 
+            - name: Setup Node.JS
+              uses: actions/setup-node@v4.0.2
+              with:
+                  node-version: 20.6.0
+                  cache: npm
+
+            - name: Bump Twemoji
+              run:
+                  npm pkg set dependencies.@twemoji/parser="<=$(npm show @discordapp/twemoji
+                  version)"
+
             - name: Bump
               id: sync_types
               uses: RedGuy12/sync-types@v2.1.0

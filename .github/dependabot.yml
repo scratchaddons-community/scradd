@@ -13,3 +13,4 @@ updates:
           time: "12:45"
       ignore:
           - dependency-name: "@types/*"
+          - dependency-name: "@twemoji/parser"
