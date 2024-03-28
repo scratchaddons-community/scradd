@@ -43,7 +43,7 @@ export function decodeRegexp({ source }: RegExp): string {
 				"o": /[o⒪*#°⊘⍥🇴🅾○⭕¤၀๐໐߀〇০୦0०੦૦௦౦೦൦０⓪⓿⁰₀٥۵oｏℴⓞºₒᴏᴑꬽθοσⲟофჿօסⵔዐዕଠഠဝꓳ-]/giu
 					.source,
 				"p": /[p⒫⍴p🇵ｐⓟℙₚᴘρϱ🅿ⲣрየꮲᑭꓑ𝐏]/giu.source,
-				"q": /[q⒬۹9o🇶qｑⓠℚϙϱԛфգզⵕᑫ𝐐]/giu.source,
+				"q": /[q⒬۹9🇶qｑⓠℚϙϱԛфգզⵕᑫ𝐐]/giu.source,
 				"r": /[r⒭rｒⓡℝℛℜ🇷ʀɾꭇꭈᴦⲅгհዪꭱꮁꮢꮧᖇꓣ乃几卂尺𝐑]/giu.source,
 				"s": /[s⒮🇸§$₴sｓⓢₛꜱʂƽςѕꙅտֆꭶꮥꮪᔆᔕꓢ丂𝐒]/giu.source,
 				"t": /[t⒯⊤⟙✝ℑ🇹tｔⓣₜᴛŧƫƭτⲧтፕꭲꮏｷꓔ千]/giu.source,

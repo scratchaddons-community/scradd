@@ -1,6 +1,6 @@
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-import tryCensor, { censor, isPingable } from "./misc.js";
+import tryCensor, { censor, decodeRegexp, isPingable } from "./misc.js";
 
 await describe("tryCensor", async () => {
 	await it("should not catch fine words", () => {
@@ -57,5 +57,10 @@ await describe("isPingable", async () => {
 	});
 	await it("should allow simple names", () => {
 		strictEqual(isPingable("foo"), true);
+	});
+});
+await describe("decodeRegexp", async () => {
+	await it("should not match O as Q", () => {
+		ok(!decodeRegexp(/d/).includes("o"));
 	});
 });
