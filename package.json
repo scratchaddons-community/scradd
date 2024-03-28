@@ -26,7 +26,7 @@
 		"@khanacademy/simple-markdown": "0.11.4",
 		"@napi-rs/canvas": "0.1.51",
 		"@sa-community/addons-data": "1.36.0",
-		"@twemoji/parser": "15.0.0",
+		"@twemoji/parser": "15.1.0",
 		"chart.js": "4.4.2",
 		"didyoumean2": "6.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
