@@ -32,6 +32,7 @@ defineChatCommand(
 				required: true,
 			},
 		},
+		access: true,
 	},
 	async (interaction, { operation }) => {
 		const [commandName, args] = splitFirstArgument(operation);
@@ -95,7 +96,7 @@ defineChatCommand(
 
 		const permission = await hasPermission(
 			schema,
-			interaction.member,
+			interaction.member ?? interaction.user,
 			interaction.channel ?? undefined,
 		);
 		if (!permission) {
