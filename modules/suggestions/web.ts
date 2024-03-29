@@ -82,7 +82,6 @@ export default async function suggestionsPage(
 	const messages = [
 		!starterMessage || config.channels.oldSuggestions?.id === thread.parentId ?
 			{
-				interaction: starterMessage?.interaction,
 				createdAt: (starterMessage ?? thread).createdAt,
 				id: (starterMessage ?? thread).id,
 				attachments:
@@ -132,14 +131,8 @@ export default async function suggestionsPage(
 			answer: { emoji: prepareEmoji(answer.emoji, "❓"), name: answer.name },
 			url: thread.url,
 		},
-		interactionAvatar(this: MessageInteraction | null | undefined) {
-			return this?.user.displayAvatarURL({ size: 64 });
-		},
 		userAvatar(this: (typeof messages)[number]) {
 			return this.author.displayAvatarURL({ size: 64 });
-		},
-		userIcon(this: (typeof messages)[number]) {
-			return this.member?.roles?.icon?.iconURL();
 		},
 		createdDate(this: (typeof messages)[number]) {
 			return this.createdAt?.toLocaleString([], { dateStyle: "short", timeStyle: "short" });

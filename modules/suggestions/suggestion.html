@@ -38,20 +38,6 @@
 		<div class="discord-messages">
 			{{#messages}}
 			<div id="m-{{id}}" class="discord-message">
-				{{#interaction}}
-				<div class="discord-executed-command">
-					<img
-						class="discord-executed-command-avatar"
-						src="{{interactionAvatar}}"
-						alt="{{interaction.user.displayName}}"
-					/>
-					<span class="discord-executed-command-username">
-						{{interaction.user.displayName}}
-					</span>
-					&nbsp;used&nbsp;
-					<div class="discord-command-name">/{{interaction.commandName}}</div>
-				</div>
-				{{/interaction}}
 				<div class="discord-message-inner">
 					<div class="discord-author-avatar">
 						<img src="{{userAvatar}}" alt="{{author.displayName}}" />
@@ -63,17 +49,7 @@
 								style="color: {{member.displayHexColor}}"
 							>
 								{{author.displayName}}
-							</span>
-							{{#userIcon}}
-							<img
-								class="discord-author-role-icon"
-								src="{{userIcon}}"
-								height="20"
-								width="20"
-								alt="{{member.roles.hoist.name}}"
-								draggable="false"
-							/>
-							{{/userIcon}}{{#author.bot}}
+							</span>{{#author.bot}}
 							<span class="discord-application-tag">Bot</span>
 							{{/author.bot}}
 						</div>
