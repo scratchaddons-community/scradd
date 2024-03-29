@@ -11,7 +11,6 @@ import {
 	type RESTPutAPICurrentUserApplicationRoleConnectionJSONBody,
 	type RESTPutAPICurrentUserApplicationRoleConnectionResult,
 } from "discord.js";
-import { createHash, randomBytes } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -30,8 +29,6 @@ await client.application.editRoleConnectionMetadataRecords([
 	},
 ]);
 
-const HASH = randomBytes(16);
-const sessions: Record<string, string> = {};
 export default async function linkScratchRole(
 	request: IncomingMessage,
 	response: ServerResponse,
@@ -40,11 +37,6 @@ export default async function linkScratchRole(
 		return response.writeHead(501, { "content-type": "text/plain" }).end("501 Not Implemented");
 	if (request.method === "OPTIONS")
 		return response.writeHead(201, { "content-type": "text/plain" }).end("201 No Content");
-
-	const ipHash = createHash("sha384")
-		.update(request.socket.remoteAddress ?? "")
-		.update(HASH)
-		.digest("base64");
 
 	const requestUrl = getRequestUrl(request);
 	const redirectUri = requestUrl.origin + requestUrl.pathname;
@@ -83,12 +75,15 @@ export default async function linkScratchRole(
 		if (!tokenData)
 			return response.writeHead(401, { "content-type": "text/html" }).end(discordHtml);
 
-		sessions[ipHash] = tokenData.refresh_token;
-
-		return response.writeHead(303, { location: scratchUrl }).end();
+		return response
+			.writeHead(303, {
+				"Set-Cookie": `refresh_token=${tokenData.refresh_token}; HttpOnly; SameSite=Strict`,
+				"location": scratchUrl,
+			})
+			.end();
 	}
 
-	const discordToken = sessions[ipHash];
+	const discordToken = getCookies(request.headers.Cookie).refresh_token;
 	if (!discordToken)
 		return response.writeHead(401, { "content-type": "text/html" }).end(discordHtml);
 	const tokenData = (await client.rest
@@ -145,4 +140,24 @@ export default async function linkScratchRole(
 		{ embeds: [await handleUser(["", "", username])] },
 	);
 	return response.writeHead(303, { location: config.guild.rulesChannel?.url }).end();
+}
+
+function getCookies(cookies?: string[] | string): Record<string, string> {
+	const entries = (typeof cookies === "object" ? cookies : (cookies ?? "").split(";")).map(
+		(pair) => {
+			const indexOfEquals = pair.indexOf("=");
+
+			const name = indexOfEquals > -1 ? pair.slice(0, Math.max(0, indexOfEquals)).trim() : "";
+			const value = indexOfEquals > -1 ? pair.slice(indexOfEquals + 1).trim() : pair.trim();
+
+			const firstQuote = value.indexOf('"'); // eslint-disable-line unicorn/string-content
+			const lastQuote = value.lastIndexOf('"'); // eslint-disable-line unicorn/string-content
+
+			return [
+				name,
+				firstQuote > -1 && lastQuote > -1 ? value.slice(firstQuote + 1, lastQuote) : value,
+			] as const;
+		},
+	);
+	return Object.fromEntries(entries.toReversed());
 }
