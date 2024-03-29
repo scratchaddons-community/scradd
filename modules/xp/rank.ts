@@ -154,6 +154,10 @@ export async function top(
 		});
 	}
 
+	const ephemeral =
+		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
+	await interaction.deferReply({ ephemeral });
+
 	await paginate(
 		leaderboard,
 		async (xp) =>
@@ -162,7 +166,7 @@ export async function top(
 				interaction.user,
 				interaction.guild ?? config.guild,
 			)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
-		(data) => interaction.reply(data),
+		(data) => interaction.editReply(data),
 		{
 			title: "XP Leaderboard",
 			singular: "user",
@@ -171,9 +175,7 @@ export async function top(
 
 			user: interaction.user,
 			rawOffset: index,
-			ephemeral:
-				interaction.isButton() &&
-				interaction.message.interaction?.user.id !== interaction.user.id,
+			ephemeral,
 
 			async generateComponents() {
 				return (await getSettings(interaction.user, false)).useMentions === undefined ?
