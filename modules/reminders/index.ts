@@ -17,7 +17,7 @@ defineSubcommands(
 			add: {
 				description: "Sets a reminder",
 				options: {
-					dms: {
+					dm: {
 						type: ApplicationCommandOptionType.Boolean,
 						description:
 							"Send the reminder in DMs instead of this channel (defaults to true unless changed with /settings)",

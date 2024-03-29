@@ -63,12 +63,12 @@ export async function listReminders(interaction: ChatInputCommandInteraction): P
 
 export async function createReminder(
 	interaction: ChatInputCommandInteraction,
-	options: { dms?: boolean; time: string; reminder: string },
+	options: { dm?: boolean; time: string; reminder: string },
 ): Promise<InteractionResponse | undefined> {
 	const reminders = getUserReminders(interaction.user.id);
-	const dms = options.dms ?? (await getSettings(interaction.user)).dmReminders;
+	const dm = options.dm ?? (await getSettings(interaction.user)).dmReminders;
 
-	if (!dms && !badWordsAllowed(interaction.channel)) {
+	if (!dm && !badWordsAllowed(interaction.channel)) {
 		const censored = tryCensor(options.reminder);
 
 		if (censored) {
@@ -112,7 +112,7 @@ export async function createReminder(
 	}
 
 	const channel =
-		dms ? (await interaction.user.createDM().catch(() => void 0))?.id : interaction.channel?.id;
+		dm ? (await interaction.user.createDM().catch(() => void 0))?.id : interaction.channel?.id;
 	if (!channel)
 		return await interaction.reply({
 			ephemeral: true,
@@ -127,7 +127,7 @@ export async function createReminder(
 	await queueReminders();
 
 	await interaction.reply({
-		ephemeral: dms,
+		ephemeral: dm,
 		content: `${constants.emojis.statuses.yes} I’ll remind you ${time(
 			date,
 			TimestampStyles.RelativeTime,
