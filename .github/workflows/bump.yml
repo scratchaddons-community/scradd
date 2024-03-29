@@ -35,7 +35,7 @@ jobs:
 
             - name: Bump
               id: sync_types
-              uses: RedGuy12/sync-types@v2.1.0
+              uses: RedGuy12/sync-types@v2.1.1
 
             - name: Commit
               id: commit
