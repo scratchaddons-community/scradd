@@ -138,7 +138,7 @@ async function settingsCommand(
 ): Promise<void> {
 	const newOptions = Object.fromEntries(
 		Object.entries(options).map(([option, value]) => [
-			option.replaceAll(/-./g, (match) => match.toUpperCase()) as keyof typeof SETTINGS,
+			option.replaceAll(/-./g, (match) => match[1]?.toUpperCase() ?? ""),
 			value,
 		]),
 	);
