@@ -49,7 +49,7 @@ jobs:
 
             - name: Deploy
               run:
-                  npx railway up --detach --service b8b10332-30c2-4b72-8999-78c69ddcd63a
+                  npx railway up --detach --service afdb8def-13c6-4650-af4e-ef60d2009b56
                   --environment production
               env:
                   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
