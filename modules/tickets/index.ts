@@ -223,7 +223,7 @@ defineMenuCommand(
 				],
 			},
 		);
-		await interaction.reply({
+		await modalInteraction.reply({
 			content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
 			ephemeral: true,
 		});
