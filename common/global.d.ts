@@ -156,8 +156,8 @@ declare global {
 			PORT?: `${number}`;
 			/** The bot’s client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */
 			CLIENT_SECRET?: string;
-			/** The API key to force a database write on `/cleanDatabaseListeners`. */
-			CDBL_AUTH?: string;
+			/** The API key to force a database write and prepare to restart on `/prepare-exit`. */
+			EXIT_AUTH?: string;
 		}
 	}
 }

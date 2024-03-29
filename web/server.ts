@@ -32,13 +32,13 @@ const server = http.createServer(async (request, response) => {
 			:	`${requestUrl.pathname}/`).toLowerCase();
 		switch (pathname) {
 			case "/prepare-exit/": {
-				if (requestUrl.searchParams.get("auth") !== process.env.CDBL_AUTH)
+				if (requestUrl.searchParams.get("auth") !== process.env.EXIT_AUTH)
 					return response
 						.writeHead(403, { "content-type": "text/plain" })
 						.end("403 Forbidden");
 
 				await prepareExit();
-				process.emitWarning("cleanDatabaseListeners ran");
+				process.emitWarning("prepare-exit called");
 				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
 
 				return;

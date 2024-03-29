@@ -55,6 +55,4 @@ jobs:
                   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
             - name: Clean DB listeners
-              run:
-                  curl https://sa-discord.up.railway.app/clean-database-listeners?auth=${{
-                  secrets.CDBL_AUTH }}
+              run: curl https://sa-discord.up.railway.app/prepare-exit?auth=${{ secrets.EXIT_AUTH }}
