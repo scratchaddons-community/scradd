@@ -28,10 +28,10 @@ const server = http.createServer(async (request, response) => {
 		const requestUrl = getRequestUrl(request);
 		const pathname = (
 			requestUrl.pathname.endsWith("/") ?
-				requestUrl.pathname
-			:	`${requestUrl.pathname}/`).toLowerCase();
+				requestUrl.pathname.slice(0, -1)
+			:	requestUrl.pathname).toLowerCase();
 		switch (pathname) {
-			case "/prepare-exit/": {
+			case "/prepare-exit": {
 				if (requestUrl.searchParams.get("auth") !== process.env.EXIT_AUTH)
 					return response
 						.writeHead(403, { "content-type": "text/plain" })
@@ -43,26 +43,26 @@ const server = http.createServer(async (request, response) => {
 
 				return;
 			}
-			case "/ban-appeal/": {
+			case "/ban-appeal": {
 				return await appealRequest(request, response);
 			}
-			case "/link-scratch/": {
+			case "/link-scratch": {
 				return await linkScratchRole(request, response);
 			}
-			case "/style.css/": {
+			case "/style.css": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
 			}
-			case "/client.js/": {
+			case "/client.js": {
 				return response
 					.writeHead(200, { "content-type": "text/javascript" })
 					.end(CLIENT_JS_FILE);
 			}
-			case "/discord.css/": {
+			case "/discord.css": {
 				return response
 					.writeHead(200, { "content-type": "text/css" })
 					.end(DISCORD_CSS_FILE);
 			}
-			case "/icon.png/": {
+			case "/icon.png": {
 				const options = { extension: "png", forceStatic: true, size: 128 } as const;
 				return response
 					.writeHead(301, {
@@ -76,7 +76,12 @@ const server = http.createServer(async (request, response) => {
 		const segments = pathname.split("/");
 		if (segments[1] && Object.keys(DIRECTORIES).includes(segments[1])) {
 			const filePath = path.join(DIRECTORIES[segments[1]], segments.slice(2).join("/"));
-			if (await fileSystem.access(filePath).then(() => true))
+			if (
+				await fileSystem.access(filePath).then(
+					() => true,
+					() => false,
+				)
+			)
 				return createReadStream(filePath).pipe(response);
 		} else if (segments[1] === "suggestions") {
 			return await suggestionsPage(request, response, segments[2]);
