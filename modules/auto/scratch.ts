@@ -78,19 +78,22 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 		title: project.title,
 		color: constants.scratchColor,
 
-		fields: project.stats?[
-			{
-				name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
-					constants.emojis.scratch.favorite
-				} ${project.stats.favorites.toLocaleString()}`,
-				value: `**${
-					constants.emojis.scratch.remix
-				} ${project.stats.remixes.toLocaleString()} ${
-					constants.emojis.scratch.view
-				} ${project.stats.views.toLocaleString()}**`,
-				inline: true,
-			},
-		]:[],
+		fields:
+			project.stats ?
+				[
+					{
+						name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
+							constants.emojis.scratch.favorite
+						} ${project.stats.favorites.toLocaleString()}`,
+						value: `**${
+							constants.emojis.scratch.remix
+						} ${project.stats.remixes.toLocaleString()} ${
+							constants.emojis.scratch.view
+						} ${project.stats.views.toLocaleString()}**`,
+						inline: true,
+					},
+				]
+			:	[],
 		thumbnail: { url: project.images["282x218"] },
 		author: {
 			name: project.author.username,
