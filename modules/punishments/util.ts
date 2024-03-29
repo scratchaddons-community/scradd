@@ -112,6 +112,7 @@ export async function listStrikes(
 		),
 	);
 
+	const count = Math.floor(strike.count);
 	await paginate(
 		strikes,
 		(strike) =>
@@ -120,9 +121,9 @@ export async function listStrikes(
 				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
 				: "*"
 			}\`${strike.id}\`${
-				strike.count === 1 ?
+				count === 1 ?
 					""
-				:	` (${strike.count < 1 ? "verbal" : `\\*${Math.floor(strike.count)}`})`
+				:	` (${count < 1 ? "verbal" : `\\*${count}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~"
 				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
