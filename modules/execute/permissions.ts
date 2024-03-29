@@ -53,11 +53,10 @@ export default async function hasPermission(
 			true);
 	if (!channelPermission) return false;
 
-	const userPermission =
-		permissions.find(
-			({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.user.id,
-		)?.permission ?? true;
-	if (!userPermission) return false;
+	const userPermission = permissions.find(
+		({ id, type }) => type === ApplicationCommandPermissionType.User && id === user.user.id,
+	)?.permission;
+	if (userPermission !== undefined) return userPermission;
 
 	const rolePermissions = permissions.filter(
 		({ id, type }) =>
