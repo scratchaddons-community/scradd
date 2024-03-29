@@ -202,8 +202,6 @@ async function handleMutatable(
 	const chatResponse = scraddChat(message);
 	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
 
-	if (!canDoSecrets(message, true)) return;
-
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 	if (/^i[\p{Pi}\p{Pf}＂＇'"`՚’]?m\b/u.test(cleanContent)) {
 		const name = cleanContent
@@ -217,6 +215,7 @@ async function handleMutatable(
 
 		if (name && message.member) {
 			const response = dad(name, message.member);
+			if (!canDoSecrets(message, true)) return;
 			return Array.isArray(response) ?
 					([
 						{
