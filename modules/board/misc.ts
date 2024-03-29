@@ -194,7 +194,7 @@ function formatChannel(channel: TextBasedChannel): string {
 	const otherServer =
 		!channel.isDMBased() &&
 		channel.guild.id !== config.guild.id &&
-		(channel.guild.id === config.guilds.development.id ? "SA Dev" : config.guild.name);
+		(channel.guild.id === config.guilds.development.id ? "SA Dev" : channel.guild.name);
 
 	if (thread && otherServer) return `${channel.toString()} (${thread} - ${otherServer})`;
 	if (thread) return `${channel.toString()} (${thread})`;
