@@ -12,8 +12,8 @@ import constants from "../../../common/constants.js";
 import { convertBase } from "../../../util/numbers.js";
 import { joinWithAnd } from "../../../util/text.js";
 
-export const NEEDED_ACCEPT = 2,
-	NEEDED_REJECT = 1;
+export const NEEDED_ACCEPT = 4,
+	NEEDED_REJECT = 3;
 
 export default function generateAppeal(
 	data: { components?: ActionRowData<MessageActionRowComponent>; appeal?: Embed },
