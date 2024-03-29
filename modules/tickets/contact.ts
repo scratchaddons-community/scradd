@@ -166,7 +166,7 @@ export default async function contactMods(
 	const ping =
 		category === MOD_CATEGORY || process.env.NODE_ENV !== "production" ?
 			""
-		:	config.roles.staff.toString();
+		:	config.roles.mod.toString();
 	await (["appeal", "report", "other", MOD_CATEGORY].includes(category) ?
 		listStrikes(
 			member,
