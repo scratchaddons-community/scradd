@@ -172,6 +172,12 @@ defineModal("contactMods", async (interaction, id) => {
 defineMenuCommand(
 	{ name: "Report Message", type: ApplicationCommandType.Message },
 	async (interaction) => {
+		if (interaction.targetMessage.author.id === interaction.user.id) {
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} You can’t report your own messages!`,
+			});
+		}
 		await interaction.showModal({
 			title: "Report Message",
 			customId: interaction.id,
