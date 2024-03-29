@@ -24,7 +24,7 @@ jobs:
             - name: Download autos data
               run:
                   curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/autos-data.ts" --output modules/automod/autos-data.ts
+                  }}/raw/autos-data.ts" --output modules/auto/autos-data.ts
 
             - name: Download bad words
               run:
