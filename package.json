@@ -63,7 +63,7 @@
 	},
 	"overrides": {
 		"@discordjs/builders": "dev",
-		"@discordjs/collection": "dev",
+		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
 		"@discordjs/formatters": "dev",
 		"@discordjs/rest": "dev",
 		"@discordjs/util": "dev",
