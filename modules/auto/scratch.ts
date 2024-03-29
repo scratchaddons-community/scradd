@@ -78,7 +78,7 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 		title: project.title,
 		color: constants.scratchColor,
 
-		fields: [
+		fields: project.stats?[
 			{
 				name: `${constants.emojis.scratch.love} ${project.stats.loves.toLocaleString()} ${
 					constants.emojis.scratch.favorite
@@ -90,7 +90,7 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 				} ${project.stats.views.toLocaleString()}**`,
 				inline: true,
 			},
-		],
+		]:[],
 		thumbnail: { url: project.images["282x218"] },
 		author: {
 			name: project.author.username,

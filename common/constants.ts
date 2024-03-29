@@ -8,7 +8,7 @@ const domains = {
 		:	(`http://localhost:${process.env.PORT}` as const),
 	scratch: "https://scratch.mit.edu",
 	scratchAddons: "https://scratchaddons.com",
-	scratchApi: "https://api.scratch.mit.edu",
+	scratchApi: "https://corsproxy.io/?https://api.scratch.mit.edu",
 	scratchdb: "https://scratchdb.lefty.one/v3",
 } as const;
 
