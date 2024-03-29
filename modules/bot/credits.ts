@@ -18,6 +18,7 @@ const designers = "966174686142672917",
 	testers = "938440159102386276";
 
 export default async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
+	await interaction.deferReply();
 	const dependencies = Object.keys(pkg.dependencies)
 		.map((name) => {
 			const { version } = lockFile.dependencies[name];
@@ -47,7 +48,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 		})
 		.toSorted(([one], [two]) => one.localeCompare(two));
 
-	await interaction.reply({
+	await interaction.editReply({
 		embeds: [
 			{
 				title: "Credits",
