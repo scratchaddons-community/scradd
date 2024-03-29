@@ -23,26 +23,26 @@ jobs:
 
             - name: Download autos data
               run:
-                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
                   }}/raw/autos-data.ts" --output modules/automod/autos-data.ts
 
             - name: Download bad words
               run:
-                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
                   }}/raw/bad-words.ts" --output modules/automod/bad-words.ts
 
             - name: Download dad
               run:
-                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST }}/raw/dad.ts"
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST }}/raw/dad.ts"
                   --output modules/auto/dad.ts
 
             - name: Download strings
               run:
-                  curl "https://gist.githubusercontent.com/{{ secrets.PRIVATE_GIST
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
                   }}/raw/strings.ts" --output common/strings.ts
 
             - name: Checkout images
-              run: git clone https://gist.github.com/{{ secrets.IMAGES_GIST }}.git scripts/images
+              run: git clone https://gist.github.com/${{ secrets.IMAGES_GIST }}.git scripts/images
 
             - name: Install
               run: npm ci --force
