@@ -37,7 +37,7 @@ export default async function suggestionsPage(
 				all: all ? "&all" : "",
 				pageInfo,
 				previousPage: currentPage - 1,
-				nextPage: pageInfo && pageInfo.includes(`/${currentPage}`) ? 0 : currentPage + 1,
+				nextPage: pageInfo && pageInfo.includes(`/${currentPage} `) ? 0 : currentPage + 1,
 			}),
 		);
 	}
