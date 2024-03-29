@@ -61,11 +61,11 @@ export default async function linkScratchRole(
 		const tokenData = (await client.rest
 			.post(Routes.oauth2TokenExchange(), {
 				body: new URLSearchParams({
+					redirect_uri: redirectUri,
 					client_id: client.user.id,
 					client_secret: process.env.CLIENT_SECRET,
-					code,
 					grant_type: "authorization_code",
-					redirect_uri: redirectUri,
+					code,
 				} satisfies RESTPostOAuth2AccessTokenURLEncodedData),
 				passThroughBody: true,
 				headers: { "content-type": "application/x-www-form-urlencoded" },

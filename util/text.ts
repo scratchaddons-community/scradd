@@ -117,7 +117,7 @@ export function getRequestUrl(request: IncomingMessage): URL {
 		`${
 			(process.env.NODE_ENV !== "production" &&
 				request.headers["x-forwarded-proto"]?.toString()) ||
-			`http${"encrypted" in request.socket ? "s" : ""}`
+			`http${request.headers.host === "localhost" ? "" : "s"}`
 		}://${
 			(process.env.NODE_ENV !== "production" &&
 				request.headers["x-forwarded-host"]?.toString()) ||
