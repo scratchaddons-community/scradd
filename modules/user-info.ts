@@ -66,7 +66,7 @@ async function userInfo(
 				[
 					...member.roles
 						.valueOf()
-						.toSorted((one, two) => two.comparePositionTo(one))
+						.sorted((one, two) => two.comparePositionTo(one))
 						.filter(({ id }) => id !== interaction.guild?.id)
 						.values(),
 				].join(" ") || "*No roles*",

@@ -197,7 +197,7 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 							[
 								...interaction.member.roles
 									.valueOf()
-									.toSorted((one, two) => two.comparePositionTo(one))
+									.sorted((one, two) => two.comparePositionTo(one))
 									.filter(({ id }) => id !== config.guild.id)
 									.values(),
 							].join(" ") || "*No roles*",

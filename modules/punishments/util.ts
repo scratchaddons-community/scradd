@@ -112,23 +112,22 @@ export async function listStrikes(
 		),
 	);
 
-	const count = Math.floor(strike.count);
 	await paginate(
 		strikes,
-		(strike) =>
-			`${
+		(strike) => {
+			const count = Math.floor(strike.count);
+			return `${
 				strike.removed ? "~~"
 				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
 				: "*"
 			}\`${strike.id}\`${
-				count === 1 ?
-					""
-				:	` (${count < 1 ? "verbal" : `\\*${count}`})`
+				count === 1 ? "" : ` (${count < 1 ? "verbal" : `\\*${count}`})`
 			} - ${time(new Date(strike.date), TimestampStyles.RelativeTime)}${
 				strike.removed ? "~~"
 				: strike.date + EXPIRY_LENGTH > Date.now() ? ""
 				: "*"
-			}`,
+			}`;
+		},
 		reply,
 		{
 			title: `${member.displayName}’s strikes`,

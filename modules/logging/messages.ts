@@ -70,26 +70,28 @@ export async function messageDeleteBulk(
 	if (!shouldLog(channel)) return;
 	const messagesInfo = (
 		await Promise.all(
-			messages.toReversed().map(async (message) => {
-				const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
-					message.embeds.length > 1 ? "s" : ""
-				}`;
-				const attachments = `${
-					message.attachments.size ? `${message.attachments.size} attachment` : ""
-				}${message.attachments.size > 1 ? "s" : ""}`;
-				const extremities =
-					message.embeds.length || message.attachments.size ?
-						` (${embeds}${embeds && attachments && ", "}${attachments})`
-					:	"";
+			messages
+				.map(async (message) => {
+					const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
+						message.embeds.length > 1 ? "s" : ""
+					}`;
+					const attachments = `${
+						message.attachments.size ? `${message.attachments.size} attachment` : ""
+					}${message.attachments.size > 1 ? "s" : ""}`;
+					const extremities =
+						message.embeds.length || message.attachments.size ?
+							` (${embeds}${embeds && attachments && ", "}${attachments})`
+						:	"";
 
-				const author =
-					message.author ?
-						`${message.author.tag} - ${message.author.id}`
-					:	"[unknown author]";
-				const content = !message.partial && (await messageToText(message));
+					const author =
+						message.author ?
+							`${message.author.tag} - ${message.author.id}`
+						:	"[unknown author]";
+					const content = !message.partial && (await messageToText(message));
 
-				return `${author}${extremities}${content ? `:\n${content}` : ""}`;
-			}),
+					return `${author}${extremities}${content ? `:\n${content}` : ""}`;
+				})
+				.toReversed(),
 		)
 	).join("\n\n---\n\n");
 

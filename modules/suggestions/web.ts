@@ -97,7 +97,7 @@ export default async function suggestionsPage(
 					message.id !== starterMessage?.id &&
 					(message.content || message.attachments.size),
 			)
-			.toSorted((one, two) => one.createdTimestamp - two.createdTimestamp)
+			.sorted((one, two) => one.createdTimestamp - two.createdTimestamp)
 			.values(),
 	];
 
