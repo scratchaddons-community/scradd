@@ -42,7 +42,7 @@ export default async function logError(
 							}`,
 					)
 			}`,
-			LogSeverity.Alert,
+			LogSeverity.ImportantUpdate,
 			{
 				files: [
 					{
