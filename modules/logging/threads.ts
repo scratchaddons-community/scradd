@@ -79,8 +79,8 @@ export async function threadUpdate(
 	if (oldThread.flags.has("ActiveChannelsRemoved") !== removedActive) {
 		await log(
 			`${LoggingEmojis.Channel} ${newThread.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} Active Channels`,
+				removedActive ? "hidden in" : "shown in"
+			} Active Now`,
 			LogSeverity.ServerChange,
 		);
 	}

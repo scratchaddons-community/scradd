@@ -102,8 +102,8 @@ export async function channelUpdate(
 	if (oldChannel.flags.has("ActiveChannelsRemoved") !== removedActive) {
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} Active Channels`,
+				removedActive ? "hidden from" : "shown in"
+			} Active Now`,
 			LogSeverity.ServerChange,
 		);
 	}
