@@ -378,17 +378,18 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 				.then((reply) => {
 					const cleanContent =
 						reply && messageToText(reply, false).replaceAll(/\s+/g, " ");
-					return `[*${
-						reply ?
-							`Replying to ${reply.author.toString()}${cleanContent ? `:` : ""}`
-						:	`${constants.emojis.message.reply} Original message was deleted`
-					}*](${messageLink(
+					const replyContent =
+						cleanContent ? `\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "";
+					const replyLink = messageLink(
 						message.reference?.guildId ?? message.guild?.id ?? "@me",
 						message.reference?.channelId ?? message.channel.id,
 						message.reference?.messageId ?? message.id,
-					)})${
-						cleanContent ? `\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : ""
-					}\n\n${content}`;
+					);
+					return `[*${
+						reply ? `Replying to ` : (
+							`${constants.emojis.message.reply} Original message was deleted`
+						)
+					}*](${replyLink})${reply ? reply.author.toString() + (replyContent ? `:` : "") : ""}${replyContent}\n\n${content}`;
 				});
 		}
 

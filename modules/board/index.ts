@@ -82,11 +82,9 @@ defineMenuCommand(
 		const count = interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
 		await updateBoard({ count, message: interaction.targetMessage });
 		await interaction.editReply(
-			`${
-				constants.emojis.statuses.yes
-			} Synced ${reactionsName}! [That message by ${interaction.targetMessage.author.toString()}](<${
+			`${constants.emojis.statuses.yes} Synced ${reactionsName}! [That message](<${
 				interaction.targetMessage.url
-			}>) has ${count || "no"} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
+			}>) by ${interaction.targetMessage.author.toString()} has ${count || "no"} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
 		);
 	},
 );
