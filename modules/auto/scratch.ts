@@ -71,7 +71,7 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 	if (!project || project.code) return;
 
 	const parent =
-		project.remix.parent &&
+		project.remix?.parent &&
 		(await gracefulFetch(`${constants.domains.scratchApi}/projects/${project.remix.parent}/`));
 
 	const embed = {
