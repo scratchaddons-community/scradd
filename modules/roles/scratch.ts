@@ -19,6 +19,7 @@ import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
 import { handleUser } from "../auto/scratch.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{
@@ -46,11 +47,7 @@ export default async function linkScratchRole(
 		response_type: "code",
 		scope: OAuth2Scopes.Identify + " " + OAuth2Scopes.RoleConnectionsWrite,
 	}).toString()}`;
-	const scratchUrl = `https://auth.itinerary.eu.org/auth/?name=${encodeURIComponent(
-		client.user.displayName,
-	)}&redirect=${Buffer.from(redirectUri).toString("base64")}`;
 	const discordHtml = `<meta http-equiv="refresh" content="0;url=${discordUrl}">`; // eslint-disable-line unicorn/string-content
-	const scratchHtml = `<meta http-equiv="refresh" content="0;url=${scratchUrl}">`; // eslint-disable-line unicorn/string-content
 
 	const search = new URLSearchParams(requestUrl.search);
 	const scratchToken = search.get("privateCode");
@@ -75,15 +72,11 @@ export default async function linkScratchRole(
 		if (!tokenData)
 			return response.writeHead(401, { "content-type": "text/html" }).end(discordHtml);
 
-		return response
-			.writeHead(303, {
-				"Set-Cookie": `refresh_token=${tokenData.refresh_token}; HttpOnly; SameSite=Strict`,
-				"location": scratchUrl,
-			})
-			.end();
+		return response.writeHead(303, { location: getScratchUrl(tokenData.refresh_token) }).end();
 	}
 
-	const discordToken = getCookies(request.headers.Cookie).refresh_token;
+	const rawToken = search.get("refresh_token");
+	const discordToken = rawToken && decodeString(rawToken);
 	if (!discordToken)
 		return response.writeHead(401, { "content-type": "text/html" }).end(discordHtml);
 	const tokenData = (await client.rest
@@ -106,7 +99,10 @@ export default async function linkScratchRole(
 		`https://auth-api.itinerary.eu.org/auth/verifyToken/${encodeURI(scratchToken)}`,
 	).then((verification) => verification.json<{ username: string | null }>());
 	const scratch = username && (await fetchUser(username));
-	if (!scratch) return response.writeHead(401, { "content-type": "text/html" }).end(scratchHtml);
+	if (!scratch)
+		return response.writeHead(401, { "content-type": "text/html" }).end(
+			`<meta http-equiv="refresh" content="0;url=${getScratchUrl(tokenData.refresh_token)}">`, // eslint-disable-line unicorn/string-content
+		);
 
 	(await client.rest.put(Routes.userApplicationRoleConnection(client.user.id), {
 		body: JSON.stringify({
@@ -140,24 +136,29 @@ export default async function linkScratchRole(
 		{ embeds: [await handleUser(["", "", username])] },
 	);
 	return response.writeHead(303, { location: config.guild.rulesChannel?.url }).end();
+
+	function getScratchUrl(refreshToken: string): string {
+		const encodedRedirectUri = Buffer.from(
+			redirectUri + "?refresh_token=" + encodeString(refreshToken),
+		).toString("base64");
+		return `https://auth.itinerary.eu.org/auth/?name=${encodeURIComponent(
+			client.user.displayName,
+		)}&redirect=${encodedRedirectUri}`;
+	}
 }
 
-function getCookies(cookies?: string[] | string): Record<string, string> {
-	const entries = (typeof cookies === "object" ? cookies : (cookies ?? "").split(";")).map(
-		(pair) => {
-			const indexOfEquals = pair.indexOf("=");
+const secretKey = randomBytes(32);
+function encodeString(text: string): string {
+	const iv = randomBytes(16);
+	const cipher = createCipheriv("aes-256-cbc", secretKey, iv);
+	const encrypted = cipher.update(text, "utf8", "hex") + cipher.final("hex");
+	return iv.toString("hex") + ":" + encrypted;
+}
 
-			const name = indexOfEquals > -1 ? pair.slice(0, Math.max(0, indexOfEquals)).trim() : "";
-			const value = indexOfEquals > -1 ? pair.slice(indexOfEquals + 1).trim() : pair.trim();
-
-			const firstQuote = value.indexOf('"'); // eslint-disable-line unicorn/string-content
-			const lastQuote = value.lastIndexOf('"'); // eslint-disable-line unicorn/string-content
-
-			return [
-				name,
-				firstQuote > -1 && lastQuote > -1 ? value.slice(firstQuote + 1, lastQuote) : value,
-			] as const;
-		},
-	);
-	return Object.fromEntries(entries.toReversed());
+// Decode the string
+function decodeString(encryptedText: string): string {
+	const parts = encryptedText.split(":");
+	const iv = Buffer.from(parts.shift() ?? "", "hex");
+	const decipher = createDecipheriv("aes-256-cbc", secretKey, iv);
+	return decipher.update(parts.join(":"), "hex", "utf8") + decipher.final("utf8");
 }
