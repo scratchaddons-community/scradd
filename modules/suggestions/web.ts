@@ -1,12 +1,4 @@
-import {
-	Collection,
-	channelLink,
-	type Attachment,
-	type DefaultReactionEmoji,
-	type EmbedAssetData,
-	type MessageInteraction,
-	type Snowflake,
-} from "discord.js";
+import { channelLink, type DefaultReactionEmoji, type Snowflake } from "discord.js";
 import Mustache from "mustache";
 import fileSystem from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -84,13 +76,8 @@ export default async function suggestionsPage(
 			{
 				createdAt: (starterMessage ?? thread).createdAt,
 				id: (starterMessage ?? thread).id,
-				attachments:
-					starterMessage?.embeds[0]?.image ?
-						new Collection<Snowflake, Attachment | EmbedAssetData>([
-							...starterMessage.attachments,
-							["0", starterMessage.embeds[0].image],
-						])
-					:	starterMessage?.attachments,
+				attachments: starterMessage?.attachments,
+				embeds: starterMessage?.embeds,
 				content:
 					starterMessage?.content ||
 					starterMessage?.embeds[0]?.description ||
@@ -138,15 +125,51 @@ export default async function suggestionsPage(
 			return this.createdAt?.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
 		},
 		attachmentArray(this: (typeof messages)[number]) {
-			return Array.from(this.attachments?.values() ?? [], (attachment) => ({
-				name: "name" in attachment ? attachment.name : "",
-				url: attachment.proxyURL ?? attachment.url,
-				height: attachment.height,
-				width: attachment.width,
-				isImage: !("id" in attachment) || attachment.contentType?.startsWith("image/"),
-				isVideo: "id" in attachment && attachment.contentType?.startsWith("video/"),
-				isAudio: "id" in attachment && attachment.contentType?.startsWith("audio/"),
-			}));
+			const embedImages = Array.from(this.embeds ?? [], (attachment) =>
+				attachment.video ?
+					{
+						name: attachment.title,
+						url: attachment.video.proxyURL ?? attachment.video.url,
+						height: attachment.video.height,
+						width: attachment.video.width,
+						isImage: false,
+						isVideo: true,
+						isAudio: false,
+					}
+				: attachment.thumbnail ?
+					{
+						name: attachment.title,
+						url: attachment.thumbnail.proxyURL ?? attachment.thumbnail.url,
+						height: attachment.thumbnail.height,
+						width: attachment.thumbnail.width,
+						isImage: true,
+						isVideo: false,
+						isAudio: false,
+					}
+				: attachment.image ?
+					{
+						name: attachment.title,
+						url: attachment.image.proxyURL ?? attachment.image.url,
+						height: attachment.image.height,
+						width: attachment.image.width,
+						isImage: true,
+						isVideo: false,
+						isAudio: false,
+					}
+				:	undefined,
+			);
+			return [
+				...Array.from(this.attachments?.values() ?? [], (attachment) => ({
+					name: attachment.name,
+					url: attachment.proxyURL,
+					height: attachment.height,
+					width: attachment.width,
+					isImage: attachment.contentType?.startsWith("image/"),
+					isVideo: attachment.contentType?.startsWith("video/"),
+					isAudio: attachment.contentType?.startsWith("audio/"),
+				})),
+				...embedImages.filter(Boolean),
+			];
 		},
 		messageContent(this: (typeof messages)[number]) {
 			return markdownToHtml(this.content);
