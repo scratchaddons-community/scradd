@@ -72,8 +72,6 @@ export enum LogSeverity {
 	 * - Server identity changed.
 	 * - Thread deleted.
 	 * - User punished.
-	 *
-	 * @todo - When migrating, the `members` thread should become this to keep warn messages all in the same thread.
 	 */
 	ImportantUpdate,
 	/**
