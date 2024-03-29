@@ -148,7 +148,7 @@ defineEvent("guildMemberAdd", async (member) => {
 	);
 });
 
-const INTRO_INTERVAL = 5;
+const INTRO_INTERVAL = 10;
 let introCount = 0;
 let introTemplate =
 	(await config.channels.intros?.messages.fetch({ limit: 100 }))?.find(
