@@ -114,15 +114,10 @@ export function trimPatchVersion(full: string): string {
 export function getRequestUrl(request: IncomingMessage): URL {
 	return new URL(
 		request.url ?? "",
-		`${
-			(process.env.NODE_ENV !== "production" &&
-				request.headers["x-forwarded-proto"]?.toString()) ||
-			`http${request.headers.host === "localhost" ? "" : "s"}`
-		}://${
-			(process.env.NODE_ENV !== "production" &&
-				request.headers["x-forwarded-host"]?.toString()) ||
-			request.headers.host ||
-			constants.domains.scradd
-		}`,
+		process.env.NODE_ENV !== "production" && request.headers["x-forwarded-host"] ?
+			`${request.headers["x-forwarded-proto"]?.toString() || "http"}://${request.headers[
+				"x-forwarded-host"
+			].toString()}`
+		:	constants.domains.scradd,
 	);
 }
