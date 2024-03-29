@@ -198,7 +198,7 @@ export async function checkXPRoles(member: GuildMember): Promise<void> {
 	if (config.roles.epic) {
 		const sorted = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 		const rank = sorted.findIndex((info) => info.user === member.id);
-		if (rank < 30 && !member.roles.resolve(config.roles.epic.id)) {
+		if (rank >= 0 && rank < 30 && !member.roles.resolve(config.roles.epic.id)) {
 			await member.roles.add(config.roles.epic, "Top 30 on the XP leaderboard");
 			await config.channels.general?.send(
 				`🎊 ${member.toString()} Congratulations on being in the top 30 of the XP leaderboard! You have earned ${config.roles.epic.toString()}.`,
