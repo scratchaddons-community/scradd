@@ -68,6 +68,8 @@ export default function scraddChat(message: Message): string | undefined {
 
 const previousMessages: Record<Snowflake, Message> = {};
 export async function learn(message: Message): Promise<void> {
+	if (message.channel.id === thread?.id) return;
+
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
 
