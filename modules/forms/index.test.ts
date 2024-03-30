@@ -75,12 +75,7 @@ await describe("getAppealComponents", async () => {
 
 	await it("should disable buttons when accepted", () => {
 		const resolved = getAppealComponents({
-			accepters: new Set([
-				"771422735486156811",
-				"914126244407296020",
-				"0",
-				"1",
-			]),
+			accepters: new Set(["771422735486156811", "914126244407296020", "0", "1"]),
 			rejecters: new Set(),
 		});
 		strictEqual(resolved.components[0].disabled, true);
