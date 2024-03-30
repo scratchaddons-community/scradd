@@ -78,8 +78,8 @@ await describe("getAppealComponents", async () => {
 			accepters: new Set([
 				"771422735486156811",
 				"914126244407296020",
-				"914126244407296020",
-				"914126244407296020",
+				"0",
+				"1",
 			]),
 			rejecters: new Set(),
 		});
@@ -88,8 +88,8 @@ await describe("getAppealComponents", async () => {
 	});
 	await it("should disable buttons when rejected", () => {
 		const resolved = getAppealComponents({
-			accepters: new Set([]),
-			rejecters: new Set(["914126244407296020", "914126244407296020", "914126244407296020"]),
+			accepters: new Set(),
+			rejecters: new Set(["914126244407296020", "0", "1"]),
 		});
 		strictEqual(resolved.components[0].disabled, true);
 		strictEqual(resolved.components[1].disabled, true);
