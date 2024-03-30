@@ -1,3 +1,5 @@
+/** On production, this file is replaced with another file with the same structure. */
+
 /**
  * The index of each array determines how many strikes the word gives.
  *

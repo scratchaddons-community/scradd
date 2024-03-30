@@ -1,3 +1,5 @@
+/** On production, this file is replaced with another file with the same structure. */
+
 import type { GuildMember } from "discord.js";
 import {
 	customComments,
