@@ -27,7 +27,7 @@ await describe("generateAppeal", async () => {
 				{},
 				{ accepted: "Note for accept" },
 				{
-					accepters: new Set(["771422735486156811", "1084118992735719507"]),
+					accepters: new Set(["771422735486156811", "1084118992735719507", "1", "2"]),
 					rejecters: new Set(),
 				},
 			).embeds ?? [];
@@ -40,7 +40,7 @@ await describe("generateAppeal", async () => {
 			generateAppeal(
 				{},
 				{ rejected: "Note for reject" },
-				{ accepters: new Set(), rejecters: new Set(["700822091649515530"]) },
+				{ accepters: new Set(), rejecters: new Set(["700822091649515530", "1", "2"]) },
 			).embeds ?? [];
 		ok(embed);
 		ok("title" in embed);
@@ -73,10 +73,23 @@ await describe("getAppealComponents", async () => {
 		);
 	});
 
-	await it("should disable buttons when resolved", () => {
+	await it("should disable buttons when accepted", () => {
 		const resolved = getAppealComponents({
-			accepters: new Set(["771422735486156811", "914126244407296020"]),
-			rejecters: new Set(["914126244407296020"]),
+			accepters: new Set([
+				"771422735486156811",
+				"914126244407296020",
+				"914126244407296020",
+				"914126244407296020",
+			]),
+			rejecters: new Set(),
+		});
+		strictEqual(resolved.components[0].disabled, true);
+		strictEqual(resolved.components[1].disabled, true);
+	});
+	await it("should disable buttons when rejected", () => {
+		const resolved = getAppealComponents({
+			accepters: new Set([]),
+			rejecters: new Set(["914126244407296020", "914126244407296020", "914126244407296020"]),
 		});
 		strictEqual(resolved.components[0].disabled, true);
 		strictEqual(resolved.components[1].disabled, true);
