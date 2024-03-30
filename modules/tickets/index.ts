@@ -326,6 +326,8 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 			await newThread.setArchived(false, "To lock it");
 			await newThread.setLocked(true, "Was closed");
 		}
+	} else if (newThread.locked) {
+		TICKETS_BY_MEMBER[memberId] = undefined;
 	} else if (TICKETS_BY_MEMBER[memberId]) {
 		await newThread.setArchived(true, "Reopened while another ticket is already open");
 		await newThread.setLocked(true, "Reopened while another ticket is already open");
