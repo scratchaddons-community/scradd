@@ -28,6 +28,7 @@ import { RoleList, persistedRoles } from "../../roles/persisted.js";
 import giveXp from "../../xp/give-xp.js";
 import appeals, { appealThread } from "./appeals.js";
 import { getAppealComponents } from "./generate-appeal.js";
+import { banDates } from "../index.js";
 
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
@@ -38,6 +39,9 @@ const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
 	}),
 	NOT_BANNED_PAGE = Mustache.render(APPEAL_FRAME, {
 		content: await fileSystem.readFile("./modules/forms/appeals/not-banned.html", "utf8"),
+	}),
+	WAIT_PAGE = Mustache.render(APPEAL_FRAME, {
+		content: await fileSystem.readFile("./modules/forms/appeals/wait.html", "utf8"),
 	});
 
 export default async function appealRequest(
@@ -84,6 +88,14 @@ export default async function appealRequest(
 			auth: false,
 		})) as RESTGetAPICurrentUserResult;
 
+		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
+			return response.writeHead(403, { "content-type": "text/html" }).end(
+				Mustache.render(NOT_BANNED_PAGE, {
+					username: user.global_name ?? user.username,
+					invite: pkg.homepage,
+					id: user.id,
+				}),
+			);
 		const appeal = appeals[userMention(user.id)];
 		if (appeal)
 			return response.writeHead(200, { "content-type": "text/html" }).end(
@@ -96,12 +108,14 @@ export default async function appealRequest(
 					date: appeal.date,
 				}),
 			);
-		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
-			return response.writeHead(403, { "content-type": "text/html" }).end(
-				Mustache.render(NOT_BANNED_PAGE, {
-					username: user.global_name ?? user.username,
-					invite: pkg.homepage,
+		const banDate = banDates[user.id];
+		const appealDate = banDate && banDate + 7 * 24 * 60 * 60 * 1000;
+		if (appealDate && appealDate < Date.now())
+			return response.writeHead(200, { "content-type": "text/html" }).end(
+				Mustache.render(WAIT_PAGE, {
 					id: user.id,
+					username: user.global_name ?? user.username,
+					date: new Date(appealDate + 24 * 60 * 60 * 1000).toDateString(),
 				}),
 			);
 

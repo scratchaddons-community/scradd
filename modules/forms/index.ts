@@ -1,4 +1,4 @@
-import { defineButton, defineModal } from "strife.js";
+import { defineButton, defineEvent, defineModal } from "strife.js";
 import {
 	confirmAcceptAppeal,
 	confirmRejectAppeal,
@@ -6,6 +6,13 @@ import {
 	submitRejectAppeal,
 } from "./appeals/appeals.js";
 import confirmInterest, { fillInterest, submitInterest } from "./mod-interest.js";
+import type { Snowflake } from "discord.js";
+import config from "../../common/config.js";
+
+export const banDates: Record<Snowflake, number> = {};
+defineEvent("guildBanAdd", (ban) => {
+	if (ban.guild.id === config.guild.id) banDates[ban.user.id] = Date.now();
+});
 
 defineButton("confirmInterest", confirmInterest);
 defineButton("modInterestForm", fillInterest);
