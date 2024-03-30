@@ -114,7 +114,7 @@ export async function cancelThreadChange(
 ): Promise<InteractionResponse | undefined> {
 	if (
 		interaction.inGuild() &&
-		interaction.channel?.permissionsFor(interaction.user)?.has("ManageThreads")
+		!interaction.channel?.permissionsFor(interaction.user)?.has("ManageThreads")
 	) {
 		return await interaction.reply({
 			ephemeral: true,
