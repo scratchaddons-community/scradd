@@ -101,7 +101,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 	if (
 		config.channels.share &&
 		baseChannel &&
-		[config.channels.advertise?.id, config.channels.share.id].includes(baseChannel.id) &&
+		![config.channels.advertise?.id, config.channels.share.id].includes(baseChannel.id) &&
 		!baseChannel.isDMBased() &&
 		baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")
 	) {
@@ -136,7 +136,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			deletionMessage += ` Please don’t post bot invites outside of ${config.channels.share.toString()}!`;
 		}
 
-		if (baseChannel.name.includes("general") || baseChannel.name.includes("showcase")) {
+		if (baseChannel.name.includes("general") || baseChannel.name.includes("chat")) {
 			const links = Array.from(
 				new Set(message.content.match(/(https?:\/\/[^\s"')*,.:;<>\]]+)/gis) ?? []),
 				(link) => new URL(link),
