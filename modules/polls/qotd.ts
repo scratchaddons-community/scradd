@@ -188,10 +188,11 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 }
 
 export async function listQuestions(interaction: ChatInputCommandInteraction): Promise<void> {
+	await interaction.deferReply({ ephemeral: true });
 	await paginate(
 		questions,
 		({ question }) => question ?? "",
-		(data) => interaction.reply(data),
+		(data) => interaction.editReply(data),
 		{
 			title: "Upcoming QOTDs",
 			singular: "QOTD",
