@@ -25,7 +25,7 @@
 		"@fontsource-variable/sora": "5.0.17",
 		"@khanacademy/simple-markdown": "0.11.4",
 		"@napi-rs/canvas": "0.1.51",
-		"@sa-community/addons-data": "1.37.0",
+		"@sa-community/addons-data": "1.37.1",
 		"@twemoji/parser": "<=15.0.3",
 		"chart.js": "4.4.2",
 		"didyoumean2": "6.0.1",
