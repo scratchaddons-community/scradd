@@ -43,9 +43,8 @@ export default async function updateBoard({
 	} else if (count >= reactionThreshold) {
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(message)),
-			allowedMentions: {
-				users: (await getSettings(message.author)).boardPings ? [message.author.id] : [],
-			},
+			allowedMentions:
+				(await getSettings(message.author)).boardPings ? undefined : { users: [] },
 		});
 
 		await giveXp(message.author, sentMessage.url);

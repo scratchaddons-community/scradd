@@ -181,7 +181,7 @@ export async function top(
 				return (await getSettings(interaction.user, false)).useMentions === undefined ?
 						[
 							{
-								customId: "levelUpPings_toggleSetting",
+								customId: `useMentions-${interaction.user.id}_toggleSetting`,
 								type: ComponentType.Button,
 								label: "Toggle Mentions",
 								style: ButtonStyle.Success,

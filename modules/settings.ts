@@ -165,7 +165,7 @@ export async function updateSettings(
 		Object.entries(SETTINGS).map(([setting, label]) => [
 			setting,
 			{
-				customId: `${setting}_toggleSetting`,
+				customId: `${setting}-${user.id}_toggleSetting`,
 				label: label,
 				style: ButtonStyle[updated[setting] ? "Success" : "Danger"],
 				type: ComponentType.Button,
@@ -204,12 +204,9 @@ export async function updateSettings(
 	};
 }
 
-defineButton("toggleSetting", async (interaction, setting = "") => {
-	if (
-		interaction.message.interaction?.user.id !== interaction.user.id &&
-		!interaction.message.content.includes(userMention(interaction.user.id)) &&
-		!interaction.message.flags.has("Ephemeral")
-	) {
+defineButton("toggleSetting", async (interaction, data) => {
+	const [setting, id] = data.split("-");
+	if (interaction.user.id !== id) {
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You don’t have permission to update other people’s settings!`,

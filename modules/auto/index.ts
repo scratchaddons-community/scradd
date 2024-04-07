@@ -133,19 +133,20 @@ async function handleMutatable(
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs.id === baseChannel?.id) return;
 
-	const settings = await getSettings(message.author);
+	const settings = await getSettings(message.author),
+		configuredSettings = await getSettings(message.author, false);
 
 	const links = settings.github && github(message.content, message.guild?.id);
 	if (links)
 		return {
 			content: links,
 			components:
-				(await getSettings(message.author, false)).github === undefined ?
+				configuredSettings.github === undefined ?
 					[
 						{
 							components: [
 								{
-									customId: "scratchEmbeds_toggleSetting",
+									customId: `scratchEmbeds-${message.author.id}_toggleSetting`,
 									type: ComponentType.Button as const,
 									label: `Disable GitHub Links`,
 									style: ButtonStyle.Success as const,
@@ -158,15 +159,14 @@ async function handleMutatable(
 		};
 
 	if (settings.scratchEmbeds) {
-		const notSet = (await getSettings(message.author, false)).scratchEmbeds === undefined;
-
 		const matches = getMatches(message.content);
 		const embeds: APIEmbed[] = [];
 		for (const match of matches) {
 			const embed = await handleMatch(match);
 			if (embed) {
 				embeds.push(embed);
-				if (!notSet) embed.footer = { text: "Disable this using /settings" };
+				if (configuredSettings.scratchEmbeds !== undefined)
+					embed.footer = { text: "Disable this using /settings" };
 			}
 			if (embeds.length >= 5) break;
 		}
@@ -176,14 +176,14 @@ async function handleMutatable(
 				files: [],
 				embeds,
 				components:
-					notSet ?
+					configuredSettings.scratchEmbeds === undefined ?
 						[
 							{
 								components: [
 									{
-										customId: "scratchEmbeds_toggleSetting",
+										customId: `scratchEmbeds-${message.author.id}_toggleSetting`,
 										type: ComponentType.Button as const,
-										label: `Disable Scratch Embeds`,
+										label: "Disable Scratch Embeds",
 										style: ButtonStyle.Success as const,
 									},
 								],
