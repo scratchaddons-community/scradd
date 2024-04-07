@@ -221,7 +221,10 @@ export async function handleStudio(urlParts: string[]): Promise<APIEmbed | undef
 			},
 			{
 				name: `${constants.emojis.scratch.comments} Comments`,
-				value: studio.stats.comments + (studio.comments_allowed ? "" : " (off)"),
+				value:
+					studio.stats.comments +
+					(studio.stats.comments < 100 ? "" : "+") +
+					(studio.comments_allowed ? "" : " (off)"),
 				inline: true,
 			},
 		],
