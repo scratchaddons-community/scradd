@@ -41,7 +41,7 @@ async function getConfig() {
 	);
 
 	const roles = ((await guild?.roles.fetch()) ?? new Collection()).filter(
-		(role) => role.editable && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
+		(role) => !role.managed && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
 	);
 	const modRole = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
 	const staffRole = assertOutsideTests(
