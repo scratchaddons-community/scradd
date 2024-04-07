@@ -78,40 +78,38 @@ defineEvent("messageCreate", async (message) => {
 	if (!settings.autoreactions || !canDoSecrets(message)) return;
 	const content = stripMarkdown(normalize(message.content.toLowerCase()));
 	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
-		let doReact = false;
+		let shouldReact = false;
 		const emojis = [rawEmojis].flat();
-		if (emojis.some((emoji) => content.includes(emoji))) continue;
+		if (emojis.some((emoji) => content.includes(emoji.replace(/^<a?:_/, "")))) continue;
 
 		for (const requirement of requirements) {
-			const [rawMatch, type = "word"] =
-				Array.isArray(requirement) ? requirement : [requirement];
+			const [rawMatch, type] =
+				Array.isArray(requirement) ? requirement : ([requirement, "word"] as const);
 			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
 
 			if (type === "ping") {
-				doReact ||= message.mentions.has(match, {
+				shouldReact ||= message.mentions.has(match, {
 					ignoreEveryone: true,
 					ignoreRoles: true,
 				});
 			} else {
 				const result = new RegExp(
-					type === "partial" || type === "raw" ?
-						match
-					:	`${type === "full" ? "^" : "\\b"}(?:${match})${
-							type === "plural" ? /(?:e?s)?/.source : ""
-						}${type === "full" ? "$" : "\\b"}`,
+					type === "partial" || type === "raw" ? match
+					: type === "full" ? `^(?:${match})$`
+					: `\\b(?:${match})${type === "plural" ? /(?:e?s)?/.source : ""}\\b`,
 					"iu",
 				).test(type === "raw" ? message.content : content);
 
 				if (type === "negative" && result) continue reactionLoop;
 
-				doReact ||= result;
+				shouldReact ||= result;
 			}
 		}
 
-		if (doReact) {
+		if (shouldReact) {
 			reactions += emojis.length;
 			const messageReactions = await reactAll(message, emojis);
-			if (reactions > REACTION_CAP || !messageReactions.length) return;
+			if (reactions > REACTION_CAP || messageReactions.length < emojis.length) return;
 		}
 	}
 });
@@ -202,6 +200,7 @@ async function handleMutatable(
 	const chatResponse = scraddChat(message);
 	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
 
+	if (!canDoSecrets(message, true)) return;
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
 	if (/^i[\S\W]?m\b/u.test(cleanContent)) {
 		const name = cleanContent
@@ -215,7 +214,6 @@ async function handleMutatable(
 
 		if (name && message.member) {
 			const response = dad(name, message.member);
-			if (!canDoSecrets(message, true)) return;
 			return Array.isArray(response) ?
 					([
 						{
