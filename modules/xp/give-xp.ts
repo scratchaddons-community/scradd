@@ -124,8 +124,11 @@ export default async function giveXp(
 	recentXpDatabase.data = weekly;
 }
 
+const MAX_LEVELS: Record<Snowflake, number> = {};
 async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: string): Promise<void> {
 	const newLevel = getLevelForXp(newXp);
+	if (newLevel <= (MAX_LEVELS[member.id] ?? 0)) return;
+	MAX_LEVELS[member.id] = newLevel;
 	const nextLevelXp = getXpForLevel(newLevel + 1);
 	const pingsConfigured = (await getSettings(member, false)).levelUpPings;
 	const pingsDefault = (await getDefaultSettings(member)).levelUpPings;
