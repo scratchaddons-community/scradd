@@ -251,6 +251,7 @@ export async function removeResponse(
 		LogSeverity.ImportantUpdate,
 		{ files: [{ content: response, extension: "md" }] },
 	);
+	await interaction.targetMessage.delete();
 	await modalInteraction.reply({
 		content: `${
 			constants.emojis.statuses.yes
