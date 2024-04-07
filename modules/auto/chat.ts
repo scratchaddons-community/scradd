@@ -213,7 +213,7 @@ export async function removeResponse(
 						label: "Please confirm to remove this response",
 						required: true,
 						customId: "confirm",
-						placeholder: "Type anything in this box to confirm. This is unreversible.",
+						placeholder: "Type anything in this box to confirm. This is irreversible.",
 					},
 				],
 			},
