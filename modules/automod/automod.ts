@@ -19,7 +19,7 @@ import { xpDatabase } from "../xp/util.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 
 const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
-const whitelistedLinks = await Promise.all(
+const whitelistedInvites = await Promise.all(
 	threads?.map(async (thread) =>
 		(await getAllMessages(thread)).flatMap(
 			({ content }) =>
@@ -27,17 +27,33 @@ const whitelistedLinks = await Promise.all(
 		),
 	) ?? [],
 );
-
 const WHITELISTED_INVITE_GUILDS = new Set([
 	config.guild.id,
 	...config.otherGuildIds,
 	...(await Promise.all(
-		whitelistedLinks
+		whitelistedInvites
 			.flat()
 			.map(async (link) => (await client.fetchInvite(link).catch(() => void 0))?.guild?.id),
 	)),
 	undefined, // Invalid links
 ]);
+
+const LINK_THRESHOLD = 5,
+	BLACKLISTED_DOMAINS = [
+		"scratch.camp",
+		"scratch.love",
+		"scratch.mit.edu",
+		"scratch.org",
+		"scratch.pizza",
+		"scratch.team",
+
+		"turbowarp.org",
+		"turbowarp.xyz",
+
+		"youtu.be",
+		"youtube.com",
+		"youtube-nocookie.com",
+	];
 
 export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
@@ -138,20 +154,12 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 		if (baseChannel.name.includes("general") || baseChannel.name.includes("chat")) {
 			const links = Array.from(
-				new Set(message.content.match(/(https?:\/\/[^\s"')*,.:;<>\]]+)/gis) ?? []),
+				new Set(message.content.match(/(https?:\/\/[\w.:@]+(?=[^\w.:@]|$))/gis) ?? []),
 				(link) => new URL(link),
 			).filter((link) =>
-				[
-					"scratch.camp",
-					"scratch.love",
-					"scratch.mit.edu",
-					"scratch.org",
-					"scratch.pizza",
-					"scratch.team",
-
-					"youtu.be",
-					"youtube.com",
-				].includes(link.hostname),
+				BLACKLISTED_DOMAINS.some(
+					(domain) => link.hostname === domain || link.hostname.endsWith(`.${domain}`),
+				),
 			);
 
 			const level = getLevelForXp(
@@ -159,8 +167,8 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			);
 			const canPostLinks =
 				!links.length ||
-				level > 4 ||
-				[(config.roles.dev?.id, config.roles.epic?.id, config.roles.booster?.id)].some(
+				level >= LINK_THRESHOLD ||
+				[config.roles.dev?.id, config.roles.epic?.id, config.roles.booster?.id].some(
 					(role) => !message.member || (role && message.member.roles.resolve(role)),
 				);
 
@@ -174,7 +182,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 					links.length * PARTIAL_STRIKE_COUNT,
 					links.join(" "),
 				);
-				deletionMessage += ` Sorry, but you need level 5 to post ${
+				deletionMessage += ` Sorry, but you need level ${LINK_THRESHOLD} to post ${
 					links.length === 1 ? "that link" : "those links"
 				} outside a channel like ${config.channels.share.toString()}!`;
 			}
