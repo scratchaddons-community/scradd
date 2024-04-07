@@ -30,7 +30,7 @@ const data: CustomOperation = {
 		const reactions: MessageReaction[] = [];
 		for (const emoji of emojis.toSorted(() => Math.random() - 0.5)) {
 			await Promise.all([
-				reactions.at(-3)?.users.remove(client.user),
+				reactions.at(-3)?.remove(),
 				message.react(emoji).then(
 					(reaction) => reactions.push(reaction),
 					() => void 0,
