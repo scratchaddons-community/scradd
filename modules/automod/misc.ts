@@ -67,7 +67,6 @@ export default function tryCensor(
 
 		return string.replaceAll(regexp, (word) => {
 			if (
-				word.length < 3 ||
 				(word.match(/[\d!#*@|-]/gi)?.length ?? 0) > word.length * 0.5 + 1 ||
 				"-#*".includes(word[0] ?? word) ||
 				"-#*".includes(word.at(-1) ?? word)
