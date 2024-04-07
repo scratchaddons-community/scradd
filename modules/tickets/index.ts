@@ -20,7 +20,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
 	SA_CATEGORY,
@@ -212,7 +212,7 @@ defineMenuCommand(
 		await log(
 			`${LoggingEmojis.Punishment} ${interaction.user.toString()} reported [a message](<${
 				interaction.targetMessage.url
-			}>) by ${interaction.targetMessage.author.toString()}\n${reason}`,
+			}>)${extraAuditLogsInfo({ executor: interaction.targetMessage.author, reason })}`,
 			LogSeverity.Alert,
 			{
 				buttons: [

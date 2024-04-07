@@ -227,11 +227,9 @@ export function extraAuditLogsInfo(entry: {
 }): string {
 	const reason = entry.reason?.trim();
 	return `${entry.executor ? ` by ${entry.executor.toString()}` : ""}${
-		reason ?
-			reason.includes("\n") ?
-				`:\n${reason}`
-			:	` (${reason})`
-		:	""
+		reason?.includes("\n") ? `:\n${reason}`
+		: reason ? ` (${reason})`
+		: ""
 	}`;
 }
 
