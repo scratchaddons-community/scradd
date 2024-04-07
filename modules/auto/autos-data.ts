@@ -1,4 +1,4 @@
-/** On production, this file is replaced with another file with the same structure. */
+/* On production, this file is replaced with another file with the same structure. */
 
 import type { Snowflake } from "discord.js";
 

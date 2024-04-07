@@ -1,4 +1,4 @@
-/** On production, this file is replaced with another file with the same structure. */
+/* On production, this file is replaced with another file with the same structure. */
 
 export const joins = ["Welcome {{{MEMBER}}}, you’re our **{{{COUNT}}}** member!"] as const;
 export const bans = ["Oop, **{{{MEMBER}}}** was banned."] as const;
