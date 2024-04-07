@@ -185,7 +185,7 @@ export async function messageUpdate(
 			} Message by ${newMessage.author.toString()} in ${newMessage.channel.toString()} (ID: ${
 				newMessage.id
 			}) ${newMessage.pinned ? "" : "un"}pinned`,
-			LogSeverity.ImportantUpdate,
+			LogSeverity.ServerChange,
 			{ buttons: [{ label: "Message", url: newMessage.url }] },
 		);
 	}
