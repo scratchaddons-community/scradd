@@ -40,7 +40,7 @@ const dictionary = (await Chat.find({}))
 export default function scraddChat(message: Message): string | undefined {
 	if (
 		message.author.id === client.user.id ||
-		message.channel.id !== thread?.id ||
+		message.channel.id !== chatThread?.id ||
 		(message.mentions.users.size > +message.mentions.has(message.author) &&
 			!message.mentions.has(client.user))
 	)
@@ -68,7 +68,7 @@ export default function scraddChat(message: Message): string | undefined {
 
 const previousMessages: Record<Snowflake, Message> = {};
 export async function learn(message: Message): Promise<void> {
-	if (message.channel.id === thread?.id) return;
+	if (message.channel.id === chatThread?.id) return;
 
 	const previous = previousMessages[message.channel.id];
 	previousMessages[message.channel.id] = message;
@@ -116,7 +116,7 @@ export async function learn(message: Message): Promise<void> {
 	await new Chat({ prompt, response }).save();
 }
 
-const thread = await getThread();
+export const chatThread = await getThread();
 async function getThread(): Promise<ThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
