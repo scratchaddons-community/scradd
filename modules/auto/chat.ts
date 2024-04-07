@@ -29,6 +29,8 @@ import tryCensor, { censor } from "../automod/misc.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { getSettings, userSettingsDatabase } from "../settings.js";
 
+export const chatName = `${client.user.displayName} Chat` as const;
+
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
 const dictionary = (await Chat.find({}))
 	.map((chat) => ({ response: chat.response, prompt: chat.prompt ?? "" }))
@@ -120,18 +122,18 @@ export const chatThread = await getThread();
 async function getThread(): Promise<ThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
-	const intitialThread = getInitialChannelThreads(config.channels.bots).find(
-		({ name }) => name === "Scradd Chat",
+	const intitialThread = getInitialChannelThreads(config.channels.bots).find(({ name }) =>
+		name.startsWith(chatName),
 	);
 	if (intitialThread) return intitialThread;
 
 	const createdThread = await config.channels.bots.threads.create({
-		name: "Scradd Chat",
-		reason: "For Scradd Chat",
+		name: `${chatName} (Check pins!)`,
+		reason: `For ${chatName}`,
 	});
 	const message = await createdThread.send({
 		content:
-			"## Scradd Chat\n### Basic regurgitating chatbot\nScradd Chat learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.",
+			`## ${chatName}\n### Basic regurgitating chatbot\n${chatName} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -152,7 +154,7 @@ async function getThread(): Promise<ThreadChannel | undefined> {
 			},
 		],
 	});
-	await message.pin("Pinned Scradd Chat consent message for easy access");
+	await message.pin(`Pinned ${chatName} consent message for ease of access`);
 	return createdThread;
 }
 export async function allowChat(
@@ -245,7 +247,7 @@ export async function removeResponse(
 	await log(
 		`${
 			LoggingEmojis.Bot
-		} ${interaction.user.toString()} permamently removed a response from Scradd Chat (${deletedCount} prompt${
+		} ${interaction.user.toString()} permamently removed a response from ${chatName} (${deletedCount} prompt${
 			deletedCount === 1 ? "" : "s"
 		})`,
 		LogSeverity.ImportantUpdate,

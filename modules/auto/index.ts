@@ -19,7 +19,7 @@ import { normalize } from "../../util/text.js";
 import { BOARD_EMOJI } from "../board/misc.js";
 import { getSettings } from "../settings.js";
 import autoreactions from "./autos-data.js";
-import scraddChat, { allowChat, denyChat, learn, removeResponse } from "./chat.js";
+import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.js";
 import dad from "./dad.js";
 import { getMatches, handleMatch } from "./scratch.js";
 import github from "./github.js";
@@ -275,6 +275,6 @@ function canDoSecrets(message: Message, checkDads = false): boolean {
 defineButton("allowChat", allowChat);
 defineButton("denyChat", denyChat);
 defineMenuCommand(
-	{ name: "Remove Scradd Chat Response", type: ApplicationCommandType.Message, restricted: true },
+	{ name: `Remove ${chatName} Response`, type: ApplicationCommandType.Message, restricted: true },
 	removeResponse,
 );
