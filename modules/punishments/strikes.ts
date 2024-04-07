@@ -31,13 +31,12 @@ export async function getStrikes(
 		});
 	}
 
-	const member =
+	await interaction.deferReply({ ephemeral: true });
+	await listStrikes(
 		selected instanceof GuildMember ? selected : (
 			await config.guild.members.fetch(selected.id).catch(() => selected)
-		);
-	await listStrikes(
-		member,
-		(data) => (interaction.replied ? interaction.editReply(data) : interaction.reply(data)),
+		),
+		(data) => interaction.editReply(data),
 		options,
 		interaction.user,
 	);

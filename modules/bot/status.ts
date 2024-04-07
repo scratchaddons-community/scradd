@@ -4,7 +4,7 @@ import constants from "../../common/constants.js";
 import pkg from "../../package.json" assert { type: "json" };
 
 export default async function status(interaction: ChatInputCommandInteraction): Promise<void> {
-	const message = await interaction.reply({ content: "Pinging…", fetchReply: true });
+	const message = await interaction.deferReply({ fetchReply: true });
 
 	await interaction.editReply({
 		content: "",

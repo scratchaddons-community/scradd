@@ -154,9 +154,11 @@ export async function top(
 		});
 	}
 
-	const ephemeral =
-		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
-	await interaction.deferReply({ ephemeral });
+	await interaction.deferReply({
+		ephemeral:
+			interaction.isButton() &&
+			interaction.message.interaction?.user.id !== interaction.user.id,
+	});
 
 	await paginate(
 		leaderboard,
@@ -175,7 +177,6 @@ export async function top(
 
 			user: interaction.user,
 			rawOffset: index,
-			ephemeral,
 
 			async generateComponents() {
 				return (await getSettings(interaction.user, false)).useMentions === undefined ?

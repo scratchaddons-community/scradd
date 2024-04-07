@@ -16,6 +16,8 @@ export default async function top(
 	interaction?: RepliableInteraction,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
 ): Promise<InteractionReplyOptions | undefined> {
+	await interaction?.deferReply();
+
 	const { suggestions } = config.channels;
 	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
 		?.displayName;
@@ -58,7 +60,7 @@ export default async function top(
 				)
 			}`,
 
-		(data) => interaction?.reply(data),
+		(data) => interaction?.editReply(data),
 		{
 			title: `Top suggestions${displayName ? ` by ${displayName}` : ""}${
 				options.answer && options.user ? " and" : ""

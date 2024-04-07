@@ -4,8 +4,7 @@ import {
 	ComponentType,
 	FormattingPatterns,
 	GuildMember,
-	InteractionResponse,
-	Message,
+	type Message,
 	MessageFlags,
 	MessageMentions,
 	MessageType,
@@ -598,7 +597,6 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	rawOffset?: number;
 	highlightOffset?: boolean;
 	totalCount?: number;
-	ephemeral?: boolean;
 	pageLength?: number;
 	columns?: 1 | 2 | 3;
 
@@ -608,19 +606,25 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: InteractionReplyOptions) => Promise<InteractionResponse | Message>,
-	options: PaginateOptions<Item, User>,
-): Promise<undefined>;
-export async function paginate<Item>(
-	array: Item[],
-	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: InteractionReplyOptions) => unknown,
+	editReply: (options: InteractionReplyOptions) => Awaitable<void> | Promise<Message>,
 	options: PaginateOptions<Item>,
 ): Promise<InteractionReplyOptions | undefined>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	reply: (options: InteractionReplyOptions) => Awaitable<unknown>,
+	editReply: (options: InteractionReplyOptions) => Awaitable<void>,
+	options: PaginateOptions<Item, false>,
+): Promise<InteractionReplyOptions>;
+export async function paginate<Item>(
+	array: Item[],
+	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	editReply: (options: InteractionReplyOptions) => Promise<Message>,
+	options: PaginateOptions<Item, User>,
+): Promise<undefined>;
+export async function paginate<Item>(
+	array: Item[],
+	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
+	editReply: (options: InteractionReplyOptions) => Awaitable<void> | Promise<Message>,
 	{
 		title,
 		format,
@@ -632,7 +636,6 @@ export async function paginate<Item>(
 		rawOffset,
 		highlightOffset = true,
 		totalCount,
-		ephemeral = false,
 		pageLength = 20,
 		columns = 1,
 
@@ -641,13 +644,9 @@ export async function paginate<Item>(
 	}: PaginateOptions<Item>,
 ): Promise<InteractionReplyOptions | undefined> {
 	if (!array.length) {
-		const messageOptions = {
-			content: `${constants.emojis.statuses.no} ${failMessage}`,
-			ephemeral: true,
-		};
-		await reply(messageOptions);
-		if (user) return;
-		return messageOptions;
+		const content = `${constants.emojis.statuses.no} ${failMessage}`;
+		await editReply({ content });
+		return user ? undefined : { content };
 	}
 
 	const pageCount = Math.ceil(array.length / pageLength);
@@ -746,39 +745,25 @@ export async function paginate<Item>(
 						:	undefined,
 
 					color:
-						format ?
-							format instanceof GuildMember ?
-								format.displayColor
-							:	undefined
-						:	constants.themeColor,
+						format instanceof GuildMember ? format.displayColor
+						: format ? undefined
+						: constants.themeColor,
 				},
 			],
-			ephemeral,
-			fetchReply: true,
 		};
 	}
 
 	const firstReplyOptions = await generateMessage();
-	let message = await reply(firstReplyOptions);
-	if (
-		pageCount === 1 ||
-		!user ||
-		!(message instanceof InteractionResponse || message instanceof Message)
-	)
-		return firstReplyOptions;
-	const messageId = message.id;
-
-	const editReply = (data: InteractionReplyOptions & MessageEditOptions): unknown =>
-		ephemeral || !(message instanceof InteractionResponse || message instanceof Message) ?
-			reply(data)
-		:	message.edit(data);
+	const message = await editReply(firstReplyOptions);
+	if (!user || !message) return firstReplyOptions;
+	if (pageCount === 1) return;
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
-			buttonInteraction.message.id === messageId && buttonInteraction.user.id === user.id,
+			buttonInteraction.message.id === message.id && buttonInteraction.user.id === user.id,
 
 		idle: constants.collectorTime,
-		time: ephemeral ? (14 * 60 + 50) * 1000 : undefined,
+		time: message.flags.has("Ephemeral") ? (14 * 60 + 50) * 1000 : undefined,
 	});
 
 	collector
@@ -789,7 +774,7 @@ export async function paginate<Item>(
 			else return;
 
 			await buttonInteraction.deferUpdate();
-			message = await editReply(await generateMessage());
+			await editReply(await generateMessage());
 		})
 		.on("end", async () => {
 			await editReply(await generateMessage(true));

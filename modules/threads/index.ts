@@ -106,7 +106,6 @@ defineSubcommands(
 						singular: "thread",
 						failMessage: "You’ve joined all public open threads here!",
 						user: interaction.user,
-						ephemeral: true,
 						totalCount: unjoined.length,
 					},
 				);

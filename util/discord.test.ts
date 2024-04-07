@@ -139,8 +139,10 @@ await describe("paginate", async () => {
 		await paginate(
 			[1, 2, 3],
 			(value) => value.toString(),
-			(message) => messages.push(message),
-			{ title: "Pagination Test", singular: "item", user: false, ephemeral: true },
+			(message) => {
+				messages.push(message);
+			},
+			{ title: "Pagination Test", singular: "item", user: false },
 		);
 		strictEqual(messages.length, 1);
 	});
@@ -149,7 +151,9 @@ await describe("paginate", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 			(value) => value.toString(),
-			(message) => messages.push(message),
+			(message) => {
+				messages.push(message);
+			},
 			{ title: "Pagination Test", singular: "item", user: false },
 		);
 		deepStrictEqual(messages, [
@@ -165,20 +169,8 @@ await describe("paginate", async () => {
 						color: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 					},
 				],
-				ephemeral: false,
-				fetchReply: true,
 			},
 		]);
-	});
-	await it("should respect the `ephemeral` option", async () => {
-		await paginate(
-			[1, 2, 3],
-			(value) => value.toString(),
-			(message) => {
-				strictEqual(message.ephemeral, true);
-			},
-			{ title: "Pagination Test", singular: "item", user: false, ephemeral: true },
-		);
 	});
 	await it("should respect the `pageLength` option", async () => {
 		await paginate(
@@ -295,11 +287,11 @@ await describe("paginate", async () => {
 		await paginate(
 			[],
 			(value) => value,
-			(message) => messages.push(message),
+			(message) => {
+				messages.push(message);
+			},
 			{ title: "Pagination Test", singular: "item", user: false, failMessage: "fail" },
 		);
-		deepStrictEqual(messages, [
-			{ content: `${constants.emojis.statuses.no} fail`, ephemeral: true },
-		]);
+		deepStrictEqual(messages, [{ content: `${constants.emojis.statuses.no} fail` }]);
 	});
 });
