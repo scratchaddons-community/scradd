@@ -53,7 +53,13 @@ const data: CustomOperation = {
 			} \`${string}\` matches the following regular expressions:\n${matches
 				.map((match) =>
 					match.raw ?
-						`- [\`/${match.regex}/\`](<https://regex101.com/?flavor=javascript&regex=${match.regex}&testString=${string}&delimiter=/&flags=${regexpFlags}>)`
+						`- [\`/${match.regex}/\`](<https://regex101.com/?${new URLSearchParams({
+							flavor: "javascript",
+							regex: match.regex,
+							testString: string,
+							delimiter: "/",
+							flags: regexpFlags,
+						}).toString()}>)`
 					:	`- \`/${match.regex}/\`*`,
 				)
 				.join("\n")}${
