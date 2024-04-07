@@ -20,8 +20,6 @@ import {
 import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
 import { getAllSchemas } from "./util.js";
 
-const schemas = { [config.guild.id]: await getAllSchemas(config.guild) };
-
 defineChatCommand(
 	{
 		name: "execute",
@@ -47,9 +45,7 @@ defineChatCommand(
 			});
 		}
 
-		const allSchemas = (schemas[interaction.guild?.id ?? "@me"] ??= await getAllSchemas(
-			interaction.guild,
-		));
+		const allSchemas = await getAllSchemas(interaction.guild);
 		const schema = allSchemas.find(({ name }) => name === commandName);
 		const command =
 			commands[commandName]?.[0] ?? (!(schema instanceof ApplicationCommand) && schema);
