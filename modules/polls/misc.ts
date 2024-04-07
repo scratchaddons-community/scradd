@@ -14,7 +14,7 @@ export const DEFAULT_SHAPES = [
 	"❕",
 	"◽",
 ];
-export const bannedReactions = new Set(BOARD_EMOJI);
+export const bannedReactions = new Set([BOARD_EMOJI]);
 
 export function parseOptions(rawOptions: string): { reactions: string[]; options: string[] } {
 	if (rawOptions === "") return { reactions: [], options: [] };
