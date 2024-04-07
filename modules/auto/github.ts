@@ -28,7 +28,7 @@ export default function github(content: string, guildId?: Snowflake): string | u
 		/(?:^|\s)(?:(?:(?<owner>[\w.-]+)\/)?(?<repo>[\w.-]+))?#0*(?<issue>[1-9]\d*)\b/gi,
 	)) {
 		const { owner, repo, issue } = match.groups ?? {};
-		if (!issue) continue;
+		if (!issue || (issue.length === 1 && !repo)) continue;
 
 		const lowercasedOwner = owner?.toLowerCase();
 		const resolvedOwner =
@@ -52,5 +52,5 @@ export default function github(content: string, guildId?: Snowflake): string | u
 		output.add(`https://github.com/${resolvedPath}/issues/${issue}`);
 	}
 	return [...output].slice(0, 5).join(" ");
-	// TODO: Verify the link doesn't already exist in the OG content
+	// TODO: Verify the link doesn't already exist in the OG content, also the Set is case-sensitive
 }

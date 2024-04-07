@@ -61,8 +61,14 @@ await describe("github", async () => {
 	await it("should strip leading zeros", () => {
 		strictEqual(github("#0123"), "https://github.com/ScratchAddons/ScratchAddons/issues/123");
 	});
+	await it("should ignore single digits", () => {
+		strictEqual(github("#9"), "");
+	});
+	await it("should not ignore single digits with repos", () => {
+		strictEqual(github("#9"), "https://github.com/ScratchAddons/ScratchAddons/issues/9");
+	});
 	await it("should ignore all zeros", () => {
-		strictEqual(github("#0"), "");
+		strictEqual(github("#0000"), "");
 	});
 	await it("should support multiple references", () => {
 		strictEqual(
