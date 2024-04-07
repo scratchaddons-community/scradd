@@ -58,9 +58,11 @@ const LINK_THRESHOLD = 5,
 export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
 	const baseChannel = getBaseChannel(message.channel);
+
+	const mentions = message.mentions.users.filter((user) => !user.bot);
 	const pings =
-		message.mentions.users.size ?
-			` (ghost pinged ${joinWithAnd(message.mentions.users.map((user) => user.toString()))})`
+		mentions.size ?
+			` (ghost pinged ${joinWithAnd(mentions.map((user) => user.toString()))})`
 		:	"";
 
 	let needsDelete = false;
