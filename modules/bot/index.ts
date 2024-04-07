@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === "production") {
 		{ name: "restart", description: "Restart the bot", restricted: true },
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
-			await interaction.reply("Restarts bot…");
+			await interaction.reply("Restarting bot…");
 			await prepareExit();
 			process.exit(1);
 		},
