@@ -372,24 +372,23 @@ export function messageToText(message: Message, replies = true): Awaitable<strin
 
 		case MessageType.Reply: {
 			if (!replies) break;
+			const replyLink = `<${messageLink(
+				message.reference?.guildId ?? message.guild?.id ?? "@me",
+				message.reference?.channelId ?? message.channel.id,
+				message.reference?.messageId ?? message.id,
+			)}>`;
+
 			return message
 				.fetchReference()
 				.catch(() => void 0)
 				.then((reply) => {
-					const cleanContent =
-						reply && messageToText(reply, false).replaceAll(/\s+/g, " ");
+					if (!reply) {
+						return `*${constants.emojis.message.reply}[ Original message was deleted](${replyLink})*\n\n${content}`;
+					}
+					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					const replyContent =
-						cleanContent ? `\n> ${truncateText(stripMarkdown(cleanContent), 300)}` : "";
-					const replyLink = messageLink(
-						message.reference?.guildId ?? message.guild?.id ?? "@me",
-						message.reference?.channelId ?? message.channel.id,
-						message.reference?.messageId ?? message.id,
-					);
-					return `[*${
-						reply ? `Replying to ` : (
-							`${constants.emojis.message.reply} Original message was deleted`
-						)
-					}*](${replyLink})${reply ? reply.author.toString() + (replyContent ? `:` : "") : ""}${replyContent}\n\n${content}`;
+						cleanContent && `\n> ${truncateText(stripMarkdown(cleanContent), 300)}`;
+					return `*[Replying to ](${replyLink})${reply.author.toString()}${replyContent && `:`}*${replyContent}\n\n${content}`;
 				});
 		}
 
