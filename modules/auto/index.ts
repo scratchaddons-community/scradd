@@ -238,10 +238,11 @@ async function handleMutatable(
 
 defineEvent("messageDelete", async (message) => {
 	const found = autoResponses.get(message.id);
-	if (!found) return;
+	if (found) await found.delete();
 
-	await found.delete();
-	autoResponses.delete(found.id);
+	const reference =
+		found?.id ?? [...autoResponses.entries()].find(([, { id }]) => id === message.id)?.[0];
+	if (reference) autoResponses.delete(reference);
 });
 
 const autoResponses = new Map<Snowflake, Message>();
