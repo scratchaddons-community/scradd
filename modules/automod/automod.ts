@@ -99,7 +99,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			allowedMentions: { users: [], repliedUser: true },
 		});
 		await message.delete();
-		setTimeout(() => publicWarn.delete(), 300_000);
+		if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 		return false;
 	}
 
@@ -258,7 +258,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				allowedMentions: { users: [], repliedUser: true },
 			});
 			await message.delete();
-			setTimeout(() => publicWarn.delete(), 300_000);
+			if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 			return false;
 		}
 
@@ -272,7 +272,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			allowedMentions: { users: [], repliedUser: true },
 		});
 		await message.suppressEmbeds();
-		setTimeout(() => publicWarn.delete(), 300_000);
+		if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 	}
 
 	return true;
