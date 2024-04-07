@@ -65,7 +65,7 @@ await describe("github", async () => {
 		strictEqual(github("#9"), "");
 	});
 	await it("should not ignore single digits with repos", () => {
-		strictEqual(github("#9"), "https://github.com/ScratchAddons/ScratchAddons/issues/9");
+		strictEqual(github("sa#9"), "https://github.com/ScratchAddons/ScratchAddons/issues/9");
 	});
 	await it("should ignore all zeros", () => {
 		strictEqual(github("#0000"), "");
