@@ -5,7 +5,6 @@ import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
-import { getMessageJSON } from "../util/discord.js";
 
 const directoryUrl =
 	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
@@ -150,28 +149,28 @@ defineEvent("guildMemberAdd", async (member) => {
 
 const INTRO_INTERVAL = 10;
 let introCount = 0;
-let introTemplate =
+const introTemplate = {
+	embeds: [
+		{
+			title: "Introduction Template",
+			color: constants.themeColor,
+			description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${constants.domains.scratch}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
+		},
+	],
+};
+let templateMessage =
 	(await config.channels.intros?.messages.fetch({ limit: 100 }))?.find(
 		(message) =>
 			message.author.id === client.user.id &&
 			message.embeds[0]?.title === "Introduction Template",
-	) ??
-	(await config.channels.intros?.send({
-		embeds: [
-			{
-				title: "Introduction Template",
-				color: constants.themeColor,
-				description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${constants.domains.scratch}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
-			},
-		],
-	}));
+	) ?? (await config.channels.intros?.send(introTemplate));
 defineEvent("messageCreate", async (message) => {
 	if (message.channel.id !== config.channels.intros?.id) return;
 
 	introCount++;
 	if (introCount % INTRO_INTERVAL) return;
 
-	const newTemplate = await introTemplate?.reply(getMessageJSON(introTemplate));
-	await introTemplate?.delete();
-	introTemplate = newTemplate;
+	const newMessage = await templateMessage?.reply(introTemplate);
+	await templateMessage?.delete();
+	templateMessage = newMessage;
 });
