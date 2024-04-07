@@ -17,6 +17,7 @@ import warn from "../punishments/warn.js";
 import { getLevelForXp } from "../xp/misc.js";
 import { xpDatabase } from "../xp/util.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
+import { ignoredDeletions } from "../logging/messages.js";
 
 const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
 const whitelistedInvites = await Promise.all(
@@ -100,6 +101,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			content: `${constants.emojis.statuses.no}${deletionMessage}${pings}`,
 			allowedMentions: { users: [], repliedUser: true },
 		});
+		ignoredDeletions.add(publicWarn.id);
 		await message.delete();
 		if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 		return false;
@@ -259,6 +261,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				content: `${constants.emojis.statuses.no}${deletionMessage}${pings}`,
 				allowedMentions: { users: [], repliedUser: true },
 			});
+			ignoredDeletions.add(publicWarn.id);
 			await message.delete();
 			if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 			return false;
@@ -273,6 +276,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			content: `${constants.emojis.statuses.no}${deletionMessage}`,
 			allowedMentions: { users: [], repliedUser: true },
 		});
+		ignoredDeletions.add(publicWarn.id);
 		await message.suppressEmbeds();
 		if (!pings) setTimeout(() => publicWarn.delete(), 300_000);
 	}
