@@ -10,7 +10,13 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
-import { DEFAULT_XP, getLevelForXp, getXpForLevel } from "./misc.js";
+import {
+	DEFAULT_XP,
+	getLevelForXp,
+	getXpForLevel,
+	ACTIVE_THRESHOLD_ONE,
+	ACTIVE_THRESHOLD_TWO,
+} from "./misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
@@ -189,12 +195,14 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 export async function checkXPRoles(member: GuildMember): Promise<void> {
 	if (config.roles.active) {
 		const isActive =
-			getFullWeeklyData().find((item) => member.id == item.user && item.xp >= 300) ??
+			getFullWeeklyData().find(
+				(item) => member.id == item.user && item.xp >= ACTIVE_THRESHOLD_ONE,
+			) ??
 			recentXpDatabase.data.reduce(
 				(accumulator, gain) =>
 					gain.user === member.id ? accumulator + gain.xp : accumulator,
 				0,
-			) >= 500;
+			) >= ACTIVE_THRESHOLD_TWO;
 
 		if (isActive) await member.roles.add(config.roles.active, "Active");
 	}

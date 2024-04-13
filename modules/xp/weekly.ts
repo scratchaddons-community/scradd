@@ -11,6 +11,7 @@ import constants from "../../common/constants.js";
 import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
 import { recheckMemberRole } from "../roles/custom.js";
 import { getFullWeeklyData, recentXpDatabase } from "./util.js";
+import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.js";
 
 export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();
@@ -76,7 +77,7 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 	const weeklyWinners = getFullWeeklyData();
 
 	const latestActiveMembers = weeklyWinners
-		.filter((item) => item.xp >= 300)
+		.filter((item) => item.xp >= ACTIVE_THRESHOLD_ONE)
 		.map((item) => item.user);
 	const activeMembers = new Set([
 		...latestActiveMembers,
@@ -86,7 +87,7 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 				return accumulator;
 			}, {}),
 		)
-			.filter(([, xp]) => xp >= 500)
+			.filter(([, xp]) => xp >= ACTIVE_THRESHOLD_TWO)
 			.map((entry) => entry[0]),
 	]);
 
