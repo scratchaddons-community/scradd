@@ -57,4 +57,3 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		await other.users.remove(user);
 	}
 });
-
