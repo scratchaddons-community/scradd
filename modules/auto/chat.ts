@@ -32,7 +32,7 @@ import { getSettings, userSettingsDatabase } from "../settings.js";
 export const chatName = `${client.user.displayName} Chat` as const;
 
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
-const dictionary = (await Chat.find({}))
+const chats = (await Chat.find({}))
 	.map((chat) => ({ response: chat.response, prompt: chat.prompt ?? "" }))
 	.filter(
 		(chat): chat is { response: string; prompt: string } =>
@@ -49,11 +49,11 @@ export default function scraddChat(message: Message): string | undefined {
 		return;
 	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
 
-	const responses = didYouMean(prompt, dictionary, {
+	const responses = didYouMean(prompt, chats, {
 		matchPath: ["prompt"],
 		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
 		thresholdType: ThresholdTypeEnums.SIMILARITY,
-		threshold: 0.6,
+		threshold: 0.5,
 	})
 		.toSorted(() => Math.random() - 0.5)
 		.filter(
@@ -114,7 +114,7 @@ export async function learn(message: Message): Promise<void> {
 
 	if (reference?.author.id === message.author.id || prompt === undefined || prompt === response)
 		return;
-	dictionary.push({ prompt, response });
+	chats.push({ prompt, response });
 	await new Chat({ prompt, response }).save();
 }
 
