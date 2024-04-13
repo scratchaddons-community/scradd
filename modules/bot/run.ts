@@ -11,6 +11,11 @@ import constants from "../../common/constants.js";
 import { generateError } from "../logging/errors.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
+const censoredToken = client.token
+	.split(".")
+	.map((section, index) => (index > 1 ? "*".repeat(section.length) : section))
+	.join(".");
+
 export default async function getCode(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ): Promise<InteractionResponse | undefined> {
@@ -55,18 +60,21 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 			}})()`,
 		);
 
+		const stringifiedOutput =
+			typeof output === "bigint" || typeof output === "symbol" ?
+				// eslint-disable-next-line unicorn/string-content
+				`"${output.toString().replaceAll('"', '\\"')}"`
+			: output === undefined || typeof output === "object" ?
+				JSON.stringify(output, undefined, "  ") ?? "undefined"
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
+			:	output.toString();
+
 		await interaction.editReply({
 			files: [
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
 				{
 					attachment: Buffer.from(
-						typeof output === "bigint" || typeof output === "symbol" ?
-							// eslint-disable-next-line unicorn/string-content
-							`"${output.toString().replaceAll('"', '\\"')}"`
-						: output === undefined || typeof output === "object" ?
-							JSON.stringify(output, undefined, "  ") ?? "undefined"
-							// eslint-disable-next-line @typescript-eslint/no-base-to-string
-						:	output.toString(),
+						stringifiedOutput.replaceAll(client.token, censoredToken),
 						"utf8",
 					),
 					name: `output.${
