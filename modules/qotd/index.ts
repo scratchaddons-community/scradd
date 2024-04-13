@@ -1,5 +1,12 @@
 import { ChannelType } from "discord.js";
-import { client, defineButton, defineEvent, defineSelect, defineSubcommands } from "strife.js";
+import {
+	client,
+	defineButton,
+	defineEvent,
+	defineModal,
+	defineSelect,
+	defineSubcommands,
+} from "strife.js";
 import config from "../../common/config.js";
 import getQuestionData, { addQuestion } from "./add.js";
 import { listQuestions, removeQuestion, viewQuestion } from "./list.js";
