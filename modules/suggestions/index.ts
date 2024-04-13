@@ -1,29 +1,20 @@
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	AuditLogEvent,
-	Colors,
-	ForumChannel,
 	MessageType,
-	ThreadChannel,
 	type Snowflake,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { formatAnyEmoji, stripMarkdown } from "../../util/markdown.js";
-import { lerpColors } from "../../util/numbers.js";
+import { stripMarkdown } from "../../util/markdown.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
-import type { AuditLog } from "../logging/misc.js";
-import {
-	getSuggestionData,
-	parseSuggestionTags,
-	suggestionAnswers,
-	suggestionsDatabase,
-} from "./misc.js";
-import updateReactions, { addToDatabase } from "./update.js";
+import answerSuggestion from "./answer.js";
+import { sendDuplicates } from "./duplicates.js";
+import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
 import top from "./top.js";
+import updateReactions, { addToDatabase, updateSuggestion } from "./update.js";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
@@ -38,82 +29,7 @@ defineEvent("messageReactionRemove", async (partialReaction) => {
 		partialReaction.partial ? await partialReaction.fetch() : partialReaction,
 	);
 });
-defineEvent("threadUpdate", async (_, newThread) => {
-	if (!config.channels.suggestions || newThread.parent?.id !== config.channels.suggestions.id)
-		return;
-	if (newThread.locked) {
-		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== newThread.id);
-		return;
-	}
-
-	const defaultEmoji = config.channels.suggestions.defaultReactionEmoji;
-	const message = await newThread.fetchStarterMessage().catch(() => void 0);
-	const count = (defaultEmoji?.id && message?.reactions.resolve(defaultEmoji.id)?.count) || 0;
-
-	suggestionsDatabase.updateById(
-		{ count, ...getSuggestionData(newThread) },
-		{ author: newThread.ownerId ?? client.user.id },
-	);
-});
-defineEvent("guildAuditLogEntryCreate", async (rawEntry) => {
-	if (rawEntry.action !== AuditLogEvent.ThreadUpdate) return;
-	const entry = rawEntry as AuditLog<AuditLogEvent.ThreadUpdate, "applied_tags">;
-
-	if (!(entry.target instanceof ThreadChannel)) return;
-	const channel = entry.target.parent;
-	if (
-		!(channel instanceof ForumChannel) ||
-		![config.channels.suggestions?.id, config.channels.bugs?.id].includes(channel.id)
-	)
-		return;
-
-	const changes = entry.changes.filter(
-		(change): change is { key: "applied_tags"; old: Snowflake[]; new: Snowflake[] } =>
-			change.key === "applied_tags",
-	);
-	if (!changes.length) return;
-
-	const oldAnswer = parseSuggestionTags(
-		changes[0]?.old ?? [],
-		channel.availableTags,
-		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
-	).answer;
-	const newAnswer = parseSuggestionTags(
-		changes.at(-1)?.new ?? [],
-		channel.availableTags,
-		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
-	).answer;
-	if (oldAnswer.name === newAnswer.name) return;
-
-	const user =
-		entry.executor &&
-		(await config.guild.members.fetch(entry.executor.id).catch(() => entry.executor));
-
-	await entry.target.send({
-		embeds: [
-			{
-				author:
-					user ?
-						{
-							icon_url: user.displayAvatarURL(),
-							name: "Answered by " + user.displayName,
-						}
-					:	undefined,
-				color:
-					newAnswer.position < 0 ?
-						undefined
-					:	lerpColors(
-							[Colors.Green, Colors.Blue, Colors.Yellow, Colors.Red],
-							newAnswer.position,
-						),
-				title:
-					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
-				description: channel.topic?.split(`\n- **${newAnswer.name}**: `)[1]?.split("\n")[0],
-				footer: { text: `Was previously ${oldAnswer.name}` },
-			},
-		],
-	});
-});
+defineEvent("threadUpdate", updateSuggestion);
 defineEvent("threadDelete", (thread) => {
 	if (thread.parent?.id === config.channels.suggestions?.id)
 		suggestionsDatabase.data = suggestionsDatabase.data.filter(({ id }) => id !== thread.id);
@@ -155,6 +71,10 @@ defineMenuCommand(
 defineButton("suggestions", async (interaction, userId) => {
 	await top(interaction, { user: await client.users.fetch(userId) });
 });
+
+defineEvent("guildAuditLogEntryCreate", answerSuggestion);
+
+defineEvent("messageCreate", sendDuplicates);
 
 const pinnedMessages = new Set<Snowflake>();
 defineMenuCommand(
