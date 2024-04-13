@@ -14,7 +14,13 @@ import {
 	defineSubcommands,
 } from "strife.js";
 import poll from "./poll.js";
-import { addQuestion, listQuestions, removeQuestion, viewQuestion } from "./qotd.js";
+import {
+	addQuestion,
+	getQuestionData,
+	listQuestions,
+	removeQuestion,
+	viewQuestion,
+} from "./qotd.js";
 import { DEFAULT_SHAPES } from "./misc.js";
 import config from "../../common/config.js";
 
@@ -89,9 +95,8 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		.valueOf()
 		.filter(
 			({ emoji }) => emoji.name !== reaction.emoji.name && emojis.includes(emoji.name || "_"),
-		)) {
+		))
 		await other.users.remove(user);
-	}
 });
 
 defineSubcommands(
@@ -109,7 +114,7 @@ defineSubcommands(
 	async (interaction, { subcommand }) => {
 		switch (subcommand) {
 			case "add": {
-				await addQuestion(interaction);
+				await getQuestionData(interaction);
 				break;
 			}
 			case "list": {
@@ -119,6 +124,7 @@ defineSubcommands(
 		}
 	},
 );
+defineModal("addQuestion", addQuestion);
 
 defineSelect("viewQuestion", viewQuestion);
 defineButton("removeQuestion", removeQuestion);
