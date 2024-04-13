@@ -180,7 +180,7 @@ defineMenuCommand(
 		}
 		await interaction.showModal({
 			title: "Report Message",
-			customId: interaction.id,
+			customId: `${interaction.targetMessage.id}_report`,
 			components: [
 				{
 					type: ComponentType.ActionRow,
@@ -198,43 +198,46 @@ defineMenuCommand(
 				},
 			],
 		});
-
-		const modalInteraction = await interaction
-			.awaitModalSubmit({
-				time: constants.collectorTime,
-				filter: (modalInteraction) => modalInteraction.customId === interaction.id,
-			})
-			.catch(() => void 0);
-
-		if (!modalInteraction) return;
-		const reason = modalInteraction.fields.getTextInputValue("reason");
-
-		await log(
-			`${LoggingEmojis.Punishment} ${interaction.user.toString()} reported [a message](<${
-				interaction.targetMessage.url
-			}>)${extraAuditLogsInfo({ executor: interaction.targetMessage.author, reason })}`,
-			LogSeverity.Alert,
-			{
-				buttons: [
-					{
-						label: "Contact Reporter",
-						style: ButtonStyle.Secondary,
-						customId: `${interaction.user.id}_contactUser`,
-					},
-					{
-						label: "Contact Reportee",
-						style: ButtonStyle.Secondary,
-						customId: `${interaction.targetMessage.author.id}_contactUser`,
-					},
-				],
-			},
-		);
-		await modalInteraction.reply({
-			content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
-			ephemeral: true,
-		});
 	},
 );
+defineModal("report", async (interaction, messageId) => {
+	const message = await interaction.channel?.messages.fetch(messageId).catch(() => void 0);
+	if (!message) {
+		await interaction.reply({
+			content: `${constants.emojis.statuses.no} Cannot report that message! Has it already been deleted?`,
+			ephemeral: true,
+		});
+		return;
+	}
+
+	await log(
+		`${LoggingEmojis.Punishment} ${interaction.user.toString()} reported [a message](<${
+			message.url
+		}>)${extraAuditLogsInfo({
+			executor: message.author,
+			reason: interaction.fields.getTextInputValue("reason"),
+		})}`,
+		LogSeverity.Alert,
+		{
+			buttons: [
+				{
+					label: "Contact Reporter",
+					style: ButtonStyle.Secondary,
+					customId: `${interaction.user.id}_contactUser`,
+				},
+				{
+					label: "Contact Reportee",
+					style: ButtonStyle.Secondary,
+					customId: `${message.author.id}_contactUser`,
+				},
+			],
+		},
+	);
+	await interaction.reply({
+		content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
+		ephemeral: true,
+	});
+});
 
 defineChatCommand(
 	{
