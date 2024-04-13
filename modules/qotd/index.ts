@@ -1,7 +1,7 @@
 import { ChannelType } from "discord.js";
 import { client, defineButton, defineEvent, defineSelect, defineSubcommands } from "strife.js";
 import config from "../../common/config.js";
-import { addQuestion } from "./add.js";
+import getQuestionData, { addQuestion } from "./add.js";
 import { listQuestions, removeQuestion, viewQuestion } from "./list.js";
 
 defineSubcommands(
@@ -19,7 +19,7 @@ defineSubcommands(
 	async (interaction, { subcommand }) => {
 		switch (subcommand) {
 			case "add": {
-				await addQuestion(interaction);
+				await getQuestionData(interaction);
 				break;
 			}
 			case "list": {
@@ -29,6 +29,7 @@ defineSubcommands(
 		}
 	},
 );
+defineModal("addQuestion", addQuestion);
 
 defineSelect("viewQuestion", viewQuestion);
 defineButton("removeQuestion", removeQuestion);
@@ -53,7 +54,6 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 		.valueOf()
 		.filter(
 			({ emoji }) => emoji.name !== reaction.emoji.name && emojis.includes(emoji.name || "_"),
-		)) {
+		))
 		await other.users.remove(user);
-	}
 });
