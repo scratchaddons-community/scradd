@@ -3,6 +3,7 @@ import {
 	ComponentType,
 	TextInputStyle,
 	type ChatInputCommandInteraction,
+	type ModalSubmitInteraction,
 } from "discord.js";
 import constants from "../../common/constants.js";
 import tryCensor from "../automod/misc.js";
@@ -10,10 +11,12 @@ import warn from "../punishments/warn.js";
 import { DEFAULT_SHAPES, parseOptions } from "./misc.js";
 import { Question, questions } from "./send.js";
 
-export async function addQuestion(interaction: ChatInputCommandInteraction): Promise<void> {
+export default async function getQuestionData(
+	interaction: ChatInputCommandInteraction,
+): Promise<void> {
 	await interaction.showModal({
 		title: "Add A Question of The Day",
-		customId: interaction.id,
+		customId: "_addQuestion",
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -56,18 +59,11 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 			// TODO: Specify dates or ranges of dates
 		],
 	});
-
-	const modalInteraction = await interaction
-		.awaitModalSubmit({
-			time: constants.collectorTime,
-			filter: (modalInteraction) => modalInteraction.customId === interaction.id,
-		})
-		.catch(() => void 0);
-	if (!modalInteraction) return;
-
-	const question = modalInteraction.fields.getTextInputValue("question").trim();
-	const rawDescription = modalInteraction.fields.fields.get("description")?.value.trim();
-	const rawOptions = modalInteraction.fields.fields.get("answers")?.value.trim() ?? "";
+}
+export async function addQuestion(interaction: ModalSubmitInteraction): Promise<void> {
+	const question = interaction.fields.getTextInputValue("question").trim();
+	const rawDescription = interaction.fields.fields.get("description")?.value.trim();
+	const rawOptions = interaction.fields.fields.get("answers")?.value.trim() ?? "";
 	const description = (rawDescription ?? "") + (rawDescription && rawOptions ? "\n\n" : "");
 	const toCensor = `${question}${
 		description || rawOptions ? "\n\n\n" : ""
@@ -80,7 +76,7 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 			censored.strikes,
 			`Attempted to create QOTD:\n>>> ${toCensor}`,
 		);
-		await modalInteraction.reply({
+		await interaction.reply({
 			content: `${constants.emojis.statuses.no} Please ${
 				censored.strikes < 1 ? "don’t say that here" : "watch your language"
 			}!`,
@@ -91,7 +87,7 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 
 	const { options, reactions } = parseOptions(rawOptions);
 	if (options.length !== reactions.length) {
-		await modalInteraction.reply({
+		await interaction.reply({
 			content: `${constants.emojis.statuses.no} You can’t have over ${
 				DEFAULT_SHAPES.length
 			} option${DEFAULT_SHAPES.length === 1 ? "" : "s"}!`,
@@ -108,11 +104,11 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 			question,
 			description: fullDescription,
 			reactions,
-			_id: modalInteraction.id,
+			_id: interaction.id,
 		}).save(),
 	);
 
-	await modalInteraction.reply({
+	await interaction.reply({
 		content: constants.emojis.statuses.yes + " Added question!",
 		embeds: [{ color: constants.themeColor, title: question, description: fullDescription }],
 		components: [
@@ -120,7 +116,7 @@ export async function addQuestion(interaction: ChatInputCommandInteraction): Pro
 				type: ComponentType.ActionRow,
 				components: [
 					{
-						customId: modalInteraction.id + "_removeQuestion",
+						customId: interaction.id + "_removeQuestion",
 						type: ComponentType.Button,
 						label: "Remove",
 						style: ButtonStyle.Danger,
