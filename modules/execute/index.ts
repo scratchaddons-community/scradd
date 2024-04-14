@@ -57,6 +57,18 @@ defineChatCommand(
 			});
 		}
 
+		const permission = await hasPermission(
+			schema,
+			interaction.member ?? interaction.user,
+			interaction.channel ?? undefined,
+		);
+		if (!permission) {
+			return await interaction.reply({
+				ephemeral: true,
+				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${OPERATION_PREFIX}${commandName}\` operation!`,
+			});
+		}
+
 		const options =
 			("type" in schema ? schema.type : ApplicationCommandType.ChatInput) !==
 				ApplicationCommandType.ChatInput ||
@@ -91,18 +103,6 @@ defineChatCommand(
 						schema.name,
 					),
 				],
-			});
-		}
-
-		const permission = await hasPermission(
-			schema,
-			interaction.member ?? interaction.user,
-			interaction.channel ?? undefined,
-		);
-		if (!permission) {
-			return await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${OPERATION_PREFIX}${commandName}\` operation!`,
 			});
 		}
 
