@@ -33,9 +33,9 @@ async function userInfo(
 			value: time(user.createdAt, TimestampStyles.RelativeTime),
 			inline: true,
 		},
-		user.globalName ?
-			{ name: "🪪 Display Name", value: user.globalName, inline: true }
-		:	{ name: constants.zws, value: constants.zws, inline: true },
+		user.tag === user.displayName ?
+			{ name: constants.zws, value: constants.zws, inline: true }
+		:	{ name: "🪪 Username", value: user.tag, inline: true },
 	];
 
 	if (member?.joinedAt)
@@ -149,7 +149,7 @@ async function userInfo(
 				thumbnail: { url: (member ?? user).displayAvatarURL() },
 				fields,
 				author: {
-					name: user.tag + (user.bot ? " 🤖" : ""),
+					name: user.displayName + (user.bot ? " 🤖" : ""),
 					url:
 						member &&
 						`${constants.urls.permissions}/${

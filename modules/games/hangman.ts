@@ -322,7 +322,7 @@ async function getMember(player: User): Promise<GuildMember> {
 		.filter(
 			(member) =>
 				member.id !== player.id &&
-				member.user.username.length > 5 &&
+				/^[\w.]{5,}$/i.test(member.user.username) &&
 				!tryCensor(member.user.username) &&
 				(process.env.NODE_ENV !== "production" ||
 					testers?.get(member.id)?.displayColor ||

@@ -135,9 +135,7 @@ defineEvent("guildMemberRemove", async (member) => {
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 	await config.channels.info?.setName(
-		`Info - ${(
-			config.guild.memberCount - (config.guild.memberCount > 1005 ? 5 : 0)
-		).toLocaleString([], {
+		`Info - ${config.guild.memberCount.toLocaleString([], {
 			compactDisplay: "short",
 			maximumFractionDigits: 1,
 			minimumFractionDigits: config.guild.memberCount > 1000 ? 1 : 0,
