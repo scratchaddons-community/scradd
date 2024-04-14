@@ -54,6 +54,10 @@ const LINK_THRESHOLD = 5,
 		"youtu.be",
 		"youtube.com",
 		"youtube-nocookie.com",
+
+		...(await fetch("https://raw.githubusercontent.com/timleland/url-shorteners/main/list.txt")
+			.then((response) => response.text())
+			.then((text) => text.split("\n"))),
 	];
 
 export default async function automodMessage(message: Message): Promise<boolean> {
@@ -160,10 +164,10 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			const links = Array.from(
 				new Set(message.content.match(/(https?:\/\/[\w.:@]+(?=[^\w.:@]|$))/gis) ?? []),
 				(link) => new URL(link),
-			).filter((link) =>
-				BLACKLISTED_DOMAINS.some(
-					(domain) => link.hostname === domain || link.hostname.endsWith(`.${domain}`),
-				),
+			).filter(
+				(link) =>
+					BLACKLISTED_DOMAINS.includes(link.hostname) ||
+					BLACKLISTED_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`)),
 			);
 
 			const level = getLevelForXp(
