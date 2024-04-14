@@ -1,7 +1,7 @@
 import addons from "@sa-community/addons-data" assert { type: "json" };
 
 const domains = {
-	npm: "https://npm.im",
+	npm: "https://npmjs.com/package",
 	scradd:
 		process.env.NODE_ENV === "production" || !process.env.PORT ?
 			"https://sa-discord.up.railway.app"
