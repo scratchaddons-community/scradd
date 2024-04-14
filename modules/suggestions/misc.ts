@@ -98,11 +98,9 @@ export function parseSuggestionTags(
 		categories: string[];
 	}>(
 		({ answer, categories }, tag) =>
-			tag.name !== "Other" && appliedTags.includes(tag.id) ?
-				suggestionAnswers.includes(tag.name) ?
-					{ answer: tag, categories }
-				:	{ answer, categories: [...categories, tag.name] }
-			:	{ answer, categories },
+			tag.name === "Other" || !appliedTags.includes(tag.id) ? { answer, categories }
+			: tag.moderated ? { answer: tag, categories }
+			: { answer, categories: [...categories, tag.name] },
 		{
 			answer: { name: defaultAnswer, emoji: { name: "❓", id: null }, moderated: true },
 			categories: [],
