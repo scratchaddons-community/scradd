@@ -1,4 +1,6 @@
 import {
+	ButtonStyle,
+	ComponentType,
 	GuildMember,
 	channelLink,
 	hyperlink,
@@ -7,6 +9,7 @@ import {
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
 import { mentionUser } from "../settings.js";
@@ -71,6 +74,17 @@ export default async function top(
 			pageLength: interaction ? 15 : 25,
 			rawOffset: (options.page ?? 0) * (interaction ? 15 : 25),
 			highlightOffset: false,
+			generateComponents() {
+				return [
+					{
+						type: ComponentType.Button,
+						style: ButtonStyle.Link,
+						label: "Suggestions Site",
+						url: `${constants.domains.scradd}/suggestions${options.all === undefined ? "" : `?all=${options.all.toString()}`}`,
+					},
+				];
+			},
+			customComponentLocation: "below",
 		},
 	);
 }
