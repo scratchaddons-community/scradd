@@ -155,9 +155,11 @@ export async function guildScheduledEventUpdate(
 }
 
 export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
+	console.log(newState);
 	if (!newState.member || newState.guild.id !== config.guild.id) return;
+	const { channel } = newState;
 
-	if (oldState.channel?.id !== newState.channel?.id && !newState.member.user.bot) {
+	if (oldState.channel?.id !== channel?.id && !newState.member.user.bot) {
 		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {
 			await log(
 				`${
@@ -167,11 +169,11 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 			);
 		}
 
-		if (newState.channel && newState.channel.type !== ChannelType.GuildStageVoice) {
+		if (channel && channel.type !== ChannelType.GuildStageVoice) {
 			await log(
 				`${
 					LoggingEmojis.Voice
-				} ${newState.member.toString()} joined voice channel ${newState.channel.toString()}, ${
+				} ${newState.member.toString()} joined voice channel ${channel.toString()}, ${
 					newState.mute ? "" : "un"
 				}muted and ${newState.deaf ? "" : "un"}deafened`,
 				LogSeverity.Resource,
@@ -181,15 +183,13 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		return;
 	}
 
-	if (!newState.channel) return;
-
-	if (newState.suppress && newState.channel.type === ChannelType.GuildStageVoice) return;
+	if (!channel || (newState.suppress && channel.type === ChannelType.GuildStageVoice)) return;
 
 	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
 		await log(
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.selfDeaf ? "" : "un"
-			}deafened in ${newState.channel.toString()}`,
+			}deafened in ${channel.toString()}`,
 			LogSeverity.Resource,
 		);
 	}
@@ -198,7 +198,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		await log(
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.selfMute ? "" : "un"
-			}muted in ${newState.channel.toString()}`,
+			}muted in ${channel.toString()}`,
 			LogSeverity.Resource,
 		);
 	}
@@ -207,7 +207,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		await log(
 			`${LoggingEmojis.Voice} ${newState.member.toString()} turned camera ${
 				newState.selfVideo ? "on" : "off"
-			} in ${newState.channel.toString()}`,
+			} in ${channel.toString()}`,
 			LogSeverity.Resource,
 		);
 	}
@@ -234,7 +234,7 @@ export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceStat
 		await log(
 			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
 				newState.streaming ? "started" : "stopped"
-			} screen sharing in ${newState.channel.toString()}`,
+			} screen sharing in ${channel.toString()}`,
 			LogSeverity.Resource,
 		);
 	}
