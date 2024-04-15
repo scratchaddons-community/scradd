@@ -4,7 +4,6 @@ import {
 	ComponentType,
 	FormattingPatterns,
 	GuildMember,
-	type Message,
 	MessageFlags,
 	MessageMentions,
 	MessageType,
@@ -24,11 +23,13 @@ import {
 	type Awaitable,
 	type Channel,
 	type ChatInputCommandInteraction,
+	type Collection,
 	type DMChannel,
 	type EmojiIdentifierResolvable,
 	type Guild,
 	type GuildTextBasedChannel,
 	type InteractionReplyOptions,
+	type Message,
 	type MessageActionRowComponent,
 	type MessageActionRowComponentData,
 	type MessageEditOptions,
@@ -170,6 +171,15 @@ export function getMessageJSON(message: Message): {
 		embeds: message.embeds.map((embed) => embed.toJSON()),
 		files: message.attachments.map((attachment) => attachment.url),
 	} satisfies MessageEditOptions;
+}
+
+const membersPromises: Record<Snowflake, Promise<Collection<Snowflake, GuildMember>> | undefined> =
+	{};
+
+export async function getAllMembers(guild: Guild): Promise<Collection<Snowflake, GuildMember>> {
+	const members = await (membersPromises[guild.id] ??= config.guild.members.fetch());
+	membersPromises[guild.id] = undefined;
+	return members;
 }
 
 /**

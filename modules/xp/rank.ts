@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { paginate } from "../../util/discord.js";
+import { getAllMembers, paginate } from "../../util/discord.js";
 import { nth } from "../../util/numbers.js";
 import { getSettings, mentionUser } from "../settings.js";
 import { getLevelForXp, getXpForLevel } from "./misc.js";
@@ -35,7 +35,7 @@ export default async function getUserRank(
 	const weeklyRank = getFullWeeklyData().findIndex((entry) => entry.user === user.id) + 1;
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
-	const guildMembers = await config.guild.members.fetch();
+	const guildMembers = await getAllMembers(config.guild);
 	const serverRank =
 		allXp
 			.filter((entry) => guildMembers.has(entry.user))
@@ -140,6 +140,7 @@ async function makeCanvasFiles(progress: number): Promise<{ attachment: Buffer; 
 export async function top(
 	interaction: ButtonInteraction | ChatInputCommandInteraction<"cached" | "raw">,
 	user?: GuildMember | User,
+	onlyMembers = false,
 ): Promise<InteractionResponse | undefined> {
 	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
@@ -159,9 +160,10 @@ export async function top(
 			interaction.isButton() &&
 			interaction.message.interaction?.user.id !== interaction.user.id,
 	});
+	const guildMembers = onlyMembers && (await getAllMembers(config.guild));
 
 	await paginate(
-		leaderboard,
+		guildMembers ? leaderboard.filter((entry) => guildMembers.has(entry.user)) : leaderboard,
 		async (xp) =>
 			`${await mentionUser(
 				xp.user,

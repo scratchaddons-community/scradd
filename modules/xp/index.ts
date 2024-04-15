@@ -45,9 +45,14 @@ defineSubcommands(
 				description: "View the server XP leaderboard",
 
 				options: {
-					user: {
+					"user": {
 						type: ApplicationCommandOptionType.User,
 						description: "User to jump to",
+					},
+					"only-members": {
+						type: ApplicationCommandOptionType.Boolean,
+						description:
+							"Only include server members and exclude those who have left (defaults to false)",
 					},
 				},
 			},
@@ -94,7 +99,13 @@ defineSubcommands(
 				});
 			}
 			case "top": {
-				await top(interaction, user || undefined);
+				await top(
+					interaction,
+					user || undefined,
+					options?.options && "only-members" in options.options ?
+						options.options["only-members"]
+					:	undefined,
+				);
 				break;
 			}
 		}

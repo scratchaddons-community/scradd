@@ -1,6 +1,7 @@
 import {
 	ButtonStyle,
 	ComponentType,
+	Guild,
 	TextInputStyle,
 	inlineCode,
 	type ChatInputCommandInteraction,
@@ -10,7 +11,7 @@ import {
 import fileSystem from "node:fs/promises";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents, getAllMembers } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
@@ -315,8 +316,11 @@ const ROLES = [
 	config.roles.active?.id,
 ];
 async function getMember(player: User): Promise<GuildMember> {
-	const members = await config.guild.members.fetch();
-	const testers = await config.guilds.testing.members?.fetch();
+	const members = await getAllMembers(config.guild);
+	const testers =
+		config.guilds.testing instanceof Guild ?
+			await getAllMembers(config.guilds.testing)
+		:	undefined;
 
 	const member = members
 		.filter(
