@@ -107,7 +107,7 @@ export function parseSuggestionTags(
 		},
 	);
 	const answers = availableTags.filter((tag) => tag.moderated);
-	const index = answers.findIndex((tag) => answer.id === tag.name);
+	const index = answers.findIndex((tag) => answer.id === tag.id);
 	return {
 		answer: { ...answer, index, position: index / (answers.length - 1) },
 		category: (categories.length === 1 && categories[0]) || "Other",
