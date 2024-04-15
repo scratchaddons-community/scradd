@@ -104,7 +104,7 @@ export const rules = {
 				typeof node.target === "string" ? node.target : undefined,
 			);
 			const url = href && new URL(href);
-			if (url && ["discord.com", "ptb.discord.com", "discord.com"].includes(url.hostname)) {
+			if (url && ["discord.com", "ptb.discord.com", "canary.discord.com"].includes(url.hostname)) {
 				url.hostname = "discord.com";
 				const parts = url.pathname.split("/");
 				if (
