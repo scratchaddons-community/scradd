@@ -19,12 +19,17 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 	const question = questions[random];
 	if (!question) {
 		await log(
-			`${LoggingErrorEmoji} No QOTDs remain! Please add a new one now.`,
+			`${LoggingErrorEmoji} Could not find a QOTD for today! Please add new ones now.`,
 			LogSeverity.Alert,
 		);
 		return;
 	}
-	if (questions.length < 5) {
+	if (questions.length === 1) {
+		await log(
+			`${LoggingErrorEmoji} No QOTDs remain! Please add new ones now.`,
+			LogSeverity.Alert,
+		);
+	} else if (questions.length < 5) {
 		await log(
 			`${LoggingErrorEmoji} ${questions.length - 1} QOTD${
 				questions.length === 2 ? " remains" : "s remain"
