@@ -337,6 +337,6 @@
 
 .discord-attachment .discord-image-wrapper img,
 .discord-attachment .discord-image-wrapper video {
-	width: 100%;
+	max-width: 500px;
 	height: auto;
 }
