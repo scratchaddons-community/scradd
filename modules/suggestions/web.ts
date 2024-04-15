@@ -4,6 +4,7 @@ import fileSystem from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.js";
 import { getRequestUrl } from "../../util/text.js";
 import { oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
@@ -95,7 +96,9 @@ export default async function suggestionsPage(
 			.filter(
 				(message) =>
 					message.id !== starterMessage?.id &&
-					(message.content || message.attachments.size),
+					(message.content ||
+						message.attachments.size ||
+						message.interaction?.commandName === "addon"),
 			)
 			.sorted((one, two) => one.createdTimestamp - two.createdTimestamp)
 			.values(),
@@ -178,7 +181,19 @@ export default async function suggestionsPage(
 			];
 		},
 		messageContent(this: (typeof messages)[number]) {
-			return markdownToHtml(this.content);
+			return markdownToHtml(
+				this.content ||
+					((
+						"interaction" in this &&
+						this.interaction?.commandName === "addon" &&
+						this.embeds[0]
+					) ?
+						`## ${this.embeds[0].title ?? ""}\n${this.embeds[0].description ?? ""}\n` +
+						(this.embeds[0].footer?.text ?
+							`[Enable Addon](${constants.urls.settings}#addon-${this.embeds[0].footer.text})`
+						:	"")
+					:	""),
+			);
 		},
 	});
 	return response.writeHead(200, { "content-type": "text/html" }).end(rendered);
