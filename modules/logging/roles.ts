@@ -1,4 +1,10 @@
-import { Role, roleMention, type AuditLogEvent } from "discord.js";
+import {
+	Role,
+	RoleFlagsBitField,
+	roleMention,
+	type AuditLogEvent,
+	type Snowflake,
+} from "discord.js";
 import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
@@ -9,37 +15,44 @@ export async function memberRoleUpdate(
 ): Promise<void> {
 	if (!entry.target) return;
 
-	const addedRoles = entry.changes
-		.map((change) => change.key === "$add" && change.new)
-		.filter(Boolean)
-		.flat();
+	const { $add, $remove } = entry.changes.reduce<{
+		$add?: { assignable: Snowflake[]; unassignable: Snowflake[] };
+		$remove?: { assignable: Snowflake[]; unassignable: Snowflake[] };
+	}>(
+		(accumulator, change) =>
+			change.key !== "id" && change.new ?
+				{
+					...accumulator,
+					[change.key]: change.new.reduce(
+						({ assignable, unassignable }, { flags, id }) => {
+							const isAssignable = new RoleFlagsBitField(flags).has("InPrompt");
+							(isAssignable ? assignable : unassignable).push(roleMention(id));
+							return { assignable, unassignable };
+						},
+						accumulator[change.key] ?? { assignable: [], unassignable: [] },
+					),
+				}
+			:	accumulator,
+		{},
+	);
 
-	const removedRoles = entry.changes
-		.map((change) => change.key === "$remove" && change.new)
-		.filter(Boolean)
-		.flat();
+	if ($add?.assignable.length)
+		await logRoles(`gained ${joinWithAnd($add.assignable)}`, LogSeverity.Resource);
+	if ($add?.unassignable.length)
+		await logRoles(`gained ${joinWithAnd($add.unassignable)}`, LogSeverity.ServerChange);
 
-	if (addedRoles.length)
+	if ($remove?.assignable.length)
+		await logRoles(`lost ${joinWithAnd($remove.assignable)}`, LogSeverity.Resource);
+	if ($remove?.unassignable.length)
+		await logRoles(`lost ${joinWithAnd($remove.unassignable)}`, LogSeverity.ServerChange);
+
+	async function logRoles(message: string, severity: LogSeverity): Promise<void> {
+		if (!entry.target) return;
 		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} gained ${joinWithAnd(
-				addedRoles,
-				({ id }) => roleMention(id),
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-				entry.reason ? ` (${entry.reason})` : ""
-			}`,
-			LogSeverity.ServerChange,
+			`${LoggingEmojis.Role} ${entry.target.toString()} ${message}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${extraAuditLogsInfo({ reason: entry.reason })}`,
+			severity,
 		);
-
-	if (removedRoles.length)
-		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} lost ${joinWithAnd(
-				removedRoles,
-				({ id }) => roleMention(id),
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${
-				entry.reason ? ` (${entry.reason})` : ""
-			}`,
-			LogSeverity.ServerChange,
-		);
+	}
 }
 
 export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>): Promise<void> {

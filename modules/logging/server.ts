@@ -15,7 +15,7 @@ import {
 	type Invite,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, type AuditLog } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 
 const createdInvites = new Set<string>();
 export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {
@@ -39,7 +39,7 @@ export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>):
 					:	""
 				}`
 			:	""
-		}${entry.reason ? ` (${entry.reason})` : ""}`,
+		}${extraAuditLogsInfo({ reason: entry.reason })}`,
 		LogSeverity.Resource,
 	);
 }

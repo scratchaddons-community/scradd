@@ -43,8 +43,7 @@ export default function scraddChat(message: Message): string | undefined {
 	if (
 		message.author.id === client.user.id ||
 		message.channel.id !== chatThread?.id ||
-		(message.mentions.users.size > +message.mentions.has(message.author) &&
-			!message.mentions.has(client.user))
+		(message.mentions.users.size && !message.mentions.has(client.user))
 	)
 		return;
 	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
