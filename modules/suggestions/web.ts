@@ -103,7 +103,6 @@ export default async function suggestionsPage(
 
 	const emoji = prepareEmoji(
 		!("old" in suggestion) && config.channels.suggestions?.defaultReactionEmoji,
-		"👍",
 	);
 
 	const answer = config.channels.suggestions?.availableTags.find(
@@ -115,7 +114,14 @@ export default async function suggestionsPage(
 		suggestion: {
 			title: suggestion.title,
 			votes: { emoji, count: suggestion.count.toLocaleString() },
-			answer: { emoji: prepareEmoji(answer.emoji, "❓"), name: answer.name },
+			answer: {
+				emoji: prepareEmoji(answer.emoji),
+				name: answer.name,
+				description:
+					config.channels.suggestions?.topic
+						?.split(`\n- **${answer.name}**: `)[1]
+						?.split("\n")[0] ?? "",
+			},
 			url: thread.url,
 		},
 		userAvatar(this: (typeof messages)[number]) {
@@ -178,17 +184,17 @@ export default async function suggestionsPage(
 	return response.writeHead(200, { "content-type": "text/html" }).end(rendered);
 }
 
-function prepareEmoji(
-	emoji: Partial<DefaultReactionEmoji> | false | null | undefined,
-	defaultTwemoji: string,
-): { name: string; url: string } {
+function prepareEmoji(emoji?: Partial<DefaultReactionEmoji> | false | null | undefined): {
+	name: string;
+	url: string;
+} {
 	if (emoji && emoji.id) {
 		return {
 			name: `:${emoji.name ?? "_"}:`,
 			url: client.rest.cdn.emoji(emoji.id, { size: 32 }),
 		};
-	} else {
-		const name = (emoji && emoji.name) || defaultTwemoji;
-		return { name: name, url: getTwemojiUrl(name) };
 	}
+
+	const name = (emoji && emoji.name) || "👍";
+	return { name: name, url: getTwemojiUrl(name) };
 }
