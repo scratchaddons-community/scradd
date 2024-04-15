@@ -193,7 +193,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 }
 
 export async function checkXPRoles(member: GuildMember): Promise<void> {
-	if (config.roles.active) {
+	if (config.roles.active && !member.roles.resolve(config.roles.active.id)) {
 		const isActive =
 			getFullWeeklyData().find(
 				(item) => member.id == item.user && item.xp >= ACTIVE_THRESHOLD_ONE,
@@ -204,13 +204,20 @@ export async function checkXPRoles(member: GuildMember): Promise<void> {
 				0,
 			) >= ACTIVE_THRESHOLD_TWO;
 
-		if (isActive) await member.roles.add(config.roles.active, "Active");
+		if (isActive) {
+			await member.roles.add(config.roles.active, "Active");
+			await config.channels.bots?.send({
+				allowedMentions:
+					(await getSettings(member)).levelUpPings ? undefined : { users: [] },
+				content: `🎊 ${member.toString()} Thanks for being active recently! You have earned ${config.roles.active.toString()}.`,
+			});
+		}
 	}
 
-	if (config.roles.epic) {
+	if (config.roles.epic && !member.roles.resolve(config.roles.epic.id)) {
 		const sorted = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 		const rank = sorted.findIndex((info) => info.user === member.id);
-		if (rank >= 0 && rank < 30 && !member.roles.resolve(config.roles.epic.id)) {
+		if (rank >= 0 && rank < 30) {
 			await member.roles.add(config.roles.epic, "Top 30 on the XP leaderboard");
 			await config.channels.general?.send(
 				`🎊 ${member.toString()} Congratulations on being in the top 30 of the XP leaderboard! You have earned ${config.roles.epic.toString()}.`,
