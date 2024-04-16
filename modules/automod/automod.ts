@@ -39,26 +39,25 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 	undefined, // Invalid links
 ]);
 
-const LINK_THRESHOLD = 5,
-	BLACKLISTED_DOMAINS = [
-		"scratch.camp",
-		"scratch.love",
-		"scratch.mit.edu",
-		"scratch.org",
-		"scratch.pizza",
-		"scratch.team",
+const BLACKLISTED_DOMAINS = [
+	"scratch.camp",
+	"scratch.love",
+	"scratch.mit.edu",
+	"scratch.org",
+	"scratch.pizza",
+	"scratch.team",
 
-		"turbowarp.org",
-		"turbowarp.xyz",
+	"turbowarp.org",
+	"turbowarp.xyz",
 
-		"youtu.be",
-		"youtube.com",
-		"youtube-nocookie.com",
+	"youtu.be",
+	"youtube.com",
+	"youtube-nocookie.com",
 
-		...(await fetch("https://raw.githubusercontent.com/timleland/url-shorteners/main/list.txt")
-			.then((response) => response.text())
-			.then((text) => text.split("\n"))),
-	];
+	...(await fetch("https://raw.githubusercontent.com/timleland/url-shorteners/main/list.txt")
+		.then((response) => response.text())
+		.then((text) => text.split("\n"))),
+];
 
 export default async function automodMessage(message: Message): Promise<boolean> {
 	const allowBadWords = badWordsAllowed(message.channel);
