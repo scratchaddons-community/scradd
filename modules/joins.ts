@@ -94,7 +94,7 @@ defineEvent("guildMemberAdd", async (member) => {
 defineEvent("guildMemberUpdate", async (_, member) => {
 	if (!config.roles.autoKick) return;
 	if (member.roles.resolve(config.roles.autoKick.id))
-		if (!member.joinedTimestamp || member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
+		if (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
 			member.kick("chose the autokick role in onboarding");
 		else member.roles.remove(config.roles.autoKick, "chose autokick option after 1 hour");
 });
