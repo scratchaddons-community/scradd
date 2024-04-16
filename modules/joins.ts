@@ -93,11 +93,11 @@ defineEvent("guildMemberAdd", async (member) => {
 
 defineEvent("guildMemberUpdate", async (_, member) => {
 	if (!config.roles.autoKick) return;
-	if (!member.roles.resolve(config.roles.autoKick.id)) return
-	
-		if (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
-			member.kick("Autokick role assigned");
-		else member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join");
+	if (!member.roles.resolve(config.roles.autoKick.id)) return;
+
+	if (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
+		member.kick("Autokick role assigned");
+	else member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join");
 });
 
 defineEvent("guildMemberAdd", async (member) => {
