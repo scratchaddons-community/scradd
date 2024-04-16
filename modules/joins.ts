@@ -89,7 +89,19 @@ defineEvent("guildMemberAdd", async (member) => {
 			],
 		})
 		.catch(() => void 0);
+
+
 });
+
+defineEvent("guildMemberUpdate", async (_,member) => {
+	if (!config.roles.autoKick) return
+	if (member.roles.resolve(config.roles.autoKick.id))
+		if (!member.joinedTimestamp || member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
+			member.kick('chose the autokick role in onboarding')
+		else
+			member.roles.remove(config.roles.autoKick, "chose autokick option after 1 hour")
+
+})
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -97,10 +109,10 @@ defineEvent("guildMemberAdd", async (member) => {
 	const countString = config.guild.memberCount.toString();
 	const jokes =
 		/^[1-9]0+$/.test(countString) ? ` (${"🥳".repeat(countString.length - 1)})`
-		: countString.includes("69") ? " (nice)"
-		: countString.endsWith("87") ?
-			` (WAS THAT THE BITE OF ’87${"⁉".repeat(Math.ceil(countString.length / 2))})`
-		:	"";
+			: countString.includes("69") ? " (nice)"
+				: countString.endsWith("87") ?
+					` (WAS THAT THE BITE OF ’87${"⁉".repeat(Math.ceil(countString.length / 2))})`
+					: "";
 	const memberCount = nth(config.guild.memberCount) + jokes;
 
 	const greeting = joins[Math.floor(Math.random() * joins.length)] ?? joins[0];
