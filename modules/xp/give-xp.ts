@@ -16,6 +16,7 @@ import {
 	getXpForLevel,
 	ACTIVE_THRESHOLD_ONE,
 	ACTIVE_THRESHOLD_TWO,
+	ESTABLISHED_THRESHOLD,
 } from "./misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
 
@@ -193,6 +194,14 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 }
 
 export async function checkXPRoles(member: GuildMember): Promise<void> {
+	if (config.roles.established && !member.roles.resolve(config.roles.established.id)) {
+		const xp = xpDatabase.data.find((entry) => entry.user === member.id)?.xp ?? 0;
+		const level = getLevelForXp(xp);
+		await (level >= ESTABLISHED_THRESHOLD ?
+			member.roles.add(config.roles.established, "Reached level 5")
+		:	member.roles.remove(config.roles.established, "Lost level 5"));
+	}
+
 	if (config.roles.active && !member.roles.resolve(config.roles.active.id)) {
 		const isActive =
 			getFullWeeklyData().find(

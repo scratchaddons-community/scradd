@@ -14,7 +14,7 @@ import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
-import { getLevelForXp } from "../xp/misc.js";
+import { ESTABLISHED_THRESHOLD, getLevelForXp } from "../xp/misc.js";
 import { xpDatabase } from "../xp/util.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { ignoredDeletions } from "../logging/messages.js";
@@ -170,17 +170,20 @@ export default async function automodMessage(message: Message): Promise<boolean>
 					BLACKLISTED_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`)),
 			);
 
-			const level = getLevelForXp(
-				xpDatabase.data.find(({ user }) => user === message.author.id)?.xp ?? 0,
-			);
 			const canPostLinks =
 				!links.length ||
-				level >= LINK_THRESHOLD ||
-				[config.roles.dev?.id, config.roles.epic?.id, config.roles.booster?.id].some(
-					(role) => !message.member || (role && message.member.roles.resolve(role)),
-				);
+				[
+					config.roles.dev?.id,
+					config.roles.epic?.id,
+					config.roles.booster?.id,
+					config.roles.established?.id,
+				].some((role) => !message.member || (role && message.member.roles.resolve(role)));
 
 			if (!canPostLinks) {
+				const level = getLevelForXp(
+					xpDatabase.data.find(({ user }) => user === message.author.id)?.xp ?? 0,
+				);
+
 				needsDelete = true;
 				await warn(
 					message.author,
@@ -190,7 +193,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 					links.length * PARTIAL_STRIKE_COUNT,
 					links.join(" "),
 				);
-				deletionMessage += ` Sorry, but you need level ${LINK_THRESHOLD} to post ${
+				deletionMessage += ` Sorry, but you need level ${ESTABLISHED_THRESHOLD} to post ${
 					links.length === 1 ? "that link" : "those links"
 				} outside a channel like ${config.channels.share.toString()}!`;
 			}

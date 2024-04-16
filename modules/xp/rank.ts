@@ -24,7 +24,7 @@ export default async function getUserRank(
 
 	const member = await config.guild.members.fetch(user.id).catch(() => void 0);
 
-	const xp = Math.floor(allXp.find((entry) => entry.user === user.id)?.xp ?? 0);
+	const xp = allXp.find((entry) => entry.user === user.id)?.xp ?? 0;
 	const level = getLevelForXp(xp);
 	const xpForNextLevel = getXpForLevel(level + 1);
 	const xpForPreviousLevel = getXpForLevel(level);
@@ -58,7 +58,7 @@ export default async function getUserRank(
 
 				fields: [
 					{ name: "📊 Level", value: level.toLocaleString(), inline: true },
-					{ name: "✨ XP", value: xp.toLocaleString(), inline: true },
+					{ name: "✨ XP", value: Math.floor(xp).toLocaleString(), inline: true },
 					{
 						name: "⏳ Weekly rank",
 
