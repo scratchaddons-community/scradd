@@ -51,13 +51,13 @@ jobs:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup CodeQL
-              uses: github/codeql-action/init@v3.24.10
+              uses: github/codeql-action/init@v3.25.0
               with:
                   languages: javascript
                   queries: security-and-quality
 
             - name: Analyze
-              uses: github/codeql-action/analyze@v3.24.10
+              uses: github/codeql-action/analyze@v3.25.0
 
     build:
         name: Build & Test
