@@ -80,7 +80,7 @@ defineEvent("messageCreate", async (message) => {
 	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
 		let shouldReact = false;
 		const emojis = [rawEmojis].flat();
-		if (emojis.some((emoji) => content.includes(emoji.replace(/^<a?:_/, "")))) continue;
+		if (emojis.some((emoji) => content.includes(emoji.replace(/^<a?:_*/, "")))) continue;
 
 		for (const requirement of requirements) {
 			const [rawMatch, type] =
