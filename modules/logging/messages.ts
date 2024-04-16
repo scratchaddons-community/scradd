@@ -202,6 +202,7 @@ export async function messageUpdate(
 					oldMessage.partial ? "Unknown message" : "Message"
 				}](<${newMessage.url}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited`,
 				LogSeverity.ContentEdit,
+				{ files },
 			);
 		}
 	}
