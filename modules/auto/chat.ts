@@ -228,20 +228,21 @@ export async function removeResponse(
 		.catch(() => void 0);
 
 	if (!modalInteraction) return;
+	await modalInteraction.deferReply({ ephemeral: true });
 
 	const response = interaction.targetMessage.content
 		.replaceAll(client.user.toString(), "<@0>")
 		.replaceAll(interaction.targetMessage.author.toString(), client.user.toString());
-
 	removedResponses.add(response);
-	const { deletedCount } = await Chat.deleteMany({ response }).exec();
 
+	const { deletedCount } = await Chat.deleteMany({ response }).exec();
 	if (!deletedCount) {
-		return await modalInteraction.reply({
-			content: `${constants.emojis.statuses.no} Could not find that as a response to any prompt!`,
-			ephemeral: true,
-		});
+		await modalInteraction.editReply(
+			`${constants.emojis.statuses.no} Could not find that as a response to any prompt!`,
+		);
+		return;
 	}
+
 	await log(
 		`${
 			LoggingEmojis.Bot
@@ -252,12 +253,11 @@ export async function removeResponse(
 		{ files: [{ content: response, extension: "md" }] },
 	);
 	await interaction.targetMessage.delete();
-	await modalInteraction.reply({
-		content: `${
+	await modalInteraction.editReply(
+		`${
 			constants.emojis.statuses.yes
 		} Permamently removed response. That response was associated with ${deletedCount} prompt${
 			deletedCount === 1 ? "" : "s"
 		}.`,
-		ephemeral: true,
-	});
+	);
 }
