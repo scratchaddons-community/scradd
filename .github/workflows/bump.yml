@@ -39,7 +39,7 @@ jobs:
 
             - name: Commit
               id: commit
-              uses: peter-evans/create-pull-request@v6.0.3
+              uses: peter-evans/create-pull-request@v6.0.4
               with:
                   token: ${{ secrets.TOKEN }}
                   push-to-fork: RedGuy13/scradd
