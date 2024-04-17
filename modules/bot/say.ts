@@ -24,7 +24,7 @@ export default async function sayCommand(
 		chatThread?.id === interaction.channel?.id ||
 		config.channels.board?.id === interaction.channel?.id ||
 		config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id ||
-		interaction.channel?.permissionsFor(client.user)?.has("SendMessages")
+		!interaction.channel?.permissionsFor(client.user)?.has("SendMessages")
 	) {
 		await interaction.reply({
 			content: `${constants.emojis.statuses.no} Can not send messages in this channel!`,
@@ -38,7 +38,7 @@ export default async function sayCommand(
 		return;
 	}
 
-	await interaction.channel?.sendTyping();
+	await interaction.channel.sendTyping();
 	await interaction.showModal({
 		title: "Send Message",
 		customId: `${options.reply ?? ""}_say`,
