@@ -79,7 +79,7 @@ export async function say(
 	content = silent ? content.replace("@silent", "").trim() : content;
 	const oldMessage =
 		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
-	if (reply && !oldMessage)
+	if (reply && (!oldMessage || oldMessage.system))
 		return await interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
 		);
