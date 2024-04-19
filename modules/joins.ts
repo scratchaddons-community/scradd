@@ -97,7 +97,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 
 	if (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000)
 		await member.kick("Autokick role assigned");
-	else member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join");
+else await member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join");
 });
 
 defineEvent("guildMemberAdd", async (member) => {
