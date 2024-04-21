@@ -70,7 +70,8 @@ export default async function automodMessage(message: Message): Promise<boolean>
 	if (spam) {
 		await message.delete();
 		await warn(message.author, "Spamming", 1, message.content);
-		(needsDelete = true), deletionMessages.push("Please don’t spam!");
+		needsDelete = true;
+	    deletionMessages.push("Please don’t spam!");
 	}
 
 	const animatedEmojis =
