@@ -111,7 +111,7 @@ export async function listOperations(
 				.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 				.map(
 					(schema) =>
-						inlineCode(OPERATION_PREFIX + schema.name) + ": " + schema.description,
+						`- ${inlineCode(OPERATION_PREFIX + schema.name)}: ${schema.description}`,
 				),
 		),
 	};

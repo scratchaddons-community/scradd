@@ -60,7 +60,9 @@ defineEvent("messageCreate", async (message) => {
 		if (response === true) return;
 		const isArray = Array.isArray(response);
 		if (isArray) {
-			const reply = await message.reply(response[0]);
+			const reply = await (message.system ?
+				message.channel.send(response[0])
+			:	message.reply(response[0]));
 			autoResponses.set(message.id, reply);
 			for (const action of response.slice(1)) {
 				if (typeof action === "number") {
@@ -71,7 +73,11 @@ defineEvent("messageCreate", async (message) => {
 				const edited = await reply.edit(action).catch(() => void 0);
 				if (!edited) break;
 			}
-		} else autoResponses.set(message.id, await message.reply(response));
+		} else
+			autoResponses.set(
+				message.id,
+				await (message.system ? message.channel.send(response) : message.reply(response)),
+			);
 	}
 
 	const settings = await getSettings(message.author);
@@ -124,7 +130,11 @@ defineEvent("messageUpdate", async (_, message) => {
 	const data = typeof response === "object" && !Array.isArray(response) && response;
 	if (found)
 		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
-	else if (data) autoResponses.set(message.id, await message.reply(data));
+	else if (data)
+		autoResponses.set(
+			message.id,
+			await (message.system ? message.channel.send(data) : message.reply(data)),
+		);
 });
 
 async function handleMutatable(

@@ -23,29 +23,30 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 		.map((name) => {
 			const { version } = lockFile.dependencies[name];
 
-			if (version.startsWith("file:")) return [name] as const;
+			if (version.startsWith("file:")) return [inlineCode(name)] as const;
 
-			if (/^https?:\/\//.test(version)) return [name, version] as const;
+			if (/^https?:\/\//.test(version)) return [inlineCode(name), version] as const;
 
 			if (version.startsWith("git+")) {
-				const segments = version.split("+")[1]?.split("#");
-				return segments ?
-						([`${name}${segments[1] ? `@${segments[1]}` : ""}`, segments[0]] as const)
-					:	([name] as const);
+				const git = version.split("+")[1]?.split("#");
+				return git ?
+						([git[1] ? (`${name}@${git[1]}` as const) : name, git[0]] as const)
+					:	([inlineCode(name)] as const);
 			}
 			if (version.startsWith("npm:")) {
-				const segments = version.split("@");
-				const reference = `${segments.length > 2 ? "@" : ""}${
-					segments.at(-2) ?? segments[0]
-				}`;
-				const resolvedVersion = segments.at(-1) ?? segments[0];
+				const npm = version.split("@");
+				const reference = `${npm.length > 2 ? "@" : ""}${npm.at(-2) ?? npm[0]}`;
+				const resolvedVersion = npm.at(-1) ?? npm[0];
 				return [
-					`${reference}@${resolvedVersion}`,
+					`${inlineCode(reference)}@${resolvedVersion}`,
 					`${constants.domains.npm}/${reference}/v/${resolvedVersion}`,
 				] as const;
 			}
 
-			return [`${name}@${version}`, `${constants.domains.npm}/${name}/v/${version}`] as const;
+			return [
+				`${inlineCode(name)}@${version}`,
+				`${constants.domains.npm}/${name}/v/${version}`,
+			] as const;
 		})
 		.toSorted(([one], [two]) => one.localeCompare(two));
 
@@ -66,8 +67,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 					...(await columnize(
 						dependencies,
 						([specifier, link]) =>
-							"- " +
-							(link ? `[${inlineCode(specifier)}](${link})` : inlineCode(specifier)),
+							"- " + (link ? `[${specifier}](${link})` : specifier),
 						"🗄️ Third-party code libraries",
 					)),
 				],
