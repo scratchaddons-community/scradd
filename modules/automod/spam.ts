@@ -2,9 +2,9 @@ const x = 5;
 const timeWindow = 20;
 
 type Message = {
-    message: string;
-    timestamp: number;
-}
+	message: string;
+	timestamp: number;
+};
 const userMessages: Record<string, Message[]> = {};
 function logMessage(userId: string, message: string): void {
 	const timestamp: number = Math.floor(Date.now() / 1000);
@@ -14,8 +14,8 @@ function logMessage(userId: string, message: string): void {
 
 	userMessages[userId]?.push({ message, timestamp });
 
-
-    userMessages[userId] = userMessages[userId]?.filter(m => timestamp - m.timestamp <= timeWindow) ?? []
+	userMessages[userId] =
+		userMessages[userId]?.filter((m) => timestamp - m.timestamp <= timeWindow) ?? [];
 }
 
 export function isSpam(userId: string, message: string): boolean {
