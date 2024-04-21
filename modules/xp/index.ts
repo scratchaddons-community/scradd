@@ -79,7 +79,7 @@ defineSubcommands(
 				const startData =
 					recentXpDatabase.data.toSorted((one, two) => one.time - two.time)[0]?.time ?? 0;
 				return await interaction.reply({
-					content: `Select up to 7 users. I will graph thier XP __last__ week (${time(
+					content: `Select up to 7 users. I will graph their XP __last__ week (${time(
 						new Date(startData),
 						"d",
 					)} to ${time(new Date(startData + 604_800_000), "d")}).`,
