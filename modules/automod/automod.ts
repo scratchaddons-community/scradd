@@ -61,7 +61,6 @@ const BLACKLISTED_DOMAINS = [
 ];
 
 export default async function automodMessage(message: Message): Promise<boolean> {
-
 	const baseChannel = getBaseChannel(message.channel);
 
 	let needsDelete = false;
@@ -69,12 +68,10 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 	const spam = handleMessage(message.author.id, message.content);
 	if (spam) {
-		await message.delete()
-		await warn(message.author, "Spamming", 1, message.content)
-		needsDelete = true,
-			deletionMessages.push("Please don’t spam!");
+		await message.delete();
+		await warn(message.author, "Spamming", 1, message.content);
+		(needsDelete = true), deletionMessages.push("Please don’t spam!");
 	}
-
 
 	const animatedEmojis =
 		baseChannel?.id !== config.channels.bots?.id && message.content.match(GlobalAnimatedEmoji);
@@ -174,14 +171,16 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 				await warn(
 					message.author,
-					`Posted blacklisted link${links.length === 1 ? "" : "s"
+					`Posted blacklisted link${
+						links.length === 1 ? "" : "s"
 					} in ${message.channel.toString()} while at level ${level}`,
 					links.length * PARTIAL_STRIKE_COUNT,
 					links.join(" "),
 				);
 				needsDelete = true;
 				deletionMessages.push(
-					`Sorry, but you need level ${ESTABLISHED_THRESHOLD} to post ${links.length === 1 ? "that link" : "those links"
+					`Sorry, but you need level ${ESTABLISHED_THRESHOLD} to post ${
+						links.length === 1 ? "that link" : "those links"
 					} outside a channel like ${config.channels.share.toString()}!`,
 				);
 			}
@@ -219,14 +218,14 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			(bad, current) => {
 				const censored = tryCensor(current || "", 1);
 				return censored ?
-					{
-						strikes: bad.strikes + censored.strikes,
-						words: bad.words.map((words, index) => [
-							...words,
-							...(censored.words[index] ?? []),
-						]),
-					}
-					: bad;
+						{
+							strikes: bad.strikes + censored.strikes,
+							words: bad.words.map((words, index) => [
+								...words,
+								...(censored.words[index] ?? []),
+							]),
+						}
+					:	bad;
 			},
 			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
 		);
@@ -289,7 +288,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		if (needsDelete) {
 			await (message.deletable ?
 				message.delete()
-				: log(
+			:	log(
 					`${LoggingErrorEmoji} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
 					LogSeverity.Alert,
 				));
