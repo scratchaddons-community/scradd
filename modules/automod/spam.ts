@@ -1,7 +1,7 @@
-const x: number = 5;
-const timeWindow: number = 20;
+const x = 5;
+const timeWindow = 20;
 
-interface Message {
+type Message = {
     message: string;
     timestamp: number;
 }
@@ -15,7 +15,7 @@ function logMessage(userId: string, message: string): void {
     userMessages[userId]?.push({ message, timestamp });
 
 
-    userMessages[userId] = userMessages[userId]?.filter(m => timestamp - m.timestamp <= timeWindow) || []
+    userMessages[userId] = userMessages[userId]?.filter(m => timestamp - m.timestamp <= timeWindow) ?? []
 }
 
 export function isSpam(userId: string, message: string): boolean {
