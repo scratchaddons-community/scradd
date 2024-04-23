@@ -62,13 +62,11 @@ const BLACKLISTED_DOMAINS = [
 
 export default async function automodMessage(message: Message): Promise<boolean> {
 	const baseChannel = getBaseChannel(message.channel);
-
 	let needsDelete = false;
 	const deletionMessages: string[] = [];
 
-	const spam = handleMessage(message.author.id, message.content);
+	const spam = handleMessage(message.author, message.content);
 	if (spam) {
-		await message.delete();
 		await warn(message.author, "Spamming", 1, message.content);
 		needsDelete = true;
 		deletionMessages.push("Please don’t spam!");
