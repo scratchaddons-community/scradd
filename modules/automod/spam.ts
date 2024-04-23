@@ -22,21 +22,19 @@ function logMessage(userId: string, message: string): void {
 }
 
 export function isSpam(user: User, message: string): boolean {
-
 	const xp = xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0;
 	const level = getLevelForXp(xp);
-	const levelFactor = (Math.min(10 * Math.log10((1 + level)), 15))
+	const levelFactor = Math.min(10 * Math.log10(1 + level), 15);
 
-	const x = Math.max(2, Math.round((5 + levelFactor) * (1 - (message.length / 2000))))
+	const x = Math.max(2, Math.round((5 + levelFactor) * (1 - message.length / 2000)));
 
 	const timestamp: number = Math.floor(Date.now() / 1000);
-	console.log(message.length, x, (message.length / 400));
+	console.log(message.length, x, message.length / 400);
 	if ((userMessages[user.id]?.length || 0) < x) {
 		return false;
 	}
 
 	const recentMessages = userMessages[user.id]?.slice(-x);
-
 
 	return (
 		recentMessages?.every(

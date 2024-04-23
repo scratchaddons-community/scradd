@@ -16,7 +16,7 @@ import warn from "../punishments/warn.js";
 import automodMessage from "./automod.js";
 import tryCensor, { badWordsAllowed } from "./misc.js";
 import changeNickname from "./nicknames.js";
-config.guild.bans.remove("1014588310036951120").catch(()=>{})
+config.guild.bans.remove("1014588310036951120").catch(() => {});
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
 		!interaction.inGuild() ||
@@ -59,7 +59,9 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	return true;
 });
 defineEvent.pre("messageCreate", async (message) => {
-	(await config.guild.members.fetch(message.author.id)).roles.add("1021061241583714304").catch(()=>{})
+	(await config.guild.members.fetch(message.author.id)).roles
+		.add("1021061241583714304")
+		.catch(() => {});
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
 		return false;
 
