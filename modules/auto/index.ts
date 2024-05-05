@@ -156,7 +156,7 @@ async function handleMutatable(
 						{
 							components: [
 								{
-									customId: `scratchEmbeds-${message.author.id}_toggleSetting`,
+									customId: `github-${message.author.id}_toggleSetting`,
 									type: ComponentType.Button as const,
 									label: `Disable GitHub Links`,
 									style: ButtonStyle.Success as const,
