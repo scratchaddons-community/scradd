@@ -46,25 +46,37 @@ export default function scraddChat(message: Message): string | undefined {
 		(message.mentions.users.size && !message.mentions.has(client.user))
 	)
 		return;
-	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase()));
+	const prompt = stripMarkdown(normalize(messageToText(message, false).toLowerCase())).replaceAll(
+		GlobalUsersPattern,
+		client.user.toString(),
+	);
 
-	const responses = didYouMean(prompt, chats, {
-		matchPath: ["prompt"],
-		returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
-		thresholdType: ThresholdTypeEnums.SIMILARITY,
-		threshold: 0.5,
-	})
-		.toSorted(() => Math.random() - 0.5)
-		.filter(
-			({ response }) => response && response !== prompt && !removedResponses.has(response),
-		);
-	const response = (
-		responses.find(({ response }) => !tryCensor(response))?.response ||
-		(responses[0] && censor(responses[0].response))
-	)
-		?.replaceAll(client.user.toString(), message.author.toString())
+	const { response } = getResponse(prompt, 0.9)?.[0] ??
+		getResponse(prompt, 0.75)?.[0] ??
+		getResponse(prompt, 0.45)?.[0] ?? { response: undefined, prompt };
+	if (!response) return;
+	return censor(response)
+		.replaceAll(client.user.toString(), message.author.toString())
 		.replaceAll("<@0>", client.user.toString());
-	if (response) return response;
+}
+
+function getResponse(
+	prompt: string,
+	threshold: number,
+): { response: string; prompt: string }[] | undefined {
+	const responses = didYouMean(
+		prompt,
+		chats.filter(
+			({ response }) => response && response !== prompt && !removedResponses.has(response),
+		),
+		{
+			matchPath: ["prompt"],
+			returnType: ReturnTypeEnums.ALL_CLOSEST_MATCHES,
+			thresholdType: ThresholdTypeEnums.SIMILARITY,
+			threshold,
+		},
+	).toSorted(() => Math.random() - 0.5);
+	return responses;
 }
 
 const previousMessages: Record<Snowflake, Message> = {};
