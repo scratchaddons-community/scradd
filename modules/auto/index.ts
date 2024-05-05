@@ -38,6 +38,7 @@ const ignoreTriggers = [
 	/\bbleed/i,
 ];
 
+const ignoredChannels = new Set<Snowflake>();
 defineEvent("messageCreate", async (message) => {
 	await learn(message);
 
@@ -56,28 +57,34 @@ defineEvent("messageCreate", async (message) => {
 	}
 
 	const response = await handleMutatable(message);
-	if (response) {
-		if (response === true) return;
-		const isArray = Array.isArray(response);
-		if (isArray) {
-			const reply = await (message.system ?
-				message.channel.send(response[0])
-			:	message.reply(response[0]));
-			autoResponses.set(message.id, reply);
-			for (const action of response.slice(1)) {
-				if (typeof action === "number") {
-					await wait(action);
-					continue;
-				}
+	if (response === true) return;
+	for (const [index, action] of [response].flat().entries()) {
+		if (!action) break;
 
-				const edited = await reply.edit(action).catch(() => void 0);
-				if (!edited) break;
+		if (typeof action === "number") {
+			if (index === 0) {
+				if (ignoredChannels.has(message.channel.id)) break;
+				else ignoredChannels.add(message.channel.id);
 			}
-		} else
-			autoResponses.set(
-				message.id,
-				await (message.system ? message.channel.send(response) : message.reply(response)),
-			);
+			await message.channel.sendTyping();
+			await wait(action);
+			if (index === 0) ignoredChannels.delete(message.channel.id);
+			continue;
+		}
+
+		if (!autoResponses.has(message.id)) {
+			const reply = await (message.system ?
+				message.channel.send(action)
+			:	message.reply(action));
+			autoResponses.set(message.id, reply);
+			continue;
+		}
+
+		const reply = await autoResponses
+			.get(message.id)
+			?.edit(action)
+			.catch(() => void 0);
+		if (!reply) break;
 	}
 
 	const settings = await getSettings(message.author);
@@ -127,7 +134,10 @@ defineEvent("messageUpdate", async (_, message) => {
 	if (!found && 1 > +"0" /* TODO: only return if there's new messages */) return;
 
 	const response = await handleMutatable(message);
-	const data = typeof response === "object" && !Array.isArray(response) && response;
+	const data =
+		Array.isArray(response) ?
+			response.find((item): item is BaseMessageOptions => typeof item === "object")
+		:	typeof response === "object" && response;
 	if (found)
 		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
 	else if (data)
@@ -139,7 +149,7 @@ defineEvent("messageUpdate", async (_, message) => {
 
 async function handleMutatable(
 	message: Message,
-): Promise<BaseMessageOptions | true | [BaseMessageOptions, ...(number | string)[]] | undefined> {
+): Promise<(BaseMessageOptions | number)[] | BaseMessageOptions | true | undefined> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs.id === baseChannel?.id) return;
 
@@ -208,7 +218,11 @@ async function handleMutatable(
 	if (ignored) return true;
 
 	const chatResponse = scraddChat(message);
-	if (chatResponse) return { content: chatResponse, files: [], embeds: [], components: [] };
+	if (chatResponse)
+		return [
+			Math.random() * Math.random() * 9750,
+			{ content: chatResponse, files: [], embeds: [], components: [] },
+		];
 
 	if (!canDoSecrets(message, true)) return;
 	const cleanContent = stripMarkdown(normalize(message.cleanContent.toLowerCase()));
@@ -222,27 +236,18 @@ async function handleMutatable(
 			.map((word) => (word[0] ?? "").toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ");
 
-		if (name && message.member) {
-			const response = dad(name, message.member);
-			return Array.isArray(response) ?
-					([
-						{
-							content: response[0],
-							files: [],
-							embeds: [],
-							components: [],
-							allowedMentions: { users: [], repliedUser: true },
-						},
-						...response.slice(1),
-					] as const)
-				:	{
-						content: response,
+		if (name && message.member)
+			return [dad(name, message.member)].flat().map((item) =>
+				typeof item === "string" ?
+					{
+						content: item,
 						files: [],
 						embeds: [],
 						components: [],
 						allowedMentions: { users: [], repliedUser: true },
-					};
-		}
+					}
+				:	item,
+			);
 	}
 }
 
