@@ -1,5 +1,5 @@
 const auto = process.env.NODE_ENV !== "production";
-const callbacks = [ () => true, () => false ] as const;
+const callbacks = [() => true, () => false] as const;
 
 export default {
 	_canvas:
