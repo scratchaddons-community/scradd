@@ -5,6 +5,7 @@ import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
+import features from "../common/features.js";
 
 const directoryUrl =
 	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
@@ -89,6 +90,19 @@ defineEvent("guildMemberAdd", async (member) => {
 			],
 		})
 		.catch(() => void 0);
+});
+
+defineEvent("guildMemberUpdate", async (_, member) => {
+	if (
+		!features.joinsAutoKick ||
+		!config.roles.autoKick ||
+		!member.roles.resolve(config.roles.autoKick.id)
+	)
+		return;
+
+	await (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000 ?
+		member.kick("Autokick role assigned")
+	:	member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join"));
 });
 
 defineEvent("guildMemberAdd", async (member) => {

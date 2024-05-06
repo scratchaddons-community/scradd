@@ -112,6 +112,7 @@ async function getConfig() {
 			booster: roles.find((role) => role.name.toLowerCase().includes("booster")),
 			active: roles.find((role) => role.name.toLowerCase().includes("active")),
 			established: roles.find((role) => role.name.toLowerCase().includes("established")),
+			autoKick: roles.find((role) => role.name.toLowerCase().includes("autokick")),
 		},
 	};
 

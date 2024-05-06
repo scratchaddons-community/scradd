@@ -6,4 +6,5 @@ export default {
 		(await import("@napi-rs/canvas").then(...callbacks)) &&
 		(await import("chart.js").then(...callbacks)),
 	autosTypeInChat: auto,
+	joinsAutoKick: auto,
 };
