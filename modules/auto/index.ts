@@ -23,6 +23,7 @@ import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from
 import dad from "./dad.js";
 import { getMatches, handleMatch } from "./scratch.js";
 import github from "./github.js";
+import features from "../../common/features.js";
 
 const REACTION_CAP = 3;
 
@@ -220,7 +221,7 @@ async function handleMutatable(
 	const chatResponse = scraddChat(message);
 	if (chatResponse)
 		return [
-			Math.random() * Math.random() * 9750,
+			...(features.autosTypeInChat ? [Math.random() * Math.random() * 9750] : []),
 			{ content: chatResponse, files: [], embeds: [], components: [] },
 		];
 

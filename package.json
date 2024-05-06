@@ -24,10 +24,8 @@
 	"dependencies": {
 		"@fontsource-variable/sora": "5.0.18",
 		"@khanacademy/simple-markdown": "0.11.4",
-		"@napi-rs/canvas": "0.1.52",
 		"@sa-community/addons-data": "1.37.1",
 		"@twemoji/parser": "<=15.0.3",
-		"chart.js": "4.4.2",
 		"didyoumean2": "6.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
@@ -55,7 +53,9 @@
 		"typescript": "5.4.5"
 	},
 	"optionalDependencies": {
-		"@railway/cli": "3.5.2"
+		"@napi-rs/canvas": "0.1.52",
+		"@railway/cli": "3.5.2",
+		"chart.js": "4.4.2"
 	},
 	"engines": {
 		"node": ">=20.10.0",

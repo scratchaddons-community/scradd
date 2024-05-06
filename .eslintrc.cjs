@@ -46,6 +46,7 @@ module.exports =
 					"modules/_private/**",
 					"modules/auto/secrets.ts",
 					"common/constants.ts",
+					"common/features.ts",
 					".eslintrc.cjs",
 				],
 				rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },

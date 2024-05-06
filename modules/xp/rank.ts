@@ -15,6 +15,7 @@ import { nth } from "../../util/numbers.js";
 import { getSettings, mentionUser } from "../settings.js";
 import { getLevelForXp, getXpForLevel } from "./misc.js";
 import { getFullWeeklyData, xpDatabase } from "./util.js";
+import features from "../../common/features.js";
 
 export default async function getUserRank(
 	interaction: RepliableInteraction,
@@ -106,7 +107,7 @@ export default async function getUserRank(
 }
 
 async function makeCanvasFiles(progress: number): Promise<{ attachment: Buffer; name: string }[]> {
-	if (process.env.CANVAS === "false") return [];
+	if (!features._canvas) return [];
 
 	const { createCanvas } = await import("@napi-rs/canvas");
 	const canvas = createCanvas(1000, 50);

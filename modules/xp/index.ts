@@ -17,6 +17,7 @@ import config from "../../common/config.js";
 import { giveXpForMessage } from "./give-xp.js";
 import getUserRank, { top } from "./rank.js";
 import { recentXpDatabase } from "./util.js";
+import features from "../../common/features.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;
@@ -56,7 +57,7 @@ defineSubcommands(
 					},
 				},
 			},
-			...(process.env.CANVAS !== "false" && {
+			...(features._canvas && {
 				graph: { description: "Graph users’ XP over the last week", options: {} } as const,
 			}),
 		},
@@ -119,7 +120,7 @@ defineButton("viewLeaderboard", async (interaction, userId) => {
 	await top(interaction, await client.users.fetch(userId));
 });
 
-if (process.env.CANVAS !== "false") {
+if (features._canvas) {
 	const { default: weeklyXpGraph } = await import("./graph.js");
 	defineSelect("weeklyXpGraph", weeklyXpGraph);
 }
