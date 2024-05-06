@@ -9,10 +9,7 @@ import {
 	greetings,
 } from "./autos-data.js";
 
-export default function dad(
-	name: string,
-	_: GuildMember,
-): string | readonly [string, ...(number | string)[]] {
+export default function dad(name: string, _: GuildMember): string | readonly (number | string)[] {
 	const split = name.split(/\b/);
 	const firstName =
 		split.find(

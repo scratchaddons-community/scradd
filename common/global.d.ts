@@ -128,7 +128,6 @@ declare global {
 		 * 	BOT_TOKEN = …
 		 * 	MONGO_URI = mongodb://127.0.0.1:27017/scradd
 		 * 	NODE_ENV = development
-		 * 	CANVAS = true
 		 * 	PORT = 80
 		 * 	CLIENT_SECRET = …
 		 */
@@ -145,13 +144,6 @@ declare global {
 			 * @default "development"
 			 */
 			NODE_ENV?: "development" | "production";
-			/**
-			 * Whether or not to enable features requiring `@napi-api/canvas`, which does not work on some devices. For
-			 * consistency, always compare against `"false"` in code.
-			 *
-			 * @default true
-			 */
-			CANVAS?: `${boolean}`;
 			/** The port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;
 			/** The bot’s client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */

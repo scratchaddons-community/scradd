@@ -16,6 +16,7 @@ import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
+import features from "../../common/features.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -342,7 +343,7 @@ async function makeCanvasFiles(
 	url: string,
 	win: boolean,
 ): Promise<{ attachment: Buffer; name: string }[]> {
-	if (process.env.CANVAS === "false") return [];
+	if (!features._canvas) return [];
 
 	const { createCanvas, loadImage } = await import("@napi-rs/canvas");
 	const canvas = createCanvas(200, 181);
