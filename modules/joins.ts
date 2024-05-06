@@ -93,7 +93,7 @@ defineEvent("guildMemberAdd", async (member) => {
 });
 
 defineEvent("guildMemberUpdate", async (_, member) => {
-	if (!features.joins) return
+	if (!features.joins) return;
 	if (!config.roles.autoKick) return;
 	if (!member.roles.resolve(config.roles.autoKick.id)) return;
 
