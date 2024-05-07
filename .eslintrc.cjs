@@ -62,6 +62,7 @@ module.exports =
 		reportUnusedDisableDirectives: true,
 		root: true,
 		rules: {
+			"@typescript-eslint/consistent-return": "off",
 			"@typescript-eslint/consistent-type-definitions": ["error", "type"],
 			"@typescript-eslint/explicit-function-return-type": [
 				"error",
@@ -157,6 +158,7 @@ module.exports =
 				{ allowDefaultCaseForExhaustiveSwitch: false },
 			],
 			"@typescript-eslint/typedef": "off",
+			"@typescript-eslint/use-unknown-in-catch-callback-variable": "warn", // https://github.com/typescript-eslint/typescript-eslint/issues/9057
 			"capitalized-comments": "off",
 			"line-comment-position": "off",
 			"max-depth": "error",
@@ -240,4 +242,3 @@ module.exports =
 
 // todo: [..] over toJSON?
 // todo: stop nesting why tf are there 11-level nesting places
-// todo: unicorn/prefer-spread with objects
