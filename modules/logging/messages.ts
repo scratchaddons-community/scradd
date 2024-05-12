@@ -37,10 +37,11 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 	const auditLogs = await config.guild
 		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MessageDelete })
 		.catch(() => void 0);
+		const executor = auditLogs?.entries.first()?.executor
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
-		} in ${message.url} (Sent: ${time(Math.floor(message.createdTimestamp / 1000))}) deleted ${auditLogs?.entries.first()?.executor ? `by ${auditLogs.entries.first()?.executor?.toString()}` : ""}`,
+		} in ${message.url} (Sent: ${time(message.createdAt)}) deleted ${executor ? `by ${executor.toString()}` : ""}`,
 		LogSeverity.ContentEdit,
 		{
 			embeds,
