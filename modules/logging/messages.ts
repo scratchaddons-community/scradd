@@ -40,7 +40,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
-		} in ${message.url} (Sent: ${time(Math.floor(message.createdTimestamp / 1000))}) deleted ${auditLogs ? `by ${auditLogs.entries.first()?.executor?.toString()}` : ""}`,
+		} in ${message.url} (Sent: ${time(Math.floor(message.createdTimestamp / 1000))}) deleted ${auditLogs?.entries.first()?.executor ? `by ${auditLogs.entries.first()?.executor?.toString()}` : ""}`,
 		LogSeverity.ContentEdit,
 		{
 			embeds,
