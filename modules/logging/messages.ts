@@ -37,7 +37,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 	const auditLogs = await config.guild
 		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MessageDelete })
 		.catch(() => void 0);
-		const executor = auditLogs?.entries.first()?.executor
+	const executor = auditLogs?.entries.first()?.executor;
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
