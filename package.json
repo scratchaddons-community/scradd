@@ -55,7 +55,7 @@
 	"optionalDependencies": {
 		"@napi-rs/canvas": "0.1.52",
 		"@railway/cli": "3.5.2",
-		"chart.js": "4.4.2"
+		"chart.js": "4.4.3"
 	},
 	"engines": {
 		"node": ">=20.10.0",
