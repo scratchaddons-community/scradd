@@ -18,9 +18,9 @@ const designers = "966174686142672917",
 
 const dependencies = await Promise.all(
 	Object.keys({ ...pkg.dependencies, ...pkg.optionalDependencies }).map(async (name) => {
-		const { default: dep } = await import(`../../../node_modules/${name}/package.json`, {
+		const { default: dep } = (await import(`../../../node_modules/${name}/package.json`, {
 			assert: { type: "json" },
-		});
+		})) as { default: { name: string; version: `${bigint}.${bigint}.${string}` } };
 
 		return [
 			`${inlineCode(dep.name)}@${dep.version}`,
@@ -46,7 +46,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 					},
 					...(await columnize(
 						dependencies.toSorted(([one], [two]) => one.localeCompare(two)),
-						([specifier, link]) => `- ${link ? `[${specifier}](${link})` : specifier}`,
+						([specifier, link]) => `- [${specifier}](${link})`,
 						"🗄️ Third-party code libraries",
 					)),
 				],

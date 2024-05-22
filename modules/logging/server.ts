@@ -339,6 +339,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 					[Locale.Romanian]: "Română",
 					[Locale.Russian]: "Русский",
 					[Locale.SpanishES]: "Español",
+					[Locale.SpanishLATAM]: "Español, LATAM",
 					[Locale.Swedish]: "Svenska",
 					[Locale.Thai]: "ไทย",
 					[Locale.Turkish]: "Türkçe",
