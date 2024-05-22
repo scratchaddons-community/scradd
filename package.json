@@ -4,7 +4,7 @@
 	"private": true,
 	"homepage": "https://discord.gg/FPv957V6SD",
 	"type": "module",
-	"main": "dist/index.js",
+	"main": "./dist/index.js",
 	"scripts": {
 		"build": "rm -rf dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
@@ -24,7 +24,7 @@
 	"dependencies": {
 		"@fontsource-variable/sora": "5.0.18",
 		"@khanacademy/simple-markdown": "0.11.4",
-		"@sa-community/addons-data": "1.37.1",
+		"@sa-community/addons-data": "1.38.0",
 		"@twemoji/parser": "<=15.0.3",
 		"didyoumean2": "6.0.1",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
@@ -44,8 +44,8 @@
 		"@types/mustache": "<=4.2",
 		"@types/node": "<=20.10",
 		"@types/papaparse": "<=5.4",
-		"@typescript-eslint/eslint-plugin": "7.8.0",
-		"@typescript-eslint/parser": "7.8.0",
+		"@typescript-eslint/eslint-plugin": "7.9.0",
+		"@typescript-eslint/parser": "7.10.0",
 		"eslint": "8.57.0",
 		"eslint-plugin-unicorn": "52.0.0",
 		"nodemon": "3.1.0",
@@ -55,7 +55,7 @@
 	"optionalDependencies": {
 		"@napi-rs/canvas": "0.1.52",
 		"@railway/cli": "3.5.2",
-		"chart.js": "4.4.2"
+		"chart.js": "4.4.3"
 	},
 	"engines": {
 		"node": ">=20.10.0",
