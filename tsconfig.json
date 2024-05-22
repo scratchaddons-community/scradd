@@ -10,7 +10,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"isolatedModules": true,
-		"jsx": "preserve",
 		"lib": ["es2023"],
 		"module": "NodeNext",
 		"noEmitOnError": true,
@@ -20,11 +19,9 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"outDir": "dist",
-		"removeComments": true,
 		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
-		"stripInternal": true,
 		"target": "es2022",
 		"paths": {
 			"*": ["./common/typedefs/*.d.ts", "./node_modules/@types/*", "./node_modules/*"]

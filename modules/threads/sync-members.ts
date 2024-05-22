@@ -1,11 +1,10 @@
-import {
+import type {
+	AnyThreadChannel,
+	ChatInputCommandInteraction,
+	GuildMember,
+	InteractionResponse,
+	PartialGuildMember,
 	Role,
-	roleMention,
-	type AnyThreadChannel,
-	type ChatInputCommandInteraction,
-	type GuildMember,
-	type InteractionResponse,
-	type PartialGuildMember,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -32,9 +31,7 @@ export async function syncMembers(
 			{ keepOpen: threadConfig.keepOpen },
 		);
 		return await interaction.reply(
-			`${constants.emojis.statuses.yes} I will no longer add all ${roleMention(
-				role.id,
-			)} to this thread!`,
+			`${constants.emojis.statuses.yes} I will no longer add all ${role.toString()} to this thread!`,
 		);
 	}
 
@@ -43,10 +40,10 @@ export async function syncMembers(
 		{ keepOpen: threadConfig.keepOpen },
 	);
 	await interaction.reply(
-		`${constants.emojis.statuses.yes} I will add all ${roleMention(role.id)} to this thread!`,
+		`${constants.emojis.statuses.yes} I will add all ${role.toString()} to this thread!`,
 	);
 
-	if (role instanceof Role) await addRoleToThread({ role, thread: interaction.channel });
+	await addRoleToThread({ role, thread: interaction.channel });
 }
 
 export async function updateMemberThreads(

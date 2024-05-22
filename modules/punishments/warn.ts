@@ -116,10 +116,11 @@ export default async function warn(
 					]
 				:	[],
 		})
-		.catch(async (): Promise<undefined> => {
+		.catch(async () => {
 			await logMessage.edit(logMessage.content + " (could not send DM)");
 		});
 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	await giveXp(user, (dm ?? logMessage).url, XP_PUNISHMENT * strikes);
 
 	strikeDatabase.data = [

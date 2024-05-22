@@ -163,21 +163,26 @@ export default class Database<Data extends Record<string, boolean | number | str
 			const content = messageContent.join("\n").trim();
 			const promise = message
 				.edit({ content, files })
-				.catch(async (error) => {
-					if (error.code !== RESTJSONErrorCodes.UnknownMessage) {
-						return await message.edit({ content, files }).catch((retryError) => {
-							throw new AggregateError(
-								[error, retryError],
-								"Failed to write to database!",
-								{ cause: { data, database: this.name } },
-							);
-						});
+				.catch(async (error: unknown) => {
+					if (
+						error &&
+						typeof error === "object" &&
+						"code" in error &&
+						error.code === RESTJSONErrorCodes.UnknownMessage
+					) {
+						databases[this.name] = undefined;
+						this.message = undefined;
+						await this.init();
+						return await callback();
 					}
 
-					databases[this.name] = undefined;
-					this.message = undefined;
-					await this.init();
-					return await callback();
+					return await message.edit({ content, files }).catch((retryError: unknown) => {
+						throw new AggregateError(
+							[error, retryError],
+							"Failed to write to database!",
+							{ cause: { data, database: this.name } },
+						);
+					});
 				})
 				.then(async (edited) => {
 					const attachment = edited.attachments.first()?.url;
