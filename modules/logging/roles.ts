@@ -17,7 +17,7 @@ export async function memberRoleUpdate(
 		$remove?: { assignable: RoleMention[]; unassignable: RoleMention[] };
 	}>(
 		(accumulator, change) =>
-			change.key !== "id" && change.new ?
+			(change.key === "$add" || change.key === "$remove") && change.new ?
 				{
 					...accumulator,
 					[change.key]: change.new.reduce(
@@ -140,6 +140,7 @@ export async function roleUpdate(
 				break;
 			}
 			default: {
+				//todo: flags, position, tags
 				break;
 			}
 		}
@@ -147,7 +148,7 @@ export async function roleUpdate(
 
 	if (!iconChanged || !(entry.target instanceof Role)) return;
 	await log(
-		`${LoggingEmojis.Role} ${roleMention(entry.target.id)}’s role icon ${
+		`${LoggingEmojis.Role} ${entry.target.toString()}’s role icon ${
 			entry.target.unicodeEmoji ? `set to ${entry.target.unicodeEmoji}`
 			: entry.target.icon ? "changed"
 			: "removed"
