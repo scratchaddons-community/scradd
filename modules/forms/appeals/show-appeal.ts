@@ -88,14 +88,6 @@ export default async function appealRequest(
 			auth: false,
 		})) as RESTGetAPICurrentUserResult;
 
-		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
-			return response.writeHead(403, { "content-type": "text/html" }).end(
-				Mustache.render(NOT_BANNED_PAGE, {
-					username: user.global_name ?? user.username,
-					invite: pkg.homepage,
-					id: user.id,
-				}),
-			);
 		const appeal = appeals[userMention(user.id)];
 		if (appeal)
 			return response.writeHead(200, { "content-type": "text/html" }).end(
@@ -106,6 +98,14 @@ export default async function appealRequest(
 					username: user.global_name ?? user.username,
 					invite: pkg.homepage,
 					date: appeal.date,
+				}),
+			);
+		if (!(await config.guild.bans.fetch(user.id).catch(() => void 0)))
+			return response.writeHead(403, { "content-type": "text/html" }).end(
+				Mustache.render(NOT_BANNED_PAGE, {
+					username: user.global_name ?? user.username,
+					invite: pkg.homepage,
+					id: user.id,
 				}),
 			);
 		const banDate = banDates[user.id];

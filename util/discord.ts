@@ -24,7 +24,6 @@ import {
 	type Channel,
 	type ChatInputCommandInteraction,
 	type Collection,
-	type DMChannel,
 	type EmojiIdentifierResolvable,
 	type Guild,
 	type GuildTextBasedChannel,
@@ -34,9 +33,7 @@ import {
 	type MessageActionRowComponentData,
 	type MessageEditOptions,
 	type MessageReaction,
-	type PartialDMChannel,
 	type Snowflake,
-	type TextBasedChannel,
 	type ThreadChannel,
 	type User,
 } from "discord.js";
@@ -182,21 +179,10 @@ export async function getAllMembers(guild: Guild): Promise<Collection<Snowflake,
 	return members;
 }
 
-/**
- * Get all messages from a channel.
- *
- * @param channel - The channel to fetch messages from.
- * @returns The messages.
- */
+/** @deprecated */
 export async function getAllMessages(
 	channel: GuildTextBasedChannel | ThreadChannel,
-): Promise<Message<true>[]>;
-export async function getAllMessages(
-	channel: DMChannel | PartialDMChannel,
-): Promise<Message<false>[]>;
-export async function getAllMessages(
-	channel: TextBasedChannel | ThreadChannel,
-): Promise<Message[]> {
+): Promise<Message<true>[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;
