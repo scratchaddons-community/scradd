@@ -41,10 +41,11 @@ const date = new Date();
 
 if (
 	config.channels.announcements &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Weekly)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.Weekly).length !==
+		1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.Weekly),
 		{
 			channel: config.channels.announcements.id,
 			date: +new Date(+date + ((7 - date.getUTCDay()) % 7) * 86_400_000).setUTCHours(
@@ -62,10 +63,13 @@ if (
 
 if (
 	config.channels.suggestions?.parent &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.UpdateSACategory)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.UpdateSACategory)
+		.length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter(
+			(reminder) => reminder.id !== SpecialReminders.UpdateSACategory,
+		),
 		{
 			channel: config.channels.suggestions.parent.id,
 			date: +date,
@@ -78,10 +82,10 @@ if (
 
 if (
 	process.env.NODE_ENV === "production" &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.Bump)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.Bump).length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.Bump),
 		{
 			channel: BUMPING_THREAD,
 			date: +date + 3_600_000,
@@ -94,10 +98,13 @@ if (
 
 if (
 	process.env.NODE_ENV === "production" &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.BackupDatabases)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.BackupDatabases)
+		.length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter(
+			(reminder) => reminder.id !== SpecialReminders.BackupDatabases,
+		),
 		{
 			channel: BACKUPS_THREAD,
 			date: +date,
@@ -110,10 +117,13 @@ if (
 
 if (
 	config.channels.board &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.SyncRandomBoard)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.SyncRandomBoard)
+		.length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter(
+			(reminder) => reminder.id !== SpecialReminders.SyncRandomBoard,
+		),
 		{
 			channel: config.channels.board.id,
 			date: +date,
@@ -123,27 +133,32 @@ if (
 	];
 }
 
-const nextChange = remindersDatabase.data.find(
-	(reminder) => reminder.id === SpecialReminders.ChangeStatus,
-);
-
-remindersDatabase.data = [
-	...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.ChangeStatus),
-	{
-		channel: "0",
-		date: +date,
-		reminder: +(nextChange?.reminder ?? 0),
-		id: SpecialReminders.ChangeStatus,
-		user: client.user.id,
-	},
-];
+if (
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.ChangeStatus)
+		.length !== 1
+) {
+	remindersDatabase.data = [
+		...remindersDatabase.data.filter(
+			(reminder) => reminder.id !== SpecialReminders.ChangeStatus,
+		),
+		{
+			channel: "0",
+			date: +date,
+			reminder: +0,
+			id: SpecialReminders.ChangeStatus,
+			user: client.user.id,
+		},
+	];
+}
 
 if (
 	config.channels.qotd &&
-	!remindersDatabase.data.some((reminder) => reminder.id === SpecialReminders.QOTD)
+	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.QOTD).length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data,
+		...remindersDatabase.data.filter(
+			(reminder) => reminder.id !== SpecialReminders.QOTD,
+		),
 		{
 			channel: config.channels.qotd.id,
 			date: date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 12 ? 86_400_000 : 0),
