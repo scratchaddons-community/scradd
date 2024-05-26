@@ -1,10 +1,11 @@
-import type {
-	AnyThreadChannel,
-	ChatInputCommandInteraction,
-	GuildMember,
-	InteractionResponse,
-	PartialGuildMember,
-	Role,
+import {
+	Collection,
+	type AnyThreadChannel,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+	type InteractionResponse,
+	type PartialGuildMember,
+	type Role,
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -95,6 +96,9 @@ async function addRoleToThread({
 	role: Role;
 	thread: AnyThreadChannel;
 }): Promise<void> {
+	if (!(role.members instanceof Collection)) {
+		throw new TypeError("role.members is not a Collection!", { cause: role });
+	}
 	for (const [, member] of role.members) {
 		const baseChannel = getBaseChannel(thread);
 		if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))
