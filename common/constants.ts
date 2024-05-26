@@ -87,6 +87,7 @@ export default {
 
 	fonts: "Sora, SoraExt, sans-serif",
 	footerSeperator: " • ",
+	isTesting: process.argv.some((file) => file.endsWith(".test.js")),
 
 	repos: {
 		scradd: "scratchaddons-community/scradd",

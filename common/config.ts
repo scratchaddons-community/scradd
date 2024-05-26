@@ -12,14 +12,13 @@ import {
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 import type { NonFalsy } from "./misc.js";
+import constants from "./constants.js";
 
-const IS_TESTING = process.argv.some((file) => file.endsWith(".test.js"));
-
-const guild = IS_TESTING ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
+const guild = constants.isTesting ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
 if (guild && !guild.available) throw new ReferenceError("Main guild is unavailable!");
 
 function assertOutsideTests<T>(value: T): NonFalsy<T> {
-	if (!IS_TESTING) assert(value);
+	if (!constants.isTesting) assert(value);
 	return value as NonFalsy<T>;
 }
 

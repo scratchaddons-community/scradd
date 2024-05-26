@@ -1,6 +1,8 @@
 /* On production, this file is replaced with another file with the same structure. */
 
 import type { Snowflake } from "discord.js";
+import { client } from "strife.js";
+import constants from "../../common/constants.js";
 
 export const greetings = ["Hi"] as const;
 export const customResponses: Record<string, string> = {};
@@ -34,5 +36,8 @@ const autoreactions: [
 		| [RegExp | string, "full" | "negative" | "partial" | "plural" | "raw"]
 		| [Snowflake, "ping"]
 	)[],
-][] = [];
+][] = [
+	//
+	["👋", [constants.isTesting ? "0" : client.user.id, "ping"]],
+];
 export default autoreactions;
