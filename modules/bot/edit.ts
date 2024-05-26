@@ -12,7 +12,7 @@ import { databaseThread } from "../../common/database.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
 import { generateError } from "../logging/errors.js";
 import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
-import { chatThread } from "../auto/chat.js";
+import { chatThread } from "../autos/chat.js";
 
 export default async function editMessage(
 	interaction: MessageContextMenuCommandInteraction,

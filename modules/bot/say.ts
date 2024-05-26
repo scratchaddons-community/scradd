@@ -11,7 +11,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getBaseChannel, mentionChatCommand } from "../../util/discord.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { chatThread } from "../auto/chat.js";
+import { chatThread } from "../autos/chat.js";
 import { client } from "strife.js";
 
 export default async function sayCommand(

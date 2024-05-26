@@ -27,7 +27,7 @@ export default async function getQuestionData(
 						label: "The question to ask",
 						required: true,
 						customId: "question",
-						maxLength: 256,
+						maxLength: 82,
 					},
 				],
 			},

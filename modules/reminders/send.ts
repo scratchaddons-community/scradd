@@ -23,7 +23,7 @@ import {
 	remindersDatabase,
 	type Reminder,
 } from "./misc.js";
-import sendQuestion from "../qotd/send.js";
+import sendQuestion from "../qotds/send.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {

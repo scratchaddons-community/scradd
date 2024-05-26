@@ -17,7 +17,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
-import { handleUser } from "../auto/scratch.js";
+import { handleUser } from "../autos/scratch.js";
 import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 

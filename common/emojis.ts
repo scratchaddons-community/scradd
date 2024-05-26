@@ -1,4 +1,4 @@
-import autoreactions from "../modules/auto/autos-data.js";
+import autoreactions from "../modules/autos/autos-data.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 
 export default [
