@@ -189,11 +189,10 @@ export async function messageUpdate(
 				.replace(/^-{3} \n\+{3} \n/, "");
 		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 
-		const changedFiles = new Set(newMessage.attachments.map((attachment) => attachment.id));
 		files.push(
 			...oldMessage.attachments
-				.map((attachment) => attachment.id)
-				.filter((attachment) => !changedFiles.has(attachment)),
+				.filter((attachment) => !newMessage.attachments.has(attachment.id))
+				.map((attachment) => attachment.url),
 		);
 
 		if (files.length) {
