@@ -120,7 +120,7 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 			`${LoggingEmojis.Integration} Permissions for ${userMention(
 				entry.extra.applicationId,
 			)}’s commands changed${extraAuditLogsInfo(entry)}`,
-			LogSeverity.ImportantUpdate,
+			LogSeverity.ServerChange,
 		);
 	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
