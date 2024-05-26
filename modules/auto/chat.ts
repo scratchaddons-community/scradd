@@ -88,6 +88,7 @@ export async function learn(message: Message): Promise<void> {
 	previousMessages[message.channel.id] = message;
 
 	if (
+		message.interaction ||
 		[message.author.id, previous?.author.id].includes(client.user.id) ||
 		!(await getSettings(message.author)).scraddChat
 	)
