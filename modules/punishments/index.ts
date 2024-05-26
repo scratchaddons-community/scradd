@@ -190,7 +190,7 @@ defineModal("warn", async (interaction, id) => {
 	await interaction.editReply(
 		success ?
 			`${constants.emojis.statuses.yes} ${
-				strikes < 1 ? "Warned" : "Verbally warned"
+				strikes < 1 ? "Verbally warned" : "Warned"
 			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
 				success === "no-dm" ? " I was not able to DM them." : ""
 			} ${reason}`
