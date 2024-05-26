@@ -6,6 +6,7 @@ import {
 	inlineCode,
 	type ChatInputCommandInteraction,
 	type GuildMember,
+	type MessageEditOptions,
 	type User,
 } from "discord.js";
 import fileSystem from "node:fs/promises";
@@ -74,7 +75,7 @@ export default async function hangman(
 
 	const guesses: ((typeof CHARACTERS)[number] | Lowercase<string>)[] = [];
 	const message = await interaction.deferReply({ fetchReply: true });
-	await tick();
+	await tick((options) => interaction.editReply(options));
 
 	const collector = message
 		.createMessageComponentCollector({
@@ -205,7 +206,9 @@ export default async function hangman(
 		},
 	});
 
-	async function tick(): Promise<void> {
+	async function tick(
+		reply = (options: MessageEditOptions) => message.edit(options),
+	): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",
 		).join("");
@@ -221,7 +224,7 @@ export default async function hangman(
 
 		const wrongCount = (color === undefined ? 0 : HINT_PENALTY) + wrongs.length;
 
-		await message.edit({
+		await reply({
 			embeds: [
 				{
 					color,
