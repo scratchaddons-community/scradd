@@ -247,7 +247,7 @@ export async function handleForumPost(
 		:	type === "topic" &&
 			(await gracefulFetch(
 				`${constants.domains.scratchdb}/forum/topic/posts/${id}?o=oldest`,
-			).then(([post]) => post));
+			).then((posts) => posts[0]));
 	if (!post || post.error || post.deleted) return;
 
 	const editedString =
