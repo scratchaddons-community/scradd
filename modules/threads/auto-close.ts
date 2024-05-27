@@ -84,7 +84,6 @@ export async function setUpAutoClose(
 			id: SpecialReminders[options.subcommand === "close-in" ? "CloseThread" : "LockThread"],
 		},
 	];
-	await queueReminders();
 
 	const [type] = options.subcommand.split("-");
 	await interaction.reply({
@@ -106,6 +105,8 @@ export async function setUpAutoClose(
 			},
 		],
 	});
+
+	await queueReminders();
 }
 
 export async function cancelThreadChange(
@@ -146,9 +147,10 @@ export async function cancelThreadChange(
 					reminder.channel === interaction.channel?.id
 				),
 		);
-		await queueReminders();
 
 		await interaction.reply(`${constants.emojis.statuses.yes} Canceled ${type}!`);
+
+		await queueReminders();
 	}
 }
 
@@ -176,7 +178,6 @@ export async function autoClose(
 				id: SpecialReminders.CloseThread,
 			},
 		];
-		await queueReminders();
 
 		await thread.send({
 			content: `${constants.emojis.statuses.yes} I’ll close this thread ${time(
@@ -197,5 +198,7 @@ export async function autoClose(
 				},
 			],
 		});
+
+		await queueReminders();
 	}
 }

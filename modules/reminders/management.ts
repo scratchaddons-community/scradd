@@ -124,7 +124,6 @@ export async function createReminder(
 		...remindersDatabase.data,
 		{ channel, date: +date, reminder: options.reminder, user: interaction.user.id, id },
 	];
-	await queueReminders();
 
 	await interaction.reply({
 		ephemeral: dm,
@@ -146,6 +145,8 @@ export async function createReminder(
 			},
 		],
 	});
+
+	await queueReminders();
 }
 
 export async function cancelReminder(
@@ -180,6 +181,5 @@ export async function cancelReminder(
 	}
 
 	remindersDatabase.data = filtered;
-	await queueReminders();
 	return true;
 }
