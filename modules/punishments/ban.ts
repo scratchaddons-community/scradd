@@ -7,6 +7,7 @@ import {
 	time,
 	type InteractionResponse,
 	type RepliableInteraction,
+	type Snowflake,
 } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
@@ -37,10 +38,19 @@ export default async function ban(
 
 	if (isBanned) {
 		const unbanTimer = remindersDatabase.data.find(
-			(reminder) =>
+			(
+				reminder,
+			): reminder is {
+				channel: Snowflake;
+				date: number;
+				reminder: Snowflake;
+				user: Snowflake;
+				id: SpecialReminders.Unban;
+			} =>
 				reminder.user === client.user.id &&
 				reminder.id === SpecialReminders.Unban &&
-				reminder.reminder === userToBan.id,
+				reminder.reminder === userToBan.id &&
+				reminder.date !== "NaN",
 		);
 		if (unbanTime) {
 			remindersDatabase.data = [

@@ -48,7 +48,11 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 		toPostpone: Reminder[];
 	}>(
 		(accumulator, reminder) => {
-			accumulator[reminder.date - Date.now() < 500 ? "toSend" : "toPostpone"].push(reminder);
+			accumulator[
+				reminder.date === "NaN" || reminder.date - Date.now() < 500 ?
+					"toSend"
+				:	"toPostpone"
+			].push(reminder);
 			return accumulator;
 		},
 		{ toSend: [], toPostpone: [] },
@@ -210,7 +214,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 						...remindersDatabase.data,
 						{
 							channel: channel.id,
-							date: reminder.date + 86_400_000,
+							date: (reminder.date === "NaN" ? 0 : reminder.date) + 86_400_000,
 							reminder: undefined,
 							id: SpecialReminders.QOTD,
 							user: client.user.id,
@@ -242,9 +246,11 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 }
 
 function getNextInterval(): number | undefined {
-	const [reminder] = remindersDatabase.data.toSorted((one, two) => one.date - two.date);
+	const [reminder] = remindersDatabase.data.toSorted(
+		(one, two) => (one.date === "NaN" ? 0 : one.date) - (two.date === "NaN" ? 0 : two.date),
+	);
 	if (!reminder) return;
-	return reminder.date - Date.now();
+	return (reminder.date !== "NaN" && reminder.date - Date.now()) || 0;
 }
 
 await queueReminders();

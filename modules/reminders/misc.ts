@@ -18,7 +18,7 @@ export enum SpecialReminders {
 }
 export type Reminder = {
 	channel: Snowflake;
-	date: number;
+	date: number | "NaN";
 	reminder?: number | string;
 	user: Snowflake;
 	id: SpecialReminders | string;
@@ -34,7 +34,9 @@ await remindersDatabase.init();
 export function getUserReminders(id: string): Reminder[] {
 	return remindersDatabase.data
 		.filter((reminder) => reminder.user === id)
-		.toSorted((one, two) => one.date - two.date);
+		.toSorted(
+			(one, two) => (one.date === "NaN" ? 0 : one.date) - (two.date === "NaN" ? 0 : two.date),
+		);
 }
 
 const date = new Date();
@@ -156,9 +158,7 @@ if (
 	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminders.QOTD).length !== 1
 ) {
 	remindersDatabase.data = [
-		...remindersDatabase.data.filter(
-			(reminder) => reminder.id !== SpecialReminders.QOTD,
-		),
+		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminders.QOTD),
 		{
 			channel: config.channels.qotd.id,
 			date: date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 12 ? 86_400_000 : 0),
