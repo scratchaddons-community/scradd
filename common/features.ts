@@ -7,4 +7,5 @@ export default {
 		(await import("chart.js").then(...callbacks)),
 	autosTypeInChat: auto,
 	joinsAutoKick: auto,
+	joinsDmRevision: auto,
 };
