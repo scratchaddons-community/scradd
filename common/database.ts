@@ -224,8 +224,6 @@ export async function prepareExit(): Promise<void> {
 	await client.destroy();
 }
 
-let called = false,
-	exited = false;
 for (const [event, code] of Object.entries({
 	exit: undefined,
 	beforeExit: 0,
@@ -236,25 +234,18 @@ for (const [event, code] of Object.entries({
 	message: 0,
 } as const)) {
 	// eslint-disable-next-line @typescript-eslint/no-loop-func
-	process.on(event, (message) => {
-		if (called || (event === "message" && message !== "shutdown")) return;
-		called = true;
-
-		function doExit(): void {
-			if (exited) return;
-			exited = true;
-
-			if (event !== "exit") process.nextTick(() => process.exit(code));
-		}
+	process.once(event, (message) => {
+		if (event === "message" && message !== "shutdown") return;
 
 		if (event !== "exit" && Object.values(timeouts).length) {
 			void prepareExit().then(() => {
-				process.nextTick(doExit);
+				process.nextTick(() => process.exit(code));
 			});
-			setTimeout(doExit, 30_000);
+			setTimeout(() => {
+				process.nextTick(() => process.exit(code));
+			}, 30_000);
 		} else {
 			void prepareExit();
-			doExit();
 		}
 	});
 }
