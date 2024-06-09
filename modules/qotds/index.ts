@@ -60,7 +60,7 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 	for (const [, other] of message.reactions
 		.valueOf()
 		.filter(
-			({ emoji }) => emoji.name !== reaction.emoji.name && emojis.includes(emoji.name || "_"),
+			({ emoji }) => emoji.name !== reaction.emoji.name && emojis.includes(emoji.name || "__"),
 		))
 		await other.users.remove(user);
 });

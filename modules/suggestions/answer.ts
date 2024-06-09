@@ -46,6 +46,7 @@ export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): P
 		entry.executor &&
 		(await config.guild.members.fetch(entry.executor.id).catch(() => entry.executor));
 
+	const emoji = formatAnyEmoji(newAnswer.emoji);
 	await entry.target.send({
 		embeds: [
 			{
@@ -63,8 +64,7 @@ export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): P
 							[Colors.Green, Colors.Blue, Colors.Yellow, Colors.Red],
 							newAnswer.position,
 						),
-				title:
-					(newAnswer.emoji ? `${formatAnyEmoji(newAnswer.emoji)} ` : "") + newAnswer.name,
+				title: `${emoji ? `${emoji} ` : ""}${newAnswer.name}`,
 				description: channel.topic?.split(`\n- **${newAnswer.name}**: `)[1]?.split("\n")[0],
 				footer: { text: `Was previously ${oldAnswer.name}` },
 			},

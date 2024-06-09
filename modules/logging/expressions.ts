@@ -20,7 +20,7 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): P
 			}renamed to :${
 				typeof change.new === "string" ?
 					change.new
-				:	("name" in entry.target && entry.target.name) || "_"
+				:	("name" in entry.target && entry.target.name) || "__"
 			}\\:${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
@@ -35,7 +35,7 @@ export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>): P
 					change.key === "name" && typeof change.old === "string",
 			)?.old;
 	await log(
-		`${LoggingEmojis.Expression} :${oldName ?? "_"}\\: (ID: ${
+		`${LoggingEmojis.Expression} :${oldName ?? "__"}\\: (ID: ${
 			entry.target.id
 		}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
@@ -56,7 +56,7 @@ export async function stickerUpdate(entry: AuditLog<AuditLogEvent.StickerUpdate>
 		switch (change.key) {
 			case "name": {
 				await log(
-					`${LoggingEmojis.Expression} Sticker ${change.old ?? "_"} (ID: ${
+					`${LoggingEmojis.Expression} Sticker ${change.old ?? "__"} (ID: ${
 						entry.target.id
 					}) renamed to ${change.new ?? entry.target.name}${extraAuditLogsInfo(entry)}`,
 					LogSeverity.ImportantUpdate,

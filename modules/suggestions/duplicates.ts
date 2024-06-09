@@ -52,9 +52,7 @@ export async function sendDuplicates(message: Message): Promise<void> {
 			answer: suggestion.answer,
 
 			markdown: `**${suggestion.count} ${
-				config.channels.suggestions?.defaultReactionEmoji?.id ?
-					formatAnyEmoji(config.channels.suggestions.defaultReactionEmoji)
-				:	config.channels.suggestions?.defaultReactionEmoji?.name || "👍"
+				formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji) || "👍"
 			}** ${hyperlink(
 				suggestion.originalTitle,
 				channelLink(suggestion.id, config.guild.id),

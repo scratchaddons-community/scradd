@@ -291,13 +291,13 @@ export async function channelUpdate(
 
 	if (
 		oldChannel.defaultReactionEmoji?.id !== newChannel.defaultReactionEmoji?.id ||
-		oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name
+		(oldChannel.defaultReactionEmoji?.name !== newChannel.defaultReactionEmoji?.name &&
+			!newChannel.defaultReactionEmoji?.id)
 	) {
+		const emoji = formatAnyEmoji(newChannel.defaultReactionEmoji);
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s default reaction was ${
-				newChannel.defaultReactionEmoji ?
-					`set to ${formatAnyEmoji(newChannel.defaultReactionEmoji)}`
-				:	"removed"
+				emoji ? `set to ${emoji}` : "removed"
 			}`,
 			LogSeverity.ServerChange,
 		);

@@ -31,19 +31,31 @@ export function stripMarkdown(text: string): string {
 
 export function formatAnyEmoji(
 	options:
+		| string
 		| { animated?: boolean | null; id: Snowflake; name?: string | null }
-		| { animated?: false | null; id?: null; name: string }
-		| { animated?: false | null; id?: null; name?: null }
+		| { animated?: boolean | null; id?: Snowflake | null; name: string },
+): string;
+export function formatAnyEmoji(
+	options?:
+		| string
+		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
 		| null
 		| undefined,
-): string {
-	return typeof options?.id === "string" ?
-			formatEmoji({
-				...options,
-				animated: options.animated ?? false,
-				name: options.name ?? undefined,
-			})
-		:	options?.name ?? "_";
+): string | undefined;
+export function formatAnyEmoji(
+	options?:
+		| string
+		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
+		| null
+		| undefined,
+): string | undefined {
+	if (typeof options === "string") return options;
+	if (typeof options?.id !== "string") return options?.name ?? undefined;
+	return formatEmoji({
+		id: options.id,
+		animated: options.animated ?? false,
+		name: options.name ?? undefined,
+	});
 }
 
 const DATE_TYPE_FORMATS = {
@@ -172,8 +184,8 @@ export const rules = {
 			return match?.index ? undefined : match;
 		},
 		parse: (capture) => ({ animated: capture[1] === "a", name: capture[2], id: capture[3] }),
-		html: (node) => {
-			const name = `:${(typeof node.name === "string" && node.name) || "_"}:`;
+		html(node) {
+			const name = `:${(typeof node.name === "string" && node.name) || "__"}:`;
 			return markdown.htmlTag("img", "", {
 				src: client.rest.cdn.emoji(typeof node.id === "string" ? node.id : "0", {
 					size: 128,
@@ -198,16 +210,13 @@ export const rules = {
 		order: markdown.defaultRules.strong.order,
 		match: (source) => /^<t:(\d+)(?::([DFRTdft]))?>/.exec(source),
 		parse: (capture) => ({ timestamp: capture[1], format: capture[2] }),
-		html: (node, output, state) => {
+		html(node, output, state) {
 			const date = new Date(+(typeof node.timestamp === "string" && node.timestamp) * 1000);
 			const format =
-				(
-					typeof node.format === "string" &&
-					Object.keys(DATE_TYPE_FORMATS).includes(node.format)
-				) ?
-					node.format
-				:	"f";
-			const formatOptions = DATE_TYPE_FORMATS[format];
+				typeof node.format === "string" &&
+				Object.keys(DATE_TYPE_FORMATS).includes(node.format) &&
+				node.format;
+			const formatOptions = DATE_TYPE_FORMATS[format || "f"];
 
 			return markdown.htmlTag(
 				"span",

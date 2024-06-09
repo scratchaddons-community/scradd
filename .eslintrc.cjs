@@ -234,6 +234,7 @@ module.exports =
 							suggest: "${",
 						},
 						[/!\?/gu.source]: "⁉",
+						[/:_:/gu.source]: ":__:",
 					},
 				},
 			],
