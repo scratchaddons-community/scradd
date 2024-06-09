@@ -178,6 +178,7 @@ export default async function hangman(
 			}
 		})
 		.on("end", async (_, reason) => {
+			CURRENTLY_PLAYING.delete(interaction.user.id);
 			const image = await makeCanvasFiles(
 				user.displayAvatarURL({ forceStatic: true, size: 64 }),
 				reason === "win",
@@ -196,7 +197,6 @@ export default async function hangman(
 				allowedMentions: { users: [] },
 			});
 			await message.edit({ components: disableComponents(message.components) });
-			CURRENTLY_PLAYING.delete(interaction.user.id);
 		});
 
 	CURRENTLY_PLAYING.set(interaction.user.id, {
