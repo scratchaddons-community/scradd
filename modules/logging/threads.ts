@@ -127,7 +127,7 @@ export async function threadUpdate(
 			LogSeverity.ContentEdit,
 		);
 
-	if (oldThread.rateLimitPerUser !== newThread.rateLimitPerUser) {
+	if ((oldThread.rateLimitPerUser ?? 0) !== (newThread.rateLimitPerUser ?? 0)) {
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()}’s slowmode was set to ${
 				newThread.rateLimitPerUser ?? 0

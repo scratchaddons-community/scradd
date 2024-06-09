@@ -195,7 +195,7 @@ export async function channelUpdate(
 			LogSeverity.ImportantUpdate,
 		);
 
-	if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser)
+	if ((oldChannel.rateLimitPerUser ?? 0) !== (newChannel.rateLimitPerUser ?? 0))
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s ${
 				newChannel.isThreadOnly() ? "post " : ""
@@ -276,7 +276,10 @@ export async function channelUpdate(
 		);
 	}
 
-	if (oldChannel.defaultThreadRateLimitPerUser !== newChannel.defaultThreadRateLimitPerUser)
+	if (
+		(oldChannel.defaultThreadRateLimitPerUser ?? 0) !==
+		(newChannel.defaultThreadRateLimitPerUser ?? 0)
+	)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s message slowmode set to ${
 				newChannel.defaultThreadRateLimitPerUser ?? 0
