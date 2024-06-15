@@ -6,6 +6,7 @@ import constants from "../common/constants.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
 import features from "../common/features.js";
+import { ignoredDeletions } from "./logging/messages.js";
 
 const directoryUrl =
 	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
@@ -197,30 +198,33 @@ defineEvent("guildMemberAdd", async (member) => {
 	);
 });
 
-const INTRO_INTERVAL = 10;
-let introCount = 0;
-const introTemplate = {
-	embeds: [
-		{
-			title: "Introduction Template",
-			color: constants.themeColor,
-			description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${constants.domains.scratch}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
-		},
-	],
-};
-let templateMessage =
-	(await config.channels.intros?.messages.fetch({ limit: 100 }))?.find(
-		(message) =>
-			message.author.id === client.user.id &&
-			message.embeds[0]?.title === "Introduction Template",
-	) ?? (await config.channels.intros?.send(introTemplate));
-defineEvent("messageCreate", async (message) => {
-	if (message.channel.id !== config.channels.intros?.id) return;
+if (config.channels.intros) {
+	const INTRO_INTERVAL = 10;
+	let introCount = 0;
+	const introTemplate = {
+		embeds: [
+			{
+				title: "Introduction Template",
+				color: constants.themeColor,
+				description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${constants.domains.scratch}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
+			},
+		],
+	};
+	let templateMessage =
+		(await config.channels.intros.messages.fetch({ limit: 100 })).find(
+			(message) =>
+				message.author.id === client.user.id &&
+				message.embeds[0]?.title === "Introduction Template",
+		) ?? (await config.channels.intros.send(introTemplate));
+	defineEvent("messageCreate", async (message) => {
+		if (message.channel.id !== config.channels.intros?.id) return;
 
-	introCount++;
-	if (introCount % INTRO_INTERVAL) return;
+		introCount++;
+		if (introCount % INTRO_INTERVAL) return;
 
-	const newMessage = await templateMessage?.reply(introTemplate);
-	await templateMessage?.delete();
-	templateMessage = newMessage;
-});
+		const newMessage = await templateMessage.reply(introTemplate);
+		ignoredDeletions.add(templateMessage.id);
+		await templateMessage.delete();
+		templateMessage = newMessage;
+	});
+}
