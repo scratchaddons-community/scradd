@@ -21,7 +21,6 @@ export default async function updateBoard({
 }): Promise<void> {
 	if (processing.has(message.id)) return;
 	processing.add(message.id);
-	if (!config.channels.board) throw new ReferenceError("Could not find board channel");
 	const reactionThreshold = boardReactionCount(message.channel, message.createdTimestamp);
 	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
@@ -29,7 +28,7 @@ export default async function updateBoard({
 
 	const boardMessage =
 		boardMessageId &&
-		(await config.channels.board.messages.fetch(boardMessageId).catch(() => void 0));
+		(await config.channels.board?.messages.fetch(boardMessageId).catch(() => void 0));
 
 	if (boardMessage) {
 		if (count < minReactions) {
@@ -40,7 +39,7 @@ export default async function updateBoard({
 			await boardMessage.edit(content);
 			updateById({ source: message.id, reactions: count });
 		}
-	} else if (count >= reactionThreshold) {
+	} else if (count >= reactionThreshold && config.channels.board) {
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions:
@@ -80,8 +79,8 @@ export default async function updateBoard({
 			return onBoard;
 		}),
 	);
-	const pins = await config.channels.board.messages.fetchPinned();
-	if (pins.size > topIds.length) {
+	const pins = await config.channels.board?.messages.fetchPinned();
+	if (pins && pins.size > topIds.length) {
 		for (const [, pin] of pins.filter((pin) => !topIds.includes(pin.id)))
 			await pin.unpin("No longer a top-reacted message");
 	}
