@@ -35,9 +35,9 @@ const data: CustomOperation = {
 			if (invite.inviter?.id === interaction.user.id) return invite;
 
 			if (invite.inviter?.id !== client.user.id) return false;
-			return (await Invite.exists({ code: invite.code, member: interaction.user.id })) ?
-					invite
-				:	false;
+			if (await Invite.exists({ code: invite.code, member: interaction.user.id }))
+				return invite;
+			return false;
 		}).next();
 
 		if (existing.value) {

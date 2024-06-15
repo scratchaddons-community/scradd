@@ -183,16 +183,15 @@ export default async function suggestionsPage(
 		messageContent(this: (typeof messages)[number]) {
 			return markdownToHtml(
 				this.content ||
-					((
-						"interaction" in this &&
+					("interaction" in this &&
 						this.interaction?.commandName === "addon" &&
-						this.embeds[0]
-					) ?
-						`## ${this.embeds[0].title ?? ""}\n${this.embeds[0].description ?? ""}\n` +
-						(this.embeds[0].footer?.text ?
-							`[Enable Addon](${constants.urls.settings}#addon-${this.embeds[0].footer.text})`
-						:	"")
-					:	""),
+						this.embeds[0] &&
+						`## ${this.embeds[0].title ?? ""}\n${this.embeds[0].description ?? ""}\n${
+							this.embeds[0].footer?.text ?
+								`[Enable Addon](${constants.urls.settings}#addon-${this.embeds[0].footer.text})`
+							:	""
+						}`) ||
+					"",
 			);
 		},
 	});

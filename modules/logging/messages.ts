@@ -123,7 +123,7 @@ export async function messageReactionRemoveAll(
 ): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
-	if (!shouldLog(message.channel) || ignoredReactionPurges.has(message.id)) return;
+	if (!shouldLog(message.channel) || ignoredReactionPurges.delete(message.id)) return;
 
 	await log(
 		`${

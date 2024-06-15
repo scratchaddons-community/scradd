@@ -22,10 +22,8 @@ export async function sendDuplicates(message: Message): Promise<void> {
 	>(
 		(suggestions, { title, ...suggestion }) =>
 			(
-				(suggestion.category === "Other" ||
-					newSuggestion.category === "Other" ||
-					suggestion.category === newSuggestion.category) &&
-				suggestion.id !== newSuggestion.id
+				suggestion.id !== newSuggestion.id &&
+				new Set([newSuggestion.category, suggestion.category, "Other"]).size < 3
 			) ?
 				[
 					...suggestions,
