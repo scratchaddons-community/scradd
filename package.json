@@ -38,7 +38,7 @@
 		"strife.js": "4.0.1"
 	},
 	"devDependencies": {
-		"@redguy12/prettier-config": "3.0.1",
+		"@redguy12/prettier-config": "3.0.2",
 		"@types/difflib": "<=0.2",
 		"@types/eslint": "<=8.57",
 		"@types/mustache": "<=4.2",
