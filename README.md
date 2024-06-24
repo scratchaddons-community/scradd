@@ -8,8 +8,8 @@ specific to Scratch Addons, including addon search, suggestion utilities, fun ga
 
 ## Contributors
 
-The majority of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Please run `/credits` for more information --
-thanks to everyone listed on there!
+Most of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Please run `/credits` for more information -- thanks
+to everyone listed on there!
 
 Pull requests are welcome if you would like to help contribute. Please read through the
 [Contributing Guidelines](/.github/CONTRIBUTING.md) if you are interested in helping out.
@@ -34,7 +34,18 @@ Pull requests are welcome if you would like to help contribute. Please read thro
 3. Enable Developer Mode under User Settings → Advanced.
 4. Right-click on your new testing server, copy its ID, and note it for future use.
 5. Invite your bot at
-   https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[SERVER_ID_HERE]&permissions=8&scope=applications.commands%20bot
+   `https://discord.com/oauth2/authorize?client_id=[APPLICATION_ID_HERE]&guild_id=[SERVER_ID_HERE]&permissions=8&scope=applications.commands%20bot`
+
+### Set up MongoDB
+
+1. [Make a MongoDB account](https://www.mongodb.com/cloud/atlas/register) if you don't already have one.
+2. When asked to deploy a cluster, select a free M0 cluster and name it Scradd. All other default settings are fine.
+3. Choose to authenticate with a username and password. What you set them to doesn't matter. Note the password for
+   future use.
+4. Choose connecting from your local environment and add your current IP address to the list. If you expect to develop
+   from many locations, you can alternatively add `0.0.0.0/0` to allow any IPs to connect.
+5. Once the cluster is created, select “Get connection string” under “Application Development”. Copy the connection
+   string from the modal (probably under step 3), replace `<password>` with your password, and note it for future use.
 
 ### Set up the repository locally
 
@@ -42,7 +53,7 @@ Pull requests are welcome if you would like to help contribute. Please read thro
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
 4. Set up the .env file as described in
-   [`global.d.ts`](https://github.com/search?q=repo%3Ascratchaddons-community/scradd%20ProcessEnv&type=code).
+   [`global.d.ts`](https://github.com/search?q=repo%3Ascratchaddons-community%2Fscradd+path%3Aglobal.d.ts+ProcessEnv&type=code).
 5. Code!
 
 ## Development
