@@ -18,6 +18,7 @@ import { ESTABLISHED_THRESHOLD, getLevelForXp } from "../xp/misc.js";
 import { xpDatabase } from "../xp/util.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { ignoredDeletions } from "../logging/messages.js";
+import { handleMessage } from "./spam.js";
 
 const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
 const whitelistedInvites = await Promise.all(
@@ -64,9 +65,15 @@ const SHORTENER_DOMAINS = await fetch(
 export default async function automodMessage(message: Message): Promise<boolean> {
 	if (badWordsAllowed(message.channel)) return true;
 	const baseChannel = getBaseChannel(message.channel);
-
 	let needsDelete = false;
 	const deletionMessages: string[] = [];
+
+	const spam = handleMessage(message.author, message.content);
+	if (spam) {
+		await warn(message.author, "Spamming", 1, message.content);
+		needsDelete = true;
+		deletionMessages.push("Please don’t spam!");
+	}
 
 	const animatedEmojis =
 		baseChannel?.id !== config.channels.bots?.id && message.content.match(GlobalAnimatedEmoji);
