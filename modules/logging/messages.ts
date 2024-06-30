@@ -47,9 +47,9 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 						{
 							label: "Reference",
 							url: messageLink(
-								message.reference.guildId ?? "@me",
 								message.reference.channelId,
 								message.reference.messageId,
+								message.reference.guildId ?? "@me",
 							),
 						},
 					]
