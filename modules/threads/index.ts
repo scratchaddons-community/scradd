@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType, roleMention, userMention } from "discord.js";
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import { paginate } from "../../util/discord.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
@@ -59,7 +59,7 @@ defineSubcommands(
 				},
 			},
 			"list-unjoined": {
-				description: "List public open threads that you are not in",
+				description: "List open threads that you can access but are not in",
 				options: {},
 			},
 		},
@@ -99,12 +99,15 @@ defineSubcommands(
 				);
 				await paginate(
 					unjoined,
-					(thread) => thread.parent?.toString() + " > " + thread.toString(),
+					(thread) =>
+						(thread.parent ? `${thread.parent.toString()} > ` : "") +
+						thread.toString() +
+						(thread.ownerId ? ` - by ${userMention(thread.ownerId)}` : ""),
 					(data) => interaction.editReply(data),
 					{
 						title: "Unjoined Threads",
 						singular: "thread",
-						failMessage: "You’ve joined all public open threads here!",
+						failMessage: "You’ve joined all open threads that you can access here!",
 						user: interaction.user,
 						totalCount: unjoined.length,
 					},
