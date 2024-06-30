@@ -10,6 +10,7 @@ import {
 	type AuditLogEvent,
 	type AutoModerationRule,
 	type Base,
+	type Channel,
 	type Embed,
 	type Guild,
 	type GuildAuditLogsEntry,
@@ -23,7 +24,6 @@ import {
 	type Snowflake,
 	type StageInstance,
 	type Sticker,
-	type TextBasedChannel,
 	type TextChannel,
 	type ThreadChannel,
 	type User,
@@ -34,14 +34,13 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getBaseChannel } from "../../util/discord.js";
 
-export function shouldLog(channel: TextBasedChannel | null): boolean {
+export function shouldLog(channel: Channel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
 
-	return Boolean(
-		baseChannel?.type !== ChannelType.DM &&
-			baseChannel?.guild.id === config.guild.id &&
-			baseChannel.permissionsFor(config.roles.staff).has("ViewChannel"),
-	);
+	if (!baseChannel) return true;
+	if (baseChannel.isDMBased()) return false;
+	if (baseChannel.guild.id !== config.guild.id) return false;
+	return baseChannel.permissionsFor(config.roles.staff).has("ViewChannel");
 }
 
 export enum LogSeverity {
