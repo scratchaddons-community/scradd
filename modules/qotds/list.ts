@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { paginate } from "../../util/discord.js";
+import { disableComponents, paginate } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { Question, questions } from "./send.js";
@@ -148,10 +148,13 @@ export async function removeQuestion(interaction: ButtonInteraction, id = ""): P
 
 				const index = questions.findIndex((question) => question._id === id);
 				if (index > -1) questions.splice(index, 1);
-
 				await message.edit({
 					content: `${constants.emojis.statuses.yes} Removed QOTD!`,
 					components: [],
+				});
+
+				await interaction.message.edit({
+					components: disableComponents(interaction.message.components),
 				});
 			}
 
