@@ -1,6 +1,5 @@
 import {
 	ButtonStyle,
-	ChannelType,
 	ComponentType,
 	ThreadAutoArchiveDuration,
 	type APIAuditLogChange,

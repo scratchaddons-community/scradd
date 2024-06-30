@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { defineChatCommand, defineEvent, defineModal } from "strife.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { createCustomRole, customRole, recheckAllRoles, recheckMemberRole } from "./custom.js";
 import { persistedLeave, persistedRejoin } from "./persisted.js";
 
