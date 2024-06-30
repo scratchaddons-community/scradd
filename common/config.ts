@@ -93,9 +93,6 @@ async function getConfig() {
 
 			qotd: getChannel("question", ChannelType.GuildForum, "partial"),
 			share: getChannel("share", ChannelType.GuildForum),
-			advertise:
-				getChannel("advertise", ChannelType.GuildText, "partial") ??
-				getChannel("promo", ChannelType.GuildText, "partial"),
 			bots: getChannel("bots", ChannelType.GuildText, "partial"),
 
 			oldSuggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),

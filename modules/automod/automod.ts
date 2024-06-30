@@ -98,7 +98,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 	if (
 		config.channels.share &&
 		baseChannel &&
-		![config.channels.advertise?.id, config.channels.share.id].includes(baseChannel.id) &&
+		config.channels.share.id !== baseChannel.id &&
 		!baseChannel.isDMBased() &&
 		baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")
 	) {
