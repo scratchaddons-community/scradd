@@ -171,7 +171,7 @@ export default async function warn(
 				`## This is your last chance. If you get another strike before ${time(
 					new Date((allUserStrikes[0]?.date ?? Date.now()) + EXPIRY_LENGTH),
 					TimestampStyles.LongDate,
-				)}, you will be banned.`,
+				)}, you may be banned.`,
 			)
 			.catch(() => void 0);
 	}

@@ -187,7 +187,13 @@ export default async function appealRequest(
 		unban: body.get("unban")?.trim(),
 		misc: body.get("misc")?.trim(),
 	};
-	if (!fields.ban || !fields.unban)
+	if (
+		!fields.ban ||
+		!fields.unban ||
+		fields.ban.length > 1024 ||
+		fields.unban.length > 1024 ||
+		(fields.misc?.length ?? 0) > 1024
+	)
 		return response.writeHead(400, { "content-type": "text/html" }).end(
 			Mustache.render(APPEAL_PAGE, {
 				username: user.displayName,

@@ -185,7 +185,7 @@ export async function allowChat(
 	await interaction.reply(
 		`${
 			constants.emojis.statuses.yes
-		} ${interaction.user.toString()}, your messages will be saved in all public channels. If you ever reverse this decision, messages can’t be retroactively removed. If you disagree with these terms, please select the appropriate button on [this message](<${
+		} ${interaction.user.toString()}, your messages may be saved in all public channels. If you ever reverse this decision, messages can’t be retroactively removed. If you disagree with these terms, please select the appropriate button on [this message](<${
 			interaction.message.url
 		}>).`,
 	);

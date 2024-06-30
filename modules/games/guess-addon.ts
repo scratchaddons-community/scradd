@@ -528,7 +528,7 @@ function getNextQuestions(
  * @param justAsked - The question that was answered.
  * @param probabilityShift - How much to care.
  * @param probabilitiesBefore - The probabilities of addons before this question.
- * @param askedQuestions - Questions that were already asked. This function will be modify this array.
+ * @param askedQuestions - Questions that were already asked. This function will modify this array.
  * @returns The new probabilities.
  */
 function answerQuestion(

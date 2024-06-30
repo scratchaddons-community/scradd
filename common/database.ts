@@ -54,7 +54,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 	constructor(public name: string) {
 		if (contructed.includes(name)) {
 			throw new RangeError(
-				`Cannot create a second database for ${name}, they will have conflicting data`,
+				`Cannot create a second database for ${name}, they may have conflicting data`,
 			);
 		}
 		contructed.push(name);
