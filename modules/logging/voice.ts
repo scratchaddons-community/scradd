@@ -155,7 +155,6 @@ export async function guildScheduledEventUpdate(
 }
 
 export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
-	console.log(newState);
 	if (!newState.member || newState.guild.id !== config.guild.id) return;
 	const { channel } = newState;
 
