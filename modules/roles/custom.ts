@@ -2,6 +2,7 @@ import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
+	PermissionsBitField,
 	TextInputStyle,
 	type ApplicationCommand,
 	type ChatInputCommandInteraction,
@@ -220,6 +221,7 @@ export async function createCustomRole(
 		name: CUSTOM_ROLE_PREFIX + name,
 		reason: `Created by ${interaction.user.tag}`,
 		position: config.roles.staff.position + 1,
+		permissions: new PermissionsBitField(),
 		...iconData,
 	});
 	await interaction.member.roles.add(role, "Custom role created");
