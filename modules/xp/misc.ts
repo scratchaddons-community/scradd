@@ -43,10 +43,12 @@ function getIncrementForLevel(level: number): number {
  * @returns The needed XP.
  */
 export function getXpForLevel(level: number): number {
-	const xpForLevel = XP_PER_LEVEL[level];
-	if (xpForLevel !== undefined) return xpForLevel;
+	const absolute = Math.abs(level);
+	const sign = Math.sign(level);
+	const xpForLevel = XP_PER_LEVEL[absolute];
+	if (xpForLevel !== undefined) return xpForLevel * sign;
 
-	return getXpForLevel(level - 1) + getIncrementForLevel(level);
+	return (getXpForLevel(absolute - 1) + getIncrementForLevel(absolute)) * sign;
 }
 
 /**

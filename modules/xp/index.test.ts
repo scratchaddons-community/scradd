@@ -15,6 +15,12 @@ await describe("getXpForLevel", async () => {
 		strictEqual(getXpForLevel(91), 660_000);
 		strictEqual(getXpForLevel(100), 845_000);
 	});
+	await it("should not crash on levels smaller than 1", () => {
+		strictEqual(getXpForLevel(0), 0);
+		strictEqual(getXpForLevel(-1), -50);
+		strictEqual(getXpForLevel(-88), -605_000);
+		strictEqual(getXpForLevel(-100), -845_000);
+	});
 });
 
 await describe("getLevelForXp", async () => {
