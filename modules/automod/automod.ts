@@ -60,6 +60,7 @@ const BLACKLISTED_DOMAINS = [
 ];
 
 export default async function automodMessage(message: Message): Promise<boolean> {
+	if (badWordsAllowed(message.channel)) return true;
 	const baseChannel = getBaseChannel(message.channel);
 
 	let needsDelete = false;
@@ -81,8 +82,6 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		needsDelete = true;
 		deletionMessages.push("Please don’t post that many animated emojis!");
 	}
-
-	if (badWordsAllowed(message.channel)) return !(needsDelete && (await deleteMessage()));
 
 	const invitePromises = message.content
 		.match(InvitesPattern)
