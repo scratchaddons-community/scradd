@@ -33,9 +33,7 @@ async function userInfo(
 			value: time(user.createdAt, TimestampStyles.RelativeTime),
 			inline: true,
 		},
-		user.tag === user.displayName ?
-			{ name: constants.zws, value: constants.zws, inline: true }
-		:	{ name: "🪪 Username", value: user.tag, inline: true },
+		{ name: "🪪 Username", value: `\`${user.tag}\``, inline: true },
 	];
 
 	if (member?.joinedAt)
