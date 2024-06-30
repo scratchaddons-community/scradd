@@ -60,26 +60,14 @@ export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	};
 }
 
-export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
-	if (config.channels.announcements) {
-		remindersDatabase.data = [
-			...remindersDatabase.data,
-			{
-				channel: config.channels.announcements.id,
-				date: Number(nextWeeklyDate),
-				reminder: undefined,
-				id: SpecialReminders.Weekly,
-				user: client.user.id,
-			},
-		];
-	}
-
+export default async function getWeekly(date: Date): Promise<string> {
+	const title = `## 🏆 Weekly Winners week of ${date.toLocaleString([], { month: "long", day: "numeric" })}`;
 	const weeklyWinners = getFullWeeklyData();
 
+	// Remove Active role from inactive members
 	const latestActiveMembers = weeklyWinners
 		.filter((item) => item.xp >= ACTIVE_THRESHOLD_ONE)
 		.map((item) => item.user);
-
 	if (config.roles.active) {
 		const activeMembers = new Set([
 			...latestActiveMembers,
@@ -93,62 +81,67 @@ export default async function getWeekly(nextWeeklyDate: Date): Promise<string> {
 				.map((entry) => entry[0]),
 		]);
 		for (const [, member] of config.roles.active.members) {
-			if (activeMembers.has(member.id)) continue;
-			await member.roles.remove(config.roles.active, "Inactive");
+			if (!activeMembers.has(member.id))
+				await member.roles.remove(config.roles.active, "Inactive");
 		}
 	}
 
+	// Reset for next weekly
+	date.setUTCDate(date.getUTCDate() + 14);
+	if (config.channels.announcements) {
+		remindersDatabase.data = [
+			...remindersDatabase.data,
+			{
+				channel: config.channels.announcements.id,
+				date: Number(date),
+				reminder: undefined,
+				id: SpecialReminders.Weekly,
+				user: client.user.id,
+			},
+		];
+	}
 	recentXpDatabase.data = recentXpDatabase.data.filter(
 		(entry) => entry.time + 604_800_000 > Date.now(),
 	);
 
-	const date = new Date();
-	date.setUTCDate(date.getUTCDate() - 7);
-	const chatters = weeklyWinners.length;
+	// Determine stats and the winners
 	const allXp = Math.floor(weeklyWinners.reduce((one, two) => one + two.xp, 0));
-
+	const chatters = weeklyWinners.length;
 	weeklyWinners.splice(
 		weeklyWinners.findIndex(
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
 		) + 1 || weeklyWinners.length,
 	);
-	const ids = new Set(weeklyWinners.map((gain) => gain.user));
 
+	// Sync the Winner role
 	const role = config.roles.weeklyWinner;
 	if (role) {
+		const ids = new Set(weeklyWinners.map((gain) => gain.user));
 		for (const [, weeklyMember] of role.members) {
 			if (!ids.has(weeklyMember.id))
 				await weeklyMember.roles.remove(role, "No longer weekly winner");
 		}
+	}
+	for (const [index, { user }] of weeklyWinners.entries()) {
+		const member = await config.guild.members.fetch(user).catch(() => void 0);
+		if (!member) continue;
 
-		for (const [index, { user }] of weeklyWinners.entries()) {
-			const member = await config.guild.members.fetch(user).catch(() => void 0);
-			await member?.roles.add(
-				index || !config.roles.epic ? role : [role, config.roles.epic],
-				"Weekly winner",
-			);
-		}
+		await recheckMemberRole(member, member);
+		await member.roles.add(
+			[role, !index && config.roles.epic].filter(Boolean),
+			"Weekly winner",
+		);
 	}
 
-	for (const winner of weeklyWinners) {
-		const member = await config.guild.members.fetch(winner.user).catch(() => void 0);
-		if (member) await recheckMemberRole(member, member);
-	}
-
-	return `## 🏆 Weekly Winners week of ${new Date().toLocaleString([], {
-		month: "long",
-		day: "numeric",
-	})}\n${
-		weeklyWinners
-			.map(
-				(gain, index) =>
-					`${["🥇", "🥈", "🥉"][index] || "🏅"} ${userMention(gain.user)} - ${Math.floor(
-						gain.xp,
-					).toLocaleString()} XP`,
-			)
-			.join("\n") || "*Nobody got any XP this week!*"
-	}\n\n*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*\n### Next week’s weekly winners will be posted ${time(
-		nextWeeklyDate,
-		TimestampStyles.RelativeTime,
-	)}.`;
+	// Send weekly
+	const winners = weeklyWinners
+		.map((gain, index) => {
+			return `${["🥇", "🥈", "🥉"][index] ?? "🏅"} ${userMention(
+				gain.user,
+			)} - ${Math.floor(gain.xp).toLocaleString()} XP`;
+		})
+		.join("\n");
+	const stats = `*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*`;
+	const nextWeek = `### Next week’s weekly winners will be posted ${time(date, TimestampStyles.RelativeTime)}.`;
+	return `${title}\n${winners || "*Nobody got any XP this week!*"}\n\n${stats}\n${nextWeek}`;
 }

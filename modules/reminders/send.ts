@@ -66,20 +66,24 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 				case SpecialReminders.Weekly: {
 					if (!channel?.isTextBased()) continue;
 
-					const nextWeeklyDate = new Date(reminder.date);
-					nextWeeklyDate.setUTCDate(nextWeeklyDate.getUTCDate() + 7);
+					const weekOfDate = new Date(reminder.date);
+					weekOfDate.setUTCDate(weekOfDate.getUTCDate() - 7);
+					const title = `🏆 Weekly Winners week of ${weekOfDate.toLocaleString([], {
+						month: "long",
+						day: "numeric",
+					})}`;
+
+					const message = await channel.send(await getWeekly(weekOfDate));
 
 					const chatters = await getChatters();
-					const message = await channel.send(await getWeekly(nextWeeklyDate));
 					if (!chatters) continue;
+
 					const thread = await message.startThread({
-						name: `🏆 Weekly Winners week of ${new Date().toLocaleString([], {
-							month: "long",
-							day: "numeric",
-						})}`,
+						name: title,
 						reason: "To send all chatters",
 					});
 					await thread.send(chatters);
+
 					continue;
 				}
 				case SpecialReminders.UpdateSACategory: {
