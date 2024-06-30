@@ -179,10 +179,6 @@ export default async function hangman(
 		})
 		.on("end", async (_, reason) => {
 			CURRENTLY_PLAYING.delete(interaction.user.id);
-			const image = await makeCanvasFiles(
-				user.displayAvatarURL({ forceStatic: true, size: 64 }),
-				reason === "win",
-			);
 
 			await message.reply({
 				content: `# You ${reason === "win" ? "saved" : "killed"} ${user.toString()}!\n${
@@ -193,7 +189,15 @@ export default async function hangman(
 						win: "Great job!",
 					}[reason] ?? "R.I.P."
 				}`,
-				files: image,
+				files: [
+					{
+						attachment: await makeCanvasFiles(
+							reason === "win",
+							user.displayAvatarURL({ forceStatic: true, size: 64 }),
+						),
+						name: "hangman.png",
+					},
+				],
 				allowedMentions: { users: [] },
 			});
 			await message.edit({ components: disableComponents(message.components) });
@@ -300,9 +304,7 @@ export default async function hangman(
 			],
 			files: [
 				{
-					attachment: await fileSystem.readFile(
-						`./modules/games/hangman-photos/${Math.min(wrongCount, MAX_WRONGS - 1)}.png`,
-					),
+					attachment: await makeCanvasFiles(Math.min(wrongCount, MAX_WRONGS - 1)),
 					name: "hangman.png",
 				},
 			],
@@ -342,28 +344,35 @@ async function getMember(player: User): Promise<GuildMember> {
 	return member;
 }
 
-async function makeCanvasFiles(
-	url: string,
-	win: boolean,
-): Promise<{ attachment: Buffer; name: string }[]> {
-	if (!features._canvas) return [];
+async function makeCanvasFiles(wrongCount: number): Promise<Buffer>;
+async function makeCanvasFiles(wrongCount: boolean, url: string): Promise<Buffer>;
+async function makeCanvasFiles(wrongCount: boolean | number, url?: string): Promise<Buffer> {
+	const fileUrl = `./modules/games/hangman-photos/${
+		typeof wrongCount === "number" ? wrongCount
+		: wrongCount ? "win"
+		: MAX_WRONGS - 1
+	}.png`;
+	if (!features._canvas || wrongCount === 0) return await fileSystem.readFile(fileUrl);
 
 	const { createCanvas, loadImage } = await import("@napi-rs/canvas");
 	const canvas = createCanvas(200, 181);
 	const context = canvas.getContext("2d");
-	context.drawImage(
-		await loadImage(`./modules/games/hangman-photos/${win ? "win" : MAX_WRONGS - 1}.png`),
-		0,
-		0,
-		canvas.width,
-		canvas.height,
-	);
-	const x = 136.5,
-		y = win ? 38 : 20,
-		size = 40;
-	context.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-	context.clip();
-	context.drawImage(await loadImage(url), x, y, size, size);
 
-	return [{ attachment: canvas.toBuffer("image/png"), name: "hangman.png" }];
+	context.drawImage(await loadImage(fileUrl), 0, 0, canvas.width, canvas.height);
+
+	const x = 136.5,
+		y = wrongCount === true ? 38 : 20,
+		size = 40;
+
+	if (typeof wrongCount === "number") context.beginPath();
+	context.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+	if (typeof wrongCount === "number") {
+		context.fillStyle = "black";
+		context.fill();
+	} else if (url) {
+		context.clip();
+		context.drawImage(await loadImage(url), x, y, size, size);
+	}
+
+	return canvas.toBuffer("image/png");
 }
