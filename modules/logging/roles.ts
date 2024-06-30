@@ -120,7 +120,7 @@ export async function roleUpdate(
 					`${LoggingEmojis.Role} ${roleMention(
 						entry.target.id,
 					)}’s permissions changed${extraAuditLogsInfo(entry)}`,
-					LogSeverity.ImportantUpdate,
+					LogSeverity.ServerChange,
 					change.new === undefined ?
 						{}
 					:	{
