@@ -55,9 +55,9 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 	const code = interaction.fields.getTextInputValue("code").trim();
 	try {
 		const output: unknown = await eval(
-			`(async () => {${
-				code.includes("\n") || code.includes("return") ? code : `return ${code}`
-			}})()`,
+			"(async () => {\n" +
+				(code.includes("\n") || code.includes("return") ? code : `return ${code}`) +
+				"\n;})()",
 		);
 
 		const stringifiedOutput =
