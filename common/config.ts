@@ -6,7 +6,6 @@ import {
 	type Channel,
 	type Guild,
 	type NonThreadGuildBasedChannel,
-	type Snowflake,
 	type ThreadManager,
 } from "discord.js";
 import { client } from "strife.js";
@@ -54,7 +53,7 @@ async function getConfig() {
 		guilds: Object.fromEntries(
 			await Promise.all(
 				Object.entries(guildIds).map(async ([key, id]) => {
-					const basic: Partial<Guild> & { id: Snowflake } = { id, valueOf: () => id };
+					const basic: Partial<Guild> & { id: typeof id } = { id, valueOf: () => id };
 					return [
 						key,
 						guild ? await client.guilds.fetch(id).catch(() => basic) : basic,
