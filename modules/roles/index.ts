@@ -42,7 +42,6 @@ defineEvent("guildMemberAdd", async () => {
 		const inviter = await config.guild.members.fetch(invite._id).catch(() => void 0);
 		if (
 			!inviter ||
-			inviter.id === constants.users.hans ||
 			inviter.user.bot ||
 			!config.roles.epic ||
 			inviter.roles.resolve(config.roles.epic.id)
