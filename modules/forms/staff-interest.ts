@@ -18,12 +18,12 @@ import { getLevelForXp } from "../xp/misc.js";
 import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 
 const thread =
-	getInitialChannelThreads(config.channels.admin).find(
-		(thread) => thread.name === "Moderator Interest Forms",
-	) ??
+	(await getInitialChannelThreads(config.channels.admin)
+		.find((thread) => thread.name.endsWith(" Interest Forms"))
+		?.setName("Staff Interest Forms")) ??
 	(await config.channels.admin.threads.create({
-		name: "Moderator Interest Forms",
-		reason: "For moderator interest forms",
+		name: "Staff Interest Forms",
+		reason: "For staff interest forms",
 	}));
 
 const applications = Object.fromEntries(
@@ -56,7 +56,11 @@ export default async function confirmInterest(interaction: ButtonInteraction): P
 	await interaction.reply({
 		ephemeral: true,
 		content:
-			"## Moderator Interest Form\n__This is not a mod application.__ This form mainly exists just to determine who in the server wants moderator in the first place. Filling out this form does not guarantee anything. However, if you don’t fill out the form, you do not have any chance of promotion.\nAlso, know that this form is not the only step in being promoted. If admins think you are a good candidate for moderator, they will DM you further questions before promoting you.\nFinally, please note that 2-factor authentication (2FA) is required for moderators in this server. If you are unable to enable 2FA, please try using an online service such as <https://totp.app/>.\nThanks for being a part of the server and filling out the form!",
+			"## Staff Interest Form\n" +
+			"__This is not a staff application.__ This form mainly exists just to determine who in the server wants a staff position in the first place. Filling out this form does not guarantee anything. You may not ever get an explicit response. But without filling this out, you have little chance of promotion.\n" +
+			"Also, please be aware that this form is not the only step in being promoted. If admins are interested in promoting you, they will DM you further questions before promoting you.\n" +
+			"Finally, please note that 2-factor authentication (2FA) is required for staff in this server. If you are unable to enable 2FA, please try using an online service such as <https://totp.app/>.\n" +
+			"Thanks for being a part of the server and filling out the form!",
 
 		components: [
 			{
@@ -78,7 +82,7 @@ export async function fillInterest(interaction: ButtonInteraction): Promise<void
 	const mention = interaction.user.toString();
 	await interaction.showModal({
 		customId: "_modInterestForm",
-		title: "Moderator Interest Form",
+		title: "Staff Interest Form",
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -183,7 +187,7 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 	const data = {
 		embeds: [
 			{
-				title: "Moderator Interest Form",
+				title: "Staff Interest Form",
 				color: interaction.member.displayColor,
 				author: {
 					name: interaction.user.tag,

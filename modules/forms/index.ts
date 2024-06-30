@@ -5,7 +5,7 @@ import {
 	submitAcceptAppeal,
 	submitRejectAppeal,
 } from "./appeals/appeals.js";
-import confirmInterest, { fillInterest, submitInterest } from "./mod-interest.js";
+import confirmInterest, { fillInterest, submitInterest } from "./staff-interest.js";
 import type { Snowflake } from "discord.js";
 import config from "../../common/config.js";
 
