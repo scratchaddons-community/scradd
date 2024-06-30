@@ -87,7 +87,7 @@ export async function sendDuplicates(message: Message): Promise<void> {
 }
 
 function shortenTitle(title: number | string): string {
-	const stringified = `${title}`;
+	const stringified = `${title}`.toLowerCase();
 	if (stringified.length < 15) return stringified;
 	const shortened = stringified.replaceAll(/\s*\b\S{1,3}\b\s*/g, " ").trim();
 	return shortened.split(/[\s\b]+/g).length < 2 ? stringified : shortened;
