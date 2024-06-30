@@ -132,23 +132,23 @@ declare global {
 		 * 	CLIENT_SECRET = …
 		 */
 		interface ProcessEnv {
-			/** The main guild ID for the bot to operate in. Requires Administrator permission in this server. */
+			/** ID of the main server for the app to operate in. Assumes Administrator permission in this server. */
 			GUILD_ID: Snowflake;
-			/** The bot’s token. */
+			/** Token of the bot. */
 			BOT_TOKEN: string;
-			/** The URI to use when connecting to MongoDB. */
+			/** URI to connect to MongoDB with. */
 			MONGO_URI: string;
 			/**
-			 * The mode for the bot to run in. For consistency, always compare against `"production"` in code.
+			 * Mode for the bot to run in. For consistency, always compare against `"production"` in code.
 			 *
 			 * @default "development"
 			 */
 			NODE_ENV?: "development" | "production";
-			/** The port to run the web server on. Omit to not run the server. */
+			/** Port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;
-			/** The bot’s client secret, used in OAuth2 flows. Omit to disable all features using OAuth2. */
+			/** Client secret of the app, used in OAuth2 flows. Omit to disable all features using OAuth2. */
 			CLIENT_SECRET?: string;
-			/** The API key to force a database write and prepare to restart on `/prepare-exit`. */
+			/** API key used in `/prepare-exit`. */
 			EXIT_AUTH?: string;
 		}
 	}

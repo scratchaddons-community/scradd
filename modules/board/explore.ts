@@ -19,13 +19,6 @@ import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.
 export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
 
-/**
- * Determine if a text-based channel is a match of a guild-based channel.
- *
- * @param channelWanted - Guild based channel.
- * @param channelFound - Text based channel.
- * @returns Whether the channel is a match.
- */
 async function textChannelMatches(
 	channelWanted: GuildBasedChannel,
 	channelFound: Snowflake,

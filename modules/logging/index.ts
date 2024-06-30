@@ -31,7 +31,7 @@ import {
 } from "./messages.js";
 import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
-import { guildUpdate, inviteCreate, inviteDelete } from "./server.js";
+import { guildUpdate, inviteCreate, inviteDelete } from "./guild.js";
 import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 import {
 	guildMemberAdd,

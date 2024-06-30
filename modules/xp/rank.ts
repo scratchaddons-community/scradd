@@ -37,15 +37,15 @@ export default async function getUserRank(
 	const approximateWeeklyRank = Math.ceil(weeklyRank / 10) * 10;
 
 	const guildMembers = await getAllMembers(config.guild);
-	const serverRank =
+	const guildRank =
 		allXp
 			.filter((entry) => guildMembers.has(entry.user))
 			.findIndex((entry) => entry.user === user.id) + 1;
 	const rankInfo =
 		rank &&
 		`Ranked ${rank.toLocaleString()}/${allXp.length.toLocaleString()}${
-			serverRank ?
-				` (${serverRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
+			guildRank ?
+				` (${guildRank.toLocaleString()}/${guildMembers.size.toLocaleString()} in the server)`
 			:	""
 		}`;
 
