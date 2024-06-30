@@ -197,6 +197,7 @@ export default async function appealRequest(
 		);
 
 	const message = await appealThread.send({
+		content: config.roles.mod.toString(),
 		embeds: [
 			{
 				title: "Ban Appeal",
