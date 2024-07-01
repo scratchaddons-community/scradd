@@ -8,4 +8,5 @@ export default {
 	autosTypeInChat: auto,
 	joinsAutoKick: auto,
 	joinsDmRevision: auto,
+	ticketsPingForReports: auto,
 };

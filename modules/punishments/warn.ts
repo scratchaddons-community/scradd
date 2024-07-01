@@ -138,7 +138,11 @@ export default async function warn(
 			(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
 		) ?
 			member.ban({ reason: "Too many strikes" })
-		:	log(`${LoggingErrorEmoji} Unable to ban ${user.toString()}`, LogSeverity.Alert));
+		:	log(
+				`${LoggingErrorEmoji} Unable to ban ${user.toString()} (Too many strikes)`,
+				LogSeverity.Alert,
+				{ pingHere: true },
+			));
 		return true;
 	}
 
@@ -162,6 +166,7 @@ export default async function warn(
 					process.env.NODE_ENV === "production" ? "hour" : "minute"
 				}${addedMuteLength === 1 ? "" : "s"}`,
 				LogSeverity.Alert,
+				{ pingHere: true },
 			));
 	}
 

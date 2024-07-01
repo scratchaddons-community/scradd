@@ -32,6 +32,7 @@ import type { actualPrimitives } from "mongoose";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getBaseChannel } from "../../util/discord.js";
+import features from "../../common/features.js";
 
 export function shouldLog(channel: Channel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
@@ -104,6 +105,8 @@ export enum LogSeverity {
 	Resource,
 }
 
+let lastPing = 0;
+
 export default async function log(
 	content: `${LoggingEmojis | typeof LoggingErrorEmoji} ${string}`,
 	group: LogSeverity | TextChannel,
@@ -114,6 +117,7 @@ export default async function log(
 			| { customId: string; style: Exclude<ButtonStyle, ButtonStyle.Link> }
 			| { url: string }
 		))[];
+		pingHere?: boolean;
 	} = {},
 ): Promise<Message<true>> {
 	const thread = typeof group === "object" ? group : await getLoggingThread(group);
@@ -138,15 +142,20 @@ export default async function log(
 		{ external: [], embedded: [] },
 	) ?? { external: [], embedded: [] };
 
+	const shouldPing =
+		extra.pingHere && features.ticketsPingForReports && Date.now() - lastPing > 90_000;
+	if (shouldPing) lastPing = Date.now();
+
 	return await thread.send({
 		content:
 			content +
+			(shouldPing ? `${content.includes("\n") ? "\n" : " "}@here` : "") +
 			(embedded.length ?
 				embedded
 					.map((file) => `\n\`\`\`${file.extension || ""}\n${file.content}\n\`\`\``)
 					.join("")
 			:	""),
-		allowedMentions: { users: [] },
+		allowedMentions: { users: [], parse: shouldPing ? ["everyone"] : undefined },
 		embeds: extra.embeds?.filter(Boolean),
 		components: extra.buttons && [
 			{

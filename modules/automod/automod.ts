@@ -309,6 +309,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			:	log(
 					`${LoggingErrorEmoji} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
 					LogSeverity.Alert,
+					{ pingHere: true },
 				));
 		}
 

@@ -73,9 +73,7 @@ export default async function changeNickname(member: GuildMember): Promise<void>
 			if (oldest) unchanged.delete(oldest);
 		} else if (unchanged.size > 1)
 			await log(
-				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd([
-					...unchanged.values(),
-				])}`,
+				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd([...unchanged.values()])}`,
 				LogSeverity.Alert,
 			);
 	}
@@ -97,6 +95,7 @@ async function setNickname(
 	await log(
 		`${LoggingErrorEmoji} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		LogSeverity.Alert,
+		{ pingHere: true },
 	);
 }
 

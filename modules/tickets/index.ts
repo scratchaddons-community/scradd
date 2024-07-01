@@ -219,6 +219,7 @@ defineModal("report", async (interaction, messageId) => {
 		})}`,
 		LogSeverity.Alert,
 		{
+			pingHere: true,
 			buttons: [
 				{
 					label: "Contact Reporter",
