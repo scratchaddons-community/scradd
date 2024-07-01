@@ -40,13 +40,7 @@ const WHITELISTED_INVITE_GUILDS = new Set([
 ]);
 
 const AD_DOMAINS = [
-	"scratch.camp",
-	"scratch.love",
 	"scratch.mit.edu",
-	"scratch.org",
-	"scratch.pizza",
-	"scratch.team",
-
 	"turbowarp.org",
 	"turbowarp.xyz",
 
