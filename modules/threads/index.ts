@@ -1,9 +1,10 @@
-import { ApplicationCommandOptionType, ChannelType, roleMention, userMention } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
 import { paginate } from "../../util/discord.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
+import { mentionUser } from "../settings.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
@@ -99,10 +100,12 @@ defineSubcommands(
 				);
 				await paginate(
 					unjoined,
-					(thread) =>
+					async (thread) =>
 						(thread.parent ? `${thread.parent.toString()} > ` : "") +
 						thread.toString() +
-						(thread.ownerId ? ` - by ${userMention(thread.ownerId)}` : ""),
+						(thread.ownerId ?
+							` - by ${await mentionUser(thread.ownerId, interaction.user)}`
+						:	""),
 					(data) => interaction.editReply(data),
 					{
 						title: "Unjoined Threads",

@@ -5,7 +5,6 @@ import {
 	User,
 	hyperlink,
 	userMention,
-	type Guild,
 	type InteractionReplyOptions,
 	type RepliableInteraction,
 	type Snowflake,
@@ -251,13 +250,12 @@ export async function getSettings(
 export async function mentionUser(
 	user: Snowflake | User,
 	interactor?: { id: Snowflake },
-	guild?: Guild,
 ): Promise<UserMention | `[${string}](${string})`> {
 	const useMentions = interactor && (await getSettings(interactor)).useMentions;
 	const id = user instanceof User ? user.id : user;
 	if (useMentions) return userMention(id);
 
-	const presence = interactor && guild?.presences.resolve(interactor.id);
+	const presence = interactor && config.guild.presences.resolve(interactor.id);
 	const url = `<${
 		presence && !presence.clientStatus?.mobile && !presence.clientStatus?.web ?
 			"discord://-"

@@ -18,6 +18,7 @@ import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import features from "../../common/features.js";
+import { mentionUser } from "../settings.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -181,7 +182,7 @@ export default async function hangman(
 			CURRENTLY_PLAYING.delete(interaction.user.id);
 
 			await message.reply({
-				content: `# You ${reason === "win" ? "saved" : "killed"} ${user.toString()}!\n${
+				content: `# You ${reason === "win" ? "saved" : "killed"} ${await mentionUser(user, interaction.user)}!\n${
 					{
 						idle: "You didn’t save them in time, so they died \\:(",
 						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?⁉",

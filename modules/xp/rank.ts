@@ -166,11 +166,7 @@ export async function top(
 	await paginate(
 		guildMembers ? leaderboard.filter((entry) => guildMembers.has(entry.user)) : leaderboard,
 		async (xp) =>
-			`${await mentionUser(
-				xp.user,
-				interaction.user,
-				interaction.guild ?? config.guild,
-			)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+			`${await mentionUser(xp.user, interaction.user)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
 		(data) => interaction.editReply(data),
 		{
 			title: "XP Leaderboard",

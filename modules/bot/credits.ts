@@ -64,9 +64,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 
 		const mentions = members
 			.toSorted((one, two) => one.user.displayName.localeCompare(two.user.displayName))
-			.map(({ user }) =>
-				mentionUser(user, interaction.user, interaction.guild ?? config.guild),
-			);
+			.map(({ user }) => mentionUser(user, interaction.user));
 		return joinWithAnd(await Promise.all(mentions));
 	}
 }

@@ -66,10 +66,9 @@ export async function getStrikeById(
 	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));
 
 	const moderator =
-		isModerator && strike.mod === "AutoMod" ?
-			strike.mod
-		:	strike.mod &&
-			(await mentionUser(strike.mod, interaction.member, interaction.guild ?? config.guild));
+		isModerator &&
+		strike.mod &&
+		(strike.mod === "AutoMod" ? strike.mod : await mentionUser(strike.mod, interaction.member));
 	const nick = (member ?? user)?.displayName;
 	return await interaction.editReply({
 		components:
@@ -132,11 +131,7 @@ export async function getStrikeById(
 						[
 							{
 								name: "👤 Target user",
-								value: await mentionUser(
-									user,
-									interaction.member,
-									interaction.guild ?? config.guild,
-								),
+								value: await mentionUser(user, interaction.member),
 								inline: true,
 							},
 						]
