@@ -595,6 +595,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	totalCount?: number;
 	pageLength?: number;
 	columns?: 1 | 2 | 3;
+	timeout?: number;
 
 	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";
@@ -634,6 +635,7 @@ export async function paginate<Item>(
 		totalCount,
 		pageLength = 20,
 		columns = 1,
+		timeout = constants.collectorTime,
 
 		generateComponents,
 		customComponentLocation = "above",
@@ -758,7 +760,7 @@ export async function paginate<Item>(
 		filter: (buttonInteraction) =>
 			buttonInteraction.message.id === message.id && buttonInteraction.user.id === user.id,
 
-		idle: constants.collectorTime,
+		idle: timeout === 0 ? undefined : timeout,
 		time: message.flags.has("Ephemeral") ? (14 * 60 + 50) * 1000 : undefined,
 	});
 

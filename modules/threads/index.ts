@@ -110,6 +110,7 @@ defineSubcommands(
 						failMessage: "You’ve joined all open threads that you can access here!",
 						user: interaction.user,
 						totalCount: unjoined.length,
+						timeout: 0,
 					},
 				);
 				return;
