@@ -4,7 +4,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
-import { BUMPING_THREAD, SpecialReminders, remindersDatabase } from "./misc.js";
+import { bumpingThread, SpecialReminders, remindersDatabase } from "./misc.js";
 import queueReminders from "./send.js";
 
 defineSubcommands(
@@ -86,9 +86,9 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 
 defineEvent("messageCreate", async (message) => {
 	if (
-		message.guild?.id === config.guild.id &&
 		message.interaction?.commandName == "bump" &&
-		message.author.id === constants.users.disboard
+		message.author.id === constants.users.disboard &&
+		message.guild?.id === config.guild.id
 	) {
 		remindersDatabase.data = [
 			...remindersDatabase.data.filter(
@@ -96,7 +96,7 @@ defineEvent("messageCreate", async (message) => {
 					!(reminder.id === SpecialReminders.Bump && reminder.user === client.user.id),
 			),
 			{
-				channel: BUMPING_THREAD,
+				channel: bumpingThread?.id ?? message.channel.id,
 				date: Date.now() + 7_200_000,
 				reminder: undefined,
 				id: SpecialReminders.Bump,

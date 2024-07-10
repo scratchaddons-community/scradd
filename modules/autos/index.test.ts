@@ -2,6 +2,7 @@ import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 import { getMatches, htmlToMarkdown, linkifyMentions } from "./scratch.js";
 import github from "./github.js";
+import config from "../../common/config.js";
 
 await describe("github", async () => {
 	await it("should support basic references", () => {
@@ -30,31 +31,31 @@ await describe("github", async () => {
 	});
 	await it("should default to Scradd repo in Scradd server", () => {
 		strictEqual(
-			github("#123", "938438560925761619"),
+			github("#123", config.guilds.testing.id),
 			"https://github.com/scratchaddons-community/scradd/issues/123",
 		);
 	});
 	await it("should support preset repo shorthands in Scradd server", () => {
 		strictEqual(
-			github("site#123", "938438560925761619"),
+			github("site#123", config.guilds.testing.id),
 			"https://github.com/ScratchAddons/website-v2/issues/123",
 		);
 	});
 	await it("should support custom repos in Scradd server", () => {
 		strictEqual(
-			github("foobar#123", "938438560925761619"),
+			github("foobar#123", config.guilds.testing.id),
 			"https://github.com/ScratchAddons/foobar/issues/123",
 		);
 	});
 	await it("should support preset org shothands in Scradd server", () => {
 		strictEqual(
-			github("sa/foobar#123", "938438560925761619"),
+			github("sa/foobar#123", config.guilds.testing.id),
 			"https://github.com/ScratchAddons/foobar/issues/123",
 		);
 	});
 	await it("should support custom orgs and repos in Scradd server", () => {
 		strictEqual(
-			github("foo/bar#123", "938438560925761619"),
+			github("foo/bar#123", config.guilds.testing.id),
 			"https://github.com/foo/bar/issues/123",
 		);
 	});

@@ -51,6 +51,7 @@ async function getConfig() {
 	);
 	const execRole = roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staffRole;
 
+	const tickets = getChannel("contact", ChannelType.GuildText, "start");
 	return {
 		guild: assertOutsideTests(guild),
 		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
@@ -76,8 +77,8 @@ async function getConfig() {
 				"end",
 			),
 			servers: getChannel("servers", ChannelType.GuildText, "end"),
-			tickets: getChannel("contact", ChannelType.GuildText, "start"),
-			server: "1138116320249000077",
+			tickets,
+			server: tickets && getInitialThreads(tickets, "Server ").first(),
 			welcome: getChannel("welcome", ChannelType.GuildText),
 			intros: getChannel("intro", ChannelType.GuildText, "partial"),
 

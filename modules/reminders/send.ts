@@ -17,7 +17,6 @@ import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
 import {
-	BUMPING_THREAD,
 	BUMP_COMMAND_ID,
 	SpecialReminders,
 	remindersDatabase,
@@ -122,7 +121,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
-							channel: BUMPING_THREAD,
+							channel: reminder.channel,
 							date: Date.now() + 1_800_000,
 							reminder: undefined,
 							id: SpecialReminders.Bump,
@@ -197,7 +196,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
-							channel: "0",
+							channel: reminder.channel,
 							date: Date.now() + (Math.random() * 3 + 3) * 3_600_000,
 							reminder: next,
 							id: SpecialReminders.ChangeStatus,
@@ -217,7 +216,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					remindersDatabase.data = [
 						...remindersDatabase.data,
 						{
-							channel: channel.id,
+							channel: reminder.channel,
 							date: (reminder.date === "NaN" ? 0 : reminder.date) + 86_400_000,
 							reminder: undefined,
 							id: SpecialReminders.QOTD,

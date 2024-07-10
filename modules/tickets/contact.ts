@@ -4,7 +4,6 @@ import {
 	ComponentType,
 	GuildMember,
 	InteractionType,
-	channelMention,
 	type APIEmbedField,
 	type AnySelectMenuInteraction,
 	type ButtonInteraction,
@@ -63,20 +62,18 @@ export async function showTicketModal(
 		});
 	}
 
-	if (option === SERVER_CATEGORY) {
+	if (option === SERVER_CATEGORY && config.channels.server) {
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
-			} Please don’t contact mods for server suggestions. Instead, share them in ${channelMention(
-				config.channels.server,
-			)}.`,
+			} Please don’t contact mods for server suggestions. Instead, share them in ${config.channels.server.toString()}.`,
 
 			ephemeral: true,
 		});
 	}
 
 	if (!option || !TICKET_CATEGORIES.includes(option))
-		throw new TypeError(`Unknown ticket category: ${option ?? "undefined"}`);
+		throw new TypeError(`Unknown ticket category: ${option ?? "`undefined`"}`);
 
 	const fields = allFields[option];
 
