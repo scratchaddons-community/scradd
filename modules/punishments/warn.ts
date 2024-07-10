@@ -215,7 +215,8 @@ export async function removeStrike(
 		content: `${constants.emojis.statuses.yes} Removed ${user.toString()}’s strike \`${id}\`!`,
 	});
 	if (
-		member?.communicationDisabledUntil &&
+		member?.moderatable &&
+		member.communicationDisabledUntil &&
 		Number(member.communicationDisabledUntil) > Date.now()
 	)
 		await member.disableCommunicationUntil(Date.now(), "Strike removed");

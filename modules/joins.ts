@@ -135,6 +135,7 @@ defineEvent("guildMemberUpdate", async (_, member) => {
 	if (
 		!features.joinsAutoKick ||
 		!config.roles.autoKick ||
+		!member.kickable ||
 		!member.roles.resolve(config.roles.autoKick.id)
 	)
 		return;
@@ -213,6 +214,7 @@ if (config.channels.intros) {
 	let templateMessage =
 		(await config.channels.intros.messages.fetch({ limit: 100 })).find(
 			(message) =>
+				message.deletable &&
 				message.author.id === client.user.id &&
 				message.embeds[0]?.title === "Introduction Template",
 		) ?? (await config.channels.intros.send(introTemplate));

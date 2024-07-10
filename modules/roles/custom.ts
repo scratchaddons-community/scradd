@@ -238,9 +238,7 @@ export async function recheckMemberRole(
 }
 export async function recheckAllRoles(): Promise<void> {
 	for (const [, role] of await config.guild.roles.fetch()) {
-		if (role.name.startsWith(CUSTOM_ROLE_PREFIX)) {
-			await recheckRole(role);
-		}
+		if (role.editable && role.name.startsWith(CUSTOM_ROLE_PREFIX)) await recheckRole(role);
 	}
 }
 async function recheckRole(role: Role, reason = "No longer qualifies"): Promise<Role | undefined> {
@@ -259,7 +257,9 @@ async function recheckRole(role: Role, reason = "No longer qualifies"): Promise<
 }
 
 export function getCustomRole(member: GuildMember): Role | undefined {
-	return member.roles.valueOf().find((role) => role.name.startsWith(CUSTOM_ROLE_PREFIX));
+	return member.roles
+		.valueOf()
+		.find((role) => role.editable && role.name.startsWith(CUSTOM_ROLE_PREFIX));
 }
 export async function qualifiesForRole(member: GuildMember): Promise<boolean> {
 	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);

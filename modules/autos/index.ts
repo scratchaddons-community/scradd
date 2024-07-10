@@ -254,7 +254,7 @@ async function handleMutatable(
 
 defineEvent("messageDelete", async (message) => {
 	const found = autoResponses.get(message.id);
-	if (found) await found.delete();
+	if (found?.deletable) await found.delete();
 
 	const reference =
 		found?.id ?? [...autoResponses.entries()].find(([, { id }]) => id === message.id)?.[0];

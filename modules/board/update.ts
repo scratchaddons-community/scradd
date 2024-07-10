@@ -1,4 +1,4 @@
-import { ChannelType, type Message, type Snowflake } from "discord.js";
+import type{ Message, Snowflake } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
@@ -48,8 +48,7 @@ export default async function updateBoard({
 
 		await giveXp(message.author, sentMessage.url);
 
-		if (config.channels.board.type === ChannelType.GuildAnnouncement)
-			await sentMessage.crosspost();
+		if (sentMessage.crosspostable) await sentMessage.crosspost();
 
 		updateById(
 			{ source: message.id, onBoard: sentMessage.id, reactions: count },
@@ -74,7 +73,7 @@ export default async function updateBoard({
 				onBoard &&
 				(await config.channels.board?.messages.fetch(onBoard).catch(() => void 0));
 
-			if (toPin) await toPin.pin("Is a top-reacted message");
+			if (toPin && toPin.pinnable) await toPin.pin("Is a top-reacted message");
 
 			return onBoard;
 		}),
