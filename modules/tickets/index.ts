@@ -7,6 +7,7 @@ import {
 	GuildMember,
 	TextInputStyle,
 	channelLink,
+	userMention,
 } from "discord.js";
 import {
 	client,
@@ -318,23 +319,33 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 	if (
 		newThread.parent?.id !== config.channels.tickets?.id ||
 		newThread.type !== ChannelType.PrivateThread ||
-		oldThread.archived === newThread.archived
+		oldThread.archived === newThread.archived ||
+		!newThread.editable
 	)
 		return;
 	const memberId = getIdFromName(newThread.name);
 	if (!memberId) return;
 
+	const existing = TICKETS_BY_MEMBER[memberId];
 	if (newThread.archived) {
 		TICKETS_BY_MEMBER[memberId] = undefined;
-		if (!newThread.locked) {
+		if (newThread.sendable && !newThread.locked) {
 			await newThread.setArchived(false, "To lock it");
-			await newThread.setLocked(true, "Was closed");
+			await newThread.edit({ archived: true, locked: true, reason: "Was closed" });
 		}
 	} else if (newThread.locked) {
 		TICKETS_BY_MEMBER[memberId] = undefined;
-	} else if (TICKETS_BY_MEMBER[memberId]) {
-		await newThread.setArchived(true, "Reopened while another ticket is already open");
-		await newThread.setLocked(true, "Reopened while another ticket is already open");
+	} else if (existing) {
+		await newThread.send(
+			`${constants.emojis.statuses.no} ${userMention(
+				memberId,
+			)} already has another ticket open! Please use ${existing.toString()}.`,
+		);
+		await newThread.edit({
+			archived: true,
+			locked: true,
+			reason: "Reopened while another ticket is already open",
+		});
 	} else {
 		TICKETS_BY_MEMBER[memberId] = newThread;
 	}
