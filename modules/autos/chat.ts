@@ -131,7 +131,6 @@ export async function learn(message: Message): Promise<void> {
 	await new Chat({ prompt, response }).save();
 }
 
-
 const consent = {
 		content:
 			`## ${chatName}\n` +

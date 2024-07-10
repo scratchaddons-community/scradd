@@ -16,12 +16,7 @@ import { convertBase } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
-import {
-	BUMP_COMMAND_ID,
-	SpecialReminders,
-	remindersDatabase,
-	type Reminder,
-} from "./misc.js";
+import { BUMP_COMMAND_ID, SpecialReminders, remindersDatabase, type Reminder } from "./misc.js";
 import sendQuestion from "../qotds/send.js";
 
 let nextReminder: NodeJS.Timeout | undefined;

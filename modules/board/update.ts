@@ -1,4 +1,4 @@
-import type{ Message, Snowflake } from "discord.js";
+import type { Message, Snowflake } from "discord.js";
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
