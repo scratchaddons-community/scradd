@@ -1,6 +1,6 @@
 import type { Message } from "discord.js";
 import { client } from "strife.js";
-import config from "../../common/config.js";
+import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
 	GlobalAnimatedEmoji,
@@ -19,7 +19,7 @@ import { xpDatabase } from "../xp/util.js";
 import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
-const { threads } = (await config.channels.servers?.threads.fetchActive()) ?? {};
+const threads = config.channels.servers && getInitialThreads(config.channels.servers);
 const whitelistedInvites = await Promise.all(
 	threads?.map(async (thread) =>
 		(await getAllMessages(thread)).flatMap(

@@ -7,18 +7,17 @@ import {
 	type TextInputComponentData,
 	type ThreadChannel,
 } from "discord.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
+import config, { getInitialThreads } from "../../common/config.js";
 
 export const TICKETS_BY_MEMBER = Object.fromEntries<
 	PrivateThreadChannel | ThreadChannel | undefined
 >(
 	config.channels.tickets ?
-		getInitialChannelThreads(config.channels.tickets)
-			.map(
-				(thread) =>
-					thread.type === ChannelType.PrivateThread &&
-					([getIdFromName(thread.name) ?? "", thread] as const),
-			)
+		getInitialThreads(config.channels.tickets)
+			.map((thread) => {
+				const id = thread.type === ChannelType.PrivateThread && getIdFromName(thread.name);
+				return id && ([id, thread] as const);
+			})
 			.filter(Boolean)
 	:	[],
 );

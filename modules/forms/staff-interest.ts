@@ -8,7 +8,7 @@ import {
 	type ModalSubmitInteraction,
 } from "discord.js";
 import { client } from "strife.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
+import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getAllMessages } from "../../util/discord.js";
 import { EXPIRY_LENGTH } from "../punishments/misc.js";
@@ -18,8 +18,8 @@ import { getLevelForXp } from "../xp/misc.js";
 import { getWeeklyXp, xpDatabase } from "../xp/util.js";
 
 const thread =
-	(await getInitialChannelThreads(config.channels.admin)
-		.find((thread) => thread.name.endsWith(" Interest Forms"))
+	(await getInitialThreads(config.channels.admin, " Interest Forms")
+		.first()
 		?.setName("Staff Interest Forms")) ??
 	(await config.channels.admin.threads.create({
 		name: "Staff Interest Forms",

@@ -6,7 +6,7 @@ import {
 	type ModalSubmitInteraction,
 } from "discord.js";
 import { client } from "strife.js";
-import config, { getInitialChannelThreads } from "../../../common/config.js";
+import config, { getInitialThreads } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import { getAllMessages } from "../../../util/discord.js";
 import { escapeMessage } from "../../../util/markdown.js";
@@ -14,9 +14,7 @@ import { LoggingEmojis } from "../../logging/misc.js";
 import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
 
 export const appealThread =
-	getInitialChannelThreads(config.channels.mod).find(
-		(thread) => thread.name === "Ban Appeal Forms",
-	) ??
+	getInitialThreads(config.channels.mod, "Ban Appeal Forms").first() ??
 	(await config.channels.mod.threads.create({
 		name: "Ban Appeal Forms",
 		reason: "For ban appeal forms",

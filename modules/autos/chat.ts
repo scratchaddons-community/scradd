@@ -14,7 +14,7 @@ import {
 } from "discord.js";
 import mongoose from "mongoose";
 import { client } from "strife.js";
-import config, { getInitialChannelThreads } from "../../common/config.js";
+import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
 	GlobalBotInvitesPattern,
