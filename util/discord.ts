@@ -508,7 +508,7 @@ export async function messageToEmbed(
 ): Promise<APIEmbed> {
 	const lines = (await messageToText(message)).split("\n");
 	const content =
-		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
+		message.type === MessageType.GuildInviteReminder ? (lines[1] ?? "") : lines.join("\n");
 	const author =
 		message.type === MessageType.AutoModerationAction ? content
 		: message.type === MessageType.GuildInviteReminder ? lines[0] + " 🤖"
@@ -667,7 +667,7 @@ export async function paginate<Item>(
 		const pages = condensed ? Math.ceil(array.length / length) : pageCount;
 		const offset =
 			Math.floor(
-				(currentOffset === originalOffset ? rawOffset ?? 0 : currentOffset) / length,
+				(currentOffset === originalOffset ? (rawOffset ?? 0) : currentOffset) / length,
 			) * length;
 		const filtered = array.filter((_, index) => index >= offset && index < offset + length);
 		const itemCount = totalCount ?? array.length;

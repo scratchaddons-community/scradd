@@ -239,7 +239,7 @@ export async function handleForumPost(
 	hash: string,
 ): Promise<APIEmbed | undefined> {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
-	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
+	const id = urlParts[2] === "topic" && type == "post" ? (hash.split("-")[1] ?? "") : urlParts[3];
 
 	const post =
 		type === "post" ?

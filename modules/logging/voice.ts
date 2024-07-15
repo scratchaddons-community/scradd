@@ -130,7 +130,7 @@ export async function guildScheduledEventUpdate(
 				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
 				}) rescheduled${
-					start ?? end ?
+					(start ?? end) ?
 						` to ${time(start ?? end ?? new Date())}${
 							end && start ? `-${time(end)}` : ""
 						}`

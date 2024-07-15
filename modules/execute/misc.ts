@@ -104,7 +104,7 @@ export async function parseArgument(
 ): Promise<Options[string] | { error: boolean }> {
 	if (schema.name === "option") return { error: true };
 
-	const required = "required" in schema ? schema.required ?? true : true;
+	const required = "required" in schema ? (schema.required ?? true) : true;
 
 	if (argument) {
 		switch (schema.type) {

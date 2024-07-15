@@ -21,7 +21,7 @@ export default async function getCode(
 ): Promise<InteractionResponse | undefined> {
 	const { owner } = await client.application.fetch();
 	const owners =
-		owner instanceof User ? [owner.id] : owner?.members.map((member) => member.id) ?? [];
+		owner instanceof User ? [owner.id] : (owner?.members.map((member) => member.id) ?? []);
 	if (process.env.NODE_ENV === "production" && !owners.includes(interaction.user.id))
 		return await interaction.reply({
 			ephemeral: true,
@@ -65,7 +65,7 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 				// eslint-disable-next-line unicorn/string-content
 				`"${output.toString().replaceAll('"', '\\"')}"`
 			: output === undefined || typeof output === "object" ?
-				JSON.stringify(output, undefined, "  ") ?? "undefined"
+				(JSON.stringify(output, undefined, "  ") ?? "undefined")
 				// eslint-disable-next-line @typescript-eslint/no-base-to-string
 			:	output.toString();
 

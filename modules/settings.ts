@@ -153,7 +153,7 @@ export async function updateSettings(
 		...Object.fromEntries(
 			Object.keys(SETTINGS).map((setting) => {
 				const value = settings[setting];
-				return [setting, value === "toggle" ? !old[setting] : value ?? old[setting]];
+				return [setting, value === "toggle" ? !old[setting] : (value ?? old[setting])];
 			}),
 		),
 	};
@@ -263,6 +263,6 @@ export async function mentionUser(
 	}/users/${id}>`;
 
 	const { displayName } =
-		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
+		user instanceof User ? user : ((await client.users.fetch(user).catch(() => void 0)) ?? {});
 	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
 }

@@ -94,7 +94,7 @@ export default async function contactMods(
 
 	const member =
 		options instanceof GuildMember ? options : (
-			interaction.member ?? (await config.guild.members.fetch(interaction.user.id))
+			(interaction.member ?? (await config.guild.members.fetch(interaction.user.id)))
 		);
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 

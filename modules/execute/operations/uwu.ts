@@ -8,7 +8,7 @@ export function uwuify(text: string): string {
 		.split(/\s+/)
 		.map((word) =>
 			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word) ? word : (
-				uwuReplacements[word.toLowerCase()] ?? convertWord(word)
+				(uwuReplacements[word.toLowerCase()] ?? convertWord(word))
 			),
 		);
 
