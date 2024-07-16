@@ -33,12 +33,12 @@ export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): P
 	const oldAnswer = parseSuggestionTags(
 		changes[0]?.old ?? [],
 		channel.availableTags,
-		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+		channel.id === config.channels.bugs?.id ? undefined : suggestionAnswers[0],
 	).answer;
 	const newAnswer = parseSuggestionTags(
 		changes.at(-1)?.new ?? [],
 		channel.availableTags,
-		channel.id === config.channels.bugs?.id ? "Unconfirmed" : suggestionAnswers[0],
+		channel.id === config.channels.bugs?.id ? undefined : suggestionAnswers[0],
 	).answer;
 	if (oldAnswer.name === newAnswer.name) return;
 

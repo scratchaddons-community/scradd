@@ -7,7 +7,12 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.js";
 import { getRequestUrl } from "../../util/text.js";
-import { oldSuggestions, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import {
+	oldSuggestions,
+	parseSuggestionTags,
+	suggestionAnswers,
+	suggestionsDatabase,
+} from "./misc.js";
 import top from "./top.js";
 
 const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8"),
@@ -108,9 +113,11 @@ export default async function suggestionsPage(
 		!("old" in suggestion) && config.channels.suggestions?.defaultReactionEmoji,
 	);
 
-	const answer = config.channels.suggestions?.availableTags.find(
-		(tag) => tag.moderated && tag.name === suggestion.answer,
-	) ?? { name: suggestionAnswers[0], emoji: undefined };
+	const { answer } = parseSuggestionTags(
+		thread.appliedTags,
+		config.channels.suggestions?.availableTags ?? [],
+		suggestionAnswers[0],
+	);
 
 	const rendered = Mustache.render(SUGGESTION_PAGE, {
 		messages,

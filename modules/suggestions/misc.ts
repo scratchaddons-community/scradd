@@ -84,7 +84,7 @@ export function getSuggestionData(
 export function parseSuggestionTags(
 	appliedTags: Snowflake[],
 	availableTags: GuildForumTag[],
-	defaultAnswer: string,
+	defaultAnswer = "Unconfirmed",
 ): {
 	answer: Omit<GuildForumTag, "id"> & {
 		index: number;
