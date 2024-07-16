@@ -14,7 +14,9 @@ import { disableComponents } from "../../util/discord.js";
 import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
-import { boardDatabase, boardReactionCount, generateBoardMessage } from "./misc.js";
+import boardReactionCount from "./counts.js";
+import generateBoardMessage from "./generate.js";
+import { boardDatabase } from "./misc.js";
 
 export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);
