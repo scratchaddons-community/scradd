@@ -27,13 +27,13 @@ function convertWord(word: string): string {
 
 const data: CustomOperation = {
 	name: "uwu",
-	description: uwuify("Uwuify provided text"),
+	description: uwuify("Uwu-ify provided text"),
 	censored: "channel",
 	options: [
 		{
 			type: ApplicationCommandOptionType.String,
 			name: "text",
-			description: uwuify("The text to uwuify"),
+			description: uwuify("The text to uwu-ify"),
 			required: true,
 			maxLength: 1000,
 		},
