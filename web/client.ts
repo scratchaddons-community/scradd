@@ -11,7 +11,7 @@ for (const spoiler of spoilers) {
 }
 
 const emojis = [
-	"⚠",
+	"⚠️",
 	"✨",
 	"❤️‍🔥",
 	"⭐",

@@ -207,9 +207,9 @@ export async function getLoggingThread(group: LogSeverity): Promise<TextChannel 
 
 export enum LoggingEmojis {
 	SettingChange = "📋",
-	Channel = "🗄",
+	Channel = "🗄️",
 	Punishment = "🔨",
-	Role = "🏷",
+	Role = "🏷️",
 	Integration = "🖇",
 	Thread = "📂",
 	ServerUpdate = "✨",

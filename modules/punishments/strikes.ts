@@ -120,7 +120,7 @@ export async function getStrikeById(
 
 				fields: [
 					{
-						name: "⚠️ Count",
+						name: "⚠️️ Count",
 						value: strike.count < 1 ? "verbal" : Math.floor(strike.count).toString(),
 						inline: true,
 					},

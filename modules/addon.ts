@@ -95,7 +95,7 @@ defineChatCommand(
 					description:
 						`${escapeMessage(addon.description)}\n` +
 						(addon.permissions?.length ?
-							"\n\n**⚠ This addon may require additional permissions to be granted in order to function.**"
+							"\n\n**⚠️ This addon may require additional permissions to be granted in order to function.**"
 						:	""),
 
 					fields: [

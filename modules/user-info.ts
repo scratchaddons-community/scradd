@@ -27,7 +27,7 @@ async function userInfo(
 		:	interaction.member?.roles.includes(config.roles.mod.id);
 
 	const fields = [
-		{ name: "🏷️ ID", value: user.id, inline: true },
+		{ name: "🏷️️ ID", value: user.id, inline: true },
 		{
 			name: "🆕 Created Account",
 			value: time(user.createdAt, TimestampStyles.RelativeTime),
