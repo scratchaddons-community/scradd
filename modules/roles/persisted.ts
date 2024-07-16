@@ -40,6 +40,8 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember): 
 export async function persistedRejoin(member: GuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 
+	if (member.user.bot) await member.roles.add("806609992597110825", "Is bot");
+
 	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();
 	for (const roleName of Object.keys(persistedRoles)) {
 		const [role] = [persistedRoles[roleName]].flat();
