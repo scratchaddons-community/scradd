@@ -21,9 +21,10 @@ const data: CustomOperation = {
 	],
 	permissions: (user) =>
 		!(user instanceof User) &&
-		!!(user instanceof GuildMember ?
-			user.roles.resolve(config.roles.staff.id)
-		:	user.roles.includes(config.roles.staff.id)),
+		(user instanceof GuildMember ?
+			!!user.roles.resolve(config.roles.staff.id)
+		:	user.roles.includes(config.roles.staff.id)) &&
+		undefined,
 
 	async command(interaction, { string }) {
 		assert(typeof string === "string");
