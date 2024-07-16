@@ -52,6 +52,15 @@ export default async function memoryMatch(
 		});
 	}
 
+	if (await checkIfUserPlaying(interaction)) return;
+	if (CURRENTLY_PLAYING.get(interaction.user.id)) {
+		await interaction.reply({
+			content: `${constants.emojis.statuses.no} ${interaction.user.toString()} already has an ongoing game!`,
+			ephemeral: true,
+		});
+		return;
+	}
+
 	const { opponent, "easy-mode": easyMode = false, "bonus-turns": bonusTurns = true } = options;
 
 	const message = await interaction.reply({
