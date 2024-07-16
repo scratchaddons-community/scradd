@@ -27,7 +27,6 @@ const data: CustomOperation = {
 		{
 			name: "static",
 			description: "View custom emojis used in responses and information about secrets",
-
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 	],
