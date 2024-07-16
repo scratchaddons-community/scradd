@@ -1,7 +1,8 @@
 import {
 	ApplicationCommandOptionType,
-	AutoModerationActionType,
+	AutoModerationRuleTriggerType,
 	GuildMember,
+	MessageMentions,
 	MessageType,
 	underline,
 	type CommandInteractionOption,
@@ -200,14 +201,14 @@ defineChatCommand(
 defineEvent("autoModerationActionExecution", async (action) => {
 	if (
 		action.guild.id === config.guild.id &&
-		action.action.type === AutoModerationActionType.SendAlertMessage &&
+		action.ruleTriggerType === AutoModerationRuleTriggerType.KeywordPreset &&
 		action.alertSystemMessageId &&
-		tryCensor(action.content)
+		action.action.metadata.channelId &&
+		tryCensor(action.content) &&
+		!MessageMentions.EveryonePattern.test(action.content)
 	) {
-		const channel =
-			action.action.metadata.channelId &&
-			(await config.guild.channels.fetch(action.action.metadata.channelId));
-		if (channel && channel.isTextBased()) {
+		const channel = await config.guild.channels.fetch(action.action.metadata.channelId);
+		if (channel?.isTextBased()) {
 			ignoredDeletions.add(action.alertSystemMessageId);
 			await channel.messages.delete(action.alertSystemMessageId);
 		}
