@@ -22,8 +22,8 @@ const data: CustomOperation = {
 	permissions: (user) =>
 		!(user instanceof User) &&
 		(user instanceof GuildMember ?
-			!!user.roles.resolve(config.roles.staff.id)
-		:	user.roles.includes(config.roles.staff.id)) &&
+			!!user.roles.resolve(config.roles.mod.id)
+		:	user.roles.includes(config.roles.mod.id)) &&
 		undefined,
 
 	async command(interaction, { string }) {
