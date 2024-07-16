@@ -17,11 +17,11 @@ import { truncateText } from "../../util/text.js";
 const EMBED_LENGTH = 750;
 
 export function getMatches(content: string): URL[] {
-	const scratchUrlRegex =
-		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regex and like half of this code
+	const scratchUrlRegexp =
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regexp and like half of this code
 
 	const urls = new Map<string, URL>();
-	for (const match of content.match(scratchUrlRegex) ?? []) {
+	for (const match of content.match(scratchUrlRegexp) ?? []) {
 		const url = parseURL(match);
 		if (url) urls.set(url.href, url);
 	}

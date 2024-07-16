@@ -12,13 +12,13 @@ import { client } from "strife.js";
 import config from "../../common/config.js";
 
 export const OPERATION_PREFIX = "~ ";
-const operationPrefixRegex = new RegExp(
+const operationPrefixRegexp = new RegExp(
 	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\s*`,
 );
 
 export function splitFirstArgument(argumentString: string): readonly [Lowercase<string>, string] {
 	const [commandName, args = ""] = argumentString
-		.replace(operationPrefixRegex, "")
+		.replace(operationPrefixRegexp, "")
 		.split(/(?<=^\S+)\s+/);
 	return [commandName.toLowerCase(), args] as const;
 }
