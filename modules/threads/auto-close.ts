@@ -173,7 +173,7 @@ export async function autoClose(
 	)
 		return;
 
-	const date = Date.now() + 43_200_000;
+	const date = Date.now() + 86_400_000;
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{
