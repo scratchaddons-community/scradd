@@ -105,6 +105,10 @@ async function getConfig() {
 		roles: {
 			mod: modRole ?? staffRole,
 			exec: execRole,
+			helper:
+				roles.find((role) => role.name.toLowerCase().startsWith("helper")) ??
+				modRole ??
+				staffRole,
 			staff: staffRole,
 			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
 			dev: roles.find((role) => role.name.toLowerCase().startsWith("dev")),
