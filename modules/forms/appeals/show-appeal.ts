@@ -238,7 +238,7 @@ export default async function appealRequest(
 					},
 					{ name: "User’s Perspective", value: fields.ban, inline: true },
 					{ name: "Appeal", value: fields.unban, inline: true },
-					...(fields.misc ? [{ name: "Misc", value: fields.misc, inline: true }] : []),
+					...(fields.misc ? [{ name: "Misc", value: fields.misc, inline: false }] : []),
 				],
 			},
 		],
