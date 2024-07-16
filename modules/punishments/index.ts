@@ -262,6 +262,7 @@ defineMenuCommand(
 					components: [
 						{
 							label: "Message Delete Range",
+							placeholder: "1d",
 							type: ComponentType.TextInput,
 							style: TextInputStyle.Short,
 							customId: "delete-range",
