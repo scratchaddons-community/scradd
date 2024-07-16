@@ -21,6 +21,10 @@ async function userInfo(
 	interaction: RepliableInteraction,
 	{ member, user }: { member?: GuildMember; user: User },
 ): Promise<void> {
+	const isHelper =
+		interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.helper.id)
+		:	interaction.member?.roles.includes(config.roles.helper.id);
 	const isMod =
 		interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.mod.id)
@@ -76,7 +80,7 @@ async function userInfo(
 		(await config.guild.bans.fetch(user.id).catch(() => void 0));
 	if (banned)
 		fields.push(
-			isMod ?
+			isHelper ?
 				{
 					name: "🔨 Ban Reason",
 					value: banned.reason ?? constants.defaultPunishment,
