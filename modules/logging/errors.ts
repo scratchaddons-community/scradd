@@ -43,14 +43,7 @@ export default async function logError(
 					)
 			}`,
 			LogSeverity.ImportantUpdate,
-			{
-				files: [
-					{
-						content: JSON.stringify(generateError(error), undefined, "  "),
-						extension: "json",
-					},
-				],
-			},
+			{ files: [{ content: stringifyError(error), extension: "json" }] },
 		);
 	} catch (loggingError) {
 		console.error(loggingError);
@@ -59,50 +52,46 @@ export default async function logError(
 	}
 }
 
-/**
- * Standardize an error.
- *
- * @param error The error to standardize.
- * @param returnObject Whether to return an object.
- * @returns The standardized error.
- */
-export function generateError(error: unknown): object {
-	if (typeof error === "object" && error) {
-		const serialized = serializeError(error);
-		delete serialized.name;
-		delete serialized.message;
-		delete serialized.stack;
-		delete serialized.errors;
-		delete serialized.cause;
-		delete serialized.error;
-		delete serialized.surpressed;
-		delete serialized.reason;
+export function stringifyError(error: unknown): string {
+	return JSON.stringify(
+		error,
+		(_, value) =>
+			typeof value === "bigint" || typeof value === "symbol" ? value.toString()
+			: value instanceof Error ? generateError(value)
+			: value,
+		"  ",
+	);
+}
+function generateError(error: unknown): object {
+	if (typeof error !== "object" || !error) return { error };
 
-		const subErrors =
-			"errors" in error && Array.isArray(error.errors) ? error.errors : undefined;
+	const serialized = serializeError(error);
+	delete serialized.name;
+	delete serialized.code;
+	delete serialized.message;
+	delete serialized.stack;
 
-		const object = {
-			name: "name" in error ? error.name : undefined,
-			message: "message" in error ? error.message : undefined,
-			// eslint-disable-next-line unicorn/error-message, @typescript-eslint/restrict-template-expressions
-			stack: sanitizePath(`${("stack" in error ? error : new Error()).stack}`)
-				.split("\n")
-				.slice(1),
-			errors: subErrors?.map((sub) => generateError(sub)),
-			cause:
-				"cause" in error ?
-					error.cause instanceof Error ?
-						generateError(error.cause)
-					:	error.cause
-				:	undefined,
-			error: "error" in error ? generateError(error.error) : undefined,
-			surpressed: "surpressed" in error ? generateError(error.surpressed) : undefined,
-			reason: "reason" in error ? generateError(error.reason) : undefined,
-			...(typeof serialized === "object" ? serialized : { serialized }),
-		};
-		return object;
-	}
-	return { error };
+	const message =
+		"message" in error ?
+			typeof error.message === "string" && error.message.includes("\n") ?
+				error.message.split("\n")
+			:	error.message
+		:	undefined;
+	// eslint-disable-next-line unicorn/error-message
+	const { stack } = "stack" in error ? error : new Error();
+
+	return {
+		name: "name" in error ? error.name : undefined,
+		code: "code" in error ? error.code : undefined,
+		message,
+		stack:
+			typeof stack === "string" ?
+				sanitizePath(stack)
+					.split("\n")
+					.slice(Array.isArray(message) ? message.length : 1)
+			:	stack,
+		...serialized,
+	};
 }
 
 export function sanitizePath(unclean: string, relative = true): string {

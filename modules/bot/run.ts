@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import constants from "../../common/constants.js";
-import { generateError } from "../logging/errors.js";
+import { stringifyError } from "../logging/errors.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
 const censoredToken = client.token
@@ -89,13 +89,7 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 		await interaction.editReply({
 			files: [
 				{ attachment: Buffer.from(code, "utf8"), name: "code.js" },
-				{
-					attachment: Buffer.from(
-						JSON.stringify(generateError(error), undefined, "  "),
-						"utf8",
-					),
-					name: "error.json",
-				},
+				{ attachment: Buffer.from(stringifyError(error), "utf8"), name: "error.json" },
 			],
 		});
 	}

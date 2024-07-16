@@ -80,12 +80,12 @@ declare global {
 		: string;
 		stringify<T>(
 			value: T,
-			replacer: (this: unknown, key: string, value: ToJSON<T>) => unknown,
+			replacer: (this: unknown, key: string, value: unknown) => unknown,
 			space?: number | string | undefined,
 		): string;
 		stringify<T>(
 			value: T,
-			replacer?: ((this: unknown, key: string, value: ToJSON<T>) => unknown) | undefined,
+			replacer?: ((this: unknown, key: string, value: unknown) => unknown) | undefined,
 			space?: number | string | undefined,
 		): string | undefined;
 

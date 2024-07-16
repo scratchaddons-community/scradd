@@ -10,7 +10,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { databaseThread } from "../../common/database.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { generateError } from "../logging/errors.js";
+import { stringifyError } from "../logging/errors.js";
 import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { chatThread } from "../autos/chat.js";
 
@@ -83,14 +83,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			ephemeral: true,
 
 			files: [
-				{
-					attachment: Buffer.from(
-						JSON.stringify(generateError(error), undefined, "  "),
-						"utf8",
-					),
-
-					name: "error.json",
-				},
+				{ attachment: Buffer.from(stringifyError(error), "utf8"), name: "error.json" },
 				{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
 			],
 		});
@@ -105,14 +98,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 			content: `${constants.emojis.statuses.no} An error occurred while editing the message.`,
 
 			files: [
-				{
-					attachment: Buffer.from(
-						JSON.stringify(generateError(error), undefined, "  "),
-						"utf8",
-					),
-
-					name: "error.json",
-				},
+				{ attachment: Buffer.from(stringifyError(error), "utf8"), name: "error.json" },
 				{ attachment: Buffer.from(text, "utf8"), name: "json.json" },
 			],
 		});
