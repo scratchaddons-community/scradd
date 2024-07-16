@@ -16,12 +16,12 @@ import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "config",
-	description: "View and (admins only) update my configuration",
+	description: "View and (executives only) update my configuration",
 	options: [
 		{
 			name: "dynamic",
 			description:
-				"View and (admins only) update channels and roles used for special behavior",
+				"View and (executives only) update channels and roles used for special behavior",
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		{
@@ -35,8 +35,8 @@ const data: CustomOperation = {
 			case "dynamic": {
 				const isStaff =
 					interaction.member instanceof GuildMember ?
-						interaction.member.roles.resolve(config.roles.staff.id)
-					:	interaction.member.roles.includes(config.roles.staff.id);
+						interaction.member.roles.resolve(config.roles.exec.id)
+					:	interaction.member.roles.includes(config.roles.exec.id);
 				await interaction.reply({
 					embeds: getDynamicConfig(),
 
@@ -131,8 +131,8 @@ function getDynamicConfig(): APIEmbed[] {
 export async function syncConfigButton(interaction: ButtonInteraction): Promise<void> {
 	if (
 		interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.staff.id)
-		:	interaction.member?.roles.includes(config.roles.staff.id)
+			interaction.member.roles.resolve(config.roles.exec.id)
+		:	interaction.member?.roles.includes(config.roles.exec.id)
 	) {
 		await syncConfig();
 		await interaction.message.edit({ embeds: getDynamicConfig() });
