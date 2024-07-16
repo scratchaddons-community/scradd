@@ -30,13 +30,23 @@ const data: CustomOperation = {
 		assert(typeof string === "string");
 
 		const matches = badWords
-			.flat(2)
-			.map((regex) => {
-				if (new RegExp(caesar(regex.source), regexpFlags).test(string))
-					return { regex: regex.source, raw: true };
-				if (new RegExp(decodeRegexp(regex), regexpFlags).test(string))
-					return { regex: regex.source, raw: false };
-			})
+			.flatMap((severityList: RegExp[][], severity: number) =>
+				severityList.flatMap((regexes: RegExp[]) =>
+					regexes.map((regex) => {
+						const start = severity === 1 || severity === 2 ? "" : /\b/.source;
+						const end = severity === 1 ? "" : /\b/.source;
+						const actual = `${start}${caesar(regex.source)}${end}`;
+						if (new RegExp(actual, regexpFlags).test(string))
+							return { regex: regex.source, raw: true, actual };
+						if (
+							new RegExp(`${start}${decodeRegexp(regex)}${end}`, regexpFlags).test(
+								string,
+							)
+						)
+							return { regex: regex.source, raw: false, actual };
+					}),
+				),
+			)
 			.filter(Boolean)
 			.sort((a, b) => +b.raw - +a.raw || a.regex.localeCompare(b.regex));
 
@@ -56,7 +66,7 @@ const data: CustomOperation = {
 					match.raw ?
 						`- [\`/${match.regex}/\`](<https://regex101.com/?${new URLSearchParams({
 							flavor: "javascript",
-							regex: match.regex,
+							regex: match.actual,
 							testString: string,
 							delimiter: "/",
 							flags: regexpFlags,
