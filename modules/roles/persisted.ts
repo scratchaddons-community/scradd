@@ -7,7 +7,7 @@ export const persistedRoles = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
 	admin: ["1069776422467555328", "806603332944134164"],
-	mod: ["881623848137682954", config.roles.staff.id, config.roles.mod.id, config.roles.exec.id],
+	mod: ["881623848137682954", config.roles.staff.id],
 	dev: config.roles.dev?.id,
 	translator: "841696608592330794",
 	contributor: "991413187427700786",
