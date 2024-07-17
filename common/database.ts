@@ -43,29 +43,30 @@ for (const message of allDatabaseMessages) {
 	}
 }
 
-const contructed: string[] = [];
+const contructed = new Set<string>();
 
 export default class Database<Data extends Record<string, boolean | number | string | null>> {
 	message: Message<true> | undefined;
 	#data: readonly Data[] = [];
 
 	constructor(public name: string) {
-		if (contructed.includes(name)) {
+		this.name = name.replaceAll(" ", "_");
+		if (contructed.has(this.name)) {
 			throw new RangeError(
-				`Cannot create a second database for ${name}, they may have conflicting data`,
+				`Cannot create a second database for ${this.name}, they may have conflicting data`,
 			);
 		}
-		contructed.push(name);
+		contructed.add(this.name);
 	}
 
 	async init(): Promise<void> {
 		if (this.message) return;
-		this.message = databases[this.name] ||= await databaseThread.send(
-			`__**SCRADD ${this.name.toUpperCase()} DATABASE**__\n\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
-				"_",
-				" ",
-			)} information may be reset.*`,
-		);
+
+		const content =
+			`__**${client.user.displayName.replaceAll(" ", "-").toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n\n` +
+			`*Please don’t delete this message. If you do, all ${this.name.replaceAll("_", " ")} information may be reset.*`;
+		if (databases[this.name]) await databases[this.name]?.edit(content);
+		this.message = databases[this.name] ||= await databaseThread.send(content);
 
 		const attachment = this.message.attachments.first();
 		if (!attachment) {
