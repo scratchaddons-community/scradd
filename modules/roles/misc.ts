@@ -6,8 +6,12 @@ export const CUSTOM_ROLE_PREFIX = "✨ ";
 
 const validContentTypes = ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp"];
 /**
- * Valid strings: string matching twemojiRegexp, Snowflake of existing server emoji, data: URI, string starting with
- * https://
+ * Valid strings:
+ *
+ * - String matching `twemojiRegexp`.
+ * - Snowflake of existing server emoji.
+ * - `data:` URI.
+ * - String starting with `https://`
  */
 export async function resolveIcon(
 	icon: string,

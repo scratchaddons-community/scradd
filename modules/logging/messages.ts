@@ -11,7 +11,13 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import { databaseThread } from "../../common/database.js";
-import { extractMessageExtremities, getBaseChannel, messageToText } from "../../util/discord.js";
+import {
+	extractMessageExtremities,
+	getBaseChannel,
+	isFileExpired,
+	messageToText,
+	unsignFiles,
+} from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { LogSeverity, LoggingEmojis, shouldLog } from "./misc.js";
 
@@ -31,12 +37,18 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 
 	const content = !shush && messageToText(message, false);
 	const { embeds, files } =
-		shush ? { embeds: [], files: [] } : extractMessageExtremities(message);
+		shush ?
+			{ embeds: [], files: [] }
+		:	await extractMessageExtremities(message, undefined, false);
+
+	const unknownAttachments = message.attachments.filter(isFileExpired);
 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
 			message.author ? ` by ${message.author.toString()}` : ""
-		} in ${message.channel.toString()} (ID: ${message.id}) deleted`,
+		} in ${message.channel.toString()} (ID: ${message.id}) deleted${
+			unknownAttachments.size ? `\n ${unknownAttachments.size} unknown attachment` : ""
+		}${unknownAttachments.size > 1 ? "s" : ""}`,
 		LogSeverity.ContentEdit,
 		{
 			embeds,
@@ -79,7 +91,7 @@ export async function messageDeleteBulk(
 						message.attachments.size ? `${message.attachments.size} attachment` : ""
 					}${message.attachments.size > 1 ? "s" : ""}`;
 					const extremities =
-						message.embeds.length || message.attachments.size ?
+						embeds || attachments ?
 							` (${embeds}${embeds && attachments && ", "}${attachments})`
 						:	"";
 
@@ -180,26 +192,35 @@ export async function messageUpdate(
 
 	if (!newMessage.author.bot) {
 		const files = [];
-		const contentDiff =
+		const diff =
 			!oldMessage.partial &&
-			unifiedDiff(oldMessage.content.split("\n"), newMessage.content.split("\n"), {
-				lineterm: "",
-			})
+			unifiedDiff(
+				unsignFiles(oldMessage.content).split("\n"),
+				unsignFiles(newMessage.content).split("\n"),
+				{ lineterm: "" },
+			)
 				.join("\n")
 				.replace(/^-{3} \n\+{3} \n/, "");
-		if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
+		if (diff) files.push({ content: diff, extension: "diff" });
 
+		const removedAttachments = oldMessage.attachments.filter(
+			(file) => !newMessage.attachments.has(file.id),
+		);
 		files.push(
-			...oldMessage.attachments
-				.filter((attachment) => !newMessage.attachments.has(attachment.id))
+			...removedAttachments
+				.filter((file) => !isFileExpired(file))
 				.map((attachment) => attachment.url),
 		);
 
 		if (files.length) {
 			await log(
-				`${LoggingEmojis.MessageEdit} [${
-					oldMessage.partial ? "Unknown message" : "Message"
-				}](<${newMessage.url}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited`,
+				`${LoggingEmojis.MessageEdit} [${oldMessage.partial ? "Unknown message" : "Message"}](<${
+					newMessage.url
+				}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited${
+					removedAttachments.size ?
+						`\n ${removedAttachments.size} attachment${removedAttachments.size > 1 ? "s" : ""} were removed`
+					:	""
+				}`,
 				LogSeverity.ContentEdit,
 				{ files },
 			);

@@ -9,16 +9,9 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import { extractMessageExtremities, messageToEmbed } from "../../util/discord.js";
-import tryCensor, { censor } from "../automod/misc.js";
+import { censor } from "../automod/misc.js";
 import { BOARD_EMOJI, type boardDatabase } from "./misc.js";
 
-/**
- * Generate an embed and button to represent a board message with.
- *
- * @param info - Info to generate a message from.
- * @param extraButtons - Extra custom buttons to show.
- * @returns The representation of the message.
- */
 export default async function generateBoardMessage(
 	info: (typeof boardDatabase.data)[number] | Message,
 	extraButtons: { pre?: APIButtonComponent[]; post?: APIButtonComponent[] } = {},
@@ -26,14 +19,8 @@ export default async function generateBoardMessage(
 	const count =
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
-	/**
-	 * Convert a message to an embed and button representation.
-	 *
-	 * @param message - The message to convert.
-	 * @returns The converted message.
-	 */
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = extractMessageExtremities(message, tryCensor);
+		const { files, embeds } = await extractMessageExtremities(message, censor);
 		embeds.unshift(await messageToEmbed(message, censor));
 
 		return {
@@ -75,14 +62,11 @@ export default async function generateBoardMessage(
 			:	[...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
-			allowedMentions: { users: [] },
-
+			...(await extractMessageExtremities(onBoard, censor)),
+			content: onBoard.content,
 			components:
 				buttons.length ? [{ type: ComponentType.ActionRow, components: buttons }] : [],
-
-			content: onBoard.content,
-			embeds: onBoard.embeds.map((oldEmbed) => oldEmbed.data),
-			files: onBoard.attachments.map((attachment) => attachment),
+			allowedMentions: { users: [] },
 		};
 	}
 

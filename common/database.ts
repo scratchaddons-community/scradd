@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
-import { extractMessageExtremities, getAllMessages } from "../util/discord.js";
+import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
 import config from "./config.js";
 let timeouts: Record<
 	Snowflake,
@@ -37,7 +37,7 @@ for (const message of allDatabaseMessages) {
 			message.author.id === client.user.id ?
 				message
 			:	await databaseThread.send({
-					...extractMessageExtremities(message),
+					files: [...(await getFilesFromMessage(message)).values()],
 					content: message.content,
 				});
 	}
@@ -68,7 +68,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 		if (databases[this.name]) await databases[this.name]?.edit(content);
 		this.message = databases[this.name] ||= await databaseThread.send(content);
 
-		const attachment = this.message.attachments.first();
+		const attachment = (await getFilesFromMessage(this.message)).first();
 		if (!attachment) {
 			this.#queueWrite();
 			return;
@@ -160,6 +160,8 @@ export default class Database<Data extends Record<string, boolean | number | str
 					});
 				})
 				.then(async (edited) => {
+					databases[this.name] = edited;
+
 					const attachment = edited.attachments.first()?.url;
 
 					const written =
@@ -228,9 +230,13 @@ for (const [event, code] of Object.entries({
 export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
 	if (process.env.NODE_ENV !== "production") return;
 
-	const attachments = Object.values(databases)
-		.map((database) => database?.attachments.first())
-		.filter(Boolean);
+	const attachments = (
+		await Promise.all(
+			Object.values(databases).map(
+				async (database) => database && (await getFilesFromMessage(database)).first(),
+			),
+		)
+	).filter(Boolean);
 
 	await channel.send("# Daily Scradd Database Backup");
 	while (attachments.length) {

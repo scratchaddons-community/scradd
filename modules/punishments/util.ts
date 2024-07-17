@@ -11,16 +11,14 @@ import {
 	type User,
 } from "discord.js";
 import Database, { allDatabaseMessages } from "../../common/database.js";
-import { GlobalUsersPattern, paginate } from "../../util/discord.js";
+import { GlobalUsersPattern, getFilesFromMessage, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
-import { gracefulFetch } from "../../util/promises.js";
+import { asyncFilter, gracefulFetch } from "../../util/promises.js";
 import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{
-	/** The ID of the user who was warned. */
 	user: Snowflake;
-	/** The time when this strike was issued. */
 	date: number;
 	id: number | string;
 	count: number;
@@ -28,13 +26,13 @@ export const strikeDatabase = new Database<{
 }>("strikes");
 await strikeDatabase.init();
 
-const robotopUrl = allDatabaseMessages
-	.find((message) => message.attachments.first()?.name === "robotop_warns.json")
-	?.attachments.first()?.url;
-const robotopStrikes =
-	(robotopUrl &&
-		(await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(robotopUrl))) ||
-	[];
+const { value: robotopStrikes = [] } = await asyncFilter(allDatabaseMessages, async (message) => {
+	const files = await getFilesFromMessage(message);
+	const file = files.find(({ name }) => name === "robotop_warns.json");
+	const strikes =
+		file && (await gracefulFetch<{ id: number; mod: Snowflake; reason: string }[]>(file.url));
+	return strikes ?? false;
+}).next();
 
 const strikesCache: Record<string, { mod?: string; reason?: string }> = {};
 

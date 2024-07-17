@@ -32,7 +32,7 @@ export default async function editMessage(
 	}
 
 	const pre =
-		JSON.stringify(getMessageJSON(interaction.targetMessage), undefined, "  ").match(
+		JSON.stringify(await getMessageJSON(interaction.targetMessage), undefined, "  ").match(
 			/.{1,4000}/gsy,
 		) ?? [];
 	await interaction.showModal({
@@ -91,7 +91,7 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 	if (!json) return;
 	const message = await interaction.channel?.messages.fetch(id);
 	if (!message) throw new TypeError("Used command in DM!");
-	const oldJSON = getMessageJSON(message);
+	const oldJSON = await getMessageJSON(message);
 	const edited = await message.edit(json).catch(async (error: unknown) => {
 		await interaction.reply({
 			ephemeral: true,
@@ -119,9 +119,11 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 		.replace(/^-{3} \n\+{3} \n/, "");
 	const extraDiff = unifiedDiff(
 		JSON.stringify({ ...oldJSON, content: undefined }, undefined, "  ").split("\n"),
-		JSON.stringify({ ...getMessageJSON(edited), content: undefined }, undefined, "  ").split(
-			"\n",
-		),
+		JSON.stringify(
+			{ ...(await getMessageJSON(edited)), content: undefined },
+			undefined,
+			"  ",
+		).split("\n"),
 		{ lineterm: "" },
 	)
 		.join("\n")

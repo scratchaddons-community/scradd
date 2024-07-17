@@ -43,130 +43,147 @@ import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
 import { truncateText } from "./text.js";
 
-/**
- * Extract extremities (embeds, stickers, and attachments) from a message.
- *
- * @param message - The message to extract extremeties from.
- * @param tryCensor - Function to censor bad words. Omit to not censor.
- */
-export function extractMessageExtremities(
-	message: Message,
-	tryCensor?: (text: string) => false | { censored: string; strikes: number; words: string[][] },
-): { embeds: APIEmbed[]; files: Attachment[] } {
-	const embeds = [
-		...message.stickers
-			.filter((sticker) => !tryCensor?.(sticker.name))
-			.map(
-				(sticker): APIEmbed => ({
-					color: Colors.Blurple,
-					image: { url: sticker.url },
-					footer: { text: sticker.name },
-				}),
-			),
-		...message.embeds
-			.filter((embed) => !embed.video && !message.flags.has(MessageFlags.SuppressEmbeds))
-			.map(({ data }): APIEmbed => {
-				const automodInfo = (data.fields ?? []).reduce(
-					(accumulator, field) => ({ ...accumulator, [field.name]: field.value }),
-					{
-						flagged_message_id: message.id,
-						channel_id: message.channel.id,
-						keyword: "",
-						rule_name: "",
-					},
-				);
-
-				const newEmbed =
-					message.type === MessageType.AutoModerationAction ?
-						{
-							description: data.description ?? message.content,
-							color: message.member?.displayColor ?? data.color,
-							author: {
-								icon_url: (message.member ?? message.author).displayAvatarURL(),
-								name: (message.member ?? message.author).displayName,
-							},
-							url: messageLink(
-								message.guild?.id ?? "@me",
-								automodInfo.channel_id,
-								automodInfo.flagged_message_id,
-							),
-							footer: {
-								text: `${automodInfo.keyword && `Keyword: ${automodInfo.keyword}`}${
-									automodInfo.keyword &&
-									automodInfo.rule_name &&
-									constants.footerSeperator
-								}${automodInfo.rule_name && `Rule: ${automodInfo.rule_name}`}`,
-							},
-						}
-					:	{ ...data };
-
-				if (!tryCensor) return newEmbed;
-
-				if (newEmbed.description) {
-					const censored = tryCensor(newEmbed.description);
-					if (censored) newEmbed.description = censored.censored;
-				}
-
-				if (newEmbed.title) {
-					const censored = tryCensor(newEmbed.title);
-					if (censored) newEmbed.title = censored.censored;
-				}
-
-				if (newEmbed.url && tryCensor(newEmbed.url)) newEmbed.url = "";
-
-				if (newEmbed.image?.url && tryCensor(newEmbed.image.url))
-					newEmbed.image = undefined;
-
-				if (newEmbed.thumbnail?.url && tryCensor(newEmbed.thumbnail.url))
-					newEmbed.thumbnail = undefined;
-
-				if (newEmbed.footer?.text) {
-					const censored = tryCensor(newEmbed.footer.text);
-					if (censored) newEmbed.footer.text = censored.censored;
-				}
-
-				if (newEmbed.author) {
-					const censoredName = tryCensor(newEmbed.author.name);
-					if (censoredName) newEmbed.author.name = censoredName.censored;
-
-					const censoredUrl = newEmbed.author.url && tryCensor(newEmbed.author.url);
-					if (censoredUrl) newEmbed.author.url = "";
-				}
-
-				newEmbed.fields = (newEmbed.fields ?? []).map((field) => {
-					const censoredName = tryCensor(field.name);
-					const censoredValue = tryCensor(field.value);
-					return {
-						inline: field.inline,
-						name: censoredName ? censoredName.censored : field.name,
-						value: censoredValue ? censoredValue.censored : field.value,
-					};
-				});
-
-				return newEmbed;
-			}),
-	];
-
-	return { embeds: embeds.slice(0, 10), files: [...message.attachments.values()] };
+export function unsignFiles(content: string): string {
+	return content.replaceAll(
+		/https:\/\/(?:cdn|media)\.discordapp\.(?:net|com)\/attachments\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+/gis,
+		(match) => {
+			const url = new URL(match);
+			return url.origin + url.pathname;
+		},
+	);
 }
 
-/**
- * Converts a message to a JSON object describing it.
- *
- * @param message - The message to convert.
- * @returns The JSON.
- */
-export function getMessageJSON(message: Message): {
+export function isFileExpired(file: { url: string }): boolean {
+	const expirey = new URL(file.url).searchParams.get("ex");
+	return !!expirey && Number.parseInt(expirey, 16) * 1000 < Date.now();
+}
+
+export async function getFilesFromMessage(
+	message: Message,
+): Promise<Collection<string, Attachment>> {
+	const expired = message.attachments.some(isFileExpired);
+	if (!expired) return message.attachments;
+
+	const fetched = await message.fetch(true);
+	return fetched.attachments;
+}
+
+export async function extractMessageExtremities(
+	message: Message,
+	censor?: (text: string) => string,
+	forceRefetch = true,
+): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
+	const embeds = [];
+	for (const { data } of message.flags.has(MessageFlags.SuppressEmbeds) ? [] : message.embeds) {
+		if (
+			forceRefetch &&
+			((data.footer?.icon_url && isFileExpired({ url: data.footer.icon_url })) ||
+				(data.image && isFileExpired(data.image)) ||
+				(data.thumbnail && isFileExpired(data.thumbnail)) ||
+				(data.video?.url && isFileExpired({ url: data.video.url })) ||
+				(data.author?.icon_url && isFileExpired({ url: data.author.icon_url })))
+		)
+			return await extractMessageExtremities(await message.fetch(true), censor, false);
+
+		const automodInfo =
+			message.type === MessageType.AutoModerationAction &&
+			(data.fields ?? []).reduce(
+				(accumulator, field) => ({ ...accumulator, [field.name]: field.value }),
+				{
+					flagged_message_id: message.id,
+					channel_id: message.channel.id,
+					keyword: "",
+					rule_name: "",
+				},
+			);
+
+		const newEmbed =
+			automodInfo ?
+				{
+					...data,
+					description: data.description ?? message.content,
+					color: message.member?.displayColor ?? data.color,
+					author: {
+						icon_url: (message.member ?? message.author).displayAvatarURL(),
+						name: (message.member ?? message.author).displayName,
+					},
+					url: messageLink(
+						message.guild?.id ?? "@me",
+						automodInfo.channel_id,
+						automodInfo.flagged_message_id,
+					),
+					footer: {
+						text: `${automodInfo.keyword && `Keyword: ${automodInfo.keyword}`}${
+							automodInfo.keyword &&
+							automodInfo.rule_name &&
+							constants.footerSeperator
+						}${automodInfo.rule_name && `Rule: ${automodInfo.rule_name}`}`,
+					},
+					fields: [],
+				}
+			:	{ ...data };
+
+		if (!censor) {
+			embeds.push(newEmbed);
+			continue;
+		}
+
+		newEmbed.title = censor(newEmbed.title ?? "");
+		newEmbed.description = censor(newEmbed.description ?? "");
+		if (newEmbed.author) newEmbed.author.name = censor(newEmbed.author.name);
+		if (newEmbed.footer) newEmbed.footer.text = censor(newEmbed.footer.text);
+
+		if (newEmbed.url && newEmbed.url !== censor(newEmbed.url)) newEmbed.url = undefined;
+		if (newEmbed.author?.url && newEmbed.author.url !== censor(newEmbed.author.url))
+			newEmbed.author.url = undefined;
+		if (newEmbed.thumbnail && newEmbed.thumbnail.url !== censor(newEmbed.thumbnail.url))
+			newEmbed.thumbnail = undefined;
+		if (newEmbed.video?.url && newEmbed.video.url !== censor(newEmbed.video.url))
+			newEmbed.video = undefined;
+		if (newEmbed.image && newEmbed.image.url !== censor(newEmbed.image.url))
+			newEmbed.image = undefined;
+
+		newEmbed.fields = (newEmbed.fields ?? []).map((field) => ({
+			inline: field.inline,
+			name: censor(field.name),
+			value: censor(field.value),
+		}));
+
+		embeds.push(newEmbed);
+	}
+
+	const stickers = message.stickers
+		.filter((sticker) => !censor?.(sticker.name))
+		.map(
+			(sticker): APIEmbed => ({
+				color: Colors.Blurple,
+				image: { url: sticker.url },
+				footer: { text: sticker.name },
+			}),
+		);
+
+	const files = (
+		forceRefetch ?
+			await getFilesFromMessage(message)
+		:	message.attachments.filter((file) => !isFileExpired(file))).values();
+
+	return {
+		embeds: [...stickers, ...embeds].slice(0, 10),
+		files: [...files],
+	};
+}
+
+export async function getMessageJSON(message: Message): Promise<{
 	components: APIActionRowComponent<APIMessageActionRowComponent>[];
 	content: string;
 	embeds: APIEmbed[];
 	files: string[];
-} {
+}> {
 	return {
 		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
 		embeds: message.embeds.map((embed) => embed.toJSON()),
-		files: message.attachments.map((attachment) => attachment.url),
+		files: (await getFilesFromMessage(message)).map((attachment) => attachment.url),
 	} satisfies MessageEditOptions;
 }
 
