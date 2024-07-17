@@ -32,15 +32,14 @@ const databases: Record<string, Message<true> | undefined> = {};
 export const allDatabaseMessages = await getAllMessages(databaseThread);
 for (const message of allDatabaseMessages) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
-	if (name) {
+	if (name && message.attachments.size) {
 		databases[name] =
-			message.author.id === client.user.id ? message
-			: message.attachments.size ?
-				await databaseThread.send({
+			message.author.id === client.user.id ?
+				message
+			:	await databaseThread.send({
 					...extractMessageExtremities(message),
 					content: message.content,
-				})
-			:	undefined;
+				});
 	}
 }
 
@@ -48,7 +47,7 @@ const contructed: string[] = [];
 
 export default class Database<Data extends Record<string, boolean | number | string | null>> {
 	message: Message<true> | undefined;
-	#data: readonly Data[] | undefined;
+	#data: readonly Data[] = [];
 
 	constructor(public name: string) {
 		if (contructed.includes(name)) {
@@ -68,25 +67,26 @@ export default class Database<Data extends Record<string, boolean | number | str
 			)} information may be reset.*`,
 		);
 
-		const attachment = this.message.attachments.first()?.url;
+		const attachment = this.message.attachments.first();
+		if (!attachment) {
+			this.#queueWrite();
+			return;
+		}
 
-		this.#data =
-			attachment ?
-				await fetch(attachment)
-					.then(async (res) => await res.text())
-					.then(
-						(csv) =>
-							papaparse.parse<Data>(csv.trim(), {
-								dynamicTyping: true,
-								header: true,
-								delimiter: ",",
-							}).data,
-					)
-			:	[];
+		this.#data = await fetch(attachment.url)
+			.then(async (res) => await res.text())
+			.then(
+				(csv) =>
+					papaparse.parse<Data>(csv.trim(), {
+						dynamicTyping: true,
+						header: true,
+						delimiter: ",",
+					}).data,
+			);
 	}
 
 	get data(): readonly Data[] {
-		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.data`");
+		if (!this.message) throw new ReferenceError("Must call `.init()` before reading `.data`");
 		return this.#data;
 	}
 	set data(content: readonly Data[]) {
@@ -130,12 +130,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 
 			const { message } = this;
 
-			const data = this.#data?.length && papaparse.unparse([...this.#data]).trim();
-
-			const files =
-				data ?
-					[{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
-				:	[];
+			const data = papaparse.unparse([...this.#data]).trim();
+			const files = [
+				{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` },
+			];
 
 			const promise = message
 				.edit({ files })
