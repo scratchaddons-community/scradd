@@ -108,11 +108,7 @@ export default async function linkScratchRole(
 		body: JSON.stringify({
 			platform_name: "Scratch",
 			platform_username: username,
-			metadata: {
-				joined: ("joined" in scratch ? scratch.joined : scratch.history.joined).split(
-					"T",
-				)[0],
-			},
+			metadata: { joined: scratch.history.joined.split("T")[0] },
 		} satisfies RESTPutAPICurrentUserApplicationRoleConnectionJSONBody),
 		passThroughBody: true,
 		headers: {

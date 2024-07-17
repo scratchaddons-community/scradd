@@ -9,6 +9,7 @@ const domains = {
 	scratch: "https://scratch.mit.edu",
 	scratchAddons: "https://scratchaddons.com",
 	scratchApi: "https://corsproxy.io/?https://api.scratch.mit.edu",
+	/** @deprecated */
 	scratchdb: "https://scratchdb.lefty.one/v3",
 } as const;
 

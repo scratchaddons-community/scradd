@@ -9,7 +9,6 @@ import { TimestampStyles, cleanCodeBlockContent, time, type APIEmbed } from "dis
 import { parser, type Node } from "posthtml-parser";
 import constants from "../../common/constants.js";
 import { escapeMessage } from "../../util/markdown.js";
-import { nth } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { fetchUser } from "../../util/scratch.js";
 import { truncateText } from "../../util/text.js";
@@ -133,69 +132,28 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 	if (!user) return;
 
 	const embed = {
-		title: `${user.username}${
-			(
-				"status" in user ? user.status == "Scratch Team" : user.scratchteam
-			) ?
-				"*"
-			:	""
-		}`,
+		title: `${user.username}${user.scratchteam ? "*" : ""}`,
 		color: constants.scratchColor,
 
-		fields:
-			"statistics" in user && user.statistics ?
-				[
-					{
-						name: `${constants.emojis.scratch.followers} Followers`,
-						value: `${user.statistics.followers.toLocaleString()} (ranked ${nth(
-							user.statistics.ranks.followers,
-						)})`,
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.scratch.following} Following`,
-						value: user.statistics.following.toLocaleString(),
-						inline: true,
-					},
-				]
-			:	[],
+		fields: [
+			// TODO: partition instead of just half and half
+			user.profile.bio && {
+				name: "👋 About me",
+				value: truncateText(linkifyMentions(user.profile.bio), EMBED_LENGTH / 2, true),
+				inline: false,
+			},
+			user.profile.status && {
+				// eslint-disable-next-line unicorn/string-content
+				name: "🛠️ What I'm working on",
+				value: truncateText(linkifyMentions(user.profile.status), EMBED_LENGTH / 2, true),
+				inline: false,
+			},
+		].filter(Boolean),
 		thumbnail: { url: `https://uploads.scratch.mit.edu/get_image/user/${user.id}_90x90.png` },
-		author: {
-			name: `${"country" in user ? user.country : user.profile.country}${
-				"status" in user && user.status == "New Scratcher" ?
-					`${constants.footerSeperator}${user.status}`
-				:	""
-			}`,
-		},
+		author: { name: user.profile.country },
 		url: `${constants.domains.scratch}/users/${user.username}`,
-		timestamp: new Date("joined" in user ? user.joined : user.history.joined).toISOString(),
-	};
-
-	if ("profile" in user ? user.profile.status : user.work) {
-		embed.fields.unshift({
-			// eslint-disable-next-line unicorn/string-content
-			name: "🛠️ What I'm working on",
-			value: truncateText(
-				"profile" in user ?
-					linkifyMentions(user.profile.status)
-				:	htmlToMarkdown(user.work),
-				EMBED_LENGTH / 2, // TODO: partition instead of just half and half
-				true,
-			),
-			inline: false,
-		});
-	}
-	if ("profile" in user ? user.profile.bio : user.bio) {
-		embed.fields.unshift({
-			name: "👋 About me",
-			value: truncateText(
-				"profile" in user ? linkifyMentions(user.profile.bio) : htmlToMarkdown(user.bio),
-				EMBED_LENGTH / 2,
-				true,
-			),
-			inline: false,
-		});
-	}
+		timestamp: new Date(user.history.joined).toISOString(),
+	} satisfies APIEmbed;
 
 	return embed;
 }
