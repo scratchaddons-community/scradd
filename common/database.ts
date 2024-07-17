@@ -49,7 +49,6 @@ const contructed: string[] = [];
 export default class Database<Data extends Record<string, boolean | number | string | null>> {
 	message: Message<true> | undefined;
 	#data: readonly Data[] | undefined;
-	#extra: string | undefined;
 
 	constructor(public name: string) {
 		if (contructed.includes(name)) {
@@ -84,9 +83,6 @@ export default class Database<Data extends Record<string, boolean | number | str
 							}).data,
 					)
 			:	[];
-
-		// eslint-disable-next-line @typescript-eslint/prefer-destructuring
-		this.#extra = this.message.content.split("\n")[5];
 	}
 
 	get data(): readonly Data[] {
@@ -96,16 +92,6 @@ export default class Database<Data extends Record<string, boolean | number | str
 	set data(content: readonly Data[]) {
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
-		this.#queueWrite();
-	}
-
-	get extra(): string | undefined {
-		if (!this.#data) throw new ReferenceError("Must call `.init()` before reading `.extra`");
-		return this.#extra;
-	}
-	set extra(content: string | undefined) {
-		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.extra`");
-		this.#extra = content;
 		this.#queueWrite();
 	}
 
@@ -133,20 +119,15 @@ export default class Database<Data extends Record<string, boolean | number | str
 	}
 
 	#queueWrite(): void {
-		if (!this.message) {
-			throw new ReferenceError(
-				"Must call `.init()` before reading or setting `.data` or `.extra`",
-			);
-		}
+		if (!this.message)
+			throw new ReferenceError("Must call `.init()` before reading or setting `.data`");
 
 		const timeoutId = timeouts[this.message.id];
 
 		const callback = async (): Promise<Message<true>> => {
-			if (!this.message) {
-				throw new ReferenceError(
-					"Must call `.init()` before reading or setting `.data` or `.extra`",
-				);
-			}
+			if (!this.message)
+				throw new ReferenceError("Must call `.init()` before reading or setting `.data`");
+
 			const { message } = this;
 
 			const data = this.#data?.length && papaparse.unparse([...this.#data]).trim();
@@ -155,14 +136,9 @@ export default class Database<Data extends Record<string, boolean | number | str
 				data ?
 					[{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` }]
 				:	[];
-			const messageContent = message.content.split("\n");
-			messageContent[3] = "";
-			messageContent[4] = this.#extra ? "Extra misc info:" : "";
-			messageContent[5] = this.#extra || "";
 
-			const content = messageContent.join("\n").trim();
 			const promise = message
-				.edit({ content, files })
+				.edit({ files })
 				.catch(async (error: unknown) => {
 					if (
 						error &&
@@ -176,7 +152,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 						return await callback();
 					}
 
-					return await message.edit({ content, files }).catch((retryError: unknown) => {
+					return await message.edit({ files }).catch((retryError: unknown) => {
 						throw new AggregateError(
 							[error, retryError],
 							"Failed to write to database!",
