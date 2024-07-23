@@ -150,11 +150,11 @@ defineButton("appealStrike", async (interaction, id) => {
 			ephemeral: true,
 		});
 	}
-	appealedStrikes.add(id);
 	return await showTicketModal(interaction, "appeal", id);
 });
-defineModal("contactMods", async (interaction, id) => {
-	if (!TICKET_CATEGORIES.includes(id)) throw new TypeError(`Unknown ticket category: ${id}`);
+defineModal("contactMods", async (interaction, category) => {
+	if (!TICKET_CATEGORIES.includes(category))
+		throw new TypeError(`Unknown ticket category: ${category}`);
 
 	if (!interaction.inGuild()) {
 		const reply =
@@ -163,12 +163,14 @@ defineModal("contactMods", async (interaction, id) => {
 	}
 
 	await interaction.deferReply({ ephemeral: true });
-	const thread = await contactMods(interaction, id);
+	const thread = await contactMods(interaction, category);
 	await interaction.editReply(
 		`${
 			constants.emojis.statuses.yes
 		} **Ticket opened!** Send the mods messages in ${thread.toString()}.`,
 	);
+
+	if (category === "appeal") appealedStrikes.add(interaction.fields.getTextInputValue("strike"));
 });
 defineMenuCommand(
 	{ name: "Report Message", type: ApplicationCommandType.Message },
