@@ -69,7 +69,7 @@ export default async function hasPermission(
 		:	memberPermissions.has(
 				schema.defaultMemberPermissions?.equals(0n) ?
 					"Administrator"
-				:	schema.defaultMemberPermissions ?? 0n,
+				:	(schema.defaultMemberPermissions ?? 0n),
 			);
 }
 
