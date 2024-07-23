@@ -81,7 +81,7 @@ export default async function filterToStrike(
 		reason:
 			url ?
 				await fetch(url).then(async (response) => await response.text())
-			:	/```.*\n([^]+)\n```$/.exec(message.content)?.[1] ?? message.content,
+			:	/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content,
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
