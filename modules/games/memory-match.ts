@@ -174,13 +174,11 @@ async function playGame(
 	}
 
 	await interaction.deferUpdate();
-
 	let turn = 0;
-	let turnInfo = await setupNextTurn();
 	let totalTurns = 0;
+	const scores: [string[], string[]] = [[], ["22"]];
 	const shown = new Set<string>();
 
-	const scores: [string[], string[]] = [[], ["22"]];
 	const chunks = await setupGame(easyMode ? 4 : 2, interaction.guild ?? undefined);
 	const message = await interaction.message.edit(getBoard());
 	const thread =
@@ -195,6 +193,7 @@ async function playGame(
 				autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
 			})
 		:	undefined;
+	let turnInfo = await setupNextTurn();
 
 	const collector = message
 		.createMessageComponentCollector({
