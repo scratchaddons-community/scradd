@@ -46,17 +46,17 @@ export async function getStrikeById(
 	interaction: RepliableInteraction,
 	filter: string,
 ): Promise<Message> {
-	if (!(interaction.member instanceof GuildMember))
-		throw new TypeError("interaction.member is not a GuildMember");
-
 	await interaction.deferReply({ ephemeral: true });
 
 	const strike = await filterToStrike(filter);
 	if (!strike)
 		return await interaction.editReply(`${constants.emojis.statuses.no} Invalid strike ID!`);
 
-	const isModerator = interaction.member.roles.resolve(config.roles.mod.id);
-	if (strike.user !== interaction.member.id && !isModerator) {
+	const isModerator =
+		interaction.member instanceof GuildMember ?
+			interaction.member.roles.resolve(config.roles.mod.id)
+		:	interaction.member?.roles.includes(config.roles.mod.id);
+	if (strike.user !== interaction.user.id && !isModerator) {
 		return await interaction.editReply(
 			`${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		);
@@ -68,7 +68,7 @@ export async function getStrikeById(
 	const moderator =
 		isModerator &&
 		strike.mod &&
-		(strike.mod === "AutoMod" ? strike.mod : await mentionUser(strike.mod, interaction.member));
+		(strike.mod === "AutoMod" ? strike.mod : await mentionUser(strike.mod, interaction.user));
 	const nick = (member ?? user)?.displayName;
 	return await interaction.editReply({
 		components:
@@ -131,7 +131,7 @@ export async function getStrikeById(
 						[
 							{
 								name: "👤 Target user",
-								value: await mentionUser(user, interaction.member),
+								value: await mentionUser(user, interaction.user),
 								inline: true,
 							},
 						]
