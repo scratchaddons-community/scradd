@@ -1,4 +1,5 @@
 import {
+	ActivityType,
 	ApplicationCommandOptionType,
 	AutoModerationRuleTriggerType,
 	GuildMember,
@@ -133,13 +134,16 @@ defineEvent.pre("userUpdate", async (_, user) => {
 defineEvent("presenceUpdate", async (_, newPresence) => {
 	if (newPresence.guild?.id !== config.guild.id) return;
 
-	const [presence] = newPresence.activities;
-	if (!presence) return;
+	const activity =
+		newPresence.activities.find((activity) => activity.type === ActivityType.Custom) ??
+		newPresence.activities[0];
+	if (!activity) return;
 
 	const status =
-		(presence.emoji?.toString() ?? "") +
+		(activity.emoji?.toString() ?? "") +
 		" " +
-		(presence.state ?? newPresence.activities.find((activity) => activity.name)?.name ?? "");
+		(activity.type === ActivityType.Custom ? activity.state : activity.name);
+	// TODO: Check `.details` for hang statuses
 	const censored = tryCensor(status, 1);
 	if (censored && newPresence.member?.roles.resolve(config.roles.staff.id)) {
 		await warn(
