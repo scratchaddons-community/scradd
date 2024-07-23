@@ -829,6 +829,14 @@ export const BotInvitesPattern = new RegExp(
 	"i",
 );
 
+/**
+ * A combination of {@link FormattingPatterns.UserWithOptionalNickname}, {@link FormattingPatterns.Channel},
+ * {@link FormattingPatterns.Role}, {@link FormattingPatterns.SlashCommand}, {@link FormattingPatterns.Emoji}, and
+ * {@link FormattingPatterns.Timestamp}.
+ */
+export const GlobalMentionsPattern =
+	/<:(?:\/[- _\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,98}:|a?:\w{2,32}:|@[!&]?|#)\d{17,20}>|<t:-?\d{1,13}(?::[DFRTdft])?>/gu;
+
 /** A global regular expression variant of {@link BotInvitesPattern}. */
 export const GlobalBotInvitesPattern = new RegExp(BotInvitesPattern, `g${BotInvitesPattern.flags}`);
 

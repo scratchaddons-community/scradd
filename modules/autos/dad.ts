@@ -9,8 +9,12 @@ import {
 	greetings,
 } from "./autos-data.js";
 
-export default function dad(name: string, _: GuildMember): string | readonly (number | string)[] {
-	const split = name.split(/\b/);
+export default function dad(
+	name: string,
+	_: GuildMember,
+): string | readonly (number | string)[] {
+	const split = name
+		.split(/[\b\s]+/);
 	const firstName =
 		split.find(
 			(word) =>
@@ -21,13 +25,15 @@ export default function dad(name: string, _: GuildMember): string | readonly (nu
 		) ||
 		split[0] ||
 		name;
-
-	const greeting = greetings[Math.floor(Math.random() * greetings.length)] ?? greetings[0];
-	const customName = customNames[firstName] || firstName;
+	const customName = customNames[firstName] || name;
 	const comment = customComments[firstName] || "I’m Scradd!";
 
-	return (
+	const greetingIndex = Math.floor(Math.random() * greetings.length);
+	const greeting = greetings[greetingIndex] ?? greetings[0];
+
+	const response =
 		customResponses[firstName] ||
-		`${greeting} ${customName}${customTriggers.includes(firstName) ? "!" : ","} ${comment}`
-	);
+		`${greeting} ${customName}${customTriggers.includes(firstName) ? "!" : ","} ${comment}`;
+
+	return response;
 }
