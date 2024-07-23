@@ -185,7 +185,7 @@ export const rules = {
 		},
 		parse: (capture) => ({ animated: capture[1] === "a", name: capture[2], id: capture[3] }),
 		html(node) {
-			const name = `:${(typeof node.name === "string" && node.name) || "__"}:`;
+			const name = `:${(typeof node.name === "string" && node.name) || "emoji"}:`;
 			return markdown.htmlTag("img", "", {
 				src: client.rest.cdn.emoji(typeof node.id === "string" ? node.id : "0", {
 					size: 128,

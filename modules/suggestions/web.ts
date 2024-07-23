@@ -211,7 +211,7 @@ function prepareEmoji(emoji?: Partial<DefaultReactionEmoji> | false | null | und
 } {
 	if (emoji && emoji.id) {
 		return {
-			name: `:${emoji.name ?? "__"}:`,
+			name: `:${emoji.name ?? "emoji"}:`,
 			url: client.rest.cdn.emoji(emoji.id, { size: 32 }),
 		};
 	}

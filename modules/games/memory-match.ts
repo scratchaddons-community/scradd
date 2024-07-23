@@ -408,7 +408,7 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<strin
 	const guildEmojis = (await guild.emojis.fetch())
 		.filter((emoji) => emoji.available)
 		.map((emoji) =>
-			formatEmoji({ animated: emoji.animated ?? false, id: emoji.id, name: "__" }),
+			formatEmoji({ animated: emoji.animated ?? false, id: emoji.id, name: "emoji" }),
 		);
 	const allEmojis = [...new Set([...constantEmojis, ...guildEmojis])].sort(
 		() => Math.random() - 0.5,

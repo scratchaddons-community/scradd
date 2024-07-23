@@ -222,7 +222,7 @@ module.exports =
 			],
 			"unicorn/relative-url-style": ["error", "always"],
 			"unicorn/string-content": [
-				"warn",
+				"error",
 				{
 					patterns: {
 						[/\.{3}/gu.source]: "…",
@@ -234,7 +234,7 @@ module.exports =
 							suggest: "${",
 						},
 						[/!\?/gu.source]: "⁉",
-						[/:_:/gu.source]: ":__:",
+						[/:_+:/gu.source]: ":emoji:",
 					},
 				},
 			],
