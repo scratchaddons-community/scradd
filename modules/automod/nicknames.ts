@@ -100,8 +100,7 @@ async function setNickname(
 }
 
 function findName(member: GuildMember): string {
-	const nick = censor(member.displayName);
-	if (isPingable(nick)) return nick;
+	if (!tryCensor(member.displayName) && isPingable(member.displayName)) return member.displayName;
 
 	const user = censor(member.user.displayName);
 	if (isPingable(user)) return user;
@@ -109,5 +108,5 @@ function findName(member: GuildMember): string {
 	const tag = censor(member.user.tag);
 	if (isPingable(tag)) return tag;
 
-	return nick;
+	return censor(member.displayName);
 }
