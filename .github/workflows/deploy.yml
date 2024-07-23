@@ -42,7 +42,7 @@ jobs:
                   }}/raw/strings.ts" --output common/strings.ts
 
             - name: Checkout images
-              run: git clone https://gist.github.com/${{ secrets.IMAGES_GIST }}.git scripts/images
+              run: git clone https://gist.github.com/${{ secrets.IMAGES_GIST }}.git .private/images
 
             - name: Install
               run: npm ci --force

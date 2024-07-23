@@ -15,7 +15,7 @@ module.exports =
 				),
 		),
 		extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
-		ignorePatterns: "dist",
+		ignorePatterns: "./dist",
 		overrides: [
 			{
 				files: "*.cjs",
@@ -40,14 +40,14 @@ module.exports =
 					],
 				},
 			},
-			{ files: "common/typedefs/**", rules: { "unicorn/filename-case": "off" } },
+			{ files: "./common/typedefs/**", rules: { "unicorn/filename-case": "off" } },
 			{
 				files: [
-					"modules/_private/**",
-					"modules/auto/secrets.ts",
-					"common/constants.ts",
-					"common/features.ts",
-					".eslintrc.cjs",
+					"./.private/**",
+					"./modules/auto/secrets.ts",
+					"./common/constants.ts",
+					"./common/features.ts",
+					"./.eslintrc.cjs",
 				],
 				rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 			},

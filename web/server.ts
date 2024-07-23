@@ -20,7 +20,7 @@ const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceA
 const CLIENT_JS_FILE = await fileSystem.readFile("./dist/web/client.js", "utf8");
 const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
 const DIRECTORIES = {
-	images: path.resolve("./scripts/images"),
+	images: path.resolve("./.private/images"),
 	sora: path.dirname(fileURLToPath(import.meta.resolve("@fontsource-variable/sora"))),
 };
 const server = http.createServer(async (request, response) => {

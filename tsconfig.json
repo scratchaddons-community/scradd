@@ -29,7 +29,7 @@
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["./node_modules", "./.git", "./dist"],
+	"exclude": ["./.git", "./dist", "./node_modules"],
 	"typeAcquisition": { "enable": true },
-	"include": ["./**/*", "./.*"]
+	"include": ["**/.*", "**/.*/**/.*", "**/.*/**/*", "**/*"]
 }
