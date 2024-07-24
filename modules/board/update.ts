@@ -115,8 +115,7 @@ export async function syncRandomBoard(): Promise<void> {
 		const channel = await client.channels.fetch(info.channel).catch(() => void 0);
 		if (!channel?.isTextBased()) continue;
 
-		if (reactionsNeeded === undefined && info.reactions < boardReactionCount(channel))
-			continue;
+		if (reactionsNeeded === undefined && info.reactions < boardReactionCount(channel)) continue;
 
 		const message = await channel.messages.fetch(info.source).catch(() => void 0);
 		const reaction = message?.reactions.resolve(BOARD_EMOJI);
