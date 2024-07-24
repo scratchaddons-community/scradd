@@ -36,7 +36,7 @@ defineEvent("guildMemberAdd", async (member) => {
 								name: "**What is this server?**",
 								value:
 									`In addition to being **[Scratch Addons](${constants.domains.scratchAddons})’s support server**, we are also *the largest Scratch server*!` +
-									` Check out some of our funniest and most memorable moments${config.channels.board ? ` on the ${config.channels.board.toString()}` : ""} and introduce yourself${config.channels.intros ? ` in ${config.channels.intros.toString()}` : ""}.` +
+									` Check out some of our most memorable moments${config.channels.board ? ` on the ${config.channels.board.toString()}` : ""} and introduce yourself${config.channels.intros ? ` in ${config.channels.intros.toString()}` : ""}.` +
 									(directoryUrl &&
 										` You can also check out our [server directory](<${directoryUrl}>) for other large Scratch servers to chat in, including non-English servers.`),
 							},

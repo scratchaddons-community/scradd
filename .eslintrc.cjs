@@ -15,7 +15,7 @@ module.exports =
 				),
 		),
 		extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
-		ignorePatterns: "./dist",
+		ignorePatterns: ["!.*", "./.git", "./dist", "./node_modules"],
 		overrides: [
 			{
 				files: "*.cjs",
