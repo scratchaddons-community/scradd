@@ -29,6 +29,7 @@ import giveXp from "../../xp/give-xp.js";
 import appeals, { appealThread } from "./appeals.js";
 import { getAppealComponents } from "./generate-appeal.js";
 import { banDates } from "../index.js";
+import features from "../../../common/features.js";
 
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {
@@ -203,7 +204,7 @@ export default async function appealRequest(
 		);
 
 	const message = await appealThread.send({
-		content: config.roles.mod.toString(),
+		content: features.formsPingForAppeals ? config.roles.mod.toString() : undefined,
 		embeds: [
 			{
 				title: "Ban Appeal",

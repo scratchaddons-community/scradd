@@ -8,6 +8,7 @@ export default {
 	autosTypeInChat: auto,
 	executeCaesar: auto,
 	executeCoinFlip: auto,
+	formsPingForAppeals: auto,
 	joinsAutoKick: auto,
 	joinsDmRevision: auto,
 	ticketsPingForReports: auto,
