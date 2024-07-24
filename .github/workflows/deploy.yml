@@ -21,20 +21,20 @@ jobs:
                   node-version: 20.6.0
                   cache: npm
 
-            - name: Download autos data
-              run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/autos-data.ts" --output modules/auto/autos-data.ts
-
             - name: Download bad words
               run:
                   curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/bad-words.ts" --output modules/automod/bad-words.ts
+                  }}/raw/automod_bad-words.ts" --output modules/automod/bad-words.ts
+
+            - name: Download autos data
+              run:
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
+                  }}/raw/autos_autos-data.ts" --output modules/autos/autos-data.ts
 
             - name: Download dad
               run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST }}/raw/dad.ts"
-                  --output modules/auto/dad.ts
+                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
+                  }}/raw/autos_dad.ts" --output modules/autos/dad.ts
 
             - name: Download strings
               run:

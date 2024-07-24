@@ -142,18 +142,20 @@ export async function messageReactionRemoveAll(
 			LoggingEmojis.Expression
 		} Reactions purged on [message](<${message.url}>) by ${message.author.toString()} in ${message.channel.toString()}`,
 		LogSeverity.ContentEdit,
-		{
-			embeds: [
-				{
-					fields: reactions.map((reaction) => ({
-						name: reaction.emoji.toString(),
-						value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
-						inline: true,
-					})),
-					color: Colors.Blurple,
-				},
-			],
-		},
+		reactions.size ?
+			{
+				embeds: [
+					{
+						fields: reactions.map((reaction) => ({
+							name: reaction.emoji.toString(),
+							value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
+							inline: true,
+						})),
+						color: Colors.Blurple,
+					},
+				],
+			}
+		:	{},
 	);
 }
 export async function messageUpdate(

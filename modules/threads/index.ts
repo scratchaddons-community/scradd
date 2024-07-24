@@ -6,6 +6,7 @@ import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
 import { mentionUser } from "../settings.js";
 import config from "../../common/config.js";
+import features from "../../common/features.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;
@@ -28,7 +29,7 @@ defineSubcommands(
 		description: "Manage threads",
 		restricted: true,
 		access:
-			process.env.NODE_ENV === "production" ?
+			features.threadsTestingServer && process.env.NODE_ENV === "production" ?
 				["@defaults", config.guilds.testing.id]
 			:	undefined,
 		subcommands: {
