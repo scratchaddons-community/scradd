@@ -25,7 +25,14 @@ const DIRECTORIES = {
 };
 const server = http.createServer(async (request, response) => {
 	try {
-		const requestUrl = getRequestUrl(request);
+		const requestUrl = await new Promise<URL>((resolve) => {
+			resolve(getRequestUrl(request));
+		}).catch(() => void 0);
+		if (!requestUrl)
+			return response
+				.writeHead(422, { "content-type": "text/plain" })
+				.end("422 Unprocessable Content");
+
 		const pathname = (
 			requestUrl.pathname.endsWith("/") ?
 				requestUrl.pathname.slice(0, -1)
