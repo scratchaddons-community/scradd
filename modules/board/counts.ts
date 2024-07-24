@@ -2,8 +2,6 @@ import { BaseChannel, ChannelType, type Snowflake, type TextBasedChannel } from 
 import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 
-/** Number of days for required potato count to double. */
-const DECAY_SPEED = 750;
 const COUNTS = {
 	admins: 2,
 	testing: 3,
@@ -61,8 +59,7 @@ export default function boardReactionCount(
 			channel instanceof BaseChannel && channel.type === ChannelType.PrivateThread ?
 				2 / 3
 			:	1;
-		const timeShift = (Date.now() - +time) / 86_400_000 / DECAY_SPEED + 1;
-		return Math.max(2, Math.round(count * privateThread * timeShift));
+		return Math.max(2, Math.round(count * privateThread));
 	}
 }
 function baseReactionCount(id: Snowflake): number | undefined {
