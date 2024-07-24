@@ -45,7 +45,6 @@ const server = http.createServer(async (request, response) => {
 						.end("403 Forbidden");
 
 				await prepareExit();
-				process.emitWarning("prepare-exit called");
 				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
 
 				return;

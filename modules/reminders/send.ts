@@ -134,8 +134,8 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 					continue;
 				}
 				case SpecialReminders.RebootBot: {
-					await prepareExit();
 					process.emitWarning(`${client.user.tag} is killing the bot`);
+					await prepareExit();
 					process.exit(1);
 					// Fake “fall-through” since ESLint doesn’t realize this is unreacahble
 				}

@@ -198,6 +198,7 @@ export async function cleanListeners(): Promise<void> {
 export async function prepareExit(): Promise<void> {
 	await cleanListeners();
 	client.user.setStatus("dnd");
+	process.emitWarning("prepare-exit called");
 	await client.destroy();
 }
 
