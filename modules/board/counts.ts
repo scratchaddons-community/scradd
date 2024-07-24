@@ -17,14 +17,10 @@ const COUNTS = {
  * @param channel - The channel to determine reaction count for.
  * @returns The reaction count.
  */
-export default function boardReactionCount(channel?: TextBasedChannel, time?: number): number;
-export default function boardReactionCount(
-	channel: { id: Snowflake },
-	time?: number,
-): number | undefined;
+export default function boardReactionCount(channel?: TextBasedChannel): number;
+export default function boardReactionCount(channel: { id: Snowflake }): number | undefined;
 export default function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
-	time = Date.now(),
 ): number | undefined {
 	if (process.env.NODE_ENV !== "production") return shift(COUNTS.admins);
 	if (!channel) return shift(COUNTS.default);

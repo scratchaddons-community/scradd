@@ -23,7 +23,7 @@ export default async function updateBoard({
 }): Promise<void> {
 	if (processing.has(message.id)) return;
 	processing.add(message.id);
-	const reactionThreshold = boardReactionCount(message.channel, message.createdTimestamp);
+	const reactionThreshold = boardReactionCount(message.channel);
 	const minReactions = Math.floor(boardReactionCount(message.channel) * 0.9);
 
 	const boardMessageId = boardDatabase.data.find(({ source }) => source === message.id)?.onBoard;
@@ -109,15 +109,13 @@ export async function syncRandomBoard(): Promise<void> {
 	for (const info of boardDatabase.data.toSorted(() => Math.random() - 0.5)) {
 		if (info.onBoard) continue;
 
-		const date = Number(BigInt(info.source) >> 22n) + 1_420_070_400_000;
-
-		const reactionsNeeded = boardReactionCount({ id: info.channel }, date);
+		const reactionsNeeded = boardReactionCount({ id: info.channel });
 		if (reactionsNeeded !== undefined && info.reactions < reactionsNeeded) continue;
 
 		const channel = await client.channels.fetch(info.channel).catch(() => void 0);
 		if (!channel?.isTextBased()) continue;
 
-		if (reactionsNeeded === undefined && info.reactions < boardReactionCount(channel, date))
+		if (reactionsNeeded === undefined && info.reactions < boardReactionCount(channel))
 			continue;
 
 		const message = await channel.messages.fetch(info.source).catch(() => void 0);
