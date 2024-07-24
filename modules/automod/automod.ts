@@ -169,17 +169,20 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				{ shorteners: [], ads: [] },
 			);
 
-			await warn(
-				message.author,
-				`Used ${
-					shorteners.length === 1 ? "a link shortener" : "link shorteners"
-				} in ${message.channel.toString()} while at level ${level}`,
-				shorteners.length * PARTIAL_STRIKE_COUNT,
-				shorteners.join(" "),
-			);
-			needsDelete = true;
-			deletionMessages.push("For moderation purposes, please do not use link shorteners.");
-
+			if (shorteners.length) {
+				await warn(
+					message.author,
+					`Used ${
+						shorteners.length === 1 ? "a link shortener" : "link shorteners"
+					} in ${message.channel.toString()} while at level ${level}`,
+					shorteners.length * PARTIAL_STRIKE_COUNT,
+					shorteners.join(" "),
+				);
+				needsDelete = true;
+				deletionMessages.push(
+					"For moderation purposes, please do not use link shorteners.",
+				);
+			}
 			if (ads.length) {
 				await warn(
 					message.author,
