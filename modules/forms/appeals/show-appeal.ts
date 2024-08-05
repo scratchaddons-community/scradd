@@ -23,7 +23,7 @@ import pkg from "../../../package.json" assert { type: "json" };
 import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
 import { strikeDatabase } from "../../punishments/util.js";
-import { SpecialReminders, remindersDatabase } from "../../reminders/misc.js";
+import { SpecialReminder, remindersDatabase } from "../../reminders/misc.js";
 import { RoleList, persistedRoles } from "../../roles/persisted.js";
 import giveXp from "../../xp/give-xp.js";
 import appeals, { appealThread } from "./appeals.js";
@@ -178,7 +178,7 @@ export default async function appealRequest(
 	const unbanTime = remindersDatabase.data.find(
 		(reminder) =>
 			reminder.user === client.user.id &&
-			reminder.id === SpecialReminders.Unban &&
+			reminder.id === SpecialReminder.Unban &&
 			reminder.reminder === user.id,
 	)?.date;
 

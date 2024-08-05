@@ -16,7 +16,7 @@ import pkg from "../../package.json" assert { type: "json" };
 import { disableComponents } from "../../util/discord.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { parseTime } from "../../util/numbers.js";
-import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
+import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";
 
 export default async function ban(
@@ -45,10 +45,10 @@ export default async function ban(
 				date: number;
 				reminder: Snowflake;
 				user: Snowflake;
-				id: SpecialReminders.Unban;
+				id: SpecialReminder.Unban;
 			} =>
 				reminder.user === client.user.id &&
-				reminder.id === SpecialReminders.Unban &&
+				reminder.id === SpecialReminder.Unban &&
 				reminder.reminder === userToBan.id &&
 				reminder.date !== "NaN",
 		);
@@ -58,7 +58,7 @@ export default async function ban(
 					(reminder) =>
 						!(
 							reminder.user === client.user.id &&
-							reminder.id === SpecialReminders.Unban &&
+							reminder.id === SpecialReminder.Unban &&
 							reminder.reminder === userToBan.id
 						),
 				),
@@ -66,7 +66,7 @@ export default async function ban(
 					channel: "0",
 					date: +unbanTime,
 					user: client.user.id,
-					id: SpecialReminders.Unban,
+					id: SpecialReminder.Unban,
 					reminder: userToBan.id,
 				},
 			];
@@ -85,7 +85,7 @@ export default async function ban(
 				(reminder) =>
 					!(
 						reminder.user === client.user.id &&
-						reminder.id === SpecialReminders.Unban &&
+						reminder.id === SpecialReminder.Unban &&
 						reminder.reminder === userToBan.id
 					),
 			);
@@ -194,7 +194,7 @@ async function confirmBan(
 				channel: "0",
 				date: +options.unbanTime,
 				user: client.user.id,
-				id: SpecialReminders.Unban,
+				id: SpecialReminder.Unban,
 				reminder: options.user.id,
 			},
 		];

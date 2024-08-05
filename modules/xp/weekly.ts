@@ -8,7 +8,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
+import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
 import { recheckMemberRole } from "../roles/custom.js";
 import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.js";
@@ -95,7 +95,7 @@ export default async function getWeekly(date: Date): Promise<string> {
 				channel: config.channels.announcements.id,
 				date: Number(date),
 				reminder: undefined,
-				id: SpecialReminders.Weekly,
+				id: SpecialReminder.Weekly,
 				user: client.user.id,
 			},
 		];

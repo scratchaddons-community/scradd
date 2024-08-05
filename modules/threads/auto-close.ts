@@ -14,7 +14,7 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { parseTime } from "../../util/numbers.js";
-import { SpecialReminders, remindersDatabase } from "../reminders/misc.js";
+import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 
@@ -81,7 +81,7 @@ export async function setUpAutoClose(
 			date: +date,
 			reminder: undefined,
 			user: client.user.id,
-			id: SpecialReminders[options.subcommand === "close-in" ? "CloseThread" : "LockThread"],
+			id: SpecialReminder[options.subcommand === "close-in" ? "CloseThread" : "LockThread"],
 		},
 	];
 
@@ -142,7 +142,7 @@ export async function cancelThreadChange(
 			(reminder) =>
 				!(
 					reminder.id ===
-						SpecialReminders[type === "close" ? "CloseThread" : "LockThread"] &&
+						SpecialReminder[type === "close" ? "CloseThread" : "LockThread"] &&
 					reminder.user === client.user.id &&
 					reminder.channel === interaction.channel?.id
 				),
@@ -181,7 +181,7 @@ export async function autoClose(
 			date: date,
 			reminder: undefined,
 			user: client.user.id,
-			id: SpecialReminders.CloseThread,
+			id: SpecialReminder.CloseThread,
 		},
 	];
 
