@@ -8,7 +8,7 @@ specific to Scratch Addons, including addon search, suggestion utilities, fun ga
 
 ## Contributors
 
-Most of Scradd is programmed by @cobaltt7. Please run `/credits` for more information -- thanks
+Most of Scradd is programmed by [@cobaltt7](https://github.com/cobaltt7). Please run `/credits` for more information -- thanks
 to everyone listed on there!
 
 Pull requests are welcome if you would like to help contribute. Please read through the
