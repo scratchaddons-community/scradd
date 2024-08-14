@@ -4,11 +4,11 @@
 
 Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](https://discord.gg/FPv957V6SD). It has
 many features, such as punishments, auto moderation, “potatoboard”, XP, and much more. It also has many features
-specific to Scratch Addons, including addon search, suggestion utilities, fun games, tons of inside jokes, and more.
+specific to Scratch Addons, including addon search, suggestion utilities, fun games, tons of inside jokes, and others.
 
 ## Contributors
 
-Most of Scradd is programmed by @RedGuy12 (`cobaltt7` on Discord). Please run `/credits` for more information -- thanks
+Most of Scradd is programmed by @cobaltt7. Please run `/credits` for more information -- thanks
 to everyone listed on there!
 
 Pull requests are welcome if you would like to help contribute. Please read through the
