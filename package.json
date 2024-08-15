@@ -26,7 +26,7 @@
 		"@khanacademy/simple-markdown": "0.12.0",
 		"@sa-community/addons-data": "1.38.2",
 		"@twemoji/parser": "<=15.0.3",
-		"didyoumean2": "6.0.1",
+		"didyoumean2": "7.0.2",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "dev",
 		"match-sorter": "6.3.4",
