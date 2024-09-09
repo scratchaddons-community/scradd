@@ -207,7 +207,7 @@ export async function channelUpdate(
 		if (oldChannel.bitrate !== newChannel.bitrate)
 			await log(
 				`${LoggingEmojis.Channel} ${newChannel.toString()}’s bitrate set to ${
-					newChannel.bitrate
+					newChannel.bitrate / 1000
 				}kbps`,
 				LogSeverity.ServerChange,
 			);
