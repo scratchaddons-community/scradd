@@ -53,7 +53,7 @@
 		"typescript": "5.4.5"
 	},
 	"optionalDependencies": {
-		"@napi-rs/canvas": "0.1.54",
+		"@napi-rs/canvas": "0.1.56",
 		"@railway/cli": "3.11.4",
 		"chart.js": "4.4.4"
 	},
