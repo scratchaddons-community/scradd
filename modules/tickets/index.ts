@@ -126,7 +126,7 @@ defineButton("confirmStrikeAppeal", async (interaction, id) => {
 	return await interaction.reply({
 		ephemeral: true,
 		content:
-			"## Strike Appeal\nThis form is for letting us know if we made a mistake so we can remove the strike. If you just made a mistake, don’t worry, strikes expire after 21 days, and just a couple strikes don’t ban you.\nIf you belive this strike was given in error and needs to be removed, please click below.",
+			"## Strike Appeal\nThis form is for letting us know if we made a mistake so we can remove the strike. If you just made a mistake, don’t worry, strikes expire after 21 days, and just a couple strikes don’t ban you.\nIf you believe this strike was given in error and needs to be removed, please click below.",
 
 		components: [
 			{
