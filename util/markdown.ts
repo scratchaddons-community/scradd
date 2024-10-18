@@ -29,7 +29,6 @@ export function stripMarkdown(text: string): string {
 	);
 }
 
-
 export function formatAnyEmoji(
 	options:
 		| string
