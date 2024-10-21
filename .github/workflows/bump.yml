@@ -17,6 +17,7 @@ jobs:
     bump:
         name: Bump
         runs-on: ubuntu-20.04
+        concurrency: bump-group
 
         steps:
             - name: Checkout
