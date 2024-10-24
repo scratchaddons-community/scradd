@@ -81,7 +81,10 @@ export async function setUpAutoClose(
 			date: +date,
 			reminder: undefined,
 			user: client.user.id,
-			id: SpecialReminder[options.subcommand === "close-in" ? "CloseThread" : "LockThread"],
+			id:
+				options.subcommand === "close-in" ?
+					SpecialReminder.CloseThread
+				:	SpecialReminder.LockThread,
 		},
 	];
 
@@ -138,11 +141,11 @@ export async function cancelThreadChange(
 			`${constants.emojis.statuses.yes} This thread will not be prevented from closing!`,
 		);
 	} else {
+		const action = type === "close" ? SpecialReminder.CloseThread : SpecialReminder.LockThread;
 		remindersDatabase.data = remindersDatabase.data.filter(
 			(reminder) =>
 				!(
-					reminder.id ===
-						SpecialReminder[type === "close" ? "CloseThread" : "LockThread"] &&
+					reminder.id === action &&
 					reminder.user === client.user.id &&
 					reminder.channel === interaction.channel?.id
 				),

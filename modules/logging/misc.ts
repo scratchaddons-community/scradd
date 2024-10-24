@@ -205,7 +205,7 @@ export async function getLoggingThread(group: LogSeverity): Promise<TextChannel 
 	);
 }
 
-export enum LoggingEmojis {
+export const enum LoggingEmojis {
 	SettingChange = "📋",
 	Channel = "🗄️",
 	Punishment = "🔨",

@@ -3,7 +3,7 @@ import { client } from "strife.js";
 import config, { getInitialThreads } from "../../common/config.js";
 import Database from "../../common/database.js";
 
-export enum SpecialReminder {
+export const enum SpecialReminder {
 	Weekly,
 	UpdateSACategory,
 	/** @deprecated */
