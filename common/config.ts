@@ -2,6 +2,7 @@ import assert from "node:assert";
 import {
 	ChannelType,
 	Collection,
+	type Role,
 	type AnyThreadChannel,
 	type ForumChannel,
 	type Guild,
@@ -45,16 +46,53 @@ async function getConfig() {
 	const roles = ((await guild?.roles.fetch()) ?? new Collection()).filter(
 		(role) => !role.managed && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
 	);
-	const modRole = roles.find((role) => role.name.toLowerCase().startsWith("mod"));
-	const staffRole = assertOutsideTests(
-		roles.find((role) => role.name.toLowerCase().startsWith("staff")) ?? modRole,
-	);
-	const execRole = roles.find((role) => role.name.toLowerCase().includes("exec")) ?? staffRole;
+	const modRole = getRole("mod", "start");
+	const staffRole = assertOutsideTests(getRole("staff") ?? modRole);
+	const execRole = getRole("exec") ?? staffRole;
 
-	const tickets = getChannel("contact", ChannelType.GuildText, "start");
+	const tickets = getChannel("contact", ChannelType.GuildText);
 	return {
+		channels: {
+			info: getChannel("Info", ChannelType.GuildCategory, "start"),
+			announcements:
+				guild?.systemChannel ??
+				getChannel(
+					"server",
+					[ChannelType.GuildText, ChannelType.GuildAnnouncement],
+					"start",
+				),
+			board: getChannel(
+				"board",
+				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
+				"end",
+			),
+			servers: getChannel("servers", ChannelType.GuildText, "end"),
+			tickets,
+			server: tickets && getInitialThreads(tickets, "Server ").first(),
+			welcome: getChannel("welcome", ChannelType.GuildText),
+			intros: getChannel("intro", ChannelType.GuildText),
+
+			mod: modChannel,
+			modlogs: assertOutsideTests(modlogsChannel ?? modChannel),
+			exec: getChannel("exec", ChannelType.GuildText),
+			admin: getChannel("admin", ChannelType.GuildText, "start") ?? modChannel,
+
+			general: getChannel("general", ChannelType.GuildText, "full"),
+
+			support: getChannel("support", ChannelType.GuildText),
+			updates: getChannel("updates", ChannelType.GuildText),
+			suggestions: getChannel("suggestions", ChannelType.GuildForum, "full"),
+			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
+			devs: getChannel("devs", ChannelType.GuildText, "start"),
+
+			qotd: getChannel("question", ChannelType.GuildForum),
+			share: getChannel("share", ChannelType.GuildForum, "full"),
+			bots: getChannel("bots", ChannelType.GuildText),
+
+			oldSuggestions: getChannel("suggestions", ChannelType.GuildText),
+		},
+
 		guild: assertOutsideTests(guild),
-		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
 		guilds: Object.fromEntries(
 			await Promise.all(
 				Object.entries(guildIds).map(async ([key, id]) => {
@@ -66,85 +104,66 @@ async function getConfig() {
 				}),
 			),
 		),
-
-		channels: {
-			info: getChannel("Info", ChannelType.GuildCategory, "start"),
-			announcements:
-				guild?.systemChannel ?? getChannel("server", ChannelType.GuildText, "start"),
-			board: getChannel(
-				"board",
-				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
-				"end",
-			),
-			servers: getChannel("servers", ChannelType.GuildText, "end"),
-			tickets,
-			server: tickets && getInitialThreads(tickets, "Server ").first(),
-			welcome: getChannel("welcome", ChannelType.GuildText),
-			intros: getChannel("intro", ChannelType.GuildText, "partial"),
-
-			mod: modChannel,
-			modlogs: assertOutsideTests(modlogsChannel ?? modChannel),
-			exec: getChannel("exec", ChannelType.GuildText, "start"),
-			admin: getChannel("admin", ChannelType.GuildText, "start") ?? modChannel,
-
-			general: getChannel("general", ChannelType.GuildText),
-
-			support: getChannel("support", ChannelType.GuildText, "partial"),
-			updates: getChannel("updates", ChannelType.GuildText, "partial"),
-			suggestions: getChannel("suggestions", ChannelType.GuildForum),
-			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-			devs: getChannel("devs", ChannelType.GuildText, "start"),
-
-			qotd: getChannel("question", ChannelType.GuildForum, "partial"),
-			share: getChannel("share", ChannelType.GuildForum),
-			bots: getChannel("bots", ChannelType.GuildText, "partial"),
-
-			oldSuggestions: getChannel("suggestions", ChannelType.GuildText, "partial"),
-		},
+		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
 
 		roles: {
 			mod: modRole ?? staffRole,
 			exec: execRole,
-			helper:
-				roles.find((role) => role.name.toLowerCase().startsWith("helper")) ??
-				modRole ??
-				staffRole,
+			helper: getRole("helper", "start") ?? modRole ?? staffRole,
 			staff: staffRole,
-			weeklyWinner: roles.find((role) => role.name.toLowerCase().includes("weekly")),
-			dev: roles.find((role) => role.name.toLowerCase().startsWith("dev")),
-			epic: roles.find((role) => role.name.toLowerCase().includes("epic")),
-			booster: roles.find((role) => role.name.toLowerCase().includes("booster")),
-			active: roles.find((role) => role.name.toLowerCase().includes("active")),
-			established: roles.find((role) => role.name.toLowerCase().includes("established")),
-			autoKick: roles.find((role) => role.name.toLowerCase().includes("autokick")),
+			weeklyWinner: getRole("weekly"),
+			dev: getRole("dev", "start"),
+			epic: getRole("epic"),
+			booster: getRole("booster"),
+			active: getRole("active"),
+			established: getRole("established"),
+			autoKick: getRole("autokick"),
 		},
 	};
 
 	function getChannel<T extends ChannelType>(
-		name: string,
+		search: string,
 		type: T | T[] = [],
-		matchType: "end" | "full" | "partial" | "start" = "full",
+		matchType: "end" | "full" | "partial" | "start" = "partial",
 	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
 		return channels.find(
-			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> =>
-				!!channel &&
-				types.has(channel.type) &&
-				{
-					end: channel.name.endsWith(name),
-					full: channel.name === name,
-					partial: channel.name.includes(name),
-					start: channel.name.startsWith(name),
-				}[matchType],
+			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> => {
+				if (!channel || !types.has(channel.type)) return false;
+				const name = channel.name.toLowerCase();
+				return {
+					end: () => name.endsWith(search),
+					full: () => name === search,
+					partial: () => name.includes(search),
+					start: () => name.startsWith(search),
+				}[matchType]();
+			},
 		);
+	}
+
+	function getRole(
+		search: string,
+		matchType: "end" | "full" | "partial" | "start" = "partial",
+	): Role | undefined {
+		return roles.find((role) => {
+			const name = role.name.toLowerCase();
+			return {
+				end: () => name.endsWith(search),
+				full: () => name === search,
+				partial: () => name.includes(search),
+				start: () => name.startsWith(search),
+			}[matchType]();
+		});
 	}
 }
 
 const config = await getConfig();
 export async function syncConfig(): Promise<void> {
 	const newConfig = await getConfig();
-	config.roles = newConfig.roles;
 	config.channels = newConfig.channels;
+	config.guilds = newConfig.guilds;
+	config.otherGuildIds = newConfig.otherGuildIds;
+	config.roles = newConfig.roles;
 }
 export default config;
 

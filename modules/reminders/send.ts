@@ -107,6 +107,7 @@ async function sendSpecialReminder(reminder: {
 			})}`;
 
 			const message = await reminder.channel.send(await getWeekly(reminder.date));
+			if (message.crosspostable) await message.crosspost();
 
 			const chatters = await getChatters();
 			if (!chatters) break;
