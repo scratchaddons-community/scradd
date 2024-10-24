@@ -15,7 +15,11 @@ let timeouts: Record<
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
 > = {};
 
-const threadName = "databases";
+const threadName = "databases",
+	databaseFileType =
+		process.env.NODE_ENV === "production" ?
+			`${client.user.displayName.toLowerCase()}-db`
+		:	"csv";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
@@ -133,7 +137,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 
 			const data = papaparse.unparse([...this.#data]).trim();
 			const files = [
-				{ attachment: Buffer.from(data, "utf8"), name: `${this.name}.scradddb` },
+				{
+					attachment: Buffer.from(data, "utf8"),
+					name: `${this.name}.${databaseFileType}`,
+				},
 			];
 
 			const promise = message
@@ -239,7 +246,7 @@ export async function backupDatabases(channel: TextBasedChannel): Promise<void> 
 		)
 	).filter(Boolean);
 
-	await channel.send("# Daily Scradd Database Backup");
+	await channel.send(`# Daily ${client.user.displayName} Database Backup`);
 	while (attachments.length) {
 		await channel.send({ files: attachments.splice(0, 10) });
 	}

@@ -100,7 +100,7 @@ defineButton("contactMods", async (interaction) => {
 								appeal: "Appeal a strike",
 								report: "Report a user",
 								role: "Request a contributor role",
-								bug: "Report a Scradd bug",
+								bug: `Report a ${client.user.displayName} bug`,
 								[SERVER_CATEGORY]: "Suggest a server change",
 								rules: "Get clarification on a rule",
 								[SA_CATEGORY]: "Get help with Scratch Addons",

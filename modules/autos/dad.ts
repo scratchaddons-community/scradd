@@ -8,6 +8,7 @@ import {
 	customTriggers,
 	greetings,
 } from "./autos-data.js";
+import { client } from "strife.js";
 
 export default function dad(name: string, _: GuildMember): string | readonly (number | string)[] {
 	const split = name.split(/[\b\s]+/);
@@ -22,7 +23,7 @@ export default function dad(name: string, _: GuildMember): string | readonly (nu
 		split[0] ||
 		name;
 	const customName = customNames[firstName] || name;
-	const comment = customComments[firstName] || "I’m Scradd!";
+	const comment = customComments[firstName] || `I’m ${client.user.displayName}!`;
 
 	const greetingIndex = Math.floor(Math.random() * greetings.length);
 	const greeting = greetings[greetingIndex] ?? greetings[0];

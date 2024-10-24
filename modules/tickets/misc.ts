@@ -8,6 +8,7 @@ import {
 	type ThreadChannel,
 } from "discord.js";
 import config, { getInitialThreads } from "../../common/config.js";
+import { client } from "strife.js";
 
 export const TICKETS_BY_MEMBER = Object.fromEntries<
 	PrivateThreadChannel | ThreadChannel | undefined
@@ -159,7 +160,7 @@ export const categoryToDescription = {
 	appeal: "Strike Appeal",
 	report: "User Report",
 	role: "Role Request",
-	bug: "Scradd Bug",
+	bug: `${client.user.displayName} Bug`,
 	rules: "Rule Clarification",
 	server: "Other Scratch Servers",
 	other: "Other",
