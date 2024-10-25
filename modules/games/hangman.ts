@@ -184,9 +184,9 @@ export default async function hangman(
 			await message.reply({
 				content: `# You ${reason === "win" ? "saved" : "killed"} ${await mentionUser(user, interaction.user)}!\n${
 					{
-						idle: "You didn’t save them in time, so they died \\:(",
-						end: "You gave up saving them, so they died \\:(\nWhat kind of person *are* you?⁉",
-						lose: "You couldn’t guess their username right, so they died \\:(",
+						idle: String.raw`You didn’t save them in time, so they died \:(`,
+						end: String.raw`You gave up saving them, so they died \:(\nWhat kind of person *are* you?⁉`,
+						lose: String.raw`You couldn’t guess their username right, so they died \:(`,
 						win: "Great job!",
 					}[reason] ?? "R.I.P."
 				}`,

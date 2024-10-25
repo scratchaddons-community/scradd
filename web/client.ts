@@ -142,8 +142,8 @@ class EmojiActor {
 		this.position.x += (this.velocity.x * timeElapsed) / 60;
 		this.position.y += (this.velocity.y * timeElapsed) / 60;
 
-		const windowHeight = window.outerHeight || document.documentElement.clientHeight;
-		const windowWidth = window.outerWidth || document.documentElement.clientWidth;
+		const windowHeight = globalThis.outerHeight || document.documentElement.clientHeight;
+		const windowWidth = globalThis.outerWidth || document.documentElement.clientWidth;
 
 		if (this.position.y - this.element.clientHeight > windowHeight + 350) return true;
 		if (this.position.y + this.element.clientHeight < -350) return true;

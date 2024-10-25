@@ -35,7 +35,7 @@ export async function resolveIcon(
 	const response = await fetch(icon, { method: "HEAD" });
 	if (!response.ok) return;
 
-	const contentLength = +(response.headers.get("Content-Length") ?? Number.POSITIVE_INFINITY);
+	const contentLength = +(response.headers.get("Content-Length") ?? Infinity);
 	if (contentLength > 256_000) return;
 
 	const contentType = response.headers.get("Content-Type");
