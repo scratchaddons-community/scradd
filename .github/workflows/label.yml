@@ -19,7 +19,6 @@ jobs:
             - name: Add labels
               run:
                   gh pr edit ${{ github.event.pull_request.number }} --add-label
-                  "${{steps.metadata.outputs.dependency-type}},
-                  ${{steps.metadata.outputs.update-type}}"
+                  "${{steps.metadata.outputs.dependency-type}},${{steps.metadata.outputs.update-type}}"
               env:
                   GITHUB_TOKEN: ${{secrets.TOKEN}}
