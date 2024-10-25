@@ -2,7 +2,7 @@ import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	MessageMentions,
 	type ApplicationCommandSubCommand,
 	type Awaitable,

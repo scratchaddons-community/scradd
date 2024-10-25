@@ -615,7 +615,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	timeout?: number;
 
 	generateComponents?(
-		this: void,
+		this: undefined,
 		items: Item[],
 	): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";

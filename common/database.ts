@@ -105,14 +105,14 @@ export default class Database<Data extends Record<string, boolean | number | str
 		newData: Data["id"] extends string ? Overwritten : never,
 		oldData?: NoInfer<
 			Partial<Data> & {
-				[P in Extract<
+				[Q in Extract<
 					{
 						[P in keyof Data]: Data[P] extends undefined ? never
 						: Overwritten[P] extends Data[P] ? never
 						: P;
 					}[keyof Data],
 					keyof Data
-				>]: Data[P];
+				>]: Data[Q];
 			}
 		>,
 	): void {
