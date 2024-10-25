@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import config from "../../common/config.js";
 import { checkXPRoles } from "../xp/give-xp.js";
 
-export const persistedRoles = {
+export const PERSISTED_ROLES = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
 	admin: ["1069776422467555328", "806603332944134164"],
@@ -19,7 +19,7 @@ export const RoleList = mongoose.model(
 	"RoleList",
 	new mongoose.Schema({
 		id: String,
-		...Object.fromEntries(Object.keys(persistedRoles).map((role) => [role, Boolean])),
+		...Object.fromEntries(Object.keys(PERSISTED_ROLES).map((role) => [role, Boolean])),
 	}),
 );
 
@@ -27,7 +27,7 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember): 
 	if (member.guild.id !== config.guild.id) return;
 
 	const roles = Object.fromEntries(
-		Object.entries(persistedRoles).map(([key, ids]) => [
+		Object.entries(PERSISTED_ROLES).map(([key, ids]) => [
 			key,
 			[ids].flat().some((id) => id && member.roles.resolve(id)),
 		]),
@@ -43,9 +43,10 @@ export async function persistedRejoin(member: GuildMember): Promise<void> {
 	if (member.user.bot) await member.roles.add("806609992597110825", "Is bot");
 
 	const memberRoles = await RoleList.findOneAndDelete({ id: member.id }).exec();
-	for (const roleName of Object.keys(persistedRoles)) {
-		const [role] = [persistedRoles[roleName]].flat();
-		if (memberRoles?.[roleName] && role) await member.roles.add(role, "Persisting roles");
+	if (!memberRoles) return;
+	for (const roleName of Object.keys(PERSISTED_ROLES)) {
+		const [role] = [PERSISTED_ROLES[roleName]].flat();
+		if (memberRoles[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
 	await checkXPRoles(member);
 }

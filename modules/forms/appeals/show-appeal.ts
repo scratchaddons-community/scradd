@@ -24,7 +24,7 @@ import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
 import { strikeDatabase } from "../../punishments/util.js";
 import { SpecialReminder, remindersDatabase } from "../../reminders/misc.js";
-import { RoleList, persistedRoles } from "../../roles/persisted.js";
+import { RoleList, PERSISTED_ROLES } from "../../roles/persisted.js";
 import giveXp from "../../xp/give-xp.js";
 import appeals, { appealThread } from "./appeals.js";
 import { getAppealComponents } from "./generate-appeal.js";
@@ -214,7 +214,7 @@ export default async function appealRequest(
 					{
 						name: "Persisted Roles",
 						value:
-							[...Object.entries(persistedRoles)]
+							Object.entries(PERSISTED_ROLES)
 								.map(([name, ids]) => persistant?.[name] && [ids].flat()[0])
 								.filter(Boolean)
 								.toSorted((one, two) =>
