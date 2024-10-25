@@ -51,7 +51,7 @@
 		"eslint-plugin-unicorn": "56.0.0",
 		"nodemon": "3.1.4",
 		"prettier": "3.3.2",
-		"typescript": "5.4.5"
+		"typescript": "5.6.3"
 	},
 	"optionalDependencies": {
 		"@napi-rs/canvas": "0.1.58",
