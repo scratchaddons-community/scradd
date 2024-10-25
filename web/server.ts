@@ -80,7 +80,7 @@ const server = http.createServer(async (request, response) => {
 		}
 
 		const segments = pathname.split("/");
-		const [,first] = segments;
+		const [, first] = segments;
 		if (first && Object.keys(DIRECTORIES).includes(first)) {
 			const filePath = path.join(DIRECTORIES[first], segments.slice(2).join("/"));
 			if (
