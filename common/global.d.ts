@@ -35,6 +35,24 @@ declare global {
 		): readonly (U extends number ? `${U}` : U)[];
 	}
 
+	interface String {
+		split<Separator extends RegExp | string, Limit extends number>(
+			separator: Separator,
+			limit?: Limit,
+		): Limit extends 0 ? []
+		: Separator extends "" ? string[]
+		: [string, ...string[]];
+		startsWith<P extends string>(searchString: P, position?: 0): this is `${P}${string}`;
+		endsWith<P extends string>(
+			searchString: P,
+			endPosition?: undefined,
+		): this is `${string}${P}`;
+		toLowerCase<T extends string>(this: T): Lowercase<T>;
+		toLocaleLowerCase<T extends string>(this: T): Lowercase<T>;
+		toUpperCase<T extends string>(this: T): Uppercase<T>;
+		toLocaleUpperCase<T extends string>(this: T): Uppercase<T>;
+	}
+
 	namespace NodeJS {
 		/**
 		 * @example

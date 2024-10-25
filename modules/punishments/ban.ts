@@ -30,7 +30,7 @@ export default async function ban(
 ): Promise<InteractionResponse | undefined> {
 	const userToBan = options.user instanceof GuildMember ? options.user.user : options.user;
 	const unbanIn = options["unban-in"]?.toLowerCase();
-	const unbanTime = unbanIn && unbanIn !== "never" && parseTime(unbanIn);
+	const unbanTime = unbanIn ? unbanIn !== "never" && parseTime(unbanIn) : false;
 
 	const isBanned =
 		options.user instanceof User &&
