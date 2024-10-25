@@ -614,10 +614,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	columns?: 1 | 2 | 3;
 	timeout?: number;
 
-	generateComponents?(
-		this: undefined,
-		items: Item[],
-	): Awaitable<MessageActionRowComponentData[] | undefined>;
+	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";
 };
 export async function paginate<Item>(
@@ -657,6 +654,7 @@ export async function paginate<Item>(
 		columns = 1,
 		timeout = constants.collectorTime,
 
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
