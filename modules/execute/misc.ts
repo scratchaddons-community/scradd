@@ -207,7 +207,7 @@ export function partitionArguments(
 	);
 	const stringEnd = words.length - schema.length + stringIndex + 1;
 
-	return stringIndex !== -1 ?
+	return stringIndex === -1 ? words : (
 			[
 				...words.slice(0, stringIndex),
 				words
@@ -220,5 +220,5 @@ export function partitionArguments(
 					),
 				...words.slice(stringEnd),
 			]
-		:	words;
+		);
 }
