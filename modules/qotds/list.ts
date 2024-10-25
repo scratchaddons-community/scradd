@@ -37,8 +37,9 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 						options: filtered.map((question) => ({
 							label: truncateText(question.question ?? "", 100),
 							description:
-								question.description && truncateText(question.description, 100),
-							value: question._id,
+								(question.description && truncateText(question.description, 100)) ??
+								undefined,
+							value: question._id ?? "",
 						})),
 					},
 				];
@@ -69,8 +70,8 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 				embeds: [
 					{
 						color: constants.themeColor,
-						title: question.question,
-						description: question.description,
+						title: question.question ?? undefined,
+						description: question.description ?? undefined,
 					},
 				],
 				components: [
@@ -78,7 +79,7 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 						type: ComponentType.ActionRow,
 						components: [
 							{
-								customId: question.id + "_removeQuestion",
+								customId: (question._id ?? "") + "_removeQuestion",
 								type: ComponentType.Button,
 								label: "Remove",
 								style: ButtonStyle.Danger,
