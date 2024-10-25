@@ -34,10 +34,7 @@ module.exports =
 				rules: {
 					"@typescript-eslint/consistent-type-definitions": "off",
 					"@typescript-eslint/naming-convention": "off",
-					"@typescript-eslint/no-unused-vars": [
-						"error",
-						{ varsIgnorePattern: /^.*$/u.source },
-					],
+					"@typescript-eslint/no-unused-vars": "off",
 				},
 			},
 			{ files: "./common/typedefs/**", rules: { "unicorn/filename-case": "off" } },
@@ -57,7 +54,7 @@ module.exports =
 			},
 		],
 		parser: "@typescript-eslint/parser",
-		parserOptions: { project: true, sourceType: "module", tsconfigRootDir: __dirname },
+		parserOptions: { projectService: true, sourceType: "module", tsconfigRootDir: __dirname },
 		plugins: ["@typescript-eslint"],
 		reportUnusedDisableDirectives: true,
 		root: true,
@@ -110,6 +107,8 @@ module.exports =
 					selector: ["typeLike", "enumMember"],
 				},
 			],
+			"@typescript-eslint/no-deprecated": "error",
+			"@typescript-eslint/no-floating-promises": ["error", { checkThenables: true }],
 			"@typescript-eslint/no-magic-numbers": [
 				"off", // TODO
 				{
@@ -129,10 +128,11 @@ module.exports =
 				"error",
 				{ builtinGlobals: true, ignoreOnInitialization: true },
 			],
+			"@typescript-eslint/no-unnecessary-condition": ["error", { checkTypePredicates: true }],
 			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unused-vars": [
 				"error",
-				{ args: "all", argsIgnorePattern: /^_+$/u.source, caughtErrors: "all" },
+				{ args: "all", argsIgnorePattern: /^_+$/u.source, reportUsedIgnorePattern: true },
 			],
 			"@typescript-eslint/no-use-before-define": "off",
 			"@typescript-eslint/parameter-properties": ["error", { prefer: "parameter-property" }],
@@ -140,7 +140,6 @@ module.exports =
 			"@typescript-eslint/prefer-nullish-coalescing": [
 				"error",
 				{
-					ignoreConditionalTests: true,
 					ignoreMixedLogicalExpressions: true,
 					ignorePrimitives: true,
 				},
