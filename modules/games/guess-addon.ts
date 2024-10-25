@@ -494,6 +494,7 @@ function getNextQuestions(
 				questions.filter((questionInfo) => !askedQuestions.includes(questionInfo.question)),
 			),
 		)
+		// eslint-disable-next-line unicorn/no-magic-array-flat-depth
 		.flat(2);
 
 	for (const question of questions) {

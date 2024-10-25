@@ -147,7 +147,7 @@ export async function removeQuestion(interaction: ButtonInteraction, id = ""): P
 				await Question.findByIdAndDelete(id).exec();
 
 				const index = questions.findIndex((question) => question._id === id);
-				if (index > -1) questions.splice(index, 1);
+				if (index !== -1) questions.splice(index, 1);
 				await message.edit({
 					content: `${constants.emojis.statuses.yes} Removed QOTD!`,
 					components: [],

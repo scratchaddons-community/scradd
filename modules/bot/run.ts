@@ -63,7 +63,7 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 		const stringifiedOutput =
 			typeof output === "bigint" || typeof output === "symbol" ?
 				// eslint-disable-next-line unicorn/string-content
-				`"${output.toString().replaceAll('"', '\\"')}"`
+				`"${output.toString().replaceAll('"', String.raw`\"`)}"`
 			: output === undefined ? "undefined"
 			: typeof output === "object" ? JSON.stringify(output, undefined, "  ")
 				// eslint-disable-next-line @typescript-eslint/no-base-to-string

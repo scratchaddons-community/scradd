@@ -13,7 +13,7 @@ import config from "../../common/config.js";
 
 export const OPERATION_PREFIX = "~ ";
 const operationPrefixRegexp = new RegExp(
-	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\s*`,
+	`^${OPERATION_PREFIX.trim().replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`)}\\s*`,
 );
 
 export function splitFirstArgument(argumentString: string): readonly [Lowercase<string>, string] {
@@ -207,7 +207,7 @@ export function partitionArguments(
 	);
 	const stringEnd = words.length - schema.length + stringIndex + 1;
 
-	return stringIndex > -1 ?
+	return stringIndex !== -1 ?
 			[
 				...words.slice(0, stringIndex),
 				words
