@@ -49,6 +49,7 @@ for (const message of allDatabaseMessages) {
 
 const contructed = new Set<string>();
 
+/** @deprecated */
 export default class Database<Data extends Record<string, boolean | number | string | null>> {
 	message: Message<true> | undefined;
 	#data: readonly Data[] = [];
@@ -100,19 +101,20 @@ export default class Database<Data extends Record<string, boolean | number | str
 		this.#queueWrite();
 	}
 
-	updateById<
-		Overwritten extends Partial<Data>,
-		DefaultKeys extends Extract<
-			{
-				[P in keyof Data]: Data[P] extends undefined ? never
-				: Overwritten[P] extends Data[P] ? never
-				: P;
-			}[keyof Data],
-			keyof Data
-		>,
-	>(
+	updateById<Overwritten extends Partial<Data>>(
 		newData: Data["id"] extends string ? Overwritten : never,
-		oldData?: NoInfer<Partial<Data> & { [P in DefaultKeys]: Data[P] }>,
+		oldData?: NoInfer<
+			Partial<Data> & {
+				[Q in Extract<
+					{
+						[P in keyof Data]: Data[P] extends undefined ? never
+						: Overwritten[P] extends Data[P] ? never
+						: P;
+					}[keyof Data],
+					keyof Data
+				>]: Data[Q];
+			}
+		>,
 	): void {
 		const data = [...this.data];
 		const index = data.findIndex((suggestion) => suggestion.id === newData.id);

@@ -12,7 +12,6 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import { anyPromise, asyncFilter } from "../../util/promises.js";
-import { generateHash } from "../../util/text.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 import boardReactionCount from "./counts.js";
 import generateBoardMessage from "./generate.js";
@@ -85,8 +84,8 @@ export default async function makeSlideshow(
 			message,
 	);
 
-	const nextId = generateHash("next");
-	const previousId = generateHash("prev");
+	const nextId = interaction.id + "next";
+	const previousId = interaction.id + "prev";
 
 	const messages: MessageEditOptions[] = [];
 	let index = 0;
@@ -154,10 +153,7 @@ export default async function makeSlideshow(
 	reply = await interaction.editReply(await getNextMessage());
 
 	const collector = reply.createMessageComponentCollector({
-		filter: (buttonInteraction) =>
-			[previousId, nextId].includes(buttonInteraction.customId) &&
-			buttonInteraction.user.id === interaction.user.id,
-
+		filter: (buttonInteraction) => [previousId, nextId].includes(buttonInteraction.customId),
 		idle: GAME_COLLECTOR_TIME,
 		time: ephemeral ? (14 * 60 + 50) * 1000 : undefined,
 	});

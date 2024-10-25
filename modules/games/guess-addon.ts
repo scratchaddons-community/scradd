@@ -10,7 +10,6 @@ import {
 import constants from "../../common/constants.js";
 import { disableComponents, mentionChatCommand } from "../../util/discord.js";
 import { escapeMessage } from "../../util/markdown.js";
-import { generateHash } from "../../util/text.js";
 import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
@@ -95,31 +94,31 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 							type: ComponentType.Button,
 							label: "Yes",
 							style: ButtonStyle.Success,
-							customId: generateHash("yes"),
+							customId: `yes.${interaction.id}`,
 						},
 						{
 							type: ComponentType.Button,
 							label: "I think so",
 							style: ButtonStyle.Success,
-							customId: generateHash("probably"),
+							customId: `probably.${interaction.id}`,
 						},
 						{
 							type: ComponentType.Button,
 							label: "I don’t know",
 							style: ButtonStyle.Primary,
-							customId: generateHash("dontKnow"),
+							customId: `dontKnow.${interaction.id}`,
 						},
 						{
 							type: ComponentType.Button,
 							label: "I don’t think so",
 							style: ButtonStyle.Danger,
-							customId: generateHash("not"),
+							customId: `not.${interaction.id}`,
 						},
 						{
 							type: ComponentType.Button,
 							label: "No",
 							style: ButtonStyle.Danger,
-							customId: generateHash("no"),
+							customId: `no.${interaction.id}`,
 						},
 					],
 				},
@@ -131,14 +130,14 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 							type: ComponentType.Button,
 							label: "Back",
 							style: ButtonStyle.Secondary,
-							customId: generateHash("back"),
+							customId: `back.${interaction.id}`,
 							disabled: typeof backInfo !== "object",
 						},
 						{
 							type: ComponentType.Button,
 							label: "End",
 							style: ButtonStyle.Secondary,
-							customId: generateHash("end"),
+							customId: `end.${interaction.id}`,
 						},
 					],
 				},
@@ -337,14 +336,14 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 							type: ComponentType.Button,
 							label: "Back",
 							style: ButtonStyle.Secondary,
-							customId: generateHash("back"),
+							customId: `back.${interaction.id}`,
 							disabled: typeof backInfo !== "object",
 						},
 						{
 							type: ComponentType.Button,
 							label: "No it’s not, continue!",
 							style: ButtonStyle.Primary,
-							customId: generateHash("continue"),
+							customId: `continue.${interaction.id}`,
 						},
 					],
 				},

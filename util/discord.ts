@@ -567,7 +567,7 @@ export async function messageToEmbed(
  */
 export async function reactAll(
 	message: Message,
-	reactions: Readonly<EmojiIdentifierResolvable[]>,
+	reactions: readonly EmojiIdentifierResolvable[],
 ): Promise<MessageReaction[]> {
 	const messageReactions = [];
 	for (const reaction of reactions) {
@@ -654,6 +654,7 @@ export async function paginate<Item>(
 		columns = 1,
 		timeout = constants.collectorTime,
 
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,

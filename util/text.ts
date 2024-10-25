@@ -2,21 +2,6 @@ import type { IncomingMessage } from "node:http";
 import constants from "../common/constants.js";
 
 /**
- * Generate a short, random string based off the date. Note that the length is not fixed.
- *
- * Intended for use on `APIBaseComponent#customId`s.
- *
- * @deprecated Use `Interaction#id` instead.
- * @param prefix - An optional prefix to the hash.
- * @returns Hash.
- */
-export function generateHash(prefix = ""): string {
-	return `${prefix}.${Math.round(
-		Math.random() * 100_000_000 + Date.now() - 1_643_000_000_000,
-	).toString(36)}`;
-}
-
-/**
  * Joins an array using (Oxford) comma rules and the word "and".
  *
  * @param array - The array to join.
@@ -25,7 +10,7 @@ export function generateHash(prefix = ""): string {
  */
 export function joinWithAnd<Item extends { toString(): string }>(
 	array: Item[],
-	stringify?: ((item: Item, index: number, array: Item[]) => string) | undefined,
+	stringify?: (item: Item, index: number, array: Item[]) => string,
 ): string;
 export function joinWithAnd<Item>(
 	array: Item[],
