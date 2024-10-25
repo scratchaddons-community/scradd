@@ -40,7 +40,7 @@ export default function github(content: string, guildId?: Snowflake): string | u
 		if (lowercasedRepo && Object.keys(presets).includes(lowercasedRepo)) {
 			const [presetOwner, presetRepo] = presets[lowercasedRepo];
 			if (!resolvedOwner || resolvedOwner === presetOwner) {
-				output.add(`https://github.com/${presetOwner}/${presetRepo}/issues/${issue}`);
+				output.add(`https://github.com/${presetOwner ?? ""}/${presetRepo}/issues/${issue}`);
 				continue;
 			}
 		}
@@ -48,7 +48,7 @@ export default function github(content: string, guildId?: Snowflake): string | u
 		const resolvedPath =
 			!repo && guildId === config.guilds.testing.id ?
 				constants.repos.scradd
-			:	`${resolvedOwner ?? scratchAddons[0]}/${repo ?? scratchAddons[1] ?? scratchAddons[0]}`;
+			:	`${resolvedOwner ?? scratchAddons[0] ?? ""}/${repo ?? scratchAddons[1] ?? scratchAddons[0] ?? ""}`;
 		output.add(`https://github.com/${resolvedPath}/issues/${issue}`);
 	}
 	return [...output].slice(0, 5).join(" ");

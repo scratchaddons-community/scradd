@@ -80,8 +80,9 @@ const server = http.createServer(async (request, response) => {
 		}
 
 		const segments = pathname.split("/");
-		if (segments[1] && Object.keys(DIRECTORIES).includes(segments[1])) {
-			const filePath = path.join(DIRECTORIES[segments[1]], segments.slice(2).join("/"));
+		const [,first] = segments;
+		if (first && Object.keys(DIRECTORIES).includes(first)) {
+			const filePath = path.join(DIRECTORIES[first], segments.slice(2).join("/"));
 			if (
 				await fileSystem.access(filePath).then(
 					() => true,
@@ -89,7 +90,7 @@ const server = http.createServer(async (request, response) => {
 				)
 			)
 				return createReadStream(filePath).pipe(response);
-		} else if (segments[1] === "suggestions") {
+		} else if (first === "suggestions") {
 			return await suggestionsPage(request, response, segments[2]);
 		}
 

@@ -56,6 +56,7 @@ export function stringifyError(error: unknown): string {
 	return JSON.stringify(
 		error,
 		(_, value) =>
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			typeof value === "bigint" || typeof value === "symbol" ? value.toString()
 			: value instanceof Error ? generateError(value)
 			: value,

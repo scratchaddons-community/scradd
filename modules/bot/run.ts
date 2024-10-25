@@ -64,10 +64,10 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 			typeof output === "bigint" || typeof output === "symbol" ?
 				// eslint-disable-next-line unicorn/string-content
 				`"${output.toString().replaceAll('"', '\\"')}"`
-			: output === undefined || typeof output === "object" ?
-				JSON.stringify(output, undefined, "  ") ?? "undefined"
+			: output === undefined ? "undefined"
+			: typeof output === "object" ? JSON.stringify(output, undefined, "  ")
 				// eslint-disable-next-line @typescript-eslint/no-base-to-string
-			:	output.toString();
+			: output.toString();
 
 		await interaction.editReply({
 			files: [

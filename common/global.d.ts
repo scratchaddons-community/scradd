@@ -1,42 +1,17 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
+import "@total-typescript/ts-reset";
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
-import type { FilterNonFalsy, NonFalsy, ToJSON, UndefinedDomain, WidenLiteral } from "./misc.js";
+import type { FilterNonFalsy } from "./misc.js";
 
 declare global {
-	interface Array<T> {
-		lastIndexOf(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
-			fromIndex?: number,
-		): number;
-		indexOf(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
-			fromIndex?: number,
-		): number;
-		filter<S extends T>(
-			predicate: (value: T, index: number, array: readonly T[]) => value is S,
-			thisArg?: undefined,
-		): S[];
-		filter<P extends (value: T, index: number, array: T[]) => unknown>(
-			predicate: P,
-			thisArg?: unknown,
-		): (P extends BooleanConstructor ? NonFalsy<T> : T)[];
-	}
 	interface ReadonlyArray<T> {
 		includes(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
+			searchElement: T | (NonNullable<unknown> & TSReset.WidenLiteral<T>),
 			fromIndex?: number,
 		): searchElement is T;
-		lastIndexOf(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
-			fromIndex?: number,
-		): number;
-		indexOf(
-			searchElement: T | (NonNullable<unknown> & WidenLiteral<T>),
-			fromIndex?: number,
-		): number;
 		map<U>(
 			callbackfn: (value: T, index: number, array: readonly T[]) => U,
 			thisArg?: unknown,
@@ -50,13 +25,6 @@ declare global {
 			thisArg?: unknown,
 		): P extends BooleanConstructor ? FilterNonFalsy<this> : T[];
 	}
-	interface ArrayConstructor {
-		isArray(arg: unknown): arg is unknown[] | readonly unknown[];
-	}
-	interface ReadonlySet<T> {
-		has(value: T | (NonNullable<unknown> & WidenLiteral<T>)): boolean;
-	}
-
 	interface ObjectConstructor {
 		entries<T, U extends PropertyKey>(
 			o: ArrayLike<T> | Record<U, T>,
@@ -65,60 +33,6 @@ declare global {
 		keys<U extends PropertyKey>(
 			entries: Record<U, unknown>,
 		): readonly (U extends number ? `${U}` : U)[];
-	}
-
-	interface Response {
-		json<T = unknown>(): Promise<T>;
-	}
-	interface JSON {
-		stringify<T>(
-			value: T,
-			replacer?: (number | string)[] | null | undefined,
-			space?: number | string | undefined,
-		): T extends UndefinedDomain ? undefined
-		: UndefinedDomain extends T ? undefined
-		: string;
-		stringify<T>(
-			value: T,
-			replacer: (this: unknown, key: string, value: unknown) => unknown,
-			space?: number | string | undefined,
-		): string;
-		stringify<T>(
-			value: T,
-			replacer?: ((this: unknown, key: string, value: unknown) => unknown) | undefined,
-			space?: number | string | undefined,
-		): string | undefined;
-
-		parse(text: string): unknown;
-		parse<T = unknown>(
-			text: string,
-			reviver: <M extends string>(this: Record<M, unknown>, key: M, value: unknown) => T,
-		): T;
-	}
-
-	interface BooleanConstructor {
-		// eslint-disable-next-line @typescript-eslint/ban-types
-		new (value?: unknown): Boolean;
-		<T>(value?: T): value is NonFalsy<T>;
-		// eslint-disable-next-line @typescript-eslint/ban-types
-		readonly prototype: Boolean;
-	}
-	interface String {
-		split<Separator extends RegExp | string, Limit extends number>(
-			separator: Separator,
-			limit?: Limit,
-		): Limit extends 0 ? []
-		: Separator extends "" ? string[]
-		: [string, ...string[]];
-		startsWith<P extends string>(searchString: P, position?: 0): this is `${P}${string}`;
-		endsWith<P extends string>(
-			searchString: P,
-			endPosition?: undefined,
-		): this is `${string}${P}`;
-		toLowerCase<T extends string>(this: T): Lowercase<T>;
-		toLocaleLowerCase<T extends string>(this: T): Lowercase<T>;
-		toUpperCase<T extends string>(this: T): Uppercase<T>;
-		toLocaleUpperCase<T extends string>(this: T): Uppercase<T>;
 	}
 
 	namespace NodeJS {

@@ -29,9 +29,10 @@ export async function setUpAutoClose(
 		});
 
 	const threadConfig = getThreadConfig(interaction.channel);
+	const type = options.subcommand === "close-in" ? "close" : "lock";
 	const timer = options.options.time.toLowerCase();
 	if (timer === "never") {
-		if (options.subcommand === "lock-in")
+		if (type === "lock")
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} That option is not supported for this command!`,
@@ -81,14 +82,10 @@ export async function setUpAutoClose(
 			date: +date,
 			reminder: undefined,
 			user: client.user.id,
-			id:
-				options.subcommand === "close-in" ?
-					SpecialReminder.CloseThread
-				:	SpecialReminder.LockThread,
+			id: type === "close" ? SpecialReminder.CloseThread : SpecialReminder.LockThread,
 		},
 	];
 
-	const [type] = options.subcommand.split("-");
 	await interaction.reply({
 		content: `${constants.emojis.statuses.yes} I’ll ${type} this thread ${time(
 			date,

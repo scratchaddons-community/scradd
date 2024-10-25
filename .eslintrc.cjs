@@ -158,7 +158,7 @@ module.exports =
 				{ allowDefaultCaseForExhaustiveSwitch: false },
 			],
 			"@typescript-eslint/typedef": "off",
-			"@typescript-eslint/use-unknown-in-catch-callback-variable": "warn", // https://github.com/typescript-eslint/typescript-eslint/issues/9057
+			"@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
 			"capitalized-comments": "off",
 			"line-comment-position": "off",
 			"max-depth": "error",

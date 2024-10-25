@@ -78,13 +78,15 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 			TimestampStyles.RelativeTime,
 		);
 
-		await channel
-			.send({
+		try {
+			await channel.send({
 				content: `🔔 ${ping}${content} (from ${date})`,
 				allowedMentions: { users: [reminder.user] },
 				flags: silent ? MessageFlags.SuppressNotifications : undefined,
-			})
-			.catch(() => void 0);
+			});
+		} catch {
+			// Ignored error
+		}
 	}
 
 	return await queueReminders();

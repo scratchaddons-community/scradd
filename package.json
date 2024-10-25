@@ -39,6 +39,7 @@
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.2",
+		"@total-typescript/ts-reset": "0.6.1",
 		"@types/difflib": "<=0.2",
 		"@types/eslint": "<=8.57",
 		"@types/mustache": "<=4.2",
@@ -67,7 +68,6 @@
 		"@discordjs/formatters": "dev",
 		"@discordjs/rest": "dev",
 		"@discordjs/util": "dev",
-		"@discordjs/ws": "dev",
-		"@sapphire/snowflake": "next"
+		"@discordjs/ws": "dev"
 	}
 }

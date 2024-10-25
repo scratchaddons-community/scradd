@@ -97,7 +97,7 @@ export default async function linkScratchRole(
 
 	const { username } = await fetch(
 		`https://auth-api.itinerary.eu.org/auth/verifyToken/${encodeURI(scratchToken)}`,
-	).then((verification) => verification.json<{ username: string | null }>());
+	).then((verification) => verification.json() as Promise<{ username: string | null }>);
 	const scratch = username && (await fetchUser(username));
 	if (!scratch)
 		return response.writeHead(401, { "content-type": "text/html" }).end(

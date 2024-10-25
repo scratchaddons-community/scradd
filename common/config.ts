@@ -14,16 +14,15 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
-import type { NonFalsy } from "./misc.js";
 import constants from "./constants.js";
 
 const guild = constants.isTesting ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
 if (guild && !guild.available) throw new ReferenceError("Main server is unavailable!");
 const threads = (await guild?.channels.fetchActiveThreads())?.threads ?? new Collection();
 
-function assertOutsideTests<T>(value: T): NonFalsy<T> {
+function assertOutsideTests<T>(value: T): TSReset.NonFalsy<T> {
 	if (!constants.isTesting) assert(value);
-	return value as NonFalsy<T>;
+	return value as TSReset.NonFalsy<T>;
 }
 
 const guildIds = {
