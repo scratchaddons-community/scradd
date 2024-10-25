@@ -2,8 +2,10 @@ import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
+	ChatInputCommandInteraction,
 	MessageMentions,
 	type ApplicationCommandSubCommand,
+	type Awaitable,
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
@@ -128,8 +130,12 @@ defineChatCommand(
 			return;
 		}
 
-		// eslint-disable-next-line @typescript-eslint/ban-types
-		await (command.command as Function)(interaction, options);
+		await (
+			command.command as (
+				interaction: ChatInputCommandInteraction,
+				options: object,
+			) => Awaitable<void>
+		)(interaction, options);
 	},
 );
 

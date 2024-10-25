@@ -50,7 +50,9 @@ module.exports =
 			},
 			{
 				files: ["*.test.ts", "*.test.js"],
-				rules: { "@typescript-eslint/no-magic-numbers": "off" },
+				rules: {
+					"@typescript-eslint/no-magic-numbers": "off",
+				},
 			},
 		],
 		parser: "@typescript-eslint/parser",
@@ -107,7 +109,7 @@ module.exports =
 					selector: ["typeLike", "enumMember"],
 				},
 			],
-			"@typescript-eslint/no-deprecated": "error",
+			"@typescript-eslint/no-deprecated": "warn",
 			"@typescript-eslint/no-floating-promises": ["error", { checkThenables: true }],
 			"@typescript-eslint/no-magic-numbers": [
 				"off", // TODO
@@ -128,7 +130,6 @@ module.exports =
 				"error",
 				{ builtinGlobals: true, ignoreOnInitialization: true },
 			],
-			"@typescript-eslint/no-unnecessary-condition": ["error", { checkTypePredicates: true }],
 			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unused-vars": [
 				"error",

@@ -567,7 +567,7 @@ export async function messageToEmbed(
  */
 export async function reactAll(
 	message: Message,
-	reactions: Readonly<EmojiIdentifierResolvable[]>,
+	reactions: readonly EmojiIdentifierResolvable[],
 ): Promise<MessageReaction[]> {
 	const messageReactions = [];
 	for (const reaction of reactions) {
@@ -614,7 +614,10 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	columns?: 1 | 2 | 3;
 	timeout?: number;
 
-	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
+	generateComponents?(
+		this: void,
+		items: Item[],
+	): Awaitable<MessageActionRowComponentData[] | undefined>;
 	customComponentLocation?: "above" | "below";
 };
 export async function paginate<Item>(

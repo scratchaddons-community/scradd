@@ -205,7 +205,7 @@ export default async function suggestionsPage(
 	return response.writeHead(200, { "content-type": "text/html" }).end(rendered);
 }
 
-function prepareEmoji(emoji?: Partial<DefaultReactionEmoji> | false | null | undefined): {
+function prepareEmoji(emoji?: Partial<DefaultReactionEmoji> | false | null): {
 	name: string;
 	url: string;
 } {

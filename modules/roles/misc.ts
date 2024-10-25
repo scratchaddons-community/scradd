@@ -18,7 +18,6 @@ export async function resolveIcon(
 ): Promise<
 	{ icon: string; unicodeEmoji: null } | { unicodeEmoji: string; icon: null } | undefined
 > {
-	// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
 	const twemoji = icon.match(twemojiRegexp.default);
 	if (twemoji?.[0] === icon) return { unicodeEmoji: icon, icon: null };
 

@@ -22,7 +22,6 @@ export function parseOptions(rawOptions: string): { reactions: string[]; options
 		.split(/\s*\n\s*/g)
 		.reduce<{ customReactions: (string | undefined)[]; options: string[] }>(
 			({ customReactions, options }, option) => {
-				// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
 				const match = option.match(twemojiRegexp.default);
 				const emoji = match && option.startsWith(match[0]) && match[0];
 				return {
