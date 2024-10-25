@@ -1,4 +1,4 @@
-export type Falsy = false | 0 | "" | null | undefined | 0n;
+export type Falsy = "" | 0 | 0n | false | null | undefined;
 
 export type FilterNonFalsy<T> =
 	T extends readonly [infer F, ...infer R] ?

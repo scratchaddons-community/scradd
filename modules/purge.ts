@@ -182,9 +182,6 @@ async function purge(
 					else start--;
 					break;
 				}
-				case undefined: {
-					break;
-				}
 			}
 
 			await buttonInteraction.deferUpdate();
