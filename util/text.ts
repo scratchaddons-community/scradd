@@ -10,7 +10,7 @@ import constants from "../common/constants.js";
  */
 export function joinWithAnd<Item extends { toString(): string }>(
 	array: Item[],
-	stringify?: ((item: Item, index: number, array: Item[]) => string),
+	stringify?: (item: Item, index: number, array: Item[]) => string,
 ): string;
 export function joinWithAnd<Item>(
 	array: Item[],
