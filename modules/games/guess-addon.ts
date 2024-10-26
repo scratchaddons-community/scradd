@@ -1,5 +1,5 @@
-import addons from "@sa-community/addons-data" assert { type: "json" };
-import scratchAddons from "@sa-community/addons-data/manifest.json" assert { type: "json" };
+import addons from "@sa-community/addons-data" with { type: "json" };
+import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
 import {
 	ButtonStyle,
 	ComponentType,

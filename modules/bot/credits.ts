@@ -7,7 +7,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" with { type: "json" };
 import { columnize } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
