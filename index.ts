@@ -11,12 +11,10 @@ import { LoggingEmojisError, LoggingEmojis } from "./modules/logging/util.js";
 dns.setDefaultResultOrder("ipv4first");
 
 if (
-	process.env.BOT_TOKEN.startsWith(
-		Buffer.from(constants.users.scradd).toString("base64") + ".",
-	) &&
+	process.env.BOT_TOKEN.startsWith(Buffer.from(constants.users.bot).toString("base64") + ".") &&
 	!process.argv.includes("--production")
 )
-	throw new Error("Refusing to run on production Scradd without `--production` flag");
+	throw new Error("Refusing to run on the production bot without `--production` flag");
 
 await mongoose.connect(process.env.MONGO_URI);
 
@@ -64,7 +62,7 @@ await login({
 	defaultCommandAccess: process.env.GUILD_ID,
 	handleError: { channel: getErrorsChannel, emoji: LoggingEmojisError },
 
-			clientOptions: {
+	clientOptions: {
 		intents:
 			GatewayIntentBits.Guilds |
 			GatewayIntentBits.GuildMembers |

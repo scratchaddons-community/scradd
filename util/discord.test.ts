@@ -166,7 +166,7 @@ await describe("paginate", async () => {
 						fields: [],
 						footer: { text: `Page 1/1 • 10 items` },
 						author: undefined,
-						color: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+						color: constants.env === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 					},
 				],
 			},
