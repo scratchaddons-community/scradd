@@ -48,19 +48,19 @@ appropriate issue number. That will cause GitHub to automatically close the issu
 Please:
 
 -   Minimize the number of `@ts-` comments you use, and if you must use one, use `@ts-expect-error`.
--   Format your code by using `npm run format` before pushing. If you don’t, it may be automatically run in the
+-   Format your code by using `node --run format` before pushing. If you don’t, it may be automatically run in the
     workflow.
--   Lint your code by using `npm run lint`. No lint errors may be present when your PR is merged. Warnings may be
-    allowed depending on the context. Some lint errors may be fixed automatically with `npm run lint -- --fix`, but it
-    is important to manually confirm it worked as intended. The workflow fails if any errors are present.
--   Rerun the unit tests by using `npm run test`. Make sure the unit tests continue to succeed. No tests may fail when
-    your PR is merged. We would also very much appreciate any new tests you add if you could. We use the Node.js native
-    test runner for tests.
+-   Lint your code by using `node --run lint`. No lint errors may be present when your PR is merged. Warnings may be
+    allowed depending on the context. Some lint errors may be fixed automatically with `node --run lint -- --fix`, but
+    it is important to manually confirm it worked as intended. The workflow fails if any errors are present.
+-   Rerun the unit tests by using `node --run test`. Make sure the unit tests continue to succeed. No tests may fail
+    when your PR is merged. We would also very much appreciate any new tests you add if you could. We use the Node.js
+    native test runner for tests.
 
-To test your code, it’s easiest to run `npm run serve & npm run dev` in my opinion. That runs both TypeScript and
-nodemon on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful
-build. Using this setup, you hardly ever need to touch the terminal, and there's only one place you need to look for
-error logs.
+To test your code, it’s easiest to run `node --run serve & node --run dev` in my opinion. That runs both TypeScript and
+Node on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful build.
+Using this setup, you hardly ever need to touch the terminal, and there's only one place you need to look for error
+logs.
 
-Before committing your code, it is necessary to run `npm run format`, then `npm run lint` and fix any lint errors,
-finally `npm run test` and fix any failing tests, then repeat all three until no more lint errors are left.
+Before committing your code, it is necessary to run `node --run format`, then `node --run lint` and fix any lint errors,
+finally `node --run test` and fix any failing tests, then repeat all three until no more lint errors are left.
