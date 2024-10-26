@@ -48,11 +48,11 @@ export async function getDefaultSettings(user: {
 		)) ?? !member;
 	return {
 		autoreactions: true,
-		boardPings: process.env.NODE_ENV === "production",
+		boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
 		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
-		levelUpPings: process.env.NODE_ENV === "production",
+		levelUpPings: constants.env === "production",
 		preDango: false,
 		scraddChat: false,
 		scratchEmbeds: true,

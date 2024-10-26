@@ -14,7 +14,8 @@ import Database, { allDatabaseMessages } from "../../common/database.js";
 import { GlobalUsersPattern, getFilesFromMessage, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { asyncFilter, gracefulFetch } from "../../util/promises.js";
-import { LogSeverity, getLoggingThread } from "../logging/misc.js";
+import { getLoggingThread } from "../logging/misc.js";
+import { LogSeverity } from "../logging/util.js";
 import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{

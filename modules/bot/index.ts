@@ -9,6 +9,7 @@ import sayCommand, { say } from "./say.js";
 import status from "./status.js";
 import config from "../../common/config.js";
 import features from "../../common/features.js";
+import constants from "../../common/constants.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -30,7 +31,7 @@ defineChatCommand(
 );
 defineModal("run", run);
 
-if (process.env.NODE_ENV === "production") {
+if (constants.env === "production") {
 	defineChatCommand(
 		{ name: "restart", description: "Restart the bot", restricted: true },
 		async (interaction) => {

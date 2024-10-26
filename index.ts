@@ -2,10 +2,11 @@ import { GatewayIntentBits } from "discord.js";
 import mongoose from "mongoose";
 import dns from "node:dns";
 import { fileURLToPath } from "node:url";
-import { client, login } from "strife.js";
+import { client, login, logError } from "strife.js";
 import constants from "./common/constants.js";
 import pkg from "./package.json" with { type: "json" };
 import features from "./common/features.js";
+import { LoggingEmojisError, LoggingEmojis } from "./modules/logging/util.js";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -61,12 +62,9 @@ if (features._canvas) {
 await login({
 	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
 	defaultCommandAccess: process.env.GUILD_ID,
-	async handleError(error, event) {
-		const { default: logError } = await import("./modules/logging/errors.js");
+	handleError: { channel: getErrorsChannel, emoji: LoggingEmojisError },
 
-		await logError(error, event);
-	},
-	clientOptions: {
+			clientOptions: {
 		intents:
 			GatewayIntentBits.Guilds |
 			GatewayIntentBits.GuildMembers |

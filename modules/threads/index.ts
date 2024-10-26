@@ -29,7 +29,7 @@ defineSubcommands(
 		description: "Manage threads",
 		restricted: true,
 		access:
-			features.threadsTestingServer && process.env.NODE_ENV === "production" ?
+			features.threadsTestingServer && config.guilds.testing ?
 				["@defaults", config.guilds.testing.id]
 			:	undefined,
 		subcommands: {

@@ -825,7 +825,7 @@ export const GlobalAnimatedEmoji = new RegExp(
 export const BotInvitesPattern = new RegExp(
 	/discord(?:app)?\.com\/(?:(?:api\/)?oauth2\/authorize\/?\?\S*client_id=(?!CLIENT_ID)\d{17,20}\S*(?:\s|$)|application-directory\/(?!CLIENT_ID)\d{17,20})/.source.replaceAll(
 		"CLIENT_ID",
-		constants.isTesting ? "0" : client.user.id,
+		constants.env === "testing" ? "0" : client.user.id,
 	),
 	"i",
 );

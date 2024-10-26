@@ -162,7 +162,7 @@ export default async function contactMods(
 	);
 
 	const ping =
-		category === MOD_CATEGORY || process.env.NODE_ENV !== "production" ?
+		category === MOD_CATEGORY || constants.env === "development" ?
 			""
 		:	config.roles.helper.toString();
 	await (["appeal", "report", "other", MOD_CATEGORY].includes(category) ?

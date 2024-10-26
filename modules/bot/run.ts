@@ -22,7 +22,7 @@ export default async function getCode(
 	const { owner } = await client.application.fetch();
 	const owners =
 		owner instanceof User ? [owner.id] : owner?.members.map((member) => member.id) ?? [];
-	if (process.env.NODE_ENV === "production" && !owners.includes(interaction.user.id))
+	if (constants.env === "production" && !owners.includes(interaction.user.id))
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} This command is reserved for ${

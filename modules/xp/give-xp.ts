@@ -90,7 +90,7 @@ export default async function giveXp(
 	amount = DEFAULT_XP,
 ): Promise<void> {
 	const user = to instanceof User ? to : to.user;
-	if (process.env.NODE_ENV === "production" && user.bot) return;
+	if (constants.env === "production" && user.bot) return;
 
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);

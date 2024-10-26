@@ -93,7 +93,7 @@ export default async function warn(
 						text: `Strike ${id}${
 							displayStrikes ?
 								`${constants.footerSeperator}Expiring in 21 ${
-									process.env.NODE_ENV === "production" ? "day" : "minute"
+									constants.env === "production" ? "day" : "minute"
 								}s`
 							:	""
 						}`,
@@ -136,7 +136,7 @@ export default async function warn(
 			member?.bannable &&
 			!member.roles.premiumSubscriberRole &&
 			!member.roles.resolve(config.roles.staff.id) &&
-			(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
+					(constants.env === "production" || member.roles.highest.name === "@everyone")
 		) ?
 			member.ban({ reason: "Too many strikes" })
 		:	log(
@@ -158,13 +158,13 @@ export default async function warn(
 	if (addedMuteLength) {
 		await (member?.moderatable ?
 			member.disableCommunicationUntil(
-				addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+				addedMuteLength * (constants.env === "production" ? 3_600_000 : 60_000) +
 					Date.now(),
 				"Too many strikes",
 			)
 		:	log(
 				`${LoggingEmojisError} Unable to mute ${user.toString()} for ${addedMuteLength} ${
-					process.env.NODE_ENV === "production" ? "hour" : "minute"
+					constants.env === "production" ? "hour" : "minute"
 				}${addedMuteLength === 1 ? "" : "s"}`,
 				LogSeverity.Alert,
 				{ pingHere: true },

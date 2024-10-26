@@ -10,6 +10,7 @@ import papaparse from "papaparse";
 import { client } from "strife.js";
 import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
 import config from "./config.js";
+import constants from "./constants.js";
 let timeouts: Record<
 	Snowflake,
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
@@ -17,9 +18,7 @@ let timeouts: Record<
 
 const threadName = "databases",
 	databaseFileType =
-		process.env.NODE_ENV === "production" ?
-			`${client.user.displayName.toLowerCase()}-db`
-		:	"csv";
+		constants.env === "production" ? `${client.user.displayName.toLowerCase()}-db` : "csv";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
@@ -238,7 +237,7 @@ for (const [event, code] of Object.entries({
 }
 
 export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
-	if (process.env.NODE_ENV !== "production") return;
+	if (constants.env === "development") return;
 
 	const attachments = (
 		await Promise.all(

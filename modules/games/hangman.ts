@@ -335,7 +335,7 @@ async function getMember(player: User): Promise<GuildMember> {
 				member.id !== player.id &&
 				/^[\w.]{5,}$/i.test(member.user.username) &&
 				!tryCensor(member.user.username) &&
-				(process.env.NODE_ENV !== "production" ||
+				(constants.env === "development" ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)

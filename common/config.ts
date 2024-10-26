@@ -16,12 +16,13 @@ import { client } from "strife.js";
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 import constants from "./constants.js";
 
-const guild = constants.isTesting ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
+const guild =
+	constants.env === "testing" ? undefined : await client.guilds.fetch(process.env.GUILD_ID);
 if (guild && !guild.available) throw new ReferenceError("Main server is unavailable!");
 const threads = (await guild?.channels.fetchActiveThreads())?.threads ?? new Collection();
 
 function assertOutsideTests<T>(value: T): TSReset.NonFalsy<T> {
-	if (!constants.isTesting) assert(value);
+	if (constants.env !== "testing") assert(value);
 	return value as TSReset.NonFalsy<T>;
 }
 

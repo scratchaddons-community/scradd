@@ -38,6 +38,6 @@ const autoreactions: [
 	)[],
 ][] = [
 	//
-	["👋", [constants.isTesting ? "0" : client.user.id, "ping"]],
+	["👋", [constants.env === "testing" ? "0" : client.user.id, "ping"]],
 ];
 export default autoreactions;
