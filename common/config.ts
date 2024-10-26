@@ -34,6 +34,17 @@ const guildIds = {
 async function getConfig() {
 	const otherGuilds = guild && (await client.guilds.fetch());
 	if (otherGuilds) otherGuilds.delete(guild.id);
+	const guilds = Object.fromEntries(
+		await Promise.all(
+			Object.entries(guildIds).map(async ([key, id]) => {
+				const basic: Partial<Guild> & { id: typeof id } = { id, valueOf: () => id };
+				return [
+					key,
+					guild ? await client.guilds.fetch(id).catch(() => basic) : basic,
+				] as const;
+			}),
+		),
+	);
 
 	const channels = (await guild?.channels.fetch()) ?? new Collection();
 	const modlogsChannel =
@@ -89,20 +100,19 @@ async function getConfig() {
 			bots: getChannel("bots", ChannelType.GuildText),
 
 			oldSuggestions: getChannel("suggestions", ChannelType.GuildText),
+
+			errors: assertOutsideTests(
+				getChannel(
+					"error",
+					ChannelType.GuildText,
+					"partial",
+					await guilds.testing?.channels?.fetch(),
+				),
+			),
 		},
 
 		guild: assertOutsideTests(guild),
-		guilds: Object.fromEntries(
-			await Promise.all(
-				Object.entries(guildIds).map(async ([key, id]) => {
-					const basic: Partial<Guild> & { id: typeof id } = { id, valueOf: () => id };
-					return [
-						key,
-						guild ? await client.guilds.fetch(id).catch(() => basic) : basic,
-					] as const;
-				}),
-			),
-		),
+		guilds,
 		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
 
 		roles: {
@@ -124,9 +134,10 @@ async function getConfig() {
 		search: string,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "partial",
+		searchChannels: Collection<string, NonThreadGuildBasedChannel | null> = channels,
 	): Extract<NonThreadGuildBasedChannel, { type: T }> | undefined {
 		const types = new Set<ChannelType>([type].flat());
-		return channels.find(
+		return searchChannels.find(
 			(channel): channel is Extract<NonThreadGuildBasedChannel, { type: T }> => {
 				if (!channel || !types.has(channel.type)) return false;
 				const name = channel.name.toLowerCase();

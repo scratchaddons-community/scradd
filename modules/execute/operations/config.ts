@@ -11,7 +11,8 @@ import {
 import config, { syncConfig } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import autoreactions, { dadEasterEggCount } from "../../autos/autos-data.js";
-import log, { LogSeverity, LoggingEmojis } from "../../logging/misc.js";
+import log from "../../logging/misc.js";
+import { LogSeverity, LoggingEmojis } from "../../logging/util.js";
 import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {

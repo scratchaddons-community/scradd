@@ -89,14 +89,33 @@ await login({
 
 if (process.env.PORT) await import("./web/server.js");
 
-if (process.env.NODE_ENV === "production") {
-	const { default: log, LogSeverity, LoggingEmojis } = await import("./modules/logging/misc.js");
-	await log(
-		`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`,
-		LogSeverity.ImportantUpdate,
+const channel = await getErrorsChannel();
+process
+	.on(
+		"uncaughtException",
+		async (error, event) =>
+			await logError({ error, event, channel, emoji: constants.emojis.statuses.no }),
+	)
+	.on(
+		"warning",
+		async (error) =>
+			await logError({
+				error,
+				event: "warning",
+				channel,
+				emoji: constants.emojis.statuses.no,
+			}),
 	);
+
+if (constants.env === "production") {
+	await channel.send(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`);
 }
 
 const { cleanListeners } = await import("./common/database.js");
 await cleanListeners();
 client.user.setStatus("online");
+
+async function getErrorsChannel() {
+	const { default: config } = await import("./common/config.js");
+	return config.channels.errors;
+}

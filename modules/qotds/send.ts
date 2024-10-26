@@ -2,7 +2,8 @@ import type { ForumChannel, MediaChannel } from "discord.js";
 import mongoose from "mongoose";
 import constants from "../../common/constants.js";
 import { reactAll } from "../../util/discord.js";
-import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
+import { LogSeverity, LoggingEmojisError } from "../logging/util.js";
+import log from "../logging/misc.js";
 export const Question = mongoose.model(
 	"question",
 	new mongoose.Schema({
@@ -19,19 +20,19 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 	const question = questions[random];
 	if (!question) {
 		await log(
-			`${LoggingErrorEmoji} Could not find a QOTD for today! Please add new ones now.`,
+			`${LoggingEmojisError} Could not find a QOTD for today! Please add new ones now.`,
 			LogSeverity.Alert,
 		);
 		return;
 	}
 	if (questions.length === 1) {
 		await log(
-			`${LoggingErrorEmoji} No QOTDs remain! Please add new ones now.`,
+			`${LoggingEmojisError} No QOTDs remain! Please add new ones now.`,
 			LogSeverity.Alert,
 		);
 	} else if (questions.length < 5) {
 		await log(
-			`${LoggingErrorEmoji} ${questions.length - 1} QOTD${
+			`${LoggingEmojisError} ${questions.length - 1} QOTD${
 				questions.length === 2 ? " remains" : "s remain"
 			}! Please add new ones before they run out.`,
 			LogSeverity.Alert,

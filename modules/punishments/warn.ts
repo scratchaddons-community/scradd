@@ -14,7 +14,8 @@ import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { convertBase } from "../../util/numbers.js";
-import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LogSeverity, LoggingEmojis, LoggingEmojisError } from "../logging/util.js";
 import giveXp from "../xp/give-xp.js";
 import {
 	DEFAULT_STRIKES,
@@ -139,7 +140,7 @@ export default async function warn(
 		) ?
 			member.ban({ reason: "Too many strikes" })
 		:	log(
-				`${LoggingErrorEmoji} Unable to ban ${user.toString()} (Too many strikes)`,
+				`${LoggingEmojisError} Unable to ban ${user.toString()} (Too many strikes)`,
 				LogSeverity.Alert,
 				{ pingHere: true },
 			));
@@ -162,7 +163,7 @@ export default async function warn(
 				"Too many strikes",
 			)
 		:	log(
-				`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
+				`${LoggingEmojisError} Unable to mute ${user.toString()} for ${addedMuteLength} ${
 					process.env.NODE_ENV === "production" ? "hour" : "minute"
 				}${addedMuteLength === 1 ? "" : "s"}`,
 				LogSeverity.Alert,

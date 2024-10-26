@@ -10,7 +10,7 @@ import config, { getInitialThreads } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import { getAllMessages } from "../../../util/discord.js";
 import { escapeMessage } from "../../../util/markdown.js";
-import { LoggingEmojis } from "../../logging/misc.js";
+import { LoggingEmojis } from "../../logging/util.js";
 import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
 
 export const appealThread =

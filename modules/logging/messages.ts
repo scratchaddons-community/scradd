@@ -19,7 +19,8 @@ import {
 	unsignFiles,
 } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { LogSeverity, LoggingEmojis, shouldLog } from "./misc.js";
+import log, { shouldLog } from "./misc.js";
+import { LogSeverity, LoggingEmojis } from "./util.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 

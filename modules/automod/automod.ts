@@ -11,7 +11,8 @@ import {
 } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LogSeverity, LoggingEmojisError } from "../logging/util.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import warn from "../punishments/warn.js";
 import { ESTABLISHED_THRESHOLD, getLevelForXp } from "../xp/misc.js";
@@ -304,7 +305,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			await (message.deletable ?
 				message.delete()
 			:	log(
-					`${LoggingErrorEmoji} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
+					`${LoggingEmojisError} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
 					LogSeverity.Alert,
 					{ pingHere: true },
 				));

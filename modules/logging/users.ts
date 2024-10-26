@@ -7,7 +7,8 @@ import {
 	type User,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import log from "./misc.js";
+import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
 
 export async function memberKick(entry: AuditLog<AuditLogEvent.MemberKick>): Promise<void> {
 	await log(

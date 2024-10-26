@@ -15,7 +15,8 @@ import {
 	type Invite,
 } from "discord.js";
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import log from "./misc.js";
+import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
 
 const createdInvites = new Set<string>();
 export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {

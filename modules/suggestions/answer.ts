@@ -9,7 +9,7 @@ import {
 import config from "../../common/config.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
 import { lerpColors } from "../../util/numbers.js";
-import type { AuditLog } from "../logging/misc.js";
+import type { AuditLog } from "../logging/util.js";
 import { parseSuggestionTags, suggestionAnswers } from "./misc.js";
 
 export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): Promise<void> {

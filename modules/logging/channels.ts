@@ -19,7 +19,8 @@ import {
 import config from "../../common/config.js";
 import { formatAnyEmoji } from "../../util/markdown.js";
 import { messageDeleteBulk } from "./messages.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import log from "./misc.js";
+import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
 
 export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(

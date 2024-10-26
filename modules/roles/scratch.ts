@@ -18,7 +18,8 @@ import constants from "../../common/constants.js";
 import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
 import { handleUser } from "../autos/scratch.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LogSeverity, LoggingEmojis } from "../logging/util.js";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
 await client.application.editRoleConnectionMetadataRecords([

@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 import constants from "../../common/constants.js";
-import { stringifyError } from "../logging/errors.js";
+import { stringifyError } from "strife.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
 const censoredToken = client.token

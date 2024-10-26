@@ -21,7 +21,8 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/util.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
 	SA_CATEGORY,
