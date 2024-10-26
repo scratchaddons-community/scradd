@@ -49,7 +49,7 @@ Pull requests are welcome if you would like to help contribute. Please read thro
 
 ### Set up the repository locally
 
-1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) if you haven’t already.
+1. Download [git](https://git-scm.com) and [Node.js](https://nodejs.org) (v22.10+) if you haven’t already.
 2. Clone the repository using the `git clone` command.
 3. Install dependencies with `npm install`.
 4. Set up the .env file as described in
@@ -69,10 +69,10 @@ to this bot but could be useful in other apps as well.
 
 Scradd has a couple of dev commands to streamline your coding.
 
--   `npm run build`: One-time build with TypeScript
--   `npm run start`: Run the bot
--   `npm run dev`: Rebuild with TypeScript on each code change
--   `npm run serve`: Run the bot and restart with nodemon on each successful build
--   `npm run format`: Format code with Prettier
--   `npm run lint`: Lint code with ESLint
--   `npm run test`: Run unit tests with the Node.js native test runner
+-   `node --run build`: One-time build with TypeScript
+-   `node --run start`: Run the bot
+-   `node --run dev`: Rebuild with TypeScript on each code change
+-   `node --run serve`: Run the bot and restart on each successful build
+-   `node --run format`: Format code with Prettier
+-   `node --run lint`: Lint code with ESLint
+-   `node --run test`: Run unit tests with the Node.js native test runner

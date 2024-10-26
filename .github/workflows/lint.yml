@@ -16,20 +16,21 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.2.2
               with:
+                  token: ${{ secrets.TOKEN }}
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 20.6.0
+                  node-version: 22.10.0
                   cache: npm
 
             - name: Install
               run: npm ci
 
             - name: Format
-              run: npm run format
+              run: node --run format
 
             - name: Assert clean
               if: startsWith(github.ref_name, 'dependabot/') == true
@@ -74,14 +75,14 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 20.6.0
+                  node-version: 22.10.0
                   cache: npm
 
             - name: Install
               run: npm ci
 
             - name: Build & Test
-              run: npm run test
+              run: node --run test
 
     lint:
         name: Lint
@@ -97,11 +98,11 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 20.6.0
+                  node-version: 22.10.0
                   cache: npm
 
             - name: Install
               run: npm ci
 
             - name: Lint
-              run: npm run lint
+              run: node --run lint

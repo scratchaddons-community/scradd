@@ -12,7 +12,7 @@ import {
 import { client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" with { type: "json" };
 import { disableComponents } from "../../util/discord.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { parseTime } from "../../util/numbers.js";
