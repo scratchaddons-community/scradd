@@ -10,13 +10,13 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getAllMembers,  } from "../../util/discord.js";
+import { getAllMembers } from "../../util/discord.js";
 import { nth } from "../../util/numbers.js";
 import { getSettings, mentionUser } from "../settings.js";
 import { getLevelForXp, getXpForLevel } from "./misc.js";
 import { getFullWeeklyData, xpDatabase } from "./util.js";
 import features from "../../common/features.js";
-import { zeroWidthSpace,paginate } from "strife.js";
+import { zeroWidthSpace, paginate } from "strife.js";
 
 export default async function getUserRank(
 	interaction: RepliableInteraction,

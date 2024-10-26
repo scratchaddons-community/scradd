@@ -26,7 +26,7 @@ import {
 	categoryToDescription,
 	type Category,
 } from "./misc.js";
-import {disableComponents, zeroWidthSpace } from "strife.js";
+import { disableComponents, zeroWidthSpace } from "strife.js";
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,

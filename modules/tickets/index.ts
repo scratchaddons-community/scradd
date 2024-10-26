@@ -16,7 +16,8 @@ import {
 	defineEvent,
 	defineMenuCommand,
 	defineModal,
-	defineSelect,disableComponents
+	defineSelect,
+	disableComponents,
 } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";

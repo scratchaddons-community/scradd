@@ -10,7 +10,13 @@ import {
 	type Snowflake,
 	type UserMention,
 } from "discord.js";
-import { disableComponents ,client, defineButton, defineChatCommand, type BasicOption } from "strife.js";
+import {
+	disableComponents,
+	client,
+	defineButton,
+	defineChatCommand,
+	type BasicOption,
+} from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";

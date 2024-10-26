@@ -14,7 +14,7 @@ import { ignoredDeletions } from "../logging/messages.js";
 import { Question, questions } from "./send.js";
 
 export async function listQuestions(interaction: ChatInputCommandInteraction): Promise<void> {
-	const message = await interaction.deferReply({ ephemeral: true, fetchReply:true });
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	await paginate(
 		questions,

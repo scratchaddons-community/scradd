@@ -9,7 +9,7 @@ import {
 	type ButtonInteraction,
 	type InteractionResponse,
 } from "discord.js";
-import { escapeAllMarkdown,client, footerSeperator } from "strife.js";
+import { escapeAllMarkdown, client, footerSeperator } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";

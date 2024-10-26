@@ -10,7 +10,16 @@ import {
 	type Snowflake,
 } from "discord.js";
 import { setTimeout as wait } from "node:timers/promises";
-import { client, defineButton, defineEvent, defineMenuCommand, zeroWidthSpace,stripMarkdown, getBaseChannel, reactAll } from "strife.js";
+import {
+	client,
+	defineButton,
+	defineEvent,
+	defineMenuCommand,
+	zeroWidthSpace,
+	stripMarkdown,
+	getBaseChannel,
+	reactAll,
+} from "strife.js";
 import config from "../../common/config.js";
 import { GlobalMentionsPattern } from "../../util/discord.js";
 import { normalize } from "../../util/text.js";
