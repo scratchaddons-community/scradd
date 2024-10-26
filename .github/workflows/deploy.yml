@@ -49,8 +49,8 @@ jobs:
 
             - name: Deploy
               run:
-                  npx railway up --ci --service afdb8def-13c6-4650-af4e-ef60d2009b56
-                  --environment production
+                  npx railway up --ci --service afdb8def-13c6-4650-af4e-ef60d2009b56 --environment
+                  production
               env:
                   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
