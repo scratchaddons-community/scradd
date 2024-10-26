@@ -10,7 +10,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"isolatedModules": true,
-		"lib": ["ES2023", "ESNext.Disposable"],
+		"lib": ["ES2023"],
 		"module": "NodeNext",
 		"moduleDetection": "force",
 		"noEmitOnError": true,
@@ -24,7 +24,7 @@
 		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
-		"target": "ES2022",
+		"target": "ES2023",
 		"paths": {
 			"*": ["./common/typedefs/*.d.ts", "./node_modules/@types/*", "./node_modules/*"]
 		},
