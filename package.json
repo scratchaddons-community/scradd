@@ -6,13 +6,13 @@
 	"type": "module",
 	"main": "./dist/index.js",
 	"scripts": {
-		"build": "rm -rf dist && tsc --project tsconfig.json",
+		"build": "rm -rf ./dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache",
 		"lint": "eslint .",
-		"serve": "nodemon --env-file=.env --enable-source-maps . --ext js,json,html,css,png",
-		"start": "node --enable-source-maps .",
-		"test": "npm run build && node --enable-source-maps --test"
+		"serve": "node . --enable-source-maps --env-file=.env --watch --watch-path=./dist --watch-preserve-output",
+		"start": "node . --enable-source-maps",
+		"test": "node --run build && node --enable-source-maps --test"
 	},
 	"browserslist": [
 		"chrome 80",
@@ -43,13 +43,12 @@
 		"@types/difflib": "<=0.2",
 		"@types/eslint": "<=8.57",
 		"@types/mustache": "<=4.2",
-		"@types/node": "<=20.10",
+		"@types/node": "<=22.10",
 		"@types/papaparse": "<=5.4",
 		"@typescript-eslint/eslint-plugin": "8.11.0",
 		"@typescript-eslint/parser": "8.11.0",
 		"eslint": "8.57.0",
 		"eslint-plugin-unicorn": "56.0.0",
-		"nodemon": "3.1.4",
 		"prettier": "3.3.2",
 		"typescript": "5.4.5"
 	},
@@ -59,8 +58,8 @@
 		"chart.js": "4.4.4"
 	},
 	"engines": {
-		"node": "^20.10.0",
-		"npm": ">=8.0.0"
+		"node": "^22.10.0",
+		"npm": ">=9.0.0"
 	},
 	"overrides": {
 		"@discordjs/builders": "dev",

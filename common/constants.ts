@@ -1,4 +1,4 @@
-import addons from "@sa-community/addons-data" assert { type: "json" };
+import addons from "@sa-community/addons-data" with { type: "json" };
 
 const domains = {
 	npm: "https://npmjs.com/package",

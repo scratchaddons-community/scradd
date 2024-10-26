@@ -4,7 +4,7 @@ import dns from "node:dns";
 import { fileURLToPath } from "node:url";
 import { client, login } from "strife.js";
 import constants from "./common/constants.js";
-import pkg from "./package.json" assert { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 import features from "./common/features.js";
 
 dns.setDefaultResultOrder("ipv4first");

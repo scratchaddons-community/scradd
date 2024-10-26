@@ -19,7 +19,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
 import config from "../../../common/config.js";
 import constants from "../../../common/constants.js";
-import pkg from "../../../package.json" assert { type: "json" };
+import pkg from "../../../package.json" with { type: "json" };
 import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
 import { strikeDatabase } from "../../punishments/util.js";

@@ -10,7 +10,7 @@ import appealRequest from "../modules/forms/appeals/show-appeal.js";
 import logError from "../modules/logging/errors.js";
 import linkScratchRole from "../modules/roles/scratch.js";
 import suggestionsPage from "../modules/suggestions/web.js";
-import pkg from "../package.json" assert { type: "json" };
+import pkg from "../package.json" with { type: "json" };
 import { getRequestUrl } from "../util/text.js";
 
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(

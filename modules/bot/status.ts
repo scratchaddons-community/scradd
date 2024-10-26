@@ -1,7 +1,7 @@
 import { TimestampStyles, time, type ChatInputCommandInteraction } from "discord.js";
 import { client } from "strife.js";
 import constants from "../../common/constants.js";
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" with { type: "json" };
 
 export default async function status(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.deferReply({ fetchReply: true });
