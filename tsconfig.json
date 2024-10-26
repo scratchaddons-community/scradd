@@ -17,6 +17,7 @@
 		"noErrorTruncation": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"outDir": "./dist",

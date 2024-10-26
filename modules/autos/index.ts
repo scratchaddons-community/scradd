@@ -138,7 +138,7 @@ defineEvent("messageUpdate", async (_, message) => {
 	const response = await handleMutatable(message);
 	const data =
 		Array.isArray(response) ?
-			response.find((item): item is BaseMessageOptions => typeof item === "object")
+			response.find((item) => typeof item === "object")
 		:	typeof response === "object" && response;
 	if (found)
 		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });

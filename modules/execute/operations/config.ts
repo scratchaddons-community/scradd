@@ -6,7 +6,6 @@ import {
 	GuildMember,
 	type APIEmbed,
 	type ButtonInteraction,
-	type Snowflake,
 } from "discord.js";
 import config, { syncConfig } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
@@ -96,21 +95,14 @@ function getDynamicConfig(): APIEmbed[] {
 			title: "Channels",
 			color: constants.themeColor,
 
-			fields: Object.entries(config.channels)
-				.filter(
-					(
-						channel,
-					): channel is [(typeof channel)[0], Exclude<(typeof channel)[1], Snowflake>] =>
-						typeof channel[1] !== "string",
-				)
-				.map((channel) => ({
-					name: `${channel[0].replaceAll(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${
-						channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
-					}`,
+			fields: [...Object.entries(config.channels)].map((channel) => ({
+				name: `${channel[0].replaceAll(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${
+					channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
+				}`,
 
-					value: channel[1]?.toString() ?? "*None*",
-					inline: true,
-				})),
+				value: channel[1]?.toString() ?? "*None*",
+				inline: true,
+			})),
 		},
 		{
 			title: "Roles",
