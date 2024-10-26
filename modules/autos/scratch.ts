@@ -8,10 +8,10 @@
 import { TimestampStyles, cleanCodeBlockContent, time, type APIEmbed } from "discord.js";
 import { parser, type Node } from "posthtml-parser";
 import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { fetchUser } from "../../util/scratch.js";
 import { truncateText } from "../../util/text.js";
+import { footerSeperator, escapeAllMarkdown } from "strife.js";
 
 const EMBED_LENGTH = 750;
 
@@ -217,7 +217,7 @@ export async function handleForumPost(
 		:	"";
 
 	return {
-		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${constants.footerSeperator}${
+		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${footerSeperator}${
 			post.topic.category
 		}`,
 		description: truncateText(
@@ -241,7 +241,7 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	if (Array.isArray(node))
 		return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
 	if (typeof node !== "object")
-		return shouldEscape ? escapeMessage(node.toString()) : node.toString();
+		return shouldEscape ? escapeAllMarkdown(node.toString()) : node.toString();
 
 	const content =
 		typeof node.content !== "number" && !node.content?.length ? "" : nodesToText(node.content);
@@ -303,7 +303,7 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 }
 
 export function linkifyMentions(string: string): string {
-	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
+	return escapeAllMarkdown(string).replaceAll(/@([\w\\-])+/g, (name) => {
 		name = name.replaceAll("\\", "");
 		return `[${name}](${constants.domains.scratch}/users/${name.slice(1)})`;
 	});

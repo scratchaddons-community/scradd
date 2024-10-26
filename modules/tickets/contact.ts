@@ -13,7 +13,6 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import log from "../logging/misc.js";
 import { LogSeverity, LoggingEmojis } from "../logging/util.js";
 import { listStrikes } from "../punishments/util.js";
@@ -27,6 +26,7 @@ import {
 	categoryToDescription,
 	type Category,
 } from "./misc.js";
+import {disableComponents, zeroWidthSpace } from "strife.js";
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,
@@ -133,7 +133,7 @@ export default async function contactMods(
 		author: { icon_url: member.displayAvatarURL(), name: member.displayName },
 		...(body ?
 			fields.length ?
-				{ fields: [...fields, { name: constants.zws, value: body }] }
+				{ fields: [...fields, { name: zeroWidthSpace, value: body }] }
 			:	{ description: body }
 		:	{ fields }),
 	};
@@ -171,7 +171,6 @@ export default async function contactMods(
 			(data) =>
 				thread.send({
 					...data,
-					flags: undefined,
 					embeds: [details, ...(data.embeds ?? [])],
 					content: ping,
 					allowedMentions: { parse: ["roles"] },

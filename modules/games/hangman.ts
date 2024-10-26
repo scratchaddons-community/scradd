@@ -12,13 +12,14 @@ import {
 import fileSystem from "node:fs/promises";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, getAllMembers } from "../../util/discord.js";
+import { getAllMembers } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import features from "../../common/features.js";
 import { mentionUser } from "../settings.js";
+import { disableComponents } from "strife.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;

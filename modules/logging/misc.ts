@@ -10,7 +10,7 @@ import {
 	type ThreadChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import { getBaseChannel } from "../../util/discord.js";
+import { getBaseChannel } from "strife.js";
 import features from "../../common/features.js";
 import { LogSeverity, type LoggingEmojis, type LoggingEmojisError } from "./util.js";
 
@@ -22,7 +22,6 @@ export function shouldLog(channel: Channel | null): boolean {
 	if (baseChannel.guild.id !== config.guild.id) return false;
 	return baseChannel.permissionsFor(config.roles.staff).has("ViewChannel");
 }
-
 
 let lastPing = 0;
 

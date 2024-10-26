@@ -1,9 +1,8 @@
 import type { ForumChannel, MediaChannel } from "discord.js";
 import mongoose from "mongoose";
-import constants from "../../common/constants.js";
-import { reactAll } from "../../util/discord.js";
 import { LogSeverity, LoggingEmojisError } from "../logging/util.js";
 import log from "../logging/misc.js";
+import { reactAll, zeroWidthSpace } from "strife.js";
 export const Question = mongoose.model(
 	"question",
 	new mongoose.Schema({
@@ -44,7 +43,7 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 			month: "short",
 			day: "numeric",
 		})})`,
-		message: { content: question.description || constants.zws },
+		message: { content: question.description || zeroWidthSpace },
 		reason: "For today’s QOTD",
 	});
 

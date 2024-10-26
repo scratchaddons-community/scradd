@@ -9,7 +9,7 @@ import {
 import constants from "../../../common/constants.js";
 import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
 import type { CustomOperation } from "../util.js";
-import { columnize } from "../../../util/discord.js";
+import { columnize } from "strife.js";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,

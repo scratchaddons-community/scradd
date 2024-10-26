@@ -19,6 +19,7 @@ import {
 	ESTABLISHED_THRESHOLD,
 } from "./misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
+import { zeroWidthSpace } from "strife.js";
 
 const latestMessages: Record<Snowflake, Message[]> = {};
 
@@ -174,7 +175,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 						value: `${Math.floor(newXp).toLocaleString()} XP`,
 						inline: true,
 					},
-					{ name: constants.zws, value: constants.zws, inline: true },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: true },
 					{
 						name: "⬆️ Next level",
 						value: `${nextLevelXp.toLocaleString()} XP`,

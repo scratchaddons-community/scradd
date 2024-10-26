@@ -8,9 +8,8 @@ import {
 	type AutocompleteInteraction,
 } from "discord.js";
 import { matchSorter } from "match-sorter";
-import { defineChatCommand } from "strife.js";
+import { defineChatCommand ,escapeAllMarkdown} from "strife.js";
 import constants from "../common/constants.js";
-import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
 defineChatCommand(
@@ -93,7 +92,7 @@ defineChatCommand(
 			embeds: [
 				{
 					description:
-						`${escapeMessage(addon.description)}\n` +
+						`${escapeAllMarkdown(addon.description)}\n` +
 						(addon.permissions?.length ?
 							"\n\n**⚠️ This addon may require additional permissions to be granted in order to function.**"
 						:	""),
@@ -102,7 +101,7 @@ defineChatCommand(
 						...(credits.length ?
 							[{ inline: true, name: "🫂 Contributors", value: credits }]
 						:	[]),
-						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
+						{ inline: true, name: "📦 Group", value: escapeAllMarkdown(group) },
 						{ inline: true, name: "📝 Version added", value: updateInfo },
 					],
 

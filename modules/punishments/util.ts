@@ -5,18 +5,19 @@ import {
 	TimestampStyles,
 	time,
 	type GuildMember,
-	type InteractionReplyOptions,
+	type BaseMessageOptions,
 	type Message,
 	type Snowflake,
 	type User,
 } from "discord.js";
 import Database, { allDatabaseMessages } from "../../common/database.js";
-import { GlobalUsersPattern, getFilesFromMessage, paginate } from "../../util/discord.js";
+import { GlobalUsersPattern, getFilesFromMessage, paginate } from "strife.js";
 import { convertBase } from "../../util/numbers.js";
 import { asyncFilter, gracefulFetch } from "../../util/promises.js";
 import { getLoggingThread } from "../logging/misc.js";
 import { LogSeverity } from "../logging/util.js";
 import { EXPIRY_LENGTH } from "./misc.js";
+import constants from "../../common/constants.js";
 
 export const strikeDatabase = new Database<{
 	user: Snowflake;
@@ -90,7 +91,7 @@ export default async function filterToStrike(
 
 export async function listStrikes(
 	member: GuildMember | User,
-	reply: (options: InteractionReplyOptions) => Promise<Message>,
+	reply: (options: BaseMessageOptions) => Promise<Message>,
 	{ expired: showExpired = true, removed: showRemoved = false } = {},
 	commandUser: User | false = false,
 ): Promise<void> {
@@ -129,11 +130,13 @@ export async function listStrikes(
 		reply,
 		{
 			title: `${member.displayName}’s strikes`,
-			format: member,
 			singular: "strike",
 
 			user: commandUser,
 			totalCount: totalStrikeCount,
+
+			timeout: constants.collectorTime,
+			format: member,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {

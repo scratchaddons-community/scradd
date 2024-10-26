@@ -17,7 +17,7 @@ import {
 	type NonThreadGuildBasedChannel,
 } from "discord.js";
 import config from "../../common/config.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
+import { formatAnyEmoji } from "strife.js";
 import { messageDeleteBulk } from "./messages.js";
 import log from "./misc.js";
 import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";

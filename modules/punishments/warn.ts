@@ -9,10 +9,9 @@ import {
 	type ButtonInteraction,
 	type InteractionResponse,
 } from "discord.js";
-import { client } from "strife.js";
+import { escapeAllMarkdown,client, footerSeperator } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { convertBase } from "../../util/numbers.js";
 import log from "../logging/misc.js";
 import { LogSeverity, LoggingEmojis, LoggingEmojisError } from "../logging/util.js";
@@ -82,7 +81,7 @@ export default async function warn(
 						strikes > 0.5 ?
 							`warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 						:	"verbally warned"
-					} in ${escapeMessage(config.guild.name)}!`,
+					} in ${escapeAllMarkdown(config.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
 					color: member?.displayColor,
@@ -92,7 +91,7 @@ export default async function warn(
 
 						text: `Strike ${id}${
 							displayStrikes ?
-								`${constants.footerSeperator}Expiring in 21 ${
+								`${footerSeperator}Expiring in 21 ${
 									constants.env === "production" ? "day" : "minute"
 								}s`
 							:	""
@@ -136,7 +135,7 @@ export default async function warn(
 			member?.bannable &&
 			!member.roles.premiumSubscriberRole &&
 			!member.roles.resolve(config.roles.staff.id) &&
-					(constants.env === "production" || member.roles.highest.name === "@everyone")
+			(constants.env === "production" || member.roles.highest.name === "@everyone")
 		) ?
 			member.ban({ reason: "Too many strikes" })
 		:	log(

@@ -13,17 +13,16 @@ import {
 	type ThreadChannel,
 } from "discord.js";
 import mongoose from "mongoose";
-import { client } from "strife.js";
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
 import {
-	GlobalBotInvitesPattern,
+	stripMarkdown,
 	GlobalUsersPattern,
 	InvitesPattern,
 	getBaseChannel,
-	messageToText,
-} from "../../util/discord.js";
-import { stripMarkdown } from "../../util/markdown.js";
+	client,
+} from "strife.js";
+import config, { getInitialThreads } from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.js";
 import { normalize } from "../../util/text.js";
 import tryCensor, { censor } from "../automod/misc.js";
 import log from "../logging/misc.js";

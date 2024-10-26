@@ -7,7 +7,7 @@ import {
 	type Snowflake,
 } from "discord.js";
 import config from "../../common/config.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
+import { formatAnyEmoji } from "strife.js";
 import { lerpColors } from "../../util/numbers.js";
 import type { AuditLog } from "../logging/util.js";
 import { parseSuggestionTags, suggestionAnswers } from "./misc.js";

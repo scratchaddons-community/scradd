@@ -9,11 +9,10 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getBaseChannel, mentionChatCommand } from "../../util/discord.js";
 import log from "../logging/misc.js";
 import { LogSeverity, LoggingEmojis } from "../logging/util.js";
 import { chatThread } from "../autos/chat.js";
-import { client } from "strife.js";
+import { getBaseChannel, mentionChatCommand, client } from "strife.js";
 
 export default async function sayCommand(
 	interaction:

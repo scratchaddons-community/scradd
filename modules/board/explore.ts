@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents } from "strife.js";
 import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 import boardReactionCount from "./counts.js";

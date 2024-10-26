@@ -10,11 +10,10 @@ import {
 	type Snowflake,
 	type UserMention,
 } from "discord.js";
-import { client, defineButton, defineChatCommand, type BasicOption } from "strife.js";
+import { disableComponents ,client, defineButton, defineChatCommand, type BasicOption } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
 import { getWeeklyXp } from "./xp/util.js";
 import type { CamelToKebab } from "../common/misc.js";

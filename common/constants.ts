@@ -95,8 +95,6 @@ export default {
 
 	env,
 	fonts: "Sora, SoraExt, sans-serif",
-	footerSeperator: " • ",
-	isTesting: process.argv.some((file) => file.endsWith(".test.js")),
 
 	repos: {
 		scradd: "scratchaddons-community/scradd",
@@ -115,11 +113,10 @@ export default {
 	},
 
 	users: {
-bot: "929928324959055932",
+		bot: "929928324959055932",
 		robotop: "323630372531470346",
-				weirdo: "691223009515667457",
+		weirdo: "691223009515667457",
 	},
 
 	webhookName: "scradd-webhook",
-	zws: "\u200B",
 } as const;

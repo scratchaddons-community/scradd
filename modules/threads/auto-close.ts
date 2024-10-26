@@ -9,10 +9,10 @@ import {
 	type ChatInputCommandInteraction,
 	type InteractionResponse,
 } from "discord.js";
-import { client } from "strife.js";
+import { disableComponents,client } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import {  } from "../../util/discord.js";
 import { parseTime } from "../../util/numbers.js";
 import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";

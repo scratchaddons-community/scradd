@@ -7,10 +7,9 @@ import {
 	type ApplicationCommandSubCommand,
 	type Awaitable,
 } from "discord.js";
-import { commands, defineChatCommand, defineEvent } from "strife.js";
+import { mentionChatCommand, commands, defineChatCommand, defineEvent } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { mentionChatCommand } from "../../util/discord.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";

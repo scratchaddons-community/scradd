@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getBaseChannel } from "../../util/discord.js";
+import { getBaseChannel } from "strife.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 
 export async function syncMembers(

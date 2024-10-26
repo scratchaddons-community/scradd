@@ -7,8 +7,8 @@ import {
 	type TextBasedChannel,
 } from "discord.js";
 import papaparse from "papaparse";
-import { client } from "strife.js";
-import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
+import { client, getFilesFromMessage } from "strife.js";
+import { getAllMessages } from "../util/discord.js";
 import config from "./config.js";
 import constants from "./constants.js";
 let timeouts: Record<

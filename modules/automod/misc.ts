@@ -1,6 +1,6 @@
 import { ChannelType, type TextBasedChannel } from "discord.js";
 import config from "../../common/config.js";
-import { getBaseChannel } from "../../util/discord.js";
+import { getBaseChannel } from "strife.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import badWords from "./bad-words.js";

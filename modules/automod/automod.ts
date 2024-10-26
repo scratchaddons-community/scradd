@@ -1,15 +1,14 @@
 import type { Message } from "discord.js";
-import { client } from "strife.js";
+import {
+	InvitesPattern,
+	GlobalAnimatedEmoji,
+	getBaseChannel,
+	client,
+	stripMarkdown,
+} from "strife.js";
 import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
-import {
-	GlobalAnimatedEmoji,
-	GlobalBotInvitesPattern,
-	InvitesPattern,
-	getAllMessages,
-	getBaseChannel,
-} from "../../util/discord.js";
-import { stripMarkdown } from "../../util/markdown.js";
+import { GlobalBotInvitesPattern, getAllMessages } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import log from "../logging/misc.js";
 import { LogSeverity, LoggingEmojisError } from "../logging/util.js";

@@ -14,7 +14,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents } from "strife.js";
 import { asyncFilter } from "../../util/promises.js";
 import tryCensor from "../automod/misc.js";
 import hasPermission from "../execute/permissions.js";

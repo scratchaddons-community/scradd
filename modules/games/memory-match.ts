@@ -17,7 +17,7 @@ import {
 } from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+import { disableComponents } from "strife.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import constantEmojis from "../../common/emojis.js";

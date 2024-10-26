@@ -16,11 +16,10 @@ import {
 	defineEvent,
 	defineMenuCommand,
 	defineModal,
-	defineSelect,
+	defineSelect,disableComponents
 } from "strife.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import log from "../logging/misc.js";
 import { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/util.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";

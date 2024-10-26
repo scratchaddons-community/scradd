@@ -9,8 +9,7 @@ import {
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { databaseThread } from "../../common/database.js";
-import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { stringifyError } from "strife.js";
+import { getBaseChannel, getMessageJSON, stringifyError } from "strife.js";
 import log, { shouldLog } from "../logging/misc.js";
 import { LogSeverity, LoggingEmojis } from "../logging/util.js";
 import { chatThread } from "../autos/chat.js";
