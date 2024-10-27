@@ -1,12 +1,14 @@
-import {
-	Collection,
-	type AnyThreadChannel,
-	type ChatInputCommandInteraction,
-	type GuildMember,
-	type InteractionResponse,
-	type PartialGuildMember,
-	type Role,
+import type {
+	AnyThreadChannel,
+	ChatInputCommandInteraction,
+	GuildMember,
+	InteractionResponse,
+	PartialGuildMember,
+	Role,
 } from "discord.js";
+
+import { Collection } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getBaseChannel } from "../../util/discord.js";

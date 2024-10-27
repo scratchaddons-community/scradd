@@ -1,8 +1,11 @@
 import type { ForumChannel, MediaChannel } from "discord.js";
+
 import mongoose from "mongoose";
+
 import constants from "../../common/constants.js";
 import { reactAll } from "../../util/discord.js";
-import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
+import log, { LoggingErrorEmoji, LogSeverity } from "../logging/misc.js";
+
 export const Question = mongoose.model(
 	"question",
 	new mongoose.Schema({

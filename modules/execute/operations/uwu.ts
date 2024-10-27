@@ -1,14 +1,16 @@
+import type { CustomOperation } from "../util.js";
+
 import { ApplicationCommandOptionType } from "discord.js";
+
 import { uwuEndings, uwuReplacements } from "../../../common/strings.js";
 import { stripMarkdown } from "../../../util/markdown.js";
-import type { CustomOperation } from "../util.js";
 
 export function uwuify(text: string): string {
 	const output = stripMarkdown(text)
 		.split(/\s+/)
 		.map((word) =>
 			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word) ? word : (
-				uwuReplacements[word.toLowerCase()] ?? convertWord(word)
+				(uwuReplacements[word.toLowerCase()] ?? convertWord(word))
 			),
 		);
 

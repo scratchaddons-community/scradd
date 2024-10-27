@@ -13,6 +13,7 @@ import {
 	defineSelect,
 	defineSubcommands,
 } from "strife.js";
+
 import constants from "../../common/constants.js";
 import ban from "./ban.js";
 import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.js";

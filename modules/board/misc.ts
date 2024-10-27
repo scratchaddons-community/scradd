@@ -1,4 +1,5 @@
 import type { Snowflake } from "discord.js";
+
 import Database from "../../common/database.js";
 
 export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",

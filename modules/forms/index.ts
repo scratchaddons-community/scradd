@@ -1,4 +1,8 @@
+import type { Snowflake } from "discord.js";
+
 import { defineButton, defineEvent, defineModal } from "strife.js";
+
+import config from "../../common/config.js";
 import {
 	confirmAcceptAppeal,
 	confirmRejectAppeal,
@@ -6,8 +10,6 @@ import {
 	submitRejectAppeal,
 } from "./appeals/appeals.js";
 import confirmInterest, { fillInterest, submitInterest } from "./staff-interest.js";
-import type { Snowflake } from "discord.js";
-import config from "../../common/config.js";
 
 export const banDates: Record<Snowflake, number> = {};
 defineEvent("guildBanAdd", (ban) => {

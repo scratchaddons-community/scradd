@@ -1,5 +1,7 @@
 import type { AnyThreadChannel, MessageReaction } from "discord.js";
+
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import { getSuggestionData, suggestionsDatabase } from "./misc.js";
 

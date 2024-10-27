@@ -1,17 +1,18 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	ActionRow as _ActionRow,
-	type APIActionRowComponent,
-	type APIMessageActionRowComponent,
-	type APITextInputComponent,
-	type ButtonComponent,
-	type InteractionReplyOptions,
-	type MessageActionRowComponent,
-	type TextInputComponent,
+import type {
+	APIActionRowComponent,
+	APIMessageActionRowComponent,
+	APITextInputComponent,
+	ButtonComponent,
+	InteractionReplyOptions,
+	MessageActionRowComponent,
+	TextInputComponent,
 } from "discord.js";
+
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
+
+import { ActionRow as _ActionRow, ButtonStyle, ComponentType } from "discord.js";
+
 import constants from "../common/constants.js";
 import { disableComponents, paginate } from "./discord.js";
 

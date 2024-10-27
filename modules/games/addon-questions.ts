@@ -1,5 +1,6 @@
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
+
 import constants from "../../common/constants.js";
 import { escapeMessage } from "../../util/markdown.js";
 import { trimPatchVersion } from "../../util/text.js";

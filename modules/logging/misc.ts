@@ -1,38 +1,38 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	ThreadAutoArchiveDuration,
-	type APIAuditLogChange,
-	type APIEmbed,
-	type AnyThreadChannel,
-	type ApplicationCommand,
-	type AuditLogEvent,
-	type AutoModerationRule,
-	type Base,
-	type Channel,
-	type Embed,
-	type Guild,
-	type GuildAuditLogsEntry,
-	type GuildEmoji,
-	type GuildScheduledEvent,
-	type Integration,
-	type Invite,
-	type Message,
-	type NonThreadGuildBasedChannel,
-	type Role,
-	type Snowflake,
-	type StageInstance,
-	type Sticker,
-	type TextChannel,
-	type ThreadChannel,
-	type User,
-	type Webhook,
+import type {
+	AnyThreadChannel,
+	APIAuditLogChange,
+	APIEmbed,
+	ApplicationCommand,
+	AuditLogEvent,
+	AutoModerationRule,
+	Base,
+	Channel,
+	Embed,
+	Guild,
+	GuildAuditLogsEntry,
+	GuildEmoji,
+	GuildScheduledEvent,
+	Integration,
+	Invite,
+	Message,
+	NonThreadGuildBasedChannel,
+	Role,
+	Snowflake,
+	StageInstance,
+	Sticker,
+	TextChannel,
+	ThreadChannel,
+	User,
+	Webhook,
 } from "discord.js";
 import type { actualPrimitives } from "mongoose";
+
+import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getBaseChannel } from "../../util/discord.js";
 import features from "../../common/features.js";
+import { getBaseChannel } from "../../util/discord.js";
 
 export function shouldLog(channel: Channel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
