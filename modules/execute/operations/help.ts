@@ -52,7 +52,7 @@ const data: CustomOperation = {
 			embeds: [
 				operation ?
 					getHelpForOperation(operation, schemas, operationName)
-				:	await listOperations(schemas),
+				:	listOperations(schemas),
 			],
 		});
 	},
@@ -100,9 +100,9 @@ export function getHelpForOperation(
 	};
 }
 
-export async function listOperations(
+export function listOperations(
 	schemas: Record<string, ApplicationCommand | CustomOperation>,
-): Promise<APIEmbed> {
+): APIEmbed {
 	return {
 		color: constants.themeColor,
 		title: "Available Operations",

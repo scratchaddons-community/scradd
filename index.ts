@@ -115,7 +115,7 @@ const { cleanListeners } = await import("./common/database.js");
 await cleanListeners();
 client.user.setStatus("online");
 
-async function getErrorsChannel(): TextChannel {
+async function getErrorsChannel(): Promise<TextChannel> {
 	const { default: config } = await import("./common/config.js");
 	return config.channels.errors;
 }

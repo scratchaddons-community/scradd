@@ -58,7 +58,7 @@ defineChatCommand(
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Could not find the \`${OPERATION_PREFIX}${commandName}\` operation!`,
-				embeds: [await listOperations(await getSchemasFromInteraction(interaction))],
+				embeds: [listOperations(await getSchemasFromInteraction(interaction))],
 			});
 		}
 
