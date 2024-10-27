@@ -1,18 +1,19 @@
+import type { RepliableInteraction, User } from "discord.js";
+
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
-	TimestampStyles,
 	time,
-	type RepliableInteraction,
-	type User,
+	TimestampStyles,
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
-import { REACTIONS_NAME, boardDatabase } from "./board/misc.js";
+import { boardDatabase, REACTIONS_NAME } from "./board/misc.js";
 import { strikeDatabase } from "./punishments/util.js";
 import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
 import { xpDatabase } from "./xp/util.js";

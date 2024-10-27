@@ -1,12 +1,14 @@
-import { GatewayIntentBits } from "discord.js";
-import mongoose from "mongoose";
 import dns from "node:dns";
 import { fileURLToPath } from "node:url";
-import { client, login, logError } from "strife.js";
+
+import { GatewayIntentBits } from "discord.js";
+import mongoose from "mongoose";
+import { client, logError, login } from "strife.js";
+
 import constants from "./common/constants.js";
-import pkg from "./package.json" with { type: "json" };
 import features from "./common/features.js";
-import { LoggingEmojisError, LoggingEmojis } from "./modules/logging/util.js";
+import { LoggingEmojis, LoggingEmojisError } from "./modules/logging/util.js";
+import pkg from "./package.json" with { type: "json" };
 
 dns.setDefaultResultOrder("ipv4first");
 

@@ -2,9 +2,10 @@
 /// <reference lib="dom.iterable" />
 
 import "@total-typescript/ts-reset";
-import type constants from "./constants.js";
+
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
+import type constants from "./constants.js";
 import type { FilterNonFalsy } from "./misc.js";
 
 declare global {

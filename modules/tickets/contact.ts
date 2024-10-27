@@ -1,32 +1,30 @@
-import {
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	GuildMember,
-	InteractionType,
-	type APIEmbedField,
-	type AnySelectMenuInteraction,
-	type ButtonInteraction,
-	type InteractionResponse,
-	type RepliableInteraction,
-	type ThreadChannel,
+import type {
+	AnySelectMenuInteraction,
+	APIEmbedField,
+	ButtonInteraction,
+	InteractionResponse,
+	RepliableInteraction,
+	ThreadChannel,
 } from "discord.js";
+import type { Category } from "./misc.js";
+
+import { ButtonStyle, ChannelType, ComponentType, GuildMember, InteractionType } from "discord.js";
+import { disableComponents, zeroWidthSpace } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import log from "../logging/misc.js";
-import { LogSeverity, LoggingEmojis } from "../logging/util.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 import { listStrikes } from "../punishments/util.js";
 import {
+	allFields,
+	categoryToDescription,
 	MOD_CATEGORY,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKETS_BY_MEMBER,
 	TICKET_CATEGORIES,
-	allFields,
-	categoryToDescription,
-	type Category,
+	TICKETS_BY_MEMBER,
 } from "./misc.js";
-import { disableComponents, zeroWidthSpace } from "strife.js";
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,
@@ -95,7 +93,7 @@ export default async function contactMods(
 
 	const member =
 		options instanceof GuildMember ? options : (
-			interaction.member ?? (await config.guild.members.fetch(interaction.user.id))
+			(interaction.member ?? (await config.guild.members.fetch(interaction.user.id)))
 		);
 	if (!(member instanceof GuildMember)) throw new TypeError("member is not a GuildMember!");
 

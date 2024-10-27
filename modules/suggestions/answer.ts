@@ -1,15 +1,11 @@
-import {
-	AuditLogEvent,
-	Colors,
-	ForumChannel,
-	ThreadChannel,
-	type GuildAuditLogsEntry,
-	type Snowflake,
-} from "discord.js";
-import config from "../../common/config.js";
-import { formatAnyEmoji } from "strife.js";
-import { lerpColors } from "../../util/numbers.js";
+import type { GuildAuditLogsEntry, Snowflake } from "discord.js";
 import type { AuditLog } from "../logging/util.js";
+
+import { AuditLogEvent, Colors, ForumChannel, ThreadChannel } from "discord.js";
+import { formatAnyEmoji } from "strife.js";
+
+import config from "../../common/config.js";
+import { lerpColors } from "../../util/numbers.js";
 import { parseSuggestionTags, suggestionAnswers } from "./misc.js";
 
 export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): Promise<void> {

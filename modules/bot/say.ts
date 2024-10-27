@@ -1,18 +1,18 @@
-import {
-	ComponentType,
-	MessageFlags,
-	TextInputStyle,
-	type ChatInputCommandInteraction,
-	type Message,
-	type MessageContextMenuCommandInteraction,
-	type RepliableInteraction,
+import type {
+	ChatInputCommandInteraction,
+	Message,
+	MessageContextMenuCommandInteraction,
+	RepliableInteraction,
 } from "discord.js";
+
+import { ComponentType, MessageFlags, TextInputStyle } from "discord.js";
+import { client, getBaseChannel, mentionChatCommand } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import log from "../logging/misc.js";
-import { LogSeverity, LoggingEmojis } from "../logging/util.js";
 import { chatThread } from "../autos/chat.js";
-import { getBaseChannel, mentionChatCommand, client } from "strife.js";
+import log from "../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 
 export default async function sayCommand(
 	interaction:

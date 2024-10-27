@@ -1,10 +1,7 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	TextInputStyle,
-	type ChatInputCommandInteraction,
-	type ModalSubmitInteraction,
-} from "discord.js";
+import type { ChatInputCommandInteraction, ModalSubmitInteraction } from "discord.js";
+
+import { ButtonStyle, ComponentType, TextInputStyle } from "discord.js";
+
 import constants from "../../common/constants.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";

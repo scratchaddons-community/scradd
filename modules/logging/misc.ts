@@ -1,18 +1,12 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	ThreadAutoArchiveDuration,
-	type APIEmbed,
-	type Channel,
-	type Embed,
-	type Message,
-	type TextChannel,
-	type ThreadChannel,
-} from "discord.js";
-import config from "../../common/config.js";
+import type { APIEmbed, Channel, Embed, Message, TextChannel, ThreadChannel } from "discord.js";
+import type { LoggingEmojis, LoggingEmojisError } from "./util.js";
+
+import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 import { getBaseChannel } from "strife.js";
+
+import config from "../../common/config.js";
 import features from "../../common/features.js";
-import { LogSeverity, type LoggingEmojis, type LoggingEmojisError } from "./util.js";
+import { LogSeverity } from "./util.js";
 
 export function shouldLog(channel: Channel | null): boolean {
 	const baseChannel = getBaseChannel(channel);

@@ -1,21 +1,22 @@
-import { unifiedDiff } from "difflib";
-import {
-	Colors,
-	messageLink,
-	type ReadonlyCollection,
-	type GuildTextBasedChannel,
-	type Message,
-	type MessageReaction,
-	type PartialMessage,
-	type Snowflake,
+import type {
+	GuildTextBasedChannel,
+	Message,
+	MessageReaction,
+	PartialMessage,
+	ReadonlyCollection,
+	Snowflake,
 } from "discord.js";
+
+import { unifiedDiff } from "difflib";
+import { Colors, messageLink } from "discord.js";
+import { getBaseChannel, isFileExpired, unsignFiles } from "strife.js";
+
 import config from "../../common/config.js";
 import { databaseThread } from "../../common/database.js";
-import { getBaseChannel, isFileExpired, unsignFiles } from "strife.js";
 import { extractMessageExtremities, messageToText } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import log, { shouldLog } from "./misc.js";
-import { LogSeverity, LoggingEmojis } from "./util.js";
+import { LoggingEmojis, LogSeverity } from "./util.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 

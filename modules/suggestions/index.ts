@@ -1,17 +1,15 @@
+import type { Snowflake } from "discord.js";
+
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageType } from "discord.js";
 import {
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
-	MessageType,
-	type Snowflake,
-} from "discord.js";
-import {
-	stripMarkdown,
 	client,
 	defineButton,
 	defineChatCommand,
 	defineEvent,
 	defineMenuCommand,
+	stripMarkdown,
 } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { truncateText } from "../../util/text.js";

@@ -1,16 +1,16 @@
-import {
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	type GuildBasedChannel,
-	type InteractionReplyOptions,
-	type MessageEditOptions,
-	type RepliableInteraction,
-	type Snowflake,
+import type {
+	GuildBasedChannel,
+	InteractionReplyOptions,
+	MessageEditOptions,
+	RepliableInteraction,
+	Snowflake,
 } from "discord.js";
+
+import { ButtonStyle, ChannelType, ComponentType } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "strife.js";
 import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 import boardReactionCount from "./counts.js";

@@ -1,7 +1,8 @@
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
-import constants from "../../common/constants.js";
 import { escapeAllMarkdown } from "strife.js";
+
+import constants from "../../common/constants.js";
 import { trimPatchVersion } from "../../util/text.js";
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;

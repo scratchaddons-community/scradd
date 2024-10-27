@@ -1,8 +1,11 @@
-import { ChannelType, type Snowflake } from "discord.js";
+import type { Snowflake } from "discord.js";
+
+import { ChannelType } from "discord.js";
 import { client } from "strife.js";
+
 import config, { getInitialThreads } from "../../common/config.js";
-import Database from "../../common/database.js";
 import constants from "../../common/constants.js";
+import Database from "../../common/database.js";
 
 export const enum SpecialReminder {
 	Weekly,

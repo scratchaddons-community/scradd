@@ -1,6 +1,9 @@
-import { BaseChannel, ChannelType, type Snowflake, type TextBasedChannel } from "discord.js";
-import config from "../../common/config.js";
+import type { Snowflake, TextBasedChannel } from "discord.js";
+
+import { BaseChannel, ChannelType } from "discord.js";
 import { getBaseChannel } from "strife.js";
+
+import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 
 const enum Counts {

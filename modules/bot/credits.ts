@@ -1,11 +1,8 @@
-import {
-	inlineCode,
-	type APIEmbedField,
-	type ChatInputCommandInteraction,
-	type Snowflake,
-	type User,
-} from "discord.js";
+import type { APIEmbedField, ChatInputCommandInteraction, Snowflake, User } from "discord.js";
+
+import { inlineCode } from "discord.js";
 import { client, columnize } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import pkg from "../../package.json" with { type: "json" };

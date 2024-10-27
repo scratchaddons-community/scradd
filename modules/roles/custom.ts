@@ -1,20 +1,24 @@
+import type {
+	ApplicationCommand,
+	ChatInputCommandInteraction,
+	InteractionResponse,
+	ModalSubmitInteraction,
+	PartialGuildMember,
+	Role,
+	Snowflake,
+} from "discord.js";
+
 import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
 	PermissionsBitField,
 	TextInputStyle,
-	type ApplicationCommand,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
-	type ModalSubmitInteraction,
-	type PartialGuildMember,
-	type Role,
-	type Snowflake,
 } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "strife.js";
 import { asyncFilter } from "../../util/promises.js";
 import tryCensor from "../automod/misc.js";
 import hasPermission from "../execute/permissions.js";

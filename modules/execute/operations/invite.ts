@@ -1,9 +1,11 @@
-import { getBaseChannel, client } from "strife.js";
+import type { CustomOperation } from "../util.js";
+
+import { client, getBaseChannel } from "strife.js";
+
 import config from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import { asyncFilter } from "../../../util/promises.js";
 import { Invite } from "../../roles/index.js";
-import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "invite",

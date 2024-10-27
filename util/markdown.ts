@@ -1,9 +1,11 @@
 import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
+
 import SimpleMarkdown from "@khanacademy/simple-markdown";
 import { toCodePoints } from "@twemoji/parser";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { Faces, FormattingPatterns, MessageMentions } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../common/config.js";
 
 const DATE_TYPE_FORMATS = {

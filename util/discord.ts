@@ -1,30 +1,34 @@
+import type {
+	APIEmbed,
+	Attachment,
+	Awaitable,
+	Collection,
+	Guild,
+	GuildMember,
+	GuildTextBasedChannel,
+	Message,
+	Snowflake,
+	ThreadChannel,
+} from "discord.js";
+
 import {
-	Colors,
-	type GuildMember,
-	MessageFlags,
-	MessageType,
 	channelMention,
+	Colors,
 	hyperlink,
+	MessageFlags,
 	messageLink,
-	type APIEmbed,
-	type Attachment,
-	type Awaitable,
-	type Collection,
-	type Guild,
-	type GuildTextBasedChannel,
-	type Message,
-	type Snowflake,
-	type ThreadChannel,
+	MessageType,
 } from "discord.js";
 import {
 	client,
-	footerSeperator,
 	escapeAllMarkdown,
-	stripMarkdown,
-	isFileExpired,
+	footerSeperator,
 	getFilesFromMessage,
+	isFileExpired,
 	mentionChatCommand,
+	stripMarkdown,
 } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { truncateText } from "./text.js";
@@ -470,7 +474,7 @@ export async function messageToEmbed(
 ): Promise<APIEmbed> {
 	const lines = (await messageToText(message)).split("\n");
 	const content =
-		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
+		message.type === MessageType.GuildInviteReminder ? (lines[1] ?? "") : lines.join("\n");
 	const author =
 		message.type === MessageType.AutoModerationAction ? content
 		: message.type === MessageType.GuildInviteReminder ? lines[0] + " 🤖"

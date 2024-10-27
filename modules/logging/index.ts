@@ -1,11 +1,9 @@
-import {
-	AuditLogEvent,
-	AutoModerationRuleTriggerType,
-	WebhookType,
-	userMention,
-	type Awaitable,
-} from "discord.js";
+import type { Awaitable } from "discord.js";
+import type { AuditLog } from "./util.js";
+
+import { AuditLogEvent, AutoModerationRuleTriggerType, userMention, WebhookType } from "discord.js";
 import { defineEvent } from "strife.js";
+
 import config from "../../common/config.js";
 import {
 	channelCreate,
@@ -23,6 +21,7 @@ import {
 	stickerDelete,
 	stickerUpdate,
 } from "./expressions.js";
+import { guildUpdate, inviteCreate, inviteDelete } from "./guild.js";
 import {
 	messageDelete,
 	messageDeleteBulk,
@@ -30,9 +29,7 @@ import {
 	messageUpdate,
 } from "./messages.js";
 import log from "./misc.js";
-import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
 import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
-import { guildUpdate, inviteCreate, inviteDelete } from "./guild.js";
 import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 import {
 	guildMemberAdd,
@@ -44,6 +41,7 @@ import {
 	memberPrune,
 	userUpdate,
 } from "./users.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,

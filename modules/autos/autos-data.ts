@@ -1,7 +1,9 @@
 /* On production, this file is replaced with another file with the same structure. */
 
 import type { Snowflake } from "discord.js";
+
 import { client } from "strife.js";
+
 import constants from "../../common/constants.js";
 
 export const greetings = ["Hi"] as const;

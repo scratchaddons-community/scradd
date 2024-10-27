@@ -1,16 +1,16 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	userMention,
-	type ActionRowData,
-	type Embed,
-	type InteractionButtonComponentData,
-	type MessageActionRowComponent,
-	type MessageEditOptions,
+import type {
+	ActionRowData,
+	Embed,
+	InteractionButtonComponentData,
+	MessageActionRowComponent,
+	MessageEditOptions,
 } from "discord.js";
+
+import { ButtonStyle, ComponentType, userMention } from "discord.js";
+import { zeroWidthSpace } from "strife.js";
+
 import { convertBase } from "../../../util/numbers.js";
 import { joinWithAnd } from "../../../util/text.js";
-import { zeroWidthSpace } from "strife.js";
 
 export const NEEDED_ACCEPT = 4,
 	NEEDED_REJECT = 3;

@@ -1,3 +1,6 @@
+import type { AuditLogEvent, Guild, Invite } from "discord.js";
+import type { AuditLog } from "./util.js";
+
 import { unifiedDiff } from "difflib";
 import {
 	GuildDefaultMessageNotifications,
@@ -7,16 +10,14 @@ import {
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
 	Locale,
-	TimestampStyles,
 	time,
+	TimestampStyles,
 	userMention,
-	type AuditLogEvent,
-	type Guild,
-	type Invite,
 } from "discord.js";
+
 import config from "../../common/config.js";
 import log from "./misc.js";
-import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 const createdInvites = new Set<string>();
 export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {

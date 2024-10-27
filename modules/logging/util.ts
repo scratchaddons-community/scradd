@@ -1,6 +1,6 @@
 import type {
-	APIAuditLogChange,
 	AnyThreadChannel,
+	APIAuditLogChange,
 	ApplicationCommand,
 	AuditLogEvent,
 	AutoModerationRule,
@@ -20,6 +20,7 @@ import type {
 	Webhook,
 } from "discord.js";
 import type { actualPrimitives } from "mongoose";
+
 import constants from "../../common/constants.js";
 
 export enum LogSeverity {

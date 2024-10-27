@@ -1,26 +1,27 @@
+import type { AuditLogEvent, DMChannel, NonThreadGuildBasedChannel } from "discord.js";
+import type { AuditLog } from "./util.js";
+
 import { unifiedDiff } from "difflib";
 import {
 	AuditLogOptionsType,
 	Base,
 	BaseChannel,
+	channelMention,
 	ChannelType,
 	ForumLayoutType,
+	roleMention,
 	SortOrderType,
 	TextChannel,
 	ThreadAutoArchiveDuration,
-	VideoQualityMode,
-	channelMention,
-	roleMention,
 	userMention,
-	type AuditLogEvent,
-	type DMChannel,
-	type NonThreadGuildBasedChannel,
+	VideoQualityMode,
 } from "discord.js";
-import config from "../../common/config.js";
 import { formatAnyEmoji } from "strife.js";
+
+import config from "../../common/config.js";
 import { messageDeleteBulk } from "./messages.js";
 import log from "./misc.js";
-import { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./util.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(

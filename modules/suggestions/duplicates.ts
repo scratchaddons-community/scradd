@@ -1,7 +1,10 @@
+import type { APIEmbedField, Message } from "discord.js";
+
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
-import { channelLink, hyperlink, type APIEmbedField, type Message } from "discord.js";
+import { channelLink, hyperlink } from "discord.js";
 import { matchSorter } from "match-sorter";
-import { formatAnyEmoji, client } from "strife.js";
+import { client, formatAnyEmoji } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getSuggestionData, suggestionAnswers, suggestionsDatabase } from "./misc.js";

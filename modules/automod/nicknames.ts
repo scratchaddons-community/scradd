@@ -1,8 +1,9 @@
 import type { GuildMember } from "discord.js";
+
 import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
 import log from "../logging/misc.js";
-import { LogSeverity, LoggingEmojisError } from "../logging/util.js";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { censor, isPingable } from "./misc.js";
 

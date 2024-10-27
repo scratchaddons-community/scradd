@@ -1,9 +1,7 @@
-import {
-	cleanContent,
-	type AnyThreadChannel,
-	type GuildForumTag,
-	type Snowflake,
-} from "discord.js";
+import type { AnyThreadChannel, GuildForumTag, Snowflake } from "discord.js";
+
+import { cleanContent } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import Database from "../../common/database.js";

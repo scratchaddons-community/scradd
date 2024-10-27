@@ -1,17 +1,21 @@
+import type {
+	APIEmbed,
+	BaseMessageOptions,
+	GuildMember,
+	InteractionReplyOptions,
+	InteractionResponse,
+	RepliableInteraction,
+	User,
+} from "discord.js";
+
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
-	type APIEmbed,
-	type BaseMessageOptions,
-	type GuildMember,
-	type InteractionReplyOptions,
-	type InteractionResponse,
-	type RepliableInteraction,
-	type User,
 } from "discord.js";
-import { disableComponents, client, defineChatCommand, defineMenuCommand } from "strife.js";
+import { client, defineChatCommand, defineMenuCommand, disableComponents } from "strife.js";
+
 import constants from "../common/constants.js";
 import { messageToEmbed } from "../util/discord.js";
 

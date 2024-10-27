@@ -1,17 +1,21 @@
+import type {
+	ChatInputCommandInteraction,
+	InteractionResponse,
+	MessageComponentInteraction,
+} from "discord.js";
+
 import {
 	ButtonStyle,
+	channelMention,
 	ComponentType,
 	GuildMember,
-	TimestampStyles,
-	channelMention,
 	time,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
-	type MessageComponentInteraction,
+	TimestampStyles,
 } from "discord.js";
+import { disableComponents, paginate } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, paginate } from "strife.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";

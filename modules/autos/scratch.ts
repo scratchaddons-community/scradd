@@ -1,17 +1,21 @@
+import type { APIEmbed } from "discord.js";
+import type { Node } from "posthtml-parser";
+
+import { cleanCodeBlockContent, time, TimestampStyles } from "discord.js";
+import { parser } from "posthtml-parser";
+import { escapeAllMarkdown, footerSeperator } from "strife.js";
+
+import constants from "../../common/constants.js";
+import { gracefulFetch } from "../../util/promises.js";
+import { fetchUser } from "../../util/scratch.js";
+import { truncateText } from "../../util/text.js";
+
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
-
-import { TimestampStyles, cleanCodeBlockContent, time, type APIEmbed } from "discord.js";
-import { parser, type Node } from "posthtml-parser";
-import constants from "../../common/constants.js";
-import { gracefulFetch } from "../../util/promises.js";
-import { fetchUser } from "../../util/scratch.js";
-import { truncateText } from "../../util/text.js";
-import { footerSeperator, escapeAllMarkdown } from "strife.js";
 
 const EMBED_LENGTH = 750;
 
@@ -197,7 +201,7 @@ export async function handleForumPost(
 	hash: string,
 ): Promise<APIEmbed | undefined> {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
-	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
+	const id = urlParts[2] === "topic" && type == "post" ? (hash.split("-")[1] ?? "") : urlParts[3];
 
 	const post =
 		type === "post" ?

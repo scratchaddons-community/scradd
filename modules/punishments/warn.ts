@@ -1,20 +1,21 @@
+import type { ButtonInteraction, InteractionResponse } from "discord.js";
+
 import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
+	time,
 	TimestampStyles,
 	User,
-	time,
 	userMention,
-	type ButtonInteraction,
-	type InteractionResponse,
 } from "discord.js";
-import { escapeAllMarkdown, client, footerSeperator } from "strife.js";
+import { client, escapeAllMarkdown, footerSeperator } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { convertBase } from "../../util/numbers.js";
 import log from "../logging/misc.js";
-import { LogSeverity, LoggingEmojis, LoggingEmojisError } from "../logging/util.js";
+import { LoggingEmojis, LoggingEmojisError, LogSeverity } from "../logging/util.js";
 import giveXp from "../xp/give-xp.js";
 import {
 	DEFAULT_STRIKES,
