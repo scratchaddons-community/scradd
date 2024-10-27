@@ -109,7 +109,7 @@ async function getConfig() {
 					"error",
 					ChannelType.GuildText,
 					"partial",
-					await guilds.testing?.channels?.fetch(),
+					await guilds.testing.channels?.fetch(),
 				),
 			),
 		},

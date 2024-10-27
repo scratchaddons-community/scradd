@@ -106,7 +106,7 @@ export async function listOperations(
 	return {
 		color: constants.themeColor,
 		title: "Available Operations",
-		fields: await columnize(
+		fields: columnize(
 			Object.values(schemas)
 				.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 				.map(

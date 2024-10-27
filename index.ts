@@ -1,3 +1,5 @@
+import type { TextChannel } from "discord.js";
+
 import dns from "node:dns";
 import { fileURLToPath } from "node:url";
 
@@ -113,7 +115,7 @@ const { cleanListeners } = await import("./common/database.js");
 await cleanListeners();
 client.user.setStatus("online");
 
-async function getErrorsChannel() {
+async function getErrorsChannel(): TextChannel {
 	const { default: config } = await import("./common/config.js");
 	return config.channels.errors;
 }

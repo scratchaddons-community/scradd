@@ -28,10 +28,7 @@ defineSubcommands(
 		name: "thread",
 		description: "Manage threads",
 		restricted: true,
-		access:
-			features.threadsTestingServer && config.guilds.testing ?
-				["@defaults", config.guilds.testing.id]
-			:	undefined,
+		access: features.threadsTestingServer ? ["@defaults", config.guilds.testing.id] : undefined,
 		subcommands: {
 			"close-in": {
 				description: "Close this thread after a specified amount of time",
