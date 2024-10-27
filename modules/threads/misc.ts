@@ -1,5 +1,4 @@
 import type { AnyThreadChannel, Snowflake } from "discord.js";
-
 import config from "../../common/config.js";
 import Database from "../../common/database.js";
 

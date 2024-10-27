@@ -1,13 +1,13 @@
-import type {
-	ActionRowData,
-	Embed,
-	InteractionButtonComponentData,
-	MessageActionRowComponent,
-	MessageEditOptions,
+import {
+	ButtonStyle,
+	ComponentType,
+	userMention,
+	type ActionRowData,
+	type Embed,
+	type InteractionButtonComponentData,
+	type MessageActionRowComponent,
+	type MessageEditOptions,
 } from "discord.js";
-
-import { ButtonStyle, ComponentType, userMention } from "discord.js";
-
 import constants from "../../../common/constants.js";
 import { convertBase } from "../../../util/numbers.js";
 import { joinWithAnd } from "../../../util/text.js";

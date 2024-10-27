@@ -1,12 +1,8 @@
-import type { AuditLogEvent, RoleMention } from "discord.js";
-import type { AuditLog } from "./misc.js";
-
-import { Role, roleMention } from "discord.js";
-
+import { Role, roleMention, type AuditLogEvent, type RoleMention } from "discord.js";
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import constants from "../../common/constants.js";
 
 export async function memberRoleUpdate(
 	entry: AuditLog<AuditLogEvent.MemberRoleUpdate, "$add" | "$remove">,

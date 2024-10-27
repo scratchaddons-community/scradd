@@ -1,6 +1,5 @@
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import tryCensor, { censor, decodeRegexp, isPingable } from "./misc.js";
 
 await describe("tryCensor", async () => {

@@ -1,9 +1,6 @@
 /* On production, this file is replaced with another file with the same structure. */
 
 import type { GuildMember } from "discord.js";
-
-import { client } from "strife.js";
-
 import {
 	customComments,
 	customNames,
@@ -11,6 +8,7 @@ import {
 	customTriggers,
 	greetings,
 } from "./autos-data.js";
+import { client } from "strife.js";
 
 export default function dad(name: string, _: GuildMember): string | readonly (number | string)[] {
 	const split = name.split(/[\b\s]+/);

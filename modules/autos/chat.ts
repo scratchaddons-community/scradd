@@ -1,30 +1,32 @@
-import type {
-	ButtonInteraction,
-	InteractionResponse,
-	Message,
-	MessageContextMenuCommandInteraction,
-	Snowflake,
-	ThreadChannel,
-} from "discord.js";
-
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
-import { ButtonStyle, ChannelType, ComponentType, MessageType, TextInputStyle } from "discord.js";
+import {
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	MessageType,
+	TextInputStyle,
+	type ButtonInteraction,
+	type InteractionResponse,
+	type Message,
+	type MessageContextMenuCommandInteraction,
+	type Snowflake,
+	type ThreadChannel,
+} from "discord.js";
 import mongoose from "mongoose";
 import { client } from "strife.js";
-
 import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import {
-	getBaseChannel,
 	GlobalBotInvitesPattern,
 	GlobalUsersPattern,
 	InvitesPattern,
+	getBaseChannel,
 	messageToText,
 } from "../../util/discord.js";
 import { stripMarkdown } from "../../util/markdown.js";
 import { normalize } from "../../util/text.js";
 import tryCensor, { censor } from "../automod/misc.js";
-import log, { LoggingEmojis, LogSeverity } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
 import { getSettings, userSettingsDatabase } from "../settings.js";
 
 export const chatName = `${client.user.displayName} Chat` as const;

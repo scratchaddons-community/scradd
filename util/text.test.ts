@@ -1,6 +1,5 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import { caesar, joinWithAnd, normalize, trimPatchVersion, truncateText } from "./text.js";
 
 await describe("joinWithAnd", async () => {

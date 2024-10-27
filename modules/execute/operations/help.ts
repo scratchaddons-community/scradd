@@ -1,15 +1,15 @@
-import type {
-	APIEmbed,
-	ApplicationCommandSubCommand,
-	ChatInputCommandInteraction,
+import {
+	ApplicationCommand,
+	ApplicationCommandOptionType,
+	inlineCode,
+	type APIEmbed,
+	type ApplicationCommandSubCommand,
+	type ChatInputCommandInteraction,
 } from "discord.js";
-import type { CustomOperation } from "../util.js";
-
-import { ApplicationCommand, ApplicationCommandOptionType, inlineCode } from "discord.js";
-
 import constants from "../../../common/constants.js";
-import { columnize } from "../../../util/discord.js";
 import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
+import type { CustomOperation } from "../util.js";
+import { columnize } from "../../../util/discord.js";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,

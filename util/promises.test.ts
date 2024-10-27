@@ -1,6 +1,5 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import { anyPromise, asyncFilter } from "./promises.js";
 
 await describe("asyncFilter", async () => {

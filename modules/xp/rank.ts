@@ -1,22 +1,21 @@
-import type {
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	GuildMember,
-	InteractionResponse,
-	RepliableInteraction,
-	User,
+import {
+	ButtonStyle,
+	ComponentType,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type GuildMember,
+	type InteractionResponse,
+	type RepliableInteraction,
+	type User,
 } from "discord.js";
-
-import { ButtonStyle, ComponentType } from "discord.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import features from "../../common/features.js";
 import { getAllMembers, paginate } from "../../util/discord.js";
 import { nth } from "../../util/numbers.js";
 import { getSettings, mentionUser } from "../settings.js";
 import { getLevelForXp, getXpForLevel } from "./misc.js";
 import { getFullWeeklyData, xpDatabase } from "./util.js";
+import features from "../../common/features.js";
 
 export default async function getUserRank(
 	interaction: RepliableInteraction,

@@ -1,15 +1,17 @@
-import type { ChatInputCommandInteraction, Message } from "discord.js";
-import type { AddonQuestion, Dependencies } from "./addon-questions.js";
-
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
-import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
-
+import {
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	type ChatInputCommandInteraction,
+	type Message,
+} from "discord.js";
 import constants from "../../common/constants.js";
 import { disableComponents, mentionChatCommand } from "../../util/discord.js";
 import { escapeMessage } from "../../util/markdown.js";
-import QUESTIONS_BY_ADDON from "./addon-questions.js";
-import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
+import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
+import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];

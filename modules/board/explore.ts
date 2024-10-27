@@ -1,13 +1,13 @@
-import type {
-	GuildBasedChannel,
-	InteractionReplyOptions,
-	MessageEditOptions,
-	RepliableInteraction,
-	Snowflake,
+import {
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	type GuildBasedChannel,
+	type InteractionReplyOptions,
+	type MessageEditOptions,
+	type RepliableInteraction,
+	type Snowflake,
 } from "discord.js";
-
-import { ButtonStyle, ChannelType, ComponentType } from "discord.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";

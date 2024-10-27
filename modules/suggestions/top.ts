@@ -1,7 +1,13 @@
-import type { InteractionReplyOptions, RepliableInteraction, User } from "discord.js";
-
-import { ButtonStyle, channelLink, ComponentType, GuildMember, hyperlink } from "discord.js";
-
+import {
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	channelLink,
+	hyperlink,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type User,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { paginate } from "../../util/discord.js";

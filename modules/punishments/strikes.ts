@@ -1,8 +1,13 @@
-import type { InteractionResponse, Message, RepliableInteraction, User } from "discord.js";
-
-import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+import {
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	type InteractionResponse,
+	type Message,
+	type RepliableInteraction,
+	type User,
+} from "discord.js";
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { mentionUser } from "../settings.js";

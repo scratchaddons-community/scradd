@@ -1,14 +1,12 @@
-import type { Category } from "./misc.js";
-
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
-	channelLink,
 	ChannelType,
 	ComponentType,
 	GuildMember,
 	TextInputStyle,
+	channelLink,
 	userMention,
 } from "discord.js";
 import {
@@ -20,18 +18,18 @@ import {
 	defineModal,
 	defineSelect,
 } from "strife.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/misc.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
-	getIdFromName,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
+	TICKET_CATEGORIES,
+	getIdFromName,
+	type Category,
 } from "./misc.js";
 
 const appealedStrikes = new Set<string>();

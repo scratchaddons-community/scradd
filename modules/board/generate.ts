@@ -1,13 +1,16 @@
-import type { APIButtonComponent, BaseMessageOptions, TextBasedChannel } from "discord.js";
-import type { boardDatabase } from "./misc.js";
-
-import { ButtonStyle, ComponentType, Message } from "discord.js";
+import {
+	ButtonStyle,
+	ComponentType,
+	Message,
+	type APIButtonComponent,
+	type BaseMessageOptions,
+	type TextBasedChannel,
+} from "discord.js";
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 import { extractMessageExtremities, messageToEmbed } from "../../util/discord.js";
 import { censor } from "../automod/misc.js";
-import { BOARD_EMOJI } from "./misc.js";
+import { BOARD_EMOJI, type boardDatabase } from "./misc.js";
 
 export default async function generateBoardMessage(
 	info: (typeof boardDatabase.data)[number] | Message,

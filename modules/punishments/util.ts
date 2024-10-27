@@ -1,12 +1,20 @@
-import type { GuildMember, InteractionReplyOptions, Message, Snowflake, User } from "discord.js";
-
-import { ButtonStyle, ComponentType, MessageType, time, TimestampStyles } from "discord.js";
-
+import {
+	ButtonStyle,
+	ComponentType,
+	MessageType,
+	TimestampStyles,
+	time,
+	type GuildMember,
+	type InteractionReplyOptions,
+	type Message,
+	type Snowflake,
+	type User,
+} from "discord.js";
 import Database, { allDatabaseMessages } from "../../common/database.js";
-import { getFilesFromMessage, GlobalUsersPattern, paginate } from "../../util/discord.js";
+import { GlobalUsersPattern, getFilesFromMessage, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { asyncFilter, gracefulFetch } from "../../util/promises.js";
-import { getLoggingThread, LogSeverity } from "../logging/misc.js";
+import { LogSeverity, getLoggingThread } from "../logging/misc.js";
 import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{
@@ -73,7 +81,7 @@ export default async function filterToStrike(
 		reason:
 			url ?
 				await fetch(url).then(async (response) => await response.text())
-			:	(/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content),
+			:	/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content,
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };

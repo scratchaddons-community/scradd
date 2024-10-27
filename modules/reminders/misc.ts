@@ -1,8 +1,5 @@
-import type { Snowflake } from "discord.js";
-
-import { ChannelType } from "discord.js";
+import { ChannelType, type Snowflake } from "discord.js";
 import { client } from "strife.js";
-
 import config, { getInitialThreads } from "../../common/config.js";
 import Database from "../../common/database.js";
 

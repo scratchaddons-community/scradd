@@ -1,7 +1,5 @@
 import type { Message, Snowflake } from "discord.js";
-
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/give-xp.js";

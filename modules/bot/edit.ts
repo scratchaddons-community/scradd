@@ -1,19 +1,18 @@
-import type {
-	InteractionResponse,
-	MessageContextMenuCommandInteraction,
-	ModalSubmitInteraction,
-} from "discord.js";
-
 import { unifiedDiff } from "difflib";
-import { ComponentType, TextInputStyle } from "discord.js";
-
+import {
+	ComponentType,
+	TextInputStyle,
+	type InteractionResponse,
+	type MessageContextMenuCommandInteraction,
+	type ModalSubmitInteraction,
+} from "discord.js";
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { databaseThread } from "../../common/database.js";
 import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { chatThread } from "../autos/chat.js";
 import { stringifyError } from "../logging/errors.js";
-import log, { LoggingEmojis, LogSeverity, shouldLog } from "../logging/misc.js";
+import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
+import { chatThread } from "../autos/chat.js";
 
 export default async function editMessage(
 	interaction: MessageContextMenuCommandInteraction,

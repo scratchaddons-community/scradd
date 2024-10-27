@@ -1,18 +1,16 @@
 import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
-import type { Snowflake } from "discord.js";
-
 import SimpleMarkdown from "@khanacademy/simple-markdown";
 import { toCodePoints } from "@twemoji/parser";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import {
-	escapeMarkdown,
 	Faces,
-	formatEmoji,
 	FormattingPatterns,
 	MessageMentions,
+	escapeMarkdown,
+	formatEmoji,
+	type Snowflake,
 } from "discord.js";
 import { client } from "strife.js";
-
 import config from "../common/config.js";
 
 export function escapeMessage(text: string): string {

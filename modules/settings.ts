@@ -1,28 +1,23 @@
-import type {
-	InteractionReplyOptions,
-	RepliableInteraction,
-	Snowflake,
-	UserMention,
-} from "discord.js";
-import type { BasicOption } from "strife.js";
-import type { CamelToKebab } from "../common/misc.js";
-
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	hyperlink,
 	User,
+	hyperlink,
 	userMention,
+	type InteractionReplyOptions,
+	type RepliableInteraction,
+	type Snowflake,
+	type UserMention,
 } from "discord.js";
-import { client, defineButton, defineChatCommand } from "strife.js";
-
+import { client, defineButton, defineChatCommand, type BasicOption } from "strife.js";
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
 import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
 import { getWeeklyXp } from "./xp/util.js";
+import type { CamelToKebab } from "../common/misc.js";
 
 /**
  * ## How to add a setting
@@ -158,7 +153,7 @@ export async function updateSettings(
 		...Object.fromEntries(
 			Object.keys(SETTINGS).map((setting) => {
 				const value = settings[setting];
-				return [setting, value === "toggle" ? !old[setting] : (value ?? old[setting])];
+				return [setting, value === "toggle" ? !old[setting] : value ?? old[setting]];
 			}),
 		),
 	};
@@ -268,6 +263,6 @@ export async function mentionUser(
 	}/users/${id}>`;
 
 	const { displayName } =
-		user instanceof User ? user : ((await client.users.fetch(user).catch(() => void 0)) ?? {});
+		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
 	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
 }

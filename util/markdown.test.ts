@@ -1,6 +1,5 @@
 import { deepStrictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import { parseMarkdown } from "./markdown.js";
 
 await describe("parseMarkdown", async () => {

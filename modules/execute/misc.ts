@@ -1,14 +1,14 @@
-import type {
-	ApplicationCommandOption,
-	ApplicationCommandSubCommand,
-	GuildBasedChannel,
-	Role,
-	User,
+import {
+	ApplicationCommandOptionType,
+	Base,
+	MessageMentions,
+	type ApplicationCommandOption,
+	type ApplicationCommandSubCommand,
+	type GuildBasedChannel,
+	type Role,
+	type User,
 } from "discord.js";
-
-import { ApplicationCommandOptionType, Base, MessageMentions } from "discord.js";
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 
 export const OPERATION_PREFIX = "~ ";
@@ -104,7 +104,7 @@ export async function parseArgument(
 ): Promise<Options[string] | { error: boolean }> {
 	if (schema.name === "option") return { error: true };
 
-	const required = "required" in schema ? (schema.required ?? true) : true;
+	const required = "required" in schema ? schema.required ?? true : true;
 
 	if (argument) {
 		switch (schema.type) {

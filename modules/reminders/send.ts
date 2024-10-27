@@ -1,16 +1,13 @@
-import type { Channel } from "discord.js";
-import type { Reminder } from "./misc.js";
-
 import {
 	ActivityType,
 	ChannelType,
 	MessageFlags,
-	time,
 	TimestampStyles,
+	time,
 	userMention,
+	type Channel,
 } from "discord.js";
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { backupDatabases, prepareExit } from "../../common/database.js";
@@ -18,9 +15,9 @@ import { statuses } from "../../common/strings.js";
 import { convertBase } from "../../util/numbers.js";
 import { gracefulFetch } from "../../util/promises.js";
 import { syncRandomBoard } from "../board/update.js";
-import sendQuestion from "../qotds/send.js";
 import getWeekly, { getChatters } from "../xp/weekly.js";
-import { remindersDatabase, SpecialReminder } from "./misc.js";
+import { SpecialReminder, remindersDatabase, type Reminder } from "./misc.js";
+import sendQuestion from "../qotds/send.js";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {

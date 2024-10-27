@@ -1,12 +1,8 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
-import type { DefaultReactionEmoji, Snowflake } from "discord.js";
-
-import fileSystem from "node:fs/promises";
-
-import { channelLink } from "discord.js";
+import { channelLink, type DefaultReactionEmoji, type Snowflake } from "discord.js";
 import Mustache from "mustache";
+import fileSystem from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.js";

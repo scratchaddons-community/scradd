@@ -1,5 +1,3 @@
-import type { CommandInteractionOption } from "discord.js";
-
 import {
 	ActivityType,
 	ApplicationCommandOptionType,
@@ -8,9 +6,9 @@ import {
 	MessageMentions,
 	MessageType,
 	underline,
+	type CommandInteractionOption,
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
-
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { escapeMessage } from "../../util/markdown.js";

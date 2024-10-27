@@ -1,6 +1,5 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import { parseColor, resolveIcon } from "./misc.js";
 
 await describe("resolveIcon", async () => {

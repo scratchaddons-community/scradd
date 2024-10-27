@@ -1,22 +1,18 @@
-import type {
-	APIInteractionGuildMember,
-	ApplicationCommandPermissions,
-	ApplicationCommandPermissionsUpdateData,
-	Guild,
-	Snowflake,
-	TextBasedChannel,
-} from "discord.js";
-import type { CustomOperation } from "./util.js";
-
 import {
 	ApplicationCommand,
 	ApplicationCommandPermissionType,
 	GuildMember,
 	PermissionsBitField,
 	User,
+	type APIInteractionGuildMember,
+	type ApplicationCommandPermissions,
+	type ApplicationCommandPermissionsUpdateData,
+	type Guild,
+	type Snowflake,
+	type TextBasedChannel,
 } from "discord.js";
 import { client } from "strife.js";
-
+import type { CustomOperation } from "./util.js";
 import { getSettings } from "../settings.js";
 
 const permissionsCache: Record<
@@ -73,7 +69,7 @@ export default async function hasPermission(
 		:	memberPermissions.has(
 				schema.defaultMemberPermissions?.equals(0n) ?
 					"Administrator"
-				:	(schema.defaultMemberPermissions ?? 0n),
+				:	schema.defaultMemberPermissions ?? 0n,
 			);
 }
 

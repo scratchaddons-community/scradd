@@ -13,12 +13,11 @@ import {
 	defineSelect,
 	defineSubcommands,
 } from "strife.js";
-
 import config from "../../common/config.js";
-import features from "../../common/features.js";
 import { giveXpForMessage } from "./give-xp.js";
 import getUserRank, { top } from "./rank.js";
 import { recentXpDatabase } from "./util.js";
+import features from "../../common/features.js";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;

@@ -1,7 +1,4 @@
-import type { Snowflake, TextBasedChannel } from "discord.js";
-
-import { BaseChannel, ChannelType } from "discord.js";
-
+import { BaseChannel, ChannelType, type Snowflake, type TextBasedChannel } from "discord.js";
 import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 

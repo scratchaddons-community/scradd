@@ -1,14 +1,14 @@
-import type {
-	PrivateThreadChannel,
-	Snowflake,
-	TextInputComponentData,
-	ThreadChannel,
+import {
+	ChannelType,
+	ComponentType,
+	TextInputStyle,
+	type PrivateThreadChannel,
+	type Snowflake,
+	type TextInputComponentData,
+	type ThreadChannel,
 } from "discord.js";
-
-import { ChannelType, ComponentType, TextInputStyle } from "discord.js";
-import { client } from "strife.js";
-
 import config, { getInitialThreads } from "../../common/config.js";
+import { client } from "strife.js";
 
 export const TICKETS_BY_MEMBER = Object.fromEntries<
 	PrivateThreadChannel | ThreadChannel | undefined

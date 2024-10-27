@@ -1,13 +1,12 @@
 import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
 import { defineButton, defineEvent, defineSubcommands } from "strife.js";
-
-import config from "../../common/config.js";
-import features from "../../common/features.js";
 import { paginate } from "../../util/discord.js";
-import { mentionUser } from "../settings.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 import { syncMembers, updateMemberThreads, updateThreadMembers } from "./sync-members.js";
+import { mentionUser } from "../settings.js";
+import config from "../../common/config.js";
+import features from "../../common/features.js";
 
 defineEvent("threadCreate", async (thread) => {
 	if (thread.type === ChannelType.PrivateThread) return;

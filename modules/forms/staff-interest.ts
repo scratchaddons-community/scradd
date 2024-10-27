@@ -1,8 +1,13 @@
-import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
-
-import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
+import {
+	ButtonStyle,
+	ComponentType,
+	GuildMember,
+	TextInputStyle,
+	time,
+	type ButtonInteraction,
+	type ModalSubmitInteraction,
+} from "discord.js";
 import { client } from "strife.js";
-
 import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getAllMessages } from "../../util/discord.js";

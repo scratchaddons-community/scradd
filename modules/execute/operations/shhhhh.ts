@@ -1,12 +1,9 @@
-import type { MessageReaction, Snowflake } from "discord.js";
+import { Faces, type MessageReaction, escapeMarkdown, User, type Snowflake } from "discord.js";
 import type { CustomOperation } from "../util.js";
-
-import { escapeMarkdown, Faces, User } from "discord.js";
-import { client } from "strife.js";
-
-import constants from "../../../common/constants.js";
+import { executeMessages, executeEmojis } from "../../../common/strings.js";
 import emojis from "../../../common/emojis.js";
-import { executeEmojis, executeMessages } from "../../../common/strings.js";
+import { client } from "strife.js";
+import constants from "../../../common/constants.js";
 import { ignoredReactionPurges } from "../../logging/messages.js";
 import { getSettings, userSettingsDatabase } from "../../settings.js";
 

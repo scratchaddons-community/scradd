@@ -1,7 +1,5 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
-
 import mongoose from "mongoose";
-
 import config from "../../common/config.js";
 import { checkXPRoles } from "../xp/give-xp.js";
 

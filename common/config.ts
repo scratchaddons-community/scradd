@@ -1,20 +1,18 @@
-import type {
-	AnyThreadChannel,
-	ForumChannel,
-	Guild,
-	MediaChannel,
-	NewsChannel,
-	NonThreadGuildBasedChannel,
-	PublicThreadChannel,
-	Role,
-	TextChannel,
-} from "discord.js";
-
 import assert from "node:assert";
-
-import { ChannelType, Collection } from "discord.js";
+import {
+	ChannelType,
+	Collection,
+	type Role,
+	type AnyThreadChannel,
+	type ForumChannel,
+	type Guild,
+	type MediaChannel,
+	type NewsChannel,
+	type NonThreadGuildBasedChannel,
+	type PublicThreadChannel,
+	type TextChannel,
+} from "discord.js";
 import { client } from "strife.js";
-
 import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
 import constants from "./constants.js";
 

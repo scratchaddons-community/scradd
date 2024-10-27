@@ -1,10 +1,6 @@
-import type { ApplicationCommandOption } from "discord.js";
-
+import { ApplicationCommandOptionType, type ApplicationCommandOption } from "discord.js";
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
-import { ApplicationCommandOptionType } from "discord.js";
-
 import { parseArgument, parseArguments, partitionArguments, splitFirstArgument } from "./misc.js";
 
 await describe("splitFirstArgument", async () => {

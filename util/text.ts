@@ -1,5 +1,4 @@
 import type { IncomingMessage } from "node:http";
-
 import constants from "../common/constants.js";
 
 /**

@@ -1,12 +1,15 @@
-import type { Message, Snowflake, TextBasedChannel } from "discord.js";
-
-import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
+import {
+	ChannelType,
+	RESTJSONErrorCodes,
+	ThreadAutoArchiveDuration,
+	type Message,
+	type Snowflake,
+	type TextBasedChannel,
+} from "discord.js";
 import papaparse from "papaparse";
 import { client } from "strife.js";
-
 import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
 import config from "./config.js";
-
 let timeouts: Record<
 	Snowflake,
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined

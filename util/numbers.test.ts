@@ -1,6 +1,5 @@
 import { AssertionError, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
-
 import { bigIntPower, convertBase, lerpColors, nth, parseTime } from "./numbers.js";
 
 await describe("bigintPow", async () => {

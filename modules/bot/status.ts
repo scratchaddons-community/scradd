@@ -1,8 +1,5 @@
-import type { ChatInputCommandInteraction } from "discord.js";
-
-import { time, TimestampStyles } from "discord.js";
+import { TimestampStyles, time, type ChatInputCommandInteraction } from "discord.js";
 import { client } from "strife.js";
-
 import constants from "../../common/constants.js";
 import pkg from "../../package.json" with { type: "json" };
 
