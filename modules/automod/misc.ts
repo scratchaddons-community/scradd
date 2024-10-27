@@ -1,4 +1,7 @@
-import { ChannelType, type TextBasedChannel } from "discord.js";
+import type { TextBasedChannel } from "discord.js";
+
+import { ChannelType } from "discord.js";
+
 import config from "../../common/config.js";
 import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";

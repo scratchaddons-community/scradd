@@ -1,22 +1,17 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	MessageType,
-	User,
-	type Message,
-	type Snowflake,
-} from "discord.js";
+import type { Message, Snowflake } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember, MessageType, User } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import {
-	DEFAULT_XP,
-	getLevelForXp,
-	getXpForLevel,
 	ACTIVE_THRESHOLD_ONE,
 	ACTIVE_THRESHOLD_TWO,
+	DEFAULT_XP,
 	ESTABLISHED_THRESHOLD,
+	getLevelForXp,
+	getXpForLevel,
 } from "./misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
 

@@ -2,7 +2,9 @@ import { createReadStream, promises as fileSystem } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { client } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { prepareExit } from "../common/database.js";

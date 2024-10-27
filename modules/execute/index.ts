@@ -1,13 +1,17 @@
+import type {
+	ApplicationCommandSubCommand,
+	Awaitable,
+	ChatInputCommandInteraction,
+} from "discord.js";
+
 import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	type ChatInputCommandInteraction,
 	MessageMentions,
-	type ApplicationCommandSubCommand,
-	type Awaitable,
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { mentionChatCommand } from "../../util/discord.js";
@@ -112,7 +116,7 @@ defineChatCommand(
 			interaction.guild?.id === config.guild.id &&
 			(command.censored === "channel" ?
 				!badWordsAllowed(interaction.channel)
-			:	command.censored ?? true);
+			:	(command.censored ?? true));
 		const censoredOptions = shouldCensor && tryCensor(operation);
 		if (censoredOptions && censoredOptions.strikes) {
 			await interaction.reply({

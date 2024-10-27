@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
+
 import constants from "../../common/constants.js";
 import { disableComponents } from "../../util/discord.js";
 import guessAddon from "./guess-addon.js";

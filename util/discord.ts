@@ -1,43 +1,47 @@
+import type {
+	ActionRow,
+	ActionRowData,
+	AnyThreadChannel,
+	APIActionRowComponent,
+	APIEmbed,
+	APIEmbedField,
+	APIMessageActionRowComponent,
+	Attachment,
+	Awaitable,
+	Channel,
+	ChatInputCommandInteraction,
+	Collection,
+	EmojiIdentifierResolvable,
+	Guild,
+	GuildTextBasedChannel,
+	InteractionReplyOptions,
+	Message,
+	MessageActionRowComponent,
+	MessageActionRowComponentData,
+	MessageEditOptions,
+	MessageReaction,
+	Snowflake,
+	ThreadChannel,
+	User,
+} from "discord.js";
+
 import {
+	bold,
 	ButtonStyle,
+	channelMention,
+	chatInputApplicationCommandMention,
 	Colors,
 	ComponentType,
 	FormattingPatterns,
 	GuildMember,
+	hyperlink,
 	MessageFlags,
+	messageLink,
 	MessageMentions,
 	MessageType,
-	bold,
-	channelMention,
-	chatInputApplicationCommandMention,
-	hyperlink,
-	messageLink,
-	type APIActionRowComponent,
-	type APIEmbed,
-	type APIEmbedField,
-	type APIMessageActionRowComponent,
-	type ActionRow,
-	type ActionRowData,
-	type AnyThreadChannel,
-	type Attachment,
-	type Awaitable,
-	type Channel,
-	type ChatInputCommandInteraction,
-	type Collection,
-	type EmojiIdentifierResolvable,
-	type Guild,
-	type GuildTextBasedChannel,
-	type InteractionReplyOptions,
-	type Message,
-	type MessageActionRowComponent,
-	type MessageActionRowComponentData,
-	type MessageEditOptions,
-	type MessageReaction,
-	type Snowflake,
-	type ThreadChannel,
-	type User,
 } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { escapeMessage, stripMarkdown } from "./markdown.js";
@@ -525,7 +529,7 @@ export async function messageToEmbed(
 ): Promise<APIEmbed> {
 	const lines = (await messageToText(message)).split("\n");
 	const content =
-		message.type === MessageType.GuildInviteReminder ? lines[1] ?? "" : lines.join("\n");
+		message.type === MessageType.GuildInviteReminder ? (lines[1] ?? "") : lines.join("\n");
 	const author =
 		message.type === MessageType.AutoModerationAction ? content
 		: message.type === MessageType.GuildInviteReminder ? lines[0] + " 🤖"
@@ -685,7 +689,7 @@ export async function paginate<Item>(
 		const pages = condensed ? Math.ceil(array.length / length) : pageCount;
 		const offset =
 			Math.floor(
-				(currentOffset === originalOffset ? rawOffset ?? 0 : currentOffset) / length,
+				(currentOffset === originalOffset ? (rawOffset ?? 0) : currentOffset) / length,
 			) * length;
 		const filtered = array.filter((_, index) => index >= offset && index < offset + length);
 		const itemCount = totalCount ?? array.length;

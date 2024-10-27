@@ -1,17 +1,14 @@
-import {
-	TimestampStyles,
-	time,
-	userMention,
-	type MessageCreateOptions,
-	type Snowflake,
-} from "discord.js";
+import type { MessageCreateOptions, Snowflake } from "discord.js";
+
+import { time, TimestampStyles, userMention } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
+import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
 import { recheckMemberRole } from "../roles/custom.js";
-import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.js";
+import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 
 export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();

@@ -2,6 +2,7 @@
 /// <reference lib="dom.iterable" />
 
 import "@total-typescript/ts-reset";
+
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
 import type { FilterNonFalsy } from "./misc.js";

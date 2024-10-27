@@ -1,25 +1,30 @@
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type {
+	RESTGetAPICurrentUserResult,
+	RESTPostOAuth2AccessTokenResult,
+	RESTPostOAuth2AccessTokenURLEncodedData,
+	RESTPostOAuth2RefreshTokenResult,
+	RESTPostOAuth2RefreshTokenURLEncodedData,
+	RESTPutAPICurrentUserApplicationRoleConnectionJSONBody,
+	RESTPutAPICurrentUserApplicationRoleConnectionResult,
+} from "discord.js";
+
+import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+
 import {
 	ApplicationRoleConnectionMetadataType,
 	OAuth2Scopes,
 	Routes,
 	userMention,
-	type RESTGetAPICurrentUserResult,
-	type RESTPostOAuth2AccessTokenResult,
-	type RESTPostOAuth2AccessTokenURLEncodedData,
-	type RESTPostOAuth2RefreshTokenResult,
-	type RESTPostOAuth2RefreshTokenURLEncodedData,
-	type RESTPutAPICurrentUserApplicationRoleConnectionJSONBody,
-	type RESTPutAPICurrentUserApplicationRoleConnectionResult,
 } from "discord.js";
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { fetchUser } from "../../util/scratch.js";
 import { getRequestUrl } from "../../util/text.js";
 import { handleUser } from "../autos/scratch.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import log, { LoggingEmojis, LogSeverity } from "../logging/misc.js";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{

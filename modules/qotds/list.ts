@@ -1,11 +1,11 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	type AnySelectMenuInteraction,
-	type ButtonInteraction,
-	type ChatInputCommandInteraction,
+import type {
+	AnySelectMenuInteraction,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
 } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { disableComponents, paginate } from "../../util/discord.js";

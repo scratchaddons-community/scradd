@@ -1,12 +1,12 @@
-import {
-	ButtonStyle,
-	Collection,
-	ComponentType,
-	type CommandInteraction,
-	type MessageComponentInteraction,
-	type ModalSubmitInteraction,
-	type Snowflake,
+import type {
+	CommandInteraction,
+	MessageComponentInteraction,
+	ModalSubmitInteraction,
+	Snowflake,
 } from "discord.js";
+
+import { ButtonStyle, Collection, ComponentType } from "discord.js";
+
 import constants from "../../common/constants.js";
 
 export const GAME_COLLECTOR_TIME = constants.collectorTime * 4;

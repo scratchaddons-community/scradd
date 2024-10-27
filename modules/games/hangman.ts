@@ -1,24 +1,23 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	Guild,
-	TextInputStyle,
-	inlineCode,
-	type ChatInputCommandInteraction,
-	type GuildMember,
-	type MessageEditOptions,
-	type User,
+import type {
+	ChatInputCommandInteraction,
+	GuildMember,
+	MessageEditOptions,
+	User,
 } from "discord.js";
+
 import fileSystem from "node:fs/promises";
+
+import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
+import features from "../../common/features.js";
 import { disableComponents, getAllMembers } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
-import features from "../../common/features.js";
 import { mentionUser } from "../settings.js";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;

@@ -1,14 +1,11 @@
+import type { AutocompleteInteraction } from "discord.js";
+
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
-import {
-	ApplicationCommandOptionType,
-	ButtonStyle,
-	ComponentType,
-	hyperlink,
-	type AutocompleteInteraction,
-} from "discord.js";
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } from "discord.js";
 import { matchSorter } from "match-sorter";
 import { defineChatCommand } from "strife.js";
+
 import constants from "../common/constants.js";
 import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";

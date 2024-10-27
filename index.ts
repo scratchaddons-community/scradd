@@ -1,11 +1,13 @@
-import { GatewayIntentBits } from "discord.js";
-import mongoose from "mongoose";
 import dns from "node:dns";
 import { fileURLToPath } from "node:url";
+
+import { GatewayIntentBits } from "discord.js";
+import mongoose from "mongoose";
 import { client, login } from "strife.js";
+
 import constants from "./common/constants.js";
-import pkg from "./package.json" with { type: "json" };
 import features from "./common/features.js";
+import pkg from "./package.json" with { type: "json" };
 
 dns.setDefaultResultOrder("ipv4first");
 
