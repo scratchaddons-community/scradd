@@ -1,3 +1,6 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import js from "@eslint/js";
 import unicorn from "eslint-plugin-unicorn";
 import globals from "globals";
@@ -13,10 +16,12 @@ const config = typescriptEslint.config(
 		languageOptions: {
 			ecmaVersion: 2025,
 			globals: globals.node,
-			parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+			parserOptions: {
+				projectService: true,
+				tsconfigRootDir: fileURLToPath(path.dirname(__filename)),
+			},
 		},
 		linterOptions: { reportUnusedDisableDirectives: "error" },
-		plugins: { unicorn },
 		rules: {
 			"@typescript-eslint/consistent-return": "off",
 			"@typescript-eslint/consistent-type-definitions": ["error", "type"],
