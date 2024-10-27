@@ -7,7 +7,7 @@ import globals from "globals";
 import typescriptEslint from "typescript-eslint";
 
 const config = typescriptEslint.config(
-	{ files: ["**/*.ts", "**/*.cts", "**.*.mts"] },
+	{ files: ["**/*.ts"] },
 	{ ignores: ["./dist"] },
 	js.configs.recommended,
 	...typescriptEslint.configs.all,
@@ -203,15 +203,7 @@ const config = typescriptEslint.config(
 		},
 	},
 	{
-		files: ["**/*.cjs"],
-		languageOptions: { ecmaVersion: 5, sourceType: "script" },
-		rules: {
-			"@typescript-eslint/no-require-imports": "off",
-			"@typescript-eslint/no-var-requires": "off",
-		},
-	},
-	{
-		files: ["**/.*"],
+		files: ["**/*.config.js"],
 		rules: { "unicorn/prevent-abbreviations": "off", "unicorn/string-content": "off" },
 	},
 	{
