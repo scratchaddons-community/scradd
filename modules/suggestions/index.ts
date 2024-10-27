@@ -1,11 +1,17 @@
 import type { Snowflake } from "discord.js";
 
 import { ApplicationCommandOptionType, ApplicationCommandType, MessageType } from "discord.js";
-import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
+import {
+	client,
+	defineButton,
+	defineChatCommand,
+	defineEvent,
+	defineMenuCommand,
+	stripMarkdown,
+} from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { stripMarkdown } from "../../util/markdown.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import answerSuggestion from "./answer.js";

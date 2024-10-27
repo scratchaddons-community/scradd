@@ -1,10 +1,10 @@
 import type { GuildAuditLogsEntry, Snowflake } from "discord.js";
-import type { AuditLog } from "../logging/misc.js";
+import type { AuditLog } from "../logging/util.js";
 
 import { AuditLogEvent, Colors, ForumChannel, ThreadChannel } from "discord.js";
+import { formatAnyEmoji } from "strife.js";
 
 import config from "../../common/config.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
 import { lerpColors } from "../../util/numbers.js";
 import { parseSuggestionTags, suggestionAnswers } from "./misc.js";
 

@@ -7,8 +7,8 @@ import type {
 } from "discord.js";
 
 import { ButtonStyle, ComponentType, userMention } from "discord.js";
+import { zeroWidthSpace } from "strife.js";
 
-import constants from "../../../common/constants.js";
 import { convertBase } from "../../../util/numbers.js";
 import { joinWithAnd } from "../../../util/text.js";
 
@@ -43,7 +43,7 @@ export default function generateAppeal(
 						value: joinWithAnd([...users.rejecters], userMention) || "Nobody",
 						inline: true,
 					},
-					{ name: constants.zws, value: constants.zws, inline: true },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: true },
 					{ name: "Accepted Note", value: notes.accepted ?? "N/A", inline: true },
 					{ name: "Rejected Note", value: notes.rejected ?? "N/A", inline: true },
 				],

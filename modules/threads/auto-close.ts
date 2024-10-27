@@ -6,11 +6,13 @@ import type {
 } from "discord.js";
 
 import { ButtonStyle, ChannelType, ComponentType, time, TimestampStyles } from "discord.js";
-import { client } from "strife.js";
+import { client, disableComponents } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+
+import "../../util/discord.js";
+
 import { parseTime } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";

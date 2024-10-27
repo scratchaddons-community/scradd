@@ -3,13 +3,12 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { client } from "strife.js";
+import { client, logError } from "strife.js";
 
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import { prepareExit } from "../common/database.js";
 import appealRequest from "../modules/forms/appeals/show-appeal.js";
-import logError from "../modules/logging/errors.js";
 import linkScratchRole from "../modules/roles/scratch.js";
 import suggestionsPage from "../modules/suggestions/web.js";
 import pkg from "../package.json" with { type: "json" };
@@ -105,7 +104,12 @@ const server = http.createServer(async (request, response) => {
 			})
 			.end();
 	} catch (error) {
-		await logError(error, request.url ?? "").catch(console.error);
+		await logError({
+			error,
+			event: request.url ?? "",
+			channel: config.channels.errors,
+			emoji: constants.emojis.statuses.no,
+		}).catch(console.error);
 		response.writeHead(500, { "content-type": "text/plain" }).end("500 Internal Server Error");
 	}
 });

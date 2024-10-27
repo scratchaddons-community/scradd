@@ -4,13 +4,14 @@ import type {
 	PartialGuildScheduledEvent,
 	VoiceState,
 } from "discord.js";
-import type { AuditLog } from "./misc.js";
+import type { AuditLog } from "./util.js";
 
 import { unifiedDiff } from "difflib";
 import { ChannelType, GuildScheduledEventStatus, time } from "discord.js";
 
 import config from "../../common/config.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./misc.js";
+import log from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function guildScheduledEventCreate(
 	entry: AuditLog<AuditLogEvent.GuildScheduledEventCreate>,

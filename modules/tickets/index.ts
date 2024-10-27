@@ -19,12 +19,13 @@ import {
 	defineMenuCommand,
 	defineModal,
 	defineSelect,
+	disableComponents,
 } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/util.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
 	getIdFromName,

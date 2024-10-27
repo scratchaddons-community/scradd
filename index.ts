@@ -1,23 +1,24 @@
+import type { TextChannel } from "discord.js";
+
 import dns from "node:dns";
 import { fileURLToPath } from "node:url";
 
 import { GatewayIntentBits } from "discord.js";
 import mongoose from "mongoose";
-import { client, login } from "strife.js";
+import { client, logError, login } from "strife.js";
 
 import constants from "./common/constants.js";
 import features from "./common/features.js";
+import { LoggingEmojis, LoggingEmojisError } from "./modules/logging/util.js";
 import pkg from "./package.json" with { type: "json" };
 
 dns.setDefaultResultOrder("ipv4first");
 
 if (
-	process.env.BOT_TOKEN.startsWith(
-		Buffer.from(constants.users.scradd).toString("base64") + ".",
-	) &&
+	process.env.BOT_TOKEN.startsWith(Buffer.from(constants.users.bot).toString("base64") + ".") &&
 	!process.argv.includes("--production")
 )
-	throw new Error("Refusing to run on production Scradd without `--production` flag");
+	throw new Error("Refusing to run on the production bot without `--production` flag");
 
 await mongoose.connect(process.env.MONGO_URI);
 
@@ -63,11 +64,8 @@ if (features._canvas) {
 await login({
 	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
 	defaultCommandAccess: process.env.GUILD_ID,
-	async handleError(error, event) {
-		const { default: logError } = await import("./modules/logging/errors.js");
+	handleError: { channel: getErrorsChannel, emoji: LoggingEmojisError },
 
-		await logError(error, event);
-	},
 	clientOptions: {
 		intents:
 			GatewayIntentBits.Guilds |
@@ -91,14 +89,33 @@ await login({
 
 if (process.env.PORT) await import("./web/server.js");
 
-if (process.env.NODE_ENV === "production") {
-	const { default: log, LogSeverity, LoggingEmojis } = await import("./modules/logging/misc.js");
-	await log(
-		`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`,
-		LogSeverity.ImportantUpdate,
+const channel = await getErrorsChannel();
+process
+	.on(
+		"uncaughtException",
+		async (error, event) =>
+			await logError({ error, event, channel, emoji: constants.emojis.statuses.no }),
+	)
+	.on(
+		"warning",
+		async (error) =>
+			await logError({
+				error,
+				event: "warning",
+				channel,
+				emoji: constants.emojis.statuses.no,
+			}),
 	);
+
+if (constants.env === "production") {
+	await channel.send(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`);
 }
 
 const { cleanListeners } = await import("./common/database.js");
 await cleanListeners();
 client.user.setStatus("online");
+
+async function getErrorsChannel(): Promise<TextChannel> {
+	const { default: config } = await import("./common/config.js");
+	return config.channels.errors;
+}

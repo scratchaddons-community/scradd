@@ -5,10 +5,9 @@ import type {
 } from "discord.js";
 
 import { ComponentType, TextInputStyle, User } from "discord.js";
-import { client } from "strife.js";
+import { client, stringifyError } from "strife.js";
 
 import constants from "../../common/constants.js";
-import { stringifyError } from "../logging/errors.js";
 import { ignoredDeletions } from "../logging/messages.js";
 
 const censoredToken = client.token
@@ -22,7 +21,7 @@ export default async function getCode(
 	const { owner } = await client.application.fetch();
 	const owners =
 		owner instanceof User ? [owner.id] : (owner?.members.map((member) => member.id) ?? []);
-	if (process.env.NODE_ENV === "production" && !owners.includes(interaction.user.id))
+	if (constants.env === "production" && !owners.includes(interaction.user.id))
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} This command is reserved for ${

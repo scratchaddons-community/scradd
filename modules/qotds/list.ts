@@ -5,20 +5,21 @@ import type {
 } from "discord.js";
 
 import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+import { disableComponents, paginate } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, paginate } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { Question, questions } from "./send.js";
 
 export async function listQuestions(interaction: ChatInputCommandInteraction): Promise<void> {
-	await interaction.deferReply({ ephemeral: true });
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
+
 	await paginate(
 		questions,
 		({ question }) => question ?? "",
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		{
 			title: "Upcoming QOTDs",
 			singular: "QOTD",
@@ -26,6 +27,9 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 			user: interaction.user,
 			pageLength: 10,
 			totalCount: questions.length,
+
+			timeout: constants.collectorTime,
+			color: constants.themeColor,
 
 			generateComponents(filtered) {
 				return [

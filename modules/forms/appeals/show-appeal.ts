@@ -20,13 +20,12 @@ import {
 	userMention,
 } from "discord.js";
 import Mustache from "mustache";
-import { client } from "strife.js";
+import { client, stripMarkdown, zeroWidthSpace } from "strife.js";
 
 import config from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import features from "../../../common/features.js";
 import pkg from "../../../package.json" with { type: "json" };
-import { stripMarkdown } from "../../../util/markdown.js";
 import { getRequestUrl } from "../../../util/text.js";
 import { strikeDatabase } from "../../punishments/util.js";
 import { remindersDatabase, SpecialReminder } from "../../reminders/misc.js";
@@ -236,7 +235,7 @@ export default async function appealRequest(
 						inline: true,
 					},
 					{ name: "Strikes", value: totalStrikeCount.toLocaleString(), inline: true },
-					{ name: constants.zws, value: constants.zws, inline: false },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: false },
 					{
 						name: "Mod’s Perspective",
 						value: reason ?? constants.defaultPunishment,

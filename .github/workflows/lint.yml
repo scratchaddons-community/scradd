@@ -16,7 +16,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.2.2
               with:
-                  token: ${{ secrets.TOKEN }}
+                  token: ${{ secrets.TOKEN || secrets.GITHUB_TOKEN }}
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 

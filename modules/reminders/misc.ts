@@ -4,6 +4,7 @@ import { ChannelType } from "discord.js";
 import { client } from "strife.js";
 
 import config, { getInitialThreads } from "../../common/config.js";
+import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 
 export const enum SpecialReminder {
@@ -84,7 +85,7 @@ if (
 const backupsThread = getInitialThreads(config.channels.modlogs).find(
 	(thread) => thread.type === ChannelType.PrivateThread && thread.name === "Database Backups",
 );
-if (backupsThread && process.env.NODE_ENV === "production") {
+if (backupsThread && constants.env === "production") {
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter(
 			(reminder) => reminder.id !== SpecialReminder.BackupDatabases,

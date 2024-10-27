@@ -1,8 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import { defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
+import { defineButton, defineChatCommand, defineMenuCommand, disableComponents } from "strife.js";
 
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import guessAddon from "./guess-addon.js";
 import hangman from "./hangman.js";
 import memoryMatch, { showMemoryInstructions } from "./memory-match.js";

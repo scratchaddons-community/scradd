@@ -8,11 +8,12 @@ import type {
 import fileSystem from "node:fs/promises";
 
 import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
+import { disableComponents } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import features from "../../common/features.js";
-import { disableComponents, getAllMembers } from "../../util/discord.js";
+import { getAllMembers } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
@@ -334,7 +335,7 @@ async function getMember(player: User): Promise<GuildMember> {
 				member.id !== player.id &&
 				/^[\w.]{5,}$/i.test(member.user.username) &&
 				!tryCensor(member.user.username) &&
-				(process.env.NODE_ENV !== "production" ||
+				(constants.env === "development" ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)

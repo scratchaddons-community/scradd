@@ -2,10 +2,11 @@ import type { Message, Snowflake, TextBasedChannel } from "discord.js";
 
 import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
 import papaparse from "papaparse";
-import { client } from "strife.js";
+import { client, getFilesFromMessage } from "strife.js";
 
-import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
+import { getAllMessages } from "../util/discord.js";
 import config from "./config.js";
+import constants from "./constants.js";
 
 let timeouts: Record<
 	Snowflake,
@@ -14,9 +15,7 @@ let timeouts: Record<
 
 const threadName = "databases",
 	databaseFileType =
-		process.env.NODE_ENV === "production" ?
-			`${client.user.displayName.toLowerCase()}-db`
-		:	"csv";
+		constants.env === "production" ? `${client.user.displayName.toLowerCase()}-db` : "csv";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
@@ -235,7 +234,7 @@ for (const [event, code] of Object.entries({
 }
 
 export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
-	if (process.env.NODE_ENV !== "production") return;
+	if (constants.env === "development") return;
 
 	const attachments = (
 		await Promise.all(

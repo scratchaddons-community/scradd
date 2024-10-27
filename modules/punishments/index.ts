@@ -107,7 +107,7 @@ defineChatCommand(
 			reason: {
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the warning",
-				required: process.env.NODE_ENV === "production",
+				required: constants.env === "production",
 				minLength: 10,
 				maxLength: 1024,
 			},
@@ -155,7 +155,7 @@ defineMenuCommand(
 							style: TextInputStyle.Paragraph,
 							customId: "reason",
 							value:
-								process.env.NODE_ENV === "production" ?
+								constants.env === "production" ?
 									undefined
 								:	constants.defaultPunishment,
 						},
@@ -217,7 +217,7 @@ defineChatCommand(
 			"reason": {
 				type: ApplicationCommandOptionType.String,
 				description: "Reason for the ban",
-				required: process.env.NODE_ENV === "production",
+				required: constants.env === "production",
 				minLength: 10,
 				maxLength: 1024,
 			},
@@ -252,7 +252,7 @@ defineMenuCommand(
 							style: TextInputStyle.Paragraph,
 							customId: "reason",
 							value:
-								process.env.NODE_ENV === "production" ?
+								constants.env === "production" ?
 									undefined
 								:	constants.defaultPunishment,
 						},

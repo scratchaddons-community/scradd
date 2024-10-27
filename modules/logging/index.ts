@@ -1,5 +1,5 @@
 import type { Awaitable } from "discord.js";
-import type { AuditLog } from "./misc.js";
+import type { AuditLog } from "./util.js";
 
 import { AuditLogEvent, AutoModerationRuleTriggerType, userMention, WebhookType } from "discord.js";
 import { defineEvent } from "strife.js";
@@ -28,7 +28,7 @@ import {
 	messageReactionRemoveAll,
 	messageUpdate,
 } from "./messages.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./misc.js";
+import log from "./misc.js";
 import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
 import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
 import {
@@ -41,6 +41,7 @@ import {
 	memberPrune,
 	userUpdate,
 } from "./users.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,

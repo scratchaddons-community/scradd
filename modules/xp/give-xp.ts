@@ -1,6 +1,7 @@
 import type { Message, Snowflake } from "discord.js";
 
 import { ButtonStyle, ComponentType, GuildMember, MessageType, User } from "discord.js";
+import { zeroWidthSpace } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -85,7 +86,7 @@ export default async function giveXp(
 	amount = DEFAULT_XP,
 ): Promise<void> {
 	const user = to instanceof User ? to : to.user;
-	if (process.env.NODE_ENV === "production" && user.bot) return;
+	if (constants.env === "production" && user.bot) return;
 
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
@@ -169,7 +170,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 						value: `${Math.floor(newXp).toLocaleString()} XP`,
 						inline: true,
 					},
-					{ name: constants.zws, value: constants.zws, inline: true },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: true },
 					{
 						name: "⬆️ Next level",
 						value: `${nextLevelXp.toLocaleString()} XP`,

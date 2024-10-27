@@ -15,12 +15,11 @@ import {
 	User,
 	userMention,
 } from "discord.js";
-import { client, defineButton, defineChatCommand } from "strife.js";
+import { client, defineButton, defineChatCommand, disableComponents } from "strife.js";
 
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
 import { getWeeklyXp } from "./xp/util.js";
 
@@ -53,11 +52,11 @@ export async function getDefaultSettings(user: {
 		)) ?? !member;
 	return {
 		autoreactions: true,
-		boardPings: process.env.NODE_ENV === "production",
+		boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
 		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
-		levelUpPings: process.env.NODE_ENV === "production",
+		levelUpPings: constants.env === "production",
 		preDango: false,
 		scraddChat: false,
 		scratchEmbeds: true,

@@ -9,18 +9,14 @@ import type {
 
 import { unifiedDiff } from "difflib";
 import { Colors, messageLink } from "discord.js";
+import { getBaseChannel, isFileExpired, unsignFiles } from "strife.js";
 
 import config from "../../common/config.js";
 import { databaseThread } from "../../common/database.js";
-import {
-	extractMessageExtremities,
-	getBaseChannel,
-	isFileExpired,
-	messageToText,
-	unsignFiles,
-} from "../../util/discord.js";
+import { extractMessageExtremities, messageToText } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { LoggingEmojis, LogSeverity, shouldLog } from "./misc.js";
+import log, { shouldLog } from "./misc.js";
+import { LoggingEmojis, LogSeverity } from "./util.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 
@@ -42,7 +38,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 			{ embeds: [], files: [] }
 		:	await extractMessageExtremities(message, undefined, false);
 
-	const unknownAttachments = message.attachments.filter(isFileExpired);
+	const unknownAttachments = message.attachments.filter((file) => isFileExpired(file.url));
 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
@@ -211,7 +207,7 @@ export async function messageUpdate(
 		);
 		files.push(
 			...removedAttachments
-				.filter((file) => !isFileExpired(file))
+				.filter((file) => !isFileExpired(file.url))
 				.map((attachment) => attachment.url),
 		);
 

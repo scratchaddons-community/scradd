@@ -6,13 +6,13 @@ import type {
 } from "discord.js";
 
 import { ComponentType, MessageFlags, TextInputStyle } from "discord.js";
-import { client } from "strife.js";
+import { client, getBaseChannel, mentionChatCommand } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getBaseChannel, mentionChatCommand } from "../../util/discord.js";
 import { chatThread } from "../autos/chat.js";
-import log, { LoggingEmojis, LogSeverity } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 
 export default async function sayCommand(
 	interaction:

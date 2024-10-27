@@ -1,8 +1,8 @@
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
+import { escapeAllMarkdown } from "strife.js";
 
 import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { trimPatchVersion } from "../../util/text.js";
 
 export const GROUP_NAMES = ["Addon name", "Categorization", "Credits", "Misc"] as const;
@@ -20,7 +20,7 @@ export type AddonQuestion = {
 
 const firstLetters = Object.fromEntries(
 		addons.map((addon) => [
-			`Does your addon’s name __start__ with **${escapeMessage(
+			`Does your addon’s name __start__ with **${escapeAllMarkdown(
 				addon.manifest.name[0]?.toUpperCase() ?? "",
 			)}**?`,
 			false,
@@ -28,7 +28,7 @@ const firstLetters = Object.fromEntries(
 	),
 	lastLetters = Object.fromEntries(
 		addons.map((addon) => [
-			`Does your addon’s name __end__ with **${escapeMessage(
+			`Does your addon’s name __end__ with **${escapeAllMarkdown(
 				addon.manifest.name.at(-1)?.toUpperCase() ?? "",
 			)}**?`,
 			false,
@@ -76,8 +76,8 @@ export default Object.fromEntries(
 	addons.map(({ manifest: addon, addonId }) => {
 		const result: AddonQuestion[] = [];
 
-		const firstLetter = escapeMessage(addon.name[0]?.toUpperCase() ?? "");
-		const lastLetter = escapeMessage(addon.name.at(-1)?.toUpperCase() ?? "");
+		const firstLetter = escapeAllMarkdown(addon.name[0]?.toUpperCase() ?? "");
+		const lastLetter = escapeAllMarkdown(addon.name.at(-1)?.toUpperCase() ?? "");
 		result.push(
 			{
 				dependencies: {
@@ -459,8 +459,8 @@ export default Object.fromEntries(
 					({ name }) =>
 						({
 							dependencies: { [questionStrings.credits]: true },
-							question: `Did **${escapeMessage(name)}** contribute to your addon?`,
-							statement: `**${escapeMessage(name)}** contributed to this addon!`,
+							question: `Did **${escapeAllMarkdown(name)}** contribute to your addon?`,
+							statement: `**${escapeAllMarkdown(name)}** contributed to this addon!`,
 						}) as const,
 				),
 			);

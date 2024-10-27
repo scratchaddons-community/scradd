@@ -23,7 +23,7 @@ defineEvent("messageReactionAdd", async ({ message: partialMessage }, partialUse
 	if (!reaction) return;
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
-	if (user.id === message.author.id && process.env.NODE_ENV === "production")
+	if (user.id === message.author.id && constants.env === "production")
 		return await reaction.users.remove(user);
 
 	await updateBoard({ count: reaction.count, message });

@@ -10,21 +10,21 @@ import type {
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
 import { ButtonStyle, ChannelType, ComponentType, MessageType, TextInputStyle } from "discord.js";
 import mongoose from "mongoose";
-import { client } from "strife.js";
+import {
+	client,
+	getBaseChannel,
+	GlobalUsersPattern,
+	InvitesPattern,
+	stripMarkdown,
+} from "strife.js";
 
 import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
-import {
-	getBaseChannel,
-	GlobalBotInvitesPattern,
-	GlobalUsersPattern,
-	InvitesPattern,
-	messageToText,
-} from "../../util/discord.js";
-import { stripMarkdown } from "../../util/markdown.js";
+import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.js";
 import { normalize } from "../../util/text.js";
 import tryCensor, { censor } from "../automod/misc.js";
-import log, { LoggingEmojis, LogSeverity } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 import { getSettings, userSettingsDatabase } from "../settings.js";
 
 export const chatName = `${client.user.displayName} Chat` as const;

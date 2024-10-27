@@ -1,13 +1,11 @@
 import type { InteractionResponse, RepliableInteraction, Snowflake } from "discord.js";
 
 import { ButtonStyle, ComponentType, GuildMember, time, TimestampStyles, User } from "discord.js";
-import { client } from "strife.js";
+import { client, disableComponents, escapeAllMarkdown } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import pkg from "../../package.json" with { type: "json" };
-import { disableComponents } from "../../util/discord.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { parseTime } from "../../util/numbers.js";
 import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";
@@ -197,7 +195,7 @@ async function confirmBan(
 		.send({
 			embeds: [
 				{
-					title: `You were banned from ${escapeMessage(config.guild.name)}!`,
+					title: `You were banned from ${escapeAllMarkdown(config.guild.name)}!`,
 					description:
 						(options.reason || "") +
 						(options.unbanTime ?

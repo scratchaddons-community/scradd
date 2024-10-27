@@ -18,11 +18,11 @@ import {
 	GuildMember,
 	ThreadAutoArchiveDuration,
 } from "discord.js";
+import { disableComponents } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import constantEmojis from "../../common/emojis.js";
-import { disableComponents } from "../../util/discord.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 

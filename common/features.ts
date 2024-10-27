@@ -1,4 +1,6 @@
-const auto = process.env.NODE_ENV !== "production";
+import constants from "./constants.js";
+
+const auto = constants.env !== "production";
 const callbacks = [() => true, () => false] as const;
 
 export default {

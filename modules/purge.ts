@@ -14,10 +14,10 @@ import {
 	ButtonStyle,
 	ComponentType,
 } from "discord.js";
-import { client, defineChatCommand, defineMenuCommand } from "strife.js";
+import { client, defineChatCommand, defineMenuCommand, disableComponents } from "strife.js";
 
 import constants from "../common/constants.js";
-import { disableComponents, messageToEmbed } from "../util/discord.js";
+import { messageToEmbed } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 

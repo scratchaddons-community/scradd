@@ -1,9 +1,8 @@
 import { ApplicationCommandOptionType, ChannelType, roleMention } from "discord.js";
-import { defineButton, defineEvent, defineSubcommands } from "strife.js";
+import { defineButton, defineEvent, defineSubcommands, paginate } from "strife.js";
 
 import config from "../../common/config.js";
 import features from "../../common/features.js";
-import { paginate } from "../../util/discord.js";
 import { mentionUser } from "../settings.js";
 import { autoClose, cancelThreadChange, setUpAutoClose } from "./auto-close.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
@@ -29,10 +28,7 @@ defineSubcommands(
 		name: "thread",
 		description: "Manage threads",
 		restricted: true,
-		access:
-			features.threadsTestingServer && process.env.NODE_ENV === "production" ?
-				["@defaults", config.guilds.testing.id]
-			:	undefined,
+		access: features.threadsTestingServer ? ["@defaults", config.guilds.testing.id] : undefined,
 		subcommands: {
 			"close-in": {
 				description: "Close this thread after a specified amount of time",

@@ -8,10 +8,10 @@ import type {
 } from "discord.js";
 
 import { Collection } from "discord.js";
+import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getBaseChannel } from "../../util/discord.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 
 export async function syncMembers(

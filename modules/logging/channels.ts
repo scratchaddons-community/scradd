@@ -1,5 +1,5 @@
 import type { AuditLogEvent, DMChannel, NonThreadGuildBasedChannel } from "discord.js";
-import type { AuditLog } from "./misc.js";
+import type { AuditLog } from "./util.js";
 
 import { unifiedDiff } from "difflib";
 import {
@@ -16,11 +16,12 @@ import {
 	userMention,
 	VideoQualityMode,
 } from "discord.js";
+import { formatAnyEmoji } from "strife.js";
 
 import config from "../../common/config.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
 import { messageDeleteBulk } from "./messages.js";
-import log, { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./misc.js";
+import log from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(
