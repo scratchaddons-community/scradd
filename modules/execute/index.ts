@@ -1,16 +1,19 @@
+import type {
+	ApplicationCommandSubCommand,
+	Awaitable,
+	ChatInputCommandInteraction,
+} from "discord.js";
+
 import {
 	ApplicationCommand,
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	type ChatInputCommandInteraction,
 	MessageMentions,
-	type ApplicationCommandSubCommand,
-	type Awaitable,
 } from "discord.js";
-import { commands, defineChatCommand, defineEvent } from "strife.js";
+import { commands, defineChatCommand, defineEvent, mentionChatCommand } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { mentionChatCommand } from "../../util/discord.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
@@ -55,7 +58,7 @@ defineChatCommand(
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Could not find the \`${OPERATION_PREFIX}${commandName}\` operation!`,
-				embeds: [await listOperations(await getSchemasFromInteraction(interaction))],
+				embeds: [listOperations(await getSchemasFromInteraction(interaction))],
 			});
 		}
 
@@ -112,7 +115,7 @@ defineChatCommand(
 			interaction.guild?.id === config.guild.id &&
 			(command.censored === "channel" ?
 				!badWordsAllowed(interaction.channel)
-			:	command.censored ?? true);
+			:	(command.censored ?? true));
 		const censoredOptions = shouldCensor && tryCensor(operation);
 		if (censoredOptions && censoredOptions.strikes) {
 			await interaction.reply({

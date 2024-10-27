@@ -1,13 +1,8 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	type InteractionResponse,
-	type Message,
-	type RepliableInteraction,
-	type User,
-} from "discord.js";
+import type { InteractionResponse, Message, RepliableInteraction, User } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { mentionUser } from "../settings.js";
@@ -30,13 +25,13 @@ export async function getStrikes(
 			content: `${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		});
 	}
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
-	await interaction.deferReply({ ephemeral: true });
 	await listStrikes(
 		selected instanceof GuildMember ? selected : (
 			await config.guild.members.fetch(selected.id).catch(() => selected)
 		),
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		options,
 		interaction.user,
 	);

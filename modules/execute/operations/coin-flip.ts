@@ -1,6 +1,8 @@
-import { setTimeout as wait } from "node:timers/promises";
-import constants from "../../../common/constants.js";
 import type { CustomOperation } from "../util.js";
+
+import { setTimeout as wait } from "node:timers/promises";
+
+import constants from "../../../common/constants.js";
 import features from "../../../common/features.js";
 
 const data: CustomOperation | undefined =

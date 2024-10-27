@@ -1,14 +1,16 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
+
+import config from "../../common/config.js";
+import constants from "../../common/constants.js";
 import { prepareExit } from "../../common/database.js";
+import features from "../../common/features.js";
 import { syncConfigButton } from "../execute/operations/config.js";
 import credits from "./credits.js";
 import editMessage, { submitEdit } from "./edit.js";
 import getCode, { run } from "./run.js";
 import sayCommand, { say } from "./say.js";
 import status from "./status.js";
-import config from "../../common/config.js";
-import features from "../../common/features.js";
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },
@@ -16,23 +18,17 @@ defineMenuCommand(
 );
 defineModal("edit", submitEdit);
 
+const access = features.botRunTestingServer ? ["@defaults", config.guilds.testing.id] : undefined;
+
 defineChatCommand(
-	{
-		name: "run",
-		description: "Run code on the bot",
-		restricted: true,
-		access:
-			features.botRunTestingServer && process.env.NODE_ENV === "production" ?
-				["@defaults", config.guilds.testing.id]
-			:	undefined,
-	},
+	{ name: "run", description: "Run code on the bot", restricted: true, access },
 	getCode,
 );
 defineModal("run", run);
 
-if (process.env.NODE_ENV === "production") {
+if (constants.env === "production") {
 	defineChatCommand(
-		{ name: "restart", description: "Restart the bot", restricted: true },
+		{ name: "restart", description: "Restart the bot", restricted: true, access },
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
 			await interaction.reply("Restarting bot…");
@@ -42,7 +38,7 @@ if (process.env.NODE_ENV === "production") {
 	);
 } else {
 	defineChatCommand(
-		{ name: "kill", description: "Kill the bot", restricted: true },
+		{ name: "kill", description: "Kill the bot", restricted: true, access },
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is killing the bot`);
 			await interaction.reply("Killing bot…");

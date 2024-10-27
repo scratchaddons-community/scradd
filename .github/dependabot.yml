@@ -14,3 +14,4 @@ updates:
       ignore:
           - dependency-name: "@types/*"
           - dependency-name: "@twemoji/parser"
+          - dependency-name: "discord.js"

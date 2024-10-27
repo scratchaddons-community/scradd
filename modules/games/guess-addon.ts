@@ -1,17 +1,19 @@
+import type { ChatInputCommandInteraction, Message } from "discord.js";
+import type { AddonQuestion, Dependencies } from "./addon-questions.js";
+
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
+import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
 import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	type ChatInputCommandInteraction,
-	type Message,
-} from "discord.js";
+	disableComponents,
+	escapeAllMarkdown,
+	footerSeperator,
+	mentionChatCommand,
+} from "strife.js";
+
 import constants from "../../common/constants.js";
-import { disableComponents, mentionChatCommand } from "../../util/discord.js";
-import { escapeMessage } from "../../util/markdown.js";
-import QUESTIONS_BY_ADDON, { type AddonQuestion, type Dependencies } from "./addon-questions.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
+import QUESTIONS_BY_ADDON from "./addon-questions.js";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];
@@ -176,7 +178,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 										previousCount === "0 questions" ? "" : "s"
 									}`,
 							) ??
-							`Answer my questions using the buttons below${constants.footerSeperator}0 questions asked`,
+							`Answer my questions using the buttons below${footerSeperator}0 questions asked`,
 					},
 				},
 			],
@@ -349,7 +351,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 				},
 			],
 
-			content: `${constants.emojis.misc.addon} Your addon is **${escapeMessage(
+			content: `${constants.emojis.misc.addon} Your addon is **${escapeAllMarkdown(
 				foundAddon.manifest.name,
 			)}**!`,
 
@@ -387,9 +389,7 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 
 					footer: {
 						text: `Guessed after ${askedCount} questions.${
-							nextChoice ?
-								`${constants.footerSeperator}Next choice: ${nextChoice}`
-							:	""
+							nextChoice ? `${footerSeperator}Next choice: ${nextChoice}` : ""
 						}`,
 					},
 				},

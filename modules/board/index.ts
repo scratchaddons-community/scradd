@@ -1,8 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import makeSlideshow, { NO_BOARDS_MESSAGE, defaultMinReactions } from "./explore.js";
+import makeSlideshow, { defaultMinReactions, NO_BOARDS_MESSAGE } from "./explore.js";
 import { BOARD_EMOJI, REACTIONS_NAME } from "./misc.js";
 import updateBoard from "./update.js";
 
@@ -22,7 +23,7 @@ defineEvent("messageReactionAdd", async ({ message: partialMessage }, partialUse
 	if (!reaction) return;
 
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
-	if (user.id === message.author.id && process.env.NODE_ENV === "production")
+	if (user.id === message.author.id && constants.env === "production")
 		return await reaction.users.remove(user);
 
 	await updateBoard({ count: reaction.count, message });

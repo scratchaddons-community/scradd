@@ -2,8 +2,10 @@
 /// <reference lib="dom.iterable" />
 
 import "@total-typescript/ts-reset";
+
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
+import type constants from "./constants.js";
 import type { FilterNonFalsy } from "./misc.js";
 
 declare global {
@@ -62,6 +64,7 @@ declare global {
 		 * 	NODE_ENV = development
 		 * 	PORT = 80
 		 * 	CLIENT_SECRET = …
+		 * 	EXIT_AUTH = …
 		 */
 		interface ProcessEnv {
 			/** ID of the main server for the app to operate in. Assumes Administrator permission in this server. */
@@ -70,11 +73,7 @@ declare global {
 			BOT_TOKEN: string;
 			/** URI to connect to MongoDB with. */
 			MONGO_URI: string;
-			/**
-			 * Mode for the bot to run in. For consistency, always compare against `"production"` in code.
-			 *
-			 * @default "development"
-			 */
+			/** Used to configure {@link constants.env} */
 			NODE_ENV?: "development" | "production";
 			/** Port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;

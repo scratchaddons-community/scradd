@@ -1,17 +1,21 @@
+import type {
+	ChatInputCommandInteraction,
+	InteractionResponse,
+	MessageComponentInteraction,
+} from "discord.js";
+
 import {
 	ButtonStyle,
+	channelMention,
 	ComponentType,
 	GuildMember,
-	TimestampStyles,
-	channelMention,
 	time,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
-	type MessageComponentInteraction,
+	TimestampStyles,
 } from "discord.js";
+import { disableComponents, paginate } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, paginate } from "../../util/discord.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
@@ -22,7 +26,7 @@ import { getUserReminders, remindersDatabase } from "./misc.js";
 import queueReminders from "./send.js";
 
 export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {
-	await interaction.deferReply({ ephemeral: true });
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	const reminders = getUserReminders(interaction.user.id);
 	await paginate(
@@ -32,16 +36,18 @@ export async function listReminders(interaction: ChatInputCommandInteraction): P
 				new Date(reminder.date),
 				TimestampStyles.RelativeTime,
 			)}: ${channelMention(reminder.channel)} ${reminder.reminder ?? ""}`,
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		{
 			title: "Your reminders",
-			format:
-				interaction.member instanceof GuildMember ? interaction.member : interaction.user,
 			singular: "reminder",
 			failMessage: "You don’t have any reminders set!",
 
 			user: interaction.user,
 			totalCount: reminders.length,
+
+			timeout: constants.collectorTime,
+			format:
+				interaction.member instanceof GuildMember ? interaction.member : interaction.user,
 
 			generateComponents(page) {
 				return [

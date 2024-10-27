@@ -1,15 +1,15 @@
-import {
-	ApplicationCommand,
-	ApplicationCommandOptionType,
-	inlineCode,
-	type APIEmbed,
-	type ApplicationCommandSubCommand,
-	type ChatInputCommandInteraction,
+import type {
+	APIEmbed,
+	ApplicationCommandSubCommand,
+	ChatInputCommandInteraction,
 } from "discord.js";
+import type { CustomOperation } from "../util.js";
+
+import { ApplicationCommand, ApplicationCommandOptionType, inlineCode } from "discord.js";
+import { columnize } from "strife.js";
+
 import constants from "../../../common/constants.js";
 import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
-import type { CustomOperation } from "../util.js";
-import { columnize } from "../../../util/discord.js";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,
@@ -52,7 +52,7 @@ const data: CustomOperation = {
 			embeds: [
 				operation ?
 					getHelpForOperation(operation, schemas, operationName)
-				:	await listOperations(schemas),
+				:	listOperations(schemas),
 			],
 		});
 	},
@@ -100,13 +100,13 @@ export function getHelpForOperation(
 	};
 }
 
-export async function listOperations(
+export function listOperations(
 	schemas: Record<string, ApplicationCommand | CustomOperation>,
-): Promise<APIEmbed> {
+): APIEmbed {
 	return {
 		color: constants.themeColor,
 		title: "Available Operations",
-		fields: await columnize(
+		fields: columnize(
 			Object.values(schemas)
 				.toSorted(({ name: one }, { name: two }) => one.localeCompare(two))
 				.map(

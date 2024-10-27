@@ -1,9 +1,14 @@
 import addons from "@sa-community/addons-data" with { type: "json" };
 
+const env =
+	process.argv.some((file) => file.endsWith(".test.js")) ? "testing"
+	: process.env.NODE_ENV === "production" ? "production"
+	: "development";
+
 const domains = {
 	npm: "https://npmjs.com/package",
 	scradd:
-		process.env.NODE_ENV === "production" || !process.env.PORT ?
+		env === "production" || !process.env.PORT ?
 			"https://sa-discord.up.railway.app"
 		:	(`http://localhost:${process.env.PORT}` as const),
 	scratch: "https://scratch.mit.edu",
@@ -88,9 +93,8 @@ export default {
 		},
 	},
 
+	env,
 	fonts: "Sora, SoraExt, sans-serif",
-	footerSeperator: " • ",
-	isTesting: process.argv.some((file) => file.endsWith(".test.js")),
 
 	repos: {
 		scradd: "scratchaddons-community/scradd",
@@ -98,7 +102,7 @@ export default {
 	},
 
 	scratchColor: 0x88_5c_d4,
-	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+	themeColor: env === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
 		addonImages: `${domains.scratchAddons}/assets/img/addons`,
@@ -109,11 +113,10 @@ export default {
 	},
 
 	users: {
+		bot: "929928324959055932",
 		robotop: "323630372531470346",
-		scradd: "929928324959055932",
 		weirdo: "691223009515667457",
 	},
 
 	webhookName: "scradd-webhook",
-	zws: "\u200B",
 } as const;

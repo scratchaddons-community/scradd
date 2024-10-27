@@ -1,7 +1,9 @@
 import type { GuildMember } from "discord.js";
+
 import config from "../../common/config.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
 import warn from "../punishments/warn.js";
 import tryCensor, { censor, isPingable } from "./misc.js";
 
@@ -73,7 +75,7 @@ export default async function changeNickname(member: GuildMember): Promise<void>
 			if (oldest) unchanged.delete(oldest);
 		} else if (unchanged.size > 1)
 			await log(
-				`${LoggingErrorEmoji} Conflicting nicknames: ${joinWithAnd([...unchanged.values()])}`,
+				`${LoggingEmojisError} Conflicting nicknames: ${joinWithAnd([...unchanged.values()])}`,
 				LogSeverity.Alert,
 			);
 	}
@@ -93,7 +95,7 @@ async function setNickname(
 	}
 
 	await log(
-		`${LoggingErrorEmoji} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+		`${LoggingEmojisError} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
 		LogSeverity.Alert,
 		{ pingHere: true },
 	);

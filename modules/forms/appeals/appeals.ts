@@ -1,16 +1,12 @@
-import {
-	ComponentType,
-	MessageMentions,
-	TextInputStyle,
-	type ButtonInteraction,
-	type ModalSubmitInteraction,
-} from "discord.js";
-import { client } from "strife.js";
+import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+
+import { ComponentType, MessageMentions, TextInputStyle } from "discord.js";
+import { client, escapeAllMarkdown } from "strife.js";
+
 import config, { getInitialThreads } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import { getAllMessages } from "../../../util/discord.js";
-import { escapeMessage } from "../../../util/markdown.js";
-import { LoggingEmojis } from "../../logging/misc.js";
+import { LoggingEmojis } from "../../logging/util.js";
 import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
 
 export const appealThread =
@@ -112,7 +108,7 @@ export async function submitAcceptAppeal(
 	users.accepters.add(interaction.user.id);
 	users.rejecters.delete(interaction.user.id);
 
-	const note = escapeMessage(interaction.fields.getTextInputValue("note"));
+	const note = escapeAllMarkdown(interaction.fields.getTextInputValue("note"));
 	await interaction.message?.edit(
 		generateAppeal(
 			{
@@ -161,7 +157,7 @@ export async function submitRejectAppeal(
 	users.rejecters.add(interaction.user.id);
 	users.accepters.delete(interaction.user.id);
 
-	const note = escapeMessage(interaction.fields.getTextInputValue("note"));
+	const note = escapeAllMarkdown(interaction.fields.getTextInputValue("note"));
 	await interaction.message?.edit(
 		generateAppeal(
 			{

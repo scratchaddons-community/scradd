@@ -1,29 +1,36 @@
+import type { APIEmbed, BaseMessageOptions, Message, Snowflake } from "discord.js";
+
+import { setTimeout as wait } from "node:timers/promises";
+
 import {
 	ApplicationCommandType,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	MessageType,
-	type APIEmbed,
-	type BaseMessageOptions,
-	type Message,
-	type Snowflake,
 } from "discord.js";
-import { setTimeout as wait } from "node:timers/promises";
-import { client, defineButton, defineEvent, defineMenuCommand } from "strife.js";
+import {
+	client,
+	defineButton,
+	defineEvent,
+	defineMenuCommand,
+	getBaseChannel,
+	reactAll,
+	stripMarkdown,
+	zeroWidthSpace,
+} from "strife.js";
+
 import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { GlobalMentionsPattern, getBaseChannel, reactAll } from "../../util/discord.js";
-import { stripMarkdown } from "../../util/markdown.js";
+import features from "../../common/features.js";
+import { GlobalMentionsPattern } from "../../util/discord.js";
 import { normalize } from "../../util/text.js";
 import { BOARD_EMOJI } from "../board/misc.js";
 import { getSettings } from "../settings.js";
 import autoreactions from "./autos-data.js";
 import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.js";
 import dad from "./dad.js";
-import { getMatches, handleMatch } from "./scratch.js";
 import github from "./github.js";
-import features from "../../common/features.js";
+import { getMatches, handleMatch } from "./scratch.js";
 
 const REACTION_CAP = 3;
 
@@ -141,7 +148,9 @@ defineEvent("messageUpdate", async (_, message) => {
 			response.find((item): item is BaseMessageOptions => typeof item === "object")
 		:	typeof response === "object" && response;
 	if (found)
-		await found.edit(data || { content: constants.zws, components: [], embeds: [], files: [] });
+		await found.edit(
+			data || { content: zeroWidthSpace, components: [], embeds: [], files: [] },
+		);
 	else if (data)
 		autoResponses.set(
 			message.id,

@@ -1,15 +1,17 @@
-import { unifiedDiff } from "difflib";
-import {
-	ChannelType,
-	GuildScheduledEventStatus,
-	time,
-	type AuditLogEvent,
-	type GuildScheduledEvent,
-	type PartialGuildScheduledEvent,
-	type VoiceState,
+import type {
+	AuditLogEvent,
+	GuildScheduledEvent,
+	PartialGuildScheduledEvent,
+	VoiceState,
 } from "discord.js";
+import type { AuditLog } from "./util.js";
+
+import { unifiedDiff } from "difflib";
+import { ChannelType, GuildScheduledEventStatus, time } from "discord.js";
+
 import config from "../../common/config.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import log from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function guildScheduledEventCreate(
 	entry: AuditLog<AuditLogEvent.GuildScheduledEventCreate>,
@@ -130,7 +132,7 @@ export async function guildScheduledEventUpdate(
 				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
 				}) rescheduled${
-					start ?? end ?
+					(start ?? end) ?
 						` to ${time(start ?? end ?? new Date())}${
 							end && start ? `-${time(end)}` : ""
 						}`

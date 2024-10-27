@@ -1,6 +1,10 @@
-import { BaseChannel, ChannelType, type Snowflake, type TextBasedChannel } from "discord.js";
+import type { Snowflake, TextBasedChannel } from "discord.js";
+
+import { BaseChannel, ChannelType } from "discord.js";
+import { getBaseChannel } from "strife.js";
+
 import config from "../../common/config.js";
-import { getBaseChannel } from "../../util/discord.js";
+import constants from "../../common/constants.js";
 
 const enum Counts {
 	Admins = 2,
@@ -22,7 +26,7 @@ export default function boardReactionCount(channel: { id: Snowflake }): number |
 export default function boardReactionCount(
 	channel?: TextBasedChannel | { id: Snowflake },
 ): number | undefined {
-	if (process.env.NODE_ENV !== "production") return shift(Counts.Admins);
+	if (constants.env === "development") return shift(Counts.Admins);
 	if (!channel) return shift(Counts.Default);
 
 	if (channel.id === config.channels.updates?.id) return shift(Counts.Info);

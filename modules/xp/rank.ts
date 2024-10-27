@@ -1,21 +1,23 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	type ButtonInteraction,
-	type ChatInputCommandInteraction,
-	type GuildMember,
-	type InteractionResponse,
-	type RepliableInteraction,
-	type User,
+import type {
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	GuildMember,
+	InteractionResponse,
+	RepliableInteraction,
+	User,
 } from "discord.js";
+
+import { ButtonStyle, ComponentType } from "discord.js";
+import { paginate, zeroWidthSpace } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { getAllMembers, paginate } from "../../util/discord.js";
+import features from "../../common/features.js";
+import { getAllMembers } from "../../util/discord.js";
 import { nth } from "../../util/numbers.js";
 import { getSettings, mentionUser } from "../settings.js";
 import { getLevelForXp, getXpForLevel } from "./misc.js";
 import { getFullWeeklyData, xpDatabase } from "./util.js";
-import features from "../../common/features.js";
 
 export default async function getUserRank(
 	interaction: RepliableInteraction,
@@ -73,7 +75,7 @@ export default async function getUserRank(
 						inline: true,
 					},
 					{
-						name: constants.zws,
+						name: zeroWidthSpace,
 						value: `**⬆️ Next level progress** ${xpForNextLevel.toLocaleString()} XP needed`,
 					},
 				],
@@ -156,10 +158,11 @@ export async function top(
 		});
 	}
 
-	await interaction.deferReply({
+	const message = await interaction.deferReply({
 		ephemeral:
 			interaction.isButton() &&
 			interaction.message.interaction?.user.id !== interaction.user.id,
+		fetchReply: true,
 	});
 	const guildMembers = onlyMembers && (await getAllMembers(config.guild));
 
@@ -167,15 +170,17 @@ export async function top(
 		guildMembers ? leaderboard.filter((entry) => guildMembers.has(entry.user)) : leaderboard,
 		async (xp) =>
 			`${await mentionUser(xp.user, interaction.user)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		{
 			title: "XP Leaderboard",
 			singular: "user",
-			pageLength: 30,
-			columns: 3,
 
 			user: interaction.user,
 			rawOffset: index,
+			pageLength: 30,
+
+			timeout: constants.collectorTime,
+			color: constants.themeColor,
 
 			async generateComponents() {
 				return (await getSettings(interaction.user, false)).useMentions === undefined ?

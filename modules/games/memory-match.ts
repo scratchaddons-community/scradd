@@ -1,26 +1,30 @@
+import type {
+	ActionRowData,
+	APIInteractionGuildMember,
+	ButtonInteraction,
+	InteractionButtonComponentData,
+	InteractionResponse,
+	Message,
+	RepliableInteraction,
+	User,
+} from "discord.js";
+
 import {
 	Base,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
+	formatEmoji,
 	GuildMember,
 	ThreadAutoArchiveDuration,
-	formatEmoji,
-	type APIInteractionGuildMember,
-	type ActionRowData,
-	type ButtonInteraction,
-	type InteractionButtonComponentData,
-	type InteractionResponse,
-	type Message,
-	type RepliableInteraction,
-	type User,
 } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import constantEmojis from "../../common/emojis.js";
+import { ignoredDeletions } from "../logging/messages.js";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 
 const EMPTY_TILE = "⬛";
 

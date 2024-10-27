@@ -1,5 +1,7 @@
 /* On production, this file is replaced with another file with the same structure. */
 
+import constants from "../../common/constants.js";
+
 /**
  * The index of each array determines how many strikes the word gives.
  *
@@ -15,6 +17,6 @@ const badWords: [RegExp[], RegExp[], RegExp[]][] = [
 	[[], [], []],
 ];
 
-if (process.env.NODE_ENV !== "production") badWords[1]?.[0]?.push(/nhgbzbqzhgr/);
+if (constants.env !== "production") badWords[1]?.[0]?.push(/nhgbzbqzhgr/);
 
 export default badWords;

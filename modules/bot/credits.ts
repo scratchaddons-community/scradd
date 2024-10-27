@@ -1,14 +1,11 @@
-import {
-	inlineCode,
-	type ChatInputCommandInteraction,
-	type Snowflake,
-	type User,
-} from "discord.js";
-import { client } from "strife.js";
+import type { APIEmbedField, ChatInputCommandInteraction, Snowflake, User } from "discord.js";
+
+import { inlineCode } from "discord.js";
+import { client, columnize } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import pkg from "../../package.json" with { type: "json" };
-import { columnize } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import { mentionUser } from "../settings.js";
 
@@ -16,25 +13,14 @@ const designers = "966174686142672917",
 	developers = "938439909742616616",
 	testers = "938440159102386276";
 
-const dependencies = await Promise.all(
-	Object.keys({ ...pkg.dependencies, ...pkg.optionalDependencies }).map(async (name) => {
-		const { default: dep } = (await import(`../../../node_modules/${name}/package.json`, {
-			assert: { type: "json" },
-		})) as { default: { name: string; version: `${bigint}.${bigint}.${string}` } };
-
-		return [
-			`${inlineCode(dep.name)}@${dep.version}`,
-			`${constants.domains.npm}/${dep.name}/v/${dep.version}`,
-		] as const;
-	}),
-);
+const dependencyColumns = await getDependencies();
 
 export default async function credits(interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.reply({
 		embeds: [
 			{
 				title: "Credits",
-				description: `Scradd is hosted on [Railway](${constants.urls.railway}) using Node.JS ${process.version}.`,
+				description: `${client.user.displayName} is hosted on [Railway](${constants.urls.railway}) using Node.JS ${process.version}.`,
 
 				fields: [
 					{ name: "🧑‍💻 Developers", value: await getRole(developers), inline: true },
@@ -44,11 +30,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 						value: await getRole(testers),
 						inline: true,
 					},
-					...(await columnize(
-						dependencies.toSorted(([one], [two]) => one.localeCompare(two)),
-						([specifier, link]) => `- [${specifier}](${link})`,
-						"🗄️ Third-party code libraries",
-					)),
+					...dependencyColumns,
 				],
 
 				color: constants.themeColor,
@@ -67,4 +49,23 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 			.map(({ user }) => mentionUser(user, interaction.user));
 		return joinWithAnd(await Promise.all(mentions));
 	}
+}
+
+async function getDependencies(): Promise<APIEmbedField[]> {
+	const dependencyNames = Object.keys({ ...pkg.dependencies, ...pkg.optionalDependencies });
+	const promises = dependencyNames.map((name) =>
+		import(`../../../node_modules/${name}/package.json`, { assert: { type: "json" } }).then(
+			(dependency: { default: { name: string; version: `${bigint}.${bigint}.${string}` } }) =>
+				`- [${inlineCode(dependency.default.name)}@${
+					dependency.default.version
+				}](https://npmjs.com/package/${dependency.default.name}/v/${
+					dependency.default.version
+				})`,
+			() => void 0,
+		),
+	);
+	const dependencies = (await Promise.all(promises))
+		.filter(Boolean)
+		.toSorted((one, two) => one.localeCompare(two));
+	return columnize(dependencies, "🗄️ Third-party code libraries");
 }
