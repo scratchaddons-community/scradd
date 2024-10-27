@@ -11,11 +11,13 @@ jobs:
               uses: dependabot/fetch-metadata@v2.2.0
               with:
                   skip-verification: true
+
             - name: Checkout
               uses: actions/checkout@v4.2.2
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
+
             - name: Add labels
               run:
                   gh pr edit ${{ github.event.pull_request.number }} --add-label
