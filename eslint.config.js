@@ -1,65 +1,27 @@
-"use strict";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const { compilerOptions } = require("./tsconfig.json");
+import js from "@eslint/js";
+import unicorn from "eslint-plugin-unicorn";
+import globals from "globals";
+import typescriptEslint from "typescript-eslint";
 
-module.exports =
-	/** @satisfies {import("eslint").ESLint.ConfigData} @type {const} */
-	({
-		env: Object.fromEntries(
-			[...compilerOptions.lib, ...compilerOptions.types, compilerOptions.target]
-				.map((library) => /** @type {const} */ ([library.toLowerCase(), true]))
-				.filter(
-					([library]) =>
-						(library.length === 6 && library.startsWith("es")) ||
-						compilerOptions.types.includes(library),
-				),
-		),
-		extends: ["eslint:recommended", "plugin:unicorn/all", "plugin:@typescript-eslint/all"],
-		ignorePatterns: ["!.*", "./.git", "./dist", "./node_modules"],
-		overrides: [
-			{
-				files: "*.cjs",
-				parserOptions: { sourceType: "script" },
-				rules: {
-					"@typescript-eslint/no-require-imports": "off",
-					"@typescript-eslint/no-var-requires": "off",
-				},
+const config = typescriptEslint.config(
+	{ files: ["**/*.ts"] },
+	{ ignores: ["./dist"] },
+	js.configs.recommended,
+	...typescriptEslint.configs.all,
+	unicorn.configs["flat/all"],
+	{
+		languageOptions: {
+			ecmaVersion: 2025,
+			globals: globals.node,
+			parserOptions: {
+				projectService: true,
+				tsconfigRootDir: path.dirname(fileURLToPath(import.meta.url)),
 			},
-			{
-				files: ".*",
-				rules: { "unicorn/prevent-abbreviations": "off", "unicorn/string-content": "off" },
-			},
-			{
-				files: "*.d.ts",
-				rules: {
-					"@typescript-eslint/consistent-type-definitions": "off",
-					"@typescript-eslint/naming-convention": "off",
-					"@typescript-eslint/no-unused-vars": "off",
-				},
-			},
-			{ files: "./common/typedefs/**", rules: { "unicorn/filename-case": "off" } },
-			{
-				files: [
-					"./.private/**",
-					"./modules/auto/secrets.ts",
-					"./common/constants.ts",
-					"./common/features.ts",
-					"./.eslintrc.cjs",
-				],
-				rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
-			},
-			{
-				files: ["*.test.ts", "*.test.js"],
-				rules: {
-					"@typescript-eslint/no-magic-numbers": "off",
-				},
-			},
-		],
-		parser: "@typescript-eslint/parser",
-		parserOptions: { projectService: true, sourceType: "module", tsconfigRootDir: __dirname },
-		plugins: ["@typescript-eslint"],
-		reportUnusedDisableDirectives: true,
-		root: true,
+		},
+		linterOptions: { reportUnusedDisableDirectives: "error" },
 		rules: {
 			"@typescript-eslint/consistent-return": "off",
 			"@typescript-eslint/consistent-type-definitions": ["error", "type"],
@@ -140,10 +102,7 @@ module.exports =
 			"@typescript-eslint/prefer-enum-initializers": "off",
 			"@typescript-eslint/prefer-nullish-coalescing": [
 				"error",
-				{
-					ignoreMixedLogicalExpressions: true,
-					ignorePrimitives: true,
-				},
+				{ ignoreMixedLogicalExpressions: true, ignorePrimitives: true },
 			],
 			"@typescript-eslint/prefer-readonly-parameter-types": "off",
 			"@typescript-eslint/promise-function-async": "off",
@@ -165,10 +124,13 @@ module.exports =
 			"multiline-comment-style": ["error", "separate-lines"],
 			"no-fallthrough": [
 				"error",
-				{ allowEmptyCase: true, commentPattern: /[Ff]alls?[ -]?through/u.source },
+				{
+					allowEmptyCase: true,
+					commentPattern: /[Ff]alls?[ -]?through/u.source,
+					reportUnusedFallthroughComment: true,
+				},
 			],
 			"no-inline-comments": "off",
-			"no-mixed-spaces-and-tabs": "off",
 			"no-restricted-syntax": [
 				"error",
 				"CallExpression[callee.name='String']",
@@ -239,7 +201,37 @@ module.exports =
 				},
 			],
 		},
-	});
+	},
+	{
+		files: ["**/*.config.js"],
+		rules: { "unicorn/prevent-abbreviations": "off", "unicorn/string-content": "off" },
+	},
+	{
+		files: ["**/*.d.ts"],
+		rules: {
+			"@typescript-eslint/consistent-type-definitions": "off",
+			"@typescript-eslint/naming-convention": "off",
+			"@typescript-eslint/no-unused-vars": "off",
+		},
+	},
+	{ files: ["./common/typedefs/**"], rules: { "unicorn/filename-case": "off" } },
+	{
+		files: [
+			"./.private/**",
+			"./modules/auto/secrets.ts",
+			"./common/constants.ts",
+			"./common/features.ts",
+			"./.eslintrc.cjs",
+		],
+		rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
+	},
+	{
+		files: ["*.test.ts", "*.test.js"],
+		rules: { "@typescript-eslint/no-magic-numbers": "off" },
+	},
+);
+
+export default config;
 
 // todo: [..] over toJSON?
 // todo: stop nesting why tf are there 11-level nesting places
