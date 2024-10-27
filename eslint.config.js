@@ -18,7 +18,7 @@ const config = typescriptEslint.config(
 			globals: globals.node,
 			parserOptions: {
 				projectService: true,
-				tsconfigRootDir: fileURLToPath(path.dirname(__filename)),
+				tsconfigRootDir: path.dirname(fileURLToPath(import.meta.url)),
 			},
 		},
 		linterOptions: { reportUnusedDisableDirectives: "error" },
