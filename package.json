@@ -9,7 +9,7 @@
 		"build": "rm -rf ./dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache",
-		"lint": "eslint .",
+		"lint": "eslint",
 		"serve": "node . --enable-source-maps --env-file=.env --watch --watch-path=./dist --watch-preserve-output",
 		"start": "node . --enable-source-maps",
 		"test": "node --run build && node --enable-source-maps --test"
@@ -38,19 +38,20 @@
 		"strife.js": "4.0.1"
 	},
 	"devDependencies": {
+		"@eslint/js": "9.13.0",
 		"@redguy12/prettier-config": "3.0.2",
 		"@total-typescript/ts-reset": "0.6.1",
 		"@types/difflib": "<=0.2",
-		"@types/eslint": "<=9.7",
+		"@types/eslint__js": "8.42.3",
 		"@types/mustache": "<=4.2",
 		"@types/node": "<=22.10",
 		"@types/papaparse": "<=5.4",
-		"@typescript-eslint/eslint-plugin": "8.11.0",
-		"@typescript-eslint/parser": "8.11.0",
 		"eslint": "9.13.0",
 		"eslint-plugin-unicorn": "56.0.0",
+		"globals": "15.11.0",
 		"prettier": "3.3.2",
-		"typescript": "5.4.5"
+		"typescript": "5.4.5",
+		"typescript-eslint": "8.11.0"
 	},
 	"optionalDependencies": {
 		"@napi-rs/canvas": "0.1.58",
