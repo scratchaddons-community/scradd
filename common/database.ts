@@ -67,7 +67,7 @@ export default class Database<Data extends Record<string, boolean | number | str
 			`__**${client.user.displayName.replaceAll(" ", "-").toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n` +
 			`\n*Please don’t delete this message. If you do, all ${this.name.replaceAll("_", " ")} information may be reset.*`;
 		if (databases[this.name]) await databases[this.name]?.edit(content);
-		this.message = databases[this.name] ||= await databaseThread.send(content);
+		this.message = databases[this.name] ??= await databaseThread.send(content);
 
 		const attachment = (await getFilesFromMessage(this.message)).first();
 		if (!attachment) {
