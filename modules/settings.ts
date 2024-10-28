@@ -137,7 +137,7 @@ defineChatCommand(
 
 async function settingsCommand(
 	interaction: RepliableInteraction,
-	options: Record<CamelToKebab<keyof typeof SETTINGS>, boolean | undefined>,
+	options: Partial<Record<CamelToKebab<keyof typeof SETTINGS>, boolean | undefined>>,
 ): Promise<void> {
 	const newOptions = Object.fromEntries(
 		Object.entries(options).map(([option, value]) => [
@@ -149,7 +149,7 @@ async function settingsCommand(
 }
 export async function updateSettings(
 	user: User,
-	settings: { [key in keyof typeof SETTINGS]?: boolean | "toggle" },
+	settings: Partial<Record<keyof typeof SETTINGS, boolean | "toggle" | undefined>>,
 ): Promise<InteractionReplyOptions> {
 	const old = await getSettings(user);
 	const updated = {
