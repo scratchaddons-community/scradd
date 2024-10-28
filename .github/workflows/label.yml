@@ -15,12 +15,12 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.2.2
               with:
-                  ref: ${{ github.head_ref }}
-                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+                  ref: ${{github.head_ref}}
+                  repository: ${{github.event.pull_request.head.repo.full_name}}
 
             - name: Add labels
               run:
-                  gh pr edit ${{ github.event.pull_request.number }} --add-label
+                  gh pr edit ${{github.event.pull_request.number}} --add-label
                   "${{steps.metadata.outputs.dependency-type}},${{steps.metadata.outputs.update-type}}"
               env:
                   GITHUB_TOKEN: ${{secrets.TOKEN}}
