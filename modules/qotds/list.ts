@@ -55,8 +55,8 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 export async function viewQuestion(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (
 		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.exec.id)
-		:	interaction.member?.roles.includes(config.roles.exec.id))
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,
@@ -103,8 +103,8 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 export async function removeQuestion(interaction: ButtonInteraction, id = ""): Promise<void> {
 	if (
 		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.exec.id)
-		:	interaction.member?.roles.includes(config.roles.exec.id))
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,
