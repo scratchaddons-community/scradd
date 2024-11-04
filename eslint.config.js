@@ -114,7 +114,10 @@ const config = typescriptEslint.config(
 			"@typescript-eslint/strict-boolean-expressions": "off",
 			"@typescript-eslint/switch-exhaustiveness-check": [
 				"error",
-				{ allowDefaultCaseForExhaustiveSwitch: false },
+				{
+					allowDefaultCaseForExhaustiveSwitch: false,
+					considerDefaultExhaustiveForUnions: true,
+				},
 			],
 			"@typescript-eslint/typedef": "off",
 			"@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
