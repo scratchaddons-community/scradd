@@ -252,7 +252,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 	if (languageStrikes) {
 		const words = [...badWords.words.flat(), ...badEmbedWords.words.flat()];
 		await warn(
-			message.interaction?.user ?? message.author,
+			message.interactionMetadata?.user ?? message.author,
 			words.length === 1 ? "Used a banned word" : "Used banned words",
 			languageStrikes,
 			words.join(", "),
@@ -275,7 +275,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 			(user) =>
 				!user.bot &&
 				user.id !== message.author.id &&
-				user.id !== message.interaction?.user.id,
+				user.id !== message.interactionMetadata?.user.id,
 		);
 		if (mentions.size && needsDelete && message.deletable)
 			deletionMessages.push(
@@ -291,12 +291,14 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 			return await message.channel.send({
 				content: `${constants.emojis.statuses.no} ${(
-					message.interaction?.user ?? message.author
+					message.interactionMetadata?.user ?? message.author
 				).toString()}, ${deletionMessages[0]?.toLowerCase() ?? ""}${[
 					"",
 					...deletionMessages.slice(1),
 				].join("\n")}`,
-				allowedMentions: { users: [(message.interaction?.user ?? message.author).id] },
+				allowedMentions: {
+					users: [(message.interactionMetadata?.user ?? message.author).id],
+				},
 			});
 		}
 

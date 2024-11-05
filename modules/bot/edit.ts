@@ -20,7 +20,7 @@ export default async function editMessage(
 ): Promise<InteractionResponse | undefined> {
 	if (
 		!interaction.targetMessage.editable ||
-		interaction.targetMessage.interaction ||
+		interaction.targetMessage.interactionMetadata ||
 		chatThread?.id === interaction.channel?.id ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id &&
