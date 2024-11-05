@@ -23,13 +23,12 @@ export async function guildScheduledEventCreate(
 		LogSeverity.ServerChange,
 	);
 }
+
 export async function guildScheduledEventUpdate(
 	entry: AuditLog<
 		AuditLogEvent.GuildScheduledEventUpdate,
-		| "channel_id"
 		| "entity_id"
 		| "entity_metadata"
-		| "entity_type"
 		| "image_hash"
 		| "image"
 		| "location"
@@ -111,6 +110,7 @@ export async function guildScheduledEventUpdate(
 				break;
 			}
 			default: {
+				// todo: recurrence_rule
 				break;
 			}
 		}

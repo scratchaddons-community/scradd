@@ -30,9 +30,9 @@ export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>):
 
 	await log(
 		`${LoggingEmojis.Thread} ${
-			"name" in entry.target ? `Thread #${entry.target.name}` : "Unknown thread"
+			entry.target.name === "string" ? `Thread #${entry.target.name}` : "Unknown thread"
 		}${
-			"parent" in entry.target && entry.target.parent ?
+			entry.target instanceof ThreadChannel && entry.target.parent ?
 				` in ${entry.target.parent.toString()}`
 			:	""
 		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
