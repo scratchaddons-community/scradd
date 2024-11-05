@@ -132,27 +132,30 @@ export async function messageReactionRemoveAll(
 ): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
-	if (!shouldLog(message.channel) || ignoredReactionPurges.delete(message.id)) return;
+	if (!shouldLog(message.channel) || ignoredReactionPurges.delete(message.id) || !reactions.size)
+		return;
 
 	await log(
 		`${
 			LoggingEmojis.Expression
 		} Reactions purged on [message](<${message.url}>) by ${message.author.toString()} in ${message.channel.toString()}`,
 		LogSeverity.ContentEdit,
-		reactions.size ?
-			{
-				embeds: [
-					{
-						fields: reactions.map((reaction) => ({
+		{
+			embeds: [
+				{
+					fields: reactions.map((reaction) => {
+						const { burst } = reaction.countDetails;
+						const burstInfo = ` (including ${burst} super reaction${burst === 1 ? "" : "s"})`;
+						return {
 							name: reaction.emoji.toString(),
-							value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
+							value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}${burst ? burstInfo : ""}`,
 							inline: true,
-						})),
-						color: Colors.Blurple,
-					},
-				],
-			}
-		:	{},
+						};
+					}),
+					color: Colors.Blurple,
+				},
+			],
+		},
 	);
 }
 export async function messageUpdate(

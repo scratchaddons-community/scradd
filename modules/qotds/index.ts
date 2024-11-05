@@ -42,7 +42,7 @@ defineModal("addQuestion", addQuestion);
 defineSelect("viewQuestion", viewQuestion);
 defineButton("removeQuestion", removeQuestion);
 
-defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
+defineEvent("messageReactionAdd", async (partialReaction, partialUser, { burst }) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 	const user = partialUser.partial ? await partialUser.fetch() : partialUser;
@@ -54,6 +54,11 @@ defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
 			message.channel.parent?.id !== config.channels.qotd)
 	)
 		return;
+
+	if (burst) {
+		await reaction.users.remove(user);
+		return;
+	}
 
 	const emojis = (message.embeds[0]?.description ?? message.content).match(/^\S+/gm);
 	if (!reaction.emoji.name || !emojis?.includes(reaction.emoji.name)) return;

@@ -26,11 +26,14 @@ defineEvent("messageReactionAdd", async ({ message: partialMessage }, partialUse
 	if (user.id === message.author.id && constants.env === "production")
 		return await reaction.users.remove(user);
 
-	await updateBoard({ count: reaction.count, message });
+	await updateBoard({ count: reaction.countDetails.normal, message });
 });
 defineEvent("messageReactionRemove", async ({ message: partialMessage }) => {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
-	await updateBoard({ count: message.reactions.resolve(BOARD_EMOJI)?.count ?? 0, message });
+	await updateBoard({
+		count: message.reactions.resolve(BOARD_EMOJI)?.countDetails.normal ?? 0,
+		message,
+	});
 });
 
 defineChatCommand(
@@ -80,7 +83,8 @@ defineMenuCommand(
 	{ name: `Sync ${REACTIONS_NAME}`, type: ApplicationCommandType.Message, access: false },
 	async (interaction) => {
 		await interaction.deferReply({ ephemeral: true });
-		const count = interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.count ?? 0;
+		const count =
+			interaction.targetMessage.reactions.resolve(BOARD_EMOJI)?.countDetails.normal ?? 0;
 		await updateBoard({ count, message: interaction.targetMessage });
 		await interaction.editReply(
 			`${constants.emojis.statuses.yes} Synced ${reactionsName}! [That message](<${

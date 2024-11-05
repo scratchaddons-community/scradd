@@ -122,7 +122,7 @@ export async function syncRandomBoard(): Promise<void> {
 		const message = await channel.messages.fetch(info.source).catch(() => void 0);
 		const reaction = message?.reactions.resolve(BOARD_EMOJI);
 		if (message && reaction) {
-			await updateBoard({ count: reaction.count, message });
+			await updateBoard({ count: reaction.countDetails.normal, message });
 			break;
 		}
 	}
