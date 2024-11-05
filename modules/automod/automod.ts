@@ -1,5 +1,6 @@
 import type { Message } from "discord.js";
 
+import { InviteType } from "discord.js";
 import {
 	client,
 	getBaseChannel,
@@ -102,7 +103,12 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		const badInvites = [
 			...new Set(
 				invites
-					.filter(([, invite]) => !WHITELISTED_INVITE_GUILDS.has(invite?.guild?.id))
+					.filter(
+						([, invite]) =>
+							invite &&
+							invite.type === InviteType.Guild &&
+							!WHITELISTED_INVITE_GUILDS.has(invite.guild?.id),
+					)
 					.map(([link]) => link),
 			),
 		];
