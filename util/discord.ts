@@ -8,7 +8,6 @@ import type {
 	GuildTextBasedChannel,
 	Message,
 	Snowflake,
-	ThreadChannel,
 } from "discord.js";
 
 import {
@@ -146,9 +145,7 @@ export async function getAllMembers(guild: Guild): Promise<Collection<Snowflake,
 }
 
 /** @deprecated */
-export async function getAllMessages(
-	channel: GuildTextBasedChannel | ThreadChannel,
-): Promise<Message<true>[]> {
+export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]> {
 	const messages = [];
 
 	let lastId: Snowflake | undefined;

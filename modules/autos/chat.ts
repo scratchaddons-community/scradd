@@ -4,7 +4,7 @@ import type {
 	Message,
 	MessageContextMenuCommandInteraction,
 	Snowflake,
-	ThreadChannel,
+	TextThreadChannel,
 } from "discord.js";
 
 import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
@@ -156,7 +156,7 @@ const consent = {
 	} as const,
 	threadName = `${chatName} (Check pins!)` as const;
 export const chatThread = await getThread();
-async function getThread(): Promise<ThreadChannel | undefined> {
+async function getThread(): Promise<TextThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const thread = getInitialThreads(config.channels.bots, chatName).first();
