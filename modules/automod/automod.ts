@@ -288,13 +288,14 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				`(ghost pinged ${joinWithAnd(mentions.map((user) => user.toString()))})`,
 			);
 
-		async function sendPublicWarn(): Promise<Message> {
+		async function sendPublicWarn(): Promise<Message | undefined> {
 			if (!message.system)
 				return await message.reply({
 					content: `${constants.emojis.statuses.no} ${deletionMessages.join("\n")}`,
 					allowedMentions: { users: [], repliedUser: true },
 				});
 
+			if (!message.channel.isSendable()) return;
 			return await message.channel.send({
 				content: `${constants.emojis.statuses.no} ${(
 					message.interactionMetadata?.user ?? message.author
@@ -320,7 +321,7 @@ export default async function automodMessage(message: Message): Promise<boolean>
 				));
 		}
 
-		if (!mentions.size || !needsDelete) {
+		if ((!mentions.size || !needsDelete) && publicWarn) {
 			ignoredDeletions.add(publicWarn.id);
 			setTimeout(() => publicWarn.delete(), 300_000);
 		}

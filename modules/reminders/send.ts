@@ -70,7 +70,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 			continue;
 		}
 
-		if (!channel?.isTextBased()) continue;
+		if (!channel?.isSendable()) continue;
 
 		const silent = reminderText.startsWith("@silent");
 
@@ -103,7 +103,7 @@ async function sendSpecialReminder(reminder: {
 }): Promise<void> {
 	switch (reminder.id) {
 		case SpecialReminder.Weekly: {
-			if (!reminder.channel?.isTextBased()) break;
+			if (!reminder.channel?.isSendable()) break;
 
 			reminder.date.setUTCDate(reminder.date.getUTCDate() - 7);
 			const title = `🏆 Weekly Winners week of ${reminder.date.toLocaleString([], {
@@ -179,7 +179,7 @@ async function sendSpecialReminder(reminder: {
 			break;
 		}
 		case SpecialReminder.BackupDatabases: {
-			if (!reminder.channel?.isTextBased()) break;
+			if (!reminder.channel?.isSendable()) break;
 
 			remindersDatabase.data = [
 				...remindersDatabase.data,

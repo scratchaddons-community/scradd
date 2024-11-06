@@ -1,14 +1,15 @@
-import type {
-	ChatInputCommandInteraction,
-	GuildMember,
-	MessageEditOptions,
-	User,
-} from "discord.js";
+import type { BaseMessageOptions, ChatInputCommandInteraction, GuildMember, Message, User } from "discord.js";
+
+
 
 import fileSystem from "node:fs/promises";
 
+
+
 import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
 import { disableComponents } from "strife.js";
+
+
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -19,6 +20,7 @@ import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { mentionUser } from "../settings.js";
 import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
+
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -212,7 +214,7 @@ export default async function hangman(
 	});
 
 	async function tick(
-		reply = (options: MessageEditOptions) => message.edit(options),
+		reply = (options: BaseMessageOptions): Promise<Message> => message.edit(options),
 	): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",

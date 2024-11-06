@@ -74,11 +74,19 @@ export async function say(
 	content: string,
 	reply?: string,
 ): Promise<Message | undefined> {
+	if (!interaction.channel?.isSendable()) {
+		await interaction.reply({
+			content: `${constants.emojis.statuses.no} Can not send messages in this channel!`,
+			ephemeral: true,
+		});
+		return;
+	}
+
 	await interaction.deferReply({ ephemeral: true });
 	const silent = content.startsWith("@silent");
 	content = silent ? content.replace("@silent", "").trim() : content;
 	const oldMessage =
-		reply && (await interaction.channel?.messages.fetch(reply).catch(() => void 0));
+		reply && (await interaction.channel.messages.fetch(reply).catch(() => void 0));
 	if (reply && (!oldMessage || oldMessage.system))
 		return await interaction.editReply(
 			`${constants.emojis.statuses.no} Could not find message to reply to!`,
@@ -89,24 +97,21 @@ export async function say(
 			content,
 			flags: silent ? MessageFlags.SuppressNotifications : undefined,
 		})
-	:	interaction.channel?.send({
+	:	interaction.channel.send({
 			content,
 			flags: silent ? MessageFlags.SuppressNotifications : undefined,
 		}));
 
-	if (message) {
-		await log(
-			`${LoggingEmojis.Bot} ${await mentionChatCommand(
-				"say",
-				interaction.guild ?? undefined,
-			)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
-				message.id
-			})`,
-			(interaction.guild?.id !== config.guild.id &&
-				interaction.guild?.publicUpdatesChannel) ||
-				LogSeverity.ServerChange,
-			{ buttons: [{ label: "Message", url: message.url }] },
-		);
-		await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);
-	}
+	await log(
+		`${LoggingEmojis.Bot} ${await mentionChatCommand(
+			"say",
+			interaction.guild ?? undefined,
+		)} used by ${interaction.user.toString()} in ${message.channel.toString()} (ID: ${
+			message.id
+		})`,
+		(interaction.guild?.id !== config.guild.id && interaction.guild?.publicUpdatesChannel) ||
+			LogSeverity.ServerChange,
+		{ buttons: [{ label: "Message", url: message.url }] },
+	);
+	await interaction.editReply(`${constants.emojis.statuses.yes} Message sent!`);
 }

@@ -95,8 +95,9 @@ export async function learn(message: Message): Promise<void> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (
 		message.channel.type === ChannelType.PrivateThread ||
-		baseChannel?.type === ChannelType.DM ||
-		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
+		!baseChannel ||
+		baseChannel.isDMBased() ||
+		!baseChannel.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
 	)
 		return;
 

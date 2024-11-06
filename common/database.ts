@@ -1,4 +1,4 @@
-import type { Message, Snowflake, TextBasedChannel } from "discord.js";
+import type { Message, Snowflake, SendableChannels } from "discord.js";
 
 import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
 import papaparse from "papaparse";
@@ -233,7 +233,7 @@ for (const [event, code] of Object.entries({
 	});
 }
 
-export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
+export async function backupDatabases(channel: SendableChannels): Promise<void> {
 	if (constants.env === "development") return;
 
 	const attachments = (
