@@ -54,7 +54,7 @@
 		"typescript-eslint": "8.14.0"
 	},
 	"optionalDependencies": {
-		"@napi-rs/canvas": "0.1.60",
+		"@napi-rs/canvas": "0.1.61",
 		"@railway/cli": "3.18.0",
 		"chart.js": "4.4.6"
 	},
