@@ -10,7 +10,7 @@ jobs:
     format:
         name: Format
         runs-on: ubuntu-20.04
-        concurrency: format-${{github.ref}}
+        concurrency: format-${{github.head_ref}}
 
         steps:
             - name: Checkout
@@ -53,13 +53,13 @@ jobs:
                   repository: ${{github.event.pull_request.head.repo.full_name}}
 
             - name: Setup CodeQL
-              uses: github/codeql-action/init@v3.27.0
+              uses: github/codeql-action/init@v3.27.5
               with:
                   languages: javascript
                   queries: security-and-quality
 
             - name: Analyze
-              uses: github/codeql-action/analyze@v3.27.0
+              uses: github/codeql-action/analyze@v3.27.5
 
     build:
         name: Build & Test
