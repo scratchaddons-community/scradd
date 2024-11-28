@@ -1,9 +1,4 @@
-import type {
-	ApplicationCommandOption,
-	GuildBasedChannel,
-	Role,
-	User,
-} from "discord.js";
+import type { ApplicationCommandOption, GuildBasedChannel, Role, User } from "discord.js";
 
 import { ApplicationCommandOptionType, Base, MessageMentions } from "discord.js";
 import { client } from "strife.js";
