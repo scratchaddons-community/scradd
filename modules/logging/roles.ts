@@ -54,9 +54,9 @@ export async function memberRoleUpdate(
 	): Promise<void> {
 		if (!entry.target || !roleMentions.length) return;
 		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} ${type} ${joinWithAnd(
-				roleMentions,
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${extraAuditLogsInfo({ reason: entry.reason })}`,
+			`${LoggingEmojis.Role} ${entry.target.toString()} ${type} ${joinWithAnd(roleMentions)}${
+				entry.executor ? ` from ${entry.executor.toString()}` : ""
+			}${extraAuditLogsInfo({ reason: entry.reason })}`,
 			severity,
 		);
 	}

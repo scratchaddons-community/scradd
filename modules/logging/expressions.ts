@@ -9,9 +9,9 @@ import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Expression} ${formatAnyEmoji(entry.target) ?? ":emoji:"} created${extraAuditLogsInfo(
-			entry,
-		)}`,
+		`${LoggingEmojis.Expression} ${
+			formatAnyEmoji(entry.target) ?? ":emoji:"
+		} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }

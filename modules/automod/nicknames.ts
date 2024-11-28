@@ -95,7 +95,9 @@ async function setNickname(
 	}
 
 	await log(
-		`${LoggingEmojisError} Unable to change ${member.toString()}’s nickname to \`${newNickname}\` (${reason})`,
+		`${LoggingEmojisError} Unable to change ${member.toString()}’s nickname to \`${
+			newNickname
+		}\` (${reason})`,
 		LogSeverity.Alert,
 		{ pingHere: true },
 	);

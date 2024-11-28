@@ -57,7 +57,9 @@ async function purge(
 			return {
 				content: `${
 					constants.emojis.statuses.no
-				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
+				} No messages matched those filters! Note: I cannot detect messages more than ${
+					MAX_FETCH_COUNT
+				} messages ${
 					before && channel ?
 						`before [this message](<${channel.url}/${before}>). Try searching from an older message.`
 					:	"ago. Use the `message` option to search backwards from a certain point."

@@ -49,7 +49,9 @@ defineChatCommand(
 			},
 
 			"minimum-reactions": {
-				description: `Only get messages with at least this many reactions (defaults to ${defaultMinReactions})`,
+				description: `Only get messages with at least this many reactions (defaults to ${
+					defaultMinReactions
+				})`,
 				minValue: 1,
 				type: ApplicationCommandOptionType.Integer,
 			},
@@ -89,7 +91,9 @@ defineMenuCommand(
 		await interaction.editReply(
 			`${constants.emojis.statuses.yes} Synced ${reactionsName}! [That message](<${
 				interaction.targetMessage.url
-			}>) by ${interaction.targetMessage.author.toString()} has ${count || "no"} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
+			}>) by ${interaction.targetMessage.author.toString()} has ${
+				count || "no"
+			} ${BOARD_EMOJI} reaction${count === 1 ? "" : "s"}.`,
 		);
 	},
 );

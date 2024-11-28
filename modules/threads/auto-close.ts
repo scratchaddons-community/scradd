@@ -71,7 +71,9 @@ export async function setUpAutoClose(
 	if (+date < Date.now() + 900_000 || +date > Date.now() + 1_814_400_000) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t close the thread sooner than 15 minutes or later than 3 weeks.`,
+			content: `${
+				constants.emojis.statuses.no
+			} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t close the thread sooner than 15 minutes or later than 3 weeks.`,
 		});
 	}
 

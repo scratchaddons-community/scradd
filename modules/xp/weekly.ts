@@ -58,7 +58,10 @@ export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 }
 
 export default async function getWeekly(date: Date): Promise<string> {
-	const title = `## 🏆 Weekly Winners week of ${date.toLocaleString([], { month: "long", day: "numeric" })}`;
+	const title = `## 🏆 Weekly Winners week of ${date.toLocaleString([], {
+		month: "long",
+		day: "numeric",
+	})}`;
 	const weeklyWinners = getFullWeeklyData();
 
 	// Remove Active role from inactive members
@@ -139,6 +142,9 @@ export default async function getWeekly(date: Date): Promise<string> {
 		})
 		.join("\n");
 	const stats = `*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*`;
-	const nextWeek = `### Next week’s weekly winners will be posted ${time(date, TimestampStyles.RelativeTime)}.`;
+	const nextWeek = `### Next week’s weekly winners will be posted ${time(
+		date,
+		TimestampStyles.RelativeTime,
+	)}.`;
 	return `${title}\n${winners || "*Nobody got any XP this week!*"}\n\n${stats}\n${nextWeek}`;
 }

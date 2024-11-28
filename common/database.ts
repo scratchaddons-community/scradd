@@ -1,4 +1,4 @@
-import type { Message, Snowflake, SendableChannels } from "discord.js";
+import type { Message, SendableChannels, Snowflake } from "discord.js";
 
 import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
 import papaparse from "papaparse";
@@ -64,8 +64,13 @@ export default class Database<Data extends Record<string, boolean | number | str
 		if (this.message) return;
 
 		const content =
-			`__**${client.user.displayName.replaceAll(" ", "-").toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n` +
-			`\n*Please don’t delete this message. If you do, all ${this.name.replaceAll("_", " ")} information may be reset.*`;
+			`__**${client.user.displayName
+				.replaceAll(" ", "-")
+				.toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n` +
+			`\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+				"_",
+				" ",
+			)} information may be reset.*`;
 		if (databases[this.name]) await databases[this.name]?.edit(content);
 		this.message = databases[this.name] ??= await databaseThread.send(content);
 

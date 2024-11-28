@@ -135,9 +135,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 
 	if (files.length) {
 		await log(
-			`${
-				LoggingEmojis.MessageEdit
-			} [Message](<${edited.url}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+			`${LoggingEmojis.MessageEdit} [Message](<${
+				edited.url
+			}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
 			(interaction.guild?.id !== config.guild.id &&
 				interaction.guild?.publicUpdatesChannel) ||
 				LogSeverity.ServerChange,

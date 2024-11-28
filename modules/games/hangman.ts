@@ -1,15 +1,15 @@
-import type { BaseMessageOptions, ChatInputCommandInteraction, GuildMember, Message, User } from "discord.js";
-
-
+import type {
+	BaseMessageOptions,
+	ChatInputCommandInteraction,
+	GuildMember,
+	Message,
+	User,
+} from "discord.js";
 
 import fileSystem from "node:fs/promises";
 
-
-
 import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
 import { disableComponents } from "strife.js";
-
-
 
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
@@ -20,7 +20,6 @@ import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
 import { mentionUser } from "../settings.js";
 import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
-
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -98,7 +97,9 @@ export default async function hangman(
 			if (componentInteraction.customId === "hint") {
 				await componentInteraction.reply({
 					ephemeral: true,
-					content: `This will use ${HINT_PENALTY} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
+					content: `This will use ${
+						HINT_PENALTY
+					} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -184,7 +185,9 @@ export default async function hangman(
 			CURRENTLY_PLAYING.delete(interaction.user.id);
 
 			await message.reply({
-				content: `# You ${reason === "win" ? "saved" : "killed"} ${await mentionUser(user, interaction.user)}!\n${
+				content: `# You ${
+					reason === "win" ? "saved" : "killed"
+				} ${await mentionUser(user, interaction.user)}!\n${
 					{
 						idle: String.raw`You didn’t save them in time, so they died \:(`,
 						end: String.raw`You gave up saving them, so they died \:(\nWhat kind of person *are* you?⁉`,

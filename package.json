@@ -10,8 +10,8 @@
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache",
 		"lint": "eslint",
-		"serve": "node . --enable-source-maps --env-file=.env --watch --watch-path=./dist --watch-preserve-output",
-		"start": "node . --enable-source-maps",
+		"serve": "node --env-file .env --enable-source-maps --watch-path ./dist --watch-preserve-output .",
+		"start": "node --enable-source-maps .",
 		"test": "node --run build && node --enable-source-maps --test"
 	},
 	"browserslist": [

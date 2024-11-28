@@ -258,7 +258,10 @@ export function pollToEmbed(poll: Poll): APIEmbed {
 				answer.voteCount / (votes || 1)
 			).toLocaleString([], { style: "percent", maximumFractionDigits: 1 })})`;
 			return answer.voteCount === winner ?
-					{ name: underline(name), value: underline(`${counts} ${constants.emojis.message.checkmark}`) }
+					{
+						name: underline(name),
+						value: underline(`${counts} ${constants.emojis.message.checkmark}`),
+					}
 				:	{ name, value: counts };
 		}),
 		footer: {
@@ -551,7 +554,9 @@ export function messageToText(
 				.fetchReference()
 				.catch(() => void 0)
 				.then(async (reference) =>
-					reference ? (await messageToText(reference, references)) || content : failMessage,
+					reference ?
+						(await messageToText(reference, references)) || content
+					:	failMessage,
 				);
 		}
 		case MessageType.GuildInviteReminder: {

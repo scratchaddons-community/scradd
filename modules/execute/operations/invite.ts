@@ -45,9 +45,9 @@ const data: CustomOperation = {
 			await interaction.reply({
 				content: `${
 					constants.emojis.statuses.no
-				} You already have a personal invite created! ${existing.value.toString()}\nYou have invited **${uses} ${
-					uses === 1 ? "person" : "people"
-				}** to this server so far.`,
+				} You already have a personal invite created! ${existing.value.toString()}\nYou have invited **${
+					uses
+				} ${uses === 1 ? "person" : "people"}** to this server so far.`,
 				ephemeral: true,
 			});
 			return;

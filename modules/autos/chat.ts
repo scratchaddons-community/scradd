@@ -134,7 +134,9 @@ const consent = {
 		content:
 			`## ${chatName}\n` +
 			`### Basic regurgitating chatbot\n` +
-			`${chatName} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
+			`${
+				chatName
+			} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -271,11 +273,9 @@ export async function removeResponse(
 	}
 
 	await log(
-		`${
-			LoggingEmojis.Bot
-		} ${interaction.user.toString()} permamently removed a response from ${chatName} (${deletedCount} prompt${
-			deletedCount === 1 ? "" : "s"
-		})`,
+		`${LoggingEmojis.Bot} ${interaction.user.toString()} permamently removed a response from ${
+			chatName
+		} (${deletedCount} prompt${deletedCount === 1 ? "" : "s"})`,
 		LogSeverity.ImportantUpdate,
 		{ files: [{ content: response, extension: "md" }] },
 	);

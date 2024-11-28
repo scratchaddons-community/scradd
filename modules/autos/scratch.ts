@@ -20,8 +20,9 @@ import { truncateText } from "../../util/text.js";
 const EMBED_LENGTH = 750;
 
 export function getMatches(content: string): URL[] {
+	//gpt wrote the regexp and like half of this code
 	const scratchUrlRegexp =
-		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regexp and like half of this code
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis;
 
 	const urls = new Map<string, URL>();
 	for (const match of content.match(scratchUrlRegexp) ?? []) {

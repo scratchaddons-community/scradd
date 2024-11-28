@@ -62,7 +62,9 @@ const data: CustomOperation = {
 			}
 			case "static": {
 				await interaction.reply({
-					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
+					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${
+						autoreactions.length
+					}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
 					embeds: [
 						{
 							title: "Emojis",
