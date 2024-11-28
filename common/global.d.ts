@@ -18,14 +18,6 @@ declare global {
 			callbackfn: (value: T, index: number, array: readonly T[]) => U,
 			thisArg?: unknown,
 		): { readonly [K in keyof this]: U };
-		filter<S extends T>(
-			predicate: (value: T, index: number, array: readonly T[]) => value is S,
-			thisArg?: undefined,
-		): S[];
-		filter<P extends (value: T, index: number, array: T[]) => unknown>(
-			predicate: P,
-			thisArg?: unknown,
-		): P extends BooleanConstructor ? FilterNonFalsy<this> : T[];
 	}
 	interface ObjectConstructor {
 		entries<T, U extends PropertyKey>(

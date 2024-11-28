@@ -504,10 +504,8 @@ function getNextQuestions(
 		// eslint-disable-next-line unicorn/no-magic-array-flat-depth
 		.flat(2);
 
-	for (const question of questions) {
-		frequencies[question.question] ||= 0;
-		frequencies[question.question]++;
-	}
+	for (const question of questions)
+		frequencies[question.question] = (frequencies[question.question] ?? 0) + 1;
 
 	const frequenciesArray = Object.entries(frequencies);
 
@@ -565,7 +563,7 @@ function answerQuestion(
 		if (
 			allDependencies[justAsked] !== undefined &&
 			((probabilityShift > 0 && !allDependencies[justAsked]) ||
-				(probabilityShift < 0 && allDependencies[justAsked] !== false))
+				(probabilityShift < 0 && allDependencies[justAsked]))
 		) {
 			justAskedQuestions.push(
 				...addonQuestions
