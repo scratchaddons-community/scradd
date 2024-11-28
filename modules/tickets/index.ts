@@ -210,7 +210,9 @@ defineModal("report", async (interaction, messageId) => {
 	const message = await interaction.channel?.messages.fetch(messageId).catch(() => void 0);
 	if (!message) {
 		await interaction.reply({
-			content: `${constants.emojis.statuses.no} Cannot report that message! Has it already been deleted?`,
+			content: `${
+				constants.emojis.statuses.no
+			} Cannot report that message! Has it already been deleted?`,
 			ephemeral: true,
 		});
 		return;
@@ -241,7 +243,9 @@ defineModal("report", async (interaction, messageId) => {
 		},
 	);
 	await interaction.reply({
-		content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
+		content: `${
+			constants.emojis.statuses.yes
+		} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
 		ephemeral: true,
 	});
 });

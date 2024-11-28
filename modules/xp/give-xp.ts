@@ -27,24 +27,24 @@ export async function giveXpForMessage(message: Message): Promise<void> {
 		const accumulator: Message[] = [];
 		for (let index = 0; index < fetched.length && accumulator.length < DEFAULT_XP; index++) {
 			const item = fetched[index];
-			if (item && (!item.author.bot || item.interaction)) accumulator.push(item);
+			if (item && (!item.author.bot || item.interactionMetadata)) accumulator.push(item);
 		}
 		latestMessages[message.channel.id] = accumulator;
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
-			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
+		return ![message.author.id, message.interactionMetadata?.user.id || ""].some((user) =>
+			[foundMessage.author.id, foundMessage.interactionMetadata?.user.id].includes(user),
 		);
 	});
 
 	const newChannel = lastInChannel.length < DEFAULT_XP;
 	if (!newChannel) lastInChannel.pop();
 	lastInChannel.unshift(message);
-	const bot = 1 + Number(Boolean(message.interaction));
+	const bot = 1 + Number(Boolean(message.interactionMetadata));
 
 	await giveXp(
-		message.interaction?.user ?? message.author,
+		message.interactionMetadata?.user ?? message.author,
 		message.url,
 		spam === -1 && !newChannel ?
 			1

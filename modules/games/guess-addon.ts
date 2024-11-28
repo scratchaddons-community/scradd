@@ -79,7 +79,9 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 			await interaction.editReply({ components: disableComponents(oldMessage.components) });
 
 			await interaction.followUp(
-				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${scratchAddons.version_name})`,
+				`🤯 You beat me! How *did* you do that? You were thinking of an actual addon, right? (Also, I only know about addons available in v${
+					scratchAddons.version_name
+				})`,
 			);
 
 			CURRENTLY_PLAYING.delete(interaction.user.id);
@@ -220,7 +222,9 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 						backInfo.probabilities,
 						askedCount - 1,
 						backInfo.justAsked,
-						buttonInteraction.component.label ?? undefined,
+						("label" in buttonInteraction.component &&
+							buttonInteraction.component.label) ||
+							undefined,
 					);
 
 					if (nextMessage)
@@ -255,7 +259,8 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 						justAsked: questions[0] ?? "",
 						probabilities: addonProbabilities,
 					},
-					buttonInteraction.component.label ?? "",
+					("label" in buttonInteraction.component && buttonInteraction.component.label) ||
+						"",
 				);
 
 				if (nextMessage)
@@ -438,7 +443,9 @@ export default async function guessAddon(interaction: ChatInputCommandInteractio
 								backInfo.probabilities,
 								askedCount - 1,
 								backInfo.justAsked,
-								buttonInteraction.component.label ?? undefined,
+								("label" in buttonInteraction.component &&
+									buttonInteraction.component.label) ||
+									undefined,
 							)
 						:	new TypeError("backInfo must be an object to go back")
 					:	await reply(

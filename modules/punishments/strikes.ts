@@ -22,7 +22,9 @@ export async function getStrikes(
 	) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
+			content: `${
+				constants.emojis.statuses.no
+			} You don’t have permission to view this member’s strikes!`,
 		});
 	}
 	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });

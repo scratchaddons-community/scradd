@@ -1,7 +1,13 @@
 import type { Awaitable } from "discord.js";
 import type { AuditLog } from "./util.js";
 
-import { AuditLogEvent, AutoModerationRuleTriggerType, userMention, WebhookType } from "discord.js";
+import {
+	AuditLogEvent,
+	AutoModerationRule,
+	AutoModerationRuleTriggerType,
+	userMention,
+	WebhookType,
+} from "discord.js";
 import { defineEvent } from "strife.js";
 
 import config from "../../common/config.js";
@@ -68,7 +74,9 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 			LogSeverity.ImportantUpdate,
 		);
 	},
+	// @ts-expect-error -- https://github.com/discordjs/discord.js/pull/10591
 	[AuditLogEvent.RoleCreate]: roleCreate,
+	// @ts-expect-error -- https://github.com/discordjs/discord.js/pull/10591
 	[AuditLogEvent.RoleUpdate]: roleUpdate,
 	[AuditLogEvent.InviteCreate]: inviteCreate,
 	async [AuditLogEvent.WebhookCreate](entry) {
@@ -123,6 +131,7 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 		);
 	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
+		if (!(entry.target instanceof AutoModerationRule)) return;
 		await log(
 			`${LoggingEmojis.Integration} ${
 				{
@@ -130,6 +139,8 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 					[AutoModerationRuleTriggerType.Spam]: "Block Suspected Spam Content",
 					[AutoModerationRuleTriggerType.KeywordPreset]: "Block Commonly Flagged Words",
 					[AutoModerationRuleTriggerType.MentionSpam]: "Block Mention Spam",
+					[AutoModerationRuleTriggerType.MemberProfile]:
+						"Block Words in Member Profile Names",
 				}[entry.target.triggerType]
 			} AutoMod Rule ${entry.target.name} (ID: ${
 				entry.target.id
@@ -138,6 +149,7 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 		);
 	},
 	async [AuditLogEvent.AutoModerationRuleDelete](entry) {
+		if (!(entry.target instanceof AutoModerationRule)) return;
 		await log(
 			`${LoggingEmojis.Integration} AutoMod Rule ${entry.target.name} (ID: ${
 				entry.target.id

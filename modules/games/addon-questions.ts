@@ -35,7 +35,9 @@ const firstLetters = Object.fromEntries(
 		]),
 	);
 
-const versionMarkdown = `**[${scratchAddons.version_name}](https://github.com/${constants.repos.scratchAddons}/releases/tag/v${scratchAddons.version})**`;
+const versionMarkdown = `**[${scratchAddons.version_name}](https://github.com/${
+	constants.repos.scratchAddons
+}/releases/tag/v${scratchAddons.version})**`;
 const questionStrings = {
 	editorCategory: "Is your addon listed under **Scratch Editor Features**?",
 	codeEditorCategory: "Is your addon listed under **Scratch Editor Features** → **Code Editor**?",

@@ -214,7 +214,9 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 					},
 					{
 						name: "Strikes",
-						value: `${totalStrikeCount} (${recentStrikeCount} in the past 3 weeks; ${semiRecentStrikeCount} in the past 6 weeks)`,
+						value: `${totalStrikeCount} (${
+							recentStrikeCount
+						} in the past 3 weeks; ${semiRecentStrikeCount} in the past 6 weeks)`,
 						inline: true,
 					},
 					{

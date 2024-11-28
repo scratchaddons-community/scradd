@@ -7,6 +7,7 @@ import { Faces, FormattingPatterns, MessageMentions } from "discord.js";
 import { client } from "strife.js";
 
 import config from "../common/config.js";
+import { formatDuration } from "./numbers.js";
 
 const DATE_TYPE_FORMATS = {
 	t: { timeStyle: "short" },
@@ -161,13 +162,27 @@ export const rules = {
 		match: (source) => /^<t:(\d+)(?::([DFRTdft]))?>/.exec(source),
 		parse: (capture) => ({ timestamp: capture[1], format: capture[2] }),
 		html(node, output, state) {
-			const date = new Date(+(typeof node.timestamp === "string" && node.timestamp) * 1000);
+			const milliseconds = +(typeof node.timestamp === "string" && node.timestamp) * 1000;
+			if (node.format === "R") {
+				const now = Date.now();
+				const past = now > milliseconds;
+				const duration = formatDuration(past ? now - milliseconds : milliseconds - now);
+				return markdown.htmlTag(
+					"span",
+					output(
+						{ type: "text", content: past ? `${duration} ago` : `in ${duration}` },
+						state,
+					),
+					{ class: "discord-time" },
+				);
+			}
 			const format =
 				typeof node.format === "string" &&
 				Object.keys(DATE_TYPE_FORMATS).includes(node.format) &&
 				node.format;
 			const formatOptions = DATE_TYPE_FORMATS[format || "f"];
 
+			const date = new Date(milliseconds);
 			return markdown.htmlTag(
 				"span",
 				output({ type: "text", content: date.toLocaleString([], formatOptions) }, state),

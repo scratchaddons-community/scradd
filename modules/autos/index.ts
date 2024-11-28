@@ -151,7 +151,7 @@ defineEvent("messageUpdate", async (_, message) => {
 		await found.edit(
 			data || { content: zeroWidthSpace, components: [], embeds: [], files: [] },
 		);
-	else if (data)
+	else if (data && message.channel.isSendable())
 		autoResponses.set(
 			message.id,
 			await (message.system ? message.channel.send(data) : message.reply(data)),

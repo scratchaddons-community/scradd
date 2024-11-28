@@ -106,7 +106,9 @@ defineChatCommand(
 					footer: { text: addonId },
 					thumbnail: { url: `${constants.urls.addonImages}/${addonId}.png` },
 					title: addon.name,
-					url: `https://github.com/${constants.repos.scratchAddons}/tree/v${scratchAddons.version}/addons/${addonId}/`,
+					url: `https://github.com/${
+						constants.repos.scratchAddons
+					}/tree/v${scratchAddons.version}/addons/${addonId}/`,
 				},
 			],
 

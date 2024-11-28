@@ -53,7 +53,8 @@ export default async function linkScratchRole(
 		response_type: "code",
 		scope: OAuth2Scopes.Identify + " " + OAuth2Scopes.RoleConnectionsWrite,
 	}).toString()}`;
-	const discordHtml = `<meta http-equiv="refresh" content="0;url=${discordUrl}">`; // eslint-disable-line unicorn/string-content
+	// eslint-disable-next-line unicorn/string-content
+	const discordHtml = `<meta http-equiv="refresh" content="0;url=${discordUrl}">`;
 
 	const search = new URLSearchParams(requestUrl.search);
 	const scratchToken = search.get("privateCode");
@@ -107,7 +108,8 @@ export default async function linkScratchRole(
 	const scratch = username && (await fetchUser(username));
 	if (!scratch)
 		return response.writeHead(401, { "content-type": "text/html" }).end(
-			`<meta http-equiv="refresh" content="0;url=${getScratchUrl(tokenData.refresh_token)}">`, // eslint-disable-line unicorn/string-content
+			// eslint-disable-next-line unicorn/string-content
+			`<meta http-equiv="refresh" content="0;url=${getScratchUrl(tokenData.refresh_token)}">`,
 		);
 
 	(await client.rest.put(Routes.userApplicationRoleConnection(client.user.id), {

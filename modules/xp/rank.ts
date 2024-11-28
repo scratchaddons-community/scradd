@@ -104,7 +104,7 @@ export default async function getUserRank(
 		files: await makeCanvasFiles(progress),
 		ephemeral:
 			interaction.isButton() &&
-			interaction.message.interaction?.user.id !== interaction.user.id,
+			interaction.message.interactionMetadata?.user.id !== interaction.user.id,
 	});
 }
 
@@ -161,7 +161,7 @@ export async function top(
 	const message = await interaction.deferReply({
 		ephemeral:
 			interaction.isButton() &&
-			interaction.message.interaction?.user.id !== interaction.user.id,
+			interaction.message.interactionMetadata?.user.id !== interaction.user.id,
 		fetchReply: true,
 	});
 	const guildMembers = onlyMembers && (await getAllMembers(config.guild));
@@ -169,7 +169,9 @@ export async function top(
 	await paginate(
 		guildMembers ? leaderboard.filter((entry) => guildMembers.has(entry.user)) : leaderboard,
 		async (xp) =>
-			`${await mentionUser(xp.user, interaction.user)}\n Level ${getLevelForXp(xp.xp)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
+			`${await mentionUser(xp.user, interaction.user)}\n Level ${getLevelForXp(
+				xp.xp,
+			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
 		(data) => message.edit(data),
 		{
 			title: "XP Leaderboard",

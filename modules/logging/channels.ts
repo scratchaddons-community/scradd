@@ -51,7 +51,7 @@ export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>
 
 	await log(
 		`${LoggingEmojis.Channel} ${
-			"name" in entry.target ? `#${entry.target.name}` : "Unknown channel"
+			typeof entry.target.name === "string" ? `#${entry.target.name}` : "Unknown channel"
 		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);

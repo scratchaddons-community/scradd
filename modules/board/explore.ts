@@ -64,7 +64,8 @@ export default async function makeSlideshow(
 	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
 ): Promise<void> {
 	const ephemeral =
-		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
+		interaction.isButton() &&
+		interaction.message.interactionMetadata?.user.id !== interaction.user.id;
 	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });
 
 	const fetchedMessages = asyncFilter(

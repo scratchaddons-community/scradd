@@ -57,7 +57,9 @@ defineChatCommand(
 		if (!command || !schema) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Could not find the \`${OPERATION_PREFIX}${commandName}\` operation!`,
+				content: `${constants.emojis.statuses.no} Could not find the \`${
+					OPERATION_PREFIX
+				}${commandName}\` operation!`,
 				embeds: [listOperations(await getSchemasFromInteraction(interaction))],
 			});
 		}
@@ -70,7 +72,9 @@ defineChatCommand(
 		if (!permission) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${OPERATION_PREFIX}${commandName}\` operation!`,
+				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${
+					OPERATION_PREFIX
+				}${commandName}\` operation!`,
 			});
 		}
 

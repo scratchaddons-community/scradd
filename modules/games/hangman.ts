@@ -1,7 +1,8 @@
 import type {
+	BaseMessageOptions,
 	ChatInputCommandInteraction,
 	GuildMember,
-	MessageEditOptions,
+	Message,
 	User,
 } from "discord.js";
 
@@ -96,7 +97,9 @@ export default async function hangman(
 			if (componentInteraction.customId === "hint") {
 				await componentInteraction.reply({
 					ephemeral: true,
-					content: `This will use ${HINT_PENALTY} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
+					content: `This will use ${
+						HINT_PENALTY
+					} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -182,7 +185,9 @@ export default async function hangman(
 			CURRENTLY_PLAYING.delete(interaction.user.id);
 
 			await message.reply({
-				content: `# You ${reason === "win" ? "saved" : "killed"} ${await mentionUser(user, interaction.user)}!\n${
+				content: `# You ${
+					reason === "win" ? "saved" : "killed"
+				} ${await mentionUser(user, interaction.user)}!\n${
 					{
 						idle: String.raw`You didn’t save them in time, so they died \:(`,
 						end: String.raw`You gave up saving them, so they died \:(\nWhat kind of person *are* you?⁉`,
@@ -212,7 +217,7 @@ export default async function hangman(
 	});
 
 	async function tick(
-		reply = (options: MessageEditOptions) => message.edit(options),
+		reply = (options: BaseMessageOptions): Promise<Message> => message.edit(options),
 	): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",

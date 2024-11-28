@@ -62,7 +62,9 @@ export default async function top(
 						type: ComponentType.Button,
 						style: ButtonStyle.Link,
 						label: "Suggestions Site",
-						url: `${constants.domains.scradd}/suggestions${options.all === undefined ? "" : `?all=${options.all.toString()}`}`,
+						url: `${constants.domains.scradd}/suggestions${
+							options.all === undefined ? "" : `?all=${options.all.toString()}`
+						}`,
 					},
 				];
 			},

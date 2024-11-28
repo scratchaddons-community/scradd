@@ -1,25 +1,13 @@
 import type {
-	AnyThreadChannel,
 	APIAuditLogChange,
-	ApplicationCommand,
 	AuditLogEvent,
-	AutoModerationRule,
 	Base,
-	Guild,
 	GuildAuditLogsEntry,
-	GuildEmoji,
-	GuildScheduledEvent,
-	Integration,
-	Invite,
-	NonThreadGuildBasedChannel,
-	Role,
-	Snowflake,
-	StageInstance,
-	Sticker,
+	PartialUser,
 	User,
-	Webhook,
 } from "discord.js";
 import type { actualPrimitives } from "mongoose";
+import type { CamelToKebab } from "../../common/misc.js";
 
 import constants from "../../common/constants.js";
 
@@ -109,7 +97,7 @@ export const enum LoggingEmojis {
 export const LoggingEmojisError = constants.emojis.statuses.no;
 
 export function extraAuditLogsInfo(entry: {
-	executor?: User | null;
+	executor?: User | PartialUser | null;
 	reason?: string | null;
 }): string {
 	const reason = entry.reason?.trim();
@@ -120,95 +108,16 @@ export function extraAuditLogsInfo(entry: {
 	}`;
 }
 
-export type AuditLogTargets<Type extends AuditLogEvent> =
-	Type extends (
-		AuditLogEvent.ThreadCreate | AuditLogEvent.ThreadDelete | AuditLogEvent.ThreadUpdate
-	) ?
-		AnyThreadChannel | { id: Snowflake }
-	: Type extends AuditLogEvent.ApplicationCommandPermissionUpdate ?
-		ApplicationCommand | { id: Snowflake }
-	: Type extends (
-		| AuditLogEvent.AutoModerationBlockMessage
-		| AuditLogEvent.AutoModerationFlagToChannel
-		| AuditLogEvent.AutoModerationRuleCreate
-		| AuditLogEvent.AutoModerationRuleDelete
-		| AuditLogEvent.AutoModerationRuleUpdate
-		| AuditLogEvent.AutoModerationUserCommunicationDisabled
-	) ?
-		AutoModerationRule
-	: Type extends (
-		| AuditLogEvent.IntegrationCreate
-		| AuditLogEvent.IntegrationDelete
-		| AuditLogEvent.IntegrationUpdate
-	) ?
-		Integration
-	: Type extends (
-		AuditLogEvent.InviteCreate | AuditLogEvent.InviteDelete | AuditLogEvent.InviteUpdate
-	) ?
-		Invite
-	: Type extends AuditLogEvent.GuildUpdate ? Guild
-	: Type extends AuditLogEvent.MessageBulkDelete ? Guild | { id: Snowflake }
-	: Type extends (
-		AuditLogEvent.EmojiCreate | AuditLogEvent.EmojiDelete | AuditLogEvent.EmojiUpdate
-	) ?
-		GuildEmoji | { id: Snowflake }
-	: Type extends (
-		| AuditLogEvent.GuildScheduledEventCreate
-		| AuditLogEvent.GuildScheduledEventDelete
-		| AuditLogEvent.GuildScheduledEventUpdate
-	) ?
-		GuildScheduledEvent
-	: Type extends (
-		| AuditLogEvent.ChannelCreate
-		| AuditLogEvent.ChannelDelete
-		| AuditLogEvent.ChannelOverwriteCreate
-		| AuditLogEvent.ChannelOverwriteDelete
-		| AuditLogEvent.ChannelOverwriteUpdate
-		| AuditLogEvent.ChannelUpdate
-	) ?
-		NonThreadGuildBasedChannel | { id: Snowflake }
-	: Type extends AuditLogEvent.RoleCreate | AuditLogEvent.RoleDelete | AuditLogEvent.RoleUpdate ?
-		Role | { id: Snowflake }
-	: Type extends (
-		| AuditLogEvent.StageInstanceCreate
-		| AuditLogEvent.StageInstanceDelete
-		| AuditLogEvent.StageInstanceUpdate
-	) ?
-		StageInstance
-	: Type extends (
-		AuditLogEvent.StickerCreate | AuditLogEvent.StickerDelete | AuditLogEvent.StickerUpdate
-	) ?
-		Sticker
-	: Type extends (
-		AuditLogEvent.MessageDelete | AuditLogEvent.MessagePin | AuditLogEvent.MessageUnpin
-	) ?
-		User
-	: Type extends (
-		| AuditLogEvent.BotAdd
-		| AuditLogEvent.MemberBanAdd
-		| AuditLogEvent.MemberBanRemove
-		| AuditLogEvent.MemberDisconnect
-		| AuditLogEvent.MemberKick
-		| AuditLogEvent.MemberMove
-		| AuditLogEvent.MemberPrune
-		| AuditLogEvent.MemberRoleUpdate
-		| AuditLogEvent.MemberUpdate
-	) ?
-		User | null
-	: Type extends (
-		AuditLogEvent.WebhookCreate | AuditLogEvent.WebhookDelete | AuditLogEvent.WebhookUpdate
-	) ?
-		Webhook
-	:	{ id: Snowflake } | null;
 export type AuditLog<
 	Event extends AuditLogEvent,
 	ExtraChangeKeys extends string = never,
-	Target = AuditLogTargets<Event>,
+	Target = GuildAuditLogsEntry<Event>["target"],
 	AllKeys extends string =
 		| ExtraChangeKeys
 		| Extract<
 				APIAuditLogChange["key"],
-				Extract<Target, Base> extends never ? string : keyof Extract<Target, Base>
+				Extract<Target, Base> extends never ? string
+				:	CamelToKebab<Extract<keyof Extract<Target, Base>, string>, "_">
 		  >,
 > = Omit<GuildAuditLogsEntry<Event>, "changes" | "target"> & {
 	target: Target;

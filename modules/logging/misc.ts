@@ -1,4 +1,4 @@
-import type { APIEmbed, Channel, Embed, Message, TextChannel, ThreadChannel } from "discord.js";
+import type { AnyThreadChannel, APIEmbed, Channel, Embed, Message, TextChannel } from "discord.js";
 import type { LoggingEmojis, LoggingEmojisError } from "./util.js";
 
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
@@ -98,7 +98,9 @@ export default async function log(
 	});
 }
 
-export async function getLoggingThread(group: LogSeverity): Promise<TextChannel | ThreadChannel> {
+export async function getLoggingThread(
+	group: LogSeverity,
+): Promise<TextChannel | AnyThreadChannel> {
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
 	const name = `${group}) ${LogSeverity[group]

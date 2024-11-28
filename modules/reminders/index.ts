@@ -73,7 +73,9 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 			content: `~~${interaction.message.content}~~\n${
 				constants.emojis.statuses.no
 			} Reminder canceled${
-				interaction.user.id === interaction.message.interaction?.user.id ? "" : " by a mod"
+				interaction.user.id === interaction.message.interactionMetadata?.user.id ?
+					""
+				:	" by a mod"
 			}.`,
 			components: disableComponents(interaction.message.components),
 		});

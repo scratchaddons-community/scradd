@@ -212,7 +212,9 @@ defineButton("toggleSetting", async (interaction, data) => {
 	if (interaction.user.id !== id) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have permission to update other people’s settings!`,
+			content: `${
+				constants.emojis.statuses.no
+			} You don’t have permission to update other people’s settings!`,
 		});
 	}
 	await interaction.reply(await updateSettings(interaction.user, { [setting]: "toggle" }));

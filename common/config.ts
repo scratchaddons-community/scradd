@@ -1,6 +1,7 @@
 import type {
 	AnyThreadChannel,
 	ForumChannel,
+	ForumThreadChannel,
 	Guild,
 	MediaChannel,
 	NewsChannel,
@@ -8,6 +9,7 @@ import type {
 	PublicThreadChannel,
 	Role,
 	TextChannel,
+	TextThreadChannel,
 } from "discord.js";
 
 import assert from "node:assert";
@@ -183,7 +185,7 @@ export default config;
 export function getInitialThreads(
 	channel: ForumChannel | MediaChannel,
 	filter?: string,
-): Collection<string, PublicThreadChannel<true>>;
+): Collection<string, ForumThreadChannel>;
 export function getInitialThreads(
 	channel: NewsChannel | TextChannel,
 	filter: string,
@@ -191,7 +193,7 @@ export function getInitialThreads(
 export function getInitialThreads(
 	channel: NewsChannel | TextChannel,
 	filter?: undefined,
-): Collection<string, AnyThreadChannel<false>>;
+): Collection<string, TextThreadChannel>;
 export function getInitialThreads(
 	channel?: ForumChannel | MediaChannel | NewsChannel | TextChannel,
 	filter?: undefined,

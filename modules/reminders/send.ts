@@ -70,7 +70,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 			continue;
 		}
 
-		if (!channel?.isTextBased()) continue;
+		if (!channel?.isSendable()) continue;
 
 		const silent = reminderText.startsWith("@silent");
 
@@ -103,7 +103,7 @@ async function sendSpecialReminder(reminder: {
 }): Promise<void> {
 	switch (reminder.id) {
 		case SpecialReminder.Weekly: {
-			if (!reminder.channel?.isTextBased()) break;
+			if (!reminder.channel?.isSendable()) break;
 
 			reminder.date.setUTCDate(reminder.date.getUTCDate() - 7);
 			const title = `🏆 Weekly Winners week of ${reminder.date.toLocaleString([], {
@@ -179,7 +179,7 @@ async function sendSpecialReminder(reminder: {
 			break;
 		}
 		case SpecialReminder.BackupDatabases: {
-			if (!reminder.channel?.isTextBased()) break;
+			if (!reminder.channel?.isSendable()) break;
 
 			remindersDatabase.data = [
 				...remindersDatabase.data,
@@ -232,17 +232,22 @@ async function sendSpecialReminder(reminder: {
 		}
 		case SpecialReminder.QOTD: {
 			if (!reminder.channel?.isThreadOnly()) break;
+			const post = await sendQuestion(reminder.channel);
+			const date = new Date();
 			remindersDatabase.data = [
 				...remindersDatabase.data,
 				{
 					channel: reminder.channel.id,
-					date: +reminder.date + 86_400_000,
+					date:
+						post ?
+							+reminder.date + 86_400_000
+						:	date.setUTCHours(12, 0, 0, 0) +
+							(date.getUTCHours() >= 12 ? 86_400_000 : 0),
 					reminder: undefined,
 					id: SpecialReminder.QOTD,
 					user: client.user.id,
 				},
 			];
-			await sendQuestion(reminder.channel);
 			break;
 		}
 		default: {

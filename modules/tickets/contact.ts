@@ -3,10 +3,12 @@ import type {
 	APIEmbedField,
 	ButtonInteraction,
 	InteractionResponse,
+	PrivateThreadChannel,
 	RepliableInteraction,
-	ThreadChannel,
 } from "discord.js";
 import type { Category } from "./misc.js";
+
+import assert from "node:assert";
 
 import { ButtonStyle, ChannelType, ComponentType, GuildMember, InteractionType } from "discord.js";
 import { disableComponents, zeroWidthSpace } from "strife.js";
@@ -88,7 +90,7 @@ export async function showTicketModal(
 export default async function contactMods(
 	interaction: RepliableInteraction,
 	options: Category | GuildMember,
-): Promise<ThreadChannel> {
+): Promise<PrivateThreadChannel> {
 	const category = options instanceof GuildMember ? MOD_CATEGORY : options;
 
 	const member =
@@ -151,6 +153,7 @@ export default async function contactMods(
 		type: ChannelType.PrivateThread,
 		invitable: false,
 	});
+	assert(thread.type === ChannelType.PrivateThread);
 	TICKETS_BY_MEMBER[member.id] = thread;
 	await log(
 		`${LoggingEmojis.Thread} ${interaction.user.toString()} contacted ${

@@ -143,7 +143,7 @@ async function userInfo(
 	await interaction.reply({
 		ephemeral:
 			interaction.isButton() &&
-			interaction.message.interaction?.user.id !== interaction.user.id,
+			interaction.message.interactionMetadata?.user.id !== interaction.user.id,
 		embeds: [
 			{
 				description: user.toString(),

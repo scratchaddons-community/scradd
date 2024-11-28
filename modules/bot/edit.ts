@@ -20,7 +20,7 @@ export default async function editMessage(
 ): Promise<InteractionResponse | undefined> {
 	if (
 		!interaction.targetMessage.editable ||
-		interaction.targetMessage.interaction ||
+		interaction.targetMessage.interactionMetadata ||
 		chatThread?.id === interaction.channel?.id ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id &&
@@ -135,9 +135,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 
 	if (files.length) {
 		await log(
-			`${
-				LoggingEmojis.MessageEdit
-			} [Message](<${edited.url}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+			`${LoggingEmojis.MessageEdit} [Message](<${
+				edited.url
+			}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
 			(interaction.guild?.id !== config.guild.id &&
 				interaction.guild?.publicUpdatesChannel) ||
 				LogSeverity.ServerChange,

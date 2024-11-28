@@ -1,4 +1,4 @@
-import type { ForumChannel, MediaChannel } from "discord.js";
+import type { ForumChannel, ForumThreadChannel, MediaChannel } from "discord.js";
 
 import mongoose from "mongoose";
 import { reactAll, zeroWidthSpace } from "strife.js";
@@ -17,7 +17,9 @@ export const Question = mongoose.model(
 );
 export const questions = await Question.find();
 
-export default async function sendQuestion(channel: ForumChannel | MediaChannel): Promise<void> {
+export default async function sendQuestion(
+	channel: ForumChannel | MediaChannel,
+): Promise<ForumThreadChannel | undefined> {
 	const random = Math.floor(Math.random() * questions.length);
 	const question = questions[random];
 	if (!question) {
@@ -55,4 +57,5 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 
 	await question.deleteOne();
 	questions.splice(random, 1);
+	return post;
 }
