@@ -4,7 +4,7 @@ import type { AnySelectMenuInteraction } from "discord.js";
 import { createCanvas } from "@napi-rs/canvas";
 import { Chart } from "chart.js/auto";
 
-import { recentXpDatabase } from "./util.js";
+import { recentXpDatabase } from "./util.ts";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import addons from "@sa-community/addons-data" with { type: "json" };
 import { matchSorter } from "match-sorter";
 
-import constants from "./constants.js";
+import constants from "./constants.ts";
 
 await describe("addonSearchOptions", async () => {
 	await it("should match on addon ID", () => {

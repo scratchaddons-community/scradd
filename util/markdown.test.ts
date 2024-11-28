@@ -1,7 +1,7 @@
 import { deepStrictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { parseMarkdown } from "./markdown.js";
+import { parseMarkdown } from "./markdown.ts";
 
 await describe("parseMarkdown", async () => {
 	await it("should distinguish bold and italic", () => {

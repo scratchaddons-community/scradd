@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { parseColor, resolveIcon } from "./misc.js";
+import { parseColor, resolveIcon } from "./misc.ts";
 
 await describe("resolveIcon", async () => {
 	await it("should support Twemoji", async () => {

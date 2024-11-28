@@ -6,7 +6,7 @@ import type {
 	Snowflake,
 	TextBasedChannel,
 } from "discord.js";
-import type { CustomOperation } from "./util.js";
+import type { CustomOperation } from "./util.ts";
 
 import {
 	ApplicationCommand,
@@ -17,7 +17,7 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 
-import { getSettings } from "../settings.js";
+import { getSettings } from "../settings.ts";
 
 const permissionsCache: Record<
 	Guild["id"],

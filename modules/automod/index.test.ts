@@ -1,7 +1,7 @@
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import tryCensor, { censor, decodeRegexp, isPingable } from "./misc.js";
+import tryCensor, { censor, decodeRegexp, isPingable } from "./misc.ts";
 
 await describe("tryCensor", async () => {
 	await it("should not catch fine words", () => {

@@ -1,11 +1,11 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import assert from "node:assert";
 
 import { ApplicationCommandOptionType } from "discord.js";
 
-import features from "../../../common/features.js";
-import { caesar } from "../../../util/text.js";
+import features from "../../../common/features.ts";
+import { caesar } from "../../../util/text.ts";
 
 const data: CustomOperation | undefined =
 	features.executeCaesar ?

@@ -3,8 +3,8 @@ import type { ForumChannel, ForumThreadChannel, MediaChannel } from "discord.js"
 import mongoose from "mongoose";
 import { reactAll, zeroWidthSpace } from "strife.js";
 
-import log from "../logging/misc.js";
-import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
+import log from "../logging/misc.ts";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.ts";
 
 export const Question = mongoose.model(
 	"question",

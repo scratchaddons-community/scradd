@@ -10,15 +10,15 @@ import {
 	stripMarkdown,
 } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { truncateText } from "../../util/text.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import answerSuggestion from "./answer.js";
-import { sendDuplicates } from "./duplicates.js";
-import { suggestionAnswers, suggestionsDatabase } from "./misc.js";
-import top from "./top.js";
-import updateReactions, { addToDatabase, updateSuggestion } from "./update.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { truncateText } from "../../util/text.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
+import answerSuggestion from "./answer.ts";
+import { sendDuplicates } from "./duplicates.ts";
+import { suggestionAnswers, suggestionsDatabase } from "./misc.ts";
+import top from "./top.ts";
+import updateReactions, { addToDatabase, updateSuggestion } from "./update.ts";
 
 defineEvent("threadCreate", addToDatabase);
 defineEvent("messageReactionAdd", async (partialReaction, { id: user }, { burst }) => {

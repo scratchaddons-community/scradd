@@ -3,11 +3,11 @@ import type { InteractionResponse, Message, RepliableInteraction, User } from "d
 import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { mentionUser } from "../settings.js";
-import { EXPIRY_LENGTH } from "./misc.js";
-import filterToStrike, { listStrikes } from "./util.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { mentionUser } from "../settings.ts";
+import { EXPIRY_LENGTH } from "./misc.ts";
+import filterToStrike, { listStrikes } from "./util.ts";
 
 export async function getStrikes(
 	selected: GuildMember | User,

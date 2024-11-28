@@ -3,10 +3,10 @@ import type { InteractionReplyOptions, RepliableInteraction, User } from "discor
 import { ButtonStyle, channelLink, ComponentType, GuildMember, hyperlink } from "discord.js";
 import { formatAnyEmoji, paginate } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { mentionUser } from "../settings.js";
-import { oldSuggestions, suggestionsDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { mentionUser } from "../settings.ts";
+import { oldSuggestions, suggestionsDatabase } from "./misc.ts";
 
 export default async function top(
 	interaction?: RepliableInteraction,

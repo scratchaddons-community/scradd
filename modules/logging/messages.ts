@@ -11,12 +11,12 @@ import { unifiedDiff } from "difflib";
 import { Colors, messageLink } from "discord.js";
 import { getBaseChannel, isFileExpired, unsignFiles } from "strife.js";
 
-import config from "../../common/config.js";
-import { databaseThread } from "../../common/database.js";
-import { extractMessageExtremities, messageToText } from "../../util/discord.js";
-import { joinWithAnd } from "../../util/text.js";
-import log, { shouldLog } from "./misc.js";
-import { LoggingEmojis, LogSeverity } from "./util.js";
+import config from "../../common/config.ts";
+import { databaseThread } from "../../common/database.ts";
+import { extractMessageExtremities, messageToText } from "../../util/discord.ts";
+import { joinWithAnd } from "../../util/text.ts";
+import log, { shouldLog } from "./misc.ts";
+import { LoggingEmojis, LogSeverity } from "./util.ts";
 
 export const ignoredDeletions = new Set<Snowflake>();
 

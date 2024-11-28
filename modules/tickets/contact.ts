@@ -6,18 +6,18 @@ import type {
 	PrivateThreadChannel,
 	RepliableInteraction,
 } from "discord.js";
-import type { Category } from "./misc.js";
+import type { Category } from "./misc.ts";
 
 import assert from "node:assert";
 
 import { ButtonStyle, ChannelType, ComponentType, GuildMember, InteractionType } from "discord.js";
 import { disableComponents, zeroWidthSpace } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import log from "../logging/misc.js";
-import { LoggingEmojis, LogSeverity } from "../logging/util.js";
-import { listStrikes } from "../punishments/util.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojis, LogSeverity } from "../logging/util.ts";
+import { listStrikes } from "../punishments/util.ts";
 import {
 	allFields,
 	categoryToDescription,
@@ -26,7 +26,7 @@ import {
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
-} from "./misc.js";
+} from "./misc.ts";
 
 export async function showTicketModal(
 	interaction: AnySelectMenuInteraction,

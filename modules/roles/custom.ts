@@ -17,14 +17,14 @@ import {
 } from "discord.js";
 import { disableComponents } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { asyncFilter } from "../../util/promises.js";
-import tryCensor from "../automod/misc.js";
-import hasPermission from "../execute/permissions.js";
-import warn from "../punishments/warn.js";
-import { recentXpDatabase } from "../xp/util.js";
-import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { asyncFilter } from "../../util/promises.ts";
+import tryCensor from "../automod/misc.ts";
+import hasPermission from "../execute/permissions.ts";
+import warn from "../punishments/warn.ts";
+import { recentXpDatabase } from "../xp/util.ts";
+import { CUSTOM_ROLE_PREFIX, parseColor, resolveIcon } from "./misc.ts";
 
 let command: ApplicationCommand | undefined;
 

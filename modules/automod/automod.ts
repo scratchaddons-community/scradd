@@ -9,18 +9,18 @@ import {
 	stripMarkdown,
 } from "strife.js";
 
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getAllMessages, GlobalBotInvitesPattern } from "../../util/discord.js";
-import { joinWithAnd } from "../../util/text.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import log from "../logging/misc.js";
-import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
-import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
-import warn from "../punishments/warn.js";
-import { ESTABLISHED_THRESHOLD, getLevelForXp } from "../xp/misc.js";
-import { xpDatabase } from "../xp/util.js";
-import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.js";
+import config, { getInitialThreads } from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { getAllMessages, GlobalBotInvitesPattern } from "../../util/discord.ts";
+import { joinWithAnd } from "../../util/text.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.ts";
+import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.ts";
+import warn from "../punishments/warn.ts";
+import { ESTABLISHED_THRESHOLD, getLevelForXp } from "../xp/misc.ts";
+import { xpDatabase } from "../xp/util.ts";
+import tryCensor, { badWordRegexps, badWordsAllowed } from "./misc.ts";
 
 const threads = config.channels.servers && getInitialThreads(config.channels.servers);
 const whitelistedInvites = await Promise.all(

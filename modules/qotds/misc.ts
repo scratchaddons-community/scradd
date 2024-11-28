@@ -1,6 +1,6 @@
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 
-import { BOARD_EMOJI } from "../board/misc.js";
+import { BOARD_EMOJI } from "../board/misc.ts";
 
 export const DEFAULT_SHAPES = [
 	"🔺",

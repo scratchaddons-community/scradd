@@ -7,14 +7,14 @@ import type {
 	Message,
 	TextChannel,
 } from "discord.js";
-import type { LoggingEmojis, LoggingEmojisError } from "./util.js";
+import type { LoggingEmojis, LoggingEmojisError } from "./util.ts";
 
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
-import config from "../../common/config.js";
-import features from "../../common/features.js";
-import { LogSeverity } from "./util.js";
+import config from "../../common/config.ts";
+import features from "../../common/features.ts";
+import { LogSeverity } from "./util.ts";
 
 export function shouldLog(channel: Channel | null): boolean {
 	const baseChannel = getBaseChannel(channel);

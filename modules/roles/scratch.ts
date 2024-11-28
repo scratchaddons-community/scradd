@@ -19,13 +19,13 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { fetchUser } from "../../util/scratch.js";
-import { getRequestUrl } from "../../util/text.js";
-import { handleUser } from "../autos/scratch.js";
-import log from "../logging/misc.js";
-import { LoggingEmojis, LogSeverity } from "../logging/util.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { fetchUser } from "../../util/scratch.ts";
+import { getRequestUrl } from "../../util/text.ts";
+import { handleUser } from "../autos/scratch.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojis, LogSeverity } from "../logging/util.ts";
 
 await client.application.editRoleConnectionMetadataRecords([
 	{

@@ -5,14 +5,14 @@ import { fileURLToPath } from "node:url";
 
 import { client, logError } from "strife.js";
 
-import config from "../common/config.js";
-import constants from "../common/constants.js";
-import { prepareExit } from "../common/database.js";
-import appealRequest from "../modules/forms/appeals/show-appeal.js";
-import linkScratchRole from "../modules/roles/scratch.js";
-import suggestionsPage from "../modules/suggestions/web.js";
+import config from "../common/config.ts";
+import constants from "../common/constants.ts";
+import { prepareExit } from "../common/database.ts";
+import appealRequest from "../modules/forms/appeals/show-appeal.ts";
+import linkScratchRole from "../modules/roles/scratch.ts";
+import suggestionsPage from "../modules/suggestions/web.ts";
 import pkg from "../package.json" with { type: "json" };
-import { getRequestUrl } from "../util/text.js";
+import { getRequestUrl } from "../util/text.ts";
 
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",

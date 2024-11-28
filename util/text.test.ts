@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { caesar, joinWithAnd, normalize, trimPatchVersion, truncateText } from "./text.js";
+import { caesar, joinWithAnd, normalize, trimPatchVersion, truncateText } from "./text.ts";
 
 await describe("joinWithAnd", async () => {
 	await it("should join an array of 3 items correctly", () => {

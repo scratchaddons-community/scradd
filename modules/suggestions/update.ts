@@ -2,8 +2,8 @@ import type { AnyThreadChannel, MessageReaction } from "discord.js";
 
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import { getSuggestionData, suggestionsDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import { getSuggestionData, suggestionsDatabase } from "./misc.ts";
 
 export async function addToDatabase(thread: AnyThreadChannel): Promise<void> {
 	if (thread.parent?.id !== config.channels.suggestions?.id) return;

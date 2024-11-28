@@ -14,11 +14,11 @@ import {
 	defineSubcommands,
 } from "strife.js";
 
-import config from "../../common/config.js";
-import features from "../../common/features.js";
-import { giveXpForMessage } from "./give-xp.js";
-import getUserRank, { top } from "./rank.js";
-import { recentXpDatabase } from "./util.js";
+import config from "../../common/config.ts";
+import features from "../../common/features.ts";
+import { giveXpForMessage } from "./give-xp.ts";
+import getUserRank, { top } from "./rank.ts";
+import { recentXpDatabase } from "./util.ts";
 
 defineEvent("messageCreate", async (message) => {
 	if (message.guild?.id !== config.guild.id) return;

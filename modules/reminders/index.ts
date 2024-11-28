@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import { defineButton, defineSelect, defineSubcommands, disableComponents } from "strife.js";
 
-import constants from "../../common/constants.js";
-import { cancelReminder, createReminder, listReminders } from "./management.js";
+import constants from "../../common/constants.ts";
+import { cancelReminder, createReminder, listReminders } from "./management.ts";
 
 defineSubcommands(
 	{

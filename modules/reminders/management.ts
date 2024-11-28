@@ -14,16 +14,16 @@ import {
 } from "discord.js";
 import { disableComponents, paginate } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { convertBase, parseTime } from "../../util/numbers.js";
-import tryCensor, { badWordsAllowed } from "../automod/misc.js";
-import warn from "../punishments/warn.js";
-import { getSettings } from "../settings.js";
-import { getLevelForXp } from "../xp/misc.js";
-import { xpDatabase } from "../xp/util.js";
-import { getUserReminders, remindersDatabase } from "./misc.js";
-import queueReminders from "./send.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { convertBase, parseTime } from "../../util/numbers.ts";
+import tryCensor, { badWordsAllowed } from "../automod/misc.ts";
+import warn from "../punishments/warn.ts";
+import { getSettings } from "../settings.ts";
+import { getLevelForXp } from "../xp/misc.ts";
+import { xpDatabase } from "../xp/util.ts";
+import { getUserReminders, remindersDatabase } from "./misc.ts";
+import queueReminders from "./send.ts";
 
 export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });

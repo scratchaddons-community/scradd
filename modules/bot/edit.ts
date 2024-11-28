@@ -8,12 +8,12 @@ import { unifiedDiff } from "difflib";
 import { ComponentType, TextInputStyle } from "discord.js";
 import { getBaseChannel, getMessageJSON, stringifyError } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { databaseThread } from "../../common/database.js";
-import { chatThread } from "../autos/chat.js";
-import log, { shouldLog } from "../logging/misc.js";
-import { LoggingEmojis, LogSeverity } from "../logging/util.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { databaseThread } from "../../common/database.ts";
+import { chatThread } from "../autos/chat.ts";
+import log, { shouldLog } from "../logging/misc.ts";
+import { LoggingEmojis, LogSeverity } from "../logging/util.ts";
 
 export default async function editMessage(
 	interaction: MessageContextMenuCommandInteraction,

@@ -1,5 +1,5 @@
-import autoreactions from "../modules/autos/autos-data.js";
-import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
+import autoreactions from "../modules/autos/autos-data.ts";
+import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.ts";
 
 export default [
 	...autoreactions.flatMap(([emoji]) => emoji),

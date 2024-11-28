@@ -7,9 +7,9 @@ import type {
 	User,
 } from "discord.js";
 import type { actualPrimitives } from "mongoose";
-import type { CamelToKebab } from "../../common/misc.js";
+import type { CamelToKebab } from "../../common/misc.ts";
 
-import constants from "../../common/constants.js";
+import constants from "../../common/constants.ts";
 
 export enum LogSeverity {
 	/**

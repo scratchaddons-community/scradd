@@ -1,5 +1,5 @@
 import type { Awaitable } from "discord.js";
-import type { AuditLog } from "./util.js";
+import type { AuditLog } from "./util.ts";
 
 import {
 	AuditLogEvent,
@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { defineEvent } from "strife.js";
 
-import config from "../../common/config.js";
+import config from "../../common/config.ts";
 import {
 	channelCreate,
 	channelDelete,
@@ -18,7 +18,7 @@ import {
 	channelOverwriteDelete,
 	channelOverwriteUpdate,
 	channelUpdate,
-} from "./channels.js";
+} from "./channels.ts";
 import {
 	emojiCreate,
 	emojiDelete,
@@ -26,17 +26,17 @@ import {
 	stickerCreate,
 	stickerDelete,
 	stickerUpdate,
-} from "./expressions.js";
-import { guildUpdate, inviteCreate, inviteDelete } from "./guild.js";
+} from "./expressions.ts";
+import { guildUpdate, inviteCreate, inviteDelete } from "./guild.ts";
 import {
 	messageDelete,
 	messageDeleteBulk,
 	messageReactionRemoveAll,
 	messageUpdate,
-} from "./messages.js";
-import log from "./misc.js";
-import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.js";
-import { threadCreate, threadDelete, threadUpdate } from "./threads.js";
+} from "./messages.ts";
+import log from "./misc.ts";
+import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.ts";
+import { threadCreate, threadDelete, threadUpdate } from "./threads.ts";
 import {
 	guildMemberAdd,
 	guildMemberRemove,
@@ -46,14 +46,14 @@ import {
 	memberKick,
 	memberPrune,
 	userUpdate,
-} from "./users.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
+} from "./users.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,
 	guildScheduledEventUpdate,
 	voiceStateUpdate,
-} from "./voice.js";
+} from "./voice.ts";
 
 const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void> } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,

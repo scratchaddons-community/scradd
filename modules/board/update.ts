@@ -2,12 +2,12 @@ import type { Message, Snowflake } from "discord.js";
 
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import { getSettings } from "../settings.js";
-import giveXp from "../xp/give-xp.js";
-import boardReactionCount from "./counts.js";
-import generateBoardMessage from "./generate.js";
-import { BOARD_EMOJI, boardDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import { getSettings } from "../settings.ts";
+import giveXp from "../xp/give-xp.ts";
+import boardReactionCount from "./counts.ts";
+import generateBoardMessage from "./generate.ts";
+import { BOARD_EMOJI, boardDatabase } from "./misc.ts";
 
 const processing = new Set<Snowflake>();
 

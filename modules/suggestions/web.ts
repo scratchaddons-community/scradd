@@ -7,17 +7,17 @@ import { channelLink } from "discord.js";
 import Mustache from "mustache";
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.js";
-import { getRequestUrl } from "../../util/text.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.ts";
+import { getRequestUrl } from "../../util/text.ts";
 import {
 	oldSuggestions,
 	parseSuggestionTags,
 	suggestionAnswers,
 	suggestionsDatabase,
-} from "./misc.js";
-import top from "./top.js";
+} from "./misc.ts";
+import top from "./top.ts";
 
 const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8"),
 	SUGGESTION_PAGE = await fileSystem.readFile("./modules/suggestions/suggestion.html", "utf8");

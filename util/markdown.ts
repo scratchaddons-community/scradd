@@ -6,8 +6,8 @@ import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { Faces, FormattingPatterns, MessageMentions } from "discord.js";
 import { client } from "strife.js";
 
-import config from "../common/config.js";
-import { formatDuration } from "./numbers.js";
+import config from "../common/config.ts";
+import { formatDuration } from "./numbers.ts";
 
 const DATE_TYPE_FORMATS = {
 	t: { timeStyle: "short" },

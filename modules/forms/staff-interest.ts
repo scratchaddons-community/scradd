@@ -3,14 +3,14 @@ import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
 import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
 import { client, zeroWidthSpace } from "strife.js";
 
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getAllMessages } from "../../util/discord.js";
-import { EXPIRY_LENGTH } from "../punishments/misc.js";
-import { strikeDatabase } from "../punishments/util.js";
-import giveXp from "../xp/give-xp.js";
-import { getLevelForXp } from "../xp/misc.js";
-import { getWeeklyXp, xpDatabase } from "../xp/util.js";
+import config, { getInitialThreads } from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { getAllMessages } from "../../util/discord.ts";
+import { EXPIRY_LENGTH } from "../punishments/misc.ts";
+import { strikeDatabase } from "../punishments/util.ts";
+import giveXp from "../xp/give-xp.ts";
+import { getLevelForXp } from "../xp/misc.ts";
+import { getWeeklyXp, xpDatabase } from "../xp/util.ts";
 
 const thread =
 	(await getInitialThreads(config.channels.admin, " Interest Forms")

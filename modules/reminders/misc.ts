@@ -3,9 +3,9 @@ import type { Snowflake } from "discord.js";
 import { ChannelType } from "discord.js";
 import { client } from "strife.js";
 
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
-import Database from "../../common/database.js";
+import config, { getInitialThreads } from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import Database from "../../common/database.ts";
 
 export const enum SpecialReminder {
 	Weekly,

@@ -3,8 +3,8 @@ import type { Snowflake, TextBasedChannel } from "discord.js";
 import { BaseChannel, ChannelType } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
 
 const enum Counts {
 	Admins = 2,

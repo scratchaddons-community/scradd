@@ -10,9 +10,9 @@ import type {
 import { Collection } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getThreadConfig, threadsDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { getThreadConfig, threadsDatabase } from "./misc.ts";
 
 export async function syncMembers(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,

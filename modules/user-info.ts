@@ -11,12 +11,12 @@ import {
 } from "discord.js";
 import { client, defineButton, defineChatCommand, defineMenuCommand } from "strife.js";
 
-import config from "../common/config.js";
-import constants from "../common/constants.js";
-import { boardDatabase, REACTIONS_NAME } from "./board/misc.js";
-import { strikeDatabase } from "./punishments/util.js";
-import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.js";
-import { xpDatabase } from "./xp/util.js";
+import config from "../common/config.ts";
+import constants from "../common/constants.ts";
+import { boardDatabase, REACTIONS_NAME } from "./board/misc.ts";
+import { strikeDatabase } from "./punishments/util.ts";
+import { oldSuggestions, suggestionsDatabase } from "./suggestions/misc.ts";
+import { xpDatabase } from "./xp/util.ts";
 
 async function userInfo(
 	interaction: RepliableInteraction,

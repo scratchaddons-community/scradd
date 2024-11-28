@@ -2,11 +2,11 @@ import type { ChatInputCommandInteraction, ModalSubmitInteraction } from "discor
 
 import { ButtonStyle, ComponentType, TextInputStyle } from "discord.js";
 
-import constants from "../../common/constants.js";
-import tryCensor from "../automod/misc.js";
-import warn from "../punishments/warn.js";
-import { DEFAULT_SHAPES, parseOptions } from "./misc.js";
-import { Question, questions } from "./send.js";
+import constants from "../../common/constants.ts";
+import tryCensor from "../automod/misc.ts";
+import warn from "../punishments/warn.ts";
+import { DEFAULT_SHAPES, parseOptions } from "./misc.ts";
+import { Question, questions } from "./send.ts";
 
 export default async function getQuestionData(
 	interaction: ChatInputCommandInteraction,

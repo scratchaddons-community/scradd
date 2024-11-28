@@ -17,8 +17,8 @@ import assert from "node:assert";
 import { ChannelType, Collection } from "discord.js";
 import { client } from "strife.js";
 
-import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.js";
-import constants from "./constants.js";
+import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.ts";
+import constants from "./constants.ts";
 
 const guild =
 	constants.env === "testing" ? undefined : await client.guilds.fetch(process.env.GUILD_ID);

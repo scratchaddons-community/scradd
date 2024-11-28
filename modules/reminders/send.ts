@@ -1,5 +1,5 @@
 import type { Channel } from "discord.js";
-import type { Reminder } from "./misc.js";
+import type { Reminder } from "./misc.ts";
 
 import {
 	ActivityType,
@@ -11,16 +11,16 @@ import {
 } from "discord.js";
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { backupDatabases, prepareExit } from "../../common/database.js";
-import { statuses } from "../../common/strings.js";
-import { convertBase } from "../../util/numbers.js";
-import { gracefulFetch } from "../../util/promises.js";
-import { syncRandomBoard } from "../board/update.js";
-import sendQuestion from "../qotds/send.js";
-import getWeekly, { getChatters } from "../xp/weekly.js";
-import { remindersDatabase, SpecialReminder } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { backupDatabases, prepareExit } from "../../common/database.ts";
+import { statuses } from "../../common/strings.ts";
+import { convertBase } from "../../util/numbers.ts";
+import { gracefulFetch } from "../../util/promises.ts";
+import { syncRandomBoard } from "../board/update.ts";
+import sendQuestion from "../qotds/send.ts";
+import getWeekly, { getChatters } from "../xp/weekly.ts";
+import { remindersDatabase, SpecialReminder } from "./misc.ts";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {

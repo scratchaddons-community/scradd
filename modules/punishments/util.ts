@@ -3,13 +3,13 @@ import type { BaseMessageOptions, GuildMember, Message, Snowflake, User } from "
 import { ButtonStyle, ComponentType, MessageType, time, TimestampStyles } from "discord.js";
 import { getFilesFromMessage, GlobalUsersPattern, paginate } from "strife.js";
 
-import constants from "../../common/constants.js";
-import Database, { allDatabaseMessages } from "../../common/database.js";
-import { convertBase } from "../../util/numbers.js";
-import { asyncFilter, gracefulFetch } from "../../util/promises.js";
-import { getLoggingThread } from "../logging/misc.js";
-import { LogSeverity } from "../logging/util.js";
-import { EXPIRY_LENGTH } from "./misc.js";
+import constants from "../../common/constants.ts";
+import Database, { allDatabaseMessages } from "../../common/database.ts";
+import { convertBase } from "../../util/numbers.ts";
+import { asyncFilter, gracefulFetch } from "../../util/promises.ts";
+import { getLoggingThread } from "../logging/misc.ts";
+import { LogSeverity } from "../logging/util.ts";
+import { EXPIRY_LENGTH } from "./misc.ts";
 
 export const strikeDatabase = new Database<{
 	user: Snowflake;

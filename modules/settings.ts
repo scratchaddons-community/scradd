@@ -5,7 +5,7 @@ import type {
 	UserMention,
 } from "discord.js";
 import type { BasicOption } from "strife.js";
-import type { CamelToKebab } from "../common/misc.js";
+import type { CamelToKebab } from "../common/misc.ts";
 
 import {
 	ApplicationCommandOptionType,
@@ -17,11 +17,11 @@ import {
 } from "discord.js";
 import { client, defineButton, defineChatCommand, disableComponents } from "strife.js";
 
-import config from "../common/config.js";
-import constants from "../common/constants.js";
-import Database from "../common/database.js";
-import { censor } from "./automod/misc.js";
-import { getWeeklyXp } from "./xp/util.js";
+import config from "../common/config.ts";
+import constants from "../common/constants.ts";
+import Database from "../common/database.ts";
+import { censor } from "./automod/misc.ts";
+import { getWeeklyXp } from "./xp/util.ts";
 
 /**
  * ## How to add a setting

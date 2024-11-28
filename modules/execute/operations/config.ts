@@ -1,5 +1,5 @@
 import type { APIEmbed, ButtonInteraction } from "discord.js";
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import {
 	ApplicationCommandOptionType,
@@ -9,11 +9,11 @@ import {
 	GuildMember,
 } from "discord.js";
 
-import config, { syncConfig } from "../../../common/config.js";
-import constants from "../../../common/constants.js";
-import autoreactions, { dadEasterEggCount } from "../../autos/autos-data.js";
-import log from "../../logging/misc.js";
-import { LoggingEmojis, LogSeverity } from "../../logging/util.js";
+import config, { syncConfig } from "../../../common/config.ts";
+import constants from "../../../common/constants.ts";
+import autoreactions, { dadEasterEggCount } from "../../autos/autos-data.ts";
+import log from "../../logging/misc.ts";
+import { LoggingEmojis, LogSeverity } from "../../logging/util.ts";
 
 const data: CustomOperation = {
 	name: "config",

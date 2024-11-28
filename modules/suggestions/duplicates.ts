@@ -5,9 +5,9 @@ import { channelLink, hyperlink } from "discord.js";
 import { matchSorter } from "match-sorter";
 import { client, formatAnyEmoji } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { getSuggestionData, suggestionAnswers, suggestionsDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { getSuggestionData, suggestionAnswers, suggestionsDatabase } from "./misc.ts";
 
 export async function sendDuplicates(message: Message): Promise<void> {
 	if (

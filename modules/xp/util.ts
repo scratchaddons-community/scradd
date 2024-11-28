@@ -1,6 +1,6 @@
 import type { Snowflake } from "discord.js";
 
-import Database from "../../common/database.js";
+import Database from "../../common/database.ts";
 
 export const xpDatabase = new Database<{
 	/** The ID of the user. */
