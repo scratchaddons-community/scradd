@@ -1,4 +1,4 @@
-import type { APIEmbed, ButtonInteraction, Snowflake } from "discord.js";
+import type { APIEmbed, ButtonInteraction } from "discord.js";
 import type { CustomOperation } from "../util.js";
 
 import {
