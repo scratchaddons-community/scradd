@@ -1,14 +1,14 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import assert from "node:assert";
 
 import { ApplicationCommandOptionType, GuildMember, User } from "discord.js";
 
-import config from "../../../common/config.js";
-import constants from "../../../common/constants.js";
-import { caesar } from "../../../util/text.js";
-import badWords from "../../automod/bad-words.js";
-import { decodeRegexp, regexpFlags } from "../../automod/misc.js";
+import config from "../../../common/config.ts";
+import constants from "../../../common/constants.ts";
+import { caesar } from "../../../util/text.ts";
+import badWords from "../../automod/bad-words.ts";
+import { decodeRegexp, regexpFlags } from "../../automod/misc.ts";
 
 const data: CustomOperation = {
 	name: "debug-bad-words",

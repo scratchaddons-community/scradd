@@ -1,9 +1,9 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import { ApplicationCommandOptionType } from "discord.js";
 import { stripMarkdown } from "strife.js";
 
-import { uwuEndings, uwuReplacements } from "../../../common/strings.js";
+import { uwuEndings, uwuReplacements } from "../../../common/strings.ts";
 
 export function uwuify(text: string): string {
 	const output = stripMarkdown(text)

@@ -3,13 +3,13 @@ import type {
 	ApplicationCommandSubCommand,
 	ChatInputCommandInteraction,
 } from "discord.js";
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import { ApplicationCommand, ApplicationCommandOptionType, inlineCode } from "discord.js";
 import { columnize } from "strife.js";
 
-import constants from "../../../common/constants.js";
-import { OPERATION_PREFIX, splitFirstArgument } from "../misc.js";
+import constants from "../../../common/constants.ts";
+import { OPERATION_PREFIX, splitFirstArgument } from "../misc.ts";
 
 export const getSchemasFromInteraction = async (
 	interaction: ChatInputCommandInteraction,

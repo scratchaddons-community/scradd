@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
+		"allowImportingTsExtensions": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"baseUrl": "./",
@@ -10,7 +11,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"isolatedModules": true,
-		"lib": ["ES2023"],
+		"lib": ["ES2024"],
 		"module": "NodeNext",
 		"moduleDetection": "force",
 		"noEmitOnError": true,
@@ -22,9 +23,10 @@
 		"noUnusedParameters": true,
 		"outDir": "./dist",
 		"resolveJsonModule": true,
+		"rewriteRelativeImportExtensions": true,
 		"sourceMap": true,
 		"strict": true,
-		"target": "ES2023",
+		"target": "ES2024",
 		"paths": { "*": ["./common/typedefs/*.d.ts"] },
 		"types": ["node"],
 		"verbatimModuleSyntax": true

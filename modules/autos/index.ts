@@ -20,17 +20,17 @@ import {
 	zeroWidthSpace,
 } from "strife.js";
 
-import config from "../../common/config.js";
-import features from "../../common/features.js";
-import { GlobalMentionsPattern } from "../../util/discord.js";
-import { normalize } from "../../util/text.js";
-import { BOARD_EMOJI } from "../board/misc.js";
-import { getSettings } from "../settings.js";
-import autoreactions from "./autos-data.js";
-import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.js";
-import dad from "./dad.js";
-import github from "./github.js";
-import { getMatches, handleMatch } from "./scratch.js";
+import config from "../../common/config.ts";
+import features from "../../common/features.ts";
+import { GlobalMentionsPattern } from "../../util/discord.ts";
+import { normalize } from "../../util/text.ts";
+import { BOARD_EMOJI } from "../board/misc.ts";
+import { getSettings } from "../settings.ts";
+import autoreactions from "./autos-data.ts";
+import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.ts";
+import dad from "./dad.ts";
+import github from "./github.ts";
+import { getMatches, handleMatch } from "./scratch.ts";
 
 const REACTION_CAP = 3;
 

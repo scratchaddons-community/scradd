@@ -5,8 +5,8 @@ import "@total-typescript/ts-reset";
 
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
-import type constants from "./constants.js";
-import type { FilterNonFalsy } from "./misc.js";
+import type constants from "./constants.ts";
+import type { FilterNonFalsy } from "./misc.ts";
 
 declare global {
 	interface ReadonlyArray<T> {

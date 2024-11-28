@@ -8,9 +8,9 @@ import {
 	defineSubcommands,
 } from "strife.js";
 
-import config from "../../common/config.js";
-import getQuestionData, { addQuestion } from "./add.js";
-import { listQuestions, removeQuestion, viewQuestion } from "./list.js";
+import config from "../../common/config.ts";
+import getQuestionData, { addQuestion } from "./add.ts";
+import { listQuestions, removeQuestion, viewQuestion } from "./list.ts";
 
 defineSubcommands(
 	{

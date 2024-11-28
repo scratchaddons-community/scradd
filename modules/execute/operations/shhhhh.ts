@@ -1,14 +1,14 @@
 import type { MessageReaction, Snowflake } from "discord.js";
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import { escapeMarkdown, Faces, User } from "discord.js";
 import { client } from "strife.js";
 
-import constants from "../../../common/constants.js";
-import emojis from "../../../common/emojis.js";
-import { executeEmojis, executeMessages } from "../../../common/strings.js";
-import { ignoredReactionPurges } from "../../logging/messages.js";
-import { getSettings, userSettingsDatabase } from "../../settings.js";
+import constants from "../../../common/constants.ts";
+import emojis from "../../../common/emojis.ts";
+import { executeEmojis, executeMessages } from "../../../common/strings.ts";
+import { ignoredReactionPurges } from "../../logging/messages.ts";
+import { getSettings, userSettingsDatabase } from "../../settings.ts";
 
 const counts: Record<Snowflake, number> = {};
 

@@ -2,12 +2,12 @@ import { AuditLogEvent, ButtonStyle, channelLink, ComponentType } from "discord.
 import Mustache from "mustache";
 import { client, defineEvent } from "strife.js";
 
-import config from "../common/config.js";
-import constants from "../common/constants.js";
-import features from "../common/features.js";
-import { bans, joins, leaves } from "../common/strings.js";
-import { nth } from "../util/numbers.js";
-import { ignoredDeletions } from "./logging/messages.js";
+import config from "../common/config.ts";
+import constants from "../common/constants.ts";
+import features from "../common/features.ts";
+import { bans, joins, leaves } from "../common/strings.ts";
+import { nth } from "../util/numbers.ts";
+import { ignoredDeletions } from "./logging/messages.ts";
 
 const directoryUrl =
 	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";

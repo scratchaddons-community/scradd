@@ -1,11 +1,11 @@
 import type { GuildMember } from "discord.js";
 
-import config from "../../common/config.js";
-import { joinWithAnd } from "../../util/text.js";
-import log from "../logging/misc.js";
-import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
-import warn from "../punishments/warn.js";
-import tryCensor, { censor, isPingable } from "./misc.js";
+import config from "../../common/config.ts";
+import { joinWithAnd } from "../../util/text.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.ts";
+import warn from "../punishments/warn.ts";
+import tryCensor, { censor, isPingable } from "./misc.ts";
 
 export default async function changeNickname(member: GuildMember): Promise<void> {
 	const censored = tryCensor(member.displayName);

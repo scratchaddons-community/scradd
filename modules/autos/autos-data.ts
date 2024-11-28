@@ -4,7 +4,7 @@ import type { Snowflake } from "discord.js";
 
 import { client } from "strife.js";
 
-import constants from "../../common/constants.js";
+import constants from "../../common/constants.ts";
 
 export const greetings = ["Hi"] as const;
 export const customResponses: Record<string, string> = {};

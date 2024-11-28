@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction, Message } from "discord.js";
-import type { AddonQuestion, Dependencies } from "./addon-questions.js";
+import type { AddonQuestion, Dependencies } from "./addon-questions.ts";
 
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
@@ -11,9 +11,9 @@ import {
 	mentionChatCommand,
 } from "strife.js";
 
-import constants from "../../common/constants.js";
-import QUESTIONS_BY_ADDON from "./addon-questions.js";
-import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
+import constants from "../../common/constants.ts";
+import QUESTIONS_BY_ADDON from "./addon-questions.ts";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.ts";
 
 type Probability = readonly [string, number];
 type Probabilities = Probability[];

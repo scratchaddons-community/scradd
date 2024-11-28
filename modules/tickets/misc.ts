@@ -3,7 +3,7 @@ import type { PrivateThreadChannel, Snowflake, TextInputComponentData } from "di
 import { ChannelType, ComponentType, TextInputStyle } from "discord.js";
 import { client } from "strife.js";
 
-import config, { getInitialThreads } from "../../common/config.js";
+import config, { getInitialThreads } from "../../common/config.ts";
 
 export const TICKETS_BY_MEMBER = Object.fromEntries(
 	config.channels.tickets ?

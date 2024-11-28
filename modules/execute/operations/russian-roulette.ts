@@ -1,10 +1,10 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import { setTimeout as wait } from "node:timers/promises";
 
 import { GuildMember } from "discord.js";
 
-import constants from "../../../common/constants.js";
+import constants from "../../../common/constants.ts";
 
 const data: CustomOperation = {
 	name: "russian-roulette",

@@ -1,11 +1,11 @@
 import type { AnyThreadChannel, AuditLogEvent } from "discord.js";
-import type { AuditLog } from "./util.js";
+import type { AuditLog } from "./util.ts";
 
 import { channelMention, ChannelType, ThreadAutoArchiveDuration, ThreadChannel } from "discord.js";
 
-import { messageDeleteBulk } from "./messages.js";
-import log, { shouldLog } from "./misc.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
+import { messageDeleteBulk } from "./messages.ts";
+import log, { shouldLog } from "./misc.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
 export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>): Promise<void> {
 	if (!(entry.target instanceof ThreadChannel)) {

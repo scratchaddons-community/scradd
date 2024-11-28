@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { anyPromise, asyncFilter } from "./promises.js";
+import { anyPromise, asyncFilter } from "./promises.ts";
 
 await describe("asyncFilter", async () => {
 	await it("should filter elements of array based on predicate", async () => {

@@ -1,5 +1,5 @@
 import type { AuditLogEvent, Guild, Invite } from "discord.js";
-import type { AuditLog } from "./util.js";
+import type { AuditLog } from "./util.ts";
 
 import { unifiedDiff } from "difflib";
 import {
@@ -15,9 +15,9 @@ import {
 	userMention,
 } from "discord.js";
 
-import config from "../../common/config.js";
-import log from "./misc.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
+import config from "../../common/config.ts";
+import log from "./misc.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
 const createdInvites = new Set<string>();
 export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {

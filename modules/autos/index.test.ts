@@ -1,9 +1,9 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import config from "../../common/config.js";
-import github from "./github.js";
-import { getMatches, htmlToMarkdown, linkifyMentions } from "./scratch.js";
+import config from "../../common/config.ts";
+import github from "./github.ts";
+import { getMatches, htmlToMarkdown, linkifyMentions } from "./scratch.ts";
 
 await describe("github", async () => {
 	await it("should support basic references", () => {

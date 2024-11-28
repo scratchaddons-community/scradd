@@ -11,12 +11,12 @@ import {
 } from "discord.js";
 import { client, escapeAllMarkdown, footerSeperator } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { convertBase } from "../../util/numbers.js";
-import log from "../logging/misc.js";
-import { LoggingEmojis, LoggingEmojisError, LogSeverity } from "../logging/util.js";
-import giveXp from "../xp/give-xp.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { convertBase } from "../../util/numbers.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojis, LoggingEmojisError, LogSeverity } from "../logging/util.ts";
+import giveXp from "../xp/give-xp.ts";
 import {
 	DEFAULT_STRIKES,
 	EXPIRY_LENGTH,
@@ -25,8 +25,8 @@ import {
 	PARTIAL_STRIKE_COUNT,
 	STRIKES_PER_MUTE,
 	XP_PUNISHMENT,
-} from "./misc.js";
-import filterToStrike, { strikeDatabase } from "./util.js";
+} from "./misc.ts";
+import filterToStrike, { strikeDatabase } from "./util.ts";
 
 export default async function warn(
 	user: GuildMember | User,

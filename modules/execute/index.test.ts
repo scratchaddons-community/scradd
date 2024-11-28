@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 
 import { ApplicationCommandOptionType } from "discord.js";
 
-import { parseArgument, parseArguments, partitionArguments, splitFirstArgument } from "./misc.js";
+import { parseArgument, parseArguments, partitionArguments, splitFirstArgument } from "./misc.ts";
 
 await describe("splitFirstArgument", async () => {
 	await it("should remove the first argument", () => {

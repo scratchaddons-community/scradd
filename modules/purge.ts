@@ -16,8 +16,8 @@ import {
 } from "discord.js";
 import { client, defineChatCommand, defineMenuCommand, disableComponents } from "strife.js";
 
-import constants from "../common/constants.js";
-import { messageToEmbed } from "../util/discord.js";
+import constants from "../common/constants.ts";
+import { messageToEmbed } from "../util/discord.ts";
 
 const MAX_FETCH_COUNT = 100;
 

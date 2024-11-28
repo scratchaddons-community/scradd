@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 
-import constants from "../common/constants.js";
+import constants from "../common/constants.ts";
 
 /**
  * Joins an array using (Oxford) comma rules and the word "and".

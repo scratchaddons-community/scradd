@@ -1,5 +1,5 @@
 import type { AuditLogEvent, DMChannel, NonThreadGuildBasedChannel } from "discord.js";
-import type { AuditLog } from "./util.js";
+import type { AuditLog } from "./util.ts";
 
 import { unifiedDiff } from "difflib";
 import {
@@ -18,10 +18,10 @@ import {
 } from "discord.js";
 import { formatAnyEmoji } from "strife.js";
 
-import config from "../../common/config.js";
-import { messageDeleteBulk } from "./messages.js";
-import log from "./misc.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
+import config from "../../common/config.ts";
+import { messageDeleteBulk } from "./messages.ts";
+import log from "./misc.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
 export async function channelCreate(entry: AuditLog<AuditLogEvent.ChannelCreate>): Promise<void> {
 	await log(

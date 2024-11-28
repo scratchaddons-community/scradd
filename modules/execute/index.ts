@@ -12,18 +12,18 @@ import {
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent, mentionChatCommand } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import tryCensor, { badWordsAllowed } from "../automod/misc.js";
-import warn from "../punishments/warn.js";
-import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import tryCensor, { badWordsAllowed } from "../automod/misc.ts";
+import warn from "../punishments/warn.ts";
+import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.ts";
 import {
 	getHelpForOperation,
 	getSchemasFromInteraction,
 	listOperations,
-} from "./operations/help.js";
-import hasPermission, { handleCommandPermissionUpdate } from "./permissions.js";
-import { getAllSchemas } from "./util.js";
+} from "./operations/help.ts";
+import hasPermission, { handleCommandPermissionUpdate } from "./permissions.ts";
+import { getAllSchemas } from "./util.ts";
 
 defineChatCommand(
 	{

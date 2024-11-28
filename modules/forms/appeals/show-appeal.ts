@@ -22,18 +22,18 @@ import {
 import Mustache from "mustache";
 import { client, stripMarkdown, zeroWidthSpace } from "strife.js";
 
-import config from "../../../common/config.js";
-import constants from "../../../common/constants.js";
-import features from "../../../common/features.js";
+import config from "../../../common/config.ts";
+import constants from "../../../common/constants.ts";
+import features from "../../../common/features.ts";
 import pkg from "../../../package.json" with { type: "json" };
-import { getRequestUrl } from "../../../util/text.js";
-import { strikeDatabase } from "../../punishments/util.js";
-import { remindersDatabase, SpecialReminder } from "../../reminders/misc.js";
-import { PERSISTED_ROLES, RoleList } from "../../roles/persisted.js";
-import giveXp from "../../xp/give-xp.js";
-import { banDates } from "../index.js";
-import appeals, { appealThread } from "./appeals.js";
-import { getAppealComponents } from "./generate-appeal.js";
+import { getRequestUrl } from "../../../util/text.ts";
+import { strikeDatabase } from "../../punishments/util.ts";
+import { remindersDatabase, SpecialReminder } from "../../reminders/misc.ts";
+import { PERSISTED_ROLES, RoleList } from "../../roles/persisted.ts";
+import giveXp from "../../xp/give-xp.ts";
+import { banDates } from "../index.ts";
+import appeals, { appealThread } from "./appeals.ts";
+import { getAppealComponents } from "./generate-appeal.ts";
 
 const APPEAL_FRAME = await fileSystem.readFile("./modules/forms/appeals/frame.html", "utf8");
 const ANSWER_PAGE = Mustache.render(APPEAL_FRAME, {

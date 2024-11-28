@@ -1,7 +1,7 @@
 import type { Snowflake } from "discord.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
 
 const scratchAddons = constants.repos.scratchAddons.split("/"),
 	scradd = constants.repos.scradd.split("/");

@@ -4,9 +4,9 @@ import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "disc
 import papaparse from "papaparse";
 import { client, getFilesFromMessage } from "strife.js";
 
-import { getAllMessages } from "../util/discord.js";
-import config from "./config.js";
-import constants from "./constants.js";
+import { getAllMessages } from "../util/discord.ts";
+import config from "./config.ts";
+import constants from "./constants.ts";
 
 let timeouts: Record<
 	Snowflake,

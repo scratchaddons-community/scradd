@@ -18,14 +18,14 @@ import {
 	stripMarkdown,
 } from "strife.js";
 
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.js";
-import { normalize } from "../../util/text.js";
-import tryCensor, { censor } from "../automod/misc.js";
-import log from "../logging/misc.js";
-import { LoggingEmojis, LogSeverity } from "../logging/util.js";
-import { getSettings, userSettingsDatabase } from "../settings.js";
+import config, { getInitialThreads } from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.ts";
+import { normalize } from "../../util/text.ts";
+import tryCensor, { censor } from "../automod/misc.ts";
+import log from "../logging/misc.ts";
+import { LoggingEmojis, LogSeverity } from "../logging/util.ts";
+import { getSettings, userSettingsDatabase } from "../settings.ts";
 
 export const chatName = `${client.user.displayName} Chat` as const;
 

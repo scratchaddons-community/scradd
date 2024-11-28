@@ -8,7 +8,7 @@ import type {
 	TextBasedChannel,
 	User,
 } from "discord.js";
-import type { Options } from "./misc.js";
+import type { Options } from "./misc.ts";
 
 import fileSystem from "node:fs/promises";
 import path from "node:path";
@@ -17,9 +17,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { ApplicationCommandType, Collection, GuildMember } from "discord.js";
 import { client } from "strife.js";
 
-import { asyncFilter } from "../../util/promises.js";
-import { schemaSupported } from "./misc.js";
-import hasPermission from "./permissions.js";
+import { asyncFilter } from "../../util/promises.ts";
+import { schemaSupported } from "./misc.ts";
+import hasPermission from "./permissions.ts";
 
 export type CustomOperation = {
 	name: string;

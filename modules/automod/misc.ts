@@ -3,10 +3,10 @@ import type { TextBasedChannel } from "discord.js";
 import { ChannelType } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
-import config from "../../common/config.js";
-import { caesar, normalize } from "../../util/text.js";
-import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
-import badWords from "./bad-words.js";
+import config from "../../common/config.ts";
+import { caesar, normalize } from "../../util/text.ts";
+import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.ts";
+import badWords from "./bad-words.ts";
 
 export const regexpFlags = "giu";
 export const badWordRegexps = badWords.map(

@@ -1,4 +1,4 @@
-import constants from "./constants.js";
+import constants from "./constants.ts";
 
 const auto = constants.env !== "production";
 const callbacks = [() => true, () => false] as const;

@@ -5,10 +5,10 @@ import { cleanCodeBlockContent, time, TimestampStyles } from "discord.js";
 import { parser } from "posthtml-parser";
 import { escapeAllMarkdown, footerSeperator } from "strife.js";
 
-import constants from "../../common/constants.js";
-import { gracefulFetch } from "../../util/promises.js";
-import { fetchUser } from "../../util/scratch.js";
-import { truncateText } from "../../util/text.js";
+import constants from "../../common/constants.ts";
+import { gracefulFetch } from "../../util/promises.ts";
+import { fetchUser } from "../../util/scratch.ts";
+import { truncateText } from "../../util/text.ts";
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */

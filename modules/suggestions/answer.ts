@@ -1,12 +1,12 @@
 import type { GuildAuditLogsEntry, Snowflake } from "discord.js";
-import type { AuditLog } from "../logging/util.js";
+import type { AuditLog } from "../logging/util.ts";
 
 import { AuditLogEvent, Colors, ForumChannel, ThreadChannel } from "discord.js";
 import { formatAnyEmoji } from "strife.js";
 
-import config from "../../common/config.js";
-import { lerpColors } from "../../util/numbers.js";
-import { parseSuggestionTags, suggestionAnswers } from "./misc.js";
+import config from "../../common/config.ts";
+import { lerpColors } from "../../util/numbers.ts";
+import { parseSuggestionTags, suggestionAnswers } from "./misc.ts";
 
 export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): Promise<void> {
 	if (rawEntry.action !== AuditLogEvent.ThreadUpdate) return;

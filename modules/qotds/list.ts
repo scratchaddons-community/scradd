@@ -7,11 +7,11 @@ import type {
 import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
 import { disableComponents, paginate } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { truncateText } from "../../util/text.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import { Question, questions } from "./send.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { truncateText } from "../../util/text.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
+import { Question, questions } from "./send.ts";
 
 export async function listQuestions(interaction: ChatInputCommandInteraction): Promise<void> {
 	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });

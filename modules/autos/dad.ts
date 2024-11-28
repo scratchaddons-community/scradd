@@ -10,7 +10,7 @@ import {
 	customResponses,
 	customTriggers,
 	greetings,
-} from "./autos-data.js";
+} from "./autos-data.ts";
 
 export default function dad(name: string, _: GuildMember): string | readonly (number | string)[] {
 	const split = name.split(/[\b\s]+/);

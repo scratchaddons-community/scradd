@@ -1,7 +1,7 @@
 import type { Snowflake } from "discord.js";
 
-import constants from "../../common/constants.js";
-import Database from "../../common/database.js";
+import constants from "../../common/constants.ts";
+import Database from "../../common/database.ts";
 
 export const BOARD_EMOJI = constants.env === "production" ? "🥔" : "⭐",
 	REACTIONS_NAME = constants.env === "production" ? "Potatoes" : "Stars";

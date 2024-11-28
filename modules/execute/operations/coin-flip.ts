@@ -1,9 +1,9 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
 import { setTimeout as wait } from "node:timers/promises";
 
-import constants from "../../../common/constants.js";
-import features from "../../../common/features.js";
+import constants from "../../../common/constants.ts";
+import features from "../../../common/features.ts";
 
 const data: CustomOperation | undefined =
 	features.executeCoinFlip ?

@@ -1,6 +1,6 @@
-import type { CustomOperation } from "../util.js";
+import type { CustomOperation } from "../util.ts";
 
-import { getSettings, userSettingsDatabase } from "../../settings.js";
+import { getSettings, userSettingsDatabase } from "../../settings.ts";
 
 const data: CustomOperation = {
 	name: "dango-farm",

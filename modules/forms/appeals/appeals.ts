@@ -3,11 +3,11 @@ import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
 import { ComponentType, MessageMentions, TextInputStyle } from "discord.js";
 import { client, escapeAllMarkdown } from "strife.js";
 
-import config, { getInitialThreads } from "../../../common/config.js";
-import constants from "../../../common/constants.js";
-import { getAllMessages } from "../../../util/discord.js";
-import { LoggingEmojis } from "../../logging/util.js";
-import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.js";
+import config, { getInitialThreads } from "../../../common/config.ts";
+import constants from "../../../common/constants.ts";
+import { getAllMessages } from "../../../util/discord.ts";
+import { LoggingEmojis } from "../../logging/util.ts";
+import generateAppeal, { NEEDED_ACCEPT, NEEDED_REJECT, parseIds } from "./generate-appeal.ts";
 
 export const appealThread =
 	getInitialThreads(config.channels.mod, "Ban Appeal Forms").first() ??

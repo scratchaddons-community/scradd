@@ -9,8 +9,8 @@ import type {
 import { ButtonStyle, ComponentType, userMention } from "discord.js";
 import { zeroWidthSpace } from "strife.js";
 
-import { convertBase } from "../../../util/numbers.js";
-import { joinWithAnd } from "../../../util/text.js";
+import { convertBase } from "../../../util/numbers.ts";
+import { joinWithAnd } from "../../../util/text.ts";
 
 export const NEEDED_ACCEPT = 4,
 	NEEDED_REJECT = 3;

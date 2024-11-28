@@ -6,8 +6,8 @@ import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } f
 import { matchSorter } from "match-sorter";
 import { defineChatCommand, escapeAllMarkdown } from "strife.js";
 
-import constants from "../common/constants.js";
-import { joinWithAnd } from "../util/text.js";
+import constants from "../common/constants.ts";
+import { joinWithAnd } from "../util/text.ts";
 
 defineChatCommand(
 	{

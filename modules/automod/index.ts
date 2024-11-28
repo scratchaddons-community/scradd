@@ -11,14 +11,14 @@ import {
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent, escapeAllMarkdown } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { joinWithAnd } from "../../util/text.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import warn from "../punishments/warn.js";
-import automodMessage from "./automod.js";
-import tryCensor, { badWordsAllowed } from "./misc.js";
-import changeNickname from "./nicknames.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { joinWithAnd } from "../../util/text.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
+import warn from "../punishments/warn.ts";
+import automodMessage from "./automod.ts";
+import tryCensor, { badWordsAllowed } from "./misc.ts";
+import changeNickname from "./nicknames.ts";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (

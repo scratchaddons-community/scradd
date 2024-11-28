@@ -8,15 +8,15 @@ import type {
 import { ButtonStyle, ChannelType, ComponentType, time, TimestampStyles } from "discord.js";
 import { client, disableComponents } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
 
 import "../../util/discord.js";
 
-import { parseTime } from "../../util/numbers.js";
-import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
-import queueReminders from "../reminders/send.js";
-import { getThreadConfig, threadsDatabase } from "./misc.js";
+import { parseTime } from "../../util/numbers.ts";
+import { remindersDatabase, SpecialReminder } from "../reminders/misc.ts";
+import queueReminders from "../reminders/send.ts";
+import { getThreadConfig, threadsDatabase } from "./misc.ts";
 
 export async function setUpAutoClose(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,

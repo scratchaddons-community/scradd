@@ -10,14 +10,14 @@ import type {
 import { ButtonStyle, ComponentType } from "discord.js";
 import { paginate, zeroWidthSpace } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import features from "../../common/features.js";
-import { getAllMembers } from "../../util/discord.js";
-import { nth } from "../../util/numbers.js";
-import { getSettings, mentionUser } from "../settings.js";
-import { getLevelForXp, getXpForLevel } from "./misc.js";
-import { getFullWeeklyData, xpDatabase } from "./util.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import features from "../../common/features.ts";
+import { getAllMembers } from "../../util/discord.ts";
+import { nth } from "../../util/numbers.ts";
+import { getSettings, mentionUser } from "../settings.ts";
+import { getLevelForXp, getXpForLevel } from "./misc.ts";
+import { getFullWeeklyData, xpDatabase } from "./util.ts";
 
 export default async function getUserRank(
 	interaction: RepliableInteraction,

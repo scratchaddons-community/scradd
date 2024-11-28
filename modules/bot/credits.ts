@@ -3,11 +3,11 @@ import type { APIEmbedField, ChatInputCommandInteraction, Snowflake, User } from
 import { inlineCode } from "discord.js";
 import { client, columnize } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
 import pkg from "../../package.json" with { type: "json" };
-import { joinWithAnd } from "../../util/text.js";
-import { mentionUser } from "../settings.js";
+import { joinWithAnd } from "../../util/text.ts";
+import { mentionUser } from "../settings.ts";
 
 const designers = "966174686142672917",
 	developers = "938439909742616616",

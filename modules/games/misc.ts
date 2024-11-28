@@ -7,7 +7,7 @@ import type {
 
 import { ButtonStyle, Collection, ComponentType } from "discord.js";
 
-import constants from "../../common/constants.js";
+import constants from "../../common/constants.ts";
 
 export const GAME_COLLECTOR_TIME = constants.collectorTime * 4;
 

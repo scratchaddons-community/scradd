@@ -14,11 +14,11 @@ import {
 	defineSubcommands,
 } from "strife.js";
 
-import constants from "../../common/constants.js";
-import ban from "./ban.js";
-import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.js";
-import { getStrikeById, getStrikes } from "./strikes.js";
-import warn, { addStrikeBack, removeStrike } from "./warn.js";
+import constants from "../../common/constants.ts";
+import ban from "./ban.ts";
+import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.ts";
+import { getStrikeById, getStrikes } from "./strikes.ts";
+import warn, { addStrikeBack, removeStrike } from "./warn.ts";
 
 defineSubcommands(
 	{

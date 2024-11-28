@@ -11,15 +11,15 @@ import fileSystem from "node:fs/promises";
 import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
 import { disableComponents } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import features from "../../common/features.js";
-import { getAllMembers } from "../../util/discord.js";
-import { joinWithAnd } from "../../util/text.js";
-import tryCensor from "../automod/misc.js";
-import warn from "../punishments/warn.js";
-import { mentionUser } from "../settings.js";
-import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import features from "../../common/features.ts";
+import { getAllMembers } from "../../util/discord.ts";
+import { joinWithAnd } from "../../util/text.ts";
+import tryCensor from "../automod/misc.ts";
+import warn from "../punishments/warn.ts";
+import { mentionUser } from "../settings.ts";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.ts";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;

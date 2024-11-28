@@ -7,8 +7,8 @@ import type {
 import { ComponentType, TextInputStyle, User } from "discord.js";
 import { client, stringifyError } from "strife.js";
 
-import constants from "../../common/constants.js";
-import { ignoredDeletions } from "../logging/messages.js";
+import constants from "../../common/constants.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
 
 const censoredToken = client.token
 	.split(".")

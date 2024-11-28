@@ -1,11 +1,11 @@
 import type { AuditLogEvent, GuildMember, PartialGuildMember, PartialUser, User } from "discord.js";
-import type { AuditLog } from "./util.js";
+import type { AuditLog } from "./util.ts";
 
 import { time } from "discord.js";
 
-import config from "../../common/config.js";
-import log from "./misc.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
+import config from "../../common/config.ts";
+import log from "./misc.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
 export async function memberKick(entry: AuditLog<AuditLogEvent.MemberKick>): Promise<void> {
 	await log(

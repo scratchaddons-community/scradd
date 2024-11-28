@@ -3,7 +3,7 @@ import type { ApplicationCommandOption, GuildBasedChannel, Role, User } from "di
 import { ApplicationCommandOptionType, Base, MessageMentions } from "discord.js";
 import { client } from "strife.js";
 
-import config from "../../common/config.js";
+import config from "../../common/config.ts";
 
 export const OPERATION_PREFIX = "~ ";
 const operationPrefixRegexp = new RegExp(

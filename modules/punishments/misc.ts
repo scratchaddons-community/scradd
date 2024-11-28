@@ -1,5 +1,5 @@
-import constants from "../../common/constants.js";
-import { DEFAULT_XP } from "../xp/misc.js";
+import constants from "../../common/constants.ts";
+import { DEFAULT_XP } from "../xp/misc.ts";
 
 export const EXPIRY_LENGTH = 1_260_000 * (constants.env === "production" ? 1440 : 1),
 	STRIKES_PER_MUTE = 3,

@@ -1,4 +1,4 @@
-import type { Category } from "./misc.js";
+import type { Category } from "./misc.ts";
 
 import {
 	ApplicationCommandOptionType,
@@ -22,18 +22,18 @@ import {
 	disableComponents,
 } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import log from "../logging/misc.js";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/util.js";
-import contactMods, { contactUser, showTicketModal } from "./contact.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import log from "../logging/misc.ts";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/util.ts";
+import contactMods, { contactUser, showTicketModal } from "./contact.ts";
 import {
 	getIdFromName,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
 	TICKET_CATEGORIES,
 	TICKETS_BY_MEMBER,
-} from "./misc.js";
+} from "./misc.ts";
 
 const appealedStrikes = new Set<string>();
 const resourcesDmed = new Set<string>();

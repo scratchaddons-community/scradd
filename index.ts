@@ -7,9 +7,9 @@ import { GatewayIntentBits } from "discord.js";
 import mongoose from "mongoose";
 import { client, logError, login } from "strife.js";
 
-import constants from "./common/constants.js";
-import features from "./common/features.js";
-import { LoggingEmojis, LoggingEmojisError } from "./modules/logging/util.js";
+import constants from "./common/constants.ts";
+import features from "./common/features.ts";
+import { LoggingEmojis, LoggingEmojisError } from "./modules/logging/util.ts";
 import pkg from "./package.json" with { type: "json" };
 
 dns.setDefaultResultOrder("ipv4first");

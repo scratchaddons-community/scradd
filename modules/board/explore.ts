@@ -9,13 +9,13 @@ import type {
 import { ButtonStyle, ChannelType, ComponentType } from "discord.js";
 import { disableComponents } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import { anyPromise, asyncFilter } from "../../util/promises.js";
-import { GAME_COLLECTOR_TIME } from "../games/misc.js";
-import boardReactionCount from "./counts.js";
-import generateBoardMessage from "./generate.js";
-import { boardDatabase } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import { anyPromise, asyncFilter } from "../../util/promises.ts";
+import { GAME_COLLECTOR_TIME } from "../games/misc.ts";
+import boardReactionCount from "./counts.ts";
+import generateBoardMessage from "./generate.ts";
+import { boardDatabase } from "./misc.ts";
 
 export const NO_BOARDS_MESSAGE = "No messages found. Try changing any filters you may have used.";
 export const defaultMinReactions = Math.round(boardReactionCount() * 0.4);

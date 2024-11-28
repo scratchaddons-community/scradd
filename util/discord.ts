@@ -36,10 +36,10 @@ import {
 	stripMarkdown,
 } from "strife.js";
 
-import config from "../common/config.js";
-import constants from "../common/constants.js";
-import { formatDuration } from "./numbers.js";
-import { truncateText } from "./text.js";
+import config from "../common/config.ts";
+import constants from "../common/constants.ts";
+import { formatDuration } from "./numbers.ts";
+import { truncateText } from "./text.ts";
 
 export async function extractMessageExtremities(
 	message: Message,

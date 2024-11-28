@@ -2,11 +2,11 @@ import type { AnyThreadChannel, GuildForumTag, Snowflake } from "discord.js";
 
 import { cleanContent } from "discord.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import Database from "../../common/database.js";
-import { getAllMessages } from "../../util/discord.js";
-import { truncateText } from "../../util/text.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import Database from "../../common/database.ts";
+import { getAllMessages } from "../../util/discord.ts";
+import { truncateText } from "../../util/text.ts";
 
 export const suggestionAnswers = [
 	"Unanswered",

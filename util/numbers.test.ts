@@ -1,7 +1,7 @@
 import { AssertionError, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { bigIntPower, convertBase, formatDuration, lerpColors, nth, parseTime } from "./numbers.js";
+import { bigIntPower, convertBase, formatDuration, lerpColors, nth, parseTime } from "./numbers.ts";
 
 await describe("bigintPow", async () => {
 	await it("should correctly calculate the power of a bigint when exponent is 0", () => {

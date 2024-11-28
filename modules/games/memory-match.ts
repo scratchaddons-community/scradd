@@ -20,11 +20,11 @@ import {
 } from "discord.js";
 import { disableComponents } from "strife.js";
 
-import config from "../../common/config.js";
-import constants from "../../common/constants.js";
-import constantEmojis from "../../common/emojis.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
+import config from "../../common/config.ts";
+import constants from "../../common/constants.ts";
+import constantEmojis from "../../common/emojis.ts";
+import { ignoredDeletions } from "../logging/messages.ts";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.ts";
 
 const EMPTY_TILE = "⬛";
 
