@@ -1,4 +1,4 @@
-import type { Message } from "discord.js";
+import type { Channel, GuildMember, Message, MessageSnapshot } from "discord.js";
 
 import { InviteType } from "discord.js";
 import {
@@ -60,206 +60,100 @@ const SHORTENER_DOMAINS = await fetch(
 
 export default async function automodMessage(message: Message): Promise<boolean> {
 	if (badWordsAllowed(message.channel)) return true;
-	const baseChannel = getBaseChannel(message.channel);
+
+	const violations = await findViolations(
+		message,
+		getBaseChannel(message.channel) ?? message.channel,
+		message.member ?? undefined,
+	);
+
+	const user = message.interactionMetadata?.user ?? message.author;
 
 	let needsDelete = false;
 	const deletionMessages: string[] = [];
 
-	const animatedEmojis =
-		baseChannel?.id !== config.channels.bots?.id && message.content.match(GlobalAnimatedEmoji);
-	const badAnimatedEmojis =
-		animatedEmojis &&
-		animatedEmojis.length > 15 &&
-		Math.floor((animatedEmojis.length - 16) / 10) * PARTIAL_STRIKE_COUNT;
-	if (animatedEmojis && typeof badAnimatedEmojis === "number") {
+	if (violations.animatedEmojis.length > 15) {
 		await warn(
-			message.author,
-			`${animatedEmojis.length} animated emojis`,
-			badAnimatedEmojis,
-			animatedEmojis.join(""),
+			user,
+			`${violations.animatedEmojis.length} animated emojis`,
+			Math.floor((violations.animatedEmojis.length - 16) / 10) * PARTIAL_STRIKE_COUNT,
+			violations.animatedEmojis.join(""),
 		);
 		needsDelete = true;
 		deletionMessages.push("Please don’t post that many animated emojis!");
 	}
 
-	const invitePromises = message.content
-		.match(InvitesPattern)
-		?.map(
-			async (link) =>
-				[
-					link,
-					await client.fetchInvite(link.split("/").at(-1) ?? link).catch(() => void 0),
-				] as const,
+	if (violations.invites.size) {
+		await warn(
+			user,
+			`Server invite${violations.invites.size === 1 ? "" : "s"} in ${message.channel.toString()}`,
+			violations.invites.size,
+			[...violations.invites].join("\n"),
 		);
-	const invites = await Promise.all(invitePromises ?? []);
-
-	if (
-		config.channels.share &&
-		baseChannel &&
-		config.channels.share.id !== baseChannel.id &&
-		!baseChannel.isDMBased() &&
-		baseChannel.permissionsFor(baseChannel.guild.id)?.has("SendMessages")
-	) {
-		const badInvites = [
-			...new Set(
-				invites
-					.filter(
-						([, invite]) =>
-							invite &&
-							invite.type === InviteType.Guild &&
-							!WHITELISTED_INVITE_GUILDS.has(invite.guild?.id),
-					)
-					.map(([link]) => link),
-			),
-		];
-
-		if (badInvites.length) {
-			await warn(
-				message.author,
-				`Server invite in ${message.channel.toString()}`,
-				badInvites.length,
-				badInvites.join("\n"),
-			);
-			needsDelete = true;
-			deletionMessages.push(
-				`Please keep server invites in ${config.channels.share.toString()}!`,
-			);
-		}
-
-		const bots = [...new Set(message.content.match(GlobalBotInvitesPattern))];
-		if (!message.author.bot && bots.length) {
-			await warn(
-				message.author,
-				`Bot invite in ${message.channel.toString()}`,
-				bots.length,
-				bots.join("\n"),
-			);
-			needsDelete = true;
-			deletionMessages.push(
-				`Please don’t post bot invites outside of ${config.channels.share.toString()}!`,
-			);
-		}
-
-		if (
-			![
-				config.roles.dev?.id,
-				config.roles.epic?.id,
-				config.roles.booster?.id,
-				config.roles.established?.id,
-			].some((role) => !message.member || (role && message.member.roles.resolve(role)))
-		) {
-			const level = getLevelForXp(
-				xpDatabase.data.find(({ user }) => user === message.author.id)?.xp ?? 0,
-			);
-			const adsAllowed =
-				!baseChannel.name.includes("general") && !baseChannel.name.includes("chat");
-
-			const links = Array.from(
-				new Set(message.content.match(/(https?:\/\/[\w.:@]+(?=[^\w.:@]|$))/gis) ?? []),
-				(link) => new URL(link),
-			);
-
-			const { shorteners, ads } = links.reduce<{ shorteners: URL[]; ads: URL[] }>(
-				({ shorteners, ads }, link) => {
-					if (
-						SHORTENER_DOMAINS.includes(link.hostname) ||
-						SHORTENER_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`))
-					)
-						shorteners.push(link);
-					if (
-						!adsAllowed &&
-						(AD_DOMAINS.includes(link.hostname) ||
-							AD_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`)))
-					)
-						ads.push(link);
-					return { shorteners, ads };
-				},
-				{ shorteners: [], ads: [] },
-			);
-
-			if (shorteners.length) {
-				await warn(
-					message.author,
-					`Used ${
-						shorteners.length === 1 ? "a link shortener" : "link shorteners"
-					} in ${message.channel.toString()} while at level ${level}`,
-					shorteners.length * PARTIAL_STRIKE_COUNT,
-					shorteners.join(" "),
-				);
-				needsDelete = true;
-				deletionMessages.push(
-					"For moderation purposes, please do not use link shorteners.",
-				);
-			}
-			if (ads.length) {
-				await warn(
-					message.author,
-					`Posted blacklisted link${
-						ads.length === 1 ? "" : "s"
-					} in ${message.channel.toString()} while at level ${level}`,
-					ads.length * PARTIAL_STRIKE_COUNT,
-					ads.join(" "),
-				);
-				needsDelete = true;
-				deletionMessages.push(
-					`Sorry, but you need level ${ESTABLISHED_THRESHOLD} to post ${
-						ads.length === 1 ? "that link" : "those links"
-					} outside a channel like ${config.channels.share.toString()}!`,
-				);
-			}
-		}
+		needsDelete = true;
+		deletionMessages.push(
+			config.channels.share ?
+				`Please keep server invites in ${config.channels.share.toString()}!`
+			:	`Please don’t post server invites!`,
+		);
 	}
 
-	const badWords = [
-		tryCensor(stripMarkdown(message.content)),
-		...message.stickers.map(({ name }) => tryCensor(name)),
-		...invites.map(([, invite]) => !!invite?.guild && tryCensor(invite.guild.name)),
-	].reduce(
-		(bad, censored) =>
-			typeof censored === "boolean" ? bad : (
-				{
-					strikes: bad.strikes + censored.strikes,
-					words: bad.words.map((words, index) => [
-						...words,
-						...(censored.words[index] ?? []),
-					]),
-				}
-			),
-		{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
-	);
-	if (badWords.strikes) needsDelete = true;
-
-	const badEmbedWords = message.embeds
-		.flatMap((embed) => [
-			embed.description,
-			embed.title,
-			embed.footer?.text,
-			embed.author?.name,
-			...embed.fields.flatMap((field) => [field.name, field.value]),
-		])
-		.reduce(
-			(bad, current) => {
-				const censored = tryCensor(current || "", 1);
-				return censored ?
-						{
-							strikes: bad.strikes + censored.strikes,
-							words: bad.words.map((words, index) => [
-								...words,
-								...(censored.words[index] ?? []),
-							]),
-						}
-					:	bad;
-			},
-			{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
-		);
-	if (badEmbedWords.strikes && message.system) needsDelete = true;
-
-	const languageStrikes = badWords.strikes + badEmbedWords.strikes;
-	if (languageStrikes) {
-		const words = [...badWords.words.flat(), ...badEmbedWords.words.flat()];
+	if (violations.bots.size) {
 		await warn(
-			message.interactionMetadata?.user ?? message.author,
-			words.length === 1 ? "Used a banned word" : "Used banned words",
+			user,
+			`Bot invite${violations.bots.size === 1 ? "" : "s"} in ${message.channel.toString()}`,
+			violations.bots.size,
+			[...violations.bots].join("\n"),
+		);
+		needsDelete = true;
+		deletionMessages.push(
+			`Please don’t post bot invites${
+				config.channels.share ? ` outside of ${config.channels.share.toString()}` : ""
+			}!`,
+		);
+	}
+
+	const level = getLevelForXp(xpDatabase.data.find((entry) => entry.user === user.id)?.xp ?? 0);
+
+	if (violations.shorteners.size) {
+		await warn(
+			user,
+			`Link shortener${violations.shorteners.size === 1 ? "" : "s"} while at level ${level}`,
+			violations.shorteners.size * PARTIAL_STRIKE_COUNT,
+			[...violations.shorteners].join(" "),
+		);
+		needsDelete = true;
+		deletionMessages.push("For moderation purposes, please do not use link shorteners.");
+	}
+
+	if (violations.ads.size) {
+		await warn(
+			user,
+			`Blacklisted link${
+				violations.ads.size === 1 ? "" : "s"
+			} in ${message.channel.toString()} while at level ${level}`,
+			violations.ads.size * PARTIAL_STRIKE_COUNT,
+			[...violations.ads].join(" "),
+		);
+		needsDelete = true;
+		deletionMessages.push(
+			`Sorry, but you need level ${ESTABLISHED_THRESHOLD} to post ${
+				violations.ads.size === 1 ? "that link" : "those links"
+			}${config.channels.share ? ` outside a channel like ${config.channels.share.toString()}` : ""}!`,
+		);
+	}
+
+	if (violations.badWords.strikes) needsDelete = true;
+
+	const languageStrikes = violations.badWords.strikes + violations.badEmbedWords.strikes;
+	if (languageStrikes) {
+		const words = [
+			...violations.badWords.words.flat(),
+			...violations.badEmbedWords.words.flat(),
+		];
+		await warn(
+			user,
+			words.length === 1 ? "Banned word" : "Banned words",
 			languageStrikes,
 			words.join(", "),
 		);
@@ -268,8 +162,9 @@ export default async function automodMessage(message: Message): Promise<boolean>
 		);
 	}
 
-	if (needsDelete) return !(await deleteMessage());
-	if (badEmbedWords.strikes) {
+	if (needsDelete || (violations.badEmbedWords.strikes && message.system))
+		return !(await deleteMessage());
+	if (violations.badEmbedWords.strikes) {
 		await deleteMessage();
 		await message.suppressEmbeds();
 	}
@@ -278,14 +173,11 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 	async function deleteMessage(): Promise<boolean> {
 		const mentions = message.mentions.users.filter(
-			(user) =>
-				!user.bot &&
-				user.id !== message.author.id &&
-				user.id !== message.interactionMetadata?.user.id,
+			(mention) => !mention.bot && mention.id !== user.id,
 		);
 		if (mentions.size && needsDelete && message.deletable)
 			deletionMessages.push(
-				`(ghost pinged ${joinWithAnd(mentions.map((user) => user.toString()))})`,
+				`(ghost pinged ${joinWithAnd(mentions.map((mention) => mention.toString()))})`,
 			);
 
 		async function sendPublicWarn(): Promise<Message | undefined> {
@@ -297,14 +189,11 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 			if (!message.channel.isSendable()) return;
 			return await message.channel.send({
-				content: `${constants.emojis.statuses.no} ${(
-					message.interactionMetadata?.user ?? message.author
-				).toString()}, ${deletionMessages[0]?.toLowerCase() ?? ""}${[
-					"",
-					...deletionMessages.slice(1),
-				].join("\n")}`,
+				content: `${constants.emojis.statuses.no} ${user.toString()}, ${
+					deletionMessages[0]?.toLowerCase() ?? ""
+				}${["", ...deletionMessages.slice(1)].join("\n")}`,
 				allowedMentions: {
-					users: [(message.interactionMetadata?.user ?? message.author).id],
+					users: [user.id],
 				},
 			});
 		}
@@ -328,4 +217,170 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 		return needsDelete && message.deletable;
 	}
+}
+
+async function findViolations(
+	message: Message | MessageSnapshot,
+	channel: Channel,
+	member?: GuildMember,
+): Promise<{
+	animatedEmojis: string[];
+	invites: Set<string>;
+	bots: Set<string>;
+	shorteners: Set<string>;
+	ads: Set<string>;
+	badWords: { strikes: number; words: string[][] };
+	badEmbedWords: { strikes: number; words: string[][] };
+}> {
+	const invitePromises = message.content
+		.match(InvitesPattern)
+		?.map(
+			async (link) =>
+				[
+					link,
+					await client.fetchInvite(link.split("/").at(-1) ?? link).catch(() => void 0),
+				] as const,
+		);
+	const allInvites = await Promise.all(invitePromises ?? []);
+
+	const banInvites =
+		config.channels.share &&
+		config.channels.share.id !== channel.id &&
+		!channel.isDMBased() &&
+		channel.permissionsFor(channel.guild.id)?.has("SendMessages") &&
+		!message.author?.bot;
+	const invites = (banInvites ? allInvites : []).filter(
+		([, invite]) =>
+			invite?.type === InviteType.Guild && !WHITELISTED_INVITE_GUILDS.has(invite.guild?.id),
+	);
+
+	const banShorteners =
+		!member ||
+		![
+			config.roles.dev?.id,
+			config.roles.epic?.id,
+			config.roles.booster?.id,
+			config.roles.established?.id,
+		].some((role) => role && member.roles.resolve(role));
+	const banAds =
+		banInvites &&
+		banShorteners &&
+		(channel.name.includes("general") || channel.name.includes("chat"));
+	const links = Array.from(
+		banShorteners || banAds ?
+			new Set(message.content.match(/(https?:\/\/[\w.:@]+(?=[^\w.:@]|$))/gis))
+		:	[],
+		(link) => new URL(link),
+	);
+	const { shorteners, ads } = links.reduce(
+		({ shorteners, ads }, link) => {
+			if (
+				banShorteners &&
+				(SHORTENER_DOMAINS.includes(link.hostname) ||
+					SHORTENER_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`)))
+			)
+				shorteners.add(link.toString());
+			else if (
+				banAds &&
+				(AD_DOMAINS.includes(link.hostname) ||
+					AD_DOMAINS.some((domain) => link.hostname.endsWith(`.${domain}`)))
+			)
+				ads.add(link.toString());
+			return { shorteners, ads };
+		},
+		{ shorteners: new Set<string>(), ads: new Set<string>() },
+	);
+
+	const badWords = getBadWords(
+		[
+			stripMarkdown(message.content),
+			message.poll?.question.text,
+			...(message.poll?.answers.map((answer) => [answer.emoji?.name, answer.text]) ?? []),
+			...message.attachments.map((attachment) => [
+				attachment.title ?? attachment.name,
+				attachment.description,
+			]),
+			...message.stickers.map((sticker) => [sticker.name, sticker.description]),
+		].flat(),
+	);
+	const badEmbedWords = getBadWords(
+		[
+			...message.embeds.flatMap((embed) => [
+				embed.title,
+				embed.description,
+				embed.author?.name,
+				embed.footer?.text,
+				embed.url,
+				embed.author?.url,
+				embed.author?.iconURL,
+				embed.thumbnail?.url,
+				embed.video?.url,
+				embed.image?.url,
+				...embed.fields.flatMap((field) => [field.name, field.value]),
+			]),
+			...allInvites.map(([, invite]) => [
+				invite?.guild?.name,
+				invite?.channel?.name,
+				invite?.guildScheduledEvent?.name,
+				invite?.guildScheduledEvent?.description,
+				invite?.guildScheduledEvent?.entityMetadata?.location,
+				invite?.targetApplication?.name,
+				invite?.targetApplication?.description,
+			]),
+		].flat(),
+		1,
+	);
+
+	const animatedEmojis =
+		channel.id !== config.channels.bots?.id && message.content.match(GlobalAnimatedEmoji);
+	const violationData = {
+		animatedEmojis: animatedEmojis ? [...animatedEmojis] : [],
+		invites: new Set(invites.map(([link]) => link)),
+		bots: new Set(banInvites ? message.content.match(GlobalBotInvitesPattern) : []),
+		shorteners,
+		ads,
+		badWords,
+		badEmbedWords,
+	};
+
+	if (!message.messageSnapshots) return violationData;
+	return await message.messageSnapshots.reduce(async (violationsPromise, snapshot) => {
+		const violations = await violationsPromise;
+		const newViolations = await findViolations(snapshot, channel, member);
+		return {
+			animatedEmojis: [...violations.animatedEmojis, ...newViolations.animatedEmojis],
+			invites: new Set([...violations.invites, ...newViolations.invites]),
+			bots: new Set([...violations.bots, ...newViolations.bots]),
+			shorteners: new Set([...violations.shorteners, ...newViolations.shorteners]),
+			ads: new Set([...violations.ads, ...newViolations.ads]),
+			badWords: mergeBadWords([violations.badWords, newViolations.badWords]),
+			badEmbedWords: mergeBadWords([violations.badEmbedWords, newViolations.badEmbedWords]),
+		};
+	}, Promise.resolve(violationData));
+}
+
+function getBadWords(
+	strings: (string | null | undefined)[],
+	shift?: number,
+): { strikes: number; words: string[][] } {
+	return strings.reduce(
+		(bad, current) => {
+			const censored = current && tryCensor(current, shift);
+			if (!censored) return bad;
+			return mergeBadWords([bad, censored]);
+		},
+		{ strikes: 0, words: Array.from<string[]>({ length: badWordRegexps.length }).fill([]) },
+	);
+}
+
+function mergeBadWords(badWords: { strikes: number; words: string[][] }[]): {
+	strikes: number;
+	words: string[][];
+} {
+	return {
+		strikes: badWords.reduce((sum, { strikes }) => sum + strikes, 0),
+		words: Array.from({ length: badWordRegexps.length }, (_, index) =>
+			badWords.reduce<string[]>((all, { words }) => [...all, ...(words[index] ?? [])], []),
+		),
+	};
 }
