@@ -232,17 +232,22 @@ async function sendSpecialReminder(reminder: {
 		}
 		case SpecialReminder.QOTD: {
 			if (!reminder.channel?.isThreadOnly()) break;
+			const post = await sendQuestion(reminder.channel);
+			const date = new Date();
 			remindersDatabase.data = [
 				...remindersDatabase.data,
 				{
 					channel: reminder.channel.id,
-					date: +reminder.date + 86_400_000,
+					date:
+						post ?
+							+reminder.date + 86_400_000
+						:	date.setUTCHours(12, 0, 0, 0) +
+							(date.getUTCHours() >= 12 ? 86_400_000 : 0),
 					reminder: undefined,
 					id: SpecialReminder.QOTD,
 					user: client.user.id,
 				},
 			];
-			await sendQuestion(reminder.channel);
 			break;
 		}
 		default: {
