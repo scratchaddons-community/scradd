@@ -1,20 +1,20 @@
-import {
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	TimestampStyles,
-	time,
-	type AnyThreadChannel,
-	type ButtonInteraction,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
+import type {
+	AnyThreadChannel,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	InteractionResponse,
 } from "discord.js";
-import { client } from "strife.js";
+
+import { ButtonStyle, ChannelType, ComponentType, time, TimestampStyles } from "discord.js";
+import { client, disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
+
+import "../../util/discord.js";
+
 import { parseTime } from "../../util/numbers.js";
-import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
+import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
 import queueReminders from "../reminders/send.js";
 import { getThreadConfig, threadsDatabase } from "./misc.js";
 
@@ -71,7 +71,9 @@ export async function setUpAutoClose(
 	if (+date < Date.now() + 900_000 || +date > Date.now() + 1_814_400_000) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t close the thread sooner than 15 minutes or later than 3 weeks.`,
+			content: `${
+				constants.emojis.statuses.no
+			} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t close the thread sooner than 15 minutes or later than 3 weeks.`,
 		});
 	}
 

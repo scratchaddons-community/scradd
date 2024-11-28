@@ -1,12 +1,14 @@
+import type { Category } from "./misc.js";
+
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
+	channelLink,
 	ChannelType,
 	ComponentType,
 	GuildMember,
 	TextInputStyle,
-	channelLink,
 	userMention,
 } from "discord.js";
 import {
@@ -17,19 +19,20 @@ import {
 	defineMenuCommand,
 	defineModal,
 	defineSelect,
+	disableComponents,
 } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "../logging/util.js";
 import contactMods, { contactUser, showTicketModal } from "./contact.js";
 import {
+	getIdFromName,
 	SA_CATEGORY,
 	SERVER_CATEGORY,
-	TICKETS_BY_MEMBER,
 	TICKET_CATEGORIES,
-	getIdFromName,
-	type Category,
+	TICKETS_BY_MEMBER,
 } from "./misc.js";
 
 const appealedStrikes = new Set<string>();
@@ -207,7 +210,9 @@ defineModal("report", async (interaction, messageId) => {
 	const message = await interaction.channel?.messages.fetch(messageId).catch(() => void 0);
 	if (!message) {
 		await interaction.reply({
-			content: `${constants.emojis.statuses.no} Cannot report that message! Has it already been deleted?`,
+			content: `${
+				constants.emojis.statuses.no
+			} Cannot report that message! Has it already been deleted?`,
 			ephemeral: true,
 		});
 		return;
@@ -238,7 +243,9 @@ defineModal("report", async (interaction, messageId) => {
 		},
 	);
 	await interaction.reply({
-		content: `${constants.emojis.statuses.yes} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
+		content: `${
+			constants.emojis.statuses.yes
+		} Thanks for the report! Please do not spam or meaninglessly report, or you may be blacklisted from reporting.`,
 		ephemeral: true,
 	});
 });

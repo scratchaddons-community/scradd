@@ -1,5 +1,8 @@
-import { TimestampStyles, time, type ChatInputCommandInteraction } from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
+
+import { inlineCode, time, TimestampStyles } from "discord.js";
 import { client } from "strife.js";
+
 import constants from "../../common/constants.js";
 import pkg from "../../package.json" with { type: "json" };
 
@@ -14,12 +17,14 @@ export default async function status(interaction: ChatInputCommandInteraction): 
 				title: "Status",
 				thumbnail: { url: client.user.displayAvatarURL() },
 				color: constants.themeColor,
-				description: `I’m open-source! The source code is available [on GitHub](https://github.com/${constants.repos.scradd}).`,
+				description: `I’m open-source! The source code is available [on GitHub](https://github.com/${
+					constants.repos.scradd
+				}).`,
 
 				fields: [
 					{
 						name: "⚙️ Mode",
-						value: process.env.NODE_ENV === "production" ? "Production" : "Development",
+						value: inlineCode(constants.env),
 						inline: true,
 					},
 					{ name: "🔢 Version", value: `v${pkg.version}`, inline: true },

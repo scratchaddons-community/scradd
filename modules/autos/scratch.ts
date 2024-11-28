@@ -1,3 +1,15 @@
+import type { APIEmbed } from "discord.js";
+import type { Node } from "posthtml-parser";
+
+import { cleanCodeBlockContent, time, TimestampStyles } from "discord.js";
+import { parser } from "posthtml-parser";
+import { escapeAllMarkdown, footerSeperator } from "strife.js";
+
+import constants from "../../common/constants.js";
+import { gracefulFetch } from "../../util/promises.js";
+import { fetchUser } from "../../util/scratch.js";
+import { truncateText } from "../../util/text.js";
+
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -5,19 +17,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TODO: actually type this
 
-import { TimestampStyles, cleanCodeBlockContent, time, type APIEmbed } from "discord.js";
-import { parser, type Node } from "posthtml-parser";
-import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
-import { gracefulFetch } from "../../util/promises.js";
-import { fetchUser } from "../../util/scratch.js";
-import { truncateText } from "../../util/text.js";
-
 const EMBED_LENGTH = 750;
 
 export function getMatches(content: string): URL[] {
+	//gpt wrote the regexp and like half of this code
 	const scratchUrlRegexp =
-		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis; //gpt wrote the regexp and like half of this code
+		/(?:^|.)?https?:\/\/scratch\.(?:mit\.edu|org|camp|love|pizza|team)\/(?:projects|users|studios|discuss)\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+(?:$|.)?/gis;
 
 	const urls = new Map<string, URL>();
 	for (const match of content.match(scratchUrlRegexp) ?? []) {
@@ -197,7 +202,7 @@ export async function handleForumPost(
 	hash: string,
 ): Promise<APIEmbed | undefined> {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
-	const id = urlParts[2] === "topic" && type == "post" ? hash.split("-")[1] ?? "" : urlParts[3];
+	const id = urlParts[2] === "topic" && type == "post" ? (hash.split("-")[1] ?? "") : urlParts[3];
 
 	const post =
 		type === "post" ?
@@ -217,7 +222,7 @@ export async function handleForumPost(
 		:	"";
 
 	return {
-		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${constants.footerSeperator}${
+		title: `${post.topic.closed ? "🔒 " : ""}${post.topic.title}${footerSeperator}${
 			post.topic.category
 		}`,
 		description: truncateText(
@@ -241,7 +246,7 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 	if (Array.isArray(node))
 		return node.map((subnode) => nodesToText(subnode, shouldEscape)).join("");
 	if (typeof node !== "object")
-		return shouldEscape ? escapeMessage(node.toString()) : node.toString();
+		return shouldEscape ? escapeAllMarkdown(node.toString()) : node.toString();
 
 	const content =
 		typeof node.content !== "number" && !node.content?.length ? "" : nodesToText(node.content);
@@ -303,7 +308,7 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 }
 
 export function linkifyMentions(string: string): string {
-	return escapeMessage(string).replaceAll(/@([\w\\-])+/g, (name) => {
+	return escapeAllMarkdown(string).replaceAll(/@([\w\\-])+/g, (name) => {
 		name = name.replaceAll("\\", "");
 		return `[${name}](${constants.domains.scratch}/users/${name.slice(1)})`;
 	});

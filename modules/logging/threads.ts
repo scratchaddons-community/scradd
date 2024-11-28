@@ -1,19 +1,11 @@
-import {
-	ChannelType,
-	ThreadAutoArchiveDuration,
-	ThreadChannel,
-	channelMention,
-	type AnyThreadChannel,
-	type AuditLogEvent,
-} from "discord.js";
+import type { AnyThreadChannel, AuditLogEvent } from "discord.js";
+import type { AuditLog } from "./util.js";
+
+import { channelMention, ChannelType, ThreadAutoArchiveDuration, ThreadChannel } from "discord.js";
+
 import { messageDeleteBulk } from "./messages.js";
-import log, {
-	LogSeverity,
-	LoggingEmojis,
-	extraAuditLogsInfo,
-	shouldLog,
-	type AuditLog,
-} from "./misc.js";
+import log, { shouldLog } from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>): Promise<void> {
 	if (!(entry.target instanceof ThreadChannel)) {
@@ -38,9 +30,9 @@ export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>):
 
 	await log(
 		`${LoggingEmojis.Thread} ${
-			"name" in entry.target ? `Thread #${entry.target.name}` : "Unknown thread"
+			entry.target.name === "string" ? `Thread #${entry.target.name}` : "Unknown thread"
 		}${
-			"parent" in entry.target && entry.target.parent ?
+			entry.target instanceof ThreadChannel && entry.target.parent ?
 				` in ${entry.target.parent.toString()}`
 			:	""
 		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,

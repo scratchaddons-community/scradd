@@ -1,8 +1,13 @@
-import { Role, roleMention, type AuditLogEvent, type RoleMention } from "discord.js";
+import type { AuditLogEvent, RoleMention } from "discord.js";
+import type { AuditLog } from "./util.js";
+
+import { Role, roleMention } from "discord.js";
+
 import config from "../../common/config.js";
-import { joinWithAnd } from "../../util/text.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
 import constants from "../../common/constants.js";
+import { joinWithAnd } from "../../util/text.js";
+import log from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function memberRoleUpdate(
 	entry: AuditLog<AuditLogEvent.MemberRoleUpdate, "$add" | "$remove">,
@@ -49,15 +54,17 @@ export async function memberRoleUpdate(
 	): Promise<void> {
 		if (!entry.target || !roleMentions.length) return;
 		await log(
-			`${LoggingEmojis.Role} ${entry.target.toString()} ${type} ${joinWithAnd(
-				roleMentions,
-			)}${entry.executor ? ` from ${entry.executor.toString()}` : ""}${extraAuditLogsInfo({ reason: entry.reason })}`,
+			`${LoggingEmojis.Role} ${entry.target.toString()} ${type} ${joinWithAnd(roleMentions)}${
+				entry.executor ? ` from ${entry.executor.toString()}` : ""
+			}${extraAuditLogsInfo({ reason: entry.reason })}`,
 			severity,
 		);
 	}
 }
 
-export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>): Promise<void> {
+export async function roleCreate(
+	entry: AuditLog<AuditLogEvent.RoleCreate, never, Role>,
+): Promise<void> {
 	await log(
 		`${LoggingEmojis.Role} ${roleMention(entry.target.id)} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
@@ -65,7 +72,7 @@ export async function roleCreate(entry: AuditLog<AuditLogEvent.RoleCreate>): Pro
 }
 
 export async function roleUpdate(
-	entry: AuditLog<AuditLogEvent.RoleUpdate, "icon_hash" | "unicode_emoji">,
+	entry: AuditLog<AuditLogEvent.RoleUpdate, "icon_hash" | "unicode_emoji", Role>,
 ): Promise<void> {
 	let iconChanged = false;
 

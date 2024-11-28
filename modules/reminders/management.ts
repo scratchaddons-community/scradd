@@ -1,17 +1,21 @@
+import type {
+	ChatInputCommandInteraction,
+	InteractionResponse,
+	MessageComponentInteraction,
+} from "discord.js";
+
 import {
 	ButtonStyle,
+	channelMention,
 	ComponentType,
 	GuildMember,
-	TimestampStyles,
-	channelMention,
 	time,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
-	type MessageComponentInteraction,
+	TimestampStyles,
 } from "discord.js";
+import { disableComponents, paginate } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, paginate } from "../../util/discord.js";
 import { convertBase, parseTime } from "../../util/numbers.js";
 import tryCensor, { badWordsAllowed } from "../automod/misc.js";
 import warn from "../punishments/warn.js";
@@ -22,7 +26,7 @@ import { getUserReminders, remindersDatabase } from "./misc.js";
 import queueReminders from "./send.js";
 
 export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {
-	await interaction.deferReply({ ephemeral: true });
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	const reminders = getUserReminders(interaction.user.id);
 	await paginate(
@@ -32,16 +36,18 @@ export async function listReminders(interaction: ChatInputCommandInteraction): P
 				new Date(reminder.date),
 				TimestampStyles.RelativeTime,
 			)}: ${channelMention(reminder.channel)} ${reminder.reminder ?? ""}`,
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		{
 			title: "Your reminders",
-			format:
-				interaction.member instanceof GuildMember ? interaction.member : interaction.user,
 			singular: "reminder",
 			failMessage: "You don’t have any reminders set!",
 
 			user: interaction.user,
 			totalCount: reminders.length,
+
+			timeout: constants.collectorTime,
+			format:
+				interaction.member instanceof GuildMember ? interaction.member : interaction.user,
 
 			generateComponents(page) {
 				return [
@@ -99,7 +105,9 @@ export async function createReminder(
 	) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You already have ${reminders.length} reminders set! Please cancel some or level up before setting any more.`,
+			content: `${constants.emojis.statuses.no} You already have ${
+				reminders.length
+			} reminders set! Please cancel some or level up before setting any more.`,
 		});
 	}
 
@@ -107,7 +115,9 @@ export async function createReminder(
 	if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t remind you sooner than 1 minute or later than 365 days.`,
+			content: `${
+				constants.emojis.statuses.no
+			} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t remind you sooner than 1 minute or later than 365 days.`,
 		});
 	}
 
@@ -154,7 +164,7 @@ export async function cancelReminder(
 	id: string,
 ): Promise<boolean> {
 	if (
-		interaction.user.id !== interaction.message.interaction?.user.id &&
+		interaction.user.id !== interaction.message.interactionMetadata?.user.id &&
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.mod.id)
 		:	interaction.member?.roles.includes(config.roles.mod.id))

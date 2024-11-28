@@ -1,22 +1,18 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	MessageType,
-	User,
-	type Message,
-	type Snowflake,
-} from "discord.js";
+import type { Message, Snowflake } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember, MessageType, User } from "discord.js";
+import { zeroWidthSpace } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getDefaultSettings, getSettings } from "../settings.js";
 import {
-	DEFAULT_XP,
-	getLevelForXp,
-	getXpForLevel,
 	ACTIVE_THRESHOLD_ONE,
 	ACTIVE_THRESHOLD_TWO,
+	DEFAULT_XP,
 	ESTABLISHED_THRESHOLD,
+	getLevelForXp,
+	getXpForLevel,
 } from "./misc.js";
 import { getFullWeeklyData, recentXpDatabase, xpDatabase } from "./util.js";
 
@@ -31,24 +27,24 @@ export async function giveXpForMessage(message: Message): Promise<void> {
 		const accumulator: Message[] = [];
 		for (let index = 0; index < fetched.length && accumulator.length < DEFAULT_XP; index++) {
 			const item = fetched[index];
-			if (item && (!item.author.bot || item.interaction)) accumulator.push(item);
+			if (item && (!item.author.bot || item.interactionMetadata)) accumulator.push(item);
 		}
 		latestMessages[message.channel.id] = accumulator;
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
 	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interaction?.user.id || ""].some((user) =>
-			[foundMessage.author.id, foundMessage.interaction?.user.id].includes(user),
+		return ![message.author.id, message.interactionMetadata?.user.id || ""].some((user) =>
+			[foundMessage.author.id, foundMessage.interactionMetadata?.user.id].includes(user),
 		);
 	});
 
 	const newChannel = lastInChannel.length < DEFAULT_XP;
 	if (!newChannel) lastInChannel.pop();
 	lastInChannel.unshift(message);
-	const bot = 1 + Number(Boolean(message.interaction));
+	const bot = 1 + Number(Boolean(message.interactionMetadata));
 
 	await giveXp(
-		message.interaction?.user ?? message.author,
+		message.interactionMetadata?.user ?? message.author,
 		message.url,
 		spam === -1 && !newChannel ?
 			1
@@ -90,7 +86,7 @@ export default async function giveXp(
 	amount = DEFAULT_XP,
 ): Promise<void> {
 	const user = to instanceof User ? to : to.user;
-	if (process.env.NODE_ENV === "production" && user.bot) return;
+	if (constants.env === "production" && user.bot) return;
 
 	const xp = [...xpDatabase.data];
 	const xpDatabaseIndex = xp.findIndex((entry) => entry.user === user.id);
@@ -174,7 +170,7 @@ async function sendLevelUpMessage(member: GuildMember, newXp: number, url?: stri
 						value: `${Math.floor(newXp).toLocaleString()} XP`,
 						inline: true,
 					},
-					{ name: constants.zws, value: constants.zws, inline: true },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: true },
 					{
 						name: "⬆️ Next level",
 						value: `${nextLevelXp.toLocaleString()} XP`,

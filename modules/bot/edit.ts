@@ -1,25 +1,26 @@
-import { unifiedDiff } from "difflib";
-import {
-	ComponentType,
-	TextInputStyle,
-	type InteractionResponse,
-	type MessageContextMenuCommandInteraction,
-	type ModalSubmitInteraction,
+import type {
+	InteractionResponse,
+	MessageContextMenuCommandInteraction,
+	ModalSubmitInteraction,
 } from "discord.js";
+
+import { unifiedDiff } from "difflib";
+import { ComponentType, TextInputStyle } from "discord.js";
+import { getBaseChannel, getMessageJSON, stringifyError } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { databaseThread } from "../../common/database.js";
-import { getBaseChannel, getMessageJSON } from "../../util/discord.js";
-import { stringifyError } from "../logging/errors.js";
-import log, { LogSeverity, LoggingEmojis, shouldLog } from "../logging/misc.js";
 import { chatThread } from "../autos/chat.js";
+import log, { shouldLog } from "../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 
 export default async function editMessage(
 	interaction: MessageContextMenuCommandInteraction,
 ): Promise<InteractionResponse | undefined> {
 	if (
 		!interaction.targetMessage.editable ||
-		interaction.targetMessage.interaction ||
+		interaction.targetMessage.interactionMetadata ||
 		chatThread?.id === interaction.channel?.id ||
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id &&
@@ -134,9 +135,9 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 
 	if (files.length) {
 		await log(
-			`${
-				LoggingEmojis.MessageEdit
-			} [Message](<${edited.url}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+			`${LoggingEmojis.MessageEdit} [Message](<${
+				edited.url
+			}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
 			(interaction.guild?.id !== config.guild.id &&
 				interaction.guild?.publicUpdatesChannel) ||
 				LogSeverity.ServerChange,

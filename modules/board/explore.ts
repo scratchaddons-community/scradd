@@ -1,16 +1,16 @@
-import {
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	type GuildBasedChannel,
-	type InteractionReplyOptions,
-	type MessageEditOptions,
-	type RepliableInteraction,
-	type Snowflake,
+import type {
+	GuildBasedChannel,
+	InteractionReplyOptions,
+	MessageEditOptions,
+	RepliableInteraction,
+	Snowflake,
 } from "discord.js";
+
+import { ButtonStyle, ChannelType, ComponentType } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import { anyPromise, asyncFilter } from "../../util/promises.js";
 import { GAME_COLLECTOR_TIME } from "../games/misc.js";
 import boardReactionCount from "./counts.js";
@@ -64,7 +64,8 @@ export default async function makeSlideshow(
 	}: { user?: string; channel?: GuildBasedChannel; minReactions?: number } = {},
 ): Promise<void> {
 	const ephemeral =
-		interaction.isButton() && interaction.message.interaction?.user.id !== interaction.user.id;
+		interaction.isButton() &&
+		interaction.message.interactionMetadata?.user.id !== interaction.user.id;
 	let reply = await interaction.deferReply({ ephemeral, fetchReply: true });
 
 	const fetchedMessages = asyncFilter(

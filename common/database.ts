@@ -1,15 +1,13 @@
-import {
-	ChannelType,
-	RESTJSONErrorCodes,
-	ThreadAutoArchiveDuration,
-	type Message,
-	type Snowflake,
-	type TextBasedChannel,
-} from "discord.js";
+import type { Message, SendableChannels, Snowflake } from "discord.js";
+
+import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
 import papaparse from "papaparse";
-import { client } from "strife.js";
-import { getAllMessages, getFilesFromMessage } from "../util/discord.js";
+import { client, getFilesFromMessage } from "strife.js";
+
+import { getAllMessages } from "../util/discord.js";
 import config from "./config.js";
+import constants from "./constants.js";
+
 let timeouts: Record<
 	Snowflake,
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
@@ -17,9 +15,7 @@ let timeouts: Record<
 
 const threadName = "databases",
 	databaseFileType =
-		process.env.NODE_ENV === "production" ?
-			`${client.user.displayName.toLowerCase()}-db`
-		:	"csv";
+		constants.env === "production" ? `${client.user.displayName.toLowerCase()}-db` : "csv";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
@@ -68,10 +64,15 @@ export default class Database<Data extends Record<string, boolean | number | str
 		if (this.message) return;
 
 		const content =
-			`__**${client.user.displayName.replaceAll(" ", "-").toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n` +
-			`\n*Please don’t delete this message. If you do, all ${this.name.replaceAll("_", " ")} information may be reset.*`;
+			`__**${client.user.displayName
+				.replaceAll(" ", "-")
+				.toUpperCase()} ${this.name.toUpperCase()} DATABASE**__\n` +
+			`\n*Please don’t delete this message. If you do, all ${this.name.replaceAll(
+				"_",
+				" ",
+			)} information may be reset.*`;
 		if (databases[this.name]) await databases[this.name]?.edit(content);
-		this.message = databases[this.name] ||= await databaseThread.send(content);
+		this.message = databases[this.name] ??= await databaseThread.send(content);
 
 		const attachment = (await getFilesFromMessage(this.message)).first();
 		if (!attachment) {
@@ -237,8 +238,8 @@ for (const [event, code] of Object.entries({
 	});
 }
 
-export async function backupDatabases(channel: TextBasedChannel): Promise<void> {
-	if (process.env.NODE_ENV !== "production") return;
+export async function backupDatabases(channel: SendableChannels): Promise<void> {
+	if (constants.env === "development") return;
 
 	const attachments = (
 		await Promise.all(

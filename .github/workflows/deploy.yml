@@ -13,7 +13,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.2.2
               with:
-                  ref: ${{ github.head_ref }}
+                  ref: ${{github.head_ref}}
 
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
@@ -23,26 +23,29 @@ jobs:
 
             - name: Download bad words
               run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/automod_bad-words.ts" --output modules/automod/bad-words.ts
+                  curl
+                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/automod_bad-words.ts"
+                  --output modules/automod/bad-words.ts
 
             - name: Download autos data
               run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/autos_autos-data.ts" --output modules/autos/autos-data.ts
+                  curl
+                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/autos_autos-data.ts"
+                  --output modules/autos/autos-data.ts
 
             - name: Download dad
               run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/autos_dad.ts" --output modules/autos/dad.ts
+                  curl
+                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/autos_dad.ts"
+                  --output modules/autos/dad.ts
 
             - name: Download strings
               run:
-                  curl "https://gist.githubusercontent.com/${{ secrets.PRIVATE_GIST
-                  }}/raw/strings.ts" --output common/strings.ts
+                  curl "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/strings.ts"
+                  --output common/strings.ts
 
             - name: Checkout images
-              run: git clone https://gist.github.com/${{ secrets.IMAGES_GIST }}.git .private/images
+              run: git clone https://gist.github.com/${{secrets.IMAGES_GIST}}.git .private/images
 
             - name: Install
               run: npm ci --force
@@ -52,7 +55,7 @@ jobs:
                   npx railway up --ci --service afdb8def-13c6-4650-af4e-ef60d2009b56 --environment
                   production
               env:
-                  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+                  RAILWAY_TOKEN: ${{secrets.RAILWAY_TOKEN}}
 
             - name: Clean DB listeners
-              run: curl https://sa-discord.up.railway.app/prepare-exit?auth=${{ secrets.EXIT_AUTH }}
+              run: curl https://sa-discord.up.railway.app/prepare-exit?auth=${{secrets.EXIT_AUTH}}

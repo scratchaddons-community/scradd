@@ -1,20 +1,14 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	MessageType,
-	TimestampStyles,
-	time,
-	type GuildMember,
-	type InteractionReplyOptions,
-	type Message,
-	type Snowflake,
-	type User,
-} from "discord.js";
+import type { BaseMessageOptions, GuildMember, Message, Snowflake, User } from "discord.js";
+
+import { ButtonStyle, ComponentType, MessageType, time, TimestampStyles } from "discord.js";
+import { getFilesFromMessage, GlobalUsersPattern, paginate } from "strife.js";
+
+import constants from "../../common/constants.js";
 import Database, { allDatabaseMessages } from "../../common/database.js";
-import { GlobalUsersPattern, getFilesFromMessage, paginate } from "../../util/discord.js";
 import { convertBase } from "../../util/numbers.js";
 import { asyncFilter, gracefulFetch } from "../../util/promises.js";
-import { LogSeverity, getLoggingThread } from "../logging/misc.js";
+import { getLoggingThread } from "../logging/misc.js";
+import { LogSeverity } from "../logging/util.js";
 import { EXPIRY_LENGTH } from "./misc.js";
 
 export const strikeDatabase = new Database<{
@@ -81,7 +75,7 @@ export default async function filterToStrike(
 		reason:
 			url ?
 				await fetch(url).then(async (response) => await response.text())
-			:	/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content,
+			:	(/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content),
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
@@ -89,7 +83,7 @@ export default async function filterToStrike(
 
 export async function listStrikes(
 	member: GuildMember | User,
-	reply: (options: InteractionReplyOptions) => Promise<Message>,
+	reply: (options: BaseMessageOptions) => Promise<Message>,
 	{ expired: showExpired = true, removed: showRemoved = false } = {},
 	commandUser: User | false = false,
 ): Promise<void> {
@@ -128,11 +122,13 @@ export async function listStrikes(
 		reply,
 		{
 			title: `${member.displayName}’s strikes`,
-			format: member,
 			singular: "strike",
 
 			user: commandUser,
 			totalCount: totalStrikeCount,
+
+			timeout: constants.collectorTime,
+			format: member,
 
 			generateComponents(filtered) {
 				if (filtered.length > 5) {

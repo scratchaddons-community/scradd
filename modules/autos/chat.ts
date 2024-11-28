@@ -1,32 +1,30 @@
-import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
-import {
-	ButtonStyle,
-	ChannelType,
-	ComponentType,
-	MessageType,
-	TextInputStyle,
-	type ButtonInteraction,
-	type InteractionResponse,
-	type Message,
-	type MessageContextMenuCommandInteraction,
-	type Snowflake,
-	type ThreadChannel,
+import type {
+	ButtonInteraction,
+	InteractionResponse,
+	Message,
+	MessageContextMenuCommandInteraction,
+	Snowflake,
+	TextThreadChannel,
 } from "discord.js";
+
+import didYouMean, { ReturnTypeEnums, ThresholdTypeEnums } from "didyoumean2";
+import { ButtonStyle, ChannelType, ComponentType, MessageType, TextInputStyle } from "discord.js";
 import mongoose from "mongoose";
-import { client } from "strife.js";
-import config, { getInitialThreads } from "../../common/config.js";
-import constants from "../../common/constants.js";
 import {
-	GlobalBotInvitesPattern,
+	client,
+	getBaseChannel,
 	GlobalUsersPattern,
 	InvitesPattern,
-	getBaseChannel,
-	messageToText,
-} from "../../util/discord.js";
-import { stripMarkdown } from "../../util/markdown.js";
+	stripMarkdown,
+} from "strife.js";
+
+import config, { getInitialThreads } from "../../common/config.js";
+import constants from "../../common/constants.js";
+import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.js";
 import { normalize } from "../../util/text.js";
 import tryCensor, { censor } from "../automod/misc.js";
-import log, { LogSeverity, LoggingEmojis } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../logging/util.js";
 import { getSettings, userSettingsDatabase } from "../settings.js";
 
 export const chatName = `${client.user.displayName} Chat` as const;
@@ -88,7 +86,7 @@ export async function learn(message: Message): Promise<void> {
 	previousMessages[message.channel.id] = message;
 
 	if (
-		message.interaction ||
+		message.interactionMetadata ||
 		[message.author.id, previous?.author.id].includes(client.user.id) ||
 		!(await getSettings(message.author)).scraddChat
 	)
@@ -97,8 +95,9 @@ export async function learn(message: Message): Promise<void> {
 	const baseChannel = getBaseChannel(message.channel);
 	if (
 		message.channel.type === ChannelType.PrivateThread ||
-		baseChannel?.type === ChannelType.DM ||
-		!baseChannel?.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
+		!baseChannel ||
+		baseChannel.isDMBased() ||
+		!baseChannel.permissionsFor(baseChannel.guild.id)?.has("ViewChannel")
 	)
 		return;
 
@@ -135,7 +134,9 @@ const consent = {
 		content:
 			`## ${chatName}\n` +
 			`### Basic regurgitating chatbot\n` +
-			`${chatName} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
+			`${
+				chatName
+			} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
 		components: [
 			{
 				type: ComponentType.ActionRow,
@@ -158,7 +159,7 @@ const consent = {
 	} as const,
 	threadName = `${chatName} (Check pins!)` as const;
 export const chatThread = await getThread();
-async function getThread(): Promise<ThreadChannel | undefined> {
+async function getThread(): Promise<TextThreadChannel | undefined> {
 	if (!config.channels.bots) return;
 
 	const thread = getInitialThreads(config.channels.bots, chatName).first();
@@ -272,11 +273,9 @@ export async function removeResponse(
 	}
 
 	await log(
-		`${
-			LoggingEmojis.Bot
-		} ${interaction.user.toString()} permamently removed a response from ${chatName} (${deletedCount} prompt${
-			deletedCount === 1 ? "" : "s"
-		})`,
+		`${LoggingEmojis.Bot} ${interaction.user.toString()} permamently removed a response from ${
+			chatName
+		} (${deletedCount} prompt${deletedCount === 1 ? "" : "s"})`,
 		LogSeverity.ImportantUpdate,
 		{ files: [{ content: response, extension: "md" }] },
 	);

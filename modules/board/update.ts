@@ -1,5 +1,7 @@
 import type { Message, Snowflake } from "discord.js";
+
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import { getSettings } from "../settings.js";
 import giveXp from "../xp/give-xp.js";
@@ -120,7 +122,7 @@ export async function syncRandomBoard(): Promise<void> {
 		const message = await channel.messages.fetch(info.source).catch(() => void 0);
 		const reaction = message?.reactions.resolve(BOARD_EMOJI);
 		if (message && reaction) {
-			await updateBoard({ count: reaction.count, message });
+			await updateBoard({ count: reaction.countDetails.normal, message });
 			break;
 		}
 	}

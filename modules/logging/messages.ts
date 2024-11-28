@@ -1,25 +1,22 @@
-import { unifiedDiff } from "difflib";
-import {
-	Colors,
-	messageLink,
-	type ReadonlyCollection,
-	type GuildTextBasedChannel,
-	type Message,
-	type MessageReaction,
-	type PartialMessage,
-	type Snowflake,
+import type {
+	GuildTextBasedChannel,
+	Message,
+	MessageReaction,
+	PartialMessage,
+	ReadonlyCollection,
+	Snowflake,
 } from "discord.js";
+
+import { unifiedDiff } from "difflib";
+import { Colors, messageLink } from "discord.js";
+import { getBaseChannel, isFileExpired, unsignFiles } from "strife.js";
+
 import config from "../../common/config.js";
 import { databaseThread } from "../../common/database.js";
-import {
-	extractMessageExtremities,
-	getBaseChannel,
-	isFileExpired,
-	messageToText,
-	unsignFiles,
-} from "../../util/discord.js";
+import { extractMessageExtremities, messageToText } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
-import log, { LogSeverity, LoggingEmojis, shouldLog } from "./misc.js";
+import log, { shouldLog } from "./misc.js";
+import { LoggingEmojis, LogSeverity } from "./util.js";
 
 export const ignoredDeletions = new Set<Snowflake>();
 
@@ -41,7 +38,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 			{ embeds: [], files: [] }
 		:	await extractMessageExtremities(message, undefined, false);
 
-	const unknownAttachments = message.attachments.filter(isFileExpired);
+	const unknownAttachments = message.attachments.filter((file) => isFileExpired(file.url));
 
 	await log(
 		`${LoggingEmojis.MessageDelete} ${message.partial ? "Unknown message" : "Message"}${
@@ -84,16 +81,21 @@ export async function messageDeleteBulk(
 		await Promise.all(
 			messages
 				.map(async (message) => {
-					const embeds = `${message.embeds.length ? `${message.embeds.length} embed` : ""}${
-						message.embeds.length > 1 ? "s" : ""
-					}`;
-					const attachments = `${
-						message.attachments.size ? `${message.attachments.size} attachment` : ""
-					}${message.attachments.size > 1 ? "s" : ""}`;
-					const extremities =
-						embeds || attachments ?
-							` (${embeds}${embeds && attachments && ", "}${attachments})`
-						:	"";
+					const embeds =
+						message.embeds.length &&
+						`${message.embeds.length} embed${message.embeds.length > 1 ? "s" : ""}`;
+					const attachments =
+						message.attachments.size &&
+						`${message.attachments.size} attachment${
+							message.attachments.size > 1 ? "s" : ""
+						}`;
+					const stickers =
+						message.stickers.size &&
+						`${message.stickers.size} sticker${message.stickers.size > 1 ? "s" : ""}`;
+					const poll = message.poll && "a poll";
+					const extremities = joinWithAnd(
+						[embeds, attachments, stickers, poll].filter(Boolean),
+					);
 
 					const author =
 						message.author ?
@@ -101,7 +103,9 @@ export async function messageDeleteBulk(
 						:	"[unknown author]";
 					const content = !message.partial && (await messageToText(message));
 
-					return `${author}${extremities}${content ? `:\n${content}` : ""}`;
+					return `${author}${
+						extremities ? ` (with ${extremities})` : ""
+					}${content ? `:\n${content}` : ""}`;
 				})
 				.toReversed(),
 		)
@@ -135,27 +139,32 @@ export async function messageReactionRemoveAll(
 ): Promise<void> {
 	const message = partialMessage.partial ? await partialMessage.fetch() : partialMessage;
 
-	if (!shouldLog(message.channel) || ignoredReactionPurges.delete(message.id)) return;
+	if (!shouldLog(message.channel) || ignoredReactionPurges.delete(message.id) || !reactions.size)
+		return;
 
 	await log(
-		`${
-			LoggingEmojis.Expression
-		} Reactions purged on [message](<${message.url}>) by ${message.author.toString()} in ${message.channel.toString()}`,
+		`${LoggingEmojis.Expression} Reactions purged on [message](<${
+			message.url
+		}>) by ${message.author.toString()} in ${message.channel.toString()}`,
 		LogSeverity.ContentEdit,
-		reactions.size ?
-			{
-				embeds: [
-					{
-						fields: reactions.map((reaction) => ({
+		{
+			embeds: [
+				{
+					fields: reactions.map((reaction) => {
+						const { burst } = reaction.countDetails;
+						const burstInfo = ` (including ${burst} super reaction${burst === 1 ? "" : "s"})`;
+						return {
 							name: reaction.emoji.toString(),
-							value: `${reaction.count} reaction${reaction.count === 1 ? "" : "s"}`,
+							value: `${reaction.count} reaction${
+								reaction.count === 1 ? "" : "s"
+							}${burst ? burstInfo : ""}`,
 							inline: true,
-						})),
-						color: Colors.Blurple,
-					},
-				],
-			}
-		:	{},
+						};
+					}),
+					color: Colors.Blurple,
+				},
+			],
+		},
 	);
 }
 export async function messageUpdate(
@@ -167,9 +176,11 @@ export async function messageUpdate(
 
 	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
 		await log(
-			`${
-				LoggingEmojis.MessageUpdate
-			} [Message](<${newMessage.url}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${newMessage.flags.has("Crossposted") ? "" : "un"}published`,
+			`${LoggingEmojis.MessageUpdate} [Message](<${
+				newMessage.url
+			}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				newMessage.flags.has("Crossposted") ? "" : "un"
+			}published`,
 			LogSeverity.ServerChange,
 		);
 	}
@@ -177,7 +188,9 @@ export async function messageUpdate(
 		await log(
 			`${LoggingEmojis.MessageUpdate} Embeds ${
 				newMessage.flags.has("SuppressEmbeds") ? "removed from" : "shown on"
-			} [message](<${newMessage.url}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
+			} [message](<${
+				newMessage.url
+			}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()}`,
 			LogSeverity.ContentEdit,
 			{ embeds: oldMessage.embeds },
 		);
@@ -185,9 +198,11 @@ export async function messageUpdate(
 
 	if (!oldMessage.partial && oldMessage.pinned !== newMessage.pinned) {
 		await log(
-			`${
-				LoggingEmojis.MessageUpdate
-			} [Message](<${newMessage.url}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${newMessage.pinned ? "" : "un"}pinned`,
+			`${LoggingEmojis.MessageUpdate} [Message](<${
+				newMessage.url
+			}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} ${
+				newMessage.pinned ? "" : "un"
+			}pinned`,
 			LogSeverity.ServerChange,
 		);
 	}
@@ -210,7 +225,7 @@ export async function messageUpdate(
 		);
 		files.push(
 			...removedAttachments
-				.filter((file) => !isFileExpired(file))
+				.filter((file) => !isFileExpired(file.url))
 				.map((attachment) => attachment.url),
 		);
 
@@ -220,7 +235,9 @@ export async function messageUpdate(
 					newMessage.url
 				}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited${
 					removedAttachments.size ?
-						`\n ${removedAttachments.size} attachment${removedAttachments.size > 1 ? "s" : ""} were removed`
+						`\n ${removedAttachments.size} attachment${
+							removedAttachments.size > 1 ? "s" : ""
+						} were removed`
 					:	""
 				}`,
 				LogSeverity.ContentEdit,

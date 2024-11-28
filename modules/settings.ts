@@ -1,23 +1,27 @@
+import type {
+	InteractionReplyOptions,
+	RepliableInteraction,
+	Snowflake,
+	UserMention,
+} from "discord.js";
+import type { BasicOption } from "strife.js";
+import type { CamelToKebab } from "../common/misc.js";
+
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ComponentType,
-	User,
 	hyperlink,
+	User,
 	userMention,
-	type InteractionReplyOptions,
-	type RepliableInteraction,
-	type Snowflake,
-	type UserMention,
 } from "discord.js";
-import { client, defineButton, defineChatCommand, type BasicOption } from "strife.js";
+import { client, defineButton, defineChatCommand, disableComponents } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
 import Database from "../common/database.js";
-import { disableComponents } from "../util/discord.js";
 import { censor } from "./automod/misc.js";
 import { getWeeklyXp } from "./xp/util.js";
-import type { CamelToKebab } from "../common/misc.js";
 
 /**
  * ## How to add a setting
@@ -48,11 +52,11 @@ export async function getDefaultSettings(user: {
 		)) ?? !member;
 	return {
 		autoreactions: true,
-		boardPings: process.env.NODE_ENV === "production",
+		boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
 		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
-		levelUpPings: process.env.NODE_ENV === "production",
+		levelUpPings: constants.env === "production",
 		preDango: false,
 		scraddChat: false,
 		scratchEmbeds: true,
@@ -133,7 +137,7 @@ defineChatCommand(
 
 async function settingsCommand(
 	interaction: RepliableInteraction,
-	options: Partial<{ [key in CamelToKebab<keyof typeof SETTINGS>]?: boolean }>,
+	options: Partial<Record<CamelToKebab<keyof typeof SETTINGS>, boolean | undefined>>,
 ): Promise<void> {
 	const newOptions = Object.fromEntries(
 		Object.entries(options).map(([option, value]) => [
@@ -145,7 +149,7 @@ async function settingsCommand(
 }
 export async function updateSettings(
 	user: User,
-	settings: { [key in keyof typeof SETTINGS]?: boolean | "toggle" },
+	settings: Partial<Record<keyof typeof SETTINGS, boolean | "toggle" | undefined>>,
 ): Promise<InteractionReplyOptions> {
 	const old = await getSettings(user);
 	const updated = {
@@ -153,7 +157,7 @@ export async function updateSettings(
 		...Object.fromEntries(
 			Object.keys(SETTINGS).map((setting) => {
 				const value = settings[setting];
-				return [setting, value === "toggle" ? !old[setting] : value ?? old[setting]];
+				return [setting, value === "toggle" ? !old[setting] : (value ?? old[setting])];
 			}),
 		),
 	};
@@ -208,7 +212,9 @@ defineButton("toggleSetting", async (interaction, data) => {
 	if (interaction.user.id !== id) {
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} You don’t have permission to update other people’s settings!`,
+			content: `${
+				constants.emojis.statuses.no
+			} You don’t have permission to update other people’s settings!`,
 		});
 	}
 	await interaction.reply(await updateSettings(interaction.user, { [setting]: "toggle" }));
@@ -263,6 +269,6 @@ export async function mentionUser(
 	}/users/${id}>`;
 
 	const { displayName } =
-		user instanceof User ? user : (await client.users.fetch(user).catch(() => void 0)) ?? {};
+		user instanceof User ? user : ((await client.users.fetch(user).catch(() => void 0)) ?? {});
 	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
 }

@@ -1,8 +1,10 @@
 import type { Snowflake } from "discord.js";
+
+import constants from "../../common/constants.js";
 import Database from "../../common/database.js";
 
-export const BOARD_EMOJI = process.env.NODE_ENV === "production" ? "🥔" : "⭐",
-	REACTIONS_NAME = process.env.NODE_ENV === "production" ? "Potatoes" : "Stars";
+export const BOARD_EMOJI = constants.env === "production" ? "🥔" : "⭐",
+	REACTIONS_NAME = constants.env === "production" ? "Potatoes" : "Stars";
 
 export const boardDatabase = new Database<{
 	/** The number of reactions this message has. */

@@ -1,26 +1,30 @@
+import type {
+	ActionRowData,
+	APIInteractionGuildMember,
+	ButtonInteraction,
+	InteractionButtonComponentData,
+	InteractionResponse,
+	Message,
+	RepliableInteraction,
+	User,
+} from "discord.js";
+
 import {
 	Base,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
+	formatEmoji,
 	GuildMember,
 	ThreadAutoArchiveDuration,
-	formatEmoji,
-	type APIInteractionGuildMember,
-	type ActionRowData,
-	type ButtonInteraction,
-	type InteractionButtonComponentData,
-	type InteractionResponse,
-	type Message,
-	type RepliableInteraction,
-	type User,
 } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
-import { ignoredDeletions } from "../logging/messages.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
 import constantEmojis from "../../common/emojis.js";
+import { ignoredDeletions } from "../logging/messages.js";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 
 const EMPTY_TILE = "⬛";
 
@@ -55,7 +59,9 @@ export default async function memoryMatch(
 	if (await checkIfUserPlaying(interaction)) return;
 	if (CURRENTLY_PLAYING.get(interaction.user.id)) {
 		await interaction.reply({
-			content: `${constants.emojis.statuses.no} ${interaction.user.toString()} already has an ongoing game!`,
+			content: `${
+				constants.emojis.statuses.no
+			} ${interaction.user.toString()} already has an ongoing game!`,
 			ephemeral: true,
 		});
 		return;
@@ -438,7 +444,9 @@ export function showMemoryInstructions(
 		content:
 			"## Memory Match Instructions\n" +
 			"### The objective is to find matching emoji pairs by clicking on tiles and remembering which emoji is where.\n" +
-			`The first player is determined randomly. Since they get an advantage by going first, the second player gets the middle tile as a bonus point. The two players are assigned colors (${constants.emojis.misc.blue} ${constants.emojis.misc.green}), which are shown above the board.\n` +
+			`The first player is determined randomly. Since they get an advantage by going first, the second player gets the middle tile as a bonus point. The two players are assigned colors (${
+				constants.emojis.misc.blue
+			} ${constants.emojis.misc.green}), which are shown above the board.\n` +
 			"Take turns flipping two tiles at a time by clicking them. Both players will be able to see the flipped emojis. *💡 Protip: unless you’re sure of a match, click tiles you haven’t seen before to expand your knowledge of the board.*\n" +
 			"If you find matching emojis, those two tiles will not be flipped back over, but change to your color instead. You will also receive two points and a bonus turn (unless bonus turns are disabled via `bonus-turns`).\n" +
 			`If the two flipped tiles do not match, it will be the other player’s turn. The tiles will be flipped back over once the other player starts their turn or after ${

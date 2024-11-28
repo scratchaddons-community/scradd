@@ -1,11 +1,12 @@
-import { AuditLogEvent, ButtonStyle, ComponentType, channelLink } from "discord.js";
+import { AuditLogEvent, ButtonStyle, channelLink, ComponentType } from "discord.js";
 import Mustache from "mustache";
 import { client, defineEvent } from "strife.js";
+
 import config from "../common/config.js";
 import constants from "../common/constants.js";
+import features from "../common/features.js";
 import { bans, joins, leaves } from "../common/strings.js";
 import { nth } from "../util/numbers.js";
-import features from "../common/features.js";
 import { ignoredDeletions } from "./logging/messages.js";
 
 const directoryUrl =
@@ -28,28 +29,50 @@ defineEvent("guildMemberAdd", async (member) => {
 								name: "**What is Scratch Addons?**",
 								value:
 									"Scratch Addons is the *all-in-one browser extension for Scratch*." +
-									` Scratch Addons combines new and existing features and themes for [the Scratch website and project editor](${constants.domains.scratch}) into one __easy-to-access and configurable__ browser extension.` +
-									` For more information about us, **visit [ScratchAddons.com](${constants.domains.scratchAddons})**.` +
-									` If you have any questions about or issues with Scratch Addons, please ask in ${config.channels.support?.toString() ?? "our support channel"}!`,
+									` Scratch Addons combines new and existing features and themes for [the Scratch website and project editor](${
+										constants.domains.scratch
+									}) into one __easy-to-access and configurable__ browser extension.` +
+									` For more information about us, **visit [ScratchAddons.com](${
+										constants.domains.scratchAddons
+									})**.` +
+									` If you have any questions about or issues with Scratch Addons, please ask in ${
+										config.channels.support?.toString() ?? "our support channel"
+									}!`,
 							},
 							{
 								name: "**What is this server?**",
 								value:
-									`In addition to being **[Scratch Addons](${constants.domains.scratchAddons})’s support server**, we are also *the largest Scratch server*!` +
-									` Check out some of our most memorable moments${config.channels.board ? ` on the ${config.channels.board.toString()}` : ""} and introduce yourself${config.channels.intros ? ` in ${config.channels.intros.toString()}` : ""}.` +
+									`In addition to being **[Scratch Addons](${
+										constants.domains.scratchAddons
+									})’s support server**, we are also *the largest Scratch server*!` +
+									` Check out some of our most memorable moments${
+										config.channels.board ?
+											` on the ${config.channels.board.toString()}`
+										:	""
+									} and introduce yourself${
+										config.channels.intros ?
+											` in ${config.channels.intros.toString()}`
+										:	""
+									}.` +
 									(directoryUrl &&
-										` You can also check out our [server directory](<${directoryUrl}>) for other large Scratch servers to chat in, including non-English servers.`),
+										` You can also check out our [server directory](<${
+											directoryUrl
+										}>) for other large Scratch servers to chat in, including non-English servers.`),
 							},
 							{
 								name: "**We are not the Scratch Team.**",
 								value:
 									"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
-									` If you wish to contact the Scratch Team, please use [Contact Us](<${constants.domains.scratch}/contact-us>).` +
+									` If you wish to contact the Scratch Team, please use [Contact Us](<${
+										constants.domains.scratch
+									}/contact-us>).` +
 									" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
 							},
 						],
 						footer: {
-							icon_url: `https://raw.githubusercontent.com/${constants.repos.scratchAddons}/master/images/icon.png`,
+							icon_url: `https://raw.githubusercontent.com/${
+								constants.repos.scratchAddons
+							}/master/images/icon.png`,
 							text: "~ the Scratch Addons team",
 						},
 						image: { url: `${constants.domains.scradd}/images/join-dm-1.png` },
@@ -64,27 +87,43 @@ defineEvent("guildMemberAdd", async (member) => {
 								name: "**What is this server?**",
 								value:
 									`This is *the largest [Scratch](${constants.domains.scratch}) server*!` +
-									` Check out some of our funniest and most memorable moments${config.channels.board ? ` on the ${config.channels.board.toString()}` : ""} and introduce yourself${config.channels.intros ? ` in ${config.channels.intros.toString()}` : ""}.` +
+									` Check out some of our funniest and most memorable moments${
+										config.channels.board ?
+											` on the ${config.channels.board.toString()}`
+										:	""
+									} and introduce yourself${
+										config.channels.intros ?
+											` in ${config.channels.intros.toString()}`
+										:	""
+									}.` +
 									(directoryUrl &&
-										` You can also check out our [server directory](<${directoryUrl}>) for other large Scratch servers to chat in.`),
+										` You can also check out our [server directory](<${
+											directoryUrl
+										}>) for other large Scratch servers to chat in.`),
 							},
 							{
 								name: "**What is Scratch Addons?**",
 								value:
 									"This server focuses specifically on *the Scratch Addons browser extension*, the all-in-one browser extension for Scratch." +
 									" Scratch Addons combines new and existing features and themes for the Scratch website and project editor into one __easy-to-access and configurable__ browser extension." +
-									` For more information about us, **visit [ScratchAddons.com](${constants.domains.scratchAddons})**.`,
+									` For more information about us, **visit [ScratchAddons.com](${
+										constants.domains.scratchAddons
+									})**.`,
 							},
 							{
 								name: "**We are not the Scratch Team.**",
 								value:
 									"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
-									` If you wish to contact the ST, please use [Contact Us](<${constants.domains.scratch}/contact-us>).` +
+									` If you wish to contact the ST, please use [Contact Us](<${
+										constants.domains.scratch
+									}/contact-us>).` +
 									" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
 							},
 						],
 						footer: {
-							icon_url: `https://raw.githubusercontent.com/${constants.repos.scratchAddons}/master/images/icon.png`,
+							icon_url: `https://raw.githubusercontent.com/${
+								constants.repos.scratchAddons
+							}/master/images/icon.png`,
 							text: "~ the Scratch Addons team",
 						},
 						image: { url: `${constants.domains.scradd}/images/join-dm-1.png` },
@@ -207,7 +246,9 @@ if (config.channels.intros) {
 			{
 				title: "Introduction Template",
 				color: constants.themeColor,
-				description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${constants.domains.scratch}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
+				description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${
+					constants.domains.scratch
+				}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
 			},
 		],
 	};

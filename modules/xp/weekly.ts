@@ -1,17 +1,14 @@
-import {
-	TimestampStyles,
-	time,
-	userMention,
-	type MessageCreateOptions,
-	type Snowflake,
-} from "discord.js";
+import type { MessageCreateOptions, Snowflake } from "discord.js";
+
+import { time, TimestampStyles, userMention } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { SpecialReminder, remindersDatabase } from "../reminders/misc.js";
+import { remindersDatabase, SpecialReminder } from "../reminders/misc.js";
 import { recheckMemberRole } from "../roles/custom.js";
-import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.js";
+import { getFullWeeklyData, recentXpDatabase } from "./util.js";
 
 export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 	const weeklyWinners = getFullWeeklyData();
@@ -61,7 +58,10 @@ export async function getChatters(): Promise<MessageCreateOptions | undefined> {
 }
 
 export default async function getWeekly(date: Date): Promise<string> {
-	const title = `## 🏆 Weekly Winners week of ${date.toLocaleString([], { month: "long", day: "numeric" })}`;
+	const title = `## 🏆 Weekly Winners week of ${date.toLocaleString([], {
+		month: "long",
+		day: "numeric",
+	})}`;
 	const weeklyWinners = getFullWeeklyData();
 
 	// Remove Active role from inactive members
@@ -142,6 +142,9 @@ export default async function getWeekly(date: Date): Promise<string> {
 		})
 		.join("\n");
 	const stats = `*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*`;
-	const nextWeek = `### Next week’s weekly winners will be posted ${time(date, TimestampStyles.RelativeTime)}.`;
+	const nextWeek = `### Next week’s weekly winners will be posted ${time(
+		date,
+		TimestampStyles.RelativeTime,
+	)}.`;
 	return `${title}\n${winners || "*Nobody got any XP this week!*"}\n\n${stats}\n${nextWeek}`;
 }

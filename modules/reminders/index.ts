@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { defineButton, defineSelect, defineSubcommands } from "strife.js";
+import { defineButton, defineSelect, defineSubcommands, disableComponents } from "strife.js";
+
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import { cancelReminder, createReminder, listReminders } from "./management.js";
 
 defineSubcommands(
@@ -73,7 +73,9 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 			content: `~~${interaction.message.content}~~\n${
 				constants.emojis.statuses.no
 			} Reminder canceled${
-				interaction.user.id === interaction.message.interaction?.user.id ? "" : " by a mod"
+				interaction.user.id === interaction.message.interactionMetadata?.user.id ?
+					""
+				:	" by a mod"
 			}.`,
 			components: disableComponents(interaction.message.components),
 		});

@@ -1,20 +1,24 @@
+import type {
+	ApplicationCommand,
+	ChatInputCommandInteraction,
+	InteractionResponse,
+	ModalSubmitInteraction,
+	PartialGuildMember,
+	Role,
+	Snowflake,
+} from "discord.js";
+
 import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
 	PermissionsBitField,
 	TextInputStyle,
-	type ApplicationCommand,
-	type ChatInputCommandInteraction,
-	type InteractionResponse,
-	type ModalSubmitInteraction,
-	type PartialGuildMember,
-	type Role,
-	type Snowflake,
 } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents } from "../../util/discord.js";
 import { asyncFilter } from "../../util/promises.js";
 import tryCensor from "../automod/misc.js";
 import hasPermission from "../execute/permissions.js";
@@ -152,7 +156,9 @@ export async function createCustomRole(
 
 				await existingRole.delete(`Deleted by ${interaction.user.tag}`);
 				await buttonInteraction.reply(
-					`${constants.emojis.statuses.yes} Deleted your role ${existingRole.name} (${existingRole.hexColor})!`,
+					`${constants.emojis.statuses.yes} Deleted your role ${
+						existingRole.name
+					} (${existingRole.hexColor})!`,
 				);
 			})
 			.on("end", async () => {
@@ -202,7 +208,9 @@ export async function createCustomRole(
 	if (!iconData)
 		return await interaction.reply({
 			ephemeral: true,
-			content: `${constants.emojis.statuses.no} Could not resolve that icon! Make sure the link is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
+			content: `${
+				constants.emojis.statuses.no
+			} Could not resolve that icon! Make sure the link is a valid JPG, PNG, WEBP or GIF file under 256KB.`,
 		});
 
 	if (existingRole) {

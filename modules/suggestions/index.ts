@@ -1,13 +1,17 @@
+import type { Snowflake } from "discord.js";
+
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageType } from "discord.js";
 import {
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
-	MessageType,
-	type Snowflake,
-} from "discord.js";
-import { client, defineButton, defineChatCommand, defineEvent, defineMenuCommand } from "strife.js";
+	client,
+	defineButton,
+	defineChatCommand,
+	defineEvent,
+	defineMenuCommand,
+	stripMarkdown,
+} from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { stripMarkdown } from "../../util/markdown.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import answerSuggestion from "./answer.js";
@@ -17,12 +21,10 @@ import top from "./top.js";
 import updateReactions, { addToDatabase, updateSuggestion } from "./update.js";
 
 defineEvent("threadCreate", addToDatabase);
-defineEvent("messageReactionAdd", async (partialReaction, partialUser) => {
+defineEvent("messageReactionAdd", async (partialReaction, { id: user }, { burst }) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 
-	if (!(await updateReactions(reaction)))
-		await message.reactions.resolve(reaction).users.remove(partialUser.id);
+	if (burst || !(await updateReactions(reaction))) await reaction.users.remove(user);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	await updateReactions(

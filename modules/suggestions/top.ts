@@ -1,17 +1,10 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	channelLink,
-	hyperlink,
-	type InteractionReplyOptions,
-	type RepliableInteraction,
-	type User,
-} from "discord.js";
+import type { InteractionReplyOptions, RepliableInteraction, User } from "discord.js";
+
+import { ButtonStyle, channelLink, ComponentType, GuildMember, hyperlink } from "discord.js";
+import { formatAnyEmoji, paginate } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { paginate } from "../../util/discord.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
 import { mentionUser } from "../settings.js";
 import { oldSuggestions, suggestionsDatabase } from "./misc.js";
 
@@ -19,7 +12,7 @@ export default async function top(
 	interaction?: RepliableInteraction,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
 ): Promise<InteractionReplyOptions | undefined> {
-	await interaction?.deferReply();
+	const message = await interaction?.deferReply({ fetchReply: true });
 
 	const { suggestions } = config.channels;
 	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
@@ -48,24 +41,30 @@ export default async function top(
 				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
 			)}${options.user ? "" : ` by ${await mentionUser(author, interaction?.user)}`}`,
-		(data) => interaction?.editReply(data),
+		(data) => message?.edit(data),
 		{
 			title: `Top suggestions${displayName ? ` by ${displayName}` : ""}${
 				options.answer && options.user ? " and" : ""
 			}${options.answer ? ` answered with ${options.answer}` : ""}`,
-			format: options.user,
 			singular: "suggestion",
+
 			user: interaction?.user ?? false,
-			pageLength: interaction ? 15 : 25,
 			rawOffset: (options.page ?? 0) * (interaction ? 15 : 25),
 			highlightOffset: false,
+			pageLength: interaction ? 15 : 25,
+
+			timeout: constants.collectorTime,
+			format: options.user,
+
 			generateComponents() {
 				return [
 					{
 						type: ComponentType.Button,
 						style: ButtonStyle.Link,
 						label: "Suggestions Site",
-						url: `${constants.domains.scradd}/suggestions${options.all === undefined ? "" : `?all=${options.all.toString()}`}`,
+						url: `${constants.domains.scradd}/suggestions${
+							options.all === undefined ? "" : `?all=${options.all.toString()}`
+						}`,
 					},
 				];
 			},

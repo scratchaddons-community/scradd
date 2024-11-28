@@ -1,10 +1,11 @@
-import { client } from "strife.js";
+import type { CustomOperation } from "../util.js";
+
+import { client, getBaseChannel } from "strife.js";
+
 import config from "../../../common/config.js";
 import constants from "../../../common/constants.js";
-import { getBaseChannel } from "../../../util/discord.js";
 import { asyncFilter } from "../../../util/promises.js";
 import { Invite } from "../../roles/index.js";
-import type { CustomOperation } from "../util.js";
 
 const data: CustomOperation = {
 	name: "invite",
@@ -44,9 +45,9 @@ const data: CustomOperation = {
 			await interaction.reply({
 				content: `${
 					constants.emojis.statuses.no
-				} You already have a personal invite created! ${existing.value.toString()}\nYou have invited **${uses} ${
-					uses === 1 ? "person" : "people"
-				}** to this server so far.`,
+				} You already have a personal invite created! ${existing.value.toString()}\nYou have invited **${
+					uses
+				} ${uses === 1 ? "person" : "people"}** to this server so far.`,
 				ephemeral: true,
 			});
 			return;

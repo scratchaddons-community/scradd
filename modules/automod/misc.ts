@@ -1,6 +1,9 @@
-import { ChannelType, type TextBasedChannel } from "discord.js";
+import type { TextBasedChannel } from "discord.js";
+
+import { ChannelType } from "discord.js";
+import { getBaseChannel } from "strife.js";
+
 import config from "../../common/config.js";
-import { getBaseChannel } from "../../util/discord.js";
 import { caesar, normalize } from "../../util/text.js";
 import { PARTIAL_STRIKE_COUNT } from "../punishments/misc.js";
 import badWords from "./bad-words.js";
@@ -103,8 +106,9 @@ export function badWordsAllowed(channel?: TextBasedChannel | null): boolean {
 	const baseChannel = getBaseChannel(channel);
 
 	return (
-		baseChannel?.type === ChannelType.DM ||
-		baseChannel?.guild.id !== config.guild.id ||
+		!baseChannel ||
+		baseChannel.isDMBased() ||
+		baseChannel.guild.id !== config.guild.id ||
 		baseChannel.id === config.channels.devs?.id ||
 		baseChannel.parent?.id === config.channels.mod.parent?.id ||
 		(channel?.type === ChannelType.PrivateThread &&

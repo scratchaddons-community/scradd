@@ -1,13 +1,17 @@
-import { unifiedDiff } from "difflib";
 import type { AuditLogEvent } from "discord.js";
-import { formatAnyEmoji } from "../../util/markdown.js";
-import log, { LogSeverity, LoggingEmojis, extraAuditLogsInfo, type AuditLog } from "./misc.js";
+import type { AuditLog } from "./util.js";
+
+import { unifiedDiff } from "difflib";
+import { formatAnyEmoji } from "strife.js";
+
+import log from "./misc.js";
+import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.js";
 
 export async function emojiCreate(entry: AuditLog<AuditLogEvent.EmojiCreate>): Promise<void> {
 	await log(
-		`${LoggingEmojis.Expression} ${formatAnyEmoji(entry.target)} created${extraAuditLogsInfo(
-			entry,
-		)}`,
+		`${LoggingEmojis.Expression} ${
+			formatAnyEmoji(entry.target) ?? ":emoji:"
+		} created${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }
@@ -15,12 +19,12 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): P
 	for (const change of entry.changes) {
 		if (change.key !== "name") return;
 		await log(
-			`${LoggingEmojis.Expression} ${formatAnyEmoji(entry.target)} ${
+			`${LoggingEmojis.Expression} ${formatAnyEmoji(entry.target) ?? ":emoji:"} ${
 				change.old ? `(:${change.old}\\:) ` : ``
 			}renamed to :${
 				typeof change.new === "string" ?
 					change.new
-				:	("name" in entry.target && entry.target.name) || "emoji"
+				:	(entry.target && "name" in entry.target && entry.target.name) || "emoji"
 			}\\:${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ImportantUpdate,
 		);
@@ -28,16 +32,16 @@ export async function emojiUpdate(entry: AuditLog<AuditLogEvent.EmojiUpdate>): P
 }
 export async function emojiDelete(entry: AuditLog<AuditLogEvent.EmojiDelete>): Promise<void> {
 	const oldName =
-		"name" in entry.target ?
+		entry.target && "name" in entry.target ?
 			entry.target.name
 		:	entry.changes.find(
 				(change): change is { key: "name"; old: string } =>
 					change.key === "name" && typeof change.old === "string",
 			)?.old;
 	await log(
-		`${LoggingEmojis.Expression} :${oldName ?? "emoji"}\\: (ID: ${
-			entry.target.id
-		}) deleted${extraAuditLogsInfo(entry)}`,
+		`${LoggingEmojis.Expression} :${oldName ?? "emoji"}\\: ${
+			entry.target ? `(ID: ${entry.target.id}) ` : ""
+		}deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
 	);
 }

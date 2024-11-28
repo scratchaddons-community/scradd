@@ -1,19 +1,23 @@
+import type {
+	APIEmbed,
+	BaseMessageOptions,
+	GuildMember,
+	InteractionReplyOptions,
+	InteractionResponse,
+	RepliableInteraction,
+	User,
+} from "discord.js";
+
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
 	ComponentType,
-	type APIEmbed,
-	type BaseMessageOptions,
-	type GuildMember,
-	type InteractionReplyOptions,
-	type InteractionResponse,
-	type RepliableInteraction,
-	type User,
 } from "discord.js";
-import { client, defineChatCommand, defineMenuCommand } from "strife.js";
+import { client, defineChatCommand, defineMenuCommand, disableComponents } from "strife.js";
+
 import constants from "../common/constants.js";
-import { disableComponents, messageToEmbed } from "../util/discord.js";
+import { messageToEmbed } from "../util/discord.js";
 
 const MAX_FETCH_COUNT = 100;
 
@@ -53,7 +57,9 @@ async function purge(
 			return {
 				content: `${
 					constants.emojis.statuses.no
-				} No messages matched those filters! Note: I cannot detect messages more than ${MAX_FETCH_COUNT} messages ${
+				} No messages matched those filters! Note: I cannot detect messages more than ${
+					MAX_FETCH_COUNT
+				} messages ${
 					before && channel ?
 						`before [this message](<${channel.url}/${before}>). Try searching from an older message.`
 					:	"ago. Use the `message` option to search backwards from a certain point."

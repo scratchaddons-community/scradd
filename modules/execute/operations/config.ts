@@ -1,17 +1,19 @@
+import type { APIEmbed, ButtonInteraction, Snowflake } from "discord.js";
+import type { CustomOperation } from "../util.js";
+
 import {
 	ApplicationCommandOptionType,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	GuildMember,
-	type APIEmbed,
-	type ButtonInteraction,
 } from "discord.js";
+
 import config, { syncConfig } from "../../../common/config.js";
 import constants from "../../../common/constants.js";
 import autoreactions, { dadEasterEggCount } from "../../autos/autos-data.js";
-import log, { LogSeverity, LoggingEmojis } from "../../logging/misc.js";
-import type { CustomOperation } from "../util.js";
+import log from "../../logging/misc.js";
+import { LoggingEmojis, LogSeverity } from "../../logging/util.js";
 
 const data: CustomOperation = {
 	name: "config",
@@ -60,7 +62,9 @@ const data: CustomOperation = {
 			}
 			case "static": {
 				await interaction.reply({
-					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${autoreactions.length}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
+					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${
+						autoreactions.length
+					}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
 					embeds: [
 						{
 							title: "Emojis",

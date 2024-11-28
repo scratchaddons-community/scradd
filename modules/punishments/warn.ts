@@ -1,20 +1,21 @@
+import type { ButtonInteraction, InteractionResponse } from "discord.js";
+
 import {
 	ButtonStyle,
 	ComponentType,
 	GuildMember,
+	time,
 	TimestampStyles,
 	User,
-	time,
 	userMention,
-	type ButtonInteraction,
-	type InteractionResponse,
 } from "discord.js";
-import { client } from "strife.js";
+import { client, escapeAllMarkdown, footerSeperator } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { convertBase } from "../../util/numbers.js";
-import log, { LogSeverity, LoggingEmojis, LoggingErrorEmoji } from "../logging/misc.js";
+import log from "../logging/misc.js";
+import { LoggingEmojis, LoggingEmojisError, LogSeverity } from "../logging/util.js";
 import giveXp from "../xp/give-xp.js";
 import {
 	DEFAULT_STRIKES,
@@ -81,7 +82,7 @@ export default async function warn(
 						strikes > 0.5 ?
 							`warned${displayStrikes > 1 ? ` ${displayStrikes} times` : ""}`
 						:	"verbally warned"
-					} in ${escapeMessage(config.guild.name)}!`,
+					} in ${escapeAllMarkdown(config.guild.name)}!`,
 
 					description: reason + (context && `\n>>> ${context}`),
 					color: member?.displayColor,
@@ -91,8 +92,8 @@ export default async function warn(
 
 						text: `Strike ${id}${
 							displayStrikes ?
-								`${constants.footerSeperator}Expiring in 21 ${
-									process.env.NODE_ENV === "production" ? "day" : "minute"
+								`${footerSeperator}Expiring in 21 ${
+									constants.env === "production" ? "day" : "minute"
 								}s`
 							:	""
 						}`,
@@ -135,11 +136,11 @@ export default async function warn(
 			member?.bannable &&
 			!member.roles.premiumSubscriberRole &&
 			!member.roles.resolve(config.roles.staff.id) &&
-			(process.env.NODE_ENV === "production" || member.roles.highest.name === "@everyone")
+			(constants.env === "production" || member.roles.highest.name === "@everyone")
 		) ?
 			member.ban({ reason: "Too many strikes" })
 		:	log(
-				`${LoggingErrorEmoji} Unable to ban ${user.toString()} (Too many strikes)`,
+				`${LoggingEmojisError} Unable to ban ${user.toString()} (Too many strikes)`,
 				LogSeverity.Alert,
 				{ pingHere: true },
 			));
@@ -157,13 +158,13 @@ export default async function warn(
 	if (addedMuteLength) {
 		await (member?.moderatable ?
 			member.disableCommunicationUntil(
-				addedMuteLength * (process.env.NODE_ENV === "production" ? 3_600_000 : 60_000) +
+				addedMuteLength * (constants.env === "production" ? 3_600_000 : 60_000) +
 					Date.now(),
 				"Too many strikes",
 			)
 		:	log(
-				`${LoggingErrorEmoji} Unable to mute ${user.toString()} for ${addedMuteLength} ${
-					process.env.NODE_ENV === "production" ? "hour" : "minute"
+				`${LoggingEmojisError} Unable to mute ${user.toString()} for ${addedMuteLength} ${
+					constants.env === "production" ? "hour" : "minute"
 				}${addedMuteLength === 1 ? "" : "s"}`,
 				LogSeverity.Alert,
 				{ pingHere: true },

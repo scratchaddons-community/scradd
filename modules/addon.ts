@@ -1,16 +1,12 @@
+import type { AutocompleteInteraction } from "discord.js";
+
 import addons from "@sa-community/addons-data" with { type: "json" };
 import scratchAddons from "@sa-community/addons-data/manifest.json" with { type: "json" };
-import {
-	ApplicationCommandOptionType,
-	ButtonStyle,
-	ComponentType,
-	hyperlink,
-	type AutocompleteInteraction,
-} from "discord.js";
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } from "discord.js";
 import { matchSorter } from "match-sorter";
-import { defineChatCommand } from "strife.js";
+import { defineChatCommand, escapeAllMarkdown } from "strife.js";
+
 import constants from "../common/constants.js";
-import { escapeMessage } from "../util/markdown.js";
 import { joinWithAnd } from "../util/text.js";
 
 defineChatCommand(
@@ -93,7 +89,7 @@ defineChatCommand(
 			embeds: [
 				{
 					description:
-						`${escapeMessage(addon.description)}\n` +
+						`${escapeAllMarkdown(addon.description)}\n` +
 						(addon.permissions?.length ?
 							"\n\n**⚠️ This addon may require additional permissions to be granted in order to function.**"
 						:	""),
@@ -102,7 +98,7 @@ defineChatCommand(
 						...(credits.length ?
 							[{ inline: true, name: "🫂 Contributors", value: credits }]
 						:	[]),
-						{ inline: true, name: "📦 Group", value: escapeMessage(group) },
+						{ inline: true, name: "📦 Group", value: escapeAllMarkdown(group) },
 						{ inline: true, name: "📝 Version added", value: updateInfo },
 					],
 
@@ -110,7 +106,9 @@ defineChatCommand(
 					footer: { text: addonId },
 					thumbnail: { url: `${constants.urls.addonImages}/${addonId}.png` },
 					title: addon.name,
-					url: `https://github.com/${constants.repos.scratchAddons}/tree/v${scratchAddons.version}/addons/${addonId}/`,
+					url: `https://github.com/${
+						constants.repos.scratchAddons
+					}/tree/v${scratchAddons.version}/addons/${addonId}/`,
 				},
 			],
 

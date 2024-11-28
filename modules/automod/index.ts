@@ -1,3 +1,5 @@
+import type { CommandInteractionOption } from "discord.js";
+
 import {
 	ActivityType,
 	ApplicationCommandOptionType,
@@ -6,12 +8,11 @@ import {
 	MessageMentions,
 	MessageType,
 	underline,
-	type CommandInteractionOption,
 } from "discord.js";
-import { commands, defineChatCommand, defineEvent } from "strife.js";
+import { commands, defineChatCommand, defineEvent, escapeAllMarkdown } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { escapeMessage } from "../../util/markdown.js";
 import { joinWithAnd } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import warn from "../punishments/warn.js";
@@ -196,7 +197,7 @@ defineChatCommand(
 					`That text gives **${strikes} strike${strikes === 1 ? "" : "s"}**.\n\n`
 				:	"") +
 				`*I detected the following words as bad*: ${joinWithAnd(words, (word) =>
-					underline(escapeMessage(word)),
+					underline(escapeAllMarkdown(word)),
 				)}`,
 		});
 	},

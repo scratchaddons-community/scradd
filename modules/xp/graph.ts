@@ -1,13 +1,16 @@
-import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
-import { Chart } from "chart.js/auto";
+import type { SKRSContext2D } from "@napi-rs/canvas";
 import type { AnySelectMenuInteraction } from "discord.js";
+
+import { createCanvas } from "@napi-rs/canvas";
+import { Chart } from "chart.js/auto";
+
 import { recentXpDatabase } from "./util.js";
 
 export default async function graph(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (!interaction.isUserSelectMenu())
 		throw new TypeError("weeklyXpGraph is not a UserSelectMenu!");
 
-	if (interaction.user.id !== interaction.message.interaction?.user.id) return;
+	if (interaction.user.id !== interaction.message.interactionMetadata?.user.id) return;
 
 	const recentXp = recentXpDatabase.data.toSorted((one, two) => one.time - two.time);
 	const maxDate = (recentXp[0]?.time ?? 0) + 604_800_000;

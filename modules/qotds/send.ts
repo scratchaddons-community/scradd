@@ -1,8 +1,11 @@
-import type { ForumChannel, MediaChannel } from "discord.js";
+import type { ForumChannel, ForumThreadChannel, MediaChannel } from "discord.js";
+
 import mongoose from "mongoose";
-import constants from "../../common/constants.js";
-import { reactAll } from "../../util/discord.js";
-import log, { LogSeverity, LoggingErrorEmoji } from "../logging/misc.js";
+import { reactAll, zeroWidthSpace } from "strife.js";
+
+import log from "../logging/misc.js";
+import { LoggingEmojisError, LogSeverity } from "../logging/util.js";
+
 export const Question = mongoose.model(
 	"question",
 	new mongoose.Schema({
@@ -14,24 +17,26 @@ export const Question = mongoose.model(
 );
 export const questions = await Question.find();
 
-export default async function sendQuestion(channel: ForumChannel | MediaChannel): Promise<void> {
+export default async function sendQuestion(
+	channel: ForumChannel | MediaChannel,
+): Promise<ForumThreadChannel | undefined> {
 	const random = Math.floor(Math.random() * questions.length);
 	const question = questions[random];
 	if (!question) {
 		await log(
-			`${LoggingErrorEmoji} Could not find a QOTD for today! Please add new ones now.`,
+			`${LoggingEmojisError} Could not find a QOTD for today! Please add new ones now.`,
 			LogSeverity.Alert,
 		);
 		return;
 	}
 	if (questions.length === 1) {
 		await log(
-			`${LoggingErrorEmoji} No QOTDs remain! Please add new ones now.`,
+			`${LoggingEmojisError} No QOTDs remain! Please add new ones now.`,
 			LogSeverity.Alert,
 		);
 	} else if (questions.length < 5) {
 		await log(
-			`${LoggingErrorEmoji} ${questions.length - 1} QOTD${
+			`${LoggingEmojisError} ${questions.length - 1} QOTD${
 				questions.length === 2 ? " remains" : "s remain"
 			}! Please add new ones before they run out.`,
 			LogSeverity.Alert,
@@ -43,7 +48,7 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 			month: "short",
 			day: "numeric",
 		})})`,
-		message: { content: question.description || constants.zws },
+		message: { content: question.description || zeroWidthSpace },
 		reason: "For today’s QOTD",
 	});
 
@@ -52,4 +57,5 @@ export default async function sendQuestion(channel: ForumChannel | MediaChannel)
 
 	await question.deleteOne();
 	questions.splice(random, 1);
+	return post;
 }

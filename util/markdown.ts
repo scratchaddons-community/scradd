@@ -1,60 +1,13 @@
 import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
+
 import SimpleMarkdown from "@khanacademy/simple-markdown";
 import { toCodePoints } from "@twemoji/parser";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
-import {
-	Faces,
-	FormattingPatterns,
-	MessageMentions,
-	escapeMarkdown,
-	formatEmoji,
-	type Snowflake,
-} from "discord.js";
+import { Faces, FormattingPatterns, MessageMentions } from "discord.js";
 import { client } from "strife.js";
+
 import config from "../common/config.js";
-
-export function escapeMessage(text: string): string {
-	return escapeMarkdown(text, {
-		heading: true,
-		bulletedList: true,
-		numberedList: true,
-		maskedLink: true,
-	});
-}
-
-export function stripMarkdown(text: string): string {
-	return text.replaceAll(
-		/(?<!\\)\\|```\S*\s+(.+?)\s*```|(?<!\\)\*\*(.+?)(?<!\\)\*\*|(?<!\\)__(.+?)(?<!\\)__|(?<!\\\*?)\*(.+?)(?<!\\|\*)\*|(?<!\\_?)_(.+?)(?<!\\|_)_|~~(.+?)(?<!\\)~~|`(.+?)(?<!\\|`)`|^> (.+?)/gms,
-		"$1$2$3$4$5$6$7$8",
-	);
-}
-
-export function formatAnyEmoji(
-	options:
-		| string
-		| { animated?: boolean | null; id: Snowflake; name?: string | null }
-		| { animated?: boolean | null; id?: Snowflake | null; name: string },
-): string;
-export function formatAnyEmoji(
-	options?:
-		| string
-		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
-		| null,
-): string | undefined;
-export function formatAnyEmoji(
-	options?:
-		| string
-		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
-		| null,
-): string | undefined {
-	if (typeof options === "string") return options;
-	if (typeof options?.id !== "string") return options?.name ?? undefined;
-	return formatEmoji({
-		id: options.id,
-		animated: options.animated ?? false,
-		name: options.name ?? undefined,
-	});
-}
+import { formatDuration } from "./numbers.js";
 
 const DATE_TYPE_FORMATS = {
 	t: { timeStyle: "short" },
@@ -209,13 +162,27 @@ export const rules = {
 		match: (source) => /^<t:(\d+)(?::([DFRTdft]))?>/.exec(source),
 		parse: (capture) => ({ timestamp: capture[1], format: capture[2] }),
 		html(node, output, state) {
-			const date = new Date(+(typeof node.timestamp === "string" && node.timestamp) * 1000);
+			const milliseconds = +(typeof node.timestamp === "string" && node.timestamp) * 1000;
+			if (node.format === "R") {
+				const now = Date.now();
+				const past = now > milliseconds;
+				const duration = formatDuration(past ? now - milliseconds : milliseconds - now);
+				return markdown.htmlTag(
+					"span",
+					output(
+						{ type: "text", content: past ? `${duration} ago` : `in ${duration}` },
+						state,
+					),
+					{ class: "discord-time" },
+				);
+			}
 			const format =
 				typeof node.format === "string" &&
 				Object.keys(DATE_TYPE_FORMATS).includes(node.format) &&
 				node.format;
 			const formatOptions = DATE_TYPE_FORMATS[format || "f"];
 
+			const date = new Date(milliseconds);
 			return markdown.htmlTag(
 				"span",
 				output({ type: "text", content: date.toLocaleString([], formatOptions) }, state),

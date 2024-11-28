@@ -1,24 +1,25 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	Guild,
-	TextInputStyle,
-	inlineCode,
-	type ChatInputCommandInteraction,
-	type GuildMember,
-	type MessageEditOptions,
-	type User,
+import type {
+	BaseMessageOptions,
+	ChatInputCommandInteraction,
+	GuildMember,
+	Message,
+	User,
 } from "discord.js";
+
 import fileSystem from "node:fs/promises";
+
+import { ButtonStyle, ComponentType, Guild, inlineCode, TextInputStyle } from "discord.js";
+import { disableComponents } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, getAllMembers } from "../../util/discord.js";
+import features from "../../common/features.js";
+import { getAllMembers } from "../../util/discord.js";
 import { joinWithAnd } from "../../util/text.js";
 import tryCensor from "../automod/misc.js";
 import warn from "../punishments/warn.js";
-import { CURRENTLY_PLAYING, GAME_COLLECTOR_TIME, checkIfUserPlaying } from "./misc.js";
-import features from "../../common/features.js";
 import { mentionUser } from "../settings.js";
+import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.js";
 
 const MAX_WRONGS = 7,
 	HINT_PENALTY = 2;
@@ -96,7 +97,9 @@ export default async function hangman(
 			if (componentInteraction.customId === "hint") {
 				await componentInteraction.reply({
 					ephemeral: true,
-					content: `This will use ${HINT_PENALTY} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
+					content: `This will use ${
+						HINT_PENALTY
+					} of your incorrect guesses, and will change the embed color to the user’s role color. Are you sure you want to do this?`,
 					components: [
 						{
 							type: ComponentType.ActionRow,
@@ -182,7 +185,9 @@ export default async function hangman(
 			CURRENTLY_PLAYING.delete(interaction.user.id);
 
 			await message.reply({
-				content: `# You ${reason === "win" ? "saved" : "killed"} ${await mentionUser(user, interaction.user)}!\n${
+				content: `# You ${
+					reason === "win" ? "saved" : "killed"
+				} ${await mentionUser(user, interaction.user)}!\n${
 					{
 						idle: String.raw`You didn’t save them in time, so they died \:(`,
 						end: String.raw`You gave up saving them, so they died \:(\nWhat kind of person *are* you?⁉`,
@@ -212,7 +217,7 @@ export default async function hangman(
 	});
 
 	async function tick(
-		reply = (options: MessageEditOptions) => message.edit(options),
+		reply = (options: BaseMessageOptions): Promise<Message> => message.edit(options),
 	): Promise<void> {
 		const word = Array.from(user.username.toUpperCase(), (letter) =>
 			CHARACTERS.includes(letter) && guesses.includes(letter) ? letter : "-",
@@ -335,7 +340,7 @@ async function getMember(player: User): Promise<GuildMember> {
 				member.id !== player.id &&
 				/^[\w.]{5,}$/i.test(member.user.username) &&
 				!tryCensor(member.user.username) &&
-				(process.env.NODE_ENV !== "production" ||
+				(constants.env === "development" ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),
 		)

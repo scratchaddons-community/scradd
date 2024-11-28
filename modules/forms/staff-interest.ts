@@ -1,13 +1,8 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	TextInputStyle,
-	time,
-	type ButtonInteraction,
-	type ModalSubmitInteraction,
-} from "discord.js";
-import { client } from "strife.js";
+import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember, TextInputStyle, time } from "discord.js";
+import { client, zeroWidthSpace } from "strife.js";
+
 import config, { getInitialThreads } from "../../common/config.js";
 import constants from "../../common/constants.js";
 import { getAllMessages } from "../../util/discord.js";
@@ -219,7 +214,9 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 					},
 					{
 						name: "Strikes",
-						value: `${totalStrikeCount} (${recentStrikeCount} in the past 3 weeks; ${semiRecentStrikeCount} in the past 6 weeks)`,
+						value: `${totalStrikeCount} (${
+							recentStrikeCount
+						} in the past 3 weeks; ${semiRecentStrikeCount} in the past 6 weeks)`,
 						inline: true,
 					},
 					{
@@ -232,7 +229,7 @@ export async function submitInterest(interaction: ModalSubmitInteraction): Promi
 						value: `${getWeeklyXp(interaction.user.id).toLocaleString()} XP`,
 						inline: true,
 					},
-					{ name: constants.zws, value: constants.zws, inline: false },
+					{ name: zeroWidthSpace, value: zeroWidthSpace, inline: false },
 					{ name: "Timezone", value: fields.timezone, inline: true },
 					{ name: "Activity", value: fields.activity, inline: true },
 					{ name: "Age", value: fields.age, inline: true },

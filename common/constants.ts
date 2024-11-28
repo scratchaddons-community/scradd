@@ -1,9 +1,16 @@
+import type { Snowflake } from "discord.js";
+
 import addons from "@sa-community/addons-data" with { type: "json" };
+
+const env =
+	process.argv.some((file) => file.endsWith(".test.js")) ? "testing"
+	: process.env.NODE_ENV === "production" ? "production"
+	: "development";
 
 const domains = {
 	npm: "https://npmjs.com/package",
 	scradd:
-		process.env.NODE_ENV === "production" || !process.env.PORT ?
+		env === "production" || !process.env.PORT ?
 			"https://sa-discord.up.railway.app"
 		:	(`http://localhost:${process.env.PORT}` as const),
 	scratch: "https://scratch.mit.edu",
@@ -36,14 +43,18 @@ export default {
 			add: "<:emoji:938441019278635038>",
 			boost: "<:emoji:938441038756986931>",
 			call: "<:emoji:1202779913975894058>",
+			checkmark: "<:emoji:1307192889226559580>",
 			edit: "<:emoji:938441054716297277>",
 			error: "<:emoji:949439327413358602>",
 			fail: "<:emoji:1048464674892558396>",
+			forward: "<:emoji:1307195472573632532>",
 			live: "<:emoji:1202777724519845918>",
 			pin: "<:emoji:1202777778345218048>",
+			poll: "<:emoji:1307193974410182767>",
 			raisedHand: "<:emoji:1202777719461646406>",
 			remove: "<:emoji:947707131879104554>",
 			reply: "<:emoji:1202777780077469708>",
+			sad: "<:emoji:1307190290234478682>",
 			speaker: "<:emoji:1202777720971464704>",
 			stage: "<:emoji:1202777723001380936>",
 			subscription: "<:emoji:1202777717439987722>",
@@ -86,11 +97,10 @@ export default {
 			join: "<:emoji:1041863919708418068>",
 			leave: "<:emoji:1041863867757756477>",
 		},
-	},
+	} satisfies Record<string, Record<string, `<${"a" | ""}:emoji:${Snowflake}>`>>,
 
+	env,
 	fonts: "Sora, SoraExt, sans-serif",
-	footerSeperator: " • ",
-	isTesting: process.argv.some((file) => file.endsWith(".test.js")),
 
 	repos: {
 		scradd: "scratchaddons-community/scradd",
@@ -98,7 +108,7 @@ export default {
 	},
 
 	scratchColor: 0x88_5c_d4,
-	themeColor: process.env.NODE_ENV === "production" ? 0xff_7b_26 : 0x17_5e_f8,
+	themeColor: env === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
 		addonImages: `${domains.scratchAddons}/assets/img/addons`,
@@ -109,11 +119,10 @@ export default {
 	},
 
 	users: {
+		bot: "929928324959055932",
 		robotop: "323630372531470346",
-		scradd: "929928324959055932",
 		weirdo: "691223009515667457",
 	},
 
 	webhookName: "scradd-webhook",
-	zws: "\u200B",
 } as const;

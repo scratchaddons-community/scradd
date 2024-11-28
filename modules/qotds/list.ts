@@ -1,24 +1,25 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	type AnySelectMenuInteraction,
-	type ButtonInteraction,
-	type ChatInputCommandInteraction,
+import type {
+	AnySelectMenuInteraction,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
 } from "discord.js";
+
+import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+import { disableComponents, paginate } from "strife.js";
+
 import config from "../../common/config.js";
 import constants from "../../common/constants.js";
-import { disableComponents, paginate } from "../../util/discord.js";
 import { truncateText } from "../../util/text.js";
 import { ignoredDeletions } from "../logging/messages.js";
 import { Question, questions } from "./send.js";
 
 export async function listQuestions(interaction: ChatInputCommandInteraction): Promise<void> {
-	await interaction.deferReply({ ephemeral: true });
+	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
+
 	await paginate(
 		questions,
 		({ question }) => question ?? "",
-		(data) => interaction.editReply(data),
+		(data) => message.edit(data),
 		{
 			title: "Upcoming QOTDs",
 			singular: "QOTD",
@@ -26,6 +27,9 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 			user: interaction.user,
 			pageLength: 10,
 			totalCount: questions.length,
+
+			timeout: constants.collectorTime,
+			color: constants.themeColor,
 
 			generateComponents(filtered) {
 				return [
@@ -51,8 +55,8 @@ export async function listQuestions(interaction: ChatInputCommandInteraction): P
 export async function viewQuestion(interaction: AnySelectMenuInteraction): Promise<void> {
 	if (
 		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.exec.id)
-		:	interaction.member?.roles.includes(config.roles.exec.id))
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,
@@ -99,8 +103,8 @@ export async function viewQuestion(interaction: AnySelectMenuInteraction): Promi
 export async function removeQuestion(interaction: ButtonInteraction, id = ""): Promise<void> {
 	if (
 		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.exec.id)
-		:	interaction.member?.roles.includes(config.roles.exec.id))
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		await interaction.reply({
 			ephemeral: true,
