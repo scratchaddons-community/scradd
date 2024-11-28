@@ -25,9 +25,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "ES2023",
-		"paths": {
-			"*": ["./common/typedefs/*.d.ts", "./node_modules/@types/*", "./node_modules/*"]
-		},
+		"paths": { "*": ["./common/typedefs/*.d.ts"] },
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
