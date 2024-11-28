@@ -67,6 +67,7 @@
 		"@discordjs/formatters": "dev",
 		"@discordjs/rest": "dev",
 		"@discordjs/util": "dev",
-		"@discordjs/ws": "1.2.0-dev.1721822666-fcd35ea2e"
+		"@discordjs/ws": "1.2.0-dev.1721822666-fcd35ea2e",
+		"discord-api-types": "next"
 	}
 }
