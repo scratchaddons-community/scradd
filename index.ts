@@ -71,7 +71,7 @@ await login({
 			GatewayIntentBits.Guilds |
 			GatewayIntentBits.GuildMembers |
 			GatewayIntentBits.GuildModeration |
-			GatewayIntentBits.GuildEmojisAndStickers |
+			GatewayIntentBits.GuildExpressions |
 			GatewayIntentBits.GuildWebhooks |
 			GatewayIntentBits.GuildInvites |
 			GatewayIntentBits.GuildVoiceStates |

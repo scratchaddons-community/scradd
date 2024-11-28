@@ -1,4 +1,12 @@
-import type { AnyThreadChannel, APIEmbed, Channel, Embed, Message, TextChannel } from "discord.js";
+import type {
+	AnyThreadChannel,
+	APIButtonComponentWithCustomId,
+	APIEmbed,
+	Channel,
+	Embed,
+	Message,
+	TextChannel,
+} from "discord.js";
 import type { LoggingEmojis, LoggingEmojisError } from "./util.js";
 
 import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.js";
@@ -26,7 +34,7 @@ export default async function log(
 		embeds?: (APIEmbed | Embed | undefined)[];
 		files?: (string | { extension?: string; content: string })[];
 		buttons?: ({ label: string } & (
-			| { customId: string; style: Exclude<ButtonStyle, ButtonStyle.Link> }
+			| { customId: string; style: APIButtonComponentWithCustomId["style"] }
 			| { url: string }
 		))[];
 		pingHere?: boolean;
