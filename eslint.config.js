@@ -93,6 +93,7 @@ const config = typescriptEslint.config(
 				{ builtinGlobals: true, ignoreOnInitialization: true },
 			],
 			"@typescript-eslint/no-unsafe-member-access": "off",
+			"@typescript-eslint/no-unsafe-type-assertion": "warn",
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{ args: "all", argsIgnorePattern: /^_+$/u.source, reportUsedIgnorePattern: true },
