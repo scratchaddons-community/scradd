@@ -1,10 +1,4 @@
-import type {
-	ApplicationCommandOption,
-	ApplicationCommandSubCommand,
-	GuildBasedChannel,
-	Role,
-	User,
-} from "discord.js";
+import type { ApplicationCommandOption, GuildBasedChannel, Role, User } from "discord.js";
 
 import { ApplicationCommandOptionType, Base, MessageMentions } from "discord.js";
 import { client } from "strife.js";
@@ -36,10 +30,7 @@ export const UNSUPPORTED_OPTIONS = [
 export function schemaSupported(options: ApplicationCommandOption[]): boolean {
 	const isSubcommands =
 		options.length &&
-		options.every(
-			(option): option is ApplicationCommandSubCommand =>
-				option.type === ApplicationCommandOptionType.Subcommand,
-		);
+		options.every((option) => option.type === ApplicationCommandOptionType.Subcommand);
 	if (!isSubcommands)
 		return options.every((suboption) => !UNSUPPORTED_OPTIONS.includes(suboption.type));
 
@@ -68,10 +59,7 @@ export async function parseArguments(
 ): Promise<Options | boolean | { subcommand: string; options: Options | boolean }> {
 	const hasSubcommands =
 		schema.length &&
-		schema.every(
-			(found): found is ApplicationCommandSubCommand =>
-				found.type === ApplicationCommandOptionType.Subcommand,
-		); // todo: implement subgroups
+		schema.every((found) => found.type === ApplicationCommandOptionType.Subcommand); // todo: implement subgroups
 	if (hasSubcommands) {
 		if (!allowSubcommands) return true;
 
