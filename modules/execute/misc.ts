@@ -1,6 +1,5 @@
 import type {
 	ApplicationCommandOption,
-	ApplicationCommandSubCommand,
 	GuildBasedChannel,
 	Role,
 	User,
