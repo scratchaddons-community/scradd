@@ -26,13 +26,8 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 22.10.0
+                  node-version-file: package.json
                   cache: npm
-
-            - name: Bump Twemoji
-              run:
-                  npm pkg set dependencies.@twemoji/parser="<=$(npm show @discordapp/twemoji
-                  version)"
 
             - name: Bump
               id: sync_types

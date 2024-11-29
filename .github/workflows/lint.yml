@@ -23,11 +23,16 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 22.10.0
+                  node-version-file: package.json
                   cache: npm
 
             - name: Install
               run: npm ci
+
+            - name: Bump Twemoji
+              run:
+                  npm pkg set dependencies.@twemoji/parser="<=$(npm show @discordapp/twemoji
+                  version)"
 
             - name: Format
               run: node --run format
@@ -75,7 +80,7 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 22.10.0
+                  node-version-file: package.json
                   cache: npm
 
             - name: Install
@@ -98,7 +103,7 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.1.0
               with:
-                  node-version: 22.10.0
+                  node-version-file: package.json
                   cache: npm
 
             - name: Install
