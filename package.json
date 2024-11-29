@@ -25,7 +25,7 @@
 		"@fontsource-variable/sora": "5.1.0",
 		"@khanacademy/simple-markdown": "0.13.6",
 		"@sa-community/addons-data": "1.39.2",
-		"@twemoji/parser": "<=15.1.0",
+		"@twemoji/parser": "<=15.1.1",
 		"didyoumean2": "7.0.4",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
 		"discord.js": "14.17.0-dev.1727784303-b20346f43",
