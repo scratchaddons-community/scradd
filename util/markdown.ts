@@ -3,6 +3,7 @@ import type { Rules, SingleASTNode } from "@khanacademy/simple-markdown";
 import SimpleMarkdown from "@khanacademy/simple-markdown";
 import { toCodePoints } from "@twemoji/parser";
 import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
+import twemojiPackage from "@twemoji/parser/package.json" with { type: "json" };
 import { Faces, FormattingPatterns, MessageMentions } from "discord.js";
 import { client } from "strife.js";
 
@@ -321,6 +322,6 @@ export function markdownToHtml(source: string): string {
 }
 
 export const getTwemojiUrl = (emoji: string) =>
-	`https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${toCodePoints(
+	`https://cdn.jsdelivr.net/gh/jdecked/twemoji@${twemojiPackage.version}/assets/svg/${toCodePoints(
 		emoji.includes("\u200D") ? emoji : emoji.replaceAll("\uFE0F", ""),
 	).join("-")}.svg` as const;
