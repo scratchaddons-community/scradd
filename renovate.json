@@ -1,1 +1,4 @@
-{ "extends": ["github>cobaltt7/renovate"] }
+{
+	"extends": ["github>cobaltt7/renovate"],
+	"packageRules": [{ "matchPackageNames": ["@twemoji/parser"], "enabled": false }]
+}
