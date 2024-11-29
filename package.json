@@ -63,11 +63,11 @@
 	},
 	"overrides": {
 		"@discordjs/builders": "1.9.1-dev.1727784293-b20346f43",
-		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
+		"@discordjs/collection": "2.1.1",
 		"@discordjs/formatters": "0.6.0-dev.1732709129-97ffa201a",
 		"@discordjs/rest": "2.4.1-dev.1732709129-97ffa201a",
 		"@discordjs/util": "1.1.2-dev.1732709129-97ffa201a",
-		"@discordjs/ws": "1.2.0-dev.1721822666-fcd35ea2e",
+		"@discordjs/ws": "2.0.0",
 		"discord-api-types": "next"
 	}
 }
