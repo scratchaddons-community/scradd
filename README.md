@@ -69,10 +69,10 @@ to this bot but could be useful in other apps as well.
 
 Scradd has a couple of dev commands to streamline your coding.
 
--   `node --run build`: One-time build with TypeScript
--   `node --run start`: Run the bot
--   `node --run dev`: Rebuild with TypeScript on each code change
--   `node --run serve`: Run the bot and restart on each successful build
--   `node --run format`: Format code with Prettier
--   `node --run lint`: Lint code with ESLint
--   `node --run test`: Run unit tests with the Node.js native test runner
+- `node --run build`: One-time build with TypeScript
+- `node --run start`: Run the bot
+- `node --run dev`: Rebuild with TypeScript on each code change
+- `node --run serve`: Run the bot and restart on each successful build
+- `node --run format`: Format code with Prettier
+- `node --run lint`: Lint code with ESLint
+- `node --run test`: Run unit tests with the Node.js native test runner
