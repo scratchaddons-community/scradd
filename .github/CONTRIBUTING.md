@@ -58,9 +58,9 @@ Please:
     native test runner for tests.
 
 To test your code, it’s easiest to run `node --run serve & node --run dev` in my opinion. That runs both TypeScript and
-Node on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful build.
-Using this setup, you hardly ever need to touch the terminal, and there's only one place you need to look for error
-logs.
+nodemon on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful
+build. Using this setup, you hardly ever need to touch the terminal, and there's only one place you need to look for
+error logs.
 
 Before committing your code, it is necessary to run `node --run format`, then `node --run lint` and fix any lint errors,
 finally `node --run test` and fix any failing tests, then repeat all three until no more lint errors are left.

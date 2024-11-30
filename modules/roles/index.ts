@@ -65,12 +65,3 @@ defineEvent.pre("guildMemberUpdate", async (_, member) => {
 
 	return true;
 });
-
-defineChatCommand(
-	{ name: "custom-role", description: "Create a custom role for yourself", restricted: true },
-	customRole,
-);
-defineModal("customRole", createCustomRole);
-defineEvent("guildMemberRemove", recheckAllRoles);
-defineEvent("guildMemberUpdate", recheckMemberRole);
-defineEvent("applicationCommandPermissionsUpdate", recheckAllRoles);

@@ -8,9 +8,9 @@
 	"scripts": {
 		"build": "rm -rf ./dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
-		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache",
+		"format": "prettier --write \"**\" \"!./dist/\" --ignore-unknown --cache",
 		"lint": "eslint",
-		"serve": "node --env-file .env --enable-source-maps --watch-path ./dist --watch-preserve-output .",
+		"serve": "nodemon --env-file .env --enable-source-maps . --ext js,json",
 		"start": "node --enable-source-maps .",
 		"test": "node --run build && node --enable-source-maps --test"
 	},
@@ -48,6 +48,7 @@
 		"eslint": "9.15.0",
 		"eslint-plugin-unicorn": "56.0.1",
 		"globals": "15.12.0",
+		"nodemon": "3.1.7",
 		"prettier": "3.3.3",
 		"typescript": "5.7.2",
 		"typescript-eslint": "8.16.0"

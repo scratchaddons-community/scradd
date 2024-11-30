@@ -6,7 +6,6 @@ import "@total-typescript/ts-reset";
 import type { Snowflake } from "discord.js";
 import type { MenuCommandContext } from "strife.js";
 import type constants from "./constants.ts";
-import type { FilterNonFalsy } from "./misc.ts";
 
 declare global {
 	interface ReadonlyArray<T> {
@@ -65,7 +64,7 @@ declare global {
 			BOT_TOKEN: string;
 			/** URI to connect to MongoDB with. */
 			MONGO_URI: string;
-			/** Used to configure {@link constants.env} */
+			/** Used to configure {@link constants.env}. */
 			NODE_ENV?: "development" | "production";
 			/** Port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;

@@ -56,7 +56,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 async function getDependencies(): Promise<APIEmbedField[]> {
 	const dependencyNames = Object.keys({ ...pkg.dependencies, ...pkg.optionalDependencies });
 	const promises = dependencyNames.map((name) =>
-		import(`../../../node_modules/${name}/package.json`, { assert: { type: "json" } }).then(
+		import(`../../../node_modules/${name}/package.json`, { with: { type: "json" } }).then(
 			(dependency: { default: { name: string; version: `${bigint}.${bigint}.${string}` } }) =>
 				`- [${inlineCode(dependency.default.name)}@${
 					dependency.default.version

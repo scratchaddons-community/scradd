@@ -9,38 +9,7 @@ import {
 } from "strife.js";
 
 import config from "../../common/config.ts";
-import getQuestionData, { addQuestion } from "./add.ts";
-import { listQuestions, removeQuestion, viewQuestion } from "./list.ts";
 
-defineSubcommands(
-	{
-		name: "qotd",
-		description: "Manage Questions of The Day",
-
-		subcommands: {
-			add: { description: "Add a Question of The Day" },
-			list: { description: "List Questions of The Day" },
-		},
-
-		restricted: true,
-	},
-	async (interaction, { subcommand }) => {
-		switch (subcommand) {
-			case "add": {
-				await getQuestionData(interaction);
-				break;
-			}
-			case "list": {
-				await listQuestions(interaction);
-				break;
-			}
-		}
-	},
-);
-defineModal("addQuestion", addQuestion);
-
-defineSelect("viewQuestion", viewQuestion);
-defineButton("removeQuestion", removeQuestion);
 
 defineEvent("messageReactionAdd", async (partialReaction, partialUser, { burst }) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;

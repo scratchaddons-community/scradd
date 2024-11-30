@@ -1,6 +1,8 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
 
+
+
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { prepareExit } from "../../common/database.ts";
@@ -11,6 +13,7 @@ import editMessage, { submitEdit } from "./edit.ts";
 import getCode, { run } from "./run.ts";
 import sayCommand, { say } from "./say.ts";
 import status from "./status.ts";
+
 
 defineMenuCommand(
 	{ name: "Edit Message", restricted: true, type: ApplicationCommandType.Message, access: false },

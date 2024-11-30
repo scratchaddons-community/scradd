@@ -107,9 +107,8 @@ process
 			}),
 	);
 
-if (constants.env === "production") {
+if (constants.env === "production")
 	await channel.send(`${LoggingEmojis.Bot} Restarted bot on version **v${pkg.version}**`);
-}
 
 const { cleanListeners } = await import("./common/database.js");
 await cleanListeners();

@@ -1,8 +1,6 @@
 import type {
 	AnyThreadChannel,
-	ChatInputCommandInteraction,
 	GuildMember,
-	InteractionResponse,
 	PartialGuildMember,
 	Role,
 } from "discord.js";
@@ -11,43 +9,8 @@ import { Collection } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.ts";
-import constants from "../../common/constants.ts";
 import { getThreadConfig, threadsDatabase } from "./misc.ts";
 
-export async function syncMembers(
-	interaction: ChatInputCommandInteraction<"cached" | "raw">,
-	{ role }: { role: Role },
-): Promise<InteractionResponse | undefined> {
-	if (!interaction.channel?.isThread())
-		return await interaction.reply({
-			ephemeral: true,
-			content: `${constants.emojis.statuses.no} This command can only be used in threads!`,
-		});
-
-	const threadConfig = getThreadConfig(interaction.channel);
-	if (threadConfig.roles.includes(role.id)) {
-		threadsDatabase.updateById(
-			{
-				id: interaction.channel.id,
-				roles: threadConfig.roles.filter((found) => found !== role.id).join("|"),
-			},
-			{ keepOpen: threadConfig.keepOpen },
-		);
-		return await interaction.reply(
-			`${constants.emojis.statuses.yes} I will no longer add all ${role.toString()} to this thread!`,
-		);
-	}
-
-	threadsDatabase.updateById(
-		{ id: interaction.channel.id, roles: [...threadConfig.roles, role.id].join("|") },
-		{ keepOpen: threadConfig.keepOpen },
-	);
-	await interaction.reply(
-		`${constants.emojis.statuses.yes} I will add all ${role.toString()} to this thread!`,
-	);
-
-	await addRoleToThread({ role, thread: interaction.channel });
-}
 
 export async function updateMemberThreads(
 	oldMember: GuildMember | PartialGuildMember,

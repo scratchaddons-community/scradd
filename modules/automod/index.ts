@@ -18,7 +18,6 @@ import { ignoredDeletions } from "../logging/messages.ts";
 import warn from "../punishments/warn.ts";
 import automodMessage from "./automod.ts";
 import tryCensor, { badWordsAllowed } from "./misc.ts";
-import changeNickname from "./nicknames.ts";
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
@@ -117,43 +116,8 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
 });
-defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-	await changeNickname(member);
-});
-defineEvent("guildMemberUpdate", async (_, member) => {
-	await changeNickname(member);
-});
 defineEvent.pre("userUpdate", async (_, user) => {
-	const member = await config.guild.members.fetch(user).catch(() => void 0);
-	if (member) {
-		await changeNickname(member);
-		return true;
-	}
-	return false;
-});
-defineEvent("presenceUpdate", async (_, newPresence) => {
-	if (newPresence.guild?.id !== config.guild.id) return;
-
-	const activity =
-		newPresence.activities.find((activity) => activity.type === ActivityType.Custom) ??
-		newPresence.activities[0];
-	if (!activity) return;
-
-	const status =
-		(activity.emoji?.toString() ?? "") +
-		" " +
-		(activity.type === ActivityType.Custom ? activity.state : activity.name);
-	// TODO: Check `.details` for hang statuses
-	const censored = tryCensor(status, 1);
-	if (censored && newPresence.member?.roles.resolve(config.roles.staff.id)) {
-		await warn(
-			newPresence.member,
-			"As server representatives, staff members are not allowed to have bad words in their statuses. Please change yours now to avoid another strike.",
-			censored.strikes,
-			"Set status to " + status,
-		);
-	}
+	return await config.guild.members.fetch(user).then(() => true, () => false);
 });
 
 defineChatCommand(
