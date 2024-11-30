@@ -68,7 +68,7 @@ async function getConfig() {
 	const tickets = getChannel("contact", ChannelType.GuildText);
 	return {
 		channels: {
-			info: getChannel("Info", ChannelType.GuildCategory, "start"),
+			info: getChannel("info", ChannelType.GuildCategory, "start"),
 			announcements:
 				guild?.systemChannel ??
 				getChannel(
@@ -135,7 +135,7 @@ async function getConfig() {
 	};
 
 	function getChannel<T extends ChannelType>(
-		search: string,
+		search: Lowercase<string>,
 		type: T | T[] = [],
 		matchType: "end" | "full" | "partial" | "start" = "partial",
 		searchChannels: Collection<string, NonThreadGuildBasedChannel | null> = channels,
