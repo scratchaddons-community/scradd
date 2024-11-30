@@ -117,7 +117,10 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 	}
 });
 defineEvent.pre("userUpdate", async (_, user) => {
-	return await config.guild.members.fetch(user).then(() => true, () => false);
+	return await config.guild.members.fetch(user).then(
+		() => true,
+		() => false,
+	);
 });
 
 defineChatCommand(

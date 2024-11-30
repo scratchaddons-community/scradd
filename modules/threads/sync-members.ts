@@ -1,16 +1,10 @@
-import type {
-	AnyThreadChannel,
-	GuildMember,
-	PartialGuildMember,
-	Role,
-} from "discord.js";
+import type { AnyThreadChannel, GuildMember, PartialGuildMember, Role } from "discord.js";
 
 import { Collection } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.ts";
 import { getThreadConfig, threadsDatabase } from "./misc.ts";
-
 
 export async function updateMemberThreads(
 	oldMember: GuildMember | PartialGuildMember,

@@ -61,8 +61,7 @@ export default async function log(
 		{ external: [], embedded: [] },
 	) ?? { external: [], embedded: [] };
 
-	const shouldPing =
-		extra.pingHere && Date.now() - lastPing > 90_000;
+	const shouldPing = extra.pingHere && Date.now() - lastPing > 90_000;
 	if (shouldPing) lastPing = Date.now();
 
 	return await thread.send({

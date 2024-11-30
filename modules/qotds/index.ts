@@ -10,7 +10,6 @@ import {
 
 import config from "../../common/config.ts";
 
-
 defineEvent("messageReactionAdd", async (partialReaction, partialUser, { burst }) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
 	const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
