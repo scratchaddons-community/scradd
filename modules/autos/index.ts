@@ -21,7 +21,6 @@ import {
 } from "strife.js";
 
 import config from "../../common/config.ts";
-import features from "../../common/features.ts";
 import { GlobalMentionsPattern } from "../../util/discord.ts";
 import { normalize } from "../../util/text.ts";
 import { BOARD_EMOJI } from "../board/misc.ts";
@@ -231,7 +230,7 @@ async function handleMutatable(
 	const chatResponse = scraddChat(message);
 	if (chatResponse)
 		return [
-			...(features.autosTypeInChat ? [Math.random() * Math.random() * 9750] : []),
+			Math.random() * Math.random() * 9750,
 			{ content: chatResponse, files: [], embeds: [], components: [] },
 		];
 

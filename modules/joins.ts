@@ -4,7 +4,6 @@ import { client, defineEvent } from "strife.js";
 
 import config from "../common/config.ts";
 import constants from "../common/constants.ts";
-import features from "../common/features.ts";
 import { bans, joins, leaves } from "../common/strings.ts";
 import { nth } from "../util/numbers.ts";
 import { ignoredDeletions } from "./logging/messages.ts";
@@ -16,118 +15,72 @@ defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
 	await member
 		.send({
+			content:
+				"# Unfortunately, this server is currently in the process of shutting down.\n" +
+				"### Channels will be archived one-by-one, but archive will remain publically available.\n" +
+				"### Scratch Addons announcements as well as one-on-one spport will also continue to be provided.\n" +
+				"## The server will be fully archived on January 3rd, 2025.\n" +
+				"[More information](https://discord.com/channels/806602307750985799/806605043817644074/1312176716571217953)",
 			embeds: [
-				features.joinsDmRevision ?
-					{
-						color: constants.themeColor,
-						url: constants.domains.scratchAddons,
-						description:
-							"### Welcome to the __Scratch Addons__ Discord server!\n" +
-							`Thank you, ${member.toString()}, for joining the Scratch Addons community!`,
-						fields: [
-							{
-								name: "**What is Scratch Addons?**",
-								value:
-									"Scratch Addons is the *all-in-one browser extension for Scratch*." +
-									` Scratch Addons combines new and existing features and themes for [the Scratch website and project editor](${
-										constants.domains.scratch
-									}) into one __easy-to-access and configurable__ browser extension.` +
-									` For more information about us, **visit [ScratchAddons.com](${
-										constants.domains.scratchAddons
-									})**.` +
-									` If you have any questions about or issues with Scratch Addons, please ask in ${
-										config.channels.support?.toString() ?? "our support channel"
-									}!`,
-							},
-							{
-								name: "**What is this server?**",
-								value:
-									`In addition to being **[Scratch Addons](${
-										constants.domains.scratchAddons
-									})’s support server**, we are also *the largest Scratch server*!` +
-									` Check out some of our most memorable moments${
-										config.channels.board ?
-											` on the ${config.channels.board.toString()}`
-										:	""
-									} and introduce yourself${
-										config.channels.intros ?
-											` in ${config.channels.intros.toString()}`
-										:	""
-									}.` +
-									(directoryUrl &&
-										` You can also check out our [server directory](<${
-											directoryUrl
-										}>) for other large Scratch servers to chat in, including non-English servers.`),
-							},
-							{
-								name: "**We are not the Scratch Team.**",
-								value:
-									"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
-									` If you wish to contact the Scratch Team, please use [Contact Us](<${
-										constants.domains.scratch
-									}/contact-us>).` +
-									" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
-							},
-						],
-						footer: {
-							icon_url: `https://raw.githubusercontent.com/${
-								constants.repos.scratchAddons
-							}/master/images/icon.png`,
-							text: "~ the Scratch Addons team",
+				{
+					color: constants.themeColor,
+					url: constants.domains.scratchAddons,
+					description:
+						"### Welcome to the __Scratch Addons__ Discord server!\n" +
+						`Thank you, ${member.toString()}, for joining the Scratch Addons community!`,
+					fields: [
+						{
+							name: "**What is Scratch Addons?**",
+							value:
+								"Scratch Addons is the *all-in-one browser extension for Scratch*." +
+								` Scratch Addons combines new and existing features and themes for [the Scratch website and project editor](${
+									constants.domains.scratch
+								}) into one __easy-to-access and configurable__ browser extension.` +
+								` For more information about us, **visit [ScratchAddons.com](${
+									constants.domains.scratchAddons
+								})**.` +
+								` If you have any questions about or issues with Scratch Addons, please ask in ${
+									config.channels.support?.toString() ?? "our support channel"
+								}!`,
 						},
-						image: { url: `${constants.domains.scradd}/images/join-dm-1.png` },
-					}
-				:	{
-						color: constants.themeColor,
-						url: constants.domains.scratchAddons,
-						title: "Welcome to the __Scratch Addons__ Discord server!",
-						description: "Thank you for joining the Scratch Addons community!",
-						fields: [
-							{
-								name: "**What is this server?**",
-								value:
-									`This is *the largest [Scratch](${constants.domains.scratch}) server*!` +
-									` Check out some of our funniest and most memorable moments${
-										config.channels.board ?
-											` on the ${config.channels.board.toString()}`
-										:	""
-									} and introduce yourself${
-										config.channels.intros ?
-											` in ${config.channels.intros.toString()}`
-										:	""
-									}.` +
-									(directoryUrl &&
-										` You can also check out our [server directory](<${
-											directoryUrl
-										}>) for other large Scratch servers to chat in.`),
-							},
-							{
-								name: "**What is Scratch Addons?**",
-								value:
-									"This server focuses specifically on *the Scratch Addons browser extension*, the all-in-one browser extension for Scratch." +
-									" Scratch Addons combines new and existing features and themes for the Scratch website and project editor into one __easy-to-access and configurable__ browser extension." +
-									` For more information about us, **visit [ScratchAddons.com](${
-										constants.domains.scratchAddons
-									})**.`,
-							},
-							{
-								name: "**We are not the Scratch Team.**",
-								value:
-									"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
-									` If you wish to contact the ST, please use [Contact Us](<${
-										constants.domains.scratch
-									}/contact-us>).` +
-									" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
-							},
-						],
-						footer: {
-							icon_url: `https://raw.githubusercontent.com/${
-								constants.repos.scratchAddons
-							}/master/images/icon.png`,
-							text: "~ the Scratch Addons team",
+						{
+							name: "**What is this server?**",
+							value:
+								`This is **[Scratch Addons](${
+									constants.domains.scratchAddons
+								})’s support server**. It is currently *the largest Scratch server*!` +
+								` Check out some of our most memorable moments${
+									config.channels.board ?
+										` on the ${config.channels.board.toString()}`
+									:	""
+								} and introduce yourself${
+									config.channels.intros ?
+										` in ${config.channels.intros.toString()}`
+									:	""
+								}.` +
+								(directoryUrl &&
+									` You can also check out our [server directory](<${
+										directoryUrl
+									}>) for other large Scratch servers to chat in, including non-English servers.`),
 						},
-						image: { url: `${constants.domains.scradd}/images/join-dm-1.png` },
+						{
+							name: "**We are not the Scratch Team.**",
+							value:
+								"Please know that *nobody here is a Scratch developer or moderator*, we’re just some people who like to code, like you!" +
+								` If you wish to contact the Scratch Team, please use [Contact Us](<${
+									constants.domains.scratch
+								}/contact-us>).` +
+								" **No official Scratch server exists**, but please feel free to socialize with other Scratchers here.",
+						},
+					],
+					footer: {
+						icon_url: `https://raw.githubusercontent.com/${
+							constants.repos.scratchAddons
+						}/master/images/icon.png`,
+						text: "~ the Scratch Addons team",
 					},
+					image: { url: `${constants.domains.scradd}/images/join-dm-1.png` },
+				},
 				{
 					url: constants.domains.scratchAddons,
 					image: { url: `${constants.domains.scradd}/images/join-dm-2.png` },
@@ -168,20 +121,6 @@ defineEvent("guildMemberAdd", async (member) => {
 			],
 		})
 		.catch(() => void 0);
-});
-
-defineEvent("guildMemberUpdate", async (_, member) => {
-	if (
-		!features.joinsAutoKick ||
-		!config.roles.autoKick ||
-		!member.kickable ||
-		!member.roles.resolve(config.roles.autoKick.id)
-	)
-		return;
-
-	await (member.joinedTimestamp && member.joinedTimestamp > Date.now() - 60 * 60 * 1000 ?
-		member.kick("Autokick role assigned")
-	:	member.roles.remove(config.roles.autoKick, "Autokick role assigned post-join"));
 });
 
 defineEvent("guildMemberAdd", async (member) => {

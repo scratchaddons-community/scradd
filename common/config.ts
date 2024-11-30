@@ -131,7 +131,6 @@ async function getConfig() {
 			booster: getRole("booster"),
 			active: getRole("active"),
 			established: getRole("established"),
-			autoKick: getRole("autokick"),
 		},
 	};
 

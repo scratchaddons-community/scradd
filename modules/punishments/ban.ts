@@ -212,19 +212,6 @@ async function confirmBan(
 						config.guild.icon ? { url: config.guild.iconURL() || "" } : undefined,
 				},
 			],
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Link,
-							label: "Appeal Ban",
-							url: constants.domains.scradd + "/ban-appeal",
-						},
-					],
-				},
-			],
 		})
 		.catch(() => void 0);
 

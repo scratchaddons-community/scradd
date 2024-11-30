@@ -22,26 +22,7 @@ export default async function sendQuestion(
 ): Promise<ForumThreadChannel | undefined> {
 	const random = Math.floor(Math.random() * questions.length);
 	const question = questions[random];
-	if (!question) {
-		await log(
-			`${LoggingEmojisError} Could not find a QOTD for today! Please add new ones now.`,
-			LogSeverity.Alert,
-		);
-		return;
-	}
-	if (questions.length === 1) {
-		await log(
-			`${LoggingEmojisError} No QOTDs remain! Please add new ones now.`,
-			LogSeverity.Alert,
-		);
-	} else if (questions.length < 5) {
-		await log(
-			`${LoggingEmojisError} ${questions.length - 1} QOTD${
-				questions.length === 2 ? " remains" : "s remain"
-			}! Please add new ones before they run out.`,
-			LogSeverity.Alert,
-		);
-	}
+	if (!question) return;
 
 	const post = await channel.threads.create({
 		name: `${question.question ?? ""} (QOTD for ${new Date().toLocaleString([], {

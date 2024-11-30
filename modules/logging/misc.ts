@@ -13,7 +13,6 @@ import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.j
 import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.ts";
-import features from "../../common/features.ts";
 import { LogSeverity } from "./util.ts";
 
 export function shouldLog(channel: Channel | null): boolean {
@@ -63,7 +62,7 @@ export default async function log(
 	) ?? { external: [], embedded: [] };
 
 	const shouldPing =
-		extra.pingHere && features.ticketsPingForReports && Date.now() - lastPing > 90_000;
+		extra.pingHere && Date.now() - lastPing > 90_000;
 	if (shouldPing) lastPing = Date.now();
 
 	return await thread.send({
