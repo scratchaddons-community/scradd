@@ -4,17 +4,17 @@ For anyone who knows [Git](https://git-scm.com) and TypeScript/JavaScript basics
 repository! Our code is open source. Be sure to follow our [code of conduct](CODE_OF_CONDUCT.md). Anyone who has a
 meaningful pull request merged may also receive one or more of the following:
 
--   `@Scradd Contributor` role in the Scratch Addons server
--   access to the private Scradd Testing server
--   credit under `/credits`
+- `@Scradd Contributor` role in the Scratch Addons server
+- access to the private Scradd Testing server
+- credit under `/credits`
 
 ## General guidelines
 
 Please:
 
--   Follow [the code of conduct](CODE_OF_CONDUCT.md).
--   Stay on topic. Use the SA server for random chatting, that's basically why it exists.
--   Use reactions instead of meaningless comments, or in other words, 👍 reactions instead of “Good idea” comments.
+- Follow [the code of conduct](CODE_OF_CONDUCT.md).
+- Stay on topic. Use the SA server for random chatting, that's basically why it exists.
+- Use reactions instead of meaningless comments, or in other words, 👍 reactions instead of “Good idea” comments.
 
 ## Filing [issues](https://docs.github.com/en/github/managing-your-work-on-github/about-issues)
 
@@ -47,15 +47,15 @@ appropriate issue number. That will cause GitHub to automatically close the issu
 
 Please:
 
--   Minimize the number of `@ts-` comments you use, and if you must use one, use `@ts-expect-error`.
--   Format your code by using `node --run format` before pushing. If you don’t, it may be automatically run in the
-    workflow.
--   Lint your code by using `node --run lint`. No lint errors may be present when your PR is merged. Warnings may be
-    allowed depending on the context. Some lint errors may be fixed automatically with `node --run lint -- --fix`, but
-    it is important to manually confirm it worked as intended. The workflow fails if any errors are present.
--   Rerun the unit tests by using `node --run test`. Make sure the unit tests continue to succeed. No tests may fail
-    when your PR is merged. We would also very much appreciate any new tests you add if you could. We use the Node.js
-    native test runner for tests.
+- Minimize the number of `@ts-` comments you use, and if you must use one, use `@ts-expect-error`.
+- Format your code by using `node --run format` before pushing. If you don’t, it may be automatically run in the
+  workflow.
+- Lint your code by using `node --run lint`. No lint errors may be present when your PR is merged. Warnings may be
+  allowed depending on the context. Some lint errors may be fixed automatically with `node --run lint -- --fix`, but it
+  is important to manually confirm it worked as intended. The workflow fails if any errors are present.
+- Rerun the unit tests by using `node --run test`. Make sure the unit tests continue to succeed. No tests may fail when
+  your PR is merged. We would also very much appreciate any new tests you add if you could. We use the Node.js native
+  test runner for tests.
 
 To test your code, it’s easiest to run `node --run serve & node --run dev` in my opinion. That runs both TypeScript and
 nodemon on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful
