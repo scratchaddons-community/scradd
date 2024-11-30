@@ -234,7 +234,6 @@ async function sendSpecialReminder(reminder: {
 			if (!reminder.channel?.isThreadOnly()) break;
 			const post = await sendQuestion(reminder.channel);
 			if (!post) break;
-			const date = new Date();
 			remindersDatabase.data = [
 				...remindersDatabase.data,
 				{

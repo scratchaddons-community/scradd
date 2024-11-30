@@ -43,7 +43,7 @@
 		"@total-typescript/ts-reset": "0.6.1",
 		"@types/difflib": "<=0.2",
 		"@types/mustache": "<=4.2",
-		"@types/node": "<=22.10",
+		"@types/node": "<=22.3",
 		"@types/papaparse": "<=5.4",
 		"eslint": "9.15.0",
 		"eslint-plugin-unicorn": "56.0.1",
@@ -59,7 +59,7 @@
 		"chart.js": "4.4.6"
 	},
 	"engines": {
-		"node": "^22.10.0",
+		"node": "^22.3.0",
 		"npm": ">=9.0.0"
 	},
 	"overrides": {
