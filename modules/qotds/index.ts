@@ -1,11 +1,7 @@
 import { ChannelType } from "discord.js";
 import {
 	client,
-	defineButton,
 	defineEvent,
-	defineModal,
-	defineSelect,
-	defineSubcommands,
 } from "strife.js";
 
 import config from "../../common/config.ts";

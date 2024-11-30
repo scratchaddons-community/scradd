@@ -6,7 +6,6 @@ import { client } from "strife.js";
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { remindersDatabase, SpecialReminder } from "../reminders/misc.ts";
-import { recheckMemberRole } from "../roles/custom.ts";
 import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.ts";
 import { getFullWeeklyData, recentXpDatabase } from "./util.ts";
 
@@ -121,16 +120,10 @@ export default async function getWeekly(date: Date): Promise<string> {
 			if (!ids.has(weeklyMember.id))
 				await weeklyMember.roles.remove(role, "No longer weekly winner");
 		}
-	}
-	for (const [index, { user }] of weeklyWinners.entries()) {
-		const member = await config.guild.members.fetch(user).catch(() => void 0);
-		if (!member) continue;
-
-		await recheckMemberRole(member, member);
-		await member.roles.add(
-			[role, !index && config.roles.epic].filter(Boolean),
-			"Weekly winner",
-		);
+		for (const { user } of weeklyWinners.values()) {
+			const member = await config.guild.members.fetch(user).catch(() => void 0);
+			if (member) await member.roles.add(role, "Weekly winner");
+		}
 	}
 
 	// Send weekly

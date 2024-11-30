@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { defineChatCommand, defineEvent, defineModal } from "strife.js";
+import { defineEvent } from "strife.js";
 
 import config from "../../common/config.ts";
-import { createCustomRole, customRole, recheckAllRoles, recheckMemberRole } from "./custom.ts";
 import { persistedLeave, persistedRejoin } from "./persisted.ts";
 
 export const Invite = mongoose.model(

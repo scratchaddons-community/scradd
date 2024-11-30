@@ -1,7 +1,6 @@
 import type { CommandInteractionOption } from "discord.js";
 
 import {
-	ActivityType,
 	ApplicationCommandOptionType,
 	AutoModerationRuleTriggerType,
 	GuildMember,

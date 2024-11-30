@@ -1,19 +1,10 @@
-import type {
-	AnyThreadChannel,
-	ButtonInteraction,
-	ChatInputCommandInteraction,
-	InteractionResponse,
-} from "discord.js";
+import type { AnyThreadChannel, ButtonInteraction, InteractionResponse } from "discord.js";
 
 import { ButtonStyle, ChannelType, ComponentType, time, TimestampStyles } from "discord.js";
 import { client, disableComponents } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
-
-import "../../util/discord.js";
-
-import { parseTime } from "../../util/numbers.ts";
 import { remindersDatabase, SpecialReminder } from "../reminders/misc.ts";
 import queueReminders from "../reminders/send.ts";
 import { getThreadConfig, threadsDatabase } from "./misc.ts";
