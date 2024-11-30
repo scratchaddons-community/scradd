@@ -1,8 +1,5 @@
 import { ChannelType } from "discord.js";
-import {
-	client,
-	defineEvent,
-} from "strife.js";
+import { client, defineEvent } from "strife.js";
 
 import config from "../../common/config.ts";
 
