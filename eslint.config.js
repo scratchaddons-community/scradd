@@ -15,7 +15,7 @@ const config = typescriptEslint.config(
 	{
 		languageOptions: {
 			ecmaVersion: 2025,
-			globals: globals.node,
+			globals: globals.nodeBuiltin,
 			parserOptions: {
 				projectService: true,
 				tsconfigRootDir: path.dirname(fileURLToPath(import.meta.url)),
@@ -225,7 +225,7 @@ const config = typescriptEslint.config(
 			"./modules/auto/secrets.ts",
 			"./common/constants.ts",
 			"./common/features.ts",
-			"./.eslintrc.cjs",
+			"**/*.config.js",
 		],
 		rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 	},
