@@ -4,7 +4,6 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonStyle,
-	channelLink,
 	ChannelType,
 	ComponentType,
 	GuildMember,
@@ -36,58 +35,7 @@ import {
 } from "./misc.ts";
 
 const appealedStrikes = new Set<string>();
-const resourcesDmed = new Set<string>();
 
-defineEvent("messageCreate", async (message) => {
-	if (
-		message.channel.type === ChannelType.DM &&
-		message.author.id !== client.user.id &&
-		!resourcesDmed.has(message.author.id)
-	) {
-		await message.channel.send({
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Link,
-							label: "Server Rules",
-							url: config.guild.rulesChannel?.url ?? channelLink("", config.guild.id),
-						},
-						// {
-						// 	type: ComponentType.Button,
-						// 	style: ButtonStyle.Link,
-						// 	label: "FAQ",
-						// 	url: channelLink("TODO", config.guild.id),
-						// },
-						...((
-							config.channels.tickets
-								?.permissionsFor(message.author)
-								?.has("ViewChannel")
-						) ?
-							[
-								{
-									type: ComponentType.Button,
-									style: ButtonStyle.Secondary,
-									label: "Contact Mods",
-									custom_id: "_contactMods",
-								} as const,
-							]
-						:	[]),
-						{
-							type: ComponentType.Button,
-							style: ButtonStyle.Link,
-							label: "SA Support",
-							url: config.channels.support?.url ?? channelLink("", config.guild.id),
-						},
-					],
-				},
-			],
-		});
-		resourcesDmed.add(message.author.id);
-	}
-});
 defineButton("contactMods", async (interaction) => {
 	await interaction.reply({
 		content: `${constants.emojis.statuses.yes} Thanks for reaching out!`,
