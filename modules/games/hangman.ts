@@ -72,11 +72,12 @@ export default async function hangman(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 ): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
+	const message = await interaction.deferReply({ fetchReply: true });
+	
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
 
 	const guesses: ((typeof CHARACTERS)[number] | Lowercase<string>)[] = [];
-	const message = await interaction.deferReply({ fetchReply: true });
 	await tick((options) => interaction.editReply(options));
 
 	const collector = message
