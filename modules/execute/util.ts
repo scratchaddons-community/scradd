@@ -66,9 +66,9 @@ export async function getAllSchemas(
 	commandSchemas.set(guildId, guildCommandSchemas);
 	return guildCommandSchemas;
 }
+
 // eslint-disable-next-line unicorn/prefer-top-level-await
-getAllSchemas(config.guild).then(
-	() => void 0,
+getAllSchemas(config.guild).catch(
 	(error) =>
 		logError({
 			error,

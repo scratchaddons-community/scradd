@@ -9,7 +9,7 @@ import {
 	TimestampStyles,
 	userMention,
 } from "discord.js";
-import { client } from "strife.js";
+import { client, logError } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
@@ -18,9 +18,9 @@ import { statuses } from "../../common/strings.ts";
 import { convertBase } from "../../util/numbers.ts";
 import { gracefulFetch } from "../../util/promises.ts";
 import { syncRandomBoard } from "../board/update.ts";
-import sendQuestion from "../qotds/send.ts";
 import getWeekly, { getChatters } from "../xp/weekly.ts";
 import { remindersDatabase, SpecialReminder } from "./misc.ts";
+import { LoggingEmojisError } from "../logging/util.ts";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -55,6 +55,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 		{ toSend: [], toPostpone: [] },
 	);
 	remindersDatabase.data = toPostpone;
+	const timeout = await queueReminders();
 
 	for (const reminder of toSend) {
 		const channel =
@@ -92,7 +93,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 		}
 	}
 
-	return await queueReminders();
+	return timeout;
 }
 
 async function sendSpecialReminder(reminder: {
@@ -230,22 +231,6 @@ async function sendSpecialReminder(reminder: {
 			});
 			break;
 		}
-		case SpecialReminder.QOTD: {
-			if (!reminder.channel?.isThreadOnly()) break;
-			const post = await sendQuestion(reminder.channel);
-			if (!post) break;
-			remindersDatabase.data = [
-				...remindersDatabase.data,
-				{
-					channel: reminder.channel.id,
-					date: +reminder.date + 86_400_000,
-					reminder: undefined,
-					id: SpecialReminder.QOTD,
-					user: client.user.id,
-				},
-			];
-			break;
-		}
 		default: {
 			throw new ReferenceError(
 				`Unknown, possibly deprecated, special reminder type ${reminder.id} used`,
@@ -262,4 +247,13 @@ function getNextInterval(): number | undefined {
 	return reminder.date === "NaN" ? 0 : reminder.date - Date.now();
 }
 
-await queueReminders();
+// eslint-disable-next-line unicorn/prefer-top-level-await
+queueReminders().catch(
+	(error) =>
+		logError({
+			error,
+			channel: config.channels.errors,
+			emoji: LoggingEmojisError,
+			event: "queueReminders",
+		}),
+);
