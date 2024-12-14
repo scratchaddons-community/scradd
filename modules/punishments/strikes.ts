@@ -27,13 +27,13 @@ export async function getStrikes(
 			} You don’t have permission to view this member’s strikes!`,
 		});
 	}
-	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
+	await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	await listStrikes(
 		selected instanceof GuildMember ? selected : (
 			await config.guild.members.fetch(selected.id).catch(() => selected)
 		),
-		(data) => message.edit(data),
+		(data) => interaction.editReply(data),
 		options,
 		interaction.user,
 	);
