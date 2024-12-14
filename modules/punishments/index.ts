@@ -15,7 +15,6 @@ import {
 } from "strife.js";
 
 import constants from "../../common/constants.ts";
-import ban from "./ban.ts";
 import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.ts";
 import { getStrikeById, getStrikes } from "./strikes.ts";
 import warn, { addStrikeBack, removeStrike } from "./warn.ts";
@@ -200,97 +199,3 @@ defineModal("warn", async (interaction, id) => {
 });
 defineButton("removeStrike", removeStrike);
 defineButton("addStrikeBack", addStrikeBack);
-
-defineChatCommand(
-	{
-		name: "ban-user",
-		description: "Ban a member",
-		restricted: true,
-
-		options: {
-			"user": {
-				type: ApplicationCommandOptionType.User,
-				description: "The member to ban",
-				required: true,
-			},
-
-			"reason": {
-				type: ApplicationCommandOptionType.String,
-				description: "Reason for the ban",
-				required: constants.env === "production",
-				minLength: 10,
-				maxLength: 1024,
-			},
-
-			"delete-range": {
-				type: ApplicationCommandOptionType.String,
-				description: "How far back to delete their messages (defaults to none)",
-			},
-
-			"unban-in": {
-				type: ApplicationCommandOptionType.String,
-				description: "When to unban them in (defaults to never)",
-			},
-		},
-	},
-
-	ban,
-);
-defineMenuCommand(
-	{ name: "Ban User", type: ApplicationCommandType.User, restricted: true },
-	async (interaction) => {
-		await interaction.showModal({
-			title: "Ban User",
-			customId: `${interaction.targetUser.id}_ban`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							label: "Reason",
-							type: ComponentType.TextInput,
-							style: TextInputStyle.Paragraph,
-							customId: "reason",
-							value:
-								constants.env === "production" ?
-									undefined
-								:	constants.defaultPunishment,
-						},
-					],
-				},
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							label: "Message Delete Range",
-							placeholder: "1d",
-							type: ComponentType.TextInput,
-							style: TextInputStyle.Short,
-							customId: "delete-range",
-							required: false,
-						},
-					],
-				},
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							label: "Unban In",
-							type: ComponentType.TextInput,
-							style: TextInputStyle.Short,
-							customId: "unban-in",
-							required: false,
-						},
-					],
-				},
-			],
-		});
-	},
-);
-defineModal("ban", async (interaction, id) => {
-	const user = await client.users.fetch(id);
-	const reason = interaction.fields.getTextInputValue("reason");
-	const deleteRange = interaction.fields.fields.get("delete-range")?.value;
-	const unbanIn = interaction.fields.fields.get("unban-in")?.value;
-	await ban(interaction, { user, reason, "delete-range": deleteRange, "unban-in": unbanIn });
-});
