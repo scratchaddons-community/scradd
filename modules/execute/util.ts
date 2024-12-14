@@ -15,9 +15,11 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { ApplicationCommandType, Collection, GuildMember } from "discord.js";
-import { client } from "strife.js";
+import { client, logError } from "strife.js";
 
+import config from "../../common/config.ts";
 import { asyncFilter } from "../../util/promises.ts";
+import { LoggingEmojisError } from "../logging/util.ts";
 import { schemaSupported } from "./misc.ts";
 import hasPermission from "./permissions.ts";
 
@@ -64,6 +66,17 @@ export async function getAllSchemas(
 	commandSchemas.set(guildId, guildCommandSchemas);
 	return guildCommandSchemas;
 }
+// eslint-disable-next-line unicorn/prefer-top-level-await
+getAllSchemas(config.guild).then(
+	() => void 0,
+	(error) =>
+		logError({
+			error,
+			channel: config.channels.errors,
+			emoji: LoggingEmojisError,
+			event: "getAllSchemas",
+		}),
+);
 
 export default async function getSchemas(
 	user: APIInteractionGuildMember | GuildMember | User,
