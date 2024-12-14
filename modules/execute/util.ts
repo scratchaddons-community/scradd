@@ -68,14 +68,13 @@ export async function getAllSchemas(
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-getAllSchemas(config.guild).catch(
-	(error) =>
-		logError({
-			error,
-			channel: config.channels.errors,
-			emoji: LoggingEmojisError,
-			event: "getAllSchemas",
-		}),
+getAllSchemas(config.guild).catch((error) =>
+	logError({
+		error,
+		channel: config.channels.errors,
+		emoji: LoggingEmojisError,
+		event: "getAllSchemas",
+	}),
 );
 
 export default async function getSchemas(

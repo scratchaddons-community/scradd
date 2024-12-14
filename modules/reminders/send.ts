@@ -18,9 +18,9 @@ import { statuses } from "../../common/strings.ts";
 import { convertBase } from "../../util/numbers.ts";
 import { gracefulFetch } from "../../util/promises.ts";
 import { syncRandomBoard } from "../board/update.ts";
+import { LoggingEmojisError } from "../logging/util.ts";
 import getWeekly, { getChatters } from "../xp/weekly.ts";
 import { remindersDatabase, SpecialReminder } from "./misc.ts";
-import { LoggingEmojisError } from "../logging/util.ts";
 
 let nextReminder: NodeJS.Timeout | undefined;
 export default async function queueReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -248,12 +248,11 @@ function getNextInterval(): number | undefined {
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-queueReminders().catch(
-	(error) =>
-		logError({
-			error,
-			channel: config.channels.errors,
-			emoji: LoggingEmojisError,
-			event: "queueReminders",
-		}),
+queueReminders().catch((error) =>
+	logError({
+		error,
+		channel: config.channels.errors,
+		emoji: LoggingEmojisError,
+		event: "queueReminders",
+	}),
 );

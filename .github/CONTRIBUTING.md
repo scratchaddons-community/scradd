@@ -57,8 +57,8 @@ Please:
   your PR is merged. We would also very much appreciate any new tests you add if you could. We use the Node.js native
   test runner for tests.
 
-To test your code, it’s easiest, in my opinion, to run `node --run serve & node --run dev`. That runs both TypeScript and
-nodemon on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful
+To test your code, it’s easiest, in my opinion, to run `node --run serve & node --run dev`. That runs both TypeScript
+and nodemon on watch mode, to attempt to rebuild your code on every change, and to restart the bot on every successful
 build. Using this setup, you hardly ever need to touch the terminal, and there's only one place you need to look for
 error logs.
 

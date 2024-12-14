@@ -73,7 +73,7 @@ export default async function hangman(
 ): Promise<void> {
 	if (await checkIfUserPlaying(interaction)) return;
 	const message = await interaction.deferReply({ fetchReply: true });
-	
+
 	const { user, displayColor } = await getMember(interaction.user);
 	let color: number | undefined;
 
