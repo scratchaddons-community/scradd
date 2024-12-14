@@ -17,12 +17,12 @@ import { LoggingEmojis, LogSeverity } from "../../logging/util.ts";
 
 const data: CustomOperation = {
 	name: "config",
-	description: "View and (executives only) update my configuration",
+	description: "View and (staff only) update my configuration",
 	options: [
 		{
 			name: "dynamic",
 			description:
-				"View and (executives only) update channels and roles used for special behavior",
+				"View and (staff only) update channels and roles used for special behavior",
 			type: ApplicationCommandOptionType.Subcommand,
 		},
 		{
@@ -36,8 +36,8 @@ const data: CustomOperation = {
 			case "dynamic": {
 				const isStaff =
 					interaction.member instanceof GuildMember ?
-						interaction.member.roles.resolve(config.roles.exec.id)
-					:	interaction.member.roles.includes(config.roles.exec.id);
+						interaction.member.roles.resolve(config.roles.staff.id)
+					:	interaction.member.roles.includes(config.roles.staff.id);
 				await interaction.reply({
 					embeds: getDynamicConfig(),
 
@@ -127,8 +127,8 @@ function getDynamicConfig(): APIEmbed[] {
 export async function syncConfigButton(interaction: ButtonInteraction): Promise<void> {
 	if (
 		interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.exec.id)
-		:	interaction.member?.roles.includes(config.roles.exec.id)
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id)
 	) {
 		await syncConfig();
 		await interaction.message.edit({ embeds: getDynamicConfig() });

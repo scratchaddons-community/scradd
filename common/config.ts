@@ -63,7 +63,6 @@ async function getConfig() {
 	);
 	const modRole = getRole("mod", "start");
 	const staffRole = assertOutsideTests(getRole("staff") ?? modRole);
-	const execRole = getRole("exec") ?? staffRole;
 
 	const tickets = getChannel("contact", ChannelType.GuildText);
 	return {
@@ -85,11 +84,9 @@ async function getConfig() {
 			tickets,
 			server: tickets && getInitialThreads(tickets, "Server ").first(),
 			welcome: getChannel("welcome", ChannelType.GuildText),
-			intros: getChannel("intro", ChannelType.GuildText),
 
 			mod: modChannel,
 			modlogs: assertOutsideTests(modlogsChannel ?? modChannel),
-			exec: getChannel("exec", ChannelType.GuildText),
 			admin: getChannel("admin", ChannelType.GuildText, "start") ?? modChannel,
 
 			general: getChannel("general", ChannelType.GuildText, "full"),
@@ -121,7 +118,6 @@ async function getConfig() {
 
 		roles: {
 			mod: modRole ?? staffRole,
-			exec: execRole,
 			helper: getRole("helper", "start") ?? modRole ?? staffRole,
 			staff: staffRole,
 			weeklyWinner: getRole("weekly"),

@@ -38,12 +38,12 @@ defineSubcommands(
 			},
 
 			user: {
-				description: "View your or (mods only) someone else’s strikes",
+				description: "View your or (staff only) someone else’s strikes",
 
 				options: {
 					user: {
 						type: ApplicationCommandOptionType.User,
-						description: "(Mods only) The user to see strikes for",
+						description: "(Staff only) The user to see strikes for",
 					},
 					expired: {
 						type: ApplicationCommandOptionType.Boolean,

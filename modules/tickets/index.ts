@@ -245,8 +245,8 @@ defineMenuCommand(
 defineButton("contactUser", async (interaction, userId = "") => {
 	if (
 		!(interaction.member instanceof GuildMember ?
-			interaction.member.roles.resolve(config.roles.mod.id)
-		:	interaction.member?.roles.includes(config.roles.mod.id))
+			interaction.member.roles.resolve(config.roles.staff.id)
+		:	interaction.member?.roles.includes(config.roles.staff.id))
 	) {
 		return await interaction.reply({
 			ephemeral: true,

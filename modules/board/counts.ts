@@ -62,7 +62,6 @@ export default function boardReactionCount(
 function baseReactionCount(id: Snowflake): number | undefined {
 	return {
 		[config.channels.tickets?.id || ""]: Counts.Default,
-		[config.channels.exec?.id || ""]: Counts.Private,
 		[config.channels.admin.id || ""]: Counts.Admins,
 		"853256939089559583": Counts.Private, // #ba-doosters
 		[config.channels.devs?.id || ""]: Counts.Private,

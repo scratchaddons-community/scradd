@@ -1,12 +1,11 @@
 import { AuditLogEvent, ButtonStyle, channelLink, ComponentType } from "discord.js";
 import Mustache from "mustache";
-import { client, defineEvent } from "strife.js";
+import { defineEvent } from "strife.js";
 
 import config from "../common/config.ts";
 import constants from "../common/constants.ts";
 import { bans, joins, leaves } from "../common/strings.ts";
 import { nth } from "../util/numbers.ts";
-import { ignoredDeletions } from "./logging/messages.ts";
 
 const directoryUrl =
 	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
@@ -54,8 +53,8 @@ defineEvent("guildMemberAdd", async (member) => {
 										` on the ${config.channels.board.toString()}`
 									:	""
 								} and introduce yourself${
-									config.channels.intros ?
-										` in ${config.channels.intros.toString()}`
+									config.channels.general ?
+										` in ${config.channels.general.toString()}`
 									:	""
 								}.` +
 								(directoryUrl &&
@@ -176,37 +175,3 @@ defineEvent("guildMemberAdd", async (member) => {
 		`${member.user.tag} joined the server`,
 	);
 });
-
-if (config.channels.intros) {
-	const INTRO_INTERVAL = 10;
-	let introCount = 0;
-	const introTemplate = {
-		embeds: [
-			{
-				title: "Introduction Template",
-				color: constants.themeColor,
-				description: `\`\`\`md\n- Name/Nickname: \n- Pronouns: \n- Age: \n- Scratch profile: ${
-					constants.domains.scratch
-				}/users/\n- Country/Location: \n- Favorite addon: \n- Hobbies: \n- Extra: \n\`\`\``,
-			},
-		],
-	};
-	let templateMessage =
-		(await config.channels.intros.messages.fetch({ limit: 100 })).find(
-			(message) =>
-				message.deletable &&
-				message.author.id === client.user.id &&
-				message.embeds[0]?.title === "Introduction Template",
-		) ?? (await config.channels.intros.send(introTemplate));
-	defineEvent("messageCreate", async (message) => {
-		if (message.channel.id !== config.channels.intros?.id) return;
-
-		introCount++;
-		if (introCount % INTRO_INTERVAL) return;
-
-		const newMessage = await templateMessage.reply(introTemplate);
-		ignoredDeletions.add(templateMessage.id);
-		await templateMessage.delete();
-		templateMessage = newMessage;
-	});
-}

@@ -1,14 +1,11 @@
 import type { CommandInteractionOption } from "discord.js";
 
-import {
-	ApplicationCommandOptionType,
-	AutoModerationRuleTriggerType,
-	GuildMember,
-	MessageMentions,
-	MessageType,
-	underline,
-} from "discord.js";
+
+
+import { ApplicationCommandOptionType, AutoModerationRuleTriggerType, GuildMember, MessageMentions, MessageType, underline } from "discord.js";
 import { commands, defineChatCommand, defineEvent, escapeAllMarkdown } from "strife.js";
+
+
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
@@ -17,6 +14,7 @@ import { ignoredDeletions } from "../logging/messages.ts";
 import warn from "../punishments/warn.ts";
 import automodMessage from "./automod.ts";
 import tryCensor, { badWordsAllowed } from "./misc.ts";
+
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
@@ -145,8 +143,8 @@ defineChatCommand(
 
 		const isMod =
 			interaction.member instanceof GuildMember ?
-				interaction.member.roles.resolve(config.roles.mod.id)
-			:	interaction.member.roles.includes(config.roles.mod.id);
+				interaction.member.roles.resolve(config.roles.staff.id)
+			:	interaction.member.roles.includes(config.roles.staff.id);
 
 		await interaction.reply({
 			ephemeral: true,

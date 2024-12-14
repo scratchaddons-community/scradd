@@ -19,7 +19,6 @@ export function getThreadConfig(thread: AnyThreadChannel): { roles: string[]; ke
 			[config.channels.servers?.id || ""]: { roles: [], keepOpen: true },
 			[config.channels.mod.id || ""]: { roles: [config.roles.staff.id], keepOpen: false },
 			[config.channels.modlogs.id || ""]: { roles: [config.roles.mod.id], keepOpen: true },
-			[config.channels.exec?.id || ""]: { roles: [config.roles.exec.id], keepOpen: false },
 			[config.channels.admin.id || ""]: { roles: [config.roles.staff.id], keepOpen: false },
 		}[thread.parent?.id || ""] ?? { roles: [], keepOpen: false }
 	);
