@@ -1,11 +1,14 @@
 import type { CommandInteractionOption } from "discord.js";
 
-
-
-import { ApplicationCommandOptionType, AutoModerationRuleTriggerType, GuildMember, MessageMentions, MessageType, underline } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	AutoModerationRuleTriggerType,
+	GuildMember,
+	MessageMentions,
+	MessageType,
+	underline,
+} from "discord.js";
 import { commands, defineChatCommand, defineEvent, escapeAllMarkdown } from "strife.js";
-
-
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
@@ -14,7 +17,6 @@ import { ignoredDeletions } from "../logging/messages.ts";
 import warn from "../punishments/warn.ts";
 import automodMessage from "./automod.ts";
 import tryCensor, { badWordsAllowed } from "./misc.ts";
-
 
 defineEvent.pre("interactionCreate", async (interaction) => {
 	if (
