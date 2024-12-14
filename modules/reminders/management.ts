@@ -26,7 +26,7 @@ import { getUserReminders, remindersDatabase } from "./misc.ts";
 import queueReminders from "./send.ts";
 
 export async function listReminders(interaction: ChatInputCommandInteraction): Promise<void> {
-	const message = await interaction.deferReply({ ephemeral: true, fetchReply: true });
+	await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	const reminders = getUserReminders(interaction.user.id);
 	await paginate(
@@ -36,7 +36,7 @@ export async function listReminders(interaction: ChatInputCommandInteraction): P
 				new Date(reminder.date),
 				TimestampStyles.RelativeTime,
 			)}: ${channelMention(reminder.channel)} ${reminder.reminder ?? ""}`,
-		(data) => message.edit(data),
+		(data) => interaction.editReply(data),
 		{
 			title: "Your reminders",
 			singular: "reminder",
