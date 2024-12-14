@@ -21,10 +21,9 @@ import top from "./top.ts";
 import updateReactions, { addToDatabase, updateSuggestion } from "./update.ts";
 
 defineEvent("threadCreate", addToDatabase);
-defineEvent("messageReactionAdd", async (partialReaction, { id: user }, { burst }) => {
+defineEvent("messageReactionAdd", async (partialReaction, { id: user }) => {
 	const reaction = partialReaction.partial ? await partialReaction.fetch() : partialReaction;
-
-	if (burst || !(await updateReactions(reaction))) await reaction.users.remove(user);
+	if (!(await updateReactions(reaction))) await reaction.users.remove(user);
 });
 defineEvent("messageReactionRemove", async (partialReaction) => {
 	await updateReactions(

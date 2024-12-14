@@ -200,14 +200,13 @@ export default async function automodMessage(message: Message): Promise<boolean>
 
 		const publicWarn = await sendPublicWarn();
 
-		if (needsDelete) {
-			await (message.deletable ?
-				message.delete()
-			:	log(
-					`${LoggingEmojisError} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
-					LogSeverity.Alert,
-					{ pingHere: true },
-				));
+		if (needsDelete && !(message.deletable && (await message.delete().catch(() => void 0)))) {
+			await log(
+				`${LoggingEmojisError} Unable to delete ${message.url} (${deletionMessages.join(" ")})`,
+				LogSeverity.Alert,
+				{ pingHere: true },
+			);
+			return false;
 		}
 
 		if ((!mentions.size || !needsDelete) && publicWarn) {
