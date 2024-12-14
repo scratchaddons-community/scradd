@@ -130,27 +130,7 @@ export async function guildMemberUpdate(
 }
 
 export async function userUpdate(oldUser: PartialUser | User, newUser: User): Promise<void> {
-	if (oldUser.partial) return;
-
-	if (oldUser.avatar !== newUser.avatar) {
-		await log(
-			`${LoggingEmojis.User} ${newUser.toString()} changed their avatar`,
-			LogSeverity.Resource,
-			{ files: [newUser.displayAvatarURL({ size: 128 })] },
-		);
-	}
-
-	if (oldUser.globalName !== newUser.globalName)
-		await log(
-			`${LoggingEmojis.User} ${newUser.toString()}${
-				newUser.globalName ?
-					oldUser.globalName ?
-						` changed their display name from ${oldUser.globalName} to ${newUser.globalName}`
-					:	` set their display name to ${newUser.globalName}`
-				:	"’s display name was removed"
-			}`,
-			LogSeverity.Resource,
-		);
+	if (oldUser.partial || !(await config.guild.members.fetch(newUser).catch(() => void 0))) return;
 
 	const quarantined = !!newUser.flags?.has("Quarantined");
 	if (!!oldUser.flags?.has("Quarantined") !== quarantined) {
@@ -169,15 +149,6 @@ export async function userUpdate(oldUser: PartialUser | User, newUser: User): Pr
 				spammer ? "" : "un"
 			}marked as likely spammer`,
 			LogSeverity.Alert,
-		);
-	}
-
-	if (oldUser.tag !== newUser.tag) {
-		await log(
-			`${LoggingEmojis.User} ${newUser.toString()} changed their username from ${
-				oldUser.tag
-			} to ${newUser.tag}`,
-			LogSeverity.Resource,
 		);
 	}
 }

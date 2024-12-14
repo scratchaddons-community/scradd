@@ -115,12 +115,6 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 		await newThread.setName(oldThread.name, "Censored bad word");
 	}
 });
-defineEvent.pre("userUpdate", async (_, user) => {
-	return await config.guild.members.fetch(user).then(
-		() => true,
-		() => false,
-	);
-});
 
 defineChatCommand(
 	{

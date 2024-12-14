@@ -1,13 +1,8 @@
-import type {
-	AuditLogEvent,
-	GuildScheduledEvent,
-	PartialGuildScheduledEvent,
-	VoiceState,
-} from "discord.js";
+import type { AuditLogEvent, GuildScheduledEvent, PartialGuildScheduledEvent } from "discord.js";
 import type { AuditLog } from "./util.ts";
 
 import { unifiedDiff } from "difflib";
-import { ChannelType, GuildScheduledEventStatus, time } from "discord.js";
+import { GuildScheduledEventStatus, time } from "discord.js";
 
 import config from "../../common/config.ts";
 import log from "./misc.ts";
@@ -156,90 +151,6 @@ export async function guildScheduledEventUpdate(
 	}
 }
 
-export async function voiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
-	if (!newState.member || newState.guild.id !== config.guild.id) return;
-	const { channel } = newState;
-
-	if (oldState.channel?.id !== channel?.id && !newState.member.user.bot) {
-		if (oldState.channel && oldState.channel.type !== ChannelType.GuildStageVoice) {
-			await log(
-				`${
-					LoggingEmojis.Voice
-				} ${newState.member.toString()} left voice channel ${oldState.channel.toString()}`,
-				LogSeverity.Resource,
-			);
-		}
-
-		if (channel && channel.type !== ChannelType.GuildStageVoice) {
-			await log(
-				`${
-					LoggingEmojis.Voice
-				} ${newState.member.toString()} joined voice channel ${channel.toString()}, ${
-					newState.mute ? "" : "un"
-				}muted and ${newState.deaf ? "" : "un"}deafened`,
-				LogSeverity.Resource,
-			);
-		}
-
-		return;
-	}
-
-	if (!channel || (newState.suppress && channel.type === ChannelType.GuildStageVoice)) return;
-
-	if (Boolean(oldState.selfDeaf) !== Boolean(newState.selfDeaf)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.selfDeaf ? "" : "un"
-			}deafened in ${channel.toString()}`,
-			LogSeverity.Resource,
-		);
-	}
-
-	if (Boolean(oldState.selfMute) !== Boolean(newState.selfMute)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.selfMute ? "" : "un"
-			}muted in ${channel.toString()}`,
-			LogSeverity.Resource,
-		);
-	}
-
-	if (Boolean(oldState.selfVideo) !== Boolean(newState.selfVideo)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} turned camera ${
-				newState.selfVideo ? "on" : "off"
-			} in ${channel.toString()}`,
-			LogSeverity.Resource,
-		);
-	}
-
-	if (Boolean(oldState.serverDeaf) !== Boolean(newState.serverDeaf)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
-				newState.serverDeaf ? "" : "un-"
-			}server deafened`,
-			LogSeverity.Resource,
-		);
-	}
-
-	if (Boolean(oldState.serverMute) !== Boolean(newState.serverMute)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} was ${
-				newState.serverMute ? "" : "un-"
-			}server muted`,
-			LogSeverity.Resource,
-		);
-	}
-
-	if (Boolean(oldState.streaming) !== Boolean(newState.streaming)) {
-		await log(
-			`${LoggingEmojis.Voice} ${newState.member.toString()} ${
-				newState.streaming ? "started" : "stopped"
-			} screen sharing in ${channel.toString()}`,
-			LogSeverity.Resource,
-		);
-	}
-}
 export async function guildScheduledEventDelete(
 	event: GuildScheduledEvent | PartialGuildScheduledEvent,
 ): Promise<void> {

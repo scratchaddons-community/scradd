@@ -19,14 +19,6 @@ import {
 	channelOverwriteUpdate,
 	channelUpdate,
 } from "./channels.ts";
-import {
-	emojiCreate,
-	emojiDelete,
-	emojiUpdate,
-	stickerCreate,
-	stickerDelete,
-	stickerUpdate,
-} from "./expressions.ts";
 import { guildUpdate, inviteCreate, inviteDelete } from "./guild.ts";
 import {
 	messageDelete,
@@ -52,7 +44,6 @@ import {
 	guildScheduledEventCreate,
 	guildScheduledEventDelete,
 	guildScheduledEventUpdate,
-	voiceStateUpdate,
 } from "./voice.ts";
 
 const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void> } = {
@@ -96,9 +87,6 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 			LogSeverity.ImportantUpdate,
 		);
 	},
-	[AuditLogEvent.EmojiCreate]: emojiCreate,
-	[AuditLogEvent.EmojiUpdate]: emojiUpdate,
-	[AuditLogEvent.EmojiDelete]: emojiDelete,
 	async [AuditLogEvent.IntegrationCreate](entry) {
 		await log(
 			`${LoggingEmojis.Integration} ${entry.target.name} (ID: ${
@@ -115,9 +103,6 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 			LogSeverity.ImportantUpdate,
 		);
 	},
-	[AuditLogEvent.StickerCreate]: stickerCreate,
-	[AuditLogEvent.StickerUpdate]: stickerUpdate,
-	[AuditLogEvent.StickerDelete]: stickerDelete,
 	[AuditLogEvent.GuildScheduledEventCreate]: guildScheduledEventCreate,
 	[AuditLogEvent.GuildScheduledEventUpdate]: guildScheduledEventUpdate,
 	[AuditLogEvent.ThreadCreate]: threadCreate,
@@ -177,4 +162,3 @@ defineEvent("messageUpdate", messageUpdate);
 defineEvent("roleDelete", roleDelete);
 defineEvent("threadUpdate", threadUpdate);
 defineEvent("userUpdate", userUpdate);
-defineEvent("voiceStateUpdate", voiceStateUpdate);
