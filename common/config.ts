@@ -100,7 +100,6 @@ async function getConfig() {
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
 			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
-			qotd: getChannel("question", ChannelType.GuildForum),
 			share: getChannel("share", ChannelType.GuildForum, "full"),
 			bots: getChannel("bots", ChannelType.GuildText),
 

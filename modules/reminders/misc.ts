@@ -19,6 +19,7 @@ export const enum SpecialReminder {
 	BackupDatabases,
 	SyncRandomBoard,
 	ChangeStatus,
+	/** @deprecated */
 	QOTD,
 }
 export type Reminder = {
@@ -124,19 +125,3 @@ remindersDatabase.data = [
 		user: client.user.id,
 	},
 ];
-
-if (
-	config.channels.qotd &&
-	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminder.QOTD).length !== 1
-) {
-	remindersDatabase.data = [
-		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminder.QOTD),
-		{
-			channel: config.channels.qotd.id,
-			date: date.setUTCHours(12, 0, 0, 0) + (date.getUTCHours() >= 12 ? 86_400_000 : 0),
-			reminder: undefined,
-			id: SpecialReminder.QOTD,
-			user: client.user.id,
-		},
-	];
-}
