@@ -39,9 +39,9 @@ export const oldSuggestions =
 
 				author:
 					(message.author.id === constants.users.robotop ?
-						message.embeds[0]?.footer?.text.split(": ")[1]
-					:	/\/(?<userId>\d+)\//.exec(message.embeds[0]?.author?.iconURL ?? "")?.groups
-							?.userId) ?? message.author,
+						embed?.footer?.text.split(": ")[1]
+					:	/(?:users|avatars)\/(?<userId>\d+)\//.exec(embed?.author?.iconURL ?? "")
+							?.groups?.userId) ?? message.author,
 
 				count:
 					(message.reactions.valueOf().first()?.count ?? 0) -
