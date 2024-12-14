@@ -38,14 +38,14 @@
 		"strife.js": "4.2.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "9.16.0",
+		"@eslint/js": "9.17.0",
 		"@redguy12/prettier-config": "3.2.1",
 		"@total-typescript/ts-reset": "0.6.1",
 		"@types/difflib": "<=0.2",
 		"@types/mustache": "<=4.2",
 		"@types/node": "<=22.10",
 		"@types/papaparse": "<=5.4",
-		"eslint": "9.16.0",
+		"eslint": "9.17.0",
 		"eslint-plugin-unicorn": "56.0.1",
 		"globals": "15.13.0",
 		"nodemon": "3.1.7",
