@@ -169,7 +169,7 @@ export async function top(
 	await paginate(
 		guildMembers ? leaderboard.filter((entry) => guildMembers.has(entry.user)) : leaderboard,
 		async (xp) =>
-			`${await mentionUser(xp.user, interaction.user)}\n Level ${getLevelForXp(
+			`${await mentionUser(xp.user, interaction.user)} - Level ${getLevelForXp(
 				xp.xp,
 			)} (${Math.floor(xp.xp).toLocaleString()} XP)`,
 		(data) => message.edit(data),
@@ -179,7 +179,7 @@ export async function top(
 
 			user: interaction.user,
 			rawOffset: index,
-			pageLength: 30,
+			pageLength: 15,
 
 			timeout: constants.collectorTime,
 			color: constants.themeColor,
