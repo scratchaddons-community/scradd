@@ -116,10 +116,7 @@
 			"groupName": "eslint monorepo"
 		},
 		{
-			"matchDatasources": [
-				"docker",
-				"node-version"
-			],
+			"matchDatasources": ["docker", "node-version"],
 			"matchPackageNames": [
 				"/(?:^|/)node$/",
 				"!calico/node",
@@ -148,7 +145,7 @@
 			"patch": { "enabled": false },
 			"versioning": "node"
 		},
-		
+
 		{
 			"matchDepNames": ["@types/node", "python", "npm", "poetry"],
 			"major": { "enabled": true },
