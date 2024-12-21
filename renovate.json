@@ -7,7 +7,6 @@
 		"docker:pinDigests",
 		"group:monorepos",
 		"group:recommended",
-		"helpers:pinGitHubActionDigestsToSemver",
 		"preview:dockerVersions",
 		"replacements:all",
 		"security:openssf-scorecard",
