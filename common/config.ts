@@ -62,7 +62,7 @@ async function getConfig() {
 		(role) => !role.managed && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
 	);
 	const modRole = getRole("mod", "start");
-	const staffRole = assertOutsideTests(getRole("staff") ?? modRole);
+	const staffRole = assertOutsideTests(getRole("staff", "start") ?? modRole);
 
 	const tickets = getChannel("contact", ChannelType.GuildText);
 	return {
