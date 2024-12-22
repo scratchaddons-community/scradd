@@ -24,7 +24,7 @@
 	"dependencies": {
 		"@fontsource-variable/sora": "5.1.0",
 		"@khanacademy/simple-markdown": "0.13.7",
-		"@sa-community/addons-data": "1.39.2",
+		"@sa-community/addons-data": "1.40.0",
 		"@twemoji/parser": "<=15.1.0",
 		"didyoumean2": "7.0.4",
 		"difflib": "npm:@ewoudenberg/difflib@0.1.0",
