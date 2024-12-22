@@ -34,8 +34,7 @@ import { getWeeklyXp } from "./xp/util.ts";
 const SETTINGS = {
 		boardPings: "Board Pings",
 	dmReminders: "DM Reminders",
-	github: "GitHub Reference Links",
-	levelUpPings: "Level Up Pings",
+		levelUpPings: "Level Up Pings",
 	scratchEmbeds: "Scratch Link Embeds",
 	useMentions: "Use Mentions",
 } as const;
@@ -52,8 +51,7 @@ export async function getDefaultSettings(user: {
 				boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
-		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
-		levelUpPings: constants.env === "production",
+				levelUpPings: constants.env === "production",
 		preDango: false,
 		scraddChat: false,
 		scratchEmbeds: true,
@@ -111,11 +109,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
-			"github": {
-				type: ApplicationCommandOptionType.Boolean,
-				description: "Link GitHub issues, PRs, and discussions when you send references",
-			},
-			"scratch-embeds": {
+						"scratch-embeds": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Show information about Scratch links you send",
 			},
@@ -182,14 +176,7 @@ export async function updateSettings(
 				type: ComponentType.ActionRow,
 			},
 			{
-				components: [
-					buttons.useMentions,
-										buttons.scratchEmbeds,
-					...((await config.guilds.development.members?.fetch(user.id).then(
-						() => [buttons.github],
-						() => [],
-					)) ?? [buttons.github]),
-				],
+				components: [					buttons.useMentions, 										buttons.scratchEmbeds				],
 				type: ComponentType.ActionRow,
 			},
 		],

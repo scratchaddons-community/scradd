@@ -15,7 +15,7 @@ import {
 	defineEvent,
 	defineMenuCommand,
 	getBaseChannel,
-		stripMarkdown,
+	stripMarkdown,
 	zeroWidthSpace,
 } from "strife.js";
 
@@ -26,7 +26,6 @@ import { BOARD_EMOJI } from "../board/misc.ts";
 import { getSettings } from "../settings.ts";
 import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.ts";
 import dad from "./dad.ts";
-import github from "./github.ts";
 import { getMatches, handleMatch } from "./scratch.ts";
 
 const ignoreTriggers = [
@@ -55,7 +54,7 @@ defineEvent("messageCreate", async (message) => {
 		].includes(message.type)
 	)
 		await message.react(BOARD_EMOJI).catch(() => void 0);
-		
+
 	const response = await handleMutatable(message);
 	if (response === true) return;
 	for (const [index, action] of [response].flat().entries()) {
@@ -118,28 +117,6 @@ async function handleMutatable(
 
 	const settings = await getSettings(message.author),
 		configuredSettings = await getSettings(message.author, false);
-
-	const links = settings.github && github(message.content, message.guild?.id);
-	if (links)
-		return {
-			content: links,
-			components:
-				configuredSettings.github === undefined ?
-					[
-						{
-							components: [
-								{
-									customId: `github-${message.author.id}_toggleSetting`,
-									type: ComponentType.Button as const,
-									label: `Disable GitHub Links`,
-									style: ButtonStyle.Success as const,
-								},
-							],
-							type: ComponentType.ActionRow,
-						},
-					]
-				:	[],
-		};
 
 	if (settings.scratchEmbeds) {
 		const matches = getMatches(message.content);
