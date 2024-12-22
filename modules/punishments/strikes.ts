@@ -1,6 +1,6 @@
 import type { InteractionResponse, Message, RepliableInteraction, User } from "discord.js";
 
-import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+import { GuildMember } from "discord.js";
 import { client } from "strife.js";
 
 import config from "../../common/config.ts";
@@ -68,31 +68,6 @@ export async function getStrikeById(
 		(strike.mod === "AutoMod" ? strike.mod : await mentionUser(strike.mod, interaction.user));
 	const nick = (member ?? user)?.displayName;
 	return await interaction.editReply({
-		components:
-			isModerator ?
-				[
-					{
-						type: ComponentType.ActionRow,
-
-						components: [
-							strike.removed ?
-								{
-									type: ComponentType.Button,
-									customId: `${strike.id}_addStrikeBack`,
-									label: "Add back",
-									style: ButtonStyle.Primary,
-								}
-							:	{
-									type: ComponentType.Button,
-									customId: `${strike.id}_removeStrike`,
-									label: "Remove",
-									style: ButtonStyle.Danger,
-								},
-						],
-					},
-				]
-			:	[],
-
 		embeds: [
 			{
 				color: member?.displayColor,

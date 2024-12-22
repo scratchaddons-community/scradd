@@ -1,23 +1,13 @@
-import {
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
-	ComponentType,
-	TextInputStyle,
-} from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
 import {
 	client,
 	defineButton,
-	defineChatCommand,
 	defineMenuCommand,
-	defineModal,
 	defineSelect,
 	defineSubcommands,
 } from "strife.js";
 
-import constants from "../../common/constants.ts";
-import { DEFAULT_STRIKES, MAX_STRIKES } from "./misc.ts";
 import { getStrikeById, getStrikes } from "./strikes.ts";
-import warn, { addStrikeBack, removeStrike } from "./warn.ts";
 
 defineSubcommands(
 	{
@@ -87,113 +77,3 @@ defineSelect("selectStrike", async (interaction) => {
 	const [id] = interaction.values;
 	if (id) await getStrikeById(interaction, id);
 });
-
-defineChatCommand(
-	{
-		name: "warn",
-		description: "Warn a user",
-		restricted: true,
-
-		options: {
-			user: {
-				type: ApplicationCommandOptionType.User,
-				description: "The user to warn",
-				required: true,
-			},
-
-			reason: {
-				type: ApplicationCommandOptionType.String,
-				description: "Reason for the warning",
-				required: constants.env === "production",
-				minLength: 10,
-				maxLength: 1024,
-			},
-
-			strikes: {
-				type: ApplicationCommandOptionType.Integer,
-				description: `How many times to warn them (defaults to ${DEFAULT_STRIKES})`,
-				maxValue: MAX_STRIKES,
-				minValue: 0,
-			},
-		},
-	},
-
-	async (interaction, options) => {
-		const reason = options.reason || constants.defaultPunishment;
-		const strikes = options.strikes ?? DEFAULT_STRIKES;
-		await interaction.deferReply();
-		const success = await warn(options.user, reason, strikes, interaction.user);
-		const displayedStrikes = Math.round(strikes);
-
-		await interaction.editReply(
-			success ?
-				`${constants.emojis.statuses.yes} ${
-					strikes < 1 ? "Verbally warned" : "Warned"
-				} ${options.user.toString()}${
-					displayedStrikes > 1 ? ` ${displayedStrikes} times` : ""
-				}.${success === "no-dm" ? " I was not able to DM them." : ""} ${reason}`
-			:	`${constants.emojis.statuses.no} Can not warn ${options.user.toString()}.`,
-		);
-	},
-);
-defineMenuCommand(
-	{ name: "Warn User", type: ApplicationCommandType.User, restricted: true },
-	async (interaction) => {
-		await interaction.showModal({
-			title: "Warn User",
-			customId: `${interaction.targetUser.id}_warn`,
-			components: [
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							label: "Reason",
-							type: ComponentType.TextInput,
-							style: TextInputStyle.Paragraph,
-							customId: "reason",
-							value:
-								constants.env === "production" ?
-									undefined
-								:	constants.defaultPunishment,
-						},
-					],
-				},
-				{
-					type: ComponentType.ActionRow,
-					components: [
-						{
-							label: "Strikes",
-							type: ComponentType.TextInput,
-							style: TextInputStyle.Short,
-							customId: "strikes",
-							value: "1",
-						},
-					],
-				},
-			],
-		});
-	},
-);
-defineModal("warn", async (interaction, id) => {
-	const user = await client.users.fetch(id);
-	const reason = interaction.fields.getTextInputValue("reason");
-	const rawStrikes = +interaction.fields.getTextInputValue("strikes");
-	await interaction.deferReply();
-
-	const strikes =
-		Number.isNaN(rawStrikes) || rawStrikes < 0 ?
-			1
-		:	Math.min(MAX_STRIKES, Math.floor(rawStrikes));
-	const success = await warn(user, reason, strikes, interaction.user);
-	await interaction.editReply(
-		success ?
-			`${constants.emojis.statuses.yes} ${
-				strikes < 1 ? "Verbally warned" : "Warned"
-			} ${user.toString()}${strikes > 1 ? ` ${strikes} times` : ""}.${
-				success === "no-dm" ? " I was not able to DM them." : ""
-			} ${reason}`
-		:	`${constants.emojis.statuses.no} Can not warn ${user.toString()}.`,
-	);
-});
-defineButton("removeStrike", removeStrike);
-defineButton("addStrikeBack", addStrikeBack);
