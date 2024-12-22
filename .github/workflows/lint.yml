@@ -10,7 +10,6 @@ jobs:
     format:
         name: Format
         runs-on: ubuntu-24.04
-        concurrency: format-${{github.head_ref}}
 
         steps:
             - name: Checkout
