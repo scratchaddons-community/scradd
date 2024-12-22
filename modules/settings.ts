@@ -32,9 +32,9 @@ import { getWeeklyXp } from "./xp/util.ts";
  * 4. Add buttons in {@link updateSettings} as desired to toggle this setting.
  */
 const SETTINGS = {
-		boardPings: "Board Pings",
+	boardPings: "Board Pings",
 	dmReminders: "DM Reminders",
-		levelUpPings: "Level Up Pings",
+	levelUpPings: "Level Up Pings",
 	scratchEmbeds: "Scratch Link Embeds",
 	useMentions: "Use Mentions",
 } as const;
@@ -48,11 +48,10 @@ export async function getDefaultSettings(user: {
 			() => false,
 		)) ?? !member;
 	return {
-				boardPings: constants.env === "production",
+		boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
-				levelUpPings: constants.env === "production",
-		preDango: false,
+		levelUpPings: constants.env === "production",
 		scraddChat: false,
 		scratchEmbeds: true,
 		useMentions: getWeeklyXp(user.id) > 100 || isDev,
@@ -65,7 +64,7 @@ defineChatCommand(
 		description: "Customize your personal settings",
 
 		options: {
-						"board-pings": {
+			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: `Ping you when your messages get on ${
 					config.channels.board ? "#" + config.channels.board.name : "the board"
@@ -109,7 +108,7 @@ defineChatCommand(
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Send reminders in your DMs by default",
 			},
-						"scratch-embeds": {
+			"scratch-embeds": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: "Show information about Scratch links you send",
 			},
@@ -176,7 +175,7 @@ export async function updateSettings(
 				type: ComponentType.ActionRow,
 			},
 			{
-				components: [					buttons.useMentions, 										buttons.scratchEmbeds				],
+				components: [buttons.useMentions, buttons.scratchEmbeds],
 				type: ComponentType.ActionRow,
 			},
 		],
@@ -205,12 +204,9 @@ defineButton("toggleSetting", async (interaction, data) => {
 });
 
 export const userSettingsDatabase = new Database<
-	{
-		id: Snowflake;
-		execute?: boolean;
-		preDango?: boolean;
-		scraddChat?: boolean;
-	} & { [key in keyof typeof SETTINGS]?: boolean }
+	{ id: Snowflake; execute?: boolean; scraddChat?: boolean } & {
+		[key in keyof typeof SETTINGS]?: boolean;
+	}
 >("user_settings");
 await userSettingsDatabase.init();
 export async function getSettings(
@@ -249,5 +245,5 @@ export async function mentionUser(
 
 	const { displayName } =
 		user instanceof User ? user : ((await client.users.fetch(user).catch(() => void 0)) ?? {});
-	return displayName ? hyperlink((displayName), url) : userMention(id);
+	return displayName ? hyperlink(displayName, url) : userMention(id);
 }
