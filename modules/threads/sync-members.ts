@@ -40,7 +40,7 @@ export async function updateThreadMembers(
 	if (thread.guild.id === config.guild.id && wasArchived && !thread.archived) {
 		const options = getThreadConfig(thread);
 		for (const roleId of options.roles) {
-			const role = await config.guild.roles.fetch(roleId).catch(() => void 0);
+			const role = roleId && (await config.guild.roles.fetch(roleId).catch(() => void 0));
 			if (!role) continue;
 			await addRoleToThread({ role, thread });
 			continue;
