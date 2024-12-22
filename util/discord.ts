@@ -43,17 +43,14 @@ import { truncateText } from "./text.ts";
 
 export async function extractMessageExtremities(
 	message: Message,
-	censor?: (text: string) => string,
 	forceRefetch?: boolean,
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }>;
 export async function extractMessageExtremities(
 	message: MessageSnapshot,
-	censor: ((text: string) => string) | undefined,
 	forceRefetch: false,
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }>;
 export async function extractMessageExtremities(
 	message: Message | MessageSnapshot,
-	censor?: (text: string) => string,
 	forceRefetch = true,
 ): Promise<{ embeds: APIEmbed[]; files: Attachment[] }> {
 	const embeds = [];
@@ -67,7 +64,7 @@ export async function extractMessageExtremities(
 				(data.video?.url && isFileExpired(data.video.url)) ||
 				(data.author?.icon_url && isFileExpired(data.author.icon_url)))
 		)
-			return await extractMessageExtremities(await message.fetch(true), censor, false);
+			return await extractMessageExtremities(await message.fetch(true), false);
 
 		const automodInfo =
 			message.type === MessageType.AutoModerationAction &&
@@ -147,37 +144,6 @@ export async function extractMessageExtremities(
 				}
 			:	{ ...data };
 
-		if (!censor) {
-			embeds.push(newEmbed);
-			continue;
-		}
-
-		newEmbed.title = censor(newEmbed.title ?? "");
-		newEmbed.description = censor(newEmbed.description ?? "");
-		if (newEmbed.author) newEmbed.author.name = censor(newEmbed.author.name);
-		if (newEmbed.footer) newEmbed.footer.text = censor(newEmbed.footer.text);
-
-		if (newEmbed.url && newEmbed.url !== censor(newEmbed.url)) newEmbed.url = undefined;
-		if (newEmbed.author?.url && newEmbed.author.url !== censor(newEmbed.author.url))
-			newEmbed.author.url = undefined;
-		if (
-			newEmbed.author?.icon_url &&
-			newEmbed.author.icon_url !== censor(newEmbed.author.icon_url)
-		)
-			newEmbed.author.icon_url = undefined;
-		if (newEmbed.thumbnail && newEmbed.thumbnail.url !== censor(newEmbed.thumbnail.url))
-			newEmbed.thumbnail = undefined;
-		if (newEmbed.video?.url && newEmbed.video.url !== censor(newEmbed.video.url))
-			newEmbed.video = undefined;
-		if (newEmbed.image && newEmbed.image.url !== censor(newEmbed.image.url))
-			newEmbed.image = undefined;
-
-		newEmbed.fields = (newEmbed.fields ?? []).map((field) => ({
-			inline: field.inline,
-			name: censor(field.name),
-			value: censor(field.value),
-		}));
-
 		embeds.push(newEmbed);
 	}
 
@@ -205,15 +171,13 @@ export async function extractMessageExtremities(
 			]
 		:	[];
 
-	const stickers = message.stickers
-		.filter((sticker) => !censor?.(sticker.name))
-		.map(
-			(sticker): APIEmbed => ({
-				color: Colors.Blurple,
-				image: { url: sticker.url },
-				footer: { text: sticker.name },
-			}),
-		);
+	const stickers = message.stickers.map(
+		(sticker): APIEmbed => ({
+			color: Colors.Blurple,
+			image: { url: sticker.url },
+			footer: { text: sticker.name },
+		}),
+	);
 
 	const files = (
 		forceRefetch && !message.partial ?
@@ -221,9 +185,8 @@ export async function extractMessageExtremities(
 		:	message.attachments.filter((file) => !isFileExpired(file.url))).values();
 
 	const snapshots = await Promise.all(
-		message.messageSnapshots?.map((snapshot) =>
-			extractMessageExtremities(snapshot, censor, false),
-		) ?? [],
+		message.messageSnapshots?.map((snapshot) => extractMessageExtremities(snapshot, false)) ??
+			[],
 	);
 
 	return {
@@ -688,10 +651,7 @@ const autoModMessages = new Set([
 	MessageType.GuildIncidentReportFalseAlarm,
 ]);
 
-export async function messageToEmbed(
-	message: Message,
-	censor = (text: string) => text,
-): Promise<APIEmbed> {
+export async function messageToEmbed(message: Message): Promise<APIEmbed> {
 	const lines = (await messageToText(message)).split("\n");
 	const content =
 		message.type === MessageType.GuildInviteReminder ? (lines[1] ?? "") : lines.join("\n");
@@ -706,7 +666,7 @@ export async function messageToEmbed(
 			autoModMessages.has(message.type) ? 0x99_a1_f2
 			: message.type === MessageType.GuildInviteReminder ? undefined
 			: message.member?.displayColor,
-		description: message.type === MessageType.AutoModerationAction ? "" : censor(content),
+		description: message.type === MessageType.AutoModerationAction ? "" : content,
 
 		author: {
 			icon_url:
@@ -716,7 +676,7 @@ export async function messageToEmbed(
 					"https://discord.com/assets/e4c6bb8de56c299978ec36136e53591a.svg"
 				:	(message.member ?? message.author).displayAvatarURL(),
 
-			name: censor(author),
+			name: author,
 		},
 
 		timestamp:

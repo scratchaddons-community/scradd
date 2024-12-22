@@ -12,10 +12,7 @@ import {
 } from "discord.js";
 import { commands, defineChatCommand, defineEvent, mentionChatCommand } from "strife.js";
 
-import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
-import tryCensor, { badWordsAllowed } from "../automod/misc.ts";
-import warn from "../punishments/warn.ts";
 import { OPERATION_PREFIX, parseArguments, splitFirstArgument } from "./misc.ts";
 import {
 	getHelpForOperation,
@@ -29,7 +26,6 @@ defineChatCommand(
 	{
 		name: "execute",
 		description: "Make me do something…",
-		censored: false,
 		options: {
 			operation: {
 				type: ApplicationCommandOptionType.String,
@@ -113,28 +109,6 @@ defineChatCommand(
 					),
 				],
 			});
-		}
-
-		const shouldCensor =
-			interaction.guild?.id === config.guild.id &&
-			(command.censored === "channel" ?
-				!badWordsAllowed(interaction.channel)
-			:	(command.censored ?? true));
-		const censoredOptions = shouldCensor && tryCensor(operation);
-		if (censoredOptions && censoredOptions.strikes) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Please ${
-					censoredOptions.strikes < 1 ? "don’t say that here" : "watch your language"
-				}!`,
-			});
-			await warn(
-				interaction.user,
-				censoredOptions.words.length === 1 ? "Used a banned word" : "Used banned words",
-				censoredOptions.strikes,
-				`Used command \`${interaction.toString()}\``,
-			);
-			return;
 		}
 
 		await (

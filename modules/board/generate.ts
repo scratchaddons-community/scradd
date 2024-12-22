@@ -6,7 +6,6 @@ import { client } from "strife.js";
 
 import config from "../../common/config.ts";
 import { extractMessageExtremities, messageToEmbed } from "../../util/discord.ts";
-import { censor } from "../automod/misc.ts";
 import { BOARD_EMOJI } from "./misc.ts";
 
 export default async function generateBoardMessage(
@@ -17,8 +16,8 @@ export default async function generateBoardMessage(
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = await extractMessageExtremities(message, censor);
-		embeds.unshift(await messageToEmbed(message, censor));
+		const { files, embeds } = await extractMessageExtremities(message, );
+		embeds.unshift(await messageToEmbed(message,));
 
 		return {
 			allowedMentions: { users: [] },
@@ -59,7 +58,7 @@ export default async function generateBoardMessage(
 			:	[...(extraButtons.pre ?? []), ...(extraButtons.post ?? [])];
 
 		return {
-			...(await extractMessageExtremities(onBoard, censor)),
+			...(await extractMessageExtremities(onBoard)),
 			content: onBoard.content,
 			components:
 				buttons.length ? [{ type: ComponentType.ActionRow, components: buttons }] : [],

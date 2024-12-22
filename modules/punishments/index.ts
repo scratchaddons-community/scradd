@@ -56,8 +56,6 @@ defineSubcommands(
 				},
 			},
 		},
-
-		censored: false,
 	},
 	async (interaction, options) => {
 		switch (options.subcommand) {

@@ -30,7 +30,6 @@ function convertWord(word: string): string {
 const data: CustomOperation = {
 	name: "uwu",
 	description: uwuify("Uwu-ify provided text"),
-	censored: "channel",
 	options: [
 		{
 			type: ApplicationCommandOptionType.String,

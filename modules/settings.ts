@@ -20,7 +20,6 @@ import { client, defineButton, defineChatCommand, disableComponents } from "stri
 import config from "../common/config.ts";
 import constants from "../common/constants.ts";
 import Database from "../common/database.ts";
-import { censor } from "./automod/misc.ts";
 import { getWeeklyXp } from "./xp/util.ts";
 
 /**
@@ -270,5 +269,5 @@ export async function mentionUser(
 
 	const { displayName } =
 		user instanceof User ? user : ((await client.users.fetch(user).catch(() => void 0)) ?? {});
-	return displayName ? hyperlink(censor(displayName), url) : userMention(id);
+	return displayName ? hyperlink((displayName), url) : userMention(id);
 }

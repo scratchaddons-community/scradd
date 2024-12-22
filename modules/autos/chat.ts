@@ -22,7 +22,6 @@ import config, { getInitialThreads } from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { GlobalBotInvitesPattern, messageToText } from "../../util/discord.ts";
 import { normalize } from "../../util/text.ts";
-import tryCensor, { censor } from "../automod/misc.ts";
 import log from "../logging/misc.ts";
 import { LoggingEmojis, LogSeverity } from "../logging/util.ts";
 import { getSettings, userSettingsDatabase } from "../settings.ts";
@@ -32,10 +31,7 @@ export const chatName = `${client.user.displayName} Chat` as const;
 const Chat = mongoose.model("Chat", new mongoose.Schema({ prompt: String, response: String }));
 const chats = (await Chat.find({}))
 	.map((chat) => ({ response: chat.response, prompt: chat.prompt ?? "" }))
-	.filter(
-		(chat): chat is { response: string; prompt: string } =>
-			!!(chat.response && !tryCensor(chat.response)),
-	);
+	.filter((chat): chat is { response: string; prompt: string } => !!chat.response);
 
 export default function scraddChat(message: Message): string | undefined {
 	if (
@@ -54,7 +50,7 @@ export default function scraddChat(message: Message): string | undefined {
 		getResponse(prompt, 0.75)?.[0] ??
 		getResponse(prompt, 0.45)?.[0] ?? { response: undefined, prompt };
 	if (!response) return;
-	return censor(response)
+	return response
 		.replaceAll(client.user.toString(), message.author.toString())
 		.replaceAll("<@0>", client.user.toString());
 }

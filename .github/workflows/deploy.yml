@@ -21,12 +21,6 @@ jobs:
                   node-version-file: package.json
                   cache: npm
 
-            - name: Download bad words
-              run:
-                  curl
-                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/automod_bad-words.ts"
-                  --output modules/automod/bad-words.ts
-
             - name: Download autos data
               run:
                   curl

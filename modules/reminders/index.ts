@@ -8,7 +8,6 @@ defineSubcommands(
 	{
 		name: "reminders",
 		description: "Manage your reminders",
-		censored: false,
 		access: true,
 		subcommands: {
 			add: {

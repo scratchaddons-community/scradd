@@ -17,8 +17,6 @@ import { disableComponents, paginate } from "strife.js";
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { convertBase, parseTime } from "../../util/numbers.ts";
-import tryCensor, { badWordsAllowed } from "../automod/misc.ts";
-import warn from "../punishments/warn.ts";
 import { getSettings } from "../settings.ts";
 import { getLevelForXp } from "../xp/misc.ts";
 import { xpDatabase } from "../xp/util.ts";
@@ -73,26 +71,6 @@ export async function createReminder(
 ): Promise<InteractionResponse | undefined> {
 	const reminders = getUserReminders(interaction.user.id);
 	const dm = options.dm ?? (await getSettings(interaction.user)).dmReminders;
-
-	if (!dm && !badWordsAllowed(interaction.channel)) {
-		const censored = tryCensor(options.reminder);
-
-		if (censored) {
-			await interaction.reply({
-				ephemeral: true,
-				content: `${constants.emojis.statuses.no} Please ${
-					censored.strikes < 1 ? "don’t say that here" : "watch your language"
-				}!`,
-			});
-			await warn(
-				interaction.user,
-				censored.words.length === 1 ? "Used a banned word" : "Used banned words",
-				censored.strikes,
-				`Used command ${interaction.toString()}`,
-			);
-			return;
-		}
-	}
 
 	if (
 		reminders.length >

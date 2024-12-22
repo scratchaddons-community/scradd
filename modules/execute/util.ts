@@ -30,7 +30,6 @@ export type CustomOperation = {
 		user: APIInteractionGuildMember | GuildMember | User,
 		channel?: TextBasedChannel,
 	): boolean | undefined;
-	censored?: "channel" | false | undefined;
 	options?: ApplicationCommandOption[];
 	command(
 		interaction: ChatInputCommandInteraction<"cached" | "raw">,

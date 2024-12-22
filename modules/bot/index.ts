@@ -61,7 +61,6 @@ defineChatCommand(
 		},
 
 		restricted: true,
-		censored: "channel",
 		access: false,
 	},
 	sayCommand,

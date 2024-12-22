@@ -16,8 +16,6 @@ import constants from "../../common/constants.ts";
 import features from "../../common/features.ts";
 import { getAllMembers } from "../../util/discord.ts";
 import { joinWithAnd } from "../../util/text.ts";
-import tryCensor from "../automod/misc.ts";
-import warn from "../punishments/warn.ts";
 import { mentionUser } from "../settings.ts";
 import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.ts";
 
@@ -159,22 +157,6 @@ export default async function hangman(
 				if (!modalInteraction) return;
 				await modalInteraction.deferUpdate();
 				const guess = modalInteraction.fields.getTextInputValue("username").toUpperCase();
-
-				const censored = tryCensor(guess);
-				if (censored) {
-					await warn(
-						interaction.user,
-						censored.words.length === 1 ? "Used a banned word" : "Used banned words",
-						censored.strikes,
-						`Guessed ${guess} on Hangman`,
-					);
-					return await interaction.reply({
-						ephemeral: true,
-						content: `${constants.emojis.statuses.no} Please ${
-							censored.strikes < 1 ? "don’t say that here" : "watch your language"
-						}!`,
-					});
-				}
 
 				if (/^[\d.A-Z_]+$/.test(guess))
 					if (guess.toLowerCase() === user.username) collector.stop("win");
@@ -340,7 +322,6 @@ async function getMember(player: User): Promise<GuildMember> {
 			(member) =>
 				member.id !== player.id &&
 				/^[\w.]{5,}$/i.test(member.user.username) &&
-				!tryCensor(member.user.username) &&
 				(constants.env === "development" ||
 					testers?.get(member.id)?.displayColor ||
 					ROLES.some((role) => role && member.roles.resolve(role))),

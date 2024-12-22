@@ -12,7 +12,6 @@ import { joinWithAnd } from "../util/text.ts";
 defineChatCommand(
 	{
 		name: "addon",
-		censored: "channel",
 		description: `Get information about an addon as of v${scratchAddons.version_name}`,
 
 		options: {
