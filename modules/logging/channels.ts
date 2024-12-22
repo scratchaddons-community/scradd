@@ -3,17 +3,13 @@ import type { AuditLog } from "./util.ts";
 
 import { unifiedDiff } from "difflib";
 import {
-	AuditLogOptionsType,
-	Base,
 	BaseChannel,
 	channelMention,
 	ChannelType,
 	ForumLayoutType,
-	roleMention,
 	SortOrderType,
 	TextChannel,
 	ThreadAutoArchiveDuration,
-	userMention,
 	VideoQualityMode,
 } from "discord.js";
 import { formatAnyEmoji } from "strife.js";
@@ -54,42 +50,6 @@ export async function channelDelete(entry: AuditLog<AuditLogEvent.ChannelDelete>
 			typeof entry.target.name === "string" ? `#${entry.target.name}` : "Unknown channel"
 		} (ID: ${entry.target.id}) deleted${extraAuditLogsInfo(entry)}`,
 		LogSeverity.ImportantUpdate,
-	);
-}
-export async function channelOverwriteCreate(
-	entry: AuditLog<AuditLogEvent.ChannelOverwriteCreate>,
-): Promise<void> {
-	await log(
-		`${LoggingEmojis.Channel} Permissions for ${
-			entry.extra instanceof Base ? entry.extra.toString()
-			: entry.extra.type === AuditLogOptionsType.Member ? userMention(entry.extra.id)
-			: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
-		LogSeverity.ServerChange,
-	);
-}
-export async function channelOverwriteUpdate(
-	entry: AuditLog<AuditLogEvent.ChannelOverwriteUpdate>,
-): Promise<void> {
-	await log(
-		`${LoggingEmojis.Channel} Permissions for ${
-			entry.extra instanceof Base ? entry.extra.toString()
-			: entry.extra.type === AuditLogOptionsType.Member ? userMention(entry.extra.id)
-			: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
-		LogSeverity.ServerChange,
-	);
-}
-export async function channelOverwriteDelete(
-	entry: AuditLog<AuditLogEvent.ChannelOverwriteDelete>,
-): Promise<void> {
-	await log(
-		`${LoggingEmojis.Channel} Permissions for ${
-			entry.extra instanceof Base ? entry.extra.toString()
-			: entry.extra.type === AuditLogOptionsType.Member ? userMention(entry.extra.id)
-			: roleMention(entry.extra.id)
-		} in ${channelMention(entry.target.id)} changed${extraAuditLogsInfo(entry)}`,
-		LogSeverity.ServerChange,
 	);
 }
 
@@ -158,13 +118,6 @@ export async function channelUpdate(
 				newChannel.name
 			}`,
 			LogSeverity.ImportantUpdate,
-		);
-	if (oldChannel.rawPosition !== newChannel.rawPosition)
-		await log(
-			`${LoggingEmojis.Channel} ${newChannel.toString()} moved to position ${
-				newChannel.rawPosition
-			}`,
-			LogSeverity.ServerChange,
 		);
 	if (oldChannel.type !== newChannel.type) {
 		await log(

@@ -34,9 +34,7 @@ export async function messageDelete(message: Message | PartialMessage): Promise<
 
 	const content = !shush && messageToText(message, false);
 	const { embeds, files } =
-		shush ?
-			{ embeds: [], files: [] }
-		:	await extractMessageExtremities(message, undefined, false);
+		shush ? { embeds: [], files: [] } : await extractMessageExtremities(message, false);
 
 	const unknownAttachments = message.attachments.filter((file) => isFileExpired(file.url));
 

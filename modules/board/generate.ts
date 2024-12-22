@@ -16,8 +16,8 @@ export default async function generateBoardMessage(
 		info instanceof Message ? info.reactions.resolve(BOARD_EMOJI)?.count || 0 : info.reactions;
 
 	async function messageToBoardData(message: Message): Promise<BaseMessageOptions> {
-		const { files, embeds } = await extractMessageExtremities(message, );
-		embeds.unshift(await messageToEmbed(message,));
+		const { files, embeds } = await extractMessageExtremities(message);
+		embeds.unshift(await messageToEmbed(message));
 
 		return {
 			allowedMentions: { users: [] },

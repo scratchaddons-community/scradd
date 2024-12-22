@@ -5,20 +5,12 @@ import {
 	AuditLogEvent,
 	AutoModerationRule,
 	AutoModerationRuleTriggerType,
-	userMention,
 	WebhookType,
 } from "discord.js";
 import { defineEvent } from "strife.js";
 
 import config from "../../common/config.ts";
-import {
-	channelCreate,
-	channelDelete,
-	channelOverwriteCreate,
-	channelOverwriteDelete,
-	channelOverwriteUpdate,
-	channelUpdate,
-} from "./channels.ts";
+import { channelCreate, channelDelete, channelUpdate } from "./channels.ts";
 import { guildUpdate, inviteCreate, inviteDelete } from "./guild.ts";
 import {
 	messageDelete,
@@ -49,9 +41,6 @@ import {
 const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void> } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,
 	[AuditLogEvent.ChannelDelete]: channelDelete,
-	[AuditLogEvent.ChannelOverwriteCreate]: channelOverwriteCreate,
-	[AuditLogEvent.ChannelOverwriteUpdate]: channelOverwriteUpdate,
-	[AuditLogEvent.ChannelOverwriteDelete]: channelOverwriteDelete,
 	[AuditLogEvent.MemberKick]: memberKick,
 	[AuditLogEvent.MemberPrune]: memberPrune,
 	[AuditLogEvent.MemberBanAdd]: memberBanAdd,
@@ -107,14 +96,6 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 	[AuditLogEvent.GuildScheduledEventUpdate]: guildScheduledEventUpdate,
 	[AuditLogEvent.ThreadCreate]: threadCreate,
 	[AuditLogEvent.ThreadDelete]: threadDelete,
-	async [AuditLogEvent.ApplicationCommandPermissionUpdate](entry) {
-		await log(
-			`${LoggingEmojis.Integration} Permissions for ${userMention(
-				entry.extra.applicationId,
-			)}’s commands changed${extraAuditLogsInfo(entry)}`,
-			LogSeverity.ServerChange,
-		);
-	},
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
 		if (!(entry.target instanceof AutoModerationRule)) return;
 		await log(

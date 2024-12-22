@@ -45,13 +45,6 @@ export async function memberBanRemove(
 export async function guildMemberAdd(member: GuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
 	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, LogSeverity.Resource);
-
-	if (member.user.flags?.has("Spammer")) {
-		await log(
-			`${LoggingEmojis.Punishment} ${member.toString()} marked as likely spammer`,
-			LogSeverity.Alert,
-		);
-	}
 }
 export async function guildMemberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
 	if (member.guild.id !== config.guild.id) return;
@@ -138,16 +131,6 @@ export async function userUpdate(oldUser: PartialUser | User, newUser: User): Pr
 			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
-			LogSeverity.Alert,
-		);
-	}
-
-	const spammer = !!newUser.flags?.has("Spammer");
-	if (!!oldUser.flags?.has("Spammer") !== spammer) {
-		await log(
-			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
-				spammer ? "" : "un"
-			}marked as likely spammer`,
 			LogSeverity.Alert,
 		);
 	}
