@@ -11,7 +11,7 @@ import {
 
 import config, { syncConfig } from "../../../common/config.ts";
 import constants from "../../../common/constants.ts";
-import autoreactions, { dadEasterEggCount } from "../../autos/autos-data.ts";
+import { dadEasterEggCount } from "../../autos/autos-data.ts";
 import log from "../../logging/misc.ts";
 import { LoggingEmojis, LogSeverity } from "../../logging/util.ts";
 
@@ -62,9 +62,7 @@ const data: CustomOperation = {
 			}
 			case "static": {
 				await interaction.reply({
-					content: `There are currently **${dadEasterEggCount}** custom dad responses and **${
-						autoreactions.length
-					}** autoreactions.\nSome have multiple triggers, which are not counted here.`,
+					content: `There are currently **${dadEasterEggCount}** custom dad responses. Some have multiple triggers, which are not counted here.`,
 					embeds: [
 						{
 							title: "Emojis",

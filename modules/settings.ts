@@ -32,8 +32,7 @@ import { getWeeklyXp } from "./xp/util.ts";
  * 4. Add buttons in {@link updateSettings} as desired to toggle this setting.
  */
 const SETTINGS = {
-	autoreactions: "Autoreactions",
-	boardPings: "Board Pings",
+		boardPings: "Board Pings",
 	dmReminders: "DM Reminders",
 	github: "GitHub Reference Links",
 	levelUpPings: "Level Up Pings",
@@ -50,8 +49,7 @@ export async function getDefaultSettings(user: {
 			() => false,
 		)) ?? !member;
 	return {
-		autoreactions: true,
-		boardPings: constants.env === "production",
+				boardPings: constants.env === "production",
 		dmReminders: true,
 		execute: false,
 		github: !member || (getWeeklyXp(user.id) < 100 && isDev),
@@ -69,11 +67,7 @@ defineChatCommand(
 		description: "Customize your personal settings",
 
 		options: {
-			"autoreactions": {
-				type: ApplicationCommandOptionType.Boolean,
-				description: "Add automatic funny emoji reactions to your messages",
-			},
-			"board-pings": {
+						"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: `Ping you when your messages get on ${
 					config.channels.board ? "#" + config.channels.board.name : "the board"
@@ -190,8 +184,7 @@ export async function updateSettings(
 			{
 				components: [
 					buttons.useMentions,
-					buttons.autoreactions,
-					buttons.scratchEmbeds,
+										buttons.scratchEmbeds,
 					...((await config.guilds.development.members?.fetch(user.id).then(
 						() => [buttons.github],
 						() => [],

@@ -15,8 +15,7 @@ import {
 	defineEvent,
 	defineMenuCommand,
 	getBaseChannel,
-	reactAll,
-	stripMarkdown,
+		stripMarkdown,
 	zeroWidthSpace,
 } from "strife.js";
 
@@ -25,13 +24,10 @@ import { GlobalMentionsPattern } from "../../util/discord.ts";
 import { normalize } from "../../util/text.ts";
 import { BOARD_EMOJI } from "../board/misc.ts";
 import { getSettings } from "../settings.ts";
-import autoreactions from "./autos-data.ts";
 import scraddChat, { allowChat, chatName, denyChat, learn, removeResponse } from "./chat.ts";
 import dad from "./dad.ts";
 import github from "./github.ts";
 import { getMatches, handleMatch } from "./scratch.ts";
-
-const REACTION_CAP = 3;
 
 const ignoreTriggers = [
 	/\babus/i,
@@ -50,8 +46,6 @@ const ignoredChannels = new Set<Snowflake>();
 defineEvent("messageCreate", async (message) => {
 	await learn(message);
 
-	let reactions = 0;
-
 	if (
 		[
 			MessageType.GuildBoost,
@@ -59,11 +53,9 @@ defineEvent("messageCreate", async (message) => {
 			MessageType.GuildBoostTier2,
 			MessageType.GuildBoostTier3,
 		].includes(message.type)
-	) {
+	)
 		await message.react(BOARD_EMOJI).catch(() => void 0);
-		reactions++;
-	}
-
+		
 	const response = await handleMutatable(message);
 	if (response === true) return;
 	for (const [index, action] of [response].flat().entries()) {
@@ -93,45 +85,6 @@ defineEvent("messageCreate", async (message) => {
 			?.edit(action)
 			.catch(() => void 0);
 		if (!reply) break;
-	}
-
-	const settings = await getSettings(message.author);
-	if (!settings.autoreactions || !canDoSecrets(message)) return;
-	const content = stripMarkdown(normalize(message.content.toLowerCase()));
-	reactionLoop: for (const [rawEmojis, ...requirements] of autoreactions) {
-		let shouldReact = false;
-		const emojis = [rawEmojis].flat();
-		if (emojis.some((emoji) => content.includes(emoji.replace(/^<a?:_*/, "")))) continue;
-
-		for (const requirement of requirements) {
-			const [rawMatch, type] =
-				Array.isArray(requirement) ? requirement : ([requirement, "word"] as const);
-			const match = typeof rawMatch === "string" ? rawMatch : rawMatch.source;
-
-			if (type === "ping") {
-				shouldReact ||= message.mentions.has(match, {
-					ignoreEveryone: true,
-					ignoreRoles: true,
-				});
-			} else {
-				const result = new RegExp(
-					type === "partial" || type === "raw" ? match
-					: type === "full" ? `^(?:${match})$`
-					: `\\b(?:${match})${type === "plural" ? /(?:e?s)?/.source : ""}\\b`,
-					"iu",
-				).test(type === "raw" ? message.content : content);
-
-				if (type === "negative" && result) continue reactionLoop;
-
-				shouldReact ||= result;
-			}
-		}
-
-		if (shouldReact) {
-			reactions += emojis.length;
-			const messageReactions = await reactAll(message, emojis);
-			if (reactions > REACTION_CAP || messageReactions.length < emojis.length) return;
-		}
 	}
 });
 
