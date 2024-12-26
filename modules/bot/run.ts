@@ -25,7 +25,9 @@ export default async function getCode(
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} This command is reserved for ${
-				owner instanceof User ? owner.displayName : "the " + owner?.name + " team"
+				owner instanceof User ? owner.displayName
+				: owner ? `the ${owner.name} team`
+				: "the developers"
 			} only!`,
 		});
 
@@ -54,9 +56,9 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 	const code = interaction.fields.getTextInputValue("code").trim();
 	try {
 		const output: unknown = await eval(
-			"(async () => {\n" +
-				(code.includes("\n") || code.includes("return") ? code : `return ${code}`) +
-				"\n;})()",
+			`(async () => {\n${
+				code.includes("\n") || code.includes("return") ? code : `return ${code}`
+			}\n;})()`,
 		);
 
 		const stringifiedOutput =
@@ -77,8 +79,8 @@ export async function run(interaction: ModalSubmitInteraction): Promise<void> {
 						"utf8",
 					),
 					name: `output.${
-						"string" === typeof output ? "txt"
-						: "function" === typeof output ? "js"
+						typeof output === "string" ? "txt"
+						: typeof output === "function" ? "js"
 						: "json"
 					}`,
 				},

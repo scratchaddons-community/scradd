@@ -4,6 +4,7 @@ import twemojiRegexp from "@twemoji/parser/dist/lib/regex.js";
 import { Colors, FormattingPatterns } from "discord.js";
 
 import config from "../../common/config.ts";
+import { camelToLowerSentence } from "../../util/text.ts";
 
 export const CUSTOM_ROLE_PREFIX = "✨ ";
 
@@ -50,7 +51,7 @@ export async function resolveIcon(
 export const COLORS = Object.fromEntries(
 	([...Object.keys(Colors), "Random"] as const).flatMap((color) => [
 		[color.toLowerCase(), color],
-		[color.replaceAll(/(?<!^)([A-Z])/g, " $1").toLowerCase(), color],
+		[camelToLowerSentence(color), color],
 	]),
 );
 export function parseColor(
@@ -58,13 +59,15 @@ export function parseColor(
 ): Extract<ColorResolvable, string> | undefined {
 	if (!rawColor) return undefined;
 
-	const preset = COLORS[rawColor.toLowerCase()];
+	const color = rawColor.toLowerCase();
+
+	const preset = Object.keys(COLORS).includes(color) && COLORS[color];
 	if (preset) return preset;
 
-	const color = (rawColor.startsWith("#") ? rawColor : (`#${rawColor}` as const)).toLowerCase();
-	if (!/^#([\da-f]{6}|[\da-f]{3})$/i.test(color)) return undefined;
+	const hex = color.startsWith("#") ? color : (`#${color}` as const);
+	if (!/^#(?:[\da-f]{6}|[\da-f]{3})$/i.test(hex)) return undefined;
 
-	return color.length === 4 ?
-			`#${color[1] ?? ""}${color.slice(1, 3)}${color.slice(2, 4)}${color[3] ?? ""}`
-		:	color;
+	return hex.length === 4 ?
+			`#${hex[1] ?? ""}${hex.slice(1, 3)}${hex.slice(2, 4)}${hex[3] ?? ""}`
+		:	hex;
 }

@@ -75,7 +75,8 @@ export default async function filterToStrike(
 		reason:
 			url ?
 				await fetch(url).then(async (response) => await response.text())
-			:	(/```.*\n([^]+)\n```/.exec(message.content)?.[1] ?? message.content),
+			:	(/```.*\n(?<reason>[^]+)\n```/.exec(message.content)?.groups?.reason ??
+				message.content),
 	};
 	strikesCache[strikeId] = data;
 	return { ...strike, ...data };
@@ -131,7 +132,7 @@ export async function listStrikes(
 			format: member,
 
 			generateComponents(filtered) {
-				if (filtered.length > 5) {
+				if (filtered.length > 5)
 					return [
 						{
 							type: ComponentType.StringSelect,
@@ -144,7 +145,6 @@ export async function listStrikes(
 							})),
 						},
 					];
-				}
 				return filtered.map((strike) => ({
 					label: strike.id.toString(),
 					style: ButtonStyle.Secondary,

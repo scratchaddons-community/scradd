@@ -172,7 +172,7 @@ export async function messageUpdate(
 	if (newMessage.partial) return;
 	if (!shouldLog(newMessage.channel) || newMessage.flags.has("Ephemeral")) return;
 
-	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted")) {
+	if (oldMessage.flags.has("Crossposted") !== newMessage.flags.has("Crossposted"))
 		await log(
 			`${LoggingEmojis.MessageUpdate} [Message](<${
 				newMessage.url
@@ -181,8 +181,7 @@ export async function messageUpdate(
 			}published`,
 			LogSeverity.ServerChange,
 		);
-	}
-	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds")) {
+	if (oldMessage.flags.has("SuppressEmbeds") !== newMessage.flags.has("SuppressEmbeds"))
 		await log(
 			`${LoggingEmojis.MessageUpdate} Embeds ${
 				newMessage.flags.has("SuppressEmbeds") ? "removed from" : "shown on"
@@ -192,9 +191,7 @@ export async function messageUpdate(
 			LogSeverity.ContentEdit,
 			{ embeds: oldMessage.embeds },
 		);
-	}
-
-	if (!oldMessage.partial && oldMessage.pinned !== newMessage.pinned) {
+	if (!oldMessage.partial && oldMessage.pinned !== newMessage.pinned)
 		await log(
 			`${LoggingEmojis.MessageUpdate} [Message](<${
 				newMessage.url
@@ -203,44 +200,41 @@ export async function messageUpdate(
 			}pinned`,
 			LogSeverity.ServerChange,
 		);
-	}
 
-	if (!newMessage.author.bot) {
-		const files = [];
-		const diff =
-			!oldMessage.partial &&
-			unifiedDiff(
-				unsignFiles(oldMessage.content).split("\n"),
-				unsignFiles(newMessage.content).split("\n"),
-				{ lineterm: "" },
-			)
-				.join("\n")
-				.replace(/^-{3} \n\+{3} \n/, "");
-		if (diff) files.push({ content: diff, extension: "diff" });
+	if (newMessage.author.bot) return;
+	const files = [];
+	const diff =
+		!oldMessage.partial &&
+		unifiedDiff(
+			unsignFiles(oldMessage.content).split("\n"),
+			unsignFiles(newMessage.content).split("\n"),
+			{ lineterm: "" },
+		)
+			.join("\n")
+			.replace(/^-{3} \n\+{3} \n/, "");
+	if (diff) files.push({ content: diff, extension: "diff" });
 
-		const removedAttachments = oldMessage.attachments.filter(
-			(file) => !newMessage.attachments.has(file.id),
-		);
-		files.push(
-			...removedAttachments
-				.filter((file) => !isFileExpired(file.url))
-				.map((attachment) => attachment.url),
-		);
+	const removedAttachments = oldMessage.attachments.filter(
+		(file) => !newMessage.attachments.has(file.id),
+	);
+	files.push(
+		...removedAttachments
+			.filter((file) => !isFileExpired(file.url))
+			.map((attachment) => attachment.url),
+	);
 
-		if (files.length) {
-			await log(
-				`${LoggingEmojis.MessageEdit} [${oldMessage.partial ? "Unknown message" : "Message"}](<${
-					newMessage.url
-				}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited${
-					removedAttachments.size ?
-						`\n ${removedAttachments.size} attachment${
-							removedAttachments.size > 1 ? "s" : ""
-						} were removed`
-					:	""
-				}`,
-				LogSeverity.ContentEdit,
-				{ files },
-			);
-		}
-	}
+	if (!files.length) return;
+	await log(
+		`${LoggingEmojis.MessageEdit} [${oldMessage.partial ? "Unknown message" : "Message"}](<${
+			newMessage.url
+		}>) by ${newMessage.author.toString()} in ${newMessage.channel.toString()} edited${
+			removedAttachments.size ?
+				`\n ${removedAttachments.size} attachment${
+					removedAttachments.size > 1 ? "s" : ""
+				} were removed`
+			:	""
+		}`,
+		LogSeverity.ContentEdit,
+		{ files },
+	);
 }

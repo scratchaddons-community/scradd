@@ -5,7 +5,7 @@ import type {
 	UserMention,
 } from "discord.js";
 import type { BasicOption } from "strife.js";
-import type { CamelToKebab } from "../common/misc.ts";
+import type { CamelToKebab } from "../util/text.ts";
 
 import {
 	ApplicationCommandOptionType,
@@ -67,7 +67,7 @@ defineChatCommand(
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: `Ping you when your messages get on ${
-					config.channels.board ? "#" + config.channels.board.name : "the board"
+					config.channels.board ? `#${config.channels.board.name}` : "the board"
 				}`,
 			},
 			"dm-reminders": {
@@ -101,7 +101,7 @@ defineChatCommand(
 			"board-pings": {
 				type: ApplicationCommandOptionType.Boolean,
 				description: `Pings you when your messages get on ${
-					config.channels.board ? "#" + config.channels.board.name : "the board"
+					config.channels.board ? `#${config.channels.board.name}` : "the board"
 				} in the community server`,
 			},
 			"dm-reminders": {
@@ -155,7 +155,7 @@ export async function updateSettings(
 			setting,
 			{
 				customId: `${setting}-${user.id}_toggleSetting`,
-				label: label,
+				label,
 				style: ButtonStyle[updated[setting] ? "Success" : "Danger"],
 				type: ComponentType.Button,
 			} as const,
@@ -187,14 +187,14 @@ export async function updateSettings(
 
 defineButton("toggleSetting", async (interaction, data) => {
 	const [setting, id] = data.split("-");
-	if (interaction.user.id !== id) {
+	if (interaction.user.id !== id)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${
 				constants.emojis.statuses.no
 			} You don’t have permission to update other people’s settings!`,
 		});
-	}
+
 	await interaction.reply(await updateSettings(interaction.user, { [setting]: "toggle" }));
 
 	if (!interaction.message.flags.has("Ephemeral"))

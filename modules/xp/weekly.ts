@@ -79,15 +79,14 @@ export default async function getWeekly(date: Date): Promise<string> {
 				.filter(([, xp]) => xp >= ACTIVE_THRESHOLD_TWO)
 				.map((entry) => entry[0]),
 		]);
-		for (const [, member] of config.roles.active.members) {
+		for (const [, member] of config.roles.active.members)
 			if (!activeMembers.has(member.id))
 				await member.roles.remove(config.roles.active, "Inactive");
-		}
 	}
 
 	// Reset for next weekly
 	date.setUTCDate(date.getUTCDate() + 14);
-	if (config.channels.announcements) {
+	if (config.channels.announcements)
 		remindersDatabase.data = [
 			...remindersDatabase.data,
 			{
@@ -98,7 +97,7 @@ export default async function getWeekly(date: Date): Promise<string> {
 				user: client.user.id,
 			},
 		];
-	}
+
 	recentXpDatabase.data = recentXpDatabase.data.filter(
 		(entry) => entry.time + 604_800_000 > Date.now(),
 	);
@@ -116,10 +115,10 @@ export default async function getWeekly(date: Date): Promise<string> {
 	const role = config.roles.weeklyWinner;
 	if (role) {
 		const ids = new Set(weeklyWinners.map((gain) => gain.user));
-		for (const [, weeklyMember] of role.members) {
+		for (const [, weeklyMember] of role.members)
 			if (!ids.has(weeklyMember.id))
 				await weeklyMember.roles.remove(role, "No longer weekly winner");
-		}
+
 		for (const { user } of weeklyWinners.values()) {
 			const member = await config.guild.members.fetch(user).catch(() => void 0);
 			if (member) await member.roles.add(role, "Weekly winner");
@@ -128,11 +127,12 @@ export default async function getWeekly(date: Date): Promise<string> {
 
 	// Send weekly
 	const winners = weeklyWinners
-		.map((gain, index) => {
-			return `${["🥇", "🥈", "🥉"][index] ?? "🏅"} ${userMention(
-				gain.user,
-			)} - ${Math.floor(gain.xp).toLocaleString()} XP`;
-		})
+		.map(
+			(gain, index) =>
+				`${["🥇", "🥈", "🥉"][index] ?? "🏅"} ${userMention(
+					gain.user,
+				)} - ${Math.floor(gain.xp).toLocaleString()} XP`,
+		)
 		.join("\n");
 	const stats = `*This week, ${chatters.toLocaleString()} people chatted, and ${latestActiveMembers.length.toLocaleString()} people were active. Altogether, people gained ${allXp.toLocaleString()} XP this week.*`;
 	const nextWeek = `### Next week’s weekly winners will be posted ${time(

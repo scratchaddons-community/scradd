@@ -49,16 +49,21 @@ export const rules = {
 	br: { ...markdown.defaultRules.br, match: (source) => /^\n(?!\n*$)/i.exec(source) },
 	del: {
 		...markdown.defaultRules.del,
+		// eslint-disable-next-line prefer-named-capture-group
 		match: (source, { inline }) => (inline ? /^~~([^]+?)~~(?!_)/.exec(source) : undefined),
 	},
 	codeBlock: {
 		...markdown.defaultRules.codeBlock,
-		match: (source) => /^```(?:([\w-]+)\n)?\n*([^]+?)\n*```/i.exec(source),
-		parse: (capture) => ({ lang: capture[1] ?? "", content: capture[2] ?? "" }),
+		match: (source) => /^```(?:(?<lang>[\w-]+)\n)?\n*(?<content>[^]+?)\n*```/i.exec(source),
+		parse: (capture) => ({
+			lang: capture.groups?.lang ?? "",
+			content: capture.groups?.content ?? "",
+		}),
 	},
 	heading: {
 		...markdown.defaultRules.heading,
 		match: (source, { inline }) =>
+			// eslint-disable-next-line prefer-named-capture-group
 			inline ? undefined : /^ *(#{1,3}) +(.+?)(?:\n\s*)+/.exec(source),
 	},
 	link: {
@@ -79,16 +84,15 @@ export const rules = {
 					parts[2] === config.guild.id &&
 					parts[3] &&
 					parts.length === 4
-				) {
+				)
 					return markdown.htmlTag("a", output(node.content as SingleASTNode[], state), {
 						href: `/suggestions/${parts[3]}`,
 						title: typeof node.title === "string" ? node.title : "",
 					});
-				}
 			}
 
 			return markdown.htmlTag("a", output(node.content as SingleASTNode[], state), {
-				href: href,
+				href,
 				title: typeof node.title === "string" ? node.title : "",
 				target: "_blank",
 				rel: "noreferrer",
@@ -98,6 +102,7 @@ export const rules = {
 	list: {
 		...markdown.defaultRules.list,
 		match: (source) =>
+			// eslint-disable-next-line prefer-named-capture-group
 			/^( *)([*-]|\d+\.) .+(?:\n|$)(?: *(?:[*-]|\d+\.) .+(?:\n|$))*/.exec(source),
 	},
 	text: {
@@ -151,8 +156,10 @@ export const rules = {
 	},
 	spoiler: {
 		order: 0,
-		match: (source) => /^\|\|([^]+?)\|\|/.exec(source),
-		parse: ([, capture = ""], parse, state) => ({ content: parse(capture, state) }),
+		match: (source) => /^\|\|(?<content>[^]+?)\|\|/.exec(source),
+		parse: (capture, parse, state) => ({
+			content: parse(capture.groups?.content ?? "", state),
+		}),
 		html: (node, output, state) =>
 			markdown.htmlTag("span", output(node.content as SingleASTNode[], state), {
 				class: "discord-spoiler",
@@ -160,8 +167,11 @@ export const rules = {
 	},
 	timestamp: {
 		order: markdown.defaultRules.strong.order,
-		match: (source) => /^<t:(\d+)(?::([DFRTdft]))?>/.exec(source),
-		parse: (capture) => ({ timestamp: capture[1], format: capture[2] }),
+		match: (source) => /^<t:(?<timestamp>\d+)(?::(?<format>[DFRTdft]))?>/.exec(source),
+		parse: (capture) => ({
+			timestamp: capture.groups?.timestamp,
+			format: capture.groups?.format,
+		}),
 		html(node, output, state) {
 			const milliseconds = +(typeof node.timestamp === "string" && node.timestamp) * 1000;
 			if (node.format === "R") {
@@ -321,7 +331,10 @@ export function markdownToHtml(source: string): string {
 	return rawOutputter(parseMarkdown(source));
 }
 
-export const getTwemojiUrl = (emoji: string) =>
-	`https://cdn.jsdelivr.net/gh/jdecked/twemoji@${twemojiPackage.version}/assets/svg/${toCodePoints(
+export function getTwemojiUrl(
+	emoji: string,
+): `https://cdn.jsdelivr.net/gh/jdecked/twemoji@${string}/assets/svg/${string}.svg` {
+	return `https://cdn.jsdelivr.net/gh/jdecked/twemoji@${twemojiPackage.version}/assets/svg/${toCodePoints(
 		emoji.includes("\u200D") ? emoji : emoji.replaceAll("\uFE0F", ""),
 	).join("-")}.svg` as const;
+}

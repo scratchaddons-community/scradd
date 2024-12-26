@@ -13,6 +13,7 @@ import { ButtonStyle, ComponentType, ThreadAutoArchiveDuration } from "discord.j
 import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.ts";
+import { camelToLowerSentence } from "../../util/text.ts";
 import { LogSeverity } from "./util.ts";
 
 export function shouldLog(channel: Channel | null): boolean {
@@ -46,12 +47,11 @@ export default async function log(
 		embedded: { extension?: string | undefined; content: string }[];
 	}>(
 		(accumulator, file) => {
-			if (typeof file === "string" || file.content.includes("```")) {
+			if (typeof file === "string" || file.content.includes("```"))
 				return {
 					embedded: accumulator.embedded,
 					external: [...accumulator.external, file],
 				};
-			}
 
 			const lines = file.content.split("\n");
 			return lines.length > 10 || lines.some((line) => line.length > 100) ?
@@ -109,9 +109,7 @@ export async function getLoggingThread(
 ): Promise<TextChannel | AnyThreadChannel> {
 	if (group === LogSeverity.Alert) return config.channels.modlogs;
 
-	const name = `${group}) ${LogSeverity[group]
-		.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
-		.toLowerCase()}s`;
+	const name = `${group}) ${camelToLowerSentence(LogSeverity[group])}s`;
 
 	return (
 		(await config.channels.modlogs.threads.fetch()).threads.find(

@@ -62,12 +62,12 @@ defineButton("cancelReminder", async (interaction, id = "") => {
 	const success = await cancelReminder(interaction, id);
 	if (!success) return;
 
-	if (interaction.message.flags.has("Ephemeral")) {
+	if (interaction.message.flags.has("Ephemeral"))
 		await interaction.reply({
 			content: `${constants.emojis.statuses.yes} Reminder canceled!`,
 			ephemeral: true,
 		});
-	} else {
+	else {
 		await interaction.message.edit({
 			content: `~~${interaction.message.content}~~\n${
 				constants.emojis.statuses.no

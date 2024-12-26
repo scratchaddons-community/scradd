@@ -148,7 +148,7 @@ export async function top(
 	const leaderboard = xpDatabase.data.toSorted((one, two) => two.xp - one.xp);
 
 	const index = user && leaderboard.findIndex(({ user: id }) => id === user.id);
-	if (user && index === -1) {
+	if (user && index === -1)
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
@@ -156,7 +156,6 @@ export async function top(
 
 			ephemeral: true,
 		});
-	}
 
 	const message = await interaction.deferReply({
 		ephemeral:

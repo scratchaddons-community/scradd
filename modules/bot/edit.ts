@@ -25,12 +25,11 @@ export default async function editMessage(
 		config.channels.board?.id === interaction.channel?.id ||
 		(config.channels.modlogs.id === getBaseChannel(interaction.channel)?.id &&
 			databaseThread.id !== interaction.channel?.id)
-	) {
+	)
 		return await interaction.reply({
 			content: `${constants.emojis.statuses.no} Can not edit this message!`,
 			ephemeral: true,
 		});
-	}
 
 	const pre =
 		JSON.stringify(await getMessageJSON(interaction.targetMessage), undefined, "  ").match(
@@ -133,20 +132,16 @@ export async function submitEdit(interaction: ModalSubmitInteraction, id: string
 	if (contentDiff) files.push({ content: contentDiff, extension: "diff" });
 	if (extraDiff) files.push({ content: extraDiff, extension: "diff" });
 
-	if (files.length) {
-		await log(
-			`${LoggingEmojis.MessageEdit} [Message](<${
-				edited.url
-			}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
-			(interaction.guild?.id !== config.guild.id &&
-				interaction.guild?.publicUpdatesChannel) ||
-				LogSeverity.ServerChange,
-			{
-				files:
-					interaction.guild?.id !== config.guild.id || shouldLog(edited.channel) ?
-						files
-					:	[],
-			},
-		);
-	}
+	if (!files.length) return;
+	await log(
+		`${LoggingEmojis.MessageEdit} [Message](<${
+			edited.url
+		}>) by ${edited.author.toString()} in ${edited.channel.toString()} edited by ${interaction.user.toString()}`,
+		(interaction.guild?.id !== config.guild.id && interaction.guild?.publicUpdatesChannel) ||
+			LogSeverity.ServerChange,
+		{
+			files:
+				interaction.guild?.id !== config.guild.id || shouldLog(edited.channel) ? files : [],
+		},
+	);
 }

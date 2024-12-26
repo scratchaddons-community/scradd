@@ -46,15 +46,14 @@ export function joinWithAnd(
  * @returns The truncated string.
  */
 export function truncateText(text: string, maxLength: number, multiline = false): string {
-	text = text.replaceAll(/\n+/g, "\n").trim();
-	const condensed = (!multiline && text.split("\n")[0]) || text;
+	const condensed = ((!multiline && text.split("\n")[0]) || text.replaceAll(/\n+/g, "\n")).trim();
 	const trimmed = condensed.slice(0, maxLength);
 	const segments = Array.from(new Intl.Segmenter().segment(trimmed), ({ segment }) => segment);
 
 	if (trimmed.length > maxLength) segments.pop();
 	const output = segments.join("").trim();
 	return output === text ? output : (
-			output.slice(0, output.length === maxLength ? -1 : undefined) + "…"
+			`${output.slice(0, output.length === maxLength ? -1 : undefined)}…`
 		);
 }
 
@@ -107,3 +106,16 @@ export function getRequestUrl(request: IncomingMessage): URL {
 		:	constants.domains.scradd,
 	);
 }
+
+export function camelToLowerSentence<T extends string>(text: T): CamelToKebab<T, " "> {
+	return text
+		.replaceAll(/(?<one>[a-z])(?<two>[A-Z])/g, "$<one> $<two>")
+		.toLowerCase() as CamelToKebab<T, " ">;
+}
+
+export type CamelToKebab<S extends string, Seperator extends string = "-"> =
+	S extends `${infer T}${infer U}` ?
+		U extends Uncapitalize<U> ?
+			`${Lowercase<T>}${CamelToKebab<U, Seperator>}`
+		:	`${Lowercase<T>}${Seperator}${CamelToKebab<U, Seperator>}`
+	:	"";

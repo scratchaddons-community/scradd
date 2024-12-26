@@ -35,8 +35,8 @@ export function getMatches(content: string): URL[] {
 export function parseURL(match: string): URL | undefined {
 	if (match.startsWith("<") && match.endsWith(">")) return;
 
-	const start = match.startsWith("http") ? 0 : 1,
-		end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
+	const start = match.startsWith("http") ? 0 : 1;
+	const end = match.length - (/[\w!#$&'()*+,./:;=?@~-]$/.test(match) ? 0 : 1);
 
 	return new URL(match.slice(start, end));
 }
@@ -108,27 +108,26 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 		timestamp: new Date(project.history.shared).toISOString(),
 	};
 
-	if (parent) {
+	if (parent)
 		embed.fields.push({
 			name: "⬆️ Remix of",
 			value: `[${parent.title}](${constants.domains.scratch}/projects/${project.remix.parent}/)`,
 			inline: true,
 		});
-	}
-	if (project.description) {
+
+	if (project.description)
 		embed.fields.unshift({
 			name: "🫂 Notes and Credits",
 			value: truncateText(linkifyMentions(project.description), EMBED_LENGTH / 2, true),
 			inline: false,
 		});
-	}
-	if (project.instructions) {
+
+	if (project.instructions)
 		embed.fields.unshift({
 			name: "📜 Instructions",
 			value: truncateText(linkifyMentions(project.instructions), EMBED_LENGTH / 2, true),
 			inline: false,
 		});
-	}
 
 	return embed;
 }
@@ -202,7 +201,8 @@ export async function handleForumPost(
 	hash: string,
 ): Promise<APIEmbed | undefined> {
 	const type = urlParts[2] === "topic" && hash.startsWith("#post-") ? "post" : urlParts[2];
-	const id = urlParts[2] === "topic" && type == "post" ? (hash.split("-")[1] ?? "") : urlParts[3];
+	const id =
+		urlParts[2] === "topic" && type === "post" ? (hash.split("-")[1] ?? "") : urlParts[3];
 
 	const post =
 		type === "post" ?
@@ -308,8 +308,8 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 }
 
 export function linkifyMentions(string: string): string {
-	return escapeAllMarkdown(string).replaceAll(/@([\w\\-])+/g, (name) => {
-		name = name.replaceAll("\\", "");
+	return escapeAllMarkdown(string).replaceAll(/@[\w\\-]+/g, (ping) => {
+		const name = ping.replaceAll("\\", "");
 		return `[${name}](${constants.domains.scratch}/users/${name.slice(1)})`;
 	});
 }

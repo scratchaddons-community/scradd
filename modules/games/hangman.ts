@@ -19,51 +19,51 @@ import { joinWithAnd } from "../../util/text.ts";
 import { mentionUser } from "../settings.ts";
 import { checkIfUserPlaying, CURRENTLY_PLAYING, GAME_COLLECTOR_TIME } from "./misc.ts";
 
-const MAX_WRONGS = 7,
-	HINT_PENALTY = 2;
+const MAX_WRONGS = 7;
+const HINT_PENALTY = 2;
 
 const CONSONANTS = [
-		"B",
-		"C",
-		"D",
-		"F",
-		"G",
-		"H",
-		"J",
-		"K",
-		"L",
-		"M",
-		"N",
-		"P",
-		"Q",
-		"R",
-		"S",
-		"T",
-		"V",
-		"W",
-		"X",
-		"Z",
-	] as const,
-	VOWELS = [
-		"A",
-		"E",
-		"I",
-		"O",
-		"U",
-		"Y",
-		"0",
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"6",
-		"7",
-		"8",
-		"9",
-		"_",
-		".",
-	] as const;
+	"B",
+	"C",
+	"D",
+	"F",
+	"G",
+	"H",
+	"J",
+	"K",
+	"L",
+	"M",
+	"N",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"V",
+	"W",
+	"X",
+	"Z",
+] as const;
+const VOWELS = [
+	"A",
+	"E",
+	"I",
+	"O",
+	"U",
+	"Y",
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"_",
+	".",
+] as const;
 const CHARACTERS = [...CONSONANTS, ...VOWELS] as const;
 
 export default async function hangman(
@@ -107,7 +107,7 @@ export default async function hangman(
 									type: ComponentType.Button,
 									label: "Ok",
 									style: ButtonStyle.Success,
-									customId: componentInteraction.id + "-hint",
+									customId: `${componentInteraction.id}-hint`,
 								},
 							],
 						},
@@ -118,7 +118,7 @@ export default async function hangman(
 						time: constants.collectorTime,
 						componentType: ComponentType.Button,
 						filter: (buttonInteraction) =>
-							buttonInteraction.customId === componentInteraction.id + "-hint",
+							buttonInteraction.customId === `${componentInteraction.id}-hint`,
 					})
 					.catch(() => void 0);
 				if (buttonInteraction) {
@@ -348,9 +348,9 @@ async function makeCanvasFiles(wrongCount: boolean | number, url?: string): Prom
 
 	context.drawImage(await loadImage(fileUrl), 0, 0, canvas.width, canvas.height);
 
-	const x = 136.5,
-		y = wrongCount === true ? 38 : 20,
-		size = 40;
+	const x = 136.5;
+	const y = wrongCount === true ? 38 : 20;
+	const size = 40;
 
 	if (typeof wrongCount === "number") context.beginPath();
 	context.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);

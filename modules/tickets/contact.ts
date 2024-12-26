@@ -47,7 +47,7 @@ export async function showTicketModal(
 ): Promise<InteractionResponse | undefined> {
 	const option = interaction.isAnySelectMenu() ? interaction.values[0] : category;
 
-	if (option === SA_CATEGORY) {
+	if (option === SA_CATEGORY)
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
@@ -61,9 +61,8 @@ export async function showTicketModal(
 
 			ephemeral: true,
 		});
-	}
 
-	if (option === SERVER_CATEGORY && config.channels.server) {
+	if (option === SERVER_CATEGORY && config.channels.server)
 		return await interaction.reply({
 			content: `${
 				constants.emojis.statuses.no
@@ -71,7 +70,6 @@ export async function showTicketModal(
 
 			ephemeral: true,
 		});
-	}
 
 	if (!option || !TICKET_CATEGORIES.includes(option))
 		throw new TypeError(`Unknown ticket category: ${option ?? "`undefined`"}`);

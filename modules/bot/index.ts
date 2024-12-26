@@ -25,7 +25,7 @@ defineChatCommand(
 );
 defineModal("run", run);
 
-if (constants.env === "production") {
+if (constants.env === "production")
 	defineChatCommand(
 		{ name: "restart", description: "Restart the bot", restricted: true, access },
 		async (interaction) => {
@@ -35,7 +35,7 @@ if (constants.env === "production") {
 			process.exit(1);
 		},
 	);
-} else {
+else
 	defineChatCommand(
 		{ name: "kill", description: "Kill the bot", restricted: true, access },
 		async (interaction) => {
@@ -45,7 +45,6 @@ if (constants.env === "production") {
 			process.exit(1);
 		},
 	);
-}
 
 defineChatCommand(
 	{

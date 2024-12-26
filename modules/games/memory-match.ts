@@ -48,13 +48,12 @@ export default async function memoryMatch(
 		!(options.opponent instanceof GuildMember) ||
 		options.opponent.user.bot ||
 		interaction.user.id === options.opponent.id
-	) {
+	)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You can’t play against that user!`,
 			components: [{ type: ComponentType.ActionRow, components: [instructionsButton] }],
 		});
-	}
 
 	if (await checkIfUserPlaying(interaction)) return;
 	if (CURRENTLY_PLAYING.get(interaction.user.id)) {
@@ -231,7 +230,8 @@ async function playGame(
 					collector.stop();
 					await endGame();
 					return;
-				} else await interaction.message.edit(getBoard());
+				}
+				await interaction.message.edit(getBoard());
 			}
 			if (!match || !bonusTurns) {
 				turn++;
@@ -243,19 +243,15 @@ async function playGame(
 			shown.clear();
 		})
 		.on("end", async (_, endReason) => {
-			if (endReason === "idle") {
+			if (endReason === "idle")
 				await endGame(
 					`🛑 ${turnInfo.user.toString()}, you didn’t take your turn!`,
 					turnInfo.user,
 				);
-				return;
-			}
-			if (endReason === "end") {
+			else if (endReason === "end")
 				await turnInfo.ping.edit({
 					components: disableComponents(turnInfo.ping.components),
 				});
-				return;
-			}
 		});
 
 	CURRENTLY_PLAYING.set(players[0].id, {
@@ -325,8 +321,8 @@ async function playGame(
 		content: string;
 		components: ActionRowData<InteractionButtonComponentData>[];
 	} {
-		const firstTurn = turn % 2 ? "" : "__",
-			secondTurn = turn % 2 ? "__" : "";
+		const firstTurn = turn % 2 ? "" : "__";
+		const secondTurn = turn % 2 ? "__" : "";
 
 		return {
 			content: `${firstTurn}${constants.emojis.misc.blue} ${players[0].toString()} - **${
@@ -372,15 +368,15 @@ async function playGame(
 			})),
 		});
 
-		const firstScore = scores[0].length - (players[0].id === user?.id ? 2 : 0),
-			secondScore = scores[1].length - (players[1].id === user?.id ? 2 : 0);
+		const firstScore = scores[0].length - (players[0].id === user?.id ? 2 : 0);
+		const secondScore = scores[1].length - (players[1].id === user?.id ? 2 : 0);
 
 		const firstUser = `${players[0].toString()} - **${firstScore}** point${
-				firstScore === 1 ? "" : "s"
-			}`,
-			secondUser = `${players[1].toString()} - **${secondScore}** point${
-				secondScore === 1 ? "" : "s"
-			}`;
+			firstScore === 1 ? "" : "s"
+		}`;
+		const secondUser = `${players[1].toString()} - **${secondScore}** point${
+			secondScore === 1 ? "" : "s"
+		}`;
 		const secondWon = firstScore < secondScore;
 		const winner = await interaction.guild?.members.fetch(players[secondWon ? 1 : 0].id);
 
@@ -425,13 +421,12 @@ async function setupGame(difficulty: 2 | 4, guild = config.guild): Promise<strin
 		.toSorted(() => Math.random() - 0.5);
 
 	const chunks = [];
-	while (emojis.length) {
+	while (emojis.length)
 		chunks.push(
 			chunks.length === 2 ?
 				[...emojis.splice(0, 2), EMPTY_TILE, ...emojis.splice(0, 2)]
 			:	emojis.splice(0, 5),
 		);
-	}
 
 	return chunks;
 }

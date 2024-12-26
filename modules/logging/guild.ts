@@ -49,20 +49,18 @@ export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>):
 export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<void> {
 	if (newGuild.id !== config.guild.id) return;
 
-	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id) {
+	if (oldGuild.afkChannel?.id !== newGuild.afkChannel?.id)
 		await log(
 			`${LoggingEmojis.SettingChange} Inactive channel set to ${
 				newGuild.afkChannel?.toString() ?? "No inactive channel"
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
 	if (oldGuild.afkTimeout !== newGuild.afkTimeout)
 		await log(
 			`${LoggingEmojis.SettingChange} Inactive timeout set to ${newGuild.afkTimeout} seconds`,
 			LogSeverity.ServerChange,
 		);
-
 	if (oldGuild.banner !== newGuild.banner) {
 		const url = newGuild.bannerURL({ size: 512 });
 		await log(
@@ -73,7 +71,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			{ files: url ? [url] : [] },
 		);
 	}
-	if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications) {
+	if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications)
 		await log(
 			`${LoggingEmojis.SettingChange} Default notification settings set to ${
 				{
@@ -83,8 +81,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
-	if (oldGuild.description !== newGuild.description) {
+	if (oldGuild.description !== newGuild.description)
 		await log(
 			`${LoggingEmojis.SettingChange} Server description changed`,
 			LogSeverity.ServerChange,
@@ -103,7 +100,6 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 				],
 			},
 		);
-	}
 	if (oldGuild.discoverySplash !== newGuild.discoverySplash) {
 		const url = newGuild.discoverySplashURL({ size: 512 });
 		await log(
@@ -114,7 +110,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			{ files: url ? [url] : [] },
 		);
 	}
-	if (oldGuild.explicitContentFilter !== newGuild.explicitContentFilter) {
+	if (oldGuild.explicitContentFilter !== newGuild.explicitContentFilter)
 		await log(
 			`${LoggingEmojis.SettingChange} Explicit image filter set to ${
 				{
@@ -126,122 +122,6 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
-	const community = newGuild.features.includes("COMMUNITY");
-	if (oldGuild.features.includes("COMMUNITY") === community) {
-		if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id) {
-			await log(
-				`${LoggingEmojis.SettingChange} Community updates channel ${
-					newGuild.publicUpdatesChannel ?
-						`set to ${newGuild.publicUpdatesChannel.toString()}`
-					:	"unset"
-				}`,
-				LogSeverity.ServerChange,
-			);
-		}
-		if (oldGuild.rulesChannel?.id !== newGuild.rulesChannel?.id) {
-			await log(
-				`${LoggingEmojis.SettingChange} Rules or guidelines channel ${
-					newGuild.rulesChannel ? `set to ${newGuild.rulesChannel.toString()}` : "unset"
-				}`,
-				LogSeverity.ServerChange,
-			);
-		}
-	} else {
-		await log(
-			`${LoggingEmojis.SettingChange} Community ${community ? "enabled" : "disabled"}`,
-			LogSeverity.ImportantUpdate,
-		);
-	}
-	const monetized = newGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL");
-	if (oldGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL") !== monetized)
-		await log(
-			`${LoggingEmojis.SettingChange} Monetization ${monetized ? "enabled" : "disabled"}`,
-			LogSeverity.ImportantUpdate,
-		);
-	const storePage = newGuild.features.includes("CREATOR_STORE_PAGE");
-	if (oldGuild.features.includes("CREATOR_STORE_PAGE") !== storePage)
-		await log(
-			`${LoggingEmojis.SettingChange} Server Subscription Promo Page ${
-				storePage ? "enabled" : "disabled"
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
-	const developerSupport = newGuild.features.includes("DEVELOPER_SUPPORT_SERVER");
-	if (oldGuild.features.includes("DEVELOPER_SUPPORT_SERVER") !== developerSupport)
-		await log(
-			`${LoggingEmojis.SettingChange} Server ${
-				developerSupport ? "" : "un"
-			}marked as a Developer Support Server`,
-			LogSeverity.ImportantUpdate,
-		);
-	const discoverable = newGuild.features.includes("DISCOVERABLE");
-	if (oldGuild.features.includes("DISCOVERABLE") !== discoverable)
-		await log(
-			`${LoggingEmojis.SettingChange} Discovery ${discoverable ? "enabled" : "disabled"}`,
-			LogSeverity.ImportantUpdate,
-		);
-	const featured = newGuild.features.includes("FEATURABLE");
-	if (oldGuild.features.includes("FEATURABLE") !== featured)
-		await log(
-			`${LoggingEmojis.ServerUpdate} Server ${
-				featured ? "" : "un"
-			}featured in Server Discovery`,
-			LogSeverity.ImportantUpdate,
-		);
-	const directory = newGuild.features.includes("HAS_DIRECTORY_ENTRY");
-	if (oldGuild.features.includes("HAS_DIRECTORY_ENTRY") !== directory)
-		await log(
-			`${LoggingEmojis.ServerUpdate} Server ${
-				directory ? "added" : "removed"
-			} to a directory channel`,
-			LogSeverity.ImportantUpdate,
-		);
-	const invitesDisabled = newGuild.features.includes("INVITES_DISABLED");
-	if (oldGuild.features.includes("INVITES_DISABLED") !== invitesDisabled)
-		await log(
-			`${LoggingEmojis.Invite} Invites ${invitesDisabled ? "" : "un"}paused`,
-			LogSeverity.ImportantUpdate,
-		);
-	const hub = newGuild.features.includes("LINKED_TO_HUB");
-	if (oldGuild.features.includes("LINKED_TO_HUB") !== hub)
-		await log(
-			`${LoggingEmojis.ServerUpdate} Server ${hub ? "added" : "removed"} from a Student Hub`,
-			LogSeverity.ImportantUpdate,
-		);
-	const screening = newGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED");
-	if (oldGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED") !== screening)
-		await log(
-			`${LoggingEmojis.SettingChange} Server set to${
-				screening ? "" : " not"
-			} require members must accept rules before they can talk or DM`,
-			LogSeverity.ServerChange,
-		);
-	const subscriptions = newGuild.features.includes("ROLE_SUBSCRIPTIONS_ENABLED");
-	if (oldGuild.features.includes("ROLE_SUBSCRIPTIONS_ENABLED") !== subscriptions)
-		await log(
-			`${LoggingEmojis.SettingChange} Role Subscriptions ${
-				subscriptions ? "enabled" : "disabled"
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
-	const ticketedEvents = newGuild.features.includes("TICKETED_EVENTS_ENABLED");
-	if (oldGuild.features.includes("TICKETED_EVENTS_ENABLED") !== ticketedEvents)
-		await log(
-			`${LoggingEmojis.SettingChange} Ticketed events ${
-				ticketedEvents ? "enabled" : "disabled"
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
-	const welcomeScreen = newGuild.features.includes("WELCOME_SCREEN_ENABLED");
-	if (oldGuild.features.includes("WELCOME_SCREEN_ENABLED") !== welcomeScreen)
-		await log(
-			`${LoggingEmojis.SettingChange} Welcome Screen ${
-				welcomeScreen ? "enabled" : "disabled"
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
-
 	if (oldGuild.icon !== newGuild.icon) {
 		const url = newGuild.iconURL({ size: 512 });
 		await log(
@@ -250,7 +130,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			{ files: url ? [url] : [] },
 		);
 	}
-	if (oldGuild.maximumMembers !== newGuild.maximumMembers) {
+	if (oldGuild.maximumMembers !== newGuild.maximumMembers)
 		await log(
 			`${LoggingEmojis.ServerUpdate} Maximum members ${
 				typeof newGuild.maximumMembers === "number" ?
@@ -259,8 +139,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
-	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers) {
+	if (oldGuild.maxVideoChannelUsers !== newGuild.maxVideoChannelUsers)
 		await log(
 			`${LoggingEmojis.ServerUpdate} Maximum members in a video channel ${
 				typeof newGuild.maxVideoChannelUsers === "number" ?
@@ -269,22 +148,19 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
-	if (oldGuild.mfaLevel !== newGuild.mfaLevel) {
+	if (oldGuild.mfaLevel !== newGuild.mfaLevel)
 		await log(
 			`${LoggingEmojis.SettingChange} Server set to${
 				newGuild.mfaLevel === GuildMFALevel.None ? " not" : ""
 			} require 2FA for moderator actions`,
 			LogSeverity.ImportantUpdate,
 		);
-	}
 	if (oldGuild.name !== newGuild.name)
 		await log(
 			`${LoggingEmojis.SettingChange} Server renamed to ${newGuild.name}`,
 			LogSeverity.ImportantUpdate,
 		);
-
-	if (oldGuild.nsfwLevel !== newGuild.nsfwLevel) {
+	if (oldGuild.nsfwLevel !== newGuild.nsfwLevel)
 		await log(
 			`${LoggingEmojis.ServerUpdate} Server marked as ${
 				{
@@ -296,7 +172,6 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ImportantUpdate,
 		);
-	}
 	if (oldGuild.ownerId !== newGuild.ownerId)
 		await log(
 			`${LoggingEmojis.SettingChange} Ownership transferred to ${userMention(
@@ -304,13 +179,11 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			)}`,
 			LogSeverity.ImportantUpdate,
 		);
-
 	if (oldGuild.partnered !== newGuild.partnered)
 		await log(
 			`${LoggingEmojis.ServerUpdate} Server ${newGuild.partnered ? "" : "un"}partnered`,
 			LogSeverity.ImportantUpdate,
 		);
-
 	if (oldGuild.preferredLocale !== newGuild.preferredLocale)
 		await log(
 			`${LoggingEmojis.SettingChange} Server primary language set to ${
@@ -351,7 +224,6 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ImportantUpdate,
 		);
-
 	if (oldGuild.premiumProgressBarEnabled !== newGuild.premiumProgressBarEnabled)
 		await log(
 			`${LoggingEmojis.SettingChange} Boost progress bar ${
@@ -359,8 +231,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-
-	if (oldGuild.safetyAlertsChannel?.id !== newGuild.safetyAlertsChannel?.id) {
+	if (oldGuild.safetyAlertsChannel?.id !== newGuild.safetyAlertsChannel?.id)
 		await log(
 			`${LoggingEmojis.SettingChange} Safety notifications channel ${
 				newGuild.safetyAlertsChannel ?
@@ -369,7 +240,6 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
 	if (oldGuild.splash !== newGuild.splash) {
 		const url = newGuild.splashURL({ size: 512 });
 		await log(
@@ -380,14 +250,139 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			{ files: url ? [url] : [] },
 		);
 	}
-	if (oldGuild.systemChannel?.id !== newGuild.systemChannel?.id) {
+	if (oldGuild.systemChannel?.id !== newGuild.systemChannel?.id)
 		await log(
 			`${LoggingEmojis.SettingChange} System messages channel ${
 				newGuild.systemChannel ? `set to ${newGuild.systemChannel.toString()}` : "unset"
 			}`,
 			LogSeverity.ServerChange,
 		);
-	}
+	if (oldGuild.vanityURLCode !== newGuild.vanityURLCode)
+		await log(
+			`${LoggingEmojis.SettingChange} Custom invite link ${
+				newGuild.vanityURLCode ? `set to ${newGuild.vanityURLCode}` : "reset"
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+	if (oldGuild.verificationLevel !== newGuild.verificationLevel)
+		await log(
+			`${LoggingEmojis.SettingChange} Verification level set to ${
+				{
+					[GuildVerificationLevel.None]: "Unrestricted",
+					[GuildVerificationLevel.Low]: "Low",
+					[GuildVerificationLevel.Medium]: "Medium",
+					[GuildVerificationLevel.High]: "High",
+					[GuildVerificationLevel.VeryHigh]: "Highest",
+				}[newGuild.verificationLevel]
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+	if (oldGuild.verified !== newGuild.verified)
+		await log(
+			`${LoggingEmojis.ServerUpdate} Server ${newGuild.verified ? "" : "un"}verified`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const monetized = newGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL");
+	if (oldGuild.features.includes("CREATOR_MONETIZABLE_PROVISIONAL") !== monetized)
+		await log(
+			`${LoggingEmojis.SettingChange} Monetization ${monetized ? "enabled" : "disabled"}`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const storePage = newGuild.features.includes("CREATOR_STORE_PAGE");
+	if (oldGuild.features.includes("CREATOR_STORE_PAGE") !== storePage)
+		await log(
+			`${LoggingEmojis.SettingChange} Server Subscription Promo Page ${
+				storePage ? "enabled" : "disabled"
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const developerSupport = newGuild.features.includes("DEVELOPER_SUPPORT_SERVER");
+	if (oldGuild.features.includes("DEVELOPER_SUPPORT_SERVER") !== developerSupport)
+		await log(
+			`${LoggingEmojis.SettingChange} Server ${
+				developerSupport ? "" : "un"
+			}marked as a Developer Support Server`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const discoverable = newGuild.features.includes("DISCOVERABLE");
+	if (oldGuild.features.includes("DISCOVERABLE") !== discoverable)
+		await log(
+			`${LoggingEmojis.SettingChange} Discovery ${discoverable ? "enabled" : "disabled"}`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const featured = newGuild.features.includes("FEATURABLE");
+	if (oldGuild.features.includes("FEATURABLE") !== featured)
+		await log(
+			`${LoggingEmojis.ServerUpdate} Server ${
+				featured ? "" : "un"
+			}featured in Server Discovery`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const directory = newGuild.features.includes("HAS_DIRECTORY_ENTRY");
+	if (oldGuild.features.includes("HAS_DIRECTORY_ENTRY") !== directory)
+		await log(
+			`${LoggingEmojis.ServerUpdate} Server ${
+				directory ? "added" : "removed"
+			} to a directory channel`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const invitesDisabled = newGuild.features.includes("INVITES_DISABLED");
+	if (oldGuild.features.includes("INVITES_DISABLED") !== invitesDisabled)
+		await log(
+			`${LoggingEmojis.Invite} Invites ${invitesDisabled ? "" : "un"}paused`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const hub = newGuild.features.includes("LINKED_TO_HUB");
+	if (oldGuild.features.includes("LINKED_TO_HUB") !== hub)
+		await log(
+			`${LoggingEmojis.ServerUpdate} Server ${hub ? "added" : "removed"} from a Student Hub`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const screening = newGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED");
+	if (oldGuild.features.includes("MEMBER_VERIFICATION_GATE_ENABLED") !== screening)
+		await log(
+			`${LoggingEmojis.SettingChange} Server set to${
+				screening ? "" : " not"
+			} require members must accept rules before they can talk or DM`,
+			LogSeverity.ServerChange,
+		);
+
+	const subscriptions = newGuild.features.includes("ROLE_SUBSCRIPTIONS_ENABLED");
+	if (oldGuild.features.includes("ROLE_SUBSCRIPTIONS_ENABLED") !== subscriptions)
+		await log(
+			`${LoggingEmojis.SettingChange} Role Subscriptions ${
+				subscriptions ? "enabled" : "disabled"
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const ticketedEvents = newGuild.features.includes("TICKETED_EVENTS_ENABLED");
+	if (oldGuild.features.includes("TICKETED_EVENTS_ENABLED") !== ticketedEvents)
+		await log(
+			`${LoggingEmojis.SettingChange} Ticketed events ${
+				ticketedEvents ? "enabled" : "disabled"
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const welcomeScreen = newGuild.features.includes("WELCOME_SCREEN_ENABLED");
+	if (oldGuild.features.includes("WELCOME_SCREEN_ENABLED") !== welcomeScreen)
+		await log(
+			`${LoggingEmojis.SettingChange} Welcome Screen ${
+				welcomeScreen ? "enabled" : "disabled"
+			}`,
+			LogSeverity.ImportantUpdate,
+		);
+
 	const noSetup = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressGuildReminderNotifications,
 	);
@@ -402,6 +397,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} send helpful tips for server setup`,
 			LogSeverity.ServerChange,
 		);
+
 	const noJoinReplies = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressJoinNotificationReplies,
 	);
@@ -415,6 +411,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} prompt members to reply to welcome messages with a sticker`,
 			LogSeverity.ServerChange,
 		);
+
 	const noJoins = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressJoinNotifications,
 	);
@@ -428,6 +425,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} send a random welcome message when someone joins this server`,
 			LogSeverity.ServerChange,
 		);
+
 	const noBoosts = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressPremiumSubscriptions,
 	);
@@ -441,6 +439,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} send a message when someone boosts this server`,
 			LogSeverity.ServerChange,
 		);
+
 	const noSubscriptionReplies = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotificationReplies,
 	);
@@ -455,6 +454,7 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} prompt members to reply to Server Subscription congratulation messages with a sticker`,
 			LogSeverity.ServerChange,
 		);
+
 	const noSubscriptions = newGuild.systemChannelFlags.has(
 		GuildSystemChannelFlags.SuppressRoleSubscriptionPurchaseNotifications,
 	);
@@ -469,31 +469,28 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			} send a message when someone purchases or renews a Server Subscripton`,
 			LogSeverity.ServerChange,
 		);
-	if (oldGuild.vanityURLCode !== newGuild.vanityURLCode)
-		await log(
-			`${LoggingEmojis.SettingChange} Custom invite link ${
-				newGuild.vanityURLCode ? `set to ${newGuild.vanityURLCode}` : "reset"
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
 
-	if (oldGuild.verificationLevel !== newGuild.verificationLevel) {
+	const community = newGuild.features.includes("COMMUNITY");
+	if (oldGuild.features.includes("COMMUNITY") === community) {
+		if (oldGuild.publicUpdatesChannel?.id !== newGuild.publicUpdatesChannel?.id)
+			await log(
+				`${LoggingEmojis.SettingChange} Community updates channel ${
+					newGuild.publicUpdatesChannel ?
+						`set to ${newGuild.publicUpdatesChannel.toString()}`
+					:	"unset"
+				}`,
+				LogSeverity.ServerChange,
+			);
+		if (oldGuild.rulesChannel?.id !== newGuild.rulesChannel?.id)
+			await log(
+				`${LoggingEmojis.SettingChange} Rules or guidelines channel ${
+					newGuild.rulesChannel ? `set to ${newGuild.rulesChannel.toString()}` : "unset"
+				}`,
+				LogSeverity.ServerChange,
+			);
+	} else
 		await log(
-			`${LoggingEmojis.SettingChange} Verification level set to ${
-				{
-					[GuildVerificationLevel.None]: "Unrestricted",
-					[GuildVerificationLevel.Low]: "Low",
-					[GuildVerificationLevel.Medium]: "Medium",
-					[GuildVerificationLevel.High]: "High",
-					[GuildVerificationLevel.VeryHigh]: "Highest",
-				}[newGuild.verificationLevel]
-			}`,
-			LogSeverity.ImportantUpdate,
-		);
-	}
-	if (oldGuild.verified !== newGuild.verified)
-		await log(
-			`${LoggingEmojis.ServerUpdate} Server ${newGuild.verified ? "" : "un"}verified`,
+			`${LoggingEmojis.SettingChange} Community ${community ? "enabled" : "disabled"}`,
 			LogSeverity.ImportantUpdate,
 		);
 }

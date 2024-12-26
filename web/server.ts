@@ -14,7 +14,7 @@ import { getRequestUrl } from "../util/text.ts";
 
 const CSS_FILE = (await fileSystem.readFile("./web/style.css", "utf8")).replaceAll(
 	"#000",
-	"#" + constants.themeColor.toString(16),
+	`#${constants.themeColor.toString(16)}`,
 );
 const CLIENT_JS_FILE = await fileSystem.readFile("./dist/web/client.js", "utf8");
 const DISCORD_CSS_FILE = await fileSystem.readFile("./web/discord.css", "utf8");
@@ -83,9 +83,8 @@ const server = http.createServer(async (request, response) => {
 				)
 			)
 				return createReadStream(filePath).pipe(response);
-		} else if (first === "suggestions") {
+		} else if (first === "suggestions")
 			return await suggestionsPage(request, response, segments[2]);
-		}
 
 		response
 			.writeHead(301, {
@@ -106,6 +105,8 @@ const server = http.createServer(async (request, response) => {
 	}
 });
 
-await new Promise<void>((resolve) => server.listen(process.env.PORT, resolve));
+await new Promise<void>((resolve) => {
+	server.listen(process.env.PORT, resolve);
+});
 console.log("Server up!");
 export default server;

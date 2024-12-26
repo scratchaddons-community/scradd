@@ -237,7 +237,7 @@ await describe("formatDuration", async () => {
 
 function almostEqual(actual: number, expected: number, message?: string): void {
 	const diff = Math.abs(actual - expected);
-	if (diff > 5) {
+	if (diff > 5)
 		throw new AssertionError({
 			message: message || `${actual} is not almost equal to ${expected}`,
 			actual,
@@ -245,5 +245,4 @@ function almostEqual(actual: number, expected: number, message?: string): void {
 			operator: "almostEqual",
 			stackStartFn: almostEqual,
 		});
-	}
 }

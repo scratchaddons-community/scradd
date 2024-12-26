@@ -9,7 +9,7 @@ export function uwuify(text: string): string {
 	const output = stripMarkdown(text)
 		.split(/\s+/)
 		.map((word) =>
-			/^(?:https?:\/\/|(?:(.)\1*|<.+>)$)/.test(word) ? word : (
+			/^(?:https?:\/\/|(?:(?<char>.)\k<char>*|<.+>)$)/.test(word) ? word : (
 				(uwuReplacements[word.toLowerCase()] ?? convertWord(word))
 			),
 		);
@@ -50,7 +50,7 @@ const data: CustomOperation = {
 			content: uwuify(
 				(typeof text === "string" ? text : "") +
 					(typeof ephemeral === "string" && !["true", "false"].includes(ephemeral) ?
-						" " + ephemeral
+						` ${ephemeral}`
 					:	""),
 			),
 			ephemeral: ephemeral === "true",

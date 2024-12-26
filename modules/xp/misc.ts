@@ -66,6 +66,6 @@ export function getLevelForXp(xp: number): number {
 	return level - 1;
 }
 
-export const ACTIVE_THRESHOLD_ONE = 300,
-	ACTIVE_THRESHOLD_TWO = 500,
-	ESTABLISHED_THRESHOLD = 5;
+export const ACTIVE_THRESHOLD_ONE = 300;
+export const ACTIVE_THRESHOLD_TWO = 500;
+export const ESTABLISHED_THRESHOLD = 5;

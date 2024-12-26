@@ -70,37 +70,37 @@ defineButton("contactMods", async (interaction) => {
 		ephemeral: true,
 	});
 });
-defineSelect("contactMods", async (interaction) => {
-	return await showTicketModal(interaction);
-});
-defineButton("confirmStrikeAppeal", async (interaction, id) => {
-	return await interaction.reply({
-		ephemeral: true,
-		content:
-			"## Strike Appeal\nThis form is for letting us know if we made a mistake so we can remove the strike. If you just made a mistake, don’t worry, strikes expire after 21 days, and just a couple strikes don’t ban you.\nIf you believe this strike was given in error and needs to be removed, please click below.",
+defineSelect("contactMods", async (interaction) => await showTicketModal(interaction));
+defineButton(
+	"confirmStrikeAppeal",
+	async (interaction, id) =>
+		await interaction.reply({
+			ephemeral: true,
+			content:
+				"## Strike Appeal\nThis form is for letting us know if we made a mistake so we can remove the strike. If you just made a mistake, don’t worry, strikes expire after 21 days, and just a couple strikes don’t ban you.\nIf you believe this strike was given in error and needs to be removed, please click below.",
 
-		components: [
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						customId: `${id}_appealStrike`,
-						label: "Fill out the form",
-						style: ButtonStyle.Primary,
-						type: ComponentType.Button,
-					},
-				],
-			},
-		],
-	});
-});
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							customId: `${id}_appealStrike`,
+							label: "Fill out the form",
+							style: ButtonStyle.Primary,
+							type: ComponentType.Button,
+						},
+					],
+				},
+			],
+		}),
+);
 defineButton("appealStrike", async (interaction, id) => {
-	if (appealedStrikes.has(id)) {
+	if (appealedStrikes.has(id))
 		return await interaction.reply({
 			content: `${constants.emojis.statuses.no} You have already appealed this strike.`,
 			ephemeral: true,
 		});
-	}
+
 	return await showTicketModal(interaction, "appeal", id);
 });
 defineModal("contactMods", async (interaction, category) => {
@@ -126,12 +126,12 @@ defineModal("contactMods", async (interaction, category) => {
 defineMenuCommand(
 	{ name: "Report Message", type: ApplicationCommandType.Message },
 	async (interaction) => {
-		if (interaction.targetMessage.author.id === interaction.user.id) {
+		if (interaction.targetMessage.author.id === interaction.user.id)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} You can’t report your own messages!`,
 			});
-		}
+
 		await interaction.showModal({
 			title: "Report Message",
 			customId: `${interaction.targetMessage.id}_report`,
@@ -247,12 +247,11 @@ defineButton("contactUser", async (interaction, userId = "") => {
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.staff.id)
 		:	interaction.member?.roles.includes(config.roles.staff.id))
-	) {
+	)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You don’t have permission to contact users!`,
 		});
-	}
 
 	const member = await config.guild.members.fetch(userId).catch(() => void 0);
 	if (!member) {
@@ -290,9 +289,8 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 			await newThread.setArchived(false, "To lock it");
 			await newThread.edit({ archived: true, locked: true, reason: "Was closed" });
 		}
-	} else if (newThread.locked) {
-		TICKETS_BY_MEMBER[memberId] = undefined;
-	} else if (existing) {
+	} else if (newThread.locked) TICKETS_BY_MEMBER[memberId] = undefined;
+	else if (existing) {
 		await newThread.send(
 			`${constants.emojis.statuses.no} ${userMention(
 				memberId,
@@ -303,9 +301,7 @@ defineEvent("threadUpdate", async (oldThread, newThread) => {
 			locked: true,
 			reason: "Reopened while another ticket is already open",
 		});
-	} else {
-		TICKETS_BY_MEMBER[memberId] = newThread;
-	}
+	} else TICKETS_BY_MEMBER[memberId] = newThread;
 });
 
 defineEvent("messageReactionAdd", async (partialReaction) => {

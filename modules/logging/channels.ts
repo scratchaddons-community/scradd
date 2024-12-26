@@ -61,57 +61,51 @@ export async function channelUpdate(
 		return;
 
 	const removedActive = newChannel.flags.has("ActiveChannelsRemoved");
-	if (oldChannel.flags.has("ActiveChannelsRemoved") !== removedActive) {
+	if (oldChannel.flags.has("ActiveChannelsRemoved") !== removedActive)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "hidden from" : "shown in"
 			} Active Now`,
 			LogSeverity.ServerChange,
 		);
-	}
 	const clyde = newChannel.flags.has("ClydeAI");
-	if (oldChannel.flags.has("ClydeAI") !== clyde) {
+	if (oldChannel.flags.has("ClydeAI") !== clyde)
 		await log(
 			`${LoggingEmojis.Integration} ClydeAI ${
 				clyde ? "enabled" : "disabled"
 			} in ${newChannel.toString()}`,
 			LogSeverity.ServerChange,
 		);
-	}
 	const removedFeed = newChannel.flags.has("GuildFeedRemoved");
-	if (oldChannel.flags.has("GuildFeedRemoved") !== removedFeed) {
+	if (oldChannel.flags.has("GuildFeedRemoved") !== removedFeed)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				removedActive ? "removed from" : "re-added to"
 			} the server feed`,
 			LogSeverity.ServerChange,
 		);
-	}
 	const resource = newChannel.flags.has("IsGuildResourceChannel");
-	if (oldChannel.flags.has("IsGuildResourceChannel") !== resource) {
+	if (oldChannel.flags.has("IsGuildResourceChannel") !== resource)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${
 				resource ? "added to" : "removed from"
 			} the Resource Pages`,
 			LogSeverity.ServerChange,
 		);
-	}
 	const spam = newChannel.flags.has("IsSpam");
-	if (oldChannel.flags.has("IsSpam") !== spam) {
+	if (oldChannel.flags.has("IsSpam") !== spam)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} ${spam ? "" : "un"}marked as spam`,
 			LogSeverity.ImportantUpdate,
 		);
-	}
 	const tags = newChannel.flags.has("RequireTag");
-	if (oldChannel.flags.has("RequireTag") !== tags) {
+	if (oldChannel.flags.has("RequireTag") !== tags)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} set to ${
 				tags ? "" : "not "
 			}require people to select tags when posting`,
 			LogSeverity.ServerChange,
 		);
-	}
 	if (oldChannel.name !== newChannel.name)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} (${oldChannel.name}) renamed to ${
@@ -119,7 +113,7 @@ export async function channelUpdate(
 			}`,
 			LogSeverity.ImportantUpdate,
 		);
-	if (oldChannel.type !== newChannel.type) {
+	if (oldChannel.type !== newChannel.type)
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()} converted to a${
 				{
@@ -134,7 +128,6 @@ export async function channelUpdate(
 			} Channel`,
 			LogSeverity.ImportantUpdate,
 		);
-	}
 
 	if (
 		oldChannel.type === ChannelType.GuildCategory ||
@@ -209,7 +202,7 @@ export async function channelUpdate(
 			LogSeverity.ServerChange,
 		);
 
-	if ((oldChannel.topic ?? "") !== (newChannel.topic ?? "")) {
+	if ((oldChannel.topic ?? "") !== (newChannel.topic ?? ""))
 		await log(
 			`${LoggingEmojis.Channel} ${newChannel.toString()}’s topic changed`,
 			LogSeverity.ServerChange,
@@ -229,7 +222,6 @@ export async function channelUpdate(
 				],
 			},
 		);
-	}
 
 	if (
 		(oldChannel.defaultThreadRateLimitPerUser ?? 0) !==

@@ -44,6 +44,7 @@ export default async function graph(interaction: AnySelectMenuInteraction): Prom
 
 	const defaultColor = Chart.defaults.color;
 	Chart.defaults.color = "#fff";
+	// eslint-disable-next-line no-new
 	new Chart(context as CanvasRenderingContext2D & SKRSContext2D, {
 		options: {
 			parsing: false,

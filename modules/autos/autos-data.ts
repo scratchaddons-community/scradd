@@ -9,8 +9,4 @@ export const dadEasterEggCount =
 	Object.keys(customResponses).length +
 	Object.keys(customNames).length +
 	Object.keys(customComments).length +
-	customTriggers.length -
-	// Dupes
-	0 +
-	// Dynamic
-	0;
+	customTriggers.length;

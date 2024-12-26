@@ -92,95 +92,90 @@ export async function parseArgument(
 ): Promise<Options[string] | { error: boolean }> {
 	if (schema.name === "option") return { error: true };
 
-	const required = "required" in schema ? (schema.required ?? true) : true;
+	const defaultError =
+		!("required" in schema) || (schema.required ?? true) ?
+			{ error: UNSUPPORTED_OPTIONS.includes(schema.type) }
+		:	undefined;
 
-	if (argument) {
-		switch (schema.type) {
-			case ApplicationCommandOptionType.String: {
-				if (
-					argument.length > (schema.maxLength ?? argument.length) ||
-					argument.length < (schema.minLength ?? argument.length)
-				)
-					break;
-				if (
-					"choices" in schema &&
-					schema.choices &&
-					!schema.choices.some((choice) => choice.value === argument)
-				)
-					break;
-				return argument;
-			}
-			case ApplicationCommandOptionType.Boolean: {
-				const option = { true: true, false: false }[argument];
-				if (option === undefined) break;
-				return option;
-			}
-			case ApplicationCommandOptionType.Integer:
-			case ApplicationCommandOptionType.Number: {
-				const parsed =
-					Number[
-						schema.type === ApplicationCommandOptionType.Integer ?
-							"parseInt"
-						:	"parseFloat"
-					](argument);
+	if (!argument) return defaultError;
 
-				if (
-					Number.isNaN(parsed) ||
-					parsed > (schema.maxValue ?? parsed) ||
-					parsed < (schema.minValue ?? parsed)
-				)
-					break;
-				if (
-					"choices" in schema &&
-					schema.choices &&
-					!schema.choices.some((choice) => choice.value === parsed)
-				)
-					break;
-				return parsed;
-			}
-			case ApplicationCommandOptionType.Channel: {
-				const parsed =
-					MessageMentions.ChannelsPattern.exec(argument)?.groups?.id || argument;
-				const fetched = parsed && (await client.channels.fetch(parsed).catch(() => void 0));
-
-				if (
-					!fetched ||
-					fetched.isDMBased() ||
-					(schema.channelTypes && !schema.channelTypes.includes(fetched.type))
-				)
-					break;
-				return fetched;
-			}
-			case ApplicationCommandOptionType.User:
-			case ApplicationCommandOptionType.Mentionable: {
-				const parsed = MessageMentions.UsersPattern.exec(argument)?.groups?.id || argument;
-				const fetched = parsed && (await client.users.fetch(parsed).catch(() => void 0));
-
-				if (fetched) return fetched;
-				if (schema.type === ApplicationCommandOptionType.User) break;
-				// Mentionable falls through
-			}
-			case ApplicationCommandOptionType.Role: {
-				const parsed = MessageMentions.RolesPattern.exec(argument)?.groups?.id || argument;
-				const fetched =
-					parsed && (await config.guild.roles.fetch(parsed).catch(() => void 0));
-
-				if (fetched) return fetched;
+	switch (schema.type) {
+		case ApplicationCommandOptionType.String: {
+			if (
+				argument.length > (schema.maxLength ?? argument.length) ||
+				argument.length < (schema.minLength ?? argument.length)
+			)
 				break;
-			}
-			case ApplicationCommandOptionType.Subcommand:
-			case ApplicationCommandOptionType.SubcommandGroup:
-			case ApplicationCommandOptionType.Attachment: {
+			if (
+				"choices" in schema &&
+				schema.choices &&
+				!schema.choices.some((choice) => choice.value === argument)
+			)
 				break;
-			}
+			return argument;
+		}
+		case ApplicationCommandOptionType.Boolean: {
+			const option = { true: true, false: false }[argument];
+			if (option === undefined) break;
+			return option;
+		}
+		case ApplicationCommandOptionType.Integer:
+		case ApplicationCommandOptionType.Number: {
+			const parsed =
+				Number[
+					schema.type === ApplicationCommandOptionType.Integer ? "parseInt" : "parseFloat"
+				](argument);
+
+			if (
+				Number.isNaN(parsed) ||
+				parsed > (schema.maxValue ?? parsed) ||
+				parsed < (schema.minValue ?? parsed)
+			)
+				break;
+			if (
+				"choices" in schema &&
+				schema.choices &&
+				!schema.choices.some((choice) => choice.value === parsed)
+			)
+				break;
+			return parsed;
+		}
+		case ApplicationCommandOptionType.Channel: {
+			const parsed = MessageMentions.ChannelsPattern.exec(argument)?.groups?.id || argument;
+			const fetched = parsed && (await client.channels.fetch(parsed).catch(() => void 0));
+
+			if (
+				!fetched ||
+				fetched.isDMBased() ||
+				(schema.channelTypes && !schema.channelTypes.includes(fetched.type))
+			)
+				break;
+			return fetched;
+		}
+		case ApplicationCommandOptionType.User:
+		case ApplicationCommandOptionType.Mentionable: {
+			const parsed = MessageMentions.UsersPattern.exec(argument)?.groups?.id || argument;
+			const fetched = parsed && (await client.users.fetch(parsed).catch(() => void 0));
+
+			if (fetched) return fetched;
+			if (schema.type === ApplicationCommandOptionType.User) break;
+			// Mentionable falls through
+		}
+		case ApplicationCommandOptionType.Role: {
+			const parsed = MessageMentions.RolesPattern.exec(argument)?.groups?.id || argument;
+			const fetched = parsed && (await config.guild.roles.fetch(parsed).catch(() => void 0));
+
+			if (fetched) return fetched;
+			break;
+		}
+		case ApplicationCommandOptionType.Subcommand:
+		case ApplicationCommandOptionType.SubcommandGroup:
+		case ApplicationCommandOptionType.Attachment: {
+			break;
 		}
 	}
 
-	return (
-		UNSUPPORTED_OPTIONS.includes(schema.type) ? { error: true }
-		: required ? { error: false }
-		: undefined
-	);
+	return defaultError;
 }
 
 export function partitionArguments(
@@ -202,8 +197,11 @@ export function partitionArguments(
 					.slice(stringIndex, stringEnd)
 					.reduce(
 						(accumulator, part, index, { length }) =>
-							`${accumulator}${part}` +
-							(index + 1 === length ? "" : whitespace[index + stringIndex + 1]),
+							`${accumulator}${part}${
+								index + 1 === length ?
+									""
+								:	(whitespace[index + stringIndex + 1] ?? "")
+							}`,
 						"",
 					),
 				...words.slice(stringEnd),

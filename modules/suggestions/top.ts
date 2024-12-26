@@ -75,8 +75,8 @@ export default async function top(
 
 /** @todo - Strip full links, they can’t be escaped. */
 function padTitle(title: number | string): string {
-	const left = countOccurrences(`${title}`, "[");
-	const right = countOccurrences(`${title}`, "]");
+	const left = countOccurrences(title.toString(), "[");
+	const right = countOccurrences(title.toString(), "]");
 	return title + "]".repeat(Math.max(0, left - right));
 }
 

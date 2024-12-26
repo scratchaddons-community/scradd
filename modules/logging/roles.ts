@@ -76,7 +76,7 @@ export async function roleUpdate(
 ): Promise<void> {
 	let iconChanged = false;
 
-	for (const change of entry.changes) {
+	for (const change of entry.changes)
 		switch (change.key) {
 			case "name": {
 				await log(
@@ -151,7 +151,6 @@ export async function roleUpdate(
 				break;
 			}
 		}
-	}
 
 	if (!iconChanged || !(entry.target instanceof Role)) return;
 	await log(

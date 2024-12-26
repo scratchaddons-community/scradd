@@ -29,12 +29,10 @@ export default async function queueReminders(): Promise<NodeJS.Timeout | undefin
 	const interval = getNextInterval();
 	if (interval === undefined) return;
 
-	if (interval < 100) {
-		return await sendReminders();
-	} else {
-		nextReminder = setTimeout(sendReminders, interval);
-		return nextReminder;
-	}
+	if (interval < 100) return await sendReminders();
+
+	nextReminder = setTimeout(sendReminders, interval);
+	return nextReminder;
 }
 
 async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
@@ -60,7 +58,7 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 	for (const reminder of toSend) {
 		const channel =
 			(await client.channels.fetch(reminder.channel).catch(() => void 0)) ?? undefined;
-		const reminderText = `${reminder.reminder ?? ""}`;
+		const reminderText = reminder.reminder?.toString() ?? "";
 		if (reminder.user === client.user.id && typeof reminder.id === "number") {
 			await sendSpecialReminder({
 				channel,
@@ -75,10 +73,10 @@ async function sendReminders(): Promise<NodeJS.Timeout | undefined> {
 
 		const silent = reminderText.startsWith("@silent");
 
-		const ping = channel.isDMBased() ? "" : userMention(reminder.user) + " ";
+		const ping = channel.isDMBased() ? "" : `${userMention(reminder.user)} `;
 		const content = (silent ? reminderText.replace("@silent", "") : reminderText).trim();
 		const date = time(
-			new Date(+convertBase(reminder.id + "", convertBase.MAX_BASE, 10)),
+			new Date(+convertBase(reminder.id.toString(), convertBase.MAX_BASE, 10)),
 			TimestampStyles.RelativeTime,
 		);
 
@@ -173,7 +171,7 @@ async function sendSpecialReminder(reminder: {
 			break;
 		}
 		case SpecialReminder.Unban: {
-			if (typeof reminder.reminder == "string")
+			if (typeof reminder.reminder === "string")
 				await config.guild.bans
 					.remove(reminder.reminder, "Unbanned after set time period")
 					.catch(() => void 0);

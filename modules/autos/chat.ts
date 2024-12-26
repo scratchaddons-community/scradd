@@ -127,33 +127,33 @@ export async function learn(message: Message): Promise<void> {
 }
 
 const consent = {
-		content:
-			`## ${chatName}\n` +
-			`### Basic regurgitating chatbot\n` +
-			`${
-				chatName
-			} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
-		components: [
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						customId: "_allowChat",
-						type: ComponentType.Button,
-						label: "Store my messages",
-						style: ButtonStyle.Success,
-					},
-					{
-						customId: "_denyChat",
-						type: ComponentType.Button,
-						label: "Don’t store my messages",
-						style: ButtonStyle.Danger,
-					},
-				],
-			},
-		],
-	} as const,
-	threadName = `${chatName} (Check pins!)` as const;
+	content:
+		`## ${chatName}\n` +
+		`### Basic regurgitating chatbot\n` +
+		`${
+			chatName
+		} learns by tracking messages across all channels. Your messages will only be stored if you give explicit permission by selecting a button below. You will be able to change your decision at any time, however any past messages can’t be deleted, as message authors are not stored. By default, your messages are not saved. If you consent to these terms, you may select the appropriate button below.`,
+	components: [
+		{
+			type: ComponentType.ActionRow,
+			components: [
+				{
+					customId: "_allowChat",
+					type: ComponentType.Button,
+					label: "Store my messages",
+					style: ButtonStyle.Success,
+				},
+				{
+					customId: "_denyChat",
+					type: ComponentType.Button,
+					label: "Don’t store my messages",
+					style: ButtonStyle.Danger,
+				},
+			],
+		},
+	],
+} as const;
+const threadName = `${chatName} (Check pins!)` as const;
 export const chatThread = await getThread();
 async function getThread(): Promise<TextThreadChannel | undefined> {
 	if (!config.channels.bots) return;
@@ -184,13 +184,12 @@ export async function allowChat(
 	interaction: ButtonInteraction,
 ): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
-	if (settings.scraddChat) {
+	if (settings.scraddChat)
 		return await interaction.reply(
 			`${
 				constants.emojis.statuses.yes
 			} ${interaction.user.toString()}, your mesages will continue to be saved in all public channels.`,
 		);
-	}
 
 	userSettingsDatabase.updateById({ id: interaction.user.id, scraddChat: true }, settings);
 	await interaction.reply(
@@ -205,13 +204,12 @@ export async function denyChat(
 	interaction: ButtonInteraction,
 ): Promise<InteractionResponse | undefined> {
 	const settings = await getSettings(interaction.user);
-	if (!settings.scraddChat) {
+	if (!settings.scraddChat)
 		return await interaction.reply(
 			`${
 				constants.emojis.statuses.yes
 			} ${interaction.user.toString()}, your mesages will continue to not be saved.`,
 		);
-	}
 
 	userSettingsDatabase.updateById({ id: interaction.user.id, scraddChat: false }, settings);
 	await interaction.reply(

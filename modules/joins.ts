@@ -56,11 +56,12 @@ defineEvent("guildMemberAdd", async (member) => {
 									config.channels.general ?
 										` in ${config.channels.general.toString()}`
 									:	""
-								}.` +
-								(directoryUrl &&
+								}.${
+									directoryUrl &&
 									` You can also check out our [server directory](<${
 										directoryUrl
-									}>) for other large Scratch servers to chat in, including non-English servers.`),
+									}>) for other large Scratch servers to chat in, including non-English servers.`
+								}`,
 						},
 						{
 							name: "**We are not the Scratch Team.**",

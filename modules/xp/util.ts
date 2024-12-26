@@ -22,8 +22,7 @@ await recentXpDatabase.init();
 export function getWeeklyXp(user: Snowflake): number {
 	return recentXpDatabase.data.reduce((accumulator, gain) => {
 		if (gain.user !== user || gain.time + 604_800_000 < Date.now()) return accumulator;
-		accumulator += gain.xp;
-		return accumulator;
+		return accumulator + gain.xp;
 	}, 0);
 }
 

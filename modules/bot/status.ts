@@ -47,11 +47,10 @@ export default async function status(interaction: ChatInputCommandInteraction): 
 					},
 					{
 						name: "💾 RAM usage",
-						value:
-							(process.memoryUsage.rss() / 1_000_000).toLocaleString([], {
-								maximumFractionDigits: 2,
-								minimumFractionDigits: 2,
-							}) + " MB",
+						value: `${(process.memoryUsage.rss() / 1_000_000).toLocaleString([], {
+							maximumFractionDigits: 2,
+							minimumFractionDigits: 2,
+						})} MB`,
 						inline: true,
 					},
 				],

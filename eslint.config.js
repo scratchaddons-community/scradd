@@ -8,8 +8,8 @@ import typescriptEslint from "typescript-eslint";
 
 const config = typescriptEslint.config(
 	{ files: ["**/*.ts"] },
-	{ ignores: ["./dist"] },
-	js.configs.recommended,
+	{ ignores: ["dist"] },
+	js.configs.all,
 	...typescriptEslint.configs.all,
 	unicorn.configs["flat/all"],
 	{
@@ -93,7 +93,7 @@ const config = typescriptEslint.config(
 				{ builtinGlobals: true, ignoreOnInitialization: true },
 			],
 			"@typescript-eslint/no-unsafe-member-access": "off",
-			"@typescript-eslint/no-unsafe-type-assertion": "warn",
+			"@typescript-eslint/no-unsafe-type-assertion": "off",
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{ args: "all", argsIgnorePattern: /^_+$/u.source, reportUsedIgnorePattern: true },
@@ -122,10 +122,27 @@ const config = typescriptEslint.config(
 			],
 			"@typescript-eslint/typedef": "off",
 			"@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
+			"camelcase": "off",
 			"capitalized-comments": "off",
-			"line-comment-position": "off",
-			"max-depth": "error",
-			"multiline-comment-style": ["error", "separate-lines"],
+			"complexity": "off",
+			"curly": ["error", "multi"],
+			"default-case": "off",
+			"func-style": ["error", "declaration"],
+			"grouped-accessor-pairs": ["error", "getBeforeSet"],
+			"id-length": "off",
+			"logical-assignment-operators": ["error", "always", { enforceForIfStatements: true }],
+			"max-classes-per-file": "off",
+			"max-lines": "off",
+			"max-lines-per-function": "off",
+			"max-statements": "off",
+			"no-alert": "off",
+			"no-await-in-loop": "off",
+			"no-bitwise": "off",
+			"no-console": "off",
+			"no-continue": "off",
+			"no-div-regex": "off",
+			"no-duplicate-imports": "off",
+			"no-eval": "off",
 			"no-fallthrough": [
 				"error",
 				{
@@ -134,16 +151,36 @@ const config = typescriptEslint.config(
 					reportUnusedFallthroughComment: true,
 				},
 			],
+			"no-implicit-coercion": [
+				"error",
+				{ allow: ["!!", "+"], disallowTemplateShorthand: true },
+			],
 			"no-inline-comments": "off",
+			"no-labels": "off",
+			"no-plusplus": "off",
+			"no-proto": "off",
 			"no-restricted-syntax": [
 				"error",
-				"CallExpression[callee.name='String']",
-				"TSIndexSignature",
+				{
+					message: "Prefer `#toString()` over `String()`",
+					selector: "CallExpression[callee.name='String']",
+				},
+				{
+					message: "Prefer `Record` over an index signature",
+					selector: "TSIndexSignature",
+				},
 			],
 			"no-sparse-arrays": "off",
+			"no-ternary": "off",
+			"no-undefined": "off",
+			"no-underscore-dangle": "off",
+			"no-void": "off",
 			"no-warning-comments": ["warn", { location: "anywhere" }],
+			"one-var": ["error", { initialized: "never", uninitialized: "always" }],
+			"require-atomic-updates": "off",
 			"require-unicode-regexp": "off",
-			//TODO: enable // "sort-imports": ["error", { allowSeparatedGroups: true, ignoreDeclarationSort: true }], // TODO: enable declaration sort when we can sort by source
+			"sort-imports": "off",
+			"sort-keys": "off",
 			"unicorn/catch-error-name": ["error", { ignore: [/(?:E|^e)rror(?:[^a-z]|$)/u] }],
 			"unicorn/consistent-destructuring": "off",
 			"unicorn/explicit-length-check": "off",
@@ -157,6 +194,7 @@ const config = typescriptEslint.config(
 			"unicorn/no-process-exit": "off",
 			"unicorn/no-unreadable-array-destructuring": "off",
 			"unicorn/number-literal-case": "off",
+			"unicorn/prefer-ternary": ["error", "only-single-line"],
 			"unicorn/prevent-abbreviations": [
 				"warn",
 				{
@@ -195,15 +233,12 @@ const config = typescriptEslint.config(
 						[/"/gu.source]: { message: 'Prefer `“` or `”` over `"`.', suggest: '"' },
 						[/'/gu.source]: "’",
 						[/->/gu.source]: "→",
-						[/\$\{/gu.source]: {
-							message: "Did you mean to use a template literal?",
-							suggest: "${",
-						},
 						[/!\?/gu.source]: "⁉",
 						[/:_+:/gu.source]: ":emoji:",
 					},
 				},
 			],
+			"yoda": ["error", "never", { exceptRange: true }],
 		},
 	},
 	{
@@ -236,6 +271,3 @@ const config = typescriptEslint.config(
 );
 
 export default config;
-
-// todo: [..] over toJSON?
-// todo: stop nesting why tf are there 11-level nesting places

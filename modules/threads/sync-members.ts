@@ -1,6 +1,5 @@
 import type { AnyThreadChannel, GuildMember, PartialGuildMember, Role } from "discord.js";
 
-import { Collection } from "discord.js";
 import { getBaseChannel } from "strife.js";
 
 import config from "../../common/config.ts";
@@ -55,9 +54,6 @@ async function addRoleToThread({
 	role: Role;
 	thread: AnyThreadChannel;
 }): Promise<void> {
-	if (!(role.members instanceof Collection)) {
-		throw new TypeError("role.members is not a Collection!", { cause: role });
-	}
 	for (const [, member] of role.members) {
 		const baseChannel = getBaseChannel(thread);
 		if (!baseChannel || baseChannel.permissionsFor(member).has("ViewChannel"))

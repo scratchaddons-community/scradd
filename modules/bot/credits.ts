@@ -9,9 +9,9 @@ import pkg from "../../package.json" with { type: "json" };
 import { joinWithAnd } from "../../util/text.ts";
 import { mentionUser } from "../settings.ts";
 
-const designers = "966174686142672917",
-	developers = "938439909742616616",
-	testers = "938440159102386276";
+const designers = "966174686142672917";
+const developers = "938439909742616616";
+const testers = "938440159102386276";
 
 const dependencyColumns = await getDependencies();
 

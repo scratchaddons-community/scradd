@@ -16,12 +16,11 @@ export async function cancelThreadChange(
 	if (
 		interaction.inGuild() &&
 		!interaction.channel?.permissionsFor(interaction.user)?.has("ManageThreads")
-	) {
+	)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You don’t have permission to cancel this!`,
 		});
-	}
 
 	await interaction.message.edit({
 		components: disableComponents(interaction.message.components),
@@ -78,7 +77,7 @@ export async function autoClose(
 		...remindersDatabase.data,
 		{
 			channel: thread.id,
-			date: date,
+			date,
 			reminder: undefined,
 			user: client.user.id,
 			id: SpecialReminder.CloseThread,

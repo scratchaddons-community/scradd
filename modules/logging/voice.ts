@@ -136,7 +136,7 @@ export async function guildScheduledEventUpdate(
 				LogSeverity.ServerChange,
 			);
 		}
-		if (locationChanged) {
+		if (locationChanged)
 			await log(
 				`${LoggingEmojis.Event} [Event ${entry.target.name}](${
 					entry.target.url
@@ -147,7 +147,6 @@ export async function guildScheduledEventUpdate(
 				}${extraAuditLogsInfo(entry)}`,
 				LogSeverity.ServerChange,
 			);
-		}
 	}
 }
 

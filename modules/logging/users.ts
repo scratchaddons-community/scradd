@@ -64,8 +64,40 @@ export async function guildMemberUpdate(
 			{ files: url ? [url] : undefined },
 		);
 	}
+	if (oldMember.nickname !== newMember.nickname)
+		await log(
+			`${LoggingEmojis.User} ${newMember.toString()}${
+				newMember.nickname ?
+					` was nicknamed ${newMember.nickname}`
+				:	"’s nickname was removed"
+			}`,
+			LogSeverity.ServerChange,
+		);
 
-	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
+	const automodQuarantine =
+		newMember.flags.has("AutomodQuarantinedBio") ||
+		newMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname");
+	if (
+		(oldMember.flags.has("AutomodQuarantinedBio") ||
+			oldMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
+	)
+		await log(
+			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
+				automodQuarantine ? "" : "un"
+			}quarantined based on AutoMod rules`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const verified = newMember.flags.has("BypassesVerification");
+	if (oldMember.flags.has("BypassesVerification") !== verified)
+		await log(
+			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
+				verified ? "" : "un"
+			}verified by a moderator`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil)
 		if (
 			newMember.communicationDisabledUntil &&
 			Number(newMember.communicationDisabledUntil) > Date.now()
@@ -84,54 +116,17 @@ export async function guildMemberUpdate(
 				`${LoggingEmojis.Punishment} ${newMember.toString()}’s timeout was removed`,
 				LogSeverity.ImportantUpdate,
 			);
-	}
-
-	const automodQuarantine =
-		newMember.flags.has("AutomodQuarantinedBio") ||
-		newMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname");
-	if (
-		(oldMember.flags.has("AutomodQuarantinedBio") ||
-			oldMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
-	) {
-		await log(
-			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
-				automodQuarantine ? "" : "un"
-			}quarantined based on AutoMod rules`,
-			LogSeverity.ImportantUpdate,
-		);
-	}
-
-	const verified = newMember.flags.has("BypassesVerification");
-	if (oldMember.flags.has("BypassesVerification") !== verified) {
-		await log(
-			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
-				verified ? "" : "un"
-			}verified by a moderator`,
-			LogSeverity.ImportantUpdate,
-		);
-	}
-
-	if (oldMember.nickname !== newMember.nickname)
-		await log(
-			`${LoggingEmojis.User} ${newMember.toString()}${
-				newMember.nickname ?
-					` was nicknamed ${newMember.nickname}`
-				:	"’s nickname was removed"
-			}`,
-			LogSeverity.ServerChange,
-		);
 }
 
 export async function userUpdate(oldUser: PartialUser | User, newUser: User): Promise<void> {
 	if (oldUser.partial || !(await config.guild.members.fetch(newUser).catch(() => void 0))) return;
 
 	const quarantined = !!newUser.flags?.has("Quarantined");
-	if (!!oldUser.flags?.has("Quarantined") !== quarantined) {
+	if (!!oldUser.flags?.has("Quarantined") !== quarantined)
 		await log(
 			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
 				quarantined ? "" : "un"
 			}quarantined`,
 			LogSeverity.Alert,
 		);
-	}
 }

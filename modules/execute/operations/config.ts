@@ -11,6 +11,7 @@ import {
 
 import config, { syncConfig } from "../../../common/config.ts";
 import constants from "../../../common/constants.ts";
+import { camelToLowerSentence } from "../../../util/text.ts";
 import { dadEasterEggCount } from "../../autos/autos-data.ts";
 import log from "../../logging/misc.ts";
 import { LoggingEmojis, LogSeverity } from "../../logging/util.ts";
@@ -98,7 +99,7 @@ function getDynamicConfig(): APIEmbed[] {
 			color: constants.themeColor,
 
 			fields: [...Object.entries(config.channels)].map((channel) => ({
-				name: `${channel[0].replaceAll(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${
+				name: `${camelToLowerSentence(channel[0])} ${
 					channel[1]?.type === ChannelType.GuildCategory ? "category" : "channel"
 				}`,
 
@@ -111,9 +112,9 @@ function getDynamicConfig(): APIEmbed[] {
 			color: constants.themeColor,
 
 			fields: [...Object.entries(config.roles)].map((role) => ({
-				name: `${role[1]?.unicodeEmoji ? role[1].unicodeEmoji + " " : ""}${role[0]
-					.replaceAll(/([a-z])([A-Z])/g, "$1 $2")
-					.toLowerCase()} role`,
+				name: `${
+					role[1]?.unicodeEmoji ? `${role[1].unicodeEmoji} ` : ""
+				}${camelToLowerSentence(role[0])} role`,
 
 				value: role[1]?.toString() ?? "*None*",
 				inline: true,

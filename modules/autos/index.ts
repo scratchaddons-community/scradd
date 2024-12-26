@@ -61,10 +61,10 @@ defineEvent("messageCreate", async (message) => {
 		if (!action) break;
 
 		if (typeof action === "number") {
-			if (index === 0) {
+			if (index === 0)
 				if (ignoredChannels.has(message.channel.id)) break;
 				else ignoredChannels.add(message.channel.id);
-			}
+
 			await message.channel.sendTyping();
 			await wait(action);
 			if (index === 0) ignoredChannels.delete(message.channel.id);
@@ -91,7 +91,7 @@ defineEvent("messageUpdate", async (_, message) => {
 	if (message.partial) return;
 
 	const found = autoResponses.get(message.id);
-	if (!found && 1 > +"0" /* TODO: only return if there's new messages */) return;
+	if (!found && +"0" < 1 /* TODO: only return if there's new messages */) return;
 
 	const response = await handleMutatable(message);
 	const data =
@@ -115,8 +115,8 @@ async function handleMutatable(
 	const baseChannel = getBaseChannel(message.channel);
 	if (config.channels.modlogs.id === baseChannel?.id) return;
 
-	const settings = await getSettings(message.author),
-		configuredSettings = await getSettings(message.author, false);
+	const settings = await getSettings(message.author);
+	const configuredSettings = await getSettings(message.author, false);
 
 	if (settings.scratchEmbeds) {
 		const matches = getMatches(message.content);

@@ -64,15 +64,15 @@ defineChatCommand(
 					: "Others"
 				}`;
 
-		const credits = joinWithAnd(addon.credits ?? [], (credit) => {
-			return credit.note || credit.link ?
-					hyperlink(
-						credit.name,
-						credit.link ?? interaction.channel?.url ?? "",
-						credit.note ?? "",
-					)
-				:	credit.name;
-		});
+		const credits = joinWithAnd(addon.credits ?? [], (credit) =>
+			credit.note || credit.link ?
+				hyperlink(
+					credit.name,
+					credit.link ?? interaction.channel?.url ?? "",
+					credit.note ?? "",
+				)
+			:	credit.name,
+		);
 
 		const updateInfo = `v${addon.versionAdded}${
 			addon.latestUpdate?.version ?
@@ -87,11 +87,11 @@ defineChatCommand(
 		await interaction.reply({
 			embeds: [
 				{
-					description:
-						`${escapeAllMarkdown(addon.description)}\n` +
-						(addon.permissions?.length ?
+					description: `${escapeAllMarkdown(addon.description)}\n${
+						addon.permissions?.length ?
 							"\n\n**⚠️ This addon may require additional permissions to be granted in order to function.**"
-						:	""),
+						:	""
+					}`,
 
 					fields: [
 						...(credits.length ?

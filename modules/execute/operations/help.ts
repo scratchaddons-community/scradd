@@ -11,12 +11,15 @@ import { columnize } from "strife.js";
 import constants from "../../../common/constants.ts";
 import { OPERATION_PREFIX, splitFirstArgument } from "../misc.ts";
 
-export const getSchemasFromInteraction = async (
+export async function getSchemasFromInteraction(
 	interaction: ChatInputCommandInteraction,
-): Promise<Record<string, ApplicationCommand | CustomOperation>> =>
-	await import("../util.js").then(({ default: getSchemas }) =>
-		getSchemas(interaction.member ?? interaction.user, interaction.channel ?? undefined),
+): Promise<Record<string, ApplicationCommand | CustomOperation>> {
+	const { default: getSchemas } = await import("../util.js");
+	return await getSchemas(
+		interaction.member ?? interaction.user,
+		interaction.channel ?? undefined,
 	);
+}
 
 const data: CustomOperation = {
 	name: "help",
@@ -69,7 +72,7 @@ export function getHelpForOperation(
 		color: constants.themeColor,
 		title: `\`${OPERATION_PREFIX}${
 			!(operation instanceof ApplicationCommand) && "type" in operation ?
-				operationName + " "
+				`${operationName} `
 			:	""
 		}${operation.name}\``,
 		description: operation.description,

@@ -51,7 +51,7 @@ export default async function linkScratchRole(
 		client_id: client.user.id,
 		redirect_uri: redirectUri,
 		response_type: "code",
-		scope: OAuth2Scopes.Identify + " " + OAuth2Scopes.RoleConnectionsWrite,
+		scope: `${OAuth2Scopes.Identify} ${OAuth2Scopes.RoleConnectionsWrite}`,
 	}).toString()}`;
 	// eslint-disable-next-line unicorn/string-content
 	const discordHtml = `<meta http-equiv="refresh" content="0;url=${discordUrl}">`;
@@ -143,7 +143,7 @@ export default async function linkScratchRole(
 
 	function getScratchUrl(refreshToken: string): string {
 		const encodedRedirectUri = Buffer.from(
-			redirectUri + "?refresh_token=" + encodeString(refreshToken),
+			`${redirectUri}?refresh_token=${encodeString(refreshToken)}`,
 		).toString("base64");
 		return `https://auth.itinerary.eu.org/auth/?name=${encodeURIComponent(
 			client.user.displayName,
@@ -156,7 +156,7 @@ function encodeString(text: string): string {
 	const iv = randomBytes(16);
 	const cipher = createCipheriv("aes-256-cbc", secretKey, iv);
 	const encrypted = cipher.update(text, "utf8", "hex") + cipher.final("hex");
-	return iv.toString("hex") + ":" + encrypted;
+	return `${iv.toString("hex")}:${encrypted}`;
 }
 
 // Decode the string

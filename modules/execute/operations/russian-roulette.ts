@@ -22,11 +22,10 @@ const data: CustomOperation = {
 				Date.now() + 60 * 60 * 1000,
 				"Lost russian roulette",
 			);
-		} else {
+		} else
 			await interaction.editReply(
 				`${constants.emojis.statuses.yes} Click! You’re safe… for now.`,
 			);
-		}
 	},
 };
 

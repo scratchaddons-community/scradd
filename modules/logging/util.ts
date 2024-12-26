@@ -7,7 +7,7 @@ import type {
 	User,
 } from "discord.js";
 import type { actualPrimitives } from "mongoose";
-import type { CamelToKebab } from "../../common/misc.ts";
+import type { CamelToKebab } from "../../util/text.ts";
 
 import constants from "../../common/constants.ts";
 

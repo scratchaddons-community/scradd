@@ -32,11 +32,12 @@ export async function giveXpForMessage(message: Message): Promise<void> {
 		latestMessages[message.channel.id] = accumulator;
 	}
 	const lastInChannel = latestMessages[message.channel.id] ?? [];
-	const spam = lastInChannel.findIndex((foundMessage) => {
-		return ![message.author.id, message.interactionMetadata?.user.id || ""].some((user) =>
-			[foundMessage.author.id, foundMessage.interactionMetadata?.user.id].includes(user),
-		);
-	});
+	const spam = lastInChannel.findIndex(
+		(foundMessage) =>
+			![message.author.id, message.interactionMetadata?.user.id || ""].some((user) =>
+				[foundMessage.author.id, foundMessage.interactionMetadata?.user.id].includes(user),
+			),
+	);
 
 	const newChannel = lastInChannel.length < DEFAULT_XP;
 	if (!newChannel) lastInChannel.pop();
@@ -115,15 +116,14 @@ export default async function giveXp(
 		(entry) => entry.user === user.id && entry.time + 3_600_000 > Date.now(),
 	);
 	const weeklyAmount = (weekly[weeklyIndex]?.xp || 0) + amount;
-	if (weeklyIndex === -1) {
-		weekly.push({ user: user.id, xp: weeklyAmount, time: Date.now() });
-	} else {
+	if (weeklyIndex === -1) weekly.push({ user: user.id, xp: weeklyAmount, time: Date.now() });
+	else
 		weekly[weeklyIndex] = {
 			user: user.id,
 			xp: weeklyAmount,
 			time: weekly[weeklyIndex]?.time ?? Date.now(),
 		};
-	}
+
 	recentXpDatabase.data = weekly;
 }
 
@@ -201,7 +201,7 @@ export async function checkXPRoles(member: GuildMember): Promise<void> {
 	if (config.roles.active && !member.roles.resolve(config.roles.active.id)) {
 		const isActive =
 			getFullWeeklyData().find(
-				(item) => member.id == item.user && item.xp >= ACTIVE_THRESHOLD_ONE,
+				(item) => member.id === item.user && item.xp >= ACTIVE_THRESHOLD_ONE,
 			) ??
 			recentXpDatabase.data.reduce(
 				(accumulator, gain) =>

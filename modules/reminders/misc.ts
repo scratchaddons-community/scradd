@@ -46,7 +46,7 @@ const date = new Date();
 if (
 	config.channels.announcements &&
 	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminder.Weekly).length !== 1
-) {
+)
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminder.Weekly),
 		{
@@ -62,13 +62,12 @@ if (
 			user: client.user.id,
 		},
 	];
-}
 
 if (
 	config.channels.suggestions?.parent &&
 	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminder.UpdateSACategory)
 		.length !== 1
-) {
+)
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter(
 			(reminder) => reminder.id !== SpecialReminder.UpdateSACategory,
@@ -81,12 +80,11 @@ if (
 			user: client.user.id,
 		},
 	];
-}
 
 const backupsThread = getInitialThreads(config.channels.modlogs).find(
 	(thread) => thread.type === ChannelType.PrivateThread && thread.name === "Database Backups",
 );
-if (backupsThread && constants.env === "production") {
+if (backupsThread && constants.env === "production")
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter(
 			(reminder) => reminder.id !== SpecialReminder.BackupDatabases,
@@ -99,9 +97,8 @@ if (backupsThread && constants.env === "production") {
 			user: client.user.id,
 		},
 	];
-}
 
-if (config.channels.board) {
+if (config.channels.board)
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter(
 			(reminder) => reminder.id !== SpecialReminder.SyncRandomBoard,
@@ -113,7 +110,6 @@ if (config.channels.board) {
 			user: client.user.id,
 		},
 	];
-}
 
 remindersDatabase.data = [
 	...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminder.ChangeStatus),

@@ -73,11 +73,10 @@ export function nth(number: number): string {
 export function parseTime(time: string): Date {
 	const number = Number(time);
 
-	if (!Number.isNaN(number)) {
+	if (!Number.isNaN(number))
 		if (number > 1_000_000_000_000) return new Date(number);
 		else if (number > 1_000_000_000) return new Date(number * 1000);
 		else return new Date(Date.now() + number * 3_600_000);
-	}
 
 	const dateMatch =
 		/^(?<year>\d{4})-?(?<month>\d{1,2})-?(?<day>\d{1,2})(?:(?:\s+|T)(?<hour>\d{1,2}):(?<minute>\d{1,2})(?::?(?<second>\d{1,2}))?Z?)?$/.exec(
@@ -146,10 +145,7 @@ export function lerpColors(allColors: [number, ...number[]], percent: number): n
 	const index = Math.floor(count * percent);
 
 	const distance = count === 1 ? percent : (percent - index / count) * count;
-	const colors = allColors.slice(index, index + 2) as [
-		(typeof allColors)[0],
-		(typeof allColors)[1],
-	];
+	const colors = allColors.slice(index, index + 2);
 
 	const channelsByColor = colors.map((color) => ({
 		red: (color >> 16) & 0xff,
@@ -185,20 +181,23 @@ export function formatDuration(duration: number): Duration {
 	const monthsThreshold = 10.5;
 
 	if (seconds < secondsThreshold) return "a few seconds" as const;
-	else if (seconds < minutesThreshold * perMinute) {
+	if (seconds < minutesThreshold * perMinute) {
 		const minutes = Math.round(seconds / perMinute);
-		return minutes == 1 ? ("a minute" as const) : (`${minutes} minutes` as const);
-	} else if (seconds < hoursThreshold * perHour) {
-		const hours = Math.round(seconds / perHour);
-		return hours == 1 ? ("an hour" as const) : (`${hours} hours` as const);
-	} else if (seconds < daysThreshold * perDay) {
-		const days = Math.round(seconds / perDay);
-		return days == 1 ? ("a day" as const) : (`${days} days` as const);
-	} else if (seconds < monthsThreshold * perMonth) {
-		const months = Math.round(seconds / perMonth);
-		return months == 1 ? ("a month" as const) : (`${months} months` as const);
-	} else {
-		const years = Math.round(seconds / perYear);
-		return years == 1 ? ("a year" as const) : (`${years} years` as const);
+		return minutes === 1 ? ("a minute" as const) : (`${minutes} minutes` as const);
 	}
+	if (seconds < hoursThreshold * perHour) {
+		const hours = Math.round(seconds / perHour);
+		return hours === 1 ? ("an hour" as const) : (`${hours} hours` as const);
+	}
+	if (seconds < daysThreshold * perDay) {
+		const days = Math.round(seconds / perDay);
+		return days === 1 ? ("a day" as const) : (`${days} days` as const);
+	}
+	if (seconds < monthsThreshold * perMonth) {
+		const months = Math.round(seconds / perMonth);
+		return months === 1 ? ("a month" as const) : (`${months} months` as const);
+	}
+
+	const years = Math.round(seconds / perYear);
+	return years === 1 ? ("a year" as const) : (`${years} years` as const);
 }

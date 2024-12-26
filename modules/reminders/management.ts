@@ -54,9 +54,9 @@ export async function listReminders(interaction: ChatInputCommandInteraction): P
 						type: ComponentType.StringSelect,
 						placeholder: "Cancel",
 						options: page.map((reminder) => ({
-							value: reminder.id + "",
-							description: `${reminder.reminder ?? ""}`.slice(0, 100),
-							label: reminder.id + "",
+							value: reminder.id.toString(),
+							description: reminder.reminder?.toString().slice(0, 100),
+							label: reminder.id.toString(),
 						})),
 					},
 				];
@@ -80,24 +80,22 @@ export async function createReminder(
 			) * 0.3,
 		) +
 			5
-	) {
+	)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${constants.emojis.statuses.no} You already have ${
 				reminders.length
 			} reminders set! Please cancel some or level up before setting any more.`,
 		});
-	}
 
 	const date = parseTime(options.time);
-	if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000) {
+	if (+date < Date.now() + 60_000 || +date > Date.now() + 31_536_000_000)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${
 				constants.emojis.statuses.no
 			} Could not parse the time! Make sure to pass in the value as so: \`1h30m\`, for example. Note that I can’t remind you sooner than 1 minute or later than 365 days.`,
 		});
-	}
 
 	const channel =
 		dm ? (await interaction.user.createDM().catch(() => void 0))?.id : interaction.channel?.id;
@@ -107,7 +105,7 @@ export async function createReminder(
 			content: `${constants.emojis.statuses.no} Your DMs are closed, so I can’t remind you!`,
 		});
 
-	const id = convertBase(Date.now() + "", 10, convertBase.MAX_BASE);
+	const id = convertBase(Date.now().toString(), 10, convertBase.MAX_BASE);
 	remindersDatabase.data = [
 		...remindersDatabase.data,
 		{ channel, date: +date, reminder: options.reminder, user: interaction.user.id, id },

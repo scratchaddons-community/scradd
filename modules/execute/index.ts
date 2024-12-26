@@ -39,18 +39,17 @@ defineChatCommand(
 		const [commandName, args] = splitFirstArgument(operation);
 
 		const match = MessageMentions.UsersPattern.exec(commandName);
-		if (match?.index === 0) {
+		if (match?.index === 0)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} I said “some*thing*” not “some*one*”-`,
 			});
-		}
 
 		const allSchemas = await getAllSchemas(interaction.guild);
 		const schema = allSchemas.find(({ name }) => name === commandName);
 		const command =
 			commands[commandName]?.[0] ?? (!(schema instanceof ApplicationCommand) && schema);
-		if (!command || !schema) {
+		if (!command || !schema)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Could not find the \`${
@@ -58,21 +57,19 @@ defineChatCommand(
 				}${commandName}\` operation!`,
 				embeds: [listOperations(await getSchemasFromInteraction(interaction))],
 			});
-		}
 
 		const permission = await hasPermission(
 			schema,
 			interaction.member ?? interaction.user,
 			interaction.channel ?? undefined,
 		);
-		if (!permission) {
+		if (!permission)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} You don’t have permission to execute the \`${
 					OPERATION_PREFIX
 				}${commandName}\` operation!`,
 			});
-		}
 
 		const options =
 			("type" in schema ? schema.type : ApplicationCommandType.ChatInput) !==
@@ -86,14 +83,13 @@ defineChatCommand(
 					interaction.guild ?? undefined,
 				)}\` command is not supported as an operation!`,
 			});
-		if (options === false) {
+		if (options === false)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Invalid options!`,
 				embeds: [getHelpForOperation(schema, await getSchemasFromInteraction(interaction))],
 			});
-		}
-		if (options.options === false) {
+		if (options.options === false)
 			return await interaction.reply({
 				ephemeral: true,
 				content: `${constants.emojis.statuses.no} Invalid options!`,
@@ -101,7 +97,7 @@ defineChatCommand(
 					getHelpForOperation(
 						(schema.options ?? []).find(
 							(option): option is ApplicationCommandSubCommand =>
-								option.type == ApplicationCommandOptionType.Subcommand &&
+								option.type === ApplicationCommandOptionType.Subcommand &&
 								option.name === options.subcommand,
 						) ?? schema,
 						await getSchemasFromInteraction(interaction),
@@ -109,7 +105,6 @@ defineChatCommand(
 					),
 				],
 			});
-		}
 
 		await (
 			command.command as (

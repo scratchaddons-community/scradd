@@ -34,7 +34,7 @@ export default async function updateBoard({
 		boardMessageId &&
 		(await config.channels.board?.messages.fetch(boardMessageId).catch(() => void 0));
 
-	if (boardMessage) {
+	if (boardMessage)
 		if (count < minReactions) {
 			await boardMessage.delete();
 			updateById({ source: message.id, onBoard: 0, reactions: count });
@@ -43,7 +43,7 @@ export default async function updateBoard({
 			await boardMessage.edit(content);
 			updateById({ source: message.id, reactions: count });
 		}
-	} else if (count >= reactionThreshold && config.channels.board) {
+	else if (count >= reactionThreshold && config.channels.board) {
 		const sentMessage = await config.channels.board.send({
 			...(await generateBoardMessage(message)),
 			allowedMentions:
@@ -58,12 +58,11 @@ export default async function updateBoard({
 			{ source: message.id, onBoard: sentMessage.id, reactions: count },
 			{ channel: message.channel.id, user: message.author.id },
 		);
-	} else {
+	} else
 		updateById(
 			{ source: message.id, reactions: count, onBoard: 0 },
 			{ channel: message.channel.id, user: message.author.id },
 		);
-	}
 
 	const top = boardDatabase.data.toSorted((one, two) => two.reactions - one.reactions);
 	top.splice(
@@ -83,10 +82,9 @@ export default async function updateBoard({
 		}),
 	);
 	const pins = await config.channels.board?.messages.fetchPinned();
-	if (pins && pins.size > topIds.length) {
+	if (pins && pins.size > topIds.length)
 		for (const [, pin] of pins.filter((pin) => !topIds.includes(pin.id)))
 			await pin.unpin("No longer a top-reacted message");
-	}
 
 	processing.delete(message.id);
 }

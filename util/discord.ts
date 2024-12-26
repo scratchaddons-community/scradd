@@ -229,7 +229,7 @@ export function pollToEmbed(poll: Poll): APIEmbed {
 		}),
 		footer: {
 			text: `${votes} vote${votes === 1 ? "" : "s"}${
-				poll.resultsFinalized ? footerSeperator + "Poll closed" : ""
+				poll.resultsFinalized ? `${footerSeperator}Poll closed` : ""
 			}`,
 		},
 		timestamp: poll.resultsFinalized ? undefined : poll.expiresAt.toISOString(),
@@ -332,9 +332,8 @@ export function messageToText(
 				return participated ?
 						`${message.author.toString()} started a call that lasted ${duration}.`
 					:	`You missed a call from ${message.author.toString()} that lasted ${duration}.`;
-			} else {
-				return `${message.author.toString()} started a call.${participated ? "" : " — Join the call"}`;
 			}
+			return `${message.author.toString()} started a call.${participated ? "" : " — Join the call"}`;
 		}
 		case MessageType.ChannelNameChange: {
 			return `${constants.emojis.message.edit} ${message.author.toString()} changed the ${
@@ -480,11 +479,11 @@ export function messageToText(
 				.fetchReference()
 				.catch(() => void 0)
 				.then((reply) => {
-					if (!reply) {
+					if (!reply)
 						return `*${
 							constants.emojis.message.reply
 						}[ Original message was deleted](${replyLink})*\n\n${content}`;
-					}
+
 					const cleanContent = messageToText(reply, false).replaceAll(/\s+/g, " ");
 					const replyContent =
 						cleanContent && `\n> ${truncateText(stripMarkdown(cleanContent), 300)}`;
@@ -549,16 +548,12 @@ export function messageToText(
 				isRenewal,
 				tierName,
 			} = message.roleSubscriptionData;
-			return (
-				`${constants.emojis.message.add} ${message.author.toString()} ${
-					isRenewal ? "renewed" : "joined"
-				} **${escapeAllMarkdown(tierName)}** ${months ? "and has been" : "as"} a subscriber of ` +
-				hyperlink(
-					escapeAllMarkdown(message.guild?.name ?? ""),
-					`discord://-/channels/${message.guild?.id ?? "@me"}/role-subscriptions`,
-				) +
-				(months ? ` for ${months} month${months === 1 ? "" : "s"}!` : `!`)
-			);
+			return `${constants.emojis.message.add} ${message.author.toString()} ${
+				isRenewal ? "renewed" : "joined"
+			} **${escapeAllMarkdown(tierName)}** ${months ? "and has been" : "as"} a subscriber of ${hyperlink(
+				escapeAllMarkdown(message.guild?.name ?? ""),
+				`discord://-/channels/${message.guild?.id ?? "@me"}/role-subscriptions`,
+			)}${months ? ` for ${months} month${months === 1 ? "" : "s"}!` : `!`}`;
 		}
 		case MessageType.InteractionPremiumUpsell: {
 			break;
@@ -614,6 +609,7 @@ export function messageToText(
 			return `${message.author.toString()} resolved an Activity Alert.`;
 		}
 		case MessageType.PurchaseNotification: {
+			// todo does djs even define this
 			const purchaseNotification =
 				"purchaseNotification" in message ?
 					(message.purchaseNotification as {

@@ -85,8 +85,8 @@ export default async function makeSlideshow(
 			message,
 	);
 
-	const nextId = interaction.id + "next";
-	const previousId = interaction.id + "prev";
+	const nextId = `${interaction.id}next`;
+	const previousId = `${interaction.id}prev`;
 
 	const messages: MessageEditOptions[] = [];
 	let index = 0;

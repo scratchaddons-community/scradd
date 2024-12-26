@@ -8,21 +8,20 @@ import log, { shouldLog } from "./misc.ts";
 import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
 export async function threadCreate(entry: AuditLog<AuditLogEvent.ThreadCreate>): Promise<void> {
-	if (!(entry.target instanceof ThreadChannel)) {
+	if (!(entry.target instanceof ThreadChannel))
 		await log(
 			`${LoggingEmojis.Thread} Unknown thread ${channelMention(
 				entry.target.id,
 			)} created${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ServerChange,
 		);
-	} else if (entry.target.type === ChannelType.PrivateThread) {
+	else if (entry.target.type === ChannelType.PrivateThread)
 		await log(
 			`${
 				LoggingEmojis.Thread
 			} Private thread ${entry.target.toString()} created${extraAuditLogsInfo(entry)}`,
 			LogSeverity.ServerChange,
 		);
-	}
 }
 export async function threadDelete(entry: AuditLog<AuditLogEvent.ThreadDelete>): Promise<void> {
 	if (entry.target instanceof ThreadChannel)
@@ -53,8 +52,7 @@ export async function threadUpdate(
 			}`,
 			LogSeverity.ContentEdit,
 		);
-
-	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration) {
+	if (oldThread.autoArchiveDuration !== newThread.autoArchiveDuration)
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()}’s hide after inactivity set to ${
 				{
@@ -66,51 +64,6 @@ export async function threadUpdate(
 			}`,
 			LogSeverity.ContentEdit,
 		);
-	}
-	const removedActive = newThread.flags.has("ActiveChannelsRemoved");
-	if (oldThread.flags.has("ActiveChannelsRemoved") !== removedActive) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${
-				removedActive ? "hidden in" : "shown in"
-			} Active Now`,
-			LogSeverity.ServerChange,
-		);
-	}
-	const clyde = newThread.flags.has("ClydeAI");
-	if (oldThread.flags.has("ClydeAI") !== clyde) {
-		await log(
-			`${LoggingEmojis.Integration} ClydeAI ${
-				clyde ? "enabled" : "disabled"
-			} in ${newThread.toString()}`,
-			LogSeverity.ContentEdit,
-		);
-	}
-	const removedFeed = newThread.flags.has("GuildFeedRemoved");
-	if (oldThread.flags.has("GuildFeedRemoved") !== removedFeed) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${
-				removedActive ? "removed from" : "re-added to"
-			} the server feed`,
-			LogSeverity.ServerChange,
-		);
-	}
-	const spam = newThread.flags.has("IsSpam");
-	if (oldThread.flags.has("IsSpam") !== spam) {
-		await log(
-			`${LoggingEmojis.Channel} ${newThread.toString()} ${spam ? "" : "un"}marked as spam`,
-			LogSeverity.ImportantUpdate,
-		);
-	}
-	const pinned = newThread.flags.has("Pinned");
-	if (oldThread.flags.has("Pinned") !== pinned) {
-		await log(
-			`${LoggingEmojis.Thread} ${newThread.toString()} ${
-				newThread.flags.has("Pinned") ? "" : "un"
-			}pinned${newThread.parent ? ` in ${newThread.parent.toString()}` : ""}`,
-			LogSeverity.ServerChange,
-		);
-	}
-
 	if (oldThread.locked !== newThread.locked)
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()} ${
@@ -118,13 +71,54 @@ export async function threadUpdate(
 			}`,
 			LogSeverity.ContentEdit,
 		);
-
-	if ((oldThread.rateLimitPerUser ?? 0) !== (newThread.rateLimitPerUser ?? 0)) {
+	if ((oldThread.rateLimitPerUser ?? 0) !== (newThread.rateLimitPerUser ?? 0))
 		await log(
 			`${LoggingEmojis.Thread} ${newThread.toString()}’s slowmode was set to ${
 				newThread.rateLimitPerUser ?? 0
 			} second${newThread.rateLimitPerUser === 1 ? "" : "s"}`,
 			LogSeverity.ContentEdit,
 		);
-	}
+
+	const removedActive = newThread.flags.has("ActiveChannelsRemoved");
+	if (oldThread.flags.has("ActiveChannelsRemoved") !== removedActive)
+		await log(
+			`${LoggingEmojis.Channel} ${newThread.toString()} ${
+				removedActive ? "hidden in" : "shown in"
+			} Active Now`,
+			LogSeverity.ServerChange,
+		);
+
+	const clyde = newThread.flags.has("ClydeAI");
+	if (oldThread.flags.has("ClydeAI") !== clyde)
+		await log(
+			`${LoggingEmojis.Integration} ClydeAI ${
+				clyde ? "enabled" : "disabled"
+			} in ${newThread.toString()}`,
+			LogSeverity.ContentEdit,
+		);
+
+	const removedFeed = newThread.flags.has("GuildFeedRemoved");
+	if (oldThread.flags.has("GuildFeedRemoved") !== removedFeed)
+		await log(
+			`${LoggingEmojis.Channel} ${newThread.toString()} ${
+				removedActive ? "removed from" : "re-added to"
+			} the server feed`,
+			LogSeverity.ServerChange,
+		);
+
+	const spam = newThread.flags.has("IsSpam");
+	if (oldThread.flags.has("IsSpam") !== spam)
+		await log(
+			`${LoggingEmojis.Channel} ${newThread.toString()} ${spam ? "" : "un"}marked as spam`,
+			LogSeverity.ImportantUpdate,
+		);
+
+	const pinned = newThread.flags.has("Pinned");
+	if (oldThread.flags.has("Pinned") !== pinned)
+		await log(
+			`${LoggingEmojis.Thread} ${newThread.toString()} ${
+				newThread.flags.has("Pinned") ? "" : "un"
+			}pinned${newThread.parent ? ` in ${newThread.parent.toString()}` : ""}`,
+			LogSeverity.ServerChange,
+		);
 }

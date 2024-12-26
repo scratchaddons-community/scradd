@@ -50,7 +50,7 @@ export default async function answerSuggestion(rawEntry: GuildAuditLogsEntry): P
 					user ?
 						{
 							icon_url: user.displayAvatarURL(),
-							name: "Answered by " + user.displayName,
+							name: `Answered by ${user.displayName}`,
 						}
 					:	undefined,
 				color:

@@ -19,8 +19,8 @@ import {
 } from "./misc.ts";
 import top from "./top.ts";
 
-const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8"),
-	SUGGESTION_PAGE = await fileSystem.readFile("./modules/suggestions/suggestion.html", "utf8");
+const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8");
+const SUGGESTION_PAGE = await fileSystem.readFile("./modules/suggestions/suggestion.html", "utf8");
 
 export default async function suggestionsPage(
 	request: IncomingMessage,
@@ -91,7 +91,7 @@ export default async function suggestionsPage(
 				content:
 					starterMessage?.content ||
 					starterMessage?.embeds[0]?.description ||
-					(starterMessage?.attachments.size ? "" : `${suggestion.title}`),
+					(starterMessage?.attachments.size ? "" : suggestion.title.toString()),
 				member,
 				author:
 					member?.user ??
@@ -213,13 +213,12 @@ function prepareEmoji(emoji?: Partial<DefaultReactionEmoji> | false | null): {
 	name: string;
 	url: string;
 } {
-	if (emoji && emoji.id) {
+	if (emoji && emoji.id)
 		return {
 			name: `:${emoji.name ?? "emoji"}:`,
 			url: client.rest.cdn.emoji(emoji.id, { size: 32 }),
 		};
-	}
 
 	const name = (emoji && emoji.name) || "👍";
-	return { name: name, url: getTwemojiUrl(name) };
+	return { name, url: getTwemojiUrl(name) };
 }

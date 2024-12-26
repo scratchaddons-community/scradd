@@ -60,7 +60,6 @@ export default async function sayCommand(
 			},
 		],
 	});
-	return;
 }
 
 /**
@@ -71,7 +70,7 @@ export default async function sayCommand(
  */
 export async function say(
 	interaction: RepliableInteraction,
-	content: string,
+	rawContent: string,
 	reply?: string,
 ): Promise<Message | undefined> {
 	if (!interaction.channel?.isSendable()) {
@@ -83,8 +82,8 @@ export async function say(
 	}
 
 	await interaction.deferReply({ ephemeral: true });
-	const silent = content.startsWith("@silent");
-	content = silent ? content.replace("@silent", "").trim() : content;
+	const silent = rawContent.startsWith("@silent");
+	const content = silent ? rawContent.replace("@silent", "").trim() : rawContent;
 	const oldMessage =
 		reply && (await interaction.channel.messages.fetch(reply).catch(() => void 0));
 	if (reply && (!oldMessage || oldMessage.system))

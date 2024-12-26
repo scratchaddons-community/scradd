@@ -1,14 +1,13 @@
 /* eslint-env browser */
 
 const spoilers = [...document.querySelectorAll(".discord-spoiler")];
-for (const spoiler of spoilers) {
+for (const spoiler of spoilers)
 	spoiler.addEventListener("click", () => {
 		if (spoiler.classList.contains("discord-spoiler")) {
 			spoiler.classList.remove("discord-spoiler");
 			spoiler.classList.add("discord-spoiler--revealed");
 		}
 	});
-}
 
 const emojis = [
 	"⚠️",
@@ -110,7 +109,7 @@ function emojisplosions(): void {
 class EmojiActor {
 	readonly element = Object.assign(document.createElement("span"), {
 		className: "emojisplosion",
-		textContent: (emojis[Math.floor(Math.random() * emojis.length)] ?? emojis[0]) + "\uFE0F",
+		textContent: `${emojis[Math.floor(Math.random() * emojis.length)] ?? emojis[0]}\uFE0F`,
 	});
 	opacity = 1;
 	position = {
@@ -155,7 +154,7 @@ class EmojiActor {
 	}
 
 	private updateElement(): void {
-		this.element.style.opacity = `${this.opacity}`;
+		this.element.style.opacity = this.opacity.toString();
 		this.element.style.transform = `translate(${this.position.x}px, ${
 			this.position.y
 		}px) rotate(${Math.round(this.position.rotation)}deg)`;
@@ -167,6 +166,7 @@ function animate(actors: EmojiActor[]): void {
 	function tick(currentTime: number): void {
 		const timeElapsed = currentTime - previousTime;
 
+		// eslint-disable-next-line no-param-reassign
 		actors = actors.filter((actor) => {
 			if (!actor.act(timeElapsed)) return true;
 

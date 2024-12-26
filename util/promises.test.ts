@@ -10,9 +10,8 @@ await describe("asyncFilter", async () => {
 		for await (const value of asyncFilter(
 			[1, 2, 3, 4, 5],
 			async (value) => (await Promise.resolve(value % 2 === 0)) && value,
-		)) {
+		))
 			filteredArray.push(value);
-		}
 
 		deepStrictEqual(filteredArray, [2, 4]);
 	});
@@ -23,9 +22,8 @@ await describe("asyncFilter", async () => {
 		for await (const value of asyncFilter(
 			[],
 			async (value) => (await Promise.resolve(value % 2 === 0)) && value,
-		)) {
+		))
 			filteredArray.push(value);
-		}
 
 		deepStrictEqual(filteredArray, []);
 	});

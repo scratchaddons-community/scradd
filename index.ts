@@ -15,7 +15,7 @@ import pkg from "./package.json" with { type: "json" };
 dns.setDefaultResultOrder("ipv4first");
 
 if (
-	process.env.BOT_TOKEN.startsWith(Buffer.from(constants.users.bot).toString("base64") + ".") &&
+	process.env.BOT_TOKEN.startsWith(`${Buffer.from(constants.users.bot).toString("base64")}.`) &&
 	!process.argv.includes("--production")
 )
 	throw new Error("Refusing to run on the production bot without `--production` flag");

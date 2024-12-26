@@ -19,14 +19,14 @@ export async function getStrikes(
 		!(interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.staff.id)
 		:	interaction.member?.roles.includes(config.roles.staff.id))
-	) {
+	)
 		return await interaction.reply({
 			ephemeral: true,
 			content: `${
 				constants.emojis.statuses.no
 			} You don’t have permission to view this member’s strikes!`,
 		});
-	}
+
 	await interaction.deferReply({ ephemeral: true, fetchReply: true });
 
 	await listStrikes(
@@ -53,11 +53,10 @@ export async function getStrikeById(
 		interaction.member instanceof GuildMember ?
 			interaction.member.roles.resolve(config.roles.staff.id)
 		:	interaction.member?.roles.includes(config.roles.staff.id);
-	if (strike.user !== interaction.user.id && !isModerator) {
+	if (strike.user !== interaction.user.id && !isModerator)
 		return await interaction.editReply(
 			`${constants.emojis.statuses.no} You don’t have permission to view this member’s strikes!`,
 		);
-	}
 
 	const member = await config.guild.members.fetch(strike.user).catch(() => void 0);
 	const user = member?.user ?? (await client.users.fetch(strike.user).catch(() => void 0));

@@ -13,9 +13,9 @@ let timeouts: Record<
 	{ callback(): Promise<Message<true>>; timeout: NodeJS.Timeout } | undefined
 > = {};
 
-const threadName = "databases",
-	databaseFileType =
-		constants.env === "production" ? `${client.user.displayName.toLowerCase()}-db` : "csv";
+const threadName = "databases";
+const databaseFileType =
+	constants.env === "production" ? `${client.user.displayName.toLowerCase()}-db` : "csv";
 export const databaseThread =
 	(await config.channels.modlogs.threads.fetch()).threads.find(
 		(thread) => thread.name === threadName,
@@ -32,7 +32,7 @@ const databases: Record<string, Message<true> | undefined> = {};
 export const allDatabaseMessages = await getAllMessages(databaseThread);
 for (const message of allDatabaseMessages) {
 	const name = message.content.split(" ")[1]?.toLowerCase();
-	if (name && message.attachments.size) {
+	if (name && message.attachments.size)
 		databases[name] =
 			message.author.id === client.user.id ?
 				message
@@ -40,7 +40,6 @@ for (const message of allDatabaseMessages) {
 					files: [...(await getFilesFromMessage(message)).values()],
 					content: message.content,
 				});
-	}
 }
 
 const contructed = new Set<string>();
@@ -52,11 +51,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 
 	constructor(public name: string) {
 		this.name = name.replaceAll(" ", "_");
-		if (contructed.has(this.name)) {
+		if (contructed.has(this.name))
 			throw new RangeError(
 				`Cannot create a second database for ${this.name}, they may have conflicting data`,
 			);
-		}
 		contructed.add(this.name);
 	}
 
@@ -72,7 +70,8 @@ export default class Database<Data extends Record<string, boolean | number | str
 				" ",
 			)} information may be reset.*`;
 		if (databases[this.name]) await databases[this.name]?.edit(content);
-		this.message = databases[this.name] ??= await databaseThread.send(content);
+		this.message = databases[this.name] ?? (await databaseThread.send(content));
+		databases[this.name] ??= this.message;
 
 		const attachment = (await getFilesFromMessage(this.message)).first();
 		if (!attachment) {
@@ -178,11 +177,10 @@ export default class Database<Data extends Record<string, boolean | number | str
 						attachment &&
 						(await fetch(attachment).then(async (res) => await res.text())).trim();
 
-					if (attachment && written !== data && !written?.startsWith("<?xml")) {
+					if (attachment && written !== data && !written?.startsWith("<?xml"))
 						throw new Error("Data changed through write!", {
 							cause: { written, data, database: this.name },
 						});
-					}
 
 					return edited;
 				});
@@ -220,8 +218,7 @@ for (const [event, code] of Object.entries({
 	SIGTERM: 143,
 	SIGBREAK: 149,
 	message: 0,
-} as const)) {
-	// eslint-disable-next-line @typescript-eslint/no-loop-func
+} as const)) // eslint-disable-next-line @typescript-eslint/no-loop-func
 	process.once(event, (message) => {
 		if (event === "message" && message !== "shutdown") return;
 
@@ -232,11 +229,8 @@ for (const [event, code] of Object.entries({
 			setTimeout(() => {
 				process.nextTick(() => process.exit(code));
 			}, 30_000);
-		} else {
-			void prepareExit();
-		}
+		} else void prepareExit();
 	});
-}
 
 export async function backupDatabases(channel: SendableChannels): Promise<void> {
 	if (constants.env === "development") return;
@@ -250,7 +244,5 @@ export async function backupDatabases(channel: SendableChannels): Promise<void> 
 	).filter(Boolean);
 
 	await channel.send(`# Daily ${client.user.displayName} Database Backup`);
-	while (attachments.length) {
-		await channel.send({ files: attachments.splice(0, 10) });
-	}
+	while (attachments.length) await channel.send({ files: attachments.splice(0, 10) });
 }
