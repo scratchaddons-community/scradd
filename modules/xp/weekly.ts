@@ -5,7 +5,6 @@ import { client } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
-import { remindersDatabase, SpecialReminder } from "../reminders/misc.ts";
 import { ACTIVE_THRESHOLD_ONE, ACTIVE_THRESHOLD_TWO } from "./misc.ts";
 import { getFullWeeklyData, recentXpDatabase } from "./util.ts";
 
@@ -84,20 +83,6 @@ export default async function getWeekly(date: Date): Promise<string> {
 				await member.roles.remove(config.roles.active, "Inactive");
 	}
 
-	// Reset for next weekly
-	date.setUTCDate(date.getUTCDate() + 14);
-	if (config.channels.announcements)
-		remindersDatabase.data = [
-			...remindersDatabase.data,
-			{
-				channel: config.channels.announcements.id,
-				date: Number(date),
-				reminder: undefined,
-				id: SpecialReminder.Weekly,
-				user: client.user.id,
-			},
-		];
-
 	recentXpDatabase.data = recentXpDatabase.data.filter(
 		(entry) => entry.time + 604_800_000 > Date.now(),
 	);
@@ -110,20 +95,6 @@ export default async function getWeekly(date: Date): Promise<string> {
 			(gain, index) => index > 3 && gain.xp !== weeklyWinners[index + 1]?.xp,
 		) + 1 || weeklyWinners.length,
 	);
-
-	// Sync the Winner role
-	const role = config.roles.weeklyWinner;
-	if (role) {
-		const ids = new Set(weeklyWinners.map((gain) => gain.user));
-		for (const [, weeklyMember] of role.members)
-			if (!ids.has(weeklyMember.id))
-				await weeklyMember.roles.remove(role, "No longer weekly winner");
-
-		for (const { user } of weeklyWinners.values()) {
-			const member = await config.guild.members.fetch(user).catch(() => void 0);
-			if (member) await member.roles.add(role, "Weekly winner");
-		}
-	}
 
 	// Send weekly
 	const winners = weeklyWinners
