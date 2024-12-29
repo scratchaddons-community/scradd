@@ -51,8 +51,7 @@ async function getConfig() {
 	);
 
 	const channels = (await guild?.channels.fetch()) ?? new Collection();
-	const modlogsChannel =
-		guild?.publicUpdatesChannel ?? getChannel("logs", ChannelType.GuildText, "end");
+	const modlogsChannel = getChannel("logs", ChannelType.GuildText, "end");
 	const modChannel = assertOutsideTests(
 		getChannel("mod-talk", ChannelType.GuildText) ?? modlogsChannel,
 	);
