@@ -1,13 +1,7 @@
 import type { Channel } from "discord.js";
 import type { Reminder } from "./misc.ts";
 
-import {
-	ActivityType,
-	MessageFlags,
-	time,
-	TimestampStyles,
-	userMention,
-} from "discord.js";
+import { ActivityType, MessageFlags, time, TimestampStyles, userMention } from "discord.js";
 import { client, logError } from "strife.js";
 
 import config from "../../common/config.ts";

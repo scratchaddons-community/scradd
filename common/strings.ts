@@ -3,7 +3,6 @@ import { client } from "strife.js";
 import constants from "../common/constants.ts";
 import { gracefulFetch } from "../util/promises.ts";
 
-
 const usercount = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
 	`${constants.urls.usercount}?date=${Date.now()}`,
 );
