@@ -124,51 +124,11 @@ async function sendSpecialReminder(reminder: {
 
 			break;
 		}
-		case SpecialReminder.UpdateSACategory: {
-			if (reminder.channel?.type !== ChannelType.GuildCategory) break;
-
-			remindersDatabase.data = [
-				...remindersDatabase.data,
-				{
-					channel: reminder.channel.id,
-					date: Number(Date.now() + 3_600_000),
-					reminder: undefined,
-					id: SpecialReminder.UpdateSACategory,
-					user: client.user.id,
-				},
-			];
-
-			const count = await gracefulFetch<{ count: number; _chromeCountDate: string }>(
-				`${constants.urls.usercount}?date=${Date.now()}`,
-			);
-			if (!count) break;
-
-			await reminder.channel.setName(
-				`Scratch Addons - ${count.count.toLocaleString([], {
-					compactDisplay: "short",
-					maximumFractionDigits: 1,
-					minimumFractionDigits: +(count.count > 999),
-					notation: "compact",
-				})} users`,
-				"Automated update to sync count",
-			);
-			break;
-		}
 		case SpecialReminder.RebootBot: {
 			process.emitWarning(`${client.user.tag} is killing the bot`);
 			await prepareExit();
 			process.exit(1);
 			// Fake “fall-through” since ESLint doesn’t realize this is unreachable
-		}
-		case SpecialReminder.CloseThread: {
-			if (reminder.channel?.isThread())
-				await reminder.channel.setArchived(true, "Close requested");
-			break;
-		}
-		case SpecialReminder.LockThread: {
-			if (reminder.channel?.isThread())
-				await reminder.channel.setLocked(true, "Lock requested");
-			break;
 		}
 		case SpecialReminder.Unban: {
 			if (typeof reminder.reminder === "string")

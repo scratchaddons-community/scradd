@@ -9,11 +9,14 @@ import Database from "../../common/database.ts";
 
 export const enum SpecialReminder {
 	Weekly,
+	/** @deprecated */
 	UpdateSACategory,
 	/** @deprecated */
 	Bump,
 	RebootBot,
+	/** @deprecated */
 	CloseThread,
+	/** @deprecated */
 	LockThread,
 	Unban,
 	BackupDatabases,
@@ -59,24 +62,6 @@ if (
 			),
 			reminder: undefined,
 			id: SpecialReminder.Weekly,
-			user: client.user.id,
-		},
-	];
-
-if (
-	config.channels.suggestions?.parent &&
-	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminder.UpdateSACategory)
-		.length !== 1
-)
-	remindersDatabase.data = [
-		...remindersDatabase.data.filter(
-			(reminder) => reminder.id !== SpecialReminder.UpdateSACategory,
-		),
-		{
-			channel: config.channels.suggestions.parent.id,
-			date: +date,
-			reminder: undefined,
-			id: SpecialReminder.UpdateSACategory,
 			user: client.user.id,
 		},
 	];
