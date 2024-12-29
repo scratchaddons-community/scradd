@@ -1,5 +1,4 @@
-import type { AuditLogEvent, RoleMention } from "discord.js";
-import type { Role } from "discord.js";
+import type { AuditLogEvent, Role, RoleMention } from "discord.js";
 import type { AuditLog } from "./util.ts";
 
 import { roleMention } from "discord.js";
