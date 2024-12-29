@@ -45,7 +45,7 @@ export default function boardReactionCount(
 	return shift(
 		baseReactionCount(baseChannel.id) ??
 			{
-				[config.channels.info?.id || ""]: Counts.Info,
+				"991792808996372510": Counts.Info, // Info
 				[config.channels.modlogs.parent?.id || ""]: Counts.Misc,
 			}[baseChannel.parent?.id || ""] ??
 			Counts.Default,
@@ -61,10 +61,10 @@ export default function boardReactionCount(
 }
 function baseReactionCount(id: Snowflake): number | undefined {
 	return {
-		[config.channels.tickets?.id || ""]: Counts.Default,
-		[config.channels.admin.id || ""]: Counts.Admins,
+		"1064409498757910528": Counts.Default, // #contact-mods
+		"816329956074061867": Counts.Admins, // #admin-talk
 		"853256939089559583": Counts.Private, // #ba-doosters
-		[config.channels.devs?.id || ""]: Counts.Private,
+		"869662117651955802": Counts.Private, // #devs-only
 		"811065897057255424": Counts.Showcase, // #memes
 		"806609527281549312": Counts.Showcase, // #collabs-and-ideas
 		"939350305311715358": Counts.Testing, // #modmail

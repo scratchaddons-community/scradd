@@ -3,7 +3,6 @@ import type { Reminder } from "./misc.ts";
 
 import {
 	ActivityType,
-	ChannelType,
 	MessageFlags,
 	time,
 	TimestampStyles,
@@ -12,11 +11,9 @@ import {
 import { client, logError } from "strife.js";
 
 import config from "../../common/config.ts";
-import constants from "../../common/constants.ts";
 import { backupDatabases, prepareExit } from "../../common/database.ts";
 import { statuses } from "../../common/strings.ts";
 import { convertBase } from "../../util/numbers.ts";
-import { gracefulFetch } from "../../util/promises.ts";
 import { syncRandomBoard } from "../board/update.ts";
 import { LoggingEmojisError } from "../logging/util.ts";
 import getWeekly, { getChatters } from "../xp/weekly.ts";

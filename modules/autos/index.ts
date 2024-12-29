@@ -40,16 +40,16 @@ defineEvent("messageCreate", async (message) => {
 		await wait(response.delay);
 		ignoredChannels.delete(message.channel.id);
 	}
-	if (!autoResponses.has(message.id)) {
-		const reply = await (message.system ?
-			message.channel.send(response.data)
-		:	message.reply(response.data));
-		autoResponses.set(message.id, reply);
-	} else {
+	if (autoResponses.has(message.id))
 		await autoResponses
 			.get(message.id)
 			?.edit(response.data)
 			.catch(() => void 0);
+	else {
+		const reply = await (message.system ?
+			message.channel.send(response.data)
+		:	message.reply(response.data));
+		autoResponses.set(message.id, reply);
 	}
 });
 
@@ -62,7 +62,7 @@ defineEvent("messageUpdate", async (_, message) => {
 	const { data } = (await handleMutatable(message)) ?? {};
 	if (found)
 		await found.edit(
-			data || { content: zeroWidthSpace, components: [], embeds: [], files: [] },
+			data ?? { content: zeroWidthSpace, components: [], embeds: [], files: [] },
 		);
 	else if (data && message.channel.isSendable())
 		autoResponses.set(

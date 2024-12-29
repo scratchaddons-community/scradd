@@ -4,7 +4,6 @@
 import "@total-typescript/ts-reset";
 
 import type { Snowflake } from "discord.js";
-import type { MenuCommandContext } from "strife.js";
 import type constants from "./constants.ts";
 
 declare global {

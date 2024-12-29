@@ -47,13 +47,12 @@ export function getUserReminders(id: string): Reminder[] {
 const date = new Date();
 
 if (
-	config.channels.announcements &&
 	remindersDatabase.data.filter((reminder) => reminder.id === SpecialReminder.Weekly).length !== 1
 )
 	remindersDatabase.data = [
 		...remindersDatabase.data.filter((reminder) => reminder.id !== SpecialReminder.Weekly),
 		{
-			channel: config.channels.announcements.id,
+			channel: "1031406040148873297",
 			date: +new Date(+date + ((7 - date.getUTCDay()) % 7) * 86_400_000).setUTCHours(
 				0,
 				0,

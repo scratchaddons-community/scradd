@@ -1,5 +1,3 @@
-import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.ts";
-
 export default [
 	"‼",
 	"⁉",
@@ -95,5 +93,4 @@ export default [
 	"🛑",
 	"🛠️",
 	"🛡",
-	CUSTOM_ROLE_PREFIX.trim(),
 ] as const;

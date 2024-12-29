@@ -17,7 +17,6 @@ import assert from "node:assert";
 import { ChannelType, Collection } from "discord.js";
 import { client } from "strife.js";
 
-import { CUSTOM_ROLE_PREFIX } from "../modules/roles/misc.ts";
 import constants from "./constants.ts";
 
 const guild =
@@ -59,45 +58,28 @@ async function getConfig() {
 	);
 
 	const roles = ((await guild?.roles.fetch()) ?? new Collection()).filter(
-		(role) => !role.managed && !role.name.startsWith(CUSTOM_ROLE_PREFIX),
+		(role) => !role.managed,
 	);
 	const modRole = getRole("mod", "start");
 	const staffRole = assertOutsideTests(getRole("staff", "start") ?? modRole);
 
-	const tickets = getChannel("contact", ChannelType.GuildText);
 	return {
 		channels: {
-			info: getChannel("info", ChannelType.GuildCategory, "start"),
-			announcements:
-				guild?.systemChannel ??
-				getChannel(
-					"server",
-					[ChannelType.GuildText, ChannelType.GuildAnnouncement],
-					"start",
-				),
 			board: getChannel(
 				"board",
 				[ChannelType.GuildText, ChannelType.GuildAnnouncement],
 				"end",
 			),
-			servers: getChannel("servers", ChannelType.GuildText, "end"),
-			tickets,
-			server: tickets && getInitialThreads(tickets, "Server ").first(),
-			welcome: getChannel("welcome", ChannelType.GuildText),
 
-			mod: modChannel,
 			modlogs: assertOutsideTests(modlogsChannel ?? modChannel),
 			admin: getChannel("admin", ChannelType.GuildText, "start") ?? modChannel,
 
 			general: getChannel("general", ChannelType.GuildText, "full"),
 
-			support: getChannel("support", ChannelType.GuildText),
 			updates: getChannel("updates", ChannelType.GuildText),
 			suggestions: getChannel("suggestions", ChannelType.GuildForum, "full"),
 			bugs: getChannel("bug", ChannelType.GuildForum, "start"),
-			devs: getChannel("devs", ChannelType.GuildText, "start"),
 
-			share: getChannel("share", ChannelType.GuildForum, "full"),
 			bots: getChannel("bots", ChannelType.GuildText),
 
 			oldSuggestions: getChannel("suggestions", ChannelType.GuildText),
@@ -117,10 +99,7 @@ async function getConfig() {
 		otherGuildIds: otherGuilds ? [...otherGuilds.keys()] : [],
 
 		roles: {
-			mod: modRole ?? staffRole,
-			helper: getRole("helper", "start") ?? modRole ?? staffRole,
 			staff: staffRole,
-			weeklyWinner: getRole("weekly"),
 			dev: getRole("dev", "start"),
 			epic: getRole("epic"),
 			booster: getRole("booster"),

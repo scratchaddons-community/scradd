@@ -1,10 +1,9 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
-import { defineButton, defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
+import { defineChatCommand, defineMenuCommand, defineModal } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { prepareExit } from "../../common/database.ts";
-import { syncConfigButton } from "../execute/operations/config.ts";
 import credits from "./credits.ts";
 import editMessage, { submitEdit } from "./edit.ts";
 import getCode, { run } from "./run.ts";
@@ -82,4 +81,3 @@ defineChatCommand(
 	{ name: "credits", description: "List who and what allows me to work", access: true },
 	credits,
 );
-defineButton("syncConfig", syncConfigButton);
