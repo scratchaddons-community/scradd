@@ -1,14 +1,10 @@
-import { AuditLogEvent, ButtonStyle, channelLink, ComponentType } from "discord.js";
-import Mustache from "mustache";
+import { ButtonStyle, channelLink, ComponentType } from "discord.js";
 import { defineEvent } from "strife.js";
 
 import config from "../common/config.ts";
 import constants from "../common/constants.ts";
-import { bans, joins, leaves } from "../common/strings.ts";
-import { nth } from "../util/numbers.ts";
 
-const directoryUrl =
-	config.channels.servers ? `${config.channels.servers.url}/${config.channels.servers.id}` : "";
+const directoryUrl = "https://discord.com/channels/806602307750985799/874743757210275860";
 
 defineEvent("guildMemberAdd", async (member) => {
 	if (member.guild.id !== config.guild.id) return;
@@ -38,9 +34,7 @@ defineEvent("guildMemberAdd", async (member) => {
 								` For more information about us, **visit [ScratchAddons.com](${
 									constants.domains.scratchAddons
 								})**.` +
-								` If you have any questions about or issues with Scratch Addons, please ask in ${
-									config.channels.support?.toString() ?? "our support channel"
-								}!`,
+								` If you have any questions about or issues with Scratch Addons, please ask in our support channel`,
 						},
 						{
 							name: "**What is this server?**",
@@ -56,12 +50,9 @@ defineEvent("guildMemberAdd", async (member) => {
 									config.channels.general ?
 										` in ${config.channels.general.toString()}`
 									:	""
-								}.${
-									directoryUrl &&
-									` You can also check out our [server directory](<${
-										directoryUrl
-									}>) for other large Scratch servers to chat in, including non-English servers.`
-								}`,
+								}. You can also check out our [server directory](<${
+									directoryUrl
+								}>) for other large Scratch servers to chat in, including non-English servers.`,
 						},
 						{
 							name: "**We are not the Scratch Team.**",
@@ -111,7 +102,7 @@ defineEvent("guildMemberAdd", async (member) => {
 							label: "Server Rules",
 						},
 						{
-							url: directoryUrl || channelLink("", config.guild.id),
+							url: directoryUrl,
 							style: ButtonStyle.Link,
 							type: ComponentType.Button,
 							label: "Other Scratch Servers",
@@ -121,45 +112,4 @@ defineEvent("guildMemberAdd", async (member) => {
 			],
 		})
 		.catch(() => void 0);
-});
-
-defineEvent("guildMemberAdd", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-
-	const countString = config.guild.memberCount.toString();
-	const jokes =
-		/^[1-9]0+$/.test(countString) ? ` (${"🥳".repeat(countString.length - 1)})`
-		: countString.includes("69") ? " (nice)"
-		: countString.endsWith("87") ?
-			` (WAS THAT THE BITE OF ’87${"⁉".repeat(Math.ceil(countString.length / 2))})`
-		:	"";
-	const memberCount = nth(config.guild.memberCount) + jokes;
-
-	const greeting = joins[Math.floor(Math.random() * joins.length)] ?? joins[0];
-	await config.channels.welcome?.send(
-		`${constants.emojis.welcome.join} ${Mustache.render(greeting, {
-			MEMBER: member.toString(),
-			COUNT: memberCount,
-			RAW_COUNT: countString,
-			RAW_JOKES: jokes,
-		})}`,
-	);
-});
-defineEvent("guildMemberRemove", async (member) => {
-	if (member.guild.id !== config.guild.id) return;
-
-	const auditLogs = await config.guild
-		.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberKick })
-		.catch(() => void 0);
-	const kicked = auditLogs?.entries.first()?.target?.id === member.id;
-	const banned = await config.guild.bans.fetch(member).catch(() => void 0);
-
-	const byes = banned || kicked ? bans : leaves;
-	const bye = byes[Math.floor(Math.random() * byes.length)] ?? byes[0];
-
-	await config.channels.welcome?.send(
-		`${constants.emojis.welcome[banned ? "ban" : "leave"]} ${Mustache.render(bye, {
-			MEMBER: member.user.displayName,
-		})}`,
-	);
 });
