@@ -21,26 +21,6 @@ jobs:
                   node-version-file: package.json
                   cache: npm
 
-            - name: Download autos data
-              run:
-                  curl
-                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/autos_autos-data.ts"
-                  --output modules/autos/autos-data.ts
-
-            - name: Download dad
-              run:
-                  curl
-                  "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/autos_dad.ts"
-                  --output modules/autos/dad.ts
-
-            - name: Download strings
-              run:
-                  curl "https://gist.githubusercontent.com/${{secrets.PRIVATE_GIST}}/raw/strings.ts"
-                  --output common/strings.ts
-
-            - name: Checkout images
-              run: git clone https://gist.github.com/${{secrets.IMAGES_GIST}}.git .private/images
-
             - name: Install
               run: npm ci --force
 
