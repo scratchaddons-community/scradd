@@ -11,7 +11,7 @@ import { defineEvent } from "strife.js";
 
 import config from "../../common/config.ts";
 import { channelCreate, channelDelete, channelUpdate } from "./channels.ts";
-import { guildUpdate, inviteCreate, inviteDelete } from "./guild.ts";
+import { guildUpdate } from "./guild.ts";
 import {
 	messageDelete,
 	messageDeleteBulk,
@@ -19,24 +19,16 @@ import {
 	messageUpdate,
 } from "./messages.ts";
 import log from "./misc.ts";
-import { memberRoleUpdate, roleCreate, roleDelete, roleUpdate } from "./roles.ts";
+import { memberRoleUpdate, roleCreate, roleDelete } from "./roles.ts";
 import { threadCreate, threadDelete, threadUpdate } from "./threads.ts";
 import {
-	guildMemberAdd,
-	guildMemberRemove,
 	guildMemberUpdate,
 	memberBanAdd,
 	memberBanRemove,
 	memberKick,
 	memberPrune,
-	userUpdate,
 } from "./users.ts";
 import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
-import {
-	guildScheduledEventCreate,
-	guildScheduledEventDelete,
-	guildScheduledEventUpdate,
-} from "./voice.ts";
 
 const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable<void> } = {
 	[AuditLogEvent.ChannelCreate]: channelCreate,
@@ -56,9 +48,6 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 	},
 	// @ts-expect-error -- https://github.com/discordjs/discord.js/pull/10591
 	[AuditLogEvent.RoleCreate]: roleCreate,
-	// @ts-expect-error -- https://github.com/discordjs/discord.js/pull/10591
-	[AuditLogEvent.RoleUpdate]: roleUpdate,
-	[AuditLogEvent.InviteCreate]: inviteCreate,
 	async [AuditLogEvent.WebhookCreate](entry) {
 		if (entry.target.type !== WebhookType.Incoming) return;
 		await log(
@@ -92,8 +81,6 @@ const events: { [Event in AuditLogEvent]?: (entry: AuditLog<Event>) => Awaitable
 			LogSeverity.ImportantUpdate,
 		);
 	},
-	[AuditLogEvent.GuildScheduledEventCreate]: guildScheduledEventCreate,
-	[AuditLogEvent.GuildScheduledEventUpdate]: guildScheduledEventUpdate,
 	[AuditLogEvent.ThreadCreate]: threadCreate,
 	[AuditLogEvent.ThreadDelete]: threadDelete,
 	async [AuditLogEvent.AutoModerationRuleCreate](entry) {
@@ -130,16 +117,11 @@ defineEvent("guildAuditLogEntryCreate", async (entry, guild) => {
 });
 
 defineEvent("channelUpdate", channelUpdate);
-defineEvent("guildMemberAdd", guildMemberAdd);
-defineEvent("guildMemberRemove", guildMemberRemove);
 defineEvent("guildMemberUpdate", guildMemberUpdate);
-defineEvent("guildScheduledEventDelete", guildScheduledEventDelete);
 defineEvent("guildUpdate", guildUpdate);
-defineEvent("inviteDelete", inviteDelete);
 defineEvent("messageDelete", messageDelete);
 defineEvent("messageDeleteBulk", messageDeleteBulk);
 defineEvent("messageReactionRemoveAll", messageReactionRemoveAll);
 defineEvent("messageUpdate", messageUpdate);
 defineEvent("roleDelete", roleDelete);
 defineEvent("threadUpdate", threadUpdate);
-defineEvent("userUpdate", userUpdate);

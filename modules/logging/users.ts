@@ -1,9 +1,8 @@
-import type { AuditLogEvent, GuildMember, PartialGuildMember, PartialUser, User } from "discord.js";
+import type { AuditLogEvent, GuildMember, PartialGuildMember } from "discord.js";
 import type { AuditLog } from "./util.ts";
 
 import { time } from "discord.js";
 
-import config from "../../common/config.ts";
 import log from "./misc.ts";
 import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
 
@@ -41,92 +40,27 @@ export async function memberBanRemove(
 		LogSeverity.ImportantUpdate,
 	);
 }
-
-export async function guildMemberAdd(member: GuildMember): Promise<void> {
-	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} joined`, LogSeverity.Resource);
-}
-export async function guildMemberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
-	if (member.guild.id !== config.guild.id) return;
-	await log(`${LoggingEmojis.Member} ${member.toString()} left`, LogSeverity.Resource);
-}
 export async function guildMemberUpdate(
 	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
 ): Promise<void> {
-	if (oldMember.avatar !== newMember.avatar) {
-		const url = newMember.avatarURL({ size: 256 });
-		await log(
-			`${LoggingEmojis.User} ${newMember.toString()} ${
-				url ? "changed" : "removed"
-			} their server avatar`,
-			LogSeverity.ServerChange,
-			{ files: url ? [url] : undefined },
-		);
-	}
-	if (oldMember.nickname !== newMember.nickname)
-		await log(
-			`${LoggingEmojis.User} ${newMember.toString()}${
-				newMember.nickname ?
-					` was nicknamed ${newMember.nickname}`
-				:	"’s nickname was removed"
-			}`,
-			LogSeverity.ServerChange,
-		);
-
-	const automodQuarantine =
-		newMember.flags.has("AutomodQuarantinedBio") ||
-		newMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname");
+	if (oldMember.communicationDisabledUntil === newMember.communicationDisabledUntil) return;
 	if (
-		(oldMember.flags.has("AutomodQuarantinedBio") ||
-			oldMember.flags.has("AutomodQuarantinedUsernameOrGuildNickname")) !== automodQuarantine
+		newMember.communicationDisabledUntil &&
+		Number(newMember.communicationDisabledUntil) > Date.now()
 	)
 		await log(
-			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
-				automodQuarantine ? "" : "un"
-			}quarantined based on AutoMod rules`,
+			`${LoggingEmojis.Punishment} ${newMember.toString()} timed out until ${time(
+				newMember.communicationDisabledUntil,
+			)}`,
 			LogSeverity.ImportantUpdate,
 		);
-
-	const verified = newMember.flags.has("BypassesVerification");
-	if (oldMember.flags.has("BypassesVerification") !== verified)
+	else if (
+		oldMember.communicationDisabledUntil &&
+		Number(oldMember.communicationDisabledUntil) > Date.now()
+	)
 		await log(
-			`${LoggingEmojis.Punishment} ${newMember.toString()} ${
-				verified ? "" : "un"
-			}verified by a moderator`,
+			`${LoggingEmojis.Punishment} ${newMember.toString()}’s timeout was removed`,
 			LogSeverity.ImportantUpdate,
-		);
-
-	if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil)
-		if (
-			newMember.communicationDisabledUntil &&
-			Number(newMember.communicationDisabledUntil) > Date.now()
-		)
-			await log(
-				`${LoggingEmojis.Punishment} ${newMember.toString()} timed out until ${time(
-					newMember.communicationDisabledUntil,
-				)}`,
-				LogSeverity.ImportantUpdate,
-			);
-		else if (
-			oldMember.communicationDisabledUntil &&
-			Number(oldMember.communicationDisabledUntil) > Date.now()
-		)
-			await log(
-				`${LoggingEmojis.Punishment} ${newMember.toString()}’s timeout was removed`,
-				LogSeverity.ImportantUpdate,
-			);
-}
-
-export async function userUpdate(oldUser: PartialUser | User, newUser: User): Promise<void> {
-	if (oldUser.partial || !(await config.guild.members.fetch(newUser).catch(() => void 0))) return;
-
-	const quarantined = !!newUser.flags?.has("Quarantined");
-	if (!!oldUser.flags?.has("Quarantined") !== quarantined)
-		await log(
-			`${LoggingEmojis.Punishment} ${newUser.toString()} ${
-				quarantined ? "" : "un"
-			}quarantined`,
-			LogSeverity.Alert,
 		);
 }

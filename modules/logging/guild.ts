@@ -1,5 +1,4 @@
-import type { AuditLogEvent, Guild, Invite } from "discord.js";
-import type { AuditLog } from "./util.ts";
+import type { Guild } from "discord.js";
 
 import { unifiedDiff } from "difflib";
 import {
@@ -10,41 +9,12 @@ import {
 	GuildSystemChannelFlags,
 	GuildVerificationLevel,
 	Locale,
-	time,
-	TimestampStyles,
 	userMention,
 } from "discord.js";
 
 import config from "../../common/config.ts";
 import log from "./misc.ts";
-import { extraAuditLogsInfo, LoggingEmojis, LogSeverity } from "./util.ts";
-
-const createdInvites = new Set<string>();
-export async function inviteCreate(entry: AuditLog<AuditLogEvent.InviteCreate>): Promise<void> {
-	if (createdInvites.has(entry.target.code)) return;
-	createdInvites.add(entry.target.code);
-
-	await log(
-		`${LoggingEmojis.Invite} ${entry.target.temporary ? "Temporary invite" : "Invite"} ${
-			entry.target.code
-		}${entry.target.channel ? ` for ${entry.target.channel.toString()}` : ""} created${
-			entry.executor ? ` by ${entry.executor.toString()}` : ""
-		}${
-			entry.target.expiresAt || entry.target.maxUses ?
-				`, expiring ${
-					entry.target.expiresAt ?
-						time(entry.target.expiresAt, TimestampStyles.LongDate)
-					:	""
-				}${entry.target.expiresAt && entry.target.maxUses ? " or " : ""}${
-					entry.target.maxUses ?
-						`after ${entry.target.maxUses} use${entry.target.maxUses === 1 ? "" : "s"}`
-					:	""
-				}`
-			:	""
-		}${extraAuditLogsInfo({ reason: entry.reason })}`,
-		LogSeverity.Resource,
-	);
-}
+import { LoggingEmojis, LogSeverity } from "./util.ts";
 
 export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<void> {
 	if (newGuild.id !== config.guild.id) return;
@@ -493,13 +463,4 @@ export async function guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<voi
 			`${LoggingEmojis.SettingChange} Community ${community ? "enabled" : "disabled"}`,
 			LogSeverity.ImportantUpdate,
 		);
-}
-export async function inviteDelete(invite: Invite): Promise<void> {
-	if (invite.guild?.id !== config.guild.id) return;
-	await log(
-		`${LoggingEmojis.Invite} Invite ${invite.code} deleted${
-			invite.uses ? ` with ${invite.uses} uses` : ""
-		}`,
-		LogSeverity.Resource,
-	);
 }
