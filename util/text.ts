@@ -19,7 +19,7 @@ export function joinWithAnd<Item>(
 ): string;
 export function joinWithAnd(
 	array: { toString(): string }[],
-	stringify = (item: { toString(): string }, _: number, __: { toString(): string }[]) =>
+	stringify = (item: { toString(): string }, _index: number, _array: { toString(): string }[]) =>
 		item.toString(),
 ): string {
 	const last = array.at(-1);

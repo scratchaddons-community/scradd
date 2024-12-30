@@ -121,7 +121,7 @@ export default {
 	users: {
 		bot: "929928324959055932",
 		robotop: "323630372531470346",
-		weirdo: "691223009515667457",
+		winto: "691223009515667457",
 	},
 
 	webhookName: "scradd-webhook",

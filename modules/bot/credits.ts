@@ -44,7 +44,7 @@ export default async function credits(interaction: ChatInputCommandInteraction):
 		const role = await config.guilds.testing.roles?.fetch(roleId);
 		const members: { user: User }[] = [...(role?.members.values() ?? [])];
 		if (roleId === designers)
-			members.push({ user: await client.users.fetch(constants.users.weirdo) });
+			members.push({ user: await client.users.fetch(constants.users.winto) });
 
 		const mentions = members
 			.toSorted((one, two) => one.user.displayName.localeCompare(two.user.displayName))
