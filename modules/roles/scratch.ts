@@ -11,11 +11,7 @@ import type {
 
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
-import {
-	ApplicationRoleConnectionMetadataType,
-	OAuth2Scopes,
-	Routes,
-} from "discord.js";
+import { ApplicationRoleConnectionMetadataType, OAuth2Scopes, Routes } from "discord.js";
 import { client } from "strife.js";
 
 import config from "../../common/config.ts";

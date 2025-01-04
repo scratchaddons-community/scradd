@@ -1,9 +1,7 @@
-;
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import constants from "../common/constants.ts";
 import { gracefulFetch } from "./promises.ts";
-
 
 export async function fetchUser(username: string) {
 	const user = await gracefulFetch<

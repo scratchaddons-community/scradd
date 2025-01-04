@@ -1,15 +1,10 @@
 import type { APIEmbedField, ChatInputCommandInteraction, User } from "discord.js";
 
-
-
 import { inlineCode, Team, time, TimestampStyles } from "discord.js";
 import { client, columnize } from "strife.js";
 
-
-
 import constants from "../../common/constants.ts";
 import pkg from "../../package.json" with { type: "json" };
-
 
 const dependencyColumns = await getDependencies();
 
