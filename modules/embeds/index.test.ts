@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { getMatches, htmlToMarkdown, linkifyMentions } from "./scratch.ts";
+import { getMatches, htmlToMarkdown, linkifyMentions } from "./generate.ts";
 
 await describe("getMatches", async () => {
 	await it("should match lone links", () => {

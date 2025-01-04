@@ -1,7 +1,9 @@
+;
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import constants from "../common/constants.ts";
 import { gracefulFetch } from "./promises.ts";
+
 
 export async function fetchUser(username: string) {
 	const user = await gracefulFetch<
@@ -26,6 +28,6 @@ export async function fetchUser(username: string) {
 				};
 		  }
 		| { code: string; message: string }
-	>(`${constants.domains.scratchApi}/users/${username}/`);
+	>(`${constants.urls.scratchApi}/users/${username}/`);
 	return !user || "code" in user ? undefined : user;
 }

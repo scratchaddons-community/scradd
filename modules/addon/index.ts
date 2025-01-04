@@ -6,8 +6,20 @@ import { ApplicationCommandOptionType, ButtonStyle, ComponentType, hyperlink } f
 import { matchSorter } from "match-sorter";
 import { defineChatCommand, escapeAllMarkdown } from "strife.js";
 
-import constants from "../common/constants.ts";
-import { joinWithAnd } from "../util/text.ts";
+import constants from "../../common/constants.ts";
+
+export const addonSearchOptions = {
+	keys: [
+		({ addonId }: (typeof addons)[number]): string => addonId.replaceAll("-", " "),
+		"addonId",
+		"manifest.name",
+		"manifest.description",
+		"manifest.settings.*.name",
+		"manifest.credits.*.name",
+		"manifest.presets.*.name",
+		"manifest.presets.*.description",
+	],
+};
 
 defineChatCommand(
 	{
@@ -16,11 +28,11 @@ defineChatCommand(
 
 		options: {
 			addon: {
-				autocomplete(interaction: AutocompleteInteraction) {
+				undeautocomplete(interaction: AutocompleteInteraction) {
 					return matchSorter(
 						addons,
 						interaction.options.getString("addon") ?? "",
-						constants.addonSearchOptions,
+						addonSearchOptions,
 					).map((addon) => ({ name: addon.manifest.name, value: addon.addonId }));
 				},
 				description: "The addon to show",
@@ -33,7 +45,7 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		const { manifest: addon, addonId } =
-			matchSorter(addons, options.addon, constants.addonSearchOptions)[0] ?? {};
+			matchSorter(addons, options.addon, addonSearchOptions)[0] ?? {};
 
 		if (!addon || !addonId) {
 			await interaction.reply({
@@ -64,14 +76,16 @@ defineChatCommand(
 					: "Others"
 				}`;
 
-		const credits = joinWithAnd(addon.credits ?? [], (credit) =>
-			credit.note || credit.link ?
-				hyperlink(
-					credit.name,
-					credit.link ?? interaction.channel?.url ?? "",
-					credit.note ?? "",
-				)
-			:	credit.name,
+		const credits = new Intl.ListFormat().format(
+			addon.credits?.map((credit) =>
+				credit.note || credit.link ?
+					hyperlink(
+						credit.name,
+						credit.link ?? interaction.channel?.url ?? "",
+						credit.note ?? "",
+					)
+				:	credit.name,
+			) ?? [],
 		);
 
 		const updateInfo = `v${addon.versionAdded}${

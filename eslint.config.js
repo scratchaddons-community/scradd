@@ -19,7 +19,7 @@ export default declareConfig(
 	},
 	{ files: ["./common/typedefs/**"], rules: { "unicorn/filename-case": "off" } },
 	{
-		files: ["./modules/auto/secrets.ts", "./common/constants.ts", "./common/features.ts"],
+		files: ["./common/constants.ts"],
 		rules: { "sort-keys": ["error", "asc", { caseSensitive: false, natural: true }] },
 	},
 );

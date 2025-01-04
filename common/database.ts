@@ -1,4 +1,4 @@
-import type { Message, SendableChannels, Snowflake } from "discord.js";
+import type { Message, Snowflake } from "discord.js";
 
 import { ChannelType, RESTJSONErrorCodes, ThreadAutoArchiveDuration } from "discord.js";
 import papaparse from "papaparse";
@@ -99,30 +99,6 @@ export default class Database<Data extends Record<string, boolean | number | str
 		if (!this.message) throw new ReferenceError("Must call `.init()` before setting `.data`");
 		this.#data = content;
 		this.#queueWrite();
-	}
-
-	updateById<Overwritten extends Partial<Data>>(
-		newData: Data["id"] extends string ? Overwritten : never,
-		oldData?: NoInfer<
-			Partial<Data> & {
-				[Q in Extract<
-					{
-						[P in keyof Data]: Data[P] extends undefined ? never
-						: Overwritten[P] extends Data[P] ? never
-						: P;
-					}[keyof Data],
-					keyof Data
-				>]: Data[Q];
-			}
-		>,
-	): void {
-		const data = [...this.data];
-		const index = data.findIndex((suggestion) => suggestion.id === newData.id);
-		const suggestion = data[index];
-		if (suggestion) data[index] = { ...suggestion, ...newData };
-		else if (oldData) data.push({ ...oldData, ...newData } as unknown as Data);
-
-		this.data = data;
 	}
 
 	#queueWrite(): void {
@@ -231,18 +207,3 @@ for (const [event, code] of Object.entries({
 			}, 30_000);
 		} else void prepareExit();
 	});
-
-export async function backupDatabases(channel: SendableChannels): Promise<void> {
-	if (constants.env === "development") return;
-
-	const attachments = (
-		await Promise.all(
-			Object.values(databases).map(
-				async (database) => database && (await getFilesFromMessage(database)).first(),
-			),
-		)
-	).filter(Boolean);
-
-	await channel.send(`# Daily ${client.user.displayName} Database Backup`);
-	while (attachments.length) await channel.send({ files: attachments.splice(0, 10) });
-}

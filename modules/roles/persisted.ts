@@ -1,20 +1,24 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
 
+
+
 import mongoose from "mongoose";
 
+
+
 import config from "../../common/config.ts";
-import { checkXPRoles } from "../xp/give-xp.ts";
+
 
 export const PERSISTED_ROLES = {
 	designer: "916020774509375528",
 	scradd: "1008190416396484700",
 	admin: ["1069776422467555328", "806603332944134164"],
-	mod: ["881623848137682954", config.roles.staff.id],
-	dev: config.roles.dev?.id,
+	mod: ["881623848137682954", "1142512540342046831"],
+	dev: "806608777835053098",
 	translator: "841696608592330794",
 	contributor: "991413187427700786",
-	epic: config.roles.epic?.id,
-	booster: config.roles.booster?.id,
+	epic: "832640139108679681",
+	booster: "1042315414128037888",
 	og: "1107170572963684402",
 } as const;
 export const RoleList = mongoose.model(
@@ -31,7 +35,7 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember): 
 	const roles = Object.fromEntries(
 		Object.entries(PERSISTED_ROLES).map(([key, ids]) => [
 			key,
-			[ids].flat().some((id) => id && member.roles.resolve(id)),
+			[ids].flat().some((id) => member.roles.resolve(id)),
 		]),
 	);
 	await RoleList.findOneAndUpdate({ id: member.id }, roles, {
@@ -50,5 +54,4 @@ export async function persistedRejoin(member: GuildMember): Promise<void> {
 		const [role] = [PERSISTED_ROLES[roleName]].flat();
 		if (memberRoles[roleName] && role) await member.roles.add(role, "Persisting roles");
 	}
-	await checkXPRoles(member);
 }

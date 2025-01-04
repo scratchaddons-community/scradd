@@ -1,9 +1,8 @@
-import type { AnyThreadChannel, GuildForumTag, Snowflake } from "discord.js";
+import type { GuildForumTag, Snowflake } from "discord.js";
 
 import { cleanContent } from "discord.js";
 
 import config from "../../common/config.ts";
-import constants from "../../common/constants.ts";
 import Database from "../../common/database.ts";
 import { getAllMessages } from "../../util/discord.ts";
 import { truncateText } from "../../util/text.ts";
@@ -38,7 +37,7 @@ export const oldSuggestions =
 					suggestionAnswers[0],
 
 				author:
-					(message.author.id === constants.users.robotop ?
+					(message.author.id === "323630372531470346" ?
 						embed?.footer?.text.split(": ")[1]
 					:	/(?:users|avatars)\/(?<userId>\d+)\//.exec(embed?.author?.iconURL ?? "")
 							?.groups?.userId) ?? message.author,
@@ -59,25 +58,6 @@ export const oldSuggestions =
 			} as const;
 		})
 	:	[];
-
-export function getSuggestionData(
-	thread: AnyThreadChannel,
-):
-	| { answer: string; category: string; id: Snowflake; title: string }
-	| { author: Snowflake; answer: string; category: string; id: Snowflake; title: string } {
-	const { answer, category } = parseSuggestionTags(
-		thread.appliedTags,
-		config.channels.suggestions?.availableTags ?? [],
-		suggestionAnswers[0],
-	);
-	return {
-		answer: answer.name,
-		category,
-		id: thread.id,
-		title: thread.name,
-		...(thread.ownerId && { author: thread.ownerId }),
-	};
-}
 
 export function parseSuggestionTags(
 	appliedTags: Snowflake[],

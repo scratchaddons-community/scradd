@@ -1,42 +1,8 @@
 import type { IncomingMessage } from "node:http";
 
+
+
 import constants from "../common/constants.ts";
-
-/**
- * Joins an array using (Oxford) comma rules and the word "and".
- *
- * @param array - The array to join.
- * @param stringify - A function to convert each item to a string.
- * @returns The joined string.
- */
-export function joinWithAnd<Item extends { toString(): string }>(
-	array: Item[],
-	stringify?: (item: Item, index: number, array: Item[]) => string,
-): string;
-export function joinWithAnd<Item>(
-	array: Item[],
-	stringify: (item: Item, index: number, array: Item[]) => string,
-): string;
-export function joinWithAnd(
-	array: { toString(): string }[],
-	stringify = (item: { toString(): string }, _index: number, _array: { toString(): string }[]) =>
-		item.toString(),
-): string {
-	const last = array.at(-1);
-
-	if (last === undefined) return "";
-
-	if (array.length === 1) return stringify(last, 0, array);
-
-	return `${
-		array.length === 2 ?
-			`${array[0] ? stringify(array[0], 0, array) : ""} `
-		:	array
-				.slice(0, -1)
-				.map((item, index) => `${stringify(item, index, array)}, `)
-				.join("")
-	}and ${stringify(last, 0, array)}`;
-}
 
 /**
  * Slice a string so that it fits into a given length.
@@ -57,45 +23,6 @@ export function truncateText(text: string, maxLength: number, multiline = false)
 		);
 }
 
-/**
- * Encodes text using the Caesar Cipher.
- *
- * @param text - The text to encode.
- * @param rot - The rotate shift.
- * @returns The encoded text.
- */
-export function caesar(text: string, rot = 13): string {
-	return text.replaceAll(/[a-z]/gi, (chr) => {
-		const start = chr <= "Z" ? 65 : 97;
-
-		return String.fromCodePoint(start + (((chr.codePointAt(0) ?? 0) - start + rot) % 26));
-	});
-}
-
-/**
- * Normalize a string.
- *
- * @param text - The string to normalize.
- * @returns The normalized string.
- */
-export function normalize(text: string): string {
-	return text
-		.normalize("NFD")
-		.replaceAll(/[\p{Dia}\p{M}\p{Cf}\p{Sk}]+/gu, "")
-		.replaceAll(/[\p{Zs}\t]+/gu, " ")
-		.replaceAll(/[\p{Zl}\p{Zp}\r\n\f]+/gu, "\n");
-}
-
-/**
- * Trims the patch version off of a Semver.
- *
- * @param full - The full version.
- * @returns The patchless version.
- */
-export function trimPatchVersion(full: string): string {
-	return /^(?<main>\d+\.\d+)\.\d+/.exec(full)?.groups?.main ?? full;
-}
-
 export function getRequestUrl(request: IncomingMessage): URL {
 	return new URL(
 		request.url ?? "",
@@ -103,19 +30,6 @@ export function getRequestUrl(request: IncomingMessage): URL {
 			`${request.headers["x-forwarded-proto"]?.toString() || "http"}://${request.headers[
 				"x-forwarded-host"
 			].toString()}`
-		:	constants.domains.scradd,
+		:	constants.urls.scradd,
 	);
 }
-
-export function camelToLowerSentence<T extends string>(text: T): CamelToKebab<T, " "> {
-	return text
-		.replaceAll(/(?<one>[a-z])(?<two>[A-Z])/g, "$<one> $<two>")
-		.toLowerCase() as CamelToKebab<T, " ">;
-}
-
-export type CamelToKebab<S extends string, Seperator extends string = "-"> =
-	S extends `${infer T}${infer U}` ?
-		U extends Uncapitalize<U> ?
-			`${Lowercase<T>}${CamelToKebab<U, Seperator>}`
-		:	`${Lowercase<T>}${Seperator}${CamelToKebab<U, Seperator>}`
-	:	"";

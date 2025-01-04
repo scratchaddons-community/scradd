@@ -1,42 +1,16 @@
 import type { Snowflake } from "discord.js";
 
-import addons from "@sa-community/addons-data" with { type: "json" };
-
 const env =
 	process.argv.some((file) => file.endsWith(".test.js")) ? "testing"
 	: process.env.NODE_ENV === "production" ? "production"
 	: "development";
 
-const domains = {
-	npm: "https://npmjs.com/package",
-	scradd:
-		env === "production" || !process.env.PORT ?
-			"https://sa-discord.up.railway.app"
-		:	(`http://localhost:${process.env.PORT}` as const),
-	scratch: "https://scratch.mit.edu",
-	scratchAddons: "https://scratchaddons.com",
-	scratchApi: "https://corsproxy.io/?https://api.scratch.mit.edu",
-	/** @deprecated */
-	scratchdb: "https://scratchdb.lefty.one/v3",
-} as const;
-
 export default {
-	addonSearchOptions: {
-		keys: [
-			({ addonId }: (typeof addons)[number]) => addonId.replaceAll("-", " "),
-			"addonId",
-			"manifest.name",
-			"manifest.description",
-			"manifest.settings.*.name",
-			"manifest.credits.*.name",
-			"manifest.presets.*.name",
-			"manifest.presets.*.description",
-		],
-	},
-
 	collectorTime: 45_000,
-	defaultPunishment: "No reason given.",
-	domains,
+
+	channels: {
+		logs: "897639265696112670",
+	},
 
 	emojis: {
 		message: {
@@ -100,7 +74,6 @@ export default {
 	} satisfies Record<string, Record<string, `<${"a" | ""}:emoji:${Snowflake}>`>>,
 
 	env,
-	fonts: "Sora, SoraExt, sans-serif",
 
 	repos: {
 		scradd: "scratchaddons-community/scradd",
@@ -111,18 +84,19 @@ export default {
 	themeColor: env === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
-		addonImages: `${domains.scratchAddons}/assets/img/addons`,
-		permissions: "https://discordlookup.com/permissions-calculator",
-		railway: "https://railway.app?referralCode=RedGuy14",
-		settings: `${domains.scratch}/scratch-addons-extension/settings`,
-		usercount: `${domains.scratchAddons}/usercount.json`,
+		scradd:
+			env === "production" || !process.env.PORT ?
+				"https://sa-discord.up.railway.app"
+			:	(`http://localhost:${process.env.PORT}` as const),
+		scratchApi: "https://corsproxy.io/?https://api.scratch.mit.edu",
+		/** @deprecated */
+		scratchdb: "https://scratchdb.lefty.one/v3",
+		addonImages: `https://scratchaddons.com/assets/img/addons`,
+		scratch: "https://scratch.mit.edu",
+		settings: `https://scratch.mit.edu/scratch-addons-extension/settings`,
 	},
 
 	users: {
 		bot: "929928324959055932",
-		robotop: "323630372531470346",
-		winto: "691223009515667457",
 	},
-
-	webhookName: "scradd-webhook",
 } as const;

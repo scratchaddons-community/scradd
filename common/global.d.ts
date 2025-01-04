@@ -74,9 +74,3 @@ declare global {
 		}
 	}
 }
-
-declare module "strife.js" {
-	export interface DefaultCommandAccess {
-		inGuild: true;
-	}
-}

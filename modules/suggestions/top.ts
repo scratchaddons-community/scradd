@@ -1,19 +1,16 @@
-import type { InteractionReplyOptions, RepliableInteraction, User } from "discord.js";
+import type { InteractionReplyOptions, User } from "discord.js";
 
 import { ButtonStyle, channelLink, ComponentType, GuildMember, hyperlink } from "discord.js";
 import { formatAnyEmoji, paginate } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
-import { mentionUser } from "../settings.ts";
 import { oldSuggestions, suggestionsDatabase } from "./misc.ts";
 
 export default async function top(
-	interaction?: RepliableInteraction,
+	_?: undefined,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
 ): Promise<InteractionReplyOptions | undefined> {
-	const message = await interaction?.deferReply({ fetchReply: true });
-
 	const { suggestions } = config.channels;
 	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
 		?.displayName;
@@ -33,25 +30,25 @@ export default async function top(
 			)
 			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
 
-		async ({ answer, author, count, title, ...reference }) =>
+		({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
 				(!("old" in reference) && formatAnyEmoji(suggestions?.defaultReactionEmoji)) || "👍"
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
-			)}${options.user ? "" : ` by ${await mentionUser(author, interaction?.user)}`}`,
-		(data) => message?.edit(data),
+			)}${options.user ? "" : ` by ${author.toString()}`}`,
+		() => void 0,
 		{
 			title: `Top suggestions${displayName ? ` by ${displayName}` : ""}${
 				options.answer && options.user ? " and" : ""
 			}${options.answer ? ` answered with ${options.answer}` : ""}`,
 			singular: "suggestion",
 
-			user: interaction?.user ?? false,
-			rawOffset: (options.page ?? 0) * (interaction ? 15 : 25),
+			user: false,
+			rawOffset: options.page ?? 0,
 			highlightOffset: false,
-			pageLength: interaction ? 15 : 25,
+			pageLength: 25,
 
 			timeout: constants.collectorTime,
 			format: options.user,
@@ -62,7 +59,7 @@ export default async function top(
 						type: ComponentType.Button,
 						style: ButtonStyle.Link,
 						label: "Suggestions Site",
-						url: `${constants.domains.scradd}/suggestions${
+						url: `${constants.urls.scradd}/suggestions${
 							options.all === undefined ? "" : `?all=${options.all.toString()}`
 						}`,
 					},

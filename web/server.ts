@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { createReadStream, promises as fileSystem } from "node:fs";
 import http from "node:http";
 import path from "node:path";
@@ -8,6 +9,7 @@ import { client, logError } from "strife.js";
 import config from "../common/config.ts";
 import constants from "../common/constants.ts";
 import { prepareExit } from "../common/database.ts";
+import linkScratchRole from "../modules/roles/scratch.ts";
 import suggestionsPage from "../modules/suggestions/web.ts";
 import pkg from "../package.json" with { type: "json" };
 import { getRequestUrl } from "../util/text.ts";
@@ -47,6 +49,9 @@ const server = http.createServer(async (request, response) => {
 				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
 
 				return;
+			}
+			case "/link-scratch": {
+				return await linkScratchRole(request, response);
 			}
 			case "/style.css": {
 				return response.writeHead(200, { "content-type": "text/css" }).end(CSS_FILE);
@@ -95,10 +100,12 @@ const server = http.createServer(async (request, response) => {
 			})
 			.end();
 	} catch (error) {
+		const channel = await client.channels.fetch(constants.channels.logs);
+		assert(channel?.isSendable());
 		await logError({
 			error,
 			event: request.url ?? "",
-			channel: config.channels.errors,
+			channel,
 			emoji: constants.emojis.statuses.no,
 		}).catch(console.error);
 		response.writeHead(500, { "content-type": "text/plain" }).end("500 Internal Server Error");
