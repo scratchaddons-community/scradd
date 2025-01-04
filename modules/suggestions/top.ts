@@ -48,7 +48,7 @@ export default async function top(
 			user: false,
 			rawOffset: options.page ?? 0,
 			highlightOffset: false,
-			pageLength: 25,
+			pageLength: 50,
 
 			timeout: constants.collectorTime,
 			format: options.user,

@@ -3,11 +3,14 @@ import type { APIEmbed, BaseMessageOptions, Message, Snowflake } from "discord.j
 import { ApplicationCommandOptionType } from "discord.js";
 import { defineChatCommand, defineEvent, zeroWidthSpace } from "strife.js";
 
-import configEmbeds from "./config.ts";
+import configEmbeds, { EmbedConfig } from "./config.ts";
 import { getMatches, handleMatch } from "./generate.ts";
 
 const sentEmbeds = new Map<Snowflake, Message>();
 defineEvent("messageCreate", async (message) => {
+	const config = message.guild && (await EmbedConfig.findOne({ guild: message.guild.id }).exec());
+	if (config && (!config.enabled || config.channels.get(message.channel.id) === false)) return;
+
 	const response = await createEmbeds(message);
 	if (!response) return;
 
