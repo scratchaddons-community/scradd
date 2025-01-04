@@ -1,13 +1,8 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
 
-
-
 import mongoose from "mongoose";
 
-
-
 import config from "../../common/config.ts";
-
 
 export const PERSISTED_ROLES = {
 	designer: "916020774509375528",

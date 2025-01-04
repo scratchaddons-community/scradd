@@ -33,7 +33,4 @@ else
 		},
 	);
 
-defineChatCommand(
-	{ name: "info", description: "Show information about me and how I work" },
-	info,
-);
+defineChatCommand({ name: "info", description: "Show information about me and how I work" }, info);

@@ -1,7 +1,3 @@
-
-
-
-
 export type Duration =
 	| `a ${"few seconds" | "minute" | "day" | "month" | "year"}`
 	| "an hour"
