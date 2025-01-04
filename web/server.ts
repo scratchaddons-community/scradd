@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 
 import { client, logError } from "strife.js";
 
-import config from "../common/config.ts";
 import constants from "../common/constants.ts";
 import { prepareExit } from "../common/database.ts";
 import linkScratchRole from "../modules/roles/scratch.ts";
@@ -69,10 +68,7 @@ const server = http.createServer(async (request, response) => {
 			case "/icon.png": {
 				const options = { extension: "png", forceStatic: true, size: 128 } as const;
 				return response
-					.writeHead(301, {
-						location:
-							config.guild.iconURL(options) ?? client.user.displayAvatarURL(options),
-					})
+					.writeHead(301, { location: client.user.displayAvatarURL(options) })
 					.end();
 			}
 		}
@@ -91,14 +87,7 @@ const server = http.createServer(async (request, response) => {
 		} else if (first === "suggestions")
 			return await suggestionsPage(request, response, segments[2]);
 
-		response
-			.writeHead(301, {
-				location:
-					config.guild.features.includes("DISCOVERABLE") ?
-						`https://discord.com/servers/${config.guild.id}`
-					:	pkg.homepage,
-			})
-			.end();
+		response.writeHead(301, { location: pkg.homepage }).end();
 	} catch (error) {
 		const channel = await client.channels.fetch(constants.channels.logs);
 		assert(channel?.isSendable());

@@ -88,7 +88,7 @@ export default {
 			env === "production" || !process.env.PORT ?
 				"https://sa-discord.up.railway.app"
 			:	(`http://localhost:${process.env.PORT}` as const),
-		scratchApi: "https://corsproxy.io/?https://api.scratch.mit.edu",
+		scratchApi: "https://api.scratch.mit.edu",
 		/** @deprecated */
 		scratchdb: "https://scratchdb.lefty.one/v3",
 		addonImages: `https://scratchaddons.com/assets/img/addons`,
