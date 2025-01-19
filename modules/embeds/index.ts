@@ -100,5 +100,6 @@ defineChatCommand(
 			},
 		},
 	} as const,
+	// @ts-expect-error -- Strife bug
 	configEmbeds,
 );
