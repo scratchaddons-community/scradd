@@ -1,7 +1,5 @@
 import type { ChatInputCommandInteraction } from "discord.js";
 
-import assert from "node:assert";
-
 import { channelMention } from "discord.js";
 import mongoose from "mongoose";
 
@@ -20,11 +18,8 @@ export default async function configEmbeds(
 	interaction: ChatInputCommandInteraction<"cached" | "raw">,
 	{ setting }: { setting?: "on-channel" | "off-channel" | "server" },
 ): Promise<void> {
-	assert(interaction.guild);
-	assert(interaction.channel);
-
 	const config = await EmbedConfig.findOneAndUpdate(
-		{ guild: interaction.guild.id },
+		{ guild: interaction.guildId },
 		{},
 		{ new: true, upsert: true, setDefaultsOnInsert: true },
 	).exec();
@@ -34,11 +29,11 @@ export default async function configEmbeds(
 			break;
 		}
 		case "on-channel": {
-			config.channels.set(interaction.channel.id, false);
+			config.channels.set(interaction.channelId, true);
 			break;
 		}
 		case "off-channel": {
-			config.channels.set(interaction.channel.id, true);
+			config.channels.set(interaction.channelId, false);
 			break;
 		}
 		case undefined: {

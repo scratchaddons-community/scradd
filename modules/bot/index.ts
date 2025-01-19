@@ -1,6 +1,5 @@
 import { defineChatCommand } from "strife.js";
 
-import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import info from "./info.ts";
 
@@ -10,7 +9,7 @@ if (constants.env === "production")
 			name: "restart",
 			description: "Restart the bot",
 			restricted: true,
-			access: config.guilds.testing.id,
+			access: constants.testingServer,
 		},
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is restarting the bot`);
@@ -24,7 +23,7 @@ else
 			name: "kill",
 			description: "Kill the bot",
 			restricted: true,
-			access: config.guilds.testing.id,
+			access: constants.testingServer,
 		},
 		async (interaction) => {
 			process.emitWarning(`${interaction.user.tag} is killing the bot`);

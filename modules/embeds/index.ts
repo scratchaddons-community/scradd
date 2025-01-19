@@ -1,25 +1,30 @@
 import type { APIEmbed, BaseMessageOptions, Message, Snowflake } from "discord.js";
 
-import { ApplicationCommandOptionType } from "discord.js";
-import { defineChatCommand, defineEvent, zeroWidthSpace } from "strife.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { client, defineChatCommand, defineEvent, zeroWidthSpace } from "strife.js";
 
 import configEmbeds, { EmbedConfig } from "./config.ts";
 import { getMatches, handleMatch } from "./generate.ts";
 
 const sentEmbeds = new Map<Snowflake, Message>();
 defineEvent("messageCreate", async (message) => {
-	const config = message.guild && (await EmbedConfig.findOne({ guild: message.guild.id }).exec());
-	if (config && (!config.enabled || config.channels.get(message.channel.id) === false)) return;
+	if (message.channel.isThread())
+		if (!message.channel.sendable) return;
+		else if (
+			!message.channel.permissionsFor(client.user)?.has(PermissionFlagsBits.SendMessages)
+		)
+			return;
+
+	const config =
+		message.guild ?
+			await EmbedConfig.findOne({ guild: message.guild.id }).exec()
+		:	{ enabled: true, channels: undefined };
+	if (config && (!config.enabled || config.channels?.get(message.channel.id) === false)) return;
 
 	const response = await createEmbeds(message);
 	if (!response) return;
 
-	if (sentEmbeds.has(message.id))
-		await sentEmbeds
-			.get(message.id)
-			?.edit(response)
-			.catch(() => void 0);
-	else if (message.system) sentEmbeds.set(message.id, await message.channel.send(response));
+	if (message.system) sentEmbeds.set(message.id, await message.channel.send(response));
 	else sentEmbeds.set(message.id, await message.reply(response));
 });
 
@@ -29,16 +34,30 @@ defineEvent("messageUpdate", async (_, message) => {
 	const found = sentEmbeds.get(message.id);
 	if (!found && +"0" < 1 /* TODO: only return if there's new messages */) return;
 
-	const data = await createEmbeds(message);
+	const response = await createEmbeds(message);
 	if (found)
 		await found.edit(
-			data ?? { content: zeroWidthSpace, components: [], embeds: [], files: [] },
+			response ?? { content: zeroWidthSpace, components: [], embeds: [], files: [] },
 		);
-	else if (data && message.channel.isSendable())
-		sentEmbeds.set(
-			message.id,
-			await (message.system ? message.channel.send(data) : message.reply(data)),
-		);
+	else if (response) {
+		if (!message.channel.isSendable()) return;
+		if (message.channel.isThread())
+			if (!message.channel.sendable) return;
+			else if (
+				!message.channel.permissionsFor(client.user)?.has(PermissionFlagsBits.SendMessages)
+			)
+				return;
+
+		const config =
+			message.guild ?
+				await EmbedConfig.findOne({ guild: message.guild.id }).exec()
+			:	{ enabled: true, channels: undefined };
+		if (config && (!config.enabled || config.channels?.get(message.channel.id) === false))
+			return;
+
+		if (message.system) sentEmbeds.set(message.id, await message.channel.send(response));
+		else sentEmbeds.set(message.id, await message.reply(response));
+	}
 });
 
 async function createEmbeds(message: Message): Promise<BaseMessageOptions | undefined> {
@@ -81,6 +100,5 @@ defineChatCommand(
 			},
 		},
 	} as const,
-	// @ts-expect-error -- Strife bug
 	configEmbeds,
 );

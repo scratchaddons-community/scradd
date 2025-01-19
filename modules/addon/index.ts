@@ -28,7 +28,7 @@ defineChatCommand(
 
 		options: {
 			addon: {
-				undeautocomplete(interaction: AutocompleteInteraction) {
+				autocomplete(interaction: AutocompleteInteraction) {
 					return matchSorter(
 						addons,
 						interaction.options.getString("addon") ?? "",
@@ -119,9 +119,7 @@ defineChatCommand(
 					footer: { text: addonId },
 					thumbnail: { url: `${constants.urls.addonImages}/${addonId}.png` },
 					title: addon.name,
-					url: `https://github.com/${
-						constants.repos.scratchAddons
-					}/tree/v${scratchAddons.version}/addons/${addonId}/`,
+					url: `https://github.com/ScratchAddons/ScratchAddons/tree/v${scratchAddons.version}/addons/${addonId}/`,
 				},
 			],
 

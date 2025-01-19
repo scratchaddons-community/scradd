@@ -19,9 +19,8 @@ export default async function info(interaction: ChatInputCommandInteraction): Pr
 				title: "Status",
 				thumbnail: { url: client.user.displayAvatarURL() },
 				color: constants.themeColor,
-				description: `I’m open-source! The source code is available [on GitHub](https://github.com/${
-					constants.repos.scradd
-				}).`,
+				description:
+					"I’m open-source! The source code is available [on GitHub](https://github.com/scratchaddons-community/scradd).",
 
 				fields: [
 					{

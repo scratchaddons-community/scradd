@@ -2,9 +2,8 @@
 export async function gracefulFetch<T = any>(apiUrl: string): Promise<T | undefined> {
 	const response = await fetch(apiUrl)
 		.then((response) => response.json() as T)
-		.catch(console.error);
-	console.log(response, apiUrl);
-	return !response || (typeof response === "object" && "error" in response && response.error) ?
+		.catch(() => void 0);
+	return typeof response === "object" && response && "error" in response && response.error ?
 			undefined
 		:	response;
 }
