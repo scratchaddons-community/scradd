@@ -11,7 +11,9 @@ defineEvent("messageCreate", async (message) => {
 	if (message.channel.isThread())
 		if (!message.channel.sendable) return;
 		else if (
-			!message.channel.permissionsFor(client.user)?.has(PermissionFlagsBits.SendMessages)
+			!message.channel
+				.permissionsFor(client.user)
+				?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks)
 		)
 			return;
 
@@ -44,7 +46,9 @@ defineEvent("messageUpdate", async (_, message) => {
 		if (message.channel.isThread())
 			if (!message.channel.sendable) return;
 			else if (
-				!message.channel.permissionsFor(client.user)?.has(PermissionFlagsBits.SendMessages)
+				!message.channel
+					.permissionsFor(client.user)
+					?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks)
 			)
 				return;
 

@@ -14,7 +14,6 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import { ApplicationRoleConnectionMetadataType, OAuth2Scopes, Routes } from "discord.js";
 import { client } from "strife.js";
 
-import pkg from "../../package.json" with { type: "json" };
 import { fetchUser } from "../../util/scratch.ts";
 import { getRequestUrl } from "../../util/text.ts";
 
@@ -121,7 +120,9 @@ export default async function linkScratchRole(
 		headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` },
 		auth: false,
 	})) as RESTGetAPICurrentUserResult;
-	return response.writeHead(303, { location: pkg.homepage }).end();
+	return response
+		.writeHead(200, { "content-type": "text/html" })
+		.end("<script>window.close();</script>");
 
 	function getScratchUrl(refreshToken: string): string {
 		const encodedRedirectUri = Buffer.from(
