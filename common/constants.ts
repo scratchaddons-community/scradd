@@ -34,7 +34,7 @@ export default {
 	urls: {
 		scradd:
 			env === "production" || !process.env.PORT ?
-				"https://sa-discord.up.railway.app"
+				"https://scradd.up.railway.app"
 			:	(`http://localhost:${process.env.PORT}` as const),
 		scratchApi: "https://api.scratch.mit.edu",
 		/** @deprecated */
