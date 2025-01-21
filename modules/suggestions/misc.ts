@@ -1,11 +1,10 @@
-import type { GuildForumTag, Snowflake, User } from "discord.js";
+import type { GuildForumTag, Snowflake } from "discord.js";
 
 import assert from "node:assert";
 
 import { client } from "strife.js";
 
 export const suggestionAnswers = ["Unanswered", "Good Idea", "In Development"] as const;
-export type Answer = (typeof suggestionAnswers)[number];
 
 export function parseSuggestionTags(
 	appliedTags: Snowflake[],
@@ -42,17 +41,21 @@ export function parseSuggestionTags(
 
 const channel = await client.channels.fetch("1020381639748096050");
 assert(channel?.isTextBased());
-const message = await channel.messages.fetch("1331264119667691540");
+const message = await channel.messages.fetch("1331287625851605096");
 const attachment = message.attachments.first()?.url;
 assert(attachment);
 
 const suggestions = await fetch(attachment).then(
 	(response) =>
 		response.json() as Promise<
-			({ answer: Answer; count: number; title: number | string } & (
-				| { category: string; author: Snowflake; id: Snowflake }
-				| ({ old: true; author: Snowflake | User } & ({ id: Snowflake } | { url: string }))
-			))[]
+			{
+				answer: (typeof suggestionAnswers)[number];
+				count: number | null;
+				title: string;
+				author: Snowflake;
+				id: Snowflake;
+				old?: true;
+			}[]
 		>,
 );
 export default suggestions;

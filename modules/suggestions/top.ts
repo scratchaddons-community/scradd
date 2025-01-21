@@ -1,39 +1,36 @@
-import { channelLink, hyperlink } from "discord.js";
+import { channelLink, hyperlink, userMention } from "discord.js";
 import { footerSeperator, formatAnyEmoji } from "strife.js";
 
 import config from "../../common/config.ts";
 import suggestions from "./misc.ts";
 
-export default function top(rawOffset = 0): { list: string; pageInfo: string } {
-	if (!suggestions.length)
-		return {
-			list: `No suggestions found!`,
-			pageInfo: `Page 1/0${footerSeperator}0 suggestions`,
-		};
-
+export default function top(page = 0): { list: string; pageInfo: string } {
 	const pageLength = 50;
 
 	const pageCount = Math.ceil(suggestions.length / pageLength);
-	const offset = Math.floor(rawOffset / pageLength) * pageLength;
+	const offset = Math.floor((page * pageLength) / pageLength) * pageLength;
 
 	const lines = suggestions
-		.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count)
+		.toSorted(
+			(suggestionOne, suggestionTwo) =>
+				(suggestionTwo.count ?? 0) - (suggestionOne.count ?? 0),
+		)
 		.filter((_, index) => index >= offset && index < offset + pageLength)
-		.map(({ answer, author, count, title, ...reference }, index) => {
-			const line = `${index + offset + 1}. **${count}** ${
-				(!("old" in reference) &&
-					formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji)) ||
-				"👍"
-			} ${hyperlink(
-				padTitle(title),
-				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
-				answer,
-			)} by ${author.toString()}`;
-			return line;
-		});
+		.map(
+			(suggestion, index) =>
+				`${index + offset + 1}. **${(suggestion.count ?? 0).toLocaleString()}** ${
+					(!suggestion.old &&
+						formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji)) ||
+					"👍"
+				} ${hyperlink(
+					padTitle(suggestion.title),
+					channelLink(suggestion.id, config.guild.id),
+					suggestion.answer,
+				)} by ${userMention(suggestion.author)}`,
+		);
 
 	return {
-		list: lines.join("\n"),
+		list: lines.join("\n") || "No suggestions found!",
 		pageInfo: `Page ${offset / pageLength + 1}/${pageCount}${
 			footerSeperator
 		}${suggestions.length.toLocaleString()} ${suggestions.length === 1 ? "suggestion" : `suggestions`}`,

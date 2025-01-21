@@ -42,27 +42,21 @@ export default async function suggestionsPage(
 		);
 	}
 
-	const thread = await config.guild.channels.fetch(threadId).catch(() => void 0);
-	if (
-		!thread?.isThread() ||
-		!thread.parentId ||
-		![config.channels.suggestions?.id, config.channels.oldSuggestions?.id].includes(
-			thread.parentId,
-		)
-	)
-		return response.writeHead(308, { location: channelLink(threadId, config.guild.id) }).end();
-
 	const suggestion = suggestions.find(
 		(suggestion): suggestion is Extract<typeof suggestion, { id: Snowflake }> =>
-			"id" in suggestion && suggestion.id === thread.id,
+			"id" in suggestion && suggestion.id === threadId,
 	);
 	if (!suggestion)
+		return response.writeHead(308, { location: channelLink(threadId, config.guild.id) }).end();
+
+	const thread = await config.guild.channels.fetch(suggestion.id).catch(() => void 0);
+	if (!thread?.isThread())
 		return response.writeHead(308, { location: channelLink(threadId, config.guild.id) }).end();
 
 	const starterMessage = await thread.fetchStarterMessage().catch(() => void 0);
 
 	const member =
-		config.channels.oldSuggestions?.id === thread.parentId ?
+		"old" in suggestion ?
 			await thread.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
 				displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
 					.toString(16)
@@ -72,7 +66,7 @@ export default async function suggestionsPage(
 			}))
 		:	undefined;
 	const messages = [
-		!starterMessage || config.channels.oldSuggestions?.id === thread.parentId ?
+		!starterMessage || "old" in suggestion ?
 			{
 				createdAt: (starterMessage ?? thread).createdAt,
 				id: (starterMessage ?? thread).id,

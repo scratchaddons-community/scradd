@@ -20,7 +20,6 @@ const channels = (await guild?.channels.fetch()) ?? new Collection();
 
 export default {
 	channels: {
-		modlogs: assertOutsideTests(getChannel("mod-logs", ChannelType.GuildText, "full")),
 		suggestions: getChannel("suggestions", ChannelType.GuildForum, "full"),
 		oldSuggestions: getChannel("suggestions", ChannelType.GuildText),
 	},
