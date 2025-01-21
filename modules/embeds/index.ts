@@ -36,16 +36,16 @@ defineEvent("messageUpdate", async (_, message) => {
 			response ?? { content: zeroWidthSpace, components: [], embeds: [], files: [] },
 		);
 	else if (response) {
-		if (!assertSendable(message.channel)) return;
+		const channel = assertSendable(message.channel);
+		if (!channel) return;
 
 		const config =
 			message.guild ?
 				await EmbedConfig.findOne({ guild: message.guild.id }).exec()
 			:	{ enabled: true, channels: undefined };
-		if (config && (!config.enabled || config.channels?.get(message.channel.id) === false))
-			return;
+		if (config && (!config.enabled || config.channels?.get(channel.id) === false)) return;
 
-		if (message.system) sentEmbeds.set(message.id, await message.channel.send(response));
+		if (message.system) sentEmbeds.set(message.id, await channel.send(response));
 		else sentEmbeds.set(message.id, await message.reply(response));
 	}
 });
