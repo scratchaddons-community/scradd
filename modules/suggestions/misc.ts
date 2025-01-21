@@ -3,7 +3,7 @@ import type { GuildForumTag, Snowflake } from "discord.js";
 import { cleanContent } from "discord.js";
 
 import config from "../../common/config.ts";
-import Database from "../../common/database.ts";
+import Database, { databaseThread } from "../../common/database.ts";
 import { getAllMessages } from "../../util/discord.ts";
 import { truncateText } from "../../util/text.ts";
 
@@ -14,7 +14,7 @@ export const suggestionAnswers = [
 		.map((tag) => tag.name) ?? []),
 ] as const;
 
-export const suggestionsDatabase = new Database<{
+const suggestionsDatabase = new Database<{
 	answer: (typeof suggestionAnswers)[number];
 	category: string;
 	author: Snowflake;
@@ -24,7 +24,7 @@ export const suggestionsDatabase = new Database<{
 }>("suggestions");
 await suggestionsDatabase.init();
 
-export const oldSuggestions =
+const oldSuggestions =
 	config.channels.oldSuggestions ?
 		(await getAllMessages(config.channels.oldSuggestions)).map((message) => {
 			const [embed] = message.embeds;
@@ -91,3 +91,8 @@ export function parseSuggestionTags(
 		category: (categories.length === 1 && categories[0]) || "Other",
 	};
 }
+
+export const suggestions = [...suggestionsDatabase.data, ...oldSuggestions];
+await databaseThread.send({
+	files: [{ name: "suggestions.json", attachment: Buffer.from(JSON.stringify(suggestions)) }],
+});

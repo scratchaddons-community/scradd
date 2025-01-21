@@ -11,12 +11,7 @@ import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
 import { getTwemojiUrl, markdownToHtml } from "../../util/markdown.ts";
 import { getRequestUrl } from "../../util/text.ts";
-import {
-	oldSuggestions,
-	parseSuggestionTags,
-	suggestionAnswers,
-	suggestionsDatabase,
-} from "./misc.ts";
+import { parseSuggestionTags, suggestionAnswers, suggestions } from "./misc.ts";
 import top from "./top.ts";
 
 const TOP_PAGE = await fileSystem.readFile("./modules/suggestions/top.html", "utf8");
@@ -34,7 +29,7 @@ export default async function suggestionsPage(
 		const currentPage = Math.max(1, +(url.searchParams.get("page") ?? 1));
 		const suggestionsData = await top(undefined, { all, page: currentPage - 1 });
 		const embed = suggestionsData?.embeds?.[0];
-		const suggestions = embed && "description" in embed && embed.description;
+		const suggestionsList = embed && "description" in embed && embed.description;
 		const pageInfo = embed && "footer" in embed && embed.footer?.text;
 
 		const member = await config.guild.members.fetchMe();
@@ -43,7 +38,7 @@ export default async function suggestionsPage(
 				member,
 				avatar: member.user.displayAvatarURL({ size: 64 }),
 				icon: member.roles.icon?.iconURL(),
-				content: markdownToHtml(suggestions || ""),
+				content: markdownToHtml(suggestionsList || ""),
 				all: all ? "&all" : "",
 				pageInfo,
 				previousPage: currentPage - 1,
@@ -62,7 +57,7 @@ export default async function suggestionsPage(
 	)
 		return response.writeHead(308, { location: channelLink(threadId, config.guild.id) }).end();
 
-	const suggestion = [...suggestionsDatabase.data, ...oldSuggestions].find(
+	const suggestion = suggestions.find(
 		(suggestion): suggestion is Extract<typeof suggestion, { id: Snowflake }> =>
 			"id" in suggestion && suggestion.id === thread.id,
 	);
@@ -73,7 +68,7 @@ export default async function suggestionsPage(
 
 	const member =
 		config.channels.oldSuggestions?.id === thread.parentId ?
-			await config.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
+			await thread.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
 				displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
 					.toString(16)
 					.padStart(6, "0")}`,
