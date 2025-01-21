@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 import { client, logError } from "strife.js";
 
 import constants from "../common/constants.ts";
-import { prepareExit } from "../common/database.ts";
 import linkScratchRole from "../modules/roles/scratch.ts";
 import suggestionsPage from "../modules/suggestions/web.ts";
 import pkg from "../package.json" with { type: "json" };
@@ -38,17 +37,6 @@ const server = http.createServer(async (request, response) => {
 				requestUrl.pathname.slice(0, -1)
 			:	requestUrl.pathname).toLowerCase();
 		switch (pathname) {
-			case "/prepare-exit": {
-				if (requestUrl.searchParams.get("auth") !== process.env.EXIT_AUTH)
-					return response
-						.writeHead(403, { "content-type": "text/plain" })
-						.end("403 Forbidden");
-
-				await prepareExit();
-				response.writeHead(200, { "content-type": "text/plain" }).end("200 OK");
-
-				return;
-			}
 			case "/link-scratch": {
 				return await linkScratchRole(request, response);
 			}

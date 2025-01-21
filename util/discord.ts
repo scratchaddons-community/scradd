@@ -1,29 +1,7 @@
-import type {
-	Channel,
-	GuildTextBasedChannel,
-	Message,
-	SendableChannels,
-	Snowflake,
-} from "discord.js";
+import type { Channel, SendableChannels } from "discord.js";
 
 import { PermissionFlagsBits } from "discord.js";
 import { client } from "strife.js";
-
-/** @deprecated */
-export async function getAllMessages(channel: GuildTextBasedChannel): Promise<Message<true>[]> {
-	const messages = [];
-
-	let lastId: Snowflake | undefined;
-
-	do {
-		const fetchedMessages = await channel.messages.fetch({ before: lastId, limit: 100 });
-
-		messages.push(...fetchedMessages.values());
-		lastId = fetchedMessages.lastKey();
-	} while (lastId);
-
-	return messages;
-}
 
 export function assertSendable<T extends Channel>(channel: T): (T & SendableChannels) | undefined {
 	if (!channel.isSendable()) return;

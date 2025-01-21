@@ -30,6 +30,3 @@ jobs:
                   production
               env:
                   RAILWAY_TOKEN: ${{secrets.RAILWAY_TOKEN}}
-
-            - name: Clean DB listeners
-              run: curl https://sa-discord.up.railway.app/prepare-exit?auth=${{secrets.EXIT_AUTH}}

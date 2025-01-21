@@ -25,12 +25,8 @@ export default async function suggestionsPage(
 	const url = getRequestUrl(request);
 
 	if (!threadId) {
-		const all = url.searchParams.has("all");
 		const currentPage = Math.max(1, +(url.searchParams.get("page") ?? 1));
-		const suggestionsData = await top(undefined, { all, page: currentPage - 1 });
-		const embed = suggestionsData?.embeds?.[0];
-		const suggestionsList = embed && "description" in embed && embed.description;
-		const pageInfo = embed && "footer" in embed && embed.footer?.text;
+		const { list, pageInfo } = top(currentPage - 1);
 
 		const member = await config.guild.members.fetchMe();
 		return response.writeHead(200, { "content-type": "text/html" }).end(
@@ -38,11 +34,10 @@ export default async function suggestionsPage(
 				member,
 				avatar: member.user.displayAvatarURL({ size: 64 }),
 				icon: member.roles.icon?.iconURL(),
-				content: markdownToHtml(suggestionsList || ""),
-				all: all ? "&all" : "",
+				content: markdownToHtml(list),
 				pageInfo,
 				previousPage: currentPage - 1,
-				nextPage: pageInfo && pageInfo.includes(`/${currentPage} `) ? 0 : currentPage + 1,
+				nextPage: pageInfo.includes(`/${currentPage} `) ? 0 : currentPage + 1,
 			}),
 		);
 	}

@@ -56,9 +56,6 @@ process
 			}),
 	);
 
-const { cleanListeners } = await import("./common/database.js");
-await cleanListeners();
-
 client.user.setStatus("online");
 
 if (constants.env === "production")

@@ -1,73 +1,43 @@
-import type { InteractionReplyOptions, User } from "discord.js";
-
-import { ButtonStyle, channelLink, ComponentType, GuildMember, hyperlink } from "discord.js";
-import { formatAnyEmoji, paginate } from "strife.js";
+import { channelLink, hyperlink } from "discord.js";
+import { footerSeperator, formatAnyEmoji } from "strife.js";
 
 import config from "../../common/config.ts";
-import constants from "../../common/constants.ts";
 import suggestions from "./misc.ts";
 
-export default async function top(
-	_?: undefined,
-	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
-): Promise<InteractionReplyOptions | undefined> {
-	const channel = config.channels.suggestions;
-	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
-		?.displayName;
+export default function top(rawOffset = 0): { list: string; pageInfo: string } {
+	if (!suggestions.length)
+		return {
+			list: `No suggestions found!`,
+			pageInfo: `Page 1/0${footerSeperator}0 suggestions`,
+		};
 
-	return await paginate(
-		suggestions
-			.filter(
-				(suggestion) =>
-					(options.answer ?
-						suggestion.answer === options.answer
-					:	options.all ||
-						!("old" in suggestion) ||
-						["Unanswered", "Good Idea", "In Development"].includes(
-							suggestion.answer,
-						)) &&
-					(options.user ? suggestion.author.valueOf() === options.user.id : true),
-			)
-			.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count),
+	const pageLength = 50;
 
-		({ answer, author, count, title, ...reference }) =>
-			`**${count}** ${
-				(!("old" in reference) && formatAnyEmoji(channel?.defaultReactionEmoji)) || "👍"
+	const pageCount = Math.ceil(suggestions.length / pageLength);
+	const offset = Math.floor(rawOffset / pageLength) * pageLength;
+
+	const lines = suggestions
+		.toSorted((suggestionOne, suggestionTwo) => suggestionTwo.count - suggestionOne.count)
+		.filter((_, index) => index >= offset && index < offset + pageLength)
+		.map(({ answer, author, count, title, ...reference }, index) => {
+			const line = `${index + offset + 1}. **${count}** ${
+				(!("old" in reference) &&
+					formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji)) ||
+				"👍"
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
 				answer,
-			)}${options.user ? "" : ` by ${author.toString()}`}`,
-		() => void 0,
-		{
-			title: `Top suggestions${displayName ? ` by ${displayName}` : ""}${
-				options.answer && options.user ? " and" : ""
-			}${options.answer ? ` answered with ${options.answer}` : ""}`,
-			singular: "suggestion",
+			)} by ${author.toString()}`;
+			return line;
+		});
 
-			user: false,
-			rawOffset: options.page ?? 0,
-			highlightOffset: false,
-			pageLength: 50,
-
-			timeout: constants.collectorTime,
-			format: options.user,
-
-			generateComponents() {
-				return [
-					{
-						type: ComponentType.Button,
-						style: ButtonStyle.Link,
-						label: "Suggestions Site",
-						url: `${constants.urls.scradd}/suggestions${
-							options.all === undefined ? "" : `?all=${options.all.toString()}`
-						}`,
-					},
-				];
-			},
-			customComponentLocation: "below",
-		},
-	);
+	return {
+		list: lines.join("\n"),
+		pageInfo: `Page ${offset / pageLength + 1}/${pageCount}${
+			footerSeperator
+		}${suggestions.length.toLocaleString()} ${suggestions.length === 1 ? "suggestion" : `suggestions`}`,
+	};
 }
 
 /** @todo - Strip full links, they can’t be escaped. */

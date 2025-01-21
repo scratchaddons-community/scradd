@@ -1,63 +1,11 @@
-import type { GuildForumTag, Snowflake } from "discord.js";
+import type { GuildForumTag, Snowflake, User } from "discord.js";
 
-import { cleanContent } from "discord.js";
+import assert from "node:assert";
 
-import config from "../../common/config.ts";
-import Database, { databaseThread } from "../../common/database.ts";
-import { getAllMessages } from "../../util/discord.ts";
-import { truncateText } from "../../util/text.ts";
+import { client } from "strife.js";
 
-export const suggestionAnswers = [
-	"Unanswered",
-	...(config.channels.suggestions?.availableTags
-		.filter((tag) => tag.moderated)
-		.map((tag) => tag.name) ?? []),
-] as const;
-
-const suggestionsDatabase = new Database<{
-	answer: (typeof suggestionAnswers)[number];
-	category: string;
-	author: Snowflake;
-	count: number;
-	id: Snowflake;
-	title: number | string;
-}>("suggestions");
-await suggestionsDatabase.init();
-
-const oldSuggestions =
-	config.channels.oldSuggestions ?
-		(await getAllMessages(config.channels.oldSuggestions)).map((message) => {
-			const [embed] = message.embeds;
-
-			const segments = message.thread?.name.toLowerCase().split(" | ");
-
-			return {
-				answer:
-					suggestionAnswers.find((answer) => segments?.includes(answer.toLowerCase())) ??
-					suggestionAnswers[0],
-
-				author:
-					(message.author.id === "323630372531470346" ?
-						embed?.footer?.text.split(": ")[1]
-					:	/(?:users|avatars)\/(?<userId>\d+)\//.exec(embed?.author?.iconURL ?? "")
-							?.groups?.userId) ?? message.author,
-
-				count:
-					(message.reactions.valueOf().first()?.count ?? 0) -
-					(message.reactions.valueOf().at(1)?.count ?? 0),
-
-				title: truncateText(
-					embed?.title ??
-						(embed?.description && cleanContent(embed.description, message.channel)) ??
-						embed?.image?.url ??
-						message.content,
-					75,
-				),
-				old: true,
-				...(message.thread ? { id: message.thread.id } : { url: message.url }),
-			} as const;
-		})
-	:	[];
+export const suggestionAnswers = ["Unanswered", "Good Idea", "In Development"] as const;
+export type Answer = (typeof suggestionAnswers)[number];
 
 export function parseSuggestionTags(
 	appliedTags: Snowflake[],
@@ -92,10 +40,19 @@ export function parseSuggestionTags(
 	};
 }
 
-const suggestions = [...suggestionsDatabase.data, ...oldSuggestions].filter((suggestion) =>
-	["Unanswered", "Good Idea", "In Development"].includes(suggestion.answer),
+const channel = await client.channels.fetch("1020381639748096050");
+assert(channel?.isTextBased());
+const message = await channel.messages.fetch("1331264119667691540");
+const attachment = message.attachments.first()?.url;
+assert(attachment);
+
+const suggestions = await fetch(attachment).then(
+	(response) =>
+		response.json() as Promise<
+			({ answer: Answer; count: number; title: number | string } & (
+				| { category: string; author: Snowflake; id: Snowflake }
+				| ({ old: true; author: Snowflake | User } & ({ id: Snowflake } | { url: string }))
+			))[]
+		>,
 );
 export default suggestions;
-await databaseThread.send({
-	files: [{ name: "suggestions.json", attachment: Buffer.from(JSON.stringify(suggestions)) }],
-});

@@ -69,8 +69,6 @@ declare global {
 			PORT?: `${number}`;
 			/** Client secret of the app, used in OAuth2 flows. Omit to disable all features using OAuth2. */
 			CLIENT_SECRET?: string;
-			/** API key used in `/prepare-exit`. */
-			EXIT_AUTH?: string;
 		}
 	}
 }
