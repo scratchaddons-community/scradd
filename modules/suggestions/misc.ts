@@ -92,7 +92,9 @@ export function parseSuggestionTags(
 	};
 }
 
-const suggestions = [...suggestionsDatabase.data, ...oldSuggestions];
+const suggestions = [...suggestionsDatabase.data, ...oldSuggestions].filter((suggestion) =>
+	["Unanswered", "Good Idea", "In Development"].includes(suggestion.answer),
+);
 export default suggestions;
 await databaseThread.send({
 	files: [{ name: "suggestions.json", attachment: Buffer.from(JSON.stringify(suggestions)) }],
