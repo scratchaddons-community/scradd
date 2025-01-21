@@ -23,7 +23,7 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@fontsource-variable/sora": "5.1.1",
-		"@khanacademy/simple-markdown": "0.13.14",
+		"@khanacademy/simple-markdown": "0.13.15",
 		"@sa-community/addons-data": "1.40.0",
 		"@twemoji/parser": "<=15.1.0",
 		"didyoumean2": "7.0.4",
