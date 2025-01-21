@@ -92,7 +92,8 @@ export function parseSuggestionTags(
 	};
 }
 
-export const suggestions = [...suggestionsDatabase.data, ...oldSuggestions];
+const suggestions = [...suggestionsDatabase.data, ...oldSuggestions];
+export default suggestions;
 await databaseThread.send({
 	files: [{ name: "suggestions.json", attachment: Buffer.from(JSON.stringify(suggestions)) }],
 });

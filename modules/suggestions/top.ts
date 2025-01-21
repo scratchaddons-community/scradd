@@ -5,18 +5,18 @@ import { formatAnyEmoji, paginate } from "strife.js";
 
 import config from "../../common/config.ts";
 import constants from "../../common/constants.ts";
-import { oldSuggestions, suggestionsDatabase } from "./misc.ts";
+import suggestions from "./misc.ts";
 
 export default async function top(
 	_?: undefined,
 	options: { user?: GuildMember | User; answer?: string; all?: boolean; page?: number } = {},
 ): Promise<InteractionReplyOptions | undefined> {
-	const { suggestions } = config.channels;
+	const channel = config.channels.suggestions;
 	const displayName = (options.user instanceof GuildMember ? options.user.user : options.user)
 		?.displayName;
 
 	return await paginate(
-		[...oldSuggestions, ...suggestionsDatabase.data]
+		suggestions
 			.filter(
 				(suggestion) =>
 					(options.answer ?
@@ -32,7 +32,7 @@ export default async function top(
 
 		({ answer, author, count, title, ...reference }) =>
 			`**${count}** ${
-				(!("old" in reference) && formatAnyEmoji(suggestions?.defaultReactionEmoji)) || "👍"
+				(!("old" in reference) && formatAnyEmoji(channel?.defaultReactionEmoji)) || "👍"
 			} ${hyperlink(
 				padTitle(title),
 				"url" in reference ? reference.url : channelLink(reference.id, config.guild.id),
