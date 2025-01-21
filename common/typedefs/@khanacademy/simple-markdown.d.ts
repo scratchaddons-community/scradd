@@ -1,26 +1,38 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 export type UnTypedASTNode = Record<string, unknown>;
 export type SingleASTNode = UnTypedASTNode & { type: string };
 export type ASTNode = SingleASTNode | SingleASTNode[];
-export type Output = (node: ASTNode, state?: State | null) => string;
+export type Output = (this: void, node: ASTNode, state?: State | null) => string;
 export type State = Record<string, unknown> & { key?: number | string; inline?: boolean | null };
 
-export type Parser = (source: string, state?: State | null) => SingleASTNode[];
-export type HtmlNodeOutput = (node: SingleASTNode, output: Output, state: State) => string;
+export type Parser = (this: void, source: string, state?: State | null) => SingleASTNode[];
+export type HtmlNodeOutput = (
+	this: void,
+	node: SingleASTNode,
+	output: Output,
+	state: State,
+) => string;
 export type Rule = {
 	order: number;
 	match: ((
+		this: void,
 		source: string,
 		state: State,
 		previous: string,
 	) => RegExpMatchArray | null | undefined) & { regex?: RegExp };
-	quality?(capture: RegExpMatchArray, state: State, previous: string): number;
-	parse(capture: RegExpMatchArray, parse: Parser, state: State): ASTNode | UnTypedASTNode;
+	quality?(this: void, capture: RegExpMatchArray, state: State, previous: string): number;
+	parse(
+		this: void,
+		capture: RegExpMatchArray,
+		parse: Parser,
+		state: State,
+	): ASTNode | UnTypedASTNode;
 	html: HtmlNodeOutput | null;
 };
 export type OutputRule = Rule & { html: HtmlNodeOutput };
 
 export type DefaultRules = {
-	Array: { html(node: SingleASTNode[], nestedOutput: Output, state: State): string };
+	Array: { html(this: void, node: SingleASTNode[], nestedOutput: Output, state: State): string };
 	autolink: Rule;
 	blockQuote: OutputRule;
 	br: OutputRule;
@@ -56,11 +68,12 @@ export type Attribute = boolean | number | string | null | undefined;
 declare const Exports: {
 	default: {
 		defaultRules: DefaultRules;
-		parserFor(rules: Rules, defaultState?: State | null): Parser;
-		outputFor(rules: Rules, parameter: "html", defaultState?: State | null): Output;
-		sanitizeText(text: Attribute): string;
-		sanitizeUrl(url?: string | null): string | null | undefined;
+		parserFor(this: void, rules: Rules, defaultState?: State | null): Parser;
+		outputFor(this: void, rules: Rules, parameter: "html", defaultState?: State | null): Output;
+		sanitizeText(this: void, text: Attribute): string;
+		sanitizeUrl(this: void, url?: string | null): string | null | undefined;
 		htmlTag(
+			this: void,
 			tagName: string,
 			content: string,
 			attributes?: Record<string, Attribute>,

@@ -111,7 +111,7 @@ export default async function suggestionsPage(
 		messages,
 		suggestion: {
 			title: suggestion.title,
-			votes: { emoji, count: suggestion.count.toLocaleString() },
+			votes: { emoji, count: (suggestion.count ?? 0).toLocaleString() },
 			answer: {
 				emoji: prepareEmoji(answer.emoji),
 				name: answer.name,
