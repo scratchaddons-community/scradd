@@ -2,7 +2,7 @@
 
 ## About
 
-Scradd is a custom all-in-one Discord bot for the [Scratch Addons (SA) server](https://discord.gg/FPv957V6SD). It has
+Scradd was a custom all-in-one Discord bot for the [Scratch Addons (SA) server](https://discord.gg/FPv957V6SD). It has
 many features, such as punishments, auto moderation, “potatoboard”, XP, and much more. It also has many features
 specific to Scratch Addons, including addon search, suggestion utilities, fun games, tons of inside jokes, and others.
 
