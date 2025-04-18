@@ -31,7 +31,7 @@
 		"mongoose": "8.9.5",
 		"mustache": "4.2.0",
 		"posthtml-parser": "0.12.1",
-		"strife.js": "4.2.0"
+		"strife.js": "4.3.2"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.2.1",
