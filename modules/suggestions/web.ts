@@ -29,17 +29,19 @@ export default async function suggestionsPage(
 		const { list, pageInfo } = top(currentPage - 1);
 
 		const member = await config.guild.members.fetchMe();
-		return response.writeHead(200, { "content-type": "text/html" }).end(
-			Mustache.render(TOP_PAGE, {
-				member,
-				avatar: member.user.displayAvatarURL({ size: 64 }),
-				icon: member.roles.icon?.iconURL(),
-				content: markdownToHtml(list),
-				pageInfo,
-				previousPage: currentPage - 1,
-				nextPage: pageInfo.includes(`/${currentPage} `) ? 0 : currentPage + 1,
-			}),
-		);
+		return response
+			.writeHead(200, { "content-type": "text/html" })
+			.end(
+				Mustache.render(TOP_PAGE, {
+					member,
+					avatar: member.user.displayAvatarURL({ size: 64 }),
+					icon: member.roles.icon?.iconURL(),
+					content: markdownToHtml(list),
+					pageInfo,
+					previousPage: currentPage - 1,
+					nextPage: pageInfo.includes(`/${currentPage} `) ? 0 : currentPage + 1,
+				}),
+			);
 	}
 
 	const suggestion = suggestions.find(
@@ -57,13 +59,15 @@ export default async function suggestionsPage(
 
 	const member =
 		"old" in suggestion ?
-			await thread.guild.members.fetch(suggestion.author.valueOf()).catch(() => ({
-				displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
-					.toString(16)
-					.padStart(6, "0")}`,
-				user: undefined,
-				roles: undefined,
-			}))
+			await thread.guild.members
+				.fetch(suggestion.author.valueOf())
+				.catch(() => ({
+					displayHexColor: `#${(starterMessage?.embeds[0]?.color ?? 0)
+						.toString(16)
+						.padStart(6, "0")}`,
+					user: undefined,
+					roles: undefined,
+				}))
 		:	undefined;
 	const messages = [
 		!starterMessage || "old" in suggestion ?
@@ -73,13 +77,13 @@ export default async function suggestionsPage(
 				attachments: starterMessage?.attachments,
 				embeds: starterMessage?.embeds,
 				content:
-					starterMessage?.content ||
-					starterMessage?.embeds[0]?.description ||
-					(starterMessage?.attachments.size ? "" : suggestion.title.toString()),
+					starterMessage?.content
+					|| starterMessage?.embeds[0]?.description
+					|| (starterMessage?.attachments.size ? "" : suggestion.title.toString()),
 				member,
 				author:
-					member?.user ??
-					(typeof suggestion.author === "string" ?
+					member?.user
+					?? (typeof suggestion.author === "string" ?
 						await client.users.fetch(suggestion.author)
 					:	suggestion.author),
 			}
@@ -88,10 +92,10 @@ export default async function suggestionsPage(
 		...(await thread.messages.fetchPinned())
 			.filter(
 				(message) =>
-					message.id !== starterMessage?.id &&
-					(message.content ||
-						message.attachments.size ||
-						message.interaction?.commandName === "addon"),
+					message.id !== starterMessage?.id
+					&& (message.content
+						|| message.attachments.size
+						|| message.interaction?.commandName === "addon"),
 			)
 			.sorted((one, two) => one.createdTimestamp - two.createdTimestamp)
 			.values(),
@@ -177,16 +181,16 @@ export default async function suggestionsPage(
 		},
 		messageContent(this: (typeof messages)[number]) {
 			return markdownToHtml(
-				this.content ||
-					("interaction" in this &&
-						this.interaction?.commandName === "addon" &&
-						this.embeds[0] &&
-						`## ${this.embeds[0].title ?? ""}\n${this.embeds[0].description ?? ""}\n${
+				this.content
+					|| ("interaction" in this
+						&& this.interaction?.commandName === "addon"
+						&& this.embeds[0]
+						&& `## ${this.embeds[0].title ?? ""}\n${this.embeds[0].description ?? ""}\n${
 							this.embeds[0].footer?.text ?
 								`[Enable Addon](${constants.urls.settings}#addon-${this.embeds[0].footer.text})`
 							:	""
-						}`) ||
-					"",
+						}`)
+					|| "",
 			);
 		},
 	});

@@ -8,9 +8,7 @@ const env =
 export default {
 	collectorTime: 45_000,
 
-	channels: {
-		logs: "897639265696112670",
-	},
+	channels: { logs: "897639265696112670" },
 
 	emojis: {
 		scratch: {
@@ -44,7 +42,5 @@ export default {
 		settings: `https://scratch.mit.edu/scratch-addons-extension/settings`,
 	},
 
-	users: {
-		bot: "929928324959055932",
-	},
+	users: { bot: "929928324959055932" },
 } as const;

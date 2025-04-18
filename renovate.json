@@ -1,3 +1,1 @@
-{
-	"packageRules": [{ "matchPackageNames": ["@twemoji/parser"], "enabled": false }]
-}
+{ "packageRules": [{ "matchPackageNames": ["@twemoji/parser"], "enabled": false }] }

@@ -19,9 +19,9 @@ export default function top(page = 0): { list: string; pageInfo: string } {
 		.map(
 			(suggestion, index) =>
 				`${index + offset + 1}. **${(suggestion.count ?? 0).toLocaleString()}** ${
-					(!suggestion.old &&
-						formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji)) ||
-					"👍"
+					(!suggestion.old
+						&& formatAnyEmoji(config.channels.suggestions?.defaultReactionEmoji))
+					|| "👍"
 				} ${hyperlink(
 					padTitle(suggestion.title),
 					channelLink(suggestion.id, config.guild.id),
