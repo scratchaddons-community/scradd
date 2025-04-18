@@ -87,16 +87,16 @@ export const rules = {
 			const href = sanitizeUrl(typeof node.target === "string" ? node.target : undefined);
 			const url = href && new URL(href);
 			if (
-				url &&
-				["discord.com", "ptb.discord.com", "canary.discord.com"].includes(url.hostname)
+				url
+				&& ["discord.com", "ptb.discord.com", "canary.discord.com"].includes(url.hostname)
 			) {
 				url.hostname = "discord.com";
 				const parts = url.pathname.split("/");
 				if (
-					parts[1] === "channels" &&
-					parts[2] === config.guild.id &&
-					parts[3] &&
-					parts.length === 4
+					parts[1] === "channels"
+					&& parts[2] === config.guild.id
+					&& parts[3]
+					&& parts.length === 4
 				)
 					return htmlTag("a", output(node.content as SingleASTNode[], state), {
 						href: `/suggestions/${parts[3]}`,
@@ -195,9 +195,9 @@ export const rules = {
 				);
 			}
 			const format =
-				typeof node.format === "string" &&
-				Object.keys(DATE_TYPE_FORMATS).includes(node.format) &&
-				node.format;
+				typeof node.format === "string"
+				&& Object.keys(DATE_TYPE_FORMATS).includes(node.format)
+				&& node.format;
 			const formatOptions = DATE_TYPE_FORMATS[format || "f"];
 
 			const date = new Date(milliseconds);
