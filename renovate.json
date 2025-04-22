@@ -1,3 +1,0 @@
-{
-	"packageRules": [{ "matchPackageNames": ["@twemoji/parser"], "enabled": false }]
-}
