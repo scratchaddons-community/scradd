@@ -1,8 +1,7 @@
-import type { GuildMember, PartialGuildMember } from "discord.js";
-
 import mongoose from "mongoose";
+import { client, defineEvent } from "strife.js";
 
-import config from "../../common/config.ts";
+const guild = await client.guilds.fetch("806602307750985799").catch(() => void 0);
 
 export const PERSISTED_ROLES = {
 	support: "1323130397349118013",
@@ -27,8 +26,8 @@ export const RoleList = mongoose.model(
 	}),
 );
 
-export async function persistedLeave(member: GuildMember | PartialGuildMember): Promise<void> {
-	if (member.guild.id !== config.guild.id) return;
+defineEvent("guildMemberRemove", async (member) => {
+	if (member.guild.id !== guild?.id) return;
 
 	const roles = Object.fromEntries(
 		Object.entries(PERSISTED_ROLES).map(([key, id]) => [key, !!member.roles.resolve(id)]),
@@ -36,10 +35,10 @@ export async function persistedLeave(member: GuildMember | PartialGuildMember): 
 	await RoleList.findOneAndUpdate({ id: member.id }, roles, {
 		upsert: Object.values(roles).includes(true),
 	}).exec();
-}
+});
 
-export async function persistedRejoin(member: GuildMember): Promise<void> {
-	if (member.guild.id !== config.guild.id) return;
+defineEvent("guildMemberAdd", async (member) => {
+	if (member.guild.id !== guild?.id) return;
 
 	if (member.user.bot) await member.roles.add("806609992597110825", "Is bot");
 
@@ -48,4 +47,4 @@ export async function persistedRejoin(member: GuildMember): Promise<void> {
 	for (const roleName of Object.keys(PERSISTED_ROLES))
 		if (memberRoles[roleName])
 			await member.roles.add(PERSISTED_ROLES[roleName], "Persisting roles");
-}
+});

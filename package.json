@@ -22,21 +22,16 @@
 	],
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@fontsource-variable/sora": "5.1.1",
-		"@khanacademy/simple-markdown": "0.13.15",
 		"@sa-community/addons-data": "1.40.0",
-		"@twemoji/parser": "<=15.1.0",
 		"discord.js": "14.17.0-dev.1727611463-e1012cc54",
 		"match-sorter": "8.0.0",
 		"mongoose": "8.9.5",
-		"mustache": "4.2.0",
 		"posthtml-parser": "0.12.1",
 		"strife.js": "4.2.0"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.2.1",
 		"@total-typescript/ts-reset": "0.6.1",
-		"@types/mustache": "<=4.2",
 		"@types/node": "<=22.10",
 		"eslint": "9.17.0",
 		"eslint-config-cobaltt7": "1.0.0",

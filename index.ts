@@ -35,8 +35,6 @@ await login({
 	commandErrorMessage: `${constants.emojis.statuses.no} An error occurred.`,
 });
 
-if (process.env.PORT) await import("./web/server.js");
-
 const channel = await client.channels.fetch(constants.channels.logs);
 assert(channel?.isSendable());
 process

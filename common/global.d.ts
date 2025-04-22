@@ -48,7 +48,6 @@ declare global {
 	namespace NodeJS {
 		/**
 		 * @example
-		 * 	GUILD_ID = …
 		 * 	BOT_TOKEN = …
 		 * 	MONGO_URI = mongodb://127.0.0.1:27017/scradd
 		 * 	NODE_ENV = development
@@ -57,8 +56,6 @@ declare global {
 		 * 	EXIT_AUTH = …
 		 */
 		interface ProcessEnv {
-			/** ID of the main server for the app to operate in. Assumes Administrator permission in this server. */
-			GUILD_ID: Snowflake;
 			/** Token of the bot. */
 			BOT_TOKEN: string;
 			/** URI to connect to MongoDB with. */
