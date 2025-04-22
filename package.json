@@ -22,7 +22,7 @@
 	],
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"@sa-community/addons-data": "1.40.0",
+		"@sa-community/addons-data": "1.42.0",
 		"@twemoji/parser": "<=15.1.0",
 		"discord.js": "14.17.0-dev.1727611463-e1012cc54",
 		"match-sorter": "8.0.0",
