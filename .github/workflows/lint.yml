@@ -28,11 +28,6 @@ jobs:
             - name: Install
               run: npm ci
 
-            - name: Bump Twemoji
-              run:
-                  npm pkg set dependencies.@twemoji/parser="<=$(npm show @discordapp/twemoji
-                  version)"
-
             - name: Format
               run: node --run format
 
