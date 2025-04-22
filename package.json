@@ -23,6 +23,7 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@sa-community/addons-data": "1.40.0",
+		"@twemoji/parser": "<=15.1.0",
 		"discord.js": "14.17.0-dev.1727611463-e1012cc54",
 		"match-sorter": "8.0.0",
 		"mongoose": "8.9.5",
@@ -30,13 +31,13 @@
 		"strife.js": "4.2.0"
 	},
 	"devDependencies": {
-		"@redguy12/prettier-config": "3.2.1",
+		"@redguy12/prettier-config": "3.3.0",
 		"@total-typescript/ts-reset": "0.6.1",
 		"@types/node": "<=22.10",
 		"eslint": "9.17.0",
 		"eslint-config-cobaltt7": "1.0.0",
 		"nodemon": "3.1.9",
-		"prettier": "3.4.2",
+		"prettier": "3.5.3",
 		"typescript": "5.7.3"
 	},
 	"optionalDependencies": {
