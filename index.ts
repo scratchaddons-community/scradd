@@ -12,8 +12,8 @@ import pkg from "./package.json" with { type: "json" };
 dns.setDefaultResultOrder("ipv4first");
 
 if (
-	process.env.BOT_TOKEN.startsWith(`${Buffer.from(constants.users.bot).toString("base64")}.`) &&
-	!process.argv.includes("--production")
+	process.env.BOT_TOKEN.startsWith(`${Buffer.from(constants.users.bot).toString("base64")}.`)
+	&& !process.argv.includes("--production")
 )
 	throw new Error("Refusing to run on the production bot without `--production` flag");
 
@@ -25,11 +25,11 @@ await login({
 
 	clientOptions: {
 		intents:
-			GatewayIntentBits.Guilds |
-			GatewayIntentBits.GuildMembers |
-			GatewayIntentBits.GuildMessages |
-			GatewayIntentBits.DirectMessages |
-			GatewayIntentBits.MessageContent,
+			GatewayIntentBits.Guilds
+			| GatewayIntentBits.GuildMembers
+			| GatewayIntentBits.GuildMessages
+			| GatewayIntentBits.DirectMessages
+			| GatewayIntentBits.MessageContent,
 		presence: { status: "dnd" },
 	},
 	commandErrorMessage: `${constants.emojis.statuses.no} An error occurred.`,

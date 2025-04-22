@@ -75,8 +75,8 @@ export async function handleProject(urlParts: string[]): Promise<APIEmbed | unde
 	if (!project || project.code) return;
 
 	const parent =
-		project.remix?.parent &&
-		(await gracefulFetch(`${constants.urls.scratchApi}/projects/${project.remix.parent}/`));
+		project.remix?.parent
+		&& (await gracefulFetch(`${constants.urls.scratchApi}/projects/${project.remix.parent}/`));
 
 	const embed = {
 		title: project.title,
@@ -184,9 +184,9 @@ export async function handleStudio(urlParts: string[]): Promise<APIEmbed | undef
 			{
 				name: `${constants.emojis.scratch.comments} Comments`,
 				value:
-					studio.stats.comments +
-					(studio.stats.comments < 100 ? "" : "+") +
-					(studio.comments_allowed ? "" : " (off)"),
+					studio.stats.comments
+					+ (studio.stats.comments < 100 ? "" : "+")
+					+ (studio.comments_allowed ? "" : " (off)"),
 				inline: true,
 			},
 		],
@@ -207,8 +207,8 @@ export async function handleForumPost(
 	const post =
 		type === "post" ?
 			await gracefulFetch(`${constants.urls.scratchdb}/forum/post/info/${id}/`)
-		:	type === "topic" &&
-			(await gracefulFetch(
+		:	type === "topic"
+			&& (await gracefulFetch(
 				`${constants.urls.scratchdb}/forum/topic/posts/${id}?o=oldest`,
 			).then((posts) => posts?.[0]));
 	if (!post || post.error || post.deleted) return;
@@ -264,8 +264,8 @@ function nodesToText(node: NodeOrNodes, shouldEscape = true): string {
 		}
 		case "span": {
 			const output =
-				typeof node.attrs?.class === "string" &&
-				{
+				typeof node.attrs?.class === "string"
+				&& {
 					"bb-bold": `**${content}**`,
 					"bb-italic": `*${content}*`,
 					"bb-underline": `__${content}__`,
