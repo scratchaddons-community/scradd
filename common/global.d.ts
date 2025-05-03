@@ -64,7 +64,10 @@ declare global {
 			NODE_ENV?: "development" | "production";
 			/** Port to run the web server on. Omit to not run the server. */
 			PORT?: `${number}`;
-			/** Client secret of the app, used in OAuth2 flows. Omit to disable all features using OAuth2. */
+			/**
+			 * Client secret of the app, used in OAuth2 flows. Omit to disable all features using
+			 * OAuth2.
+			 */
 			CLIENT_SECRET?: string;
 		}
 	}
