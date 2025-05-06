@@ -33,8 +33,8 @@
 		"@redguy12/prettier-config": "3.4.3",
 		"@total-typescript/ts-reset": "0.6.1",
 		"@types/node": "<=22.10",
-		"eslint": "9.17.0",
-		"eslint-config-cobaltt7": "1.0.0",
+		"eslint": "9.26.0",
+		"eslint-config-cobaltt7": "1.2.0",
 		"nodemon": "3.1.10",
 		"prettier": "3.5.3",
 		"typescript": "5.8.3"

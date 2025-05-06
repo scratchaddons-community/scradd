@@ -149,6 +149,5 @@ function decodeString(encryptedText: string): string | undefined {
 		const iv = Buffer.from(parts.shift() ?? "", "hex");
 		const decipher = createDecipheriv("aes-256-cbc", secretKey, iv);
 		return decipher.update(parts.join(":"), "hex", "utf8") + decipher.final("utf8");
-		// eslint-disable-next-line no-empty
 	} catch {}
 }
