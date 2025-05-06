@@ -143,9 +143,12 @@ function encodeString(text: string): string {
 }
 
 // Decode the string
-function decodeString(encryptedText: string): string {
-	const parts = encryptedText.split(":");
-	const iv = Buffer.from(parts.shift() ?? "", "hex");
-	const decipher = createDecipheriv("aes-256-cbc", secretKey, iv);
-	return decipher.update(parts.join(":"), "hex", "utf8") + decipher.final("utf8");
+function decodeString(encryptedText: string): string | undefined {
+	try {
+		const parts = encryptedText.split(":");
+		const iv = Buffer.from(parts.shift() ?? "", "hex");
+		const decipher = createDecipheriv("aes-256-cbc", secretKey, iv);
+		return decipher.update(parts.join(":"), "hex", "utf8") + decipher.final("utf8");
+		// eslint-disable-next-line no-empty
+	} catch {}
 }

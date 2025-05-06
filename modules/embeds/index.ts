@@ -1,6 +1,6 @@
 import type { APIEmbed, BaseMessageOptions, Message, Snowflake } from "discord.js";
 
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { defineChatCommand, defineEvent, zeroWidthSpace } from "strife.js";
 
 import { assertSendable } from "../../util/discord.ts";
@@ -9,7 +9,7 @@ import { getMatches, handleMatch } from "./generate.ts";
 
 const sentEmbeds = new Map<Snowflake, Message>();
 defineEvent("messageCreate", async (message) => {
-	if (!assertSendable(message.channel)) return;
+	if (!assertSendable(message.channel, PermissionFlagsBits.EmbedLinks)) return;
 
 	const config =
 		message.guild ?
@@ -36,7 +36,7 @@ defineEvent("messageUpdate", async (_, message) => {
 			response ?? { content: zeroWidthSpace, components: [], embeds: [], files: [] },
 		);
 	else if (response) {
-		const channel = assertSendable(message.channel);
+		const channel = assertSendable(message.channel, PermissionFlagsBits.EmbedLinks);
 		if (!channel) return;
 
 		const config =

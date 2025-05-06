@@ -73,6 +73,8 @@ export async function handleMatch(url: URL): Promise<APIEmbed | undefined> {
 export async function handleProject(urlParts: string[]): Promise<APIEmbed | undefined> {
 	const project = await gracefulFetch(`${constants.urls.scratchApi}/projects/${urlParts[2]}/`);
 	if (!project || project.code) return;
+	if (!("title" in project))
+		throw new ReferenceError(`Failed to fetch project ${urlParts[2]}`, { cause: project });
 
 	const parent =
 		project.remix?.parent
@@ -135,6 +137,9 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 	const user = urlParts[2] && (await fetchUser(urlParts[2]));
 	if (!user) return;
 
+	if (!("username" in user))
+		throw new ReferenceError(`Failed to fetch user ${urlParts[2]}`, { cause: user });
+
 	const embed = {
 		title: `${user.username}${user.scratchteam ? "*" : ""}`,
 		color: constants.scratchColor,
@@ -164,6 +169,9 @@ export async function handleUser(urlParts: string[]): Promise<APIEmbed | undefin
 export async function handleStudio(urlParts: string[]): Promise<APIEmbed | undefined> {
 	const studio = await gracefulFetch(`${constants.urls.scratchApi}/studios/${urlParts[2]}/`);
 	if (!studio || studio.code) return;
+
+	if (!("title" in studio))
+		throw new ReferenceError(`Failed to fetch studio ${urlParts[2]}`, { cause: studio });
 
 	return {
 		title: studio.title,
