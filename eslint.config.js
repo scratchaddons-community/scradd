@@ -1,11 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import cobaltConfigs, { declareConfig, globals } from "eslint-config-cobaltt7";
+import cobaltConfigs, { globals } from "eslint-config-cobaltt7";
+import { defineConfig, globalIgnores } from "eslint/config";
 
-export default declareConfig(
+export default defineConfig(
 	{ files: ["**/*.ts"] },
-	{ ignores: ["dist"] },
+	globalIgnores(["dist"]),
 	...cobaltConfigs,
 	{
 		languageOptions: {

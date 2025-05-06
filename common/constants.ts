@@ -6,9 +6,9 @@ const env =
 	: "development";
 
 export default {
-	collectorTime: 45_000,
-
 	channels: { logs: "897639265696112670" },
+
+	collectorTime: 45_000,
 
 	emojis: {
 		scratch: {
@@ -30,15 +30,15 @@ export default {
 	themeColor: env === "production" ? 0xff_7b_26 : 0x17_5e_f8,
 
 	urls: {
+		addonImages: `https://scratchaddons.com/assets/img/addons`,
 		scradd:
 			env === "production" || !process.env.PORT ?
 				"https://scradd.up.railway.app"
 			:	(`http://localhost:${process.env.PORT}` as const),
+		scratch: "https://scratch.mit.edu",
 		scratchApi: "https://api.scratch.mit.edu",
 		/** @deprecated */
 		scratchdb: "https://scratchdb.lefty.one/v3",
-		addonImages: `https://scratchaddons.com/assets/img/addons`,
-		scratch: "https://scratch.mit.edu",
 		settings: `https://scratch.mit.edu/scratch-addons-extension/settings`,
 	},
 
