@@ -23,7 +23,7 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"@sa-community/addons-data": "1.42.0",
-		"discord.js": "14.17.0-dev.1727611463-e1012cc54",
+		"discord.js": "14.19.3",
 		"match-sorter": "8.0.1",
 		"mongoose": "8.14.1",
 		"posthtml-parser": "0.12.1",
@@ -47,12 +47,12 @@
 		"npm": ">=9.0.0"
 	},
 	"overrides": {
-		"@discordjs/builders": "1.9.1-dev.1727784293-b20346f43",
+		"@discordjs/builders": "1.11.2",
 		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
-		"@discordjs/formatters": "0.6.0-dev.1732709129-97ffa201a",
-		"@discordjs/rest": "2.4.1-dev.1732709129-97ffa201a",
-		"@discordjs/util": "1.1.2-dev.1732709129-97ffa201a",
-		"@discordjs/ws": "1.2.0-dev.1721822666-fcd35ea2e",
-		"discord-api-types": "0.37.106-next.7debb55.1732021051"
+		"@discordjs/formatters": "0.6.1",
+		"@discordjs/rest": "2.5.0",
+		"@discordjs/util": "1.1.2-dev.1738965220-519aa3abe",
+		"@discordjs/ws": "1.2.2",
+		"discord-api-types": "0.38.11"
 	}
 }
